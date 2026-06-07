@@ -1,0 +1,37 @@
+#!/data/data/com.termux/files/usr/bin/python
+
+import re
+from pathlib import Path
+
+from bs4 import BeautifulSoup
+
+meta_tag_pattern = re.compile("<meta[^>]*>", re.IGNORECASE)
+
+
+def remove_meta_tags(filepath: Path):
+    try:
+        html_content = filepath.read_text(encoding="utf-8", errors="ignore")
+        soup = BeautifulSoup(html_content, "html.parser")
+        metaz = soup.find_all("meta")
+        if metaz:
+            new_html_content = meta_tag_pattern.sub("", html_content)
+        if new_html_content != html_content:
+            filepath.write_text(new_html_content, encoding="utf-8")
+            print(f"Removed meta tags from: {filepath}")
+        else:
+            print(f"No meta tags found or removed in: {filepath}")
+    except Exception as e:
+        print(f"Error processing {filepath}: {e}")
+
+
+def process_directory(directory: Path):
+    for item in directory.rglob("*.html"):
+        if item.is_file():
+            remove_meta_tags(item)
+
+
+if __name__ == "__main__":
+    current_dir = Path()
+    print(f"Starting to remove meta tags from HTML files in '{current_dir.resolve()}' and its subdirectories...\n")
+    process_directory(current_dir)
+    print("\nFinished processing. Meta tags have been removed from applicable HTML files.")

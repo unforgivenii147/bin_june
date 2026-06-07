@@ -1,0 +1,16 @@
+#!/data/data/com.termux/files/usr/bin/python
+
+import sys
+from pathlib import Path
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: python decode_unicode_escapes.py <json_file>")
+        sys.exit(1)
+    path = Path(sys.argv[1])
+    text = path.read_text(encoding="utf-8")
+    if "\\x" in text:
+        text = text.replace("\\x", "\\u")
+    decoded = text.encode("utf-8").decode("unicode_escape")
+    path.write_text(decoded, encoding="utf-8")
+    print(f"{path} updated")
