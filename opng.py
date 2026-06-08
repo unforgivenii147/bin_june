@@ -9,7 +9,8 @@ START_DIR = Path.cwd()
 NUM_PROCESSES = 4
 
 
-def process_file(path):
+def process_file(path: str | Path):
+    path = Path(path)
     before = gsz(path)
     try:
         for i in range(1, 7):

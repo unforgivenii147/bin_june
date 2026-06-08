@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/python
+
 """
 Apply all available 2to3 fixes to Python files using multiprocessing.
 Uses lib2to3 module directly without subprocess.

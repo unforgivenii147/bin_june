@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/python
+
 """
 Binary File Analyzer - Finds executables in current directory that fail to run
 Uses concurrent.futures for parallel processing

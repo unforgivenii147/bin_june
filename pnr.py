@@ -3,22 +3,7 @@
 import argparse
 import sys
 from pathlib import Path
-
-
-def get_unique_name(path: Path, base_name: str) -> str:
-    if not (path / base_name).exists():
-        return base_name
-    name, ext = (base_name.stem, base_name.suffix)
-    counter = 1
-    while True:
-        new_name = f"{name}_{counter}{ext}"
-        if not (path / new_name).exists():
-            return new_name
-        counter += 1
-
-
-def ask_user_for_rename(old_name: str, new_name: str) -> bool:
-    return True
+from dh import unique_path
 
 
 def remove_string_from_names(
@@ -39,16 +24,7 @@ def remove_string_from_names(
                     continue
                 new_path = current_path / new_name
                 if new_path.exists():
-                    if dry_run:
-                        print(f"Would conflict: '{item.name}' -> '{new_name}' (already exists)")
-                    elif ask_user_for_rename(item.name, new_name):
-                        new_name = get_unique_name(current_path, new_name)
-                        new_path = current_path / new_name
-                    else:
-                        print(f"Skipped: '{item.name}'")
-                        continue
-                if dry_run:
-                    print(f"Would rename: '{item}' -> '{new_name}'")
+                    new_path = unique_path(new_path)
                 else:
                     try:
                         item.rename(new_path)
@@ -64,16 +40,7 @@ def remove_string_from_names(
                     continue
                 new_path = current_path / new_name
                 if new_path.exists():
-                    if dry_run:
-                        print(f"Would conflict: '{item.name}' -> '{new_name}' (already exists)")
-                    elif ask_user_for_rename(item.name, new_name):
-                        new_name = get_unique_name(current_path, new_name)
-                        new_path = current_path / new_name
-                    else:
-                        print(f"Skipped: '{item.name}'")
-                        continue
-                if dry_run:
-                    print(f"Would rename: '{item}' -> '{new_name}'")
+                    new_path = unique_path(new_path)
                 else:
                     try:
                         item.rename(new_path)
@@ -101,16 +68,7 @@ def replace_string_in_names(
                 new_name = item.name.replace(str1, str2)
                 new_path = current_path / new_name
                 if new_path.exists():
-                    if dry_run:
-                        print(f"Would conflict: '{item.name}' -> '{new_name}' (already exists)")
-                    elif ask_user_for_rename(item.name, new_name):
-                        new_name = get_unique_name(current_path, new_name)
-                        new_path = current_path / new_name
-                    else:
-                        print(f"Skipped: '{item.name}'")
-                        continue
-                if dry_run:
-                    print(f"Would rename: '{item}' -> '{new_name}'")
+                    new_path = unique_path(new_path)
                 else:
                     try:
                         item.rename(new_path)
@@ -123,16 +81,7 @@ def replace_string_in_names(
                 new_name = item.name.replace(str1, str2)
                 new_path = current_path / new_name
                 if new_path.exists():
-                    if dry_run:
-                        print(f"Would conflict: '{item.name}' -> '{new_name}' (already exists)")
-                    elif ask_user_for_rename(item.name, new_name):
-                        new_name = get_unique_name(current_path, new_name)
-                        new_path = current_path / new_name
-                    else:
-                        print(f"Skipped: '{item.name}'")
-                        continue
-                if dry_run:
-                    print(f"Would rename: '{item}' -> '{new_name}'")
+                    new_path = unique_path(new_path)
                 else:
                     try:
                         item.rename(new_path)
@@ -177,21 +126,11 @@ def rename_by_template(
             continue
         new_path = current_path / new_name
         if new_path.exists():
-            if dry_run:
-                print(f"Would conflict: '{file_path.name}' -> '{new_name}' (already exists)")
-            elif ask_user_for_rename(file_path.name, new_name):
-                new_name = get_unique_name(current_path, new_name)
-                new_path = current_path / new_name
-            else:
-                print(f"Skipped: '{file_path.name}'")
-                continue
-        if dry_run:
-            print(f"Would rename: '{file_path}' -> '{new_name}'")
+            new_path = unique_path(new_path)
         else:
             try:
-                new_path = Path(get_unique_name(current_path, new_name))
                 file_path.rename(new_path)
-                print(f"{file_path} -> {new_name}")
+                print(f"{file_path.name} -> {new_name}")
                 renamed_count += 1
             except OSError as e:
                 print(f"Error renaming '{file_path.name}': {e}")

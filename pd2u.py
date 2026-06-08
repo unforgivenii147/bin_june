@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/python
+
 
 from __future__ import annotations
 

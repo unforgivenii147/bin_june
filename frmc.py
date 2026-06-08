@@ -7,17 +7,18 @@ from pathlib import Path
 from dh import SOURCE_CODE_EXT, clean_blank_lines, cprint, fsz, get_nobinary, gsz, is_binary, mpf3
 
 
-def process_file(fp):
-    if fp.suffix == ".md":
+def process_file(path):
+    path = Path(path)
+    if path.suffix == ".md":
         return
     removed: int = 0
     inline: int = 0
-    if is_binary(fp) or fp.suffix in SOURCE_CODE_EXT:
-        print(f"[skip] {fp.name} is binary or source code")
+    if is_binary(path) or path.suffix in SOURCE_CODE_EXT:
+        print(f"[skip] {path.name} is binary or source code")
         return
-    before: int = gsz(fp)
-    lines = fp.read_text(encoding="utf-8").splitlines(keepends=True)
-    print(f"{fp.name}", end="|")
+    before: int = gsz(path)
+    lines = path.read_text(encoding="utf-8").splitlines(keepends=True)
+    print(f"{path.name}", end="|")
     if not lines:
         return
     cleaned = []
@@ -37,18 +38,18 @@ def process_file(fp):
             removed += 1
     code = "".join(cleaned)
     code = clean_blank_lines(code)
-    if fp.suffix == ".py":
+    if path.suffix == ".py":
         try:
             _ = ast.parse(code)
-            fp.write_text(code, encoding="utf-8")
-            diffsize = before - gsz(fp)
+            path.write_text(code, encoding="utf-8")
+            diffsize = before - gsz(path)
             cprint(f"{fsz(diffsize)}|removed :{removed}|inline :{inline}", "yellow")
         except:
             cprint("result code invalid.", "magenta")
             return
     else:
-        fp.write_text(code, encoding="utf-8")
-        diffsize = before - gsz(fp)
+        path.write_text(code, encoding="utf-8")
+        diffsize = before - gsz(path)
         cprint(f"{fsz(diffsize)}|removed :{removed}|inline :{inline}", "yellow")
 
 

@@ -43,7 +43,8 @@ def strip_comments(source: str) -> str:
     return "\n".join(cleaned_lines).rstrip() + "\n"
 
 
-def process_file(path: Path):
+def process_file(path: str | Path):
+    path = Path(path)
     before = gsz(path)
     if not before:
         return

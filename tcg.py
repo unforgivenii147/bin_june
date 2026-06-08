@@ -211,7 +211,7 @@ def create_symlink(target: Path) -> None:
 
         if symlink_path.exists():
             if symlink_path.is_symlink():
-                print(f"Symlink already exists: {symlink_path} -> {symlink_path.readlink()}")
+                print(f"Symlink already exists.")
             else:
                 print(f"Warning: {symlink_path} exists but is not a symlink")
             return
@@ -243,7 +243,7 @@ def main() -> None:
         shebang = detect_shebang(content)
         if shebang:
             content = shebang + content
-            print(f"Added shebang: {shebang.strip()}")
+    #            print(f"Added shebang: {shebang.strip()}")
 
     lines = content.splitlines()
     if len(lines) > 1 and lines[0].startswith("#!") and lines[1].startswith("#!"):
@@ -256,7 +256,6 @@ def main() -> None:
 
     try:
         out_file.write_text(content, encoding="utf-8")
-        print(f"Created: {out_file}")
     except OSError as e:
         print(f"Error writing file: {e}", file=sys.stderr)
         sys.exit(1)
@@ -264,7 +263,6 @@ def main() -> None:
     if is_script_dir:
         try:
             out_file.chmod(EXECUTABLE_PERMISSIONS)
-            print(f"Set permissions: {oct(EXECUTABLE_PERMISSIONS)}")
         except OSError as e:
             print(f"Error setting permissions: {e}", file=sys.stderr)
 

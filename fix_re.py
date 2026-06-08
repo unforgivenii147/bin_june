@@ -55,6 +55,7 @@ def make_raw_and_fix(token_str):
 
 
 def process_file(path):
+    path = Path(path)
     code = path.read_text(encoding="utf8")
     bakpath = path.with_name(path.name + ".bak")
     bakpath.write_text(code, encoding="utf8")

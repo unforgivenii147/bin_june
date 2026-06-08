@@ -5,7 +5,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from dh import get_files, mpf3, runcmd
+from dh import get_files, mpf3, runcmd, fsz, gsz
 
 
 def process_file(path):
@@ -18,15 +18,15 @@ def process_file(path):
             tmp_out_path = tmp_out.name
         runcmd(["svgcleaner", str(path), str(tmp_out_path)], show_output=False)
         after = Path(tmp_out_path).stat().st_size
-        size_change = before - after
+        dsz = before - after
         if after:
             Path(tmp_out_path).replace(path)
-            return (True, path, before, after, size_change)
-        return (False, path, before, after, size_change)
-    except subprocess.CalledProcessError as e:
-        return (False, path, 0, 0, f"Error: {e.stderr.decode('utf-8')}")
+            print(f"{path.name}", end=" | ")
+            cprint(f"{fsz(dsz)} | {after / before:.3f}%", "cyan")
+            return
+        return
     except Exception as e:
-        return (False, path, 0, 0, f"Unexpected error: {e}")
+        return
     finally:
         if tmp_out_path and Path(tmp_out_path).exists():
             Path(tmp_out_path).unlink()
@@ -42,12 +42,3 @@ if __name__ == "__main__":
     total_after = 0
     total_saved = 0
     results = mpf3(process_file, files)
-    for result in results:
-        success, f, before, after, size_change = result
-        if success:
-            print(f"Cleaned: {f}")
-            print(f"  Before: {before} bytes, After: {after} bytes, Saved: {size_change} bytes")
-            total_before += before
-            total_after += after
-            total_saved += size_change
-    print(f"Total size saved: {total_saved} bytes")

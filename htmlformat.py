@@ -16,7 +16,7 @@ def process_file(path):
     dsz = before - after
     print(f"{path.name}", end=" | ")
     if dsz:
-        ratio = dsz / before * 100
+        ratio = after / before * 100
         cprint(f"{fsz(dsz)} | {ratio:.1f}%", "cyan")
         path.write_text(new_content, encoding="utf-8")
         return

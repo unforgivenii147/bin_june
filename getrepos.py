@@ -1,38 +1,106 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 import sys
+import time
+import threading
+import os
 from pathlib import Path
 
-import requests
+from github import Github, GithubException, Auth
+from dotenv import load_dotenv
 
 
-def get_repos(username: str) -> None:
-    url = f"https://api.github.com/users/{username}/repos"
+def countdown(timeout: int) -> None:
+    """Display a countdown timer."""
+    for remaining in range(timeout, 0, -1):
+        sys.stdout.write(f"\rTimeout in {remaining:2d} seconds... ")
+        sys.stdout.flush()
+        time.sleep(1)
+    sys.stdout.write("\r" + " " * 30 + "\r")
+    sys.stdout.flush()
+
+
+def get_repos(username: str, token: str | None = None, timeout: int = 60) -> list:
+    """Fetch repositories for a GitHub user with optional authentication."""
+
+    # Start countdown in a separate thread
+    countdown_thread = threading.Thread(target=countdown, args=(timeout,), daemon=True)
+    countdown_thread.start()
+
     try:
-        response = requests.get(url, timeout=60)
-        if response.status_code == 404:
-            print(f"Error: User '{username}' not found.")
-            sys.exit(1)
-        response.raise_for_status()
-        repos = response.json()
+        # Initialize GitHub client with new auth method
+        if token:
+            auth = Auth.Token(token)
+            g = Github(auth=auth, timeout=timeout)
+        else:
+            g = Github(timeout=timeout)
+
+        # Get user and their repositories
+        user = g.get_user(username)
+        repos = list(user.get_repos())
+
         if not repos:
-            print(f"No public repositories found for user '{username}'.")
+            print(f"\nNo public repositories found for user '{username}'.")
             return []
+
         return repos
-    except requests.RequestException as e:
-        print(f"Error fetching repos: {e}")
+
+    except GithubException as e:
+        if e.status == 404:
+            print(f"\nError: User '{username}' not found.")
+        elif e.status == 401:
+            print("\nError: Invalid or expired token. Check your .env file.")
+        elif e.status == 403:
+            if "rate limit" in str(e).lower():
+                print("\nError: API rate limit exceeded. Use a token for higher limits.")
+            else:
+                print(f"\nError: Access forbidden. {e.data.get('message', '')}")
+        else:
+            print(f"\nGitHub API Error: {e.status} - {e.data.get('message', 'Unknown error')}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"\nError: {e}")
         sys.exit(1)
 
 
 def main() -> None:
-    user = sys.argv[1]
-    repos = get_repos(user)
-    print(f"Repositories of '{username}':")
+    if len(sys.argv) < 2:
+        print("Usage: script.py <username>")
+        sys.exit(1)
+
+    # Load environment variables from .env file
+    load_dotenv()
+    token = os.getenv("GITHUB_TOKEN")
+
+    username = sys.argv[1]
+
+    if token:
+        print("Using authenticated access (rate limit: 5000 requests/hour)")
+    else:
+        print("No token found in .env, using unauthenticated access (rate limit: 60 requests/hour)")
+
+    repos = get_repos(username, token=token, timeout=60)
+
+    print(f"\nRepositories of '{username}':")
     for repo in repos:
-        print(f"- {repo['name']}")
+        stars = repo.stargazers_count
+        language = repo.language or "N/A"
+        description = repo.description or "No description"
+        print(f"- {repo.name}")
+        print(f"  ⭐ {stars} | 🔤 {language} | {description[:80]}")
+
+    # Save to file
     with Path(f"{username}.txt").open("w", encoding="utf-8") as f:
+        f.write(f"Repositories of '{username}':\n")
+        f.write("=" * 50 + "\n\n")
         for repo in repos:
-            f.write(f"- {repo['name']}")
+            stars = repo.stargazers_count
+            language = repo.language or "N/A"
+            description = repo.description or "No description"
+            f.write(f"- {repo.name}\n")
+            f.write(f"  Stars: {stars} | Language: {language}\n")
+            f.write(f"  {description}\n")
+            f.write(f"  {repo.html_url}\n\n")
 
 
 if __name__ == "__main__":

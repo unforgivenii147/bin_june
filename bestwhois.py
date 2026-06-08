@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/python
+
 """A command-line utility for WhoisXML API services
 (c) WhoisXML API Inc. 2019.
 """

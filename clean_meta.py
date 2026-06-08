@@ -10,7 +10,8 @@ blank_line = "\n"
 IMAGE_RE = re.compile("^\\s*(\\.\\.\\s+image::|:target:|:alt:)", re.IGNORECASE)
 
 
-def process_file(path: Path):
+def process_file(path: str | Path):
+    path = Path(path)
     print(f"Processing {path.name}")
     try:
         content = path.read_text(encoding="utf-8")

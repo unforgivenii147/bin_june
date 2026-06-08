@@ -1,59 +1,120 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-import os
+"""
+Folderize files recursively by first letter.
+Files starting with 'a' go into folder 'a/', 'b' into 'b/', etc.
+Numbers and special chars go into '0-9/' folder.
+"""
+
 import shutil
 from pathlib import Path
+from collections import defaultdict
 
 
-def falpha(cwd="."):
-    root_path = Path(cwd).resolve()
-    all_files = [f for f in root_path.rglob("*") if f.is_file()]
-    for file_path in all_files:
-        if is_in_alphabetical_folder(file_path, root_path):
+def get_target_folder_name(filename: str) -> str:
+    """Determine folder name based on first character."""
+    if not filename:
+        return "0-9"
+
+    first_char = filename[0].lower()
+
+    if first_char.isalpha():
+        return first_char
+    elif first_char.isdigit():
+        return "0-9"
+    else:
+        return "0-9"  # Special characters go to 0-9
+
+
+def cleanup_empty_dirs(root: Path):
+    """Remove empty directories recursively."""
+    # Walk bottom-up to delete empty dirs
+    for dir_path in sorted(root.rglob("*"), key=lambda p: len(p.parts), reverse=True):
+        if dir_path.is_dir() and dir_path != root:
+            try:
+                dir_path.rmdir()  # Only removes if empty
+                print(f"Removed empty directory: {dir_path}")
+            except OSError:
+                pass  # Directory not empty, skip
+
+
+def folderize_files(root: Path = Path.cwd()):
+    """
+    Organize all files in root directory and subdirectories into
+    alphabetical folders based on their first letter.
+    """
+    # Collect files to move (skip directories)
+    files_to_move = []
+    for item in root.rglob("*"):
+        if ".git" in item.parts:
             continue
-        first_char = file_path.name[0].upper()
-        if first_char.isalpha():
-            folder_name = first_char
-        elif first_char.isdigit():
-            folder_name = "0-9"
-        else:
-            folder_name = "Other"
-        dest_folder = root_path / folder_name
-        dest_folder.mkdir(exist_ok=True)
-        dest_path = dest_folder / file_path.name
-        final_dest = get_unique_filename(dest_path)
-        try:
-            shutil.move(str(file_path), str(final_dest))
-            print(f"Moved: {file_path.name} -> {final_dest}")
-        except Exception as e:
-            print(f"Error moving {file_path.name}: {e}")
+        if item.is_file():
+            files_to_move.append(item)
 
+    if not files_to_move:
+        print("No files found to organize.")
+        return
 
-def is_in_alphabetical_folder(file_path, root_path):
-    relative_path = file_path.relative_to(root_path)
-    if len(relative_path.parts) > 1:
-        parent_folder = relative_path.parts[0]
-        if len(parent_folder) == 1 and parent_folder.isalpha() or parent_folder in {"0-9", "Other"}:
-            return True
-    return False
+    print(f"Found {len(files_to_move)} files to organize.")
 
+    # Track renamed files to avoid conflicts
+    renamed_count = 0
 
-def get_unique_filename(dest_path):
-    if not dest_path.exists():
-        return dest_path
-    stem = dest_path.stem
-    suffix = dest_path.suffix
-    parent = dest_path.parent
-    index = 1
-    while True:
-        new_name = f"{stem}({index}){suffix}"
-        new_path = parent / new_name
-        if not new_path.exists():
-            return new_path
-        index += 1
+    # Process each file
+    for file_path in files_to_move:
+        original_name = file_path.name
+        folder_name = get_target_folder_name(original_name)
+        target_dir = root / folder_name
+
+        # Create target directory if it doesn't exist
+        target_dir.mkdir(exist_ok=True)
+
+        target_path = target_dir / original_name
+
+        # Handle duplicate filenames
+        counter = 1
+        while target_path.exists():
+            stem = file_path.stem
+            suffix = file_path.suffix
+            new_name = f"{stem}_{counter}{suffix}"
+            target_path = target_dir / new_name
+            counter += 1
+
+        if target_path != file_path:
+            # Move file to new location
+            shutil.move(str(file_path), str(target_path))
+            if counter > 1:
+                renamed_count += 1
+                print(f"Moved and renamed: {original_name} -> {target_path.name} (duplicate avoided)")
+            else:
+                print(f"Moved: {file_path} -> {target_path}")
+
+    # Clean up empty directories after moving all files
+    print("\nCleaning up empty directories...")
+    cleanup_empty_dirs(root)
+
+    print(f"\n✓ Organization complete!")
+    print(f"  - Files processed: {len(files_to_move)}")
+    print(f"  - Files renamed: {renamed_count}")
+    print(f"  - Folders created: a, b, c, ..., 0-9")
 
 
 if __name__ == "__main__":
-    falpha(".")
-    for k in os.listdir("."):
-        print(k)
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Organize files recursively into alphabetical folders")
+    parser.add_argument("directory", nargs="?", default=".", help="Directory to organize (default: current directory)")
+    parser.add_argument("--dry-run", action="store_true", help="Show what would be moved without actually moving files")
+
+    args = parser.parse_args()
+    target_dir = Path(args.directory).resolve()
+
+    if args.dry_run:
+        print(f"DRY RUN - Would organize files in: {target_dir}")
+        # Just show what would happen
+        file_count = sum(1 for _ in target_dir.rglob("*") if _.is_file())
+        print(f"Would process {file_count} files")
+        print("Folders would be created: a/, b/, c/, ..., 0-9/")
+    else:
+        print(f"Organizing files in: {target_dir}")
+        folderize_files(target_dir)

@@ -19,45 +19,43 @@ def process_file(fp: Path) -> list[str]:
     src = fp.read_bytes()
     tree = parser.parse(src)
     root = tree.root_node
-    return [src[node.start_byte:node.end_byte].decode() 
-            for node in root.children 
-            if node.type in VALID]
+    return [src[node.start_byte : node.end_byte].decode() for node in root.children if node.type in VALID]
 
 
 def normalize_import(import_line: str) -> str | None:
     """Normalize an import line to its root module name."""
     line = import_line.lower().strip()
-    
+
     if line.startswith("import "):
         module = line[7:]  # len("import ")
         if " as " in module:
-            module = module[:module.index(" as ")]
+            module = module[: module.index(" as ")]
         if "." in module:
-            module = module[:module.index(".")]
+            module = module[: module.index(".")]
         return module if module and not module.startswith("_") else None
-        
+
     elif line.startswith("from "):
         module = line[5:]  # len("from ")
         if module.startswith("."):
             return None
         if " import" in module:
-            module = module[:module.index(" import")]
+            module = module[: module.index(" import")]
         if " as " in module:
-            module = module[:module.index(" as ")]
+            module = module[: module.index(" as ")]
         if "." in module:
-            module = module[:module.index(".")]
+            module = module[: module.index(".")]
         return module if module and not module.startswith("_") else None
-    
+
     return None
 
 
 def process_files_parallel(files: list[Path]) -> set[str]:
     """Process files in parallel using ProcessPoolExecutor."""
     all_imports = set()
-    
+
     with ProcessPoolExecutor() as executor:
         future_to_file = {executor.submit(process_file, fp): fp for fp in files}
-        
+
         for future in as_completed(future_to_file):
             try:
                 imports = future.result()
@@ -65,7 +63,7 @@ def process_files_parallel(files: list[Path]) -> set[str]:
             except Exception as e:
                 fp = future_to_file[future]
                 cprint(f"Error processing {fp}: {e}", "yellow")
-    
+
     return all_imports
 
 
@@ -75,32 +73,32 @@ def filter_imports(imports: set[str]) -> list[str]:
     stdlib_set = set(STDLIB)
     installed_pkgs = {pkg.replace("-", "_").lower() for pkg in get_installed_pkgs()}
     excluded = stdlib_set | installed_pkgs
-    
+
     # Filter and normalize imports
     filtered = []
     for imp in imports:
         normalized = normalize_import(imp)
         if normalized and normalized not in excluded:
             filtered.append(normalized + "\n")
-    
+
     return sorted(set(filtered))
 
 
 def main() -> None:
     outfile = Path("importz.txt")
     cwd = Path.cwd()
-    
+
     # Get all Python files
     pyfiles = get_pyfiles(cwd)
     cprint(f"{len(pyfiles)} python files found", "green")
-    
+
     # Extract imports in parallel
     all_imports = process_files_parallel(pyfiles)
-    
+
     # Filter and write results
     filtered_imports = filter_imports(all_imports)
     outfile.write_text("".join(filtered_imports), encoding="utf-8")
-    
+
     # Display filtered imports
     for imp in filtered_imports:
         print(imp.strip())

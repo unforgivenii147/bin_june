@@ -105,7 +105,8 @@ class DocstringRemover(ast.NodeTransformer):
         return self._remove_docstring(node)
 
 
-def process_file(path: Path) -> bool:
+def process_file(path: str | Path) -> bool:
+    path = Path(path)
     before_size = gsz(path)
     try:
         code = path.read_text(encoding="utf-8")

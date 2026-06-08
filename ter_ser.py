@@ -16,18 +16,19 @@ def safe_run(path):
     return True
 
 
-def process_file(fp) -> bool:
-    if "site-packages" in fp.parts and "notebook" in fp.parts:
+def process_file(path) -> bool:
+    path = Path(path)
+    if "site-packages" in path.parts and "notebook" in path.parts:
         return False
-    before = gsz(fp)
-    if not fp.exists() or not before:
+    before = gsz(path)
+    if not path.exists() or not before:
         return False
-    if len(fp.read_text().splitlines()) == 1:
+    if len(path.read_text().splitlines()) == 1:
         return False
-    print(f"{fp.name}", end=" ")
-    res = safe_run(fp)
+    print(f"{path.name}", end=" ")
+    res = safe_run(path)
     if res:
-        after = gsz(fp)
+        after = gsz(path)
         diffsize = before - after
         if not diffsize:
             cprint("[NO CHANGE]", "white")

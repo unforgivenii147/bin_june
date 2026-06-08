@@ -17,17 +17,18 @@ def has_shell_shebang(path):
     return "bash" in first or "sh" in first
 
 
-def process_file(fp):
-    print(f"Formatting:  {fp.name}")
+def process_file(path):
+    path = Path(path)
+    print(f"Formatting:  {path.name}")
     try:
-        res, _, _ = runcmd(["shfmt", "-w", str(fp)], show_output=True)
+        res, _, _ = runcmd(["shfmt", "-w", str(path)], show_output=True)
         if res != 0:
             print("  shfmt failed:", res.stderr.strip(), file=sys.stderr)
-            return (False, fp)
+            return (False, path)
     except Exception as e:
         print("  error running shfmt:", e, file=sys.stderr)
-        return (False, fp)
-    return (True, fp)
+        return (False, path)
+    return (True, path)
 
 
 def main():

@@ -6,13 +6,15 @@ from pathlib import Path
 from dh import get_files, mpf3, runcmd
 
 
-def process_file(fp):
-    if not fp.exists() or not fp.stat().st_size:
-        return (False, fp)
-    ret = runcmd(["prettier", "-w", str(fp).replace("/storage/emulated/0", "/sdcard")], show_output=True)
+def process_file(path: str | Path):
+    path = Path(path)
+
+    if not path.exists() or not path.stat().st_size:
+        return (False, path)
+    ret = runcmd(["prettier", "-w", str(path).replace("/storage/emulated/0", "/sdcard")], show_output=True)
     if not ret:
-        return (True, fp)
-    return (False, fp)
+        return (True, path)
+    return (False, path)
 
 
 def main():
