@@ -12,10 +12,13 @@ def sort_and_dedup(file_name):
     removed_lines = set(lines) - set(unique_lines)
     with open(file_name, "w") as f:
         f.writelines(unique_lines)
-    print(f"Removed {len(removed_lines)} lines.")
-    print("Removed lines:")
-    for line in sorted(set(removed_lines)):
-        print(line.strip())
+    if removed_lines:
+        print(f"Removed {len(removed_lines)} lines.")
+        print("Removed lines:")
+        for line in sorted(set(removed_lines)):
+            print(line.strip())
+    else:
+        print("no change")
 
 
 if __name__ == "__main__":

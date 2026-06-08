@@ -10,3 +10,12 @@ out/
 output/
 *.log
 *.tmp
+*.json
+*.txt
+*.pyc
+*.toml
+*.bak
+*.ini
+output/
+out/
+

@@ -17,18 +17,32 @@ from io import BytesIO
 import zstandard as zstd
 from joblib import Parallel, delayed
 
-from dh import MAX_WORKERS,fsz,gsz
+from dh import MAX_WORKERS, fsz, gsz
 
 
 ZST_EXT = ".zst"
-SKIP_EXTS = frozenset({
-    ".xz", ".br", ".7z", ".zip", ".gz", ".bz2", ".zst", ".whl",
-    ".mp4", ".mp3", ".jpg", ".jpeg", ".png", ".gif", ".webp", ".webm"
-})
+SKIP_EXTS = frozenset(
+    {
+        ".xz",
+        ".br",
+        ".7z",
+        ".zip",
+        ".gz",
+        ".bz2",
+        ".zst",
+        ".whl",
+        ".mp4",
+        ".mp3",
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".gif",
+        ".webp",
+        ".webm",
+    }
+)
 
 CHUNK = 262_144
-
-
 
 
 def compress_file(path: Path, level: int) -> dict:
@@ -43,7 +57,7 @@ def compress_file(path: Path, level: int) -> dict:
             return {"status": "skip", "path": str(path)}
 
         data = path.read_bytes()
-        cctx = zstd.ZstdCompressor(level=level, write_content_size=True,threads=MAX_WORKERS)
+        cctx = zstd.ZstdCompressor(level=level, write_content_size=True, threads=MAX_WORKERS)
         compressed = cctx.compress(data)
 
         if len(compressed) >= size:
@@ -87,8 +101,8 @@ def decompress_file(path: Path) -> dict:
         if dst.suffix == ".tar":
             try:
                 with tarfile.open(dst, "r") as tar:
-                    tar.extractall(path=dst.parent,filter="data")
-                dst.unlink()   # remove .tar
+                    tar.extractall(path=dst.parent, filter="data")
+                dst.unlink()  # remove .tar
                 path.unlink()  # remove .zst
                 return {
                     "status": "ok",
@@ -123,7 +137,7 @@ def compress_dir(path: Path, level: int) -> dict:
             tar.add(str(path), arcname=path.name)
         tar_data = buf.getvalue()
 
-        cctx = zstd.ZstdCompressor(level=level, write_content_size=True,threads=MAX_WORKERS)
+        cctx = zstd.ZstdCompressor(level=level, write_content_size=True, threads=MAX_WORKERS)
         compressed = cctx.compress(tar_data)
 
         orig_size = gsz(path)
@@ -215,22 +229,20 @@ def main():
         if files:
             print(f"\nfiles: {len(files)}")
             # Use joblib with loky backend (process-based, safe)
-            results = Parallel(n_jobs=workers, backend="loky")(
-                delayed(compress_file)(f, args.level) for f in files
-            )
+            results = Parallel(n_jobs=workers, backend="loky")(delayed(compress_file)(f, args.level) for f in files)
             total_orig = total_comp = ok = 0
             for r in results:
                 if r["status"] == "ok":
                     total_orig += r["original"]
                     total_comp += r["compressed"]
                     ok += 1
-                    pct = (1 - r["compressed"]/r["original"]) * 100
+                    pct = (1 - r["compressed"] / r["original"]) * 100
                     print(f"  ✓ {Path(r['path']).name}: {fsz(r['original'])} → {fsz(r['compressed'])} ({pct:.1f}%)")
                 elif r["status"] == "error":
-                    print(f"  ✗ {Path(r.get('path','?')).name}: {r.get('error')}")
+                    print(f"  ✗ {Path(r.get('path', '?')).name}: {r.get('error')}")
             if ok:
                 saved = total_orig - total_comp
-                print(f"\nsaved: {fsz(saved)} ({(saved/total_orig)*100:.1f}%)")
+                print(f"\nsaved: {fsz(saved)} ({(saved / total_orig) * 100:.1f}%)")
         else:
             print("nothing to compress")
 
@@ -241,9 +253,7 @@ def main():
             print("no .zst files")
         else:
             print(f"files: {len(files)}")
-            results = Parallel(n_jobs=workers, backend="loky")(
-                delayed(decompress_file)(f) for f in files
-            )
+            results = Parallel(n_jobs=workers, backend="loky")(delayed(decompress_file)(f) for f in files)
             ok = 0
             for r in results:
                 if r["status"] == "ok":
@@ -253,7 +263,7 @@ def main():
                     else:
                         print(f"  ✓ {Path(r['path']).name} → {Path(r['dst']).name} ({fsz(r['decompressed'])})")
                 elif r["status"] == "error":
-                    print(f"  ✗ {Path(r.get('path','?')).name}: {r.get('error')}")
+                    print(f"  ✗ {Path(r.get('path', '?')).name}: {r.get('error')}")
             if ok:
                 print(f"decompressed: {ok} files")
 
@@ -261,9 +271,9 @@ def main():
     final = gsz(target)
     diff = abs(final - initial)
     if final < initial:
-        print(f"\n✅ saved {fsz(diff)} ({(diff/initial)*100:.1f}%)")
+        print(f"\n✅ saved {fsz(diff)} ({(diff / initial) * 100:.1f}%)")
     elif final > initial:
-        print(f"\n📈 grew {fsz(diff)} ({(diff/initial)*100:.1f}%)")
+        print(f"\n📈 grew {fsz(diff)} ({(diff / initial) * 100:.1f}%)")
     else:
         print("\n📊 no change")
     return 0

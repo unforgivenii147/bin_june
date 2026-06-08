@@ -144,9 +144,7 @@ def find_py_files(root: pathlib.Path) -> List[pathlib.Path]:
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Remove unused imports from Python files."
-    )
+    parser = argparse.ArgumentParser(description="Remove unused imports from Python files.")
     parser.add_argument(
         "path",
         nargs="?",
