@@ -62,17 +62,6 @@ def main():
     ans = input(f"delete from {dir1}  ? ")
 
     if ans == "y":
-        cprint("only in first")
-        for p in only_files_first:
-            print(p)
-
-
-
-
-
-
-"""
-    if ans == "y":
         for k, v in common2.items():
             if get_sha256(k) == get_sha256(v):
                 print(f"the files are identical \n{k}\n{v}")
@@ -80,8 +69,10 @@ def main():
             else:
                 print(f"similar name filed:\n{k}\n{v}\n")
 
+    cprint("only in first")
+    for p in only_files_first:
+        print(p)
 
-"""
 
 if __name__ == "__main__":
     main()

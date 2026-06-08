@@ -69,4 +69,3 @@ if __name__ == "__main__":
                 install_by_wildcard(pkg)
             else:
                 install_whl(pkg)
-

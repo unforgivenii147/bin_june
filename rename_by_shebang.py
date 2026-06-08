@@ -12,12 +12,10 @@ from pathlib import Path
 
 
 SHEBANG_MAPPING = {
-
     r"#!/data/data/com.termux/files/usr/bin/python3?": ".py",
     r"#!/data/data/com.termux/files/usr/bin/env python3?": ".py",
     r"#!/usr/bin/env python": ".py",
     r"#!/usr/bin/python": ".py",
-
     r"#!/data/data/com.termux/files/usr/bin/env sh": ".sh",
     r"#!/data/data/com.termux/files/usr/bin/bash": ".sh",
     r"#!/data/data/com.termux/files/usr/bin/sh": ".sh",
@@ -25,41 +23,33 @@ SHEBANG_MAPPING = {
     r"#!/usr/bin/env bash": ".sh",
     r"#!/bin/bash": ".sh",
     r"#!/bin/sh": ".sh",
-
     r"#!/data/data/com.termux/files/usr/bin/node": ".js",
     r"#!/data/data/com.termux/files/usr/bin/env node": ".js",
     r"#!/usr/bin/env node": ".js",
     r"#!/usr/bin/node": ".js",
-
     r"#!/data/data/com.termux/files/usr/bin/ruby": ".rb",
     r"#!/data/data/com.termux/files/usr/bin/env ruby": ".rb",
     r"#!/usr/bin/env ruby": ".rb",
     r"#!/usr/bin/ruby": ".rb",
-
     r"#!/data/data/com.termux/files/usr/bin/perl": ".pl",
     r"#!/data/data/com.termux/files/usr/bin/env perl": ".pl",
     r"#!/usr/bin/env perl": ".pl",
     r"#!/usr/bin/perl": ".pl",
-
     r"#!/data/data/com.termux/files/usr/bin/lua": ".lua",
     r"#!/data/data/com.termux/files/usr/bin/env lua": ".lua",
     r"#!/usr/bin/env lua": ".lua",
     r"#!/usr/bin/lua": ".lua",
-
     r"#!/data/data/com.termux/files/usr/bin/php": ".php",
     r"#!/data/data/com.termux/files/usr/bin/env php": ".php",
     r"#!/usr/bin/env php": ".php",
     r"#!/usr/bin/php": ".php",
-
     r"#!/data/data/com.termux/files/usr/bin/Rscript": ".r",
     r"#!/usr/bin/env Rscript": ".r",
     r"#!/usr/bin/Rscript": ".r",
-
     r"#!/data/data/com.termux/files/usr/bin/fish": ".fish",
     r"#!/data/data/com.termux/files/usr/bin/env fish": ".fish",
     r"#!/usr/bin/env fish": ".fish",
     r"#!/usr/bin/fish": ".fish",
-
     r"#!/usr/bin/awk": ".awk",
     r"#!/usr/bin/env awk": ".awk",
     r"#!/usr/bin/sed": ".sed",
@@ -74,7 +64,6 @@ def get_shebang(file_path):
             if first_line.startswith("#!"):
                 return first_line
     except (UnicodeDecodeError, IOError):
-
         pass
     return None
 
@@ -94,7 +83,6 @@ def rename_file(old_path, new_path):
 
     counter = 1
     original_new_path = new_path
-
 
     while new_path.exists():
         stem = original_new_path.stem
@@ -129,10 +117,8 @@ def main():
     skipped_count = 0
     unknown_count = 0
 
-
     is_termux = check_termux()
     print(f"📂 Scanning directory: {current_dir}\n")
-
 
     files = [f for f in current_dir.iterdir() if f.is_file()]
 
@@ -141,25 +127,20 @@ def main():
         return
 
     for file_path in files:
-
         if file_path.name.startswith("."):
             continue
-
 
         shebang = get_shebang(file_path)
         if not shebang:
             continue
 
-
         extension = get_extension_from_shebang(shebang)
         if not extension:
-
             short_shebang = shebang[:50] + "..." if len(shebang) > 50 else shebang
             print(f"❓ Unknown shebang in: {file_path.name}")
             print(f"   Shebang: {short_shebang}")
             unknown_count += 1
             continue
-
 
         old_name = file_path.stem
         if not file_path.suffix:
@@ -173,7 +154,6 @@ def main():
         new_path = file_path.parent / new_name
         if rename_file(file_path, new_path):
             renamed_count += 1
-
 
     print(f"\n{'=' * 50}")
     print(f"📊 Summary:")
@@ -222,7 +202,6 @@ if __name__ == "__main__":
         print("  --dry-run    Preview changes without renaming")
         print("  --help       Show this help message")
     else:
-
         response = input("⚠️  This will rename files in the current directory. Continue? (y/N): ")
         if response.lower() == "y":
             main()

@@ -41,7 +41,6 @@ def main():
     cwd = Path.cwd()
     files = get_pyfiles(cwd)
 
-
     mpf3(refactor_file, files)
 
 

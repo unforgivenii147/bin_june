@@ -89,7 +89,6 @@ def list_files(path: Path) -> list[Path]:
 
 def compress_folder_sync(folder_path: Path, output_base_name: str, fmt: str = "tar") -> tuple[bool, str | None]:
     try:
-
         archive = shutil.make_archive(output_base_name, fmt, str(folder_path))
         return True, archive
     except Exception as e:
@@ -121,9 +120,7 @@ def compress_file_sync(path: Path, level: int, zstd_threads: int) -> dict:
             return result
         result["before"] = before
 
-
         cctx = zstd.ZstdCompressor(level=level, threads=zstd_threads)
-
 
         with path.open("rb") as fin, dst.open("wb") as fout:
             cctx.copy_stream(fin, fout)
@@ -139,11 +136,9 @@ def compress_file_sync(path: Path, level: int, zstd_threads: int) -> dict:
             result["error"] = "empty destination"
             return result
 
-
         try:
             path.unlink()
         except Exception as e:
-
             result["error"] = f"compressed but failed to delete original: {e}"
             result["success"] = True
             return result
@@ -182,7 +177,6 @@ def main() -> int:
         print("Target must be a directory", file=sys.stderr)
         return 2
 
-
     cpu = os.cpu_count() or 1
     workers = args.workers if args.workers > 0 else min(32, cpu * 2)
     zstd_threads = max(1, min(4, cpu))
@@ -212,7 +206,6 @@ def main() -> int:
     total_compressed = 0
     successful = 0
     total_files = len(files)
-
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as ex:
         futures = {ex.submit(compress_file_sync, path, args.level, zstd_threads): path for path in files}

@@ -13,12 +13,9 @@ def is_empty_wheel(wheel_path):
     """
     try:
         with zipfile.ZipFile(wheel_path, "r") as zip_ref:
-
             all_files = zip_ref.namelist()
 
-
             has_py_files = any(file.endswith(".py") for file in all_files)
-
 
             has_code_dirs = any(
                 not (file.startswith("dist-info/") or file.startswith("__pycache__/"))
@@ -26,7 +23,6 @@ def is_empty_wheel(wheel_path):
                 and not file.endswith(".dist-info/")
                 for file in all_files
             )
-
 
             return not (has_py_files or has_code_dirs)
 
@@ -45,9 +41,7 @@ def move_empty_wheels(source_dir, dest_dir_name="empty_wheels"):
     source_path = Path(source_dir)
     dest_path = source_path / dest_dir_name
 
-
     dest_path.mkdir(exist_ok=True)
-
 
     wheel_files = list(source_path.glob("*.whl"))
 
@@ -74,7 +68,6 @@ def move_empty_wheels(source_dir, dest_dir_name="empty_wheels"):
         return
 
     print(f"\nFound {len(empty_wheels)} empty wheel(s)")
-
 
     for wheel_file in empty_wheels:
         dest_file = dest_path / wheel_file.name

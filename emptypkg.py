@@ -32,9 +32,7 @@ def is_empty_whl(whl_path: Path) -> bool:
             if not dist_info_dirs:
                 return False
 
-
             dist_info_dir = dist_info_dirs[0].split("/")[0] + "/"
-
 
             for file_name in zf.namelist():
                 if file_name.endswith("/"):
@@ -70,13 +68,10 @@ def find_empty_wheels(current_dir: Path) -> list:
 def main() -> None:
     site_packages = sysconfig.get_paths()["purelib"]
 
-
     empty_installed = find_empty_packages(site_packages)
-
 
     current_dir = Path.cwd()
     empty_wheels = find_empty_wheels(current_dir)
-
 
     if empty_installed:
         print("\n=== Empty installed packages (site-packages) ===")

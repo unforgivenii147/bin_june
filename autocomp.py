@@ -75,7 +75,6 @@ def prepare_input(target_path):
             return f.read(), target.name
 
     elif target.is_dir():
-
         tar_path = f"{target.name}.tar"
         with tarfile.open(tar_path, "w") as tar:
             tar.add(target, arcname=target.name)
@@ -113,7 +112,6 @@ def compress_all(data, base_name, output_dir="."):
             compressed = compress_func(data)
             elapsed = time.time() - start
 
-
             with open(output_path, "wb") as f:
                 f.write(compressed)
 
@@ -129,11 +127,9 @@ def compress_all(data, base_name, output_dir="."):
             if os.path.exists(output_path):
                 os.remove(output_path)
 
-
     try:
         output_path = os.path.join(output_dir, f"{base_name}.7z")
         start = time.time()
-
 
         temp_file = f"_temp_{base_name}"
         with open(temp_file, "wb") as f:
@@ -166,10 +162,8 @@ def report_results(results, original_size):
         saved = original_size - result.size
         print(f"{i}. {result.name:10} | Size: {result.size:12,} | Ratio: {result.ratio:.4f} | Saved: {saved:12,} bytes")
 
-
     best = results[0]
     print(f"\n✓ Keeping best: {best.name} ({best.path})")
-
 
     for result in results[1:]:
         try:
@@ -193,7 +187,6 @@ def main():
     print(f"📦 Compressing: {target}\n")
 
     try:
-
         data, base_name = prepare_input(target)
         original_size = len(data)
 
@@ -201,9 +194,7 @@ def main():
         print("COMPRESSION PROGRESS:")
         print("-" * 70)
 
-
         results = compress_all(data, base_name)
-
 
         report_results(results, original_size)
 

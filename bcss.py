@@ -18,12 +18,13 @@ def process_file(path):
         diffsize = before - after
         if not diffsize:
             cprint("[NO CHANGE]", "white")
+            return
         if diffsize:
             ratio = diffsize / before * 100
             cprint(f"[OK] - {fsz(diffsize)} {abs(ratio):.1f}%", "cyan")
-        return True
+        return
     cprint("[ERROR]", "red")
-    return False
+    return
 
 
 def main():

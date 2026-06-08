@@ -57,8 +57,6 @@ def process_path(path: Path) -> None:
                 print(f"[DIR]  {path}  {oct(current_mode)} -> {oct(DIR_PERM)}")
             return
 
-
-
         if is_executable(current_mode) and (is_binary(path) or has_shebang(path)):
             return
 
@@ -79,9 +77,7 @@ def collect_paths(root_dir: str) -> list[Path]:
     root = Path(root_dir).resolve()
     paths = []
 
-
     for p in root.rglob("*"):
-
         if any(part in SKIP_NAMES for part in p.parts):
             continue
         paths.append(p)
@@ -97,7 +93,6 @@ def normalize_permissions(root_dir: str) -> None:
     print(f"Found {total} items. Processing with {cpu_count()} workers...")
 
     with Pool(processes=cpu_count()) as pool:
-
         for _ in pool.imap_unordered(process_path, all_paths, chunksize=500):
             pass
 

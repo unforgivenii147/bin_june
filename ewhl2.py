@@ -17,9 +17,7 @@ def is_empty_wheel(wheel_path):
         with zipfile.ZipFile(wheel_path, "r") as zip_ref:
             all_files = zip_ref.namelist()
 
-
             has_py_files = any(file.endswith(".py") for file in all_files)
-
 
             has_code_dirs = any(
                 not (file.startswith("dist-info/") or file.startswith("__pycache__/"))
@@ -90,7 +88,6 @@ def check_package_location(package_name):
             [sys.executable, "-m", "pip", "show", "-f", package_name], capture_output=True, text=True
         )
         if result.returncode == 0:
-
             lines = result.stdout.strip().split("\n")
             location = None
             has_files = False
@@ -98,7 +95,6 @@ def check_package_location(package_name):
                 if line.startswith("Location:"):
                     location = line.split(":", 1)[1].strip()
                 elif line.startswith("Files:"):
-
                     files_section = line
                     if any(
                         file_line.strip() and not ".dist-info" in file_line
@@ -116,9 +112,7 @@ def analyze_wheels(source_dir, dest_dir_name="empty_wheels", check_installed=Tru
     source_path = Path(source_dir)
     dest_path = source_path / dest_dir_name
 
-
     installed_packages = get_installed_packages() if check_installed else {}
-
 
     wheel_files = list(source_path.glob("*.whl"))
 
@@ -137,19 +131,15 @@ def analyze_wheels(source_dir, dest_dir_name="empty_wheels", check_installed=Tru
     for wheel_file in wheel_files:
         print(f"Checking {wheel_file.name}...")
 
-
         if is_empty_wheel(wheel_file):
             print(f"  ✓ EMPTY wheel")
 
-
             pkg_name, pkg_version = extract_package_info(wheel_file)
-
 
             if check_installed and pkg_name:
                 installed_version = installed_packages.get(pkg_name.lower())
                 if installed_version:
                     print(f"  ⚠ WARNING: Package '{pkg_name}' is INSTALLED (version {installed_version})")
-
 
                     location, has_files = check_package_location(pkg_name)
                     if location:
@@ -170,7 +160,6 @@ def analyze_wheels(source_dir, dest_dir_name="empty_wheels", check_installed=Tru
 
         print()
 
-
     print("=" * 60)
     print("SUMMARY")
     print("=" * 60)
@@ -190,7 +179,6 @@ def analyze_wheels(source_dir, dest_dir_name="empty_wheels", check_installed=Tru
         for item in installed_empty_wheels:
             print(f"     pip uninstall {item['package']} -y")
             print(f"     pip install {item['package']}")
-
 
     if empty_wheels:
         print(f"\nFound {len(empty_wheels)} empty wheel(s) total")
@@ -221,7 +209,6 @@ def analyze_wheels(source_dir, dest_dir_name="empty_wheels", check_installed=Tru
             print(f"\nMoved {moved_count} empty wheels to {dest_dir_name}/")
         else:
             print("No wheels were moved.")
-
 
     if installed_empty_wheels:
         print("\n" + "=" * 60)
@@ -268,7 +255,6 @@ def main():
 
 
 if __name__ == "__main__":
-
     try:
         import packaging
     except ImportError:

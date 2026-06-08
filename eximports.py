@@ -1,10 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/python
-
+# create requirements.txt actually importz.txt
 import sys
 from pathlib import Path
+from typing import Callable
+from concurrent.futures import ProcessPoolExecutor, as_completed
 
 import tree_sitter_python as tsp
-from dh import STDLIB, cprint, get_filez, get_installed_pkgs, is_binary
+from dh import STDLIB, cprint, get_installed_pkgs, get_pyfiles
 from tree_sitter import Language, Parser
 
 parser = Parser()
@@ -12,78 +14,96 @@ parser.language = Language(tsp.language())
 VALID = {"import_statement", "import_from_statement"}
 
 
-def extract_file(src: bytes, tree):
-    root = tree.root_node
-    return [src[node.start_byte : node.end_byte].decode() for node in root.children if node.type in VALID]
-
-
-def process_file(fp):
+def process_file(fp: Path) -> list[str]:
+    """Extract import statements from a single file."""
     src = fp.read_bytes()
     tree = parser.parse(src)
-    return extract_file(src, tree)
+    root = tree.root_node
+    return [src[node.start_byte:node.end_byte].decode() 
+            for node in root.children 
+            if node.type in VALID]
 
 
-def main():
+def normalize_import(import_line: str) -> str | None:
+    """Normalize an import line to its root module name."""
+    line = import_line.lower().strip()
+    
+    if line.startswith("import "):
+        module = line[7:]  # len("import ")
+        if " as " in module:
+            module = module[:module.index(" as ")]
+        if "." in module:
+            module = module[:module.index(".")]
+        return module if module and not module.startswith("_") else None
+        
+    elif line.startswith("from "):
+        module = line[5:]  # len("from ")
+        if module.startswith("."):
+            return None
+        if " import" in module:
+            module = module[:module.index(" import")]
+        if " as " in module:
+            module = module[:module.index(" as ")]
+        if "." in module:
+            module = module[:module.index(".")]
+        return module if module and not module.startswith("_") else None
+    
+    return None
+
+
+def process_files_parallel(files: list[Path]) -> set[str]:
+    """Process files in parallel using ProcessPoolExecutor."""
+    all_imports = set()
+    
+    with ProcessPoolExecutor() as executor:
+        future_to_file = {executor.submit(process_file, fp): fp for fp in files}
+        
+        for future in as_completed(future_to_file):
+            try:
+                imports = future.result()
+                all_imports.update(imports)
+            except Exception as e:
+                fp = future_to_file[future]
+                cprint(f"Error processing {fp}: {e}", "yellow")
+    
+    return all_imports
+
+
+def filter_imports(imports: set[str]) -> list[str]:
+    """Filter imports to only those not in stdlib or installed packages."""
+    # Pre-compute the set of excluded packages
+    stdlib_set = set(STDLIB)
+    installed_pkgs = {pkg.replace("-", "_").lower() for pkg in get_installed_pkgs()}
+    excluded = stdlib_set | installed_pkgs
+    
+    # Filter and normalize imports
+    filtered = []
+    for imp in imports:
+        normalized = normalize_import(imp)
+        if normalized and normalized not in excluded:
+            filtered.append(normalized + "\n")
+    
+    return sorted(set(filtered))
+
+
+def main() -> None:
     outfile = Path("importz.txt")
-    all_imports = []
-    seen = set()
     cwd = Path.cwd()
-    allpyfiles = len(list(cwd.rglob("*.py")))
-    cprint(f"{allpyfiles} python files found", "green")
-    c = 0
-    for f in get_filez(cwd):
-        if is_binary(f):
-            continue
-        if f.suffix == ".py":
-            cprint(f"{c}/{allpyfiles} {f.name}", "cyan")
-            c += 1
-            result = process_file(f)
-            if result:
-                for k in result:
-                    if k not in seen:
-                        seen.add(k)
-                        all_imports.append(k)
-    all_imports = sorted(all_imports)
-    outfile.write_text("\n".join(all_imports), encoding="utf-8")
-    content = outfile.read_text(encoding="utf-8")
-    impoz = []
-    for line in content.splitlines():
-        line = line.lower()
-        if line.startswith("import "):
-            line = line.replace("import ", "")
-            if " as " in line:
-                indx = line.index(" as ")
-                line = line[:indx]
-            if "." in line:
-                indx = line.index(".")
-                line = line[:indx]
-            if line not in impoz and (not line.startswith("_")):
-                impoz.append(line + "\n")
-        elif line.startswith("from "):
-            line = line.replace("from ", "")
-            if line.startswith("."):
-                continue
-            if " as " in line:
-                indx = line.index(" as ")
-                line = line[:indx]
-            if "." in line:
-                indx = line.index(".")
-                line = line[:indx]
-            if " import" in line:
-                indx = line.index(" import")
-                line = line[:indx]
-            if line not in impoz and (not line.startswith("_")):
-                impoz.append(line + "\n")
-    impoz = sorted(set(impoz))
-    stdlib_plus_installed = list(STDLIB)
-    inpkg = [p.replace("-", "_").lower() for p in get_installed_pkgs()]
-    stdlib_plus_installed.extend(inpkg)
-    filterd = []
-    for rq in impoz:
-        if rq.strip() not in stdlib_plus_installed:
-            print(rq.strip())
-            filterd.append(rq)
-    outfile.write_text("\n".join(filterd), encoding="utf-8")
+    
+    # Get all Python files
+    pyfiles = get_pyfiles(cwd)
+    cprint(f"{len(pyfiles)} python files found", "green")
+    
+    # Extract imports in parallel
+    all_imports = process_files_parallel(pyfiles)
+    
+    # Filter and write results
+    filtered_imports = filter_imports(all_imports)
+    outfile.write_text("".join(filtered_imports), encoding="utf-8")
+    
+    # Display filtered imports
+    for imp in filtered_imports:
+        print(imp.strip())
 
 
 if __name__ == "__main__":

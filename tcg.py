@@ -119,7 +119,6 @@ def strip_python_strings_and_comments(code: str) -> str:
         if hasattr(ast, "unparse"):
             return ast.unparse(stripped_tree)
 
-
         if (
             tree.body
             and isinstance(tree.body[0], ast.Expr)
@@ -131,7 +130,6 @@ def strip_python_strings_and_comments(code: str) -> str:
         return ast.unparse(tree) if hasattr(ast, "unparse") else code
 
     except SyntaxError:
-
         return code
     except Exception:
         return code
@@ -154,7 +152,6 @@ def detect_shebang(content: str) -> str | None:
     """
     stripped = content.lstrip()
 
-
     if stripped.startswith("#!"):
         shebang_line = stripped.split("\n", 1)[0].lower()
         if "python" in shebang_line:
@@ -162,31 +159,25 @@ def detect_shebang(content: str) -> str | None:
         if "bash" in shebang_line or "sh" in shebang_line:
             return TERMUX_BASH
 
-
     try:
         ast.parse(content)
         return TERMUX_PYTHON
     except SyntaxError:
         pass
 
-
     stripped_code = strip_python_strings_and_comments(content)
     stripped_lines = stripped_code.lstrip()
-
 
     for indicator in PYTHON_INDICATORS:
         if stripped_lines.startswith(indicator):
             return TERMUX_PYTHON
 
-
     if any(line.lstrip().startswith("@") for line in stripped_code.splitlines()[:5]):
         return TERMUX_PYTHON
-
 
     for indicator in BASH_INDICATORS:
         if indicator in stripped[:200]:
             return TERMUX_BASH
-
 
     python_score = 0
     bash_score = 0
@@ -242,13 +233,11 @@ def main() -> None:
     cwd = Path.cwd()
     is_script_dir = cwd in SCRIPT_DIRS
 
-
     content = get_clipboard()
 
     if not content.strip():
         print("Warning: Clipboard is empty, creating empty file")
         content = "\n"
-
 
     if is_script_dir and not content.lstrip().startswith("#!"):
         shebang = detect_shebang(content)
@@ -256,18 +245,14 @@ def main() -> None:
             content = shebang + content
             print(f"Added shebang: {shebang.strip()}")
 
-
     lines = content.splitlines()
     if len(lines) > 1 and lines[0].startswith("#!") and lines[1].startswith("#!"):
-
         lines.pop(0)
         content = "\n".join(lines) + "\n"
         print("Fixed double shebang")
 
-
     if not content.endswith("\n"):
         content += "\n"
-
 
     try:
         out_file.write_text(content, encoding="utf-8")
@@ -275,7 +260,6 @@ def main() -> None:
     except OSError as e:
         print(f"Error writing file: {e}", file=sys.stderr)
         sys.exit(1)
-
 
     if is_script_dir:
         try:

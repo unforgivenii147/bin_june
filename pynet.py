@@ -18,9 +18,6 @@ import urllib.error
 import urllib.request
 
 
-
-
-
 def get_public_ip():
     """Try multiple public IP services, return the first successful result."""
     services = [
@@ -41,13 +38,9 @@ def get_public_ip():
     return None
 
 
-
-
-
 def get_local_ip():
     """Return the primary local IP address by connecting to a remote server."""
     try:
-
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.settimeout(2)
         s.connect(("8.8.8.8", 80))
@@ -55,11 +48,7 @@ def get_local_ip():
         s.close()
         return ip
     except Exception:
-
         return socket.gethostbyname(socket.gethostname())
-
-
-
 
 
 def get_dns_servers():
@@ -78,7 +67,6 @@ def get_dns_servers():
     except Exception as e:
         return [f"Error retrieving DNS: {e}"]
 
-
     seen = set()
     unique_dns = []
     for ip in dns_list:
@@ -86,9 +74,6 @@ def get_dns_servers():
             seen.add(ip)
             unique_dns.append(ip)
     return unique_dns
-
-
-
 
 
 def test_speed():
@@ -104,7 +89,6 @@ def test_speed():
     dl_error = None
     ul_error = None
 
-
     print("    Testing download speed...")
     try:
         start = time.time()
@@ -115,7 +99,6 @@ def test_speed():
         dl_mbps = (size_bits / elapsed) / 1e6
     except Exception as e:
         dl_error = str(e)
-
 
     print("    Testing upload speed...")
     try:
@@ -149,14 +132,10 @@ def test_speed():
     return dl_mbps, ul_mbps, dl_error, ul_error
 
 
-
-
-
 def main():
     print("=" * 50)
     print(" NETWORK STATES ")
     print("=" * 50)
-
 
     print("\n[*] Public IP:")
     pub_ip = get_public_ip()
@@ -165,11 +144,9 @@ def main():
     else:
         print("    Could not determine public IP.")
 
-
     print("\n[*] Local IP (primary interface):")
     local_ip = get_local_ip()
     print(f"    {local_ip}")
-
 
     print("\n[*] DNS Servers:")
     dns = get_dns_servers()

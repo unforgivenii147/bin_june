@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script to detect and keep only the latest version of wheel, deb, or tar.gz files in current directory recursively.
+Script to detect and keep only the latest version of wheel or deb files in current directory recursively.
 """
 
 import re
@@ -51,41 +51,6 @@ def parse_wheel_version(filename: str) -> Optional[Tuple[str, str]]:
         pkg_name = "-".join(pkg_name_parts)
         version = "-".join(version_parts)
         return pkg_name, version
-
-    return None
-
-
-def parse_targz_version(filename: str) -> Optional[Tuple[str, str]]:
-    """
-    Parse tar.gz filename to extract package name and version.
-    Format: {package}-{version}.tar.gz or {package}-{version}.tgz
-    Example: regex-2023.6.3.tar.gz -> package: regex, version: 2023.6.3
-    """
-    # Remove .tar.gz or .tgz extension
-    name = filename
-    if filename.endswith(".tar.gz"):
-        name = filename[:-7]  # Remove .tar.gz
-    elif filename.endswith(".tgz"):
-        name = filename[:-4]  # Remove .tgz
-    else:
-        return None
-
-    # Find the last dash that separates name from version
-    # Version typically starts with a digit or common patterns
-    parts = name.split("-")
-
-    # Find where version starts (first part that begins with a digit)
-    for i, part in enumerate(parts):
-        if re.match(r"^\d", part):
-            # Package name is everything before this
-            pkg_name = "-".join(parts[:i])
-            version = "-".join(parts[i:])
-
-            # Clean up version (remove any trailing .tar or similar)
-            version = re.sub(r"\.(tar|tgz)$", "", version)
-
-            if pkg_name and version:
-                return pkg_name, version
 
     return None
 
@@ -150,12 +115,6 @@ def process_file(file_path: Path, file_type: str) -> Optional[Tuple[str, str, Pa
                 pkg_name, version = parsed
                 return (pkg_name, version, file_path)
 
-        elif file_type == "targz" and (filename.endswith(".tar.gz") or filename.endswith(".tgz")):
-            parsed = parse_targz_version(filename)
-            if parsed:
-                pkg_name, version = parsed
-                return (pkg_name, version, file_path)
-
         elif file_type == "deb" and filename.endswith(".deb"):
             parsed = parse_deb_version(filename)
             if parsed:
@@ -177,23 +136,17 @@ def scan_directory(directory: Path, file_type: str, check_all: bool = False) -> 
     extensions = []
 
     if check_all:
-        extensions = [".whl", ".deb", ".tar.gz", ".tgz"]
+        extensions = [".whl", ".deb"]
     else:
         if file_type == "wheel":
             extensions = [".whl"]
         elif file_type == "deb":
             extensions = [".deb"]
-        elif file_type == "targz":
-            extensions = [".tar.gz", ".tgz"]
 
     # Collect all files to process
     files_to_process = []
     for ext in extensions:
-        if ext == ".tar.gz":
-            # Special handling for .tar.gz files
-            files_to_process.extend(directory.rglob("*.tar.gz"))
-        else:
-            files_to_process.extend(directory.rglob(f"*{ext}"))
+        files_to_process.extend(directory.rglob(f"*{ext}"))
 
     print(f"Found {len(files_to_process)} files to process...")
 
@@ -205,10 +158,6 @@ def scan_directory(directory: Path, file_type: str, check_all: bool = False) -> 
                 future = executor.submit(process_file, file_path, "wheel")
             elif file_path.suffix == ".deb":
                 future = executor.submit(process_file, file_path, "deb")
-            elif file_path.suffix == ".gz" and file_path.stem.endswith(".tar"):
-                future = executor.submit(process_file, file_path, "targz")
-            elif file_path.suffix == ".tgz":
-                future = executor.submit(process_file, file_path, "targz")
             else:
                 continue
             futures[future] = file_path
@@ -241,11 +190,9 @@ def keep_latest_versions(packages: Dict[str, List[Tuple[str, Path]]], dry_run: b
     Keep only the latest version for each package, delete older ones.
     """
     total_deleted = 0
-    total_files_kept = 0
 
     for pkg_name, versions in packages.items():
         if len(versions) <= 1:
-            total_files_kept += len(versions)
             continue
 
         # Find the latest version manually using proper comparison
@@ -270,31 +217,20 @@ def keep_latest_versions(packages: Dict[str, List[Tuple[str, Path]]], dry_run: b
                 except Exception as e:
                     print(f"  Error deleting {file_path.name}: {e}")
 
-        total_files_kept += 1
-
-    return total_deleted, total_files_kept
+    return total_deleted
 
 
 def main():
     parser = argparse.ArgumentParser(
         description="Detect and keep only the latest version of package files.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  %(prog)s -w                # Clean wheel files only
-  %(prog)s -d                # Clean deb files only
-  %(prog)s -t                # Clean tar.gz files only
-  %(prog)s -a                # Clean all package types
-  %(prog)s -t --dry-run      # Preview what would be deleted
-        """,
     )
 
     # Mutually exclusive group for file type selection
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-d", "--deb", action="store_true", help="Check .deb files")
     group.add_argument("-w", "--wheel", action="store_true", help="Check .whl files")
-    group.add_argument("-t", "--targz", action="store_true", help="Check .tar.gz and .tgz files")
-    group.add_argument("-a", "--all", action="store_true", help="Check all package types (.whl, .deb, .tar.gz, .tgz)")
+    group.add_argument("-a", "--all", action="store_true", help="Check all package types (.whl and .deb)")
 
     parser.add_argument("--dry-run", action="store_true", help="Simulate deletion without actually removing files")
     parser.add_argument("--dir", type=str, default=".", help="Directory to scan (default: current directory)")
@@ -303,7 +239,7 @@ Examples:
     args = parser.parse_args()
 
     # Default to wheel if no option specified
-    if not (args.deb or args.wheel or args.targz or args.all):
+    if not (args.deb or args.wheel or args.all):
         args.wheel = True
 
     scan_dir = Path(args.dir).resolve()
@@ -316,12 +252,8 @@ Examples:
         file_type = "all"
     elif args.deb:
         file_type = "deb"
-    elif args.wheel:
-        file_type = "wheel"
-    elif args.targz:
-        file_type = "targz"
     else:
-        file_type = "wheel"  # Default
+        file_type = "wheel"
 
     print(f"Scanning directory: {scan_dir}")
     print(f"File type: {file_type}")
@@ -337,29 +269,24 @@ Examples:
         return 0
 
     # Display found packages
-    total_versions = sum(len(versions) for versions in packages.values())
-    print(f"\nFound {len(packages)} package(s) with {total_versions} total version(s):")
-
-    if args.verbose:
-        for pkg_name, versions in packages.items():
-            print(f"\n  {pkg_name}: {len(versions)} version(s)")
+    print(f"\nFound {len(packages)} package(s):")
+    for pkg_name, versions in packages.items():
+        print(f"  {pkg_name}: {len(versions)} version(s)")
+        if args.verbose and len(versions) > 1:
             for version, path in versions:
                 print(f"    - {version}: {path.name}")
-    else:
-        for pkg_name, versions in packages.items():
-            print(f"  {pkg_name}: {len(versions)} version(s)")
 
     # Keep only latest versions
     print("\n" + "=" * 50)
-    total_deleted, total_kept = keep_latest_versions(packages, args.dry_run)
+    total_deleted = keep_latest_versions(packages, args.dry_run)
 
     print("\n" + "=" * 50)
     if total_deleted == 0:
         print("No files to delete. All packages have only one version.")
     elif args.dry_run:
-        print(f"Dry run complete. Would delete {total_deleted} file(s), keep {total_kept} file(s).")
+        print(f"Dry run complete. Would delete {total_deleted} file(s).")
     else:
-        print(f"Cleanup complete. Deleted {total_deleted} file(s), kept {total_kept} file(s).")
+        print(f"Cleanup complete. Deleted {total_deleted} file(s).")
 
     return 0
 

@@ -23,17 +23,14 @@ def extract_metadata_from_wheel(wheel_path: Path) -> Optional[Dict[str, str]]:
     """
     try:
         with zipfile.ZipFile(wheel_path, "r") as zf:
-
             metadata_files = [f for f in zf.namelist() if f.endswith(".dist-info/METADATA")]
 
             if not metadata_files:
                 print(f"  Warning: No METADATA file found in {wheel_path.name}")
                 return None
 
-
             with zf.open(metadata_files[0]) as f:
                 content = f.read().decode("utf-8", errors="ignore")
-
 
             parser = HeaderParser()
             msg = parser.parsestr(content)
@@ -62,9 +59,7 @@ def extract_wheel_tags(filename: str) -> Optional[Tuple[str, str, str]]:
     """
 
     patterns = [
-
         r".*?-.*?-.*?-(py3|py2\.py3|py2|cp[0-9]+)-(none|abi[0-9]+|cp[0-9]+m?)-(manylinux[0-9_]+|linux|win_amd64|win32|macosx[0-9_]+)\.whl$",
-
         r".*?-.*?-.*?-([a-z0-9]+(?:[\.\-][a-z0-9]+)?)-([a-z0-9]+(?:[\.\-][a-z0-9]+)?)-([a-z0-9_]+(?:[\.\-][a-z0-9_]+)?)\.whl$",
     ]
 
@@ -73,9 +68,7 @@ def extract_wheel_tags(filename: str) -> Optional[Tuple[str, str, str]]:
         if match:
             return (match.group(1), match.group(2), match.group(3))
 
-
     if "cp3" in filename:
-
         py_match = re.search(r"cp3[0-9]", filename)
         if py_match:
             return (py_match.group(0), "none", "any")
@@ -90,16 +83,13 @@ def reconstruct_wheel_name(wheel_path: Path, metadata: Dict[str, str], original_
     name = metadata["name"]
     version = metadata["version"]
 
-
     tags = extract_wheel_tags(wheel_path.name)
 
     if tags:
         python_tag, abi_tag, platform_tag = tags
         return f"{name}-{version}-{python_tag}-{abi_tag}-{platform_tag}.whl"
     else:
-
         with zipfile.ZipFile(wheel_path, "r") as zf:
-
             wheel_files = [f for f in zf.namelist() if f.endswith(".dist-info/WHEEL")]
             if wheel_files:
                 with zf.open(wheel_files[0]) as f:
@@ -114,7 +104,6 @@ def reconstruct_wheel_name(wheel_path: Path, metadata: Dict[str, str], original_
                                 python_tag = py_match.group(1)
                                 abi_tag = py_match.group(2) if len(py_match.groups()) > 1 else "none"
                                 return f"{name}-{version}-{python_tag}-{abi_tag}-{platform_tag}.whl"
-
 
         print(f"  Warning: Could not determine tags for {wheel_path.name}, using generic 'py3-none-any'")
         return f"{name}-{version}-py3-none-any.whl"
@@ -142,7 +131,6 @@ def fix_whl_files_by_metadata(directory=".", dry_run=True, backup=True):
     renamed_count = 0
     failed_files = []
 
-
     backup_dir = None
     if backup and not dry_run:
         backup_dir = path / "whl_backup"
@@ -152,13 +140,11 @@ def fix_whl_files_by_metadata(directory=".", dry_run=True, backup=True):
     for idx, file_path in enumerate(whl_files, 1):
         print(f"\n[{idx}/{len(whl_files)}] Processing: {file_path.name}")
 
-
         metadata = extract_metadata_from_wheel(file_path)
 
         if not metadata:
             failed_files.append(file_path.name)
             continue
-
 
         proper_name = reconstruct_wheel_name(file_path, metadata, file_path.name)
 
@@ -172,7 +158,6 @@ def fix_whl_files_by_metadata(directory=".", dry_run=True, backup=True):
             if dry_run:
                 print(f"  Would rename to: {proper_name}")
             else:
-
                 if backup_dir:
                     backup_path = backup_dir / file_path.name
                     shutil.copy2(file_path, backup_path)
@@ -187,7 +172,6 @@ def fix_whl_files_by_metadata(directory=".", dry_run=True, backup=True):
                     failed_files.append(file_path.name)
         else:
             print(f"  Already has correct name: {file_path.name}")
-
 
     print("\n" + "=" * 60)
     print(f"SUMMARY:")
@@ -237,7 +221,6 @@ def batch_fix_with_parallel(directory=".", max_workers=4):
             except Exception as e:
                 print(f"Error processing {file_path.name}: {e}")
 
-
     print("\nExtracted information:")
     for old_name, (metadata, proper_name) in results.items():
         print(f"  {old_name} -> {metadata['name']} {metadata['version']} -> {proper_name}")
@@ -270,7 +253,6 @@ def main():
     args = parser.parse_args()
 
     if args.info_only:
-
         print("Extracting wheel information (no renaming):")
         print("=" * 60)
         if args.parallel:

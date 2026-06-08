@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 import ast
+import astor
 import sys
 import unicodedata
 from pathlib import Path
@@ -22,7 +23,7 @@ def process_file(fn: Path):
         if fn.suffix == ".py":
             try:
                 tree = ast.parse(content)
-                new_content = ast.unparse(tree)
+                new_content = astor.to_source(tree)
                 fn.write_text(new_content, encoding="utf-8")
                 print(f"\x1b[0m[ \x1b[6;96m✓\x1b[0m ] {fn.name} ")
                 return

@@ -16,16 +16,6 @@ class TextSummarizer:
     def __init__(self, language: str = "english"):
         """Initialize summarizer with language-specific resources."""
 
-
-
-
-
-
-
-
-
-
-
         self.language = language
         self.stop_words = set(stopwords.words(language))
 
@@ -48,15 +38,12 @@ class TextSummarizer:
         total_words = 0
 
         for sentence in sentences:
-
             words = word_tokenize(sentence.lower())
 
             for word in words:
-
                 if word.isalnum() and word not in self.stop_words:
                     word_freq[word] += 1
                     total_words += 1
-
 
         if total_words > 0:
             for word in word_freq:
@@ -78,7 +65,6 @@ class TextSummarizer:
                     score += word_freq[word]
                     word_count += 1
 
-
             if word_count > 0:
                 sentence_scores[idx] = score / word_count
             else:
@@ -90,7 +76,6 @@ class TextSummarizer:
         """Step 6: Select top-N sentences by score."""
 
         top_indices = sorted(sentence_scores.keys(), key=lambda x: sentence_scores[x], reverse=True)[:num_sentences]
-
 
         return sorted(top_indices)
 
@@ -111,22 +96,17 @@ class TextSummarizer:
         if not 0 < ratio <= 1:
             raise ValueError("Ratio must be between 0 and 1")
 
-
         text = self._preprocess_text(text)
         sentences = self._tokenize_sentences(text)
-
 
         if len(sentences) <= 1:
             return text
 
-
         num_sentences = max(1, int(len(sentences) * ratio))
-
 
         word_freq = self._calculate_word_frequencies(sentences)
         sentence_scores = self._score_sentences(sentences, word_freq)
         selected_indices = self._select_top_sentences(sentence_scores, num_sentences)
-
 
         summary = " ".join([sentences[i] for i in selected_indices])
         return summary
@@ -148,19 +128,15 @@ class TextSummarizer:
         if num_sentences < 1:
             raise ValueError("Number of sentences must be >= 1")
 
-
         text = self._preprocess_text(text)
         sentences = self._tokenize_sentences(text)
-
 
         if len(sentences) <= num_sentences:
             return text
 
-
         word_freq = self._calculate_word_frequencies(sentences)
         sentence_scores = self._score_sentences(sentences, word_freq)
         selected_indices = self._select_top_sentences(sentence_scores, num_sentences)
-
 
         summary = " ".join([sentences[i] for i in selected_indices])
         return summary
@@ -175,7 +151,6 @@ class TextSummarizer:
         return {sentences[idx]: score for idx, score in scores.items()}
 
 
-
 if __name__ == "__main__":
     fn = Path(sys.argv[1])
     data = fn.read_text(encoding="utf8")
@@ -186,12 +161,10 @@ if __name__ == "__main__":
     print(summary_ratio)
     print()
 
-
     print("=== Summarize by Count (3 sentences) ===")
     summary_count = summarizer.summarize_by_count(data, num_sentences=3)
     print(summary_count)
     print()
-
 
     print("=== Sentence Scores ===")
     scores = summarizer.get_scores(data)

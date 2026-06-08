@@ -23,7 +23,6 @@ def is_binary_file(file_path: Path) -> bool:
     Falls back to reading first few bytes if magic is not available.
     """
     try:
-
         mime = magic.from_file(str(file_path), mime=True)
 
         text_mimes = {
@@ -45,7 +44,6 @@ def is_binary_file(file_path: Path) -> bool:
         if mime not in text_mimes and not mime.startswith("text/"):
             return True
     except (ImportError, Exception):
-
         try:
             with open(file_path, "rb") as f:
                 chunk = f.read(8192)
@@ -53,7 +51,6 @@ def is_binary_file(file_path: Path) -> bool:
                     return True
         except Exception:
             return True
-
 
     try:
         with open(file_path, "rb") as f:
@@ -74,23 +71,18 @@ def convert_file(file_path: Path, dry_run: bool = False, force: bool = False) ->
     result = {"file": str(file_path), "status": "unchanged", "size_diff": 0, "error": None}
 
     try:
-
         if not force and is_binary_file(file_path):
             result["status"] = "skipped_binary"
             return result
-
 
         with open(file_path, "rb") as f:
             content = f.read()
 
         original_size = len(content)
 
-
         if b"\r\n" not in content and b"\r" not in content:
             result["status"] = "unchanged"
             return result
-
-
 
         converted = content.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
 
@@ -101,7 +93,6 @@ def convert_file(file_path: Path, dry_run: bool = False, force: bool = False) ->
             return result
 
         if not dry_run:
-
             with open(file_path, "wb") as f:
                 f.write(converted)
 
@@ -125,7 +116,6 @@ def process_files(files: list, dry_run: bool = False, force: bool = False, num_w
     if num_workers is None:
         num_workers = min(cpu_count(), len(files))
 
-
     convert_func = partial(convert_file, dry_run=dry_run, force=force)
 
     stats = {
@@ -138,10 +128,8 @@ def process_files(files: list, dry_run: bool = False, force: bool = False, num_w
         "files": [],
     }
 
-
     with Pool(processes=num_workers) as pool:
         results = pool.map(convert_func, files)
-
 
     for result in results:
         stats["files"].append(result)
@@ -179,7 +167,6 @@ def find_files(paths: list, recursive: bool = False, exclude_hidden: bool = True
                 pattern = "**/*" if not exclude_hidden else "**/[!.]*"
                 for p in path.glob(pattern):
                     if p.is_file():
-
                         if exclude_hidden and any(part.startswith(".") for part in p.parts):
                             continue
                         files.append(p)
@@ -189,7 +176,6 @@ def find_files(paths: list, recursive: bool = False, exclude_hidden: bool = True
                         if exclude_hidden and p.name.startswith("."):
                             continue
                         files.append(p)
-
 
     seen = set()
     unique_files = []
@@ -217,7 +203,6 @@ def print_stats(stats: dict, dry_run: bool = False):
     if stats["size_saved"] > 0:
         size_saved_mb = stats["size_saved"] / (1024 * 1024)
         print(f"\nTotal space saved: {size_saved_mb:.2f} MB")
-
 
     if stats["errors"] > 0:
         print("\nErrors:")
@@ -257,7 +242,6 @@ Examples:
 
     args = parser.parse_args()
 
-
     print("Scanning for files...")
     files = find_files(args.paths, args.recursive, args.no_hidden)
 
@@ -271,11 +255,9 @@ Examples:
 
     start_time = time.time()
 
-
     stats = process_files(files, args.dry_run, args.force, args.jobs)
 
     elapsed_time = time.time() - start_time
-
 
     if not args.quiet:
         print("\nConversion results:")

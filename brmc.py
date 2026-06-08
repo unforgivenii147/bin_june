@@ -6,6 +6,7 @@ Removes unnecessary docstrings and string literals from Python files
 while preserving module docstrings and shebangs.
 """
 
+import astor
 import ast
 import sys
 from dataclasses import dataclass
@@ -122,7 +123,7 @@ def process_file(path: Path) -> bool:
         transformer = DocstringRemover(preserve_module_docstring=True)
         new_tree = transformer.visit(tree)
         ast.fix_missing_locations(new_tree)
-        new_code = ast.unparse(new_tree)
+        new_code = astor.to_source(new_tree)
         if first_line:
             new_code = first_line + new_code
         try:
