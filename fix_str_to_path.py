@@ -2,108 +2,144 @@
 import os
 import re
 
-
 def add_path_statement(file_path):
-    """Add path=Path(path) to process_file function if not already present"""
-
-    with open(file_path, "r", encoding="utf-8") as file:
-        content = file.read()
-
-    # Check if the file contains process_file function
-    if "def process_file(" not in content:
-        print(f"Skipping {file_path}: No process_file function found")
+    """Add path=Path(path) as first line inside process_file function"""
+    
+    with open(file_path, 'r', encoding='utf-8') as file:
+        lines = file.readlines()
+    
+    modified_lines = []
+    in_function = False
+    function_indent = None
+    added = False
+    
+    for i, line in enumerate(lines):
+        # Check if this line starts a function definition
+        if re.match(r'^\s*def process_file\(', line):
+            in_function = True
+            modified_lines.append(line)
+            continue
+        
+        # If we're in the function and haven't added the path line yet
+        if in_function and not added:
+            # Skip empty lines and docstrings
+            stripped = line.strip()
+            
+            # Skip docstring lines
+            if stripped and (stripped.startswith('"""') or stripped.startswith("'''")):
+                modified_lines.append(line)
+                # If it's a multi-line docstring, we need to track it
+                if stripped.count('"""') == 1 or stripped.count("'''") == 1:
+                    # This is the start of a docstring, skip until it closes
+                    docstring_started = True
+                    modified_lines.append(line)
+                    continue
+                else:
+                    # Single line docstring, next line will be the first real code
+                    continue
+            
+            # Calculate the expected indentation (one level deeper than function def)
+            if function_indent is None:
+                # Find function line to determine its indentation
+                for j in range(i-1, -1, -1):
+                    if re.match(r'^\s*def process_file\(', modified_lines[j]):
+                        func_line = modified_lines[j]
+                        function_indent = re.match(r'^(\s*)', func_line).group(1) + '    '
+                        break
+            
+            # Check if this line is indented (actual code inside function)
+            current_indent = re.match(r'^(\s*)', line).group(1)
+            
+            # If this line has the expected function indentation (or more), add our line before it
+            if current_indent.startswith(function_indent.rstrip()) and stripped:
+                # Add the path statement before this line
+                modified_lines.append(f"{function_indent}path = Path(path)\n")
+                print(f"Added 'path = Path(path)' to {file_path}")
+                added = True
+                in_function = False
+        
+        modified_lines.append(line)
+    
+    # Write the modified content back
+    if added:
+        with open(file_path, 'w', encoding='utf-8') as file:
+            file.writelines(modified_lines)
+        return True
+    else:
+        print(f"Skipping {file_path}: No process_file function found or already has the line")
         return False
 
-    # Check if path=Path(path) already exists
-    if "path=Path(path)" in content:
+def add_path_statement_simple(file_path):
+    """Simpler version using regex"""
+    
+    with open(file_path, 'r', encoding='utf-8') as file:
+        content = file.read()
+    
+    # Check if already exists
+    if 'path=Path(path)' in content or 'path = Path(path)' in content:
         print(f"Skipping {file_path}: path=Path(path) already exists")
         return False
-
-    # Pattern to find the line after the function definition
-    # This looks for indentation after the function definition line
-    lines = content.split("\n")
-    modified_lines = []
-    found_function = False
-    lines_added = 0
-
-    for i, line in enumerate(lines):
-        modified_lines.append(line)
-
-        if found_function and lines_added == 0:
-            # Check if this line is the first non-empty line after function definition
-            stripped = line.strip()
-            if stripped and not stripped.startswith("@"):  # Skip decorators
-                # Calculate indentation of the next line
-                indent = re.match(r"^(\s*)", line).group(1)
-                # Add the path statement with proper indentation
-                modified_lines.append(f"{indent}path = Path(path)")
-                print(f"Added 'path = Path(path)' to {file_path}")
-                lines_added += 1
-                found_function = False
-
-        # Detect when we find the function definition (but don't add the line yet)
-        if re.match(r"^\s*def process_file\(", line):
-            found_function = True
-
-    # Write the modified content back if changes were made
-    if lines_added > 0:
-        with open(file_path, "w", encoding="utf-8") as file:
-            file.write("\n".join(modified_lines))
-        return True
-
-    # Alternative approach using regex for more complex cases
-    if not lines_added:
-        return add_path_with_regex(file_path, content)
-
-    return False
-
-
-def add_path_with_regex(file_path, content):
-    """Alternative method using regex to add the path statement"""
-
-    # Pattern to find the line right after the function definition
-    # Looking for the opening brace and the next non-empty line
-    pattern = r"(def process_file\([^:]*:)\s*\n(\s*)"
-
+    
+    # Pattern to match function definition and add path line right after, before anything else
+    # This handles docstrings, empty lines, etc.
+    pattern = r'(def process_file\([^:]*:)\s*\n\s*(?:"""[\s\S]*?"""|\'\'\'[\s\S]*?\'\'\')\s*\n?\s*'
+    
     def replacement(match):
-        indent = match.group(2)
-        return f"{match.group(1)}\n{indent}path = Path(path)\n{indent}"
-
+        full_match = match.group(0)
+        # Get the indentation from the function line
+        func_line = match.group(1)
+        indent = re.match(r'^(\s*)', func_line).group(1) + '    '
+        
+        # Insert path line after function declaration
+        return f"{func_line}\n{indent}path = Path(path)\n" + full_match[len(func_line):]
+    
+    # Try with docstring handling
     new_content = re.sub(pattern, replacement, content, count=1)
-
+    
+    # If no docstring, try simpler pattern
+    if new_content == content:
+        pattern = r'(def process_file\([^:]*:)\s*\n\s*'
+        def replacement2(match):
+            indent = re.match(r'^(\s*)', match.group(1)).group(1) + '    '
+            return f"{match.group(1)}\n{indent}path = Path(path)\n"
+        
+        new_content = re.sub(pattern, replacement2, content, count=1)
+    
     if new_content != content:
-        # Check again if path=Path(path) was added successfully
-        if "path=Path(path)" in new_content:
-            with open(file_path, "w", encoding="utf-8") as file:
-                file.write(new_content)
-            print(f"Added 'path = Path(path)' to {file_path} (using regex method)")
-            return True
-
+        with open(file_path, 'w', encoding='utf-8') as file:
+            file.write(new_content)
+        print(f"Added 'path = Path(path)' to {file_path}")
+        return True
+    
     return False
-
 
 def process_directory():
     """Process all Python files in current directory"""
-
+    
     current_dir = os.getcwd()
-    python_files = [f for f in os.listdir(current_dir) if f.endswith(".py") and os.path.isfile(f)]
-
+    python_files = [f for f in os.listdir(current_dir) 
+                   if f.endswith('.py') and os.path.isfile(f)]
+    
     if not python_files:
         print("No Python files found in current directory")
         return
-
+    
     print(f"Found {len(python_files)} Python file(s) to process")
     print("-" * 50)
-
+    
     modified_count = 0
     for file_name in python_files:
         file_path = os.path.join(current_dir, file_name)
-        if add_path_statement(file_path):
+        # Try the simple regex version first (more reliable)
+        if add_path_statement_simple(file_path):
             modified_count += 1
-
+        else:
+            # Fall back to the line-by-line version
+            if add_path_statement(file_path):
+                modified_count += 1
+    
     print("-" * 50)
     print(f"Modified {modified_count} file(s)")
-
 
 if __name__ == "__main__":
     process_directory()
