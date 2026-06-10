@@ -4,11 +4,11 @@ import sys
 from pathlib import Path
 
 
-def process_file(fp):
-    con = fp.read_text()
+def process_file(path):
+    con = path.read_text()
     nl = [line + "\n\n\n\n" for line in con.splitlines()]
     newconn = "\n".join(nl)
-    fp.write_text(newconn)
+    path.write_text(newconn)
 
 
 if __name__ == "__main__":

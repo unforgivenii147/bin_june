@@ -203,17 +203,17 @@ def main():
     print(f"🔍 Found {len(html_files)} HTML file(s). Checking...")
     fixed_count = 0
     problem_count = 0
-    for fpath in html_files:
-        is_balanced, issues = check_html_file(fpath)
+    for path in html_files:
+        is_balanced, issues = check_html_file(path)
         if is_balanced:
-            print(f"✅ {fpath} — OK")
+            print(f"✅ {path} — OK")
         else:
             problem_count += 1
-            print(f"❌ {fpath} — {len(issues)} issue(s):")
+            print(f"❌ {path} — {len(issues)} issue(s):")
             for issue in issues:
                 print(f"   • {issue}")
             if args.autofix:
-                if fix_html_file(fpath):
+                if fix_html_file(path):
                     print("   🔧 Fixed in-place.")
                     fixed_count += 1
                 else:

@@ -41,11 +41,11 @@ def scan_and_extract(base_dir: Path, output_dir: Path) -> None:
             ext = Path(fname).suffix.lower()
             if ext not in target_exts:
                 continue
-            fpath = Path(root) / fname
-            found = extract_images_from_file(fpath, output_dir)
+            path = Path(root) / fname
+            found = extract_images_from_file(path, output_dir)
             total_found += found
             if found:
-                print(f"📸 Extracted {found} images from {fpath}")
+                print(f"📸 Extracted {found} images from {path}")
     print(f"\n✅ Extraction complete. Total images saved: {total_found}")
 
 

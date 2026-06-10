@@ -8,11 +8,11 @@ from deep_translator import GoogleTranslator
 
 def translate_file(fname: str):
     linez = []
-    fpath = Path(fname)
-    with Path(fpath).open("r", encoding="utf-8") as infile:
+    path = Path(fname)
+    with Path(path).open("r", encoding="utf-8") as infile:
         linez = infile.readlines()
-    outf = str(fpath.name) + "_eng" + str(fpath.suffix)
-    outpath = fpath.parent / outf
+    outf = str(path.name) + "_eng" + str(path.suffix)
+    outpath = path.parent / outf
     with Path(outpath).open("a", encoding="utf-8") as f:
         for line in linez:
             if line.strip():

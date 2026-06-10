@@ -31,10 +31,10 @@ def save_hashed_asset(content: bytes, mime_type: str):
         return HASH_MAP[digest]
     ext = mimetypes.guess_extension(mime_type) or ""
     fname = f"{digest}{ext}"
-    fpath = ASSETS_DIR / fname
-    fpath.write_bytes(content)
-    HASH_MAP[digest] = fpath
-    return fpath
+    path = ASSETS_DIR / fname
+    path.write_bytes(content)
+    HASH_MAP[digest] = path
+    return path
 
 
 def extract_base64(data_url):
@@ -69,38 +69,38 @@ def process_html(path: Path):
         if not style.string:
             continue
         css = style.string.encode("utf-8")
-        fpath = save_hashed_asset(css, "text/css")
-        style.replace_with(f'<link rel="stylesheet" href="{fpath.relative_to(OUTPUT_DIR)}">')
+        path = save_hashed_asset(css, "text/css")
+        style.replace_with(f'<link rel="stylesheet" href="{path.relative_to(OUTPUT_DIR)}">')
     for script in soup.find_all("script"):
         if script.get("src"):
             src = script["src"]
             if src.startswith("http") and DOWNLOAD_REMOTE:
-                fpath = download_external(src)
-                if fpath:
-                    script["src"] = str(fpath.relative_to(OUTPUT_DIR))
+                path = download_external(src)
+                if path:
+                    script["src"] = str(path.relative_to(OUTPUT_DIR))
             continue
         js = (script.string or "").encode("utf-8")
-        fpath = save_hashed_asset(js, "application/javascript")
-        script.replace_with(f'<script src="{fpath.relative_to(OUTPUT_DIR)}"></script>')
+        path = save_hashed_asset(js, "application/javascript")
+        script.replace_with(f'<script src="{path.relative_to(OUTPUT_DIR)}"></script>')
     for img in soup.find_all("img"):
         src = img.get("src", "")
         if src.startswith("data:"):
-            fpath = extract_base64(src)
-            if fpath:
-                img["src"] = str(fpath.relative_to(OUTPUT_DIR))
+            path = extract_base64(src)
+            if path:
+                img["src"] = str(path.relative_to(OUTPUT_DIR))
     bg_re = re.compile('url\\("(data:.*?)"\\)')
     for tag in soup.find_all(style=True):
         m = bg_re.search(tag["style"])
         if m:
             data_url = m.group(1)
-            fpath = extract_base64(data_url)
-            if fpath:
-                tag["style"] = tag["style"].replace(data_url, str(fpath.relative_to(OUTPUT_DIR)))
+            path = extract_base64(data_url)
+            if path:
+                tag["style"] = tag["style"].replace(data_url, str(path.relative_to(OUTPUT_DIR)))
     for svg in soup.find_all("svg"):
         svg_bytes = str(svg).encode("utf-8")
-        fpath = save_hashed_asset(svg_bytes, "image/svg+xml")
+        path = save_hashed_asset(svg_bytes, "image/svg+xml")
         new_tag = soup.new_tag("img")
-        new_tag["src"] = str(fpath.relative_to(OUTPUT_DIR))
+        new_tag["src"] = str(path.relative_to(OUTPUT_DIR))
         svg.replace_with(new_tag)
     for link in soup.find_all("link", href=True):
         href = link["href"]

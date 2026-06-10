@@ -164,14 +164,14 @@ def _read_existing_utils(utils_dir: Path) -> Dict[str, Dict[str, _Def]]:
     """Parse existing ``utils/*.py`` and return ``{type: {name: _Def}}``."""
     existing: Dict[str, Dict[str, _Def]] = {"func": {}, "class": {}, "const": {}}
     for typ, fname in [("func", "func.py"), ("class", "class.py"), ("const", "const.py")]:
-        fpath = utils_dir / fname
-        if fpath.is_file():
+        path = utils_dir / fname
+        if path.is_file():
             try:
-                src = fpath.read_text(encoding="utf-8")
-                for d in _extract_definitions(str(fpath), src):
+                src = path.read_text(encoding="utf-8")
+                for d in _extract_definitions(str(path), src):
                     existing[typ][d.name] = d
             except Exception as exc:
-                logger.error("Error parsing existing {}: {}", fpath, exc)
+                logger.error("Error parsing existing {}: {}", path, exc)
     return existing
 
 
@@ -181,9 +181,9 @@ def _write_utils_files(utils_dir: Path, new: Dict[str, List[_Def]]) -> None:
     for typ, fname in [("func", "func.py"), ("class", "class.py"), ("const", "const.py")]:
         if not new[typ]:
             continue
-        fpath = utils_dir / fname
-        write_header = not fpath.exists() or fpath.stat().st_size == 0
-        with open(fpath, "a", encoding="utf-8") as fh:
+        path = utils_dir / fname
+        write_header = not path.exists() or path.stat().st_size == 0
+        with open(path, "a", encoding="utf-8") as fh:
             if write_header:
                 fh.write(f"# {typ.capitalize()} definitions\n\n")
             for d in new[typ]:
@@ -204,10 +204,10 @@ def _move_definitions(groups: Dict[str, List[_Def]]) -> None:
             if not d.filepath.endswith(".py") or any((d.filepath.endswith(ext) for ext in _COMPRESSED_EXT)):
                 continue
             to_remove.setdefault(d.filepath, set()).add(hash_key)
-    for fpath, hashes in to_remove.items():
+    for path, hashes in to_remove.items():
         try:
-            source = Path(fpath).read_text(encoding="utf-8")
-            tree = ast.parse(source, filename=fpath)
+            source = Path(path).read_text(encoding="utf-8")
+            tree = ast.parse(source, filename=path)
             new_body = []
             for node in tree.body:
                 try:
@@ -229,12 +229,12 @@ def _move_definitions(groups: Dict[str, List[_Def]]) -> None:
             try:
                 ast.parse(new_source)
             except SyntaxError as exc:
-                logger.error("Resulting code of {} has a syntax error – skipping: {}", fpath, exc)
+                logger.error("Resulting code of {} has a syntax error – skipping: {}", path, exc)
                 continue
-            Path(fpath).write_text(new_source, encoding="utf-8")
-            logger.info("Removed {} duplicate definition(s) from {}", len(hashes), fpath)
+            Path(path).write_text(new_source, encoding="utf-8")
+            logger.info("Removed {} duplicate definition(s) from {}", len(hashes), path)
         except Exception as exc:
-            logger.error("Failed to process {} for moving: {}", fpath, exc)
+            logger.error("Failed to process {} for moving: {}", path, exc)
 
 
 def main() -> None:

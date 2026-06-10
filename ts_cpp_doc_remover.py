@@ -31,19 +31,19 @@ class TSCppRemover:
         return remove_blank_lines(cleaned)
 
 
-def process_file(fp):
-    file_path = Path(fp)
-    before = file_path.stat().st_size
+def process_file(path):
+    path = Path(path)
+    before = path.stat().st_size
     remover = TSCppRemover()
-    code = file_path.read_text(encoding="utf-8", errors="ignore")
+    code = path.read_text(encoding="utf-8", errors="ignore")
     result = remover.remove_comments(code)
     if len(result) != len(code):
-        file_path.write_text(result, encoding="utf-8")
-        after = file_path.stat().st_size
+        path.write_text(result, encoding="utf-8")
+        after = path.stat().st_size
         reduced = round((before - after) / before / 100, 3)
-        cprint(f"[OK] {file_path.name} - {reduced} ", "cyan")
+        cprint(f"[OK] {path.name} - {reduced} ", "cyan")
     else:
-        cprint(f"[NO CHANGE] {file_path.name}", "blue")
+        cprint(f"[NO CHANGE] {path.name}", "blue")
 
 
 if __name__ == "__main__":

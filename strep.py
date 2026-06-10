@@ -6,15 +6,16 @@ from pathlib import Path
 from dh import cprint, fsz, get_files, mpf3, runcmd
 
 
-def process_file(fp):
-    before = fp.stat().st_size
-    ret, _, _ = runcmd(["strip", str(fp)], show_output=True)
-    after = fp.stat().st_size
+def process_file(path):
+    path=Path(path)
+    before = path.stat().st_size
+    ret, _, _ = runcmd(["strip", str(path)], show_output=True)
+    after = path.stat().st_size
     if not after:
         return
     dz = before - after
     if dz:
-        cprint(f"{fp.name} | ratio: {after / before:.1f}%")
+        cprint(f"{path.name} | ratio: {after / before:.1f}%")
 
 
 if __name__ == "__main__":

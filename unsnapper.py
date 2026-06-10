@@ -6,13 +6,14 @@ from pathlib import Path
 from dh import cprint, decompress, fsz, get_files, gsz, mpf3
 
 
-def process_file(fp):
-    before = gsz(fp)
+def process_file(path):
+    path=Path(path)
+    before = gsz(path)
     if not before:
         return
-    data = fp.read_bytes()
+    data = path.read_bytes()
     decompressed = decompress(data)
-    decomp_path = fp.with_name(fp.name.replace(".snappy", ""))
+    decomp_path = path.with_name(path.name.replace(".snappy", ""))
     decomp_path.write_bytes(decompressed)
     after = gsz(decomp_path)
     if not after:
@@ -22,7 +23,7 @@ def process_file(fp):
     ratio = diff_size / before * 100
     print(f"{decomp_path.name}", end=" | ")
     cprint(f"{fsz(before)} -> {fsz(after)} | {fsz(diff_size)} | {ratio:.1f}%")
-    fp.unlink()
+    path.unlink()
     return
 
 

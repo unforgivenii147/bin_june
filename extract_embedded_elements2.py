@@ -22,12 +22,12 @@ def save_asset(content: bytes, mime_type: str, file_hint="asset"):
     counter = 0
     while True:
         fname = f"{file_hint}_{counter}{ext}"
-        fpath = ASSETS_DIR / fname
-        if not fpath.exists():
+        path = ASSETS_DIR / fname
+        if not path.exists():
             break
         counter += 1
-    fpath.write_bytes(content)
-    return fpath
+    path.write_bytes(content)
+    return path
 
 
 def extract_base64_data(data_url, file_hint="asset"):
@@ -59,43 +59,43 @@ def process_file(path: Path):
         if not style_tag.string:
             continue
         css = style_tag.string
-        fpath = save_asset(css.encode("utf-8"), "text/css", f"{file_prefix}_style{i}")
-        style_tag.replace_with(f'<link rel="stylesheet" href="{fpath.relative_to(OUTPUT_DIR)}">')
+        path = save_asset(css.encode("utf-8"), "text/css", f"{file_prefix}_style{i}")
+        style_tag.replace_with(f'<link rel="stylesheet" href="{path.relative_to(OUTPUT_DIR)}">')
     for i, script in enumerate(soup.find_all("script")):
         if script.get("src"):
             src = script.get("src")
             if src.startswith("http") and DOWNLOAD_REMOTE:
-                fpath = download_external_url(src, f"{file_prefix}_script_remote")
-                if fpath:
-                    script["src"] = str(fpath.relative_to(OUTPUT_DIR))
+                path = download_external_url(src, f"{file_prefix}_script_remote")
+                if path:
+                    script["src"] = str(path.relative_to(OUTPUT_DIR))
             continue
         js = script.string or ""
-        fpath = save_asset(js.encode("utf-8"), "application/javascript", f"{file_prefix}_script{i}")
-        script.replace_with(f'<script src="{fpath.relative_to(OUTPUT_DIR)}"></script>')
+        path = save_asset(js.encode("utf-8"), "application/javascript", f"{file_prefix}_script{i}")
+        script.replace_with(f'<script src="{path.relative_to(OUTPUT_DIR)}"></script>')
     for img in soup.find_all("img"):
         src = img.get("src", "")
         if src.startswith("data:"):
-            fpath = extract_base64_data(src, f"{file_prefix}_img")
-            if fpath:
-                img["src"] = str(fpath.relative_to(OUTPUT_DIR))
+            path = extract_base64_data(src, f"{file_prefix}_img")
+            if path:
+                img["src"] = str(path.relative_to(OUTPUT_DIR))
         elif src.startswith("http") and DOWNLOAD_REMOTE:
-            fpath = download_external_url(src, f"{file_prefix}_img_remote")
-            if fpath:
-                img["src"] = str(fpath.relative_to(OUTPUT_DIR))
+            path = download_external_url(src, f"{file_prefix}_img_remote")
+            if path:
+                img["src"] = str(path.relative_to(OUTPUT_DIR))
     bg_re = re.compile('url\\("(data:.*?)"\\)')
     for tag in soup.find_all(style=True):
         style = tag["style"]
         m = bg_re.search(style)
         if m:
             data_url = m.group(1)
-            fpath = extract_base64_data(data_url, f"{file_prefix}_bg")
-            if fpath:
-                tag["style"] = style.replace(data_url, str(fpath.relative_to(OUTPUT_DIR)))
+            path = extract_base64_data(data_url, f"{file_prefix}_bg")
+            if path:
+                tag["style"] = style.replace(data_url, str(path.relative_to(OUTPUT_DIR)))
     for i, svg in enumerate(soup.find_all("svg")):
         svg_str = str(svg)
-        fpath = save_asset(svg_str.encode("utf-8"), "image/svg+xml", f"{file_prefix}_svg{i}")
+        path = save_asset(svg_str.encode("utf-8"), "image/svg+xml", f"{file_prefix}_svg{i}")
         new_tag = soup.new_tag("img")
-        new_tag["src"] = str(fpath.relative_to(OUTPUT_DIR))
+        new_tag["src"] = str(path.relative_to(OUTPUT_DIR))
         svg.replace_with(new_tag)
     for style in soup.find_all("style"):
         if not style.string:
@@ -103,16 +103,16 @@ def process_file(path: Path):
         new_css = style.string
         fonts = re.findall('url\\("(data:font\\/.+?)"\\)', new_css)
         for f in fonts:
-            fpath = extract_base64_data(f, f"{file_prefix}_font")
-            if fpath:
-                new_css = new_css.replace(f, str(fpath.relative_to(OUTPUT_DIR)))
+            path = extract_base64_data(f, f"{file_prefix}_font")
+            if path:
+                new_css = new_css.replace(f, str(path.relative_to(OUTPUT_DIR)))
         style.string.replace_with(new_css)
     for link in soup.find_all("link", href=True):
         href = link["href"]
         if href.startswith("http") and DOWNLOAD_REMOTE:
-            fpath = download_external_url(href, f"{file_prefix}_css_remote")
-            if fpath:
-                link["href"] = str(fpath)
+            path = download_external_url(href, f"{file_prefix}_css_remote")
+            if path:
+                link["href"] = str(path)
     output_html_path = OUTPUT_DIR / path.relative_to(INPUT_DIR)
     output_html_path.parent.mkdir(parents=True, exist_ok=True)
     output_html_path.write_text(str(soup), encoding="utf-8")

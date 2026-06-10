@@ -50,21 +50,21 @@ class TSRemover:
         return (cleaned, comment_count, docstring_count)
 
 
-def process_file(fp):
-    file_path = Path(fp)
+def process_file(path):
+    path = Path(path)
     ts_rmc = TSRemover()
-    code = file_path.read_text(encoding="utf-8", errors="ignore")
+    code = path.read_text(encoding="utf-8", errors="ignore")
     ts_rmc.remove_comments(code)
     result, comments, docstrings = ts_rmc.remove_comments(code)
     if comments == 0 and docstrings == 0:
-        print(f"[NO CHANGE] : {file_path.name}")
+        print(f"[NO CHANGE] : {path.name}")
         return
     try:
         ast.parse(result)
-        print(f"{file_path.name}: comments: {comments}   docstrings: {docstrings}")
-        fp.write_text(result, encoding="utf-8")
+        print(f"{path.name}: comments: {comments}   docstrings: {docstrings}")
+        path.write_text(result, encoding="utf-8")
     except:
-        print(f"{file_path.name} : invalid code")
+        print(f"{path.name} : invalid code")
 
 
 def main():

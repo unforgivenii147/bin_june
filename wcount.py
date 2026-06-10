@@ -10,19 +10,19 @@ from dh import get_nobinary
 from toolz import compose, frequencies
 from toolz.curried import map as _map
 
-MAX_QUEUE = 16
+MAX_QUEUE = 8
 
 
 def stem(word):
     return word.lower().rstrip(",.|;:'\"").lstrip("'\"")
 
 
-def process_file(fp):
-    if fp.is_symlink():
-        print(f"skipping symlink {fp.name}")
-    print(f"{fp.name}")
+def process_file(path):
+    if path.is_symlink():
+        print(f"skipping symlink {path.name}")
+    print(f"{path.name}")
     word_count = compose(frequencies, _map(stem), str.split)
-    content = fp.read_text(encoding="utf-8")
+    content = path.read_text(encoding="utf-8")
     return word_count(content)
 
 
