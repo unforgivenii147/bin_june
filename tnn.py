@@ -7,6 +7,7 @@ from dh import cprint, get_nobinary, mpf3
 
 def process_file(path: str | Path):
     path = Path(path)
+    path = Path(path)
     content = path.read_text(encoding="utf-8")
     new_content = content.replace("\t", "    ")
     if new_content == content:

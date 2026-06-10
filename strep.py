@@ -7,7 +7,7 @@ from dh import cprint, fsz, get_files, mpf3, runcmd
 
 
 def process_file(path):
-    path=Path(path)
+    path = Path(path)
     before = path.stat().st_size
     ret, _, _ = runcmd(["strip", str(path)], show_output=True)
     after = path.stat().st_size

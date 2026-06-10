@@ -8,6 +8,7 @@ from dh import get_files, mpf3, runcmd
 
 def process_file(path: str | Path):
     path = Path(path)
+    path = Path(path)
 
     if not path.exists() or not path.stat().st_size:
         return (False, path)

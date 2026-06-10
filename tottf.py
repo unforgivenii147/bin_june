@@ -7,6 +7,7 @@ from dh import get_files, runcmd
 
 
 def process_file(path) -> bool:
+    path = Path(path)
     try:
         out = path.with_suffix(".ttf")
         cmd = ["fontforge", "-lang=ff", "-c", '"Open($1); Generate($2);"', str(path), str(out)]
@@ -32,7 +33,7 @@ def main():
             if p.is_dir():
                 files.extend(get_files(p))
     else:
-        files = get_files(cwd,ext=[".svg",".woff",".eot",".otf",".ttc"])
+        files = get_files(cwd, ext=[".svg", ".woff", ".eot", ".otf", ".ttc"])
     for f in files:
         if f.suffix != ".ttf":
             process_file(f)

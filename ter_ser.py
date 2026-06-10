@@ -18,6 +18,7 @@ def safe_run(path):
 
 def process_file(path) -> bool:
     path = Path(path)
+    path = Path(path)
     if "site-packages" in path.parts and "notebook" in path.parts:
         return False
     before = gsz(path)

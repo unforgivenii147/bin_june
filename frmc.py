@@ -9,6 +9,7 @@ from dh import SOURCE_CODE_EXT, remove_blank_lines, cprint, fsz, get_nobinary, g
 
 def process_file(path):
     path = Path(path)
+    path = Path(path)
     if path.suffix == ".md":
         return
     removed: int = 0

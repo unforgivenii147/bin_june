@@ -44,6 +44,7 @@ def remove_functions_from_source(source, unused_functions):
 
 def process_file(filepath, dry_run=False):
     errors = []
+    path = Path(path)
     filepath = Path(filepath)
     try:
         source = filepath.read_text(encoding="utf-8")

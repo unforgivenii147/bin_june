@@ -9,6 +9,7 @@ from dh import cprint, fsz, get_files, gsz, mpf3
 
 def process_file(fp):
     before = gsz(fp)
+    path = Path(path)
     data = fp.read_text(encoding="utf-8")
     if not before or len(data.splitlines()) == 1:
         del data, before

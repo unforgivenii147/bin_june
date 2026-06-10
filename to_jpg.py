@@ -19,6 +19,7 @@ IGNORED_DIRS = {".git"}
 
 def process_file(file_path: str) -> bool:
     path = Path(file_path)
+    path = Path(path)
     if not path.is_file():
         print(f"Skipping: {path.name} (Unsupported format or not a file)")
         return False

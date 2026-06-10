@@ -192,6 +192,7 @@ def find_python_files(root_path: Path) -> List[Path]:
 
 def process_file(file_path: Path) -> Tuple[Path, List[str]]:
     try:
+    path = Path(path)
         remover = ImportRemover(file_path)
         return remover.process()
     except Exception as e:

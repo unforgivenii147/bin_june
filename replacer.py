@@ -9,16 +9,17 @@ from pathlib import Path
 from dh import is_binary
 
 
-def process_file(file_path, search_text, replace_text=None, dry_run=False):
+def process_file(path, search_text, replace_text=None, dry_run=False):
+    path = Path(path)
     try:
-        content = Path(file_path).read_text(encoding="utf-8")
+        content = path.read_text(encoding="utf-8")
         replacement = replace_text if replace_text is not None else ""
         escaped_search = re.escape(search_text)
         pattern = re.compile(escaped_search)
         if pattern.search(content):
             if dry_run:
                 matches = list(pattern.finditer(content))
-                print(f"[DRY RUN] Found {len(matches)} match(es) in {file_path}")
+                print(f"[DRY RUN] Found {len(matches)} match(es) in {path}")
                 for i, match in enumerate(matches[:3]):
                     start = max(0, match.start() - 20)
                     end = min(len(content), match.end() + 20)
@@ -29,14 +30,14 @@ def process_file(file_path, search_text, replace_text=None, dry_run=False):
                     print(f"  ... and {len(matches) - 3} more matches")
             else:
                 new_content = pattern.sub(replacement, content)
-                Path(file_path).write_text(new_content, encoding="utf-8")
-                print(f"Updated: {file_path}")
+                Path(path).write_text(new_content, encoding="utf-8")
+                print(f"Updated: {path}")
             return True
         return False
     except (UnicodeDecodeError, PermissionError, IsADirectoryError):
         return False
     except Exception as e:
-        print(f"Error processing {file_path}: {e}", file=sys.stderr)
+        print(f"Error processing {path}: {e}", file=sys.stderr)
         return False
 
 

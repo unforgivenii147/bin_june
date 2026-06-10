@@ -101,6 +101,7 @@ def remove_unused(source, unused):
 
 def process_file(filepath, dry_run=False):
     errors = []
+    path = Path(path)
     filepath = Path(filepath)
     try:
         source = filepath.read_text(encoding="utf-8")

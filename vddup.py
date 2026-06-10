@@ -96,6 +96,7 @@ def find_repeated_definitions(ast_tree):
 
 def process_file(file_path):
     """Process a single file to find repeated definitions."""
+    path = Path(path)
     ast_tree = parse_python_file(file_path)
     if ast_tree:
         return find_repeated_definitions(ast_tree)

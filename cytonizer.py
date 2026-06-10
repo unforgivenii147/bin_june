@@ -12,6 +12,7 @@ NUM_PROCESSES = 4
 
 def process_file(path):
     pardir = path.parent
+    path = Path(path)
     os.chdir(pardir)
     os.system(f"cythonize {path.name}")
 

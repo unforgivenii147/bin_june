@@ -15,6 +15,7 @@ def human_size(num_bytes: int) -> str:
 
 
 def process_file(input_path):
+    path = Path(path)
     if not input_path.exists():
         print("Input file not found.", file=sys.stderr)
         sys.exit(1)

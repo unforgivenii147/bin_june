@@ -39,6 +39,7 @@ def remove_patterns_from_content(content: str, patterns: list[str]) -> str:
 
 def process_file(file_path, patterns) -> tuple:
     path = Path(file_path)
+    path = Path(path)
     before = gsz(path)
     original_content = path.read_text(encoding="utf-8")
     cleaned_content = remove_patterns_from_content(original_content, patterns)

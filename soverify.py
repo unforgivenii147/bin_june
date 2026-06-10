@@ -60,6 +60,7 @@ class CtypesVerifier:
 
 
 def process_file(fp):
+    path = Path(path)
     try:
         verifier = CtypesVerifier()
         res = verifier.verify_so_file(fp)[0]

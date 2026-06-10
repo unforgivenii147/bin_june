@@ -14,6 +14,7 @@ counter = 0
 
 def process_file(fp) -> None:
     global counter
+    path = Path(path)
     counter += 1
     print(f"{counter} {fp.name}")
     content: str = ""

@@ -18,6 +18,7 @@ def stem(word):
 
 
 def process_file(path):
+    path = Path(path)
     if path.is_symlink():
         print(f"skipping symlink {path.name}")
     print(f"{path.name}")

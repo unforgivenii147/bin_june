@@ -46,6 +46,7 @@ def translate_line(line, translator, target_lang="en"):
 
 def process_file(filepath, show_translation=True):
     """
+    path = Path(path)
     Process the file: detect non-English lines, translate them,
     and update the file in-place showing translations.
     """

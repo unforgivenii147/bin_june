@@ -20,6 +20,7 @@ def get_filez(root_dir):
 
 def process_file(path):
     removed = 0
+    path = Path(path)
     content = path.read_text(encoding="utf-8")
     lines = content.splitlines(keepends=False)
     newlines = []

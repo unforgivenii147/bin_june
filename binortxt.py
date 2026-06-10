@@ -12,6 +12,7 @@ bin_dir.mkdir(exist_ok=True)
 
 def process_file(fp) -> None:
     if is_binary(fp):
+    path = Path(path)
         newpath = bin_dir / fp.name
         fp.rename(newpath)
 

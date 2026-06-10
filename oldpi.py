@@ -94,6 +94,7 @@ def autofix_file(filepath: str) -> bool:
 
 def process_file(filepath: str, autofix: bool) -> tuple[str, str] | None:
     if not regex_flag(filepath):
+    path = Path(path)
         return None
     confirmed = tokenizer_confirm(filepath)
     if not confirmed:

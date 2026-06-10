@@ -3,6 +3,7 @@
 
 def process_file(fname):
     content = fname.read_text(encoding="utf-8")
+    path = Path(path)
     content = content.replace("\\n", "\n")
     fname.write_text(content, encoding="utf-8")
     print(f"{fname.name} updated.")

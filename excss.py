@@ -24,6 +24,7 @@ def save_style(str1):
 
 def process_file(fp):
     html_content = fp.read_text(encoding="utf-8")
+    path = Path(path)
     soup = BeautifulSoup(html_content, "html.parser")
     styles = soup.find_all("style")
     if styles:

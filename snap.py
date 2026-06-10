@@ -34,6 +34,7 @@ def parallel_compress(in_path, out_path):
 
 def process_file(fp):
     fp = Path(fp)
+    path = Path(path)
     if not fp.exists() or fp.suffix == ".br":
         return
     before = gsz(fp)

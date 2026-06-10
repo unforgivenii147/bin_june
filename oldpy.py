@@ -66,6 +66,7 @@ def tokenizer_confirm(filepath: str) -> str | None:
 
 def process_file(filepath):
     if not regex_flag(filepath):
+    path = Path(path)
         return None
     confirmed = tokenizer_confirm(filepath)
     if not confirmed:

@@ -8,6 +8,7 @@ from dh import get_nobinary
 
 def process_file(fp):
     lines = fp.read_text(encoding="utf-8").splitlines()
+    path = Path(path)
     nl = []
     found = 0
     for line in lines:

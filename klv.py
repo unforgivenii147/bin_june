@@ -105,6 +105,7 @@ def compare_versions(ver1: str, ver2: str) -> int:
 
 def process_file(file_path: Path, file_type: str) -> Optional[Tuple[str, str, Path]]:
     """
+    path = Path(path)
     Process a single file and extract package info.
     """
     try:

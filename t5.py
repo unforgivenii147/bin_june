@@ -52,6 +52,7 @@ class TSRemover:
 
 def process_file(path):
     path = Path(path)
+    path = Path(path)
     ts_rmc = TSRemover()
     code = path.read_text(encoding="utf-8", errors="ignore")
     ts_rmc.remove_comments(code)

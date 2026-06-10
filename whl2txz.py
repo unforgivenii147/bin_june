@@ -225,6 +225,7 @@ def convert_tarxz_to_whl(path: Path, remove_original: bool = False) -> Tuple[boo
 def process_file(path: Path, remove_original: bool = False) -> Tuple[bool, str, Optional[Path]]:
     """Auto-detect file type and convert accordingly."""
     path = Path(path)
+    path = Path(path)
 
     if not path.exists():
         return False, f"File not found: {path}", None

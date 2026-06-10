@@ -9,6 +9,7 @@ from dh import cprint, fsz, get_files
 
 def process_file(path):
     content = path.read_text(encoding="utf-8")
+    path = Path(path)
     soup = BeautifulSoup(content, parser="lxml.parser", features="lxml")
     before = len(content)
     new_content = soup.prettify()

@@ -7,6 +7,7 @@ from dh import cprint, fsz, get_files, gsz, mpf3, runcmd
 
 def process_file(path):
     before = gsz(path)
+    path = Path(path)
     if not before or len(path.read_text().splitlines()) == 1:
         return
     try:

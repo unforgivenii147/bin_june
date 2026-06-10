@@ -8,6 +8,7 @@ from dh import compress, cprint, fsz, get_files, gsz, mpf3
 
 def process_file(fp):
     before = gsz(fp)
+    path = Path(path)
     if not before:
         return
     data = fp.read_bytes()

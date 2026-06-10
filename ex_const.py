@@ -57,6 +57,7 @@ def extract_constants(filepath: Path) -> list[tuple[str, str, str]]:
 
 def process_file(filepath: Path) -> tuple[str, list[tuple[str, str, str]] | None]:
     file_hash = get_file_hash(filepath)
+    path = Path(path)
     constants = extract_constants(filepath)
     return (file_hash, constants)
 

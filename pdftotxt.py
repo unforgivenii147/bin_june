@@ -8,6 +8,7 @@ import pdfplumber
 
 def process_file(fp):
     i = 1
+    path = Path(path)
     with pdfplumber.open(fp) as pdf:
         for page in pdf.pages:
             text = page.extract_text(encoding="utf-8")

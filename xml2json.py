@@ -12,6 +12,7 @@ REMOVE_ORIG = True
 
 
 def process_file(path):
+    path = Path(path)
     try:
         jsonpath = path.with_suffix(".json")
         cprint(f"{jsonpath} created.", "cyan")

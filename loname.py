@@ -2,6 +2,7 @@
 
 import sys
 from pathlib import Path
+from dh import mpf3
 
 
 def unique_path(path: Path | str) -> Path:
@@ -27,6 +28,7 @@ def unique_path(path: Path | str) -> Path:
 
 
 def process_file(path):
+    path = Path(path)
     if not path.exists():
         path = Path(str(path).lower())
         if not path.exists():
@@ -45,5 +47,4 @@ if __name__ == "__main__":
     cwd = Path.cwd()
     args = sys.argv[1:]
     files = list(cwd.glob("*")) if args else list(cwd.rglob("*"))
-    for f in files:
-        process_file(f)
+    mpf3(process_file, files)

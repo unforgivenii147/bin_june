@@ -34,6 +34,7 @@ def run_command(cmd):
 
 def process_file(file_path) -> None:
     print(f"[OK] {file_path.name}")
+    path = Path(path)
     check_cmd = ["ruff", "check", "--fix", "--unsafe-fixes", "--line-length", "120", "--quiet", str(file_path)]
     rc_check, out_check, err_check = run_command(check_cmd)
     format_cmd = [

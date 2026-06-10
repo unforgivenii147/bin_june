@@ -58,6 +58,7 @@ def ts_remover_initializer():
 
 def process_file(path):
     global ts_remover
+    path = Path(path)
     try:
         code = path.read_text(encoding="utf-8")
         result, comments = ts_remover.remove_comments(code)

@@ -41,6 +41,7 @@ def file_already_has_header(contents: str) -> bool:
 
 def process_file(path: str, header: str) -> None:
     with Path(path).open(encoding="utf-8", errors="ignore") as f:
+    path = Path(path)
         lines = f.readlines()
     if file_already_has_header("".join(lines)):
         return

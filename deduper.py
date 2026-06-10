@@ -261,6 +261,7 @@ def extract_objects(code: str):
 
 def process_file(path_str: str):
     path = Path(path_str)
+    path = Path(path)
     code = safe_read_text(path)
     if code is None:
         return []

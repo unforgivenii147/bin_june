@@ -8,6 +8,7 @@ from dh import get_files, mpf3
 
 
 def process_file(html_file: Path):
+    path = Path(path)
     try:
         html_content = html_file.read_text(encoding="utf-8")
         markdown = trafilatura.extract(

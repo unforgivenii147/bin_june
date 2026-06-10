@@ -32,6 +32,7 @@ def get_extension(mime: str) -> str:
 
 def process_file(file_path: Path, assets_dir: Path, processed: dict) -> None:
     """
+    path = Path(path)
     Find all data URIs in *file_path*, save the decoded assets, and
     replace the URIs with relative links to the `assets/` directory.
     """

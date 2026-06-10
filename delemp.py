@@ -9,6 +9,7 @@ from dh import cprint, fsz, get_nobinary, gsz, mpf3
 
 def process_file(path: str | Path) -> int:
     path = Path(path)
+    path = Path(path)
     if path.is_symlink() or path.suffix == ".bak" or gsz(path) == 0:
         return 0
     removed_count = 0

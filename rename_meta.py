@@ -10,6 +10,7 @@ OUT_PATH = Path("/data/data/com.termux/files/home/tmp/metadata")
 
 def process_file(fp) -> bool | None:
     pkgname = ""
+    path = Path(path)
     pkgversion = ""
     if not fp.exists():
         return False

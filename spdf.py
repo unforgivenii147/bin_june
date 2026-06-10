@@ -6,9 +6,10 @@ from pathlib import Path
 from dh import fsz, runcmd
 
 
-def process_file(input_path):
-    temp_gs = input_path.with_name(f"temp_gs_{input_path.name}")
-    size_before = input_path.stat().st_size
+def process_file(path):
+    path = Path(path)
+    temp_gs = path.with_name(f"temp_gs_{path.name}")
+    size_before = path.stat().st_size
     print(f"Before : {fsz(size_before)}")
     gs_cmd = [
         "gs",
@@ -26,7 +27,7 @@ def process_file(input_path):
         "-dNOPAUSE",
         "-dBATCH",
         f"-sOutputFile={temp_gs}",
-        str(input_path),
+        str(path),
     ]
     runcmd(gs_cmd, show_output=True)
     if temp_gs.exists():
@@ -36,7 +37,7 @@ def process_file(input_path):
             diff = size_before - size_after
             sign = "-" if diff >= 0 else "+"
             if size_after < size_before:
-                temp_gs.replace(input_path)
+                temp_gs.replace(path)
                 print(f"Saved  : {sign}{fsz(diff)}")
             else:
                 print("original file is smaller")

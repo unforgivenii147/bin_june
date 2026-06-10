@@ -8,6 +8,7 @@ from markdownlify import markdownify
 
 def process_file(fp) -> None:
     pass
+    path = Path(path)
 
 
 def main():

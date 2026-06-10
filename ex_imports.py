@@ -15,6 +15,7 @@ VALID = {"import_statement", "import_from_statement"}
 
 def process_file(fp):
     src = fp.read_bytes()
+    path = Path(path)
     tree = parser.parse(src)
     root = tree.root_node
     return [src[node.start_byte : node.end_byte].decode() for node in root.children if node.type in VALID]

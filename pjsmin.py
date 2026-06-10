@@ -9,6 +9,7 @@ from rjsmin import jsmin
 
 def process_file(path) -> str:
     before = gsz(path)
+    path = Path(path)
     print(f"{path.name}", end=" | ")
     after = before
     try:

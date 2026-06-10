@@ -10,6 +10,7 @@ cwd = Path.cwd()
 
 def process_file(path: Path):
     woff2_path = path.with_suffix(".woff2")
+    path = Path(path)
     if woff2_path.exists() and woff2_path.stat().st_size:
         print(f"{path.name} already converted.")
         return True

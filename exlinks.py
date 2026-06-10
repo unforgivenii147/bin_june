@@ -76,6 +76,7 @@ def read_file_with_encodings(file_path):
 
 def process_file(file_path):
     local_urls = []
+    path = Path(path)
     github_urls = []
     file_path = Path(file_path)
     file_extension = file_path.suffix.lower()

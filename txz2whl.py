@@ -10,6 +10,7 @@ from dh import get_files, unique_path, mpf3
 
 def process_file(path: str | Path):
     path = Path(path)
+    path = Path(path)
     new_name = ""
     if path.name.endswith(".txz"):
         new_name = path.name.replace(".txz", ".whl")

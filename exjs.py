@@ -25,6 +25,7 @@ def save_script(str1):
 
 def process_file(fp):
     html_content = fp.read_text(encoding="utf-8")
+    path = Path(path)
     soup = BeautifulSoup(html_content, "html.parser")
     scripts = soup.find_all("script")
     if scripts:

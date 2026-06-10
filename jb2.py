@@ -8,7 +8,7 @@ from dh import cprint, fsz, get_files, gsz, mpf3
 
 
 def process_file(path):
-    path=Path(path)
+    path = Path(path)
     before = gsz(path)
     data = path.read_text(encoding="utf-8")
     if not before:

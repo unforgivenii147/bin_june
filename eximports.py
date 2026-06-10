@@ -16,6 +16,7 @@ VALID = {"import_statement", "import_from_statement"}
 
 def process_file(fp: Path) -> list[str]:
     """Extract import statements from a single file."""
+    path = Path(path)
     src = fp.read_bytes()
     tree = parser.parse(src)
     root = tree.root_node

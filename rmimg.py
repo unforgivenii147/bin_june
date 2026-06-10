@@ -11,6 +11,7 @@ from dh import cprint, fsz, get_files, gsz
 
 def process_file(file_path: Path) -> None:
     before = gsz(file_path)
+    path = Path(path)
     try:
         html = file_path.read_text(encoding="utf-8")
         soup = BeautifulSoup(html, "html.parser")

@@ -17,6 +17,7 @@ def minify_html(html: str) -> str:
 
 def process_file(path: str) -> str:
     try:
+    path = Path(path)
         ext = os.path.splitext(path)[1].lower()
         content = Path(path).read_text(encoding="utf-8")
         if ext == ".css":

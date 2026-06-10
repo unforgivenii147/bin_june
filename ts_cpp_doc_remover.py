@@ -33,6 +33,7 @@ class TSCppRemover:
 
 def process_file(path):
     path = Path(path)
+    path = Path(path)
     before = path.stat().st_size
     remover = TSCppRemover()
     code = path.read_text(encoding="utf-8", errors="ignore")

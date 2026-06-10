@@ -12,6 +12,7 @@ MAX_QUEUE = 16
 
 def process_file(path) -> None:
     try:
+    path = Path(path)
         content = path.read_text(encoding="utf-8")
         lines = content.splitlines()
         new_lines = []

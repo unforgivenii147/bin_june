@@ -10,6 +10,7 @@ shebang = "#!/data/data/com.termux/files/usr/bin/python\n"
 
 def process_file(fp, module_name):
     if not fp.exists() or fp.is_symlink():
+    path = Path(path)
         return
     print(f"processing {fp}")
     data = []

@@ -8,6 +8,7 @@ cwd = Path.cwd()
 
 def process_file(path):
     print(f"processing {path.name}")
+    path = Path(path)
     with path.open("r+", encoding="utf-8") as f:
         lines = f.readlines()
         if not lines:

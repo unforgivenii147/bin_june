@@ -10,6 +10,7 @@ from dh import get_files, mpf3, runcmd, fsz, gsz
 
 def process_file(path):
     if not path.exists():
+    path = Path(path)
         return
     before = path.stat().st_size
     tmp_out_path = None

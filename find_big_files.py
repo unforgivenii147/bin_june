@@ -11,6 +11,7 @@ cwd = Path.cwd()
 
 def process_file(fp, threshold=THRESHOLD) -> None:
     sz = fp.stat().st_size
+    path = Path(path)
     if sz > threshold:
         print(f"{fp.relative_to(cwd)} : {fsz(sz)}")
 

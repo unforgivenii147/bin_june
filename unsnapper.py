@@ -7,7 +7,7 @@ from dh import cprint, decompress, fsz, get_files, gsz, mpf3
 
 
 def process_file(path):
-    path=Path(path)
+    path = Path(path)
     before = gsz(path)
     if not before:
         return

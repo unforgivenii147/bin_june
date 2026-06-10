@@ -23,6 +23,7 @@ def extract_regex_patterns(file_path):
 
 def process_file(file_path, output_dir):
     patterns = extract_regex_patterns(file_path)
+    path = Path(path)
     if patterns:
         relative_path = os.path.relpath(file_path, Path.cwd())
         output_file = output_dir / f"{relative_path.replace(os.sep, '_')}.txt"

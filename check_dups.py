@@ -104,6 +104,7 @@ def build_decl(node, kind, name, lines):
 
 def process_file(src_path):
     dup_path = src_path.parent / f"{src_path.stem}_dups.py"
+    path = Path(path)
     text = src_path.read_text(encoding="utf-8")
     lines = text.splitlines(keepends=True)
     try:

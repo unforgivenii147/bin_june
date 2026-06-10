@@ -13,6 +13,7 @@ MAX_QUEUE = 16
 
 def process_file(filepath):
     if filepath.is_symlink():
+    path = Path(path)
         return
     content = filepath.read_text(encoding="utf-8")
     content.splitlines()

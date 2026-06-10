@@ -9,6 +9,7 @@ from dh import cprint, fsz, get_files, gsz
 
 def process_file(path):
     try:
+    path = Path(path)
         outfile = path.with_suffix(".pdf")
         cairosvg.svg2pdf(url=str(path), write_to=str(outfile))
     except:

@@ -119,6 +119,7 @@ class BashCommentRemover:
 
     def process_file(self, filepath: Path, dry_run: bool = False) -> tuple[bool, int, int]:
         try:
+        path = Path(path)
             original_content = Path(filepath).read_text(encoding="utf-8")
             original_size = len(original_content.encode("utf-8"))
             if (

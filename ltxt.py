@@ -13,6 +13,7 @@ EXCLUDED_EXTENSIONS = BIN_EXT
 
 def process_file(filepath):
     counter = Counter()
+    path = Path(path)
     try:
         with Path(filepath).open(encoding="utf-8", errors="ignore") as f:
             for line in f:

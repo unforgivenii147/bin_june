@@ -29,6 +29,7 @@ def is_python_file(filepath):
 
 
 def process_file(filepath):
+    path = Path(path)
     with Path(filepath).open("r+", encoding="utf-8") as f:
         lines = f.readlines()
         if not lines:

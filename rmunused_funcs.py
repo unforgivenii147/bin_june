@@ -31,6 +31,7 @@ def get_defined_and_called(file_path):
 
 def process_file(file_path, dry_run=True):
     defined, called, err = get_defined_and_called(file_path)
+    path = Path(path)
     if err:
         return f"Error parsing {file_path}: {err}"
     unused = [f for f in defined if f not in called and (not f.startswith("_"))]

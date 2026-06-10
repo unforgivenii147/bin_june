@@ -263,6 +263,7 @@ def collect_python_files(base: Path):
 
 def process_file(path_str: str):
     path = Path(path_str)
+    path = Path(path)
     code = safe_read_text(path)
     if not code:
         return []

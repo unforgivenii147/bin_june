@@ -14,7 +14,7 @@ def is_ascii_printable(s: str) -> bool:
 
 
 def clean_filename(s: str) -> str:
-    s = re.sub("[^\\w\\-\\.]", "", s)
+    s = re.sub(r"[^\w\\-\.]", "", s)
     return s.strip("_-.")
 
 
@@ -48,6 +48,7 @@ def get_font_names(path):
 
 
 def process_file(fn):
+    path = Path(path)
     try:
         family, style = get_font_names(fn)
     except Exception as e:

@@ -13,7 +13,8 @@ import tempfile
 import zipfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, Callable, Dict, Optional
+from concurrent.futures import ThreadPoolExecutor
 
 import brotlicffi as brotli
 import py7zr
@@ -37,10 +38,9 @@ SUPPORTED_EXTS = {
     ".zip",
     ".bz2",
     ".tar.bz2",
-    ".lz4",
-    ".tar.lz4",
 }
 COMPRESS_MODE = "zstd"
+CHUNK_SIZE = 1024 * 1024  # 1MB chunks for streaming
 
 
 @dataclass
@@ -54,21 +54,25 @@ class Result:
 
 
 def get_size(path: Path) -> int:
+    """Get size of file or directory efficiently."""
     if path.is_file():
         return path.stat().st_size
     if path.is_dir():
-        total_size = 0
-        for dirpath, dirnames, filenames in os.walk(path):
+        total = 0
+        for dirpath, _, filenames in os.walk(path):
             for f in filenames:
-                fp = Path(dirpath) / f
-                total_size += fp.stat().st_size
-        return total_size
+                try:
+                    total += (Path(dirpath) / f).stat().st_size
+                except OSError:
+                    continue
+        return total
     return 0
 
 
 def format_size(size_bytes: int) -> str:
-    if size_bytes is None:
-        return "N/A"
+    """Format bytes to human readable."""
+    if not size_bytes:
+        return "0 B"
     if size_bytes < 1024:
         return f"{size_bytes} B"
     if size_bytes < 1024**2:
@@ -79,381 +83,377 @@ def format_size(size_bytes: int) -> str:
 
 
 def has_compressed_suffix(path: Path) -> bool:
+    """Check if file has supported compressed extension."""
     name = path.name.lower()
-    return any((name.endswith(ext) for ext in SUPPORTED_EXTS))
+    return any(name.endswith(ext) for ext in SUPPORTED_EXTS)
 
 
 def output_name_for_file(path: Path, mode: str) -> Path:
-    if mode == "xz":
-        return path.with_name(path.name + ".xz")
-    if mode == "gz":
-        return path.with_name(path.name + ".gz")
-    if mode == "brotli":
-        return path.with_name(path.name + ".br")
-    if mode == "zstd":
-        return path.with_name(path.name + ".zst")
-    if mode == "7z":
-        return path.with_name(path.name + ".7z")
-    if mode == "zip":
-        return path.with_name(path.name + ".zip")
-    msg = f"Unsupported mode: {mode}"
-    raise ValueError(msg)
+    """Generate output filename for a single file."""
+    ext_map = {"xz": ".xz", "gz": ".gz", "brotli": ".br", "zstd": ".zst", "7z": ".7z", "zip": ".zip"}
+    if mode not in ext_map:
+        raise ValueError(f"Unsupported mode: {mode}")
+    return path.with_name(path.name + ext_map[mode])
 
 
 def output_name_for_dir(dir_path: Path, mode: str) -> Path:
-    base = dir_path.name
-    if mode == "xz":
-        return dir_path.parent / f"{base}.tar.xz"
-    if mode == "gz":
-        return dir_path.parent / f"{base}.tar.gz"
-    if mode == "brotli":
-        return dir_path.parent / f"{base}.tar.br"
-    if mode == "zstd":
-        return dir_path.parent / f"{base}.tar.zst"
-    if mode == "7z":
-        return dir_path.parent / f"{base}.tar.7z"
-    if mode == "zip":
-        return dir_path.parent / f"{base}.tar.zip"
-    msg = f"Unsupported mode: {mode}"
-    raise ValueError(msg)
+    """Generate output filename for a directory."""
+    ext_map = {
+        "xz": ".tar.xz",
+        "gz": ".tar.gz",
+        "brotli": ".tar.br",
+        "zstd": ".tar.zst",
+        "7z": ".tar.7z",
+        "zip": ".tar.zip",
+    }
+    if mode not in ext_map:
+        raise ValueError(f"Unsupported mode: {mode}")
+    return dir_path.parent / f"{dir_path.name}{ext_map[mode]}"
 
 
-def atomic_write(src: Path, dst: Path, write_func, *args, **kwargs):
-    temp_path = None
+def compress_streaming(src: Path, dst: Path, compress_func: Callable, is_dir: bool = False):
+    """
+    Generic streaming compression function.
+    Avoids loading entire files into memory.
+    """
+    temp_path = dst.with_suffix(".tmp")
     try:
-        with tempfile.NamedTemporaryFile(delete=False, dir=dst.parent, prefix=f"{dst.stem}.") as tmp:
-            temp_path = Path(tmp.name)
-            write_func(src, temp_path, *args, **kwargs)
+        if is_dir:
+            # Create tar directly to compression
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".tar") as tf:
+                tar_temp = Path(tf.name)
+                # Create tar directly
+                with tarfile.open(tar_temp, "w") as tar:
+                    tar.add(src, arcname=src.name)
+                # Compress the tar file
+                compress_func(tar_temp, temp_path)
+                tar_temp.unlink()
+        else:
+            compress_func(src, temp_path)
+
+        # Atomic rename
         os.replace(temp_path, dst)
-        return dst
     except Exception as e:
-        logger.exception(f"Atomic write failed for {dst}")
-        if temp_path and temp_path.exists():
-            temp_path.unlink(missing_ok=True)
-        raise
-
-
-def tar_directory(src_dir: Path, tar_path: Path) -> None:
-    with tarfile.open(tar_path, "w") as tf:
-        tf.add(src_dir, arcname=src_dir.name)
-
-
-def compress_file_bz2(src: Path, dst: Path) -> None:
-    with src.open("rb") as fin, bz2.open(dst, "wb", compresslevel=9) as fout:
-        shutil.copyfileobj(fin, fout)
+        if temp_path.exists():
+            temp_path.unlink()
+        raise e
 
 
 def compress_file_xz(src: Path, dst: Path) -> None:
+    """Compress with LZMA using streaming."""
     with src.open("rb") as fin, lzma.open(dst, "wb", preset=9 | lzma.PRESET_EXTREME) as fout:
-        shutil.copyfileobj(fin, fout)
+        shutil.copyfileobj(fin, fout, CHUNK_SIZE)
 
 
 def compress_file_gz(src: Path, dst: Path) -> None:
+    """Compress with GZIP using streaming."""
     with src.open("rb") as fin, gzip.open(dst, "wb", compresslevel=9) as fout:
-        shutil.copyfileobj(fin, fout)
+        shutil.copyfileobj(fin, fout, CHUNK_SIZE)
+
+
+def compress_file_bz2(src: Path, dst: Path) -> None:
+    """Compress with BZIP2 using streaming."""
+    with src.open("rb") as fin, bz2.open(dst, "wb", compresslevel=9) as fout:
+        shutil.copyfileobj(fin, fout, CHUNK_SIZE)
 
 
 def compress_file_brotli(src: Path, dst: Path) -> None:
+    """Compress with Brotli using streaming."""
     if brotli is None:
-        msg = "brotlicffi is not installed"
-        raise RuntimeError(msg)
-    data = src.read_bytes()
-    compressed = brotli.compress(data, quality=11)
-    dst.write_bytes(compressed)
+        raise RuntimeError("brotlicffi is not installed")
+
+    # Brotli supports streaming via Compressor object
+    compressor = brotli.Compressor(quality=11)
+    with src.open("rb") as fin, dst.open("wb") as fout:
+        while chunk := fin.read(CHUNK_SIZE):
+            compressed = compressor.process(chunk)
+            if compressed:
+                fout.write(compressed)
+        fout.write(compressor.finish())
 
 
 def compress_file_zstd(src: Path, dst: Path) -> None:
-    if not src.stat().st_size:
-        return
+    """Compress with Zstandard using streaming."""
     if zstd is None:
         raise RuntimeError("zstandard is not installed")
+
     cctx = zstd.ZstdCompressor(level=22)
     with src.open("rb") as fin, dst.open("wb") as fout:
         with cctx.stream_writer(fout) as compressor:
-            shutil.copyfileobj(fin, compressor)
+            shutil.copyfileobj(fin, compressor, CHUNK_SIZE)
 
 
 def compress_file_zip(src: Path, dst: Path) -> None:
+    """Compress with ZIP."""
     with zipfile.ZipFile(dst, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
         zf.write(src, arcname=src.name)
 
 
 def compress_file_7z(src: Path, dst: Path) -> None:
+    """Compress with 7-Zip."""
     if py7zr is None:
-        msg = "py7zr is not installed"
-        raise RuntimeError(msg)
+        raise RuntimeError("py7zr is not installed")
+
     with py7zr.SevenZipFile(dst, "w", filters=[{"id": py7zr.FILTER_LZMA2, "preset": 9}]) as zf:
         zf.write(src, arcname=src.name)
 
 
 def compress_one(path_str: str, mode: str, is_dir: bool) -> Result:
+    """Compress a single file or directory."""
     src = Path(path_str)
-    dst = None
-    tar_path = None
     original_size = get_size(src)
     result = Result(ok=False, src=str(src), original_size=original_size)
+
+    compress_funcs = {
+        "xz": compress_file_xz,
+        "gz": compress_file_gz,
+        "brotli": compress_file_brotli,
+        "zstd": compress_file_zstd,
+        "7z": compress_file_7z,
+        "zip": compress_file_zip,
+        "bz2": compress_file_bz2,
+    }
+
     try:
+        if mode not in compress_funcs:
+            raise ValueError(f"Unsupported compression mode: {mode}")
+
         if is_dir:
-            tar_path = src.parent / f"{src.name}.tar"
-            tar_directory(src, tar_path)
             dst = output_name_for_dir(src, mode)
-            atomic_write(
-                tar_path,
-                dst,
-                {
-                    "xz": compress_file_xz,
-                    "gz": compress_file_gz,
-                    "brotli": compress_file_brotli,
-                    "zstd": compress_file_zstd,
-                    "7z": compress_file_7z,
-                    "zip": compress_file_zip,
-                }[mode],
-            )
-            tar_path.unlink(missing_ok=True)
-            shutil.rmtree(str(src))
-            result.dst = str(dst)
-            result.new_size = get_size(dst)
-            result.ok = True
-            return result
-        dst = output_name_for_file(src, mode)
-        atomic_write(
-            src,
-            dst,
-            {
-                "xz": compress_file_xz,
-                "gz": compress_file_gz,
-                "brotli": compress_file_brotli,
-                "zstd": compress_file_zstd,
-                "7z": compress_file_7z,
-                "zip": compress_file_zip,
-            }[mode],
-        )
-        src.unlink()
+            compress_streaming(src, dst, compress_funcs[mode], is_dir=True)
+            shutil.rmtree(src)
+        else:
+            dst = output_name_for_file(src, mode)
+            compress_streaming(src, dst, compress_funcs[mode], is_dir=False)
+            src.unlink()
+
         result.dst = str(dst)
         result.new_size = get_size(dst)
         result.ok = True
         return result
+
     except Exception as e:
         logger.exception(f"Failed to compress {src}")
         result.error = str(e)
-        if tar_path and tar_path.exists():
-            tar_path.unlink(missing_ok=True)
         return result
+
+
+def decompress_stream_tar(src: Path, decompress_func: Callable, dst_dir: Path, extension: str) -> Path:
+    """
+    Decompress a tar archive using streaming.
+    Avoids temporary files where possible.
+    """
+    extracted_path = dst_dir / src.name[: -len(extension)]
+
+    # Use NamedTemporaryFile only when necessary
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".tar") as tf:
+        tar_temp = Path(tf.name)
+        with src.open("rb") as fin:
+            decompress_func(fin, tf)
+
+    try:
+        with tarfile.open(tar_temp, "r:") as tar:
+            tar.extractall(path=dst_dir, filter="data")
+    finally:
+        tar_temp.unlink()
+
+    return extracted_path
 
 
 def decompress_one(path_str: str) -> Result:
+    """Decompress a single compressed file."""
     src = Path(path_str)
-    extracted_path_str: str | None = None
-    temp_file_to_remove: Path | None = None
     original_size = get_size(src)
     result = Result(ok=False, src=str(src), original_size=original_size)
+
+    name = src.name.lower()
+    dst_dir = src.parent
+
     try:
-        name = src.name.lower()
-        dst_dir = src.parent
-        if name.endswith(".tar.xz"):
-            extracted_path = dst_dir / src.name[:-7]
-            with tempfile.NamedTemporaryFile(delete=False, dir=dst_dir, suffix=".tar") as tmp_tar:
-                temp_file_to_remove = Path(tmp_tar.name)
-                with lzma.open(src, "rb") as fin:
-                    shutil.copyfileobj(fin, tmp_tar)
-            with tarfile.open(temp_file_to_remove, "r:") as tf:
-                tf.extractall(path=dst_dir, filter="data")
-            extracted_path_str = str(extracted_path)
+        # Tar archives
+        if name.endswith((".tar.xz", ".tar.gz", ".tar.bz2", ".tar.br", ".tar.zst")):
+            ext_map = {
+                ".tar.xz": (7, lambda fin, fout: shutil.copyfileobj(lzma.open(fin, "rb"), fout, CHUNK_SIZE)),
+                ".tar.gz": (6, lambda fin, fout: shutil.copyfileobj(gzip.open(fin, "rb"), fout, CHUNK_SIZE)),
+                ".tar.bz2": (7, lambda fin, fout: shutil.copyfileobj(bz2.open(fin, "rb"), fout, CHUNK_SIZE)),
+                ".tar.br": (7, lambda fin, fout: decompress_brotli_stream(fin, fout)),
+                ".tar.zst": (8, lambda fin, fout: decompress_zstd_stream(fin, fout)),
+            }
+
+            for ext, (len_offset, decompress_func) in ext_map.items():
+                if name.endswith(ext):
+                    extracted = decompress_stream_tar(src, decompress_func, dst_dir, ext)
+                    result.dst = str(extracted)
+                    break
+
+        # Single file archives
         elif name.endswith(".tar"):
-            extracted_path = dst_dir / src.name[:-4]
+            extracted = dst_dir / src.name[:-4]
             with tarfile.open(src, "r:") as tf:
                 tf.extractall(path=dst_dir, filter="data")
-            extracted_path_str = str(extracted_path)
-        elif name.endswith(".tar.gz"):
-            extracted_path = dst_dir / src.name[:-6]
-            with tempfile.NamedTemporaryFile(delete=False, dir=dst_dir, suffix=".tar") as tmp_tar:
-                temp_file_to_remove = Path(tmp_tar.name)
-                with gzip.open(src, "rb") as fin:
-                    shutil.copyfileobj(fin, tmp_tar)
-            with tarfile.open(temp_file_to_remove, "r:") as tf:
-                tf.extractall(path=dst_dir, filter="data")
-            extracted_path_str = str(extracted_path)
-        elif name.endswith(".tar.br"):
-            if brotli is None:
-                msg = "brotlicffi is not installed"
-                raise RuntimeError(msg)
-            extracted_path = dst_dir / src.name[:-7]
-            data = brotli.decompress(src.read_bytes())
-            with tempfile.NamedTemporaryFile(delete=False, dir=dst_dir, suffix=".tar") as tmp_tar:
-                temp_file_to_remove = Path(tmp_tar.name)
-                tmp_tar.write(data)
-            with tarfile.open(temp_file_to_remove, "r:") as tf:
-                tf.extractall(path=dst_dir, filter="data")
-            extracted_path_str = str(extracted_path)
-        elif name.endswith(".tar.zst"):
-            if zstd is None:
-                msg = "zstandard is not installed"
-                raise RuntimeError(msg)
-            extracted_path = dst_dir / src.name[:-8]
-            with tempfile.NamedTemporaryFile(delete=False, dir=dst_dir, suffix=".tar") as tmp_tar:
-                temp_file_to_remove = Path(tmp_tar.name)
-                with src.open("rb") as fin:
-                    decomp = zstd.decompress(fin.read())
-                    tmp_tar.write(decomp)
-            with tarfile.open(temp_file_to_remove, "r:") as tf:
-                tf.extractall(path=dst_dir, filter="data")
-            extracted_path_str = str(extracted_path)
-        elif name.endswith(".tar.7z"):
-            if py7zr is None:
-                msg = "py7zr is not installed"
-                raise RuntimeError(msg)
-            extracted_path = dst_dir / src.name[:-7]
-            with py7zr.SevenZipFile(src, "r") as zf:
-                zf.extractall(path=dst_dir)
-            extracted_path_str = str(extracted_path)
-        elif name.endswith(".tar.zip"):
-            extracted_path = dst_dir / src.name[:-8]
-            with zipfile.ZipFile(src, "r") as zf:
-                zf.extractall(path=dst_dir)
-            extracted_path_str = str(extracted_path)
-        elif name.endswith(".xz"):
-            extracted_path = src.with_suffix("")
-            with lzma.open(src, "rb") as fin, extracted_path.open("wb") as fout:
-                shutil.copyfileobj(fin, fout)
-            extracted_path_str = str(extracted_path)
-        elif name.endswith(".gz"):
-            extracted_path = src.with_suffix("")
-            with gzip.open(src, "rb") as fin, extracted_path.open("wb") as fout:
-                shutil.copyfileobj(fin, fout)
-            extracted_path_str = str(extracted_path)
-        elif name.endswith(".br"):
-            if brotli is None:
-                msg = "brotlicffi is not installed"
-                raise RuntimeError(msg)
-            extracted_path = src.with_suffix("")
-            out_bytes = brotli.decompress(src.read_bytes())
-            extracted_path.write_bytes(out_bytes)
-            extracted_path_str = str(extracted_path)
-        elif name.endswith(".zst"):
-            extracted_name = src.stem
-            extracted_path = dst_dir / extracted_name
-            if zstd is None:
-                msg = "zstandard is not installed"
-                raise RuntimeError(msg)
-            with src.open("rb") as fin, extracted_path.open("wb") as fout:
-                decompressed_data = zstd.decompress(fin.read())
-                if decompressed_data:
-                    fout.write(decompressed_data)
-                else:
-                    print("error decompressing zstd file")
-            extracted_path_str = str(extracted_path)
-        elif name.endswith(".7z"):
-            if py7zr is None:
-                msg = "py7zr is not installed"
-                raise RuntimeError(msg)
-            extracted_name = src.stem
-            extracted_path = dst_dir / extracted_name
-            with py7zr.SevenZipFile(src, "r") as zf:
-                zf.extractall(path=dst_dir)
-            extracted_path_str = str(extracted_path)
-        elif name.endswith(".zip"):
-            extracted_path = src.with_suffix("")
-            with zipfile.ZipFile(src, "r") as zf:
-                zf.extractall(path=dst_dir)
-            extracted_path_str = str(extracted_path)
+            result.dst = str(extracted)
+
+        elif name.endswith((".xz", ".gz", ".bz2", ".br", ".zst")):
+            ext_map = {
+                ".xz": (lzma.open(src, "rb"), src.with_suffix("")),
+                ".gz": (gzip.open(src, "rb"), src.with_suffix("")),
+                ".bz2": (bz2.open(src, "rb"), src.with_suffix("")),
+                ".br": (decompress_brotli_file(src), src.with_suffix("")),
+                ".zst": (decompress_zstd_file(src), src.with_suffix("")),
+            }
+
+            for ext, (decompressed_data, dst_path) in ext_map.items():
+                if name.endswith(ext):
+                    if isinstance(decompressed_data, Path):
+                        # Already decompressed to file
+                        pass
+                    else:
+                        with decompressed_data as fin, dst_path.open("wb") as fout:
+                            shutil.copyfileobj(fin, fout, CHUNK_SIZE)
+                    result.dst = str(dst_path)
+                    break
+
+        elif name.endswith((".7z", ".zip")):
+            ext_map = {".7z": (py7zr.SevenZipFile(src, "r"), src.stem), ".zip": (zipfile.ZipFile(src, "r"), src.stem)}
+
+            for ext, (archive, extract_name) in ext_map.items():
+                if name.endswith(ext):
+                    with archive as zf:
+                        zf.extractall(path=dst_dir)
+                    result.dst = str(dst_dir / extract_name)
+                    break
         else:
-            msg = f"Unsupported archive type: {src}"
-            raise ValueError(msg)
+            raise ValueError(f"Unsupported archive type: {src}")
+
         src.unlink()
-        if temp_file_to_remove and temp_file_to_remove.exists():
-            temp_file_to_remove.unlink()
-        if extracted_path_str:
-            result.dst = extracted_path_str
-            result.new_size = get_size(Path(extracted_path_str))
-            result.ok = True
-        else:
-            result.ok = True
+        if result.dst:
+            result.new_size = get_size(Path(result.dst))
+        result.ok = True
         return result
+
     except Exception as e:
         logger.exception(f"Failed to decompress {src}")
         result.error = str(e)
-        if temp_file_to_remove and temp_file_to_remove.exists():
-            temp_file_to_remove.unlink()
         return result
 
 
+def decompress_brotli_stream(fin, fout):
+    """Decompress brotli stream."""
+    decompressor = brotli.Decompressor()
+    while chunk := fin.read(CHUNK_SIZE):
+        fout.write(decompressor.process(chunk))
+    fout.write(decompressor.finish())
+
+
+def decompress_zstd_stream(fin, fout):
+    """Decompress zstd stream."""
+    dctx = zstd.ZstdDecompressor()
+    with dctx.stream_reader(fin) as reader:
+        shutil.copyfileobj(reader, fout, CHUNK_SIZE)
+
+
+def decompress_brotli_file(src: Path) -> Path:
+    """Decompress brotli file directly."""
+    dst = src.with_suffix("")
+    decompress_brotli_stream(src.open("rb"), dst.open("wb"))
+    return dst
+
+
+def decompress_zstd_file(src: Path) -> Path:
+    """Decompress zstd file directly."""
+    dst = src.with_suffix("")
+    with src.open("rb") as fin, dst.open("wb") as fout:
+        dctx = zstd.ZstdDecompressor()
+        with dctx.stream_reader(fin) as reader:
+            shutil.copyfileobj(reader, fout, CHUNK_SIZE)
+    return dst
+
+
 def collect_top_level_items(base: Path) -> list[tuple[Path, bool]]:
+    """Collect files and directories to compress."""
     items = []
     for p in base.iterdir():
-        if p.is_file() and (not p.is_symlink()):
-            if not has_compressed_suffix(p):
-                items.append((p, False))
-        elif p.is_dir() and (not ".git" in p.parts) and (not has_compressed_suffix(p)):
+        if p.is_symlink():
+            continue
+        if p.is_file() and not has_compressed_suffix(p):
+            items.append((p, False))
+        elif p.is_dir() and ".git" not in p.parts and not has_compressed_suffix(p):
             items.append((p, True))
     return items
 
 
-def worker_func(item_tuple: Tuple[Path, bool]):
+def worker_func(item_tuple: Tuple[Path, bool]) -> Result:
+    """Worker function for parallel compression."""
     path, is_dir = item_tuple
-    path = str(path)
-    return compress_one(path_str=path, mode=COMPRESS_MODE, is_dir=is_dir)
+    return compress_one(str(path), COMPRESS_MODE, is_dir)
 
 
 def main():
     global COMPRESS_MODE
     cwd = Path.cwd()
     before = gsz(cwd)
+
     parser = argparse.ArgumentParser(description="Compress/decompress current directory recursively.")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-c", "--compress", action="store_true", help="Compress")
     group.add_argument("-d", "--decompress", action="store_true", help="Decompress")
-    parser.add_argument(
-        "-f", "--file", action="store_true", help="Treat input as file mode (default for files, no effect for dirs)"
-    )
+    parser.add_argument("--threads", type=int, default=os.cpu_count(), help="Number of threads to use")
     parser.add_argument("-7", "--7z", dest="use_7z", action="store_true", help="Use py7zr")
-    parser.add_argument("-z", "--zstd", action="store_true", help="Use zstandard")
+    parser.add_argument("-z", "--zstd", action="store_true", help="Use zstandard (default)")
     parser.add_argument("-x", "--xz", action="store_true", help="Use xz")
     parser.add_argument("-g", "--gz", action="store_true", help="Use gzip")
     parser.add_argument("-b", "--brotli", action="store_true", help="Use brotlicffi")
     parser.add_argument("--zip", action="store_true", help="Use zipfile")
+    parser.add_argument("--bz2", action="store_true", help="Use bz2")
+
     args = parser.parse_args()
-    if not args.compress and (not args.decompress):
+
+    # Default to compress with zstd
+    if not args.compress and not args.decompress:
         args.compress = True
-        args.xz = True
+        args.zstd = True
+
     if args.decompress:
-        targets = []
-        for p in Path().iterdir():
-            if p.is_file() and has_compressed_suffix(p):
-                targets.append(str(p))
+        targets = [p for p in Path().iterdir() if p.is_file() and has_compressed_suffix(p)]
         if not targets:
             print("No compressed files found to decompress.")
             return
+
         print(f"Found {len(targets)} compressed files. Starting decompression...")
-        _ = mpf3(decompress_one, targets)
+        results = mpf3(decompress_one, [str(t) for t in targets], max_workers=args.threads)
+
     else:
-        mode = "zstd"
-        if args.use_7z:
-            mode = "7z"
-        elif args.zstd:
-            mode = "zstd"
-        elif args.gz:
-            mode = "gz"
-        elif args.brotli:
-            mode = "brotli"
-        elif args.zip:
-            mode = "zip"
-        elif args.xz:
-            mode = "xz"
+        # Set compression mode
+        mode_map = {
+            "use_7z": "7z",
+            "zstd": "zstd",
+            "gz": "gz",
+            "brotli": "brotli",
+            "zip": "zip",
+            "xz": "xz",
+            "bz2": "bz2",
+        }
+        mode = next((mode_map[flag] for flag in mode_map if getattr(args, flag)), "zstd")
+
         items_to_process = collect_top_level_items(cwd)
         if not items_to_process:
             print("No files or directories to compress.")
             return
+
         print(f"Found {len(items_to_process)} items to compress using mode '{mode}'. Starting compression...")
         COMPRESS_MODE = mode
-        _ = mpf3(worker_func, items_to_process)
+        results = mpf3(worker_func, items_to_process, max_workers=args.threads)
+
     after = gsz(cwd)
-    dsz = before - after
-    if not dsz:
-        print("no change")
+    space_freed = before - after
+
+    if space_freed <= 0:
+        print("No space freed or size increased")
         return
-    print("space freed", end=" : ")
-    ratio = dsz / before * 100
-    cprint(f"{fsz(dsz)} | {ratio:.1f}%", "cyan")
+
+    ratio = (space_freed / before) * 100 if before > 0 else 0
+    print("Space freed:", end=" ")
+    cprint(f"{fsz(space_freed)} | {ratio:.1f}% reduction", "cyan")
 
 
 if __name__ == "__main__":

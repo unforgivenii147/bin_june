@@ -195,6 +195,7 @@ class FileProcessor:
 
     def process_file(self, file_path: str) -> int:
         try:
+        path = Path(path)
             file_path = Path(file_path)
             if file_path.suffix.lower() != ".html":
                 return 0

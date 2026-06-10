@@ -13,6 +13,7 @@ c = 0
 
 def process_file(fp):
     global all_files
+    path = Path(path)
     global c
     c += 1
     print(f"[{c}/{all_files}] {fp.name}")

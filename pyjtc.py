@@ -30,6 +30,7 @@ def remove_comments_and_strings(content, filetype, keep_strings=False):
 
 def process_file(filepath, inplace=False, keep_strings=False):
     _, ext = os.path.splitext(filepath)
+    path = Path(path)
     ext = ext[1:].lower()
     if ext not in {"hpp", "h", "c", "cpp", "py", "sh"}:
         print(f"Unsupported file type: {ext}")

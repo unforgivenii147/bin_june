@@ -4,12 +4,12 @@ from io import BytesIO
 from pathlib import Path
 
 import cairosvg
-from dh import get_files,mpf3
+from dh import get_files, mpf3
 from PIL import Image
 
 
 def process_file(path):
-    path=Path(path)
+    path = Path(path)
     png_file = path.with_suffix(".png")
     with path.open("rb") as image:
         imageBinary = BytesIO(image.read())
@@ -23,7 +23,7 @@ def process_file(path):
 def main():
     cwd = Path.cwd()
     files = get_files(cwd, ext=[".svg"])
-    mpf3(process_file,files)
+    mpf3(process_file, files)
 
 
 if __name__ == "__main__":

@@ -12,6 +12,7 @@ def is_text_file(file_path, text_extensions):
 
 
 def process_file(file_path, text_extensions):
+    path = Path(path)
     if not is_text_file(file_path, text_extensions):
         return Counter()
     try:

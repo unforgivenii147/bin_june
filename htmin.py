@@ -8,6 +8,7 @@ from dh import mpf3
 
 def process_file(file: Path) -> bool:
     try:
+    path = Path(path)
         orig = file.read_text(encoding="utf-8")
         print(len(orig))
         code = orig
