@@ -7,8 +7,8 @@ from dh import get_files, mpf3, runcmd
 
 
 def process_file(fp):
-    if fp.suffix.lower() in {".html", ".htm"}:
     path = Path(path)
+    if fp.suffix.lower() in {".html", ".htm"}:
         md_file = fp.with_suffix(".md")
     else:
         return (fp, False)

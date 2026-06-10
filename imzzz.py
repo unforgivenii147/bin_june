@@ -72,8 +72,8 @@ def get_imports(file_path):
 
 
 def process_file(file_path):
-    if file_path.is_dir():
     path = Path(path)
+    if file_path.is_dir():
         return set()
     if file_path.suffix in {".zip", ".whl", ".tar.gz", ".tar.xz", ".tar.zst"}:
         extract_dir = file_path.parent / f"extracted_{file_path.stem}"

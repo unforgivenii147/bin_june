@@ -7,8 +7,8 @@ from dh import get_pyfiles, runcmd
 
 
 def process_file(fp) -> None:
-    cmd = [
     path = Path(path)
+    cmd = [
         "pylint",
         f"{fp!s}",
         "--persistent=n",

@@ -7,8 +7,8 @@ from dh import fsz, get_filez, gsz, mpf3, run_command
 
 
 def process_file(fp):
-    if not fp.exists():
     path = Path(path)
+    if not fp.exists():
         return False
     if fp.suffix == ".c":
         cmd = f"clang {fp!s} -o {fp.with_suffix('')!s}"

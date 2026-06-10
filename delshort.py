@@ -10,8 +10,8 @@ LINE_THRESHOLD = 3
 
 
 def process_file(fp) -> None:
-    if not fp.exists():
     path = Path(path)
+    if not fp.exists():
         return
     if fp.stat().st_size < SIZE_THRESHOLD and len(fp.read_text().splitlines()) < LINE_THRESHOLD:
         fp.unlink()

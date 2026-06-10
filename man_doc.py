@@ -18,8 +18,8 @@ def safe_run(path):
 
 
 def process_file(fp) -> bool:
-    if not fp.exists():
     path = Path(path)
+    if not fp.exists():
         return False
     print(f"{fp.name}", end=" ")
     res = safe_run(fp)

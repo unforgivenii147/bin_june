@@ -12,8 +12,8 @@ BACKUP = False
 
 
 def process_file(fn: Path):
-    if is_binary(fn):
     path = Path(path)
+    if is_binary(fn):
         return
     try:
         content = fn.read_text(encoding="utf-8", errors="ignore")

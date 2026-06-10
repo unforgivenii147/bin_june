@@ -10,8 +10,8 @@ from dh import fsz, get_nobinary, gsz, is_binary
 
 
 def process_file(file_path: Path) -> None:
-    if is_binary(file_path):
     path = Path(path)
+    if is_binary(file_path):
         return
     before = gsz(file_path)
     file_path.read_text(encoding="utf-8")
