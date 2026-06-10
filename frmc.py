@@ -4,7 +4,7 @@ import ast
 import sys
 from pathlib import Path
 
-from dh import SOURCE_CODE_EXT, clean_blank_lines, cprint, fsz, get_nobinary, gsz, is_binary, mpf3
+from dh import SOURCE_CODE_EXT, remove_blank_lines, cprint, fsz, get_nobinary, gsz, is_binary, mpf3
 
 
 def process_file(path):
@@ -37,7 +37,7 @@ def process_file(path):
         else:
             removed += 1
     code = "".join(cleaned)
-    code = clean_blank_lines(code)
+    code = remove_blank_lines(code)
     if path.suffix == ".py":
         try:
             _ = ast.parse(code)

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-import os
 import shutil
 from pathlib import Path
 
@@ -18,6 +17,8 @@ def folderize_by_extension(root_dir):
     root_path = Path(root_dir)
     extension_stats = {}
     for file_path in root_path.rglob("*"):
+        if ".git" in file_path.parts:
+            continue
         if file_path.is_file():
             ext = file_path.suffix.lower()[1:] if file_path.suffix else "no_extension"
             size = file_path.stat().st_size
@@ -39,12 +40,14 @@ def folderize_by_extension(root_dir):
             while target_path.exists():
                 target_path = target_dir / f"{file_path.stem}_{counter}{file_path.suffix}"
                 counter += 1
-            shutil.move(str(file_path), str(target_path))
+            try:
+                shutil.move(str(file_path), str(target_path))
+            except:
+                pass
     for dir_path in sorted(root_path.glob("**/*"), key=lambda p: len(p.parts), reverse=True):
         if dir_path.is_dir() and dir_path != root_path:
             try:
                 dir_path.rmdir()
-                print(f"Removed empty directory: {dir_path.relative_to(root_path)}")
             except OSError:
                 pass
     print("\n" + "=" * 50)
@@ -66,8 +69,6 @@ def folderize_by_extension(root_dir):
 
 
 if __name__ == "__main__":
-    target_dir = os.getcwd()
-    print(f"Organizing files in: {target_dir}")
+    target_dir = Path.cwd()
     created_dirs, stats = folderize_by_extension(target_dir)
     print(f"\nCreated {len(created_dirs)} extension folders.")
-    print("Done!")

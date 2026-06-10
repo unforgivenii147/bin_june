@@ -6,7 +6,7 @@ from pathlib import Path
 
 from dh import get_filez
 
-DRY_RUN = True
+DRY_RUN = not "-m" in sys.argv
 cwd = Path.cwd()
 err_dir = Path(f"{cwd}/error")
 counter = 0
@@ -23,7 +23,7 @@ def process_file(fp) -> None:
         print(f"error reading {fp}")
         return
     try:
-        _ = ast.parse(content)
+        ast.parse(content)
         del content
         return
     except Exception as e:
@@ -32,7 +32,7 @@ def process_file(fp) -> None:
             err_dir.mkdir(exist_ok=True)
             newpath = err_dir / fp.name
             newpath = Path(newpath)
-            newpath.write_text(f"# copied from {fp} \n\n" + content, encoding="utf-8")
+            newpath.write_text(content, encoding="utf-8")
             del content
             return
         else:

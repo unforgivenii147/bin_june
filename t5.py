@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 import tree_sitter_python as tspython
-from dh import clean_blank_lines, get_pyfiles, mpf
+from dh import remove_blank_lines, get_pyfiles, mpf
 from tree_sitter import Language, Parser, Query, QueryCursor
 
 QUERY_STRING = "\n(comment) @comment\n(block\n  . (expression_statement\n    (string)) @docstring)\n(module\n  . (expression_statement\n    (string)) @docstring)\n"
@@ -46,7 +46,7 @@ class TSRemover:
         for start, end in deletions:
             new_source = new_source[:start] + new_source[end:]
         cleaned = new_source.decode("utf-8")
-        cleaned = clean_blank_lines(cleaned)
+        cleaned = remove_blank_lines(cleaned)
         return (cleaned, comment_count, docstring_count)
 
 

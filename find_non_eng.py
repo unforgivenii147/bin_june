@@ -7,7 +7,7 @@ from collections import Counter
 from pathlib import Path
 
 import pycld2
-from dh import is_binary
+from dh import is_binary, get_nobinary, mpf3
 
 
 class LanguageDetector:

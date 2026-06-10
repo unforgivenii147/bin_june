@@ -4,6 +4,7 @@ import re
 import unicodedata
 from html.parser import HTMLParser
 from pathlib import Path
+from dh import get_files, mpf3
 
 
 def finglish(text):
@@ -117,26 +118,25 @@ def unique_path(path: Path) -> Path:
     return new_path
 
 
-def rename_html_files(cwd: Path):
-    for path in cwd.rglob("*.html"):
-        title = extract_title(path)
-        if not title:
-            continue
-        slug = slugify(title)
-        if not slug:
-            continue
-        print(slug)
-        name = finglish(slug)
-        print(name)
-        new_path = path.with_name(name + path.suffix)
-        if new_path.exists():
-            new_path = unique_path(new_path)
-        if path == new_path:
-            continue
-        print(f"{path} -> {new_path}")
-        path.rename(new_path)
+def process_file(patj: str | Path):
+    path = Path(path)
+    title = extract_title(path)
+    if not title:
+        return
+    slug = slugify(title)
+    if not slug:
+        return
+    name = finglish(slug)
+    new_path = path.with_name(name + path.suffix)
+    if new_path.exists():
+        new_path = unique_path(new_path)
+    if path == new_path:
+        return
+    print(f"{path.name[:10]} -> {new_path.name[:25]}")
+    path.rename(new_path)
 
 
 if __name__ == "__main__":
     cwd = Path.cwd()
-    rename_html_files(cwd)
+    files = get_files(cwd, ext=[".html"])
+    mpf3(process_file, files)

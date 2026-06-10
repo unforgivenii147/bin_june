@@ -7,6 +7,7 @@ from dh import cprint, fsz, get_files, gsz, mpf3, runcmd
 
 
 def process_file(path):
+    path=Path(path)
     before = gsz(path)
     if not path.exists():
         return False

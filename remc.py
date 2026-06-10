@@ -83,7 +83,7 @@ def find_docstring_ranges(node) -> list[tuple[int, int]]:
     return ranges
 
 
-def clean_blank_lines(content: str) -> str:
+def remove_blank_lines(content: str) -> str:
     content = re.sub("\\n\\n+", "\n", content)
     return "\n".join((line.rstrip() for line in content.split("\n")))
 
@@ -95,7 +95,7 @@ def process_file(file_path: Path) -> None:
             modified, removed = rm_ast(original)
         except:
             modified, removed = rm_doc(original)
-        modified = clean_blank_lines(modified)
+        modified = remove_blank_lines(modified)
         if removed:
             print(f"✓ {file_path.name} : ", end="")
             cprint(f"{removed}", "cyan")

@@ -3,7 +3,7 @@
 from pathlib import Path
 
 import tree_sitter_cpp as tscpp
-from dh import clean_blank_lines, cprint
+from dh import remove_blank_lines, cprint
 from tree_sitter import Language, Parser
 
 
@@ -28,7 +28,7 @@ class TSCppRemover:
         for start, end in sorted(to_delete, reverse=True):
             new_source = new_source[:start] + new_source[end:]
         cleaned = new_source.decode("utf-8")
-        return clean_blank_lines(cleaned)
+        return remove_blank_lines(cleaned)
 
 
 def process_file(fp):

@@ -5,19 +5,24 @@ import tarfile
 import zipfile
 from pathlib import Path
 
-from dh import get_files, unique_path
+from dh import get_files, unique_path, mpf3
 
 
-def tar_xz_to_whl(tar_path: Path):
-    target = tar_path.with_suffix(".whl")
-    tt = str(target).replace(".tar", "")
-    target = Path(tt)
+def process_file(path: str | Path):
+    path = Path(path)
+    new_name = ""
+    if path.name.endswith(".txz"):
+        new_name = path.name.replace(".txz", ".whl")
+    elif path.name.endswith(".tar.xz"):
+        new_name = path.name.replace(".tar.xz", ".whl")
+    else:
+        return
+    target = path.with_name(new_name)
     if target.exists():
         print(f"[SKIP] {target.name} already exists")
         target = unique_path(target)
-    print(f"[TAR.XZ → WHL] {tar_path.name}")
     try:
-        with tarfile.open(tar_path, "r:xz") as tf, zipfile.ZipFile(target, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        with tarfile.open(path, "r:xz") as tf, zipfile.ZipFile(target, "w", compression=zipfile.ZIP_DEFLATED) as zf:
             for member in tf.getmembers():
                 if member.isdir():
                     continue
@@ -27,15 +32,17 @@ def tar_xz_to_whl(tar_path: Path):
                 zf.writestr(member.name, extracted.read())
         print(f"[OK] {target.name}")
     except Exception as e:
-        print(f"[ERROR] {tar_path.name}: {e}")
+        print(f"[ERROR] {path.name}: {e}")
 
 
 def main():
     args = sys.argv[1:]
     cwd = Path().cwd()
-    files = [Path(arg) for arg in args] if args else get_files(cwd, recursive=False, ext=[".tar.xz", ".xz"])
-    for f in files:
-        tar_xz_to_whl(f)
+    files = [Path(arg) for arg in args] if args else get_files(cwd, ext=[".tar.xz", ".txz"])
+    if len(files) == 1:
+        process_file(files[0])
+        sys.exit(1)
+    mpf3(process_file, files)
 
 
 if __name__ == "__main__":

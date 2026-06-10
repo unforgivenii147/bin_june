@@ -5,7 +5,7 @@ from multiprocessing import get_context
 from pathlib import Path
 
 import tree_sitter_cpp as tscpp
-from dh import clean_blank_lines, get_files
+from dh import remove_blank_lines, get_files
 from tree_sitter import Language, Parser, Query, QueryCursor
 
 ts_remover = None
@@ -47,7 +47,7 @@ class TSCppRemover:
             print("Warning: Resulted code has syntax errors, returning original")
             return (source, 0)
         cleaned = new_source.decode("utf-8")
-        cleaned = clean_blank_lines(cleaned)
+        cleaned = remove_blank_lines(cleaned)
         return (cleaned, comment_count)
 
 
