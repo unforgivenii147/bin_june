@@ -11,8 +11,6 @@ from collections import namedtuple
 from pathlib import Path
 
 import blosc2
-
-
 import brotli
 import lz4.frame
 import py7zr

@@ -1,11 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/python
-import subprocess
-import re
-import sys
 import json
-from multiprocessing import Pool, cpu_count
-from functools import partial
+import re
+import subprocess
+import sys
 from datetime import datetime
+from functools import partial
+from multiprocessing import Pool, cpu_count
 
 
 def format_size(bytes_size):

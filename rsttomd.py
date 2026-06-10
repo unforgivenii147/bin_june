@@ -1,7 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from pathlib import Path
 import sys
+from pathlib import Path
+
 from dh import get_files, mpf3
 from markdownlify import markdownify
 

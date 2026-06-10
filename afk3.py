@@ -1,12 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/python
 import sys
-from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from copy import deepcopy
+from io import StringIO
 from itertools import chain
+from pathlib import Path
 from token import NAME
 from tokenize import generate_tokens
-from io import StringIO
 
 
 class ImportParseException(Exception):
@@ -168,9 +168,9 @@ def cleanup_imports(input_lines):
     return cleaned, removed
 
 
-def process_file(filepath):
+def process_file(path):
     path = Path(path)
-    with open(filepath, "r") as f:
+    with open(path, "r") as f:
         lines = f.readlines()
 
     import_lines = []
@@ -187,13 +187,13 @@ def process_file(filepath):
 
     cleaned_imports, removed = cleanup_imports(import_lines)
 
-    with open(filepath, "w") as f:
+    with open(path, "w") as f:
         f.writelines(cleaned_imports)
         if cleaned_imports and non_import_lines:
             f.write("\n")
         f.writelines(non_import_lines)
 
-    return filepath, removed
+    return path, removed
 
 
 def collect_py_files(directory):
@@ -209,9 +209,9 @@ def main():
 
     if target.is_file():
         if target.suffix == ".py" and target.name != "__init__.py":
-            filepath, removed = process_file(target)
+            path, removed = process_file(target)
             if removed:
-                print(f"\nFile: {filepath}")
+                print(f"\nFile: {path}")
                 print("Removed imports:")
                 for imp in sorted(removed):
                     print(f"  - {imp}")
@@ -227,9 +227,9 @@ def main():
         with ProcessPoolExecutor() as executor:
             futures = {executor.submit(process_file, file): file for file in py_files}
             for future in as_completed(futures):
-                filepath, removed = future.result()
+                path, removed = future.result()
                 if removed:
-                    print(f"\nFile: {filepath}")
+                    print(f"\nFile: {path}")
                     print("Removed imports:")
                     for imp in sorted(removed):
                         print(f"  - {imp}")

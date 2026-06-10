@@ -7,13 +7,13 @@ This is the most accurate method as it extracts the real distribution name and v
 
 import os
 import re
-import sys
-import zipfile
-import tempfile
 import shutil
-from pathlib import Path
+import sys
+import tempfile
+import zipfile
 from email.parser import HeaderParser
-from typing import Optional, Dict, Tuple
+from pathlib import Path
+from typing import Dict, Optional, Tuple
 
 
 def extract_metadata_from_wheel(wheel_path: Path) -> Optional[Dict[str, str]]:

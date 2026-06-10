@@ -3,7 +3,7 @@
 from pathlib import Path
 
 import tree_sitter_cpp as tscpp
-from dh import remove_blank_lines, cprint
+from dh import cprint, remove_blank_lines
 from tree_sitter import Language, Parser
 
 

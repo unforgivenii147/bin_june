@@ -1,9 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/python
 # create requirements.txt actually importz.txt
 import sys
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Callable
-from concurrent.futures import ProcessPoolExecutor, as_completed
 
 import tree_sitter_python as tsp
 from dh import STDLIB, cprint, get_installed_pkgs, get_pyfiles

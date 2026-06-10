@@ -6,15 +6,15 @@ Remove unused imports from Python files using AST analysis.
 Processes single file or directory recursively with multiprocessing.
 """
 
-import sys
 import ast
 import re
-from pathlib import Path
-from multiprocessing import Pool, cpu_count
-from typing import List, Dict, Tuple, Set, Optional
-from dataclasses import dataclass
-from concurrent.futures import ProcessPoolExecutor
+import sys
 from collections import defaultdict
+from concurrent.futures import ProcessPoolExecutor
+from dataclasses import dataclass
+from multiprocessing import Pool, cpu_count
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple
 
 
 @dataclass

@@ -13,7 +13,6 @@ import sys
 from pathlib import Path
 from typing import Final
 
-
 TERMUX_PYTHON: Final[str] = "#!/data/data/com.termux/files/usr/bin/python\n"
 TERMUX_BASH: Final[str] = "#!/data/data/com.termux/files/usr/bin/bash\n"
 EXECUTABLE_PERMISSIONS: Final[int] = 0o755

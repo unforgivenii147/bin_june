@@ -4,7 +4,7 @@ import ast
 import sys
 from pathlib import Path
 
-from dh import SOURCE_CODE_EXT, remove_blank_lines, cprint, fsz, get_nobinary, gsz, is_binary, mpf3
+from dh import SOURCE_CODE_EXT, cprint, fsz, get_nobinary, gsz, is_binary, mpf3, remove_blank_lines
 
 
 def process_file(path):

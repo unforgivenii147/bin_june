@@ -7,9 +7,9 @@ Usage: python rst_to_md.py file1.rst file2.rst ...
        python rst_to_md.py --recursive directory/
 """
 
+import argparse
 import os
 import sys
-import argparse
 from pathlib import Path
 
 try:

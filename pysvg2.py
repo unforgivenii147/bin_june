@@ -5,7 +5,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from dh import get_files, mpf3, runcmd, fsz, gsz
+from dh import fsz, get_files, gsz, mpf3, runcmd
 
 
 def process_file(path):

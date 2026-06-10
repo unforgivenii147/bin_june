@@ -6,16 +6,16 @@ Uses lib2to3 module directly without subprocess.
 Requires Python 3.12+
 """
 
+import argparse
+import logging
+import multiprocessing
 import os
 import sys
-import multiprocessing
-from pathlib import Path
-from typing import List, Tuple, Optional
 from concurrent.futures import ProcessPoolExecutor, as_completed
-import argparse
+from lib2to3.pytree import Leaf, Node
 from lib2to3.refactor import RefactoringTool, get_fixers_from_package
-from lib2to3.pytree import Node, Leaf
-import logging
+from pathlib import Path
+from typing import List, Optional, Tuple
 
 # Suppress lib2to3 logging unless verbose
 logging.getLogger("lib2to3").setLevel(logging.WARNING)

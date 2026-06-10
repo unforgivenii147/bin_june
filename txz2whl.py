@@ -5,7 +5,7 @@ import tarfile
 import zipfile
 from pathlib import Path
 
-from dh import get_files, unique_path, mpf3
+from dh import get_files, mpf3, unique_path
 
 
 def process_file(path: str | Path):

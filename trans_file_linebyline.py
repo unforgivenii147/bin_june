@@ -5,11 +5,12 @@ Translate non-English lines in a file line by line using deep_translator.
 The original file is updated in-place with translations shown alongside original lines.
 """
 
-import sys
 import os
-from deep_translator import GoogleTranslator
-from langdetect import detect, DetectorFactory
+import sys
 import tempfile
+
+from deep_translator import GoogleTranslator
+from langdetect import DetectorFactory, detect
 
 # Set seed for consistent language detection
 DetectorFactory.seed = 0

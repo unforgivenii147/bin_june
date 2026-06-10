@@ -11,7 +11,7 @@ import tempfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Tuple, List, Dict, Any, BinaryIO
+from typing import Any, BinaryIO, Dict, List, Optional, Tuple
 
 # Optional imports with fallbacks
 try:

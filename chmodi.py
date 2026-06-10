@@ -13,7 +13,6 @@ import stat
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 
-
 DIR_PERM = 0o755
 FILE_PERM = 0o644
 

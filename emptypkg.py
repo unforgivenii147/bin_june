@@ -3,8 +3,8 @@
 import csv
 import os
 import sysconfig
-import zipfile
 import tempfile
+import zipfile
 from pathlib import Path
 
 

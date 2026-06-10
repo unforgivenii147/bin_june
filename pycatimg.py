@@ -5,14 +5,15 @@ catimg - Display images in terminal with true color support (including SVG)
 """
 
 import argparse
-import sys
+import io
 import os
-from PIL import Image
+import sys
+
 import numpy as np
 
 # Try to import SVG support
 from cairosvg import svg2png
-import io
+from PIL import Image
 
 SVG_SUPPORT = True
 

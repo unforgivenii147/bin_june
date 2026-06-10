@@ -6,16 +6,16 @@ Bidirectional converter between wheel files (.whl) and tar.xz archives.
 - Auto-detects file type and performs appropriate conversion
 """
 
-import sys
-import tarfile
-import zipfile
-from pathlib import Path
-from datetime import datetime
-from typing import List, Optional, Tuple
 import argparse
 import logging
-from concurrent.futures import ProcessPoolExecutor, as_completed
+import sys
+import tarfile
 import traceback
+import zipfile
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from datetime import datetime
+from pathlib import Path
+from typing import List, Optional, Tuple
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S")

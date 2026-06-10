@@ -1,8 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+import argparse
 import mmap
 import sys
-import argparse
 from pathlib import Path
 
 from binaryornot import is_binary

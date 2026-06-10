@@ -7,8 +7,8 @@ Numbers and special chars go into '0-9/' folder.
 """
 
 import shutil
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
 
 
 def get_target_folder_name(filename: str) -> str:

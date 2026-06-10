@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 import tree_sitter_python as tspython
-from dh import remove_blank_lines, get_pyfiles, mpf
+from dh import get_pyfiles, mpf, remove_blank_lines
 from tree_sitter import Language, Parser, Query, QueryCursor
 
 QUERY_STRING = "\n(comment) @comment\n(block\n  . (expression_statement\n    (string)) @docstring)\n(module\n  . (expression_statement\n    (string)) @docstring)\n"

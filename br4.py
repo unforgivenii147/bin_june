@@ -14,13 +14,13 @@ Usage:
 
 import argparse
 import os
+import shutil
 import sys
-import time
 import tarfile
 import tempfile
-import shutil
-from pathlib import Path
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
 
 import brotlicffi
 

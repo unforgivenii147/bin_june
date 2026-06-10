@@ -1,13 +1,13 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-import sys
-import time
-import threading
 import os
+import sys
+import threading
+import time
 from pathlib import Path
 
-from github import Github, GithubException, Auth
 from dotenv import load_dotenv
+from github import Auth, Github, GithubException
 
 
 def countdown(timeout: int) -> None:

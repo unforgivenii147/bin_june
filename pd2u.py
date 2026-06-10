@@ -3,10 +3,9 @@
 
 from __future__ import annotations
 
+import sys
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-import sys
-
 
 CHUNK_SIZE = 65536
 

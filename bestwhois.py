@@ -4,12 +4,13 @@
 (c) WhoisXML API Inc. 2019.
 """
 
-import sys
-import os.path
 import datetime
-from argparse import ArgumentParser
-import requests
 import json
+import os.path
+import sys
+from argparse import ArgumentParser
+
+import requests
 
 IDN = True
 try:
@@ -17,9 +18,8 @@ try:
 except:
     IDN = False
 from pygments import highlight
-from pygments.lexers import JsonLexer
 from pygments.formatters import TerminalFormatter
-
+from pygments.lexers import JsonLexer
 
 # Static config
 VERSION = "0.1.0"

@@ -5,7 +5,7 @@ from multiprocessing import get_context
 from pathlib import Path
 
 import tree_sitter_cpp as tscpp
-from dh import remove_blank_lines, get_files
+from dh import get_files, remove_blank_lines
 from tree_sitter import Language, Parser, Query, QueryCursor
 
 ts_remover = None

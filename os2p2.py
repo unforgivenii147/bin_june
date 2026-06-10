@@ -6,10 +6,10 @@ Warning: This approach is simpler but less safe than AST-based refactoring.
 
 import re
 import sys
-from pathlib import Path
-from typing import Dict, Callable, Tuple, Optional, List, Set
 from dataclasses import dataclass
 from enum import Enum
+from pathlib import Path
+from typing import Callable, Dict, List, Optional, Set, Tuple
 
 from dh import cprint, get_pyfiles
 

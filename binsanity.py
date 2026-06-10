@@ -6,13 +6,14 @@ Uses concurrent.futures for parallel processing
 Outputs results to ~/tmp/err
 """
 
+import concurrent.futures
 import os
 import subprocess
-import concurrent.futures
 from pathlib import Path
-from typing import List, Tuple, Optional
-from dh import get_filez
+from typing import List, Optional, Tuple
+
 from binaryornot import is_binary
+from dh import get_filez
 
 
 def is_executable(filepath: str) -> bool:

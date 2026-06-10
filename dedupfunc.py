@@ -6,13 +6,13 @@ Detects functions with identical bodies (ignoring whitespace and comments)
 and optionally removes duplicates with user confirmation.
 """
 
-import ast
 import argparse
-import sys
+import ast
 import re
-from pathlib import Path
+import sys
 from collections import defaultdict
-from typing import Dict, List, Tuple, Set
+from pathlib import Path
+from typing import Dict, List, Set, Tuple
 
 
 class FunctionInfo:

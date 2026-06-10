@@ -6,12 +6,13 @@ Removes unnecessary docstrings and string literals from Python files
 while preserving module docstrings and shebangs.
 """
 
-import astor
 import ast
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Final
+
+import astor
 from dh import cprint, fsz, get_pyfiles, gsz, mpf3
 
 SINGLE_QUOTE: Final[str] = "'"

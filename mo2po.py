@@ -4,10 +4,10 @@ Convert .mo files to .po files in-place using GNU gettext utilities.
 Original .mo files are removed only if conversion succeeds.
 """
 
-import os
-import sys
 import argparse
+import os
 import subprocess
+import sys
 from pathlib import Path
 
 

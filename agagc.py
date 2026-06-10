@@ -4,16 +4,16 @@ Initializes a new repository if not already inside one.
 Automatically pushes to remote if configured.
 """
 
-import sys
-import os
 import argparse
-from pathlib import Path
-from datetime import datetime
-from dotenv import load_dotenv
-import requests
+import os
 import re
+import sys
+from datetime import datetime
+from pathlib import Path
 
-from git import Repo, InvalidGitRepositoryError
+import requests
+from dotenv import load_dotenv
+from git import InvalidGitRepositoryError, Repo
 
 
 def parse_arguments():
@@ -27,74 +27,28 @@ def parse_arguments():
 
 
 def load_git_token() -> str | None:
-    """Load GitHub token from .env file in the script's directory."""
-    # Get the directory where this script is located
-    home_dir = Path.home()
-    env_path = home_dir / ".env"
+    env_path = Path.home() / ".env"
 
-    # Also check home directory
-    home_env = Path.home() / ".env"
-
-    env_file = None
     if env_path.exists():
-        env_file = env_path
-    elif home_env.exists():
-        env_file = home_env
-
-    if env_file:
-        load_dotenv(env_file)
-        print(f"Loaded environment from {env_file}")
+        load_dotenv(env_path)
     else:
-        print(f"No .env file found")
         return None
-
-    # Try different possible environment variable names
     token = os.getenv("GITHUB_TOKEN") or os.getenv("GH_TOKEN") or os.getenv("GIT_TOKEN")
-
-    if token:
-        print("GitHub token found")
-        # Mask token for security in output
-        masked_token = token[:4] + "..." + token[-4:] if len(token) > 8 else "***"
-        print(f"Using token: {masked_token}")
-    else:
-        print("No GitHub token found in .env file")
-
     return token
 
 
-def create_github_repo(token: str, repo_name: str, description: str = "", private: bool = False) -> str:
-    """Create a new repository on GitHub."""
+def create_github_repo(repo_name, description="", private=False):
+    token = load_git_token()
     headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
-
-    data = {
-        "name": repo_name,
-        "description": description or f"Created automatically on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
-        "private": private,
-        "auto_init": False,  # Don't auto_init to avoid conflicts with existing files
-    }
-
+    data = {"name": repo_name, "description": description, "private": private, "auto_init": True}
     response = requests.post("https://api.github.com/user/repos", json=data, headers=headers)
-
     if response.status_code == 201:
-        repo_url = response.json()["html_url"]
-        clone_url = response.json()["clone_url"]
-        print(f"✅ Repository created: {repo_url}")
-        return clone_url
-    elif response.status_code == 422:
-        # Repository already exists
-        print(f"ℹ️ Repository '{repo_name}' already exists on GitHub")
-        # Try to get the clone URL for existing repo
-        username = get_github_username(token)
-        if username:
-            return f"https://github.com/{username}/{repo_name}.git"
-        raise Exception("Repository already exists and couldn't determine URL")
+        return response.json()["html_url"]
     else:
-        error_msg = response.json().get("message", "Unknown error")
-        raise Exception(f"GitHub API error ({response.status_code}): {error_msg}")
+        raise Exception(f"GitHub API error: {response.json().get('message')}")
 
 
 def get_github_username(token: str) -> str | None:
-    """Get GitHub username using the token."""
     try:
         headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
         response = requests.get("https://api.github.com/user", headers=headers)
@@ -109,26 +63,18 @@ def get_github_username(token: str) -> str | None:
 
 
 def get_current_dir_name() -> str:
-    """Get current directory name, cleaning it for use as repo name."""
     dir_name = Path.cwd().name
-    # Remove invalid characters for GitHub repo names
     dir_name = re.sub(r"[^\w\-\.]", "-", dir_name)
-    # Convert to lowercase (GitHub convention)
     return dir_name.lower()
 
 
 def clean_remote_config(repo: Repo):
-    """Remove invalid remote configurations."""
     try:
         for remote in repo.remotes:
-            # Skip if remote has no URLs or invalid URL
             try:
                 urls = list(remote.urls)
                 if not urls:
                     print(f"⚠️ Remote '{remote.name}' has no URLs, removing...")
-                    repo.delete_remote(remote)
-                elif "set-url" in remote.name or remote.name == "set-url":
-                    print(f"⚠️ Removing invalid remote '{remote.name}'...")
                     repo.delete_remote(remote)
             except Exception:
                 print(f"⚠️ Removing problematic remote '{remote.name}'...")
@@ -138,12 +84,9 @@ def clean_remote_config(repo: Repo):
 
 
 def setup_remote_repo(repo: Repo, token: str, remote_name: str, create_if_missing: bool) -> bool:
-    """Setup remote repository, optionally creating it on GitHub."""
 
-    # Clean any invalid remotes first
     clean_remote_config(repo)
 
-    # Check if the desired remote already exists and has valid URL
     existing_remote = None
     try:
         if remote_name in [r.name for r in repo.remotes]:
@@ -160,29 +103,17 @@ def setup_remote_repo(repo: Repo, token: str, remote_name: str, create_if_missin
     except Exception:
         pass
 
-    # Get the repository name from current directory
     repo_name = get_current_dir_name()
-    print(f"📁 Using directory name as repo name: {repo_name}")
 
     if not create_if_missing:
-        print("\n⚠️ No remote repository configured.")
-        print(f"Tip: Use --create flag to automatically create a GitHub repository")
-        print(f"   Example: python {sys.argv[0]} --create")
-        print(f"   Or manually add a remote: git remote add {remote_name} <your-repo-url>")
         return False
 
-    # Create repository on GitHub
-    print(f"\n🚀 Creating GitHub repository: {repo_name}")
-
-    # Ask if user wants private or public repo
-    private_input = input("Create as private repository? (y/n) [n]: ").lower()
-    is_private = private_input == "y"
+    is_private = False
 
     try:
-        # Optional: Ask for description
-        description = input("Repository description (optional, press Enter to skip): ").strip()
+        description = "Repository description"
 
-        clone_url = create_github_repo(token, repo_name, description, is_private)
+        clone_url = create_github_repo(repo_name, description, is_private)
         print(f"Adding remote '{remote_name}': {clone_url}")
         repo.create_remote(remote_name, clone_url)
         return True
@@ -218,7 +149,7 @@ def setup_git_auth(repo: Repo, token: str = None) -> None:
         print(f"Could not update remote URL: {e}")
 
 
-def push_to_remote(repo: Repo, remote_name: str, token: str = None) -> None:
+def push_to_remote(repo: Repo, remote_name: str, token: str = load_git_token()) -> None:
     """Push to remote repository using token if provided."""
     try:
         # Check if remote exists
@@ -293,11 +224,6 @@ def main() -> None:
     # Load token from script directory
     token = load_git_token()
 
-    if args.create and not token:
-        print("❌ Cannot create repository: No GitHub token found.", file=sys.stderr)
-        print("Please set GITHUB_TOKEN in ~/bin/.env or ~/.env", file=sys.stderr)
-        sys.exit(1)
-
     cwd = Path.cwd()
     repo = None
 
@@ -305,7 +231,6 @@ def main() -> None:
         repo = Repo(cwd, search_parent_directories=True)
         print(f"Found existing git repository at {repo.git_dir}")
 
-        # Clean any invalid remote configurations
         clean_remote_config(repo)
 
     except InvalidGitRepositoryError:

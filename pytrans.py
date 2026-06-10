@@ -1,15 +1,16 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 import sys
-import time
 import threading
+import time
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import TimeoutError as FuturesTimeoutError
 from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 
-from deep_translator import GoogleTranslator
-from tqdm import tqdm
 import langdetect
+from deep_translator import GoogleTranslator
 from langdetect import DetectorFactory
+from tqdm import tqdm
 
 # Set seed for consistent language detection
 DetectorFactory.seed = 0

@@ -11,10 +11,10 @@ import shutil
 import tarfile
 import tempfile
 import zipfile
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Tuple, Callable, Dict, Optional
-from concurrent.futures import ThreadPoolExecutor
+from typing import Callable, Dict, Optional, Tuple
 
 import brotlicffi as brotli
 import py7zr

@@ -3,7 +3,7 @@
 import os
 from pathlib import Path
 
-from dh import runcmd, get_files, mpf3
+from dh import get_files, mpf3, runcmd
 
 
 def process_file(fp):

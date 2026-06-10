@@ -4,12 +4,13 @@
 Script to detect and keep only the latest version of wheel or deb files in current directory recursively.
 """
 
-import re
 import argparse
-from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor, as_completed
+import re
 from collections import defaultdict
-from typing import Dict, List, Tuple, Optional
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+
 from packaging import version as pkg_version
 
 

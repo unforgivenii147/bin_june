@@ -1,7 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/python
-from git import Repo
-from datetime import datetime
 import os
+from datetime import datetime
+
+from git import Repo
 
 
 def git_commit_all():
