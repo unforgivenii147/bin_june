@@ -120,8 +120,8 @@ def extract_and_search_archive(archive_path, search_string, search_content):
 
 
 def process_file(path: Path, search_string, search_content):
-    if path.name.endswith(ARCHIVE_EXTENSIONS):
     path = Path(path)
+    if path.name.endswith(ARCHIVE_EXTENSIONS):
         results = extract_and_search_archive(path, search_string, search_content)
     else:
         results = search_in_file(path, search_string, search_content)

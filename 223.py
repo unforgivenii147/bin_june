@@ -59,11 +59,11 @@ fixes = [
 ]
 
 
-def process_file(fp):
-    for fix in fixes:
+def process_file(path):
     path = Path(path)
+    for fix in fixes:
         target_fix = f"--fix={fix}"
-        cmd = ["2to3-2.7", "-w", target_fix, str(fp)]
+        cmd = ["2to3-2.7", "-w", target_fix, str(path)]
         runcmd(cmd, show_output=True)
 
 

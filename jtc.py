@@ -8,8 +8,8 @@ from fastwalk import walk_files
 
 
 def process_file(path) -> bool:
-    try:
     path = Path(path)
+    try:
         cmd = f"just-the-code -s --language=python {path!s}"
         ret, new_code, _stderr = run_command(cmd)
         if ret == 0:

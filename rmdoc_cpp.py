@@ -27,8 +27,8 @@ class RegexCommentRemover:
 
 
 def process_file(file_path, remover):
-    try:
     path = Path(path)
+    try:
         code = Path(file_path).read_text(encoding="utf-8", errors="ignore")
     except Exception as e:
         print(f"[ERROR] {file_path.name} read: {e}")

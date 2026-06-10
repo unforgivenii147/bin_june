@@ -8,14 +8,14 @@ from fastwalk import walk_files
 shebang = "#!/data/data/com.termux/files/usr/bin/python\n"
 
 
-def process_file(fp, module_name):
-    if not fp.exists() or fp.is_symlink():
+def process_file(path, module_name):
     path = Path(path)
+    if not path.exists() or path.is_symlink():
         return
-    print(f"processing {fp}")
+    print(f"processing {path}")
     data = []
     newdata = []
-    with Path(fp).open(encoding="utf-8") as fin:
+    with Path(path).open(encoding="utf-8") as fin:
         data = fin.readlines()
     if data[0].startswith("#!"):
         newdata.extend((data[0], f"import {module_name}"))
@@ -25,7 +25,7 @@ def process_file(fp, module_name):
         newdata.extend((shebang, "import regex as re\nimport os\n"))
         for k in data:
             newdata.append(k)
-    with Path(fp).open("w", encoding="utf-8") as fo:
+    with Path(path).open("w", encoding="utf-8") as fo:
         fo.writelines(newdata)
     return
 

@@ -89,8 +89,8 @@ def remove_blank_lines(content: str) -> str:
 
 
 def process_file(file_path: Path) -> None:
-    try:
     path = Path(path)
+    try:
         original = file_path.read_text(encoding="utf-8")
         try:
             modified, removed = rm_ast(original)

@@ -8,8 +8,8 @@ from PyPDF2 import PdfReader
 
 
 def process_file(pdf_path: Path):
-    if not pdf_path.is_file() or pdf_path.suffix.lower() != ".pdf":
     path = Path(path)
+    if not pdf_path.is_file() or pdf_path.suffix.lower() != ".pdf":
         print(f"Error: Invalid PDF file path provided: {pdf_path}")
         return
     pdf_filename_base = pdf_path.stem

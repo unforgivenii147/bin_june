@@ -8,8 +8,8 @@ from dh import get_files, mpf
 
 
 def process_file(path):
-    ansi_tmux_re = re.compile(
     path = Path(path)
+    ansi_tmux_re = re.compile(
         b"\\x1B(?:[@-Z\\\\-_]|\\[[0-?]*[ -/]*[@-~])|\\x08|\\x0C|\\x0F|\\x18|\\x1C|\\(\\d+[a-z]\\(B|\\(0[Bqtxl]\\(B"
     )
     status_re = re.compile(

@@ -7,8 +7,8 @@ from dh import get_files
 
 
 def process_file(fp) -> None:
-    if fp.is_symlink():
     path = Path(path)
+    if fp.is_symlink():
         return
     content = fp.read_text()
     lines = content.splitlines()

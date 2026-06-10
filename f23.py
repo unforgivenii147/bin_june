@@ -61,8 +61,8 @@ error_files = []
 
 
 def process_file(path: Path, force=False, apply_all=False) -> None:
-    try:
     path = Path(path)
+    try:
         original = path.read_text(encoding="utf-8")
         if apply_all:
             fixed, changed = apply_all_fixes(original)

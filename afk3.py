@@ -169,8 +169,8 @@ def cleanup_imports(input_lines):
 
 
 def process_file(filepath):
-    with open(filepath, "r") as f:
     path = Path(path)
+    with open(filepath, "r") as f:
         lines = f.readlines()
 
     import_lines = []

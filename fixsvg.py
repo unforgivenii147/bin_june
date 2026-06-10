@@ -6,8 +6,8 @@ from fastwalk import walk_files
 
 
 def process_file(fp: Path):
-    if not fp.exists():
     path = Path(path)
+    if not fp.exists():
         return False
     print(f"processing  ... {fp.name}")
     last_tag_pos = -1

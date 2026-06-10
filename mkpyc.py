@@ -12,8 +12,8 @@ MAX_QUEUE = 16
 
 
 def process_file(fp):
-    if not fp.exists():
     path = Path(path)
+    if not fp.exists():
         return False
     if ".git" in fp.parts:
         return None

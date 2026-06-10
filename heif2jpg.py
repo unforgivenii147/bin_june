@@ -8,8 +8,8 @@ from fastwalk import walk_files
 
 
 def process_file(fp):
-    if not fp.exists():
     path = Path(path)
+    if not fp.exists():
         return False
     print(f"[OK] {fp.name}")
     img = ph.open_heif(fp)

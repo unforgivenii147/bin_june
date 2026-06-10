@@ -7,8 +7,8 @@ from dh import mpf3, runcmd
 
 
 def process_file(fp):
-    if not fp.exists():
     path = Path(path)
+    if not fp.exists():
         return (False, fp)
     ret = runcmd(["prettier", "-w", str(fp).replace("/storage/emulated/0", "/sdcard")], show_output=True)
     if not ret:
