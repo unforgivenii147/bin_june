@@ -23,13 +23,14 @@ def save_script(str1):
     return True
 
 
-def process_file(fp):
-    html_content = fp.read_text(encoding="utf-8")
+def process_file(path):
+    path = Path(path)
+    html_content = path.read_text(encoding="utf-8")
     path = Path(path)
     soup = BeautifulSoup(html_content, "html.parser")
     scripts = soup.find_all("script")
     if scripts:
-        cprint(f"{[fp.name]} : {len(scripts)} scripts found.", "magenta")
+        cprint(f"{[path.name]} : {len(scripts)} scripts found.", "magenta")
         for script in scripts:
             save_script(script.contents)
     return True

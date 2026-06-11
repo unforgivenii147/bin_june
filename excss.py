@@ -22,13 +22,14 @@ def save_style(str1):
     return
 
 
-def process_file(fp):
-    html_content = fp.read_text(encoding="utf-8")
+def process_file(path):
+    path = Path(path)
+    html_content = path.read_text(encoding="utf-8")
     path = Path(path)
     soup = BeautifulSoup(html_content, "html.parser")
     styles = soup.find_all("style")
     if styles:
-        cprint(f"{[fp.name]} : {len(styles)} styles found.", "green")
+        cprint(f"{[path.name]} : {len(styles)} styles found.", "green")
         for style in styles:
             save_style(style.contents)
     return True

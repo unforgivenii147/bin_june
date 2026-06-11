@@ -37,7 +37,7 @@ def load_git_token() -> str | None:
     return token
 
 
-def create_github_repo(repo_name, description="", private=False):
+def create_github_repo(repo_name, description="new git repo", private=False):
     token = load_git_token()
     headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
     data = {"name": repo_name, "description": description, "private": private, "auto_init": True}
@@ -68,24 +68,7 @@ def get_current_dir_name() -> str:
     return dir_name.lower()
 
 
-def clean_remote_config(repo: Repo):
-    try:
-        for remote in repo.remotes:
-            try:
-                urls = list(remote.urls)
-                if not urls:
-                    print(f"⚠️ Remote '{remote.name}' has no URLs, removing...")
-                    repo.delete_remote(remote)
-            except Exception:
-                print(f"⚠️ Removing problematic remote '{remote.name}'...")
-                repo.delete_remote(remote)
-    except Exception as e:
-        print(f"Note: Could not clean remotes: {e}")
-
-
 def setup_remote_repo(repo: Repo, token: str, remote_name: str, create_if_missing: bool) -> bool:
-
-    clean_remote_config(repo)
 
     existing_remote = None
     try:
@@ -230,8 +213,6 @@ def main() -> None:
     try:
         repo = Repo(cwd, search_parent_directories=True)
         print(f"Found existing git repository at {repo.git_dir}")
-
-        clean_remote_config(repo)
 
     except InvalidGitRepositoryError:
         repo = Repo.init(cwd)
