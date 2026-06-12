@@ -53,8 +53,6 @@ class Calculator(Static):
             yield Button(".", id="decimal")
             yield Button("0", id="zero")
             yield Button("", disabled=True)
-            yield Button("", disabled=True)
-            yield Button("", disabled=True)
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button presses."""

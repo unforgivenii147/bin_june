@@ -13,7 +13,6 @@ MAX_CHARS = 5000
 
 def process_file(path):
     path = Path(path)
-    path = Path(path)
     try:
         with Path(path).open(encoding="utf-8", errors="ignore") as f:
             text = f.read(MAX_CHARS).strip()

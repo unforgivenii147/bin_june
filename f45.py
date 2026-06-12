@@ -3,9 +3,14 @@
 import sys
 from pathlib import Path
 
+inplace = "-i" in sys.argv
+
 
 def fold_file(path, width=35):
-    new_path = path.with_name(path.stem + "_folded" + path.suffix)
+    if inplace:
+        new_path = path
+    else:
+        new_path = path.with_name(path.stem + "_folded" + path.suffix)
     content = path.read_text(encoding="utf-8", errors="ignore")
     lines = content.splitlines()
     folded_lines = []

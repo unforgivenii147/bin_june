@@ -15,7 +15,7 @@ from io import BytesIO
 from pathlib import Path
 
 import zstandard as zstd
-from dh import MAX_WORKERS, fsz, gsz
+from dh import MAX_WORKERS, fsz, gsz, xtar
 from joblib import Parallel, delayed
 
 ZST_EXT = ".zst"
@@ -80,22 +80,29 @@ def decompress_file(path: Path) -> dict:
         return {"status": "skip", "path": str(path)}
 
     # remove .zst suffix
-    dst = path.with_suffix("")  # e.g. foo.tar.zst → foo.tar
-    if dst.exists():
-        return {"status": "skip", "path": str(path)}
+    if path.name.endswith(".tar.zst"):
+        if dst.exists():
+            return {"status": "skip", "path": str(path)}
 
-    try:
         if path.stat().st_size == 0:
             return {"status": "skip", "path": str(path)}
 
-        compressed = path.read_bytes()
-        dctx = zstd.ZstdDecompressor()
-        with dctx.stream_reader(BytesIO(compressed)) as reader:
-            decompressed = reader.read()
+        if xtar(path):
+            path.unlink()
+            return {
+                "status": "ok",
+                "path": str(path),
+                "extracted": True,
+                "original": gsz(path),
+                "decompressed": gsz(Path(path.stem)),
+            }
+        #        compressed = path.read_bytes()
+        #        dctx = zstd.ZstdDecompressor()
+        #        with dctx.stream_reader(BytesIO(compressed)) as reader:
+        #            decompressed = reader.read()
 
-        dst.write_bytes(decompressed)
+        #        dst.write_bytes(decompressed)
 
-        # If tarball, extract and clean up
         if dst.suffix == ".tar":
             try:
                 with tarfile.open(dst, "r") as tar:
@@ -121,9 +128,6 @@ def decompress_file(path: Path) -> dict:
             "original": len(compressed),
             "decompressed": len(decompressed),
         }
-    except Exception as e:
-        dst.unlink(missing_ok=True)
-        return {"status": "error", "path": str(path), "error": str(e)}
 
 
 def compress_dir(path: Path, level: int) -> dict:
@@ -159,6 +163,8 @@ def scan(path: Path, compress: bool = True) -> tuple[list[Path], list[Path]]:
     """List directories and files to process, sorted for consistency."""
     dirs = []
     files = []
+    if not compress:
+        return [], [p for p in path.rglob("*.zst") if p.exists()]
     for entry in sorted(path.iterdir()):
         try:
             if entry.is_dir():

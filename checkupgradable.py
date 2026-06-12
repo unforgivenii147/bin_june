@@ -4,15 +4,16 @@ Script to check for updatable packages in system site-packages directory.
 Features: JSON output, resumable jobs, multiprocessing for speed, separate upgradable packages.
 """
 
-import os
-import sys
-import json
-import pkg_resources
-import subprocess
-from pathlib import Path
-from multiprocessing import Pool, cpu_count
-from typing import Dict, Tuple, Optional, Set
 import functools
+import json
+import os
+import subprocess
+import sys
+from multiprocessing import Pool, cpu_count
+from pathlib import Path
+from typing import Dict, Optional, Set, Tuple
+
+import pkg_resources
 
 # Configuration
 OUTPUT_FILE = "/sdcard/s4u.json"

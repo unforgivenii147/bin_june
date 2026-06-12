@@ -15,7 +15,10 @@ import os
 import re
 from pathlib import Path
 
-DATA_URI_PATTERN = re.compile("data:(?P<mime>[^;,]*)(?P<params>(?:;[^;,]+=[^;,]+)*);base64,(?P<data>[A-Za-z0-9+/=]+)")
+# DATA_URI_PATTERN = re.compile(r"data:(?P<mime>[^;,]*)(?P<params>(?:;[^;,]+=[^;,]+)*);base64,(?P<data>[A-Za-z0-9+/=]+)")
+DATA_URI_PATTERN = re.compile(
+    r"data:(?P<mime>[^;,]*)(?P<params>(?:;[^;,]+=[^;,]+)*?);base64,\s*(?P<data>[A-Za-z0-9+/=]+)"
+)
 
 
 def get_extension(mime: str) -> str:

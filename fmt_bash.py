@@ -19,7 +19,6 @@ def has_shell_shebang(path):
 
 def process_file(path):
     path = Path(path)
-    path = Path(path)
     print(f"Formatting:  {path.name}")
     try:
         res, _, _ = runcmd(["shfmt", "-w", str(path)], show_output=True)

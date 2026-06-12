@@ -5,7 +5,6 @@ from pathlib import Path
 
 def process_file(path):
     path = Path(path)
-    path = Path(path)
     content = path.read_text(encoding="utf-8")
     lines = content.splitlines()
     for line in lines:

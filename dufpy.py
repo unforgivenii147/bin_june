@@ -9,7 +9,6 @@ from xxhash import xxh64_hexdigest
 
 def process_file(path):
     path = Path(path)
-    path = Path(path)
     return (xxh64_hexdigest(ast.unparse(ast.parse(path.read_text(encoding="utf-8")))), path)
 
 

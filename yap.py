@@ -12,7 +12,6 @@ MODE = "black"
 def process_file(path: str | Path, mode: str = MODE) -> bool:
     stime = pff()
     path = Path(path)
-    path = Path(path)
     before: int = path.stat().st_size
     after: int = before
     try:

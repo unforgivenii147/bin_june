@@ -114,15 +114,15 @@ class ImportAnalyzer(ast.NodeVisitor):
 
 
 class ImportRemover:
-    def __init__(self, file_path: Path):
-        self.file_path = file_path
+    def __init__(self, path: Path):
+        self.path = path
         self.removed_imports = []
 
     def analyze(self) -> List[ImportInfo]:
         try:
-            with open(self.file_path, "r", encoding="utf-8") as f:
+            with open(self.path, "r", encoding="utf-8") as f:
                 content = f.read()
-            tree = ast.parse(content, filename=str(self.file_path))
+            tree = ast.parse(content, filename=str(self.path))
             analyzer = ImportAnalyzer()
             analyzer.visit(tree)
             unused_imports = []
@@ -134,17 +134,17 @@ class ImportRemover:
                     unused_imports.append(imp)
             return unused_imports
         except SyntaxError as e:
-            print(f"Syntax error in {self.file_path}: {e}", file=sys.stderr)
+            print(f"Syntax error in {self.path}: {e}", file=sys.stderr)
             return []
         except Exception as e:
-            print(f"Error analyzing {self.file_path}: {e}", file=sys.stderr)
+            print(f"Error analyzing {self.path}: {e}", file=sys.stderr)
             return []
 
     def remove_unused_imports(self, unused_imports: List[ImportInfo]) -> List[str]:
         if not unused_imports:
             return []
         try:
-            with open(self.file_path, "r", encoding="utf-8") as f:
+            with open(self.path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
             lines_to_remove = sorted(set([imp.line for imp in unused_imports]), reverse=True)
             removed_imports = []
@@ -157,19 +157,19 @@ class ImportRemover:
                             import_name = imp.alias if imp.alias else imp.name
                             removed_imports.append(f"{import_name} (line {line_num})")
             if removed_imports:
-                with open(self.file_path, "w", encoding="utf-8") as f:
+                with open(self.path, "w", encoding="utf-8") as f:
                     f.writelines(lines)
             return removed_imports
         except Exception as e:
-            print(f"Error removing imports from {self.file_path}: {e}", file=sys.stderr)
+            print(f"Error removing imports from {self.path}: {e}", file=sys.stderr)
             return []
 
     def process(self) -> Tuple[Path, List[str]]:
         unused_imports = self.analyze()
         if unused_imports:
             removed = self.remove_unused_imports(unused_imports)
-            return (self.file_path, removed)
-        return (self.file_path, [])
+            return (self.path, removed)
+        return (self.path, [])
 
 
 def find_python_files(root_path: Path) -> List[Path]:
@@ -178,26 +178,26 @@ def find_python_files(root_path: Path) -> List[Path]:
         if root_path.suffix == ".py":
             python_files.append(root_path)
     else:
-        for file_path in root_path.rglob("*.py"):
+        for path in root_path.rglob("*.py"):
             if any(
                 (
                     part.startswith(".") or part in ["__pycache__", "venv", "env", ".venv", "node_modules"]
-                    for part in file_path.parts
+                    for part in path.parts
                 )
             ):
                 continue
-            python_files.append(file_path)
+            python_files.append(path)
     return python_files
 
 
-def process_file(file_path: Path) -> Tuple[Path, List[str]]:
+def process_file(path: Path) -> Tuple[Path, List[str]]:
     path = Path(path)
     try:
-        remover = ImportRemover(file_path)
+        remover = ImportRemover(path)
         return remover.process()
     except Exception as e:
-        print(f"Failed to process {file_path}: {e}", file=sys.stderr)
-        return (file_path, [])
+        print(f"Failed to process {path}: {e}", file=sys.stderr)
+        return (path, [])
 
 
 def print_summary(results: Dict[Path, List[str]], total_files: int, total_imports_removed: int):
@@ -209,9 +209,9 @@ def print_summary(results: Dict[Path, List[str]], total_files: int, total_import
     print(f"Total unused imports removed: {total_imports_removed}")
     if results:
         print("\nModified files:")
-        for file_path, removed in results.items():
+        for path, removed in results.items():
             if removed:
-                print(f"\n  📄 {file_path}")
+                print(f"\n  📄 {path}")
                 for imp in removed:
                     print(f"     ✗ {imp}")
     print("\n" + "=" * 60)
@@ -237,22 +237,22 @@ def main():
     results = {}
     total_imports_removed = 0
     with ProcessPoolExecutor(max_workers=num_workers) as executor:
-        future_to_file = {executor.submit(process_file, file_path): file_path for file_path in python_files}
+        future_to_file = {executor.submit(process_file, path): path for path in python_files}
         from concurrent.futures import as_completed
 
         for i, future in enumerate(as_completed(future_to_file), 1):
-            file_path = future_to_file[future]
+            path = future_to_file[future]
             try:
-                file_path_result, removed_imports = future.result()
-                results[file_path_result] = removed_imports
+                path_result, removed_imports = future.result()
+                results[path_result] = removed_imports
                 total_imports_removed += len(removed_imports)
                 if removed_imports:
-                    print(f"[{i}/{len(python_files)}] ✓ {file_path_result} - Removed {len(removed_imports)} imports")
+                    print(f"[{i}/{len(python_files)}] ✓ {path_result} - Removed {len(removed_imports)} imports")
                 else:
-                    print(f"[{i}/{len(python_files)}] ○ {file_path_result} - No unused imports")
+                    print(f"[{i}/{len(python_files)}] ○ {path_result} - No unused imports")
             except Exception as e:
-                print(f"[{i}/{len(python_files)}] ✗ Failed to process {file_path}: {e}", file=sys.stderr)
-                results[file_path] = []
+                print(f"[{i}/{len(python_files)}] ✗ Failed to process {path}: {e}", file=sys.stderr)
+                results[path] = []
     print_summary(results, len(python_files), total_imports_removed)
 
 

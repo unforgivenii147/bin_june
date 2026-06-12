@@ -6,11 +6,16 @@ from pathlib import Path
 import trafilatura
 from dh import get_files, mpf3
 
+remove_orig = True
 
-def process_file(html_file: Path):
+
+def process_file(path: str | Path):
     path = Path(path)
+    md_file = path.with_suffix(".md")
+    if md_file.exists():
+        retutn(md_file, True)
     try:
-        html_content = html_file.read_text(encoding="utf-8")
+        html_content = path.read_text(encoding="utf-8")
         markdown = trafilatura.extract(
             html_content,
             output_format="markdown",
@@ -20,15 +25,16 @@ def process_file(html_file: Path):
             no_fallback=False,
         )
         if markdown:
-            md_file = html_file.with_suffix(".md")
             md_file.write_text(markdown, encoding="utf-8")
-            print(f"✓ Converted: {html_file.name} -> {md_file.name}")
+            print(f"✓ Converted: {path.name} -> {md_file.name}")
+            if remove_orig:
+                path.unlink()
             return (md_file, True)
-        print(f"✗ No content extracted from {html_file.name}")
-        return (html_file, False)
+        print(f"✗ No content extracted from {path.name}")
+        return (path, False)
     except Exception as e:
         print(f"✗ Error: {e}")
-        return (html_file, False)
+        return (path, False)
 
 
 if __name__ == "__main__":

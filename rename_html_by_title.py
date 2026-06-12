@@ -121,7 +121,6 @@ def unique_path(path: Path) -> Path:
 
 def process_file(patj: str | Path):
     path = Path(path)
-    path = Path(path)
     title = extract_title(path)
     if not title:
         return

@@ -45,7 +45,6 @@ def strip_comments(source: str) -> str:
 
 def process_file(path: str | Path):
     path = Path(path)
-    path = Path(path)
     before = gsz(path)
     if not before:
         return

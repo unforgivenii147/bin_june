@@ -1,7 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/python
-import re
 import os
+import re
 from pathlib import Path
+
+from dh import unique_path
 
 
 def normalize_filename(filename):
@@ -45,24 +47,22 @@ def normalize_filenames_in_text(text):
     return normalized_text
 
 
-def normalize_file_contents(filepath, output_path=None):
+def normalize_file_contents(path):
     """
     Read a file, normalize JS/CSS references in its content, and save it
 
     Args:
-        filepath (str): Path to input file
-        output_path (str, optional): Path to output file. If None, overwrites original
+        path (str): Path to input file
     """
-    with open(filepath, "r", encoding="utf-8") as f:
+    with open(path, "r", encoding="utf-8") as f:
         content = f.read()
 
     normalized_content = normalize_filenames_in_text(content)
 
-    output_file = output_path if output_path else filepath
-    with open(output_file, "w", encoding="utf-8") as f:
+    with open(path, "w", encoding="utf-8") as f:
         f.write(normalized_content)
 
-    print(f"Processed: {filepath} -> {output_file}")
+    print(f"Processed: {path}")
 
 
 def normalize_filenames_batch(directory, file_extensions=None):
@@ -80,60 +80,23 @@ def normalize_filenames_batch(directory, file_extensions=None):
     for root, dirs, files in os.walk(directory):
         for file in files:
             if any(file.endswith(ext) for ext in file_extensions):
-                filepath = os.path.join(root, file)
+                path = Path(root) / file
                 try:
-                    normalize_file_contents(filepath)
+                    new_name = normalize_filename(file)
+                    new_path = path.with_name(new_name)
+                    if new_path.exists():
+                        new_path = unique_path(new_path)
+                    path.rename(new_path)
                     processed_count += 1
                 except Exception as e:
-                    print(f"Error processing {filepath}: {e}")
+                    print(f"Error processing {path}: {e}")
 
     print(f"\nProcessed {processed_count} files")
 
 
 # Examples and usage
 if __name__ == "__main__":
-    # Example 1: Normalize individual filenames
-    test_filenames = [
-        "script.js?version=3.6.6",
-        "style.css?v=2.0.1",
-        "main.js#hash123",
-        "bundle.min.js?cache_buster=12345",
-        "theme.css?ver=4.7.2",
-        "normal.js",
-        "style.min.css",
-        "app.js?param1=value1&param2=value2",
-    ]
+    cwd = Path.cwd()
+    normalize_filenames_batch(cwd)
 
-    print("=== Single Filename Normalization ===\n")
-    for filename in test_filenames:
-        normalized = normalize_filename(filename)
-        print(f"Original: {filename:40} -> Normalized: {normalized}")
-
-    # Example 2: Normalize filenames within text/html content
-    html_content = """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <link rel="stylesheet" href="style.css?version=3.6.6">
-        <script src="main.js?v=2.0"></script>
-        <link rel="stylesheet" href="theme.min.css?ver=1.2.3">
-    </head>
-    <body>
-        <script src="bundle.js?cache_buster=12345"></script>
-    </body>
-    </html>
-    """
-
-    print("\n\n=== HTML Content Normalization ===\n")
-    print("Original HTML:")
-    print(html_content)
-    print("\nNormalized HTML:")
-    print(normalize_filenames_in_text(html_content))
-
-    # Example 3: Process a directory (uncomment and modify path to use)
-    # print("\n\n=== Batch Processing ===\n")
-    # normalize_filenames_batch("/path/to/your/project")
-
-    # Example 4: Single file processing (uncomment to use)
-    # print("\n\n=== Single File Processing ===\n")
     # normalize_file_contents("index.html", "index_normalized.html")

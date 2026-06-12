@@ -7,17 +7,16 @@ from pathlib import Path
 
 def find_path_duplicates():
     path_env = os.environ.get("PATH", "")
-    directories = [d for d in path_env.split(":") if d]
+    directories = [Path(d) for d in path_env.split(":") if d and Path(d).exists()]
     app_map = defaultdict(list)
-    print(f"--- Scanning {len(directories)} directories in PATH ---\n")
+    print(f"--- Scanning directories in PATH \n")
     for directory in directories:
-        if not Path(directory).is_dir():
+        if not directory.is_dir():
             continue
         try:
-            for item in os.listdir(directory):
-                full_path = os.path.join(directory, item)
-                if Path(full_path).is_file() and os.access(full_path, os.X_OK):
-                    app_map[item].append(directory)
+            for item in directory.iterdir():
+                if item.is_file() and os.access(item, os.X_OK):
+                    app_map[str(item)].append(str(directory))
         except PermissionError:
             print(f"Permission denied: {directory}")
             continue
@@ -31,7 +30,7 @@ def find_path_duplicates():
                 print(f"  - {loc}{status}")
             print("-" * 30)
     if not duplicates_found:
-        print("Clean as a whistle! No duplicate executables found.")
+        print("No duplicate executables found.")
 
 
 if __name__ == "__main__":

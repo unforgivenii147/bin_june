@@ -5,9 +5,9 @@ Converts &lt; to <, &gt; to >, and other common entities.
 """
 
 import multiprocessing as mp
-from pathlib import Path
 import re
 from functools import partial
+from pathlib import Path
 
 # HTML entity mappings
 HTML_ENTITIES = {

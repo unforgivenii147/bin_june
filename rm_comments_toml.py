@@ -65,7 +65,6 @@ def strip_comments(src: str, allow_semicolon: bool = True) -> Result:
 
 def process_file(path: str | Path):
     path = Path(path)
-    path = Path(path)
     code = path.read_text(encoding="utf-8")
     result = strip_comments(code)
 

@@ -11,7 +11,6 @@ NUM_PROCESSES = 4
 
 def process_file(path: str | Path):
     path = Path(path)
-    path = Path(path)
     before = gsz(path)
     try:
         cmd = [

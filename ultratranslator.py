@@ -110,7 +110,6 @@ def translate_python_file(source: str) -> str:
 
 def process_file(path: str | Path) -> None:
     path = Path(path)
-    path = Path(path)
     try:
         original = path.read_text(encoding="utf-8", errors="ignore")
     except Exception as e:

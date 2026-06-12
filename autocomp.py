@@ -10,7 +10,7 @@ import time
 from collections import namedtuple
 from pathlib import Path
 
-import blosc2
+import blosc
 import brotli
 import lz4.frame
 import py7zr
@@ -53,9 +53,9 @@ def compress_lz4(data):
     return lz4.frame.compress(data, compression_context=ctx)
 
 
-def compress_blosc2(data):
-    """Blosc2 compression (zstd codec, max compression)."""
-    return blosc2.compress(data, codec=blosc2.Codec.zstd, clevel=9)
+def compress_blosc(data):
+    """Blosc compression (zstd codec, max compression)."""
+    return blosc.compress(data, codec=blosc.Codec.zstd, clevel=9)
 
 
 def compress_py7zr(input_path, output_path):
@@ -99,7 +99,7 @@ def compress_all(data, base_name, output_dir="."):
         ("bz2", lambda d: compress_bz2(d), ".bz2"),
         ("gzip", lambda d: compress_gzip(d), ".gz"),
         ("lz4", lambda d: compress_lz4(d), ".lz4"),
-        ("blosc2", lambda d: compress_blosc2(d), ".blosc2"),
+        ("blosc", lambda d: compress_blosc(d), ".blosc"),
     ]
 
     for name, compress_func, ext in compressors:
