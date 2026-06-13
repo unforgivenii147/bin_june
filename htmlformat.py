@@ -28,6 +28,6 @@ def process_file(path):
 if __name__ == "__main__":
     cwd = Path.cwd()
     args = sys.argv[1:]
-    files = [Path(p) for p in args] if args else get_files(cwd, ext=[".html", ".svg", ".xml", ".mhtml"])
+    files = [Path(p) for p in args] if args else get_files(cwd, ext=[".html", ".xml", ".mhtml"])
     for f in files:
         process_file(f)

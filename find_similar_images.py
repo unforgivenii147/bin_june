@@ -5,22 +5,17 @@ from PIL import Image
 
 
 def find_similar_images(userpaths, hashfunc=imagehash.average_hash):
+    extensions=(".png",".webp",".bmp",".jpg",".jpeg",".gif")
 
     def is_image(filename):
         f = filename.lower()
         return (
-            f.endswith(".png")
-            or f.endswith(".jpg")
-            or f.endswith(".jpeg")
-            or f.endswith(".bmp")
-            or f.endswith(".gif")
-            or (".jpg" in f)
-            or f.endswith(".svg")
-        )
+            f.endswith(extensions)
 
     image_filenames = []
     for userpath in userpaths:
-        image_filenames += [os.path.join(userpath, path) for path in os.listdir(userpath) if is_image(path)]
+        for ext in extensions
+            image_filenames.extend([p for p in Path(userpath).rglob(f"*{ext}")])
     images = {}
     for img in sorted(image_filenames):
         try:

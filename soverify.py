@@ -59,12 +59,12 @@ class CtypesVerifier:
         return (can_load, symbol_info)
 
 
-def process_file(fp):
+def process_file(path):
     path = Path(path)
     try:
         verifier = CtypesVerifier()
-        res = verifier.verify_so_file(fp)[0]
-        print(f"file:{fp} | {res}")
+        res = verifier.verify_so_file(path)[0]
+        print(f"file:{path} | {res}")
         if res:
             return True
     except:

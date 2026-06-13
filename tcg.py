@@ -1,271 +1,137 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 """
-Termux script creator utility.
-
-Creates executable scripts from clipboard content with automatic
-shebang detection and environment-specific optimizations.
+Termux script creator - Creates executable scripts from clipboard content.
 """
 
-import ast
 import subprocess
 import sys
 from pathlib import Path
-from typing import Final
+from typing import Optional
 
-TERMUX_PYTHON: Final[str] = "#!/data/data/com.termux/files/usr/bin/python\n"
-TERMUX_BASH: Final[str] = "#!/data/data/com.termux/files/usr/bin/bash\n"
-EXECUTABLE_PERMISSIONS: Final[int] = 0o755
-
-
-PYTHON_INDICATORS: Final[tuple[str, ...]] = (
-    "import ",
-    "from ",
-    "def ",
-    "class ",
-    "async def ",
-    "async ",
-    "@",
-    "with ",
-    "try:",
-    "if __name__",
-)
-
-
-BASH_INDICATORS: Final[tuple[str, ...]] = (
-    "echo ",
-    "cd ",
-    "export ",
-    "set ",
-    "if [",
-    "if [[",
-    "for ",
-    "while ",
-    "case ",
-    "source ",
-    "#!/bin/sh",
-    "#!/bin/bash",
-    "$(",
-    "${",
-    "`",
-)
-
-
-SCRIPT_DIRS: Final[set[Path]] = {
-    Path.home() / "bin",
-    Path.home() / "bashbin",
+# Termux specific shebangs
+TERMUX_SHEBANGS = {
+    "python": "#!/data/data/com.termux/files/usr/bin/python",
+    "bash": "#!/data/data/com.termux/files/usr/bin/bash",
+    "sh": "#!/data/data/com.termux/files/usr/bin/sh",
 }
 
+# Directories where scripts get auto-symlinked
+SCRIPT_DIRS = {Path.home() / "bin", Path.home() / "bashbin"}
 
-def get_clipboard() -> str:
-    """Get clipboard content using termux-clipboard-get.
 
-    Returns:
-        Clipboard content as string.
-
-    Raises:
-        SystemExit: If clipboard retrieval fails.
-    """
+def get_clipboard_content() -> str:
+    """Retrieve content from Termux clipboard."""
     try:
-        content = subprocess.check_output(
+        result = subprocess.run(
             ["termux-clipboard-get"],
+            capture_output=True,
             text=True,
-            stderr=subprocess.PIPE,
+            check=True,
         )
-        return content
+        return result.stdout
     except subprocess.CalledProcessError as e:
-        print(f"Error getting clipboard: {e}", file=sys.stderr)
+        print(f"Failed to read clipboard: {e}", file=sys.stderr)
         sys.exit(1)
     except FileNotFoundError:
         print("Error: termux-clipboard-get not found", file=sys.stderr)
         sys.exit(1)
 
 
-def strip_python_strings_and_comments(code: str) -> str:
-    """Remove strings and comments from Python code for analysis.
+def detect_language(content: str) -> str:
+    """Detect if content is Python or bash/sh."""
+    first_line = content.lstrip().split("\n")[0] if content else ""
 
-    This helps identify Python code even when it starts with
-    docstrings or contains strings that might confuse detection.
+    # Check for explicit shebang
+    if first_line.startswith("#!"):
+        if "python" in first_line.lower():
+            return "python"
+        elif "bash" in first_line.lower() or "sh" in first_line.lower():
+            return "bash"
 
-    Args:
-        code: Python source code.
+    # Heuristic detection
+    python_indicators = ["import ", "from ", "def ", "class ", "if __name__", "print("]
+    bash_indicators = ["echo ", "cd ", "export ", "if [", "for ", "while ", "$("]
 
-    Returns:
-        Code with strings and comments removed.
-    """
-    try:
-        tree = ast.parse(code)
+    preview = content[:500].lower()
 
-        class StringCommentStripper(ast.NodeTransformer):
-            """Remove string expressions and comments from AST."""
+    python_score = sum(1 for ind in python_indicators if ind in preview)
+    bash_score = sum(1 for ind in bash_indicators if ind in preview)
 
-            def visit_Expr(self, node):
-                """Remove string expressions (docstrings)."""
-                if isinstance(node.value, ast.Constant) and isinstance(node.value.value, str):
-                    return None
-                return node
-
-            def visit_Constant(self, node):
-                """Replace string constants with empty string."""
-                if isinstance(node.value, str):
-                    return ast.Constant(value="")
-                return node
-
-        stripper = StringCommentStripper()
-        stripped_tree = stripper.visit(tree)
-        ast.fix_missing_locations(stripped_tree)
-
-        if hasattr(ast, "unparse"):
-            return ast.unparse(stripped_tree)
-
-        if (
-            tree.body
-            and isinstance(tree.body[0], ast.Expr)
-            and isinstance(tree.body[0].value, ast.Constant)
-            and isinstance(tree.body[0].value.value, str)
-        ):
-            tree.body = tree.body[1:]
-
-        return ast.unparse(tree) if hasattr(ast, "unparse") else code
-
-    except SyntaxError:
-        return code
-    except Exception:
-        return code
+    return "python" if python_score >= bash_score else "bash"
 
 
-def detect_shebang(content: str) -> str | None:
-    """Detect the appropriate shebang for the given content.
+def replace_shebang(content: str, lang: str) -> str:
+    """Replace or add appropriate Termux shebang."""
+    lines = content.splitlines()
 
-    Uses multiple strategies to identify Python code:
-    1. Check for explicit shebang
-    2. Validate as Python AST
-    3. Check for Python indicators after stripping strings/comments
-    4. Check for shell indicators
+    # Remove existing shebang if present
+    if lines and lines[0].startswith("#!"):
+        lines.pop(0)
 
-    Args:
-        content: Script content to analyze.
+    # Add Termux shebang
+    if lang == "python":
+        lines.insert(0, TERMUX_SHEBANGS["python"])
+    else:
+        lines.insert(0, TERMUX_SHEBANGS["bash"])
 
-    Returns:
-        Appropriate shebang string or None if undetermined.
-    """
-    stripped = content.lstrip()
-
-    if stripped.startswith("#!"):
-        shebang_line = stripped.split("\n", 1)[0].lower()
-        if "python" in shebang_line:
-            return TERMUX_PYTHON
-        if "bash" in shebang_line or "sh" in shebang_line:
-            return TERMUX_BASH
-
-    try:
-        ast.parse(content)
-        return TERMUX_PYTHON
-    except SyntaxError:
-        pass
-
-    stripped_code = strip_python_strings_and_comments(content)
-    stripped_lines = stripped_code.lstrip()
-
-    for indicator in PYTHON_INDICATORS:
-        if stripped_lines.startswith(indicator):
-            return TERMUX_PYTHON
-
-    if any(line.lstrip().startswith("@") for line in stripped_code.splitlines()[:5]):
-        return TERMUX_PYTHON
-
-    for indicator in BASH_INDICATORS:
-        if indicator in stripped[:200]:
-            return TERMUX_BASH
-
-    python_score = 0
-    bash_score = 0
-
-    for line in stripped_code.splitlines()[:10]:
-        line = line.strip()
-        if not line or line.startswith("#"):
-            continue
-
-        if any(line.startswith(ind) for ind in PYTHON_INDICATORS):
-            python_score += 1
-        elif any(ind in line for ind in BASH_INDICATORS):
-            bash_score += 1
-
-    if python_score > bash_score:
-        return TERMUX_PYTHON
-    elif bash_score > python_score:
-        return TERMUX_BASH
-
-    return None
+    # Ensure trailing newline
+    result = "\n".join(lines)
+    return result if result.endswith("\n") else result + "\n"
 
 
-def create_symlink(target: Path) -> None:
-    """Create a symlink without file extension in the same directory.
+def create_symlink(script_path: Path) -> None:
+    """Create symlink without extension in script directories."""
+    if script_path.suffix:
+        symlink_path = script_path.parent / script_path.stem
 
-    Args:
-        target: Target file to create symlink for.
-    """
-    if target.suffix:
-        symlink_path = target.parent / target.stem
-
-        if symlink_path.exists():
-            if symlink_path.is_symlink():
-                print(f"Symlink already exists.")
-            else:
-                print(f"Warning: {symlink_path} exists but is not a symlink")
-            return
-
-        try:
-            symlink_path.symlink_to(target)
-            print(f"Created symlink: {symlink_path} -> {target}")
-        except OSError as e:
-            print(f"Error creating symlink: {e}", file=sys.stderr)
+        if not symlink_path.exists():
+            try:
+                symlink_path.symlink_to(script_path)
+                print(f"  → Created symlink: {symlink_path.name}")
+            except OSError as e:
+                print(f"  ⚠️  Failed to create symlink: {e}", file=sys.stderr)
 
 
-def main() -> None:
-    """Main entry point for the script creator."""
+def main():
     if len(sys.argv) != 2:
-        print(f"Usage: {sys.argv[0]} <output_filename>", file=sys.stderr)
+        print(f"Usage: {sys.argv[0]} <filename>", file=sys.stderr)
+        print(f"Example: {sys.argv[0]} myscript.py", file=sys.stderr)
         sys.exit(1)
 
-    out_file = Path(sys.argv[1])
-    cwd = Path.cwd()
-    is_script_dir = cwd in SCRIPT_DIRS
+    filename = sys.argv[1]
+    output_path = Path(filename)
+    current_dir = Path.cwd()
+    is_script_dir = current_dir in SCRIPT_DIRS
 
-    content = get_clipboard()
+    # Get clipboard content
+    content = get_clipboard_content()
 
     if not content.strip():
-        print("Warning: Clipboard is empty, creating empty file")
+        print("⚠️  Clipboard is empty, creating empty file")
         content = "\n"
+        if is_script_dir:
+            content = TERMUX_SHEBANGS["bash"] + "\n\n" + content
+    else:
+        # Replace shebang if in script directory
+        if is_script_dir:
+            lang = detect_language(content)
+            content = replace_shebang(content, lang)
+            print(f"✓ Added {lang} shebang")
 
-    if is_script_dir and not content.lstrip().startswith("#!"):
-        shebang = detect_shebang(content)
-        if shebang:
-            content = shebang + content
-    #            print(f"Added shebang: {shebang.strip()}")
-
-    lines = content.splitlines()
-    if len(lines) > 1 and lines[0].startswith("#!") and lines[1].startswith("#!"):
-        lines.pop(0)
-        content = "\n".join(lines) + "\n"
-        print("Fixed double shebang")
-
-    if not content.endswith("\n"):
-        content += "\n"
-
+    # Write file
     try:
-        out_file.write_text(content, encoding="utf-8")
+        output_path.write_text(content)
+        print(f"✓ Created: {output_path}")
     except OSError as e:
         print(f"Error writing file: {e}", file=sys.stderr)
         sys.exit(1)
 
+    # Set executable permissions and create symlink if in script directory
     if is_script_dir:
-        try:
-            out_file.chmod(EXECUTABLE_PERMISSIONS)
-        except OSError as e:
-            print(f"Error setting permissions: {e}", file=sys.stderr)
-
-        create_symlink(out_file)
+        output_path.chmod(0o755)
+        print(f"✓ Made executable")
+        create_symlink(output_path)
 
 
 if __name__ == "__main__":

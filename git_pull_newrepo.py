@@ -14,16 +14,18 @@ import requests
 # Load environment variables
 load_dotenv()
 
+
 def find_git_repos(root_path: Path) -> list[Path]:
     """Recursively find all git repositories."""
     repos = []
     for item in root_path.iterdir():
-        if item.is_dir() and not item.name.startswith('.'):
+        if item.is_dir() and not item.name.startswith("."):
             if (item / ".git").exists():
                 repos.append(item)
             else:
                 repos.extend(find_git_repos(item))
     return repos
+
 
 def create_github_repo(repo_name: str, github_token: str) -> str | None:
     """
@@ -31,17 +33,9 @@ def create_github_repo(repo_name: str, github_token: str) -> str | None:
     Returns the clone URL if successful, None otherwise.
     """
     url = "https://api.github.com/user/repos"
-    headers = {
-        "Authorization": f"token {github_token}",
-        "Accept": "application/vnd.github.v3+json"
-    }
-    data = {
-        "name": repo_name,
-        "description": f"Repository for {repo_name}",
-        "private": False,
-        "auto_init": False
-    }
-    
+    headers = {"Authorization": f"token {github_token}", "Accept": "application/vnd.github.v3+json"}
+    data = {"name": repo_name, "description": f"Repository for {repo_name}", "private": False, "auto_init": False}
+
     try:
         response = requests.post(url, headers=headers, json=data)
         response.raise_for_status()
@@ -67,17 +61,19 @@ def create_github_repo(repo_name: str, github_token: str) -> str | None:
             print(f"   ❌ Failed to create repo: {e}")
         return None
 
+
 def get_github_username(github_token: str) -> str | None:
     """Get GitHub username from token."""
     url = "https://api.github.com/user"
     headers = {"Authorization": f"token {github_token}"}
-    
+
     try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()
         return response.json()["login"]
     except:
         return None
+
 
 def setup_remote_and_push(repo: Repo, repo_path: Path, remote_url: str) -> bool:
     """Add remote and push to GitHub."""
@@ -89,24 +85,25 @@ def setup_remote_and_push(repo: Repo, repo_path: Path, remote_url: str) -> bool:
         else:
             repo.create_remote("origin", remote_url)
             print(f"   🔗 Added remote 'origin': {remote_url}")
-        
+
         # Push to GitHub
         print(f"   📤 Pushing to GitHub...")
-        
+
         # Get current branch
         current_branch = repo.active_branch.name
-        
+
         # Push and set upstream
         repo.remotes.origin.push(refspec=f"{current_branch}:{current_branch}", set_upstream=True)
         print(f"   ✅ Pushed branch '{current_branch}' to GitHub")
         return True
-        
+
     except GitCommandError as e:
         print(f"   ❌ Git error: {e.stderr.strip() if e.stderr else str(e)}")
         return False
     except Exception as e:
         print(f"   ❌ Error: {e}")
         return False
+
 
 def process_repository(repo_path: Path, github_token: str) -> tuple[bool, str]:
     """
@@ -116,13 +113,13 @@ def process_repository(repo_path: Path, github_token: str) -> tuple[bool, str]:
     try:
         repo = Repo(repo_path)
         rel_path = repo_path.relative_to(Path.cwd())
-        
+
         # Check for remotes
         if repo.remotes:
             # Has remote - do git pull
             print(f"\n📁 {rel_path} (has remote)")
             print(f"   Branch: {repo.active_branch.name}")
-            
+
             try:
                 repo.remotes.origin.pull()
                 print(f"   ✅ Pull successful")
@@ -135,20 +132,21 @@ def process_repository(repo_path: Path, github_token: str) -> tuple[bool, str]:
             # No remote - create GitHub repo and push
             print(f"\n📁 {rel_path} (no remote configured)")
             print(f"   Creating GitHub repository: {repo_path.name}")
-            
+
             # Create repo on GitHub
             remote_url = create_github_repo(repo_path.name, github_token)
             if not remote_url:
                 return (False, "Failed to create GitHub repository")
-            
+
             # Setup remote and push
             if setup_remote_and_push(repo, repo_path, remote_url):
                 return (True, f"Created and pushed to {remote_url}")
             else:
                 return (False, "Failed to push to GitHub")
-                
+
     except Exception as e:
         return (False, f"Error: {str(e)}")
+
 
 def main():
     """Main function to process all git repositories."""
@@ -158,39 +156,40 @@ def main():
         print("❌ Error: GITHUB_TOKEN not found in .env file")
         print("Please create a .env file with: GITHUB_TOKEN=your_token_here")
         return
-    
+
     current_dir = Path.cwd()
     print(f"🔍 Scanning for git repositories in: {current_dir}")
     repos = find_git_repos(current_dir)
-    
+
     if not repos:
         print("No git repositories found")
         return
-    
+
     print(f"Found {len(repos)} repository(ies)\n")
-    
+
     results = []
     for repo_path in repos:
         success, message = process_repository(repo_path, github_token)
         results.append((repo_path, success, message))
-    
+
     # Print summary
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("SUMMARY")
-    print("="*60)
-    
+    print("=" * 60)
+
     successful = [r for r in results if r[1]]
     failed = [r for r in results if not r[1]]
-    
+
     if successful:
         print(f"\n✅ Successful ({len(successful)} repos):")
         for repo_path, _, msg in successful:
             print(f"   - {repo_path.relative_to(current_dir)}: {msg}")
-    
+
     if failed:
         print(f"\n❌ Failed ({len(failed)} repos):")
         for repo_path, _, msg in failed:
             print(f"   - {repo_path.relative_to(current_dir)}: {msg}")
+
 
 if __name__ == "__main__":
     try:

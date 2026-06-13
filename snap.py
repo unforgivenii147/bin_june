@@ -32,15 +32,14 @@ def parallel_compress(in_path, out_path):
         mm.close()
 
 
-def process_file(fp):
-    fp = Path(fp)
+def process_file(path):
     path = Path(path)
-    if not fp.exists() or fp.suffix == ".br":
+    if not path.exists() or path.suffix == ".br":
         return
-    before = gsz(fp)
-    outfile = Path(str(fp) + ".br")
-    parallel_compress(fp, outfile)
-    fp.unlink()
+    before = gsz(path)
+    outfile = Path(str(path) + ".br")
+    parallel_compress(path, outfile)
+    path.unlink()
     after = gsz(outfile)
     ratio = round((before - after) / before * 100, 3)
     cprint(f"{outfile.name}", "green", end=" | ")

@@ -17,7 +17,8 @@ BINARY_CHUNK = 32768
 DEFAULT_THREADS = 4
 ANSI_BOLD = "\x1b[1m"
 ANSI_RESET = "\x1b[0m"
-ANSI_HIGHLIGHT = "\x1b[31m"
+ANSI_RED = "\x1b[31m"
+ANSI_BLUE = "\x1b[94m"
 
 
 def colorize(text: str, start: int, end: int, enable: bool = True) -> str:
@@ -34,7 +35,7 @@ def colorize(text: str, start: int, end: int, enable: bool = True) -> str:
     new_start = start - rmchar
     new_end = end - rmchar
     text = text[ss:ee]
-    return text[:new_start] + ANSI_HIGHLIGHT + ANSI_BOLD + text[new_start:new_end] + ANSI_RESET + text[new_end:]
+    return text[:new_start] + ANSI_BLUE + ANSI_BOLD + text[new_start:new_end] + ANSI_RESET + text[new_end:]
 
 
 def matches_any_glob(path: Path, patterns: Iterable[str]) -> bool:
@@ -159,9 +160,9 @@ def main(argv: list[str] | None = None) -> int:
                             for s, e in sorted(spans, key=operator.itemgetter(0), reverse=True):
                                 out_line = colorize(out_line, s, e, enable=True)
                         if args.line_number:
-                            print(f"{path}:{lineno}:{out_line}")
+                            print(f"\033[5;96m{path}\033[0m:{lineno}:{out_line}")
                         else:
-                            print(f"{path}:{out_line}")
+                            print(f"\033[5;96m{path}\033[0m:{out_line}")
         except KeyboardInterrupt:
             print("\nSearch cancelled.", file=sys.stderr)
             return 130

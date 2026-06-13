@@ -12,32 +12,32 @@ err_dir = Path(f"{cwd}/error")
 counter = 0
 
 
-def process_file(fp) -> None:
+def process_file(path) -> None:
     global counter
     path = Path(path)
     counter += 1
-    print(f"{counter} {fp.name}")
+    print(f"{counter} {path.name}")
     content: str = ""
     try:
-        content = fp.read_text(encoding="utf-8")
+        content = path.read_text(encoding="utf-8")
     except:
-        print(f"error reading {fp}")
+        print(f"error reading {path}")
         return
     try:
         ast.parse(content)
         del content
         return
     except Exception as e:
-        print(f"{fp} | {e}")
+        print(f"{path} | {e}")
         if not DRY_RUN:
             err_dir.mkdir(exist_ok=True)
-            newpath = err_dir / fp.name
+            newpath = err_dir / path.name
             newpath = Path(newpath)
             newpath.write_text(content, encoding="utf-8")
             del content
             return
         else:
-            print(f"{fp.name} ast parse error")
+            print(f"{path.name} ast parse error")
             del content
             return
 

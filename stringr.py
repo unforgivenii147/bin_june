@@ -11,17 +11,17 @@ all_files = 0
 c = 0
 
 
-def process_file(fp):
+def process_file(path):
     global all_files
     path = Path(path)
     global c
     c += 1
-    print(f"[{c}/{all_files}] {fp.name}")
-    if not fp.exists() or not is_binary(fp):
+    print(f"[{c}/{all_files}] {path.name}")
+    if not path.exists() or not is_binary(path):
         return
-    _, txt, _ = runcmd(["strings", str(fp)], show_output=False)
+    _, txt, _ = runcmd(["strings", str(path)], show_output=False)
     with outfile.open("a", encoding="utf-8") as f:
-        f.write(f"\n# filename : {fp.name}\n{txt}")
+        f.write(f"\n# filename : {path.name}\n{txt}")
     return
 
 

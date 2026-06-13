@@ -6,23 +6,24 @@ from pathlib import Path
 from dh import get_pyfiles, runcmd
 
 
-def process_file(fp) -> None:
+def process_file(path) -> None:
     path = Path(path)
     cmd = [
         "pylint",
-        f"{fp!s}",
+        f"{path!s}",
         "--persistent=n",
         "--reports=n",
         "--output-format=parseable",
         "--msg-template='{C}:{line}:{column}:{obj}:{msg}:{msg_id}'",
-        str(fp),
+        str(path),
     ]
     return runcmd(cmd, show_output=True)
 
 
 def main():
     cwd = Path.cwd()
-    args = argv[1:]
+    args = sys.argv[1:]
+    files = []
     if args:
         for arg in args:
             p = Path(arg)

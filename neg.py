@@ -11,14 +11,14 @@ from dh import get_files
 cwd = Path.cwd()
 
 
-def process_file(fp):
-    img = cv.imread(str(fp))
+def process_file(path):
+    img = cv.imread(str(path))
     path = Path(path)
     if img is None:
         return
     img = 255 - img
-    cv.imwrite(str(fp), img)
-    print(f"{fp.relative_to(cwd)} updated.")
+    cv.imwrite(str(path), img)
+    print(f"{path.relative_to(cwd)} updated.")
 
 
 def main():

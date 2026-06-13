@@ -3,17 +3,20 @@
 import sys
 from pathlib import Path
 
-from dh import compress, cprint, fsz, get_files, gsz, mpf3
+from dh import compress, cprint, fsz, get_files, gsz, mpf3, decompress
+
+COMPRESS = "-c" in sys.argv
+DECOMPRESS = "-d" in sys.argv
+MODE = "COMPRESS"
 
 
-def process_file(fp):
-    before = gsz(fp)
-    path = Path(path)
+def compress_file(path):
+    before = gsz(path)
     if not before:
         return
-    data = fp.read_bytes()
+    data = path.read_bytes()
     compressed = compress(data)
-    snappy_path = fp.with_name(fp.name + ".snappy")
+    snappy_path = path.with_name(path.name + ".snappy")
     snappy_path.write_bytes(compressed)
     after = gsz(snappy_path)
     if not after:
@@ -21,13 +24,46 @@ def process_file(fp):
         return
     diff_size = before - after
     ratio = diff_size / before * 100
-    print(f"{fp.name}", end=" | ")
+    print(f"{path.name}", end=" | ")
     cprint(f"{fsz(before)} -> {fsz(after)} | {fsz(diff_size)} | {ratio:.1f}%")
-    fp.unlink()
+    path.unlink()
     return
 
 
+def decompress_file(path):
+    before = gsz(path)
+    if not before:
+        return
+    data = path.read_bytes()
+    decompressed = decompress(data)
+    decomp_path = path.with_name(path.name.replace(".snappy", ""))
+    decomp_path.write_bytes(decompressed)
+    after = gsz(decomp_path)
+    if not after:
+        decomp_path.unlink()
+        return
+    diff_size = before - after
+    ratio = before / after * 100
+    print(f"{decomp_path.name}", end=" | ")
+    cprint(f"{fsz(before)} -> {fsz(after)} | {fsz(diff_size)} | {ratio:.1f}%")
+    path.unlink()
+    return
+
+
+def process_file(path):
+    path = Path(path)
+    if MODE == "COMPRESS":
+        compress_file(path)
+    elif MODE == "DECOMPRESS":
+        decompress_file(path)
+
+
 def main():
+    global mode
+    if COMPRESS:
+        mode = "COMPRESS"
+    if DECOMPRESS:
+        mode = "DECONPRESS"
     cwd = Path.cwd()
     args = sys.argv[1:]
     files = []
