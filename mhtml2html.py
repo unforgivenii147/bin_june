@@ -7,7 +7,7 @@ import sys
 from email import policy
 from email.parser import BytesParser
 from pathlib import Path
-
+from dh import unique_path
 
 def sanitize_filename(name: str) -> str:
     name = name.strip().strip('"').strip("'")
@@ -161,7 +161,8 @@ def main():
         with open(out_path, "wb") as f:
             f.write(raw)
         return f'{attr}="{os.path.basename(out_dir)}/{fname}"'
-
+    if out_html.exists():
+        out_html=unique_path(out_html)
     html_text = re.sub(r"(src|href)=[\"'](data:[^\"']+)[\"']", data_uri_replacer, html_text, flags=re.IGNORECASE)
     with open(out_html, "w", encoding="utf-8") as f:
         f.write(html_text)
