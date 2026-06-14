@@ -15,7 +15,7 @@ EXCLUDE_DIRS = {".git", "__pycache__", "node_modules"}
 
 
 class FileSimilarityDetector:
-    def __init__(self, cwd=".") -> None:
+    def __init__(self, cwd: str = ".") -> None:
         self.cwd = Path(cwd)
         self.file_hashes = {}
         self.duplicates = defaultdict(list)
@@ -36,7 +36,7 @@ class FileSimilarityDetector:
         except Exception:
             return (str(path), None, None)
 
-    def process_files(self, files):
+    def process_files(self, files: list[Path]) -> None:
         files = list(files)
         print(f"Processing {len(files)} files...")
         with ThreadPoolExecutor() as pool:
@@ -70,7 +70,7 @@ class FileSimilarityDetector:
                 groups.append(group)
         return groups
 
-    def handle_groups(self, groups, *, move: bool, output_dir: str):
+    def handle_groups(self, groups, *, move: bool, output_dir: str) -> None:
         out = Path(output_dir)
         out.mkdir(exist_ok=True)
         for idx, group in enumerate(groups, 1):
@@ -90,7 +90,7 @@ class FileSimilarityDetector:
                     except Exception as e:
                         print(f"Failed to copy {p}: {e}")
 
-    def print_duplicates(self):
+    def print_duplicates(self) -> None:
         if not self.duplicates:
             return
         print("\n" + "=" * 40)
@@ -102,7 +102,7 @@ class FileSimilarityDetector:
         print("=" * 40)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Detect duplicate and similar files")
     parser.add_argument("threshold", type=int, default=70, help="Similarity threshold (0-100)")
     parser.add_argument(

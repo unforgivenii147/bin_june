@@ -14,7 +14,7 @@ def should_skip(line: str) -> bool:
     return bool(RE_REPEAT.fullmatch(s))
 
 
-def main():
+def main() -> None:
     if len(sys.argv) != 2:
         print(f"Usage: {sys.argv[0]} <wordlist.txt>", file=sys.stderr)
         sys.exit(1)

@@ -39,7 +39,7 @@ def clean_file(file_path: Path) -> None:
         print(f"✗ Error processing {file_path}: {e}")
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     log_files = list(cwd.rglob(f"*{LOG_EXT}"))
     if not log_files:

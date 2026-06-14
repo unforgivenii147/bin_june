@@ -14,7 +14,7 @@ EXT = BIN_EXT
 EXT.update(TXT_EXT)
 
 
-def extract_urls_from_text(content):
+def extract_urls_from_text(content: str):
     return set(url_pattern.findall(content))
 
 

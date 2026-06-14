@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 
-def speak_text(text: str):
+def speak_text(text: str) -> None:
     subprocess.run(["termux-tts-speak", text], check=True)
 
 
@@ -31,7 +31,7 @@ def chunk_text(text: str, max_chars: int = 3000):
     return chunks
 
 
-def main():
+def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: python tts_from_file.py /path/to/file.txt")
         sys.exit(1)

@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 
 
-def remove_ipynb_if_md_exists(root: Path, dry_run: bool = True):
+def remove_ipynb_if_md_exists(root: Path, dry_run: bool = True) -> None:
     removed = 0
     checked = 0
     for ipynb_path in root.rglob("*.ipynb"):

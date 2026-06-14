@@ -4,7 +4,7 @@ import os
 import re
 
 
-def fix_pattern_and_save(file_path):
+def fix_pattern_and_save(file_path: str) -> bool:
     """Fix misplaced 'path = Path(path)' in a single file."""
     try:
         with open(file_path, "r", encoding="utf-8") as f:
@@ -16,7 +16,7 @@ def fix_pattern_and_save(file_path):
     # Pattern: def process_file(...): → first statement → path = Path(path)
     pattern = r"(def process_file\([^)]*\):)\n(\s+)([^\n]+)\n(\s+)(path = Path\(path\))"
 
-    def replace_func(match):
+    def replace_func(match) -> str:
         func_def = match.group(1)
         indent = match.group(2)
         first_stmt = match.group(3)
@@ -38,7 +38,7 @@ def fix_pattern_and_save(file_path):
     return False
 
 
-def fix_all_python_files(directory_path="."):
+def fix_all_python_files(directory_path: str = ".") -> None:
     """Fix all .py files in directory recursively."""
     python_files = glob.glob(os.path.join(directory_path, "**/*.py"), recursive=True)
 

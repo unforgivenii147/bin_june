@@ -124,7 +124,7 @@ def rgba_to_hex(c: Color) -> str:
 
 def rgb_to_luminance(r: int, g: int, b: int) -> float:
 
-    def lin(x):
+    def lin(x: int):
         x = x / 255.0
         return x / 12.92 if x <= 0.04045 else ((x + 0.055) / 1.055) ** 2.4
 
@@ -170,7 +170,7 @@ def demo_color_blocks(colors: list[Color], max_items: int = 200) -> None:
         print(block + "\n" + text + "\n")
 
 
-def main():
+def main() -> None:
     root = "."
     all_found: list[Color] = []
     for path in iter_text_files(root):

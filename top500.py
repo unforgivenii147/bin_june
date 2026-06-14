@@ -9,7 +9,7 @@ def is_text_file(file_path, text_extensions):
     return file_path.suffix.lower() in text_extensions
 
 
-def collect_top_lines(directory, text_extensions, top_n=500) -> None:
+def collect_top_lines(directory: str, text_extensions: set[str], top_n=500) -> None:
     for ext in text_extensions:
         lines_counter = Counter()
         for root, _, files in os.walk(directory):

@@ -7,7 +7,7 @@ from pathlib import Path
 import nbformat as nbf
 
 
-def py_to_ipynb(input_file, output_file=None):
+def py_to_ipynb(input_file, output_file=None) -> bool:
     if not Path(input_file).exists():
         print(f"Error: File '{input_file}' not found.")
         return False
@@ -54,7 +54,7 @@ def py_to_ipynb(input_file, output_file=None):
     return True
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Convert a Python script to a Jupyter notebook")
     parser.add_argument("input", help="Input Python file (.py)")
     parser.add_argument("output", nargs="?", help="Output notebook file (.ipynb) (optional)")

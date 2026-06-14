@@ -8,7 +8,7 @@ from pathlib import Path
 from dh import runcmd
 
 
-def run(cmd) -> None:
+def run(cmd: str) -> None:
     try:
         subprocess.check_call(cmd, shell=True)
     except subprocess.CalledProcessError:
@@ -40,7 +40,7 @@ def symlink_global_gitignore() -> None:
         sys.exit(1)
 
 
-def get_current_branch(cmd=["git", "branch"]):
+def get_current_branch(cmd: list[str] = ["git", "branch"]) -> str:
     _, txt, _ = runcmd(cmd, show_output=False)
     branch = txt.strip().replace("* ", "")
     return branch

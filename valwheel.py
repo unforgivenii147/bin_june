@@ -13,12 +13,12 @@ WHEEL_PATTERN = re.compile(
 )
 
 
-def is_valid2(path):
+def is_valid2(path: Path) -> bool:
     filename = path.name
     return WHEEL_PATTERN.match(filename) is not None
 
 
-def is_valid(path):
+def is_valid(path: Path) -> bool:
     filename = path.name
     try:
         basename = filename[:-4]
@@ -43,7 +43,7 @@ def is_valid(path):
         return False
 
 
-def main():
+def main() -> None:
     invalid_dir = Path("invalid_wheels")
     invalid_dir.mkdir(exist_ok=True)
     cwd = Path.cwd()

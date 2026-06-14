@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from datetime import datetime
 import ctypes
 import ctypes.util
 from datetime import UTC, datetime
@@ -40,7 +41,7 @@ AT_FDCWD = -100
 STATX_BTIME = 2048
 
 
-def get_creation_time_statx(path):
+def get_creation_time_statx(path: str) -> datetime | None:
     statx_buf = Statx()
     result = libc.statx(AT_FDCWD, path.encode(), 0, STATX_BTIME, ctypes.byref(statx_buf))
     if result == 0 and statx_buf.stx_mask & STATX_BTIME:

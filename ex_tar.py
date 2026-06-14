@@ -10,7 +10,7 @@ from pathlib import Path
 import zstandard as zstd
 
 
-def get_dir_size(path):
+def get_dir_size(path: Path) -> int:
     return sum((f.stat().st_size for f in path.rglob("*") if f.is_file()))
 
 
@@ -27,7 +27,7 @@ def extract_zst_file(archive_path, extract_path):
     return output_path
 
 
-def extract_tar_zst(archive_path, extract_path):
+def extract_tar_zst(archive_path, extract_path) -> None:
     with Path(archive_path).open("rb") as compressed_file:
         dctx = zstd.ZstdDecompressor()
         with tempfile.NamedTemporaryFile(suffix=".tar", delete=False) as temp_tar:
@@ -40,12 +40,12 @@ def extract_tar_zst(archive_path, extract_path):
         Path(temp_tar_path).unlink()
 
 
-def extract_tar_xz(archive_path, extract_path):
+def extract_tar_xz(archive_path, extract_path) -> None:
     with tarfile.open(archive_path, "r:xz") as tar:
         tar.extractall(path=extract_path, filter="data")
 
 
-def process_archive(archive_path, dry_run=False, keep_original=False, quiet=False):
+def process_archive(archive_path: Path, dry_run: bool = False, keep_original: bool = False, quiet: bool = False):
     if not archive_path.exists():
         if not quiet:
             print(f"Error: File {archive_path} does not exist")
@@ -100,7 +100,7 @@ def process_archive(archive_path, dry_run=False, keep_original=False, quiet=Fals
         return (False, 0, 0)
 
 
-def find_archives(directory):
+def find_archives(directory: Path) -> list[Path]:
     directory = Path(directory).resolve()
     archives = [zst_file for zst_file in directory.rglob("*.zst") if not zst_file.name.endswith(".tar.zst")]
     archives.extend(directory.rglob("*.tar.zst"))
@@ -108,7 +108,7 @@ def find_archives(directory):
     return sorted(set(archives))
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Extract .zst, .tar.zst, and .tar.xz archives.\nIf a filename is provided, process only that file.\nIf no argument, recursively search current directory.",
         formatter_class=argparse.RawDescriptionHelpFormatter,

@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 
 
-def get_top_10_largest_files_optimized(directory="."):
+def get_top_10_largest_files_optimized(directory: str = "."):
     top_10 = []
     for root, _dirs, files in os.walk(directory):
         for file in files:

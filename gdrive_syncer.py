@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
+from googleapiclient.discovery import Resource
 import os
 import pickle
 from pathlib import Path
@@ -15,12 +16,12 @@ SCOPES = ["https://www.googleapis.com/auth/drive.readonly"]
 
 
 class GoogleDriveSyncer:
-    def __init__(self, credentials_file="credentials.json", token_file="token.pickle"):
+    def __init__(self, credentials_file: str = "credentials.json", token_file: str = "token.pickle") -> None:
         self.credentials_file = credentials_file
         self.token_file = token_file
         self.service = self.authenticate()
 
-    def authenticate(self):
+    def authenticate(self) -> Resource:
         """Authenticate and return Google Drive service object"""
         creds = None
 
@@ -47,7 +48,7 @@ class GoogleDriveSyncer:
 
         return build("drive", "v3", credentials=creds)
 
-    def get_all_files(self, folder_id="root"):
+    def get_all_files(self, folder_id: str = "root"):
         """Get all files and folders from Google Drive"""
         all_items = []
         page_token = None
@@ -79,7 +80,7 @@ class GoogleDriveSyncer:
 
         return all_items
 
-    def download_file(self, file_id, file_name, local_path):
+    def download_file(self, file_id, file_name, local_path) -> bool:
         """Download a single file from Google Drive"""
         try:
             request = self.service.files().get_media(fileId=file_id)
@@ -101,7 +102,7 @@ class GoogleDriveSyncer:
             print(f"✗ Failed to download {file_name}: {error}")
             return False
 
-    def sync_folder(self, drive_folder_id, local_folder_path, folder_name="root"):
+    def sync_folder(self, drive_folder_id: str, local_folder_path, folder_name: str = "root") -> None:
         """Recursively sync Google Drive folder to local drive"""
         print(f"\n📁 Syncing folder: {folder_name}")
 
@@ -145,7 +146,7 @@ class GoogleDriveSyncer:
                         mod_time = datetime.fromisoformat(remote_modified.replace("Z", "+00:00")).timestamp()
                         os.utime(local_item_path, (mod_time, mod_time))
 
-    def sync_by_folder_name(self, folder_name, local_base_path):
+    def sync_by_folder_name(self, folder_name, local_base_path) -> None:
         """Sync a specific folder by its name from root"""
         print(f"Searching for folder: {folder_name}")
         items = self.get_all_files("root")
@@ -161,14 +162,14 @@ class GoogleDriveSyncer:
         else:
             print(f'Folder "{folder_name}" not found in root directory')
 
-    def sync_all(self, local_base_path):
+    def sync_all(self, local_base_path: str) -> None:
         """Sync entire Google Drive to local path"""
         print("Starting full Google Drive sync...")
         self.sync_folder("root", local_base_path, "My Drive")
         print("\n✅ Sync completed!")
 
 
-def main():
+def main() -> None:
     # Configuration
     LOCAL_SYNC_PATH = "./google_drive_backup"  # Change this to your desired local path
     CREDENTIALS_FILE = "credentials.json"  # Download from Google Cloud Console

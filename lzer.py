@@ -10,7 +10,7 @@ COMPRESSED_EXT = ".lz4"
 EXT = {".gz", ".br", ".xz", ".zst", ".bz2", ".zip", ".whl", ".lz4"}
 
 
-def compress_file(src_path: Path, compression_level=lz4.frame.COMPRESSIONLEVEL_MAX):
+def compress_file(src_path: Path, compression_level=lz4.frame.COMPRESSIONLEVEL_MAX) -> None:
     if src_path.is_dir():
         return
     if src_path.suffix == COMPRESSED_EXT:
@@ -41,7 +41,7 @@ def compress_file(src_path: Path, compression_level=lz4.frame.COMPRESSIONLEVEL_M
             pass
 
 
-def compress_files_recursive(directory="."):
+def compress_files_recursive(directory: str = ".") -> None:
     for root, _, files in os.walk(directory):
         for filename in files:
             path = Path(root) / filename

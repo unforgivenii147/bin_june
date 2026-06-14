@@ -37,7 +37,7 @@ def remove_patterns_from_content(content: str, patterns: list[str]) -> str:
     return cleaned
 
 
-def process_file(file_path, patterns) -> tuple:
+def process_file(file_path: Path, patterns: list[str]) -> tuple:
     path = Path(file_path)
     path = Path(path)
     before = gsz(path)
@@ -51,7 +51,7 @@ def process_file(file_path, patterns) -> tuple:
         del before, ds, cleaned_content, original_content, path
 
 
-def main():
+def main() -> None:
     if not LIC_FILE.exists():
         print(f"Error: License file not found: {LIC_FILE}")
         return

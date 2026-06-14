@@ -10,7 +10,7 @@ from pathlib import Path
 MMAP_THRESHOLD_BYTES = 1 * 1024 * 1024
 
 
-def get_line_offsets(file_path):
+def get_line_offsets(file_path: Path):
     offsets = []
     with file_path.open("rb") as f, mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm:
         offset = 0
@@ -23,14 +23,14 @@ def get_line_offsets(file_path):
     return offsets
 
 
-def crypto_shuffle_offsets(offsets):
+def crypto_shuffle_offsets(offsets) -> None:
     n = len(offsets)
     for i in range(n - 1, 0, -1):
         j = secrets.randbelow(i + 1)
         offsets[i], offsets[j] = (offsets[j], offsets[i])
 
 
-def shuffle3_offsets(offsets):
+def shuffle3_offsets(offsets) -> None:
     sys_random = random.SystemRandom()
     n = len(offsets)
     for i in range(n - 1, 0, -1):
@@ -38,7 +38,7 @@ def shuffle3_offsets(offsets):
         offsets[i], offsets[j] = (offsets[j], offsets[i])
 
 
-def weighted_shuffle_offsets(offsets):
+def weighted_shuffle_offsets(offsets) -> None:
     n = len(offsets)
     for i in range(n - 1, 0, -1):
         j = random.randint(0, i)
@@ -49,7 +49,7 @@ def weighted_shuffle_offsets(offsets):
             offsets[i], offsets[swap_pos] = (offsets[swap_pos], offsets[i])
 
 
-def enhanced_shuffle_large_file(input_file_path, output_file_path):
+def enhanced_shuffle_large_file(input_file_path: Path, output_file_path: Path) -> bool:
     input_path = Path(input_file_path)
     output_path = Path(output_file_path)
     if not input_path.exists():
@@ -98,7 +98,7 @@ def enhanced_shuffle_large_file(input_file_path, output_file_path):
         return False
 
 
-def enhanced_shuffle_small_file(input_file_path, output_file_path):
+def enhanced_shuffle_small_file(input_file_path: Path, output_file_path: Path) -> bool:
     input_path = Path(input_file_path)
     output_path = Path(output_file_path)
     if not input_path.exists():
@@ -137,14 +137,14 @@ def enhanced_shuffle_small_file(input_file_path, output_file_path):
         return False
 
 
-def crypto_shuffle(lst):
+def crypto_shuffle(lst: list[str]) -> None:
     n = len(lst)
     for i in range(n - 1, 0, -1):
         j = secrets.randbelow(i + 1)
         lst[i], lst[j] = (lst[j], lst[i])
 
 
-def shuffle3(lst):
+def shuffle3(lst: list[str]) -> None:
     sys_random = random.SystemRandom()
     n = len(lst)
     for i in range(n - 1, 0, -1):
@@ -152,7 +152,7 @@ def shuffle3(lst):
         lst[i], lst[j] = (lst[j], lst[i])
 
 
-def weighted_shuffle(lst):
+def weighted_shuffle(lst: list[str]) -> None:
     n = len(lst)
     for i in range(n - 1, 0, -1):
         j = random.randint(0, i)
@@ -163,7 +163,7 @@ def weighted_shuffle(lst):
             lst[i], lst[swap_pos] = (lst[swap_pos], lst[i])
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Randomize lines in a file, optimized for large files.")
     parser.add_argument("input_file", help="Input file to shuffle")
     args = parser.parse_args()

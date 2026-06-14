@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 
-def fix_python_indentation(input_file_path, output_file_path=None, indent_size=4):
+def fix_python_indentation(input_file_path: Path, output_file_path: Path | None = None, indent_size=4) -> bool:
     if not Path(input_file_path).exists():
         print(f"خطا: فایل ورودی یافت نشد: {input_file_path}")
         return False

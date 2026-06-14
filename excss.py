@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from bs4.element import PageElement
 import sys
 from pathlib import Path
 
@@ -7,7 +8,7 @@ from bs4 import BeautifulSoup
 from dh import cprint, get_files, get_random_filename, mpf3
 
 
-def save_style(str1):
+def save_style(str1: list[PageElement]) -> None:
     if not str1 or len(str(str1)) < 2:
         return
     fn = "css/"
@@ -22,7 +23,7 @@ def save_style(str1):
     return
 
 
-def process_file(path):
+def process_file(path) -> bool:
     path = Path(path)
     html_content = path.read_text(encoding="utf-8")
     path = Path(path)
@@ -35,7 +36,7 @@ def process_file(path):
     return True
 
 
-def main():
+def main() -> None:
     outpath = Path("css")
     if not outpath.exists():
         outpath.mkdir(exist_ok=True)

@@ -11,7 +11,7 @@ def mergedict(da, db):
     return {**da, **db}
 
 
-def load_json_object(path):
+def load_json_object(path: Path):
     with path.open(encoding="utf-8") as f:
         data = json.load(f)
     if not isinstance(data, dict):
@@ -33,7 +33,7 @@ def merge_json_files(files):
     return merged
 
 
-def main():
+def main() -> None:
     if len(sys.argv) < 2:
         print(f"Usage: {sys.argv[0]} file1.json file2.json [...]")
         sys.exit(1)

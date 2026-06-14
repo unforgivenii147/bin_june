@@ -5,7 +5,7 @@ from datetime import datetime
 from git import Repo
 
 
-def git_commit_all():
+def git_commit_all() -> None:
     try:
         repo = Repo(os.getcwd())
     except:

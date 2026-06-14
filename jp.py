@@ -10,7 +10,7 @@ import jmespath
 from jmespath import exceptions
 
 
-def main():
+def main() -> int | None:
     parser = argparse.ArgumentParser()
     parser.add_argument("expression")
     parser.add_argument(

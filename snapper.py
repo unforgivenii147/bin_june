@@ -10,7 +10,7 @@ DECOMPRESS = "-d" in sys.argv
 MODE = "COMPRESS"
 
 
-def compress_file(path):
+def compress_file(path: Path) -> None:
     before = gsz(path)
     if not before:
         return
@@ -30,7 +30,7 @@ def compress_file(path):
     return
 
 
-def decompress_file(path):
+def decompress_file(path: Path) -> None:
     before = gsz(path)
     if not before:
         return
@@ -50,7 +50,7 @@ def decompress_file(path):
     return
 
 
-def process_file(path):
+def process_file(path) -> None:
     path = Path(path)
     if MODE == "COMPRESS":
         compress_file(path)
@@ -58,7 +58,7 @@ def process_file(path):
         decompress_file(path)
 
 
-def main():
+def main() -> None:
     global mode
     if COMPRESS:
         mode = "COMPRESS"

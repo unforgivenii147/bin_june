@@ -14,11 +14,11 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 AES_BLOCK_SIZE = 16
 
 
-def random_key(length=32):
+def random_key(length: int = 32) -> LiteralString:
     return "".join((random.choice(string.ascii_letters + string.digits) for _ in range(length)))
 
 
-def encrypt_file(file_path, key):
+def encrypt_file(file_path, key) -> None:
     backend = default_backend()
     iv = os.urandom(AES_BLOCK_SIZE)
     cipher = Cipher(algorithms.AES(key.encode()), modes.CBC(iv), backend=backend)
@@ -30,7 +30,7 @@ def encrypt_file(file_path, key):
     Path(file_path).write_bytes(iv + encrypted_data)
 
 
-def decrypt_file(file_path, key):
+def decrypt_file(file_path, key) -> None:
     backend = default_backend()
     raw = Path(file_path).read_bytes()
     iv = raw[:AES_BLOCK_SIZE]
@@ -43,7 +43,7 @@ def decrypt_file(file_path, key):
     Path(file_path).write_bytes(data)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--encrypt", action="store_true")
     parser.add_argument("--decrypt", action="store_true")

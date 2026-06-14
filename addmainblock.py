@@ -11,7 +11,7 @@ MAINBLOCK = 'if __name__ == "__main__":'
 MAX_QUEUE = 16
 
 
-def process_file(filepath):
+def process_file(filepath: Path) -> None:
     path = Path(path)
     if filepath.is_symlink():
         return
@@ -24,7 +24,7 @@ def process_file(filepath):
 '\n        initial_indent = ""\n        lines_to_write = []\n        if content_lines and not content_lines[-1].endswith("\n"):\n            lines_to_write.append("\n")\n        lines_to_write.append(f"{initial_indent}if __name__ == \'__main__\':\n")\n        lines_to_write.append(f"{initial_indent}    # Placeholder for main execution logic\n")\n        lines_to_write.append(f"{initial_indent}    pass\n")\n        with open(filepath, "a", encoding="utf-8") as f:\n            f.writelines(lines_to_write)\n    else:\n        print(f"__main__ block already present in: {filepath.name}")\n'
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
     args = sys.argv[1:]

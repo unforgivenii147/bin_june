@@ -26,7 +26,7 @@ def extract_episode(name: str):
     return None
 
 
-def clean_name(fname: str):
+def clean_name(fname: str) -> str | None:
     name = LEADING_JUNK.sub("", fname)
     ep = extract_episode(name)
     if not ep:
@@ -34,13 +34,13 @@ def clean_name(fname: str):
     return f"E{ep.zfill(2)}"
 
 
-def collect_files(path: Path, recursive: bool):
+def collect_files(path: Path, recursive: bool) -> list[Path]:
     if recursive:
         return [p for p in path.rglob("*") if p.suffix.lower() in VIDEO_EXTS]
     return [p for p in path.iterdir() if p.is_file() and p.suffix.lower() in VIDEO_EXTS]
 
 
-def main():
+def main() -> None:
     ap = argparse.ArgumentParser("Subtitle cleaner")
     ap.add_argument("-r", "--recursive", action="store_true")
     ap.add_argument("-w", "--write", action="store_true")

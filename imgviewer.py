@@ -16,11 +16,11 @@ def get_ansi_color_code(r, g, b):
     return 16 + 36 * round(r / 255 * 5) + 6 * round(g / 255 * 5) + round(b / 255 * 5)
 
 
-def get_color(r, g, b):
+def get_color(r, g, b) -> str:
     return f"\x1b[48;5;{int(get_ansi_color_code(r, g, b))}m \x1b[0m"
 
 
-def show_image(img_path):
+def show_image(img_path: str) -> None:
     try:
         img = Image.open(img_path)
     except FileNotFoundError:

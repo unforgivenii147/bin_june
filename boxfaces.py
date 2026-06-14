@@ -6,7 +6,7 @@ from pathlib import Path
 import cv2
 
 
-def detect_and_save_faces(input_video_path, output_video_path="out.mp4"):
+def detect_and_save_faces(input_video_path: str, output_video_path: str = "out.mp4") -> None:
     if not Path(input_video_path).exists():
         print(f"Error: Input video file not found at '{input_video_path}'")
         sys.exit(1)

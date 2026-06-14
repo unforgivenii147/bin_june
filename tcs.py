@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 
-def send_to_process(txt):
+def send_to_process(txt: str) -> None:
     try:
         process = subprocess.Popen(["termux-clipboard-set"], stdin=subprocess.PIPE, text=True, stderr=subprocess.PIPE)
         _stdout, stderr = process.communicate(input=txt)
@@ -20,7 +20,7 @@ def send_to_process(txt):
         sys.exit(1)
 
 
-def selective_copy(fp, lines):
+def selective_copy(fp: Path, lines: list[str]) -> None:
     cl = [p for p in lines if p != "-s"]
     selected = []
     nl = fp.read_text(encoding="utf-8").splitlines()
@@ -32,7 +32,7 @@ def selective_copy(fp, lines):
     send_to_process(content)
 
 
-def copy_lines_to_clipboard(path: str | Path, start_line: int | None = None, end_line: int | None = None):
+def copy_lines_to_clipboard(path: str | Path, start_line: int | None = None, end_line: int | None = None) -> None:
     content = ""
     path = Path(path)
     if not path.is_file():
@@ -66,7 +66,7 @@ def copy_lines_to_clipboard(path: str | Path, start_line: int | None = None, end
     send_to_process(content)
 
 
-def main():
+def main() -> None:
     if len(sys.argv) < 2 or len(sys.argv) > 5:
         print(f"Usage: {sys.argv[0]} <path> [start_line] [end_line]", file=sys.stderr)
         print("  <path>: Path to the input file.", file=sys.stderr)

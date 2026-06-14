@@ -10,12 +10,12 @@ from pathlib import Path
 from dh import get_pyfiles
 
 
-def is_blank_line(line):
+def is_blank_line(line: str):
     """Check if a line is blank or contains only whitespace."""
     return line.strip() == ""
 
 
-def find_duplicates(file_path, skip_blanks=True):
+def find_duplicates(file_path: Path, skip_blanks: bool = True):
     """Find sequentially repeated lines (optionally skipping blanks)."""
     try:
         with open(file_path, "r", encoding="utf-8") as f:
@@ -42,7 +42,7 @@ def find_duplicates(file_path, skip_blanks=True):
         return []
 
 
-def remove_duplicates(lines, duplicates):
+def remove_duplicates(lines: list[str], duplicates):
     """Remove duplicate lines."""
     lines_copy = lines.copy()
     removed = 0
@@ -54,7 +54,7 @@ def remove_duplicates(lines, duplicates):
     return lines_copy
 
 
-def process_file(file_path, duplicates, dry_run=False, auto_yes=False, skip_blanks=True):
+def process_file(file_path, duplicates, dry_run: bool = False, auto_yes=False, skip_blanks: bool = True):
     """Process a single file."""
     if not duplicates:
         return False, auto_yes
@@ -105,7 +105,7 @@ def process_file(file_path, duplicates, dry_run=False, auto_yes=False, skip_blan
     return False, auto_yes
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Find and remove sequential duplicate lines in Python files",
         epilog="Blank lines are ignored by default.",

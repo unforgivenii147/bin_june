@@ -37,7 +37,7 @@ def get_latest_version(package_name: str) -> str:
     return "Unknown"
 
 
-def main():
+def main() -> None:
     print("=== Python Packages Sanity Check ===")
     installed_pkgs = get_installed_python_packages()
     print(f"Found {len(installed_pkgs)} installed Python packages.\n")

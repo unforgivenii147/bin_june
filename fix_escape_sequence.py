@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 
 
-def show_diff(text1, text2):
+def show_diff(text1: str, text2: str) -> None:
     diff = difflib.unified_diff(text1.splitlines(keepends=True), text2.splitlines(keepends=True), lineterm="")
     changed_lines = [line for line in diff if line.startswith(("+", "-"))]
     if changed_lines:
@@ -15,7 +15,7 @@ def show_diff(text1, text2):
         print("-----------------")
 
 
-def fix_escape_sequences(directory: Path):
+def fix_escape_sequences(directory: Path) -> None:
     for path in directory.rglob("*.py"):
         if not path.is_symlink():
             try:

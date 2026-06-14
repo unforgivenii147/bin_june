@@ -32,7 +32,7 @@ def fix_by_shebang(fp) -> bool:
     return False
 
 
-def get_file_mime(path):
+def get_file_mime(path) -> str:
     _, txt, _ = runcmd(["file", "--brief", "--mime-type", str(path)], show_output=False)
     return txt
 
@@ -47,7 +47,7 @@ def safe_rename(old_path, new_path):
     return new_path
 
 
-def check_files(directory):
+def check_files(directory: Path):
     mismatched_files = []
     for root, _, files in os.walk(directory):
         for name in files:
@@ -88,7 +88,7 @@ def check_files(directory):
     return mismatched_files
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     mismatches = check_files(cwd)
     if mismatches:

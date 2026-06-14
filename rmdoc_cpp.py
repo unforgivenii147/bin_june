@@ -11,7 +11,7 @@ class RegexCommentRemover:
             "//.*?$|/\\*.*?\\*/|'(?:\\.|[^'])*'|\\\"(?:\\.|[^\\\"])*\\\"", re.DOTALL | re.MULTILINE
         )
 
-    def remove_comments(self, source: str):
+    def remove_comments(self, source: str) -> tuple[str, int]:
 
         def replacer(match):
             s = match.group(0)
@@ -26,7 +26,7 @@ class RegexCommentRemover:
         return (result, removed)
 
 
-def process_file(file_path, remover):
+def process_file(file_path: Path, remover: RegexCommentRemover):
     path = Path(path)
     try:
         code = Path(file_path).read_text(encoding="utf-8", errors="ignore")
@@ -78,7 +78,7 @@ if __name__ == "__main__":
     nochg = sum((1 for r in results if r[0] == "nochange"))
     total_comments = sum((r[2] for r in results if r[0] == "changed"))
 
-    def fsz(size):
+    def fsz(size: int) -> str:
         for unit in ["B", "KB", "MB", "GB"]:
             if size < 1024.0:
                 return f"{size:.2f} {unit}"

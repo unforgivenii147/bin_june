@@ -22,7 +22,7 @@ def is_nested(path1: Path, path2: Path) -> bool:
     return False
 
 
-def hash_folder(folder_path):
+def hash_folder(folder_path: Path) -> str:
     hasher = xxh64()
     files = []
     for path in folder_path.rglob("*"):
@@ -44,7 +44,7 @@ def hash_folder(folder_path):
     return hasher.hexdigest()
 
 
-def find_duplicate_folders(cwd):
+def find_duplicate_folders(cwd: Path):
     folder_hashes = defaultdict(list)
     for path in get_dirs(cwd):
         folder_hash = hash_folder(path)

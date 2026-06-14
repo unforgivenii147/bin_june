@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
+from requests.models import Response
 import json
 import os
 import pickle
@@ -17,7 +18,7 @@ if env_path.exists():
 
 
 class GoogleDriveSync:
-    def __init__(self, client_id=None, client_secret=None, token_file="drive_token.pkl"):
+    def __init__(self, client_id=None, client_secret=None, token_file: str = "drive_token.pkl") -> None:
         self.client_id = client_id or os.getenv("GOOGLE_CLIENT_ID")
         self.client_secret = client_secret or os.getenv("GOOGLE_CLIENT_SECRET")
         self.token_file = token_file
@@ -29,7 +30,7 @@ class GoogleDriveSync:
 
         self.load_or_auth()
 
-    def load_or_auth(self):
+    def load_or_auth(self) -> None:
         """Load existing token or authenticate"""
         if os.path.exists(self.token_file):
             with open(self.token_file, "rb") as f:
@@ -44,12 +45,12 @@ class GoogleDriveSync:
         # Need new authentication
         self.authenticate()
 
-    def is_token_expired(self):
+    def is_token_expired(self) -> bool:
         """Check if token needs refresh (simple check)"""
         # This is a simplified check - you can store expiry time for better accuracy
         return False  # Let's always try to use, refresh if 401
 
-    def refresh_access_token(self):
+    def refresh_access_token(self) -> bool:
         """Refresh the access token using refresh token"""
         if not self.refresh_token:
             return False
@@ -74,7 +75,7 @@ class GoogleDriveSync:
 
         return False
 
-    def authenticate(self):
+    def authenticate(self) -> None:
         """Manual OAuth 2.0 authentication flow"""
         print("\n" + "=" * 60)
         print("GOOGLE DRIVE AUTHENTICATION")
@@ -123,7 +124,7 @@ class GoogleDriveSync:
 
         print("\n✓ Authentication successful!\n")
 
-    def api_request(self, method, url, **kwargs):
+    def api_request(self, method: str, url: str, **kwargs) -> Response:
         """Make authenticated API request with auto-refresh"""
         headers = kwargs.get("headers", {})
         headers["Authorization"] = f"Bearer {self.access_token}"
@@ -158,7 +159,7 @@ class GoogleDriveSync:
 
         return response.json()
 
-    def get_all_files_recursive(self, folder_id="root"):
+    def get_all_files_recursive(self, folder_id: str = "root"):
         """Get all files recursively from a folder"""
         all_items = []
         page_token = None
@@ -177,7 +178,7 @@ class GoogleDriveSync:
 
         return all_items
 
-    def download_file(self, file_id, file_name, local_path):
+    def download_file(self, file_id, file_name, local_path) -> bool:
         """Download a file with progress"""
         url = f"https://www.googleapis.com/drive/v3/files/{file_id}?alt=media"
 
@@ -205,7 +206,7 @@ class GoogleDriveSync:
         print(f"\n✓ Downloaded: {file_name}")
         return True
 
-    def get_file_metadata(self, file_id):
+    def get_file_metadata(self, file_id: str):
         """Get file metadata"""
         url = f"https://www.googleapis.com/drive/v3/files/{file_id}"
         params = {"fields": "id, name, mimeType, size, modifiedTime"}
@@ -216,7 +217,7 @@ class GoogleDriveSync:
             return response.json()
         return None
 
-    def sync_folder(self, drive_folder_id, local_folder_path, folder_name="root", depth=0):
+    def sync_folder(self, drive_folder_id: str, local_folder_path, folder_name: str = "root", depth=0) -> None:
         """Recursively sync a folder"""
         indent = "  " * depth
         print(f"{indent}📁 Syncing: {folder_name}")
@@ -264,7 +265,7 @@ class GoogleDriveSync:
             filename = filename.replace(char, "_")
         return filename
 
-    def sync_all(self, local_base_path):
+    def sync_all(self, local_base_path: str) -> None:
         """Sync entire Google Drive"""
         print("\n" + "=" * 60)
         print("STARTING GOOGLE DRIVE SYNC")
@@ -281,7 +282,7 @@ class GoogleDriveSync:
         print("✅ SYNC COMPLETED!")
         print("=" * 60)
 
-    def sync_folder_by_name(self, folder_name, local_base_path):
+    def sync_folder_by_name(self, folder_name, local_base_path) -> None:
         """Sync a specific folder by name from root"""
         print(f"\nSearching for folder: {folder_name}")
 
@@ -300,7 +301,7 @@ class GoogleDriveSync:
             print(f"❌ Folder '{folder_name}' not found in root directory")
 
 
-def main():
+def main() -> None:
     # Configuration
     # On Android, use /sdcard/ or /storage/emulated/0/
     LOCAL_SYNC_PATH = "/sdcard/GoogleDriveBackup"

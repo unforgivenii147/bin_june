@@ -24,7 +24,7 @@ def process_file(fp) -> None:
     cprint(f"{fsz(diffsize)}", "cyan")
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
     args = sys.argv[1:]

@@ -73,7 +73,7 @@ def clean_file_worker(path: Path) -> tuple:
         return (path, False, str(e))
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     log_files = list(cwd.rglob(f"*{LOG_EXT}"))
     if not log_files:

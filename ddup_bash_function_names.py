@@ -9,7 +9,7 @@ from collections import Counter
 from pathlib import Path
 
 
-def extract_function_names(filepath):
+def extract_function_names(filepath: Path):
     """Extract all function names and their line numbers from a bash functions file."""
     functions = []  # List of (name, line_number, line_content)
 
@@ -56,7 +56,7 @@ def find_duplicates(functions):
     return duplicates
 
 
-def display_results(functions, duplicates, filepath):
+def display_results(functions, duplicates, filepath: Path) -> bool:
     """Display duplicate information in a readable format."""
     if not duplicates:
         print("✓ No duplicate function names found!")
@@ -80,7 +80,7 @@ def display_results(functions, duplicates, filepath):
     return False
 
 
-def show_statistics(functions, duplicates):
+def show_statistics(functions, duplicates) -> None:
     """Show statistics about the functions file."""
     total_definitions = len(functions)
     unique_functions = len(set(name for name, _, _ in functions))
@@ -98,7 +98,7 @@ def show_statistics(functions, duplicates):
         print(f"   Duplication rate: {duplication_rate:.1f}%")
 
 
-def interactive_fix(duplicates, functions, filepath):
+def interactive_fix(duplicates, functions, filepath: Path) -> None:
     """Interactively help the user fix duplicates."""
     if not duplicates:
         return

@@ -29,7 +29,7 @@ def get_all_packages():
             return []
 
 
-def search_packages(pattern):
+def search_packages(pattern: str):
     all_packages = get_all_packages()
     regex_pattern = pattern.replace("*", ".*").replace("?", ".")
     regex = re.compile(regex_pattern, re.IGNORECASE)
@@ -37,7 +37,7 @@ def search_packages(pattern):
     return matches
 
 
-def install_packages(packages):
+def install_packages(packages) -> bool:
     if not packages:
         print("No packages to install.")
         return False
@@ -57,7 +57,7 @@ def install_packages(packages):
         return False
 
 
-def main():
+def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: python install_wildcard.py <pattern>")
         print("Examples:")

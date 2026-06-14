@@ -10,7 +10,7 @@ from lzma_mt import LZMADecompressor
 MEM_LIMIT = 104857600
 
 
-def decompress_file(path):
+def decompress_file(path: Path) -> bool:
     fname = path.name
     if fname.endswith(".tar.xz"):
         extract_path = path.parent / f"{fname.replace('.tar.xz', '')}"

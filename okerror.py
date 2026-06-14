@@ -8,7 +8,7 @@ ERROR_DIR = Path("error")
 OK_DIR = Path("ok")
 
 
-def ensure_dirs():
+def ensure_dirs() -> None:
     ERROR_DIR.mkdir(exist_ok=True)
     OK_DIR.mkdir(exist_ok=True)
 
@@ -32,7 +32,7 @@ def black_check(file_path: Path) -> bool:
     return result.returncode == 0
 
 
-def main():
+def main() -> None:
     ensure_dirs()
     for py_file in Path().glob("*.py"):
         if py_file.name == Path(__file__).name:

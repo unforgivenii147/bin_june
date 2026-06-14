@@ -5,7 +5,7 @@ import os
 import sys
 
 
-def main():
+def main() -> None:
     if len(sys.argv) < 2:
         print(f"Usage: {os.path.basename(sys.argv[0])} input.html [output.html]", file=sys.stderr)
         sys.exit(1)

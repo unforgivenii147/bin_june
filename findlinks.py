@@ -10,14 +10,14 @@ import requests
 from bs4 import BeautifulSoup
 
 
-def can_fetch(rp, url):
+def can_fetch(rp: RobotFileParser, url):
     try:
         return rp.can_fetch("*", url)
     except Exception:
         return True
 
 
-def crawl_for_ext(start_url, max_pages, delay, ext):
+def crawl_for_ext(start_url: str, max_pages: int, delay: float, ext: str):
     parsed = urlparse(start_url)
     if not parsed.scheme:
         start_url = "https://" + start_url.lstrip("/")
@@ -82,13 +82,13 @@ def crawl_for_ext(start_url, max_pages, delay, ext):
     return sorted(found_urls)
 
 
-def save_urls(urls, filename="urls.txt"):
+def save_urls(urls, filename="urls.txt") -> None:
     with open(filename, "w", encoding="utf-8") as f:
         f.writelines((url + "\n" for url in urls))
     print(f"\n✅ Saved {len(urls)} URLs to '{filename}'")
 
 
-def main():
+def main() -> None:
     if len(sys.argv) < 2:
         print(__doc__)
         sys.exit(1)

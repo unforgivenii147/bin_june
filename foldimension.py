@@ -60,7 +60,7 @@ def unique_destination(dest: Path) -> Path:
         counter += 1
 
 
-def organize_images(root: Path, size_to_files: dict):
+def organize_images(root: Path, size_to_files: dict) -> None:
     """
     For each resolution group, create a folder (or use 'other') and move
     the files there. Print a summary of the moves.
@@ -79,7 +79,7 @@ def organize_images(root: Path, size_to_files: dict):
             print(f"Moved: {src} -> {dest}")
 
 
-def main():
+def main() -> None:
     root = Path.cwd()
     print(f"Scanning {root} for image files...")
     size_to_files = collect_images(root)

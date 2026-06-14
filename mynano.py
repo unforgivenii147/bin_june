@@ -14,12 +14,12 @@ from textual.widgets import Footer, Header, TextEditor
 class BasicEditor(App):
     BINDINGS = [("o", "open_file", "Open"), ("s", "save_file", "Save"), ("q", "app_quit", "Quit")]
 
-    def __init__(self, filename: str | None = None):
+    def __init__(self, filename: str | None = None) -> None:
         super().__init__()
         self.filename = filename
         self.is_dirty = False
 
-    def setup_readline(self):
+    def setup_readline(self) -> None:
         readline.parse_and_bind("tab: complete")
         readline.set_completer(rlcompleter.Completer(namespace=sys.modules).complete)
 

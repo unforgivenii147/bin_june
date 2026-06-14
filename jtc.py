@@ -7,7 +7,7 @@ from dh import run_command
 from fastwalk import walk_files
 
 
-def process_file(path) -> bool:
+def process_file(path: str) -> bool:
     path = Path(path)
     try:
         cmd = f"just-the-code -s --language=python {path!s}"
@@ -26,7 +26,7 @@ def process_file(path) -> bool:
         return False
 
 
-def walk_directory(root) -> list[str]:
+def walk_directory(root: Path) -> list[str]:
     files = []
     for pth in walk_files(root):
         path = Path(pth)
@@ -35,7 +35,7 @@ def walk_directory(root) -> list[str]:
     return files
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     files = walk_directory(cwd)
     for f in files:

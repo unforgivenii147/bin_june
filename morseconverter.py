@@ -46,7 +46,7 @@ MORSE_CODE_DICT = {
 REVERSE_MORSE_DICT = {v: k for k, v in MORSE_CODE_DICT.items()}
 
 
-def text_to_morse(text):
+def text_to_morse(text: str) -> str:
     morse = []
     for char in text.upper():
         if char in MORSE_CODE_DICT:
@@ -56,7 +56,7 @@ def text_to_morse(text):
     return " ".join(morse)
 
 
-def morse_to_text(morse):
+def morse_to_text(morse: str) -> str:
     text = []
     morse_chars = morse.split(" ")
     for code in morse_chars:

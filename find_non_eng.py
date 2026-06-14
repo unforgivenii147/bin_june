@@ -11,7 +11,7 @@ from dh import get_nobinary, is_binary, mpf3
 
 
 class LanguageDetector:
-    def __init__(self, min_bytes=100, max_bytes=10000) -> None:
+    def __init__(self, min_bytes: int = 100, max_bytes: int = 10000) -> None:
         self.min_bytes = min_bytes
         self.max_bytes = max_bytes
         self.stats = {
@@ -23,10 +23,10 @@ class LanguageDetector:
             "languages": Counter(),
         }
 
-    def is_text_file(self, filepath):
+    def is_text_file(self, filepath: Path) -> bool:
         return not is_binary(filepath)
 
-    def detect_language(self, filepath):
+    def detect_language(self, filepath: Path):
         try:
             with Path(filepath).open(encoding="utf-8", errors="ignore") as f:
                 content = f.read(self.max_bytes)
@@ -42,7 +42,7 @@ class LanguageDetector:
         except Exception as e:
             return (False, f"ERROR: {e}", None, None)
 
-    def scan_directory(self, directory, show_progress=True, only_report_non_english=True):
+    def scan_directory(self, directory, show_progress=True, only_report_non_english=True) -> None:
         directory = Path(directory)
         if not directory.exists():
             print(f"Error: Directory '{directory}' does not exist")
@@ -79,7 +79,7 @@ class LanguageDetector:
         print("\n" + "=" * 60)
         self.report_results(only_report_non_english)
 
-    def report_results(self, only_report_non_english=True):
+    def report_results(self, only_report_non_english=True) -> None:
         print("\n📊 SCAN RESULTS")
         print("=" * 60)
         print(f"📁 Total files processed: {self.stats['total_files']}")
@@ -116,7 +116,7 @@ class LanguageDetector:
             print("\n✅ No non-English files found!")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Recursively find non-English files using pycld2")
     parser.add_argument("directory", nargs="?", default=".", help="Directory to scan (default: current directory)")
     parser.add_argument(

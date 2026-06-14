@@ -9,7 +9,7 @@ def is_git_repo(path: Path) -> bool:
     return (path / ".git").is_dir()
 
 
-def git_pull(repo_path: Path):
+def git_pull(repo_path: Path) -> None:
     print(f"\n==> Pulling in repo: {repo_path}")
     try:
         subprocess.run(["git", "-C", str(repo_path), "restore", "."], check=True)
@@ -17,7 +17,7 @@ def git_pull(repo_path: Path):
         print(f"⚠️  git pull failed in: {repo_path}")
 
 
-def main():
+def main() -> None:
     root = Path.cwd()
     for dirpath, _dirnames, _filenames in os.walk(root):
         current = Path(dirpath)

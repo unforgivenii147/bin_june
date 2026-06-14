@@ -187,7 +187,7 @@ def find_files(paths: list, recursive: bool = False, exclude_hidden: bool = True
     return unique_files
 
 
-def print_stats(stats: dict, dry_run: bool = False):
+def print_stats(stats: dict, dry_run: bool = False) -> None:
     """
     Print conversion statistics.
     """
@@ -211,7 +211,7 @@ def print_stats(stats: dict, dry_run: bool = False):
                 print(f"  {result['file']}: {result['error']}")
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Convert CRLF (Windows) line endings to LF (Unix)",
         formatter_class=argparse.RawDescriptionHelpFormatter,

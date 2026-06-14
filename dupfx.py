@@ -8,7 +8,7 @@ from dh import cprint, fsz, gsz
 from xxhash import xxh64_hexdigest
 
 
-def should_skip(path):
+def should_skip(path: Path) -> bool:
     path = Path(path)
     return bool(
         path.is_symlink()
@@ -24,7 +24,7 @@ def get_hash_file(path):
         return (xxh64_hexdigest(f.read()), path)
 
 
-def find_duplicates():
+def find_duplicates() -> None:
     cwd = Path.cwd()
     files_by_hash = defaultdict(list)
     duplicate_count = 0

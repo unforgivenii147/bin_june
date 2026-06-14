@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from tree_sitter import Tree
 from collections import defaultdict
 from pathlib import Path
 
@@ -13,15 +14,15 @@ OUT_DIR.mkdir(exist_ok=True)
 VALID = {"\n(expression_statement\n  (assignment_expression\n    (=( _ )@name value:value )\n  )\n  (\n)"}
 
 
-def get_node_text(src: bytes, node):
+def get_node_text(src: bytes, node) -> str:
     return src[node.start_byte : node.end_byte].decode()
 
 
-def extract_functions_and_classes(src: bytes, tree):
+def extract_functions_and_classes(src: bytes, tree: Tree):
     root = tree.root_node
     definitions = []
 
-    def traverse(node):
+    def traverse(node) -> None:
         if node.type in VALID:
             node_text = get_node_text(src, node)
             decorators = []
@@ -46,13 +47,13 @@ def get_relative_path(file_path: Path, base_path: Path) -> Path:
         return file_path
 
 
-def extract_docstring(src: bytes, node):
+def extract_docstring(src: bytes, node) -> str | None:
     if node.children and node.children[0].type == "string":
         return get_node_text(src, node.children[0])
     return None
 
 
-def format_definition_with_metadata(def_text: str, file_name: str, line_num: int, docstring: str | None = None):
+def format_definition_with_metadata(def_text: str, file_name: str, line_num: int, docstring: str | None = None) -> str:
     lines = [f"# From: {file_name}:{line_num}"]
     if docstring:
         lines.append(f"# Docstring: {docstring[:50]}{('...' if len(docstring) > 50 else '')}")

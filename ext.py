@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from ast import AST
 import ast
 import multiprocessing as mp
 import os
@@ -31,7 +32,7 @@ def discover_python_files() -> list[str]:
     return files
 
 
-def mark_parents(node: ast.AST, parent=None):
+def mark_parents(node: ast.AST, parent: AST | None = None) -> None:
     for child in ast.iter_child_nodes(node):
         child._parent = node
         mark_parents(child, node)
@@ -93,7 +94,7 @@ def write_output(path: str, data: dict[str, str]) -> None:
         f.writelines((src.rstrip() + "\n\n" for _name, src in sorted(data.items())))
 
 
-def main():
+def main() -> None:
     Path(OUTPUT_DIR).mkdir(exist_ok=True, parents=True)
     files = discover_python_files()
     if not files:

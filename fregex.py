@@ -32,7 +32,7 @@ def process_file(file_path, output_dir):
     return (file_path, len(patterns))
 
 
-def find_regex_in_dir(start_dir, output_dir, max_workers=4):
+def find_regex_in_dir(start_dir: Path, output_dir: str, max_workers=4) -> None:
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     files_to_process = [

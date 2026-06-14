@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 
-def replace_in_file(filepath, old_text, new_text):
+def replace_in_file(filepath: Path, old_text: str, new_text: str) -> bool:
     """Replace text in a single file."""
     try:
         # Read file content
@@ -34,7 +34,7 @@ def replace_in_file(filepath, old_text, new_text):
         return False
 
 
-def main():
+def main() -> None:
     if len(sys.argv) != 3:
         print("Usage: python replacer.py <old_text> <new_text>")
         print("\nExample:")

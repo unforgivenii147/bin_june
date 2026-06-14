@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from sqlite3 import Cursor
 import base64
 import io
 import os
@@ -10,11 +11,11 @@ from pathlib import Path
 import py7zr
 
 
-def get_current_folder_name():
+def get_current_folder_name() -> str:
     return Path(Path.cwd()).name
 
 
-def get_user_folder_name(default_name):
+def get_user_folder_name(default_name: str):
     while True:
         user_input = input(f"Enter folder name (default: {default_name}): ").strip()
         if not user_input:
@@ -22,18 +23,18 @@ def get_user_folder_name(default_name):
         return user_input
 
 
-def folder_exists_in_db(cursor, folder_name):
+def folder_exists_in_db(cursor: Cursor, folder_name):
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (folder_name,))
     return cursor.fetchone() is not None
 
 
-def create_folder_table(cursor, folder_name):
+def create_folder_table(cursor: Cursor, folder_name) -> None:
     cursor.execute(
         f'\n        CREATE TABLE IF NOT EXISTS "{folder_name}" (\n            id INTEGER PRIMARY KEY AUTOINCREMENT,\n            filename TEXT NOT NULL,\n            file_contents BLOB,\n            compressed BOOLEAN DEFAULT 0,\n            original_size INTEGER DEFAULT 0,\n            compressed_size INTEGER DEFAULT 0\n        )\n    '
     )
 
 
-def compress_data(data_bytes):
+def compress_data(data_bytes) -> str | None:
     if not data_bytes:
         return None
     try:
@@ -47,7 +48,7 @@ def compress_data(data_bytes):
         return None
 
 
-def read_file_contents(filepath):
+def read_file_contents(filepath: str):
     try:
         encodings = ["utf-8", "latin-1", "cp1252", "iso-8859-1"]
         get_size = Path(filepath).stat().st_size
@@ -119,7 +120,7 @@ def get_files_in_cwd():
     return files
 
 
-def insert_files(cursor, folder_name, files):
+def insert_files(cursor: Cursor, folder_name, files) -> None:
     for file_info in files:
         cursor.execute(
             f'\n            INSERT INTO "{folder_name}" (filename, file_contents, compressed, original_size, compressed_size)\n            VALUES (?, ?, ?, ?, ?)\n        ',
@@ -133,7 +134,7 @@ def insert_files(cursor, folder_name, files):
         )
 
 
-def main():
+def main() -> None:
     try:
         pass
     except ImportError:

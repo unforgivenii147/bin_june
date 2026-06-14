@@ -6,7 +6,7 @@ import sys
 from collections import defaultdict
 
 
-def get_lines(file_path):
+def get_lines(file_path) -> list[str]:
     """Reads lines using mmap for large files (>5MB) or standard read for smaller ones."""
     file_size = os.path.getsize(file_path)
     if file_size > 5 * 1024 * 1024:
@@ -21,7 +21,7 @@ def get_lines(file_path):
             return [line.strip() for line in f if line.strip()]
 
 
-def process_wordlist(file_path):
+def process_wordlist(file_path: str) -> None:
     if not os.path.exists(file_path):
         print(f"Error: File '{file_path}' does not exist.")
         sys.exit(1)

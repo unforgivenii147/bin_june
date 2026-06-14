@@ -16,7 +16,7 @@ def get_all_dist_info_dirs():
     return dist_info_dirs
 
 
-def check_pure(dist_info_path):
+def check_pure(dist_info_path) -> str | None:
     record_file = os.path.join(dist_info_path, "RECORD")
     pkg_name = Path(dist_info_path).name.replace(".dist-info", "").split("-")[0].lower()
     sum = 0
@@ -31,7 +31,7 @@ def check_pure(dist_info_path):
     return None
 
 
-def get_pure():
+def get_pure() -> None:
     dist_info_dirs = get_all_dist_info_dirs()
     purz = []
     for ddir in dist_info_dirs:

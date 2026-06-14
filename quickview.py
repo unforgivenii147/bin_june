@@ -6,11 +6,11 @@ from pathlib import Path
 LINES_PER_FILE = 20
 
 
-def list_files():
+def list_files() -> list[Path]:
     return sorted([p for p in Path().iterdir() if p.is_file()], key=lambda p: p.name.lower())
 
 
-def head_lines(path, n):
+def head_lines(path, n: int):
     lines = []
     try:
         with Path(path).open(encoding="utf-8", errors="replace") as f:
@@ -24,7 +24,7 @@ def head_lines(path, n):
     return lines
 
 
-def init_colors():
+def init_colors() -> None:
     curses.start_color()
     curses.use_default_colors()
     curses.init_pair(1, curses.COLOR_CYAN, -1)
@@ -33,7 +33,7 @@ def init_colors():
     curses.init_pair(4, curses.COLOR_RED, -1)
 
 
-def draw(stdscr, files, idx):
+def draw(stdscr, files: list[Path], idx: int) -> None:
     stdscr.clear()
     h, w = stdscr.getmaxyx()
     header = f"File {idx + 1}/{len(files)}: {files[idx].name}"
@@ -59,7 +59,7 @@ def draw(stdscr, files, idx):
     stdscr.refresh()
 
 
-def main(stdscr):
+def main(stdscr) -> None:
     curses.curs_set(0)
     stdscr.keypad(True)
     init_colors()

@@ -4,7 +4,7 @@ import shutil
 from pathlib import Path
 
 
-def get_size_str(size_bytes):
+def get_size_str(size_bytes) -> str:
     for unit in ["B", "KB", "MB", "GB"]:
         if size_bytes < 1024.0:
             return f"{size_bytes:.1f}{unit}"
@@ -12,7 +12,7 @@ def get_size_str(size_bytes):
     return f"{size_bytes:.1f}TB"
 
 
-def folderize_by_extension(cwd):
+def folderize_by_extension(cwd: Path):
     root_path = Path(cwd)
     extension_stats = {}
     for file_path in root_path.rglob("*"):

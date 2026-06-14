@@ -30,7 +30,7 @@ def fsz(sz: float) -> str:
     return f"{value:.1f} {units[i]}"
 
 
-def du_sort_python(path):
+def du_sort_python(path: Path) -> None:
     results = []
     total = 0
     for entry in path.iterdir():

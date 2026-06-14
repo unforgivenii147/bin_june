@@ -6,7 +6,7 @@ from pathlib import Path
 from dh import get_files, mpf3, runcmd
 
 
-def process_file(fp):
+def process_file(fp) -> None:
     path = Path(path)
     path = Path(fp)
     pardir = str(path.parent)

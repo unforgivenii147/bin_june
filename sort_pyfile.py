@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 
-def sort_python_script(file_path: Path):
+def sort_python_script(file_path: Path) -> None:
     try:
         source_code = file_path.read_text(encoding="utf-8")
         tree = ast.parse(source_code)

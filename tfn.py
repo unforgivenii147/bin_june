@@ -69,7 +69,7 @@ def get_font_name_and_style(font_path):
         return (None, None)
 
 
-def sanitize_filename(name):
+def sanitize_filename(name) -> str:
     """Sanitize a string for use as a filename."""
     if not name:
         return "Unknown"
@@ -80,7 +80,7 @@ def sanitize_filename(name):
     return sanitized
 
 
-def rename_font_file(font_path):
+def rename_font_file(font_path: Path) -> str | None:
     """Rename a single font file based on its metadata."""
     family_name, style = get_font_name_and_style(font_path)
     if not family_name:
@@ -104,7 +104,7 @@ def rename_font_file(font_path):
         return None
 
 
-def process_directory(directory, recursive=True):
+def process_directory(directory: Path, recursive=True) -> int:
     """Process all font files in a directory (and subdirectories if recursive)."""
     directory = Path(directory)
     renamed_count = 0
@@ -119,7 +119,7 @@ def process_directory(directory, recursive=True):
     return renamed_count
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     renamed_count = process_directory(cwd, recursive=True)
     print(f"\n{renamed_count} font file(s).")

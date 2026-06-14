@@ -14,7 +14,7 @@ def is_comment(line: str) -> bool:
     return any((stripped.startswith(prefix) for prefix in COMMENT_PREFIXES))
 
 
-def process_lines(lines, start_idx, end_idx, unique=False, comments=True):
+def process_lines(lines: list[str], start_idx, end_idx, unique=False, comments=True):
     """
     Sort and optionally deduplicate lines in the given index range.
     comments=False:
@@ -68,7 +68,7 @@ def process_lines(lines, start_idx, end_idx, unique=False, comments=True):
     return (rebuilt, removed_lines)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Sort lines in a file within a given line range.")
     parser.add_argument("filename", help="Path to file")
     parser.add_argument("start_line", type=int, help="Start line (1-based)")

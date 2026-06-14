@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from tree_sitter import Node
 from pathlib import Path
 
 import tree_sitter_cpp as tscpp
@@ -17,7 +18,7 @@ class TSCppRemover:
         root = tree.root_node
         to_delete = []
 
-        def walk(node):
+        def walk(node: Node) -> None:
             if node.type == "comment":
                 to_delete.append((node.start_byte, node.end_byte))
             for child in node.children:
@@ -31,7 +32,7 @@ class TSCppRemover:
         return remove_blank_lines(cleaned)
 
 
-def process_file(path):
+def process_file(path: Path) -> None:
     path = Path(path)
     before = path.stat().st_size
     remover = TSCppRemover()

@@ -1,5 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from ast import FunctionDef
+from ast import ClassDef
+from ast import AsyncFunctionDef
 import ast
 import copy
 import hashlib
@@ -53,11 +56,11 @@ def stable_hash(node: ast.AST) -> str:
     return hashlib.sha256(dumped.encode("utf-8")).hexdigest()
 
 
-def get_source_segment(lines, lineno, end_lineno):
+def get_source_segment(lines, lineno, end_lineno) -> str:
     return "".join(lines[lineno - 1 : end_lineno])
 
 
-def is_simple_top_level_assign(node):
+def is_simple_top_level_assign(node) -> bool:
     if not isinstance(node, ast.Assign):
         return False
     for target in node.targets:
@@ -91,7 +94,7 @@ def build_decl_for_assign(node, lines):
     return decls
 
 
-def build_decl(node, kind, name, lines):
+def build_decl(node: AsyncFunctionDef | ClassDef | FunctionDef, kind: str, name: str, lines) -> Decl:
     return Decl(
         kind=kind,
         name=name,
@@ -102,7 +105,7 @@ def build_decl(node, kind, name, lines):
     )
 
 
-def process_file(src_path):
+def process_file(src_path) -> None:
     path = Path(path)
     dup_path = src_path.parent / f"{src_path.stem}_dups.py"
     text = src_path.read_text(encoding="utf-8")
@@ -169,7 +172,7 @@ def process_file(src_path):
     print(f"Moved {len(duplicate_ranges)} duplicate declaration block(s) to {dup_path}")
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
     args = sys.argv[1:]

@@ -114,7 +114,7 @@ def test_executable(filepath: str) -> Tuple[str, Optional[str]]:
         return filepath, str(e)[:200]
 
 
-def main():
+def main() -> None:
     # Setup output file
     output_dir = Path.home() / "tmp"
     output_dir.mkdir(exist_ok=True)

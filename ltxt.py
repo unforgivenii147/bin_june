@@ -40,7 +40,7 @@ def collect_files_by_extension():
     return ext_map
 
 
-def collect_lines_for_extension(ext, files):
+def collect_lines_for_extension(ext, files) -> None:
     if not files:
         return
     global_counter = Counter()
@@ -56,7 +56,7 @@ def collect_lines_for_extension(ext, files):
     print(f"Saved results to {output_file}")
 
 
-def main():
+def main() -> None:
     ext_map = collect_files_by_extension()
     if not ext_map:
         print("No eligible files found.")

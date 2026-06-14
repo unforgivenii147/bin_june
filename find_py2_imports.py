@@ -14,7 +14,7 @@ parser.language = Language(tsp.language())
 VALID = {"import_statement", "import_from_statement"}
 
 
-def process_file(fp):
+def process_file(fp: Path) -> None:
     path = Path(path)
     src = fp.read_bytes()
     tree = parser.parse(src)
@@ -85,7 +85,7 @@ def process_file(fp):
                 continue
 
 
-def main():
+def main() -> None:
     for path in get_filez(cwd):
         if path.is_symlink():
             continue

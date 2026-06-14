@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from bs4.element import AttributeValueList
 import base64
 import os
 import re
@@ -9,7 +10,7 @@ from pathlib import Path
 from bs4 import BeautifulSoup
 
 
-def encode_local_file_to_base64(file_path):
+def encode_local_file_to_base64(file_path) -> str | None:
     try:
         with Path(file_path).open("rb") as f:
             return base64.b64encode(f.read()).decode("utf-8")
@@ -21,7 +22,7 @@ def encode_local_file_to_base64(file_path):
         return None
 
 
-def find_local_resource(resource_name, base_html_dir):
+def find_local_resource(resource_name: AttributeValueList | str, base_html_dir: Path | str):
     search_paths = [Path("/sdcard/_static"), Path(base_html_dir), Path.cwd(), Path(base_html_dir).parent.parent]
     normalized_resource_name = resource_name
     if normalized_resource_name.startswith("/"):
@@ -59,7 +60,7 @@ def find_local_resource(resource_name, base_html_dir):
     return None
 
 
-def make_html_standalone(path):
+def make_html_standalone(path: Path) -> str:
     html_content = path.read_text(encoding="utf-8")
     soup = BeautifulSoup(html_content, "html.parser")
     base_html_dir = str(path.parent)
@@ -157,7 +158,7 @@ def make_html_standalone(path):
     return soup.prettify()
 
 
-def get_mime_type(file_path):
+def get_mime_type(file_path) -> str:
     ext = os.path.splitext(file_path)[1].lower()
     mime_map = {
         ".png": "image/png",

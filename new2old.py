@@ -140,7 +140,7 @@ def generate_setup_py(
     classifiers_str = f"[\n        {class_str}\n    ]" if class_str else "[]"
     keywords_str = ", ".join((f'"{k}"' for k in keywords)) if keywords else "[]"
 
-    def format_authors(auths):
+    def format_authors(auths) -> str:
         return ", ".join((f"'{a.get('name', '')} <{a.get('email', '')}>'" for a in auths if a.get("name")))
 
     author_str = format_authors(authors)
@@ -217,7 +217,7 @@ def generate_setup_py(
     return setup_py
 
 
-def main():
+def main() -> None:
     import argparse
 
     parser = argparse.ArgumentParser(

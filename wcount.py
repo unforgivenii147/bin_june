@@ -27,7 +27,7 @@ def process_file(path):
     return word_count(content)
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
     files = [Path(f) for f in args] if args else get_nobinary(cwd)

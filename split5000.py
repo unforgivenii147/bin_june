@@ -61,7 +61,7 @@ def chunk_text_with_nltk(text: str, max_chars: int):
     return chunks
 
 
-def write_chunks(chunks, input_path: Path, out_dir: Path, encoding: str):
+def write_chunks(chunks, input_path: Path, out_dir: Path, encoding: str) -> None:
     stem = input_path.stem
     ext = "".join(input_path.suffixes)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -72,7 +72,7 @@ def write_chunks(chunks, input_path: Path, out_dir: Path, encoding: str):
         print(f"Wrote {out_path} ({len(chunk)} chars)")
 
 
-def main():
+def main() -> None:
     inp = Path(sys.argv[1])
     if not inp.exists() or not inp.is_file() or is_binary(inp):
         print(f"Input file not found or is binary: {inp.name}", file=sys.stderr)

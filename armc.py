@@ -43,7 +43,7 @@ def strip_comments(source: str) -> str:
     return "\n".join(cleaned_lines).rstrip() + "\n"
 
 
-def process_file(path: str | Path):
+def process_file(path: str | Path) -> None:
     path = Path(path)
     before = gsz(path)
     if not before:
@@ -75,7 +75,7 @@ def process_file(path: str | Path):
         print(f"❌ {path}: {e}")
 
 
-def main():
+def main() -> None:
     args = sys.argv[1:]
     files = [Path(p.strip()) for p in args] if args else get_pyfiles(cwd)
     if not files:

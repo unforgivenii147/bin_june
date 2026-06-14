@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 
-def delete_lines_from_file():
+def delete_lines_from_file() -> None:
     filename = sys.argv[1]
     path = Path(filename)
     lines = path.read_text(encoding="utf-8").splitlines()

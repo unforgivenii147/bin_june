@@ -29,7 +29,7 @@ def get_defined_and_called(file_path):
     return (defined, called, None)
 
 
-def process_file(file_path, dry_run=True):
+def process_file(file_path, dry_run: bool = True) -> str | None:
     path = Path(path)
     defined, called, err = get_defined_and_called(file_path)
     if err:
@@ -43,7 +43,7 @@ def process_file(file_path, dry_run=True):
     return f"Processed {file_path}: Found {len(unused)} potentially unused functions."
 
 
-def run_cleaner(dry_run=True):
+def run_cleaner(dry_run: bool = True) -> None:
     files = list(Path().rglob("*.py"))
     pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
     func = partial(process_file, dry_run=dry_run)

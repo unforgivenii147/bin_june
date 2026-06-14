@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 
-def copy_lines_to_clipboard(filename: str, start_line: int, end_line: int | None = None):
+def copy_lines_to_clipboard(filename: str, start_line: int, end_line: int | None = None) -> None:
     input_file = Path(filename)
     if not input_file.is_file():
         print(f"Error: File not found at '{filename}'", file=sys.stderr)
@@ -59,7 +59,7 @@ def copy_lines_to_clipboard(filename: str, start_line: int, end_line: int | None
         sys.exit(1)
 
 
-def main():
+def main() -> None:
     if len(sys.argv) < 3 or len(sys.argv) > 4:
         print(f"Usage: {sys.argv[0]} <filename> <start_line> [end_line]", file=sys.stderr)
         print("  <filename>: Path to the input file.", file=sys.stderr)

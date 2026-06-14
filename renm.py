@@ -14,7 +14,7 @@ DIRECTORY = "."
 non_english_pattern = re.compile("[^\\x00-\\x7F]")
 
 
-def is_english(text):
+def is_english(text: str) -> bool:
     return not non_english_pattern.search(text)
 
 
@@ -35,7 +35,7 @@ def translate_name(name):
         return (name, name)
 
 
-def rename_files(directory):
+def rename_files(directory: str) -> None:
     paths = [Path(p) for p in walk_files(directory)]
     unique_names_to_translate = list({p.name for p in paths if not is_english(p.name)})
     translation_map = {}

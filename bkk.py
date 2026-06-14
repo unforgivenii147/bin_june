@@ -5,7 +5,7 @@ from pathlib import Path
 from dh import get_files, mpf3
 
 
-def process_file(path):
+def process_file(path) -> None:
     path = Path(path)
     if not path.exists():
         return

@@ -8,7 +8,7 @@ from pathlib import Path
 from rich.progress import Progress
 
 
-def optimize_png(file_path):
+def optimize_png(file_path) -> int:
     try:
         original_size = Path(file_path).stat().st_size
         subprocess.run(
@@ -23,14 +23,14 @@ def optimize_png(file_path):
         return 0
 
 
-def find_png_files(directory):
+def find_png_files(directory: Path):
     png_files = []
     for root, _, files in os.walk(directory):
         png_files.extend((os.path.join(root, file) for file in files if file.lower().endswith(".png")))
     return png_files
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     png_files = find_png_files(cwd)
     if not png_files:

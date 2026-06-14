@@ -4,7 +4,7 @@ from pathlib import Path
 from sys import argv
 
 
-def main():
+def main() -> None:
     nl = ""
     with Path(argv[1]).open(encoding="utf-8") as f:
         lines = f.readlines()

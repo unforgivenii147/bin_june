@@ -19,7 +19,7 @@ def unique_destination_path(dest_dir: Path, filename: str) -> Path:
         counter += 1
 
 
-def collect_files_by_extension(extension: str):
+def collect_files_by_extension(extension: str) -> None:
     cwd = Path.cwd()
     target_dir = cwd / extension
     target_dir.mkdir(parents=True, exist_ok=True)

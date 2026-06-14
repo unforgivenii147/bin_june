@@ -19,7 +19,7 @@ def process_file(fp):
     return ret
 
 
-def main():
+def main() -> None:
     cwd = Path().cwd()
     start_size = gsz(cwd)
     files = []

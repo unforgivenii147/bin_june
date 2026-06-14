@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 
-def extract_function_names(filepath):
+def extract_function_names(filepath: Path):
     """Extract function names from a bash functions file."""
     functions = set()
     function_pattern = re.compile(r"^\s*([a-zA-Z_][a-zA-Z0-9_-]*)\s*\(\s*\)\s*\{", re.MULTILINE)
@@ -29,7 +29,7 @@ def extract_function_names(filepath):
     return functions
 
 
-def extract_alias_names(filepath):
+def extract_alias_names(filepath: Path):
     """Extract alias names from a bash aliases file."""
     aliases = {}
     alias_pattern = re.compile(r"^\s*alias\s+([a-zA-Z_][a-zA-Z0-9_-]*)=", re.MULTILINE)
@@ -59,7 +59,7 @@ def extract_alias_names(filepath):
     return aliases
 
 
-def remove_aliases(aliases_to_remove, aliases_file):
+def remove_aliases(aliases_to_remove, aliases_file: Path) -> int:
     """Remove specific aliases from the aliases file."""
     if not aliases_to_remove:
         return 0
@@ -108,7 +108,7 @@ def remove_aliases(aliases_to_remove, aliases_file):
         return 0
 
 
-def create_backup(filepath):
+def create_backup(filepath: Path) -> str | None:
     """Create a backup of the aliases file."""
     if not os.path.exists(filepath):
         return None
@@ -125,7 +125,7 @@ def create_backup(filepath):
         return None
 
 
-def main():
+def main() -> None:
     # Define file paths
     bashd = Path.home() / ".config/bash.d"
     functions_file = bashd / "bash_functions"

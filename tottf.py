@@ -6,7 +6,7 @@ from pathlib import Path
 from dh import get_files, runcmd
 
 
-def process_file(path) -> bool:
+def process_file(path: Path) -> bool:
     path = Path(path)
     try:
         out = path.with_suffix(".ttf")
@@ -22,7 +22,7 @@ def process_file(path) -> bool:
         return False
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
     if args:

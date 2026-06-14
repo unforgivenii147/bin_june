@@ -9,7 +9,7 @@ from pathlib import Path
 python_keywords = {"def", "class", "import", "from", "lambda", "yield", "async", "await"}
 
 
-def is_probably_python(lines):
+def is_probably_python(lines: str) -> bool:
     score = 0
     for line in lines:
         if any((kw in line for kw in python_keywords)):
@@ -21,7 +21,7 @@ def is_probably_python(lines):
     return score >= 2
 
 
-def looks_like_python(code_block) -> bool | None:
+def looks_like_python(code_block: str) -> bool | None:
     try:
         tokenize.generate_tokens(StringIO(code_block).readline)
         return True
@@ -29,7 +29,7 @@ def looks_like_python(code_block) -> bool | None:
         return False
 
 
-def is_python_like(line) -> bool:
+def is_python_like(line: str) -> bool:
     if re.match("\\s*(def|class|if|elif|else|for|while|try|except|with)\\b.*:", line):
         return True
     if re.match("\\s*@[A-Za-z_]\\w*", line):

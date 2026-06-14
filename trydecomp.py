@@ -26,7 +26,7 @@ except ImportError:
     py7zr = None
 
 
-def try_decompress(filename):
+def try_decompress(filename: str) -> None:
     print(f"Attempting to decompress: {filename}\n")
     compression_methods = {
         "zlib": zlib.decompress,
@@ -39,7 +39,7 @@ def try_decompress(filename):
         compression_methods["brotli"] = brotli.decompress
     if zstd_available:
 
-        def zstd_decompress_all(data):
+        def zstd_decompress_all(data) -> bytes:
             try:
                 dctx = zstandard.ZstdDecompressor()
                 return dctx.decompress(data)

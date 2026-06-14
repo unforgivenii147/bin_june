@@ -10,7 +10,7 @@ from dh import unique_path
 USER_STOPWORDS_FILE = Path("/sdcard/stopwords")
 
 
-def load_user_stopwords(path):
+def load_user_stopwords(path: Path):
     if not path.is_file():
         return set()
     stopwords = set()
@@ -26,11 +26,11 @@ def load_user_stopwords(path):
 EXCLUDE = load_user_stopwords(USER_STOPWORDS_FILE)
 
 
-def extract_words(text):
+def extract_words(text: str):
     return re.findall("[a-z]{3,}", text.lower())
 
 
-def main():
+def main() -> None:
     if len(sys.argv) != 2:
         print(f"Usage: {sys.argv[0]} <file>")
         sys.exit(1)

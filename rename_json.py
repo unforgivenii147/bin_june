@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 
 
-def rename_pypi_metadata_files():
+def rename_pypi_metadata_files() -> None:
     files = [f for f in os.listdir(".") if f.endswith(".json")]
     for filename in files:
         try:

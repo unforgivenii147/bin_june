@@ -5,7 +5,7 @@ from collections import Counter
 from pathlib import Path
 
 
-def cliner(fn):
+def cliner(fn: str) -> None:
     cl = ""
     if "." in fn:
         indx = fn.index(".", -1)
@@ -57,7 +57,7 @@ def group_similar(names: list[str], threshold: float = 0.8):
     return groups
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     counter = Counter((cliner(p.name) for p in cwd.rglob("*") if p.is_file() and (not p.is_symlink())))
     for name, count in counter.most_common(100):

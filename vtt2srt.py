@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 
-def convert_vtt_to_srt(vtt_content):
+def convert_vtt_to_srt(vtt_content: str) -> str:
     lines = vtt_content.splitlines()
     srt_lines = []
     start_index = 0

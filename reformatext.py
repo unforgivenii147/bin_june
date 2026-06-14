@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 
-def restructure_text_file(filepath: Path):
+def restructure_text_file(filepath: Path) -> None:
     if not filepath.is_file():
         print(f"Error: File not found at {filepath}")
         return

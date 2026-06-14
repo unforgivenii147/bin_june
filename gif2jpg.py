@@ -15,7 +15,7 @@ def hash_similarity(hash1: np.ndarray, hash2: np.ndarray) -> float:
     return 1.0 - dist / max_bits
 
 
-def gif_to_unique_jpg(gif_path: Path):
+def gif_to_unique_jpg(gif_path: Path) -> None:
     if not gif_path.exists():
         raise FileNotFoundError(msg)
     if gif_path.suffix.lower() != ".gif":
@@ -49,7 +49,7 @@ def gif_to_unique_jpg(gif_path: Path):
     print(f"✅ Saved {saved_count} unique frames to: {output_dir}")
 
 
-def main():
+def main() -> None:
     if len(sys.argv) != 2:
         print("Usage: python gif_to_jpg_unique.py <input.gif>")
         sys.exit(1)

@@ -9,7 +9,7 @@ from dh import get_files, mpf3
 remove_orig = True
 
 
-def process_file(path: str | Path):
+def process_file(path: str | Path) -> tuple[Path, bool]:
     path = Path(path)
     md_file = path.with_suffix(".md")
     if md_file.exists():

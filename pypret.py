@@ -7,7 +7,7 @@ from pathlib import Path
 import jsbeautifier
 
 
-def beautify_json_file(file_path) -> bool | None:
+def beautify_json_file(file_path: str) -> bool | None:
     try:
         with Path(file_path).open(encoding="utf-8") as f:
             data = json.load(f)
@@ -20,7 +20,7 @@ def beautify_json_file(file_path) -> bool | None:
         return False
 
 
-def beautify_code_file(file_path, beautify_function, asset_type) -> bool | None:
+def beautify_code_file(file_path: str, beautify_function, asset_type: str) -> bool | None:
     try:
         original_content = Path(file_path).read_text(encoding="utf-8")
         options = jsbeautifier.default_options()
@@ -32,7 +32,7 @@ def beautify_code_file(file_path, beautify_function, asset_type) -> bool | None:
         return False
 
 
-def beautify_files_in_directory(cwd=".") -> None:
+def beautify_files_in_directory(cwd: Path | str = ".") -> None:
     processed_count = 0
     errors_count = 0
     beautifier_map = {

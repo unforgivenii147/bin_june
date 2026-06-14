@@ -25,7 +25,7 @@ def compute_hash(path: Path):
         return None
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     images = [p for p in cwd.iterdir() if is_image(p)]
     if not images:

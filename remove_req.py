@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 
-def process_file(path, text):
+def process_file(path: Path, text: str) -> None:
     path = Path(path)
     content = path.read_text()
     target = "Requires-Dist: " + text

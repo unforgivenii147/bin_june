@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from fontTools.ttLib.ttFont import TTFont
 import re
 import sys
 from pathlib import Path
@@ -18,7 +19,7 @@ def clean_filename(s: str) -> str:
     return s.strip("_-.")
 
 
-def get_best_name(font, name_id):
+def get_best_name(font: TTFont, name_id: int):
     fallback = None
     for rec in font["name"].names:
         if rec.nameID != name_id:
@@ -34,7 +35,7 @@ def get_best_name(font, name_id):
     return fallback
 
 
-def get_font_names(path):
+def get_font_names(path) -> tuple[str, str] | tuple[None, None]:
     font = TTFont(path)
     family = get_best_name(font, 1)
     subfamily = get_best_name(font, 2)
@@ -47,7 +48,7 @@ def get_font_names(path):
     return (family, subfamily)
 
 
-def process_file(fn):
+def process_file(fn: Path) -> int:
     path = Path(path)
     try:
         family, style = get_font_names(fn)

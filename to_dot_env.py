@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 
-def parse_api_keys_from_table(text):
+def parse_api_keys_from_table(text: str):
     """Parse API keys from table format and map to environment variable names"""
     lines = text.strip().split("\n")
 
@@ -91,7 +91,7 @@ def write_env_file(env_vars, output_file=".env"):
     return env_vars
 
 
-def main():
+def main() -> None:
     # Example table data (you can also read from stdin or file)
     table_data = """| Key | Model | Status | Budget | Rate Limit | Expires | Description |
 |-----|-------|--------|--------|------------|---------|-------------|

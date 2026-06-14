@@ -34,7 +34,7 @@ def canonical_url(u: str) -> str:
     return f"https://{host}/"
 
 
-def prune_urls(urls):
+def prune_urls(urls: list[str]):
     seen = set()
     out = []
     for line in urls:
@@ -48,7 +48,7 @@ def prune_urls(urls):
     return sorted(out)
 
 
-def main():
+def main() -> None:
     with open(INPUT_FILE, encoding="utf-8") as f:
         lines = f.readlines()
     pruned = prune_urls(lines)

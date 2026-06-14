@@ -122,7 +122,7 @@ COMPRESSORS = {
 }
 
 
-def setup_compressors():
+def setup_compressors() -> None:
     """Initialize compression functions for available methods."""
 
     # Zstandard
@@ -358,7 +358,7 @@ async def compress_folder_async(folder_path: Path, output_base_name: str, compre
         out_path = Path(output_base_name + ".7z")
         try:
 
-            def compress_7z():
+            def compress_7z() -> None:
                 with py7zr.SevenZipFile(
                     out_path,
                     mode="w",

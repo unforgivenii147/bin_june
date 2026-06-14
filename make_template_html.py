@@ -76,7 +76,7 @@ def create_template_html(
         return False
 
 
-def main():
+def main() -> None:
     html_files = find_html_files()
     success = create_template_html(html_files, output_file="template.html", title="Merged HTML Template")
     if success:

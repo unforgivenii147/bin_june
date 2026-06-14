@@ -8,7 +8,7 @@ from pathlib import Path
 from dh import DOC_TH1, DOC_TH2
 
 
-def format_python_file(filepath):
+def format_python_file(filepath: Path) -> None:
     if not filepath.exists():
         print(f"Error: File not found at {filepath}", file=sys.stderr)
         return

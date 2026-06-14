@@ -21,7 +21,7 @@ def clean_requirement(line: str) -> str:
     return parts[0].strip()
 
 
-def group_key(name: str):
+def group_key(name: str) -> tuple[int, str]:
     first = name[0]
     if first.isupper():
         return (0, name)

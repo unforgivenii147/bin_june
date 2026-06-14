@@ -82,7 +82,7 @@ class PackageInfo:
 class PackageStateManager:
     """Handle JSON state persistence and resume capability."""
 
-    def __init__(self, state_file: Path = Path("pkgs_state.json")):
+    def __init__(self, state_file: Path = Path("pkgs_state.json")) -> None:
         self.state_file = state_file
         self.state: Dict[str, PackageInfo] = {}
         self._load_state()
@@ -221,7 +221,7 @@ def _is_upgradable(installed: str, latest: str) -> bool:
 # ============================================================================
 
 
-def main():
+def main() -> None:
     """Main execution flow."""
     logger.info("=" * 80)
     logger.info("🚀 PyPI Package Update Checker (Multiprocessing Enabled)")

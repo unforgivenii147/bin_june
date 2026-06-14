@@ -14,7 +14,7 @@ CHUNK_SIZE = 524288  # 512KB chunks for better memory control
 N_JOBS = -1
 
 
-def compress_in_memory(infile, outfile, mode) -> bool:
+def compress_in_memory(infile, outfile, mode: int) -> bool:
     """Compress small files in memory with immediate cleanup"""
     try:
         data = infile.read_bytes()
@@ -54,17 +54,17 @@ def decompress_in_memory(infile, outfile) -> bool:
             pass
 
 
-def compress_chunk(data, mode: int = 0):
+def compress_chunk(data: bytes, mode: int = 0):
     """Compress a single chunk - returns bytes"""
     return brotli_compress(data, mode=mode, quality=11)
 
 
-def decompress_chunk(data):
+def decompress_chunk(data) -> bytes:
     """Decompress a single chunk - returns bytes"""
     return brotli_decompress(data)
 
 
-def parallel_compress(in_path, out_path):
+def parallel_compress(in_path: Path, out_path: Path) -> bool:
     """
     Memory-efficient compression using streaming and smaller chunks.
     """
@@ -97,7 +97,7 @@ def parallel_compress(in_path, out_path):
         return False
 
 
-def parallel_decompress(in_path, out_path):
+def parallel_decompress(in_path: Path, out_path: Path) -> bool:
     """
     Memory-efficient decompression by reading size-prefixed chunks.
     """
@@ -137,7 +137,7 @@ def parallel_decompress(in_path, out_path):
         return False
 
 
-def process_compress(path):
+def process_compress(path) -> None:
     """Compress a single file"""
     path = Path(path)
     if not path.exists() or path.suffix == ".br":
@@ -166,7 +166,7 @@ def process_compress(path):
         del before, after, dsz, ratio
 
 
-def process_decompress(path):
+def process_decompress(path) -> None:
     """Decompress a single file"""
     path = Path(path)
     if not path.exists() or path.suffix != ".br":
@@ -195,7 +195,7 @@ def process_decompress(path):
         del before, after, dsz
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(description="Brotli compression tool with parallel processing")
 
     group = parser.add_mutually_exclusive_group()

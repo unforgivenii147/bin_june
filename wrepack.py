@@ -23,7 +23,7 @@ def find_dist_info_dir(pkg_dir: Path) -> Path | None:
     return candidates[0]
 
 
-def create_wheel_for_dir(pkg_dir: Path, dest_dir: Path | None = None):
+def create_wheel_for_dir(pkg_dir: Path, dest_dir: Path | None = None) -> None:
     dist_info = find_dist_info_dir(pkg_dir)
     if dist_info is None:
         print(f"Skipping {pkg_dir}: no *.dist-info dir found.")
@@ -54,7 +54,7 @@ def create_wheel_for_dir(pkg_dir: Path, dest_dir: Path | None = None):
             output_path.unlink()
 
 
-def main():
+def main() -> None:
     if WHEELS_OUTPUT_DIR:
         WHEELS_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
         print(f"Output directory for wheels: {WHEELS_OUTPUT_DIR}")

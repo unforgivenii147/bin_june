@@ -24,7 +24,7 @@ except ImportError:
     USE_COLOR = False
 
 
-def get_all_files(root="."):
+def get_all_files(root: str = "."):
     file_paths = []
     for dirpath, _, filenames in os.walk(root):
         for f in filenames:
@@ -45,7 +45,7 @@ def compute_hashes(files):
     return hashes
 
 
-def group_similar_files(hashes, threshold):
+def group_similar_files(hashes, threshold: int):
     matrx = {}
     visited = set()
     groups = []
@@ -102,7 +102,7 @@ def write_report(groups, format="csv", output_dir="output") -> None:
         print(f"JSON report written to {report_file}")
 
 
-def colorize_score(score, threshold):
+def colorize_score(score, threshold) -> str:
     if not USE_COLOR or score == "":
         return str(score)
     if score == 100 or score >= threshold + 10:
@@ -112,7 +112,7 @@ def colorize_score(score, threshold):
     return Fore.RED + str(score) + Style.RESET_ALL
 
 
-def write_matrix(hashes, threshold, output_dir="output", pretty=False) -> None:
+def write_matrix(hashes, threshold: int, output_dir="output", pretty=False) -> None:
     Path(output_dir).mkdir(exist_ok=True, parents=True)
     files = list(hashes.keys())
     matrix_file = os.path.join(output_dir, "similarity_matrix.csv")

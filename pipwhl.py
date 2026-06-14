@@ -12,7 +12,7 @@ from bs4 import BeautifulSoup
 LOCAL_MIRROR_URL = "https://mirror-pypi.runflare.com"
 
 
-def download_file(url, dest_folder="."):
+def download_file(url, dest_folder: str = ".") -> str | None:
     try:
         response = requests.get(url, stream=True)
         response.raise_for_status()
@@ -54,7 +54,7 @@ def get_package_info_from_mirror(package_name):
         return None
 
 
-def install_or_download(package_name):
+def install_or_download(package_name: str) -> None:
     print(f"Checking for package: {package_name}")
     wheel_url = get_package_info_from_mirror(package_name)
     if wheel_url:

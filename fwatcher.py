@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 
 
-def watch_tor_log(log_path="~/.tor/tor.log"):
+def watch_tor_log(log_path: str = "~/.tor/tor.log") -> None:
     """Watch Tor log file and display last 5 lines, exit on 100% bootstrap"""
 
     # Expand user path (handles ~)
@@ -75,7 +75,7 @@ def watch_tor_log(log_path="~/.tor/tor.log"):
         return
 
 
-def main():
+def main() -> None:
     """Main function with optional command line argument"""
     import sys
 

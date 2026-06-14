@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 
-def compare_files(file1, file2):
+def compare_files(file1: str, file2: str) -> None:
     try:
         with Path(file1).open("r", encoding="utf-8") as f1, Path(file2).open("r", encoding="utf-8") as f2:
             lines1 = f1.readlines()

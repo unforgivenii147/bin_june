@@ -9,7 +9,7 @@ from pathlib import Path
 from dh import get_files, unique_path, should_skip
 
 
-def get_all_files(cwd):
+def get_all_files(cwd: Path):
     files = []
     for path in cwd.rglob("*"):
         if should_skip(path):
@@ -20,7 +20,7 @@ def get_all_files(cwd):
     return sorted(files, key=operator.itemgetter(1))
 
 
-def get_num_folders(files):
+def get_num_folders(files) -> int:
     if len(files) < 2:
         return 1
     sizes = [size for _, size in files]
@@ -31,7 +31,7 @@ def get_num_folders(files):
     return min(num_folders, len(files))
 
 
-def create_range_folders(cwd, files, num_folders):
+def create_range_folders(cwd: Path, files, num_folders: int):
     sizes = sorted([size for _, size in files])
     folder_ranges = []
     files_per_folder = len(files) // num_folders
@@ -43,7 +43,7 @@ def create_range_folders(cwd, files, num_folders):
         if folder_files:
             min_size, max_size = (min(folder_files), max(folder_files))
 
-            def fsz(size):
+            def fsz(size) -> str:
                 if size < 1000:
                     return f"{size}B"
                 if size < 1000000:
@@ -60,7 +60,7 @@ def create_range_folders(cwd, files, num_folders):
     return folder_ranges
 
 
-def distribute_files(files, folders, cwd):
+def distribute_files(files, folders, cwd: Path) -> None:
     size_to_folder = {}
     for min_size, max_size, folder_name in folders:
         size_to_folder[min_size, max_size] = folder_name
@@ -82,7 +82,7 @@ def distribute_files(files, folders, cwd):
             print(f"No folder match for {Path(filepath).name} ({size:,} bytes)")
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     files = get_all_files(cwd)
     if not files:

@@ -13,7 +13,7 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 
 
 class TextSummarizer:
-    def __init__(self, language: str = "english"):
+    def __init__(self, language: str = "english") -> None:
         """Initialize summarizer with language-specific resources."""
 
         self.language = language

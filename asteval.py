@@ -12,7 +12,7 @@ err_dir = Path(f"{cwd}/error")
 counter = 0
 
 
-def process_file(path) -> None:
+def process_file(path: Path) -> None:
     global counter
     path = Path(path)
     counter += 1
@@ -42,7 +42,7 @@ def process_file(path) -> None:
             return
 
 
-def main():
+def main() -> None:
     for f in get_filez(cwd):
         if f.suffix == ".py":
             process_file(f)

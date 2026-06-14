@@ -24,17 +24,17 @@ logging.getLogger("lib2to3").setLevel(logging.WARNING)
 class CustomRefactoringTool(RefactoringTool):
     """Custom refactoring tool to capture output and control behavior"""
 
-    def __init__(self, fixers, explicit=None, append=None):
+    def __init__(self, fixers, explicit=None, append=None) -> None:
         # Capture output instead of printing
         self.output_lines = []
         self.errors = []
         super().__init__(fixers, explicit, append)
 
-    def log_error(self, msg, *args, **kwargs):
+    def log_error(self, msg, *args, **kwargs) -> None:
         """Capture errors instead of printing"""
         self.errors.append(msg % args)
 
-    def write(self, msg, *args, **kwargs):
+    def write(self, msg, *args, **kwargs) -> None:
         """Capture output instead of printing"""
         if args:
             msg = msg % args
@@ -346,7 +346,7 @@ def perform_dry_run(file_paths: List[str]) -> None:
     print(f"Dry run complete: {files_with_changes} of {len(file_paths)} files would be changed")
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Apply all available 2to3 fixes to Python files using lib2to3 and multiprocessing"
     )

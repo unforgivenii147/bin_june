@@ -7,7 +7,7 @@ from pathlib import Path
 static_dir = "/sdcard/_static"
 
 
-def fix_links(file_path: Path):
+def fix_links(file_path: Path) -> None:
     content: str = file_path.read_text(encoding="utf-8", errors="replace")
     links = re.findall("href=[\\'\"]?([^\\'\" >]+)", content)
     for link in links:
@@ -20,7 +20,7 @@ def fix_links(file_path: Path):
     Path(file_path).write_text(content, encoding="utf-8")
 
 
-def main():
+def main() -> None:
     for root, _dirs, files in os.walk("."):
         for file in files:
             if file.endswith((".md", ".html")):

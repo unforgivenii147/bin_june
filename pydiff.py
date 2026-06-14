@@ -6,7 +6,7 @@ from pathlib import Path
 from dh import cprint, read_lines
 
 
-def process_files(fp1, fp2):
+def process_files(fp1: Path, fp2: Path) -> None:
     lines1 = read_lines(fp1)
     lines2 = read_lines(fp2)
     only_in_first = [p for p in lines1 if p not in lines2]

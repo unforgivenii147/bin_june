@@ -30,7 +30,7 @@ def similarity_score(h1, h2) -> float:
     )
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     images = [p for p in cwd.iterdir() if dh.is_image(p)]
     if not images:

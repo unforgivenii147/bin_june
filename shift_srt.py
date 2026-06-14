@@ -23,14 +23,14 @@ def from_ms(ms: int) -> str:
 
 def shift_content(text: str, shift_ms: int) -> str:
 
-    def repl(m):
+    def repl(m) -> str:
         start, end = m.groups()
         return f"{from_ms(to_ms(start) + shift_ms)} --> {from_ms(to_ms(end) + shift_ms)}"
 
     return TIMESTAMP_RE.sub(repl, text)
 
 
-def process_file(path: Path, shift_ms: int):
+def process_file(path: Path, shift_ms: int) -> None:
     path = Path(path)
     data = path.read_text(encoding="utf-8")
     shifted = shift_content(data, shift_ms)
@@ -38,7 +38,7 @@ def process_file(path: Path, shift_ms: int):
     print(f"✔ {path}")
 
 
-def main():
+def main() -> None:
     ap = argparse.ArgumentParser(description="Shift SRT subtitles inplace (batch folder supported)")
     ap.add_argument("path", nargs="?", default=".", help="SRT file or folder (default: current dir)")
     ap.add_argument("-s", "--shift", type=float, default=-1.0, help="Seconds to shift (negative = back, default: -1.0)")

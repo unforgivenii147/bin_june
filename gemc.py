@@ -14,12 +14,12 @@ parser = Parser(PY_LANGUAGE)
 QUERY_STRING = "\n(comment) @comment\n(block\n  . (expression_statement\n    (string)) @docstring)\n(module\n  . (expression_statement\n    (string)) @docstring)\n"
 
 
-def should_preserve_comment(content):
+def should_preserve_comment(content: str) -> bool:
     content = content.strip()
     return any((content.startswith(p) for p in ["#!", "# type:", "# fmt:"]))
 
 
-def strip_file(file_path):
+def strip_file(file_path) -> None:
     cursor = QueryCursor()
     query = Query(PY_LANGUAGE, QUERY_STRING)
     try:
@@ -54,7 +54,7 @@ def strip_file(file_path):
         print(f"Error in {file_path}: {e}")
 
 
-def main():
+def main() -> None:
     files = [os.path.join(r, f) for r, _, fs in os.walk(".") for f in fs if f.endswith(".py")]
     if not files:
         return

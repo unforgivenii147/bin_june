@@ -13,14 +13,14 @@ from email.parser import Parser
 from pathlib import Path
 
 
-def prefix_path():
+def prefix_path() -> Path:
     p = os.environ.get("PREFIX")
     if p:
         return Path(p)
     return Path(sysconfig.get_paths()["purelib"])
 
 
-def site_packages_paths(prefix):
+def site_packages_paths(prefix: Path):
     pyver = f"python{sys.version_info.major}.{sys.version_info.minor}"
     candidates = [prefix / "lib" / pyver / "site-packages"]
     for p in sys.path:
@@ -104,7 +104,7 @@ def find_script_paths(prefix, script_names):
     return out
 
 
-def compute_hash_and_size(path):
+def compute_hash_and_size(path) -> tuple[str, str]:
     h = hashlib.sha256()
     with Path(path).open("rb") as f:
         for chunk in iter(lambda: f.read(8192), b""):
@@ -125,7 +125,7 @@ def detect_wheel_tags():
     return (py_tag, abi_tag, plat)
 
 
-def collect_and_build(distinfo_path, prefix, wheel_out_path):
+def collect_and_build(distinfo_path, prefix: Path, wheel_out_path: Path) -> None:
     base = distinfo_path.parent
     rec_list = read_record_list(distinfo_path)
     if not rec_list:
@@ -178,7 +178,7 @@ def collect_and_build(distinfo_path, prefix, wheel_out_path):
     print(f"[+] Successfully built: {wheel_out_path.name}")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Repack packages into .whl files directly.")
     parser.add_argument("packages", nargs="*", help="Distribution names to repack.")
     parser.add_argument("-a", "--all", action="store_true", help="Repack all.")

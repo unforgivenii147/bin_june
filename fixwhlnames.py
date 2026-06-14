@@ -110,7 +110,7 @@ def reconstruct_wheel_name(wheel_path: Path, metadata: Dict[str, str], original_
         return f"{name}-{version}-py3-none-any.whl"
 
 
-def fix_whl_files_by_metadata(directory=".", dry_run=True, backup=True):
+def fix_whl_files_by_metadata(directory: str = ".", dry_run: bool = True, backup: bool = True):
     """
     Fix renamed .whl files by reading metadata from inside each wheel.
 
@@ -192,7 +192,7 @@ def fix_whl_files_by_metadata(directory=".", dry_run=True, backup=True):
     return renamed_count, failed_files
 
 
-def batch_fix_with_parallel(directory=".", max_workers=4):
+def batch_fix_with_parallel(directory: str = ".", max_workers: int = 4) -> None:
     """
     Faster parallel processing for many wheel files.
     """
@@ -227,7 +227,7 @@ def batch_fix_with_parallel(directory=".", max_workers=4):
         print(f"  {old_name} -> {metadata['name']} {metadata['version']} -> {proper_name}")
 
 
-def main():
+def main() -> None:
     import argparse
 
     parser = argparse.ArgumentParser(

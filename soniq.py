@@ -10,11 +10,11 @@ from binaryornot import is_binary
 THRESHOLD = 1024 * 1024
 
 
-def _process_chunk(chunk: list[str]):
+def _process_chunk(chunk: list[str]) -> list[str]:
     return [p.strip() for p in chunk if p.strip()]
 
 
-def read_lines(path: Path):
+def read_lines(path: Path) -> list[str]:
     sz = path.stat().st_size
     if sz > THRESHOLD:
         with (
@@ -27,7 +27,7 @@ def read_lines(path: Path):
         return path.read_text(encoding="utf-8", errors="ignore").splitlines()
 
 
-def sort_uniq(path: Path, show_diff: bool = False):
+def sort_uniq(path: Path, show_diff: bool = False) -> int:
     lines = read_lines(path)
     original_count = len(lines)
     if not original_count:

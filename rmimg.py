@@ -39,7 +39,7 @@ def process_file(file_path: Path) -> None:
         pass
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
     args = sys.argv[1:]

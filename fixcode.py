@@ -86,7 +86,7 @@ def ast_validate(code: str) -> tuple[bool, str | None]:
         return (False, f"{e.msg} (line {e.lineno}, col {e.offset})")
 
 
-def main():
+def main() -> None:
     import sys
 
     src = Path(sys.argv[1])

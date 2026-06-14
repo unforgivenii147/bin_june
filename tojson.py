@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 
-def file_to_json(filepath, delimiter):
+def file_to_json(filepath: Path, delimiter: str):
     result = {}
     try:
         with open(filepath, "r", encoding="utf-8") as f:

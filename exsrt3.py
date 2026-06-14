@@ -32,7 +32,7 @@ def get_subtitle_streams_info(input_path: str) -> list[dict]:
         return []
 
 
-def main():
+def main() -> None:
     if len(sys.argv) != 2:
         print(f"Usage: {sys.argv[0]} <video.mkv|video.mp4>")
         sys.exit(1)

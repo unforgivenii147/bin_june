@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from xml.etree.ElementTree import Element
 import json
 import sys
 from pathlib import Path
@@ -7,7 +8,7 @@ from pathlib import Path
 from defusedxml.ElementTree import parse as _parse
 
 
-def etree_to_dict(element):
+def etree_to_dict(element: Element | None):
     d = {element.tag: {} if element.attrib else None}
     children = list(element)
     if children:
@@ -31,7 +32,7 @@ def etree_to_dict(element):
     return d
 
 
-def xml_to_json(xml_file_path):
+def xml_to_json(xml_file_path: str) -> None:
     json_file_path = Path(xml_file_path).with_suffix(".json")
     try:
         tree = _parse(xml_file_path)

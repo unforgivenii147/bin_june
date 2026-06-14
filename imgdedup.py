@@ -8,7 +8,7 @@ import numpy as np
 from imutils import paths
 
 
-def dhash(image, hashSize=8):
+def dhash(image, hashSize=8) -> int:
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     resized = cv2.resize(gray, (hashSize + 1, hashSize))
     diff = resized[:, 1:] > resized[:, :-1]
@@ -32,7 +32,7 @@ def compute_hashes(dataset_path, hashSize=8):
     return hashes
 
 
-def main():
+def main() -> None:
     ap = argparse.ArgumentParser(
         prog="imgdedup",
         description="Find and remove visually duplicate images using perceptual hashing.",

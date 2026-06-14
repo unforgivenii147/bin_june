@@ -6,12 +6,12 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 
-def remove_items_fast(items):
+def remove_items_fast(items) -> None:
     with ThreadPoolExecutor(max_workers=32) as ex:
         ex.map(lambda p: shutil.rmtree(p) if p.is_dir() else p.unlink(), items)
 
 
-def compress_and_cleanup(root=Path()):
+def compress_and_cleanup(root: Path = Path()) -> None:
     root = root.resolve()
     archive_name = f"{root.name}.tar.gz"
     archive_path = root.parent / archive_name

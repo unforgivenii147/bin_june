@@ -12,7 +12,7 @@ def find_md_files():
     return md_files
 
 
-def update_summary():
+def update_summary() -> None:
     md_files = find_md_files()
     md_files.sort()
     summarymd = Path("SUMMARY.md")

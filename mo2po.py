@@ -11,7 +11,7 @@ import sys
 from pathlib import Path
 
 
-def check_msgunfmt():
+def check_msgunfmt() -> bool:
     """Check if msgunfmt is available."""
     try:
         subprocess.run(["msgunfmt", "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
@@ -20,7 +20,7 @@ def check_msgunfmt():
         return False
 
 
-def mo_to_po(mo_path, remove_orig=True, verbose=False):
+def mo_to_po(mo_path, remove_orig: bool = True, verbose: bool = False) -> bool:
     """
     Convert a .mo file to .po file using msgunfmt.
 
@@ -80,7 +80,7 @@ def mo_to_po(mo_path, remove_orig=True, verbose=False):
         return False
 
 
-def mo_to_po_python_only(mo_path, remove_orig=True, verbose=False):
+def mo_to_po_python_only(mo_path, remove_orig: bool = True, verbose: bool = False) -> bool:
     """
     Pure Python fallback method using struct parsing.
     This is a simplified implementation that may not handle all .mo formats.
@@ -161,7 +161,9 @@ def mo_to_po_python_only(mo_path, remove_orig=True, verbose=False):
         return False
 
 
-def process_directory(directory, recursive=False, remove_orig=True, verbose=False, fallback=False):
+def process_directory(
+    directory: Path, recursive: bool = False, remove_orig: bool = True, verbose: bool = False, fallback: bool = False
+) -> None:
     """Process all .mo files in a directory."""
     directory = Path(directory)
 

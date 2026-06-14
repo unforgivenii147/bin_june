@@ -30,13 +30,13 @@ class ImportInfo:
 
 
 class ImportAnalyzer(ast.NodeVisitor):
-    def __init__(self):
+    def __init__(self) -> None:
         self.imports = []
         self.used_names = set()
         self.defined_names = set()
         self.current_scope = []
 
-    def visit_Import(self, node):
+    def visit_Import(self, node) -> None:
         for alias in node.names:
             base_name = alias.name.split(".")[0]
             self.imports.append(
@@ -51,7 +51,7 @@ class ImportAnalyzer(ast.NodeVisitor):
             )
         self.generic_visit(node)
 
-    def visit_ImportFrom(self, node):
+    def visit_ImportFrom(self, node) -> None:
         if node.module is None:
             self.generic_visit(node)
             return
@@ -72,12 +72,12 @@ class ImportAnalyzer(ast.NodeVisitor):
             )
         self.generic_visit(node)
 
-    def visit_Name(self, node):
+    def visit_Name(self, node) -> None:
         if isinstance(node.ctx, (ast.Load, ast.AugLoad)):
             self.used_names.add(node.id)
         self.generic_visit(node)
 
-    def visit_FunctionDef(self, node):
+    def visit_FunctionDef(self, node) -> None:
         self.defined_names.add(node.name)
         for arg in node.args.args:
             self.defined_names.add(arg.arg)
@@ -87,11 +87,11 @@ class ImportAnalyzer(ast.NodeVisitor):
             self.defined_names.add(node.args.kwarg.arg)
         self.generic_visit(node)
 
-    def visit_ClassDef(self, node):
+    def visit_ClassDef(self, node) -> None:
         self.defined_names.add(node.name)
         self.generic_visit(node)
 
-    def visit_Assign(self, node):
+    def visit_Assign(self, node) -> None:
         for target in node.targets:
             if isinstance(target, ast.Name):
                 self.defined_names.add(target.id)
@@ -101,12 +101,12 @@ class ImportAnalyzer(ast.NodeVisitor):
                         self.defined_names.add(elt.id)
         self.generic_visit(node)
 
-    def visit_AnnAssign(self, node):
+    def visit_AnnAssign(self, node) -> None:
         if isinstance(node.target, ast.Name):
             self.defined_names.add(node.target.id)
         self.generic_visit(node)
 
-    def visit_alias(self, node):
+    def visit_alias(self, node) -> None:
         if node.asname:
             if node.asname in self.used_names:
                 self.used_names.add(node.name.split(".")[0])
@@ -114,7 +114,7 @@ class ImportAnalyzer(ast.NodeVisitor):
 
 
 class ImportRemover:
-    def __init__(self, path: Path):
+    def __init__(self, path: Path) -> None:
         self.path = path
         self.removed_imports = []
 
@@ -200,7 +200,7 @@ def process_file(path: Path) -> Tuple[Path, List[str]]:
         return (path, [])
 
 
-def print_summary(results: Dict[Path, List[str]], total_files: int, total_imports_removed: int):
+def print_summary(results: Dict[Path, List[str]], total_files: int, total_imports_removed: int) -> None:
     print("\n" + "=" * 60)
     print("SUMMARY")
     print("=" * 60)
@@ -217,7 +217,7 @@ def print_summary(results: Dict[Path, List[str]], total_files: int, total_import
     print("\n" + "=" * 60)
 
 
-def main():
+def main() -> None:
     if len(sys.argv) > 1:
         input_path = Path(sys.argv[1])
         if not input_path.exists():

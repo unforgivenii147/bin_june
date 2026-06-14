@@ -6,7 +6,7 @@ from pathlib import Path
 from dh import get_files, mpf3, runcmd
 
 
-def process_file(path):
+def process_file(path) -> tuple[Path, bool]:
     path = Path(path)
     if path.suffix.lower() in {".html", ".htm"}:
         md_file = path.with_suffix(".md")
@@ -22,7 +22,7 @@ def process_file(path):
         return (path, False)
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
     files = []

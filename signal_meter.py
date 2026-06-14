@@ -18,7 +18,7 @@ console = Console()
 
 
 class SignalMonitor:
-    def __init__(self):
+    def __init__(self) -> None:
         self.wifi_strength = None
         self.cellular_strength = None
         self.wifi_ssid = None
@@ -71,7 +71,7 @@ class SignalMonitor:
             self.cellular_strength = None
             return None
 
-    def strength_to_bars(self, strength_db, max_db=-30, min_db=-120):
+    def strength_to_bars(self, strength_db, max_db=-30, min_db=-120) -> tuple[str, int]:
         """Convert dB to 5-bar visual representation."""
         if strength_db is None:
             return "N/A", 0
@@ -88,7 +88,7 @@ class SignalMonitor:
 
         return f"{'█' * bars}{'░' * (5 - bars)}", int(percentage)
 
-    def get_airplane_mode(self):
+    def get_airplane_mode(self) -> bool:
         """Check if airplane mode is enabled."""
         try:
             result = subprocess.run(
@@ -99,13 +99,13 @@ class SignalMonitor:
         except:
             return False
 
-    def update(self):
+    def update(self) -> None:
         """Fetch all signal data."""
         self.get_wifi_signal()
         self.get_cellular_signal()
         self.get_airplane_mode()
 
-    def render(self):
+    def render(self) -> None:
         """Display live signal meters."""
         os.system("clear")
 
@@ -142,7 +142,7 @@ class SignalMonitor:
         console.print("[dim]Press Ctrl+C to exit[/dim]")
 
 
-def main():
+def main() -> None:
     monitor = SignalMonitor()
 
     try:

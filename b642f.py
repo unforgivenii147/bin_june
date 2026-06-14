@@ -13,7 +13,7 @@ if not out_dir.exists():
     out_dir.mkdir(exist_ok=True)
 
 
-def try_again(txt, fout):
+def try_again(txt, fout) -> None:
     try:
         txt = txt[:-1]
         dbz = base64.b64decode(txt)
@@ -38,7 +38,7 @@ def clean_line(txt):
     return cleaned
 
 
-def decode_base64_lines(path):
+def decode_base64_lines(path: Path) -> None:
     success_count = 0
     error_count = 0
     failed = []

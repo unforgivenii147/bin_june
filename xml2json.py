@@ -11,7 +11,7 @@ MAX_QUEUE = 16
 REMOVE_ORIG = True
 
 
-def process_file(path):
+def process_file(path) -> None:
     path = Path(path)
     try:
         jsonpath = path.with_suffix(".json")
@@ -26,7 +26,7 @@ def process_file(path):
         print(f"error {e}")
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
     files = [Path(p) for p in args] if args else get_files(cwd, ext=[".xml", ".svg"])

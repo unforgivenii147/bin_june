@@ -62,7 +62,7 @@ def get_repo_size_mb(user, repo):
         return None
 
 
-def clone_repo_shallow(user, repo):
+def clone_repo_shallow(user, repo) -> bool:
     repo_name = f"{user}/{repo}"
     repo_url = f"https://github.com/{repo_name}.git"
     clone_path = os.path.join(Path.cwd(), repo)
@@ -83,7 +83,7 @@ def clone_repo_shallow(user, repo):
         return False
 
 
-def process_repo(url):
+def process_repo(url: str) -> None:
     global remained
     user, repo = parse_repo_url(url)
     if not user or not repo:

@@ -21,7 +21,7 @@ def find_dist_info_dir(site_packages: Path, pkg_name: str) -> Path:
     return candidates[0]
 
 
-def copy_package_files(pkg_name: str, site_packages: Path):
+def copy_package_files(pkg_name: str, site_packages: Path) -> None:
     dist_info_dir = find_dist_info_dir(site_packages, pkg_name)
     record_path = dist_info_dir / "RECORD"
     if not record_path.is_file():
@@ -60,7 +60,7 @@ def copy_package_files(pkg_name: str, site_packages: Path):
     print("Copied: {} | Errors: {}", copied_count, error_count)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Copy (or move) package files based on RECORD metadata.")
     parser.add_argument("pkg", nargs="?", help="Package name to process")
     parser.add_argument("-a", "--all", action="store_true", help="Process all packages in current directory")

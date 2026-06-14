@@ -37,7 +37,7 @@ async def atomic_write_async(data: bytes, final_path: Path) -> bool:
     loop = asyncio.get_running_loop()
     try:
 
-        def _create_temp():
+        def _create_temp() -> Path:
             with tempfile.NamedTemporaryFile(mode="wb", dir=temp_dir, prefix=".tmp_", suffix=".br", delete=False) as f:
                 f.write(data)
                 f.flush()
@@ -87,7 +87,7 @@ async def compress_file_async(path: Path) -> bool:
     try:
         loop = asyncio.get_running_loop()
 
-        def _read():
+        def _read() -> bytes:
             with path.open("rb") as f:
                 return f.read()
 
@@ -126,7 +126,7 @@ def get_dirs(directory: Path) -> list[Path]:
     return [p for p in directory.glob("*") if not p.is_symlink() and p.is_dir()]
 
 
-def should_compress(path):
+def should_compress(path: Path) -> bool | int:
     path = Path(path)
     try:
         if path.is_symlink():

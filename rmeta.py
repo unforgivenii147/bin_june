@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 meta_tag_pattern = re.compile("<meta[^>]*>", re.IGNORECASE)
 
 
-def remove_meta_tags(filepath: Path):
+def remove_meta_tags(filepath: Path) -> None:
     try:
         html_content = filepath.read_text(encoding="utf-8", errors="ignore")
         soup = BeautifulSoup(html_content, "html.parser")
@@ -24,7 +24,7 @@ def remove_meta_tags(filepath: Path):
         print(f"Error processing {filepath}: {e}")
 
 
-def process_directory(directory: Path):
+def process_directory(directory: Path) -> None:
     for item in directory.rglob("*.html"):
         if item.is_file():
             remove_meta_tags(item)

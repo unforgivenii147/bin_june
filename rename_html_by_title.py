@@ -8,7 +8,7 @@ from pathlib import Path
 from dh import get_files, mpf3
 
 
-def finglish(text):
+def finglish(text: str) -> str:
     persian_map = {
         "ا": "a",
         "آ": "a",
@@ -73,15 +73,15 @@ class TitleParser(HTMLParser):
         self.in_title = False
         self.title = None
 
-    def handle_starttag(self, tag, attrs):
+    def handle_starttag(self, tag, attrs) -> None:
         if tag.lower() == "title":
             self.in_title = True
 
-    def handle_endtag(self, tag):
+    def handle_endtag(self, tag) -> None:
         if tag.lower() == "title":
             self.in_title = False
 
-    def handle_data(self, data):
+    def handle_data(self, data) -> None:
         if self.in_title and self.title is None:
             self.title = data.strip()
 
@@ -119,7 +119,7 @@ def unique_path(path: Path) -> Path:
     return new_path
 
 
-def process_file(patj: str | Path):
+def process_file(patj: str | Path) -> None:
     path = Path(path)
     title = extract_title(path)
     if not title:

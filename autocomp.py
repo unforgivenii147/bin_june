@@ -24,23 +24,23 @@ def compress_brotli(data):
     return brotli.compress(data, quality=11)
 
 
-def compress_zstd(data):
+def compress_zstd(data) -> bytes:
     """Zstandard compression (level 21)."""
     cctx = zstd.ZstdCompressor(level=21)
     return cctx.compress(data)
 
 
-def compress_xz(data):
+def compress_xz(data) -> bytes:
     """XZ compression (level 9)."""
     return lzma.compress(data, preset=9, format=lzma.FORMAT_XZ)
 
 
-def compress_bz2(data):
+def compress_bz2(data) -> bytes:
     """BZ2 compression (level 9)."""
     return bz2.compress(data, compresslevel=9)
 
 
-def compress_gzip(data):
+def compress_gzip(data) -> bytes:
     """Gzip compression (level 9)."""
     import gzip
 
@@ -58,13 +58,13 @@ def compress_blosc(data):
     return blosc.compress(data, codec=blosc.Codec.zstd, clevel=9)
 
 
-def compress_py7zr(input_path, output_path):
+def compress_py7zr(input_path: str, output_path: str) -> None:
     """7z compression (py7zr handles directory/file directly)."""
     with py7zr.SevenZipFile(output_path, "w") as archive:
         archive.write(input_path, arcname=Path(input_path).name)
 
 
-def prepare_input(target_path):
+def prepare_input(target_path: str) -> tuple[bytes, str]:
     """Convert file or directory to a bytes buffer (tar dirs first)."""
     target = Path(target_path)
 
@@ -87,7 +87,7 @@ def prepare_input(target_path):
         raise ValueError(f"{target_path} is neither file nor directory")
 
 
-def compress_all(data, base_name, output_dir="."):
+def compress_all(data: bytes, base_name: str, output_dir="."):
     """Compress with all 7 libraries and measure performance."""
     results = []
     original_size = len(data)
@@ -150,7 +150,7 @@ def compress_all(data, base_name, output_dir="."):
     return sorted(results, key=lambda x: x.ratio)
 
 
-def report_results(results, original_size):
+def report_results(results, original_size: int) -> None:
     """Print top 3 compression results and cleanup."""
     print("\n" + "=" * 70)
     print("TOP 3 COMPRESSION RESULTS")
@@ -171,7 +171,7 @@ def report_results(results, original_size):
             print(f"⚠ Failed to delete {result.name}: {e}")
 
 
-def main():
+def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: python script.py <file_or_directory>")
         sys.exit(1)

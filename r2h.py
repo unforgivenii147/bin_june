@@ -16,7 +16,7 @@ from mistletoe import markdown as mistletoe_markdown
 from mistletoe.html_renderer import HTMLRenderer
 
 
-def rst_to_html(content):
+def rst_to_html(content: str) -> str:
     try:
         parts = publish_parts(
             source=content,
@@ -38,7 +38,7 @@ def rst_to_html(content):
         raise
 
 
-def process_file(path):
+def process_file(path: Path) -> None:
     path = Path(path)
     content = path.read_text(encoding="utf-8")
     html_content = rst_to_html(content)
@@ -47,7 +47,7 @@ def process_file(path):
     path.unlink()
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
     files = [Path(p) for p in args] if args else get_files(cwd, ext=[".rst"])

@@ -6,7 +6,7 @@ from collections import defaultdict
 from pathlib import Path
 
 
-def extract_imports(file_path):
+def extract_imports(file_path: Path):
     """Extract all imports from a Python file using AST."""
     try:
         with open(file_path, "r", encoding="utf-8") as f:
@@ -65,7 +65,7 @@ def get_local_modules(cwd="."):
     return local_modules
 
 
-def collect_requirements(cwd=".", exclude_dirs=None, verbose=False):
+def collect_requirements(cwd: str = ".", exclude_dirs=None, verbose=False):
     """
     Collect all third-party packages from Python files.
 
@@ -145,7 +145,7 @@ def collect_requirements(cwd=".", exclude_dirs=None, verbose=False):
     return third_party
 
 
-def write_requirements(packages, output_file="requirements.txt"):
+def write_requirements(packages, output_file: str = "requirements.txt") -> Path:
     """Write packages to requirements.txt file."""
     output_path = Path(output_file)
 
@@ -167,7 +167,7 @@ def write_requirements(packages, output_file="requirements.txt"):
     return output_path
 
 
-def main():
+def main() -> None:
     """Main entry point."""
     import argparse
 

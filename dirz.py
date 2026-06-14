@@ -3,7 +3,7 @@
 from pathlib import Path
 
 
-def gsz(fp):
+def gsz(fp: Path):
     if fp.is_dir():
         return sum((p.stat().st_size for p in fp.rglob("*") if p.is_file() and (not p.is_symlink())))
     if fp.is_file():
@@ -11,7 +11,7 @@ def gsz(fp):
     return None
 
 
-def fsz(k):
+def fsz(k) -> str:
     if k > 1024 * 1024:
         return f"{k / (1024 * 1024):.1f} MB"
     return f"{k / 1024:.1f} KB"

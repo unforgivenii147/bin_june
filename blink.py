@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 
-def get_files(directory):
+def get_files(directory: Path):
     for root, _, files in os.walk(directory):
         for file in files:
             fullpath = Path(root) / file

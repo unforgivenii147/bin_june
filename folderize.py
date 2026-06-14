@@ -26,7 +26,7 @@ def get_target_folder_name(filename: str) -> str:
         return "0-9"  # Special characters go to 0-9
 
 
-def cleanup_empty_dirs(root: Path):
+def cleanup_empty_dirs(root: Path) -> None:
     """Remove empty directories recursively."""
     # Walk bottom-up to delete empty dirs
     for dir_path in sorted(root.rglob("*"), key=lambda p: len(p.parts), reverse=True):
@@ -38,7 +38,7 @@ def cleanup_empty_dirs(root: Path):
                 pass  # Directory not empty, skip
 
 
-def folderize_files(root: Path = Path.cwd()):
+def folderize_files(root: Path = Path.cwd()) -> None:
     """
     Organize all files in root directory and subdirectories into
     alphabetical folders based on their first letter.

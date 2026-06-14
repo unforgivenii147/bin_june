@@ -9,7 +9,7 @@ OUTPUT_FILE = "dictionary.pdf"
 CUSTOM_FONT = "custom.ttf"
 
 
-def convert_entry_to_html(raw_line):
+def convert_entry_to_html(raw_line: str) -> str | None:
     try:
         word, html_body = raw_line.strip().split("\t", 1)
     except ValueError:
@@ -22,7 +22,7 @@ def convert_entry_to_html(raw_line):
     return f'\n    <html>\n    <body>\n        <div class="entry">\n            <h1 class="word">{word}</h1>\n            <div class="definition">{html_body}</div>\n        </div>\n    </body>\n    </html>\n    '
 
 
-def main():
+def main() -> None:
     with open(INPUT_FILE, encoding="utf-8") as f:
         lines = f.readlines()
     pages = []

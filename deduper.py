@@ -1,5 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from ast import FunctionDef
+from ast import ClassDef
+from ast import AsyncFunctionDef
+from ast import Assign
 import argparse
 import ast
 import bz2
@@ -73,7 +77,7 @@ def normalize_newlines(text: str) -> str:
     return text.replace("\r\n", "\n").replace("\r", "\n")
 
 
-def safe_read_text(path: Path):
+def safe_read_text(path: Path) -> str | None:
     try:
         return normalize_newlines(path.read_text(encoding="utf-8"))
     except Exception as e:
@@ -81,7 +85,7 @@ def safe_read_text(path: Path):
         return None
 
 
-def safe_write_text(path: Path, content: str):
+def safe_write_text(path: Path, content: str) -> bool:
     try:
         path.write_text(content, encoding="utf-8", newline="\n")
         return True
@@ -160,7 +164,7 @@ def collect_python_files(base: Path):
     return files
 
 
-def get_module_docstring_line_span(tree: ast.Module):
+def get_module_docstring_line_span(tree: ast.Module) -> tuple[int, int | None] | None:
     if not tree.body:
         return None
     first = tree.body[0]
@@ -169,7 +173,7 @@ def get_module_docstring_line_span(tree: ast.Module):
     return None
 
 
-def source_segment(code: str, node):
+def source_segment(code: str, node: Assign | AsyncFunctionDef | ClassDef | FunctionDef) -> str | None:
     seg = ast.get_source_segment(code, node)
     if seg is not None:
         return seg
@@ -330,7 +334,7 @@ def find_import_insertion_index(code: str) -> int:
     return idx
 
 
-def add_import_line(code: str, module_name: str, names):
+def add_import_line(code: str, module_name: str, names) -> str:
     names = sorted(set(names))
     if not names:
         return code
@@ -357,7 +361,7 @@ def merge_overlapping_ranges(ranges):
     return [(s, e) for s, e in merged]
 
 
-def remove_line_ranges(code: str, ranges):
+def remove_line_ranges(code: str, ranges) -> str:
     lines = code.splitlines(keepends=True)
     zero_based = [(s - 1, e - 1) for s, e in ranges]
     merged = merge_overlapping_ranges(zero_based)
@@ -408,7 +412,7 @@ def update_file_for_move(path: Path, objects_to_remove, utils_module_name: str) 
     return safe_write_text(path, new_code)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Find repeated top-level Python objects and optionally move/copy them to utils.py"
     )

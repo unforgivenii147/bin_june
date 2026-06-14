@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from requests.sessions import Session
 import argparse
 import sys
 from pathlib import Path
@@ -9,7 +10,7 @@ import requests
 from bs4 import BeautifulSoup
 
 
-def create_session():
+def create_session() -> Session:
     session = requests.Session()
     session.headers.update({
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
@@ -58,14 +59,14 @@ def split_internal_external(base_url, links):
     return (internal, external)
 
 
-def save_links(name, links):
+def save_links(name: str, links) -> None:
     path = Path(name)
     content = "\n".join(links)
     path.write_text(content, encoding="utf-8")
     print(f"Saved {len(links)} links to {name}")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Extract and save all URLs from a webpage")
     parser.add_argument("url", nargs="?", help="Target URL")
     args = parser.parse_args()

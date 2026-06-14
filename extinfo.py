@@ -6,7 +6,7 @@ from pathlib import Path
 from dh import fsz
 
 
-def main():
+def main() -> None:
     ext = sys.argv[1]
     total_size = 0
     count = 0

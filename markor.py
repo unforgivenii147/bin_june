@@ -47,7 +47,7 @@ class GUIFramework:
             initial_path = str(Path.home())
         return input(f"Enter file path (starting from {initial_path}): ").strip() or None
 
-    def show_toast(self, message: str):
+    def show_toast(self, message: str) -> None:
         print(f"[Toast] {message}")
 
     def show_menu(self, title: str, items: list[str]) -> int:
@@ -57,7 +57,7 @@ class GUIFramework:
         choice = input("Select: ").strip()
         return int(choice) if choice.isdigit() else -1
 
-    def show_snackbar(self, message: str, action: str | None = None):
+    def show_snackbar(self, message: str, action: str | None = None) -> None:
         msg = f"[Snackbar] {message}"
         if action:
             msg += f" [{action}]"
@@ -170,7 +170,7 @@ class Document:
             return TodoFormat()
         return MarkdownFormat()
 
-    def _load(self):
+    def _load(self) -> None:
         if self.file_path.exists():
             self.content = self.file_path.read_text(encoding="utf-8")
             self.last_modified = datetime.fromtimestamp(self.file_path.stat().st_mtime)
@@ -194,7 +194,7 @@ class Document:
     def get_quick_actions(self) -> list[str]:
         return self.format_handler.get_format_actions()
 
-    def insert_text(self, text: str, position: int | None = None):
+    def insert_text(self, text: str, position: int | None = None) -> None:
         if position is None:
             position = len(self.content)
         self.content = self.content[:position] + text + self.content[position:]
@@ -323,7 +323,7 @@ class TextEditor:
             else:
                 self.show_editor_screen()
 
-    def show_home_screen(self):
+    def show_home_screen(self) -> None:
         menu_items = [
             "New Document",
             "Open Document",
@@ -349,7 +349,7 @@ class TextEditor:
         elif choice == 6:
             sys.exit(0)
 
-    def create_new_document(self):
+    def create_new_document(self) -> None:
         name = self.gui.show_text_input("New Document", "Enter document name")
         if not name:
             return
@@ -361,7 +361,7 @@ class TextEditor:
         self.current_document = self.file_manager.create_document(name, format_type=format_type)
         self.gui.show_toast(f"Created: {name}")
 
-    def open_document(self):
+    def open_document(self) -> None:
         docs = self.file_manager.list_documents(recursive=True)
         if not docs:
             self.gui.show_dialog("No Documents", "No documents found")
@@ -373,7 +373,7 @@ class TextEditor:
             if self.current_document:
                 self.gui.show_toast(f"Opened: {docs[choice]['name']}")
 
-    def show_recent_documents(self):
+    def show_recent_documents(self) -> None:
         recent = self.file_manager.get_recent_documents()
         if not recent:
             self.gui.show_dialog("No Recent Documents", "No recent documents found")
@@ -385,7 +385,7 @@ class TextEditor:
             if self.current_document:
                 self.gui.show_toast(f"Opened: {recent[choice]['name']}")
 
-    def search_documents(self):
+    def search_documents(self) -> None:
         query = self.gui.show_text_input("Search", "Enter search query")
         if not query:
             return
@@ -404,7 +404,7 @@ class TextEditor:
         if 0 <= choice < len(results):
             self.current_document = self.file_manager.open_document(results[choice]["path"])
 
-    def manage_folders(self):
+    def manage_folders(self) -> None:
         menu_items = ["Create Folder", "List Folders", "Back to Home"]
         choice = self.gui.show_menu("Manage Folders", menu_items)
         if choice == 0:
@@ -419,7 +419,7 @@ class TextEditor:
             else:
                 self.gui.show_dialog("No Folders", "No folders found")
 
-    def show_editor_screen(self):
+    def show_editor_screen(self) -> None:
         doc_name = self.current_document.file_path.name
         menu_items = [
             "Edit",
@@ -447,7 +447,7 @@ class TextEditor:
         elif choice == 7:
             self.close_document()
 
-    def edit_document(self):
+    def edit_document(self) -> None:
         print(f"\n{'=' * 50}")
         print(f"Editing: {self.current_document.file_path.name}")
         print(f"Current content ({self.current_document.get_line_count()} lines):")
@@ -468,7 +468,7 @@ class TextEditor:
                 self.current_document.content += "\n" + append_text
                 self.is_modified = True
 
-    def show_preview(self):
+    def show_preview(self) -> None:
         preview = self.current_document.get_preview()
         print(f"\n{'=' * 50}")
         print(f"Preview: {self.current_document.file_path.name}")
@@ -477,7 +477,7 @@ class TextEditor:
         print(f"{'=' * 50}")
         input("Press Enter to continue...")
 
-    def insert_template(self):
+    def insert_template(self) -> None:
         templates = {
             "markdown": {
                 "H1": "# Heading 1",
@@ -511,14 +511,14 @@ class TextEditor:
             self.is_modified = True
             self.gui.show_toast(f"Inserted: {template_name}")
 
-    def show_format_actions(self):
+    def show_format_actions(self) -> None:
         actions = self.current_document.get_quick_actions()
         choice = self.gui.show_menu("Format Actions", actions)
         if 0 <= choice < len(actions):
             action = actions[choice]
             self.gui.show_toast(f"Action: {action}")
 
-    def find_and_replace(self):
+    def find_and_replace(self) -> None:
         find_text = self.gui.show_text_input("Find", "Enter text to find")
         if not find_text:
             return
@@ -534,19 +534,19 @@ class TextEditor:
                 self.is_modified = True
                 self.gui.show_snackbar(f"Replaced {replaced} occurrence(s)")
 
-    def show_document_info(self):
+    def show_document_info(self) -> None:
         info = self.current_document.get_info()
         info_text = f"\nDocument Information\n{'=' * 40}\nName: {info['name']}\nPath: {info['path']}\nFormat: {info['format']}\nSize: {info['size_bytes']} bytes\nWords: {info['words']}\nCharacters: {info['characters']}\nLines: {info['lines']}\nLast Modified: {info['last_modified']}\n"
         self.gui.show_dialog("Document Info", info_text)
 
-    def save_document(self):
+    def save_document(self) -> None:
         if self.current_document.save():
             self.is_modified = False
             self.gui.show_snackbar("Document saved successfully")
         else:
             self.gui.show_dialog("Error", "Failed to save document")
 
-    def close_document(self):
+    def close_document(self) -> None:
         if self.is_modified:
             save_choice = self.gui.show_dialog(
                 "Save Changes?", "Document has unsaved changes", ["Save", "Don't Save", "Cancel"]
@@ -557,7 +557,7 @@ class TextEditor:
                 return
         self.current_document = None
 
-    def show_settings(self):
+    def show_settings(self) -> None:
         settings_menu = ["Theme (Dark/Light)", "Auto-save", "Font Size", "Word Wrap", "Show Line Numbers", "Back"]
         choice = self.gui.show_menu("Settings", settings_menu)
         if choice >= 0 and choice < 5:

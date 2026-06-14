@@ -12,7 +12,7 @@ import git
 from git import GitCommandError, Repo
 
 
-def delete_old_commits(days):
+def delete_old_commits(days: int) -> None:
     """
     Delete commits older than specified days from the repository.
     Args:
@@ -85,7 +85,7 @@ def delete_old_commits(days):
         sys.exit(1)
 
 
-def main():
+def main() -> None:
     if len(sys.argv) != 2:
         print("Usage: python script.py <days>")
         print("Example: python script.py 30  (deletes commits older than 30 days)")

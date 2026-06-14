@@ -13,13 +13,13 @@ TARGET_LANGUAGE = "en"
 non_english_pattern = re.compile("[^\\x00-\\x7F]")
 
 
-def chunk_text(text, chunk_size=CHUNK_SIZE):
+def chunk_text(text: str, chunk_size=CHUNK_SIZE):
     words = text.split()
     for i in range(0, len(words), chunk_size):
         yield " ".join(words[i : i + chunk_size])
 
 
-def translate_text(text):
+def translate_text(text: str):
     try:
         return GoogleTranslator(source="auto", target=TARGET_LANGUAGE).translate(text)
     except Exception as e:
@@ -27,7 +27,7 @@ def translate_text(text):
         return text
 
 
-def translate_file(filepath):
+def translate_file(filepath: Path | str) -> None:
     content = Path(filepath).read_text(encoding="utf-8")
     if not non_english_pattern.search(content):
         print(f"No non-English content found in {filepath}, skipping.")
@@ -42,7 +42,7 @@ def translate_file(filepath):
     print(f"saved as {new_filepath}")
 
 
-def translate_folder(directory):
+def translate_folder(directory: str) -> None:
     for pth in walk_files(directory):
         path = Path(pth)
         if path.is_file():

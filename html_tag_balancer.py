@@ -25,22 +25,22 @@ VOID_ELEMENTS = frozenset({
 
 
 class TagBalanceChecker(HTMLParser):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.stack = []
         self.errors = []
         self.raw_source = ""
         self.fix_needed = False
 
-    def set_source(self, source: str):
+    def set_source(self, source: str) -> None:
         self.raw_source = source
 
-    def handle_starttag(self, tag, attrs):
+    def handle_starttag(self, tag, attrs) -> None:
         if tag.lower() in VOID_ELEMENTS:
             return
         self.stack.append((tag.lower(), self.getpos()))
 
-    def handle_endtag(self, tag):
+    def handle_endtag(self, tag) -> None:
         tag = tag.lower()
         if not self.stack or self.stack[-1][0] != tag:
             try:
@@ -58,7 +58,7 @@ class TagBalanceChecker(HTMLParser):
         else:
             self.stack.pop()
 
-    def handle_startendtag(self, tag, attrs):
+    def handle_startendtag(self, tag, attrs) -> None:
         pass
 
 
@@ -98,7 +98,7 @@ def fix_html_file(path: Path) -> bool:
         line, col = pos
 
     class TagScanner(HTMLParser):
-        def __init__(self, source):
+        def __init__(self, source) -> None:
             super().__init__()
             self.source = source
             self.chars = list(source)
@@ -112,7 +112,7 @@ def fix_html_file(path: Path) -> bool:
                     idx += len(lines[i])
             return idx + col
 
-        def handle_starttag(self, tag, attrs):
+        def handle_starttag(self, tag, attrs) -> None:
             if tag.lower() not in VOID_ELEMENTS:
                 pos = self.getpos()
                 start = self.get_char_pos(*pos)
@@ -122,7 +122,7 @@ def fix_html_file(path: Path) -> bool:
                 else:
                     self.tokens.append(("start", tag, start, start + len(f"<{tag}")))
 
-        def handle_endtag(self, tag):
+        def handle_endtag(self, tag) -> None:
             pos = self.getpos()
             tag_str = f"</{tag}>"
             start = self.source.find(tag_str, self.get_char_pos(*pos))
@@ -135,7 +135,7 @@ def fix_html_file(path: Path) -> bool:
             if start != -1:
                 self.tokens.append(("end", tag, start, start + len(tag_str)))
 
-        def handle_startendtag(self, tag, attrs):
+        def handle_startendtag(self, tag, attrs) -> None:
             pos = self.getpos()
             start = self.get_char_pos(*pos)
             end = self.source.find(">", start)
@@ -195,7 +195,7 @@ def fix_html_file(path: Path) -> bool:
         return False
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Check and optionally fix HTML tag balance in files recursively.",
         formatter_class=argparse.RawDescriptionHelpFormatter,

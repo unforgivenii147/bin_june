@@ -68,7 +68,7 @@ class BatchStripper:
         return stripper.stats
 
 
-def main():
+def main() -> None:
     import argparse
 
     parser = argparse.ArgumentParser(description="Batch .so file stripping with ctypes verification")

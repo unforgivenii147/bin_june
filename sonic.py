@@ -18,7 +18,7 @@ class LineProcessor:
     def __init__(self, verbose: bool = False) -> None:
         self.verbose = verbose
 
-    def log(self, message: str):
+    def log(self, message: str) -> None:
         if self.verbose:
             print(f"[INFO] {message}")
 
@@ -252,7 +252,7 @@ class FileSorter(LineProcessor):
         except Exception as e:
             raise RuntimeError(msg)
 
-    def print_stats(self, stats: dict):
+    def print_stats(self, stats: dict) -> None:
         print("\n" + "=" * 60)
         print("STATISTICS")
         print("=" * 60)
@@ -271,7 +271,7 @@ class FileSorter(LineProcessor):
         print(f"Speed: {stats['lines_per_second']:,.0f} lines/second")
         print("=" * 60)
 
-    def save_report(self, stats: dict, report_file: str | None = None):
+    def save_report(self, stats: dict, report_file: str | None = None) -> None:
         if report_file is None:
             import json
         report = {"timestamp": datetime.now(tz=UTC).isoformat(), "statistics": stats}
@@ -309,7 +309,7 @@ class FileAnalyzer(LineProcessor):
             "most_common_lines": most_common,
         }
 
-    def print_analysis(self, file_path: Path, encoding: str = "utf-8"):
+    def print_analysis(self, file_path: Path, encoding: str = "utf-8") -> None:
         analysis = self.analyze_file(file_path, encoding)
         print(f"\n{'=' * 60}")
         print(f"File Analysis: {file_path.name}")
@@ -330,7 +330,7 @@ class FileAnalyzer(LineProcessor):
         print(f"{'=' * 60}\n")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Sort lines in a file and remove duplicates (uses mmap for large files)",
         formatter_class=argparse.RawDescriptionHelpFormatter,

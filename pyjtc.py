@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 
 
-def remove_comments_and_strings(content, filetype, keep_strings=False):
+def remove_comments_and_strings(content: str, filetype: str, keep_strings=False):
     if filetype in {"c", "cpp", "h", "hpp"}:
         content = re.sub("//.*", "", content)
         content = re.sub("/\\*.*?\\*/", "", content, flags=re.DOTALL)
@@ -28,7 +28,7 @@ def remove_comments_and_strings(content, filetype, keep_strings=False):
     return content
 
 
-def process_file(filepath, inplace=False, keep_strings=False):
+def process_file(filepath, inplace=False, keep_strings=False) -> None:
     path = Path(path)
     _, ext = os.path.splitext(filepath)
     ext = ext[1:].lower()

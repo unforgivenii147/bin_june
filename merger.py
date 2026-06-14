@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from _io import _WrappedBuffer
+from _io import TextIOWrapper
 import argparse
 from pathlib import Path
 
@@ -9,7 +11,7 @@ EXCLUDE_DIRS = {".git", "__pycache__", ".idea", ".vscode", "node_modules", ".env
 DEFAULT_OUTPUT_LEN = 8
 
 
-def read_file(path):
+def read_file(path: Path):
     """Read file content with error handling."""
     try:
         return path.read_text(encoding="utf-8", errors="ignore")
@@ -40,7 +42,7 @@ def collect_files(root, exclude_self=True, output_file=None):
         yield file_path
 
 
-def write_file_with_markers(fo, file_path, content, include_filename, is_last):
+def write_file_with_markers(fo: TextIOWrapper, file_path: Path, content, include_filename, is_last: bool) -> None:
     """Write file content with optional filename marker."""
     if include_filename:
         # Add separator before filename (except for first file)
@@ -54,7 +56,7 @@ def write_file_with_markers(fo, file_path, content, include_filename, is_last):
         fo.write("\n")
 
 
-def merge_files(root, include_filename=False, output_file=None):
+def merge_files(root: Path, include_filename: bool = False, output_file=None) -> Path | None:
     """Merge all files from root directory into single output file."""
     # Generate output filename if not provided
     if output_file is None:
@@ -88,7 +90,7 @@ def merge_files(root, include_filename=False, output_file=None):
         return None
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Merge files recursively into a single text file", epilog="Example: %(prog)s --path ./src -i"
     )

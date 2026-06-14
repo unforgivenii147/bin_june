@@ -18,47 +18,47 @@ class ImportVisitor(ast.NodeVisitor):
     def _is_top_level(self) -> bool:
         return self._nesting_level == 0
 
-    def _visit_nested(self, node: ast.AST):
+    def _visit_nested(self, node: ast.AST) -> None:
         self._nesting_level += 1
         self.generic_visit(node)
         self._nesting_level -= 1
 
-    def visit_FunctionDef(self, node: ast.FunctionDef):
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
         self._visit_nested(node)
 
-    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef):
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
         self._visit_nested(node)
 
-    def visit_ClassDef(self, node: ast.ClassDef):
+    def visit_ClassDef(self, node: ast.ClassDef) -> None:
         self._visit_nested(node)
 
-    def visit_For(self, node: ast.For):
+    def visit_For(self, node: ast.For) -> None:
         self._visit_nested(node)
 
-    def visit_AsyncFor(self, node: ast.AsyncFor):
+    def visit_AsyncFor(self, node: ast.AsyncFor) -> None:
         self._visit_nested(node)
 
-    def visit_While(self, node: ast.While):
+    def visit_While(self, node: ast.While) -> None:
         self._visit_nested(node)
 
-    def visit_If(self, node: ast.If):
+    def visit_If(self, node: ast.If) -> None:
         self._visit_nested(node)
 
-    def visit_With(self, node: ast.With):
+    def visit_With(self, node: ast.With) -> None:
         self._visit_nested(node)
 
-    def visit_AsyncWith(self, node: ast.AsyncWith):
+    def visit_AsyncWith(self, node: ast.AsyncWith) -> None:
         self._visit_nested(node)
 
-    def visit_Try(self, node: ast.Try):
+    def visit_Try(self, node: ast.Try) -> None:
         self._visit_nested(node)
 
-    def visit_Import(self, node: ast.Import):
+    def visit_Import(self, node: ast.Import) -> None:
         if not self._is_top_level():
             self.non_top_level_imports.append(node)
         self.generic_visit(node)
 
-    def visit_ImportFrom(self, node: ast.ImportFrom):
+    def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
         if not self._is_top_level():
             self.non_top_level_imports.append(node)
         self.generic_visit(node)
@@ -110,7 +110,7 @@ def inspect_file(path: Path):
     return results
 
 
-def main():
+def main() -> None:
     root = Path.cwd()
     any_found = False
     for py_file in find_python_files(root):

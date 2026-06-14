@@ -7,7 +7,7 @@ from pathlib import Path
 from bs4 import BeautifulSoup
 
 
-def remove_tag_from_html_file(file_path, tag_name):
+def remove_tag_from_html_file(file_path, tag_name) -> None:
     try:
         html = Path(file_path).read_text(encoding="utf-8")
         soup = BeautifulSoup(html, "html.parser")
@@ -19,7 +19,7 @@ def remove_tag_from_html_file(file_path, tag_name):
         print(f"❌ Error processing {file_path}: {e}")
 
 
-def process_directory(cwd, tag_name):
+def process_directory(cwd: Path, tag_name: str) -> None:
     for dirpath, _, filenames in os.walk(cwd):
         for filename in filenames:
             if filename.lower().endswith((".html", ".txt")):

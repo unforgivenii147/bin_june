@@ -133,7 +133,9 @@ def find_files_recursively(directory: Path, ignored_dirs: list[str] | None = Non
             yield item
 
 
-def detect_and_fix_mismatches(start_directory: Path = Path(), similarity_threshold: int = 70, dry_run: bool = True):
+def detect_and_fix_mismatches(
+    start_directory: Path = Path(), similarity_threshold: int = 70, dry_run: bool = True
+) -> None:
     print("--- Starting File Type Mismatch Detection ---")
     print(f"Scanning directory: {start_directory.resolve()}")
     if dry_run:

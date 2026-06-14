@@ -6,12 +6,12 @@ from pathlib import Path
 import cv2
 
 
-def format_time(time_str):
+def format_time(time_str) -> int:
     h, m, s = map(int, time_str.split(":"))
     return (h * 3600 + m * 60 + s) * 1000
 
 
-def cut_video(input_file, start_time_str, duration_str):
+def cut_video(input_file: str, start_time_str: str, duration_str: str) -> None:
     if not Path(input_file).exists():
         print(f"Error: Input file '{input_file}' not found.")
         return

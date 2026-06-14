@@ -364,7 +364,7 @@ def mpf_joblib(process_function: Callable, files: List[Path], **kwargs) -> List:
     return Parallel(n_jobs=-1, verbose=0)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
 
 
-def print_summary(results: List[ImportChange], verbose: bool = False):
+def print_summary(results: List[ImportChange], verbose: bool = False) -> None:
     """
     Print summary of changes.
 
@@ -418,7 +418,7 @@ def print_summary(results: List[ImportChange], verbose: bool = False):
     print(f"\n📊 Total unused imports removed: {total_removed}")
 
 
-def main():
+def main() -> None:
     """Main entry point with folder support and multiprocessing."""
     import argparse
 

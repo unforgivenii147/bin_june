@@ -27,7 +27,7 @@ def get_package_urls(pkg_name):
     return (release_files, latest_version)
 
 
-def download_package(pkg_name):
+def download_package(pkg_name) -> None:
     release_files, _version = get_package_urls(pkg_name)
     wheel_files = [f for f in release_files if f["packagetype"] == "bdist_wheel"]
     sdist_files = [f for f in release_files if f["packagetype"] == "sdist"]

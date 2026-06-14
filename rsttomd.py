@@ -12,7 +12,7 @@ def process_file(fp) -> None:
     path = Path(path)
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
     if args:

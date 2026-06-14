@@ -20,7 +20,7 @@ def get_sha256(path: str | Path) -> str:
     return h.hexdigest()
 
 
-def write_shell_copy(script_path: Path, src_root: Path, dst_root: Path, only_dirs, only_files):
+def write_shell_copy(script_path: Path, src_root: Path, dst_root: Path, only_dirs, only_files) -> None:
     with script_path.open("w", encoding="utf-8") as sh:
         sh.write("#!/bin/sh\n")
         for d in sorted(only_dirs):
@@ -37,7 +37,7 @@ def write_shell_copy(script_path: Path, src_root: Path, dst_root: Path, only_dir
     script_path.chmod(st.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     dir1 = sys.argv[1].strip()
     dir2 = sys.argv[2].strip()

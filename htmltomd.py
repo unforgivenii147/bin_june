@@ -66,7 +66,7 @@ def process_file_wrapper(args: tuple) -> tuple[Path, bool]:
     return convert_html_to_md(html_file, options)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Enhanced HTML to Markdown converter with better HTML5/JS/form handling",
         formatter_class=argparse.RawDescriptionHelpFormatter,

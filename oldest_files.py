@@ -9,11 +9,11 @@ from dh import get_file_age
 EXCLUDED_DIRS = {".git", "__pycache__"}
 
 
-def format_time(ts):
+def format_time(ts: float | str) -> str:
     return datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     files = []
     opt = "-r" if len(sys.argv) > 1 else "-g"

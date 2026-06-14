@@ -7,7 +7,7 @@ from pathlib import Path
 from dh import SOURCE_CODE_EXT, cprint, fsz, get_nobinary, gsz, is_binary, mpf3, remove_blank_lines
 
 
-def process_file(path):
+def process_file(path: Path) -> None:
     path = Path(path)
     if path.suffix == ".md":
         return

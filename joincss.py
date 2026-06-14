@@ -21,7 +21,7 @@ FAMILY_RULES = {
 URL_RE = re.compile("url\\(([\"\\']?)(https?://[^)]+?\\.(?:woff2?|ttf|otf|eot))\\1\\)", re.IGNORECASE)
 
 
-def find_css(paths):
+def find_css(paths: str):
     seen = set()
     result = []
     for p in paths:
@@ -47,7 +47,7 @@ def read_css(files):
     charset_line = None
     chunks = []
 
-    def localize_font_url(match):
+    def localize_font_url(match) -> str:
         url = match.group(2)
         filename = url.split("/")[-1]
         return f'url("{LOCAL_FONT_BASE}/{filename}")'
@@ -69,7 +69,7 @@ def read_css(files):
     return (charset_line, chunks)
 
 
-def join_css(files, output):
+def join_css(files, output: str) -> None:
     charset, chunks = read_css(files)
     parts = []
     if charset:
@@ -80,7 +80,7 @@ def join_css(files, output):
     atomic_write(output, final_css)
 
 
-def main():
+def main() -> None:
     files = find_css(".")
     if not files:
         print("No CSS files found.", file=sys.stderr)

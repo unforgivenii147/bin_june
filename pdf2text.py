@@ -6,7 +6,7 @@ from pathlib import Path
 import PyPDF2
 
 
-def extract_text_from_pdf(pdf_filename):
+def extract_text_from_pdf(pdf_filename: str):
     with Path(pdf_filename).open("rb") as file:
         pdf_reader = PyPDF2.PdfReader(file)
         extracted_text = ""
@@ -16,7 +16,7 @@ def extract_text_from_pdf(pdf_filename):
     return extracted_text
 
 
-def save_text_to_file(text, output_filename):
+def save_text_to_file(text, output_filename: str) -> None:
     Path(output_filename).write_text(text, encoding="utf-8")
 
 

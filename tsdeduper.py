@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from tree_sitter import Node
 import hashlib
 import os
 from dataclasses import dataclass
@@ -32,7 +33,7 @@ def make_parser() -> Parser:
     return parser
 
 
-def node_text(src: bytes, node) -> str:
+def node_text(src: bytes, node: Node) -> str:
     return src[node.start_byte : node.end_byte].decode("utf-8", errors="replace")
 
 

@@ -60,7 +60,7 @@ def remove_remote_rst_images(text: str) -> str:
     return RST_IMG_RE.sub("", text)
 
 
-def process_file(path: Path):
+def process_file(path: Path) -> None:
     path = Path(path)
     original = path.read_text(encoding="utf-8", errors="ignore")
     modified = original
@@ -76,7 +76,7 @@ def process_file(path: Path):
         print(f"Modified: {path}")
 
 
-def main():
+def main() -> None:
     extensions = {".html", ".htm", ".md", ".rst", ".txt"}
     for file in Path().rglob("*"):
         if file.is_file() and file.suffix.lower() in extensions:

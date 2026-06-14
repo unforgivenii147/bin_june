@@ -7,7 +7,7 @@ from pathlib import Path
 from dh import get_files
 
 
-def run_2to3(file_path) -> None:
+def run_2to3(file_path: Path) -> None:
     if not file_path.is_file():
         print(f"File not found: {file_path.name}")
         return

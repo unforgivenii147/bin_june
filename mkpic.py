@@ -12,7 +12,7 @@ MAX_QUEUE = 4
 REMOVE_ORIG = False
 
 
-def process_file(fp):
+def process_file(fp) -> bool | None:
     path = Path(path)
     if not fp.exists():
         return False
@@ -32,7 +32,7 @@ def process_file(fp):
     return False
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
     args = sys.argv[1:]

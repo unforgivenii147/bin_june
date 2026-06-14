@@ -4,7 +4,7 @@ import subprocess
 from pathlib import Path
 
 
-def save_installed_packages(output_file="installed.txt"):
+def save_installed_packages(output_file: str = "installed.txt") -> None:
     try:
         result = subprocess.run(
             ["dpkg-query", "-f", "${binary:Package}\n", "-W"], capture_output=True, text=True, check=True

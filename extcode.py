@@ -26,7 +26,7 @@ VALID_TOP_LEVEL_NODES = {
 }
 
 
-def extract_from_file(py_file: Path):
+def extract_from_file(py_file: Path) -> str:
     source = py_file.read_bytes()
     tree = parser.parse(source)
     root = tree.root_node
@@ -38,7 +38,7 @@ def extract_from_file(py_file: Path):
     return "\n\n".join(extracted_chunks)
 
 
-def process_directory():
+def process_directory() -> None:
     for py_file in ROOT_DIR.rglob("*.py"):
         if any((part.startswith(".") for part in py_file.parts)):
             continue

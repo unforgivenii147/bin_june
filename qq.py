@@ -12,7 +12,7 @@ OUTPUT_FILENAME = "dirinfo.png"
 CHART_TYPE = "bar"
 
 
-def format_size(size_bytes):
+def format_size(size_bytes) -> str:
     if size_bytes < 1024:
         return f"{size_bytes} B"
     size_kb = size_bytes / 1024
@@ -25,7 +25,7 @@ def format_size(size_bytes):
     return f"{size_gb:.2f} GB"
 
 
-def get_dir_size(start_path):
+def get_dir_size(start_path: str) -> int:
     total_size = 0
     try:
         for dirpath, dirnames, filenames in os.walk(start_path):
@@ -39,7 +39,7 @@ def get_dir_size(start_path):
     return total_size
 
 
-def create_chart(target_dir="."):
+def create_chart(target_dir: str = ".") -> None:
     target_dir = os.path.abspath(target_dir)
     print(f"Analyzing directory: {target_dir}")
     subdir_sizes = {}

@@ -7,7 +7,7 @@ from dh import cprint, fsz, get_files, gext, gsz, mpf
 from rcssmin import cssmin
 
 
-def process_file(path) -> str:
+def process_file(path: Path) -> str:
     before = gsz(path)
     path = Path(path)
     print(f"{path.name}", end=" | ")

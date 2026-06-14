@@ -1,5 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from mmap import mmap
+from _io import _BufferedReaderStream
+from _io import BufferedReader
 import argparse
 import mmap
 import os
@@ -15,7 +18,7 @@ SIZE_THRESHOLD = 1 * 1024 * 1024
 OLD_PRINT_RE = re.compile("(?m)^[ \\t]*print[ \\t]+[^(\\n]")
 
 
-def _open_source(filepath: str):
+def _open_source(filepath: str) -> BufferedReader | mmap:
     size = Path(filepath).stat().st_size
     f = Path(filepath).open("rb")
     if size > SIZE_THRESHOLD:

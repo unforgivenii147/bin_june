@@ -8,7 +8,7 @@ from dh import get_files
 from ppdeep import hash_from_file
 
 
-def find_dups(cwd):
+def find_dups(cwd: str):
     files_by_hash = defaultdict(list)
     duplicate_count = 0
     deleted_count = 0

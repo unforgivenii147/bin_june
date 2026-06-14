@@ -43,7 +43,7 @@ def process_file(path: str | Path) -> int:
         return 0
 
 
-def main():
+def main() -> None:
     files = []
     cwd = Path.cwd()
     before = gsz(cwd)

@@ -45,7 +45,7 @@ NOT_ALLOWED = [
 ]
 
 
-def process_lic(fp):
+def process_lic(fp: Path) -> None:
     lic_dir = fp / "licenses"
     if lic_dir.exists() and "dist-info" in lic_dir.parent.name:
         shutil.rmtree(lic_dir)
@@ -57,7 +57,7 @@ def process_lic(fp):
             nap.unlink()
 
 
-def main():
+def main() -> None:
     missings = []
     cwd = Path.cwd()
     for path in cwd.glob("*"):

@@ -10,7 +10,7 @@ class Display(Static):
 
     DEFAULT_CSS = "\n    Display {\n        width: 1fr;\n        height: 3;\n        content-align: right middle;\n        background: $surface;\n        border: solid $primary;\n        text-style: bold;\n    }\n    "
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("0")
         self.value = "0"
 
@@ -25,7 +25,7 @@ class Calculator(Static):
 
     DEFAULT_CSS = "\n    Calculator {\n        width: 50;\n        height: auto;\n        border: solid $accent;\n        background: $panel;\n    }\n    \n    #button-grid {\n        width: 1fr;\n        height: auto;\n        grid-size: 4 5;\n        grid-gutter: 1 1;\n        padding: 1;\n    }\n    \n    Button {\n        width: 1fr;\n        height: 3;\n    }\n    \n    Button.operator {\n        background: $accent 80%;\n    }\n    \n    Button.equals {\n        background: $success 80%;\n    }\n    \n    Button.clear {\n        background: $error 80%;\n    }\n    "
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.display_widget = Display()
         self.left_operand = None

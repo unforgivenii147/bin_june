@@ -29,7 +29,7 @@ def load_names(names_filepath):
     return names
 
 
-def find_names_in_files(names_db_path="names.txt"):
+def find_names_in_files(names_db_path: str = "names.txt") -> None:
     names_to_find = load_names(names_db_path)
     if not names_to_find:
         return

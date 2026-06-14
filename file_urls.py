@@ -25,7 +25,7 @@ ALL_EXT = set(list(TXT_EXT) + list(BIN_EXT))
 ALL_EXT = [p for p in ALL_EXT if p not in EXCLUDED]
 
 
-def extract_urls_to_file(output_filename="file_urls.txt"):
+def extract_urls_to_file(output_filename: str = "file_urls.txt") -> None:
     extracted_urls = set()
     html_urls = []
     pdf_urls = []

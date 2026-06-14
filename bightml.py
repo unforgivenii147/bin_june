@@ -5,7 +5,7 @@ from pathlib import Path
 from dh import get_files
 
 
-def main():
+def main() -> None:
     cwd = Path.home()
     files = get_files(cwd, ext=[".html", ".htm"])
     for f in files:

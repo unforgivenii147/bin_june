@@ -13,14 +13,14 @@ visited = set()
 found_movies = []
 
 
-def size_to_mb(size_str):
+def size_to_mb(size_str: str) -> float | None:
     match = re.search("([\\d.]+)\\s*Mi?B", size_str)
     if match:
         return float(match.group(1))
     return None
 
 
-def is_valid_movie(filename, size_mb):
+def is_valid_movie(filename: str, size_mb: float | None) -> bool:
     if not filename.lower().endswith(".mkv"):
         return False
     if not ("480p" in filename.lower() or "720p" in filename.lower()):
@@ -28,7 +28,7 @@ def is_valid_movie(filename, size_mb):
     return not (size_mb is None or size_mb >= MAX_SIZE_MB)
 
 
-def crawl(url):
+def crawl(url: str) -> None:
     if url in visited:
         return
     print(f"Crawling: {url}")

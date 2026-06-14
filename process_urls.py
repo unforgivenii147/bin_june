@@ -87,7 +87,7 @@ def prune_subaddresses(urls: list[str]) -> list[str]:
     return final_urls
 
 
-def main():
+def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: python script_name.py <input_file>")
         sys.exit(1)

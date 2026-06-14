@@ -5,7 +5,7 @@ from pathlib import Path
 from dh import get_files, mpf3
 
 
-def process_file(path):
+def process_file(path) -> None:
     path = Path(path)
     img = cv2.imread(path)
     # denoised = cv2.fastNlMeansDenoisingColored(img, None, 5, 5, 3, 14)

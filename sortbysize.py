@@ -5,7 +5,7 @@ import operator
 from pathlib import Path
 
 
-def sort_by_size(root_folder):
+def sort_by_size(root_folder: Path):
     items = []
     for path in root_folder.glob("*"):
         if path.is_symlink():

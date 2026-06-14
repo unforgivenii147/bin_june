@@ -5,7 +5,7 @@ from pathlib import Path
 from fastwalk import walk_files
 
 
-def process_file(fp: Path):
+def process_file(fp: Path) -> bool:
     path = Path(path)
     if not fp.exists():
         return False

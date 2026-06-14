@@ -9,7 +9,7 @@ import requests
 from bs4 import BeautifulSoup
 
 
-def download_image(url, output_dir):
+def download_image(url, output_dir) -> None:
     try:
         response = requests.get(url, stream=True, timeout=5)
         response.raise_for_status()
@@ -21,7 +21,7 @@ def download_image(url, output_dir):
         print(f"Failed to download {url}: {e}")
 
 
-def extract_images_from_url(url, output_dir):
+def extract_images_from_url(url, output_dir) -> None:
     try:
         response = requests.get(url, timeout=5)
         response.raise_for_status()

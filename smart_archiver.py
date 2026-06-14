@@ -122,7 +122,7 @@ def compress_brotli_standard(data, level):
     return brotli.compress(data, quality=level)
 
 
-def compress_brotli_streaming(data, level, chunk_size=512 * 1024):
+def compress_brotli_streaming(data, level, chunk_size=512 * 1024) -> bytes:
     compressor = brotli.Compressor(quality=level)
     result_parts = []
     for i in range(0, len(data), chunk_size):
@@ -136,7 +136,7 @@ def compress_lzma(data, level):
     return lzma.compress(data, preset=level)
 
 
-def compress_gzip(data, level):
+def compress_gzip(data, level) -> bytes:
     out = BytesIO()
     with gzip.GzipFile(fileobj=out, mode="wb", compresslevel=level) as gz:
         gz.write(data)
@@ -151,7 +151,7 @@ def compress_lz4(data, level):
     return lz4.frame.compress(data, compression_level=level)
 
 
-def compress_data(data, algo, level, is_large=False):
+def compress_data(data: bytes, algo: int | str, level, is_large: bool = False):
     if algo == "zstd":
         return compress_zstd(data, level)
     elif algo == "brotli":
@@ -171,7 +171,7 @@ def compress_data(data, algo, level, is_large=False):
         raise ValueError(f"Unknown algorithm: {algo}")
 
 
-def is_already_compressed(data, sample_size=4096):
+def is_already_compressed(data, sample_size=4096) -> bool:
     if len(data) < 4:
         return False
     magic_bytes = {
@@ -191,7 +191,7 @@ def is_already_compressed(data, sample_size=4096):
     return False
 
 
-def choose_algorithm(file_path, data=None, file_size=None):
+def choose_algorithm(file_path: Path, data: bytes | None = None, file_size: int | None = None) -> dict[str, int | str]:
     ext = Path(file_path).suffix.lower()
     if ext in EXTENSION_MAP:
         return EXTENSION_MAP[ext]
@@ -220,7 +220,7 @@ def choose_algorithm(file_path, data=None, file_size=None):
         return DEFAULT_SETTINGS["small_binary"]
 
 
-def compress_single_file(file_path, output_path=None, remove_original=False, verbose=False):
+def compress_single_file(file_path, output_path=None, remove_original: bool = False, verbose: bool = False):
     start_time = time.time()
     try:
         with open(file_path, "rb") as f:
@@ -351,7 +351,7 @@ def create_tar_archive(source_dir, output_path=None, compression="auto", level=N
         return tar_path, {"file_count": file_count, "original_size": total_size, "time": elapsed}
 
 
-def decompress_file(compressed_path, output_dir=None, verbose=False):
+def decompress_file(compressed_path, output_dir=None, verbose: bool = False):
     compressed_path = Path(compressed_path)
     ext = compressed_path.suffix.lower()
     algo_map = {
@@ -408,7 +408,7 @@ def decompress_file(compressed_path, output_dir=None, verbose=False):
     return output_path
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Smart Archiver - Automatically chooses best compression algorithm",
         formatter_class=argparse.RawDescriptionHelpFormatter,

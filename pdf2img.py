@@ -8,7 +8,7 @@ from pdf2image import convert_from_path
 POPPLER_PATH = None
 
 
-def convert_pdf_to_jpg(pdf_path: Path, output_folder: Path):
+def convert_pdf_to_jpg(pdf_path: Path, output_folder: Path) -> bool:
     try:
         print(f"Converting '{pdf_path.name}'...")
         pdf_output_dir = output_folder / pdf_path.stem
@@ -43,7 +43,7 @@ def convert_pdf_to_jpg(pdf_path: Path, output_folder: Path):
         return False
 
 
-def process_directory(start_dir: Path, output_base_dir: Path):
+def process_directory(start_dir: Path, output_base_dir: Path) -> None:
     print(f"Starting PDF to JPG conversion in directory: {start_dir}")
     print(f"Output will be saved in: {output_base_dir}")
     converted_count = 0

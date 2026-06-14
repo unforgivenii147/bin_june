@@ -7,7 +7,7 @@ from pathlib import Path
 from dh import get_files
 
 
-def detect_version(file_path) -> None:
+def detect_version(file_path: Path) -> None:
     try:
         source = file_path.read_text(encoding="utf-8")
     except Exception as e:

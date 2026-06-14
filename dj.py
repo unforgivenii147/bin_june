@@ -11,11 +11,11 @@ RMIT = "-r" in sys.argv
 junk_path = "/sdcard/data/junk"
 
 
-def empty_it(path) -> None:
+def empty_it(path: Path) -> None:
     path.write_text("", encoding="utf-8")
 
 
-def remove_it(fp) -> None:
+def remove_it(fp: Path) -> None:
     if fp.exists():
         if fp.is_dir():
             shutil.rmtree(fp)
@@ -23,11 +23,11 @@ def remove_it(fp) -> None:
             fp.unlink()
 
 
-def load_junk():
+def load_junk() -> list[str]:
     return read_lines(junk_path)
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     junk_files = load_junk()
     c = 0

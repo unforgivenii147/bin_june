@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 
-def install_js2py():
+def install_js2py() -> bool:
     try:
         return True
     except ImportError:

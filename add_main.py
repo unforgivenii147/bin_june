@@ -10,7 +10,7 @@ MAINBLOCK_INDICATOR = 'if __name__ == "__main__":'
 MAX_QUEUE = 16
 
 
-def add_main_block_if_missing(filepath: Path):
+def add_main_block_if_missing(filepath: Path) -> None:
     if filepath.is_symlink() or not filepath.is_file():
         return
     try:
@@ -34,7 +34,7 @@ def add_main_block_if_missing(filepath: Path):
         print(f"An unexpected error occurred with '{filepath.name}': {e}")
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     initial_directory_size = gsz(cwd)
     args = sys.argv[1:]

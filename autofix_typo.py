@@ -81,7 +81,7 @@ QWERTY_ADJACENT = {
 class PatternLearner:
     """Learns from typos and user corrections"""
 
-    def __init__(self, learning_db_path: str = "typo_patterns.json"):
+    def __init__(self, learning_db_path: str = "typo_patterns.json") -> None:
         self.learning_db_path = learning_db_path
         self.substitution_patterns = dict(COMMON_SUBSTITUTIONS)
         self.learned_corrections = {}  # wrong_word -> correct_word
@@ -90,7 +90,7 @@ class PatternLearner:
 
         self._load_learning_db()
 
-    def _load_learning_db(self):
+    def _load_learning_db(self) -> None:
         """Load previously learned patterns"""
         if Path(self.learning_db_path).exists():
             try:
@@ -103,7 +103,7 @@ class PatternLearner:
             except Exception as e:
                 print(f"Error loading learning DB: {e}", file=sys.stderr)
 
-    def save(self):
+    def save(self) -> None:
         """Save learned patterns"""
         data = {
             "corrections": self.learned_corrections,
@@ -146,7 +146,7 @@ class PatternLearner:
             return candidates[0][0]
         return word
 
-    def learn_from_correction(self, wrong: str, correct: str, context: str = ""):
+    def learn_from_correction(self, wrong: str, correct: str, context: str = "") -> None:
         """Learn from a user correction"""
         if wrong == correct:
             return
@@ -185,7 +185,7 @@ class PatternLearner:
 
 
 class TypoFixerWithLearning:
-    def __init__(self, preview: bool = True, learning_db: str = "typo_patterns.json"):
+    def __init__(self, preview: bool = True, learning_db: str = "typo_patterns.json") -> None:
         self.preview = preview
         self.learner = PatternLearner(learning_db)
         self.changes_made = 0
@@ -220,7 +220,7 @@ class TypoFixerWithLearning:
             "react",
         })
 
-    def _load_word_list(self):
+    def _load_word_list(self) -> None:
         """Load dictionary words"""
         try:
             from nltk.corpus import words
@@ -394,7 +394,7 @@ class TypoFixerWithLearning:
         self.changes_made += changes
         return changes > 0
 
-    def process_directory(self, cwd: str):
+    def process_directory(self, cwd: str) -> None:
         """Process all files recursively"""
         root_path = Path(cwd)
         extensions = {".md", ".py", ".toml", ".json", ".html", ".css", ".js", ".txt"}
@@ -414,7 +414,7 @@ class TypoFixerWithLearning:
             self.learner.save()
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Auto-fix typos with pattern learning")
     parser.add_argument("--apply", action="store_true", help="Actually apply fixes")
     parser.add_argument("--interactive", action="store_true", help="Interactive mode (learn from each fix)")

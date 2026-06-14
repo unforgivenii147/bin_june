@@ -22,7 +22,7 @@ def remove_path(path) -> None:
         print(f"Failed to remove {p}: {e}")
 
 
-def scan_and_remove(base_path):
+def scan_and_remove(base_path: Path):
     for root, dirs, files in os.walk(base_path, topdown=True):
         for file in files:
             if any((file.endswith(ext) for ext in FILE_EXTENSIONS)):

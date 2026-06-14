@@ -11,7 +11,7 @@ from dh import get_files
 cwd = Path.cwd()
 
 
-def process_file(path):
+def process_file(path: Path) -> None:
     path = Path(path)
     img = cv.imread(str(path))
     if img is None:
@@ -21,7 +21,7 @@ def process_file(path):
     print(f"{path.relative_to(cwd)} updated.")
 
 
-def main():
+def main() -> None:
     args = sys.argv[1:]
     files = [Path(arg) for arg in args] if args else get_files(cwd, ext=[".png", ".jpg"])
     if len(files) == 1:

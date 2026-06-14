@@ -3,7 +3,7 @@
 import os
 
 
-def split_file(path: str, output_dir: str, chunk_size: int = 5000):
+def split_file(path: str, output_dir: str, chunk_size: int = 5000) -> None:
     if not os.path.exists(path):
         print(f"Error: Input file '{path}' not found.")
         return

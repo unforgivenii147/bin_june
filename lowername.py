@@ -40,7 +40,7 @@ def rename_item_to_lowercase(path: Path, dry_run: bool = False, verbose: bool = 
         return None
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
     dry_run = "--dry-run" in args

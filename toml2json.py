@@ -7,7 +7,7 @@ from pathlib import Path
 import toml
 
 
-def toml_to_json(fname: str):
+def toml_to_json(fname: str) -> None:
     try:
         with open(fname, encoding="utf-8") as f:
             toml_data = toml.load(f)

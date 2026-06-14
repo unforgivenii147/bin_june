@@ -4,7 +4,7 @@ import os
 import time
 
 
-def tail_file(fname, n=10):
+def tail_file(fname: str, n=10):
     """Read file and return last n lines."""
     try:
         with open(fname, "r") as f:

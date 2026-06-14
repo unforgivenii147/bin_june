@@ -37,7 +37,7 @@ def extract_embedded_html(text: str) -> str | None:
     return None
 
 
-def main():
+def main() -> None:
     if len(sys.argv) < 2:
         print(f"Usage: {Path(sys.argv[0]).name} <singlefilez-file>")
         sys.exit(1)

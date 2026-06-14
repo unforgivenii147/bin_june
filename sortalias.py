@@ -8,7 +8,7 @@ def alias_name(line: str) -> str:
     return line.split("=", 1)[0].replace("alias ", "").strip()
 
 
-def main():
+def main() -> None:
     if len(sys.argv) != 2:
         print(f"Usage: {sys.argv[0]} <file>")
         sys.exit(1)

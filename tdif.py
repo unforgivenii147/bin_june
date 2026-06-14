@@ -34,7 +34,7 @@ class DiffLine(Static):
             return f"{prefix} ? {safe_text}"
         return f"{prefix}   {safe_text}"
 
-    def _apply_styling(self):
+    def _apply_styling(self) -> None:
         if self.line_type == " ":
             self.styles.background = Color(30, 30, 30)
             self.styles.color = Color(200, 200, 200)
@@ -179,7 +179,7 @@ class DiffViewerApp(App):
         self.notify("Next search result (feature not fully implemented)")
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Compare two files and show their differences",
         formatter_class=argparse.RawDescriptionHelpFormatter,

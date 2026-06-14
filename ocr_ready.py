@@ -23,7 +23,7 @@ def deskew(image):
     return cv2.warpAffine(image, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
 
 
-def preprocess_image(img_path):
+def preprocess_image(img_path: Path):
     img = cv2.imread(str(img_path))
     if img is None:
         return None
@@ -38,13 +38,13 @@ def preprocess_image(img_path):
     return deskew(cleaned)
 
 
-def should_skip(path: Path):
+def should_skip(path: Path) -> bool:
     if OUTPUT_DIR in path.parents:
         return True
     return path.suffix.lower() not in SUPPORTED_EXT
 
 
-def process():
+def process() -> None:
     OUTPUT_DIR.mkdir(exist_ok=True)
     for path in BASE_DIR.rglob("*"):
         if should_skip(path):

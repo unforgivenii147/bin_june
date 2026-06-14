@@ -62,7 +62,7 @@ def process_file(filepath: Path) -> tuple[str, list[tuple[str, str, str]] | None
     return (file_hash, constants)
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     python_files = list(get_pyfiles(cwd))
     if not python_files:

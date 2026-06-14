@@ -9,7 +9,7 @@ from pathlib import Path
 from dh import is_binary
 
 
-def process_file(path, search_text, replace_text=None, dry_run=False):
+def process_file(path: Path, search_text, replace_text=None, dry_run=False) -> bool:
     path = Path(path)
     try:
         content = path.read_text(encoding="utf-8")
@@ -41,7 +41,7 @@ def process_file(path, search_text, replace_text=None, dry_run=False):
         return False
 
 
-def replace_in_files(search_text, replace_text=None, target_file=None, dry_run=False):
+def replace_in_files(search_text, replace_text=None, target_file=None, dry_run=False) -> tuple[int, int]:
     exclude_dirs = {".git", "build", "dist", "__pycache__", "node_modules"}
     files_processed = 0
     files_changed = 0

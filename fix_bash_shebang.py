@@ -6,7 +6,7 @@ TARGET_SHEBANG = "#!/data/data/com.termux/files/usr/bin/bash"
 cwd = Path.cwd()
 
 
-def process_file(path):
+def process_file(path: Path) -> None:
     path = Path(path)
     print(f"processing {path.name}")
     with path.open("r+", encoding="utf-8") as f:

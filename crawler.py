@@ -19,7 +19,7 @@ JSON_OUTPUT = "movies.json"
 stop_flag = False
 
 
-def signal_handler(sig, frame):
+def signal_handler(sig, frame) -> None:
     global stop_flag
     print("\n⚠️  Interrupt received! Saving progress...")
     stop_flag = True
@@ -28,14 +28,14 @@ def signal_handler(sig, frame):
 signal.signal(signal.SIGINT, signal_handler)
 
 
-def size_to_mb(size_str):
+def size_to_mb(size_str: str) -> float | None:
     match = re.search("([\\d.]+)\\s*Mi?B", size_str)
     if match:
         return float(match.group(1))
     return None
 
 
-def extract_quality(filename):
+def extract_quality(filename: str) -> str | None:
     if "480p" in filename.lower():
         return "480"
     if "720p" in filename.lower():
@@ -43,7 +43,7 @@ def extract_quality(filename):
     return None
 
 
-def fetch_directory(url):
+def fetch_directory(url) -> str | None:
     try:
         headers = {"User-Agent": "Mozilla/5.0"}
         response = requests.get(url, headers=headers, timeout=10)
@@ -89,7 +89,7 @@ def parse_directory(url, max_size):
     return (results, subdirs)
 
 
-def save_state(queue, visited):
+def save_state(queue, visited) -> None:
     state = {"queue": list(queue), "visited": list(visited)}
     with open(STATE_FILE, "w", encoding="utf-8") as f:
         json.dump(state, f)
@@ -103,14 +103,14 @@ def load_state():
     return (set(state["visited"]), state["queue"])
 
 
-def append_results(results):
+def append_results(results) -> None:
     with open(TXT_OUTPUT, "a", encoding="utf-8") as f:
         f.writelines((r["url"] + "\n" for r in results))
     with open(JSON_OUTPUT, "a", encoding="utf-8") as f:
         f.writelines((json.dumps(r) + "\n" for r in results))
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("-u", "--url", default=DEFAULT_URL, help="Base URL to crawl")
     parser.add_argument("-s", "--size", type=float, default=300, help="Max size in MB (default 300)")

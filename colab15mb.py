@@ -8,7 +8,7 @@ from pathlib import Path
 from google.colab import files
 
 
-def gsz(path):
+def gsz(path: str) -> int:
     total = 0
     for root, _dirs, files in os.walk(path):
         for f in files:
@@ -18,7 +18,7 @@ def gsz(path):
     return total
 
 
-def compress_small_site_packages(max_size_mb=15):
+def compress_small_site_packages(max_size_mb: int = 15) -> None:
     site_packages_dir = site.getsitepackages()[0]
     output_file = "site-packages-small.tar.gz"
     with tarfile.open(output_file, "w:gz") as tar:

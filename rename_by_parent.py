@@ -8,7 +8,7 @@ from pathlib import Path
 
 
 class DirectoryWalker:
-    def __init__(self, directory):
+    def __init__(self, directory) -> None:
         self.stack = [directory]
         self.files = []
         self.index = 0

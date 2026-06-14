@@ -17,7 +17,7 @@ class TSCppRemover:
         self.parser = Parser(self.language)
         self.query = Query(self.language, "\n            (comment) @comment\n        ")
 
-    def remove_comments(self, source: str):
+    def remove_comments(self, source: str) -> tuple[str, int]:
         source_bytes = source.encode("utf-8")
         tree = self.parser.parse(source_bytes)
         cursor = QueryCursor(self.query)
@@ -51,7 +51,7 @@ class TSCppRemover:
         return (cleaned, comment_count)
 
 
-def ts_remover_initializer():
+def ts_remover_initializer() -> None:
     global ts_remover
     ts_remover = TSCppRemover()
 

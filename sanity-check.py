@@ -4,7 +4,7 @@ import sys
 from dh import runcmd
 
 
-def get_installed_packages():
+def get_installed_packages() -> list[str]:
     try:
         ret, txt, _err = runcmd(["dpkg-query", "-W", "-f='${Package}\t${Status}\t${Version}\n'"], show_output=True)
         return txt.splitlines()
@@ -13,7 +13,7 @@ def get_installed_packages():
         sys.exit(1)
 
 
-def check_package_health(package_name):
+def check_package_health(package_name: str):
     try:
         ret, txt, _err = runcmd(["dpkg", "-l", package_name], show_output=True)
         lines = txt.splitlines()
@@ -27,7 +27,7 @@ def check_package_health(package_name):
         return (False, f"Error checking package")
 
 
-def check_for_updates():
+def check_for_updates() -> str:
     try:
         res, txt, _err = runcmd(["apt-get", "-s", "upgrade"], show_output=True)
         return txt
@@ -35,7 +35,7 @@ def check_for_updates():
         return f"Error checking for updates"
 
 
-def main():
+def main() -> None:
     print("=== Installed Packages Sanity Check ===")
     installed_pkgs = get_installed_packages()
     print(f"Found {len(installed_pkgs)} installed packages.\n")

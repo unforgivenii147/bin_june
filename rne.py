@@ -11,11 +11,11 @@ DIRECTORY = "."
 non_english_pattern = re.compile("[^\\x00-\\x7F]")
 
 
-def is_english(text):
+def is_english(text: str) -> bool:
     return not non_english_pattern.search(text)
 
 
-def translate_filename(filename):
+def translate_filename(filename: str):
     name, ext = os.path.splitext(filename)
     try:
         translated = GoogleTranslator(source="auto", target="en").translate(name)
@@ -25,7 +25,7 @@ def translate_filename(filename):
         return filename
 
 
-def rename_files(directory):
+def rename_files(directory: str) -> None:
     for pth in walk_files(directory):
         path = Path(pth)
         if is_english(path.name):

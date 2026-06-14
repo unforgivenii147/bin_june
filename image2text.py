@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from PIL.Image import Image
 import sys
 from collections import deque
 from multiprocessing import get_context
@@ -12,7 +13,7 @@ from PIL import Image
 MAX_QUEUE = 16
 
 
-def process_file(image_path):
+def process_file(image_path: Path) -> Image:
     path = Path(path)
     img = cv2.imread(str(image_path))
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -41,7 +42,7 @@ def process_file2(image_path):
     return binary
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
     args = sys.argv[1:]

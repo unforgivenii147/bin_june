@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from _io import _BufferedReaderStream
+from _io import BufferedWriter
+from _io import BufferedReader
 import argparse
 import bz2
 import gzip
@@ -111,7 +114,7 @@ def output_name_for_dir(dir_path: Path, mode: str) -> Path:
     return dir_path.parent / f"{dir_path.name}{ext_map[mode]}"
 
 
-def compress_streaming(src: Path, dst: Path, compress_func: Callable, is_dir: bool = False):
+def compress_streaming(src: Path, dst: Path, compress_func: Callable, is_dir: bool = False) -> None:
     """
     Generic streaming compression function.
     Avoids loading entire files into memory.
@@ -337,7 +340,7 @@ def decompress_one(path_str: str) -> Result:
         return result
 
 
-def decompress_brotli_stream(fin, fout):
+def decompress_brotli_stream(fin: BufferedReader, fout: BufferedWriter) -> None:
     """Decompress brotli stream."""
     decompressor = brotli.Decompressor()
     while chunk := fin.read(CHUNK_SIZE):
@@ -345,7 +348,7 @@ def decompress_brotli_stream(fin, fout):
     fout.write(decompressor.finish())
 
 
-def decompress_zstd_stream(fin, fout):
+def decompress_zstd_stream(fin, fout) -> None:
     """Decompress zstd stream."""
     dctx = zstd.ZstdDecompressor()
     with dctx.stream_reader(fin) as reader:
@@ -388,7 +391,7 @@ def worker_func(item_tuple: Tuple[Path, bool]) -> Result:
     return compress_one(str(path), COMPRESS_MODE, is_dir)
 
 
-def main():
+def main() -> None:
     global COMPRESS_MODE
     cwd = Path.cwd()
     before = gsz(cwd)

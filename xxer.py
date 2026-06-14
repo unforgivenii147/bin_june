@@ -1,5 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from tempfile import _TemporaryFileWrapper
+from lzma import LZMAFile
+from gzip import GzipFile
+from bz2 import BZ2File
+from _io import _WrappedBuffer
+from _io import TextIOWrapper
 import argparse
 import bz2
 import gzip
@@ -11,7 +17,7 @@ import tempfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, BinaryIO, Dict, List, Optional, Tuple
+from typing import Any, BinaryIO, Dict, list, Optional, Tuple
 
 # Optional imports with fallbacks
 try:
@@ -168,7 +174,6 @@ def compress_stream(src: BinaryIO, dst: BinaryIO, compress_func) -> None:
 
 
 def atomic_write(src: Path, dst: Path, write_func, *args, **kwargs) -> Path:
-    """Atomic file write with temporary file"""
     temp_path = None
     try:
         with tempfile.NamedTemporaryFile(delete=False, dir=dst.parent, prefix=f"{dst.stem}.") as tmp:
@@ -352,19 +357,21 @@ def decompress_one(path_str: str) -> Result:
 
 
 # Helper functions for decompression
-def lzma_open(file, mode):
+def lzma_open(file, mode) -> LZMAFile | TextIOWrapper:
     return lzma.open(file, mode)
 
 
-def gzip_open(file, mode):
+def gzip_open(file, mode) -> GzipFile | TextIOWrapper:
     return gzip.open(file, mode)
 
 
-def bz2_open(file, mode):
+def bz2_open(file, mode) -> BZ2File | TextIOWrapper:
     return bz2.open(file, mode)
 
 
-def chunked_copy(src_file, dst_file):
+def chunked_copy(
+    src_file: BZ2File | GzipFile | LZMAFile | TextIOWrapper, dst_file: _TemporaryFileWrapper[bytes]
+) -> None:
     """Efficient chunked copy without shutil.copyfileobj"""
     while True:
         chunk = src_file.read(CHUNK_SIZE)
@@ -373,7 +380,7 @@ def chunked_copy(src_file, dst_file):
         dst_file.write(chunk)
 
 
-def handle_single_file(src, dst_dir, open_func):
+def handle_single_file(src: Path, dst_dir: Path, open_func):
     """Handle single file compression formats"""
     extracted_path = src.with_suffix("")
     with open_func(src, "rb") as fin:
@@ -382,7 +389,7 @@ def handle_single_file(src, dst_dir, open_func):
     return extracted_path
 
 
-def handle_tar(src, dst_dir):
+def handle_tar(src: Path, dst_dir: Path):
     """Handle tar archives"""
     extracted_path = dst_dir / src.stem
     with tarfile.open(src, "r:") as tf:
@@ -390,7 +397,7 @@ def handle_tar(src, dst_dir):
     return extracted_path
 
 
-def handle_tar_gz(src, dst_dir):
+def handle_tar_gz(src: Path, dst_dir: Path):
     """Handle tar.gz archives"""
     extracted_path = dst_dir / src.stem[:-4]  # Remove .tar.gz
     with tempfile.NamedTemporaryFile(delete=False, dir=dst_dir, suffix=".tar") as tmp_tar:
@@ -403,7 +410,7 @@ def handle_tar_gz(src, dst_dir):
     return extracted_path
 
 
-def handle_tar_bz2(src, dst_dir):
+def handle_tar_bz2(src: Path, dst_dir: Path):
     """Handle tar.bz2 archives"""
     extracted_path = dst_dir / src.stem[:-5]  # Remove .tar.bz2
     with tempfile.NamedTemporaryFile(delete=False, dir=dst_dir, suffix=".tar") as tmp_tar:
@@ -416,7 +423,7 @@ def handle_tar_bz2(src, dst_dir):
     return extracted_path
 
 
-def handle_tar_xz(src, dst_dir):
+def handle_tar_xz(src: Path, dst_dir: Path):
     """Handle tar.xz archives"""
     extracted_path = dst_dir / src.stem[:-4]  # Remove .tar.xz
     with tempfile.NamedTemporaryFile(delete=False, dir=dst_dir, suffix=".tar") as tmp_tar:
@@ -429,7 +436,7 @@ def handle_tar_xz(src, dst_dir):
     return extracted_path
 
 
-def handle_tar_br(src, dst_dir):
+def handle_tar_br(src: Path, dst_dir: Path):
     """Handle tar.br archives"""
     if brotli is None:
         raise RuntimeError("brotli not installed")
@@ -444,7 +451,7 @@ def handle_tar_br(src, dst_dir):
     return extracted_path
 
 
-def handle_tar_7z(src, dst_dir):
+def handle_tar_7z(src: Path, dst_dir: Path):
     """Handle tar.7z archives"""
     if py7zr is None:
         raise RuntimeError("py7zr not installed")
@@ -454,7 +461,7 @@ def handle_tar_7z(src, dst_dir):
     return extracted_path
 
 
-def handle_tar_zst(src, dst_dir):
+def handle_tar_zst(src: Path, dst_dir: Path):
     """Handle tar.zst archives"""
     if zstd is None:
         raise RuntimeError("zstandard not installed")
@@ -467,7 +474,7 @@ def handle_tar_zst(src, dst_dir):
     return extracted_path
 
 
-def handle_brotli(src, dst_dir):
+def handle_brotli(src: Path, dst_dir: Path):
     """Handle brotli compressed files"""
     if brotli is None:
         raise RuntimeError("brotli not installed")
@@ -477,7 +484,7 @@ def handle_brotli(src, dst_dir):
     return extracted_path
 
 
-def handle_zstd(src, dst_dir):
+def handle_zstd(src: Path, dst_dir: Path):
     """Handle zstd compressed files"""
     if zstd is None:
         raise RuntimeError("zstandard not installed")
@@ -494,7 +501,7 @@ def handle_zstd(src, dst_dir):
     return extracted_path
 
 
-def handle_7z(src, dst_dir):
+def handle_7z(src: Path, dst_dir: Path):
     """Handle 7z archives"""
     if py7zr is None:
         raise RuntimeError("py7zr not installed")
@@ -508,20 +515,19 @@ def handle_7z(src, dst_dir):
 def get_safe_workers() -> int:
     """Calculate safe number of parallel workers based on available memory"""
     if psutil is None:
-        return 2  # Default fallback
+        return 6
 
     try:
         total_mem = psutil.virtual_memory().total
-        mem_headroom_gb = 2
-        mem_per_worker_gb = 2  # Estimated memory per worker
+        mem_headroom_gb = 6
+        mem_per_worker_gb = 6
         max_workers = max(1, int((total_mem / 1024**3 - mem_headroom_gb) / mem_per_worker_gb))
-        return min(max_workers, 4)  # Cap at 4 workers for mobile devices
+        return min(max_workers, 6)
     except:
-        return 2
+        return 6
 
 
-def mpf3(func, items: List[str]) -> List[Result]:
-    """Multiprocessing wrapper with error handling"""
+def mpf3(func, items):
     if not items:
         return []
 
@@ -541,7 +547,7 @@ def mpf3(func, items: List[str]) -> List[Result]:
     return results
 
 
-def collect_items(base: Path) -> List[Tuple[Path, bool]]:
+def collect_items(base: Path) -> list[Tuple[Path, bool]]:
     """Collect items to compress, excluding .git and already compressed files"""
     items = []
     try:
@@ -557,7 +563,7 @@ def collect_items(base: Path) -> List[Tuple[Path, bool]]:
     return items
 
 
-def main():
+def main() -> None:
     global COMPRESS_MODE
 
     parser = argparse.ArgumentParser(description="Compress/decompress current directory recursively.")

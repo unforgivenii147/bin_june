@@ -5,7 +5,7 @@ import unicodedata
 from pathlib import Path
 
 
-def clean_file(filename):
+def clean_file(filename: str) -> None:
     try:
         with Path(filename).open(encoding="utf-8") as f:
             lines = f.readlines()

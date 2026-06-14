@@ -6,7 +6,7 @@ from pathlib import Path
 from dh import is_binary
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     binary_dir = cwd / "binary"
     binary_dir.mkdir(exist_ok=True)

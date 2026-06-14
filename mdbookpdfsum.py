@@ -20,10 +20,10 @@ class Section:
         self.children = []
         self.outline_item = None
 
-    def set_parent(self, parent):
+    def set_parent(self, parent: Section) -> None:
         self.parent = parent
 
-    def add_children(self, child):
+    def add_children(self, child: Section) -> None:
         self.children.append(child)
 
     def path_to_root(self):
@@ -74,7 +74,7 @@ def check_title(prefix_path: str, node: Section, overwrite: bool) -> bool:
     return all_matched
 
 
-def get_dom_id(node: Section):
+def get_dom_id(node: Section) -> str:
     source_path = node.source_file
     source_path = source_path.removeprefix("./")
     source_path = source_path.split(".")[0]
@@ -84,7 +84,7 @@ def get_dom_id(node: Section):
     return result.replace(" ", "-")
 
 
-def add_outline(html_root, reader: pypdf.PdfReader, writer: pypdf.PdfWriter, node: Section):
+def add_outline(html_root, reader: pypdf.PdfReader, writer: pypdf.PdfWriter, node: Section) -> None:
     if not node.is_root():
         id = get_dom_id(node)
         try:
@@ -106,7 +106,7 @@ def add_outline(html_root, reader: pypdf.PdfReader, writer: pypdf.PdfWriter, nod
         add_outline(html_root, reader, writer, child)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(prog="mdbook_pdf_summary", description="Add outline to the PDF file.")
     parser.add_argument(
         "--html_path", type=str, help="path of the `print.html` generated `mdbook-pdf`", default="print.html"
@@ -147,13 +147,13 @@ def main():
         print(f"[INFO] Write to {args.output_path}")
 
 
-def print_section_tree(root: Section):
+def print_section_tree(root: Section) -> None:
     print(root)
     for child in root.children:
         print_section_tree(child)
 
 
-def parse_section_tree(md_text: str):
+def parse_section_tree(md_text: str) -> Section:
     root = Section("root", "", 0, 0)
     bfs_map = {0: [root]}
     pattern = re.compile("( *)- ([^:\\n]+)(?:: ([^\\n]*))?\\n?")

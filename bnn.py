@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 
-def process_file(fname):
+def process_file(fname) -> None:
     path = Path(path)
     content = fname.read_text(encoding="utf-8")
     content = content.replace("\\n", "\n")

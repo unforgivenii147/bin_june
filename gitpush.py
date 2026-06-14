@@ -7,7 +7,7 @@ from datetime import datetime
 from pathlib import Path
 
 
-def run(cmd) -> bool | None:
+def run(cmd: str) -> bool | None:
     try:
         subprocess.check_call(cmd, shell=True)
         return True
@@ -15,7 +15,7 @@ def run(cmd) -> bool | None:
         return False
 
 
-def in_git_repo():
+def in_git_repo() -> bool | None:
     return run("git rev-parse --is-inside-work-tree > /dev/null 2>&1")
 
 

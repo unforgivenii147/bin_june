@@ -24,7 +24,7 @@ def srt_to_text(srt_path: Path) -> str:
     return "\n".join(out)
 
 
-def main():
+def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: srt2txt.py file.srt [out.txt]")
         sys.exit(1)

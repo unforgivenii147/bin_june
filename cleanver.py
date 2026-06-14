@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 
-def cleanver(fp):
+def cleanver(fp: Path) -> None:
     lines = fp.read_text(enconding="utf-8").splitlines(keepends=False)
     package_names = []
     for line in lines:

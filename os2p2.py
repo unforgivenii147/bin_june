@@ -37,12 +37,12 @@ class Transformation:
 class PathlibRefactorer:
     """Main refactoring engine using regex patterns."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.transformations: List[Transformation] = []
         self._setup_transformations()
         self.used_transformations: Set[str] = set()
 
-    def _setup_transformations(self):
+    def _setup_transformations(self) -> None:
         """Define all transformation rules."""
 
         # Simple direct replacements
@@ -284,7 +284,7 @@ class PathlibRefactorer:
         return result
 
 
-def main():
+def main() -> int:
     """Main entry point."""
     import argparse
 

@@ -46,7 +46,7 @@ def is_empty_whl(whl_path: Path) -> bool:
         return False
 
 
-def find_empty_packages(site_packages):
+def find_empty_packages(site_packages: str):
     empty = []
     for entry in os.listdir(site_packages):
         if entry.endswith(".dist-info"):

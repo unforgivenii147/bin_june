@@ -21,7 +21,7 @@ def pygments_highlight(html: str) -> str:
     formatter = HtmlFormatter(cssclass="highlight")
     code_block_re = re.compile('<pre><code class="language-(\\w+)">(.*?)</code></pre>', re.DOTALL)
 
-    def repl(match):
+    def repl(match) -> str:
         lang = match.group(1)
         code = match.group(2)
         code = code.replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&")
@@ -34,7 +34,7 @@ def pygments_highlight(html: str) -> str:
     return code_block_re.sub(repl, html)
 
 
-def md2pdf(pdf_file_path, md_file_path, css_file_path=None, base_url=None):
+def md2pdf(pdf_file_path, md_file_path, css_file_path=None, base_url=None) -> None:
     extras = ["header-ids", "fenced-code-blocks", "tables", "cuddled-lists"]
     html = markdown_path(md_file_path, extras=extras)
     if not html.strip():

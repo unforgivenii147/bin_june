@@ -9,12 +9,12 @@ from PIL import Image
 from pytesseract import image_to_string
 
 
-def extract_text(image_path):
+def extract_text(image_path: Path) -> bytes | dict[str, bytes | str] | str:
     img = Image.open(image_path)
     return image_to_string(img, lang="eng", config="--oem 1 --psm 6")
 
 
-def process_file(path):
+def process_file(path: Path) -> None:
     path = Path(path)
     print(f"Processing {path.name}")
     text = extract_text(path)

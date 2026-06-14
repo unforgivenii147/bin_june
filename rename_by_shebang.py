@@ -55,7 +55,7 @@ SHEBANG_MAPPING = {
 }
 
 
-def get_shebang(file_path):
+def get_shebang(file_path: Path) -> str | None:
     """Read the first line of a file and check for shebang."""
     try:
         with open(file_path, "r", encoding="utf-8") as f:
@@ -67,7 +67,7 @@ def get_shebang(file_path):
     return None
 
 
-def get_extension_from_shebang(shebang):
+def get_extension_from_shebang(shebang: str) -> str | None:
     """Match shebang to appropriate extension."""
     for pattern, extension in SHEBANG_MAPPING.items():
         if re.match(pattern, shebang):
@@ -75,7 +75,7 @@ def get_extension_from_shebang(shebang):
     return None
 
 
-def rename_file(old_path, new_path):
+def rename_file(old_path: Path, new_path: Path) -> bool:
     """Rename a file, handling name conflicts."""
     if old_path == new_path:
         return False
@@ -94,7 +94,7 @@ def rename_file(old_path, new_path):
     return True
 
 
-def check_termux():
+def check_termux() -> bool:
     """Check if running in Termux and print environment info."""
     termux_prefix = "/data/data/com.termux/files/usr"
     is_termux = os.path.exists(termux_prefix)
@@ -109,7 +109,7 @@ def check_termux():
     return is_termux
 
 
-def main():
+def main() -> None:
     """Main function to process files in current directory."""
     cwd = Path.cwd()
     renamed_count = 0
@@ -166,7 +166,7 @@ def main():
         print("\n💡 Tip: You can add new shebang patterns to the SHEBANG_MAPPING dictionary")
 
 
-def dry_run():
+def dry_run() -> None:
     """Preview changes without actually renaming."""
     cwd = Path.cwd()
 

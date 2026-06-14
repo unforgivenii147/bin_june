@@ -10,14 +10,14 @@ from rapidfuzz import fuzz
 PIP_LIST_FILE = "/sdcard/data/pip.list"
 
 
-def create_pip_list_again():
+def create_pip_list_again() -> list[str]:
     installed = get_ipkgs()
     content = "\n".join(installed)
     Path(PIP_LIST_FILE).write_text(content, encoding="utf-8")
     return installed
 
 
-def load_installed_packages():
+def load_installed_packages() -> list[str]:
     path = Path(PIP_LIST_FILE)
     if get_file_age(path) > 1.0 or not path.exists():
         return create_pip_list_again()
@@ -39,7 +39,7 @@ def find_dist_info(prefix):
     return matches
 
 
-def uninstall_packages(pkg_name):
+def uninstall_packages(pkg_name: str) -> None:
     try:
         subprocess.run([sys.executable, "-m", "pip", "uninstall", "-y", pkg_name], check=True)
         print(f"Uninstalled {pkg_name}")

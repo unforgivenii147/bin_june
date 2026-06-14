@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 
-def find_uppercase_extensions(directory, autofix=False):
+def find_uppercase_extensions(directory: Path, autofix: bool = False):
     """
     Find files with uppercase extensions in directory recursively.
 
@@ -40,7 +40,7 @@ def find_uppercase_extensions(directory, autofix=False):
     return uppercase_files
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Find files with uppercase extensions in current directory recursively"
     )

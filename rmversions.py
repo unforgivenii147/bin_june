@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 
-def clean_requirements(fname):
+def clean_requirements(fname: str) -> None:
     with Path(fname).open(encoding="utf-8") as f:
         lines = f.readlines()
     packages = set()

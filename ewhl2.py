@@ -11,7 +11,7 @@ from pathlib import Path
 from packaging import version as pkg_version
 
 
-def is_empty_wheel(wheel_path):
+def is_empty_wheel(wheel_path: Path) -> bool:
     """Check if a .whl file is empty (only contains dist-info directory)"""
     try:
         with zipfile.ZipFile(wheel_path, "r") as zip_ref:
@@ -33,7 +33,7 @@ def is_empty_wheel(wheel_path):
         return False
 
 
-def extract_package_info(wheel_path):
+def extract_package_info(wheel_path: Path) -> tuple[str, str] | tuple[None, None]:
     """Extract package name and version from wheel filename"""
     wheel_name = Path(wheel_path).stem
 
@@ -81,7 +81,7 @@ def check_pip_show(package_name):
     return None
 
 
-def check_package_location(package_name):
+def check_package_location(package_name: str) -> tuple[str | None, bool] | tuple[None, bool]:
     """Try to find where a package is installed"""
     try:
         result = subprocess.run(
@@ -107,7 +107,7 @@ def check_package_location(package_name):
     return None, False
 
 
-def analyze_wheels(source_dir, dest_dir_name="empty_wheels", check_installed=True):
+def analyze_wheels(source_dir, dest_dir_name: str = "empty_wheels", check_installed=True) -> None:
     """Scan and analyze wheels, checking if they might be installed"""
     source_path = Path(source_dir)
     dest_path = source_path / dest_dir_name
@@ -232,7 +232,7 @@ def analyze_wheels(source_dir, dest_dir_name="empty_wheels", check_installed=Tru
         )
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Identify and move empty .whl files, with detection of potentially installed ones"
     )

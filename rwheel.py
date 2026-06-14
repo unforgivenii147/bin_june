@@ -14,7 +14,7 @@ from multiprocessing import Pool, cpu_count
 from pathlib import Path
 
 
-def get_wheel_tags():
+def get_wheel_tags() -> str:
     """Determine appropriate wheel tags for the current platform."""
     python_version = f"{sys.version_info.major}{sys.version_info.minor}"
     abi_tag = f"cp{python_version}"
@@ -108,7 +108,7 @@ def collect_package_files(pkg_path, verbose=False):
     return files
 
 
-def create_wheel(pkg_path, wheels_dir, dryrun=False, verbose=False):
+def create_wheel(pkg_path, wheels_dir, dryrun: bool = False, verbose: bool = False) -> bool:
     """Create a wheel file for a package."""
     try:
         pkg_info = get_package_info(pkg_path)
@@ -200,7 +200,7 @@ Tag: {wheel_tag}
         return False
 
 
-def get_packages(site_packages_dir, package_names=None):
+def get_packages(site_packages_dir: Path, package_names=None):
     """Get list of packages to repack."""
     packages = []
 
@@ -237,7 +237,7 @@ def get_packages(site_packages_dir, package_names=None):
     return packages
 
 
-def repack_sequential(packages, wheels_dir, dryrun, verbose):
+def repack_sequential(packages, wheels_dir: Path, dryrun, verbose):
     """Repack packages sequentially."""
     results = []
     for pkg in packages:
@@ -245,7 +245,7 @@ def repack_sequential(packages, wheels_dir, dryrun, verbose):
     return results
 
 
-def repack_parallel(packages, wheels_dir, dryrun, verbose):
+def repack_parallel(packages, wheels_dir: Path, dryrun, verbose) -> list[bool]:
     """Repack packages in parallel."""
     # Create a partial function with fixed arguments
     repack_func = partial(create_wheel, wheels_dir=wheels_dir, dryrun=dryrun, verbose=verbose)
@@ -256,7 +256,7 @@ def repack_parallel(packages, wheels_dir, dryrun, verbose):
     return results
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Repack site-packages packages as wheel files")
     parser.add_argument("-a", "--all", action="store_true", help="Repack all packages (uses multiprocessing)")
     parser.add_argument("--dryrun", action="store_true", help="Show what would be done without actual repacking")

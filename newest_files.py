@@ -8,11 +8,11 @@ EXCLUDED_DIRS = {".git", "__pycache__"}
 N = 10
 
 
-def format_time(ts):
+def format_time(ts) -> str:
     return datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     files = []
     opt = "-r" if len(sys.argv) > 1 else "-g"

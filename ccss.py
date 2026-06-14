@@ -6,7 +6,7 @@ from pathlib import Path
 from dh import cprint, fsz, get_files, gsz, mpf3, runcmd
 
 
-def process_file(path):
+def process_file(path) -> bool:
     path = Path(path)
     before = gsz(path)
     if not path.exists():
@@ -29,7 +29,7 @@ def process_file(path):
     return False
 
 
-def main():
+def main() -> None:
     args = sys.argv[1:]
     cwd = Path.cwd()
     before = gsz(cwd)

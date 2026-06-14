@@ -11,7 +11,7 @@ def process_pkg(pkg) -> None:
     _, _, _ = runcmd(cmd, show_output=True)
 
 
-def main():
+def main() -> None:
     std_pkgs = list(STDLIB)
     mpf3(process_pkg, std_pkgs)
 

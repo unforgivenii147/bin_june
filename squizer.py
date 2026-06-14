@@ -7,7 +7,7 @@ import tokenize
 from pathlib import Path
 
 
-def remove_comments_and_docstrings(source_code):
+def remove_comments_and_docstrings(source_code: str) -> str:
     io_obj = io.StringIO(source_code)
     out = ""
     prev_toktype = tokenize.INDENT
@@ -39,7 +39,7 @@ def shorten_variable_name(name):
     return "".join([char for char in name if char not in vowels])
 
 
-def compress_python_file_aggressively(filepath):
+def compress_python_file_aggressively(filepath: str) -> None:
     content = Path(filepath).read_text(encoding="utf-8")
     content_no_comments = remove_comments_and_docstrings(content)
     lines = content_no_comments.splitlines()
@@ -63,7 +63,7 @@ def compress_python_file_aggressively(filepath):
     Path(filepath).write_text(final_content, encoding="utf-8")
 
 
-def compress_python_files_in_directory(directory="."):
+def compress_python_files_in_directory(directory: str = ".") -> None:
     for filename in os.listdir(directory):
         if filename.endswith(".py"):
             filepath = os.path.join(directory, filename)

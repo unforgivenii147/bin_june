@@ -41,7 +41,7 @@ class JalaliDate:
         self.day = jalali_day
 
     @staticmethod
-    def today_with_time():
+    def today_with_time() -> tuple[JalaliDate, datetime]:
         now = datetime.now()
         jdate = JalaliDate.from_gregorian(now.year, now.month, now.day)
         return (jdate, now)

@@ -7,7 +7,7 @@ from dh import get_files, mpf3
 from markdownify import markdownify
 
 
-def process_file(fp):
+def process_file(fp) -> None:
     path = Path(path)
     md_path = fp.with_suffix(".md")
     content = fp.read_text(encoding="utf8")

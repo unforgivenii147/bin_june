@@ -7,7 +7,7 @@ import subprocess
 from tqdm import tqdm
 
 
-def format_file(file_path):
+def format_file(file_path) -> str | None:
     try:
         subprocess.run(["npx", "prettier", "--write", file_path], capture_output=True, text=True, check=True)
         return None
@@ -15,7 +15,7 @@ def format_file(file_path):
         return f"{file_path}: {(e.stderr if hasattr(e, 'stderr') else e)!s}"
 
 
-def main():
+def main() -> None:
     target_extensions = (".js", ".css", ".htm", ".html", ".ts", ".jsx", ".tsx", ".xml", ".json")
     exclude_dirs = {".git"}
     exclude_extensions = (".min.js", ".min.css")

@@ -8,7 +8,7 @@ from pathlib import Path
 import ssdeep
 
 
-def get_all_files(root="."):
+def get_all_files(root: str = "."):
     file_paths = []
     for dirpath, _, filenames in os.walk(root):
         for f in filenames:
@@ -29,7 +29,7 @@ def compute_hashes(files):
     return hashes
 
 
-def group_similar_files(hashes, threshold):
+def group_similar_files(hashes, threshold: int):
     visited = set()
     groups = []
     files = list(hashes.keys())
@@ -50,7 +50,7 @@ def group_similar_files(hashes, threshold):
     return groups
 
 
-def copy_groups(groups, output_dir="output"):
+def copy_groups(groups, output_dir="output") -> None:
     Path(output_dir).mkdir(exist_ok=True, parents=True)
     for idx, group in enumerate(groups, start=1):
         group_dir = os.path.join(output_dir, f"group_{idx}")
@@ -62,7 +62,7 @@ def copy_groups(groups, output_dir="output"):
                 print(f"Failed to copy {f}: {e}")
 
 
-def main():
+def main() -> None:
     if len(sys.argv) != 2:
         print(f"Usage: {sys.argv[0]} <threshold>")
         sys.exit(1)

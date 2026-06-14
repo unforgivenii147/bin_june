@@ -20,7 +20,7 @@ def process_file(path) -> None:
     return runcmd(cmd, show_output=True)
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
     files = []

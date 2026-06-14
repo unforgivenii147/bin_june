@@ -8,7 +8,7 @@ from binaryornot import is_binary
 from dh import cprint
 
 
-def get_filez(cwd):
+def get_filez(cwd: Path):
     for r, _, files in os.walk(cwd):
         for f in files:
             fullpath = Path(r) / f
@@ -18,7 +18,7 @@ def get_filez(cwd):
                 yield fullpath
 
 
-def process_file(path):
+def process_file(path: Path) -> None:
     path = Path(path)
     removed = 0
     content = path.read_text(encoding="utf-8")

@@ -1,5 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from zipfile import ZipFile
+from tarfile import TarFile
+from _io import BufferedRandom
 import argparse
 import contextlib
 import io
@@ -45,7 +48,7 @@ ARCHIVE_SUFFIXES = (
 )
 
 
-def should_skip_dir(dirname):
+def should_skip_dir(dirname: str) -> bool:
     return any((part in EXCLUDE_DIRS for part in dirname.split(os.sep)))
 
 
@@ -67,7 +70,7 @@ def decode_bytes_to_text(b):
     return b.decode("utf-8", errors="ignore")
 
 
-def scan_bytes_for_urls(b, max_bytes, exts, name_hint=None):
+def scan_bytes_for_urls(b: bytes, max_bytes, exts, name_hint=None):
     if exts is not None and name_hint:
         _, ext = os.path.splitext(name_hint)
         if ext and ext.lower() not in exts:
@@ -78,12 +81,12 @@ def scan_bytes_for_urls(b, max_bytes, exts, name_hint=None):
     return find_urls_in_text(text)
 
 
-def is_archive_name(name):
+def is_archive_name(name) -> bool:
     nl = name.lower()
     return any((nl.endswith(suf) for suf in ARCHIVE_SUFFIXES))
 
 
-def open_tar_from_zst_path(path):
+def open_tar_from_zst_path(path) -> tuple[TarFile, BufferedRandom] | tuple[None, None]:
     if zstd is None:
         return (None, None)
     temp = tempfile.TemporaryFile()
@@ -109,7 +112,7 @@ def open_tar_from_zst_path(path):
         return (None, None)
 
 
-def process_zipfile_zipped(zipf, max_bytes, exts, found, recursion_depth, max_recursion):
+def process_zipfile_zipped(zipf: ZipFile, max_bytes, exts, found, recursion_depth, max_recursion) -> None:
     for zi in zipf.infolist():
         if zi.is_dir():
             continue
@@ -127,7 +130,7 @@ def process_zipfile_zipped(zipf, max_bytes, exts, found, recursion_depth, max_re
             found.update(scan_bytes_for_urls(b, max_bytes, exts, name_hint=name))
 
 
-def process_tarfile_obj(tarf, max_bytes, exts, found, recursion_depth, max_recursion):
+def process_tarfile_obj(tarf: TarFile, max_bytes, exts, found, recursion_depth, max_recursion) -> None:
     for member in tarf.getmembers():
         if not member.isfile():
             continue
@@ -147,7 +150,7 @@ def process_tarfile_obj(tarf, max_bytes, exts, found, recursion_depth, max_recur
             found.update(scan_bytes_for_urls(b, max_bytes, exts, name_hint=name))
 
 
-def process_bytes_as_archive(b, name, max_bytes, exts, found, recursion_depth=0, max_recursion=3):
+def process_bytes_as_archive(b, name, max_bytes, exts, found, recursion_depth: int = 0, max_recursion: int = 3) -> None:
     lname = name.lower()
     bio = io.BytesIO(b)
     try:
@@ -193,7 +196,7 @@ def process_bytes_as_archive(b, name, max_bytes, exts, found, recursion_depth=0,
         found.update(scan_bytes_for_urls(b, max_bytes, exts, name_hint=name))
 
 
-def process_path(path, max_bytes, exts, found, recursion_limit=999):
+def process_path(path: str, max_bytes: int, exts, found, recursion_limit=999) -> None:
     try:
         size = Path(path).stat().st_size
     except Exception:
@@ -281,7 +284,7 @@ def extract_and_save_gitlinks(urllist) -> None:
         print("no git link")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Find URLs in files and supported archives recursively and save them to a file."
     )

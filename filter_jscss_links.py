@@ -18,7 +18,7 @@ def is_static_asset(url: str) -> bool:
     return bool(EXT_PATTERN.search(path))
 
 
-def main():
+def main() -> None:
     if not INPUT_FILE.exists():
         print("urls.txt not found.")
         return

@@ -9,7 +9,7 @@ MAX_QUEUE = 16
 EXT = [".java", ".c", ".cpp", ".cxx", ".cc", ".h", ".hh", ".hpp", ".hxx", ".js", ".json"]
 
 
-def process_file(path):
+def process_file(path) -> bool:
     path = Path(path)
     before = gsz(path)
     print(f"{path.name} ", end=" ")

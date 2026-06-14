@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 
-def freeze_to_json(input_file="pip.freeze", output_file="packages.json"):
+def freeze_to_json(input_file: str = "pip.freeze", output_file: str = "packages.json") -> None:
     packages = {}
     with Path(input_file).open(encoding="utf-8") as f:
         for line in f:

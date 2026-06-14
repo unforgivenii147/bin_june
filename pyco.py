@@ -4,7 +4,7 @@ import shutil
 from pathlib import Path
 
 
-def fsz(sz) -> str:
+def fsz(sz: int) -> str:
     sz = abs(int(sz))
     units = ("", "K", "M", "G", "T")
     if sz == 0:
@@ -18,7 +18,7 @@ def gsz(path: Path) -> int:
     return sum((p.stat().st_size for p in path.rglob("*") if p.is_file()))
 
 
-def clean_pycache(start_dir: Path = Path.cwd()):
+def clean_pycache(start_dir: Path = Path.cwd()) -> None:
     removed = 0
     sz = 0
     for path in start_dir.rglob("__pycache__"):

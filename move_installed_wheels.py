@@ -32,7 +32,7 @@ EXCLUDED_PACKAGES = {
 }
 
 
-def ensure_venv():
+def ensure_venv() -> None:
     if sys.prefix == sys.base_prefix:
         print("⚠ Not running inside a virtual environment.")
         sys.exit(1)
@@ -52,7 +52,7 @@ def normalize(name: str) -> str:
     return name.lower().replace("-", "_")
 
 
-def main():
+def main() -> None:
     if not WHL_DIR.exists():
         print(f"Directory not found: {WHL_DIR}")
         return

@@ -17,7 +17,7 @@ def get_all_dist_info_dirs():
     return dist_info_dirs
 
 
-def check_package_binary(dist_info_path):
+def check_package_binary(dist_info_path) -> str | None:
     record_file = os.path.join(dist_info_path, "RECORD")
     pkg_name = Path(dist_info_path).name.replace(".dist-info", "").split("-")[0].lower()
     if Path(record_file).exists():
@@ -39,7 +39,7 @@ def get_binary_packages_parallel():
     return {pkg for pkg in results if pkg}
 
 
-def clean_requirements_txt(requirements_file="requirements.txt"):
+def clean_requirements_txt(requirements_file: str = "requirements.txt") -> None:
     if not Path(requirements_file).exists():
         print(f"Error: {requirements_file} not found")
         return

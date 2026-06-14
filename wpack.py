@@ -97,7 +97,7 @@ async def main_async():
     print("\nDone.")
 
 
-def main_multiprocessing():
+def main_multiprocessing() -> None:
     if WHEELS_OUTPUT_DIR:
         WHEELS_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
         print(f"Output directory for wheels: {WHEELS_OUTPUT_DIR}")

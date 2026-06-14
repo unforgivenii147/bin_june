@@ -10,7 +10,7 @@ OUTPUT_HTML = "fa_fonts_preview.html"
 FONT_SIZES = [14, 22]
 
 
-def find_fonts(cwd="."):
+def find_fonts(cwd: str = "."):
     fonts = []
     for dirpath, _, filenames in os.walk(cwd):
         fonts.extend(
@@ -19,7 +19,7 @@ def find_fonts(cwd="."):
     return fonts
 
 
-def generate_html(font_files):
+def generate_html(font_files) -> str:
     html = [
         "<!DOCTYPE html>",
         "<html lang='en'>",

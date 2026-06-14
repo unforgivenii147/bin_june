@@ -5,7 +5,7 @@ from collections import defaultdict
 from pathlib import Path
 
 
-def find_path_duplicates():
+def find_path_duplicates() -> None:
     path_env = os.environ.get("PATH", "")
     directories = [Path(d) for d in path_env.split(":") if d and Path(d).exists()]
     app_map = defaultdict(list)

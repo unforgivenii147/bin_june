@@ -3,7 +3,7 @@
 from pathlib import Path
 
 
-def process_file(path):
+def process_file(path: str) -> None:
     path = Path(path)
     content = path.read_text(encoding="utf-8")
     lines = content.splitlines()
@@ -15,7 +15,7 @@ def process_file(path):
                 f.write(pkg_name + "\n")
 
 
-def main():
+def main() -> None:
     process_file("uv.lock")
 
 

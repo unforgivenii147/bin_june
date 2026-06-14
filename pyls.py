@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from argparse import Namespace
 import argparse
 import datetime
 import grp
@@ -32,7 +33,7 @@ def colorize(name, st, enabled):
     return name
 
 
-def human_size(size):
+def human_size(size) -> str:
     for unit in ("B", "K", "M", "G", "T"):
         if size < 1024:
             return f"{size}{unit}"
@@ -50,12 +51,12 @@ def indicator(path, st):
     return ""
 
 
-def format_time(ts, full):
+def format_time(ts, full) -> str:
     dt = datetime.datetime.fromtimestamp(ts)
     return dt.strftime("%Y-%m-%d %H:%M:%S" if full else "%b %d %H:%M")
 
 
-def format_entry(entry, args, color_enabled):
+def format_entry(entry, args: Namespace, color_enabled: bool) -> str:
     try:
         st = entry.stat(follow_symlinks=args.L)
     except FileNotFoundError:
@@ -80,7 +81,7 @@ def format_entry(entry, args, color_enabled):
     return f"{inode} {blocks} {perms}  {nlink}  {uid}  {gid}  {size: >6}  {time_str}  {name} "
 
 
-def scan_dir(path, args):
+def scan_dir(path: Path, args: Namespace):
     try:
         with os.scandir(path) as it:
             entries = [Path(e.path) for e in it]
@@ -116,7 +117,7 @@ def scan_dir(path, args):
     return entries
 
 
-def print_columns(items, width, by_row):
+def print_columns(items: list[str], width, by_row) -> None:
     if not items:
         return
     max_len = max((len(i) for i in items)) + 2
@@ -130,7 +131,7 @@ def print_columns(items, width, by_row):
         print()
 
 
-def main():
+def main() -> None:
     p = argparse.ArgumentParser(add_help=False)
     p.add_argument("-1", dest="one", action="store_true")
     p.add_argument("-a", action="store_true")

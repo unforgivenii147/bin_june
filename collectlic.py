@@ -7,7 +7,7 @@ EXCLUDE_DIRS = {".git"}
 OUTPUT_FILE = "/sdcard/all2.txt"
 
 
-def read_file(path):
+def read_file(path) -> str | None:
     try:
         with Path(path).open(encoding="utf-8", errors="ignore") as f:
             return f.read()
@@ -25,7 +25,7 @@ def collect_files(root):
             yield full
 
 
-def build_all_txt(root) -> None:
+def build_all_txt(root: str) -> None:
     files = list(collect_files(root))
     print(f"Found {len(files)} files")
     with Path(OUTPUT_FILE).open("w", encoding="utf-8") as out:

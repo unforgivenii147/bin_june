@@ -6,7 +6,7 @@ from pathlib import Path
 from dh import get_files
 
 
-def process_file(fp) -> None:
+def process_file(fp: Path) -> None:
     path = Path(path)
     if fp.is_symlink():
         return
@@ -20,7 +20,7 @@ def process_file(fp) -> None:
         print(fp.name)
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
     if args:

@@ -13,7 +13,7 @@ CHUNK_SIZE = 2000
 non_english_pattern = re.compile("[^\\x00-\\x7F]")
 
 
-def split_into_chunks(text: str, size: int):
+def split_into_chunks(text: str, size: int) -> list[str]:
     return [text[i : i + size] for i in range(0, len(text), size)]
 
 
@@ -25,7 +25,7 @@ def translate_chunk(chunk: str) -> str:
         return chunk
 
 
-def translate_file(path: Path):
+def translate_file(path: Path) -> None:
     try:
         content = Path(path).read_text(encoding="utf-8")
     except:
@@ -46,7 +46,7 @@ def translate_file(path: Path):
         print(f"Error writing {new_path}: {e}")
 
 
-def process_directory(directory: str):
+def process_directory(directory: str) -> None:
     for pth in walk_files(directory):
         path = Path(pth)
         if path.is_file() and is_text_file(path):

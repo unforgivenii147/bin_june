@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from bs4.element import PageElement
 import sys
 from pathlib import Path
 
@@ -9,7 +10,7 @@ from dh import cprint, get_files, get_random_filename, mpf3
 MAX_QUEUE = 16
 
 
-def save_script(str1):
+def save_script(str1: list[PageElement]) -> bool:
     fn = "js/"
     fn += get_random_filename(10)
     fn += ".js"
@@ -23,7 +24,7 @@ def save_script(str1):
     return True
 
 
-def process_file(path):
+def process_file(path) -> bool:
     path = Path(path)
     html_content = path.read_text(encoding="utf-8")
     path = Path(path)
@@ -36,7 +37,7 @@ def process_file(path):
     return True
 
 
-def main():
+def main() -> None:
     if not Path("js").exists():
         Path("js").mkdir()
     cwd = Path.cwd()

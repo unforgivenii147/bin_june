@@ -4,7 +4,7 @@ import os
 import sys
 
 
-def sort_and_dedup(file_name):
+def sort_and_dedup(file_name: str) -> None:
     file_size = os.path.getsize(file_name)
     with open(file_name) as f:
         lines = f.readlines()

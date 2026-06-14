@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 
-def expand_path(path):
+def expand_path(path) -> Path:
     """
     Expand user home directory tilde and environment variables.
 
@@ -23,7 +23,7 @@ def expand_path(path):
     return Path(expanded_path).resolve()
 
 
-def compare_and_move_common(source_dir, target_dir):
+def compare_and_move_common(source_dir: str, target_dir: str) -> None:
     """
     Compare two directories and move files that exist in BOTH directories
     from the source directory to a 'common' subdirectory in current dir.
@@ -132,7 +132,7 @@ def compare_and_move_common(source_dir, target_dir):
         print(f"Note: These files still exist in the target directory: {target}")
 
 
-def main():
+def main() -> None:
     # Parse command line arguments
     if len(sys.argv) != 3:
         print("Usage: python compare_dirs.py <source_directory> <target_directory>")

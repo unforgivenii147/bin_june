@@ -42,7 +42,7 @@ def beautify_js(file_path) -> bool:
     return True
 
 
-def beautify_directory(directory) -> None:
+def beautify_directory(directory: str) -> None:
     failed_files = []
     for root, _dirs, files in os.walk(directory):
         for file in files:

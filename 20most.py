@@ -9,11 +9,11 @@ from pathlib import Path
 from dh import get_nobinary
 
 
-def extract_words(text):
+def extract_words(text: str):
     return re.findall("[a-z]{3,}", text.lower())
 
 
-def process_file(path: Path):
+def process_file(path: Path) -> None:
     path = Path(path)
     text = path.read_text(encoding="utf-8")
     words = extract_words(text)
@@ -22,7 +22,7 @@ def process_file(path: Path):
         print(f"{word}", end=" ")
 
 
-def main():
+def main() -> None:
     args = sys.argv[1:]
     cwd = Path.cwd()
     files = [Path(arg) for arg in args] if args else get_nobinary(cwd)

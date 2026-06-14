@@ -8,7 +8,7 @@ from pathlib import Path
 from dh import fsz, get_files, gsz, mpf3, runcmd, rrs
 
 
-def process_file(path):
+def process_file(path) -> None:
     path = Path(path)
     if not path.exists():
         return

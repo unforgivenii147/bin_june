@@ -1,11 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from subprocess import CompletedProcess
 import shutil
 import subprocess
 import sys
 
 
-def run_git_command(cmd, check=True, capture_output=True):
+def run_git_command(cmd: str, check=True, capture_output=True) -> CompletedProcess[str] | None:
     try:
         return subprocess.run(cmd, shell=True, check=check, capture_output=capture_output, text=True)
     except subprocess.CalledProcessError as e:
@@ -16,18 +17,18 @@ def run_git_command(cmd, check=True, capture_output=True):
         return None
 
 
-def is_git_repository():
+def is_git_repository() -> bool:
     return run_git_command("git rev-parse --git-dir", check=False) is not None
 
 
-def get_current_branch():
+def get_current_branch() -> str | None:
     result = run_git_command("git branch --show-current")
     if result and result.stdout:
         return result.stdout.strip()
     return None
 
 
-def get_main_branch_name():
+def get_main_branch_name() -> str:
     result = run_git_command("git remote show origin", check=False)
     if result and "HEAD branch" in result.stdout:
         for line in result.stdout.split("\n"):

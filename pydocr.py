@@ -80,14 +80,14 @@ def extract_from_importable(name: str):
         return (doc, [], [])
 
 
-def module_to_md_paths(name: str):
+def module_to_md_paths(name: str) -> tuple[str, str]:
     parts = name.split(".")
     folder = os.path.join(BASE_DIR, *parts[:-1])
     filename = f"{parts[-1]}.md"
     return (folder, os.path.join(folder, filename))
 
 
-def file_to_md_paths(py_file: str, root: str):
+def file_to_md_paths(py_file: str, root: str) -> tuple[str, str]:
     rel = os.path.relpath(py_file, root)
     parts = rel.split(os.sep)
     parts[-1] = parts[-1].replace(".py", ".md")
@@ -96,7 +96,7 @@ def file_to_md_paths(py_file: str, root: str):
     return (folder, outfile)
 
 
-def save_markdown(folder: str, path: str, content: str):
+def save_markdown(folder: str, path: str, content: str) -> None:
     folderpath = Path(folder)
     if not folderpath.exists():
         folderpath.mkdir(exist_ok=True)
@@ -106,7 +106,7 @@ def save_markdown(folder: str, path: str, content: str):
     outpath.write_text(content, encoding="utf-8")
 
 
-def process_importable_task(name: str):
+def process_importable_task(name: str) -> None:
     print(f"processing module {name}")
     result = extract_from_importable(name)
     if not result:
@@ -117,7 +117,7 @@ def process_importable_task(name: str):
     save_markdown(folder, out_path, md)
 
 
-def process_file_task(py_file):
+def process_file_task(py_file) -> None:
     filepath = Path(py_file)
     root = str(filepath.parent)
     print(f"processing file {filepath.name} from {filepath.parent.name}")
@@ -132,7 +132,7 @@ def process_file_task(py_file):
     save_markdown(folder, out_path, md)
 
 
-def main():
+def main() -> None:
     if not BASE_DIR.exists():
         BASE_DIR.mkdir(exist_ok=True)
     cwd = Path.cwd()

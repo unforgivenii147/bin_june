@@ -3,7 +3,7 @@
 from secrets import randbelow
 
 
-def show_random_color():
+def show_random_color() -> None:
     red = randbelow(256)
     green = randbelow(256)
     blue = randbelow(256)

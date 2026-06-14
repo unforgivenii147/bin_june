@@ -16,7 +16,7 @@ SAVE_EVERY = 1000
 lock = Lock()
 
 
-def translate_word(word):
+def translate_word(word) -> str | None:
     for attempt in range(3):
         try:
             return GoogleTranslator(source="auto", target="en").translate(word)
@@ -26,12 +26,12 @@ def translate_word(word):
     return None
 
 
-def load_words(input_file):
+def load_words(input_file: str) -> list[str]:
     with Path(input_file).open(encoding="utf-8") as f:
         return [w.strip() for w in f if w.strip()]
 
 
-def load_existing_results(output_file):
+def load_existing_results(output_file: str):
     if Path(output_file).exists():
         try:
             with Path(output_file).open(encoding="utf-8") as f:
@@ -43,14 +43,14 @@ def load_existing_results(output_file):
     return {}
 
 
-def save_results_atomic(results, output_file):
+def save_results_atomic(results, output_file: str) -> None:
     tmp = output_file + ".tmp"
     with Path(tmp).open("w", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
     Path(tmp).replace(output_file)
 
 
-def main():
+def main() -> None:
     words = load_words(INPUT_FILE)
     print(f"[INFO] Loaded {len(words)} Persian words")
     results = load_existing_results(OUTPUT_FILE)

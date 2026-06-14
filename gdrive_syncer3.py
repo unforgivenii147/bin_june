@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
+from googleapiclient.discovery import Resource
 import os
 import pickle
 from pathlib import Path
@@ -15,7 +16,7 @@ SCOPES = ["https://www.googleapis.com/auth/drive.readonly"]
 
 
 class GoogleDriveSyncer:
-    def __init__(self, client_id=None, client_secret=None, token_file="token.pickle"):
+    def __init__(self, client_id=None, client_secret=None, token_file: str = "token.pickle") -> None:
         self.client_id = client_id or os.getenv("GOOGLE_CLIENT_ID")
         self.client_secret = client_secret or os.getenv("GOOGLE_CLIENT_SECRET")
 
@@ -25,7 +26,7 @@ class GoogleDriveSyncer:
         self.token_file = token_file
         self.service = self.authenticate()
 
-    def authenticate(self):
+    def authenticate(self) -> Resource:
         """Authenticate without cryptography dependency"""
         creds = None
 
@@ -62,7 +63,7 @@ class GoogleDriveSyncer:
 
         return build("drive", "v3", credentials=creds)
 
-    def manual_oauth_flow(self):
+    def manual_oauth_flow(self) -> Credentials:
         """Manual OAuth flow for headless/browserless environments"""
         # Create auth URL
         auth_params = {
@@ -117,7 +118,7 @@ class GoogleDriveSyncer:
         return credentials
 
     # Rest of the sync methods remain the same
-    def get_all_files(self, folder_id="root"):
+    def get_all_files(self, folder_id: str = "root"):
         """Get all files and folders from Google Drive"""
         all_items = []
         page_token = None
@@ -149,7 +150,7 @@ class GoogleDriveSyncer:
 
         return all_items
 
-    def download_file(self, file_id, file_name, local_path):
+    def download_file(self, file_id, file_name, local_path) -> bool:
         """Download a single file from Google Drive"""
         try:
             request = self.service.files().get_media(fileId=file_id)
@@ -170,7 +171,7 @@ class GoogleDriveSyncer:
             print(f"✗ Failed to download {file_name}: {error}")
             return False
 
-    def sync_folder(self, drive_folder_id, local_folder_path, folder_name="root"):
+    def sync_folder(self, drive_folder_id: str, local_folder_path, folder_name: str = "root") -> None:
         """Recursively sync Google Drive folder to local drive"""
         print(f"\n📁 Syncing folder: {folder_name}")
 
@@ -207,7 +208,7 @@ class GoogleDriveSyncer:
                         mod_time = datetime.fromisoformat(remote_modified.replace("Z", "+00:00")).timestamp()
                         os.utime(local_item_path, (mod_time, mod_time))
 
-    def sync_all(self, local_base_path):
+    def sync_all(self, local_base_path: str) -> None:
         """Sync entire Google Drive to local path"""
         print("Starting full Google Drive sync...")
         self.sync_folder("root", local_base_path, "My Drive")
@@ -215,7 +216,7 @@ class GoogleDriveSyncer:
 
 
 # Install minimal dependencies
-def install_minimal_packages():
+def install_minimal_packages() -> None:
     """Install only required packages without cryptography"""
     import subprocess
     import sys
@@ -230,7 +231,7 @@ def install_minimal_packages():
             print(f"✗ Failed to install {package}")
 
 
-def main():
+def main() -> None:
     from pathlib import Path
 
     from dotenv import load_dotenv

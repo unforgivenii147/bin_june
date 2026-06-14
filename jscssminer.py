@@ -7,7 +7,7 @@ from rcssmin import cssmin
 from rjsmin import jsmin
 
 
-def minify_assets_in_directory(cwd=".") -> None:
+def minify_assets_in_directory(cwd: Path | str = ".") -> None:
     minified_count = 0
     errors_count = 0
     for foldername, _subfolders, filenames in os.walk(cwd):

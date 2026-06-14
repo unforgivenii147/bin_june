@@ -10,7 +10,7 @@ blank_line = "\n"
 IMAGE_RE = re.compile("^\\s*(\\.\\.\\s+image::|:target:|:alt:)", re.IGNORECASE)
 
 
-def process_file(path: str | Path):
+def process_file(path: str | Path) -> None:
     path = Path(path)
     print(f"Processing {path.name}")
     try:
@@ -61,7 +61,7 @@ def process_file(path: str | Path):
     print(f"❌ {path.name}: (no change)")
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
     args = sys.argv[1:]

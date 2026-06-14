@@ -5,14 +5,14 @@ import re
 from pathlib import Path
 
 
-def resolve_imports(content, cwd):
+def resolve_imports(content: str, cwd: Path) -> str:
     folder_name = Path(cwd).name
     content = re.sub("from \\. import ([a-zA-Z0-9_]+)", f"from {folder_name} import \\1", content)
     content = re.sub("from \\.([a-zA-Z0-9_]+) import ([a-zA-Z0-9_]+)", f"from {folder_name}.\\1 import \\2", content)
     return re.sub("import \\.", f"import {folder_name}", content)
 
 
-def merge_python_files():
+def merge_python_files() -> None:
     cwd = Path.cwd()
     folder_name = Path(cwd).name
     output_filename = f"{folder_name}.py"

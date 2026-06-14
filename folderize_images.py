@@ -55,7 +55,7 @@ def folderize_by_similarity(
     threshold: int,
     move: bool,
     copy_duplicates_to_group_only: bool,
-):
+) -> None:
     out_dir = root / out_dir_name
     out_dir.mkdir(parents=True, exist_ok=True)
     images: list[HashedImage] = []
@@ -109,7 +109,7 @@ def folderize_by_similarity(
     print(f"Action complete: {moved_or_copied} files {('moved' if move else 'copied')} into {out_dir}.")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Folderize images by similarity using imagehash.")
     parser.add_argument("--root", type=str, default=".", help="Root directory to scan (default: current dir)")
     parser.add_argument("--out", type=str, default="_similar_groups", help="Output folder name")

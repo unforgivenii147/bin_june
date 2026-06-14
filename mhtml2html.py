@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from email.message import EmailMessage
 import base64
 import os
 import re
@@ -32,7 +33,7 @@ def split_data_url(src: str):
         return None
 
 
-def main():
+def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: python mhtml_to_html.py input.mhtml [output.html] [output_files_dir]")
         sys.exit(1)
@@ -46,7 +47,7 @@ def main():
     parts = []
     if msg.is_multipart():
 
-        def walk(m):
+        def walk(m: EmailMessage) -> None:
             for p in m.iter_parts():
                 parts.append(p)
                 if p.is_multipart():

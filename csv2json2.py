@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 
-def main():
+def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: python csv_to_json.py <input.csv>")
         sys.exit(1)

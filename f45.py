@@ -6,7 +6,7 @@ from pathlib import Path
 inplace = "-i" in sys.argv
 
 
-def fold_file(path, width=35):
+def fold_file(path: Path, width=35) -> None:
     if inplace:
         new_path = path
     else:

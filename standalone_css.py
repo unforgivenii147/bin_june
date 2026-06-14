@@ -16,12 +16,12 @@ def get_file_extension(url):
     return os.path.splitext(url)[1].lower()
 
 
-def is_font_url(url):
+def is_font_url(url) -> bool:
     e = [".woff", ".woff2", ".ttf", ".eot", ".svg"]
     return any((url.lower().endswith(ext) for ext in extensions))
 
 
-def find_local_font(font_filename):
+def find_local_font(font_filename: str) -> str | None:
     if not Path(STATIC_DIR).is_dir():
         return None
     for root, _, files in os.walk(STATIC_DIR):
@@ -30,7 +30,7 @@ def find_local_font(font_filename):
     return None
 
 
-def get_local_font_base64(local_path):
+def get_local_font_base64(local_path: str) -> str | None:
     try:
         content = Path(local_path).read_bytes()
         ext = get_file_extension(local_path)
@@ -57,7 +57,7 @@ def get_local_font_base64(local_path):
         return None
 
 
-def get_remote_font_base64(url):
+def get_remote_font_base64(url) -> str | None:
     try:
         response = requests.get(url, timeout=15, stream=True)
         response.raise_for_status()
@@ -87,7 +87,7 @@ def get_remote_font_base64(url):
         return None
 
 
-def url_to_base64(url, base_css_path):
+def url_to_base64(url, base_css_path: Path) -> str | None:
     cleaned_url = url.strip("'\"")
     font_filename = Path(cleaned_url).name
     logger.debug(f"looking for {font_filename} in {STATIC_DIR}")
@@ -105,7 +105,7 @@ def url_to_base64(url, base_css_path):
     return get_remote_font_base64(full_url)
 
 
-def make_css_standalone(input_css_path, output_css_path):
+def make_css_standalone(input_css_path: Path, output_css_path: Path) -> None:
     input_css_path = Path(input_css_path).resolve()
     try:
         content = Path(input_css_path).read_text(encoding="utf-8")

@@ -24,7 +24,7 @@ def is_python_file(path: Path) -> bool:
     return False
 
 
-def run_command(cmd):
+def run_command(cmd: list[str]) -> tuple[int, str, str]:
     try:
         result = subprocess.run(cmd, check=False, capture_output=True, text=True, encoding="utf-8")
         return (result.returncode, result.stdout, result.stderr)
@@ -62,7 +62,7 @@ def process_file(file_path) -> None:
             sys.stdout.flush()
 
 
-def get_all_files(cwd):
+def get_all_files(cwd: Path):
     py_files = []
     for pth in walk_files(cwd):
         path = Path(pth)

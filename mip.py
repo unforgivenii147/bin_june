@@ -8,7 +8,7 @@ from pathlib import Path
 from dh import get_installed_packages
 
 
-def get_wheel_package_info(wheel_file):
+def get_wheel_package_info(wheel_file: str) -> tuple[str, str] | tuple[None, None]:
     try:
         with zipfile.ZipFile(wheel_file, "r") as zip_ref:
             for file in zip_ref.namelist():
@@ -26,7 +26,7 @@ def get_wheel_package_info(wheel_file):
     return (None, None)
 
 
-def remove_wheel_file(wheel_file):
+def remove_wheel_file(wheel_file: str) -> None:
     try:
         Path(wheel_file).unlink()
         print(f"Removed: {wheel_file}")
@@ -34,7 +34,7 @@ def remove_wheel_file(wheel_file):
         print(f"Error removing {wheel_file}: {e}")
 
 
-def main():
+def main() -> None:
     whl_dir = "/sdcard/whl"
     if not Path(whl_dir).exists():
         print(f"Directory {whl_dir} does not exist.")

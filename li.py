@@ -14,7 +14,7 @@ RESET = "\x1b[0m"
 COMPRESSED_EXTS = {".zip", ".tar", ".gz", ".bz2", ".xz", ".rar", ".7z"}
 
 
-def human_readable_size(size_bytes):
+def human_readable_size(size_bytes) -> str:
     if size_bytes < 1024:
         return f"{size_bytes} B"
     if size_bytes < 1024**2:
@@ -24,7 +24,7 @@ def human_readable_size(size_bytes):
     return f"{size_bytes / 1024**3:.1f} GB"
 
 
-def get_dir_size(path):
+def get_dir_size(path: str) -> int:
     total = 0
     for root, _dirs, files in os.walk(path, onerror=lambda e: None):
         for f in files:
@@ -37,7 +37,7 @@ def get_dir_size(path):
     return total
 
 
-def list_dir(path="."):
+def list_dir(path: str = ".") -> None:
     entries = os.listdir(path)
     items = []
     for entry in entries:

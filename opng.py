@@ -9,7 +9,7 @@ START_DIR = Path.cwd()
 NUM_PROCESSES = 4
 
 
-def process_file(path: str | Path):
+def process_file(path: str | Path) -> None:
     path = Path(path)
     before = gsz(path)
     try:
@@ -37,7 +37,7 @@ def process_file(path: str | Path):
     return
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
     files = []

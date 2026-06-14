@@ -12,7 +12,7 @@ video = sys.argv[1]
 txtfile = Path(video).with_suffix(".txt")
 
 
-def process_frame(frame_id, frame):
+def process_frame(frame_id: int, frame) -> None:
     frame = cv2.resize(frame, None, fx=1.5, fy=1.5, interpolation=cv2.INTER_CUBIC)
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     gray = 255 - gray
@@ -24,7 +24,7 @@ def process_frame(frame_id, frame):
         cprint(f"frame {frame_id} --> no text", "blue")
 
 
-def main():
+def main() -> None:
     cap = cv2.VideoCapture(video)
     frame_id = 0
     while True:

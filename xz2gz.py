@@ -42,7 +42,7 @@ def process_file(path: Path) -> Tuple[str, bool, str]:
         return (str(path), False, f"Error: {str(e)}")
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     files = get_files(cwd, ext=[".xz"])
     if not files:

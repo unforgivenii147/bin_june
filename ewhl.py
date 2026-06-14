@@ -7,7 +7,7 @@ import zipfile
 from pathlib import Path
 
 
-def is_empty_wheel(wheel_path):
+def is_empty_wheel(wheel_path: Path) -> bool:
     """
     Check if a .whl file is empty (only contains dist-info directory, no .py files)
     """
@@ -34,7 +34,7 @@ def is_empty_wheel(wheel_path):
         return False
 
 
-def move_empty_wheels(source_dir, dest_dir_name="empty_wheels"):
+def move_empty_wheels(source_dir, dest_dir_name: str = "empty_wheels") -> None:
     """
     Scan for .whl files in source_dir and move empty ones to dest_dir_name
     """
@@ -87,7 +87,7 @@ def move_empty_wheels(source_dir, dest_dir_name="empty_wheels"):
     print(f"  - Total checked: {len(wheel_files)}")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Move empty .whl files (only dist-info, no Python code) to a subdirectory"
     )

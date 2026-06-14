@@ -53,7 +53,7 @@ def sha256(content: str) -> str:
     return hashlib.sha256(content.encode("utf-8")).hexdigest()
 
 
-def safe_read_text(path: Path):
+def safe_read_text(path: Path) -> str | None:
     try:
         return path.read_text(encoding="utf-8")
     except Exception as e:
@@ -61,7 +61,7 @@ def safe_read_text(path: Path):
         return None
 
 
-def safe_write_text(path: Path, content: str):
+def safe_write_text(path: Path, content: str) -> bool:
     try:
         path.write_text(content, encoding="utf-8")
         return True
@@ -190,7 +190,7 @@ def is_supported_archive(path: Path) -> bool:
     return any((s.endswith(ext) for ext in SUPPORTED_ARCHIVES))
 
 
-def extract_archive(path: Path):
+def extract_archive(path: Path) -> str:
     temp_dir = tempfile.mkdtemp(prefix="dedup_py_")
     lower = str(path).lower()
     try:
@@ -310,12 +310,12 @@ def get_utils_path(base: Path) -> Path:
         i += 1
 
 
-def build_import_line(utils_module_name: str, names):
+def build_import_line(utils_module_name: str, names) -> str:
     names = sorted(set(names))
     return f"from {utils_module_name} import ({', '.join(names)})\n"
 
 
-def write_utils_file(path: Path, objects):
+def write_utils_file(path: Path, objects) -> bool:
     content = "\n\n".join((obj["snippet"].rstrip() for obj in objects)).rstrip() + "\n"
     try:
         ast.parse(content)
@@ -339,7 +339,7 @@ def insert_import_after_shebang(code: str, import_line: str) -> str:
     return "".join(lines)
 
 
-def remove_snippets_from_code(code: str, objects):
+def remove_snippets_from_code(code: str, objects) -> str:
     """
     Removes object snippets by byte range if available, otherwise by source lines.
     Removal is done in reverse order.
@@ -362,7 +362,7 @@ def remove_snippets_from_code(code: str, objects):
     return "".join(lines)
 
 
-def update_file_for_move(path: Path, objects_to_remove, utils_module_name: str):
+def update_file_for_move(path: Path, objects_to_remove, utils_module_name: str) -> bool:
     code = safe_read_text(path)
     if code is None:
         return False
@@ -384,7 +384,7 @@ def update_file_for_move(path: Path, objects_to_remove, utils_module_name: str):
     return safe_write_text(path, new_code)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Find repeated top-level Python objects and optionally move/copy them to utils.py"
     )

@@ -31,7 +31,7 @@ def break_long_sentence(sentence: str, max_len: int = MAX_LEN):
     return parts
 
 
-def restructure_paragraph(paragraph: str):
+def restructure_paragraph(paragraph: str) -> str:
     sentences = split_sentences(paragraph)
     lines = []
     for s in sentences:
@@ -39,7 +39,7 @@ def restructure_paragraph(paragraph: str):
     return "\n".join(lines)
 
 
-def restructure_file(filepath: Path):
+def restructure_file(filepath: Path) -> None:
     backup = filepath.with_suffix(filepath.suffix + ".bak")
     text = filepath.read_text(encoding="utf-8", errors="ignore")
     backup.write_text(text, encoding="utf-8")
@@ -49,7 +49,7 @@ def restructure_file(filepath: Path):
     filepath.write_text(new_text, encoding="utf-8")
 
 
-def main():
+def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: python restructure_text.py <filename>")
         sys.exit(1)

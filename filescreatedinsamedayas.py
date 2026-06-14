@@ -6,7 +6,7 @@ from datetime import datetime
 from pathlib import Path
 
 
-def get_file_creation_time(filepath):
+def get_file_creation_time(filepath: str) -> datetime | None:
     try:
         stat = os.stat(filepath)
         if sys.platform == "win32":
@@ -17,7 +17,7 @@ def get_file_creation_time(filepath):
         return None
 
 
-def main():
+def main() -> None:
     if len(sys.argv) != 2:
         print("Usage: python script.py <filename>")
         sys.exit(1)

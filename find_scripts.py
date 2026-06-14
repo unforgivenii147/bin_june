@@ -5,7 +5,7 @@ from pathlib import Path
 from dh import get_filez, is_binary
 
 
-def find_scripts_without_extension(directory):
+def find_scripts_without_extension(directory: Path):
     scripts_without_extension = []
     for item in get_filez(directory):
         if item.is_symlink():

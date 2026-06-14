@@ -4,7 +4,7 @@ import shutil
 from pathlib import Path
 
 
-def process_dir(pardir):
+def process_dir(pardir: Path) -> bool:
     dotgit = pardir / ".git"
     if not dotgit.exists():
         return False
@@ -16,7 +16,7 @@ def process_dir(pardir):
     return True
 
 
-def find_targets(cwd: Path):
+def find_targets(cwd: Path) -> None:
     for dpath in cwd.rglob("*"):
         if dpath.is_dir() and dpath.name == ".git":
             parent_of_dotgit = dpath.parent

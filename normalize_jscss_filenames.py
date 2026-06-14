@@ -8,13 +8,13 @@ from pathlib import Path
 from dh import unique_path
 
 
-def normalize_filename(filename):
+def normalize_filename(filename) -> str:
     pattern = r"(\.(?:js|css))([?#].*)?$"
     normalized = re.sub(pattern, r"\1", filename, flags=re.IGNORECASE)
     return normalized
 
 
-def normalize_filenames_in_text(text):
+def normalize_filenames_in_text(text: str) -> str:
     pattern = r"\b([^\s<>\"\']*?\.(?:js|css))([?#][^\s<>\"\']*)?\b"
 
     def replace_match(match):
@@ -24,7 +24,7 @@ def normalize_filenames_in_text(text):
     return normalized_text
 
 
-def normalize_file_contents(path):
+def normalize_file_contents(path) -> None:
     with open(path, "r", encoding="utf-8") as f:
         content = f.read()
     normalized_content = normalize_filenames_in_text(content)
@@ -33,7 +33,7 @@ def normalize_file_contents(path):
     print(f"Processed: {path}")
 
 
-def normalize_filenames_batch(directory):
+def normalize_filenames_batch(directory: Path) -> None:
     processed_count = 0
     for root, dirs, files in os.walk(directory):
         for file in files:

@@ -15,7 +15,7 @@ MANIFEST_PATH = DUPS_DIR / "manifest.json"
 READ_CHUNK = 1024 * 8
 
 
-def load_json(path):
+def load_json(path: Path):
     try:
         with Path(path).open(encoding="utf-8") as f:
             return json.load(f)
@@ -23,13 +23,13 @@ def load_json(path):
         return {}
 
 
-def save_json(path, data):
+def save_json(path: Path, data) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with Path(path).open("w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
 
-def xxh64_of_path(p: Path):
+def xxh64_of_path(p: Path) -> str:
     h = xxhash.xxh64()
     with p.open("rb") as f:
         while True:
@@ -71,7 +71,7 @@ def build_groups(root: Path, cache: dict):
     return groups
 
 
-def dedupe(root: Path, dry_run=False, force=False):
+def dedupe(root: Path, dry_run=False, force=False) -> None:
     cache = load_json(CACHE_PATH) if CACHE_PATH.exists() else {}
     groups = build_groups(root, cache)
     save_json(CACHE_PATH, cache)
@@ -124,7 +124,7 @@ def dedupe(root: Path, dry_run=False, force=False):
         print("dry-run complete; no changes written.")
 
 
-def restore(dry_run=False):
+def restore(dry_run: bool = False) -> None:
     if not MANIFEST_PATH.exists():
         print("No manifest found at ~/dups/manifest.json")
         return
@@ -176,7 +176,7 @@ def restore(dry_run=False):
             pass
 
 
-def main():
+def main() -> None:
     ap = argparse.ArgumentParser(
         description="Deduplicate files by moving one copy to ~/dups and symlinking duplicates using xxhash."
     )

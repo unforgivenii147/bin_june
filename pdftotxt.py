@@ -6,7 +6,7 @@ from pathlib import Path
 import pdfplumber
 
 
-def process_file(fp):
+def process_file(fp: str) -> None:
     path = Path(path)
     i = 1
     with pdfplumber.open(fp) as pdf:
@@ -26,7 +26,7 @@ def process_file(fp):
             i += 1
 
 
-def main():
+def main() -> None:
     process_file(sys.argv[1])
 
 

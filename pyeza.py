@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from argparse import Namespace
 import argparse
 import datetime
 import grp
@@ -188,7 +189,7 @@ def print_tree(base: str, prefix: str = "", icons=False, colors=True) -> None:
             print_tree(path, new_prefix, icons, colors)
 
 
-def list_recursive(base: str, args, depth=0) -> None:
+def list_recursive(base: str, args: Namespace, depth=0) -> None:
     if depth > 0:
         print(f"\n{base}:")
     try:
@@ -221,7 +222,7 @@ def list_recursive(base: str, args, depth=0) -> None:
             list_recursive(e.path, args, depth + 1)
 
 
-def print_entries(entries: list[Entry], args) -> None:
+def print_entries(entries: list[Entry], args: Namespace) -> None:
     if args.json:
         out = [
             {

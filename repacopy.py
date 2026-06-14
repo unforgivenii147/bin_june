@@ -195,7 +195,7 @@ class PackageRepacker:
             logger.exception(f"Error copying files for {dist_info_dir.name}: {e}")
             return False
 
-    def copy_all_packages(self):
+    def copy_all_packages(self) -> None:
         total_copied = 0
         for site_packages_dir in self.found_site_packages:
             print("Processing site-packages: %s", site_packages_dir)
@@ -222,7 +222,7 @@ class PackageRepacker:
         print(f"Package files saved to: {self.output_base}")
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(description="Automatically find and copy Python packages to a wheel structure")
     parser.add_argument("--output", "-o", default="~/tmp/repack", help="Output directory (default: ~/tmp/repack)")
     parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose output")

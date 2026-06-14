@@ -18,7 +18,7 @@ class CtypesVerifier:
         self.verbose: bool = verbose
         self.platform: str = sys.platform
 
-    def log(self, message: str):
+    def log(self, message: str) -> None:
         if self.verbose:
             logger.debug(f"[CTYPES] {message}")
 
@@ -59,7 +59,7 @@ class CtypesVerifier:
         return (can_load, symbol_info)
 
 
-def process_file(path):
+def process_file(path) -> bool | None:
     path = Path(path)
     try:
         verifier = CtypesVerifier()
@@ -71,7 +71,7 @@ def process_file(path):
         return False
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
     files = []

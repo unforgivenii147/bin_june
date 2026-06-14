@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from deep_translator.google import GoogleTranslator
 import argparse
 import sys
 from pathlib import Path
@@ -10,7 +11,7 @@ CHUNK_SIZE = 2000
 ALLOWED_EXT = {".txt", ".md", ".csv", ".json", ".py"}
 
 
-def translator():
+def translator() -> GoogleTranslator:
     return GoogleTranslator(source="zh-CN", target="en")
 
 

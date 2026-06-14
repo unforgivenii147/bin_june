@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 
-def parse_aliases(filepath):
+def parse_aliases(filepath: Path):
     """Parse aliases file and return list of (name, value, raw_line) tuples."""
     aliases = []
 
@@ -43,7 +43,7 @@ def parse_aliases(filepath):
     return aliases
 
 
-def write_sorted_aliases(aliases, filepath, create_backup=True):
+def write_sorted_aliases(aliases, filepath: Path, create_backup=True) -> None:
     """Write sorted aliases back to file."""
 
     # Sort by value (the second element in the tuple)
@@ -75,7 +75,7 @@ def write_sorted_aliases(aliases, filepath, create_backup=True):
         sys.exit(1)
 
 
-def display_aliases(aliases, limit=None):
+def display_aliases(aliases, limit=None) -> None:
     """Display aliases in a formatted table."""
     if not aliases:
         print("No aliases found")
@@ -102,7 +102,7 @@ def display_aliases(aliases, limit=None):
         print(f"{name:<{max_name_len}}  {value:<{max_value_len}}")
 
 
-def main():
+def main() -> None:
     # Get the aliases file path
     aliases_file = Path.home() / ".config/bash.d/bash_aliases"
 

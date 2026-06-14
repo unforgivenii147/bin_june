@@ -15,7 +15,7 @@ TIMEOUT = 15
 RESULTS_FILE = "/sdcard/c4u.json"
 
 
-def save_output(text, pkg):
+def save_output(text: str, pkg: str) -> None:
     Path(f"/sdcard/whl/json/{pkg}.html").write_text(text, encoding="utf-8")
 
 
@@ -55,7 +55,7 @@ def load_previous_results() -> dict[str, dict]:
     return {}
 
 
-def save_results(results: dict[str, dict]):
+def save_results(results: dict[str, dict]) -> None:
     with Path(RESULTS_FILE).open("w", encoding="utf-8") as f:
         json.dump(results, f, indent=4)
 

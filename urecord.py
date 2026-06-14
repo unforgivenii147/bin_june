@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 
-def find_site_packages():
+def find_site_packages() -> list[str]:
     import site
 
     site_packages = site.getsitepackages()
@@ -18,7 +18,7 @@ def find_site_packages():
     return valid_paths
 
 
-def update_record_file(record_path):
+def update_record_file(record_path: Path) -> bool:
     try:
         with record_path.open(encoding="utf-8") as f:
             lines = list(csv.reader(f))
@@ -47,7 +47,7 @@ def update_record_file(record_path):
         return False
 
 
-def scan_and_update(site_packages_dirs):
+def scan_and_update(site_packages_dirs) -> tuple[int, int]:
     total_updated = 0
     total_files = 0
     for site_dir in site_packages_dirs:
@@ -61,7 +61,7 @@ def scan_and_update(site_packages_dirs):
     return (total_files, total_updated)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Remove .pyc and direct_url.json references from RECORD files in site-packages"
     )

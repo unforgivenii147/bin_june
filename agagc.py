@@ -4,6 +4,7 @@ Initializes a new repository if not already inside one.
 Automatically pushes to remote if configured.
 """
 
+from argparse import Namespace
 import argparse
 import os
 import re
@@ -16,7 +17,7 @@ from dotenv import load_dotenv
 from git import InvalidGitRepositoryError, Repo
 
 
-def parse_arguments():
+def parse_arguments() -> Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(description="Commit and push all files to git repository")
     parser.add_argument(
@@ -37,7 +38,7 @@ def load_git_token() -> str | None:
     return token
 
 
-def create_github_repo(repo_name, description="new git repo", private=False):
+def create_github_repo(repo_name: str, description: str = "new git repo", private: bool = False):
     token = load_git_token()
     headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
     data = {"name": repo_name, "description": description, "private": private, "auto_init": True}

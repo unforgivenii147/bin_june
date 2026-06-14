@@ -7,7 +7,7 @@ from dh import get_ipkgs
 from Pathlib import Path
 
 
-def find_packages_with_bin_scripts(output_file="have_scripts.txt"):
+def find_packages_with_bin_scripts(output_file: str = "have_scripts.txt") -> None:
     print("Starting search for packages with 'bin' scripts...")
     try:
         installed_packages = get_ipkgs()

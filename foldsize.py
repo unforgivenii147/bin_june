@@ -27,7 +27,7 @@ def safe_rename(src: Path, dest_dir: Path) -> Path:
 
 def format_size_range(min_s: int, max_s: int) -> str:
 
-    def fmt(n):
+    def fmt(n: int) -> str:
         if n < 1000:
             return f"{n}B"
         if n < 1000000:
@@ -37,7 +37,7 @@ def format_size_range(min_s: int, max_s: int) -> str:
     return f"{fmt(min_s)}-{fmt(max_s)}"
 
 
-def main():
+def main() -> None:
     root = Path()
     files = get_all_files(root)
     if not files:

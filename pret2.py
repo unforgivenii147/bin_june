@@ -48,14 +48,14 @@ def format_file(path: Path) -> tuple[Path, bool, str | None]:
         return (path, False, str(e))
 
 
-def process_file_wrapper(path: Path):
+def process_file_wrapper(path: Path) -> tuple[bool, Path, str | None]:
     path, success, error_msg = format_file(path)
     if not success:
         move_to_error_folder(path)
     return (success, path, error_msg)
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     files = get_files(cwd, extensions=EXT)
     if not files:

@@ -4,7 +4,7 @@ import subprocess
 from pathlib import Path
 
 
-def optimize_pngs_recursively():
+def optimize_pngs_recursively() -> None:
     total_original_size = 0
     total_optimized_size = 0
     for png_file in Path().rglob("*.png"):

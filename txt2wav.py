@@ -4,18 +4,18 @@ import subprocess
 from pathlib import Path
 
 
-def speak_text(text: str):
+def speak_text(text: str) -> None:
     subprocess.run(["termux-tts-speak", text], check=True)
 
 
-def read_text_file(file_path: str):
+def read_text_file(file_path: str) -> str:
     path = Path(file_path)
     if not path.exists():
         raise FileNotFoundError(msg)
     return path.read_text(encoding="utf-8")
 
 
-def chunk_text(text, max_chars=3000):
+def chunk_text(text: str, max_chars=3000):
     chunks = []
     current = ""
     for paragraph in text.splitlines():
@@ -33,7 +33,7 @@ def chunk_text(text, max_chars=3000):
     return chunks
 
 
-def text_file_to_speech(file_path: str):
+def text_file_to_speech(file_path: str) -> None:
     text = read_text_file(file_path)
     chunks = chunk_text(text)
     for i, chunk in enumerate(chunks, start=1):

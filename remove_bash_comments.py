@@ -66,7 +66,7 @@ class BashCommentRemover:
             root_node = tree.root_node
             comments_to_remove = []
 
-            def collect_comments(node):
+            def collect_comments(node) -> None:
                 if node.type == "comment":
                     comments_to_remove.append(node)
                 for child in node.children:
@@ -181,7 +181,7 @@ class BashCommentRemover:
         return (success_count, total_original, total_new)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Remove comments from bash files using tree-sitter")
     parser.add_argument(
         "files", nargs="*", help="Files to process. If none given, process current directory recursively"

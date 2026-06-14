@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 
+from ast import Module
 import argparse
 import ast
 import os
@@ -8,12 +9,12 @@ from collections import defaultdict
 from multiprocessing import Pool, cpu_count
 
 
-def parse_python_file(file_path):
+def parse_python_file(file_path) -> Module:
     with open(file_path, "r", encoding="utf-8") as file:
         return ast.parse(file.read(), filename=file_path)
 
 
-def extract_definitions(tree):
+def extract_definitions(tree: Module):
     functions = []
     classes = []
     constants = []
@@ -48,14 +49,14 @@ def find_repeated_definitions(file_paths):
     return repeated_definitions
 
 
-def process_file(file_path, repeated_definitions, move):
+def process_file(file_path, repeated_definitions, move) -> None:
     path = Path(path)
     tree = parse_python_file(file_path)
     functions, classes, constants = extract_definitions(tree)
     utils_dir = "utils"
     os.makedirs(utils_dir, exist_ok=True)
 
-    def write_to_file(filename, content):
+    def write_to_file(filename: str, content: str) -> None:
         with open(os.path.join(utils_dir, filename), "a", encoding="utf-8") as f:
             f.write(content + "\n")
 
@@ -89,7 +90,7 @@ def process_file(file_path, repeated_definitions, move):
             file.writelines(new_lines)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Inspect Python files and copy/move repeated definitions.")
     parser.add_argument("-m", "--move", action="store_true", help="Move definitions instead of copying")
     args = parser.parse_args()

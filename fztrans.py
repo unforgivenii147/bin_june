@@ -11,7 +11,7 @@ from pathlib import Path
 DICT_FILE = "/sdcard/isaac/dic.json"
 
 
-def load_dictionary(path: Path):
+def load_dictionary(path: Path) -> tuple[dict[str, str], dict[str, str]]:
     if not path.exists():
         print(f"Error: {path} not found", file=sys.stderr)
         sys.exit(1)
@@ -22,7 +22,7 @@ def load_dictionary(path: Path):
     return (fa_en, en_fa)
 
 
-def setup_readline(words):
+def setup_readline(words) -> None:
     words = sorted(words)
 
     def completer(text, state):
@@ -34,7 +34,7 @@ def setup_readline(words):
     readline.set_completer_delims(" \t\n")
 
 
-def translate(word, fa_en, en_fa):
+def translate(word: str, fa_en: dict[str, str], en_fa: dict[str, str]):
     if word in fa_en:
         return fa_en[word]
     if word in en_fa:
@@ -42,15 +42,15 @@ def translate(word, fa_en, en_fa):
     return None
 
 
-def prefix_search(prefix, all_words):
+def prefix_search(prefix, all_words: set[str]):
     return sorted((w for w in all_words if w.startswith(prefix)))
 
 
-def fuzzy_search(word, all_words, limit=5, cutoff=0.6):
+def fuzzy_search(word, all_words: set[str], limit=5, cutoff=0.6):
     return get_close_matches(word, all_words, n=limit, cutoff=cutoff)
 
 
-def fzf_select(all_words):
+def fzf_select(all_words: set[str]) -> str | None:
     try:
         proc = subprocess.run(
             ["fzf", "--prompt=Select word: "],
@@ -66,7 +66,7 @@ def fzf_select(all_words):
     return selection or None
 
 
-def interactive_mode(fa_en, en_fa):
+def interactive_mode(fa_en: dict[str, str], en_fa: dict[str, str]) -> None:
     all_words = set(fa_en) | set(en_fa)
     setup_readline(all_words)
     print("Offline Persian ↔ English Translator")
@@ -83,7 +83,7 @@ def interactive_mode(fa_en, en_fa):
         print(result or "Not found")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Offline Persian ↔ English translator")
     parser.add_argument("word", nargs="*", help="Word to translate")
     parser.add_argument("--prefix", help="List words starting with prefix")

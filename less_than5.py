@@ -7,14 +7,14 @@ from pathlib import Path
 TIME_THRESHOLD = 8 * 60
 
 
-def get_file_age(filepath):
+def get_file_age(filepath: str) -> float:
     current_time = time.time()
     file_stat = os.stat(filepath)
     file_creation_time = file_stat.st_ctime
     return current_time - file_creation_time
 
 
-def move_recent_files(start_dir="."):
+def move_recent_files(start_dir: Path | str = ".") -> None:
     target_dir = os.path.join(start_dir, "5min")
     Path(target_dir).mkdir(exist_ok=True, parents=True)
     moved_count = 0
@@ -46,7 +46,7 @@ def move_recent_files(start_dir="."):
     print(f"\nTotal files moved: {moved_count}")
 
 
-def main():
+def main() -> None:
     try:
         start_dir = Path.cwd()
         print(f"Starting from directory: {start_dir}")

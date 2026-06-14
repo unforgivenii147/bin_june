@@ -93,7 +93,7 @@ def extract_code_blocks(md_file: Path, out_dir: Path):
     return extracted
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd().resolve()
     out_dir = cwd / "output"
     out_dir.mkdir(parents=True, exist_ok=True)

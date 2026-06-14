@@ -5,7 +5,7 @@ from pathlib import Path
 from dh import get_nobinary
 
 
-def delete_multiline_string_from_files(search_string) -> None:
+def delete_multiline_string_from_files(search_string: str) -> None:
     cwd = Path.cwd()
     files = get_nobinary(cwd)
     for path in files:
@@ -15,7 +15,7 @@ def delete_multiline_string_from_files(search_string) -> None:
         path.write_text(new_content, encoding="utf-8")
 
 
-def read_string_to_delete(filename="/sdcard/lic"):
+def read_string_to_delete(filename: str = "/sdcard/lic") -> str:
     path = Path(filename)
     return path.read_text(encoding="utf-8")
 

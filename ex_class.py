@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from tree_sitter import Tree
 from collections import defaultdict
 from pathlib import Path
 
@@ -13,7 +14,7 @@ OUT_DIR.mkdir(exist_ok=True)
 VALID = {"class_definition"}
 
 
-def extract_file(src: bytes, tree):
+def extract_file(src: bytes, tree: Tree) -> list[str]:
     root = tree.root_node
     return [src[node.start_byte : node.end_byte].decode() for node in root.children if node.type in VALID]
 

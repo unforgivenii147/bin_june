@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from ast import Module
 import ast
 import re
 import sys
@@ -64,7 +65,7 @@ def rm_ast(content: str) -> tuple[str, int]:
     return ("\n".join(lines), len(ranges))
 
 
-def find_docstring_ranges(node) -> list[tuple[int, int]]:
+def find_docstring_ranges(node: Module) -> list[tuple[int, int]]:
     ranges: list[tuple[int, int]] = []
     for child in ast.walk(node):
         if (
@@ -113,7 +114,7 @@ def process_file(file_path: Path) -> None:
         return
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
     args = sys.argv[1:]

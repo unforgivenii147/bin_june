@@ -8,7 +8,7 @@ from fastwalk import walk_files
 shebang = "#!/data/data/com.termux/files/usr/bin/python\n"
 
 
-def process_file(path, module_name):
+def process_file(path, module_name: str) -> None:
     path = Path(path)
     if not path.exists() or path.is_symlink():
         return
@@ -30,7 +30,7 @@ def process_file(path, module_name):
     return
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     files = []
     cwd = Path.cwd()

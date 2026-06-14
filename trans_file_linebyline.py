@@ -5,6 +5,7 @@ Translate non-English lines in a file line by line using deep_translator.
 The original file is updated in-place with translations shown alongside original lines.
 """
 
+from deep_translator.google import GoogleTranslator
 import os
 import sys
 import tempfile
@@ -16,7 +17,7 @@ from langdetect import DetectorFactory, detect
 DetectorFactory.seed = 0
 
 
-def is_english(text):
+def is_english(text: str):
     """
     Detect if a given text is English.
     Returns True if English, False otherwise.
@@ -32,7 +33,7 @@ def is_english(text):
         return True
 
 
-def translate_line(line, translator, target_lang="en"):
+def translate_line(line: str, translator: GoogleTranslator, target_lang="en"):
     """
     Translate a single line to target language.
     Returns translated line or original if translation fails.
@@ -45,7 +46,7 @@ def translate_line(line, translator, target_lang="en"):
         return line
 
 
-def process_file(filepath, show_translation=True):
+def process_file(filepath: str, show_translation: bool = True) -> None:
     path = Path(path)
     """
     Process the file: detect non-English lines, translate them,
@@ -99,7 +100,7 @@ def process_file(filepath, show_translation=True):
         sys.exit(1)
 
 
-def main():
+def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: python translate_file.py <filename> [--replace]")
         print("  --replace: Replace original lines with translations (don't show original)")

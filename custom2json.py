@@ -65,7 +65,7 @@ def parse_magic_file(filepath: str, encoding="latin-1"):
     return result
 
 
-def main():
+def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: python magic_to_json.py <magic_file> [output.json]", file=sys.stderr)
         sys.exit(1)

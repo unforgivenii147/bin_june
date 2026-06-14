@@ -21,7 +21,7 @@ def is_python_file(path: str) -> bool:
         return False
 
 
-def remove_header(path) -> None:
+def remove_header(path: Path) -> None:
     original = []
     try:
         with Path(path).open(encoding="utf-8", errors="ignore") as f:

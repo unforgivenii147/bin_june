@@ -6,7 +6,7 @@ from pathlib import Path
 from deep_translator import GoogleTranslator
 
 
-def translate_file(fname: str):
+def translate_file(fname: str) -> str:
     linez = []
     path = Path(fname)
     with Path(path).open("r", encoding="utf-8") as infile:

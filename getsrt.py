@@ -5,7 +5,7 @@ import subprocess
 from pathlib import Path
 
 
-def extract_subtitles(input_file, output_file=None, subtitle_index=0):
+def extract_subtitles(input_file: str, output_file=None, subtitle_index=0) -> None:
     if not Path(input_file).exists():
         raise FileNotFoundError(msg)
     if output_file is None:

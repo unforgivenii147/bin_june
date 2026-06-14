@@ -36,12 +36,12 @@ def get_files(directory: Path) -> list[Path]:
     return [p for p in directory.parent.iterdir() if p.name.endswith(".tar") and p.is_file()]
 
 
-def get_dirs(cwd: Path):
+def get_dirs(cwd: Path) -> list[Path]:
     print(f"Simulating: Getting directories in '{cwd}'...")
     return [d for d in cwd.iterdir() if d.is_dir()]
 
 
-def should_compress(path):
+def should_compress(path: Path) -> bool:
     return True
 
 

@@ -3,7 +3,7 @@
 import sys
 
 
-def move_lines(src_file, start_line, end_line, dest_file):
+def move_lines(src_file: str, start_line: int, end_line: int, dest_file: str) -> None:
     try:
         with open(src_file, "r", encoding="utf-8") as f:
             lines = f.readlines()

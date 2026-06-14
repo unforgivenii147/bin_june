@@ -8,7 +8,7 @@ from functools import partial
 from multiprocessing import Pool, cpu_count
 
 
-def format_size(bytes_size):
+def format_size(bytes_size) -> str:
     """Format bytes to human readable size"""
     if bytes_size == 0:
         return "N/A"
@@ -20,7 +20,7 @@ def format_size(bytes_size):
     return f"{bytes_size:.1f} TB"
 
 
-def parse_size(size_str):
+def parse_size(size_str: str) -> int:
     """Parse size string like '10.5 MB' or '1024 kB' to bytes"""
     size_str = size_str.strip()
 
@@ -84,7 +84,7 @@ def get_package_info(package):
         return (package, 0, False)
 
 
-def process_packages_parallel(packages, threshold_bytes, num_processes=None):
+def process_packages_parallel(packages, threshold_bytes: int, num_processes: int | None = None):
     """Process packages in parallel using multiprocessing"""
     if num_processes is None:
         num_processes = min(cpu_count(), 8)  # Limit to 8 processes max
@@ -129,7 +129,7 @@ def process_packages_parallel(packages, threshold_bytes, num_processes=None):
         return large_packages, all_packages, no_size, total
 
 
-def save_json_results(data, filename, threshold_mb, include_all=False):
+def save_json_results(data, filename: str, threshold_mb: float | int, include_all=False) -> bool:
     """Save results to JSON file"""
     output = {
         "metadata": {
@@ -154,7 +154,7 @@ def save_json_results(data, filename, threshold_mb, include_all=False):
         return False
 
 
-def main():
+def main() -> None:
     # Default threshold 10 MB
     default_threshold_mb = 10
 

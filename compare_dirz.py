@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 
-def file_hash(path, block_size=65536):
+def file_hash(path, block_size=65536) -> str:
     h = hashlib.sha256()
     with Path(path).open("rb") as f:
         while chunk := f.read(block_size):
@@ -24,7 +24,7 @@ def build_hash_map(root):
     return hash_map
 
 
-def compare_dirs(dir1, dir2):
+def compare_dirs(dir1: str, dir2: str) -> None:
     map1 = build_hash_map(dir1)
     map2 = build_hash_map(dir2)
     changed = []

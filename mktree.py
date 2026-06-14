@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 
-def parse_tree_file(tree_path):
+def parse_tree_file(tree_path: str):
     with Path(tree_path).open("r", encoding="utf-8") as f:
         lines = f.readlines()
     lines = [line.rstrip() for line in lines if line.strip()]
@@ -37,7 +37,7 @@ def parse_tree_file(tree_path):
     return entries
 
 
-def create_tree_from_entries(entries):
+def create_tree_from_entries(entries) -> None:
     created_dirs = set()
     for _indent, path_parts, is_dir in entries:
         if len(path_parts) == 1 and path_parts[0] == "dictionary-webapp":
@@ -51,7 +51,7 @@ def create_tree_from_entries(entries):
             path.touch()
 
 
-def main():
+def main() -> None:
     tree_file = sys.argv[1]
     if not Path(tree_file).exists():
         print(f"❌ Error: '{tree_file}' not found in current directory.")

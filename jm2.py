@@ -7,7 +7,7 @@ from pathlib import Path
 from dh import cprint, fsz, get_files, gsz, mpf3
 
 
-def process_file(fp):
+def process_file(fp) -> None:
     path = Path(path)
     before = gsz(fp)
     data = fp.read_text(encoding="utf-8")

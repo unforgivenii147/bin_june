@@ -68,7 +68,7 @@ def safe_stem(s: str, max_len: int = 120) -> str:
     return s[:max_len].rstrip("_") or "file"
 
 
-def extract_code_blocks(input_md: Path, output_dir: Path):
+def extract_code_blocks(input_md: Path, output_dir: Path) -> int:
     text = input_md.read_text(encoding="utf-8", errors="replace")
     matches = list(FENCE_RE.finditer(text))
     if not matches:
@@ -88,7 +88,7 @@ def extract_code_blocks(input_md: Path, output_dir: Path):
     return len(matches)
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd().resolve()
     out_dir = cwd / "output"
     out_dir.mkdir(parents=True, exist_ok=True)

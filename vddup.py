@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from ast import Module
 import argparse
 import ast
 import bz2
@@ -21,12 +22,12 @@ logger.add("error.log", level="ERROR")
 COMPRESSED_EXTENSIONS = [".zip", ".tar", ".gz", ".bz2", ".xz", ".zst", ".br"]
 
 
-def hash_content(content):
+def hash_content(content: str) -> str:
     """Generate a hash for the given content."""
     return hashlib.sha256(content.encode("utf-8")).hexdigest()
 
 
-def extract_archive(file_path, extract_to):
+def extract_archive(file_path, extract_to) -> None:
     """Extract compressed archives to a temporary directory."""
     try:
         if file_path.suffix == ".zip":
@@ -61,7 +62,7 @@ def extract_archive(file_path, extract_to):
         logger.error(f"Error extracting {file_path}: {e}")
 
 
-def parse_python_file(file_path):
+def parse_python_file(file_path) -> Module | None:
     """Parse a Python file and return its AST."""
     try:
         with open(file_path, "r", encoding="utf-8") as f:
@@ -71,7 +72,7 @@ def parse_python_file(file_path):
         return None
 
 
-def find_repeated_definitions(ast_tree):
+def find_repeated_definitions(ast_tree: Module):
     """Find repeated functions, classes, and constants in an AST."""
     definitions = {"functions": {}, "classes": {}, "constants": {}}
     for node in ast.walk(ast_tree):
@@ -119,7 +120,7 @@ def process_directory(directory):
     return repeated_definitions
 
 
-def write_definitions_to_file(definitions, output_dir, move=False):
+def write_definitions_to_file(definitions, output_dir: Path, move=False) -> None:
     """Write repeated definitions to separate files."""
     for def_type, items in definitions.items():
         file_name = f"{def_type[:-1]}.py"
@@ -137,7 +138,7 @@ def write_definitions_to_file(definitions, output_dir, move=False):
                         logger.error(f"Syntax error in {content}: {e}")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Inspect Python files for repeated definitions.")
     parser.add_argument("-m", "--move", action="store_true", help="Move repeated definitions to utils directory.")
     parser.add_argument("-c", "--copy", action="store_true", help="Copy repeated definitions to utils directory.")

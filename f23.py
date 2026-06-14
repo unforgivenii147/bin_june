@@ -22,7 +22,7 @@ def fix_py2_to_py3_all(line):
     return (line, line != original)
 
 
-def fix_print_statements(text):
+def fix_print_statements(text: str) -> tuple[str, bool]:
     lines = text.splitlines(True)
     new_lines = []
     changed = False
@@ -44,7 +44,7 @@ def fix_print_statements(text):
     return ("".join(new_lines), changed)
 
 
-def apply_all_fixes(text):
+def apply_all_fixes(text: str):
     lines = text.splitlines(True)
     new_lines = []
     changed = False

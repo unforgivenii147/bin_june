@@ -179,7 +179,7 @@ def scan(path: Path, compress: bool = True) -> tuple[list[Path], list[Path]]:
     return dirs, files
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(description="zser – fast parallel zstd compressor/decompressor")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-c", "--compress", action="store_true", help="Compress mode (default)")

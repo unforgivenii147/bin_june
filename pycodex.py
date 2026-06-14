@@ -28,7 +28,7 @@ class CodeBlock:
 
 
 class HTTPSession:
-    def __init__(self, max_retries=3, timeout=10) -> None:
+    def __init__(self, max_retries: int = 3, timeout: int = 10) -> None:
         self.session = requests.Session()
         retry_strategy = Retry(total=max_retries, backoff_factor=1)
         adapter = HTTPAdapter(max_retries=retry_strategy)

@@ -17,7 +17,7 @@ class TSRemover:
         self.parser = Parser(self.language)
         self.query = Query(self.language, QUERY_STRING)
 
-    def remove_comments(self, source: str):
+    def remove_comments(self, source: str) -> tuple[str, int, int]:
         source_bytes = source.encode("utf-8")
         tree = self.parser.parse(source_bytes)
         cursor = QueryCursor(self.query)
@@ -50,7 +50,7 @@ class TSRemover:
         return (cleaned, comment_count, docstring_count)
 
 
-def process_file(path):
+def process_file(path) -> None:
     path = Path(path)
     ts_rmc = TSRemover()
     code = path.read_text(encoding="utf-8", errors="ignore")
@@ -67,7 +67,7 @@ def process_file(path):
         print(f"{path.name} : invalid code")
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     before = gsz(".")
     args = sys.argv[1:]

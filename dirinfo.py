@@ -10,7 +10,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 
 
-def scan_directory(path="."):
+def scan_directory(path: str = "."):
     total_size = 0
     file_count = 0
     folder_count = 0
@@ -33,7 +33,7 @@ def scan_directory(path="."):
     return (total_size, file_count, folder_count, extensions, size_by_ext)
 
 
-def format_size(size_in_bytes):
+def format_size(size_in_bytes: int) -> str:
     if size_in_bytes < 1024:
         return f"{size_in_bytes} bytes"
     if size_in_bytes < 1024**2:

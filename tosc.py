@@ -29,7 +29,7 @@ def unique_path(path: Path | str) -> Path:
         counter += 1
 
 
-def main():
+def main() -> None:
     fn = Path(sys.argv[1])
     dest_path = dest / fn.name
     if dest_path.exists():

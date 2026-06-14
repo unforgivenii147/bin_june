@@ -8,7 +8,7 @@ from pathlib import Path
 from tqdm import tqdm
 
 
-def find_png_files(directory):
+def find_png_files(directory: Path):
     png_files = []
     for root, _, files in os.walk(directory):
         png_files.extend((os.path.join(root, file) for file in files if file.lower().endswith(".png")))
@@ -23,7 +23,7 @@ def optimize_png(file_path):
         return (False, file_path, str(e))
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     png_files = find_png_files(cwd)
     if not png_files:

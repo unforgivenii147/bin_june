@@ -27,7 +27,7 @@ def find_git_repos(root_path: Path) -> list[Path]:
     return git_repos
 
 
-def git_pull_all():
+def git_pull_all() -> None:
     """Run git pull on all git repositories in current directory and subdirectories."""
     cwd = Path.cwd()
 

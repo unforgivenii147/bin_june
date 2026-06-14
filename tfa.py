@@ -9,7 +9,7 @@ INPUT_FILE = "words.txt"
 OUTPUT_FILE = "dic.json"
 
 
-def translate_word(word):
+def translate_word(word: str) -> str | None:
     try:
         return GoogleTranslator(source="auto", target="en").translate(word)
     except Exception as e:
@@ -17,7 +17,7 @@ def translate_word(word):
         return None
 
 
-def main():
+def main() -> None:
     translations = {}
     with Path(INPUT_FILE).open(encoding="utf-8") as f:
         words = [line.strip() for line in f if line.strip()]

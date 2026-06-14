@@ -11,6 +11,9 @@ Usage:
 
 from __future__ import annotations
 
+from ast import expr
+from ast import Tuple
+from ast import Name
 import argparse
 import ast
 import hashlib
@@ -81,13 +84,13 @@ def is_constant_assign(node: ast.Assign) -> bool:
     if not isinstance(node, ast.Assign):
         return False
 
-    def target_ok(t):
+    def target_ok(t: Name | Tuple) -> bool:
         return isinstance(t, ast.Name)
 
     if any((not target_ok(t) for t in node.targets if isinstance(t, (ast.Name, ast.Tuple)))):
         return False
 
-    def lit_ok(n):
+    def lit_ok(n: expr | None) -> bool:
         if isinstance(n, ast.Constant):
             return True
         if isinstance(n, (ast.Tuple, ast.List, ast.Set)):
@@ -251,11 +254,11 @@ def partition_by_hash(
     return extracted_map
 
 
-def ensure_utils_dir():
+def ensure_utils_dir() -> None:
     UTILS_DIR.mkdir(exist_ok=True)
 
 
-def append_unique_to_file(target: Path, items: List[Dict], seen_hashes: set):
+def append_unique_to_file(target: Path, items: List[Dict], seen_hashes: set) -> None:
     if not items:
         return
     lines = []
@@ -274,7 +277,7 @@ def append_unique_to_file(target: Path, items: List[Dict], seen_hashes: set):
     target.write_text(new_text, encoding="utf-8")
 
 
-def safe_write_file(path: Path, content: str):
+def safe_write_file(path: Path, content: str) -> None:
     path.write_text(content, encoding="utf-8")
 
 
@@ -349,7 +352,7 @@ def validate_python_source(text: str) -> bool:
         return False
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Deduplicate top-level funcs/classes/constants into utils/*")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("-m", "--move", action="store_true", help="move duplicated objects (default off)")

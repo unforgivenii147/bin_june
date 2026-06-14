@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     for r, _, files in os.walk(cwd):
         for f in files:

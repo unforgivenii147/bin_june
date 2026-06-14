@@ -7,7 +7,7 @@ from pathlib import Path
 import ssdeep
 
 
-def find_fuzzy_duplicates(threshold: int = 70):
+def find_fuzzy_duplicates(threshold: int = 70) -> None:
     start_dir = Path.cwd()
     file_hashes = {}
     duplicates = defaultdict(list)

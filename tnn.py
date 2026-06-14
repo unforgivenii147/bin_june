@@ -5,7 +5,7 @@ from pathlib import Path
 from dh import cprint, get_nobinary, mpf3
 
 
-def process_file(path: str | Path):
+def process_file(path: str | Path) -> None:
     path = Path(path)
     content = path.read_text(encoding="utf-8")
     new_content = content.replace("\t", "    ")
@@ -16,7 +16,7 @@ def process_file(path: str | Path):
     cprint(f"{path.name} (updated)", "cyan")
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
     files = []

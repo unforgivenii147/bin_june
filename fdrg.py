@@ -19,11 +19,11 @@ DEFAULT_SKIPPED_EXTS = {".pyc", ".bak"}
 ARCHIVE_EXTENSIONS = (".tar.gz", ".tar", ".tar.xz", ".tar.zst", ".tar.bz2", ".zip", ".whl", ".apk")
 
 
-def setup_keyboard_listener():
+def setup_keyboard_listener() -> bool:
     try:
         import keyboard
 
-        def on_key_press(event):
+        def on_key_press(event) -> None:
             if event.name in {"space", "p"} and pause_event.is_set():
                 pause_event.clear()
                 print("\n[PAUSED] Press 'c' to continue...")
@@ -38,18 +38,18 @@ def setup_keyboard_listener():
         return False
 
 
-def is_excluded(path: Path, excluded_dirs, excluded_patterns):
+def is_excluded(path: Path, excluded_dirs, excluded_patterns) -> bool:
     for part in path.parts:
         if part in excluded_dirs:
             return True
     return any((fnmatch.fnmatch(path.name, pattern) for pattern in excluded_patterns))
 
 
-def should_skip_file(path: Path):
+def should_skip_file(path: Path) -> bool:
     return path.suffix in DEFAULT_SKIPPED_EXTS
 
 
-def report_result(file_path, line_num=None):
+def report_result(file_path, line_num=None) -> None:
     if line_num:
         print(f"[FOUND] {file_path} (Line: {line_num})")
     else:
@@ -57,7 +57,7 @@ def report_result(file_path, line_num=None):
     results_queue.put((file_path, line_num))
 
 
-def search_in_file(file_path, search_string, search_content):
+def search_in_file(file_path: Path, search_string, search_content):
     pause_event.wait()
     results = []
     if not search_content:
@@ -75,7 +75,7 @@ def search_in_file(file_path, search_string, search_content):
     return results
 
 
-def extract_and_search_archive(archive_path, search_string, search_content):
+def extract_and_search_archive(archive_path: Path, search_string, search_content):
     results = []
     try:
         if archive_path.suffix == ".zip" or archive_path.name.endswith((".whl", ".apk")):
@@ -119,7 +119,7 @@ def extract_and_search_archive(archive_path, search_string, search_content):
     return results
 
 
-def process_file(path: Path, search_string, search_content):
+def process_file(path: Path, search_string, search_content) -> None:
     path = Path(path)
     if path.name.endswith(ARCHIVE_EXTENSIONS):
         results = extract_and_search_archive(path, search_string, search_content)
@@ -129,7 +129,7 @@ def process_file(path: Path, search_string, search_content):
         report_result(*r)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Fast recursive string search")
     parser.add_argument("search_string")
     parser.add_argument("-c", "--content", action="store_true")

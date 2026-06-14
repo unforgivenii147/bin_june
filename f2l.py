@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 
-def main():
+def main() -> None:
     fn = sys.argv[1]
     lines = []
     with Path(fn).open(encoding="utf-8") as f:

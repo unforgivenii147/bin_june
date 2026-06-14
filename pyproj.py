@@ -6,7 +6,7 @@ from pathlib import Path
 from dh import append_text
 
 
-def create_initpy(cwd, pkg_name):
+def create_initpy(cwd: Path, pkg_name) -> None:
     src_dir = cwd / "src"
     pkg_dir = src_dir / pkg_name
     pkg_dir.mkdir(parents=True, exist_ok=True)
@@ -27,7 +27,7 @@ with suppress(PackageNotFoundError):
         append_text(init_file, init_content)
 
 
-def create_readme(cwd, pkg_name):
+def create_readme(cwd: Path, pkg_name) -> None:
     readme_file = cwd / "README.md"
     readme_content = f"""
 # {pkg_name}
@@ -48,7 +48,7 @@ import {pkg_name}
         readme_file.write_text(readme_content, encoding="utf-8")
 
 
-def create_pyproject(cwd, pkg_name):
+def create_pyproject(cwd: Path, pkg_name) -> None:
     pyproject_file = cwd / "pyproject.toml"
     pyproject_content = f"""
 [build-system]
@@ -61,10 +61,6 @@ description = "A Python package named {pkg_name}"\)
 readme = "README.md"
 authors = [{{name = "Isaac Onagh", email = "mkalafsaz@gmail.com"}},
 ]
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "Operating System :: OS Independent",
-]
 requires-python = ">=3.9"
 
 [tool.setuptools.packages.find]
@@ -75,9 +71,10 @@ where = ["src"]
         pyproject_file.write_text(pyproject_content, encoding="utf-8")
 
 
-def create_setuppy(cwd, pkg_name):
+def create_setuppy(cwd: Path, pkg_name) -> None:
     setuppy_file = cwd / "setup.py"
     setuppy_content = f"""
+#__import__("setuptools").setup()
 from pathlib import Path
 from setuptools import setup, find_packages
 import re
@@ -103,7 +100,7 @@ setup(
         setuppy_file.write_text(setuppy_content, encoding="utf-8")
 
 
-def create_python_project(pkg_name):
+def create_python_project(pkg_name: str) -> None:
     cwd = Path.cwd()
     create_initpy(cwd, pkg_name)
     create_readme(cwd, pkg_name)
@@ -111,7 +108,7 @@ def create_python_project(pkg_name):
     create_setuppy(cwd, pkg_name)
 
 
-def main():
+def main() -> None:
     if len(sys.argv) != 2:
         sys.exit(1)
     pkg = sys.argv[1]

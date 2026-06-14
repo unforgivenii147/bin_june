@@ -271,7 +271,7 @@ def choose_best(results: List[Result]) -> Optional[Result]:
     return ok[0]
 
 
-def main():
+def main() -> None:
     if len(sys.argv) != 2:
         print(f"Usage: {sys.argv[0]} <filename>", file=sys.stderr)
         sys.exit(1)

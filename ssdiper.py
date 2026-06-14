@@ -59,7 +59,7 @@ def compare_files(file_paths: list[Path], similarity_threshold: int = 70):
     return similarities
 
 
-def save_to_json(data, filename="simz.json"):
+def save_to_json(data, filename: str = "simz.json") -> None:
     try:
         with Path(filename).open("w", encoding="utf-8") as f:
             json.dump(data, f, indent=4, ensure_ascii=False)

@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from dh import cprint, fsz, get_files
 
 
-def process_file(path):
+def process_file(path: Path) -> None:
     path = Path(path)
     content = path.read_text(encoding="utf-8")
     soup = BeautifulSoup(content, parser="html.parser", featues="lxml")

@@ -19,13 +19,13 @@ MAX_WORKERS = 4
 BINARY_CHECK_THRESHOLD = 0.7
 
 
-def extract_links_from_text(text, file_path):
+def extract_links_from_text(text: str, file_path: Path | str):
     urls = URL_REGEX.findall(text)
     github_urls = GITHUB_REPO_REGEX.findall(text)
     return (urls, github_urls)
 
 
-def is_likely_binary(file_path, chunk_size=1024):
+def is_likely_binary(file_path: Path, chunk_size=1024) -> bool:
     try:
         with Path(file_path).open("rb") as f:
             chunk = f.read(chunk_size)
@@ -46,7 +46,7 @@ def is_likely_binary(file_path, chunk_size=1024):
         return True
 
 
-def read_file_with_encodings(file_path):
+def read_file_with_encodings(file_path: Path) -> tuple[str, str] | tuple[str, None] | tuple[None, None]:
     encodings_to_try = ["utf-8", "latin-1", "iso-8859-1", "cp1252"]
     for encoding in encodings_to_try:
         try:
@@ -184,7 +184,7 @@ def process_file(file_path):
     return (list(set(local_urls)), list(set(github_urls)))
 
 
-def find_files_recursively(directory):
+def find_files_recursively(directory: str):
     for root, _, files in os.walk(directory):
         for file in files:
             yield os.path.join(root, file)

@@ -26,7 +26,7 @@ def format_dir_name(start_idx: int, end_idx: int, total_files: int) -> str:
     return f"{start_idx}_{end_idx}"
 
 
-def main():
+def main() -> None:
     root = Path()
     files = get_all_files(root)
     if not files:

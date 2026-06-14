@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
+from googleapiclient.discovery import Resource
 import io
 import os
 import pickle
@@ -12,7 +13,7 @@ from googleapiclient.http import MediaIoBaseDownload
 SCOPES = ["https://www.googleapis.com/auth/drive.readonly"]
 
 
-def authenticate():
+def authenticate() -> Resource:
     """Authenticate and return Google Drive service."""
     creds = None
 
@@ -36,7 +37,7 @@ def authenticate():
     return build("drive", "v3", credentials=creds)
 
 
-def get_folder_id(service, folder_name):
+def get_folder_id(service: Resource, folder_name: str):
     """Get folder ID by name."""
     query = f"name='{folder_name}' and mimeType='application/vnd.google-apps.folder' and trashed=false"
     results = service.files().list(q=query, fields="files(id, name)").execute()
@@ -48,7 +49,7 @@ def get_folder_id(service, folder_name):
     return items[0]["id"]
 
 
-def download_folder(service, folder_id, current_path):
+def download_folder(service: Resource, folder_id, current_path: str) -> None:
     """Download all contents of a folder recursively."""
     # Query for files and folders inside the target folder
     query = f"'{folder_id}' in parents and trashed=false"
@@ -76,7 +77,7 @@ def download_folder(service, folder_id, current_path):
             fh.close()
 
 
-def main():
+def main() -> None:
     # Folder name to download
     folder_name = "notebooks"  # Change this to your folder name
 

@@ -10,7 +10,7 @@ cwd = Path.cwd()
 N = int(sys.argv[1])
 
 
-def get_sizes():
+def get_sizes() -> list[tuple[Path, int]]:
     return [(file_path.relative_to(cwd), file_path.stat().st_size) for file_path in get_files(cwd)]
 
 

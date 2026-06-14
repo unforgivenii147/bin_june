@@ -21,7 +21,7 @@ def process_file(fp):
     return [src[node.start_byte : node.end_byte].decode() for node in root.children if node.type in VALID]
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     outfile = OUTPUT_DIR / f"{cwd.name}_importz.py"
     if outfile.exists():

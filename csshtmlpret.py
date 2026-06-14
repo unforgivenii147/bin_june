@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from argparse import Namespace
 import itertools
 import os
 import re
@@ -190,7 +191,7 @@ if BeautifulSoup:
     orig_prettify = BeautifulSoup.prettify
     regez = re.compile("^(\\s*)", re.MULTILINE)
 
-    def prettify(self, encoding=None, formatter="minimal", indent_width=4):
+    def prettify(self, encoding=None, formatter: str = "minimal", indent_width: int = 4) -> str:
         print("Monkey Patching BeautifulSoup on-the-fly to process HTML...")
         return regez.sub("\\1" * indent_width, orig_prettify(self, encoding, formatter))
 
@@ -229,7 +230,7 @@ def walk2list(
     ]
 
 
-def process_multiple_files(file_path):
+def process_multiple_files(file_path) -> None:
     print(f"Process {os.getpid()} is processing {file_path}.")
     if args.watch:
         previous = int(os.stat(file_path).st_mtime)
@@ -279,7 +280,7 @@ def process_single_html_file(html_file_path: str) -> str:
     return pretty_html
 
 
-def make_arguments_parser():
+def make_arguments_parser() -> Namespace:
     parser = ArgumentParser(
         description=__doc__,
         epilog="CSS-HTML-Prettify:\n    Takes file or folder full path string and process all CSS/SCSS/HTML found.\n    If argument is not file/folder will fail. Check Updates works on Python3.\n    StdIn to StdOut is deprecated since may fail with unicode characters.\n    CSS Properties are AlphaSorted,to help spot cloned ones,Selectors not.\n    Watch works for whole folders, with minimum of ~60 Secs between runs.",
@@ -300,7 +301,7 @@ def make_arguments_parser():
     return args
 
 
-def main():
+def main() -> None:
     make_arguments_parser()
     global log
     if args.before and getoutput:

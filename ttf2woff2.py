@@ -8,7 +8,7 @@ from fontTools.ttLib import woff2
 cwd = Path.cwd()
 
 
-def process_file(path: Path):
+def process_file(path: Path) -> None:
     path = Path(path)
     woff2_path = path.with_suffix(".woff2")
     if woff2_path.exists() and woff2_path.stat().st_size:
@@ -21,7 +21,7 @@ def process_file(path: Path):
         cprint(f"error convering {path.name}")
 
 
-def main():
+def main() -> None:
     files = get_files(cwd, ext=[".ttf", ".otf"])
     _ = mpf3(process_file, files)
 

@@ -10,7 +10,7 @@ class WheelInspector:
     def __init__(self, verbose: bool = False) -> None:
         self.verbose = verbose
 
-    def log(self, message: str):
+    def log(self, message: str) -> None:
         if self.verbose:
             print(f"[INSPECT] {message}")
 
@@ -81,7 +81,7 @@ class WheelInspector:
             results.append(info)
         return results
 
-    def print_inspection(self, wheel_path: Path):
+    def print_inspection(self, wheel_path: Path) -> None:
         info = self.inspect_wheel(wheel_path)
         if "error" in info:
             print(f"Error: {info['error']}")
@@ -118,7 +118,7 @@ class WheelInspector:
         print(f"{'=' * 60}\n")
 
 
-def main():
+def main() -> None:
     import argparse
 
     parser = argparse.ArgumentParser(description="Inspect and validate .whl files")

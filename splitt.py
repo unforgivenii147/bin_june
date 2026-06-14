@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 
-def split_file_by_delimiter(fname, delim) -> None:
+def split_file_by_delimiter(fname: str, delim: str) -> None:
     content = Path(fname).read_text(encoding="utf-8")
     path = Path(fname)
     basen = path.stem

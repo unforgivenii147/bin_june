@@ -52,7 +52,7 @@ def build_mime_to_ext(cwd: Path) -> dict[str, list[str]]:
     return {k: sorted(v) for k, v in sorted(mime_to_ext.items())}
 
 
-def main():
+def main() -> None:
     cwd = Path()
     mime_to_ext = build_mime_to_ext(cwd)
     with OUTPUT_FILE.open("w", encoding="utf-8") as f:

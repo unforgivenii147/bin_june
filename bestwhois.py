@@ -38,7 +38,7 @@ def valid_date(s):
         raise argparse.ArgumentTypeError(msg)
 
 
-def dictstr(structure, ntabs):
+def dictstr(structure, ntabs: int) -> None:
     """Print parsed JSON dict in WHOIS-like textual format"""
     global raw_str
     for field in structure.keys():

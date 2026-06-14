@@ -11,7 +11,7 @@ NORMAL_IMPORT = "^import re\\b"
 REGEX_IMPORT = "^import regex as re\\b"
 
 
-def update_file(file_path, reverse=False):
+def update_file(file_path, reverse: bool = False) -> str | None:
     try:
         lines = file_path.read_text(encoding="utf-8").splitlines(keepends=True)
         new_lines = []
@@ -32,7 +32,7 @@ def update_file(file_path, reverse=False):
         return f"Error processing {file_path}: {e}"
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Recursively swap 'import re' with 'import regex as re'")
     parser.add_argument("-r", "--reverse", action="store_true", help="Reverse the replacement (regex as re -> re)")
     args = parser.parse_args()

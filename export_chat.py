@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 
-def export_to_markdown(json_path, output_dir="exported"):
+def export_to_markdown(json_path: str, output_dir="exported") -> None:
     output_dir = Path(output_dir)
     output_dir.mkdir(exist_ok=True)
     data = json.loads(Path(json_path).read_text(encoding="utf-8"))

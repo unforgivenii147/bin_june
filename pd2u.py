@@ -30,7 +30,7 @@ def is_binary(path: Path) -> bool:
         return True
 
 
-def dos2unix_file(path):
+def dos2unix_file(path: Path) -> None:
     data = path.read_text()
     new_data = data.replace("\n\r", "\n")
     path.write_text(new_data)

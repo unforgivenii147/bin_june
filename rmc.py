@@ -30,7 +30,7 @@ class FileResult:
 class DocstringProcessor(ast.NodeTransformer):
     """Process docstrings with special handling for empty bodies"""
 
-    def __init__(self, preserve_module_docstring: bool = True):
+    def __init__(self, preserve_module_docstring: bool = True) -> None:
         self.docstrings_removed = 0
         self.preserve_module_docstring = preserve_module_docstring
         super().__init__()
@@ -302,7 +302,7 @@ def format_result(result: FileResult) -> str:
     return f"{result.path.name} ({removal_text} removed)"
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Remove comments and docstrings from Python files (preserves formatting)"
     )

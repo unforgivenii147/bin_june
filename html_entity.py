@@ -44,7 +44,7 @@ ENTITY_PATTERN = re.compile("|".join(re.escape(k) for k in HTML_ENTITIES.keys())
 def replace_entities(text: str) -> str:
     """Replace HTML entities with their characters."""
 
-    def replacer(match):
+    def replacer(match) -> str:
         return HTML_ENTITIES[match.group(0)]
 
     return ENTITY_PATTERN.sub(replacer, text)
@@ -73,7 +73,7 @@ def process_file(filepath: Path) -> tuple[Path, bool, str]:
         return (filepath, False, str(e))
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
     files = [Path(p) for p in args] if args else get_nobinary(cwd)

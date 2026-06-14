@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from re import Match
 import ast
 import os
 import re
@@ -25,11 +26,11 @@ def get_translator():
     return _thread_local.translator
 
 
-def is_non_english(line):
+def is_non_english(line: str) -> Match[str] | None:
     return re.search("[^\\x00-\\x7F]", line)
 
 
-def translate_line(line):
+def translate_line(line: str):
     if is_non_english(line.strip()):
         try:
             trans = get_translator().translate(line.strip())
@@ -55,7 +56,7 @@ def split_large_text_blocks(text, max_len):
     return chunks
 
 
-def translate_docstring(docstr):
+def translate_docstring(docstr: str) -> str:
     new_lines = []
     for line in docstr.splitlines():
         new_lines.append(line)
@@ -65,7 +66,7 @@ def translate_docstring(docstr):
     return "\n".join(new_lines)
 
 
-def process_file(filepath):
+def process_file(filepath) -> None:
     path = Path(path)
     backup_path = filepath + BACKUP_EXT
     shutil.copyfile(filepath, backup_path)
@@ -125,7 +126,7 @@ def process_file(filepath):
     print(f"Translated: {filepath}")
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     py_files = get_pyfiles(cwd)
     if not py_files:

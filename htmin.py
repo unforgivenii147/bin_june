@@ -7,7 +7,7 @@ import htmlmin
 from dh import mpf3, get_files
 
 
-def process_file(path: str | Path):
+def process_file(path: str | Path) -> None:
     path = Path(path)
     try:
         orig = path.read_text(encoding="utf-8")

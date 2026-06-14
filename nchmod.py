@@ -37,7 +37,7 @@ def get_filez(p):
             yield from get_filez(f)
 
 
-def normalize_permissions(cwd) -> None:
+def normalize_permissions(cwd: Path) -> None:
     DIR_PERM = 509
     FILE_PERM = 436
     for path in get_filez(cwd):

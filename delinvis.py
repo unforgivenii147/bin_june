@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 
-def find_unprintable_positions(text):
+def find_unprintable_positions(text: str):
     allowed = set(string.printable) | {"\n", "\r", "\t"}
     positions = []
     line_num = 1
@@ -22,7 +22,7 @@ def find_unprintable_positions(text):
     return positions
 
 
-def clean_text(text):
+def clean_text(text: str) -> str:
     allowed = set(string.printable) | {"\n", "\r", "\t"}
     return "".join((ch for ch in text if ch in allowed))
 
@@ -42,7 +42,7 @@ def clean_file(path: str) -> None:
     Path(path).write_text(cleaned, encoding="utf-8", errors="ignore")
 
 
-def main():
+def main() -> None:
     if len(sys.argv) != 2:
         print(f"Usage: {Path(sys.argv[0]).name} <filename>")
         sys.exit(1)

@@ -5,7 +5,7 @@ from pathlib import Path
 from dh import cprint, fsz, get_files, gsz, mpf3, runcmd, rrs
 
 
-def process_file(path):
+def process_file(path) -> bool | None:
     path = Path(path)
     before = gsz(path)
     if not before or len(path.read_text().splitlines()) == 1:
@@ -19,7 +19,7 @@ def process_file(path):
         return False
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     files = get_files(cwd, ext=[".svg", ".SVG"])
     mpf3(process_file, files)

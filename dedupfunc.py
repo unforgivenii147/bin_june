@@ -18,7 +18,7 @@ from typing import Dict, List, Set, Tuple
 class FunctionInfo:
     """Store information about a function"""
 
-    def __init__(self, name: str, body: str, lineno: int, node: ast.FunctionDef):
+    def __init__(self, name: str, body: str, lineno: int, node: ast.FunctionDef) -> None:
         self.name = name
         self.body = self._normalize_body(body)
         self.original_body = body
@@ -45,11 +45,11 @@ class FunctionInfo:
 class DuplicateFunctionFinder(ast.NodeVisitor):
     """AST visitor to find functions and extract their bodies"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.functions: List[FunctionInfo] = []
         self.source_lines: List[str] = []
 
-    def visit_FunctionDef(self, node: ast.FunctionDef):
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
         """Extract function information"""
         # Get the function body as source code
         body_start = node.body[0].lineno - 1
@@ -89,7 +89,7 @@ class DuplicateFunctionFinder(ast.NodeVisitor):
 class DuplicateFunctionRemover:
     """Handle removal of duplicate functions"""
 
-    def __init__(self, filepath: str):
+    def __init__(self, filepath: str) -> None:
         self.filepath = Path(filepath)
         self.content = None
         self.lines = None
@@ -160,7 +160,7 @@ class DuplicateFunctionRemover:
         return str(backup_path)
 
 
-def display_duplicates(groups: Dict[str, List[FunctionInfo]]):
+def display_duplicates(groups: Dict[str, List[FunctionInfo]]) -> bool:
     """Display duplicate function groups to the user"""
     if not groups:
         print("No duplicate functions found!")
@@ -210,7 +210,7 @@ def get_user_choices(groups: Dict[str, List[FunctionInfo]]) -> Dict[str, int]:
     return choices
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Find and optionally remove duplicate functions in Python files")
     parser.add_argument("file", help="Python file to analyze")
     parser.add_argument("-r", "--remove", action="store_true", help="Remove duplicate functions with user confirmation")

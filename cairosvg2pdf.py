@@ -7,7 +7,7 @@ import cairosvg
 from dh import cprint, fsz, get_files, gsz
 
 
-def process_file(path):
+def process_file(path: Path) -> None:
     path = Path(path)
     try:
         outfile = path.with_suffix(".pdf")
@@ -16,7 +16,7 @@ def process_file(path):
         return
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
     args = sys.argv[1:]

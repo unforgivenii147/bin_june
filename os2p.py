@@ -92,7 +92,7 @@ class PathlibTransformer(ast.NodeTransformer):
         "putenv": (None, "None"),  # Keep as os.putenv
     }
 
-    def __init__(self, file_path: Path):
+    def __init__(self, file_path: Path) -> None:
         self.file_path = file_path
         self.needs_path_import = False
         self.needs_shutil_import = False
@@ -666,7 +666,7 @@ def process_file(
         return (None, False, [], [])
 
 
-def main():
+def main() -> int:
     """Main entry point."""
     import argparse
 

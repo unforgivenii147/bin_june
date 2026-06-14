@@ -1,26 +1,27 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from sqlite3 import Cursor
 import os
 import sqlite3
 from pathlib import Path
 
 
-def get_current_folder_name():
+def get_current_folder_name() -> str:
     return Path(Path.cwd()).name
 
 
-def folder_exists_in_db(cursor, folder_name):
+def folder_exists_in_db(cursor: Cursor, folder_name: str):
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (folder_name,))
     return cursor.fetchone() is not None
 
 
-def create_folder_table(cursor, folder_name):
+def create_folder_table(cursor: Cursor, folder_name: str) -> None:
     cursor.execute(
         f'\n        CREATE TABLE IF NOT EXISTS "{folder_name}" (\n            id INTEGER PRIMARY KEY AUTOINCREMENT,\n            filename TEXT NOT NULL,\n            file_contents TEXT\n        )\n    '
     )
 
 
-def read_file_contents(filepath):
+def read_file_contents(filepath: str) -> str:
     try:
         encodings = ["utf-8", "latin-1", "cp1252", "iso-8859-1"]
         for encoding in encodings:
@@ -51,7 +52,7 @@ def get_files_in_cwd():
     return files
 
 
-def insert_files(cursor, folder_name, files):
+def insert_files(cursor: Cursor, folder_name: str, files) -> None:
     for file_info in files:
         cursor.execute(
             f'\n            INSERT INTO "{folder_name}" (filename,  file_contents)\n            VALUES (?, ?)\n        ',
@@ -59,7 +60,7 @@ def insert_files(cursor, folder_name, files):
         )
 
 
-def main():
+def main() -> None:
     db_path = "/sdcard/pkg.db"
     folder_name = get_current_folder_name()
     conn = sqlite3.connect(db_path)

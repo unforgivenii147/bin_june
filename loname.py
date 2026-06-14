@@ -2,8 +2,15 @@
 
 import sys
 from pathlib import Path
+from multiprocessing import get_context
 
-from dh import mpf3
+
+def mpf3(func, files):
+    p = get_context("spawn").Pool(16)
+    for f in files:
+        p.apply_async(func, (f,))
+    p.close()
+    p.join()
 
 
 def unique_path(path: Path | str) -> Path:
@@ -28,8 +35,7 @@ def unique_path(path: Path | str) -> Path:
         counter += 1
 
 
-def process_file(path):
-    path = Path(path)
+def process_file(path) -> None:
     if not path.exists():
         path = Path(str(path).lower())
         if not path.exists():

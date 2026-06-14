@@ -33,7 +33,7 @@ def process_file(file_path: Path) -> None:
         print(fsz(before - after))
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
     args = sys.argv[1:]

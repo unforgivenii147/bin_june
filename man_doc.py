@@ -6,7 +6,7 @@ from pathlib import Path
 from dh import cprint, get_files, mpf3, runcmd
 
 
-def safe_run(path):
+def safe_run(path) -> bool:
     cmd = ["mandoc", "-T", "html", str(path)]
     res, txt, err = runcmd(cmd, show_output=False)
     if res != 0:
@@ -30,7 +30,7 @@ def process_file(fp) -> bool:
     return False
 
 
-def main():
+def main() -> None:
     args = sys.argv[1:]
     cwd = Path.cwd()
     files = (

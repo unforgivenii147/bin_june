@@ -4,6 +4,7 @@
 catimg - Display images in terminal with true color support (including SVG)
 """
 
+from PIL.ImageFile import ImageFile
 import argparse
 import io
 import os
@@ -18,7 +19,7 @@ from PIL import Image
 SVG_SUPPORT = True
 
 
-def resize_image(img, terminal_width, terminal_height, max_width=None, max_height=None):
+def resize_image(img: ImageFile, terminal_width: int, terminal_height: int, max_width=None, max_height=None):
     """Resize image based on terminal dimensions and constraints"""
     orig_width, orig_height = img.size
 
@@ -46,7 +47,7 @@ def resize_image(img, terminal_width, terminal_height, max_width=None, max_heigh
     return img.resize((new_width, new_height), Image.Resampling.LANCZOS)
 
 
-def load_svg(svg_path, width=None, height=None):
+def load_svg(svg_path, width=None, height=None) -> ImageFile:
     """Load SVG file and convert to PIL Image"""
     if not SVG_SUPPORT:
         print("Error: SVG support requires 'cairosvg' library. Install with: pip install cairosvg", file=sys.stderr)
@@ -73,7 +74,7 @@ def load_svg(svg_path, width=None, height=None):
         sys.exit(1)
 
 
-def load_image(image_path, width=None, height=None):
+def load_image(image_path, width=None, height=None) -> ImageFile:
     """Load image from file (supports PNG, JPEG, GIF, BMP, SVG)"""
     # Check if it's an SVG file
     if image_path.lower().endswith(".svg"):
@@ -87,12 +88,12 @@ def load_image(image_path, width=None, height=None):
         sys.exit(1)
 
 
-def rgb_to_ansi(r, g, b):
+def rgb_to_ansi(r, g, b) -> str:
     """Convert RGB to ANSI true color escape sequence"""
     return f"\033[38;2;{r};{g};{b}m"
 
 
-def image_to_ansi(img):
+def image_to_ansi(img) -> str:
     """Convert PIL Image to ANSI colored string"""
     img = img.convert("RGB")
     width, height = img.size
@@ -111,7 +112,7 @@ def image_to_ansi(img):
     return output
 
 
-def image_to_ansi_blocks(img):
+def image_to_ansi_blocks(img) -> str:
     """Convert image using half-block characters (▀) for better vertical resolution"""
     img = img.convert("RGB")
     width, height = img.size
@@ -142,7 +143,7 @@ def image_to_ansi_blocks(img):
     return output
 
 
-def get_terminal_size():
+def get_terminal_size() -> tuple[int, int]:
     """Get terminal width and height in characters"""
     try:
         columns, rows = os.get_terminal_size()
@@ -151,7 +152,7 @@ def get_terminal_size():
         return 80, 24
 
 
-def catimg(image_path, width=None, height=None, use_half_blocks=True, dpi=96, bg_color=None):
+def catimg(image_path, width=None, height=None, use_half_blocks=True, dpi=96, bg_color=None) -> None:
     """Display image in terminal"""
     # Check if file exists
     if not os.path.exists(image_path):
@@ -203,7 +204,7 @@ def catimg(image_path, width=None, height=None, use_half_blocks=True, dpi=96, bg
         sys.exit(1)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Display images in terminal with true color support (including SVG)",
         epilog="Supports: PNG, JPEG, GIF, BMP, TIFF, SVG (requires cairosvg)",

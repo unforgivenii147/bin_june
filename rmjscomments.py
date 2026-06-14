@@ -13,7 +13,7 @@ multi_line_comment_re = "/\\*.*?\\*/"
 single_line_comment_re = "//.*"
 
 
-def process_file(fp):
+def process_file(fp) -> None:
     path = Path(path)
     print(f"processing ...{fp.name}")
     code = fp.read_text(encoding="utf-8")
@@ -26,7 +26,7 @@ def process_file(fp):
     fp.write_text(final_code, encoding="utf-8")
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
     args = sys.argv[1:]

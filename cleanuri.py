@@ -79,7 +79,7 @@ def process_file(file_path: Path, assets_dir: Path, processed: dict) -> None:
         print(f"✎ Updated {file_path}")
 
 
-def main():
+def main() -> None:
     """Main entry point: walk the current directory and process target files."""
     mimetypes.init()
     assets_dir = Path("assets")

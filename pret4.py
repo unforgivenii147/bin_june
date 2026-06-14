@@ -29,7 +29,7 @@ def format_file(file_path: Path) -> tuple[Path, bool, str | None]:
         return (file_path, False, str(e))
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     files = get_files_to_format(cwd)
     if not files:

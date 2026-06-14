@@ -25,7 +25,7 @@ from pathlib import Path
 import brotlicffi
 
 
-def compress_file(input_path, output_path, quality=6):
+def compress_file(input_path: Path | str, output_path: Path | str, quality=6):
     """
     Compress a single file using brotlicffi
 
@@ -65,7 +65,7 @@ def compress_file(input_path, output_path, quality=6):
         return {"success": False, "input": input_path, "error": str(e)}
 
 
-def decompress_file(input_path, output_path):
+def decompress_file(input_path: Path | str, output_path: Path | str):
     """
     Decompress a single file using brotlicffi
 
@@ -101,7 +101,7 @@ def decompress_file(input_path, output_path):
         return {"success": False, "input": input_path, "error": str(e)}
 
 
-def compress_directory_to_tar(input_dir, quality=6):
+def compress_directory_to_tar(input_dir: str, quality=6) -> Path | None:
     """
     Compress a directory by first creating a tar archive, then compressing it
 
@@ -145,7 +145,7 @@ def compress_directory_to_tar(input_dir, quality=6):
         return None
 
 
-def decompress_tar_br(input_path, output_dir=None):
+def decompress_tar_br(input_path: str, output_dir=None) -> Path | None:
     """
     Decompress a .tar.br file and extract the tar archive
 
@@ -201,7 +201,7 @@ def decompress_tar_br(input_path, output_dir=None):
         return None
 
 
-def compress_path(input_path, quality=6, max_workers=4):
+def compress_path(input_path: str, quality: int = 6, max_workers: int = 4) -> bool | None:
     """
     Compress a file or directory (in-place)
 
@@ -262,7 +262,7 @@ def compress_path(input_path, quality=6, max_workers=4):
             return False
 
 
-def decompress_path(input_path, max_workers=4):
+def decompress_path(input_path: str, max_workers: int = 4) -> bool | None:
     """
     Decompress a file or directory (in-place)
 
@@ -363,7 +363,7 @@ def decompress_path(input_path, max_workers=4):
         return success_count > 0
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Compress or decompress files/directories using Brotli",
         formatter_class=argparse.RawDescriptionHelpFormatter,

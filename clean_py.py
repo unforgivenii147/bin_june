@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 class UsageAnalyzer(ast.NodeVisitor):
-    def __init__(self):
+    def __init__(self) -> None:
         self.func_defs = set()
         self.class_defs = set()
         self.var_defs = set()
@@ -19,22 +19,22 @@ class UsageAnalyzer(ast.NodeVisitor):
         self.imports = {}
         self.import_uses = set()
 
-    def visit_FunctionDef(self, node):
+    def visit_FunctionDef(self, node) -> None:
         self.func_defs.add(node.name)
         self.generic_visit(node)
 
-    def visit_ClassDef(self, node):
+    def visit_ClassDef(self, node) -> None:
         self.class_defs.add(node.name)
         self.generic_visit(node)
 
-    def visit_Assign(self, node):
+    def visit_Assign(self, node) -> None:
         if isinstance(node.parent, ast.Module):
             for target in node.targets:
                 if isinstance(target, ast.Name):
                     self.var_defs.add(target.id)
         self.generic_visit(node)
 
-    def visit_Name(self, node):
+    def visit_Name(self, node) -> None:
         if isinstance(node.ctx, ast.Load):
             self.var_uses.add(node.id)
             self.func_calls.add(node.id)
@@ -42,22 +42,22 @@ class UsageAnalyzer(ast.NodeVisitor):
             self.import_uses.add(node.id)
         self.generic_visit(node)
 
-    def visit_Import(self, node):
+    def visit_Import(self, node) -> None:
         for alias in node.names:
             self.imports[alias.asname or alias.name] = node
 
-    def visit_ImportFrom(self, node):
+    def visit_ImportFrom(self, node) -> None:
         for alias in node.names:
             self.imports[alias.asname or alias.name] = node
 
 
-def annotate_parents(tree):
+def annotate_parents(tree) -> None:
     for node in ast.walk(tree):
         for child in ast.iter_child_nodes(node):
             child.parent = node
 
 
-def find_unused_symbols(source):
+def find_unused_symbols(source: str):
     try:
         tree = ast.parse(source)
     except SyntaxError:
@@ -77,7 +77,7 @@ def find_unused_symbols(source):
     return (unused, [])
 
 
-def remove_unused(source, unused):
+def remove_unused(source: str, unused) -> str:
     tree = ast.parse(source)
     annotate_parents(tree)
     new_body = []
@@ -99,7 +99,7 @@ def remove_unused(source, unused):
     return ast.unparse(tree)
 
 
-def process_file(filepath, dry_run=False):
+def process_file(filepath, dry_run: bool = False):
     path = Path(path)
     errors = []
     filepath = Path(filepath)
@@ -126,7 +126,7 @@ def process_file(filepath, dry_run=False):
     return (filepath, unused, errors)
 
 
-def gather_python_files(root: Path):
+def gather_python_files(root: Path) -> list[Path]:
     return [p for p in root.rglob("*.py") if p.is_file()]
 
 
@@ -134,7 +134,7 @@ def worker(args):
     return process_file(*args)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Remove unused functions, classes, variables, and imports.")
     parser.add_argument("--dry-run", action="store_true", help="Show what would change without modifying files.")
     parser.add_argument("--workers", type=int, default=mp.cpu_count(), help="Number of processes")

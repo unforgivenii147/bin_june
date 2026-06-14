@@ -34,13 +34,13 @@ SAFE_EXTENSIONS = [
 EXT_PATTERN = re.compile("|".join(SAFE_EXTENSIONS), re.IGNORECASE)
 
 
-def sanitize_filename(name):
+def sanitize_filename(name) -> str:
     name = unquote(name)
     name = re.sub('[<>:"|?*]', "_", name)
     return name[:255].strip() or "downloaded_file"
 
 
-def extract_filename(url):
+def extract_filename(url) -> str:
     parsed = urlparse(url)
     path = parsed.path
     filename = path.split("/")[-1] or "index.html"
@@ -52,7 +52,7 @@ def extract_filename(url):
     return filename
 
 
-def is_safe_extension(url):
+def is_safe_extension(url) -> bool:
     parsed = urlparse(url)
     path = parsed.path
     filename = path.split("/")[-1]
@@ -60,7 +60,7 @@ def is_safe_extension(url):
     return bool(EXT_PATTERN.search(base_name))
 
 
-def get_filesize(url, session):
+def get_filesize(url, session) -> int | None:
     try:
         r = session.head(url, timeout=TIMEOUT, allow_redirects=True)
         r.raise_for_status()
@@ -99,7 +99,7 @@ def download_one(url, session, output_dir, resume_from=None):
         return (url, False, str(e))
 
 
-def download_urls(urls, output_dir=OUTPUT_DIR):
+def download_urls(urls: list[str], output_dir=OUTPUT_DIR) -> None:
     Path(output_dir).mkdir(exist_ok=True, parents=True)
     safe_urls = [url for url in urls if is_safe_extension(url)]
     skipped = len(urls) - len(safe_urls)

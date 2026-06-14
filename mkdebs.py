@@ -13,31 +13,31 @@ BASE_DIR = Path.home() / "tmp" / "debs"
 BASE_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def run(cmd):
+def run(cmd: str) -> str:
     return subprocess.check_output(cmd, shell=True, text=True)
 
 
-def get_installed_packages():
+def get_installed_packages() -> list[str]:
     return run("dpkg-query -W -f='${Package}\n'").split()
 
 
-def get_package_files(pkg):
+def get_package_files(pkg) -> list[str]:
     files = run(f"dpkg -L {pkg}").splitlines()
     return [f for f in files if Path(f).exists()]
 
 
-def get_package_metadata(pkg):
+def get_package_metadata(pkg) -> dict[str, str]:
     fmt = "${Package}\n${Version}\n${Architecture}\n${Maintainer}\n${Description}\n"
     out = run(f"dpkg-query -W -f='{fmt}' {pkg}").splitlines()
     return {"Package": out[0], "Version": out[1], "Architecture": out[2], "Maintainer": out[3], "Description": out[4]}
 
 
-def create_control_file(path, meta) -> None:
+def create_control_file(path, meta: dict[str, str]) -> None:
     control_content = f"Package: {meta['Package']}\nVersion: {meta['Version']}\nArchitecture: {meta['Architecture']}\nMaintainer: {meta['Maintainer']}\nDescription: {meta['Description']}\n"
     (path / "control").write_text(control_content)
 
 
-def copy_pkg_files(files, dest) -> None:
+def copy_pkg_files(files: list[str], dest) -> None:
     for f in files:
         target = dest / f.lstrip("/")
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -50,7 +50,7 @@ def build_tar_xz(source_dir, output_path) -> None:
         tar.add(source_dir, arcname=".")
 
 
-def build_deb(pkg_dir, output_deb) -> None:
+def build_deb(pkg_dir, output_deb: Path) -> None:
     debian_binary = pkg_dir / "debian-binary"
     debian_binary.write_text("2.0\n")
     control_tar = pkg_dir / "control.tar.xz"

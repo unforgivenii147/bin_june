@@ -184,7 +184,7 @@ async def compress_folder_async(folder_path: Path, output_path: Path) -> bool:
 
     try:
         # Compress folder directly to 7z (no intermediate tar needed)
-        def compress():
+        def compress() -> None:
             with py7zr.SevenZipFile(
                 output_path,
                 mode="w",

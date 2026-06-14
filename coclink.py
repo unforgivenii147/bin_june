@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from googleapiclient.discovery import Resource
 import os
 import re
 from datetime import UTC, datetime, timedelta
@@ -17,7 +18,7 @@ CHANNELS = {
 }
 
 
-def get_videos(youtube, channel_id):
+def get_videos(youtube: Resource, channel_id: str):
     past_date = (datetime.now(UTC) - timedelta(days=30)).isoformat()
     videos = []
     request = youtube.search().list(
@@ -46,7 +47,7 @@ def extract_th18_links(description):
     return [l for l in links if "TH18" in l.upper() or "TH18" in description.upper()]
 
 
-def create_html(channel_name, base_data):
+def create_html(channel_name: str, base_data) -> None:
     date_str = datetime.now().strftime("%d-%m-%Y")
     dir_name = f"output/{date_str}_{channel_name}"
     Path(dir_name).mkdir(exist_ok=True, parents=True)
@@ -62,7 +63,7 @@ def create_html(channel_name, base_data):
     print(f"Generated: {file_path}")
 
 
-def main():
+def main() -> None:
     if not API_KEY:
         print("Error: API_KEY not found in .env file.")
         return

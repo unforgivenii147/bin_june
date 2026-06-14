@@ -93,7 +93,7 @@ def create_symlink(script_path: Path) -> None:
                 print(f"  ⚠️  Failed to create symlink: {e}", file=sys.stderr)
 
 
-def main():
+def main() -> None:
     if len(sys.argv) != 2:
         print(f"Usage: {sys.argv[0]} <filename>", file=sys.stderr)
         print(f"Example: {sys.argv[0]} myscript.py", file=sys.stderr)

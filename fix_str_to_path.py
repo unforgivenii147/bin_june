@@ -3,7 +3,7 @@ import os
 import re
 
 
-def add_path_statement(file_path):
+def add_path_statement(file_path: str) -> bool:
     """Add path=Path(path) as first line inside process_file function"""
 
     with open(file_path, "r", encoding="utf-8") as file:
@@ -71,7 +71,7 @@ def add_path_statement(file_path):
         return False
 
 
-def add_path_statement_simple(file_path):
+def add_path_statement_simple(file_path: str) -> bool:
     """Simpler version using regex"""
 
     with open(file_path, "r", encoding="utf-8") as file:
@@ -102,7 +102,7 @@ def add_path_statement_simple(file_path):
     if new_content == content:
         pattern = r"(def process_file\([^:]*:)\s*\n\s*"
 
-        def replacement2(match):
+        def replacement2(match) -> str:
             indent = re.match(r"^(\s*)", match.group(1)).group(1) + "    "
             return f"{match.group(1)}\n{indent}path = Path(path)\n"
 
@@ -117,7 +117,7 @@ def add_path_statement_simple(file_path):
     return False
 
 
-def process_directory():
+def process_directory() -> None:
     """Process all Python files in current directory"""
 
     cwd = os.getcwd()

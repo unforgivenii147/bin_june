@@ -33,7 +33,7 @@ class EntityExtractor(ast.NodeVisitor):
             code_slice[-1] = last_line[: node.end_col_offset]
         return "".join(code_slice)
 
-    def _extract_and_save(self, node: ast.AST, entity_type: str, name: str):
+    def _extract_and_save(self, node: ast.AST, entity_type: str, name: str) -> None:
         entity_code = self._get_source_slice(node)
         scope_prefix = "_".join(self.scope_stack)
         full_name = f"{scope_prefix}_{name}" if scope_prefix else name
@@ -48,33 +48,33 @@ class EntityExtractor(ast.NodeVisitor):
             "is_function": entity_type in {"function", "method"},
         })
 
-    def visit_FunctionDef(self, node: ast.FunctionDef):
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
         entity_type = "method" if self.scope_stack and self.scope_stack[-1].startswith("class_") else "function"
         self._extract_and_save(node, entity_type, node.name)
         self.scope_stack.append(f"func_{node.name}")
         self.generic_visit(node)
         self.scope_stack.pop()
 
-    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef):
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
         entity_type = "method" if self.scope_stack and self.scope_stack[-1].startswith("class_") else "function"
         self._extract_and_save(node, entity_type, node.name)
         self.scope_stack.append(f"async_func_{node.name}")
         self.generic_visit(node)
         self.scope_stack.pop()
 
-    def visit_ClassDef(self, node: ast.ClassDef):
+    def visit_ClassDef(self, node: ast.ClassDef) -> None:
         self._extract_and_save(node, "class", node.name)
         self.scope_stack.append(f"class_{node.name}")
         self.generic_visit(node)
         self.scope_stack.pop()
 
-    def visit_Assign(self, node: ast.Assign):
+    def visit_Assign(self, node: ast.Assign) -> None:
         if not self.scope_stack and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
             target_name = node.targets[0].id
             if re.match("^[A-Z_][A-Z0-9_]*$", target_name):
                 self._extract_and_save(node, "constant", target_name)
 
-    def generic_visit(self, node: ast.AST):
+    def generic_visit(self, node: ast.AST) -> None:
         super().generic_visit(node)
 
 
@@ -91,7 +91,7 @@ def get_unique_filepath(base_path: Path) -> Path:
         i += 1
 
 
-def save_entity(entity: dict[str, Any]):
+def save_entity(entity: dict[str, Any]) -> None:
     filename_base = f"{entity['full_name']}.py"
     output_path_base = OUTPUT_DIR / entity["type"] / filename_base
     output_path_base.parent.mkdir(parents=True, exist_ok=True)
@@ -192,7 +192,7 @@ def worker_process(path_str: str) -> list[dict[str, Any]]:
     return process_single_file(path)
 
 
-def main():
+def main() -> None:
     print(f"Starting analysis in {Path.cwd()}...")
     if OUTPUT_DIR.exists():
         shutil.rmtree(OUTPUT_DIR)

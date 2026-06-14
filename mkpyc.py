@@ -11,7 +11,7 @@ from dh import fsz, get_files, gsz
 MAX_QUEUE = 16
 
 
-def process_file(fp):
+def process_file(fp) -> bool | None:
     path = Path(path)
     if not fp.exists():
         return False
@@ -21,7 +21,7 @@ def process_file(fp):
     return True
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
     args = sys.argv[1:]

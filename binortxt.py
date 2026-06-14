@@ -17,7 +17,7 @@ def process_file(fp) -> None:
         fp.rename(newpath)
 
 
-def main():
+def main() -> None:
     files = get_files(cwd)
     mpf3(process_file, files)
 

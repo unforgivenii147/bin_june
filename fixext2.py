@@ -19,7 +19,7 @@ MIME_TO_EXT = {
 }
 
 
-def detect_text_based_extension(text):
+def detect_text_based_extension(text: str):
     text = text.strip()
     if text.startswith("#!") and "python" in text:
         return "py"
@@ -46,7 +46,7 @@ def detect_text_based_extension(text):
     return None
 
 
-def detect_extension(path, mime_type):
+def detect_extension(path: str, mime_type: str):
     if mime_type in MIME_TO_EXT:
         return MIME_TO_EXT[mime_type]
     if mime_type == "text/plain":
@@ -61,7 +61,7 @@ def detect_extension(path, mime_type):
     return None
 
 
-def safe_rename(src, dst):
+def safe_rename(src: str, dst: str) -> Path:
     dst = Path(dst)
     src = Path(src)
     if not dst.exists():
@@ -77,7 +77,7 @@ def safe_rename(src, dst):
     return new_path
 
 
-def correct_file_extension(root="."):
+def correct_file_extension(root: str = ".") -> None:
     mime = magic.Magic(mime=True)
     for dirpath, _, filenames in os.walk(root):
         for name in filenames:

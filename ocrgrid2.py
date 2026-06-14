@@ -32,7 +32,9 @@ def prepare_image_for_ocr(img_path: Path):
     return cv2.warpAffine(thresh, M, (w, h), flags=cv2.INTER_CUBIC)
 
 
-def run_tesseract_on_image(img, oem, psm):
+def run_tesseract_on_image(
+    img, oem: int, psm: int
+) -> tuple[bytes | dict[str, bytes | str] | str, str, float, str] | tuple[str, str, float, str]:
     config = f"--oem {oem} --psm {psm} -l eng"
     start = time.time()
     try:
@@ -43,7 +45,7 @@ def run_tesseract_on_image(img, oem, psm):
     return (text, config, duration, "")
 
 
-def main():
+def main() -> None:
     image_files = [f for f in Path().iterdir() if f.suffix.lower() in IMG_EXT]
     all_results = []
     for img_path in image_files:

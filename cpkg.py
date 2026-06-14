@@ -20,7 +20,7 @@ def find_dist_info_dir(site_packages: Path, pkg_name: str) -> Path:
     return candidates[0]
 
 
-def copy_package_files(pkg_name: str):
+def copy_package_files(pkg_name: str) -> None:
     site_packages = Path.cwd()
     dist_info_dir = find_dist_info_dir(site_packages, pkg_name)
     record_path = dist_info_dir / "RECORD"
@@ -63,7 +63,7 @@ def copy_package_files(pkg_name: str):
     print("\nErrors: {}", error_count)
 
 
-def main():
+def main() -> None:
     if len(sys.argv) != 2:
         print(f"Usage: {sys.argv[0]} <package-name>", file=sys.stderr)
         sys.exit(1)

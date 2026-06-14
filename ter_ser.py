@@ -6,7 +6,7 @@ from pathlib import Path
 from dh import cprint, fsz, gsz, runcmd
 
 
-def safe_run(path):
+def safe_run(path: Path) -> bool:
     cmd = ["terser", "--compress", "--mangle", "--", str(path)]
     res, txt, err = runcmd(cmd, show_output=False)
     if res != 0:
@@ -40,7 +40,7 @@ def process_file(path) -> bool:
     return False
 
 
-def main():
+def main() -> None:
     from dh import get_files, mpf3
 
     args = sys.argv[1:]

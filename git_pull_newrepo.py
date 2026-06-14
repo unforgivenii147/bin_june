@@ -149,7 +149,7 @@ def process_repository(repo_path: Path, github_token: str) -> tuple[bool, str]:
         return (False, f"Error: {str(e)}")
 
 
-def main():
+def main() -> None:
     """Main function to process all git repositories."""
     # Get GitHub token from environment
     github_token = os.getenv("GITHUB_TOKEN")

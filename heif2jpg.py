@@ -7,7 +7,7 @@ import pillow_heif as ph
 from fastwalk import walk_files
 
 
-def process_file(fp):
+def process_file(fp) -> bool:
     path = Path(path)
     if not fp.exists():
         return False
@@ -18,7 +18,7 @@ def process_file(fp):
     return True
 
 
-def main():
+def main() -> None:
     cwd = Path().cwd()
     start_size = gsz(cwd)
     files = []

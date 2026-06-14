@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from ast import Module
 import ast
 import re
 import sys
@@ -31,7 +32,7 @@ def get_used_names(tree, module_name):
     return used_names
 
 
-def transform_imports(tree, source_lines):
+def transform_imports(tree: Module, source_lines: list[str]):
     imports = get_imported_names(tree)
     simple_imports = defaultdict(list)
     for name, module, alias in imports:
@@ -90,7 +91,7 @@ def transform_imports(tree, source_lines):
     return (new_lines, True)
 
 
-def main():
+def main() -> None:
     if len(sys.argv) != 2:
         print("Usage: python script.py <python_file>", file=sys.stderr)
         sys.exit(1)

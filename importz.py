@@ -18,7 +18,7 @@ def is_python_file(path: Path) -> bool:
     return False
 
 
-def get_imports_from_file(file_path):
+def get_imports_from_file(file_path: Path):
     imports = set()
     try:
         with Path(file_path).open(encoding="utf-8") as f:
@@ -33,7 +33,7 @@ def get_imports_from_file(file_path):
     return imports
 
 
-def main():
+def main() -> None:
     cwd = Path()
     output_file = cwd / "importz.txt"
     all_imports = set()

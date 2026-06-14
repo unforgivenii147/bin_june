@@ -6,7 +6,7 @@ from pathlib import Path
 from dh import get_files, mpf3, runcmd
 
 
-def process_file(path: str | Path):
+def process_file(path: str | Path) -> tuple[bool, Path]:
     path = Path(path)
 
     if not path.exists() or not path.stat().st_size:
@@ -17,7 +17,7 @@ def process_file(path: str | Path):
     return (False, path)
 
 
-def main():
+def main() -> None:
     cwd = str(Path.cwd())
     args = sys.argv[1:]
     files = (

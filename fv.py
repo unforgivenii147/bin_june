@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 
-def main():
+def main() -> None:
     pydoc.pager(Path(sys.argv[1]).read_text(encoding="utf-8", errors="replace"))
 
 

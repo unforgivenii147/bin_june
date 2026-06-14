@@ -27,7 +27,7 @@ def list_installed_packages(site: Path):
     return pkgs
 
 
-def get_wheel_tags(dist_info: Path):
+def get_wheel_tags(dist_info: Path) -> list[str]:
     wheel_file = dist_info / "WHEEL"
     if not wheel_file.exists():
         return ["py3-none-any"]
@@ -69,7 +69,7 @@ def copy_scripts(pkg: str, dst: Path) -> None:
             shutil.copy2(script, dst / script.name)
 
 
-def build_wheel(pkg: str, version: str, tag: str, src_dir: Path, out_dir: Path):
+def build_wheel(pkg: str, version: str, tag: str, src_dir: Path, out_dir: Path) -> Path:
     wheel_name = f"{pkg}-{version}-{tag}.whl"
     wheel_path = out_dir / wheel_name
     with WheelFile(str(wheel_path), "w") as wf:

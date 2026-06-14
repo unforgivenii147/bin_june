@@ -3,7 +3,7 @@
 import subprocess
 
 
-def extract_subtitles(video_path):
+def extract_subtitles(video_path) -> None:
     """Extracts subtitle streams from a video file using ffmpeg.
     Args:
         video_path (str): The path to the input video file.

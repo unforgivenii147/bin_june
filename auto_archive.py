@@ -257,7 +257,7 @@ def process_file(src: Path, out_dir: Path | None = None) -> Path | None:
 # ---------------------------------------------------------------------------
 
 
-def _worker(args):
+def _worker(args) -> Path | None:
     src, out_dir = args
     try:
         return process_file(src, out_dir)
@@ -295,7 +295,7 @@ def collect_files(root: Path) -> list[Path]:
 # ---------------------------------------------------------------------------
 
 
-def main():
+def main() -> None:
     target = Path(sys.argv[1]) if len(sys.argv) > 1 else Path.cwd()
 
     if not target.exists():

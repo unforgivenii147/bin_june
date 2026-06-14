@@ -55,7 +55,7 @@ def parse_pip_check(output):
     return missing_deps
 
 
-def format_deptree(missing_deps):
+def format_deptree(missing_deps) -> None:
     if not missing_deps:
         print("No missing dependencies found.")
         return
@@ -66,7 +66,7 @@ def format_deptree(missing_deps):
         print(f"  - {pkg} --> {requirers_str}")
 
 
-def main():
+def main() -> None:
     output = run_pip_check()
     if not output:
         print("No output from `pip check`. Are you in a virtual environment?")

@@ -25,20 +25,20 @@ def from_ms(ms: int) -> str:
 
 def shift_content(text: str, shift_ms: int) -> str:
 
-    def repl(m):
+    def repl(m) -> str:
         a, b = m.groups()
         return f"{from_ms(to_ms(a) + shift_ms)} --> {from_ms(to_ms(b) + shift_ms)}"
 
     return TIMESTAMP_RE.sub(repl, text)
 
 
-def process_file(path: Path, shift_ms: int):
+def process_file(path: Path, shift_ms: int) -> None:
     path = Path(path)
     path.write_text(shift_content(path.read_text(encoding="utf-8"), shift_ms), encoding="utf-8")
     print(f"✔ {path}")
 
 
-def main():
+def main() -> None:
     raw = sys.argv[1:]
     force_shift = None
     if raw and raw[0] in {"+", "-"}:

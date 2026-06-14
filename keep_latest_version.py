@@ -160,7 +160,7 @@ def get_latest_version(versions: List[Tuple[str, Path]]) -> Tuple[str, Path]:
     return latest
 
 
-def keep_latest_versions(packages: Dict[str, List[Tuple[str, Path]]], dry_run: bool = False):
+def keep_latest_versions(packages: Dict[str, List[Tuple[str, Path]]], dry_run: bool = False) -> tuple[int, int]:
     total_deleted = 0
     total_files_kept = 0
     for pkg_name, versions in packages.items():
@@ -187,7 +187,7 @@ def keep_latest_versions(packages: Dict[str, List[Tuple[str, Path]]], dry_run: b
     return total_deleted, total_files_kept
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Detect and keep only the latest version of package files.",
         formatter_class=argparse.RawDescriptionHelpFormatter,

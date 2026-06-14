@@ -5,7 +5,7 @@ from pathlib import Path
 from dh import get_pyfiles
 
 
-def run_script(path):
+def run_script(path: Path) -> None:
     print(f"\n{'=' * 35}")
     print(f"Running: {path}")
     try:
@@ -15,7 +15,7 @@ def run_script(path):
         raise
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     files = get_pyfiles(cwd)
     if not files:

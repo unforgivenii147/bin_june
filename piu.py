@@ -10,18 +10,18 @@ WHL_DIR = Path("/sdcard/whl")
 WILDCARD = "-w" in sys.argv
 
 
-def install(packages: list[str]):
+def install(packages: list[str]) -> int:
     args = ["install", "--no-compile", "--no-deps", *packages]
     return pip_main(args)
 
 
-def pkg_name(txt):
+def pkg_name(txt: str):
     indx = txt.index("-")
     slash = txt.rfind("/")
     return txt[slash + 1 : indx]
 
 
-def install_by_wildcard(pkg):
+def install_by_wildcard(pkg: str) -> None:
     whl = {pkg_name(str(p)): str(p) for p in WHL_DIR.glob("*.whl")}
     wheel_files = []
     for k, v in whl.items():
@@ -41,7 +41,7 @@ def install_by_wildcard(pkg):
         return
 
 
-def install_whl(pkg):
+def install_whl(pkg: str) -> None:
     whl = {pkg_name(str(p)): str(p) for p in WHL_DIR.glob("*.whl")}
     wheel_files = []
     for k, v in whl.items():

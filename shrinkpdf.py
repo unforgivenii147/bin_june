@@ -6,7 +6,7 @@ from pathlib import Path
 from dh import fsz, runcmd
 
 
-def process_file(path):
+def process_file(path: Path) -> None:
     path = Path(path)
     temp_gs = path.with_name(f"temp_gs_{path.name}")
     size_before = path.stat().st_size
@@ -44,7 +44,7 @@ def process_file(path):
                 temp_gs.unlink(missing_ok=True)
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
     if args:

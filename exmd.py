@@ -9,7 +9,7 @@ if not OUTPUT_DIR.exists():
     OUTPUT_DIR.mkdir(exist_ok=True)
 
 
-def extract_code_snippets_with_details(markdown_content):
+def extract_code_snippets_with_details(markdown_content: str):
     snippets_data = []
     lines = markdown_content.splitlines()
     in_code_block = False
@@ -46,7 +46,7 @@ def extract_code_snippets_with_details(markdown_content):
     return snippets_data
 
 
-def get_extension_from_language(language):
+def get_extension_from_language(language) -> str:
     extensions = {
         "sh": ".sh",
         "bash": ".sh",
@@ -69,7 +69,7 @@ def get_extension_from_language(language):
     return extensions.get(language.lower(), ".txt")
 
 
-def process_markdown_files(directory="."):
+def process_markdown_files(directory: str = ".") -> None:
     for root, _, files in os.walk(directory):
         for file in files:
             if file.endswith((".md", ".markdown", ".metadata", "METADATA", "PKGINFO", "PKG-INFO")):

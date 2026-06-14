@@ -3,7 +3,7 @@
 import os
 
 
-def count_lines_of_code(file_path, lang):
+def count_lines_of_code(file_path: str, lang) -> tuple[int, int, int]:
     if ".git" in str(file_path):
         return (0, 0, 0)
     if is_binary(file_path):
@@ -23,7 +23,7 @@ def count_lines_of_code(file_path, lang):
     return (code_lines, comment_lines, blank_lines)
 
 
-def scan_directory(directory="."):
+def scan_directory(directory: str = "."):
     stats = {
         "total": {"code": 0, "comments": 0, "blank": 0},
         "languages": {lang: {"code": 0, "comments": 0, "blank": 0} for lang in LANG_EXTENSIONS},

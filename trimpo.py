@@ -10,7 +10,7 @@ from loguru import logger
 logger.add("/sdcard/allimport.log", diagnose=True)
 
 
-def tryimport(package):
+def tryimport(package: str) -> bool | str:
     try:
         import_module(package)
         print(f"✓ {package}")
@@ -20,7 +20,7 @@ def tryimport(package):
         return traceback.format_exc()
 
 
-def tryallimport():
+def tryallimport() -> None:
     for pkg in distributions():
         pkn = pkg.metadata["name"]
         try:

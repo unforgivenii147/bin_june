@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from git import Repo
 
 
-def delete_commits_older_than_week(repo_path=".", branch="master"):
+def delete_commits_older_than_week(repo_path: str = ".", branch: str = "master") -> bool:
     """
     Fetch from remote, then delete local commits older than one week.
     Args:
@@ -69,7 +69,7 @@ def delete_commits_older_than_week(repo_path=".", branch="master"):
         return False
 
 
-def delete_commits_interactive(repo_path=".", branch="master", days_old=7):
+def delete_commits_interactive(repo_path: str = ".", branch: str = "master", days_old: int = 7) -> bool:
     """
     Interactive version with confirmation before deletion.
     Args:
@@ -134,7 +134,7 @@ def delete_commits_interactive(repo_path=".", branch="master", days_old=7):
         return False
 
 
-def delete_commits_with_rebase(repo_path=".", branch="master", days_old=7):
+def delete_commits_with_rebase(repo_path: str = ".", branch: str = "master", days_old: int = 7) -> bool | None:
     """
     Alternative method using interactive rebase to remove old commits.
     More precise but more complex.

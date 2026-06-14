@@ -14,7 +14,7 @@ def human_size(num_bytes: int) -> str:
     return f"{num_bytes:.2f} TB"
 
 
-def process_file(input_path):
+def process_file(input_path: Path) -> None:
     path = Path(path)
     if not input_path.exists():
         print("Input file not found.", file=sys.stderr)
@@ -37,7 +37,7 @@ def process_file(input_path):
             temp_qpdf.unlink(missing_ok=True)
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
     if args:

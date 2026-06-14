@@ -1,5 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from numpy import ndarray
+from numpy import generic
+from numpy import dtype
 import os
 import shutil
 from pathlib import Path
@@ -64,7 +67,7 @@ def compute_similarity(feat1, feat2):
     return np.dot(feat1, feat2) / (norm1 * norm2)
 
 
-def simple_clustering(features, paths, n_clusters=10, threshold=0.7):
+def simple_clustering(features: ndarray, paths, n_clusters=10, threshold=0.7) -> ndarray[tuple[int]] | ndarray:
     n_samples = len(features)
     if n_samples == 0:
         return np.array([])
@@ -100,7 +103,7 @@ def simple_clustering(features, paths, n_clusters=10, threshold=0.7):
     return labels
 
 
-def organize_photos(source_dir=".", n_clusters=10, move=False, threshold=0.7):
+def organize_photos(source_dir: str = ".", n_clusters: int = 10, move: bool = False, threshold: float = 0.7) -> None:
     print(f"Scanning directory: {source_dir}")
     image_paths = get_all_images(source_dir)
     print(f"Found {len(image_paths)} images")

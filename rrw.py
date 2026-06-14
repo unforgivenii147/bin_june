@@ -11,7 +11,7 @@ from dh import get_files, is_binary
 BACKUP = False
 
 
-def process_file(fn: Path):
+def process_file(fn: Path) -> None:
     path = Path(path)
     if is_binary(fn):
         return

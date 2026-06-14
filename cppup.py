@@ -27,7 +27,7 @@ FILE_EXTENSIONS = {
 }
 
 
-def format_file(file_path):
+def format_file(file_path) -> bool:
     pth = Path(file_path)
     print(f"formating {pth.stem}")
     try:

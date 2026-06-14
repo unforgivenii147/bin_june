@@ -7,7 +7,7 @@ import shutil
 from pathlib import Path
 
 
-def get_all_files_in_root_only(root_path):
+def get_all_files_in_root_only(root_path: Path):
     files_info = []
     try:
         for path in root_path.rglob("*"):
@@ -22,7 +22,7 @@ def get_all_files_in_root_only(root_path):
     return files_info
 
 
-def format_size1(size_bytes):
+def format_size1(size_bytes) -> str:
     if size_bytes == 0:
         return "0B"
     units = ["B", "KB", "MB", "GB", "TB"]
@@ -59,7 +59,7 @@ def analyze_size_distribution(files_info):
     }
 
 
-def organize_files_in_root(root_path=".", target_folders=4, max_get_size_mb=None):
+def organize_files_in_root(root_path: str = ".", target_folders: int = 4, max_get_size_mb=None) -> None:
     print("=" * 70)
     print("File Organization - Direct to Root Path (No Subdirectories)")
     print("=" * 70)
@@ -161,7 +161,7 @@ def organize_files_in_root(root_path=".", target_folders=4, max_get_size_mb=None
     print("=" * 70)
 
 
-def main():
+def main() -> None:
     organize_files_in_root(root_path=ROOT_PATH)
 
 

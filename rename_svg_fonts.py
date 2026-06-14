@@ -12,7 +12,7 @@ def extract_font_id(svg_text):
     return None
 
 
-def rename_svg_font(file_path_obj):
+def rename_svg_font(file_path_obj: Path) -> None:
     if not file_path_obj.is_file():
         print(f"Skipping: Not a file - {file_path_obj.name}")
         return

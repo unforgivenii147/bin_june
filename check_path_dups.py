@@ -23,7 +23,7 @@ def get_executables_in_dir(d: Path) -> list[Path]:
         return []
 
 
-def main():
+def main() -> None:
     dirs = [d for d in get_path_dirs() if d.is_dir()]
     executables: defaultdict[str, list[tuple[Path, str]]] = defaultdict(list)
     for d in dirs:

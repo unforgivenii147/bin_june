@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
+from github.Repository import Repository
 import os
 import re
 import subprocess
@@ -30,7 +31,7 @@ def parse_repo_url(txt: str) -> tuple[str, str]:
     raise ValueError(f"Invalid repository format: {txt}")
 
 
-def get_repo(repo_url: str, github_client: Github):
+def get_repo(repo_url: str, github_client: Github) -> Repository:
     try:
         owner, repo_name = parse_repo_url(repo_url)
         print(f"[INFO] Fetching repository: {owner}/{repo_name}")
@@ -44,7 +45,7 @@ def get_repo(repo_url: str, github_client: Github):
         raise Exception(f"GitHub API error: {e.status} {e.data}")
 
 
-def get_repo_size(repo) -> float:
+def get_repo_size(repo: Repository) -> float:
     try:
         size_kb = repo.size
         size_mb = size_kb / 1024
@@ -55,7 +56,7 @@ def get_repo_size(repo) -> float:
         return 0
 
 
-def get_default_branch(repo) -> str:
+def get_default_branch(repo: Repository) -> str:
     try:
         default_branch = repo.default_branch
         print(f"[INFO] Default branch: {default_branch}")
@@ -65,7 +66,7 @@ def get_default_branch(repo) -> str:
         return "main"
 
 
-def build_clone_url(repo) -> str:
+def build_clone_url(repo: Repository) -> str:
     return repo.clone_url
 
 
@@ -116,7 +117,7 @@ def confirm_large_repo(size_mb: float) -> bool:
     return True
 
 
-def main():
+def main() -> None:
     if len(sys.argv) < 2:
         print("[ERROR] Usage: script.py <repository_url> [--token YOUR_GITHUB_TOKEN]")
         print("Example: script.py owner/repo")

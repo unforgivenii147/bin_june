@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 
-def read_man_file(filename):
+def read_man_file(filename: str) -> str:
     try:
         with Path(filename).open(encoding="utf-8", errors="ignore") as f:
             return f.read()
@@ -14,7 +14,7 @@ def read_man_file(filename):
         sys.exit(f"Error: file {filename} not found")
 
 
-def man_to_markdown(content):
+def man_to_markdown(content: str) -> str:
     lines = content.splitlines()
     md_lines = []
     in_code_block = False
@@ -111,7 +111,7 @@ def man_to_markdown(content):
     return "\n".join(md_lines)
 
 
-def main():
+def main() -> None:
     if len(sys.argv) != 2:
         print("Usage: python man2md.py <manfile>")
         sys.exit(1)

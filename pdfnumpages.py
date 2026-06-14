@@ -8,7 +8,7 @@ import pdfplumber
 from fastwalk import walk_files
 
 
-def process_file(fp):
+def process_file(fp) -> None:
     path = Path(path)
     fp = Path(fp)
     if fp.exists() and (not fp.is_symlink()):
@@ -27,7 +27,7 @@ def process_file(fp):
     return
 
 
-def main():
+def main() -> None:
     files = []
     for pth in walk_files("."):
         path = Path(pth)

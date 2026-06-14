@@ -4,7 +4,7 @@ from pathlib import Path
 from sys import argv
 
 
-def remove_spaces_from_file(fname) -> None:
+def remove_spaces_from_file(fname: str) -> None:
     try:
         with Path(fname).open(encoding="utf-8") as file:
             lines = file.readlines()

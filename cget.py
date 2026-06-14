@@ -8,7 +8,7 @@ from pathlib import Path
 import pycurl
 
 
-def download_urls_from_file(filepath="urls.txt", output_dir="downloads"):
+def download_urls_from_file(filepath: str = "urls.txt", output_dir: str = "downloads") -> None:
     Path(output_dir).mkdir(exist_ok=True, parents=True)
     urls = []
     try:

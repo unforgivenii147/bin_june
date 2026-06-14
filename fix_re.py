@@ -30,7 +30,7 @@ SKIP_TYPES = {
 }
 
 
-def make_raw_and_fix(token_str):
+def make_raw_and_fix(token_str: str):
     prefix_end = 0
     for ch in token_str:
         if ch in ('"', "'"):
@@ -54,7 +54,7 @@ def make_raw_and_fix(token_str):
     return new_prefix + opening + new_content + closing
 
 
-def process_file(path):
+def process_file(path) -> bool | None:
     path = Path(path)
     code = path.read_text(encoding="utf8")
     bakpath = path.with_name(path.name + ".bak")

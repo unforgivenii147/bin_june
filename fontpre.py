@@ -26,7 +26,7 @@ def find_fonts(root=None):
     return sorted(found)
 
 
-def create_font_face(path, font_id):
+def create_font_face(path, font_id: str) -> str:
     try:
         rel_path = path.relative_to(cwd)
         url_path = quote(str(rel_path.as_posix()))
@@ -36,7 +36,7 @@ def create_font_face(path, font_id):
         return f"@font-face {{\n  font-family: 'font_{font_id}';\n  src: url('file:///{url_path}');\n  font-display: swap;\n}}"
 
 
-def generate_preview(fonts):
+def generate_preview(fonts) -> str:
     """Generate complete HTML with font previews."""
     styles = []
     sections = []
@@ -58,7 +58,7 @@ def generate_preview(fonts):
     return html_content
 
 
-def main():
+def main() -> None:
     """Main execution function."""
     fonts = find_fonts()
     if not fonts:

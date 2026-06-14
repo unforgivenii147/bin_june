@@ -13,7 +13,7 @@ video = sys.argv[1]
 txtfile = Path(video).with_suffix(".txt")
 
 
-def ocr_worker(q_in: Queue, q_out: Queue):
+def ocr_worker(q_in: Queue, q_out: Queue) -> None:
     while True:
         item = q_in.get()
         if item is None:
@@ -31,7 +31,7 @@ def ocr_worker(q_in: Queue, q_out: Queue):
         q_out.put((frame_id, text))
 
 
-def main():
+def main() -> None:
     cap = cv2.VideoCapture(video)
     q_in = Queue(maxsize=cpu_count())
     q_out = Queue()

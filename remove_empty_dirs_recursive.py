@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 
 
-def main():
+def main() -> None:
     count = 0
     for dirpath, dirnames, filenames in os.walk(Path.cwd(), topdown=False):
         if not dirnames and (not filenames):

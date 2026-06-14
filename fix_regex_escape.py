@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from ast import Call
 import ast
 from pathlib import Path
 
@@ -9,7 +10,7 @@ TARGET_FUNCS = {"compile", "search", "match", "fullmatch", "findall", "finditer"
 
 
 class RegexFixer(ast.NodeTransformer):
-    def visit_Call(self, node: ast.Call):
+    def visit_Call(self, node: ast.Call) -> Call:
         self.generic_visit(node)
         if isinstance(node.func, ast.Attribute) and (
             isinstance(node.func.value, ast.Name)
@@ -29,7 +30,7 @@ class RegexFixer(ast.NodeTransformer):
         return node
 
 
-def fix_file(path: Path):
+def fix_file(path: Path) -> bool:
     source = path.read_text(encoding="utf-8")
     try:
         tree = ast.parse(source)
@@ -47,7 +48,7 @@ def fix_file(path: Path):
     return False
 
 
-def main():
+def main() -> None:
     cwd = Path()
     files = get_pyfiles(cwd)
     changed = 0

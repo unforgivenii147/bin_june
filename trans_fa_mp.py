@@ -12,7 +12,7 @@ OUTPUT_FILE = "dic_mp.json"
 MAX_WORKERS = 16
 
 
-def translate_word(word):
+def translate_word(word) -> str | None:
     for attempt in range(3):
         try:
             return GoogleTranslator(source="auto", target="en").translate(word)
@@ -22,7 +22,7 @@ def translate_word(word):
     return None
 
 
-def main():
+def main() -> None:
     with Path(INPUT_FILE).open(encoding="utf-8") as f:
         words = [w.strip() for w in f if w.strip()]
     print(f"[INFO] Loaded {len(words)} Persian words")

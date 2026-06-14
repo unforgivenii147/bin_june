@@ -11,7 +11,7 @@ all_files = 0
 c = 0
 
 
-def process_file(path):
+def process_file(path) -> None:
     path = Path(path)
     global all_files
     global c
@@ -25,7 +25,7 @@ def process_file(path):
     return
 
 
-def main():
+def main() -> None:
     args = sys.argv[1:]
     global all_files
     files = [Path(arg) for arg in args] if args else get_files(cwd)

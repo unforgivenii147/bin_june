@@ -6,7 +6,7 @@ from pathlib import Path
 from dh import get_nobinary, mpf3, runcmd
 
 
-def has_shell_shebang(path):
+def has_shell_shebang(path: Path) -> bool:
     try:
         with Path(path).open("rb") as f:
             first = f.readline(256).decode("utf-8", errors="ignore").strip()
@@ -17,7 +17,7 @@ def has_shell_shebang(path):
     return "bash" in first or "sh" in first
 
 
-def process_file(path):
+def process_file(path) -> tuple[bool, Path]:
     path = Path(path)
     print(f"Formatting:  {path.name}")
     try:
@@ -31,7 +31,7 @@ def process_file(path):
     return (True, path)
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     files = [p for p in get_nobinary(cwd) if not p.suffix and has_shell_shebang(p) or p.suffix == ".sh"]
     results = mpf3(process_file, files)

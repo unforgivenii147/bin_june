@@ -12,7 +12,7 @@ IF_BLOCK_REGEX = re.compile(
 )
 
 
-def remove_conditional_exit_blocks(file_path: Path):
+def remove_conditional_exit_blocks(file_path: Path) -> None:
     try:
         original_content = file_path.read_text(encoding="utf-8")
         modified_content = original_content
@@ -28,7 +28,7 @@ def remove_conditional_exit_blocks(file_path: Path):
         print(f"Error processing {file_path}: {e}", file=sys.stderr)
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     files_to_process = get_nobinary(cwd)
     for item_path in files_to_process:

@@ -39,7 +39,7 @@ def rename_package_dirs(cwd: Path, dry_run: bool = False) -> None:
             pkg_dir.rename(new_dir)
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     dry_run = "--dry-run" in sys.argv
     rename_package_dirs(cwd, dry_run=dry_run)

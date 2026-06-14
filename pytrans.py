@@ -20,7 +20,7 @@ TIMEOUT_PER_FILE = 60  # Timeout in seconds for each file
 SUPPORTED_EXTENSIONS = {".txt", ".md", ".rst", ".text", ".log"}
 
 
-def get_output_filename(input_path):
+def get_output_filename(input_path: Path):
     """Generate output filename with .en suffix before extension"""
     if input_path.is_file():
         return input_path.parent / f"{input_path.stem}.en{input_path.suffix}"
@@ -28,7 +28,7 @@ def get_output_filename(input_path):
         return input_path
 
 
-def is_english(text, threshold=0.9):
+def is_english(text: str, threshold=0.9) -> bool:
     """Check if text is already English with high confidence"""
     try:
         if len(text.strip()) < 20:  # Too short to detect reliably
@@ -52,7 +52,7 @@ def is_english(text, threshold=0.9):
         return False
 
 
-def load_file(input_file):
+def load_file(input_file) -> str:
     """Load file with multiple encoding attempts"""
     encodings = ["utf-8", "latin-1", "cp1252", "iso-8859-1"]
     for encoding in encodings:
@@ -65,7 +65,7 @@ def load_file(input_file):
     raise OSError(msg)
 
 
-def save_file(output_file, content):
+def save_file(output_file, content: str) -> None:
     """Save content to file with UTF-8 encoding"""
     Path(output_file).write_text(content, encoding="utf-8")
 
@@ -83,7 +83,7 @@ def find_chunk_boundary(text, max_chars):
     return max_chars
 
 
-def chunk_text(text, max_chars):
+def chunk_text(text: str, max_chars: int):
     """Split text into chunks at appropriate boundaries"""
     chunks = []
     pos = 0
@@ -98,10 +98,10 @@ def chunk_text(text, max_chars):
     return chunks
 
 
-def translate_chunk(text, source_lang="auto", timeout=10):
+def translate_chunk(text: str, source_lang="auto", timeout=10) -> str:
     """Translate a single chunk with timeout"""
 
-    def _translate():
+    def _translate() -> str:
         translator = GoogleTranslator(source=source_lang, target="en")
         return translator.translate(text)
 
@@ -114,7 +114,7 @@ def translate_chunk(text, source_lang="auto", timeout=10):
             raise TimeoutError(f"Translation timeout after {timeout} seconds")
 
 
-def translate_file(input_file, source_lang="auto", timeout_per_chunk=10):
+def translate_file(input_file, source_lang: str = "auto", timeout_per_chunk: int = 10) -> str | None:
     """Translate a single file with English detection"""
     print(f"[INFO] Reading file: {input_file}")
     content = load_file(input_file)
@@ -173,10 +173,10 @@ def translate_file(input_file, source_lang="auto", timeout_per_chunk=10):
         return "".join(translated_chunks)
 
 
-def process_single_file(input_file, source_lang, timeout):
+def process_single_file(input_file: Path, source_lang: str, timeout: int) -> bool | None:
     """Process a single file with timeout"""
 
-    def _process():
+    def _process() -> str | None:
         return translate_file(input_file, source_lang, timeout // 10)  # Divide timeout for chunks
 
     with ThreadPoolExecutor(max_workers=1) as executor:
@@ -199,7 +199,7 @@ def process_single_file(input_file, source_lang, timeout):
             return False
 
 
-def process_folder(folder_path, source_lang, timeout, pattern="*"):
+def process_folder(folder_path: Path, source_lang: str, timeout: int, pattern="*") -> None:
     """Process all text files in a folder"""
     folder = Path(folder_path)
     if not folder.is_dir():
@@ -247,7 +247,7 @@ def process_folder(folder_path, source_lang, timeout, pattern="*"):
     print(f"Failed: {results['failed']}")
 
 
-def main():
+def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: python translate_file.py <input_file_or_folder> [source_language] [--timeout SECONDS]")
         print("\nExamples:")

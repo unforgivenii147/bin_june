@@ -39,7 +39,7 @@ SHEBANG_LANGUAGES = {
 }
 
 
-def get_language_from_shebang(file_path):
+def get_language_from_shebang(file_path: str) -> str | None:
     if is_binary(file_path):
         print(f"{file_path} is binary")
         return None
@@ -57,7 +57,7 @@ def get_language_from_shebang(file_path):
     return None
 
 
-def count_lines_of_code(file_path, lang):
+def count_lines_of_code(file_path: str, lang: str) -> tuple[int, int, int]:
     if ".git" in str(file_path):
         return (0, 0, 0)
     if is_binary(file_path):
@@ -77,7 +77,7 @@ def count_lines_of_code(file_path, lang):
     return (code_lines, comment_lines, blank_lines)
 
 
-def scan_directory(directory="."):
+def scan_directory(directory: str = ".") -> dict[str, dict[str, dict[str, int]] | dict[str, int]]:
     stats = {
         "total": {"code": 0, "comments": 0, "blank": 0},
         "languages": {lang: {"code": 0, "comments": 0, "blank": 0} for lang in LANG_EXTENSIONS},
@@ -110,7 +110,7 @@ def scan_directory(directory="."):
     return stats
 
 
-def display_stats(stats) -> None:
+def display_stats(stats: dict[str, dict[str, dict[str, int]] | dict[str, int]]) -> None:
     print(f"Total lines of code: {stats['total']['code']}")
     print(f"Total comment lines: {stats['total']['comments']}")
     print(f"Total blank lines: {stats['total']['blank']}\n")

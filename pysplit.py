@@ -11,7 +11,7 @@ def is_binary_file(path: Path, sample_size: int = 8192) -> bool:
     return b"\x00" in chunk
 
 
-def split_file_into_parts(file_path: Path, n: int):
+def split_file_into_parts(file_path: Path, n: int) -> None:
     if n <= 0:
         raise ValueError("n must be a positive integer")
     if is_binary_file(file_path):
@@ -38,7 +38,7 @@ def split_file_into_parts(file_path: Path, n: int):
         start = end
 
 
-def main():
+def main() -> None:
     if len(sys.argv) != 3:
         print("Usage: python script.py <n> <file_path>")
         sys.exit(1)

@@ -6,7 +6,7 @@ from pathlib import Path
 from PIL import Image
 
 
-def analyze_image(path, dark_threshold=50, ratio_threshold=0.6):
+def analyze_image(path: Path, dark_threshold=50, ratio_threshold=0.6) -> tuple[str, float]:
     with Image.open(path) as img:
         img = img.convert("RGB")
         pixels = img.getdata()

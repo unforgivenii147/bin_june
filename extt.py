@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from tree_sitter import Tree
 from collections import defaultdict
 from pathlib import Path
 
@@ -13,7 +14,7 @@ OUT_DIR.mkdir(exist_ok=True)
 VALID = {"function_definition", "class_definition"}
 
 
-def get_node_text(src: bytes, node):
+def get_node_text(src: bytes, node) -> str:
     return src[node.start_byte : node.end_byte].decode()
 
 
@@ -24,11 +25,11 @@ def get_node_name(node):
     return None
 
 
-def extract_functions_and_classes(src: bytes, tree):
+def extract_functions_and_classes(src: bytes, tree: Tree):
     root = tree.root_node
     definitions = []
 
-    def traverse(node):
+    def traverse(node) -> None:
         if node.type in VALID:
             name = get_node_name(node)
             node_text = get_node_text(src, node)

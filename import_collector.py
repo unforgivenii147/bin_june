@@ -27,7 +27,7 @@ PACKAGE_MAPPING = {
 }
 
 
-def get_imports_from_file(file_path):
+def get_imports_from_file(file_path: Path):
     imports = set()
     try:
         with Path(file_path).open(encoding="utf-8") as f:
@@ -42,7 +42,7 @@ def get_imports_from_file(file_path):
     return imports
 
 
-def check_status(module_name):
+def check_status(module_name) -> bool:
     try:
         importlib.metadata.distribution(module_name)
         return True
@@ -51,7 +51,7 @@ def check_status(module_name):
         return spec is not None
 
 
-def main():
+def main() -> None:
     cwd = Path()
     output_file = cwd / "importz.txt"
     pip_script = cwd / "install_deps.sh"

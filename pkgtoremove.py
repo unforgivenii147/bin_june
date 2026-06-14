@@ -57,7 +57,7 @@ def suggest_unused_packages(installed_packages, used_packages, top_n=200):
     return unused_packages[:top_n]
 
 
-def main():
+def main() -> None:
     installed_packages = get_installed_packages()
     history = get_bash_history()
     used_packages = get_used_packages(history, installed_packages)

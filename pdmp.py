@@ -55,7 +55,7 @@ def delete_empty_dirs_iterative(root: Path, dry_run: bool = False, verbose: bool
     return (removed_count, removed_dirs_list)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Find and remove empty directories, excluding specified ones.")
     parser.add_argument(
         "path",

@@ -26,7 +26,7 @@ def attempt_password(args):
         return None
 
 
-def crack_zip_password_multiprocess(zip_file_path, password_list_path, extract_dir="extracted_files"):
+def crack_zip_password_multiprocess(zip_file_path: Path, password_list_path: Path, extract_dir="extracted_files"):
     if not Path(zip_file_path).exists():
         return None
     if not Path(password_list_path).exists():

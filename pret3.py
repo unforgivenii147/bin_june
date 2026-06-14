@@ -19,7 +19,7 @@ def beautify_file(file_path) -> None:
     Path(file_path).write_text(beautified_content, encoding="utf-8")
 
 
-def beautify_directory(directory) -> None:
+def beautify_directory(directory: str) -> None:
     for root, _dirs, files in os.walk(directory):
         for file in files:
             file_path = os.path.join(root, file)

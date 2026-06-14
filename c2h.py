@@ -3,7 +3,7 @@
 from pathlib import Path
 
 
-def main():
+def main() -> None:
     with Path("/sdcard/colors").open(encoding="utf-8") as file:
         colors = file.readlines()
     cleaned = []

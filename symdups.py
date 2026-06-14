@@ -12,7 +12,7 @@ BACKUP_FILE = ".symlink_backup.json"
 MIN_FILE_SIZE = 8
 
 
-def calculate_file_hash(filepath, chunk_size=8192):
+def calculate_file_hash(filepath, chunk_size=8192) -> str | None:
     if not filepath.is_file():
         return None
     hasher = xxhash.xxh64()
@@ -26,7 +26,7 @@ def calculate_file_hash(filepath, chunk_size=8192):
         return None
 
 
-def find_duplicates(directory="."):
+def find_duplicates(directory: str = "."):
     print(f"[INFO] Scanning directory: {Path(directory).resolve()}")
     size_map = defaultdict(list)
     file_count = 0
@@ -57,7 +57,7 @@ def choose_keeper(files):
     return min(files, key=lambda f: (len(str(f)), f))
 
 
-def create_symlinks(duplicates, dry_run=False):
+def create_symlinks(duplicates, dry_run=False) -> int:
     backup_data = {"timestamp": datetime.now(tz=UTC).isoformat(), "operations": []}
     total_saved = 0
     symlink_count = 0
@@ -98,7 +98,7 @@ def create_symlinks(duplicates, dry_run=False):
     return symlink_count
 
 
-def reverse_symlinks(backup_file=BACKUP_FILE):
+def reverse_symlinks(backup_file: str = BACKUP_FILE) -> bool:
     if not Path(backup_file).exists():
         print(f"[ERROR] Backup file {backup_file} not found!")
         return False
@@ -126,7 +126,7 @@ def reverse_symlinks(backup_file=BACKUP_FILE):
     return True
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Find duplicate files and replace with symlinks (reversible)")
     parser.add_argument("directory", nargs="?", default=".", help="Directory to scan (default: current directory)")
     parser.add_argument("--dry-run", action="store_true", help="Show what would be done without making changes")

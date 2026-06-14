@@ -51,7 +51,7 @@ class GitHubRepoManager:
         returncode, stdout, _ = self._run_command(["git", "config", "--get", "remote.origin.url"], capture_output=True)
         return stdout if returncode == 0 and stdout else None
 
-    def _init_local_repo(self):
+    def _init_local_repo(self) -> None:
         print(f"\n📦 Initializing local git repository in {self.cwd}...")
         returncode, _stdout, stderr = self._run_command(["git", "init"], capture_output=True)
         if returncode != 0 and "Reinitialized" not in stderr and ("Initialized" not in stderr):
@@ -61,7 +61,7 @@ class GitHubRepoManager:
         self._run_command(["git", "config", "user.email", self.git_email], capture_output=True)
         print("✓ Local repository initialized")
 
-    def _create_github_repo(self):
+    def _create_github_repo(self) -> bool:
         print(f"\n🌐 Creating repository on GitHub:  {self.repo_name}...")
         if self._repo_exists_on_github():
             print(f"✓ Repository {self.repo_name} already exists on GitHub")
@@ -77,7 +77,7 @@ class GitHubRepoManager:
         print("✓ Repository created on GitHub")
         return True
 
-    def _stage_all_changes(self):
+    def _stage_all_changes(self) -> None:
         print("\n📝 Staging all changes...")
         returncode, _, stderr = self._run_command(["git", "add", "."], capture_output=True)
         if returncode != 0:
@@ -85,7 +85,7 @@ class GitHubRepoManager:
             sys.exit(1)
         print("✓ Changes staged")
 
-    def _ensure_content(self):
+    def _ensure_content(self) -> bool:
         files = list(self.cwd.glob("*"))
         hidden_files = list(self.cwd.glob(".*"))
         files = [f for f in files if f.name != ".git"]
@@ -102,7 +102,7 @@ class GitHubRepoManager:
                 return True
         return has_content
 
-    def _commit_changes(self, message: str | None = None):
+    def _commit_changes(self, message: str | None = None) -> bool:
         if not message:
             message = self._generate_commit_message()
         print(f"\n💾 Committing changes with message: '{message}'")
@@ -120,7 +120,7 @@ class GitHubRepoManager:
         now = datetime.now()
         return now.strftime("Auto-commit: %Y-%m-%d %H:%M:%S")
 
-    def _add_remote(self):
+    def _add_remote(self) -> None:
         print(f"\n🔗 Adding remote:  {self.repo_url}")
         returncode, current_url, _ = self._run_command(["git", "remote", "get-url", "origin"], capture_output=True)
         if returncode == 0 and current_url:
@@ -138,7 +138,7 @@ class GitHubRepoManager:
             sys.exit(1)
         print("✓ Remote added")
 
-    def _push_to_github(self, branch: str = "main"):
+    def _push_to_github(self, branch: str = "main") -> None:
         print(f"\n🚀 Pushing to GitHub ({branch} branch)...")
         returncode, stdout, stderr = self._run_command(["git", "push", "-u", "origin", branch], capture_output=True)
         if returncode != 0:
@@ -153,7 +153,7 @@ class GitHubRepoManager:
                 print(f"Warning: Push encountered an issue: {stderr}")
         print("✓ Successfully pushed to GitHub")
 
-    def _rename_branch_to_main(self):
+    def _rename_branch_to_main(self) -> None:
         returncode, current_branch, _ = self._run_command(
             ["git", "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True
         )
@@ -190,7 +190,7 @@ class GitHubRepoManager:
             else:
                 print("Invalid choice. Please select 1, 2, or 3.")
 
-    def run(self):
+    def run(self) -> None:
         print("=" * 60)
         print("GitHub Repository Manager (with gh CLI)")
         print("=" * 60)
@@ -233,7 +233,7 @@ class GitHubRepoManager:
             sys.exit(1)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Create a GitHub repository using gh CLI and auto-commit with current date/time"
     )

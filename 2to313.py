@@ -21,7 +21,7 @@ def collect_fixers():
     return fixer_names
 
 
-def refactor_file(filepath: Path):
+def refactor_file(filepath: Path) -> None:
     options = {"print_function": True}
     tool = refactor.RefactoringTool(fixers, options)
     try:
@@ -37,7 +37,7 @@ def refactor_file(filepath: Path):
         print(f"  ERROR {filepath}: {exc}", file=sys.stderr)
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     files = get_pyfiles(cwd)
 

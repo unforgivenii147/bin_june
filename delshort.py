@@ -9,7 +9,7 @@ SIZE_THRESHOLD = 100
 LINE_THRESHOLD = 3
 
 
-def process_file(fp) -> None:
+def process_file(fp: Path) -> None:
     path = Path(path)
     if not fp.exists():
         return

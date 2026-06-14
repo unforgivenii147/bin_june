@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from typing import Self
 import argparse
 import os
 import re
@@ -16,7 +17,7 @@ except ImportError:
     TQDM_AVAILABLE = False
 
     class tqdm:
-        def __init__(self, total=None, unit="B", unit_scale=True, desc=None, leave=True):
+        def __init__(self, total=None, unit: str = "B", unit_scale: bool = True, desc=None, leave: bool = True) -> None:
             self.total = total
             self.n = 0
             self.unit = unit
@@ -24,7 +25,7 @@ except ImportError:
             self.desc = desc or "Downloading"
             self.leave = leave
 
-        def update(self, n):
+        def update(self, n: int) -> None:
             self.n += n
             if self.total:
                 percent = min(100, self.n / self.total * 100)
@@ -35,16 +36,16 @@ except ImportError:
             else:
                 print(f"\r{self.desc}: {self.n} {self.unit}", end="")
 
-        def close(self):
+        def close(self) -> None:
             if self.leave:
                 print()
             else:
                 print()
 
-        def __enter__(self):
+        def __enter__(self) -> Self:
             return self
 
-        def __exit__(self, *args):
+        def __exit__(self, *args) -> None:
             self.close()
 
 
@@ -149,7 +150,7 @@ def download(
             raise RuntimeError(msg)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Modern wget clone in Python 3.13+",
         formatter_class=argparse.RawDescriptionHelpFormatter,

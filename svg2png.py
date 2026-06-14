@@ -8,7 +8,7 @@ from dh import get_files, mpf3
 from PIL import Image
 
 
-def process_file(path):
+def process_file(path) -> None:
     path = Path(path)
     png_file = path.with_suffix(".png")
     try:
@@ -23,7 +23,7 @@ def process_file(path):
         pass
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     files = get_files(cwd, ext=[".svg"])
     mpf3(process_file, files)

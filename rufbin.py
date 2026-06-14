@@ -4,7 +4,7 @@ import subprocess
 from pathlib import Path
 
 
-def is_python_file(file_path):
+def is_python_file(file_path: Path):
     try:
         with Path(file_path).open("r", encoding="utf-8", errors="ignore") as f:
             content = f.read(1024)
@@ -32,7 +32,7 @@ def is_python_file(file_path):
         return False
 
 
-def format_with_ruff(file_path):
+def format_with_ruff(file_path: Path):
     try:
         result = subprocess.run(
             ["ruff", "format", str(file_path)], check=False, capture_output=True, text=True, timeout=30

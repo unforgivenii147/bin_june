@@ -11,7 +11,7 @@ PY_LANGUAGE = Language(tsp.language())
 parser = Parser(PY_LANGUAGE)
 
 
-def extract_python_code_elements(filepath):
+def extract_python_code_elements(filepath: Path):
     try:
         with Path(filepath).open("rb") as f:
             tree = parser.parse(f.read())
@@ -65,7 +65,7 @@ def extract_python_code_elements(filepath):
     return (functions, classes, constants, imports)
 
 
-def process_directory(start_dir, output_dir):
+def process_directory(start_dir: str, output_dir: str) -> None:
     all_functions = {}
     all_classes = {}
     all_constants = {}

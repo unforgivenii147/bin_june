@@ -72,7 +72,7 @@ class ChangeHandler(FileSystemEventHandler):
         excluded_exts: set[str] | None,
         interval_sec: float,
         print_lock=None,
-    ):
+    ) -> None:
         super().__init__()
         self.cwd = cwd
         self.copy_enabled = copy_enabled
@@ -157,22 +157,22 @@ class ChangeHandler(FileSystemEventHandler):
             print("-" * 80)
             self._errors.clear()
 
-    def on_created(self, event):
+    def on_created(self, event) -> None:
         if event.is_directory:
             return
         self._queue(Path(event.src_path), "create")
 
-    def on_modified(self, event):
+    def on_modified(self, event) -> None:
         if event.is_directory:
             return
         self._queue(Path(event.src_path), "change")
 
-    def on_deleted(self, event):
+    def on_deleted(self, event) -> None:
         if event.is_directory:
             return
         self._queue(Path(event.src_path), "delete")
 
-    def on_moved(self, event):
+    def on_moved(self, event) -> None:
         if event.is_directory:
             return
         self._queue(Path(event.src_path), "moved-out")
@@ -218,7 +218,7 @@ def build_parser() -> argparse.ArgumentParser:
     return p
 
 
-def main():
+def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
     cwd = Path(args.folder).expanduser().resolve()

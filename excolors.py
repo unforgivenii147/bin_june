@@ -8,7 +8,7 @@ from dh import cprint, get_filez, is_binary
 COLOR_RE = re.compile("#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})\\b")
 
 
-def pf(path):
+def pf(path: Path):
     content = path.read_text(encoding="utf-8", errors="ignore")
     found = []
     found = COLOR_RE.findall(content)
@@ -20,7 +20,7 @@ def pf(path):
     return []
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     outfile = cwd / "colors"
     colorz = set()

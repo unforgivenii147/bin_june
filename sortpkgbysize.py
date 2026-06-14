@@ -5,7 +5,7 @@ import csv
 from pathlib import Path
 
 
-def sort_packages_by_size(filename: str):
+def sort_packages_by_size(filename: str) -> None:
     with Path(filename).open(newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         rows = list(reader)

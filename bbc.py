@@ -9,7 +9,7 @@ L3 = "tag_date = 0"
 SETUPCFG = "[egg_info]\ntag_build =\ntag_date = 0\n"
 
 
-def is_setupcfg(fn):
+def is_setupcfg(fn: Path) -> bool:
     content = fn.read_text(encoding="utf8")
     if content == SETUPCFG:
         return True

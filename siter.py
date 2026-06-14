@@ -272,7 +272,7 @@ def find_site_packages() -> list[Path]:
     return sorted(set(candidates))
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="Build proper wheel files from installed packages",
         formatter_class=argparse.RawDescriptionHelpFormatter,

@@ -927,7 +927,7 @@ colorz = [
 ]
 
 
-def color():
+def color() -> tuple[int, int, int]:
     return random_choice(colorz)
 
 

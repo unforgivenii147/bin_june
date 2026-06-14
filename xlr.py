@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 
-def process_file(path):
+def process_file(path: Path) -> None:
     path = Path(path)
     con = path.read_text()
     nl = [line + "\n\n\n\n" for line in con.splitlines()]

@@ -59,7 +59,7 @@ fixes = [
 ]
 
 
-def process_file(path):
+def process_file(path: Path) -> None:
     path = Path(path)
     for fix in fixes:
         target_fix = f"--fix={fix}"

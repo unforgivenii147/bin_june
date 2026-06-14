@@ -10,7 +10,7 @@ from collections import defaultdict
 from pathlib import Path
 
 
-def get_path_dirs():
+def get_path_dirs() -> list[str]:
     """Get all directories in PATH."""
     path_dirs = os.environ.get("PATH", "").split(os.pathsep)
     # Filter out non-existent directories
@@ -18,7 +18,7 @@ def get_path_dirs():
     return existing_dirs
 
 
-def get_commands_from_path(path_dirs):
+def get_commands_from_path(path_dirs: list[str]):
     """Get all executable commands from PATH directories."""
     commands = {}  # command -> (full_path, dir)
     duplicate_commands = defaultdict(list)
@@ -40,7 +40,7 @@ def get_commands_from_path(path_dirs):
     return commands, conflicts
 
 
-def extract_aliases(aliases_file):
+def extract_aliases(aliases_file: Path):
     """Extract alias names from bash aliases file."""
     aliases = {}
     alias_pattern = re.compile(r"^\s*alias\s+([a-zA-Z_][a-zA-Z0-9_-]*)\s*=", re.MULTILINE)
@@ -62,7 +62,7 @@ def extract_aliases(aliases_file):
     return aliases
 
 
-def extract_functions(functions_file):
+def extract_functions(functions_file: Path):
     """Extract function names from bash functions file."""
     functions = {}
     patterns = [
@@ -91,7 +91,7 @@ def extract_functions(functions_file):
     return functions
 
 
-def check_conflicts(names, path_commands, name_type):
+def check_conflicts(names, path_commands, name_type: str):
     """Check for conflicts between names and PATH commands."""
     conflicts = {}
     for name in names:
@@ -100,7 +100,7 @@ def check_conflicts(names, path_commands, name_type):
     return conflicts
 
 
-def display_results(alias_conflicts, func_conflicts, path_duplicates, path_dirs):
+def display_results(alias_conflicts, func_conflicts, path_duplicates, path_dirs: list[str]) -> None:
     """Display conflict results in a formatted way."""
     print("=" * 80)
     print("🔍 PATH CONFLICT ANALYSIS")
@@ -162,7 +162,7 @@ def display_results(alias_conflicts, func_conflicts, path_duplicates, path_dirs)
     print("=" * 80)
 
 
-def suggest_fixes(alias_conflicts, func_conflicts):
+def suggest_fixes(alias_conflicts, func_conflicts) -> None:
     """Suggest fixes for conflicts."""
     if not alias_conflicts and not func_conflicts:
         return

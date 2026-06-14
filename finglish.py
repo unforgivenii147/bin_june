@@ -4,7 +4,7 @@ import unicodedata
 from pathlib import Path
 
 
-def custom_persian_to_finglish(text):
+def custom_persian_to_finglish(text: str) -> str:
     persian_map = {
         "ا": "a",
         "آ": "a",
@@ -63,7 +63,7 @@ def custom_persian_to_finglish(text):
     return " ".join(processed_words)
 
 
-def convert_filenames_with_pathlib(directory="."):
+def convert_filenames_with_pathlib(directory: str = ".") -> None:
     start_path = Path(directory)
     for filepath in start_path.rglob("*"):
         original_filename_stem = filepath.stem

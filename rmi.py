@@ -34,7 +34,7 @@ def clean_text(text: str) -> str:
     return cleaned
 
 
-def process_file(fp):
+def process_file(fp: Path) -> None:
     path = Path(path)
     text = fp.read_text(encoding="utf-8", errors="ignore")
     cleaned = clean_text(text)
@@ -47,7 +47,7 @@ def process_file(fp):
     return
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
     files = [Path(p) for p in args] if args else get_nobinary(cwd)

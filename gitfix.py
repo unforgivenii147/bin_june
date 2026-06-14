@@ -5,7 +5,7 @@ import sys
 from git import Repo
 
 
-def sync_branch_with_upstream(repo_path="."):
+def sync_branch_with_upstream(repo_path: str = ".") -> bool:
     """
     Fetch, rebase with unrelated histories, and force push to master/main branch.
     Handles both origin/master and origin/main automatically.
@@ -49,7 +49,7 @@ def sync_branch_with_upstream(repo_path="."):
         return False
 
 
-def sync_with_plumbing(repo_path="."):
+def sync_with_plumbing(repo_path: str = ".") -> bool:
     """
     Lower-level implementation using gitpython's plumbing commands.
     More verbose but gives precise control.

@@ -8,7 +8,7 @@ from dh import cprint, get_files, unique_path
 OUT_PATH = Path("/data/data/com.termux/files/home/tmp/metadata")
 
 
-def process_file(fp) -> bool | None:
+def process_file(fp: Path) -> bool | None:
     pkgname = ""
     path = Path(path)
     pkgversion = ""

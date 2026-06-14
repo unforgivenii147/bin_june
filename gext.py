@@ -104,7 +104,7 @@ class EntityExtractor(ast.NodeVisitor):
 
         return "".join(code_slice)
 
-    def _extract_and_save(self, node: ast.AST, entity_type: str, name: str):
+    def _extract_and_save(self, node: ast.AST, entity_type: str, name: str) -> None:
         """Extract entity and add to list."""
         entity_code = self._get_source_slice(node)
         scope_prefix = "_".join(self.scope_stack)
@@ -123,29 +123,29 @@ class EntityExtractor(ast.NodeVisitor):
             "imports_from": self.imports_from.copy(),
         })
 
-    def _add_import(self, import_stmt: str):
+    def _add_import(self, import_stmt: str) -> None:
         """Track an import statement."""
         self.imports.add(import_stmt)
 
-    def _add_import_from(self, module: str, names: List[str]):
+    def _add_import_from(self, module: str, names: List[str]) -> None:
         """Track a from-import statement."""
         if module not in self.imports_from:
             self.imports_from[module] = set()
         for name in names:
             self.imports_from[module].add(name)
 
-    def visit_Import(self, node: ast.Import):
+    def visit_Import(self, node: ast.Import) -> None:
         for alias in node.names:
             self._add_import(f"import {alias.name}")
         self.generic_visit(node)
 
-    def visit_ImportFrom(self, node: ast.ImportFrom):
+    def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
         module = node.module or ""
         names = [alias.name for alias in node.names]
         self._add_import_from(module, names)
         self.generic_visit(node)
 
-    def visit_FunctionDef(self, node: ast.FunctionDef):
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
         entity_type = "method" if self.scope_stack and self.scope_stack[-1].startswith("class_") else "function"
         if entity_type == "function":
             self._extract_and_save(node, entity_type, node.name)
@@ -153,7 +153,7 @@ class EntityExtractor(ast.NodeVisitor):
             self.generic_visit(node)
             self.scope_stack.pop()
 
-    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef):
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
         entity_type = "method" if self.scope_stack and self.scope_stack[-1].startswith("class_") else "function"
         if entity_type == "function":
             self._extract_and_save(node, entity_type, node.name)
@@ -161,13 +161,13 @@ class EntityExtractor(ast.NodeVisitor):
             self.generic_visit(node)
             self.scope_stack.pop()
 
-    def visit_ClassDef(self, node: ast.ClassDef):
+    def visit_ClassDef(self, node: ast.ClassDef) -> None:
         self._extract_and_save(node, "class", node.name)
         self.scope_stack.append(f"class_{node.name}")
         self.generic_visit(node)
         self.scope_stack.pop()
 
-    def visit_Assign(self, node: ast.Assign):
+    def visit_Assign(self, node: ast.Assign) -> None:
         if not self.scope_stack and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
             target_name = node.targets[0].id
             if re.match(r"^[A-Z_][A-Z0-9_]*$", target_name):
@@ -356,7 +356,7 @@ def get_unique_filepath(base_path: Path) -> Path:
         i += 1
 
 
-def save_entity(entity: Dict[str, Any]):
+def save_entity(entity: Dict[str, Any]) -> Path | None:
     """Save entity to file with enhanced imports."""
     filename_base = f"{entity['full_name']}.py"
     output_path_base = OUTPUT_DIR / entity["type"] / filename_base.lower()
@@ -538,7 +538,7 @@ def process_files_parallel(
     return all_entities, all_imports
 
 
-def print_statistics(entities: List[Dict[str, Any]], imports: List[str], saved_entities: int):
+def print_statistics(entities: List[Dict[str, Any]], imports: List[str], saved_entities: int) -> None:
     """Print processing statistics."""
     print("\n" + "=" * 60)
     print("PROCESSING STATISTICS")
@@ -578,7 +578,7 @@ def print_statistics(entities: List[Dict[str, Any]], imports: List[str], saved_e
     print("=" * 60 + "\n")
 
 
-def main():
+def main() -> None:
     """Main entry point - merged entity extraction and import collection."""
     cwd = Path.cwd()
     print(f"🔍 Analyzing {cwd}")

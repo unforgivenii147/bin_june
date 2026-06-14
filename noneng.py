@@ -11,7 +11,7 @@ DetectorFactory.seed = 0
 MAX_CHARS = 5000
 
 
-def process_file(path):
+def process_file(path) -> bool | None:
     path = Path(path)
     try:
         with Path(path).open(encoding="utf-8", errors="ignore") as f:
@@ -25,7 +25,7 @@ def process_file(path):
         return False
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     files = get_nobinary(cwd)
     mpf3(process_file, files)

@@ -6,7 +6,7 @@ from pathlib import Path
 from dh import cprint, fsz, get_files, mpf3, runcmd
 
 
-def process_file(path):
+def process_file(path) -> None:
     path = Path(path)
     before = path.stat().st_size
     ret, _, _ = runcmd(["strip", str(path)], show_output=True)

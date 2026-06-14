@@ -6,7 +6,7 @@ from pathlib import Path
 from dh import get_nobinary
 
 
-def process_file(fp):
+def process_file(fp: Path) -> None:
     path = Path(path)
     lines = fp.read_text(encoding="utf-8").splitlines()
     nl = []
@@ -33,7 +33,7 @@ def process_file(fp):
             f.writelines((f"{k}\n" for k in nl))
 
 
-def main():
+def main() -> None:
     args = sys.argv[1:]
     cwd = Path.cwd()
     files = [Path(arg) for arg in args] if args else get_nobinary(cwd)

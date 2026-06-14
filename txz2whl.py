@@ -8,7 +8,7 @@ from pathlib import Path
 from dh import get_files, mpf3, unique_path
 
 
-def process_file(path: str | Path):
+def process_file(path: str | Path) -> None:
     path = Path(path)
     new_name = ""
     if path.name.endswith(".txz"):
@@ -35,7 +35,7 @@ def process_file(path: str | Path):
         print(f"[ERROR] {path.name}: {e}")
 
 
-def main():
+def main() -> None:
     args = sys.argv[1:]
     cwd = Path().cwd()
     files = [Path(arg) for arg in args] if args else get_files(cwd, ext=[".tar.xz", ".txz"])

@@ -37,7 +37,7 @@ def get_unique_path(path: Path) -> Path:
         counter += 1
 
 
-def rename_files(directory: str):
+def rename_files(directory: str) -> None:
     for pth in walk_files(directory):
         path = Path(pth)
         if path.is_file():

@@ -6,7 +6,7 @@ from pathlib import Path
 from fastwalk import walk_files
 
 
-def extract_requirements(metadata_path):
+def extract_requirements(metadata_path: Path) -> None:
     with Path(metadata_path).open(encoding="utf-8") as f:
         lines = f.readlines()
     requirements = []

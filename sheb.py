@@ -6,7 +6,7 @@ from pathlib import Path
 TARGET_SHEBANG = "#!/data/data/com.termux/files/usr/bin/env python"
 
 
-def is_python_file(filepath):
+def is_python_file(filepath) -> bool:
     if Path(filepath).stat().st_size == 0 or filepath.endswith("__init__.py"):
         return False
     if filepath.endswith(".py"):
@@ -28,7 +28,7 @@ def is_python_file(filepath):
         return False
 
 
-def process_file(filepath):
+def process_file(filepath) -> None:
     path = Path(path)
     with Path(filepath).open("r+", encoding="utf-8") as f:
         lines = f.readlines()
@@ -51,7 +51,7 @@ def process_file(filepath):
         Path(filepath).chmod(493)
 
 
-def traverse_directory(directory):
+def traverse_directory(directory: Path) -> None:
     for root, _, files in os.walk(directory):
         for filename in files:
             filepath = os.path.join(root, filename)

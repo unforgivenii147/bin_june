@@ -31,19 +31,19 @@ def common_suffix(strings):
     return commonpath([s[::-1] for s in strings])[::-1]
 
 
-def apply_regex(name):
+def apply_regex(name) -> str:
     for rule in REGEX_RULES:
         name = re.sub(rule, "", name, flags=re.IGNORECASE)
     return re.sub("\\.+", ".", name).strip(". ")
 
 
-def collect_files(path, recursive):
+def collect_files(path: Path, recursive):
     if recursive:
         return [p for p in path.rglob("*") if p.suffix.lower() in EXTENSIONS]
     return [p for p in path.iterdir() if p.is_file() and p.suffix.lower() in EXTENSIONS]
 
 
-def main():
+def main() -> None:
     ap = argparse.ArgumentParser(description="Clean repeated words from filenames")
     ap.add_argument("-r", "--recursive", action="store_true", help="scan recursively")
     ap.add_argument("-w", "--write", action="store_true", help="actually rename files")

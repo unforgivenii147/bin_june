@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 
-def convert_to_readable(filename):
+def convert_to_readable(filename: str) -> None:
     outfile = Path(filename)
     try:
         content = Path(filename).read_bytes()

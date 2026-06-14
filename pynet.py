@@ -76,7 +76,7 @@ def get_dns_servers():
     return unique_dns
 
 
-def test_speed():
+def test_speed() -> tuple[float | None, float | None, str | None, str | None]:
     """
     Approximate download/upload speed using HTTP.
     Returns: (download_mbps, upload_mbps, dl_error, ul_error)
@@ -132,7 +132,7 @@ def test_speed():
     return dl_mbps, ul_mbps, dl_error, ul_error
 
 
-def main():
+def main() -> None:
     print("=" * 50)
     print(" NETWORK STATES ")
     print("=" * 50)

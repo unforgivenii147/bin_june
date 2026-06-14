@@ -49,7 +49,7 @@ def is_local_module(base_path: Path, module: str) -> bool:
     return bool(py_file.exists())
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     importz = []
     for file in get_files(cwd, ext=[".py"]):

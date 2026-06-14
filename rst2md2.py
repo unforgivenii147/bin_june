@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 
-def convert_file(filepath, backup=True, remove_original=False):
+def convert_file(filepath: Path, backup=True, remove_original=False) -> bool:
     """Convert .rst to .md using pandoc."""
     filepath = Path(filepath)
 
@@ -54,7 +54,7 @@ def convert_file(filepath, backup=True, remove_original=False):
         return False
 
 
-def convert_recursive(directory, backup=True, remove_original=False):
+def convert_recursive(directory: Path, backup: bool = True, remove_original: bool = False) -> None:
     """Convert all .rst files recursively."""
     directory = Path(directory)
     if not directory.exists():
@@ -76,7 +76,7 @@ def convert_recursive(directory, backup=True, remove_original=False):
     print(f"\nConverted {success_count}/{len(rst_files)} files")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Convert .rst files to .md using pandoc")
     parser.add_argument("paths", nargs="+", help="Files or directories to convert")
     parser.add_argument("-r", "--recursive", action="store_true", help="Process directories recursively")

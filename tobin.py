@@ -17,7 +17,7 @@ def get_sha256(path: str | Path) -> str:
     return h.hexdigest()
 
 
-def main():
+def main() -> None:
     fn = Path(sys.argv[1])
     dest_path = dest / fn.name
     if dest_path.exists():

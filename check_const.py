@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 
-def main():
+def main() -> None:
     if len(sys.argv) != 2:
         print("Usage: python check_dups.py <const_file.py>")
         sys.exit(1)

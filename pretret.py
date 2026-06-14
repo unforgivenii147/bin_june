@@ -16,7 +16,7 @@ def process_file(fp):
     return (False, fp)
 
 
-def main():
+def main() -> None:
     cwd = str(Path.cwd())
     args = sys.argv[1:]
     files = (

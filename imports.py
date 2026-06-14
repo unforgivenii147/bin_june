@@ -14,18 +14,18 @@ class ImportVisitor(ast.NodeVisitor):
     def __init__(self) -> None:
         self.imports = set()
 
-    def visit_Import(self, node):
+    def visit_Import(self, node) -> None:
         for node_name in node.names:
             self.imports.add(node_name.name.split(".")[0])
         self.generic_visit(node)
 
-    def visit_ImportFrom(self, node):
+    def visit_ImportFrom(self, node) -> None:
         if node.level == 0 and node.module:
             self.imports.add(node.module.split(".")[0])
         self.generic_visit(node)
 
 
-def find_imports(start_path):
+def find_imports(start_path: Path):
     all_imports = set()
     std_libs = STDLIB
     files = get_files(start_path, ext=[".py"])
@@ -44,7 +44,7 @@ def find_imports(start_path):
     ])
 
 
-def get_version(module_name):
+def get_version(module_name) -> str:
     try:
         return importlib.metadata.version(module_name)
     except importlib.metadata.PackageNotFoundError:
@@ -62,7 +62,7 @@ def get_version(module_name):
     return "Not Installed(NA)"
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     sys.argv[1:]
     output_file = cwd / "importz.txt"

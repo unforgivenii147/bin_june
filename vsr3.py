@@ -68,7 +68,7 @@ def get_wheel_tag(dist_dir: Path) -> str | None:
     return None
 
 
-def copy_files_to_temp(files: list[Path], site_packages: Path, temp_dir: Path):
+def copy_files_to_temp(files: list[Path], site_packages: Path, temp_dir: Path) -> None:
     for file_path in files:
         try:
             rel_path = file_path.relative_to(site_packages)
@@ -135,7 +135,7 @@ def repack_package(dist_dir: Path, site_packages: Path, output_dir: Path, not_re
         return create_wheel(pkg_name, pkg_version, temp_path, output_dir, wheel_tag)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Repack installed Python packages as wheels")
     parser.add_argument("packages", nargs="*", help="Package names to repack")
     parser.add_argument("-a", "--all", action="store_true", help="Repack all installed packages")

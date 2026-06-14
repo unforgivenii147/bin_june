@@ -16,7 +16,7 @@ DOCSTRING_START_REGEX = re.compile(f"^\\s*({DOC_TH2}|{DOC_TH1}).*?(\\1)\\s*", re
 MAX_WORKERS = 4
 
 
-def strip_comments_and_docstrings(file_path_str):
+def strip_comments_and_docstrings(file_path_str) -> bool:
     file_path = Path(file_path_str)
     backup_path = file_path.with_suffix(file_path.suffix + ".bak")
     original_content = ""
@@ -70,7 +70,7 @@ def strip_comments_and_docstrings(file_path_str):
         return False
 
 
-def process_directory(directory):
+def process_directory(directory: str) -> None:
     python_files = get_pyfiles(directory)
     print(f"Found {len(python_files)} Python files to process.")
     processed_count = 0

@@ -7,7 +7,7 @@ from pathlib import Path
 README_CANDIDATES = ["README.md", "README.rst", "README.txt", "README"]
 
 
-def find_readme():
+def find_readme() -> Path | None:
     files = {p.name.lower(): p for p in Path().iterdir() if p.is_file()}
     for name in README_CANDIDATES:
         p = files.get(name.lower())
@@ -16,7 +16,7 @@ def find_readme():
     return None
 
 
-def main():
+def main() -> None:
     readme = find_readme()
     if not readme:
         print("No README file found in current directory.", file=sys.stderr)

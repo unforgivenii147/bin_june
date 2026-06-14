@@ -108,7 +108,7 @@ def analyze_directory(directory: str = ".", show_all: bool = False) -> dict:
     return results
 
 
-def print_results(results: dict, show_files: bool = False):
+def print_results(results: dict, show_files: bool = False) -> None:
     print("\n" + "=" * 70)
     print("📊 LANGUAGE DETECTION RESULTS")
     print("=" * 70)
@@ -167,7 +167,7 @@ def print_results(results: dict, show_files: bool = False):
     print("=" * 70)
 
 
-def main():
+def main() -> None:
     import argparse
 
     parser = argparse.ArgumentParser(description="Find non-English files in directory recursively using pycld2")

@@ -6,7 +6,9 @@ from pathlib import Path
 from weasyprint import CSS, HTML
 
 
-def html2pdf(pdf_file_path, html_file_path=None, css_file_path="/sdcard/_static/css/markdown.css", base_url=None):
+def html2pdf(
+    pdf_file_path, html_file_path=None, css_file_path: str = "/sdcard/_static/css/markdown.css", base_url=None
+) -> None:
     raw_html = ""
     extras = ["cuddled-lists", "tables"]
     if html_file_path:

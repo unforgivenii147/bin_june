@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from bs4.element import AttributeValueList
 import base64
 import mimetypes
 import re
@@ -17,7 +18,7 @@ TIMEOUT = 10
 ASSETS_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def save_asset(content: bytes, mime_type: str, file_hint="asset"):
+def save_asset(content: bytes, mime_type: str, file_hint="asset") -> Path:
     ext = mimetypes.guess_extension(mime_type) or ""
     counter = 0
     while True:
@@ -30,7 +31,7 @@ def save_asset(content: bytes, mime_type: str, file_hint="asset"):
     return path
 
 
-def extract_base64_data(data_url, file_hint="asset"):
+def extract_base64_data(data_url: AttributeValueList | str | None, file_hint: str = "asset") -> Path | None:
     m = re.match("data:(.*?);base64,(.*)", data_url, re.DOTALL)
     if not m:
         return None
@@ -39,7 +40,7 @@ def extract_base64_data(data_url, file_hint="asset"):
     return save_asset(content, mime_type, file_hint)
 
 
-def download_external_url(url, file_hint="remote"):
+def download_external_url(url: AttributeValueList | str | None, file_hint: str = "remote") -> Path | None:
     try:
         print("Downloading:", url)
         r = requests.get(url, timeout=TIMEOUT)
@@ -51,7 +52,7 @@ def download_external_url(url, file_hint="remote"):
         return None
 
 
-def process_file(path: Path):
+def process_file(path: Path) -> None:
     path = Path(path)
     html = path.read_text(encoding="utf-8", errors="ignore")
     soup = BeautifulSoup(html, "html.parser")

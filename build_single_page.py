@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+from bs4.element import AttributeValueList
 import base64
 import hashlib
 import mimetypes
@@ -21,7 +22,7 @@ if not ASSETS_DIR.exists():
 HASH_MAP = {}
 
 
-def sha256(data: bytes):
+def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
@@ -37,7 +38,7 @@ def save_hashed_asset(content: bytes, mime_type: str):
     return path
 
 
-def extract_base64(data_url):
+def extract_base64(data_url: AttributeValueList | str | None):
     m = re.match("data:(.*?);base64,(.*)", data_url, re.DOTALL)
     if not m:
         return None
@@ -46,7 +47,7 @@ def extract_base64(data_url):
     return save_hashed_asset(content, mime_type)
 
 
-def download_external(url):
+def download_external(url: AttributeValueList | str):
     try:
         r = requests.get(url, timeout=TIMEOUT)
         if r.status_code != 200:
@@ -60,7 +61,7 @@ def download_external(url):
 processed_html_files = []
 
 
-def process_html(path: Path):
+def process_html(path: Path) -> None:
     html = path.read_text(encoding="utf-8", errors="ignore")
     soup = BeautifulSoup(html, "html.parser")
     processed_html_files.append(soup)
@@ -112,7 +113,7 @@ def process_html(path: Path):
     print("Processed:", path)
 
 
-def build_single_page():
+def build_single_page() -> None:
     merged = BeautifulSoup("<html><head></head><body></body></html>", "html.parser")
     head = merged.head
     body = merged.body

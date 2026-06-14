@@ -10,7 +10,7 @@ from dh import get_files
 MAX_QUEUE = 16
 
 
-def process_file(fn):
+def process_file(fn: Path) -> bool:
     path = Path(path)
     text = ""
     text = Path(fn).read_text(encoding="utf-8")
@@ -28,7 +28,7 @@ def process_file(fn):
     return not stack
 
 
-def main():
+def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
     files = [Path(f) for f in args] if args else get_files(cwd, ext=[".py"])

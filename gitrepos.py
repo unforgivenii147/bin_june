@@ -6,7 +6,7 @@ from pathlib import Path
 import requests
 
 
-def get_github_repos(username, output_file=None) -> None:
+def get_github_repos(username: str, output_file=None) -> None:
     if output_file is None:
         url = f"https://api.github.com/users/{username}/repos"
     try:

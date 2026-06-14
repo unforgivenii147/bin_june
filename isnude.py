@@ -10,7 +10,7 @@ nude_path.mkdir(exist_ok=True)
 RESIZE = "-r" in sys.argv
 
 
-def check_nude(path):
+def check_nude(path: str) -> bool:
     img = cv2.imread(path)
     h, w = img.shape[:2]
     n = nude.Nude(path)
@@ -22,7 +22,7 @@ def check_nude(path):
     return bool(n.result)
 
 
-def process_file(path):
+def process_file(path) -> None:
     path = Path(path)
     if "nude" in path.parts:
         return

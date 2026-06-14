@@ -9,14 +9,14 @@ THRESHOLD = 1024 * 1024
 cwd = Path.cwd()
 
 
-def process_file(fp, threshold=THRESHOLD) -> None:
+def process_file(fp: Path, threshold: int = THRESHOLD) -> None:
     sz = fp.stat().st_size
     path = Path(path)
     if sz > threshold:
         print(f"{fp.relative_to(cwd)} : {fsz(sz)}")
 
 
-def main():
+def main() -> None:
     threshold = int(sys.argv[1]) * 1024 * 1024 if len(sys.argv) > 1 else THRESHOLD
     for path in get_filez(cwd):
         if not path.is_symlink():

@@ -10,14 +10,14 @@ from tqdm import tqdm
 MAX_CHARS = 5000
 
 
-def get_output_filename(input_file):
+def get_output_filename(input_file: str) -> Path:
     path = Path(input_file)
     stem = path.stem
     suffix = path.suffix
     return path.parent / f"{stem}_fa{suffix}"
 
 
-def load_file(input_file):
+def load_file(input_file) -> str:
     encodings = ["utf-8", "latin-1", "cp1252", "iso-8859-1"]
     for encoding in encodings:
         try:
@@ -28,7 +28,7 @@ def load_file(input_file):
     raise OSError(msg)
 
 
-def save_file(output_file, content):
+def save_file(output_file: Path, content: str) -> None:
     Path(output_file).write_text(content, encoding="utf-8")
 
 
@@ -46,7 +46,7 @@ def find_chunk_boundary(text, max_chars):
     return max_chars
 
 
-def chunk_text(text, max_chars):
+def chunk_text(text: str, max_chars: int):
     chunks = []
     pos = 0
     while pos < len(text):
@@ -60,7 +60,7 @@ def chunk_text(text, max_chars):
     return chunks
 
 
-def translate_chunk(text, source_lang="auto"):
+def translate_chunk(text: str, source_lang="auto"):
     for attempt in range(3):
         try:
             translator = GoogleTranslator(source=source_lang, target="fa")
@@ -73,7 +73,7 @@ def translate_chunk(text, source_lang="auto"):
     raise Exception(msg)
 
 
-def translate_file(input_file, source_lang="auto"):
+def translate_file(input_file: str, source_lang: str = "auto") -> str:
     print(f"[INFO] Reading file: {input_file}")
     content = load_file(input_file)
     content_length = len(content)
@@ -109,7 +109,7 @@ def translate_file(input_file, source_lang="auto"):
     return result
 
 
-def main():
+def main() -> None:
     if len(sys.argv) < 2:
         print(f"Usage: {sys.argv[0]} <input_file> [source_language]")
         print("\nExamples:")

@@ -73,7 +73,7 @@ class GitHubRepoCreator:
         except Exception as e:
             return (False, "", str(e))
 
-    def _check_prerequisites(self):
+    def _check_prerequisites(self) -> None:
         print("\n🔍 Checking prerequisites...")
         if not self._run_cmd(["git", "--version"])[0]:
             print("❌ Git is not installed")
@@ -89,7 +89,7 @@ class GitHubRepoCreator:
             sys.exit(1)
         print("✅ All prerequisites satisfied")
 
-    def _initialize_git(self):
+    def _initialize_git(self) -> None:
         print(f"\n📁 Initializing git repository: {self.repo_name}")
         success, _, _ = self._run_cmd(["git", "rev-parse", "--git-dir"])
         if success:
@@ -111,7 +111,7 @@ class GitHubRepoCreator:
             sys.exit(1)
         print("✅ Git repository initialized")
 
-    def _setup_gitignore(self):
+    def _setup_gitignore(self) -> None:
         home_gitignore = Path.home() / ".gitignore"
         local_gitignore = self.cwd / ".gitignore"
         if home_gitignore.exists() and (not local_gitignore.exists()):
@@ -196,7 +196,7 @@ class GitHubRepoCreator:
             print(f"❌ Error creating repository: {e}")
             sys.exit(1)
 
-    def _setup_remote(self):
+    def _setup_remote(self) -> None:
         print("\n🔗 Configuring remote...")
         remote_url = f"https://github.com/{self.github_username}/{self.repo_name}.git"
         success, remotes, _ = self._run_cmd(["git", "remote"])
@@ -213,7 +213,7 @@ class GitHubRepoCreator:
             else:
                 print(f"⚠️  Could not add remote: {stderr}")
 
-    def _commit_changes(self):
+    def _commit_changes(self) -> bool:
         print("\n💾 Committing changes...")
         success, _, stderr = self._run_cmd(["git", "add", "-A"])
         if not success:
@@ -231,7 +231,7 @@ class GitHubRepoCreator:
         print("✅ Changes committed")
         return True
 
-    def _push_to_github(self):
+    def _push_to_github(self) -> None:
         print("\n🚀 Pushing to GitHub...")
         auth_remote_url = (
             f"https://{self.github_username}:{self.github_token}@github.com/{self.github_username}/{self.repo_name}.git"
@@ -249,7 +249,7 @@ class GitHubRepoCreator:
             sys.exit(1)
         print("✅ Successfully pushed to GitHub")
 
-    def run(self):
+    def run(self) -> None:
         print("=" * 60)
         print("🚀 GITHUB REPOSITORY CREATOR")
         print("=" * 60)
@@ -273,7 +273,7 @@ class GitHubRepoCreator:
             print("\n⚠️  Operation cancelled")
 
 
-def main():
+def main() -> None:
     try:
         creator = GitHubRepoCreator()
         creator.run()

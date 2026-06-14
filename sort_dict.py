@@ -16,7 +16,7 @@ def dict_val(line: str) -> str:
     return line
 
 
-def main():
+def main() -> None:
     fname = sys.argv[1]
     with Path(fname).open(encoding="utf8", errors="replace") as f:
         lines = f.readlines()

@@ -9,7 +9,7 @@ ERROR_DIR = Path("error")
 OK_DIR = Path("ok")
 
 
-def ensure_dirs():
+def ensure_dirs() -> None:
     ERROR_DIR.mkdir(exist_ok=True)
     OK_DIR.mkdir(exist_ok=True)
 
@@ -51,7 +51,7 @@ def collect_python_files() -> list[Path]:
     return files
 
 
-def main():
+def main() -> None:
     ensure_dirs()
     files = collect_python_files()
     if not files:

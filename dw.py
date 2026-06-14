@@ -34,7 +34,7 @@ def get_all_files(folder):
     return files
 
 
-def copy_file(src, dst_folder):
+def copy_file(src, dst_folder: str | None) -> bool:
     """Copy file to destination folder, preserving relative structure."""
     try:
         os.makedirs(dst_folder, exist_ok=True)

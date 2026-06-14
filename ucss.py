@@ -23,12 +23,12 @@ def ext_from_mime(mime: str) -> str:
     return MIME_FALLBACKS.get(mime, ".bin")
 
 
-def extract_css_base64(css_path: Path, out_dir: Path):
+def extract_css_base64(css_path: Path, out_dir: Path) -> int:
     css = css_path.read_text(encoding="utf-8", errors="ignore")
     out_dir.mkdir(exist_ok=True)
     seen = {}
 
-    def replace(match):
+    def replace(match) -> str:
         mime = match.group("mime")
         raw = match.group("data").replace("\n", "").strip()
         binary = base64.b64decode(raw)
@@ -46,7 +46,7 @@ def extract_css_base64(css_path: Path, out_dir: Path):
     return len(seen)
 
 
-def main():
+def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: extract_css_base64.py file1.css [file2.css ...]")
         sys.exit(1)

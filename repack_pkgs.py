@@ -32,7 +32,7 @@ class PackageDetector:
     def __init__(self, verbose: bool = False) -> None:
         self.verbose = verbose
 
-    def log(self, message: str):
+    def log(self, message: str) -> None:
         if self.verbose:
             print(f"[DETECT] {message}")
 
@@ -134,7 +134,7 @@ class WheelBuilder:
     def __init__(self, verbose: bool = False) -> None:
         self.verbose = verbose
 
-    def log(self, message: str):
+    def log(self, message: str) -> None:
         if self.verbose:
             print(f"[BUILD] {message}")
 
@@ -243,7 +243,7 @@ class VenvRepacker:
         }
         self.results = []
 
-    def log(self, message: str, level: str = "INFO"):
+    def log(self, message: str, level: str = "INFO") -> None:
         if self.verbose or level in {"ERROR", "WARNING"}:
             timestamp = datetime.now().strftime("%H:%M:%S")
             print(f"[{timestamp}] [{level}] {message}")
@@ -313,7 +313,7 @@ class VenvRepacker:
                 self.results.append({"package": package_name, "success": False, "error": message})
         return self.stats
 
-    def print_stats(self):
+    def print_stats(self) -> None:
         print("\n" + "=" * 60)
         print("STATISTICS")
         print("=" * 60)
@@ -325,7 +325,7 @@ class VenvRepacker:
         print(f"Packages with C extensions: {self.stats['packages_with_c_extensions']}")
         print("=" * 60)
 
-    def save_report(self, report_file: str = "repack_report.json"):
+    def save_report(self, report_file: str = "repack_report.json") -> None:
         report = {
             "timestamp": datetime.now().isoformat(),
             "site_packages": str(self.site_packages),
@@ -341,7 +341,7 @@ class VenvRepacker:
         except Exception as e:
             print(f"\n✗ Error saving report: {e!s}")
 
-    def list_wheels(self):
+    def list_wheels(self) -> None:
         wheels = list(self.output_dir.glob("*.whl"))
         if not wheels:
             print("No .whl files found")
@@ -358,7 +358,7 @@ class VenvRepacker:
         print(f"Total size: {total_size_mb:.2f} MB")
 
 
-def main():
+def main() -> None:
     import argparse
 
     parser = argparse.ArgumentParser(
