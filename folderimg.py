@@ -24,9 +24,9 @@ def compute_hashes(path: Path):
 
 def similarity_score(h1, h2) -> float:
     return (
-        (h1["phash"] - h2["phash"]) * PHASH_W
-        + (h1["dhash"] - h2["dhash"]) * DHASH_W
-        + (h1["ahash"] - h2["ahash"]) * AHASH_W
+        (h1["phash"] - h2["phash"]) * PHASH_W +
+        (h1["dhash"] - h2["dhash"]) * DHASH_W +
+        (h1["ahash"] - h2["ahash"]) * AHASH_W
     )
 
 

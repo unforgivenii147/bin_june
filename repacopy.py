@@ -202,9 +202,9 @@ class PackageRepacker:
             env_name = "local_env"
             try:
                 if (
-                    ".venv" in str(site_packages_dir)
-                    or "venv" in str(site_packages_dir)
-                    or "env" in str(site_packages_dir)
+                    ".venv" in str(site_packages_dir) or
+                    "venv" in str(site_packages_dir) or
+                    "env" in str(site_packages_dir)
                 ):
                     env_name = site_packages_dir.parent.parent.name
             except Exception:

@@ -127,7 +127,7 @@ class PatternLearner:
         # 2. Try character substitution patterns
         for i, char in enumerate(word):
             if char in self.substitution_patterns:
-                corrected = word[:i] + self.substitution_patterns[char] + word[i + 1 :]
+                corrected = word[:i] + self.substitution_patterns[char] + word[i + 1:]
                 candidates.append((corrected, 0.9))
 
         # 3. Try multiple substitutions (for 2+ character errors)
@@ -135,7 +135,7 @@ class PatternLearner:
         multi_changes = 0
         for i, char in enumerate(word):
             if char in self.substitution_patterns:
-                multi_corrected = multi_corrected[:i] + self.substitution_patterns[char] + multi_corrected[i + 1 :]
+                multi_corrected = multi_corrected[:i] + self.substitution_patterns[char] + multi_corrected[i + 1:]
                 multi_changes += 1
         if multi_changes > 0 and multi_corrected != word:
             candidates.append((multi_corrected, 0.8 - (multi_changes * 0.1)))
@@ -170,13 +170,13 @@ class PatternLearner:
         # Learn length-based corrections (missing/extra letters)
         elif len(wrong) == len(correct) + 1:  # extra letter
             for i in range(len(wrong)):
-                if wrong[:i] + wrong[i + 1 :] == correct:
+                if wrong[:i] + wrong[i + 1:] == correct:
                     pattern = f"delete '{wrong[i]}'"
                     self.error_frequency[pattern] += 1
 
         elif len(wrong) == len(correct) - 1:  # missing letter
             for i in range(len(correct)):
-                if correct[:i] + correct[i + 1 :] == wrong:
+                if correct[:i] + correct[i + 1:] == wrong:
                     pattern = f"insert '{correct[i]}'"
                     self.error_frequency[pattern] += 1
 
@@ -282,7 +282,7 @@ class TypoFixerWithLearning:
         for i, char in enumerate(word):
             if char in QWERTY_ADJACENT:
                 for replacement in QWERTY_ADJACENT[char]:
-                    corrected = word[:i] + replacement + word[i + 1 :]
+                    corrected = word[:i] + replacement + word[i + 1:]
                     if self.is_valid_word(corrected):
                         return corrected
 

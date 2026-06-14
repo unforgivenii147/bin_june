@@ -38,7 +38,7 @@ class TSRemover:
                         comment_count += 1
                     else:
                         docstring_count += 1
-                    if end < len(source_bytes) and source_bytes[end : end + 1] == b"\n":
+                    if end < len(source_bytes) and source_bytes[end: end + 1] == b"\n":
                         end += 1
                     deletions.append((start, end))
         deletions = sorted(set(deletions), reverse=True)

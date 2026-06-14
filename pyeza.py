@@ -159,7 +159,7 @@ def output_columns(entries: list[Entry], icons=False, colors=True, width=None) -
         txt = truncate(txt, col_width - 1)
         rendered.append(txt)
     for i in range(0, len(rendered), cols):
-        row = rendered[i : i + cols]
+        row = rendered[i: i + cols]
         padded = [r + " " * (col_width - real_len(r)) for r in row]
         print("".join(padded))
 

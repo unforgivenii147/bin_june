@@ -25,7 +25,7 @@ def break_long_sentence(sentence: str, max_len: int = MAX_LEN):
         if break_pos < 0:
             break_pos = max_len
         parts.append(sentence[: break_pos + 1].strip())
-        sentence = sentence[break_pos + 1 :].strip()
+        sentence = sentence[break_pos + 1:].strip()
     if sentence:
         parts.append(sentence.strip())
     return parts

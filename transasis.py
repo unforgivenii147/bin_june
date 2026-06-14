@@ -16,7 +16,7 @@ non_english_pattern = re.compile("[^\\x00-\\x7F]")
 def chunk_text(text: str, chunk_size=CHUNK_SIZE):
     words = text.split()
     for i in range(0, len(words), chunk_size):
-        yield " ".join(words[i : i + chunk_size])
+        yield " ".join(words[i: i + chunk_size])
 
 
 def translate_text(text: str):

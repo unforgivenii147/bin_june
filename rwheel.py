@@ -274,10 +274,10 @@ def main() -> None:
 
     # Determine site-packages directory
     possible_paths = [
-        Path(sys.executable).parent
-        / "lib"
-        / f"python{sys.version_info.major}.{sys.version_info.minor}"
-        / "site-packages",
+        Path(sys.executable).parent /
+        "lib" /
+        f"python{sys.version_info.major}.{sys.version_info.minor}" /
+        "site-packages",
         Path(sys.prefix) / "lib" / f"python{sys.version_info.major}.{sys.version_info.minor}" / "site-packages",
         Path(__file__).parent if "__file__" in dir() else Path.cwd(),
     ]

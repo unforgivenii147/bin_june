@@ -179,7 +179,7 @@ def source_segment(code: str, node: Assign | AsyncFunctionDef | ClassDef | Funct
         return seg
     if hasattr(node, "lineno") and hasattr(node, "end_lineno"):
         lines = code.splitlines(keepends=True)
-        return "".join(lines[node.lineno - 1 : node.end_lineno])
+        return "".join(lines[node.lineno - 1: node.end_lineno])
     return None
 
 

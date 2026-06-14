@@ -57,9 +57,9 @@ class JalaliDate:
         gm = g_month - 1
         gd = g_day - 1
         g_day_of_year = (
-            sum([31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][:gm])
-            + gd
-            + (1 if gm > 1 and (g_year % 4 == 0 and g_year % 100 != 0 or g_year % 400 == 0) else 0)
+            sum([31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][:gm]) +
+            gd +
+            (1 if gm > 1 and (g_year % 4 == 0 and g_year % 100 != 0 or g_year % 400 == 0) else 0)
         )
         g_day_no = gy * 365 + (gy + 3) // 4 - (gy + 99) // 100 + (gy + 399) // 400 + g_day_of_year
         j_day_no = g_day_no - 79

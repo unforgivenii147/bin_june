@@ -11,6 +11,7 @@ Multiprocessing is used for fast AST analysis. Logging is handled by loguru.
 Requires Python 3.9+ (for ast.unparse).
 """
 
+from dataclasses import dataclass
 import argparse
 import ast
 import concurrent.futures
@@ -94,9 +95,6 @@ def _find_files(root: str = ".") -> List[Tuple[str, Optional[str]]]:
 def _hash(source: str) -> str:
     """SHA-256 hex digest of *source*."""
     return hashlib.sha256(source.encode("utf-8")).hexdigest()
-
-
-from dataclasses import dataclass
 
 
 @dataclass

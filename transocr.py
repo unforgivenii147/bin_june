@@ -48,7 +48,7 @@ def read_image_ocr(path: Path) -> str:
 
 
 def chunk_text(text: str, size: int = CHUNK_SIZE) -> list:
-    return [text[i : i + size] for i in range(0, len(text), size)]
+    return [text[i: i + size] for i in range(0, len(text), size)]
 
 
 def translate_chunks(chunks, src_lang: str) -> str:

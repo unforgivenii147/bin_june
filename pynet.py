@@ -112,9 +112,9 @@ def test_speed() -> tuple[float | None, float | None, str | None, str | None]:
                 f"--{boundary}\r\n"
                 'Content-Disposition: form-data; name="file"; filename="test.bin"\r\n'
                 "Content-Type: application/octet-stream\r\n\r\n"
-            ).encode()
-            + rand_data
-            + f"\r\n--{boundary}--\r\n".encode()
+            ).encode() +
+            rand_data +
+            f"\r\n--{boundary}--\r\n".encode()
         )
 
         req = urllib.request.Request(upload_url, data=body)

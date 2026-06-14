@@ -42,7 +42,7 @@ def format_python_file(filepath: Path) -> None:
                 if line.strip().endswith(string_type) and len(line.strip()) > len(string_type):
                     in_multiline_string = False
                     processed_string = "\n".join(current_multiline_string_lines)
-                    content_to_wrap = processed_string[len(string_type) : -len(string_type)]
+                    content_to_wrap = processed_string[len(string_type): -len(string_type)]
                     wrapped_content = textwrap.fill(
                         content_to_wrap,
                         width=35,
@@ -62,7 +62,7 @@ def format_python_file(filepath: Path) -> None:
             if line.strip().endswith(string_type) and len(line.strip()) > len(string_type):
                 in_multiline_string = False
                 processed_string = "\n".join(current_multiline_string_lines)
-                content_to_wrap = processed_string[len(string_type) : -len(string_type)]
+                content_to_wrap = processed_string[len(string_type): -len(string_type)]
                 wrapped_content = textwrap.fill(
                     content_to_wrap,
                     width=35,
@@ -92,7 +92,7 @@ def format_python_file(filepath: Path) -> None:
                     break_long_words=False,
                     break_on_hyphens=False,
                 )
-                formatted_lines.append(code_part + wrapped_comment[len(comment_indent + "# ") :])
+                formatted_lines.append(code_part + wrapped_comment[len(comment_indent + "# "):])
             else:
                 formatted_lines.append(line)
         else:

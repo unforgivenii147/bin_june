@@ -43,9 +43,9 @@ def iter_top_level_dirs(root: Path) -> Iterable[Path]:
 def iter_top_level_files(root: Path) -> Iterable[Path]:
     for p in root.iterdir():
         if (
-            p.is_file()
-            and (not p.is_symlink())
-            and (p.suffix not in {".7z", ".xz", ".br", ".zst", ".gz", ".zip", ".whl", ".log"})
+            p.is_file() and
+            (not p.is_symlink()) and
+            (p.suffix not in {".7z", ".xz", ".br", ".zst", ".gz", ".zip", ".whl", ".log"})
         ):
             yield p
 

@@ -24,7 +24,7 @@ def split_long_by_words(segment: str, max_chars: int = DEFAULT_MAX):
             if len(w) > max_chars:
                 i = 0
                 while i < len(w):
-                    slice_ = w[i : i + max_chars]
+                    slice_ = w[i: i + max_chars]
                     parts.append(slice_)
                     i += max_chars
                 cur = ""

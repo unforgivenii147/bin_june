@@ -29,9 +29,9 @@ def update_record_file(record_path: Path) -> bool:
                 continue
             file_path = row[0] if row else ""
             if (
-                file_path.endswith(".pyc")
-                or file_path in {"direct_url.json", "INSTALLER"}
-                or file_path.startswith("LICENSE")
+                file_path.endswith(".pyc") or
+                file_path in {"direct_url.json", "INSTALLER"} or
+                file_path.startswith("LICENSE")
             ):
                 continue
             filtered_lines.append(row)

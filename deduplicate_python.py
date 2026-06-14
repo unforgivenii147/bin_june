@@ -93,8 +93,8 @@ def extract_with_tree_sitter(code: str):
                 name_node = node.child_by_field_name("name")
                 if not name_node:
                     continue
-                name = code[name_node.start_byte : name_node.end_byte]
-                snippet = code[node.start_byte : node.end_byte]
+                name = code[name_node.start_byte: name_node.end_byte]
+                snippet = code[node.start_byte: node.end_byte]
                 kind = "function" if node.type == "function_definition" else "class"
                 objects.append({
                     "name": name,
@@ -104,7 +104,7 @@ def extract_with_tree_sitter(code: str):
                     "end_byte": node.end_byte,
                 })
             elif node.type == "expression_statement":
-                text = code[node.start_byte : node.end_byte]
+                text = code[node.start_byte: node.end_byte]
                 try:
                     parsed = ast.parse(text)
                     if len(parsed.body) == 1 and isinstance(parsed.body[0], ast.Assign):

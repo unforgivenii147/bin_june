@@ -1,17 +1,18 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-import argparse
-import shutil
 import sys
-import tempfile
+import shutil
 from pathlib import Path
+import argparse
+import tempfile
+
 
 COMMENT_PREFIXES = ("#", "//", "--")
 
 
 def is_comment(line: str) -> bool:
     stripped = line.lstrip()
-    return any((stripped.startswith(prefix) for prefix in COMMENT_PREFIXES))
+    return any(stripped.startswith(prefix) for prefix in COMMENT_PREFIXES)
 
 
 def process_lines(lines: list[str], start_idx, end_idx, unique=False, sort_comments=False):

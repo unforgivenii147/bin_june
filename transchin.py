@@ -14,7 +14,7 @@ non_english_pattern = re.compile("[^\\x00-\\x7F]")
 
 
 def split_into_chunks(text: str, size: int) -> list[str]:
-    return [text[i : i + size] for i in range(0, len(text), size)]
+    return [text[i: i + size] for i in range(0, len(text), size)]
 
 
 def translate_chunk(chunk: str) -> str:

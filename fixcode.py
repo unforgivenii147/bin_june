@@ -35,10 +35,10 @@ def is_code_line(line: str) -> bool:
             "from ",
             "@",
             "#",
-        ))
-        or "=" in s
-        or "(" in s
-        or s.endswith(":")
+        )) or
+        "=" in s or
+        "(" in s or
+        s.endswith(":")
     )
 
 

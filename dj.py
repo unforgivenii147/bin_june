@@ -54,9 +54,9 @@ def main() -> None:
             c += 1
             continue
         if (
-            loname.endswith("license.txt")
-            or (path.stem.lower() == "license" and (not path.suffix in {".c", ".py", ".pyx", ".js", ".pxd"}))
-            or any((loname == junk for junk in junk_files))
+            loname.endswith("license.txt") or
+            (path.stem.lower() == "license" and (not path.suffix in {".c", ".py", ".pyx", ".js", ".pxd"})) or
+            any((loname == junk for junk in junk_files))
         ) and path.exists():
             if RMIT:
                 remove_it(path)

@@ -20,7 +20,7 @@ def process_file(fp: Path) -> None:
     tree = parser.parse(src)
     root = tree.root_node
     impoz = []
-    results = [src[node.start_byte : node.end_byte].decode() for node in root.children if node.type in VALID]
+    results = [src[node.start_byte: node.end_byte].decode() for node in root.children if node.type in VALID]
     if results:
         for k in results:
             if k.startswith("import "):
@@ -59,10 +59,10 @@ def process_file(fp: Path) -> None:
             v = v.lower()
             ratio = fuzz.ratio(x, v)
             if (
-                ratio > 85
-                and len(x) > 3
-                and (len(v) > 3)
-                and (
+                ratio > 85 and
+                len(x) > 3 and
+                (len(v) > 3) and
+                (
                     x
                     not in {
                         "io",

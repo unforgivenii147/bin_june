@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 """
 rmc.py - Remove comments and docstrings from Python files
 Usage: python rmc.py [target_path]
@@ -14,12 +15,11 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Set, Tuple
+from dh import has_doc, remove_blank_lines
 
 
 @dataclass
 class FileResult:
-    """Store results for a processed file"""
-
     path: Path
     comments_removed: int
     docstrings_removed: int
@@ -28,67 +28,51 @@ class FileResult:
 
 
 class DocstringProcessor(ast.NodeTransformer):
-    """Process docstrings with special handling for empty bodies"""
-
     def __init__(self, preserve_module_docstring: bool = True) -> None:
         self.docstrings_removed = 0
         self.preserve_module_docstring = preserve_module_docstring
         super().__init__()
 
     def _remove_docstring(self, node) -> bool:
-        """Remove docstring and return True if removed"""
         docstring = ast.get_docstring(node)
         if docstring:
             is_module = isinstance(node, ast.Module)
-
             if is_module and self.preserve_module_docstring:
                 return False
-
             if node.body and isinstance(node.body[0], ast.Expr):
                 node.body.pop(0)
                 self.docstrings_removed += 1
-
                 if not node.body:
                     node.body.append(ast.Pass())
-
                 return True
         return False
 
     def visit_FunctionDef(self, node):
-        """Process function docstrings"""
         self._remove_docstring(node)
         self.generic_visit(node)
         return node
 
     def visit_AsyncFunctionDef(self, node):
-        """Process async function docstrings"""
         self._remove_docstring(node)
         self.generic_visit(node)
         return node
 
     def visit_ClassDef(self, node):
-        """Process class docstrings"""
         self._remove_docstring(node)
         self.generic_visit(node)
         return node
 
     def visit_Module(self, node):
-        """Process module docstrings"""
         self._remove_docstring(node)
         self.generic_visit(node)
         return node
 
 
 def extract_shebang_and_encoding(source_code: str) -> Tuple[str, str, str]:
-    """
-    Extract shebang line and encoding cookie from source code.
-    Returns (remaining_code, shebang, encoding)
-    """
     lines = source_code.splitlines(keepends=True)
     shebang = ""
     encoding = ""
     remaining_lines = []
-
     for i, line in enumerate(lines):
         if i == 0 and line.startswith("#!"):
             shebang = line
@@ -100,12 +84,10 @@ def extract_shebang_and_encoding(source_code: str) -> Tuple[str, str, str]:
             encoding = line
             continue
         remaining_lines.append(line)
-
-    return "".join(remaining_lines), shebang, encoding
+    return ("".join(remaining_lines), shebang, encoding)
 
 
 def restore_shebang_and_encoding(code: str, shebang: str, encoding: str) -> str:
-    """Restore shebang and encoding at the top of the file"""
     result = []
     if shebang:
         result.append(shebang)
@@ -118,30 +100,22 @@ def restore_shebang_and_encoding(code: str, shebang: str, encoding: str) -> str:
 
 
 def remove_comments_preserve_format(source_code: str) -> Tuple[str, int]:
-    """
-    Remove comments while preserving all whitespace and indentation.
-    Preserves # type: comments and comments inside strings.
-    """
     lines = source_code.splitlines(keepends=True)
     comments_removed = 0
     result_lines = []
-
     in_string = False
     string_char = None
     in_triple_quotes = False
     triple_quote_char = None
-
     for line in lines:
         new_line = []
         i = 0
         line_has_comment = False
         comment_start = -1
-
         while i < len(line):
             char = line[i]
-
-            if char in ('"', "'") and not in_triple_quotes:
-                if i + 2 < len(line) and line[i + 1] == char and line[i + 2] == char:
+            if char in ('"', "'") and (not in_triple_quotes):
+                if i + 2 < len(line) and line[i + 1] == char and (line[i + 2] == char):
                     if not in_string:
                         in_triple_quotes = True
                         triple_quote_char = char
@@ -154,150 +128,117 @@ def remove_comments_preserve_format(source_code: str) -> Tuple[str, int]:
                         new_line.append(char * 3)
                         i += 3
                         continue
-
-                if not in_string and not in_triple_quotes:
+                if not in_string and (not in_triple_quotes):
                     in_string = True
                     string_char = char
-                elif in_string and string_char == char and not in_triple_quotes:
+                elif in_string and string_char == char and (not in_triple_quotes):
                     in_string = False
                     string_char = None
                 new_line.append(char)
                 i += 1
                 continue
-
-            if char == "#" and not in_string and not in_triple_quotes:
+            if char == "#" and (not in_string) and (not in_triple_quotes):
                 remaining = line[i:]
                 if remaining.startswith("# type:"):
                     new_line.append(remaining)
                     break
-
                 line_has_comment = True
                 comment_start = i
                 break
-
             new_line.append(char)
             i += 1
-
         if line_has_comment and comment_start >= 0:
             comments_removed += 1
             result_line = "".join(new_line)
             result_lines.append(result_line.rstrip() + "\n")
         else:
             result_lines.append("".join(new_line))
+    return ("".join(result_lines), comments_removed)
 
-    return "".join(result_lines), comments_removed
 
-
-def validate_python_code(code: str, file_path: Path) -> Tuple[bool, Optional[str]]:
-    """Validate Python code with ast.parse"""
+def validate_python_code(code: str, path: Path) -> Tuple[bool, Optional[str]]:
     try:
         ast.parse(code)
-        return True, None
+        return (True, None)
     except SyntaxError as e:
-        return False, f"Syntax error at line {e.lineno}, column {e.offset}: {e.msg}"
+        return (False, f"Syntax error at line {e.lineno}, column {e.offset}: {e.msg}")
     except Exception as e:
-        return False, str(e)
+        return (False, str(e))
 
 
 def process_docstrings_ast(source_code: str, preserve_module_docstring: bool = True) -> Tuple[str, int]:
-    """
-    Remove docstrings using AST, preserving module docstring if requested.
-    Returns (modified_code, docstrings_removed)
-    """
     try:
         tree = ast.parse(source_code)
         processor = DocstringProcessor(preserve_module_docstring)
         modified_tree = processor.visit(tree)
         ast.fix_missing_locations(modified_tree)
-
         modified_code = ast.unparse(modified_tree)
-        return modified_code, processor.docstrings_removed
-
+        return (modified_code, processor.docstrings_removed)
     except SyntaxError as e:
         print(f"Warning: AST parsing error - {e}")
-        return source_code, 0
+        return (source_code, 0)
 
 
-def process_python_file(file_path: Path, preserve_module_docstring: bool = True) -> FileResult:
-    """
-    Process a single Python file:
-    - Preserve shebang and encoding
-    - Remove comments (except # type:)
-    - Remove docstrings (except module docstring if requested)
-    - Replace empty docstring-only bodies with pass
-    - Validate result before writing
-    """
+def process_python_file(path: Path, preserve_module_docstring: bool = True) -> FileResult:
     temp_file = None
-
     try:
-        original_code = file_path.read_text(encoding="utf-8")
-
-        code_without_header, shebang, encoding = extract_shebang_and_encoding(original_code)
-
-        # Remove comments first (preserving # type:)
+        orig = path.read_text(encoding="utf-8")
+        if not has_doc(orig):
+            return FileResult(
+                path=path, comments_removed=0, docstrings_removed=0, changed=False, error="already cleaned up"
+            )
+        code_without_header, shebang, encoding = extract_shebang_and_encoding(orig)
         code_no_comments, comments_removed = remove_comments_preserve_format(code_without_header)
 
         code_no_docstrings, docstrings_removed = process_docstrings_ast(code_no_comments, preserve_module_docstring)
 
         final_code = restore_shebang_and_encoding(code_no_docstrings, shebang, encoding)
+        code = remove_blank_lines(final_code)
 
         changed = comments_removed > 0 or docstrings_removed > 0
-
         if changed:
-            is_valid, error_msg = validate_python_code(final_code, file_path)
-
+            is_valid, error_msg = validate_python_code(final_code, path)
             if not is_valid:
                 return FileResult(
-                    path=file_path,
+                    path=path,
                     comments_removed=0,
                     docstrings_removed=0,
                     changed=False,
                     error=f"Validation failed: {error_msg}",
                 )
-
             with tempfile.NamedTemporaryFile(
-                mode="w", encoding="utf-8", dir=file_path.parent, prefix=".tmp_", delete=False
+                mode="w", encoding="utf-8", dir=path.parent, prefix=".tmp_", delete=False
             ) as tmp:
                 tmp.write(final_code)
                 temp_file = Path(tmp.name)
-
-            shutil.move(str(temp_file), str(file_path))
-
+            shutil.move(str(temp_file), str(path))
         return FileResult(
-            path=file_path, comments_removed=comments_removed, docstrings_removed=docstrings_removed, changed=changed
+            path=path, comments_removed=comments_removed, docstrings_removed=docstrings_removed, changed=changed
         )
-
     except Exception as e:
         if temp_file and temp_file.exists():
             temp_file.unlink()
-
-        return FileResult(path=file_path, comments_removed=0, docstrings_removed=0, changed=False, error=str(e))
+        return FileResult(path=path, comments_removed=0, docstrings_removed=0, changed=False, error=str(e))
 
 
 def find_python_files(path: Path) -> list[Path]:
-    """Recursively find all Python files in given path"""
     if path.is_file():
         if path.suffix == ".py":
             return [path]
         return []
-
     return list(path.rglob("*.py"))
 
 
 def format_result(result: FileResult) -> str:
-    """Format a single file result for output"""
     if result.error:
         return f"{result.path.name} (error: {result.error})"
-
     if not result.changed:
         return f"{result.path.name} (no change)"
-
     parts = []
     if result.comments_removed > 0:
-        parts.append(f"{result.comments_removed} comment{'s' if result.comments_removed != 1 else ''}")
+        parts.append(f"{result.comments_removed} comment{('s' if result.comments_removed != 1 else '')}")
     if result.docstrings_removed > 0:
-        parts.append(f"{result.docstrings_removed} docstring{'s' if result.docstrings_removed != 1 else ''}")
-
+        parts.append(f"{result.docstrings_removed} docstring{('s' if result.docstrings_removed != 1 else '')}")
     removal_text = ", ".join(parts)
     return f"{result.path.name} ({removal_text} removed)"
 
@@ -316,38 +257,29 @@ def main() -> None:
     parser.add_argument(
         "--dry-run", action="store_true", help="Show what would be changed without actually modifying files"
     )
-
     args = parser.parse_args()
-
     target_path = Path(args.target).resolve()
-
     if not target_path.exists():
         print(f"Error: {target_path} does not exist")
         sys.exit(1)
-
     python_files = find_python_files(target_path)
-
     if not python_files:
         print("No Python files found")
         return
-
-    print(f"{len(python_files)} file{'s' if len(python_files) != 1 else ''} found")
+    print(f"{len(python_files)} file{('s' if len(python_files) != 1 else '')} found")
     if args.dry_run:
         print("DRY RUN - No files will be modified")
-
     results = []
     preserve_module_docstring = not args.remove_module_docstring
-
     with ProcessPoolExecutor(max_workers=args.workers) as executor:
         future_to_file = {
             executor.submit(
                 process_python_file if not args.dry_run else lambda p: FileResult(p, 0, 0, False, "dry run"),
-                file_path,
+                path,
                 preserve_module_docstring,
-            ): file_path
-            for file_path in python_files
+            ): path
+            for path in python_files
         }
-
         for future in as_completed(future_to_file):
             result = future.result()
             results.append(result)
@@ -355,14 +287,12 @@ def main() -> None:
                 print(format_result(result))
             else:
                 print(f"{result.path.name} (would process)")
-
     if not args.dry_run:
         total_files = len(results)
-        changed_files = sum(1 for r in results if r.changed)
-        total_comments = sum(r.comments_removed for r in results)
-        total_docstrings = sum(r.docstrings_removed for r in results)
-        errors = sum(1 for r in results if r.error)
-
+        changed_files = sum((1 for r in results if r.changed))
+        total_comments = sum((r.comments_removed for r in results))
+        total_docstrings = sum((r.docstrings_removed for r in results))
+        errors = sum((1 for r in results if r.error))
         print(f"\n{'=' * 50}")
         print(f"Summary:")
         print(f"  Total files processed: {total_files}")

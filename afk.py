@@ -1,499 +1,358 @@
 #!/data/data/com.termux/files/usr/bin/python
+
 """
-Optimized import cleaner for Python files.
-Removes unused imports while preserving formatting and grouping.
-Supports single files, folders, and multiprocessing.
+Remove unused imports from Python files while preserving all other content.
+Uses direct source code scanning (ignoring comments and strings) for high accuracy.
+Supports single files, directories (recursive), and multiprocessing.
 """
 
 import sys
-import tokenize
-from io import StringIO
+import re
 from pathlib import Path
-from collections import defaultdict
-from typing import Set, Dict, List, Tuple, DefaultDict, Callable, Optional
+from typing import List, Set, Tuple, Dict, Optional
 from dataclasses import dataclass
-from joblib import Parallel, delayed
-
+from multiprocessing import Pool, cpu_count
 
 @dataclass
-class ImportChange:
-    """Represents changes made to imports in a file."""
-
-    file_path: str
+class FileResult:
+    """Result of processing a single file."""
+    path: str
     removed_imports: List[str]
-    kept_imports: List[str]
+    modified: bool
     error: Optional[str] = None
 
-
-class ImportParseException(Exception):
-    """Exception raised when parsing an import statement fails."""
-
-    pass
-
-
-def parse_import(line: str) -> Tuple[str, List[str]]:
-    """
-    Parse a 'from ... import ...' statement.
-
-    Args:
-        line: The import line to parse
-
-    Returns:
-        Tuple of (module_name, list_of_symbols)
-
-    Raises:
-        ImportParseException: If line is not a valid from-import
-    """
-    parts = line.split()
-    if len(parts) < 4 or parts[0] != "from" or parts[2] != "import":
-        raise ImportParseException(line)
-
-    module = parts[1]
-    # Join remaining parts (handles commas without spaces)
-    rest = " ".join(parts[3:])
-    symbols = [s.strip() for s in rest.split(",")]
-    return module, symbols
-
-
-def parse_splat_import(line: str) -> Set[str]:
-    """
-    Parse a direct 'import ...' statement.
-
-    Args:
-        line: The import line to parse
-
-    Returns:
-        Set of module names
-
-    Raises:
-        ImportParseException: If line is not a valid import
-    """
-    parts = line.split()
-    if len(parts) < 2 or parts[0] != "import":
-        raise ImportParseException(line)
-
-    return {s.strip() for s in " ".join(parts[1:]).split(",")}
-
-
-def gather_imports(lines: List[str]) -> Tuple[Dict[str, Set[str]], Set[str], List[str]]:
-    """
-    Extract all imports from lines, handling line continuations.
-
-    Args:
-        lines: List of source code lines
-
-    Returns:
-        Tuple of (imports_dict, splats_set, original_import_lines)
-    """
-    imports: DefaultDict[str, Set[str]] = defaultdict(set)
-    splats: Set[str] = set()
-    original_imports: List[str] = []
-
-    prev = ""
-    for line in lines:
-        if prev:
-            line = prev + line
-            prev = ""
-
-        # Handle line continuation
-        if line.rstrip().endswith("\\"):
-            prev = line.rstrip()[:-1]
-            continue
-
-        line = line.strip()
-        if not line:
-            continue
-
-        try:
-            module, symbols = parse_import(line)
-            imports[module].update(symbols)
-            original_imports.append(line)
-        except ImportParseException:
-            try:
-                modules = parse_splat_import(line)
-                splats.update(modules)
-                original_imports.append(line)
-            except ImportParseException:
-                # Not an import line, skip
-                pass
-
-    return imports, splats, original_imports
-
-
-def get_used_symbols(lines: List[str]) -> Set[str]:
-    """
-    Extract all used symbols from source code using tokenization.
-
-    Args:
-        lines: List of source code lines
-
-    Returns:
-        Set of used symbol names
-    """
-    source = "".join(lines)
-    used = {"*"}  # '*' always considered used (wildcard imports)
-
-    try:
-        tokens = tokenize.generate_tokens(StringIO(source).readline)
-        for ttype, token, _, _, _ in tokens:
-            if ttype == tokenize.NAME:
-                used.add(token)
-    except tokenize.TokenError:
-        # Handle incomplete/incorrect source
-        pass
-
-    return used
-
-
-def extract_imported_symbols(import_line: str) -> Set[str]:
-    """
-    Extract symbols imported by a single import statement.
-
-    Args:
-        import_line: The import statement line
-
-    Returns:
-        Set of imported symbol names
-    """
-    if import_line.startswith("from "):
-        try:
-            _, symbols = parse_import(import_line)
-            return set(symbols)
-        except ImportParseException:
-            return set()
-    elif import_line.startswith("import "):
-        try:
-            modules = parse_splat_import(import_line)
-            # For 'import module', we track the module name
-            return {m.split(".")[0] for m in modules}
-        except ImportParseException:
-            return set()
-    return set()
-
-
-def group_and_sort_symbols(symbols: Set[str]) -> Tuple[List[str], List[str], List[str]]:
-    """
-    Group symbols by case for organized output.
-
-    Args:
-        symbols: Set of symbol names
-
-    Returns:
-        Tuple of (lowercase, uppercase, mixedcase) symbol lists
-    """
-    lower = []
-    upper = []
-    mixed = []
-
-    for s in symbols:
-        if s.islower():
-            lower.append(s)
-        elif s.isupper():
-            upper.append(s)
-        else:
-            mixed.append(s)
-
-    # Sort with natural case-insensitive order for mixed case
-    lower.sort()
-    mixed.sort(key=str.lower)
-    upper.sort()
-
-    return lower, mixed, upper
-
-
-def format_imports(imports: Dict[str, Set[str]], splats: Set[str], max_line_length: int = 78) -> List[str]:
-    """
-    Format imports into clean, readable lines.
-
-    Args:
-        imports: Dictionary mapping modules to imported symbols
-        splats: Set of direct import statements
-        max_line_length: Maximum line length before wrapping
-
-    Returns:
-        List of formatted import lines
-    """
-    output = []
-
-    # Add direct imports
-    for module in sorted(splats):
-        output.append(f"import {module}")
-
-    # Add from-imports with line wrapping
-    for module, symbols in sorted(imports.items()):
-        if not symbols:
-            continue
-
-        lower, mixed, upper = group_and_sort_symbols(symbols)
-        all_symbols = lower + mixed + upper
-
-        line = f"from {module} import "
-
-        for sym in all_symbols:
-            if len(line) + len(sym) > max_line_length:
-                output.append(line.rstrip(", "))
-                line = f"from {module} import {sym}, "
+class ImportCleaner:
+    """Remove unused imports by scanning actual usage outside comments/strings."""
+    
+    # Imports that are always considered "used" (special cases)
+    ALWAYS_KEEP = {
+        ('__future__', 'annotations'),
+        ('__future__', 'print_function'),
+        ('__future__', 'unicode_literals'),
+        ('__future__', 'absolute_import'),
+        ('__future__', 'division'),
+        ('__future__', 'generators'),
+    }
+    
+    def __init__(self, verbose: bool = False):
+        self.verbose = verbose
+    
+    def find_python_files(self, paths: List[str], recursive: bool = True) -> List[Path]:
+        """Find all Python files from given paths."""
+        python_files = []
+        for path_str in paths:
+            path = Path(path_str)
+            if path.is_file():
+                if path.suffix == '.py':
+                    python_files.append(path)
+                elif self.verbose:
+                    print(f"Skipping non-Python file: {path}")
+            elif path.is_dir():
+                if recursive:
+                    python_files.extend(path.rglob("*.py"))
+                else:
+                    python_files.extend(path.glob("*.py"))
             else:
-                line += f"{sym}, "
-
-        if line:
-            output.append(line.rstrip(", "))
-
-    return output
-
-
-def cleanup_imports(source_lines: List[str]) -> Tuple[List[str], List[str]]:
-    """
-    Main function to clean unused imports from source code.
-
-    Args:
-        source_lines: List of source code lines
-
-    Returns:
-        Tuple of (cleaned_imports_list, removed_imports_list)
-    """
-    # Find all used symbols
-    used = get_used_symbols(source_lines)
-
-    # Gather all imports and original lines
-    imports_dict, splats_set, original_imports = gather_imports(source_lines)
-
-    # Track removed imports
-    removed_imports = []
-
-    # Remove unused symbols from imports
-    for module in list(imports_dict.keys()):
-        original_symbols = imports_dict[module].copy()
-        imports_dict[module] = {sym for sym in imports_dict[module] if sym in used}
-        removed_symbols = original_symbols - imports_dict[module]
-
-        if removed_symbols:
-            removed_imports.append(f"from {module} import {', '.join(sorted(removed_symbols))}")
-
-        if not imports_dict[module]:
-            del imports_dict[module]
-
-    # Remove unused splat imports
-    original_splats = splats_set.copy()
-    splats_set = {imp for imp in splats_set if any(imp.split(".")[0] in used for imp in [imp])}
-    removed_splats = original_splats - splats_set
-    for imp in sorted(removed_splats):
-        removed_imports.append(f"import {imp}")
-
-    # Format kept imports
-    kept_imports = format_imports(imports_dict, splats_set)
-
-    return kept_imports, removed_imports
-
-
-def get_python_files(directory: Path, recursive: bool = True) -> List[Path]:
-    """
-    Get all Python files in a directory.
-
-    Args:
-        directory: Directory to search
-        recursive: Whether to search subdirectories recursively
-
-    Returns:
-        List of Python file paths
-    """
-    pattern = "**/*.py" if recursive else "*.py"
-    return list(directory.glob(pattern))
-
-
-def process_file(file_path_str: str, in_place: bool = False, verbose: bool = False) -> ImportChange:
-    """
-    Process a single Python file to remove unused imports.
-
-    Args:
-        file_path_str: Path to the Python file as string
-        in_place: If True, modify file in place; if False, create _cleaned file
-        verbose: If True, print detailed information
-
-    Returns:
-        ImportChange object with details of changes
-    """
-    file_path = Path(file_path_str)
-
-    try:
-        # Read file
-        content = file_path.read_text(encoding="utf-8")
-        lines = content.splitlines(keepends=True)
-
-        # Clean imports
-        cleaned_imports, removed_imports = cleanup_imports(lines)
-
-        # Create result object
-        result = ImportChange(file_path=str(file_path), removed_imports=removed_imports, kept_imports=cleaned_imports)
-
-        # Only write if there are changes
-        if removed_imports:
-            output_content = "\n".join(cleaned_imports)
-
+                print(f"Path does not exist: {path}", file=sys.stderr)
+        return python_files
+    
+    def remove_comments_and_strings(self, source: str) -> str:
+        """Remove comments and string literals from source code to avoid false positives."""
+        # Simple but effective: remove triple-quoted strings first, then single-line comments
+        # This is not perfect but works for the purpose of finding identifiers.
+        
+        # Remove triple-quoted strings (both """ and ''')
+        def remove_triple_quotes(text, quote_char):
+            pattern = re.compile(f'{quote_char}{quote_char}{quote_char}.*?{quote_char}{quote_char}{quote_char}', re.DOTALL)
+            return pattern.sub(' ', text)
+        
+        source = remove_triple_quotes(source, '"')
+        source = remove_triple_quotes(source, "'")
+        
+        # Remove single-line strings
+        # Simple regex: match strings that are not part of comments (we'll handle comments next)
+        source = re.sub(r'"[^"\\]*(?:\\.[^"\\]*)*"', ' ', source)
+        source = re.sub(r"'[^'\\]*(?:\\.[^'\\]*)*'", ' ', source)
+        
+        # Remove comments (from # to end of line)
+        lines = []
+        for line in source.split('\n'):
+            # Find first # not inside quotes (but quotes already removed)
+            hash_pos = line.find('#')
+            if hash_pos >= 0:
+                line = line[:hash_pos]
+            lines.append(line)
+        source = '\n'.join(lines)
+        
+        return source
+    
+    def extract_imports(self, source_lines: List[str]) -> Dict[int, Dict]:
+        """
+        Extract all import statements with their line numbers and the names they define.
+        Returns dict: line_number -> {'type': 'import'/'from', 'names': set of defined names, 'original_line': str}
+        """
+        imports = {}
+        
+        # Regex patterns
+        import_pattern = re.compile(r'^\s*import\s+(.+?)(?:\s*#.*)?$')
+        from_import_pattern = re.compile(r'^\s*from\s+([\w.]+)\s+import\s+(.+?)(?:\s*#.*)?$')
+        
+        for i, line in enumerate(source_lines, 1):
+            stripped = line.strip()
+            if not stripped or stripped.startswith('#'):
+                continue
+            
+            # Match simple import: import a, b as c, d.e
+            m = import_pattern.match(line)
+            if m:
+                imports_line = m.group(1)
+                names = set()
+                # Split by comma, handle 'as'
+                for part in imports_line.split(','):
+                    part = part.strip()
+                    if ' as ' in part:
+                        # import module as alias
+                        original, alias = part.split(' as ')
+                        names.add(alias.strip())
+                    else:
+                        # import module (take the first part before dot)
+                        # For 'import lz4.frame', the name 'lz4' is what gets used
+                        base_name = part.split('.')[0]
+                        names.add(base_name)
+                if names:
+                    imports[i] = {
+                        'type': 'import',
+                        'names': names,
+                        'line': line.rstrip('\n'),
+                        'module': None
+                    }
+                continue
+            
+            # Match from ... import ...
+            m = from_import_pattern.match(line)
+            if m:
+                module = m.group(1)
+                imports_part = m.group(2)
+                names = set()
+                for part in imports_part.split(','):
+                    part = part.strip()
+                    if part == '*':
+                        # Cannot safely remove star imports
+                        names.add('*')
+                    elif ' as ' in part:
+                        original, alias = part.split(' as ')
+                        names.add(alias.strip())
+                    else:
+                        names.add(part.strip())
+                if names and '*' not in names:  # Skip star imports
+                    imports[i] = {
+                        'type': 'from',
+                        'names': names,
+                        'line': line.rstrip('\n'),
+                        'module': module
+                    }
+        
+        return imports
+    
+    def get_all_used_names(self, source_clean: str) -> Set[str]:
+        """
+        Extract all identifiers used in the code (after removing comments/strings).
+        """
+        # Find all words that look like identifiers (letters, numbers, underscore, not starting with digit)
+        words = re.findall(r'\b[a-zA-Z_][a-zA-Z0-9_]*\b', source_clean)
+        return set(words)
+    
+    def import_is_used(self, import_info: Dict, used_names: Set[str], source_lines: List[str]) -> bool:
+        """
+        Determine if an import is actually used in the file.
+        Handles module prefixes (e.g., 'lz4.frame' usage as 'lz4').
+        """
+        # Always keep __future__ imports
+        if import_info['type'] == 'from' and import_info.get('module') == '__future__':
+            return True
+        
+        names = import_info['names']
+        
+        # For 'from module import name', the name is directly used
+        if import_info['type'] == 'from':
+            for name in names:
+                if name in used_names:
+                    return True
+            # Also check if the module itself is used as a prefix? Not typical for 'from'
+            return False
+        
+        # For 'import module' or 'import module as alias'
+        # The name could be the alias or the base module (e.g., 'import lz4.frame' -> 'lz4' is used)
+        for name in names:
+            if name in used_names:
+                return True
+            # Also check for dotted usage: if name is 'lz4', check for 'lz4.' in source
+            # We need to look for patterns like 'lz4.frame' or 'lz4.something'
+            # To avoid re-scanning the whole file multiple times, we'll do a quick check.
+            # But used_names already contains 'lz4' if it appears, so this might be enough.
+            # However, if the code uses 'lz4.frame.compress()', the token 'lz4' is present.
+            # So the above check should catch it.
+            pass
+        
+        # Special case: 'import io' might be used via 'io.' - 'io' will appear as a name
+        return False
+    
+    def clean_file(self, file_path: Path, in_place: bool = False) -> FileResult:
+        """Clean unused imports from a single file."""
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                original_lines = f.readlines()
+            
+            if not any(l.strip() for l in original_lines):
+                return FileResult(str(file_path), [], False)
+            
+            source = ''.join(original_lines)
+            
+            # Clean version for scanning (remove comments/strings)
+            clean_source = self.remove_comments_and_strings(source)
+            used_names = self.get_all_used_names(clean_source)
+            
+            # Extract all imports
+            imports = self.extract_imports(original_lines)
+            
+            # Find unused imports
+            lines_to_remove = set()
+            removed_list = []
+            
+            for line_num, imp_info in imports.items():
+                if not self.import_is_used(imp_info, used_names, original_lines):
+                    lines_to_remove.add(line_num)
+                    removed_list.append(imp_info['line'].strip())
+            
+            if not removed_list:
+                if self.verbose:
+                    print(f"✓ No unused imports: {file_path}")
+                return FileResult(str(file_path), [], False)
+            
+            # Rebuild file without those lines
+            cleaned_lines = [line for i, line in enumerate(original_lines, 1) if i not in lines_to_remove]
+            cleaned_content = ''.join(cleaned_lines)
+            
+            # Write output
             if in_place:
-                # This simplified version only outputs imports
-                # For full preservation, preserve non-import lines
-                file_path.write_text(output_content, encoding="utf-8")
-                if verbose:
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    f.write(cleaned_content)
+                if self.verbose:
                     print(f"✓ Updated: {file_path}")
             else:
-                output_path = file_path.with_stem(f"{file_path.stem}_cleaned")
-                output_path.write_text(output_content, encoding="utf-8")
-                if verbose:
+                output_path = file_path.parent / f"{file_path.stem}_cleaned{file_path.suffix}"
+                with open(output_path, 'w', encoding='utf-8') as f:
+                    f.write(cleaned_content)
+                if self.verbose:
                     print(f"✓ Created: {output_path}")
+            
+            return FileResult(str(file_path), removed_list, True)
+        
+        except Exception as e:
+            error_msg = f"Error processing {file_path}: {str(e)}"
+            if self.verbose:
+                print(f"✗ {error_msg}", file=sys.stderr)
+            return FileResult(str(file_path), [], False, error_msg)
+    
+    def process_file_wrapper(self, args: Tuple[str, bool]) -> FileResult:
+        return self.clean_file(Path(args[0]), args[1])
 
-        return result
-
-    except Exception as e:
-        return ImportChange(file_path=str(file_path), removed_imports=[], kept_imports=[], error=str(e))
-
-
-def mpf_joblib(process_function: Callable, files: List[Path], **kwargs) -> List:
-    """
-    Process files in parallel using joblib.
-
-    Args:
-        process_function: Function to process each file
-        files: List of file paths
-        **kwargs: Additional arguments to pass to process_function
-
-    Returns:
-        List of results from process_function
-    """
-    file_strings = [str(f) for f in files]
-    return Parallel(n_jobs=-1, verbose=0)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
-
-
-def print_summary(results: List[ImportChange], verbose: bool = False) -> None:
-    """
-    Print summary of changes.
-
-    Args:
-        results: List of ImportChange objects
-        verbose: If True, print detailed information
-    """
-    total_files = len(results)
-    modified_files = [r for r in results if r.removed_imports and not r.error]
-    error_files = [r for r in results if r.error]
-    unchanged_files = [r for r in results if not r.removed_imports and not r.error]
-
-    print("\n" + "=" * 60)
+def print_summary(results: List[FileResult], verbose: bool = False):
+    """Print a summary of all processed files."""
+    total = len(results)
+    modified = [r for r in results if r.modified]
+    errors = [r for r in results if r.error]
+    
+    print("\n" + "=" * 70)
     print("IMPORT CLEANUP SUMMARY")
-    print("=" * 60)
-    print(f"Total files processed: {total_files}")
-    print(f"Files with removed imports: {len(modified_files)}")
-    print(f"Unchanged files: {len(unchanged_files)}")
-    print(f"Files with errors: {len(error_files)}")
-
-    if modified_files and verbose:
-        print("\n" + "-" * 60)
-        print("DETAILED CHANGES:")
-        print("-" * 60)
-        for result in modified_files:
-            print(f"\n📄 {result.file_path}")
-            if result.removed_imports:
-                print(f"  Removed ({len(result.removed_imports)}):")
-                for imp in result.removed_imports:
-                    print(f"    - {imp}")
-            if result.kept_imports:
-                print(f"  Kept ({len(result.kept_imports)}):")
-                for imp in result.kept_imports[:5]:  # Show first 5 kept imports
-                    print(f"    + {imp}")
-                if len(result.kept_imports) > 5:
-                    print(f"    ... and {len(result.kept_imports) - 5} more")
-
-    elif modified_files and not verbose:
-        print("\nModified files:")
-        for result in modified_files:
-            print(f"  • {result.file_path} ({len(result.removed_imports)} import(s) removed)")
-
-    if error_files:
-        print("\n" + "-" * 60)
+    print("=" * 70)
+    print(f"Total files processed: {total}")
+    print(f"Files modified: {len(modified)}")
+    print(f"Errors: {len(errors)}")
+    
+    if modified:
+        total_removed = sum(len(r.removed_imports) for r in modified)
+        print(f"Total unused imports removed: {total_removed}")
+        
+        print("\n" + "-" * 70)
+        print("MODIFIED FILES:")
+        print("-" * 70)
+        
+        for result in modified:
+            print(f"\n📄 {result.path}")
+            print(f"   Removed {len(result.removed_imports)} import(s):")
+            for imp in result.removed_imports[:15]:
+                print(f"     - {imp}")
+            if len(result.removed_imports) > 15:
+                print(f"     ... and {len(result.removed_imports) - 15} more")
+    
+    if errors and verbose:
+        print("\n" + "-" * 70)
         print("ERRORS:")
-        print("-" * 60)
-        for result in error_files:
-            print(f"  ❌ {result.file_path}: {result.error}")
+        print("-" * 70)
+        for result in errors:
+            print(f"   ❌ {result.error}")
 
-    total_removed = sum(len(r.removed_imports) for r in results)
-    print(f"\n📊 Total unused imports removed: {total_removed}")
-
-
-def main() -> None:
-    """Main entry point with folder support and multiprocessing."""
+def main():
     import argparse
-
+    
     parser = argparse.ArgumentParser(
-        description="Remove unused imports from Python files",
+        description="Remove unused imports from Python files (accurate text scanning)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
   %(prog)s script.py                    # Clean single file
-  %(prog)s src/                         # Clean all Python files in folder
-  %(prog)s src/ tests/ --recursive      # Clean multiple folders recursively
-  %(prog)s . --in-place --verbose       # Clean current directory in place with details
-  %(prog)s file1.py file2.py --no-parallel  # Process sequentially
-        """,
-    )
+  %(prog)s src/                         # Clean directory (recursive)
+  %(prog)s src/ --no-recursive          # Clean directory (non-recursive)
+  %(prog)s . -i -v                      # Clean current directory in place with verbose
+  %(prog)s file1.py file2.py --no-mp    # Process multiple files sequentially
+  %(prog)s src/ tests/ -i               # Clean multiple directories in place
 
-    parser.add_argument("paths", nargs="*", help="Files or directories to process (defaults to current directory)")
-    parser.add_argument(
-        "--in-place", "-i", action="store_true", help="Modify files in place instead of creating _cleaned copies"
+Note: __future__ imports are always preserved. Imports used inside conditional blocks or
+      via module prefixes (e.g., 'import lz4.frame' used as 'lz4.frame.compress()') are detected.
+        """
     )
-    parser.add_argument("--verbose", "-v", action="store_true", help="Show detailed information about changes")
-    parser.add_argument(
-        "--recursive", "-r", action="store_true", help="Recursively process subdirectories (default: True)"
-    )
-    parser.add_argument("--no-parallel", "-np", action="store_true", help="Disable parallel processing")
-    parser.add_argument("--no-recursive", action="store_true", help="Do not process subdirectories recursively")
-
+    
+    parser.add_argument("paths", nargs="+", help="Files or directories to process")
+    parser.add_argument("--in-place", "-i", action="store_true", 
+                       help="Modify files in place (creates _cleaned copies by default)")
+    parser.add_argument("--verbose", "-v", action="store_true",
+                       help="Show detailed output")
+    parser.add_argument("--recursive", "-r", action="store_true", default=True,
+                       help="Process directories recursively (default: True)")
+    parser.add_argument("--no-recursive", action="store_true",
+                       help="Do not process directories recursively")
+    parser.add_argument("--no-mp", action="store_true",
+                       help="Disable multiprocessing")
+    
     args = parser.parse_args()
-
-    # Determine recursive flag
+    
     recursive = args.recursive and not args.no_recursive
-
-    # Collect all Python files
-    files = []
-    cwd = Path.cwd()
-
-    if args.paths:
-        for path_str in args.paths:
-            p = Path(path_str)
-            if p.is_file():
-                if p.suffix == ".py":
-                    files.append(p)
-                elif args.verbose:
-                    print(f"⚠ Skipping non-Python file: {p}")
-            elif p.is_dir():
-                files.extend(get_python_files(p, recursive=recursive))
-            else:
-                print(f"⚠ Path does not exist: {p}", file=sys.stderr)
-    else:
-        # No arguments, process current directory
-        files = get_python_files(cwd, recursive=recursive)
-
-    if not files:
+    
+    cleaner = ImportCleaner(verbose=args.verbose)
+    python_files = cleaner.find_python_files(args.paths, recursive)
+    
+    if not python_files:
         print("No Python files found to process.")
         return
-
+    
     if args.verbose:
-        print(f"Found {len(files)} Python file(s) to process")
-        if args.no_parallel:
+        print(f"Found {len(python_files)} Python file(s) to process")
+        if args.no_mp:
             print("Processing sequentially...")
         else:
-            print("Processing in parallel...")
-
-    # Process files
-    if args.no_parallel:
+            print(f"Processing with {cpu_count()} CPU cores...")
+    
+    if args.no_mp or len(python_files) < 2:
         results = []
-        for file in files:
-            result = process_file(str(file), in_place=args.in_place, verbose=args.verbose)
-            results.append(result)
+        for file_path in python_files:
+            results.append(cleaner.clean_file(file_path, args.in_place))
     else:
-        results = mpf_joblib(process_file, files, in_place=args.in_place, verbose=args.verbose)
-
-    # Print summary
-    print_summary(results, verbose=args.verbose)
-
+        with Pool(processes=cpu_count()) as pool:
+            tasks = [(str(fp), args.in_place) for fp in python_files]
+            results = pool.map(cleaner.process_file_wrapper, tasks)
+    
+    print_summary(results, args.verbose)
 
 if __name__ == "__main__":
     main()

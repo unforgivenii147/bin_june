@@ -104,7 +104,7 @@ def wrap_css_lines(css: str, line_length: int = 80) -> str:
     lines, line_start = ([], 0)
     for i, char in enumerate(css):
         if char == "}" and i - line_start >= line_length:
-            lines.append(css[line_start : i + 1])
+            lines.append(css[line_start: i + 1])
             line_start = i + 1
     if line_start < len(css):
         lines.append(css[line_start:])

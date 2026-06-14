@@ -58,7 +58,7 @@ def main() -> None:
     print(colored("\nPreview:", "cyan", attrs=["bold"]))
     for f in files:
         name = f.name
-        core = name[len(prefix) : len(name) - len(suffix)]
+        core = name[len(prefix): len(name) - len(suffix)]
         core = apply_regex(core)
         new_name = f"{f.stem.split('.')[0]}.{core}{f.suffix}"
         new_name = re.sub("\\.+", ".", new_name)

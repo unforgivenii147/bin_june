@@ -96,7 +96,7 @@ class EntityExtractor(ast.NodeVisitor):
         code_slice = self.source_lines[start_line:end_line]
 
         if node.col_offset is not None and code_slice:
-            code_slice[0] = code_slice[0][node.col_offset :]
+            code_slice[0] = code_slice[0][node.col_offset:]
 
         if node.end_col_offset is not None and node.end_col_offset > 0 and code_slice:
             last_line = code_slice[-1]
@@ -195,7 +195,7 @@ class ImportCollector:
             imports = []
             for node in root.children:
                 if node.type in ImportCollector.VALID_IMPORT_TYPES:
-                    import_text = content[node.start_byte : node.end_byte].decode("utf-8", errors="ignore")
+                    import_text = content[node.start_byte: node.end_byte].decode("utf-8", errors="ignore")
                     # Skip relative imports
                     if not import_text.startswith("from ."):
                         imports.append(import_text)

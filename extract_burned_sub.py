@@ -53,7 +53,7 @@ def extract_frames(
             break
         if frame_count % frame_interval == 0:
             h = frame.shape[0]
-            region = frame[int(h * subtitle_top_ratio) :].copy()
+            region = frame[int(h * subtitle_top_ratio):].copy()
             if prev_region is None or not _frames_are_similar(prev_region, region):
                 frames.append((frame_count / native_fps, region))
                 prev_region = region

@@ -57,7 +57,7 @@ def stable_hash(node: ast.AST) -> str:
 
 
 def get_source_segment(lines, lineno, end_lineno) -> str:
-    return "".join(lines[lineno - 1 : end_lineno])
+    return "".join(lines[lineno - 1: end_lineno])
 
 
 def is_simple_top_level_assign(node) -> bool:

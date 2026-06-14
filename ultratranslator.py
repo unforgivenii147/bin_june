@@ -22,7 +22,7 @@ def is_english(text: str) -> bool:
 
 
 def chunk_text(text: str, size: int = 800) -> list[str]:
-    return [text[i : i + size] for i in range(0, len(text), size)]
+    return [text[i: i + size] for i in range(0, len(text), size)]
 
 
 def translate_chunk(chunk: str) -> str:
@@ -71,12 +71,12 @@ def translate_python_file(source: str) -> str:
     for i, token in enumerate(tokens):
         tok_type, tok_str, start, end, _line = token
         if start > prev_end:
-            lines_between = source.splitlines()[prev_end[0] - 1 : start[0]]
+            lines_between = source.splitlines()[prev_end[0] - 1: start[0]]
             if len(lines_between) > 1:
                 result.extend((line_content + "\n" for line_content in lines_between[:-1]))
                 result.append(lines_between[-1][: start[1]])
             elif lines_between:
-                result.append(lines_between[0][prev_end[1] : start[1]])
+                result.append(lines_between[0][prev_end[1]: start[1]])
         if tok_type == tokenize.COMMENT and (not is_english(tok_str)):
             comment_text = tok_str[1:].strip()
             print(f"  Translating comment: {comment_text[:50]}...")

@@ -22,7 +22,7 @@ def parse_magic_line(line: str):
         return None
     rule_index = int(match.group(1)) if match.group(1) else None
     offset = int(match.group(2))
-    value_part = line[match.end() :]
+    value_part = line[match.end():]
     try:
         value_bytes = value_part.encode("latin-1")
     except UnicodeEncodeError:

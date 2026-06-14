@@ -138,40 +138,40 @@ class PathlibTransformer(ast.NodeTransformer):
     def _is_os_path(self, node: ast.AST) -> bool:
         """Check if node represents os.path."""
         return (
-            isinstance(node, ast.Attribute)
-            and isinstance(node.value, ast.Name)
-            and node.value.id == self.os_var_name
-            and node.attr == "path"
+            isinstance(node, ast.Attribute) and
+            isinstance(node.value, ast.Name) and
+            node.value.id == self.os_var_name and
+            node.attr == "path"
         )
 
     def _is_os_call(self, node: ast.Call, func_name: str) -> bool:
         """Check if node is a call to os.func_name."""
         return (
-            isinstance(node.func, ast.Attribute)
-            and isinstance(node.func.value, ast.Name)
-            and node.func.value.id == self.os_var_name
-            and node.func.attr == func_name
+            isinstance(node.func, ast.Attribute) and
+            isinstance(node.func.value, ast.Name) and
+            node.func.value.id == self.os_var_name and
+            node.func.attr == func_name
         )
 
     def _is_os_path_call(self, node: ast.Call, func_name: str) -> bool:
         """Check if node is a call to os.path.func_name."""
         # Direct call: os.path.func_name()
         if (
-            isinstance(node.func, ast.Attribute)
-            and isinstance(node.func.value, ast.Attribute)
-            and isinstance(node.func.value.value, ast.Name)
-            and node.func.value.value.id == self.os_var_name
-            and node.func.value.attr == "path"
-            and node.func.attr == func_name
+            isinstance(node.func, ast.Attribute) and
+            isinstance(node.func.value, ast.Attribute) and
+            isinstance(node.func.value.value, ast.Name) and
+            node.func.value.value.id == self.os_var_name and
+            node.func.value.attr == "path" and
+            node.func.attr == func_name
         ):
             return True
 
         # Call via alias: path_var.func_name() where path_var = os.path
         if (
-            isinstance(node.func, ast.Attribute)
-            and isinstance(node.func.value, ast.Name)
-            and node.func.value.id == self.os_path_var_name
-            and node.func.attr == func_name
+            isinstance(node.func, ast.Attribute) and
+            isinstance(node.func.value, ast.Name) and
+            node.func.value.id == self.os_path_var_name and
+            node.func.attr == func_name
         ):
             return True
 
@@ -192,11 +192,11 @@ class PathlibTransformer(ast.NodeTransformer):
 
         # Handle direct string-based os calls (like os.'remove'(path))
         if (
-            isinstance(node.func, ast.Name)
-            and node.func.id == self.os_var_name
-            and node.args
-            and isinstance(node.args[0], ast.Constant)
-            and isinstance(node.args[0].value, str)
+            isinstance(node.func, ast.Name) and
+            node.func.id == self.os_var_name and
+            node.args and
+            isinstance(node.args[0], ast.Constant) and
+            isinstance(node.args[0].value, str)
         ):
             func_name = node.args[0].value
             if func_name in self.OS_MAPPINGS:
@@ -331,9 +331,9 @@ class PathlibTransformer(ast.NodeTransformer):
                 return node
             # Check for existing pathlib methods
             if (
-                isinstance(node.func, ast.Attribute)
-                and isinstance(node.func.value, ast.Name)
-                and node.func.value.id in self.pathlib_imports
+                isinstance(node.func, ast.Attribute) and
+                isinstance(node.func.value, ast.Name) and
+                node.func.value.id in self.pathlib_imports
             ):
                 return node
 

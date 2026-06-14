@@ -126,7 +126,7 @@ def compress_brotli_streaming(data, level, chunk_size=512 * 1024) -> bytes:
     compressor = brotli.Compressor(quality=level)
     result_parts = []
     for i in range(0, len(data), chunk_size):
-        chunk = data[i : i + chunk_size]
+        chunk = data[i: i + chunk_size]
         result_parts.append(compressor.process(chunk))
     result_parts.append(compressor.finish())
     return b"".join(result_parts)

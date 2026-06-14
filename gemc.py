@@ -30,7 +30,7 @@ def strip_file(file_path) -> None:
         modifications = []
         for node, tag in captures:
             if tag == "comment":
-                comment_text = source_code[node.start_byte : node.end_byte]
+                comment_text = source_code[node.start_byte: node.end_byte]
                 if not should_preserve_comment(comment_text):
                     modifications.append((node.start_byte, node.end_byte, ""))
             elif tag == "docstring":

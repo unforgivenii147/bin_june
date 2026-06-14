@@ -86,7 +86,7 @@ def enhanced_shuffle_large_file(input_file_path: Path, output_file_path: Path) -
                 else:
                     end_of_line_offset = file_size
                 actual_end_of_line = mm.find(b"\n", offset)
-                line_data = mm[offset:file_size] if actual_end_of_line == -1 else mm[offset : actual_end_of_line + 1]
+                line_data = mm[offset:file_size] if actual_end_of_line == -1 else mm[offset: actual_end_of_line + 1]
                 outfile.write(line_data)
                 if (i + 1) % 100000 == 0:
                     print(f"  {i + 1}/{original_line_count} lines written...", end="\r")

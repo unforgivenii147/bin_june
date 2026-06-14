@@ -34,7 +34,7 @@ def sort_uniq(path: Path, show_diff: bool = False) -> int:
         return 0
     if original_count > 1000:
         chunk_size = len(lines) // 5
-        chunks = [lines[i : i + chunk_size] for i in range(0, len(lines), chunk_size)]
+        chunks = [lines[i: i + chunk_size] for i in range(0, len(lines), chunk_size)]
         with get_context("spawn").Pool(4) as pool:
             processed = pool.map(_process_chunk, chunks)
         all_lines = [line for group in processed for line in group]

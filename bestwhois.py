@@ -4,6 +4,9 @@
 (c) WhoisXML API Inc. 2019.
 """
 
+from pygments.lexers import JsonLexer
+from pygments.formatters import TerminalFormatter
+from pygments import highlight
 import datetime
 import json
 import os.path
@@ -17,9 +20,6 @@ try:
     import idna
 except:
     IDN = False
-from pygments import highlight
-from pygments.formatters import TerminalFormatter
-from pygments.lexers import JsonLexer
 
 # Static config
 VERSION = "0.1.0"
@@ -200,13 +200,13 @@ else:
 
 # Deciding which API to use
 if ARGS.history or (
-    ARGS.since_date is not None
-    or ARGS.created_date_from is not None
-    or ARGS.created_date_to is not None
-    or ARGS.updated_date_from is not None
-    or ARGS.updated_date_to is not None
-    or ARGS.expired_date_from is not None
-    or ARGS.expired_date_to is not None
+    ARGS.since_date is not None or
+    ARGS.created_date_from is not None or
+    ARGS.created_date_to is not None or
+    ARGS.updated_date_from is not None or
+    ARGS.updated_date_to is not None or
+    ARGS.expired_date_from is not None or
+    ARGS.expired_date_to is not None
 ):
     API = "https://whois-history-api.whoisxmlapi.com/api/v1?" + "apiKey=" + apiKey + "&outputformat=JSON&mode=purchase"
     ARGS.history = True

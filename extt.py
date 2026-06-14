@@ -15,7 +15,7 @@ VALID = {"function_definition", "class_definition"}
 
 
 def get_node_text(src: bytes, node) -> str:
-    return src[node.start_byte : node.end_byte].decode()
+    return src[node.start_byte: node.end_byte].decode()
 
 
 def get_node_name(node):

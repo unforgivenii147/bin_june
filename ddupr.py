@@ -13,6 +13,8 @@ Usage
 """
 
 from __future__ import annotations
+import lzma_mt
+import brotlicffi as brotli
 
 import argparse
 import ast
@@ -31,8 +33,6 @@ import zstandard as zstd
 from loguru import logger
 
 HAS_ZST = True
-import brotlicffi as brotli
-import lzma_mt
 
 HAS_BR = True
 ARCHIVE_EXTENSIONS = {".zip", ".tar", ".gz", ".bz2", ".xz", ".tgz", ".tbz2", ".zst", ".br"}

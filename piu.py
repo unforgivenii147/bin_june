@@ -18,7 +18,7 @@ def install(packages: list[str]) -> int:
 def pkg_name(txt: str):
     indx = txt.index("-")
     slash = txt.rfind("/")
-    return txt[slash + 1 : indx]
+    return txt[slash + 1: indx]
 
 
 def install_by_wildcard(pkg: str) -> None:
