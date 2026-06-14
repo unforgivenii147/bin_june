@@ -61,8 +61,8 @@ def remove_remote_rst_images(text: str) -> str:
 
 
 def process_file(path: Path):
-    original = path.read_text(encoding="utf-8", errors="ignore")
     path = Path(path)
+    original = path.read_text(encoding="utf-8", errors="ignore")
     modified = original
     if path.suffix.lower() in {".html", ".htm"}:
         modified = remove_remote_html_images(original)

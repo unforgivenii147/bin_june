@@ -19,8 +19,8 @@ def remove_tag_from_html_file(file_path, tag_name):
         print(f"❌ Error processing {file_path}: {e}")
 
 
-def process_directory(root_dir, tag_name):
-    for dirpath, _, filenames in os.walk(root_dir):
+def process_directory(cwd, tag_name):
+    for dirpath, _, filenames in os.walk(cwd):
         for filename in filenames:
             if filename.lower().endswith((".html", ".txt")):
                 full_path = os.path.join(dirpath, filename)

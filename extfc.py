@@ -97,9 +97,9 @@ for folder, defs_list in folder_definitions.items():
     content = "\n".join(defs_list)
     header = "#!/usr/bin/env python\n"
     out_file.write_text(header + content)
-    folder_def_count = len(
-        [d for d in defs_list if d.strip() and (not d.startswith("#")) and (not d.startswith("\n#"))]
-    )
+    folder_def_count = len([
+        d for d in defs_list if d.strip() and (not d.startswith("#")) and (not d.startswith("\n#"))
+    ])
     print(
         f"✅ saved: {out_file} ({folder_def_count} definitions from {len([f for f in defs_list if 'File:' in f])} files)"
     )

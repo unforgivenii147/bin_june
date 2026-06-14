@@ -101,8 +101,8 @@ def main():
 
     filename = sys.argv[1]
     output_path = Path(filename)
-    current_dir = Path.cwd()
-    is_script_dir = current_dir in SCRIPT_DIRS
+    cwd = Path.cwd()
+    is_script_dir = cwd in SCRIPT_DIRS
 
     # Get clipboard content
     content = get_clipboard_content()

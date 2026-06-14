@@ -5,8 +5,8 @@ from pathlib import Path
 
 
 def process_file(path, text):
-    content = path.read_text().lower()
     path = Path(path)
+    content = path.read_text().lower()
     target1 = "requires-dist: " + text
     if target1 in content:
         print(path.parent.name)

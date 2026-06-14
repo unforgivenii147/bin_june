@@ -6,9 +6,10 @@ import mmap
 import shutil
 import sys
 import tempfile
-import py7zr
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+
+import py7zr
 
 # Use a bounded thread pool instead of semaphore
 MAX_WORKERS = 2  # 7z compression is CPU intensive, limit parallel operations

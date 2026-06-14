@@ -11,8 +11,8 @@ MAX_QUEUE = 16
 
 
 def process_file(fn):
-    text = ""
     path = Path(path)
+    text = ""
     text = Path(fn).read_text(encoding="utf-8")
     stack = []
     mapping = {")": "(", "]": "[", "}": "{"}

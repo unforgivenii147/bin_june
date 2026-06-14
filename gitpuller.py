@@ -5,7 +5,8 @@ Requires gitpython library: pip install gitpython
 """
 
 from pathlib import Path
-from git import Repo, GitCommandError
+
+from git import GitCommandError, Repo
 
 
 def find_git_repos(root_path: Path) -> list[Path]:
@@ -28,10 +29,10 @@ def find_git_repos(root_path: Path) -> list[Path]:
 
 def git_pull_all():
     """Run git pull on all git repositories in current directory and subdirectories."""
-    current_dir = Path.cwd()
+    cwd = Path.cwd()
 
-    print(f"🔍 Scanning for git repositories in: {current_dir}")
-    repos = find_git_repos(current_dir)
+    print(f"🔍 Scanning for git repositories in: {cwd}")
+    repos = find_git_repos(cwd)
 
     if not repos:
         print("No git repositories found")
@@ -43,7 +44,7 @@ def git_pull_all():
     failed_repos = []
 
     for repo_path in repos:
-        print(f"📁 Repository: {repo_path.relative_to(current_dir)}")
+        print(f"📁 Repository: {repo_path.relative_to(cwd)}")
 
         try:
             repo = Repo(repo_path)
@@ -101,12 +102,12 @@ def git_pull_all():
     if pulled_repos:
         print(f"\n✅ Successfully pulled ({len(pulled_repos)} repos):")
         for repo_path in pulled_repos:
-            print(f"   - {repo_path.relative_to(current_dir)}")
+            print(f"   - {repo_path.relative_to(cwd)}")
 
     if failed_repos:
         print(f"\n❌ Failed ({len(failed_repos)} repos):")
         for repo_path, error in failed_repos:
-            print(f"   - {repo_path.relative_to(current_dir)}: {error}")
+            print(f"   - {repo_path.relative_to(cwd)}: {error}")
 
 
 if __name__ == "__main__":

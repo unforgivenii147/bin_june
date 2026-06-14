@@ -9,8 +9,8 @@ from dh import get_files
 
 
 def process_file(image_path):
-    art = AsciiArt.from_image(image_path)
     path = Path(path)
+    art = AsciiArt.from_image(image_path)
     art.to_terminal(columns=os.get_terminal_size().columns, width_ratio=2, monochrome=False)
 
 

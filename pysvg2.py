@@ -5,7 +5,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from dh import fsz, get_files, gsz, mpf3, runcmd
+from dh import fsz, get_files, gsz, mpf3, runcmd, rrs
 
 
 def process_file(path):
@@ -19,11 +19,9 @@ def process_file(path):
             tmp_out_path = tmp_out.name
         runcmd(["svgcleaner", str(path), str(tmp_out_path)], show_output=False)
         after = Path(tmp_out_path).stat().st_size
-        dsz = before - after
         if after:
             Path(tmp_out_path).replace(path)
-            print(f"{path.name}", end=" | ")
-            cprint(f"{fsz(dsz)} | {after / before:.3f}%", "cyan")
+            rrs(path, before, after)
             return
         return
     except Exception as e:

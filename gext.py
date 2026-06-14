@@ -110,20 +110,18 @@ class EntityExtractor(ast.NodeVisitor):
         scope_prefix = "_".join(self.scope_stack)
         full_name = f"{scope_prefix}_{name}" if scope_prefix else name
 
-        self.entities.append(
-            {
-                "name": name,
-                "full_name": full_name,
-                "type": entity_type,
-                "code": entity_code,
-                "path": str(self.original_path),
-                "is_constant": entity_type == "const",
-                "is_class": entity_type == "class",
-                "is_function": entity_type in ("function", "method"),
-                "imports": list(self.imports),
-                "imports_from": self.imports_from.copy(),
-            }
-        )
+        self.entities.append({
+            "name": name,
+            "full_name": full_name,
+            "type": entity_type,
+            "code": entity_code,
+            "path": str(self.original_path),
+            "is_constant": entity_type == "const",
+            "is_class": entity_type == "class",
+            "is_function": entity_type in ("function", "method"),
+            "imports": list(self.imports),
+            "imports_from": self.imports_from.copy(),
+        })
 
     def _add_import(self, import_stmt: str):
         """Track an import statement."""

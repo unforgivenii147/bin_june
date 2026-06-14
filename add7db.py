@@ -73,12 +73,12 @@ def read_file_contents(filepath):
         return {"content": error_msg, "is_binary": False, "original_size": len(error_msg)}
 
 
-def get_files_in_current_dir():
-    current_dir = Path.cwd()
+def get_files_in_cwd():
+    cwd = Path.cwd()
     files = []
     try:
-        for item in sorted(os.listdir(current_dir)):
-            item_path = os.path.join(current_dir, item)
+        for item in sorted(os.listdir(cwd)):
+            item_path = os.path.join(cwd, item)
             if Path(item_path).is_file():
                 get_size = Path(item_path).stat().st_size
                 size_str = f"{get_size / 1024:.1f}KB" if get_size < 1024 * 1024 else f"{get_size / 1024 / 1024:.1f}MB"
@@ -87,38 +87,32 @@ def get_files_in_current_dir():
                 if file_data["is_binary"]:
                     compressed = compress_data(file_data["content"])
                     if compressed:
-                        files.append(
-                            {
-                                "filename": item,
-                                "contents": compressed,
-                                "compressed": 1,
-                                "original_size": file_data["original_size"],
-                                "compressed_size": len(compressed),
-                            }
-                        )
+                        files.append({
+                            "filename": item,
+                            "contents": compressed,
+                            "compressed": 1,
+                            "original_size": file_data["original_size"],
+                            "compressed_size": len(compressed),
+                        })
                         print(
                             f"    ✓ Compressed {file_data['original_size'] / 1024:.1f}KB to {len(compressed) / 1024:.1f}KB"
                         )
                     else:
-                        files.append(
-                            {
-                                "filename": item,
-                                "contents": "[Binary file - compression failed]",
-                                "compressed": 0,
-                                "original_size": file_data["original_size"],
-                                "compressed_size": 0,
-                            }
-                        )
-                else:
-                    files.append(
-                        {
+                        files.append({
                             "filename": item,
-                            "contents": file_data["content"],
+                            "contents": "[Binary file - compression failed]",
                             "compressed": 0,
                             "original_size": file_data["original_size"],
                             "compressed_size": 0,
-                        }
-                    )
+                        })
+                else:
+                    files.append({
+                        "filename": item,
+                        "contents": file_data["content"],
+                        "compressed": 0,
+                        "original_size": file_data["original_size"],
+                        "compressed_size": 0,
+                    })
                     print(f"    ✓ Stored as text ({file_data['original_size'] / 1024:.1f}KB)")
     except PermissionError:
         print("Warning: Permission denied accessing some files")
@@ -166,7 +160,7 @@ def main():
     create_folder_table(cursor, folder_name)
     print(f"\nScanning current directory: {Path.cwd()}")
     print("Reading and compressing file contents...")
-    files = get_files_in_current_dir()
+    files = get_files_in_cwd()
     if not files:
         print("No files found in current directory!")
     else:

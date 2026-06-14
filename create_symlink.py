@@ -6,8 +6,8 @@ BASHBIN: Path = Path.home() / "bashbin"
 BIN: Path = Path.home() / "bin"
 
 
-def process_dir(root_dir, ext):
-    for path in root_dir.glob(f"*.{ext}"):
+def process_dir(cwd, ext):
+    for path in cwd.glob(f"*.{ext}"):
         symlink_path = path.with_name(path.stem)
         if not symlink_path.exists():
             symlink_path.symlink_to(path)

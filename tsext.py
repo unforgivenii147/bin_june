@@ -109,9 +109,9 @@ def process_directory(start_dir, output_dir):
 
 
 if __name__ == "__main__":
-    current_directory = "."
+    cwdectory = "."
     output_directory = "output"
     if not Path(output_directory).exists():
         Path(output_directory).mkdir(parents=True)
     print("Starting code element extraction...")
-    process_directory(current_directory, output_directory)
+    process_directory(cwdectory, output_directory)

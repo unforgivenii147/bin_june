@@ -52,8 +52,8 @@ def download_external_url(url, file_hint="remote"):
 
 
 def process_file(path: Path):
-    html = path.read_text(encoding="utf-8", errors="ignore")
     path = Path(path)
+    html = path.read_text(encoding="utf-8", errors="ignore")
     soup = BeautifulSoup(html, "html.parser")
     file_prefix = path.stem
     for i, style_tag in enumerate(soup.find_all("style")):

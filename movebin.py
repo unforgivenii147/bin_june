@@ -7,11 +7,11 @@ from dh import is_binary
 
 
 def main():
-    current_dir = Path.cwd()
-    binary_dir = current_dir / "binary"
+    cwd = Path.cwd()
+    binary_dir = cwd / "binary"
     binary_dir.mkdir(exist_ok=True)
     files_moved = 0
-    for f in current_dir.iterdir():
+    for f in cwd.iterdir():
         if f.is_file() and is_binary(Path(f)):
             try:
                 shutil.move(str(f), binary_dir / f.name)

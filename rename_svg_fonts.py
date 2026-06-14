@@ -55,10 +55,10 @@ if __name__ == "__main__":
             print(f"Error: Invalid path provided. Must be an SVG file or a directory. Path: {input_path}")
             sys.exit(1)
     else:
-        current_dir = Path()
-        print(f"No file specified. Processing current directory: {current_dir.resolve()}")
+        cwd = Path()
+        print(f"No file specified. Processing current directory: {cwd.resolve()}")
         processed_count = 0
-        for item in current_dir.rglob("*.svg"):
+        for item in cwd.rglob("*.svg"):
             rename_svg_font(item)
             processed_count += 1
         if processed_count == 0:

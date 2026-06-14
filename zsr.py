@@ -6,9 +6,10 @@ import mmap
 import shutil
 import sys
 import tarfile
-import zstandard as zstd
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+
+import zstandard as zstd
 
 # Use a bounded thread pool instead of semaphore
 MAX_WORKERS = 4

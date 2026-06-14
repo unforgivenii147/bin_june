@@ -75,8 +75,8 @@ def read_file_with_encodings(file_path):
 
 
 def process_file(file_path):
-    local_urls = []
     path = Path(path)
+    local_urls = []
     github_urls = []
     file_path = Path(file_path)
     file_extension = file_path.suffix.lower()
@@ -191,11 +191,11 @@ def find_files_recursively(directory):
 
 
 if __name__ == "__main__":
-    current_directory = "."
+    cwdectory = "."
     all_extracted_urls = []
     all_github_urls = []
-    print(f"Starting URL extraction in directory: {Path(current_directory).resolve()}")
-    files_to_process = list(find_files_recursively(current_directory))
+    print(f"Starting URL extraction in directory: {Path(cwdectory).resolve()}")
+    files_to_process = list(find_files_recursively(cwdectory))
     print(f"Found {len(files_to_process)} files to process.")
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         futures = {executor.submit(process_file, file_path): file_path for file_path in files_to_process}

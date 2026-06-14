@@ -8,9 +8,9 @@ from dh import cprint, fsz, get_files
 
 
 def process_file(path):
-    content = path.read_text(encoding="utf-8")
     path = Path(path)
-    soup = BeautifulSoup(content, parser="lxml.parser", features="lxml")
+    content = path.read_text(encoding="utf-8")
+    soup = BeautifulSoup(content, parser="html.parser", featues="lxml")
     before = len(content)
     new_content = soup.prettify()
     after = len(new_content)
@@ -28,6 +28,6 @@ def process_file(path):
 if __name__ == "__main__":
     cwd = Path.cwd()
     args = sys.argv[1:]
-    files = [Path(p) for p in args] if args else get_files(cwd, ext=[".html", ".xml", ".mhtml"])
+    files = [Path(p) for p in args] if args else get_files(cwd, ext=[".html", ".htm", ".xhtml"])
     for f in files:
         process_file(f)

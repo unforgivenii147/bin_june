@@ -14,8 +14,8 @@ single_line_comment_re = "//.*"
 
 
 def process_file(fp):
-    print(f"processing ...{fp.name}")
     path = Path(path)
+    print(f"processing ...{fp.name}")
     code = fp.read_text(encoding="utf-8")
     new_code = re.sub(multi_line_comment_re, "", code, flags=re.DOTALL)
     lines = new_code.splitlines()
@@ -27,8 +27,8 @@ def process_file(fp):
 
 
 def main():
-    root_dir = Path.cwd()
-    before = gsz(root_dir)
+    cwd = Path.cwd()
+    before = gsz(cwd)
     args = sys.argv[1:]
     files = []
     if args:
@@ -40,7 +40,7 @@ def main():
                 files.extend(get_files(p))
     else:
         files = get_files(
-            root_dir,
+            cwd,
             e=[
                 ".js",
                 ".jsx",
@@ -60,7 +60,7 @@ def main():
             ],
         )
     Parallel(n_jobs=N_JOBS, backend="loky")((delayed(process_file)(f) for f in files))
-    diffsize = before - gsz(root_dir)
+    diffsize = before - gsz(cwd)
     cprint(f"space change : {fsz(diffsize)}", "cyan")
 
 

@@ -299,15 +299,13 @@ class VenvRepacker:
                 else:
                     self.stats["packages_with_c_extensions"] += 1
                 print(f"✓ {message}")
-                self.results.append(
-                    {
-                        "package": package_name,
-                        "version": package_info.version,
-                        "is_pure_python": package_info.is_pure_python,
-                        "wheel_filename": package_info.wheel_filename,
-                        "success": True,
-                    }
-                )
+                self.results.append({
+                    "package": package_name,
+                    "version": package_info.version,
+                    "is_pure_python": package_info.is_pure_python,
+                    "wheel_filename": package_info.wheel_filename,
+                    "success": True,
+                })
             else:
                 self.stats["failed_packages"] += 1
                 self.stats["total_packages"] += 1

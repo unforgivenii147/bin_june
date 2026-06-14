@@ -49,8 +49,8 @@ def main():
     new_text = new_text.encode().decode("unicode_escape")
 
     # Find all Python files in current directory
-    current_dir = Path(".")
-    py_files = list(current_dir.glob("*.py"))
+    cwd = Path(".")
+    py_files = list(cwd.glob("*.py"))
 
     if not py_files:
         print("No Python files found in current directory.")

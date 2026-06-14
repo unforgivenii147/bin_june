@@ -121,9 +121,9 @@ def main():
     output_file = output_dir / "err"
 
     # Get current directory
-    current_dir = Path.cwd()
+    cwd = Path.cwd()
 
-    binaries = get_binary_files(current_dir)
+    binaries = get_binary_files(cwd)
 
     if not binaries:
         print("No executable binaries found in current directory")
@@ -163,7 +163,7 @@ def main():
     # Write results to output file
     with open(output_file, "w") as f:
         f.write(f"Binary Analysis Results\n")
-        f.write(f"Directory: {current_dir}\n")
+        f.write(f"Directory: {cwd}\n")
         f.write(f"Total binaries tested: {len(binaries)}\n")
         f.write(f"Failed binaries: {len(failed_binaries)}\n")
         f.write("=" * 70 + "\n\n")

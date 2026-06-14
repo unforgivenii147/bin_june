@@ -14,6 +14,8 @@ import mimetypes
 import os
 import re
 from pathlib import Path
+from dh import MIME2EXT
+
 
 # DATA_URI_PATTERN = re.compile(r"data:(?P<mime>[^;,]*)(?P<params>(?:;[^;,]+=[^;,]+)*);base64,(?P<data>[A-Za-z0-9+/=]+)")
 DATA_URI_PATTERN = re.compile(
@@ -24,6 +26,8 @@ DATA_URI_PATTERN = re.compile(
 def get_extension(mime: str) -> str:
     """Return a file extension (with leading dot) for the given MIME type."""
     if mime:
+        if mime in MIME2EXT.keys():
+            return MIME2EXT.get(mime)[0]
         ext = mimetypes.guess_extension(mime)
         if ext:
             return ext
@@ -81,8 +85,8 @@ def main():
     assets_dir = Path("assets")
     assets_dir.mkdir(parents=True, exist_ok=True)
     processed = {}
-    current_dir = Path(".")
-    for file_path in current_dir.rglob("*"):
+    cwd = Path(".")
+    for file_path in cwd.rglob("*"):
         if file_path.is_file() and file_path.suffix.lower() in (".css", ".js", ".html"):
             process_file(file_path, assets_dir, processed)
     print("Done.")

@@ -12,8 +12,8 @@ cwd = Path.cwd()
 
 
 def process_file(path):
-    img = cv.imread(str(path))
     path = Path(path)
+    img = cv.imread(str(path))
     if img is None:
         return
     img = 255 - img

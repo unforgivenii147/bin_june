@@ -31,8 +31,8 @@ def find_png_files(directory):
 
 
 def main():
-    current_dir = Path.cwd()
-    png_files = find_png_files(current_dir)
+    cwd = Path.cwd()
+    png_files = find_png_files(cwd)
     if not png_files:
         print("No PNG files found in the current directory or subdirectories.")
         return

@@ -1,87 +1,85 @@
 #!/data/data/com.termux/files/usr/bin/python
-import os
 import json
-import time
+import os
 import pickle
 import shutil
-from pathlib import Path
+import time
 from datetime import datetime
+from pathlib import Path
+
 import requests
 from dotenv import load_dotenv
 
 # Load environment from ~/.env
-env_path = Path.home() / '.env'
+env_path = Path.home() / ".env"
 if env_path.exists():
     load_dotenv(dotenv_path=env_path)
 
 
 class GoogleDriveSync:
-    def __init__(self, client_id=None, client_secret=None, token_file='drive_token.pkl'):
-        self.client_id = client_id or os.getenv('GOOGLE_CLIENT_ID')
-        self.client_secret = client_secret or os.getenv('GOOGLE_CLIENT_SECRET')
+    def __init__(self, client_id=None, client_secret=None, token_file="drive_token.pkl"):
+        self.client_id = client_id or os.getenv("GOOGLE_CLIENT_ID")
+        self.client_secret = client_secret or os.getenv("GOOGLE_CLIENT_SECRET")
         self.token_file = token_file
         self.access_token = None
         self.refresh_token = None
-        
+
         if not self.client_id or not self.client_secret:
             raise ValueError("Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET in ~/.env")
-        
+
         self.load_or_auth()
-    
+
     def load_or_auth(self):
         """Load existing token or authenticate"""
         if os.path.exists(self.token_file):
-            with open(self.token_file, 'rb') as f:
+            with open(self.token_file, "rb") as f:
                 data = pickle.load(f)
-                self.access_token = data.get('access_token')
-                self.refresh_token = data.get('refresh_token')
-                
+                self.access_token = data.get("access_token")
+                self.refresh_token = data.get("refresh_token")
+
                 # Check if token is expired
                 if self.access_token and not self.is_token_expired():
                     return
-        
+
         # Need new authentication
         self.authenticate()
-    
+
     def is_token_expired(self):
         """Check if token needs refresh (simple check)"""
         # This is a simplified check - you can store expiry time for better accuracy
         return False  # Let's always try to use, refresh if 401
-    
+
     def refresh_access_token(self):
         """Refresh the access token using refresh token"""
         if not self.refresh_token:
             return False
-        
+
         data = {
-            'client_id': self.client_id,
-            'client_secret': self.client_secret,
-            'refresh_token': self.refresh_token,
-            'grant_type': 'refresh_token'
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+            "refresh_token": self.refresh_token,
+            "grant_type": "refresh_token",
         }
-        
-        response = requests.post('https://oauth2.googleapis.com/token', data=data)
-        
+
+        response = requests.post("https://oauth2.googleapis.com/token", data=data)
+
         if response.status_code == 200:
             token_data = response.json()
-            self.access_token = token_data.get('access_token')
-            
+            self.access_token = token_data.get("access_token")
+
             # Save tokens
-            with open(self.token_file, 'wb') as f:
-                pickle.dump({
-                    'access_token': self.access_token,
-                    'refresh_token': self.refresh_token
-                }, f)
+            with open(self.token_file, "wb") as f:
+                pickle.dump({"access_token": self.access_token, "refresh_token": self.refresh_token}, f)
             return True
-        
+
         return False
-    
+
     def authenticate(self):
         """Manual OAuth 2.0 authentication flow"""
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("GOOGLE DRIVE AUTHENTICATION")
-        print("="*60)
-        
+        print("=" * 60)
+
         # Step 1: Get authorization code
         auth_url = (
             f"https://accounts.google.com/o/oauth2/auth?"
@@ -91,221 +89,213 @@ class GoogleDriveSync:
             f"scope=https://www.googleapis.com/auth/drive.readonly&"
             f"access_type=offline"
         )
-        
+
         print("\n1. Open this URL in your browser:")
         print(f"\n{auth_url}\n")
         print("2. Sign in to your Google account")
         print("3. Grant access to Google Drive")
         print("4. Copy the authorization code")
-        print("="*60)
-        
+        print("=" * 60)
+
         auth_code = input("\nEnter authorization code: ").strip()
-        
+
         # Step 2: Exchange code for tokens
         token_data = {
-            'client_id': self.client_id,
-            'client_secret': self.client_secret,
-            'code': auth_code,
-            'grant_type': 'authorization_code',
-            'redirect_uri': 'urn:ietf:wg:oauth:2.0:oob'
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+            "code": auth_code,
+            "grant_type": "authorization_code",
+            "redirect_uri": "urn:ietf:wg:oauth:2.0:oob",
         }
-        
-        response = requests.post('https://oauth2.googleapis.com/token', data=token_data)
-        
+
+        response = requests.post("https://oauth2.googleapis.com/token", data=token_data)
+
         if response.status_code != 200:
             raise Exception(f"Authentication failed: {response.text}")
-        
+
         tokens = response.json()
-        self.access_token = tokens.get('access_token')
-        self.refresh_token = tokens.get('refresh_token')
-        
+        self.access_token = tokens.get("access_token")
+        self.refresh_token = tokens.get("refresh_token")
+
         # Save tokens
-        with open(self.token_file, 'wb') as f:
-            pickle.dump({
-                'access_token': self.access_token,
-                'refresh_token': self.refresh_token
-            }, f)
-        
+        with open(self.token_file, "wb") as f:
+            pickle.dump({"access_token": self.access_token, "refresh_token": self.refresh_token}, f)
+
         print("\n✓ Authentication successful!\n")
-    
+
     def api_request(self, method, url, **kwargs):
         """Make authenticated API request with auto-refresh"""
-        headers = kwargs.get('headers', {})
-        headers['Authorization'] = f'Bearer {self.access_token}'
-        kwargs['headers'] = headers
-        
+        headers = kwargs.get("headers", {})
+        headers["Authorization"] = f"Bearer {self.access_token}"
+        kwargs["headers"] = headers
+
         response = requests.request(method, url, **kwargs)
-        
+
         # If unauthorized, try to refresh token
         if response.status_code == 401:
             if self.refresh_access_token():
-                headers['Authorization'] = f'Bearer {self.access_token}'
+                headers["Authorization"] = f"Bearer {self.access_token}"
                 response = requests.request(method, url, **kwargs)
-        
+
         return response
-    
-    def list_files(self, folder_id='root', page_token=None):
+
+    def list_files(self, folder_id="root", page_token=None):
         """List files in a folder"""
-        url = 'https://www.googleapis.com/drive/v3/files'
+        url = "https://www.googleapis.com/drive/v3/files"
         params = {
-            'q': f"'{folder_id}' in parents and trashed=false",
-            'pageSize': 100,
-            'fields': 'nextPageToken, files(id, name, mimeType, size, modifiedTime)'
+            "q": f"'{folder_id}' in parents and trashed=false",
+            "pageSize": 100,
+            "fields": "nextPageToken, files(id, name, mimeType, size, modifiedTime)",
         }
         if page_token:
-            params['pageToken'] = page_token
-        
-        response = self.api_request('GET', url, params=params)
-        
+            params["pageToken"] = page_token
+
+        response = self.api_request("GET", url, params=params)
+
         if response.status_code != 200:
             print(f"Error listing files: {response.text}")
             return None
-        
+
         return response.json()
-    
-    def get_all_files_recursive(self, folder_id='root'):
+
+    def get_all_files_recursive(self, folder_id="root"):
         """Get all files recursively from a folder"""
         all_items = []
         page_token = None
-        
+
         while True:
             result = self.list_files(folder_id, page_token)
             if not result:
                 break
-            
-            items = result.get('files', [])
+
+            items = result.get("files", [])
             all_items.extend(items)
-            
-            page_token = result.get('nextPageToken')
+
+            page_token = result.get("nextPageToken")
             if not page_token:
                 break
-        
+
         return all_items
-    
+
     def download_file(self, file_id, file_name, local_path):
         """Download a file with progress"""
-        url = f'https://www.googleapis.com/drive/v3/files/{file_id}?alt=media'
-        
-        response = self.api_request('GET', url, stream=True)
-        
+        url = f"https://www.googleapis.com/drive/v3/files/{file_id}?alt=media"
+
+        response = self.api_request("GET", url, stream=True)
+
         if response.status_code != 200:
             print(f"Failed to download {file_name}: {response.text}")
             return False
-        
+
         # Get file size for progress
-        total_size = int(response.headers.get('content-length', 0))
+        total_size = int(response.headers.get("content-length", 0))
         downloaded = 0
-        
+
         os.makedirs(os.path.dirname(local_path), exist_ok=True)
-        
-        with open(local_path, 'wb') as f:
+
+        with open(local_path, "wb") as f:
             for chunk in response.iter_content(chunk_size=8192):
                 if chunk:
                     f.write(chunk)
                     downloaded += len(chunk)
                     if total_size > 0:
                         percent = (downloaded / total_size) * 100
-                        print(f"\rDownloading {file_name}: {percent:.1f}%", end='', flush=True)
-        
+                        print(f"\rDownloading {file_name}: {percent:.1f}%", end="", flush=True)
+
         print(f"\n✓ Downloaded: {file_name}")
         return True
-    
+
     def get_file_metadata(self, file_id):
         """Get file metadata"""
-        url = f'https://www.googleapis.com/drive/v3/files/{file_id}'
-        params = {'fields': 'id, name, mimeType, size, modifiedTime'}
-        
-        response = self.api_request('GET', url, params=params)
-        
+        url = f"https://www.googleapis.com/drive/v3/files/{file_id}"
+        params = {"fields": "id, name, mimeType, size, modifiedTime"}
+
+        response = self.api_request("GET", url, params=params)
+
         if response.status_code == 200:
             return response.json()
         return None
-    
-    def sync_folder(self, drive_folder_id, local_folder_path, folder_name='root', depth=0):
+
+    def sync_folder(self, drive_folder_id, local_folder_path, folder_name="root", depth=0):
         """Recursively sync a folder"""
         indent = "  " * depth
         print(f"{indent}📁 Syncing: {folder_name}")
-        
+
         os.makedirs(local_folder_path, exist_ok=True)
-        
+
         # Get all items in this folder
         items = self.get_all_files_recursive(drive_folder_id)
-        
+
         for item in items:
-            item_name = item['name']
-            item_id = item['id']
-            item_mime = item.get('mimeType', '')
+            item_name = item["name"]
+            item_id = item["id"]
+            item_mime = item.get("mimeType", "")
             local_path = os.path.join(local_folder_path, self.sanitize_filename(item_name))
-            
-            if item_mime == 'application/vnd.google-apps.folder':
+
+            if item_mime == "application/vnd.google-apps.folder":
                 # Handle Google Drive folder
                 self.sync_folder(item_id, local_path, item_name, depth + 1)
             else:
                 # Check if file needs download
-                remote_modified = item.get('modifiedTime')
+                remote_modified = item.get("modifiedTime")
                 should_download = True
-                
+
                 if os.path.exists(local_path):
                     local_mtime = os.path.getmtime(local_path)
                     if remote_modified:
-                        remote_time = datetime.fromisoformat(
-                            remote_modified.replace('Z', '+00:00')
-                        ).timestamp()
-                        
+                        remote_time = datetime.fromisoformat(remote_modified.replace("Z", "+00:00")).timestamp()
+
                         if local_mtime >= remote_time:
                             should_download = False
                             print(f"{indent}  ⏭ Up to date: {item_name}")
-                
+
                 if should_download:
                     if self.download_file(item_id, item_name, local_path):
                         # Set modification time to match Google Drive
                         if remote_modified:
-                            mod_time = datetime.fromisoformat(
-                                remote_modified.replace('Z', '+00:00')
-                            ).timestamp()
+                            mod_time = datetime.fromisoformat(remote_modified.replace("Z", "+00:00")).timestamp()
                             os.utime(local_path, (mod_time, mod_time))
-    
+
     def sanitize_filename(self, filename):
         """Remove invalid characters from filename"""
         # For Windows/Android compatibility
         invalid_chars = '<>:"/\\|?*'
         for char in invalid_chars:
-            filename = filename.replace(char, '_')
+            filename = filename.replace(char, "_")
         return filename
-    
+
     def sync_all(self, local_base_path):
         """Sync entire Google Drive"""
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("STARTING GOOGLE DRIVE SYNC")
-        print("="*60)
-        
+        print("=" * 60)
+
         # Get root folder info
-        root_metadata = self.get_file_metadata('root')
+        root_metadata = self.get_file_metadata("root")
         if root_metadata:
             print(f"Root folder: {root_metadata.get('name', 'My Drive')}")
-        
-        self.sync_folder('root', local_base_path, 'My Drive')
-        
-        print("\n" + "="*60)
+
+        self.sync_folder("root", local_base_path, "My Drive")
+
+        print("\n" + "=" * 60)
         print("✅ SYNC COMPLETED!")
-        print("="*60)
-    
+        print("=" * 60)
+
     def sync_folder_by_name(self, folder_name, local_base_path):
         """Sync a specific folder by name from root"""
         print(f"\nSearching for folder: {folder_name}")
-        
-        items = self.get_all_files_recursive('root')
-        
+
+        items = self.get_all_files_recursive("root")
+
         target_folder = None
         for item in items:
-            if (item['name'] == folder_name and 
-                item['mimeType'] == 'application/vnd.google-apps.folder'):
+            if item["name"] == folder_name and item["mimeType"] == "application/vnd.google-apps.folder":
                 target_folder = item
                 break
-        
+
         if target_folder:
             local_path = os.path.join(local_base_path, folder_name)
-            self.sync_folder(target_folder['id'], local_path, folder_name)
+            self.sync_folder(target_folder["id"], local_path, folder_name)
         else:
             print(f"❌ Folder '{folder_name}' not found in root directory")
 
@@ -313,27 +303,27 @@ class GoogleDriveSync:
 def main():
     # Configuration
     # On Android, use /sdcard/ or /storage/emulated/0/
-    LOCAL_SYNC_PATH = '/sdcard/GoogleDriveBackup'
-    
+    LOCAL_SYNC_PATH = "/sdcard/GoogleDriveBackup"
+
     # Alternative paths for Android
     # LOCAL_SYNC_PATH = '/storage/emulated/0/GoogleDriveBackup'
     # LOCAL_SYNC_PATH = './google_drive_backup'  # Local to Termux
-    
+
     try:
         # Initialize syncer
         syncer = GoogleDriveSync()
-        
+
         # Choose sync mode:
-        
+
         # Option 1: Sync entire Drive
         syncer.sync_all(LOCAL_SYNC_PATH)
-        
+
         # Option 2: Sync specific folder by name
         # syncer.sync_folder_by_name('Documents', LOCAL_SYNC_PATH)
-        
+
         # Option 3: Sync specific folder by ID
         # syncer.sync_folder('1ABC123DEF456', LOCAL_SYNC_PATH, 'MyFolder')
-        
+
     except KeyboardInterrupt:
         print("\n\n⚠️ Sync interrupted by user")
     except Exception as e:
@@ -347,5 +337,5 @@ def main():
         print("   GOOGLE_CLIENT_SECRET=your_secret")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

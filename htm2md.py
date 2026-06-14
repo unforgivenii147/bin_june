@@ -6,20 +6,20 @@ from pathlib import Path
 from dh import get_files, mpf3, runcmd
 
 
-def process_file(fp):
+def process_file(path):
     path = Path(path)
-    if fp.suffix.lower() in {".html", ".htm"}:
-        md_file = fp.with_suffix(".md")
+    if path.suffix.lower() in {".html", ".htm"}:
+        md_file = path.with_suffix(".md")
     else:
-        return (fp, False)
+        return (path, False)
     try:
-        _, txt, _ = runcmd(["rhtml2md", str(fp)], show_output=False)
+        _, txt, _ = runcmd(["rhtml2md", str(path)], show_output=False)
         md_file.write_text(txt, encoding="utf-8")
-        print(f"✓ Converted: {fp.name} -> {md_file.name}")
+        print(f"✓ Converted: {path.name} -> {md_file.name}")
         return (md_file, True)
     except Exception as e:
-        print(f"✗ Unexpected error converting {fp}: {e}", file=sys.stderr)
-        return (fp, False)
+        print(f"✗ Unexpected error converting {path}: {e}", file=sys.stderr)
+        return (path, False)
 
 
 def main():

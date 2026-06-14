@@ -5,8 +5,8 @@ from pathlib import Path
 
 
 def process_file(path, text):
-    content = path.read_text()
     path = Path(path)
+    content = path.read_text()
     target = "Requires-Dist: " + text
     if target in content:
         lines = content.splitlines()

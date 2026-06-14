@@ -32,8 +32,8 @@ def split_data_url(src: str):
 
 
 def process_file(path):
-    base_name = ""
     path = Path(path)
+    base_name = ""
     fname = ""
     out_html = path.with_suffix(".html")
     out_dir = path.stem + "_files"

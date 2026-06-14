@@ -690,8 +690,8 @@ Examples:
     args = parser.parse_args()
 
     # Get initial size
-    root_dir = Path.cwd()
-    before_size = gsz(root_dir)
+    cwd = Path.cwd()
+    before_size = gsz(cwd)
 
     # Collect files
     files = []
@@ -705,7 +705,7 @@ Examples:
             elif p.suffix == ".py":
                 files.append(p)
     else:
-        files = get_files(root_dir)
+        files = get_files(cwd)
 
     # Filter only Python files
     python_files = [f for f in files if f.suffix == ".py"]
@@ -754,7 +754,7 @@ Examples:
                 cprint(f"  🔍 Would modify: {file_path.name}", "yellow")
 
     # Summary
-    after_size = gsz(root_dir)
+    after_size = gsz(cwd)
     size_diff = before_size - after_size
 
     cprint("\n" + "=" * 60, "cyan")

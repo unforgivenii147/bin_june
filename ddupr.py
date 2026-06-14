@@ -369,17 +369,17 @@ def write_utils(grouped: dict[str, list[PyObject]], utils_dir: Path, *, dry_run:
     return written
 
 
-def _build_import_line(utils_dir: Path, root_dir: Path, kind: str) -> str:
+def _build_import_line(utils_dir: Path, cwd: Path, kind: str) -> str:
     """
     Build a relative import statement pointing to the correct utils module.
     e.g.  from utils.func import foo, bar
     """
-    rel = utils_dir.relative_to(root_dir)
+    rel = utils_dir.relative_to(cwd)
     module_path = ".".join(rel.parts) + "." + UTILS_MAP[kind].removesuffix(".py")
     return f"from {module_path} import {{names}}"
 
 
-def remove_and_patch(objects_to_remove: list[PyObject], utils_dir: Path, root_dir: Path) -> None:
+def remove_and_patch(objects_to_remove: list[PyObject], utils_dir: Path, cwd: Path) -> None:
     """
     Remove duplicate definitions from their origin files and inject
     the required import so the file still resolves the names.
@@ -413,7 +413,7 @@ def remove_and_patch(objects_to_remove: list[PyObject], utils_dir: Path, root_di
             imports_by_kind[obj.kind].append(obj.name)
         import_lines: list[str] = []
         for kind, names in imports_by_kind.items():
-            template = _build_import_line(utils_dir, root_dir, kind)
+            template = _build_import_line(utils_dir, cwd, kind)
             import_lines.append(template.format(names=", ".join(sorted(names))) + "\n")
         insert_at = 0
         try:
@@ -461,9 +461,9 @@ def find_duplicates(all_objects: list[PyObject]) -> tuple[dict[str, list[PyObjec
     return (duplicates, grouped)
 
 
-def run(root_dir: Path, mode: Optional[str], workers: int) -> None:
-    utils_dir = root_dir / "utils"
-    paths = collect_all_paths(root_dir)
+def run(cwd: Path, mode: Optional[str], workers: int) -> None:
+    utils_dir = cwd / "utils"
+    paths = collect_all_paths(cwd)
     logger.info("Found {} file(s) to scan", len(paths))
     all_objects: list[PyObject] = []
     with Pool(processes=workers) as pool:
@@ -494,7 +494,7 @@ def run(root_dir: Path, mode: Optional[str], workers: int) -> None:
         for h, objs in duplicates.items():
             objects_to_remove.extend(objs[1:])
             objects_to_remove.append(objs[0])
-        remove_and_patch(objects_to_remove, utils_dir, root_dir)
+        remove_and_patch(objects_to_remove, utils_dir, cwd)
 
 
 def _parse_args() -> argparse.Namespace:

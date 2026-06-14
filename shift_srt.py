@@ -31,8 +31,8 @@ def shift_content(text: str, shift_ms: int) -> str:
 
 
 def process_file(path: Path, shift_ms: int):
-    data = path.read_text(encoding="utf-8")
     path = Path(path)
+    data = path.read_text(encoding="utf-8")
     shifted = shift_content(data, shift_ms)
     path.write_text(shifted, encoding="utf-8")
     print(f"✔ {path}")

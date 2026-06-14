@@ -8,8 +8,8 @@ from binaryornot import is_binary
 from dh import cprint
 
 
-def get_filez(root_dir):
-    for r, _, files in os.walk(root_dir):
+def get_filez(cwd):
+    for r, _, files in os.walk(cwd):
         for f in files:
             fullpath = Path(r) / f
             if fullpath.is_symlink():
@@ -19,8 +19,8 @@ def get_filez(root_dir):
 
 
 def process_file(path):
-    removed = 0
     path = Path(path)
+    removed = 0
     content = path.read_text(encoding="utf-8")
     lines = content.splitlines(keepends=False)
     newlines = []

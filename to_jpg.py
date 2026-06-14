@@ -3,7 +3,7 @@
 import sys
 from pathlib import Path
 
-from dh import fsz, gsz, is_image, mpf3, unique_path
+from dh import fsz, gsz, is_image, mpf3, unique_path, get_files
 
 try:
     import cv2
@@ -17,8 +17,7 @@ except ImportError:
 IGNORED_DIRS = {".git"}
 
 
-def process_file(file_path: str) -> bool:
-    path = Path(file_path)
+def process_file(path: str) -> bool:
     path = Path(path)
     if not path.is_file():
         print(f"Skipping: {path.name} (Unsupported format or not a file)")
@@ -70,14 +69,7 @@ def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
     args = sys.argv[1:]
-    if args:
-        files = [Path(f) for f in args]
-    else:
-        files = [
-            f
-            for f in cwd.rglob("*")
-            if f.is_file() and is_image(f) and (not any((part in IGNORED_DIRS for part in f.parts)))
-        ]
+    files = [Path(f) for f in args] if args else get_files(cwd, ext=[".webp", ".bmp", ".jpeg", ".png", ".tiff", ".svg"])
     if not files:
         print("No image files detected.")
         return

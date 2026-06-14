@@ -39,9 +39,9 @@ def find_imports(start_path):
         except (SyntaxError, UnicodeDecodeError):
             continue
     local_files = {p.stem for p in start_path.glob("*.py")}
-    return sorted(
-        [imp for imp in all_imports if imp not in std_libs and imp not in local_files and (imp != "__future__")]
-    )
+    return sorted([
+        imp for imp in all_imports if imp not in std_libs and imp not in local_files and (imp != "__future__")
+    ])
 
 
 def get_version(module_name):
@@ -84,7 +84,8 @@ def main():
         lines = fin.readlines()
         cleaned.extend(
             (
-                line.rstrip()
+                line
+                .rstrip()
                 .replace("Not Installed", "")
                 .replace("==(NA)", "")
                 .replace("==(unknown)", "")

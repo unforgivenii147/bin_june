@@ -9,8 +9,8 @@ cwd = Path.cwd()
 
 
 def process_file(path: Path):
-    ttf_path = path.with_suffix(".ttf")
     path = Path(path)
+    ttf_path = path.with_suffix(".ttf")
     if ttf_path.exists() and ttf_path.stat().st_size:
         print(f"{path.name} already converted.")
         return True

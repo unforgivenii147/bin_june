@@ -6,12 +6,13 @@ import mmap
 import shutil
 import sys
 import tarfile
-import brotli
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
+import brotli
+
 # Use a bounded thread pool instead of semaphore
-MAX_WORKERS = 4
+MAX_WORKERS = 8
 CHUNK_SIZE = 524288  # 512KB
 BROTLI_QUALITY = 11  # Max compression (0-11, where 11 is best)
 BROTLI_LGWIN = 24  # Largest window size (24 = 16MB window)

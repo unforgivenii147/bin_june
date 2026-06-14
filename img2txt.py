@@ -15,8 +15,8 @@ def extract_text(image_path):
 
 
 def process_file(path):
-    print(f"Processing {path.name}")
     path = Path(path)
+    print(f"Processing {path.name}")
     text = extract_text(path)
     if text and len(text) > 1:
         txtfile = path.with_suffix(".txt")

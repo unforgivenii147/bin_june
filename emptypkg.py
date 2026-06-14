@@ -56,10 +56,10 @@ def find_empty_packages(site_packages):
     return empty
 
 
-def find_empty_wheels(current_dir: Path) -> list:
+def find_empty_wheels(cwd: Path) -> list:
     """Find empty wheel files in the current directory"""
     empty_wheels = []
-    for file in current_dir.glob("*.whl"):
+    for file in cwd.glob("*.whl"):
         if is_empty_whl(file):
             empty_wheels.append(str(file))
     return empty_wheels
@@ -70,8 +70,8 @@ def main() -> None:
 
     empty_installed = find_empty_packages(site_packages)
 
-    current_dir = Path.cwd()
-    empty_wheels = find_empty_wheels(current_dir)
+    cwd = Path.cwd()
+    empty_wheels = find_empty_wheels(cwd)
 
     if empty_installed:
         print("\n=== Empty installed packages (site-packages) ===")

@@ -5,7 +5,6 @@ from pathlib import Path
 
 
 def get_size_str(size_bytes):
-    """Convert bytes to human readable format."""
     for unit in ["B", "KB", "MB", "GB"]:
         if size_bytes < 1024.0:
             return f"{size_bytes:.1f}{unit}"
@@ -13,8 +12,8 @@ def get_size_str(size_bytes):
     return f"{size_bytes:.1f}TB"
 
 
-def folderize_by_extension(root_dir):
-    root_path = Path(root_dir)
+def folderize_by_extension(cwd):
+    root_path = Path(cwd)
     extension_stats = {}
     for file_path in root_path.rglob("*"):
         if ".git" in file_path.parts:
@@ -50,9 +49,6 @@ def folderize_by_extension(root_dir):
                 dir_path.rmdir()
             except OSError:
                 pass
-    print("\n" + "=" * 50)
-    print("ORGANIZATION SUMMARY")
-    print("=" * 50)
     total_files = 0
     total_size = 0
     for ext in sorted(extension_stats.keys()):

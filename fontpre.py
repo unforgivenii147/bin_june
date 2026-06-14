@@ -3,6 +3,7 @@
 import html
 from pathlib import Path
 from urllib.parse import quote
+from dh import fsz
 
 cwd = Path.cwd()
 FONT_EXT = {".ttf", ".otf", ".woff", ".woff2", ".eot", ".svg"}
@@ -46,12 +47,7 @@ def generate_preview(fonts):
         styles.append(create_font_face(font_path, font_id))
         escaped_sample = html.escape(SAMPLE_TEXT)
         file_size = font_path.stat().st_size if font_path.exists() else 0
-        if file_size < 1024:
-            size_str = f"{file_size} B"
-        elif file_size < 1024**2:
-            size_str = f"{file_size / 1024:.1f} KB"
-        else:
-            size_str = f"{file_size / 1024**2:.1f} MB"
+        size_str = f"{fsz(file_size)}"
         sections.append(
             f"""\n<section>\n  <h1 style="font-family: 'font_{font_id}';">{html.escape(font_name)} <small style="font-size:0.6em;opacity:0.7">({font_format})</small></h1>\n  <textarea\n    style="font-family: 'font_{font_id}', sans-serif;"\n    spellcheck="false"\n    placeholder="Type to test font..."\n  >{escaped_sample}</textarea>\n  <p class="note">{html.escape(str(font_path.name))} | {size_str}</p>\n</section>"""
         )
@@ -64,25 +60,15 @@ def generate_preview(fonts):
 
 def main():
     """Main execution function."""
-    print("🔍 Searching for font files...")
     fonts = find_fonts()
     if not fonts:
         print("❌ No font files found in current directory.")
         print(f"   Supported formats: {', '.join(sorted(FONT_EXT))}")
         return
     print(f"✓ Found {len(fonts)} font(s)")
-    print("🎨 Generating preview...")
     html_content = generate_preview(fonts)
     output_path = cwd / OUTPUT_FILE
     output_path.write_text(html_content, encoding="utf-8")
-    html_size = output_path.stat().st_size
-    if html_size < 1024:
-        size_str = f"{html_size} B"
-    else:
-        size_str = f"{html_size / 1024:.1f} KB"
-    print(f"✅ Generated {OUTPUT_FILE} ({size_str})")
-    print(f"   📂 Location: {output_path}")
-    print(f"   📊 {len(fonts)} font preview(s) ready")
 
 
 if __name__ == "__main__":

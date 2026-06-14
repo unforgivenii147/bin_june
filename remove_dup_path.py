@@ -18,4 +18,4 @@ if __name__ == "__main__":
     bashrc = Path.home() / ".bashrc"
     new_path = ":".join(dduped)
     with open(bashrc, "a") as f:
-        f.write(f"\nexport PATH=\"{new_path}\"\n")
+        f.write(f'\nexport PATH="{new_path}"\n')

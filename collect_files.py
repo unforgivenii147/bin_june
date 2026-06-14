@@ -20,11 +20,11 @@ def unique_destination_path(dest_dir: Path, filename: str) -> Path:
 
 
 def collect_files_by_extension(extension: str):
-    current_dir = Path.cwd()
-    target_dir = current_dir / extension
+    cwd = Path.cwd()
+    target_dir = cwd / extension
     target_dir.mkdir(parents=True, exist_ok=True)
     copied_count = 0
-    for file_path in current_dir.rglob(f"*.{extension}"):
+    for file_path in cwd.rglob(f"*.{extension}"):
         if file_path.is_file() and target_dir not in file_path.parents:
             try:
                 destination_path = unique_destination_path(target_dir, file_path.name)

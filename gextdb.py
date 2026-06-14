@@ -35,18 +35,16 @@ class EntityExtractor(ast.NodeVisitor):
         entity_code = self._get_source_slice(node)
         scope_prefix = "_".join(self.scope_stack)
         full_name = f"{scope_prefix}_{name}" if scope_prefix else name
-        self.entities.append(
-            {
-                "name": name,
-                "full_name": full_name,
-                "type": entity_type,
-                "code": entity_code,
-                "path": str(self.original_path),
-                "is_constant": entity_type == "constant",
-                "is_class": entity_type == "class",
-                "is_function": entity_type in {"function", "method"},
-            }
-        )
+        self.entities.append({
+            "name": name,
+            "full_name": full_name,
+            "type": entity_type,
+            "code": entity_code,
+            "path": str(self.original_path),
+            "is_constant": entity_type == "constant",
+            "is_class": entity_type == "class",
+            "is_function": entity_type in {"function", "method"},
+        })
 
     def visit_FunctionDef(self, node: ast.FunctionDef):
         if not self.scope_stack:
@@ -90,18 +88,16 @@ class EntityExtractor(ast.NodeVisitor):
         entity_code = self._get_source_slice(node)
         scope_prefix = "_".join(self.scope_stack)
         full_name = f"{scope_prefix}_{name}" if scope_prefix else name
-        self.entities.append(
-            {
-                "name": name,
-                "full_name": full_name,
-                "type": entity_type,
-                "code": entity_code,
-                "path": str(self.original_path),
-                "is_constant": entity_type == "constant",
-                "is_class": entity_type == "class",
-                "is_function": entity_type in {"function", "method"},
-            }
-        )
+        self.entities.append({
+            "name": name,
+            "full_name": full_name,
+            "type": entity_type,
+            "code": entity_code,
+            "path": str(self.original_path),
+            "is_constant": entity_type == "constant",
+            "is_class": entity_type == "class",
+            "is_function": entity_type in {"function", "method"},
+        })
 
     def visit_FunctionDef(self, node: ast.FunctionDef):
         entity_type = "method" if self.scope_stack and self.scope_stack[-1].startswith("class_") else "function"
@@ -208,8 +204,8 @@ def main():
     print(f"Starting analysis in {Path.cwd()}...")
     create_database()
     files_to_process = []
-    current_dir = Path()
-    for root, _, filenames in os.walk(current_dir):
+    cwd = Path()
+    for root, _, filenames in os.walk(cwd):
         for name in filenames:
             path = Path(root) / name
             if path.is_relative_to(OUTPUT_DIR):

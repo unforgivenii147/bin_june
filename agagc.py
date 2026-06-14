@@ -62,7 +62,7 @@ def get_github_username(token: str) -> str | None:
         return None
 
 
-def get_current_dir_name() -> str:
+def get_cwd_name() -> str:
     dir_name = Path.cwd().name
     dir_name = re.sub(r"[^\w\-\.]", "-", dir_name)
     return dir_name.lower()
@@ -86,7 +86,7 @@ def setup_remote_repo(repo: Repo, token: str, remote_name: str, create_if_missin
     except Exception:
         pass
 
-    repo_name = get_current_dir_name()
+    repo_name = get_cwd_name()
 
     if not create_if_missing:
         return False

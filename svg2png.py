@@ -11,13 +11,16 @@ from PIL import Image
 def process_file(path):
     path = Path(path)
     png_file = path.with_suffix(".png")
-    with path.open("rb") as image:
-        imageBinary = BytesIO(image.read())
-        buff = BytesIO()
-        cairosvg.svg2png(bytestring=imageBinary.getvalue(), write_to=buff)
-        buff.seek(0)
-        img = Image.open(buff)
-        img.save(png_file)
+    try:
+        with path.open("rb") as image:
+            imageBinary = BytesIO(image.read())
+            buff = BytesIO()
+            cairosvg.svg2png(bytestring=imageBinary.getvalue(), write_to=buff)
+            buff.seek(0)
+            img = Image.open(buff)
+            img.save(png_file)
+    except:
+        pass
 
 
 def main():

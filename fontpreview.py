@@ -32,24 +32,22 @@ def generate_html(font_files):
     ]
     for font_path in font_files:
         font_name = Path(font_path).name
-        html.extend(
-            (
-                "<div class='font-preview'>",
-                "<style>",
-                f"@font-face {{ font-family: '{font_name}'; src: url('{font_path}'); }}",
-                "</style>",
-            )
+        html.extend((
+            "<div class='font-preview'>",
+            "<style>",
+            f"@font-face {{ font-family: '{font_name}'; src: url('{font_path}'); }}",
+            "</style>",
+        ))
+        html.append(
+            f"""<div style='font-family: "{font_name}"; font-size: 16px;'>LIFE IS A DREAM, we are dreaming.</div>"""
         )
         html.append(
-            f'''<div style='font-family: "{font_name}"; font-size: 16px;'>LIFE IS A DREAM, we are dreaming.</div>'''
+            f"""<div style='font-family: "{font_name}"; font-size: 22px;'>LIFE IS A DREAM, we are dreaming.</div>"""
         )
         html.append(
-            f'''<div style='font-family: "{font_name}"; font-size: 22px;'>LIFE IS A DREAM, we are dreaming.</div>'''
+            f"""<div style='font-family: "{font_name}"; font-size: 28px;'>LIFE IS A DREAM, we are dreaming.</div>"""
         )
-        html.append(
-            f'''<div style='font-family: "{font_name}"; font-size: 28px;'>LIFE IS A DREAM, we are dreaming.</div>'''
-        )
-        html.append(f'''<div style='font-family: "{font_name}"; font-size: 14px;'>{font_name}</div><hr>''')
+        html.append(f"""<div style='font-family: "{font_name}"; font-size: 14px;'>{font_name}</div><hr><br/>""")
         html.append("</div>")
     html.append("</body></html>")
     return "\n".join(html)

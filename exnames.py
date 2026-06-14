@@ -34,8 +34,8 @@ def find_names_in_files(names_db_path="names.txt"):
     if not names_to_find:
         return
     found_names = {}
-    current_dir = Path.cwd()
-    for filepath in current_dir.rglob("*"):
+    cwd = Path.cwd()
+    for filepath in cwd.rglob("*"):
         if filepath.is_file() and filepath.suffix in {
             ".txt",
             ".md",
@@ -63,7 +63,7 @@ def find_names_in_files(names_db_path="names.txt"):
                             ):
                                 if original_name not in found_names:
                                     found_names[original_name] = []
-                                entry = {"file": str(filepath.relative_to(current_dir)), "match": matched_text}
+                                entry = {"file": str(filepath.relative_to(cwd)), "match": matched_text}
                                 if entry not in found_names[original_name]:
                                     found_names[original_name].append(entry)
             except Exception as e:

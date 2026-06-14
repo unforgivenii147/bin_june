@@ -103,8 +103,8 @@ def build_decl(node, kind, name, lines):
 
 
 def process_file(src_path):
-    dup_path = src_path.parent / f"{src_path.stem}_dups.py"
     path = Path(path)
+    dup_path = src_path.parent / f"{src_path.stem}_dups.py"
     text = src_path.read_text(encoding="utf-8")
     lines = text.splitlines(keepends=True)
     try:
@@ -170,8 +170,8 @@ def process_file(src_path):
 
 
 def main():
-    root_dir = Path.cwd()
-    before = gsz(root_dir)
+    cwd = Path.cwd()
+    before = gsz(cwd)
     args = sys.argv[1:]
     files = []
     if args:
@@ -182,7 +182,7 @@ def main():
             elif p.is_dir():
                 files.extend(get_pyfiles(p))
     else:
-        files = get_pyfiles(root_dir)
+        files = get_pyfiles(cwd)
     results = mpf3(process_file, files)
     for result in results:
         if result:

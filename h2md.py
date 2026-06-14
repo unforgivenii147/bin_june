@@ -8,8 +8,8 @@ from markdownify import markdownify
 
 
 def process_file(fp):
-    md_path = fp.with_suffix(".md")
     path = Path(path)
+    md_path = fp.with_suffix(".md")
     content = fp.read_text(encoding="utf8")
     md = markdownify(content)
     md_path.write_text(md_content, encoding="utf-8")

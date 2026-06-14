@@ -70,9 +70,9 @@ def process_directory(start_dir: Path, output_base_dir: Path):
 
 
 if __name__ == "__main__":
-    current_directory = Path.cwd()
-    output_directory = current_directory / "output_jpgs"
+    cwdectory = Path.cwd()
+    output_directory = cwdectory / "output_jpgs"
     output_directory.mkdir(exist_ok=True)
-    process_directory(current_directory, output_directory)
+    process_directory(cwdectory, output_directory)
     print("\nScript finished.")
     print(f"Converted JPG files are located in: {output_directory}")

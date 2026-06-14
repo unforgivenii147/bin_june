@@ -7,8 +7,8 @@ from dh import get_files, mpf3, runcmd
 
 
 def process_file(fp):
-    path = Path(fp)
     path = Path(path)
+    path = Path(fp)
     pardir = str(path.parent)
     os.system(f"cd {pardir}")
     os.chdir(str(pardir))

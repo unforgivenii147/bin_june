@@ -12,8 +12,8 @@ from dotenv import load_dotenv
 
 class GitHubRepoCreator:
     def __init__(self) -> None:
-        self.current_dir = Path.cwd()
-        self.repo_name = self.current_dir.name
+        self.cwd = Path.cwd()
+        self.repo_name = self.cwd.name
         self.env_file = Path.home() / ".env"
         self.github_token = self._load_github_token()
         self.github_username = self._get_github_username()
@@ -65,7 +65,7 @@ class GitHubRepoCreator:
 
     def _run_cmd(self, cmd: list, cwd: Path | None = None) -> tuple[bool, str, str]:
         try:
-            result = subprocess.run(cmd, cwd=cwd or self.current_dir, capture_output=True, text=True)
+            result = subprocess.run(cmd, cwd=cwd or self.cwd, capture_output=True, text=True)
             print(result.stdout)
             if result.returncode:
                 print(result.stderr)
@@ -100,7 +100,7 @@ class GitHubRepoCreator:
                 return
             import shutil
 
-            shutil.rmtree(self.current_dir / ".git", ignore_errors=True)
+            shutil.rmtree(self.cwd / ".git", ignore_errors=True)
         success, _, stderr = self._run_cmd(["git", "init"])
         if not success:
             print(f"❌ Failed to initialize git: {stderr}")
@@ -113,7 +113,7 @@ class GitHubRepoCreator:
 
     def _setup_gitignore(self):
         home_gitignore = Path.home() / ".gitignore"
-        local_gitignore = self.current_dir / ".gitignore"
+        local_gitignore = self.cwd / ".gitignore"
         if home_gitignore.exists() and (not local_gitignore.exists()):
             print("\n📄 Copying .gitignore from home directory")
             try:
@@ -253,7 +253,7 @@ class GitHubRepoCreator:
         print("=" * 60)
         print("🚀 GITHUB REPOSITORY CREATOR")
         print("=" * 60)
-        print(f"📂 Directory: {self.current_dir}")
+        print(f"📂 Directory: {self.cwd}")
         print(f"📦 Repo name: {self.repo_name}")
         print(f"👤 Username:  {self.github_username}")
         print(f"🔑 Token source: {self.env_file}")

@@ -13,8 +13,8 @@ MAX_QUEUE = 16
 
 
 def process_file(image_path):
-    img = cv2.imread(str(image_path))
     path = Path(path)
+    img = cv2.imread(str(image_path))
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
     gaussian_blur = cv2.GaussianBlur(blurred, (0, 0), 3)

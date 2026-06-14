@@ -71,9 +71,9 @@ def process_path(path: Path) -> None:
         print(f"[ERR]  {path}: {e}")
 
 
-def collect_paths(root_dir: str) -> list[Path]:
+def collect_paths(cwd: str) -> list[Path]:
     """Recursively gather all paths, applying exclusion rules."""
-    root = Path(root_dir).resolve()
+    root = Path(cwd).resolve()
     paths = []
 
     for p in root.rglob("*"):
@@ -84,10 +84,10 @@ def collect_paths(root_dir: str) -> list[Path]:
     return paths
 
 
-def normalize_permissions(root_dir: str) -> None:
+def normalize_permissions(cwd: str) -> None:
     """Walk the tree and normalize permissions using a process pool."""
-    print(f"Collecting paths under {root_dir} ...")
-    all_paths = collect_paths(root_dir)
+    print(f"Collecting paths under {cwd} ...")
+    all_paths = collect_paths(cwd)
     total = len(all_paths)
     print(f"Found {total} items. Processing with {cpu_count()} workers...")
 

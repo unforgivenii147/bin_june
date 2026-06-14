@@ -6,12 +6,14 @@ import shutil
 import sys
 from pathlib import Path
 
-from dh import get_files, unique_path
+from dh import get_files, unique_path, should_skip
 
 
 def get_all_files(cwd):
     files = []
-    for path in get_files(cwd):
+    for path in cwd.rglob("*"):
+        if should_skip(path):
+            continue
         if path.is_file():
             size = path.stat().st_size
             files.append((path, size))
@@ -86,16 +88,7 @@ def main():
     if not files:
         print("No files found.")
         return
-    SIMPLE = "-s" in sys.argv
-    if not SIMPLE:
-        numfiles = len(files)
-        if numfiles < 200:
-            midnum = 10
-        else:
-            midnum = 50
-        num_folders = int(numfiles // midnum)
-    else:
-        num_folders = get_num_folders(files)
+    num_folders = int(sys.argv[1]) if len(sys.argv) > 0 else get_num_folders(files)
     print(f"{num_folders} dirs will be created")
     folders = create_range_folders(cwd, files, num_folders)
     distribute_files(files, folders, cwd)

@@ -9,8 +9,9 @@ from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
-from packaging import version as pkg_version
+
 from dh import get_files
+from packaging import version as pkg_version
 
 
 def parse_wheel_version(filename: str) -> Optional[Tuple[str, str]]:

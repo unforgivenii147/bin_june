@@ -9,8 +9,8 @@ from pathlib import Path
 
 class GitHubRepoManager:
     def __init__(self, repo_name: str | None = None) -> None:
-        self.current_dir = Path.cwd()
-        self.repo_name = repo_name or self.current_dir.name
+        self.cwd = Path.cwd()
+        self.repo_name = repo_name or self.cwd.name
         self.github_username = "uno2os3es"
         self.git_email = "mkalafsaz@gmail.com"
         self.git_user = "uno2os3es"
@@ -20,9 +20,7 @@ class GitHubRepoManager:
         self, command: list, cwd: Path | None = None, capture_output: bool = False
     ) -> tuple[int, str, str]:
         try:
-            result = subprocess.run(
-                command, check=False, cwd=cwd or self.current_dir, capture_output=capture_output, text=True
-            )
+            result = subprocess.run(command, check=False, cwd=cwd or self.cwd, capture_output=capture_output, text=True)
             stdout = result.stdout.strip() if result.stdout else ""
             stderr = result.stderr.strip() if result.stderr else ""
             return (result.returncode, stdout, stderr)
@@ -40,7 +38,7 @@ class GitHubRepoManager:
         return returncode == 0
 
     def _repo_exists_locally(self) -> bool:
-        git_dir = self.current_dir / ". git"
+        git_dir = self.cwd / ". git"
         return git_dir.exists()
 
     def _repo_exists_on_github(self) -> bool:
@@ -54,7 +52,7 @@ class GitHubRepoManager:
         return stdout if returncode == 0 and stdout else None
 
     def _init_local_repo(self):
-        print(f"\n📦 Initializing local git repository in {self.current_dir}...")
+        print(f"\n📦 Initializing local git repository in {self.cwd}...")
         returncode, _stdout, stderr = self._run_command(["git", "init"], capture_output=True)
         if returncode != 0 and "Reinitialized" not in stderr and ("Initialized" not in stderr):
             print(f"Error initializing git repo:    {stderr}")
@@ -88,14 +86,14 @@ class GitHubRepoManager:
         print("✓ Changes staged")
 
     def _ensure_content(self):
-        files = list(self.current_dir.glob("*"))
-        hidden_files = list(self.current_dir.glob(".*"))
+        files = list(self.cwd.glob("*"))
+        hidden_files = list(self.cwd.glob(".*"))
         files = [f for f in files if f.name != ".git"]
         hidden_files = [f for f in hidden_files if f.name not in {".git", ".", ".."}]
         has_content = len(files) > 0 or len(hidden_files) > 0
         if not has_content:
             print("📄 No files found, creating initial README. md...")
-            readme = self.current_dir / "README.md"
+            readme = self.cwd / "README.md"
             if not readme.exists():
                 readme.write_text(
                     f"# {self.repo_name}\n\nRepository initialized on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
@@ -166,7 +164,7 @@ class GitHubRepoManager:
                 print(f"Warning: Could not rename branch: {stderr}")
 
     def handle_existing_repo(self) -> bool:
-        print(f"\n⚠️  Git repository already exists in {self.current_dir}")
+        print(f"\n⚠️  Git repository already exists in {self.cwd}")
         current_remote = self._get_remote_url()
         print(f"Current remote: {current_remote or 'None'}")
         while True:
@@ -196,7 +194,7 @@ class GitHubRepoManager:
         print("=" * 60)
         print("GitHub Repository Manager (with gh CLI)")
         print("=" * 60)
-        print(f"Directory: {self.current_dir}")
+        print(f"Directory: {self.cwd}")
         print(f"Repository:  {self.repo_name}")
         print(f"GitHub User: {self.github_username}")
         print(f"Email: {self.git_email}")

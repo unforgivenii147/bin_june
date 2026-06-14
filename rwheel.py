@@ -5,13 +5,13 @@ Works in Termux with Python 3.13.
 """
 
 import argparse
-import sys
-import zipfile
 import email.parser
 import platform
-from pathlib import Path
-from multiprocessing import Pool, cpu_count
+import sys
+import zipfile
 from functools import partial
+from multiprocessing import Pool, cpu_count
+from pathlib import Path
 
 
 def get_wheel_tags():

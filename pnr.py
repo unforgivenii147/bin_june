@@ -159,8 +159,8 @@ def main() -> None:
     parser.add_argument("--dry-run", action="store_true", help="Show what would be renamed without actually doing it")
     parser.add_argument("--recursive", action="store_true", help="Process directories recursively")
     args = parser.parse_args()
-    current_dir = Path.cwd()
-    print(f"Working in directory: {current_dir}")
+    cwd = Path.cwd()
+    print(f"Working in directory: {cwd}")
     if args.recursive:
         print("Recursive mode enabled")
     if args.dry_run:

@@ -16,8 +16,8 @@ def process_dir(pardir):
     return True
 
 
-def find_targets(root_dir: Path):
-    for dpath in root_dir.rglob("*"):
+def find_targets(cwd: Path):
+    for dpath in cwd.rglob("*"):
         if dpath.is_dir() and dpath.name == ".git":
             parent_of_dotgit = dpath.parent
             process_dir(parent_of_dotgit)

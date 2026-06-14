@@ -3,6 +3,10 @@
 import datetime
 from os import scandir as _scandir
 from pathlib import Path
+import sys
+
+
+REVERSE = "-r" in sys.argv
 
 
 def fsz(sz: float) -> str:
@@ -28,6 +32,8 @@ def gsz(path: str | Path) -> int:
     elif path.is_dir():
         for entry in _scandir(path):
             try:
+                if Path(entry.path).is_symlink() or not Path(entry.path).exists():
+                    continue
                 if entry.is_file():
                     total_size += entry.stat().st_size
                 elif entry.is_dir():
@@ -42,7 +48,9 @@ if __name__ == "__main__":
     dirz = []
     otherz = []
     sz = ""
-    for path in sorted(cwd.glob("*"), key=lambda e: e.stat().st_size, reverse=False):
+    for path in sorted(cwd.glob("*"), key=lambda e: e.stat().st_size, reverse=REVERSE):
+        if not path.exists():
+            continue
         if path.is_dir():
             dirz.append(path)
         else:

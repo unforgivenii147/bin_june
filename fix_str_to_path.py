@@ -120,8 +120,8 @@ def add_path_statement_simple(file_path):
 def process_directory():
     """Process all Python files in current directory"""
 
-    current_dir = os.getcwd()
-    python_files = [f for f in os.listdir(current_dir) if f.endswith(".py") and os.path.isfile(f)]
+    cwd = os.getcwd()
+    python_files = [f for f in os.listdir(cwd) if f.endswith(".py") and os.path.isfile(f)]
 
     if not python_files:
         print("No Python files found in current directory")
@@ -132,7 +132,7 @@ def process_directory():
 
     modified_count = 0
     for file_name in python_files:
-        file_path = os.path.join(current_dir, file_name)
+        file_path = os.path.join(cwd, file_name)
         # Try the simple regex version first (more reliable)
         if add_path_statement_simple(file_path):
             modified_count += 1

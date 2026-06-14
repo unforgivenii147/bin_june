@@ -9,8 +9,8 @@ from fastwalk import walk_files
 
 
 def process_file(fp):
-    fp = Path(fp)
     path = Path(path)
+    fp = Path(fp)
     if fp.exists() and (not fp.is_symlink()):
         with pdfplumber.open(fp) as pdf:
             numpages = len(pdf.pages)

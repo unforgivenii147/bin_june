@@ -46,8 +46,8 @@ def should_compress(path):
 
 
 def main() -> None:
-    current_dir = Path()
-    dirs_to_process = get_dirs(current_dir)
+    cwd = Path()
+    dirs_to_process = get_dirs(cwd)
     print("\n--- Starting Directory Compression ---")
     for d_path in dirs_to_process:
         if should_compress(d_path):
@@ -62,7 +62,7 @@ def main() -> None:
             else:
                 print(f"Error: Failed to compress directory '{d_path.name}'. Original directory will NOT be deleted.")
     print("--- Directory Compression Complete ---")
-    tar_files_to_process = get_files(current_dir)
+    tar_files_to_process = get_files(cwd)
     print("\n--- Starting .tar File Compression ---")
     for tar_file_path in tar_files_to_process:
         if should_compress(tar_file_path) and tar_file_path.suffix.lower() == ".tar":

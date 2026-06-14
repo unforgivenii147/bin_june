@@ -111,15 +111,15 @@ def check_termux():
 
 def main():
     """Main function to process files in current directory."""
-    current_dir = Path.cwd()
+    cwd = Path.cwd()
     renamed_count = 0
     skipped_count = 0
     unknown_count = 0
 
     is_termux = check_termux()
-    print(f"📂 Scanning directory: {current_dir}\n")
+    print(f"📂 Scanning directory: {cwd}\n")
 
-    files = [f for f in current_dir.iterdir() if f.is_file()]
+    files = [f for f in cwd.iterdir() if f.is_file()]
 
     if not files:
         print("No files found in current directory.")
@@ -168,13 +168,13 @@ def main():
 
 def dry_run():
     """Preview changes without actually renaming."""
-    current_dir = Path.cwd()
+    cwd = Path.cwd()
 
     print("🔍 DRY RUN MODE - No files will be renamed\n")
     check_termux()
-    print(f"📂 Scanning directory: {current_dir}\n")
+    print(f"📂 Scanning directory: {cwd}\n")
 
-    for file_path in current_dir.iterdir():
+    for file_path in cwd.iterdir():
         if not file_path.is_file() or file_path.name.startswith("."):
             continue
 

@@ -50,7 +50,7 @@ def compress_in_memory(infile: Path, outfile: Path) -> bool:
         data = infile.read_bytes()
         if not data:
             return False
-        compressed = compress(data, preset=7, threads=1)  # Single thread for small files
+        compressed = compress(data, preset=9, threads=4)
         outfile.write_bytes(compressed)
         return True
     except (OSError, MemoryError) as e:

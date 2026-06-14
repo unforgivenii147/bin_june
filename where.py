@@ -65,7 +65,7 @@ def safe_copy_file(src: Path, dst_root: Path, rel_path: Path, errors: list[str])
 class ChangeHandler(FileSystemEventHandler):
     def __init__(
         self,
-        root_dir: Path,
+        cwd: Path,
         copy_enabled: bool,
         dest_dir: Path,
         allowed_exts: set[str] | None,
@@ -74,7 +74,7 @@ class ChangeHandler(FileSystemEventHandler):
         print_lock=None,
     ):
         super().__init__()
-        self.root_dir = root_dir
+        self.cwd = cwd
         self.copy_enabled = copy_enabled
         self.dest_dir = dest_dir
         self.allowed_exts = allowed_exts
@@ -86,7 +86,7 @@ class ChangeHandler(FileSystemEventHandler):
 
     def _rel(self, p: Path) -> Path:
         try:
-            return p.relative_to(self.root_dir)
+            return p.relative_to(self.cwd)
         except ValueError:
             return Path(p.name)
 
@@ -221,10 +221,10 @@ def build_parser() -> argparse.ArgumentParser:
 def main():
     parser = build_parser()
     args = parser.parse_args()
-    root_dir = Path(args.folder).expanduser().resolve()
+    cwd = Path(args.folder).expanduser().resolve()
     dest_dir = Path(args.dest).expanduser().resolve()
-    if not root_dir.is_dir():
-        print(f"Error: folder does not exist or is not a directory: {root_dir}")
+    if not cwd.is_dir():
+        print(f"Error: folder does not exist or is not a directory: {cwd}")
         sys.exit(2)
     allowed_exts = parse_csv_exts(args.extensions)
     excluded_exts = parse_csv_exts(args.exclude)
@@ -232,7 +232,7 @@ def main():
     if args.copy:
         dest_dir.mkdir(parents=True, exist_ok=True)
     handler = ChangeHandler(
-        root_dir=root_dir,
+        cwd=cwd,
         copy_enabled=bool(args.copy),
         dest_dir=dest_dir,
         allowed_exts=allowed_exts,
@@ -240,9 +240,9 @@ def main():
         interval_sec=interval_sec,
     )
     observer = Observer()
-    observer.schedule(handler, str(root_dir), recursive=not args.no_recursive)
+    observer.schedule(handler, str(cwd), recursive=not args.no_recursive)
     observer.start()
-    print(f"Watching: {root_dir}")
+    print(f"Watching: {cwd}")
     if args.no_recursive:
         print("Mode: Non-recursive (top-level only)")
     else:

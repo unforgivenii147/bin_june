@@ -1,40 +1,38 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-import subprocess
 import sys
+from dh import runcmd
 
 
 def get_installed_packages():
     try:
-        result = subprocess.run(
-            ["dpkg-query", "-W", "-f='${Package}\t${Status}\t${Version}\n'"], capture_output=True, text=True, check=True
-        )
-        return result.stdout.splitlines()
-    except subprocess.CalledProcessError as e:
-        print(f"Error listing installed packages: {e.stderr}")
+        ret, txt, _err = runcmd(["dpkg-query", "-W", "-f='${Package}\t${Status}\t${Version}\n'"], show_output=True)
+        return txt.splitlines()
+    except:
+        print(f"Error listing installed packages")
         sys.exit(1)
 
 
 def check_package_health(package_name):
     try:
-        result = subprocess.run(["dpkg", "-l", package_name], capture_output=True, text=True, check=True)
-        lines = result.stdout.splitlines()
+        ret, txt, _err = runcmd(["dpkg", "-l", package_name], show_output=True)
+        lines = txt.splitlines()
         for line in lines:
             if package_name in line:
                 status = line.split()[0]
                 if status.startswith("ii"):
                     return (True, "OK")
                 return (False, f"Status: {status}")
-    except subprocess.CalledProcessError as e:
-        return (False, f"Error checking package: {e.stderr}")
+    except:
+        return (False, f"Error checking package")
 
 
 def check_for_updates():
     try:
-        result = subprocess.run(["apt-get", "-s", "upgrade"], capture_output=True, text=True, check=True)
-        return result.stdout
-    except subprocess.CalledProcessError as e:
-        return f"Error checking for updates: {e.stderr}"
+        res, txt, _err = runcmd(["apt-get", "-s", "upgrade"], show_output=True)
+        return txt
+    except:
+        return f"Error checking for updates"
 
 
 def main():

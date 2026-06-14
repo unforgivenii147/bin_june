@@ -145,7 +145,7 @@ def process_file(path: str | Path) -> bool:
             cprint(f"-{fsz(size_diff)} | {ratio:.1f}%", "cyan")
             return True
         else:
-            cprint(f"{path.name} (no size change)", "grey")
+            cprint(f"{path.name} (no size change)", (147, 147, 147))
             return False
     except Exception as e:
         cprint(f"❌ {path.name}: {type(e).__name__}: {e}", "yellow")

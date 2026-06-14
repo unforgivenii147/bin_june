@@ -6,9 +6,22 @@ import sys
 from html.parser import HTMLParser
 from pathlib import Path
 
-VOID_ELEMENTS = frozenset(
-    {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"}
-)
+VOID_ELEMENTS = frozenset({
+    "area",
+    "base",
+    "br",
+    "col",
+    "embed",
+    "hr",
+    "img",
+    "input",
+    "link",
+    "meta",
+    "param",
+    "source",
+    "track",
+    "wbr",
+})
 
 
 class TagBalanceChecker(HTMLParser):
@@ -194,8 +207,8 @@ def main():
         help="Fix files in-place (append missing closing tags, remove unexpected ones)",
     )
     args = parser.parse_args()
-    current_dir = Path()
-    html_files = list(current_dir.rglob("*.html")) + list(current_dir.rglob("*.htm"))
+    cwd = Path()
+    html_files = list(cwd.rglob("*.html")) + list(cwd.rglob("*.htm"))
     html_files = sorted(set(html_files))
     if not html_files:
         print("ℹ️  No HTML files found in current directory (recursively).")

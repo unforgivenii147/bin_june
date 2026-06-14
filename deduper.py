@@ -195,28 +195,24 @@ def extract_with_ast(code: str):
             snippet = source_segment(code, node)
             if not snippet:
                 continue
-            objects.append(
-                {
-                    "name": node.name,
-                    "kind": "function",
-                    "snippet": snippet,
-                    "lineno": node.lineno,
-                    "end_lineno": node.end_lineno,
-                }
-            )
+            objects.append({
+                "name": node.name,
+                "kind": "function",
+                "snippet": snippet,
+                "lineno": node.lineno,
+                "end_lineno": node.end_lineno,
+            })
         elif isinstance(node, ast.ClassDef):
             snippet = source_segment(code, node)
             if not snippet:
                 continue
-            objects.append(
-                {
-                    "name": node.name,
-                    "kind": "class",
-                    "snippet": snippet,
-                    "lineno": node.lineno,
-                    "end_lineno": node.end_lineno,
-                }
-            )
+            objects.append({
+                "name": node.name,
+                "kind": "class",
+                "snippet": snippet,
+                "lineno": node.lineno,
+                "end_lineno": node.end_lineno,
+            })
         elif isinstance(node, ast.Assign) and is_simple_constant_assign(node):
             name = node.targets[0].id
             if name in {"__all__", "__version__", "__doc__"}:
@@ -224,15 +220,13 @@ def extract_with_ast(code: str):
             snippet = source_segment(code, node)
             if not snippet:
                 continue
-            objects.append(
-                {
-                    "name": name,
-                    "kind": "constant",
-                    "snippet": snippet,
-                    "lineno": node.lineno,
-                    "end_lineno": node.end_lineno,
-                }
-            )
+            objects.append({
+                "name": name,
+                "kind": "constant",
+                "snippet": snippet,
+                "lineno": node.lineno,
+                "end_lineno": node.end_lineno,
+            })
     return objects
 
 
@@ -260,8 +254,8 @@ def extract_objects(code: str):
 
 
 def process_file(path_str: str):
-    path = Path(path_str)
     path = Path(path)
+    path = Path(path_str)
     code = safe_read_text(path)
     if code is None:
         return []
@@ -271,17 +265,15 @@ def process_file(path_str: str):
         stripped = obj["snippet"].strip()
         if not stripped:
             continue
-        out.append(
-            {
-                "file": str(path),
-                "name": obj["name"],
-                "kind": obj["kind"],
-                "snippet": obj["snippet"],
-                "hash": sha256(stripped),
-                "lineno": obj["lineno"],
-                "end_lineno": obj["end_lineno"],
-            }
-        )
+        out.append({
+            "file": str(path),
+            "name": obj["name"],
+            "kind": obj["kind"],
+            "snippet": obj["snippet"],
+            "hash": sha256(stripped),
+            "lineno": obj["lineno"],
+            "end_lineno": obj["end_lineno"],
+        })
     return out
 
 

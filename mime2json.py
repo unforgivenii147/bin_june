@@ -37,9 +37,9 @@ def extract_mime_and_extensions(obj):
     return results
 
 
-def build_mime_to_ext(root_dir: Path) -> dict[str, list[str]]:
+def build_mime_to_ext(cwd: Path) -> dict[str, list[str]]:
     mime_to_ext = defaultdict(set)
-    for json_file in root_dir.rglob("*.json"):
+    for json_file in cwd.rglob("*.json"):
         if json_file.resolve() == OUTPUT_FILE.resolve():
             continue
         try:
@@ -53,8 +53,8 @@ def build_mime_to_ext(root_dir: Path) -> dict[str, list[str]]:
 
 
 def main():
-    root_dir = Path()
-    mime_to_ext = build_mime_to_ext(root_dir)
+    cwd = Path()
+    mime_to_ext = build_mime_to_ext(cwd)
     with OUTPUT_FILE.open("w", encoding="utf-8") as f:
         json.dump(mime_to_ext, f, indent=2, ensure_ascii=False)
     print(f"Saved {len(mime_to_ext)} MIME entries to {OUTPUT_FILE}")

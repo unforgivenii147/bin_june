@@ -66,8 +66,8 @@ def translate_docstring(docstr):
 
 
 def process_file(filepath):
-    backup_path = filepath + BACKUP_EXT
     path = Path(path)
+    backup_path = filepath + BACKUP_EXT
     shutil.copyfile(filepath, backup_path)
     code = Path(filepath).read_text(encoding="utf-8")
     len(code) > CHUNK_SIZE

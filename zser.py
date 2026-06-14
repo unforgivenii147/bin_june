@@ -19,26 +19,24 @@ from dh import MAX_WORKERS, fsz, gsz, xtar
 from joblib import Parallel, delayed
 
 ZST_EXT = ".zst"
-SKIP_EXTS = frozenset(
-    {
-        ".xz",
-        ".br",
-        ".7z",
-        ".zip",
-        ".gz",
-        ".bz2",
-        ".zst",
-        ".whl",
-        ".mp4",
-        ".mp3",
-        ".jpg",
-        ".jpeg",
-        ".png",
-        ".gif",
-        ".webp",
-        ".webm",
-    }
-)
+SKIP_EXTS = frozenset({
+    ".xz",
+    ".br",
+    ".7z",
+    ".zip",
+    ".gz",
+    ".bz2",
+    ".zst",
+    ".whl",
+    ".mp4",
+    ".mp3",
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".gif",
+    ".webp",
+    ".webm",
+})
 
 CHUNK = 262_144
 

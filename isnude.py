@@ -2,10 +2,24 @@
 from pathlib import Path
 
 import nude
-from dh import get_files, mpf3, cprint
+from dh import cprint, get_files, mpf3
+import cv2
 
 nude_path = Path("nude")
 nude_path.mkdir(exist_ok=True)
+RESIZE = "-r" in sys.argv
+
+
+def check_nude(path):
+    img = cv2.imread(path)
+    h, w = img.shape[:2]
+    n = nude.Nude(path)
+    if (h > 800 or w > 800) and RESIZE:
+        n.resize(maxheight=800, maxwidth=800)
+    n.parse()
+    del img, h, w
+    print(n)
+    return bool(n.result)
 
 
 def process_file(path):
@@ -13,7 +27,7 @@ def process_file(path):
     if "nude" in path.parts:
         return
     print(f"{path.name}")
-    if nude.is_nude(str(path)):
+    if check_nude(str(path)):
         cprint(f"{path.name} is nude", "cyan")
         new_path = nude_path / path.name
         path.rename(new_path)

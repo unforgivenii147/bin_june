@@ -2,7 +2,6 @@
 
 from pathlib import Path
 
-
 if __name__ == "__main__":
     libdir: Path = Path.home() / ".local" / "lib"
     for path in libdir.glob("*"):

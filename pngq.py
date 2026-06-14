@@ -46,7 +46,7 @@ def process_file(path: str | Path):
 
 
 def main():
-    root_dir = Path.cwd()
+    cwd = Path.cwd()
     args = sys.argv[1:]
     files = []
     if args:
@@ -57,7 +57,7 @@ def main():
             elif p.is_dir():
                 files.extend(get_files(p, ext=[".png", ".PNG"]))
     else:
-        files = get_files(root_dir, ext=[".png", ".PNG"])
+        files = get_files(cwd, ext=[".png", ".PNG"])
     _ = mpf3(process_file, files)
 
 

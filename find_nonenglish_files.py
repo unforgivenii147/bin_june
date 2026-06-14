@@ -75,10 +75,10 @@ def analyze_directory(directory: str = ".", show_all: bool = False) -> dict:
     }
     for root, dirs, files in os.walk(directory):
         dirs[:] = [d for d in dirs if not d.startswith(".") and d not in {"__pycache__", "node_modules"}]
-        current_dir = Path(root)
-        rel_dir = current_dir.relative_to(directory)
+        cwd = Path(root)
+        rel_dir = cwd.relative_to(directory)
         for file in files:
-            filepath = current_dir / file
+            filepath = cwd / file
             if filepath.suffix.lower() not in SUPPORTED_EXTENSIONS:
                 continue
             if filepath.stat().st_size > MAX_FILE_SIZE:

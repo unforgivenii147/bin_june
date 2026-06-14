@@ -31,7 +31,7 @@ def process_directory(directory: Path):
 
 
 if __name__ == "__main__":
-    current_dir = Path()
-    print(f"Starting to remove meta tags from HTML files in '{current_dir.resolve()}' and its subdirectories...\n")
-    process_directory(current_dir)
+    cwd = Path()
+    print(f"Starting to remove meta tags from HTML files in '{cwd.resolve()}' and its subdirectories...\n")
+    process_directory(cwd)
     print("\nFinished processing. Meta tags have been removed from applicable HTML files.")

@@ -6,8 +6,8 @@ from pathlib import Path
 from dh import append_text
 
 
-def create_initpy(current_dir, pkg_name):
-    src_dir = current_dir / "src"
+def create_initpy(cwd, pkg_name):
+    src_dir = cwd / "src"
     pkg_dir = src_dir / pkg_name
     pkg_dir.mkdir(parents=True, exist_ok=True)
     init_file = pkg_dir / "__init__.py"
@@ -27,8 +27,8 @@ with suppress(PackageNotFoundError):
         append_text(init_file, init_content)
 
 
-def create_readme(current_dir, pkg_name):
-    readme_file = current_dir / "README.md"
+def create_readme(cwd, pkg_name):
+    readme_file = cwd / "README.md"
     readme_content = f"""
 # {pkg_name}
 
@@ -48,8 +48,8 @@ import {pkg_name}
         readme_file.write_text(readme_content, encoding="utf-8")
 
 
-def create_pyproject(current_dir, pkg_name):
-    pyproject_file = current_dir / "pyproject.toml"
+def create_pyproject(cwd, pkg_name):
+    pyproject_file = cwd / "pyproject.toml"
     pyproject_content = f"""
 [build-system]
 requires = ["setuptools>=61.0", "wheel"]
@@ -75,8 +75,8 @@ where = ["src"]
         pyproject_file.write_text(pyproject_content, encoding="utf-8")
 
 
-def create_setuppy(current_dir, pkg_name):
-    setuppy_file = current_dir / "setup.py"
+def create_setuppy(cwd, pkg_name):
+    setuppy_file = cwd / "setup.py"
     setuppy_content = f"""
 from pathlib import Path
 from setuptools import setup, find_packages

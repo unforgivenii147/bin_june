@@ -5,16 +5,16 @@ import os
 
 import matplotlib.pyplot as plt
 
-current_dir = os.getcwd()
+cwd = os.getcwd()
 subdir_sizes = {}
 total_size = 0
-for dirpath, dirnames, filenames in os.walk(current_dir):
+for dirpath, dirnames, filenames in os.walk(cwd):
     dir_size = 0
     for f in filenames:
         fp = os.path.join(dirpath, f)
         with contextlib.suppress(OSError):
             dir_size += os.path.getsize(fp)
-    if dirpath != current_dir:
+    if dirpath != cwd:
         subdir_sizes[dirpath] = dir_size
         total_size += dir_size
     else:

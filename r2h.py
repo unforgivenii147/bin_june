@@ -9,6 +9,7 @@ Usage: python rst_to_md.py file1.rst file2.rst ...
 
 import sys
 from pathlib import Path
+
 from dh import get_files, mpf3
 from docutils.core import publish_parts
 from mistletoe import markdown as mistletoe_markdown

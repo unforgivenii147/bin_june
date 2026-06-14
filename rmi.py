@@ -35,8 +35,8 @@ def clean_text(text: str) -> str:
 
 
 def process_file(fp):
-    text = fp.read_text(encoding="utf-8", errors="ignore")
     path = Path(path)
+    text = fp.read_text(encoding="utf-8", errors="ignore")
     cleaned = clean_text(text)
     removed = len(text) - len(cleaned)
     if removed:

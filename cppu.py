@@ -10,8 +10,8 @@ EXT = [".java", ".c", ".cpp", ".cxx", ".cc", ".h", ".hh", ".hpp", ".hxx", ".js",
 
 
 def process_file(path):
-    before = gsz(path)
     path = Path(path)
+    before = gsz(path)
     print(f"{path.name} ", end=" ")
     try:
         runcmd(["clang-format", "-i", "--style=LLVM", str(path)], show_output=False)

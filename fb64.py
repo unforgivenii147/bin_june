@@ -4,8 +4,8 @@ import os
 from pathlib import Path
 
 search_string = 'b64 = """'
-current_dir = Path.cwd()
-for root, _dirs, files in os.walk(current_dir):
+cwd = Path.cwd()
+for root, _dirs, files in os.walk(cwd):
     for file in files:
         file_path = os.path.join(root, file)
         try:

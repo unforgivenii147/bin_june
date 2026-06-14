@@ -36,12 +36,12 @@ def read_file_contents(filepath):
         return f"[Error reading file: {e!s}]"
 
 
-def get_files_in_current_dir():
-    current_dir = Path.cwd()
+def get_files_in_cwd():
+    cwd = Path.cwd()
     files = []
     try:
-        for item in os.listdir(current_dir):
-            item_path = os.path.join(current_dir, item)
+        for item in os.listdir(cwd):
+            item_path = os.path.join(cwd, item)
             if Path(item_path).is_file():
                 print(f"  Reading: {item}")
                 contents = read_file_contents(item_path)
@@ -67,7 +67,7 @@ def main():
     if folder_exists_in_db(cursor, folder_name):
         folder_name = folder_name + "_new"
     create_folder_table(cursor, folder_name)
-    files = get_files_in_current_dir()
+    files = get_files_in_cwd()
     if not files:
         print("No files found in current directory!")
     else:

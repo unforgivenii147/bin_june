@@ -1,37 +1,35 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 from pathlib import Path
+import sys
 
 import htmlmin
-from dh import mpf3
+from dh import mpf3, get_files
 
 
-def process_file(file: Path) -> bool:
+def process_file(path: str | Path):
     path = Path(path)
     try:
-        orig = file.read_text(encoding="utf-8")
-        print(len(orig))
-        code = orig
+        orig = path.read_text(encoding="utf-8")
+        #        print(len(orig))
+        #        code = orig
         code = htmlmin.minify(orig, remove_comments=True)
-        print(len(code))
+        #        print(len(code))
         if len(code) != len(orig):
-            Path(file).write_text(code, encoding="utf-8")
-            print(f"[OK] {file.name}")
-            return True
+            path.write_text(code, encoding="utf-8")
+            print(f"[OK] {path.name}")
+            return
     except Exception:
-        print(f"[ERR] {file.name}")
-        return False
+        print(f"[ERR] {path.name}")
+        return
 
 
 def main() -> None:
-    files = []
     cwd = Path.cwd()
-    for path in cwd.rglob("*"):
-        if path.is_file() and path.suffix in {".html", ".htm"}:
-            files.append(path)
-    if not files:
-        print("No html files detected.")
-        return
+    files = get_files(cwd, ext=[".html", ".htm", ".xhtml", ".mhtml"])
+    if len(files) == 1:
+        process_file(files[0])
+        sys.exit(1)
     mpf3(process_file, files)
 
 

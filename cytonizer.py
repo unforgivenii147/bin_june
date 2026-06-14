@@ -11,14 +11,14 @@ NUM_PROCESSES = 4
 
 
 def process_file(path):
-    pardir = path.parent
     path = Path(path)
+    pardir = path.parent
     os.chdir(pardir)
     os.system(f"cythonize {path.name}")
 
 
 def main():
-    root_dir = Path.cwd()
+    cwd = Path.cwd()
     args = sys.argv[1:]
     files = []
     if args:
@@ -29,7 +29,7 @@ def main():
             elif p.is_dir():
                 files.extend(get_files(p, ext=[".pyx"]))
     else:
-        files = get_files(root_dir, ext=[".pyx"])
+        files = get_files(cwd, ext=[".pyx"])
     _ = mpf3(process_file, files)
 
 

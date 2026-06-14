@@ -201,7 +201,7 @@ def generate_setup_py(
             cext_extension = "from setuptools import Extension\n\n" + "\n".join(ext_list) if ext_list else ""
             cext_imports = "from setuptools import Extension\n"
             cext_build = (
-                f"""    ext_modules=[{", ".join([f'''Extension("{e.get('name', '')}", sources={e.get('sources', [])})''' for e in ext_modules])}],\n"""
+                f"""    ext_modules=[{", ".join([f'''Extension("{e.get("name", "")}", sources={e.get("sources", [])})''' for e in ext_modules])}],\n"""
                 if ext_modules
                 else ""
             )

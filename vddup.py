@@ -95,8 +95,8 @@ def find_repeated_definitions(ast_tree):
 
 
 def process_file(file_path):
-    """Process a single file to find repeated definitions."""
     path = Path(path)
+    """Process a single file to find repeated definitions."""
     ast_tree = parse_python_file(file_path)
     if ast_tree:
         return find_repeated_definitions(ast_tree)
@@ -142,12 +142,12 @@ def main():
     parser.add_argument("-m", "--move", action="store_true", help="Move repeated definitions to utils directory.")
     parser.add_argument("-c", "--copy", action="store_true", help="Copy repeated definitions to utils directory.")
     args = parser.parse_args()
-    current_dir = Path.cwd()
-    utils_dir = current_dir / "utils"
+    cwd = Path.cwd()
+    utils_dir = cwd / "utils"
     utils_dir.mkdir(exist_ok=True)
     print(cpu_count())
     with Pool(cpu_count()) as pool:
-        results = pool.map(process_directory, [current_dir])
+        results = pool.map(process_directory, [cwd])
     combined_results = {"functions": {}, "classes": {}, "constants": {}}
     for result in results:
         for key in combined_results:

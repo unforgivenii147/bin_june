@@ -7,9 +7,10 @@ Requires: pip install gitpython requests python-dotenv
 
 import os
 from pathlib import Path
-from git import Repo, GitCommandError
-from dotenv import load_dotenv
+
 import requests
+from dotenv import load_dotenv
+from git import GitCommandError, Repo
 
 # Load environment variables
 load_dotenv()
@@ -157,9 +158,9 @@ def main():
         print("Please create a .env file with: GITHUB_TOKEN=your_token_here")
         return
 
-    current_dir = Path.cwd()
-    print(f"🔍 Scanning for git repositories in: {current_dir}")
-    repos = find_git_repos(current_dir)
+    cwd = Path.cwd()
+    print(f"🔍 Scanning for git repositories in: {cwd}")
+    repos = find_git_repos(cwd)
 
     if not repos:
         print("No git repositories found")
@@ -183,12 +184,12 @@ def main():
     if successful:
         print(f"\n✅ Successful ({len(successful)} repos):")
         for repo_path, _, msg in successful:
-            print(f"   - {repo_path.relative_to(current_dir)}: {msg}")
+            print(f"   - {repo_path.relative_to(cwd)}: {msg}")
 
     if failed:
         print(f"\n❌ Failed ({len(failed)} repos):")
         for repo_path, _, msg in failed:
-            print(f"   - {repo_path.relative_to(current_dir)}: {msg}")
+            print(f"   - {repo_path.relative_to(cwd)}: {msg}")
 
 
 if __name__ == "__main__":

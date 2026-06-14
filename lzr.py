@@ -2,13 +2,14 @@
 
 import argparse
 import asyncio
-import lz4.frame
 import mmap
 import shutil
 import sys
 import tarfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+
+import lz4.frame
 
 # Use a bounded thread pool instead of semaphore
 MAX_WORKERS = 4

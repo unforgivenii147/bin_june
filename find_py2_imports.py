@@ -15,8 +15,8 @@ VALID = {"import_statement", "import_from_statement"}
 
 
 def process_file(fp):
-    src = fp.read_bytes()
     path = Path(path)
+    src = fp.read_bytes()
     tree = parser.parse(src)
     root = tree.root_node
     impoz = []

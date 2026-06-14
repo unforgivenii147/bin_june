@@ -67,8 +67,8 @@ def fix_file(path: Path) -> bool:
     return changed
 
 
-def scan_and_fix(root_dir: str):
-    root = Path(root_dir)
+def scan_and_fix(cwd: str):
+    root = Path(cwd)
     fixed_files = []
     for path in root.rglob("*.py"):
         if fix_file(path):

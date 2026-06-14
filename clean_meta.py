@@ -31,19 +31,17 @@ def process_file(path: str | Path):
             nl.append("\n")
             replaced_count += 1
             continue
-        if stripped.startswith(
-            (
-                "Metadata-Version",
-                "Home-page",
-                "Author",
-                "Maintainer",
-                "License",
-                "Platform",
-                "Requires-Python",
-                "Description-Content-Type",
-                "Provides-Extra",
-            )
-        ):
+        if stripped.startswith((
+            "Metadata-Version",
+            "Home-page",
+            "Author",
+            "Maintainer",
+            "License",
+            "Platform",
+            "Requires-Python",
+            "Description-Content-Type",
+            "Provides-Extra",
+        )):
             nl.append("\n")
             replaced_count += 1
             continue
