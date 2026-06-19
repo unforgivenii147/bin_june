@@ -4,7 +4,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-OUTPUT_FILE = Path("/sdcard/installed_packages.txt")
+OUTPUT_FILE = Path("installed_packages_deb.txt")
 
 
 def get_installed_debian_packages() -> list[str]:

@@ -7,7 +7,6 @@ Termux script creator - Creates executable scripts from clipboard content.
 import subprocess
 import sys
 from pathlib import Path
-from typing import Optional
 
 # Termux specific shebangs
 TERMUX_SHEBANGS = {

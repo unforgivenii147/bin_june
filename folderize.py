@@ -7,7 +7,6 @@ Numbers and special chars go into '0-9/' folder.
 """
 
 import shutil
-from collections import defaultdict
 from pathlib import Path
 
 

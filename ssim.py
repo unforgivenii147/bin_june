@@ -60,7 +60,7 @@ class FileSimilarityDetector:
             group = [p1]
             visited.add(p1)
             h1 = self.file_hashes[p1]["ssdeep"]
-            for p2 in candidates[i + 1:]:
+            for p2 in candidates[i + 1 :]:
                 if p2 in visited:
                     continue
                 if ssdeep.compare(h1, self.file_hashes[p2]["ssdeep"]) >= threshold:

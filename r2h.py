@@ -12,8 +12,6 @@ from pathlib import Path
 
 from dh import get_files, mpf3
 from docutils.core import publish_parts
-from mistletoe import markdown as mistletoe_markdown
-from mistletoe.html_renderer import HTMLRenderer
 
 
 def rst_to_html(content: str) -> str:

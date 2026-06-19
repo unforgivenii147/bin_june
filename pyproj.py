@@ -1,118 +1,114 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-import sys
+import argparse
 from pathlib import Path
 
-from dh import append_text
+
+def load_user_info() -> dict[str, str]:
+    """Load user information from ~/.myinfo file."""
+    info_path = Path.home() / ".myinfo"
+    info = {}
+
+    if not info_path.exists():
+        return info
+
+    for line in info_path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+
+        key, val = line.split("=", 1)
+        info[key.strip()] = val.strip()
+
+    return info
 
 
-def create_initpy(cwd: Path, pkg_name) -> None:
-    src_dir = cwd / "src"
-    pkg_dir = src_dir / pkg_name
-    pkg_dir.mkdir(parents=True, exist_ok=True)
-    init_file = pkg_dir / "__init__.py"
-    init_content = f"""
-
-__version__ = (1, 4, 7)
-from contextlib import suppress
-from importlib.metadata import PackageNotFoundError,version
-with suppress(PackageNotFoundError):
-    __version__ = version(__name__)
-
-"""
-    if not init_file.exists():
-        init_file.write_text(init_content, encoding="utf-8")
-    else:
-        print("__init__.py exists")
-        append_text(init_file, init_content)
+def write_file_if_missing(path: Path, content: str = "") -> None:
+    """Write content to a file only if it doesn't already exist."""
+    if not path.exists():
+        path.write_text(content)
 
 
-def create_readme(cwd: Path, pkg_name) -> None:
-    readme_file = cwd / "README.md"
-    readme_content = f"""
-# {pkg_name}
-
-A Python package named {pkg_name}.
-```bash
-pip install -e .
-```
-
-Usage
-```python
-import {pkg_name}
-
-```
-
-"""
-    if not readme_file.exists():
-        readme_file.write_text(readme_content, encoding="utf-8")
-
-
-def create_pyproject(cwd: Path, pkg_name) -> None:
-    pyproject_file = cwd / "pyproject.toml"
-    pyproject_content = f"""
-[build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
-[project]
-name = "{pkg_name}"
-version = "1.4.7"
-description = "A Python package named {pkg_name}"\)
-readme = "README.md"
-authors = [{{name = "Isaac Onagh", email = "mkalafsaz@gmail.com"}},
-]
-requires-python = ">=3.9"
-
-[tool.setuptools.packages.find]
-where = ["src"]
-
-"""
-    if not pyproject_file.exists():
-        pyproject_file.write_text(pyproject_content, encoding="utf-8")
-
-
-def create_setuppy(cwd: Path, pkg_name) -> None:
-    setuppy_file = cwd / "setup.py"
-    setuppy_content = f"""
-#__import__("setuptools").setup()
-from pathlib import Path
-from setuptools import setup, find_packages
-import re
-here = Path(__file__).parent
-version_re = re.compile(r"__version__ = (\(.*?\))")
-version = "1.4.7"
-for line in Path("src/{pkg_name}/__init__.py").read_text().splitlines():
-    match = version_re.search(line)
-    if match:
-        version = eval(match.group(1))
-        break
-
-setup(
-    name="{pkg_name}",
-    version=".".join(map(str, version)),
-    description=f"python pkg named {pkg_name}",
-    packages=find_packages(),
-)
-
-"""
-
-    if not setuppy_file.exists():
-        setuppy_file.write_text(setuppy_content, encoding="utf-8")
-
-
-def create_python_project(pkg_name: str) -> None:
+def create_project_structure(pkg: str, author: str, email: str, url: str) -> None:
+    """Create the project directory structure and configuration files."""
     cwd = Path.cwd()
-    create_initpy(cwd, pkg_name)
-    create_readme(cwd, pkg_name)
-    create_pyproject(cwd, pkg_name)
-    create_setuppy(cwd, pkg_name)
+
+    # Version can be customized as needed
+    version = "1.4.7"
+
+    # Create README.md
+    readme_path = cwd / "README.md"
+    write_file_if_missing(readme_path, f"# {pkg}\n")
+
+    # Create src package structure
+    src_pkg = cwd / "src" / pkg
+    src_pkg.mkdir(parents=True, exist_ok=True)
+    write_file_if_missing(src_pkg / "__init__.py")
+
+    # Create tests package structure
+    tests_path = cwd / "tests"
+    tests_path.mkdir(exist_ok=True)
+    write_file_if_missing(tests_path / "__init__.py")
+
+    # Create setup.py (minimal)
+    setup_py = cwd / "setup.py"
+    setup_py.write_text('__import__("setuptools").setup()\n')
+
+    # Create setup.cfg
+    setup_cfg = cwd / "setup.cfg"
+    cfg_content = [
+        "[metadata]",
+        f"name = {pkg}",
+        f"version = {version}",
+    ]
+
+    if author:
+        cfg_content.append(f"author = {author}")
+    if email:
+        cfg_content.append(f"author_email = {email}")
+    if url:
+        cfg_content.append(f"url = {url}")
+
+    cfg_content.extend([
+        "",
+        "[options]",
+        "package_dir =",
+        "    = src",
+        "packages = find:",
+        "python_requires = >=3.13",
+        "",
+        "[options.packages.find]",
+        "where = src",
+    ])
+
+    setup_cfg.write_text("\n".join(cfg_content))
+
+    # Create pyproject.toml
+    pyproject_path = cwd / "pyproject.toml"
+    pyproject_path.write_text(
+        '[build-system]\nrequires = ["setuptools>=69.0", "wheel"]\nbuild-backend = "setuptools.build_meta"\n'
+    )
+
+    print(f"Project '{pkg}' initialized in {cwd}")
 
 
 def main() -> None:
-    if len(sys.argv) != 2:
-        sys.exit(1)
-    pkg = sys.argv[1]
-    create_python_project(pkg)
+    """Main entry point."""
+    user_info = load_user_info()
+
+    parser = argparse.ArgumentParser(description="Initialize a Python project structure")
+    parser.add_argument("name", help="Package name")
+    parser.add_argument("--version", default="1.4.7", help="Initial version (default: 1.4.7)")
+    args = parser.parse_args()
+
+    # Extract user info with defaults
+    author = user_info.get("name", "")
+    email = user_info.get("email", "")
+    github_user = user_info.get("github_username", "")
+
+    # Construct GitHub URL if username is available
+    url = f"https://github.com/{github_user}/{args.name}" if github_user else ""
+
+    create_project_structure(args.name, author, email, url)
 
 
 if __name__ == "__main__":

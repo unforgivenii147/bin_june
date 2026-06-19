@@ -1,8 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 from numpy import ndarray
-from numpy import generic
-from numpy import dtype
 import os
 import shutil
 from pathlib import Path

@@ -392,8 +392,8 @@ class TextEditor:
         search_content = (
             self.gui.show_dialog(
                 "Search Scope", "Search in filenames only or file content?", ["Filenames Only", "Content Too"]
-            ) ==
-            1
+            )
+            == 1
         )
         results = self.file_manager.search_documents(query, search_content=search_content)
         if not results:

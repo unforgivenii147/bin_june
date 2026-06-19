@@ -309,7 +309,7 @@ def remove_nodes_from_source(original_src: str, nodes_to_remove: List[str]) -> s
                 rest = out[idx:]
                 nn = rest.find("\n\n")
                 if nn != -1:
-                    out = out[:idx] + out[idx + nn + 2:]
+                    out = out[:idx] + out[idx + nn + 2 :]
                 else:
                     out = out[:idx]
             else:
@@ -328,10 +328,10 @@ def add_imports_to_source(original_src: str, import_lines: List[str]) -> str:
         return "\n".join(import_lines) + "\n\n" + original_src
     insert_at = 0
     if (
-        tree.body and
-        isinstance(tree.body[0], ast.Expr) and
-        isinstance(tree.body[0].value, ast.Constant) and
-        isinstance(tree.body[0].value.value, str)
+        tree.body
+        and isinstance(tree.body[0], ast.Expr)
+        and isinstance(tree.body[0].value, ast.Constant)
+        and isinstance(tree.body[0].value.value, str)
     ):
         doc = tree.body[0]
         if hasattr(doc, "end_lineno"):

@@ -1,7 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 import sys
-import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FuturesTimeoutError

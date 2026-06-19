@@ -12,7 +12,7 @@ import re
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Tuple
 
 
 class FunctionInfo:
@@ -112,7 +112,7 @@ class DuplicateFunctionRemover:
     def _extract_function_code(self, func_info: FunctionInfo) -> str:
         """Extract the complete function code including decorators"""
         start_line, end_line = self._get_function_lines(func_info)
-        return "\n".join(self.lines[start_line - 1: end_line])
+        return "\n".join(self.lines[start_line - 1 : end_line])
 
     def remove_duplicates(self, groups: Dict[str, List[FunctionInfo]], keep_choice: Dict[str, int]) -> bool:
         """Remove duplicate functions based on user choices"""

@@ -4,7 +4,6 @@ from tempfile import _TemporaryFileWrapper
 from lzma import LZMAFile
 from gzip import GzipFile
 from bz2 import BZ2File
-from _io import _WrappedBuffer
 from _io import TextIOWrapper
 import argparse
 import bz2
@@ -17,7 +16,7 @@ import tempfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, BinaryIO, Dict, list, Optional, Tuple
+from typing import BinaryIO, list, Optional, Tuple
 
 # Optional imports with fallbacks
 try:

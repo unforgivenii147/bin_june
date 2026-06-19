@@ -2,29 +2,47 @@
 import cv2
 import sys
 from pathlib import Path
-from dh import get_files, mpf3
+from dh import get_files
 
 
 def process_file(path) -> None:
-    path = Path(path)
-    img = cv2.imread(path)
-    # denoised = cv2.fastNlMeansDenoisingColored(img, None, 5, 5, 3, 14)
-    h, w = img.shape[:2]
-    if h > 2000 or w > 2000:
+    path_str = str(path)
+    img = cv2.imread(path_str)
+    if not img.any():
         return
-    print(f"[\u2713] {path.name}:{h}x{w}")
-
-    # nearest = cv2.resize(img, (w*2, h*2), interpolation=cv2.INTER_NEAREST)
-    bilinear = cv2.resize(img, (w * 2, h * 2), interpolation=cv2.INTER_LINEAR)
-    bicubic = cv2.resize(bilinear, (w * 3, h * 3), interpolation=cv2.INTER_CUBIC)
-    lanczos = cv2.resize(bicubic, (w * 4, h * 4), interpolation=cv2.INTER_LANCZOS4)
-    # blurred = cv2.GaussianBlur(lanczos, (0,0), 3)
-    sharpened = cv2.addWeighted(lanczos, 1.5, lanczos, -0.5, 0)
-    cv2.imwrite(path, sharpened)
+    h, w = img.shape[:2]
+    if 1 < w < 200:
+        FACTOR = 8
+    elif 200 <= w <= 500:
+        FACTOR = 6
+    elif 500 <= w <= 1000:
+        FACTOR = 4
+    elif 1000 <= w <= 2000:
+        FACTOR = 2
+    elif w > 2000:
+        del w, h, img
+        return
+    print(f"[\u2713] {path.name}:{h}X{w} -> {h * FACTOR}X{w * FACTOR}")
+    try:
+        resized = cv2.resize(img, (w * FACTOR, h * FACTOR), interpolation=cv2.INTER_LANCZOS4)
+        del img, h, w
+        # blurred = cv2.GaussianBlur(lanczos, (0,0), 3)
+        sharpened = cv2.addWeighted(resized, 1.5, resized, -0.5, 0)
+        del resized
+        cv2.imwrite(path, sharpened)
+        del sharpened
+        return
+    except:
+        return
 
 
 if __name__ == "__main__":
     cwd = Path.cwd()
     args = sys.argv[1:]
     files = [Path(p) for p in args] if args else get_files(cwd, ext=[".webp", ".jpg", ".jpeg", ".png"])
-    mpf3(process_file, files)
+
+    c = 0
+    for f in files:
+        c += 1
+        print(f"{c}/{len(files)}")
+        process_file(f)

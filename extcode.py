@@ -31,7 +31,7 @@ def extract_from_file(py_file: Path) -> str:
     tree = parser.parse(source)
     root = tree.root_node
     extracted_chunks = [
-        source[child.start_byte: child.end_byte].decode()
+        source[child.start_byte : child.end_byte].decode()
         for child in root.children
         if child.type in VALID_TOP_LEVEL_NODES
     ]

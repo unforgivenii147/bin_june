@@ -18,7 +18,7 @@ try:
 except ImportError:
     HAS_TREE_SITTER = False
 
-from dh import get_files, runcmd, unique_path
+from dh import get_files, unique_path
 
 # Try to import zstd if available
 try:
@@ -96,7 +96,7 @@ class EntityExtractor(ast.NodeVisitor):
         code_slice = self.source_lines[start_line:end_line]
 
         if node.col_offset is not None and code_slice:
-            code_slice[0] = code_slice[0][node.col_offset:]
+            code_slice[0] = code_slice[0][node.col_offset :]
 
         if node.end_col_offset is not None and node.end_col_offset > 0 and code_slice:
             last_line = code_slice[-1]
@@ -195,7 +195,7 @@ class ImportCollector:
             imports = []
             for node in root.children:
                 if node.type in ImportCollector.VALID_IMPORT_TYPES:
-                    import_text = content[node.start_byte: node.end_byte].decode("utf-8", errors="ignore")
+                    import_text = content[node.start_byte : node.end_byte].decode("utf-8", errors="ignore")
                     # Skip relative imports
                     if not import_text.startswith("from ."):
                         imports.append(import_text)
@@ -329,8 +329,6 @@ def enhance_entity_code(entity: Dict[str, Any]) -> str:
 
     # Build header
     header = f"# Extracted from: {entity['path']}\n"
-    header += f"# Entity: {entity['full_name']} ({entity['type']})\n"
-    header += f"# This file was automatically extracted and may need additional dependencies\n\n"
 
     # Add imports
     if all_imports:
@@ -510,7 +508,7 @@ def save_global_imports(all_imports: List[str], source_dir: Path) -> Path:
 
 
 def process_files_parallel(
-    file_paths: List[str], max_workers: Optional[int] = None
+    file_paths: List[str], max_workers: Optional[int] = 8
 ) -> Tuple[List[Dict[str, Any]], List[str]]:
     """Process files in parallel using ProcessPoolExecutor."""
     all_entities = []
@@ -540,9 +538,9 @@ def process_files_parallel(
 
 def print_statistics(entities: List[Dict[str, Any]], imports: List[str], saved_entities: int) -> None:
     """Print processing statistics."""
-    print("\n" + "=" * 60)
+    print("\n" + "=" * 35)
     print("PROCESSING STATISTICS")
-    print("=" * 60)
+    print("=" * 35)
 
     # Entity statistics
     entity_types = {}
@@ -550,11 +548,8 @@ def print_statistics(entities: List[Dict[str, Any]], imports: List[str], saved_e
         etype = entity["type"]
         entity_types[etype] = entity_types.get(etype, 0) + 1
 
-    print("\n📦 Entities Extracted:")
     for etype, count in sorted(entity_types.items()):
         print(f"  • {etype.capitalize()}s: {count}")
-
-    print(f"\n📚 Total Imports Collected: {len(set(imports))}")
 
     # Top imports
     from collections import Counter
@@ -573,28 +568,11 @@ def print_statistics(entities: List[Dict[str, Any]], imports: List[str], saved_e
         for module, count in import_modules.most_common(10):
             print(f"  • {module}: {count} times")
 
-    print(f"\n💾 Saved Entities: {saved_entities}")
-    print(f"📁 Output Directory: {OUTPUT_DIR}")
-    print("=" * 60 + "\n")
-
 
 def main() -> None:
     """Main entry point - merged entity extraction and import collection."""
     cwd = Path.cwd()
-    print(f"🔍 Analyzing {cwd}")
-    print(f"📁 Output directory: {OUTPUT_DIR}")
 
-    if HAS_TREE_SITTER:
-        print("✓ Tree-sitter available for advanced parsing")
-    else:
-        print("⚠ Tree-sitter not available, using fallback parser")
-
-    if HAS_ZSTD:
-        print("✓ ZSTD support enabled")
-    else:
-        print("⚠ ZSTD support not available")
-
-    # Get all files
     files = get_files(cwd)
     files_to_process = []
 
@@ -614,17 +592,11 @@ def main() -> None:
         print("❌ No Python files or archives found to process.")
         return
 
-    print(f"✓ Found {len(files_to_process)} relevant files/archives")
-    print(f"🚀 Starting parallel processing with {min(os.cpu_count() or 4, 8)} workers...\n")
-
     # Process files in parallel
     all_entities, all_imports = process_files_parallel(files_to_process)
 
     if not all_entities and not all_imports:
-        print("❌ No entities or imports extracted.")
         return
-
-    print(f"\n💾 Saving {len(all_entities)} entities...")
 
     # Save entities
     saved_count = 0
@@ -634,9 +606,7 @@ def main() -> None:
         if idx % 100 == 0:
             print(f"  Progress: {idx}/{len(all_entities)} entities processed")
 
-    # Save global imports file
     if all_imports:
-        print(f"\n📝 Saving collected imports...")
         imports_file = save_global_imports(all_imports, cwd)
         if imports_file:
             print(f"✓ Imports saved to: {imports_file}")
@@ -644,15 +614,14 @@ def main() -> None:
     # Print statistics
     print_statistics(all_entities, all_imports, saved_count)
 
-    print("✅ Processing complete!")
-
     # Optionally run ex_imports if it exists and we want to process further
-    try:
-        if saved_count > 0:
-            runcmd(["ex_imports"], show_output=False)
-            print("✓ Additional import processing completed")
-    except:
-        pass
+
+
+#    try:
+#        if saved_count > 0:
+#            runcmd(["ex_imports"], show_output=False)
+#    except:
+#        pass
 
 
 if __name__ == "__main__":

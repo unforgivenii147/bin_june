@@ -9,7 +9,7 @@ Skips symlinks and processes files recursively in the current directory.
 import gzip
 import sys
 from pathlib import Path
-from typing import List, Tuple
+from typing import Tuple
 from lzma_mt import compress
 from dh import get_files, mpf3
 

@@ -7,14 +7,12 @@ Processes single file or directory recursively with multiprocessing.
 """
 
 import ast
-import re
 import sys
-from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
-from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Tuple
+from dh import get_pyfiles
 
 
 @dataclass
@@ -172,11 +170,11 @@ class ImportRemover:
         return (self.path, [])
 
 
-def find_python_files(root_path: Path) -> List[Path]:
-    python_files = []
+def find_files(root_path: Path) -> List[Path]:
+    files = []
     if root_path.is_file():
         if root_path.suffix == ".py":
-            python_files.append(root_path)
+            files.append(root_path)
     else:
         for path in root_path.rglob("*.py"):
             if any(
@@ -186,8 +184,8 @@ def find_python_files(root_path: Path) -> List[Path]:
                 )
             ):
                 continue
-            python_files.append(path)
-    return python_files
+            files.append(path)
+    return files
 
 
 def process_file(path: Path) -> Tuple[Path, List[str]]:
@@ -218,26 +216,20 @@ def print_summary(results: Dict[Path, List[str]], total_files: int, total_import
 
 
 def main() -> None:
-    if len(sys.argv) > 1:
-        input_path = Path(sys.argv[1])
-        if not input_path.exists():
-            print(f"Error: {input_path} does not exist", file=sys.stderr)
-            sys.exit(1)
-    else:
-        input_path = Path.cwd()
-        print(f"No input provided, processing current directory: {input_path}")
-    print(f"Scanning for Python files in: {input_path}")
-    python_files = find_python_files(input_path)
-    if not python_files:
-        print("No Python files found.")
-        return
-    print(f"Found {len(python_files)} Python files")
-    num_workers = min(cpu_count(), len(python_files))
-    print(f"Using {num_workers} worker processes...")
+
+    args = sys.argv[1:]
+
+    cwd = Path.cwd()
+    files = [Path(p) for p in args] if args else get_pyfiles(cwd)
+    if len(files) == 1:
+        process_file(files[0])
+        sys.exit(1)
+
+    num_workers = 6
     results = {}
     total_imports_removed = 0
     with ProcessPoolExecutor(max_workers=num_workers) as executor:
-        future_to_file = {executor.submit(process_file, path): path for path in python_files}
+        future_to_file = {executor.submit(process_file, path): path for path in files}
         from concurrent.futures import as_completed
 
         for i, future in enumerate(as_completed(future_to_file), 1):
@@ -247,13 +239,13 @@ def main() -> None:
                 results[path_result] = removed_imports
                 total_imports_removed += len(removed_imports)
                 if removed_imports:
-                    print(f"[{i}/{len(python_files)}] ✓ {path_result} - Removed {len(removed_imports)} imports")
+                    print(f"[{i}/{len(files)}] ✓ {path_result} - Removed {len(removed_imports)} imports")
                 else:
-                    print(f"[{i}/{len(python_files)}] ○ {path_result} - No unused imports")
+                    print(f"[{i}/{len(files)}] ○ {path_result} - No unused imports")
             except Exception as e:
-                print(f"[{i}/{len(python_files)}] ✗ Failed to process {path}: {e}", file=sys.stderr)
+                print(f"[{i}/{len(files)}] ✗ Failed to process {path}: {e}", file=sys.stderr)
                 results[path] = []
-    print_summary(results, len(python_files), total_imports_removed)
+    print_summary(results, len(files), total_imports_removed)
 
 
 if __name__ == "__main__":

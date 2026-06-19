@@ -27,7 +27,7 @@ class EntityExtractor(ast.NodeVisitor):
         end_line = node.end_lineno or node.lineno
         code_slice = self.source_lines[start_line:end_line]
         if node.col_offset is not None:
-            code_slice[0] = code_slice[0][node.col_offset:]
+            code_slice[0] = code_slice[0][node.col_offset :]
         if node.end_col_offset is not None and node.end_col_offset > 0:
             last_line = code_slice[-1]
             code_slice[-1] = last_line[: node.end_col_offset]

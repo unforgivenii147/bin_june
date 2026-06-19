@@ -11,9 +11,9 @@ from xxhash import xxh64_hexdigest
 def should_skip(path: Path) -> bool:
     path = Path(path)
     return bool(
-        path.is_symlink() or
-        not path.stat().st_size or
-        any((pat in path.parts for pat in (".git", "__pycache__", ".mypy_cache", ".ruff_cache")))
+        path.is_symlink()
+        or not path.stat().st_size
+        or any((pat in path.parts for pat in (".git", "__pycache__", ".mypy_cache", ".ruff_cache")))
     )
 
 

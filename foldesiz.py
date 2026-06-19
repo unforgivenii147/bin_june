@@ -6,7 +6,7 @@ import shutil
 import sys
 from pathlib import Path
 
-from dh import get_files, unique_path, should_skip
+from dh import unique_path, should_skip
 
 
 def get_all_files(cwd: Path):

@@ -3,7 +3,6 @@
 import bz2
 import lzma
 import os
-import shutil
 import sys
 import tarfile
 import time

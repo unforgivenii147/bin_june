@@ -8,7 +8,6 @@
 - Leaves untouched: executable files that are binary or have a shebang (#!).
 """
 
-import os
 import stat
 from multiprocessing import Pool, cpu_count
 from pathlib import Path

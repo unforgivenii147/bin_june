@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from _io import _BufferedReaderStream
 from _io import BufferedWriter
 from _io import BufferedReader
 import argparse
@@ -14,10 +13,9 @@ import shutil
 import tarfile
 import tempfile
 import zipfile
-from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Dict, Optional, Tuple
+from typing import Callable, Tuple
 
 import brotlicffi as brotli
 import py7zr

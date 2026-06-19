@@ -11,10 +11,10 @@ class GitHubRepoManager:
     def __init__(self, repo_name: str | None = None) -> None:
         self.cwd = Path.cwd()
         self.repo_name = repo_name or self.cwd.name
-        self.github_username = "uno2os3es"
-        self.git_email = "mkalafsaz@gmail.com"
-        self.git_user = "uno2os3es"
-        self.repo_url = f"https://github.com/{self.github_username}/{self.repo_name}. git"
+        self.github_username = "unforgivenii147"
+        self.git_email = "adnanonagh@gmail.com"
+        self.git_user = "unforgivenii147"
+        self.repo_url = f"https://github.com/{self.github_username}/{self.repo_name}.git"
 
     def _run_command(
         self, command: list, cwd: Path | None = None, capture_output: bool = False
@@ -38,7 +38,7 @@ class GitHubRepoManager:
         return returncode == 0
 
     def _repo_exists_locally(self) -> bool:
-        git_dir = self.cwd / ". git"
+        git_dir = self.cwd / ".git"
         return git_dir.exists()
 
     def _repo_exists_on_github(self) -> bool:
@@ -57,7 +57,7 @@ class GitHubRepoManager:
         if returncode != 0 and "Reinitialized" not in stderr and ("Initialized" not in stderr):
             print(f"Error initializing git repo:    {stderr}")
             sys.exit(1)
-        self._run_command(["git", "config", "user. name", self.git_user], capture_output=True)
+        self._run_command(["git", "config", "user.name", self.git_user], capture_output=True)
         self._run_command(["git", "config", "user.email", self.git_email], capture_output=True)
         print("✓ Local repository initialized")
 
@@ -92,7 +92,7 @@ class GitHubRepoManager:
         hidden_files = [f for f in hidden_files if f.name not in {".git", ".", ".."}]
         has_content = len(files) > 0 or len(hidden_files) > 0
         if not has_content:
-            print("📄 No files found, creating initial README. md...")
+            print("📄 No files found, creating initial README.md...")
             readme = self.cwd / "README.md"
             if not readme.exists():
                 readme.write_text(

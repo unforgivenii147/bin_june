@@ -39,13 +39,13 @@ def find_packages_with_bin_scripts(output_file: str = "have_scripts.txt") -> Non
                         continue
                     for indicator in bin_indicators:
                         if (
-                            indicator in line.lower() and
-                            (
-                                line.endswith(".py") or
-                                os.path.splitext(line)[1] == "" or
-                                os.path.splitext(line)[1] == ".exe"
-                            ) and
-                            (
+                            indicator in line.lower()
+                            and (
+                                line.endswith(".py")
+                                or os.path.splitext(line)[1] == ""
+                                or os.path.splitext(line)[1] == ".exe"
+                            )
+                            and (
                                 not any(
                                     (
                                         exclude_part in line

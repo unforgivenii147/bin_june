@@ -130,7 +130,7 @@ def compress_chunked(in_path: Path, out_path: Path, file_size: int) -> bool:
 
         with in_path.open("rb") as fin, mmap.mmap(fin.fileno(), length=0, access=mmap.ACCESS_READ) as mm:
             # Create chunks lazily to save memory
-            chunks = [mm[i * CHUNK_SIZE: min((i + 1) * CHUNK_SIZE, file_size)] for i in range(chunk_count)]
+            chunks = [mm[i * CHUNK_SIZE : min((i + 1) * CHUNK_SIZE, file_size)] for i in range(chunk_count)]
 
             # Process chunks in parallel with bounded thread pool
             compressed_paths = [None] * chunk_count

@@ -1,10 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/python
 from requests.models import Response
-import json
 import os
 import pickle
-import shutil
-import time
 from datetime import datetime
 from pathlib import Path
 

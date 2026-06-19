@@ -327,7 +327,7 @@ def main() -> None:
             f"\nBest overall: {best_overall.algo} size={human(best_overall.out_size)} time={best_overall.elapsed_s:.4f}s"
         )
         if best_overall.algo.startswith("mp_"):
-            base_algo = best_overall.algo[len("mp_"):]
+            base_algo = best_overall.algo[len("mp_") :]
         else:
             base_algo = best_overall.algo
         out_final = in_path.with_name(in_path.name + best_ext(base_algo))

@@ -69,7 +69,8 @@ def main() -> None:
         sys.exit(1)
 
     # Load environment variables from .env file
-    load_dotenv()
+    env_path = Path("~/.env").expanduser()
+    load_dotenv(env_path)
     token = os.getenv("GITHUB_TOKEN")
 
     username = sys.argv[1]

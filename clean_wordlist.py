@@ -29,7 +29,7 @@ def process_wordlist(file_path: str) -> None:
     buckets = defaultdict(list)
     for word in lines:
         for i in range(len(word)):
-            wildcard = word[:i] + "*" + word[i + 1:]
+            wildcard = word[:i] + "*" + word[i + 1 :]
             buckets[wildcard].append(word)
     similar_lines = set()
     for wildcard, matched_words in buckets.items():

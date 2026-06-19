@@ -3,12 +3,10 @@
 import sys
 from pathlib import Path
 
-from dh import get_files, mpf3
-from markdownlify import markdownify
+from dh import get_files
 
 
 def process_file(fp) -> None:
-    pass
     path = Path(path)
 
 

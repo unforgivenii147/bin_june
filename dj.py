@@ -9,6 +9,7 @@ from dh import get_filez, read_lines
 EMPTYIT = "-e" in sys.argv
 RMIT = "-r" in sys.argv
 junk_path = "/sdcard/data/junk"
+SKIP_DIRS = ["lazy", ".git"]
 
 
 def empty_it(path: Path) -> None:
@@ -32,12 +33,12 @@ def main() -> None:
     junk_files = load_junk()
     c = 0
     for path in get_filez(cwd):
-        if ".git" in path.parts or "nvim" in path.parts or "var" in path.parts:
+        if ".git" in path.parts or "lazy" in path.parts or "var" in path.parts:
             continue
         loname = path.name.lower()
         if loname.endswith((".tmp", ".bak", ".log")):
             remove_it(path)
-            print(path.name)
+            print(path.relative_to(cwd))
             c += 1
             continue
         if loname in {
@@ -50,23 +51,20 @@ def main() -> None:
             "copyright",
         }:
             path.unlink()
-            print(path.name)
+            print(path.relative_to(cwd))
             c += 1
             continue
-        if (
-            loname.endswith("license.txt") or
-            (path.stem.lower() == "license" and (not path.suffix in {".c", ".py", ".pyx", ".js", ".pxd"})) or
-            any((loname == junk for junk in junk_files))
-        ) and path.exists():
+        if loname.endswith("license.txt") or loname == "license":
+            path.unlink()
+            c += 1
+            print(path.relative_to(cwd))
+            continue
+        if any((loname == junk for junk in junk_files)):
             if RMIT:
-                remove_it(path)
+                path.unlink()
                 print(path.relative_to(cwd))
                 c += 1
                 continue
-            elif EMPTYIT:
-                empty_it(path)
-                print(path.relative_to(cwd))
-                c += 1
             else:
                 empty_it(path)
                 print(path.relative_to(cwd))

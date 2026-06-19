@@ -14,8 +14,7 @@ import tempfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Set, Tuple
-from dh import has_doc, remove_blank_lines
+from typing import Optional, Tuple
 
 
 @dataclass
@@ -183,17 +182,12 @@ def process_python_file(path: Path, preserve_module_docstring: bool = True) -> F
     temp_file = None
     try:
         orig = path.read_text(encoding="utf-8")
-        if not has_doc(orig):
-            return FileResult(
-                path=path, comments_removed=0, docstrings_removed=0, changed=False, error="already cleaned up"
-            )
         code_without_header, shebang, encoding = extract_shebang_and_encoding(orig)
         code_no_comments, comments_removed = remove_comments_preserve_format(code_without_header)
 
         code_no_docstrings, docstrings_removed = process_docstrings_ast(code_no_comments, preserve_module_docstring)
 
         final_code = restore_shebang_and_encoding(code_no_docstrings, shebang, encoding)
-        code = remove_blank_lines(final_code)
 
         changed = comments_removed > 0 or docstrings_removed > 0
         if changed:

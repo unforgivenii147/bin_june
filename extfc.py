@@ -15,7 +15,7 @@ VALID = {"\n(expression_statement\n  (assignment_expression\n    (=( _ )@name va
 
 
 def get_node_text(src: bytes, node) -> str:
-    return src[node.start_byte: node.end_byte].decode()
+    return src[node.start_byte : node.end_byte].decode()
 
 
 def extract_functions_and_classes(src: bytes, tree: Tree):

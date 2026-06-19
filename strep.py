@@ -3,7 +3,7 @@
 import sys
 from pathlib import Path
 
-from dh import cprint, fsz, get_files, mpf3, runcmd
+from dh import cprint, get_files, mpf3, runcmd
 
 
 def process_file(path) -> None:

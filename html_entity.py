@@ -7,7 +7,6 @@ Converts &lt; to <, &gt; to >, and other common entities.
 import multiprocessing as mp
 import re
 import sys
-from functools import partial
 from pathlib import Path
 
 from dh import get_nobinary

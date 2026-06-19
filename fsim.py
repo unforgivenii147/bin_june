@@ -38,7 +38,7 @@ def group_similar_files(hashes, threshold: int):
             continue
         group = [f1]
         visited.add(f1)
-        for f2 in files[i + 1:]:
+        for f2 in files[i + 1 :]:
             if f2 in visited:
                 continue
             score = ssdeep.compare(hashes[f1], hashes[f2])

@@ -10,7 +10,7 @@ from dh import cprint, fsz, get_files
 def process_file(path: Path) -> None:
     path = Path(path)
     content = path.read_text(encoding="utf-8")
-    soup = BeautifulSoup(content, parser="html.parser", featues="lxml")
+    soup = BeautifulSoup(content, parser="lxml.parser", features="lxml")
     before = len(content)
     new_content = soup.prettify()
     after = len(new_content)

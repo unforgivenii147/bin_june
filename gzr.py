@@ -74,7 +74,7 @@ def compress_chunked(in_path: Path, out_path: Path, file_size: int) -> bool:
             mmap.mmap(fin.fileno(), length=0, access=mmap.ACCESS_READ) as mm,
         ):
             # Create chunks lazily to save memory
-            chunks = (mm[i * CHUNK_SIZE: min((i + 1) * CHUNK_SIZE, file_size)] for i in range(chunk_count))
+            chunks = (mm[i * CHUNK_SIZE : min((i + 1) * CHUNK_SIZE, file_size)] for i in range(chunk_count))
 
             # Process chunks in parallel with bounded thread pool
             with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
@@ -213,7 +213,6 @@ def compress_file(path: Path) -> tuple[bool, int, int]:
         if not original_size:
             return False, 0, 0
 
-        # Choose compression strategy based on file size
         if original_size < CHUNK_SIZE:
             success = compress_in_memory(path, out_path)
         else:

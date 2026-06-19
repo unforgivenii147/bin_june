@@ -2,7 +2,6 @@
 
 from zipfile import ZipFile
 from tarfile import TarFile
-from _io import BufferedRandom
 import argparse
 import contextlib
 import io
@@ -20,9 +19,10 @@ from dh import append_text, is_valid_url
 
 DEFAULT_MAX_MB = 15
 EXCLUDE_DIRS = {".git", "__pycache__"}
-URL_RE = re.compile("(https?://[^\\s\\'\"<>\\\\)\\\\(]+)", flags=re.IGNORECASE)
-GIT_FILE = Path("/sdcard/gitlinks.txt")
-REPO_FILE = Path("/sdcard/repos.txt")
+URL_RE = re.compile(r'(https?://[^\s\'"<>\\)\\(]+)', flags=re.IGNORECASE)
+
+GIT_FILE = Path("gitlinks.txt")
+REPO_FILE = Path("repos.txt")
 ARCHIVE_SUFFIXES = (
     ".tar.gz",
     ".tgz",
@@ -86,9 +86,7 @@ def is_archive_name(name) -> bool:
     return any((nl.endswith(suf) for suf in ARCHIVE_SUFFIXES))
 
 
-def open_tar_from_zst_path(path) -> tuple[TarFile, BufferedRandom] | tuple[None, None]:
-    if zstd is None:
-        return (None, None)
+def open_tar_from_zst_path(path):
     temp = tempfile.TemporaryFile()
     with Path(path).open("rb") as fh:
         dctx = zstd.ZstdDecompressor()

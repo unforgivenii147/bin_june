@@ -10,7 +10,6 @@ import os
 import re
 from datetime import datetime
 from rich.console import Console
-from rich.table import Table
 from rich.panel import Panel
 from rich.align import Align
 

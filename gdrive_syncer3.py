@@ -2,12 +2,10 @@
 from googleapiclient.discovery import Resource
 import os
 import pickle
-from pathlib import Path
-from urllib.parse import parse_qs, urlencode
+from urllib.parse import urlencode
 
 import requests
 from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload

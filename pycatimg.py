@@ -10,7 +10,6 @@ import io
 import os
 import sys
 
-import numpy as np
 
 # Try to import SVG support
 from cairosvg import svg2png

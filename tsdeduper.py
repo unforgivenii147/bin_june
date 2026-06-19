@@ -34,7 +34,7 @@ def make_parser() -> Parser:
 
 
 def node_text(src: bytes, node: Node) -> str:
-    return src[node.start_byte: node.end_byte].decode("utf-8", errors="replace")
+    return src[node.start_byte : node.end_byte].decode("utf-8", errors="replace")
 
 
 def is_const_name(name: str) -> bool:

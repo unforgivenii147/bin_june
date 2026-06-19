@@ -3,17 +3,20 @@
 import sys
 from pathlib import Path
 
-from dh import get_lines
+
+def read_lines(path):
+    return path.read_text(encoding="utf-8").splitlines(keepends=True)
+
 
 if __name__ == "__main__":
     file_name = Path(sys.argv[1])
     nl = []
     target_char = sys.argv[2]
-    for line in get_lines(file_name):
+    for line in read_lines(file_name):
         stripped = line.strip()
         if stripped and target_char in stripped:
             indx = stripped.index(target_char)
-            cleaned = stripped[: indx + 1]
+            cleaned = stripped[:indx]
             nl.append(cleaned)
         elif stripped:
             nl.append(stripped)

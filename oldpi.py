@@ -1,7 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 from mmap import mmap
-from _io import _BufferedReaderStream
 from _io import BufferedReader
 import argparse
 import mmap
@@ -84,7 +83,7 @@ def autofix_file(filepath: str) -> bool:
                 continue
             if stripped.startswith("print ") and (not stripped.startswith("print(")):
                 indent = line[: len(line) - len(stripped)]
-                content = stripped[len("print "):].rstrip()
+                content = stripped[len("print ") :].rstrip()
                 lines[i] = f"{indent}print({content})\n"
                 changed = True
         if changed:

@@ -2,7 +2,7 @@
 import sys
 from pathlib import Path
 
-from dh import cprint, get_files, mpf3
+from dh import get_files, mpf3
 
 
 class Result:

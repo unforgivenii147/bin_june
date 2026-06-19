@@ -20,19 +20,19 @@ def py_to_ipynb(input_file, output_file=None) -> bool:
     while i < len(lines):
         line = lines[i]
         if (
-            i > 0 and
-            (
-                line.startswith(("def ", "class ")) or
-                (line.startswith(("import ", "from ")) and (not current_cell[-1].startswith(("import ", "from ")))) or
-                (
-                    line.strip() == "" and
-                    current_cell and
-                    (i + 1 < len(lines)) and
-                    lines[i + 1].strip() and
-                    (not lines[i + 1].startswith((" ", "\t")))
+            i > 0
+            and (
+                line.startswith(("def ", "class "))
+                or (line.startswith(("import ", "from ")) and (not current_cell[-1].startswith(("import ", "from "))))
+                or (
+                    line.strip() == ""
+                    and current_cell
+                    and (i + 1 < len(lines))
+                    and lines[i + 1].strip()
+                    and (not lines[i + 1].startswith((" ", "\t")))
                 )
-            ) and
-            current_cell
+            )
+            and current_cell
         ):
             cell_code = "\n".join(current_cell).strip()
             if cell_code:

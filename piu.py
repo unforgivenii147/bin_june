@@ -6,19 +6,20 @@ from pathlib import Path
 from dh import partial_ratio
 from pip._internal.cli.main import main as pip_main
 
-WHL_DIR = Path("/sdcard/whl")
+WHL_DIR = Path.cwd()
+
 WILDCARD = "-w" in sys.argv
 
 
 def install(packages: list[str]) -> int:
-    args = ["install", "--no-compile", "--no-deps", *packages]
+    args = ["install", "--user", "--no-compile", "--no-deps", *packages]
     return pip_main(args)
 
 
 def pkg_name(txt: str):
     indx = txt.index("-")
     slash = txt.rfind("/")
-    return txt[slash + 1: indx]
+    return txt[slash + 1 : indx]
 
 
 def install_by_wildcard(pkg: str) -> None:
@@ -65,7 +66,7 @@ if __name__ == "__main__":
     candidates = [p.strip() for p in args if p.strip() != "-w"] if args else None
     if candidates is not None:
         for pkg in candidates:
-            if WILDCARD:
-                install_by_wildcard(pkg)
-            else:
-                install_whl(pkg)
+            install_whl(pkg)
+#            if WILDCARD:
+#                install_by_wildcard(pkg)
+#            else:

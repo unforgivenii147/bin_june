@@ -4,10 +4,7 @@ import re
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Optional
 
-import nltk
-import numpy as np
 from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize, word_tokenize
 

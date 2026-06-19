@@ -7,7 +7,6 @@ import subprocess
 import tarfile
 from pathlib import Path
 
-from dh import mpf3
 
 BASE_DIR = Path.home() / "tmp" / "debs"
 BASE_DIR.mkdir(parents=True, exist_ok=True)
@@ -87,9 +86,10 @@ def main() -> None:
     import sys
 
     args = sys.argv[1:]
-    pkgs = [p.strip() for p in args] if args else ["python", "mc"]
+    pkgs = [p.strip() for p in args] if args else ["python", "mc", "python2"]
     print(f"[+] Building {len(pkgs)} packages\n")
-    _ = mpf3(process_pkg, pkgs)
+    for pkg in pkgs:
+        process_pkg(pkg)
 
 
 if __name__ == "__main__":

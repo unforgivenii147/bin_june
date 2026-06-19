@@ -17,9 +17,7 @@ import os
 import shutil
 import sys
 import tarfile
-import tempfile
-import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import brotlicffi

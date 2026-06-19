@@ -11,11 +11,10 @@ import json
 import sys
 import time
 from pathlib import Path
-from subprocess import run, PIPE, CalledProcessError
+from subprocess import run, CalledProcessError
 from typing import Optional, Dict, Any
 from multiprocessing import Pool, cpu_count
 from dataclasses import dataclass, asdict
-from functools import partial
 import logging
 
 # ============================================================================

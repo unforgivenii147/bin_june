@@ -5,11 +5,8 @@ Fix batch-renamed .whl files by reading METADATA from inside each wheel.
 This is the most accurate method as it extracts the real distribution name and version.
 """
 
-import os
 import re
 import shutil
-import sys
-import tempfile
 import zipfile
 from email.parser import HeaderParser
 from pathlib import Path

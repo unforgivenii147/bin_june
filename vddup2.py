@@ -65,19 +65,19 @@ def process_file(file_path, repeated_definitions, move) -> None:
     new_lines = []
     for node in ast.walk(tree):
         if isinstance(node, ast.FunctionDef) and node.name in repeated_definitions["functions"]:
-            func_code = "".join(lines[node.lineno - 1: node.end_lineno])
+            func_code = "".join(lines[node.lineno - 1 : node.end_lineno])
             write_to_file("func.py", func_code)
             if move:
                 continue
         elif isinstance(node, ast.ClassDef) and node.name in repeated_definitions["classes"]:
-            class_code = "".join(lines[node.lineno - 1: node.end_lineno])
+            class_code = "".join(lines[node.lineno - 1 : node.end_lineno])
             write_to_file("class.py", class_code)
             if move:
                 continue
         elif isinstance(node, ast.Assign):
             for target in node.targets:
                 if isinstance(target, ast.Name) and target.id in repeated_definitions["constants"]:
-                    const_code = "".join(lines[node.lineno - 1: node.end_lineno])
+                    const_code = "".join(lines[node.lineno - 1 : node.end_lineno])
                     write_to_file("const.py", const_code)
                     if move:
                         break

@@ -93,7 +93,7 @@ def add_path_statement_simple(file_path: str) -> bool:
         indent = re.match(r"^(\s*)", func_line).group(1) + "    "
 
         # Insert path line after function declaration
-        return f"{func_line}\n{indent}path = Path(path)\n" + full_match[len(func_line):]
+        return f"{func_line}\n{indent}path = Path(path)\n" + full_match[len(func_line) :]
 
     # Try with docstring handling
     new_content = re.sub(pattern, replacement, content, count=1)

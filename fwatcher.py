@@ -1,7 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 import time
 import os
-from pathlib import Path
 
 
 def watch_tor_log(log_path: str = "~/.tor/tor.log") -> None:

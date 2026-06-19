@@ -1,7 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 from mmap import mmap
-from _io import _BufferedReaderStream
 from _io import BufferedReader
 import mmap
 import re

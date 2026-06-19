@@ -8,8 +8,6 @@ import sys
 import zipfile
 from pathlib import Path
 
-from packaging import version as pkg_version
-
 
 def is_empty_wheel(wheel_path: Path) -> bool:
     """Check if a .whl file is empty (only contains dist-info directory)"""
@@ -20,9 +18,9 @@ def is_empty_wheel(wheel_path: Path) -> bool:
             has_py_files = any(file.endswith(".py") for file in all_files)
 
             has_code_dirs = any(
-                not (file.startswith("dist-info/") or file.startswith("__pycache__/")) and
-                not file.endswith("/") and
-                not file.endswith(".dist-info/")
+                not (file.startswith("dist-info/") or file.startswith("__pycache__/"))
+                and not file.endswith("/")
+                and not file.endswith(".dist-info/")
                 for file in all_files
             )
 
@@ -98,7 +96,7 @@ def check_package_location(package_name: str) -> tuple[str | None, bool] | tuple
                     files_section = line
                     if any(
                         file_line.strip() and not ".dist-info" in file_line
-                        for file_line in lines[lines.index(line) + 1: lines.index(line) + 10]
+                        for file_line in lines[lines.index(line) + 1 : lines.index(line) + 10]
                     ):
                         has_files = True
             return location, has_files
@@ -227,8 +225,8 @@ def analyze_wheels(source_dir, dest_dir_name: str = "empty_wheels", check_instal
             print(f"   pip uninstall {item['package']}")
             print(f"   pip install {item['package']}  # or use a valid wheel")
         print(
-            "\n3. Or completely remove them: pip uninstall " +
-            " ".join([item["package"] for item in installed_empty_wheels])
+            "\n3. Or completely remove them: pip uninstall "
+            + " ".join([item["package"] for item in installed_empty_wheels])
         )
 
 
@@ -258,7 +256,7 @@ def main() -> None:
 
 if __name__ == "__main__":
     try:
-        import packaging
+        pass
     except ImportError:
         print("Note: 'packaging' module not found. Install it with: pip install packaging")
         print("Continuing with limited version parsing...\n")

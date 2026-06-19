@@ -1,11 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-import subprocess
 import sys
 import tempfile
 from pathlib import Path
 
-from dh import fsz, get_files, gsz, mpf3, runcmd, rrs
+from dh import get_files, mpf3, runcmd, rrs
 
 
 def process_file(path) -> None:

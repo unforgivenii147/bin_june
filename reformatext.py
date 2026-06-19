@@ -46,7 +46,7 @@ def restructure_text_file(filepath: Path) -> None:
                             break_point = i
                     if break_point != -1:
                         processed_sentence_parts.append(" ".join(current_line_words[: break_point + 1]))
-                        current_line_words = current_line_words[break_point + 1:]
+                        current_line_words = current_line_words[break_point + 1 :]
                         current_line_length = len(" ".join(current_line_words))
                     else:
                         processed_sentence_parts.append(" ".join(current_line_words))

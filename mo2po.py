@@ -5,7 +5,6 @@ Original .mo files are removed only if conversion succeeds.
 """
 
 import argparse
-import os
 import subprocess
 import sys
 from pathlib import Path

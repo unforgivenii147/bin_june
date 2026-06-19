@@ -2,11 +2,13 @@
 
 from pathlib import Path
 
-from dh import cprint, fsz, get_files, gsz, mpf3, runcmd, rrs
+from dh import get_files, gsz, mpf3, runcmd, rrs
 
 
-def process_file(path) -> bool | None:
+def process_file(path) -> None:
     path = Path(path)
+    if "lazy" in path.parts:
+        return
     before = gsz(path)
     if not before or len(path.read_text().splitlines()) == 1:
         return
@@ -14,9 +16,9 @@ def process_file(path) -> bool | None:
         runcmd(["svgo", str(path)], show_output=False)
         after = gsz(path)
         rrs(path, before, after)
-        return True
+        return
     except:
-        return False
+        return
 
 
 def main() -> None:

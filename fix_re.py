@@ -11,7 +11,6 @@ Creates a .bak backup of each file before modifying it.
 """
 
 import io
-import shutil
 import sys
 import tokenize
 from pathlib import Path
@@ -42,13 +41,13 @@ def make_raw_and_fix(token_str: str):
     if "r" in prefix.lower():
         return token_str
     quote_char = token_str[prefix_end]
-    if token_str[prefix_end: prefix_end + 3] == quote_char * 3:
+    if token_str[prefix_end : prefix_end + 3] == quote_char * 3:
         quote_len = 3
     else:
         quote_len = 1
     opening = quote_char * quote_len
     closing = opening
-    content = token_str[prefix_end + quote_len: -quote_len]
+    content = token_str[prefix_end + quote_len : -quote_len]
     new_content = content.replace("\\\\", "\\")
     new_prefix = "r" + prefix
     return new_prefix + opening + new_content + closing

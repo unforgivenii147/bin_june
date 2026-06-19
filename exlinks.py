@@ -33,8 +33,8 @@ def is_likely_binary(file_path: Path, chunk_size=1024) -> bool:
                 return False
             result = chardet.detect(chunk)
             return bool(
-                (result["encoding"] is None or result["confidence"] < BINARY_CHECK_THRESHOLD) and
-                any(
+                (result["encoding"] is None or result["confidence"] < BINARY_CHECK_THRESHOLD)
+                and any(
                     (
                         not (32 <= ord(c) <= 126 or c in "\n\r\t")
                         for c in chunk.decode(result["encoding"] or "latin-1", errors="ignore")
@@ -167,9 +167,9 @@ def process_file(file_path):
                 github_urls.extend(gh_urls)
                 logger.debug(f"Extracted from generic text file: {file_path}")
         if (
-            is_likely_binary(file_path) and
-            file_extension not in TARGET_EXTENSIONS and
-            (file_extension not in COMPRESSED_ARCHIVES)
+            is_likely_binary(file_path)
+            and file_extension not in TARGET_EXTENSIONS
+            and (file_extension not in COMPRESSED_ARCHIVES)
         ):
             content, _ = read_file_with_encodings(file_path)
             if content:

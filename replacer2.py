@@ -4,7 +4,6 @@ Text replacer for Python files in current directory.
 Replaces exact text matches in all .py files.
 """
 
-import os
 import sys
 from pathlib import Path
 

@@ -3,7 +3,7 @@
 import sys
 from pathlib import Path
 
-from dh import fsz, gsz, is_image, mpf3, unique_path, get_files
+from dh import fsz, gsz, mpf3, unique_path, get_files
 
 try:
     import cv2

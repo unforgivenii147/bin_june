@@ -25,7 +25,7 @@ class EntityExtractor(ast.NodeVisitor):
         end_line = node.end_lineno or node.lineno
         code_slice = self.source_lines[start_line:end_line]
         if node.col_offset is not None:
-            code_slice[0] = code_slice[0][node.col_offset:]
+            code_slice[0] = code_slice[0][node.col_offset :]
         if node.end_col_offset is not None and node.end_col_offset > 0:
             last_line = code_slice[-1]
             code_slice[-1] = last_line[: node.end_col_offset]
@@ -78,7 +78,7 @@ class EntityExtractor(ast.NodeVisitor):
         end_line = node.end_lineno or node.lineno
         code_slice = self.source_lines[start_line:end_line]
         if node.col_offset is not None:
-            code_slice[0] = code_slice[0][node.col_offset:]
+            code_slice[0] = code_slice[0][node.col_offset :]
         if node.end_col_offset is not None and node.end_col_offset > 0:
             last_line = code_slice[-1]
             code_slice[-1] = last_line[: node.end_col_offset]
@@ -179,8 +179,8 @@ def is_python_file_no_extension(path: Path) -> bool:
         with Path(path).open(encoding="utf-8", errors="ignore") as f:
             first_lines = "".join(f.readlines(1024))
             return bool(
-                re.match("#!\\s*/.*python", first_lines) or
-                ("def " in first_lines or "class " in first_lines or "import " in first_lines)
+                re.match("#!\\s*/.*python", first_lines)
+                or ("def " in first_lines or "class " in first_lines or "import " in first_lines)
             )
     except:
         return False

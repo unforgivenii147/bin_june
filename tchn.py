@@ -22,7 +22,7 @@ def is_text_file(path: Path) -> bool:
 
 
 def split_into_chunks(text: str, size: int) -> list[str]:
-    return [text[i: i + size] for i in range(0, len(text), size)]
+    return [text[i : i + size] for i in range(0, len(text), size)]
 
 
 def translate_chunk(chunk: str) -> str:

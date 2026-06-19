@@ -26,7 +26,7 @@ def hex_to_rgb_shorthand(value: str) -> tuple[int, int, int]:
 
 def hex_to_rgb_dict(value: str) -> dict:
     hex_color = value.lstrip("#")
-    r, g, b = (int(hex_color[i: i + 2], 16) for i in (0, 2, 4))
+    r, g, b = (int(hex_color[i : i + 2], 16) for i in (0, 2, 4))
     return {"r": r, "g": g, "b": b}
 
 

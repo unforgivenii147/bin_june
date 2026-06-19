@@ -200,13 +200,13 @@ else:
 
 # Deciding which API to use
 if ARGS.history or (
-    ARGS.since_date is not None or
-    ARGS.created_date_from is not None or
-    ARGS.created_date_to is not None or
-    ARGS.updated_date_from is not None or
-    ARGS.updated_date_to is not None or
-    ARGS.expired_date_from is not None or
-    ARGS.expired_date_to is not None
+    ARGS.since_date is not None
+    or ARGS.created_date_from is not None
+    or ARGS.created_date_to is not None
+    or ARGS.updated_date_from is not None
+    or ARGS.updated_date_to is not None
+    or ARGS.expired_date_from is not None
+    or ARGS.expired_date_to is not None
 ):
     API = "https://whois-history-api.whoisxmlapi.com/api/v1?" + "apiKey=" + apiKey + "&outputformat=JSON&mode=purchase"
     ARGS.history = True

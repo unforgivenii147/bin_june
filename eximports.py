@@ -3,7 +3,6 @@
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Callable
 
 import tree_sitter_python as tsp
 from dh import STDLIB, cprint, get_installed_pkgs, get_pyfiles
@@ -20,7 +19,7 @@ def process_file(fp: Path) -> list[str]:
     src = fp.read_bytes()
     tree = parser.parse(src)
     root = tree.root_node
-    return [src[node.start_byte: node.end_byte].decode() for node in root.children if node.type in VALID]
+    return [src[node.start_byte : node.end_byte].decode() for node in root.children if node.type in VALID]
 
 
 def normalize_import(import_line: str) -> str | None:

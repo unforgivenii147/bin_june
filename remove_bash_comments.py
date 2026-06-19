@@ -123,9 +123,9 @@ class BashCommentRemover:
             original_content = Path(filepath).read_text(encoding="utf-8")
             original_size = len(original_content.encode("utf-8"))
             if (
-                filepath.suffix not in {".sh", ".bash"} and
-                (not original_content.startswith("#!/bin/bash")) and
-                (not original_content.startswith("#!/usr/bin/env bash"))
+                filepath.suffix not in {".sh", ".bash"}
+                and (not original_content.startswith("#!/bin/bash"))
+                and (not original_content.startswith("#!/usr/bin/env bash"))
             ):
                 return (True, original_size, original_size)
             modified_content, was_modified = self.remove_comments(original_content)
