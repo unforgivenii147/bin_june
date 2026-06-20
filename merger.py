@@ -30,7 +30,7 @@ def merge_files():
                 if content is None:
                     continue
 
-                fo.write(f"\n# {file_path}\n")
+                fo.write(f"\n# {file_path.name}\n")
                 fo.write(content)
 
         print(f"\n✅ Merged {len(files)} files into: {output_file}")

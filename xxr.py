@@ -7,7 +7,6 @@ import bz2
 import gzip
 import lzma
 import os
-import shutil
 import tarfile
 import tempfile
 import zipfile
@@ -111,6 +110,12 @@ def output_name_for_dir(dir_path: Path, mode: str) -> Path:
     return dir_path.parent / f"{dir_path.name}{ext_map[mode]}"
 
 
+def copy_chunks(src_fd, dst_fd, chunk_size: int = CHUNK_SIZE) -> None:
+    """Copy data from source file descriptor to destination in chunks."""
+    while chunk := src_fd.read(chunk_size):
+        dst_fd.write(chunk)
+
+
 def compress_streaming(src: Path, dst: Path, compress_func: Callable, is_dir: bool = False) -> None:
     """
     Generic streaming compression function.
@@ -142,19 +147,19 @@ def compress_streaming(src: Path, dst: Path, compress_func: Callable, is_dir: bo
 def compress_file_xz(src: Path, dst: Path) -> None:
     """Compress with LZMA using streaming."""
     with src.open("rb") as fin, lzma.open(dst, "wb", preset=9 | lzma.PRESET_EXTREME) as fout:
-        shutil.copyfileobj(fin, fout, CHUNK_SIZE)
+        copy_chunks(fin, fout)
 
 
 def compress_file_gz(src: Path, dst: Path) -> None:
     """Compress with GZIP using streaming."""
     with src.open("rb") as fin, gzip.open(dst, "wb", compresslevel=9) as fout:
-        shutil.copyfileobj(fin, fout, CHUNK_SIZE)
+        copy_chunks(fin, fout)
 
 
 def compress_file_bz2(src: Path, dst: Path) -> None:
     """Compress with BZIP2 using streaming."""
     with src.open("rb") as fin, bz2.open(dst, "wb", compresslevel=9) as fout:
-        shutil.copyfileobj(fin, fout, CHUNK_SIZE)
+        copy_chunks(fin, fout)
 
 
 def compress_file_brotli(src: Path, dst: Path) -> None:
@@ -180,7 +185,7 @@ def compress_file_zstd(src: Path, dst: Path) -> None:
     cctx = zstd.ZstdCompressor(level=22)
     with src.open("rb") as fin, dst.open("wb") as fout:
         with cctx.stream_writer(fout) as compressor:
-            shutil.copyfileobj(fin, compressor, CHUNK_SIZE)
+            copy_chunks(fin, compressor)
 
 
 def compress_file_zip(src: Path, dst: Path) -> None:
@@ -272,12 +277,36 @@ def decompress_one(path_str: str) -> Result:
     try:
         # Tar archives
         if name.endswith((".tar.xz", ".tar.gz", ".tar.bz2", ".tar.br", ".tar.zst")):
+
+            def copy_via_lzma(fin, fout):
+                with lzma.open(fin, "rb") as lzma_fin:
+                    copy_chunks(lzma_fin, fout)
+
+            def copy_via_gzip(fin, fout):
+                with gzip.open(fin, "rb") as gz_fin:
+                    copy_chunks(gz_fin, fout)
+
+            def copy_via_bz2(fin, fout):
+                with bz2.open(fin, "rb") as bz2_fin:
+                    copy_chunks(bz2_fin, fout)
+
+            def copy_via_brotli(fin, fout):
+                decompressor = brotli.Decompressor()
+                while chunk := fin.read(CHUNK_SIZE):
+                    fout.write(decompressor.process(chunk))
+                fout.write(decompressor.finish())
+
+            def copy_via_zstd(fin, fout):
+                dctx = zstd.ZstdDecompressor()
+                with dctx.stream_reader(fin) as reader:
+                    copy_chunks(reader, fout)
+
             ext_map = {
-                ".tar.xz": (7, lambda fin, fout: shutil.copyfileobj(lzma.open(fin, "rb"), fout, CHUNK_SIZE)),
-                ".tar.gz": (6, lambda fin, fout: shutil.copyfileobj(gzip.open(fin, "rb"), fout, CHUNK_SIZE)),
-                ".tar.bz2": (7, lambda fin, fout: shutil.copyfileobj(bz2.open(fin, "rb"), fout, CHUNK_SIZE)),
-                ".tar.br": (7, lambda fin, fout: decompress_brotli_stream(fin, fout)),
-                ".tar.zst": (8, lambda fin, fout: decompress_zstd_stream(fin, fout)),
+                ".tar.xz": (7, copy_via_lzma),
+                ".tar.gz": (6, copy_via_gzip),
+                ".tar.bz2": (7, copy_via_bz2),
+                ".tar.br": (7, copy_via_brotli),
+                ".tar.zst": (8, copy_via_zstd),
             }
 
             for ext, (len_offset, decompress_func) in ext_map.items():
@@ -309,7 +338,7 @@ def decompress_one(path_str: str) -> Result:
                         pass
                     else:
                         with decompressed_data as fin, dst_path.open("wb") as fout:
-                            shutil.copyfileobj(fin, fout, CHUNK_SIZE)
+                            copy_chunks(fin, fout)
                     result.dst = str(dst_path)
                     break
 
@@ -337,25 +366,14 @@ def decompress_one(path_str: str) -> Result:
         return result
 
 
-def decompress_brotli_stream(fin: BufferedReader, fout: BufferedWriter) -> None:
-    """Decompress brotli stream."""
-    decompressor = brotli.Decompressor()
-    while chunk := fin.read(CHUNK_SIZE):
-        fout.write(decompressor.process(chunk))
-    fout.write(decompressor.finish())
-
-
-def decompress_zstd_stream(fin, fout) -> None:
-    """Decompress zstd stream."""
-    dctx = zstd.ZstdDecompressor()
-    with dctx.stream_reader(fin) as reader:
-        shutil.copyfileobj(reader, fout, CHUNK_SIZE)
-
-
 def decompress_brotli_file(src: Path) -> Path:
     """Decompress brotli file directly."""
     dst = src.with_suffix("")
-    decompress_brotli_stream(src.open("rb"), dst.open("wb"))
+    decompressor = brotli.Decompressor()
+    with src.open("rb") as fin, dst.open("wb") as fout:
+        while chunk := fin.read(CHUNK_SIZE):
+            fout.write(decompressor.process(chunk))
+        fout.write(decompressor.finish())
     return dst
 
 
@@ -365,7 +383,7 @@ def decompress_zstd_file(src: Path) -> Path:
     with src.open("rb") as fin, dst.open("wb") as fout:
         dctx = zstd.ZstdDecompressor()
         with dctx.stream_reader(fin) as reader:
-            shutil.copyfileobj(reader, fout, CHUNK_SIZE)
+            copy_chunks(reader, fout)
     return dst
 
 

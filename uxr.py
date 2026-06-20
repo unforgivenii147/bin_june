@@ -5,32 +5,35 @@ Extracts archives recursively in current directory using joblib parallelism.
 Supported: .gz, .xz, .zip, .whl, .br, .zst, .7z, and tarballs (.tar.gz, .tar.xz, etc.)
 """
 
-import shutil
 import subprocess
 import sys
 from pathlib import Path
 from typing import List, Optional, Tuple
-
 import joblib
 import py7zr
 from joblib import Parallel, delayed
 from tqdm import tqdm
 
-# Try importing optional libraries
 try:
     import zstandard as zstd
 except ImportError:
     zstd = None
-
 try:
     from brotli import decompress as brotli_decompress
 except ImportError:
     brotli_decompress = None
 
 
-class ArchiveExtractor:
-    """Handles extraction of various archive formats with parallel processing."""
+def copy_chunks(src, dst, chunk_size: int = 1024 * 1024) -> None:
+    """Copy data from source to destination in chunks."""
+    while True:
+        chunk = src.read(chunk_size)
+        if not chunk:
+            break
+        dst.write(chunk)
 
+
+class ArchiveExtractor:
     SUPPORTED_EXTENSIONS = {
         ".gz": "gzip",
         ".xz": "xz",
@@ -53,19 +56,17 @@ class ArchiveExtractor:
         self.stats = {"processed": 0, "success": 0, "failed": 0, "skipped": 0}
 
     def _print_header(self, message: str, char: str = "=", width: int = 80):
-        """Print a styled header."""
         print(f"\n{char * width}")
         print(f" {message} ".center(width, char))
         print(f"{char * width}\n")
 
     def _print_status(self, archive: Path, status: str, details: str = ""):
-        """Print colored status messages."""
         colors = {
-            "SUCCESS": "\033[92m",  # Green
-            "FAILED": "\033[91m",  # Red
-            "SKIPPED": "\033[93m",  # Yellow
-            "PROCESSING": "\033[94m",  # Blue
-            "RESET": "\033[0m",
+            "SUCCESS": "\x1b[92m",
+            "FAILED": "\x1b[91m",
+            "SKIPPED": "\x1b[93m",
+            "PROCESSING": "\x1b[94m",
+            "RESET": "\x1b[0m",
         }
         color = colors.get(status.upper(), colors["RESET"])
         icon = {"SUCCESS": "✅", "FAILED": "❌", "SKIPPED": "⏭️", "PROCESSING": "🔄"}.get(status.upper(), "➡️")
@@ -75,23 +76,16 @@ class ArchiveExtractor:
         print(f"{color}{msg}{colors['RESET']}")
 
     def _detect_format(self, archive: Path) -> Optional[str]:
-        """Detect archive format from file extension."""
-        # Check for tar combinations first (longest extensions first)
         for ext in [".tar.gz", ".tar.xz", ".tar.bz2", ".tgz", ".txz"]:
             if str(archive).endswith(ext):
                 return self.SUPPORTED_EXTENSIONS.get(ext)
-
-        # Single extension check
         if archive.suffix:
-            # Handle .zst specifically
             if archive.suffix == ".zst":
                 return "zstandard"
             return self.SUPPORTED_EXTENSIONS.get(archive.suffix)
-
         return None
 
     def _extract_tar(self, archive: Path, output_dir: Path) -> bool:
-        """Extract tar archives using Python's tarfile."""
         import tarfile
 
         try:
@@ -104,14 +98,13 @@ class ArchiveExtractor:
             return False
 
     def _extract_gz(self, archive: Path, output_dir: Path) -> bool:
-        """Extract .gz files (single file compression)."""
         try:
             import gzip
 
             output_file = output_dir / archive.stem
             with gzip.open(archive, "rb") as f_in:
                 with open(output_file, "wb") as f_out:
-                    shutil.copyfileobj(f_in, f_out)
+                    copy_chunks(f_in, f_out)
             return True
         except Exception as e:
             if self.verbose:
@@ -119,14 +112,13 @@ class ArchiveExtractor:
             return False
 
     def _extract_xz(self, archive: Path, output_dir: Path) -> bool:
-        """Extract .xz files (single file compression)."""
         try:
             import lzma
 
             output_file = output_dir / archive.stem
             with lzma.open(archive, "rb") as f_in:
                 with open(output_file, "wb") as f_out:
-                    shutil.copyfileobj(f_in, f_out)
+                    copy_chunks(f_in, f_out)
             return True
         except Exception as e:
             if self.verbose:
@@ -134,7 +126,6 @@ class ArchiveExtractor:
             return False
 
     def _extract_zip(self, archive: Path, output_dir: Path) -> bool:
-        """Extract ZIP archives (including .whl)."""
         try:
             import zipfile
 
@@ -147,12 +138,10 @@ class ArchiveExtractor:
             return False
 
     def _extract_brotli(self, archive: Path, output_dir: Path) -> bool:
-        """Extract Brotli compressed files."""
         if brotli_decompress is None:
             if self.verbose:
                 self._print_status(archive, "FAILED", "brotli library not installed")
             return False
-
         try:
             output_file = output_dir / archive.stem
             with open(archive, "rb") as f_in:
@@ -166,33 +155,25 @@ class ArchiveExtractor:
             return False
 
     def _extract_zstandard(self, archive: Path, output_dir: Path) -> bool:
-        """Extract Zstandard compressed files."""
         if zstd is None:
             if self.verbose:
                 self._print_status(archive, "FAILED", "zstandard library not installed")
             return False
-
         try:
-            # Determine output filename - handle .zst extension properly
             output_name = archive.stem
-            # If the original filename has .tar before .zst, it's a tarball
             if output_name.endswith(".tar"):
                 output_name = output_name[:-4]
                 output_file = output_dir / output_name
-                # Extract as tar after decompression
                 import tempfile
                 import tarfile
 
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".tar") as tmp:
                     temp_path = Path(tmp.name)
-                    # Decompress .zst to temp file
                     with open(archive, "rb") as f_in:
                         dctx = zstd.ZstdDecompressor()
                         with dctx.stream_reader(f_in) as reader:
-                            shutil.copyfileobj(reader, tmp)
+                            copy_chunks(reader, tmp)
                         tmp.flush()
-
-                    # Extract the tar file
                     try:
                         with tarfile.open(temp_path, "r") as tar:
                             tar.extractall(path=output_dir)
@@ -204,22 +185,19 @@ class ArchiveExtractor:
                             self._print_status(archive, "FAILED", f"Tar extraction from .zst failed: {e}")
                         return False
             else:
-                # Single file decompression
                 output_file = output_dir / output_name
                 with open(archive, "rb") as f_in:
                     dctx = zstd.ZstdDecompressor()
                     with dctx.stream_reader(f_in) as reader:
                         with open(output_file, "wb") as f_out:
-                            shutil.copyfileobj(reader, f_out)
+                            copy_chunks(reader, f_out)
                 return True
-
         except Exception as e:
             if self.verbose:
                 self._print_status(archive, "FAILED", f"Zstandard error: {e}")
             return False
 
     def _extract_7z(self, archive: Path, output_dir: Path) -> bool:
-        """Extract 7z archives using py7zr."""
         try:
             with py7zr.SevenZipFile(archive, mode="r") as sz:
                 sz.extractall(path=output_dir)
@@ -230,37 +208,21 @@ class ArchiveExtractor:
             return False
 
     def extract_single(self, archive_path: Path) -> Tuple[Path, bool, Optional[str]]:
-        """
-        Extract a single archive and return result.
-
-        Returns:
-            Tuple of (archive_path, success, error_message)
-        """
         archive = Path(archive_path)
         if not archive.exists() or not archive.is_file():
-            return (archive, False, "File not found")
-
+            return archive, False, "File not found"
         format_type = self._detect_format(archive)
         if not format_type:
-            return (archive, False, f"Unsupported format: {archive.suffix}")
-
-        # Create output directory named after archive (without extensions)
+            return archive, False, f"Unsupported format: {archive.suffix}"
         stem = archive.stem
-        # For .tar.zst, handle specially
         if str(archive).endswith(".tar.zst"):
             stem = archive.stem[:-4] if archive.stem.endswith(".tar") else archive.stem
-        # For other tar combinations
         elif format_type.startswith("tar_") and stem.endswith(".tar"):
             stem = stem[:-4]
-
         output_dir = archive.parent / stem
         output_dir.mkdir(exist_ok=True)
-
-        # Special case for .zst handling
         if format_type == "zstandard" and str(archive).endswith(".zst"):
-            # Use the enhanced zstandard handler
             pass
-
         extractors = {
             "tar": self._extract_tar,
             "tar_gz": self._extract_tar,
@@ -273,80 +235,49 @@ class ArchiveExtractor:
             "zstandard": self._extract_zstandard,
             "sevenz": self._extract_7z,
         }
-
         try:
             extractor = extractors.get(format_type)
             if not extractor:
-                return (archive, False, f"No extractor for {format_type}")
-
+                return archive, False, f"No extractor for {format_type}"
             if self.verbose:
                 self._print_status(archive, "PROCESSING", f"-> {output_dir}/")
-
             success = extractor(archive, output_dir)
-
             if success and self.remove_after:
                 archive.unlink()
                 if self.verbose:
                     self._print_status(archive, "SUCCESS", f"Removed: {archive.name}")
             elif success and self.verbose:
                 self._print_status(archive, "SUCCESS", f"Extracted to: {output_dir}")
-
-            return (archive, success, None if success else "Extraction failed")
-
+            return archive, success, None if success else "Extraction failed"
         except Exception as e:
-            return (archive, False, str(e))
+            return archive, False, str(e)
 
     def extract_recursive(self, root_dir: Path = Path.cwd(), n_jobs: int = -1) -> dict:
-        """
-        Recursively find and extract all archives in parallel.
-
-        Args:
-            root_dir: Root directory to search
-            n_jobs: Number of parallel jobs (-1 uses all cores)
-
-        Returns:
-            Dictionary with statistics
-        """
         self._print_header(f"ARCHIVE EXTRACTOR - {root_dir}", "=")
-
-        # Find all supported archive files
         archives = []
         for ext in self.SUPPORTED_EXTENSIONS:
             if ext.startswith(".tar."):
                 archives.extend(root_dir.rglob(f"*{ext}"))
             elif ext == ".tar":
-                # Skip .tar as it's handled by tar patterns
                 continue
             else:
                 archives.extend(root_dir.rglob(f"*{ext}"))
-
-        # Also handle .zst and .whl explicitly
         archives.extend(root_dir.rglob("*.zst"))
         archives.extend(root_dir.rglob("*.whl"))
-
-        # Remove duplicates and sort
         archives = sorted(set(archives))
         self.stats["total"] = len(archives)
-
         if not archives:
             print("📭 No archive files found to extract.")
             return self.stats
-
         print(f"📦 Found {len(archives)} archive(s) to process")
         print(f"⚡ Using {n_jobs if n_jobs > 0 else 'all'} CPU core(s)\n")
-
-        # Check required libraries
         if any(str(a).endswith(".zst") for a in archives) and zstd is None:
             print("⚠️  Warning: zstandard library not installed. Install with: pip install zstandard")
         if any(str(a).endswith(".br") for a in archives) and brotli_decompress is None:
             print("⚠️  Warning: brotli library not installed. Install with: pip install brotli")
-
-        # Process in parallel with progress bar
         results = Parallel(n_jobs=n_jobs, prefer="threads")(
             delayed(self.extract_single)(archive) for archive in tqdm(archives, desc="Extracting")
         )
-
-        # Collect statistics
         for archive, success, error in results:
             self.stats["processed"] += 1
             if success:
@@ -357,71 +288,42 @@ class ArchiveExtractor:
                 self.stats["failed"] += 1
                 if error and self.verbose:
                     self._print_status(archive, "FAILED", f"Error: {error}")
-
-        # Print summary
         self._print_summary()
         return self.stats
 
     def _print_summary(self):
-        """Print formatted summary statistics."""
         self._print_header("EXTRACTION SUMMARY", "-")
-
         total = self.stats["total"]
         if total == 0:
             print("No archives processed.")
             return
-
         success = self.stats["success"]
         failed = self.stats["failed"]
         skipped = self.stats["skipped"]
-
         print(f"📊 Total processed:  {total}")
         print(f"✅ Successful:       {success} ({success / total * 100:.1f}%)")
         print(f"❌ Failed:           {failed} ({failed / total * 100:.1f}%)")
         print(f"⏭️  Skipped:          {skipped} ({skipped / total * 100:.1f}%)")
         print(f"🗑️  Remove original:  {'Enabled' if self.remove_after else 'Disabled'}")
-
         if failed > 0:
             print("\n⚠️  Some archives failed to extract. Check errors above.")
-
         self._print_header("FINISHED", "-")
 
 
 def main():
-    """Main entry point with argument parsing."""
     import argparse
 
     parser = argparse.ArgumentParser(description="Extract archive files recursively with parallel processing")
     parser.add_argument("-d", "--dir", default=".", help="Root directory to search (default: current)")
-    parser.add_argument(
-        "-k",
-        "--keep",
-        action="store_true",
-        help="Keep original archive files after extraction",
-    )
-    parser.add_argument(
-        "-q",
-        "--quiet",
-        action="store_true",
-        help="Reduce verbosity (only show summary)",
-    )
-    parser.add_argument(
-        "-j",
-        "--jobs",
-        type=int,
-        default=-1,
-        help="Number of parallel jobs (-1 for all cores)",
-    )
-
+    parser.add_argument("-k", "--keep", action="store_true", help="Keep original archive files after extraction")
+    parser.add_argument("-q", "--quiet", action="store_true", help="Reduce verbosity (only show summary)")
+    parser.add_argument("-j", "--jobs", type=int, default=-1, help="Number of parallel jobs (-1 for all cores)")
     args = parser.parse_args()
-
     root_dir = Path(args.dir).resolve()
     if not root_dir.exists():
         print(f"❌ Error: Directory '{root_dir}' does not exist")
         sys.exit(1)
-
     extractor = ArchiveExtractor(remove_after=not args.keep, verbose=not args.quiet)
-
     try:
         extractor.extract_recursive(root_dir, n_jobs=args.jobs)
     except KeyboardInterrupt:

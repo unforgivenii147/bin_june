@@ -18,7 +18,7 @@ def compress_file(args):
     try:
         with open(file_path, "rb") as f:
             data = f.read()
-            compressor = zstd.ZstdCompressor(level=19, threads=6)
+            compressor = zstd.ZstdCompressor(level=3, threads=4)
             compressed = compressor.compress(data)
             return (str(relative_path), compressed, len(data))
     except Exception as e:
@@ -86,7 +86,7 @@ def create_archive_with_parallel_compression():
         archive_data.extend(compressed_data)
 
     # Compress the entire archive (zstd will compress the combined data)
-    compressor = zstd.ZstdCompressor(level=19, threads=6)
+    compressor = zstd.ZstdCompressor(level=3, threads=4)
     final_compressed = compressor.compress(bytes(archive_data))
 
     # Write final archive

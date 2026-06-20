@@ -11,7 +11,6 @@ def get_path_dirs() -> list[Path]:
     found = []
     path_env = os.environ.get("PATH", "").split(":")
     found = [Path(p).expanduser() for p in path_env]
-    found.append(Path("/data/data/com.termux/files/home/tmp/bin"))
     return found
 
 
@@ -44,8 +43,10 @@ def main() -> None:
         for path, hash_ in sorted(items, key=lambda x: str(x[0])):
             path = Path(path)
             print(f"  {path.name} in {path.parent.parent.name}/{path.parent.name}")
-            print(f"  {path.name}  {hash_}")
+            print(f"  {path.name}")
 
 
 if __name__ == "__main__":
     main()
+# optimize the script
+# show output dups more visual (design yourself)

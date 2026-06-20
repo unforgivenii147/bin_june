@@ -5,7 +5,6 @@ import bz2
 import gzip
 import lzma
 import os
-import shutil
 import tarfile
 import tempfile
 from bz2 import BZ2File
@@ -74,6 +73,15 @@ class Result:
     error: Optional[str] = None
     original_size: int = 0
     new_size: int = 0
+
+
+def copy_chunks(src, dst, chunk_size: int = CHUNK_SIZE) -> None:
+    """Copy data from source to destination in chunks."""
+    while True:
+        chunk = src.read(chunk_size)
+        if not chunk:
+            break
+        dst.write(chunk)
 
 
 def get_size(path: Path) -> int:
@@ -204,16 +212,14 @@ def compress_file_gz(src: Path, dst: Path) -> None:
     """Gzip compression with custom chunked copy"""
     with src.open("rb") as fin:
         with gzip.open(dst, "wb", compresslevel=COMPRESSION_LEVELS["gz"]) as fout:
-            for chunk in iter(lambda: fin.read(CHUNK_SIZE), b""):
-                fout.write(chunk)
+            copy_chunks(fin, fout)
 
 
 def compress_file_bz2(src: Path, dst: Path) -> None:
     """Bzip2 compression with custom chunked copy"""
     with src.open("rb") as fin:
         with bz2.open(dst, "wb", compresslevel=COMPRESSION_LEVELS["bz2"]) as fout:
-            for chunk in iter(lambda: fin.read(CHUNK_SIZE), b""):
-                fout.write(chunk)
+            copy_chunks(fin, fout)
 
 
 def compress_file_brotli(src: Path, dst: Path) -> None:
@@ -237,8 +243,7 @@ def compress_file_xz(src: Path, dst: Path) -> None:
     """XZ compression with custom chunked copy"""
     with src.open("rb") as fin:
         with lzma.open(dst, "wb", preset=COMPRESSION_LEVELS["xz"] | lzma.PRESET_EXTREME) as fout:
-            for chunk in iter(lambda: fin.read(CHUNK_SIZE), b""):
-                fout.write(chunk)
+            copy_chunks(fin, fout)
 
 
 def compress_file_zstd(src: Path, dst: Path) -> None:
@@ -285,9 +290,13 @@ def compress_one(path_str: str, mode: str, is_dir: bool) -> Result:
             # Compress the tar file
             atomic_write(tar_path, dst, compress_funcs[mode])
 
-            # Cleanup
-            tar_path.unlink(missing_ok=True)
-            shutil.rmtree(src)
+            # Cleanup - remove directory
+            for root, dirs, files in os.walk(src, topdown=False):
+                for name in files:
+                    (Path(root) / name).unlink()
+                for name in dirs:
+                    (Path(root) / name).rmdir()
+            src.rmdir()
         else:
             # Compress single file
             dst = output_name_for_file(src, mode)
@@ -369,23 +378,12 @@ def bz2_open(file, mode) -> BZ2File | TextIOWrapper:
     return bz2.open(file, mode)
 
 
-def chunked_copy(
-    src_file: BZ2File | GzipFile | LZMAFile | TextIOWrapper, dst_file: _TemporaryFileWrapper[bytes]
-) -> None:
-    """Efficient chunked copy without shutil.copyfileobj"""
-    while True:
-        chunk = src_file.read(CHUNK_SIZE)
-        if not chunk:
-            break
-        dst_file.write(chunk)
-
-
 def handle_single_file(src: Path, dst_dir: Path, open_func):
     """Handle single file compression formats"""
     extracted_path = src.with_suffix("")
     with open_func(src, "rb") as fin:
         with extracted_path.open("wb") as fout:
-            chunked_copy(fin, fout)
+            copy_chunks(fin, fout)
     return extracted_path
 
 
@@ -403,7 +401,7 @@ def handle_tar_gz(src: Path, dst_dir: Path):
     with tempfile.NamedTemporaryFile(delete=False, dir=dst_dir, suffix=".tar") as tmp_tar:
         temp_path = Path(tmp_tar.name)
         with gzip.open(src, "rb") as fin:
-            chunked_copy(fin, tmp_tar)
+            copy_chunks(fin, tmp_tar)
     with tarfile.open(temp_path, "r:") as tf:
         tf.extractall(path=dst_dir, filter="data")
     temp_path.unlink()
@@ -416,7 +414,7 @@ def handle_tar_bz2(src: Path, dst_dir: Path):
     with tempfile.NamedTemporaryFile(delete=False, dir=dst_dir, suffix=".tar") as tmp_tar:
         temp_path = Path(tmp_tar.name)
         with bz2.open(src, "rb") as fin:
-            chunked_copy(fin, tmp_tar)
+            copy_chunks(fin, tmp_tar)
     with tarfile.open(temp_path, "r:") as tf:
         tf.extractall(path=dst_dir, filter="data")
     temp_path.unlink()
@@ -429,7 +427,7 @@ def handle_tar_xz(src: Path, dst_dir: Path):
     with tempfile.NamedTemporaryFile(delete=False, dir=dst_dir, suffix=".tar") as tmp_tar:
         temp_path = Path(tmp_tar.name)
         with lzma.open(src, "rb") as fin:
-            chunked_copy(fin, tmp_tar)
+            copy_chunks(fin, tmp_tar)
     with tarfile.open(temp_path, "r:") as tf:
         tf.extractall(path=dst_dir, filter="data")
     temp_path.unlink()
@@ -492,12 +490,7 @@ def handle_zstd(src: Path, dst_dir: Path):
     dctx = zstd.ZstdDecompressor()
     with src.open("rb") as fin:
         with extracted_path.open("wb") as fout:
-            for chunk in iter(lambda: fin.read(CHUNK_SIZE), b""):
-                decompressed = dctx.decompress(chunk)
-                if decompressed:
-                    fout.write(decompressed)
-            # Handle any remaining data
-            fout.write(dctx.flush())
+            copy_chunks(fin, fout)
     return extracted_path
 
 
@@ -561,6 +554,16 @@ def collect_items(base: Path) -> list[Tuple[Path, bool]]:
     except PermissionError:
         logger.warning(f"Permission denied accessing {base}")
     return items
+
+
+def remove_directory(path: Path) -> None:
+    """Remove directory recursively without using shutil."""
+    for item in path.iterdir():
+        if item.is_file():
+            item.unlink()
+        elif item.is_dir():
+            remove_directory(item)
+    path.rmdir()
 
 
 def main() -> None:

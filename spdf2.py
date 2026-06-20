@@ -14,23 +14,23 @@ def human_size(num_bytes: int) -> str:
     return f"{num_bytes:.2f} TB"
 
 
-def process_file(input_path: Path) -> None:
+def process_file(path: Path) -> None:
     path = Path(path)
-    if not input_path.exists():
+    if not path.exists():
         print("Input file not found.", file=sys.stderr)
         sys.exit(1)
-    temp_qpdf = input_path.with_name(f"temp_qpdf_{input_path.name}")
-    size_before = input_path.stat().st_size
-    print(f"Before : {human_size(size_before)}")
-    qpdf_cmd = ["qpdf", "--linearize", "--object-streams=generate", str(input_path), str(temp_qpdf)]
+    temp_qpdf = path.with_name(f"temp_qpdf_{path.name}")
+    before = path.stat().st_size
+    print(f"Before : {human_size(before)}")
+    qpdf_cmd = ["qpdf", "--linearize", "--object-streams=generate", str(path), str(temp_qpdf)]
     runcmd(qpdf_cmd, show_output=True)
     if temp_qpdf.exists():
-        size_after = temp_qpdf.stat().st_size
-        print(f"After  : {human_size(size_after)}")
-        diff = size_before - size_after
+        after = temp_qpdf.stat().st_size
+        print(f"After  : {human_size(after)}")
+        diff = before - after
         sign = "-" if diff >= 0 else "+"
-        if size_after < size_before:
-            temp_qpdf.replace(input_path)
+        if after < before:
+            temp_qpdf.replace(path)
             print(f"Saved  : {sign}{human_size(abs(diff))}")
         else:
             print("original file is smaller")

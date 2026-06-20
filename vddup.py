@@ -7,7 +7,6 @@ import gzip
 import hashlib
 import lzma
 import os
-import shutil
 import tarfile
 import zipfile
 from ast import Module
@@ -20,6 +19,15 @@ from loguru import logger
 
 logger.add("error.log", level="ERROR")
 COMPRESSED_EXTENSIONS = [".zip", ".tar", ".gz", ".bz2", ".xz", ".zst", ".br"]
+
+
+def copy_chunks(src, dst, chunk_size: int = 1024 * 1024) -> None:
+    """Copy data from source to destination in chunks."""
+    while True:
+        chunk = src.read(chunk_size)
+        if not chunk:
+            break
+        dst.write(chunk)
 
 
 def hash_content(content: str) -> str:
@@ -39,15 +47,15 @@ def extract_archive(file_path, extract_to) -> None:
         elif file_path.suffix == ".gz":
             with gzip.open(file_path, "rb") as g:
                 with open(extract_to / file_path.stem, "wb") as f:
-                    shutil.copyfileobj(g, f)
+                    copy_chunks(g, f)
         elif file_path.suffix == ".bz2":
             with bz2.open(file_path, "rb") as b:
                 with open(extract_to / file_path.stem, "wb") as f:
-                    shutil.copyfileobj(b, f)
+                    copy_chunks(b, f)
         elif file_path.suffix == ".xz":
             with lzma.open(file_path, "rb") as x:
                 with open(extract_to / file_path.stem, "wb") as f:
-                    shutil.copyfileobj(x, f)
+                    copy_chunks(x, f)
         elif file_path.suffix == ".zst":
             with open(file_path, "rb") as z:
                 dctx = zstd.ZstdDecompressor()

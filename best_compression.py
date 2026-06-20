@@ -5,7 +5,6 @@ import gzip
 import hashlib
 import lzma
 import multiprocessing as mp
-import shutil
 import sys
 import tempfile
 import time
@@ -24,6 +23,15 @@ try:
     import huffman as huffman_lib
 except Exception:
     huffman_lib = None
+
+
+def copy_chunks(src, dst, chunk_size: int = 1024 * 1024) -> None:
+    """Copy data from source to destination in chunks."""
+    while True:
+        chunk = src.read(chunk_size)
+        if not chunk:
+            break
+        dst.write(chunk)
 
 
 @dataclass
@@ -79,18 +87,18 @@ def compress_7z(in_path: Path, out_path: Path) -> None:
 
 def compress_gz(in_path: Path, out_path: Path) -> None:
     with in_path.open("rb") as fin, gzip.open(out_path, "wb", compresslevel=9) as fout:
-        shutil.copyfileobj(fin, fout, length=1024 * 1024)
+        copy_chunks(fin, fout)
 
 
 def compress_bz2(in_path: Path, out_path: Path) -> None:
     with in_path.open("rb") as fin, bz2.open(out_path, "wb", compresslevel=9) as fout:
-        shutil.copyfileobj(fin, fout, length=1024 * 1024)
+        copy_chunks(fin, fout)
 
 
 def compress_lzma(in_path: Path, out_path: Path) -> None:
     with lzma.open(out_path, "wb", preset=9 | lzma.PRESET_EXTREME) as fout:
         with in_path.open("rb") as fin:
-            shutil.copyfileobj(fin, fout, length=1024 * 1024)
+            copy_chunks(fin, fout)
 
 
 def compress_zip(in_path: Path, out_path: Path) -> None:
@@ -271,6 +279,12 @@ def choose_best(results: List[Result]) -> Optional[Result]:
     return ok[0]
 
 
+def copy_file(src: Path, dst: Path, chunk_size: int = 1024 * 1024) -> None:
+    """Copy file from source to destination in chunks."""
+    with src.open("rb") as fin, dst.open("wb") as fout:
+        copy_chunks(fin, fout, chunk_size)
+
+
 def main() -> None:
     if len(sys.argv) != 2:
         print(f"Usage: {sys.argv[0]} <filename>", file=sys.stderr)
@@ -331,7 +345,7 @@ def main() -> None:
         else:
             base_algo = best_overall.algo
         out_final = in_path.with_name(in_path.name + best_ext(base_algo))
-        shutil.copy2(best_overall.out_path, out_final)
+        copy_file(Path(best_overall.out_path), out_final)
         logger.info(f"Saved best output to: {out_final}")
 
 

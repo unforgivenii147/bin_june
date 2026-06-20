@@ -15,7 +15,7 @@ import time
 def compress_chunk(args):
     """Compress a chunk of data using zstd."""
     data, level = args
-    compressor = zstd.ZstdCompressor(level=21, threads=6)
+    compressor = zstd.ZstdCompressor(level=3, threads=4)
     return compressor.compress(data)
 
 
@@ -45,7 +45,7 @@ def create_archive_and_remove_multiprocessing():
     try:
         # Option 1: Use zstd's built-in multi-threading (SIMPLEST)
         print("Using zstd built-in multi-threading...")
-        compressor = zstd.ZstdCompressor(level=19, threads=6)
+        compressor = zstd.ZstdCompressor(level=3, threads=4)
 
         # Create tar in memory
         with tempfile.NamedTemporaryFile(suffix=".tar", delete=False) as tmp_tar:
@@ -121,11 +121,8 @@ def create_archive_streaming_multithreaded():
     try:
         # Multithreaded zstd compressor
         compressor = zstd.ZstdCompressor(
-            level=19,
-            threads=6,  # Use all cores
-            # Optional: tune for speed
-            target_length=4096,
-            overlap_log=9,
+            level=3,
+            threads=4,  # Use all cores
         )
 
         with open(archive_path, "wb") as f_out:
