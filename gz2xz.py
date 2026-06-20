@@ -10,8 +10,9 @@ import gzip
 import sys
 from pathlib import Path
 from typing import Tuple
-from lzma_mt import compress
+
 from dh import get_files, mpf3
+from lzma_mt import compress
 
 
 def process_file(path: Path) -> Tuple[str, bool, str]:

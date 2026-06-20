@@ -5,16 +5,16 @@ Benchmark multiple compression algorithms on a file or directory,
 keep only the smallest result. Uses multiprocessing in folder mode.
 """
 
-import sys
 import bz2
 import gzip
-import lzma
 import logging
+import lzma
+import multiprocessing as mp
+import sys
 import tempfile
 import traceback
-import multiprocessing as mp
-from pathlib import Path
 from io import BytesIO
+from pathlib import Path
 
 # Third-party — install via pip: zstandard brotli lz4 py7zr
 try:

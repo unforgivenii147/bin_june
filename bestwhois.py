@@ -4,9 +4,6 @@
 (c) WhoisXML API Inc. 2019.
 """
 
-from pygments.lexers import JsonLexer
-from pygments.formatters import TerminalFormatter
-from pygments import highlight
 import datetime
 import json
 import os.path
@@ -14,6 +11,9 @@ import sys
 from argparse import ArgumentParser
 
 import requests
+from pygments import highlight
+from pygments.formatters import TerminalFormatter
+from pygments.lexers import JsonLexer
 
 IDN = True
 try:

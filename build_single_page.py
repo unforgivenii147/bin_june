@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from bs4.element import AttributeValueList
 import base64
 import hashlib
 import mimetypes
@@ -9,6 +8,7 @@ from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
+from bs4.element import AttributeValueList
 
 cwd = Path.cwd()
 OUTPUT_DIR = cwd / "output"

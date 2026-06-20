@@ -8,13 +8,14 @@ Install dependencies:
 pip install PyGithub GitPython python-dotenv
 """
 
-import sys
 import os
+import sys
 from pathlib import Path
+
+from dotenv import load_dotenv
+from git import Repo
 from github import Github
 from github.GithubException import GithubException, UnknownObjectException
-from git import Repo
-from dotenv import load_dotenv
 
 
 def load_env_token():

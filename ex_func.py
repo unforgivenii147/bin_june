@@ -1,11 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from tree_sitter import Tree
 from collections import defaultdict
 from pathlib import Path
 
 import tree_sitter_python as tsp
-from tree_sitter import Language, Parser
+from tree_sitter import Language, Parser, Tree
 
 parser = Parser()
 parser.language = Language(tsp.language())

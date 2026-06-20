@@ -1,9 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/python
 from pathlib import Path
 
+import cv2
 import nude
 from dh import cprint, get_files, mpf3
-import cv2
 
 nude_path = Path("nude")
 nude_path.mkdir(exist_ok=True)

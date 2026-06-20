@@ -1,10 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from bs4.element import PageElement
 import sys
 from pathlib import Path
 
 from bs4 import BeautifulSoup
+from bs4.element import PageElement
 from dh import cprint, get_files, get_random_filename, mpf3
 
 

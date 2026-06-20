@@ -7,10 +7,11 @@ import sys
 import tarfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+
 from lzma_mt import compress, decompress
 
 MAX_WORKERS = 4
-CHUNK_SIZE = 32768
+CHUNK_SIZE = 1048576  # 524288
 
 
 def decompress_file(path: Path) -> bool:

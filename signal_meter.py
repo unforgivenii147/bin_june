@@ -4,14 +4,15 @@ Live WiFi/Cellular Signal Strength Monitor for Termux
 Displays real-time signal meters and connection info
 """
 
-import subprocess
-import time
 import os
 import re
+import subprocess
+import time
 from datetime import datetime
+
+from rich.align import Align
 from rich.console import Console
 from rich.panel import Panel
-from rich.align import Align
 
 console = Console()
 

@@ -7,15 +7,14 @@ Images without human faces are moved to 'noface' folder.
 Images with faces stay in their original location.
 """
 
-import sys
 import logging
 import shutil
-from pathlib import Path
-from multiprocessing import Pool, cpu_count
+import sys
 import time
+from multiprocessing import Pool, cpu_count
+from pathlib import Path
 
 from tqdm import tqdm
-
 
 logging.basicConfig(
     level=logging.INFO,

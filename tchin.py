@@ -1,11 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from deep_translator.google import GoogleTranslator
 import argparse
 import sys
 from pathlib import Path
 
 from deep_translator import GoogleTranslator, single_detection
+from deep_translator.google import GoogleTranslator
 
 CHUNK_SIZE = 2000
 ALLOWED_EXT = {".txt", ".md", ".csv", ".json", ".py"}

@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/python
-from requests.models import Response
 import os
 import pickle
 import time
@@ -8,6 +7,7 @@ from pathlib import Path
 
 import requests
 from dotenv import load_dotenv
+from requests.models import Response
 
 # Load environment from ~/.env
 env_path = Path.home() / ".env"

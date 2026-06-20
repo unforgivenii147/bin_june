@@ -1,8 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 import sys
-import requests
 from pathlib import Path
+
+import requests
 
 
 def load_env_file(env_path):

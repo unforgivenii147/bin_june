@@ -1,10 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from pathlib import Path
 import sys
+from pathlib import Path
 
 import htmlmin
-from dh import mpf3, get_files
+from dh import get_files, mpf3
 
 
 def process_file(path: str | Path) -> None:

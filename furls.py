@@ -1,7 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from zipfile import ZipFile
-from tarfile import TarFile
 import argparse
 import contextlib
 import io
@@ -12,7 +10,9 @@ import tarfile
 import tempfile
 import zipfile
 from pathlib import Path
+from tarfile import TarFile
 from urllib.parse import urlparse
+from zipfile import ZipFile
 
 import zstd
 from dh import append_text, is_valid_url

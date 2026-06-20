@@ -1,12 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from numpy import ndarray
 import os
 import shutil
 from pathlib import Path
 
 import cv2
 import numpy as np
+from numpy import ndarray
 
 
 def get_image_features_cv2(image_path, size=(64, 64)):

@@ -1,13 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from googleapiclient.discovery import Resource
 import os
 import re
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from dotenv import load_dotenv
-from googleapiclient.discovery import build
+from googleapiclient.discovery import Resource, build
 
 load_dotenv()
 API_KEY = os.getenv("YOUTUBE_API_KEY")

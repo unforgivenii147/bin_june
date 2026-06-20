@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from datetime import datetime
 import ctypes
 import ctypes.util
 from datetime import UTC, datetime

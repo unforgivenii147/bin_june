@@ -1,9 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from ast import Module
 import ast
 import re
 import sys
+from ast import Module
 from collections import defaultdict
 from pathlib import Path
 

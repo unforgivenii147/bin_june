@@ -1,10 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from tempfile import _TemporaryFileWrapper
-from lzma import LZMAFile
-from gzip import GzipFile
-from bz2 import BZ2File
-from _io import TextIOWrapper
 import argparse
 import bz2
 import gzip
@@ -13,10 +8,16 @@ import os
 import shutil
 import tarfile
 import tempfile
+from bz2 import BZ2File
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
+from gzip import GzipFile
+from lzma import LZMAFile
 from pathlib import Path
-from typing import BinaryIO, list, Optional, Tuple
+from tempfile import _TemporaryFileWrapper
+from typing import BinaryIO, Optional, Tuple, list
+
+from _io import TextIOWrapper
 
 # Optional imports with fallbacks
 try:

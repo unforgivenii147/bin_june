@@ -4,14 +4,14 @@ Auto typo fixer with pattern learning.
 Learns from common substitution errors (b→n, 8→i, etc.) and user corrections.
 """
 
+import argparse
+import json
 import re
 import sys
-import json
-from pathlib import Path
-from typing import Optional
 from collections import defaultdict
 from datetime import datetime
-import argparse
+from pathlib import Path
+from typing import Optional
 
 # Common substitution errors (your examples)
 COMMON_SUBSTITUTIONS = {
@@ -221,8 +221,8 @@ class TypoFixerWithLearning:
     def _load_word_list(self) -> None:
         """Load dictionary words"""
         try:
-            from nltk.corpus import words
             import nltk
+            from nltk.corpus import words
 
             try:
                 nltk.data.find("corpora/words.zip")

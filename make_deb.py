@@ -1,12 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/python
 """Create .deb files from installed Termux packages."""
 
+import logging
 import subprocess
 import sys
-import logging
-from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Set, List
+from pathlib import Path
+from typing import List, Set
 
 # Configuration
 DEB_DIR = Path.home() / "debs"

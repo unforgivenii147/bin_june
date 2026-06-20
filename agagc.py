@@ -4,11 +4,11 @@ Initializes a new repository if not already inside one.
 Automatically pushes to remote if configured.
 """
 
-from argparse import Namespace
 import argparse
 import os
 import re
 import sys
+from argparse import Namespace
 from datetime import datetime
 from pathlib import Path
 

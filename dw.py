@@ -1,9 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/python
-import sys
-import os
-import time
-import shutil
 import argparse
+import os
+import shutil
+import sys
+import time
 
 
 def tail_file(fname, n=10):

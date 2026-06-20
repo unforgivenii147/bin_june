@@ -1,12 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from fontTools.ttLib.ttFont import TTFont
 import re
 import sys
 from pathlib import Path
 
 from dh import get_files, mpf, unique_path
 from fontTools.ttLib import TTFont
+from fontTools.ttLib.ttFont import TTFont
 from termcolor import cprint
 
 

@@ -8,14 +8,14 @@ PyPI Package Update Checker with Multiprocessing & Resume Capability
 """
 
 import json
+import logging
 import sys
 import time
-from pathlib import Path
-from subprocess import run, CalledProcessError
-from typing import Optional, Dict, Any
+from dataclasses import asdict, dataclass
 from multiprocessing import Pool, cpu_count
-from dataclasses import dataclass, asdict
-import logging
+from pathlib import Path
+from subprocess import CalledProcessError, run
+from typing import Any, Dict, Optional
 
 # ============================================================================
 # LOGGING SETUP

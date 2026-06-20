@@ -1,9 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from ast import Module
 import ast
 import re
 import sys
+from ast import Module
 from pathlib import Path
 
 from dh import cprint, fsz, get_files, gsz

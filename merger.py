@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from dh import get_random_filename, get_nobinary
+from dh import get_nobinary, get_random_filename
 
 EXCLUDE_DIRS = {".git", "__pycache__", ".idea", ".vscode", "node_modules", ".env", "venv"}
 DEFAULT_OUTPUT_LEN = 8

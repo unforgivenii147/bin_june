@@ -6,9 +6,9 @@ Recursively processes all .py files, updates in-place with AST validation.
 
 import ast
 import multiprocessing as mp
-from pathlib import Path
-from typing import Tuple, Optional
 import re
+from pathlib import Path
+from typing import Optional, Tuple
 
 from deep_translator import GoogleTranslator
 

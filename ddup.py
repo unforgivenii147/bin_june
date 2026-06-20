@@ -11,7 +11,6 @@ Multiprocessing is used for fast AST analysis. Logging is handled by loguru.
 Requires Python 3.9+ (for ast.unparse).
 """
 
-from dataclasses import dataclass
 import argparse
 import ast
 import concurrent.futures
@@ -20,6 +19,7 @@ import hashlib
 import lzma
 import os
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 

@@ -4,11 +4,11 @@ Filter the latest version for ARMv7 architecture (armeabi_v7a, armv7l, linux_arm
 from a list of wheel URLs.
 """
 
-import sys
 import re
-from pathlib import Path
+import sys
 from collections import defaultdict
-from typing import Dict, Tuple, Optional
+from pathlib import Path
+from typing import Dict, Optional, Tuple
 
 
 def parse_wheel_url(url: str) -> Optional[Tuple[str, str, Tuple[int, ...], str]]:

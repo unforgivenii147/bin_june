@@ -8,16 +8,15 @@ Skips .git, __pycache__, .ruff_cache, .pytest_cache, .mypy_cache directories glo
 
 from __future__ import annotations
 
-import sys
-import shutil
-import tarfile
 import argparse
-from pathlib import Path
+import shutil
+import sys
+import tarfile
 from io import BytesIO
+from pathlib import Path
 
 import zstandard as zstd
 from joblib import Parallel, delayed
-
 
 ZST_EXT = ".zst"
 SKIP_EXTS = frozenset({

@@ -1,11 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/python
-from googleapiclient.discovery import Resource
 import os
 import pickle
 
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
+from googleapiclient.discovery import Resource, build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
 

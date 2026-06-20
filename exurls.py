@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from requests.sessions import Session
 import argparse
 import sys
 from pathlib import Path
@@ -8,6 +7,7 @@ from urllib.parse import urljoin, urlparse
 
 import requests
 from bs4 import BeautifulSoup
+from requests.sessions import Session
 
 
 def create_session() -> Session:

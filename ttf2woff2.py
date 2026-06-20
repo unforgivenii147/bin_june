@@ -1,5 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
-
+import sys
 from pathlib import Path
 
 from dh import cprint, get_files, mpf3, unique_path
@@ -22,8 +22,12 @@ def process_file(path: Path) -> None:
 
 
 def main() -> None:
-    files = get_files(cwd, ext=[".ttf", ".otf"])
-    _ = mpf3(process_file, files)
+    args = sys.argv[1:]
+    files = [Path(p) for p in args] if args else get_files(cwd, ext=[".ttf", ".otf"])
+    if len(files) == 1:
+        process_file(files[0])
+        sys.exit(1)
+    mpf3(process_file, files)
 
 
 if __name__ == "__main__":

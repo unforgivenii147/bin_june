@@ -1,8 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from subprocess import CompletedProcess
 import subprocess
 import sys
+from subprocess import CompletedProcess
 
 
 def process_pkg(pk: str) -> CompletedProcess[bytes]:

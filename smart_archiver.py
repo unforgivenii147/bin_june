@@ -4,18 +4,18 @@ Smart Archiver - Automatically chooses best compression algorithm based on file 
 and supports parallel compression for multiple files.
 """
 
+import argparse
+import json
+import multiprocessing
 import os
 import sys
 import tarfile
 import tempfile
-from pathlib import Path
 import time
-from io import BytesIO
-import argparse
-import json
 from concurrent.futures import ProcessPoolExecutor, as_completed
-import multiprocessing
 from datetime import datetime
+from io import BytesIO
+from pathlib import Path
 
 try:
     import zstandard as zstd

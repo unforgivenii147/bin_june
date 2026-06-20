@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from typing import Self
 import argparse
 import os
 import re
@@ -8,6 +7,7 @@ import sys
 import urllib.parse
 import urllib.request
 from pathlib import Path
+from typing import Self
 
 try:
     from tqdm import tqdm

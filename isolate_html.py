@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from bs4.element import AttributeValueList
 import base64
 import os
 import re
@@ -8,6 +7,7 @@ import sys
 from pathlib import Path
 
 from bs4 import BeautifulSoup
+from bs4.element import AttributeValueList
 
 
 def encode_local_file_to_base64(file_path) -> str | None:

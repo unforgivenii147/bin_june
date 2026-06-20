@@ -3,13 +3,14 @@
 Find non-pure Python packages in system site-packages and save list to file.
 """
 
-import sys
-import site
-from pathlib import Path
 import argparse
 import logging
+import site
+import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from typing import List, Tuple, Optional
+from pathlib import Path
+from typing import List, Optional, Tuple
+
 import pkg_resources
 
 # Configure logging

@@ -6,12 +6,13 @@ Convert man pages from .gz to .xz format with maximum compression.
 Skips symlinks and processes files recursively in the current directory.
 """
 
-from gzip import compress as gzip_compress
 import sys
+from gzip import compress as gzip_compress
 from pathlib import Path
 from typing import Tuple
-from lzma_mt import decompress
+
 from dh import get_files, mpf3
+from lzma_mt import decompress
 
 
 def process_file(path: Path) -> Tuple[str, bool, str]:

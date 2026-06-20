@@ -1,11 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-import sys
-import shutil
-from pathlib import Path
 import argparse
+import shutil
+import sys
 import tempfile
-
+from pathlib import Path
 
 COMMENT_PREFIXES = ("#", "//", "--")
 

@@ -1,8 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/python
 import json
-import sys
 import os
-from typing import Dict, Optional, List
+import sys
+from typing import Dict, List, Optional
 
 
 class BidirectionalDictionary:

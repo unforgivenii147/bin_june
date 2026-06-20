@@ -1,12 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/python
-from googleapiclient.discovery import Resource
 import io
 import os
 import pickle
 
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
+from googleapiclient.discovery import Resource, build
 from googleapiclient.http import MediaIoBaseDownload
 
 # If modifying these scopes, delete the file token.pickle.

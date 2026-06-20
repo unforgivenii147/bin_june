@@ -1,10 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 
-from ast import Module
 import argparse
 import ast
 import os
+from ast import Module
 from collections import defaultdict
 from multiprocessing import Pool, cpu_count
 

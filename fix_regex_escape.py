@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from ast import Call
 import ast
+from ast import Call
 from pathlib import Path
 
 from dh import get_pyfiles

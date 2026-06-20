@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from argparse import Namespace
 import argparse
 import datetime
 import grp
@@ -8,6 +7,7 @@ import os
 import pwd
 import stat
 import sys
+from argparse import Namespace
 from pathlib import Path
 
 COLORS = {"dir": "\x1b[34m", "link": "\x1b[36m", "exec": "\x1b[32m", "reset": "\x1b[0m"}

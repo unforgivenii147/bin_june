@@ -1,9 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from subprocess import CompletedProcess
 import shutil
 import subprocess
 import sys
+from subprocess import CompletedProcess
 
 
 def run_git_command(cmd: str, check=True, capture_output=True) -> CompletedProcess[str] | None:

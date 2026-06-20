@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-from tree_sitter import Node
 import hashlib
 import os
 from dataclasses import dataclass
 from pathlib import Path
 
-from tree_sitter import Parser
+from tree_sitter import Node, Parser
 from tree_sitter_languages import get_language
 
 OUTPUT_FILE = "utils.py"

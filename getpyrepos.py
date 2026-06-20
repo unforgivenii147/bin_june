@@ -5,11 +5,12 @@ Usage: python script.py [username]
 If no username provided, fetches top trending GitHub users' Python repos
 """
 
-import sys
 import json
-import requests
+import sys
 from datetime import datetime, timedelta
-from typing import List, Dict
+from typing import Dict, List
+
+import requests
 
 
 def get_user_repos(username: str) -> List[Dict]:

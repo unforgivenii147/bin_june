@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from ast import AST
 import ast
+from ast import AST
 from pathlib import Path
 
 output_dir = Path("output")

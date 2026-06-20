@@ -1,12 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from mmap import mmap
-from _io import BufferedReader
 import mmap
 import re
 import tokenize
+from mmap import mmap
 from pathlib import Path
 
+from _io import BufferedReader
 from dh import get_files, mpf3
 
 SIZE_THRESHOLD = 1 * 1024 * 1024

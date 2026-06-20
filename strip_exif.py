@@ -4,13 +4,14 @@ Strip EXIF data from image files using pathlib only.
 Supports parallel processing, size reporting, and file/directory input.
 """
 
-import sys
 import argparse
-from pathlib import Path
+import io
+import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import cpu_count
+from pathlib import Path
+
 from PIL import Image
-import io
 
 
 def get_file_size(file_path):

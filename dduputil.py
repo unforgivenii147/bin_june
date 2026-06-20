@@ -11,15 +11,13 @@ Usage:
 
 from __future__ import annotations
 
-from ast import expr
-from ast import Tuple
-from ast import Name
 import argparse
 import ast
 import hashlib
 import os
 import sys
 import tempfile
+from ast import Name, Tuple, expr
 from dataclasses import dataclass
 from multiprocessing import Pool, cpu_count
 from pathlib import Path

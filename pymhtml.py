@@ -1,11 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from email.message import EmailMessage
 import base64
 import os
 import re
 import sys
 from email import policy
+from email.message import EmailMessage
 from email.parser import BytesParser
 from pathlib import Path
 

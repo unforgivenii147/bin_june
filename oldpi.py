@@ -1,15 +1,15 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from mmap import mmap
-from _io import BufferedReader
 import argparse
 import mmap
 import os
 import re
 import tokenize
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from mmap import mmap
 from pathlib import Path
 
+from _io import BufferedReader
 from dh import get_pyfiles
 from tqdm import tqdm
 

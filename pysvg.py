@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from dh import get_files, gsz, mpf3, runcmd, rrs
+from dh import get_files, gsz, mpf3, rrs, runcmd
 
 
 def process_file(path) -> None:

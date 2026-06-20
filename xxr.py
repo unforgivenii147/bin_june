@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from _io import BufferedWriter
-from _io import BufferedReader
 import argparse
 import bz2
 import gzip
@@ -20,6 +18,7 @@ from typing import Callable, Tuple
 import brotlicffi as brotli
 import py7zr
 import zstandard as zstd
+from _io import BufferedReader, BufferedWriter
 from dh import cprint, fsz, gsz, mpf3
 from loguru import logger
 

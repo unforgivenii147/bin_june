@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from ast import Module
 import argparse
 import ast
 import bz2
@@ -11,6 +10,7 @@ import os
 import shutil
 import tarfile
 import zipfile
+from ast import Module
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 

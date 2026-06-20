@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/python
-from github.Repository import Repository
 import re
 import subprocess
 import sys
@@ -7,6 +6,7 @@ from pathlib import Path
 
 from github import Github
 from github.GithubException import GithubException, UnknownObjectException
+from github.Repository import Repository
 from tqdm import tqdm
 
 

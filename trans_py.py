@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from re import Match
 import ast
 import os
 import re
@@ -8,6 +7,7 @@ import shutil
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+from re import Match
 
 from deep_translator import GoogleTranslator
 from dh import DOC_TH1, DOC_TH2, get_pyfiles

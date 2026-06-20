@@ -13,8 +13,6 @@ Usage
 """
 
 from __future__ import annotations
-import lzma_mt
-import brotlicffi as brotli
 
 import argparse
 import ast
@@ -29,6 +27,8 @@ from multiprocessing import Pool, cpu_count
 from pathlib import Path
 from typing import Optional
 
+import brotlicffi as brotli
+import lzma_mt
 import zstandard as zstd
 from loguru import logger
 

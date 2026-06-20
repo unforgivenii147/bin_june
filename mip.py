@@ -25,8 +25,8 @@ def get_files(directory: Path, ext: list[str]) -> list[Path]:
 def get_installed_packages() -> dict[str, str]:
     """Retrieves all installed packages in the current environment using standard libraries.
 
-    Returns: {"package-name": "version"}
-    """
+       Returns: {"package-name": "version"}
+    x"""
     # Normalize names to lowercase to prevent casing mismatches (e.g. PyYAML vs pyyaml)
     return {dist.metadata["Name"].lower(): dist.version for dist in importlib.metadata.distributions()}
 

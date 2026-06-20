@@ -1,12 +1,16 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 import re
 import shutil
+import sys
 from pathlib import Path
 
 from packaging.tags import parse_tag
 from packaging.utils import canonicalize_name
 from packaging.version import Version
+
+MOVE_MODE = "-m" in sys.argv
 
 WHEEL_PATTERN = re.compile(
     "^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])-([^-]+)-(\\d[^-]*)-([^-]+)-([^-]+)-([^-]+)\\.whl$", re.IGNORECASE
@@ -44,16 +48,16 @@ def is_valid(path: Path) -> bool:
 
 
 def main() -> None:
+    print("to move wheels with invalid name rerun with -m")
     invalid_dir = Path("invalid_wheels")
-    invalid_dir.mkdir(exist_ok=True)
     cwd = Path.cwd()
     for path in cwd.glob("*.whl"):
         if not is_valid(path) or not is_valid2(path):
             print(f"Invalid wheel name: {path}")
-            dest = invalid_dir / path.name
-            shutil.move(str(path), str(dest))
-        else:
-            print(f"Valid wheel name: {path.name}")
+            if MOVE_MODE:
+                invalid_dir.mkdir(exist_ok=True)
+                dest = invalid_dir / path.name
+                shutil.move(str(path), str(dest))
 
 
 if __name__ == "__main__":

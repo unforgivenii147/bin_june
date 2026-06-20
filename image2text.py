@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from PIL.Image import Image
 import sys
 from collections import deque
 from multiprocessing import get_context
@@ -9,6 +8,7 @@ from pathlib import Path
 import cv2
 from dh import fsz, get_files, gsz
 from PIL import Image
+from PIL.Image import Image
 
 MAX_QUEUE = 16
 

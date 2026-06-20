@@ -1,11 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from argparse import Namespace
 import itertools
 import os
 import re
 import sys
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
 from datetime import datetime
 from multiprocessing import get_context
 from pathlib import Path

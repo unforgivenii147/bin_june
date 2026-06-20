@@ -1,9 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from ast import FunctionDef
-from ast import ClassDef
-from ast import AsyncFunctionDef
-from ast import Assign
 import argparse
 import ast
 import bz2
@@ -17,6 +13,7 @@ import sys
 import tarfile
 import tempfile
 import zipfile
+from ast import Assign, AsyncFunctionDef, ClassDef, FunctionDef
 from collections import defaultdict
 from pathlib import Path
 

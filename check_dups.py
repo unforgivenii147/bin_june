@@ -1,12 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from ast import FunctionDef
-from ast import ClassDef
-from ast import AsyncFunctionDef
 import ast
 import copy
 import hashlib
 import sys
+from ast import AsyncFunctionDef, ClassDef, FunctionDef
 from dataclasses import dataclass
 from pathlib import Path
 
