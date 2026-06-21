@@ -6,9 +6,20 @@ import time
 import zipfile
 from pathlib import Path
 
-from print_persian import print_persian as _print
 
-'\ndef attempt_password2(args):\n    zip_file_path, password_candidate = args\n    try:\n        with AESZipFile(zip_file_path, "r") as zf:\n            zf.setpassword(password_candidate.encode("utf-8"))\n            zf.testzip()\n            return password_candidate\n    except RuntimeError as e:\n        if "Bad password" in str(e) or "Incorrect password" in str(e):\n            return None\n        _print(f"خطای ناشناخته در حین تلاش با \'{password_candidate}\': {e}")\n        return None\n    except Exception as e:\n        _print(f"خطای کلی در حین تلاش با \'{password_candidate}\': {e}")\n        return None\n'
+def attempt_password2(args):
+    zip_file_path, password_candidate = args
+    try:
+        with AESZipFile(zip_file_path, "r") as zf:
+            zf.setpassword(password_candidate.encode("utf-8"))
+            zf.testzip()
+            return password_candidate
+    except RuntimeError as e:
+        if "Bad password" in str(e) or "Incorrect password" in str(e):
+            return None
+        return None
+    except Exception as e:
+        return None
 
 
 def attempt_password(args):
@@ -68,6 +79,6 @@ if __name__ == "__main__":
     pass_file = Path.home() / "isaac" / "wordlist.txt"
     found_password_mp = crack_zip_password_multiprocess(zip_file, pass_file)
     if found_password_mp:
-        _print(f"\npassword: {found_password_mp}")
+        print(f"\npassword: {found_password_mp}")
     else:
-        _print("\nnot found.")
+        print("\nnot found.")
