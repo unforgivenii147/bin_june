@@ -6,21 +6,21 @@ from pathlib import Path
 import pdfplumber
 
 
-def process_file(fp: str) -> None:
+def process_file(path: str) -> None:
     path = Path(path)
     i = 1
-    with pdfplumber.open(fp) as pdf:
+    with pdfplumber.open(path) as pdf:
         for page in pdf.pages:
             text = page.extract_text(encoding="utf-8")
-            Path(fp).stem
+            Path(path).stem
             if not Path(outdir).exists():
                 Path(outdir).mkdir()
             if i < 10:
-                txtfile = f"{outdir}/{Path(fp).stem}00{i!s}.txt"
+                txtfile = f"{outdir}/{Path(path).stem}00{i!s}.txt"
             elif i < 100 and i >= 10:
-                txtfile = f"{outdir}/{Path(fp).stem}0{i!s}.txt"
+                txtfile = f"{outdir}/{Path(path).stem}0{i!s}.txt"
             else:
-                txtfile = f"{outdir}/{Path(fp).stem}{i!s}.txt"
+                txtfile = f"{outdir}/{Path(path).stem}{i!s}.txt"
             Path(txtfile).write_text(text, encoding="utf-8")
             print(f"{txtfile} created")
             i += 1

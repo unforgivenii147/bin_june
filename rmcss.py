@@ -11,16 +11,16 @@ from dh import cprint, fsz, get_files, gsz
 MAX_QUEUE = 16
 
 
-def process_file(fp) -> None:
-    before = gsz(fp)
+def process_file(path) -> None:
+    before = gsz(path)
     path = Path(path)
-    src = fp.read_text(encoding="utf-8")
+    src = path.read_text(encoding="utf-8")
     pattern = re.compile("<!--[\\s\\S]*?-->", re.MULTILINE)
     out = pattern.sub("", src)
     if out != src:
-        fp.write_text(out, encoding="utf-8")
-    after = gsz(fp)
-    print(f"[OK] {fp.name} ", end="")
+        path.write_text(out, encoding="utf-8")
+    after = gsz(path)
+    print(f"[OK] {path.name} ", end="")
     diffsize = before - after
     cprint(f"{fsz(diffsize)}", "cyan")
 

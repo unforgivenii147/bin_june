@@ -34,14 +34,14 @@ def clean_text(text: str) -> str:
     return cleaned
 
 
-def process_file(fp: Path) -> None:
+def process_file(path: Path) -> None:
     path = Path(path)
-    text = fp.read_text(encoding="utf-8", errors="ignore")
+    text = path.read_text(encoding="utf-8", errors="ignore")
     cleaned = clean_text(text)
     removed = len(text) - len(cleaned)
     if removed:
         print(f"{removed} invisible characters removed")
-        fp.write_text(cleaned, encoding="utf-8")
+        path.write_text(cleaned, encoding="utf-8")
         return
     print("No invisible characters found")
     return

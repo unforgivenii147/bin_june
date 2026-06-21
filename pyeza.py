@@ -287,18 +287,18 @@ def main() -> None:
         for n in names:
             if not args.all and n.startswith("."):
                 continue
-            fp = os.path.join(path, n)
+            path = os.path.join(path, n)
             try:
-                st = os.lstat(fp)
+                st = os.lstat(path)
             except FileNotFoundError:
                 continue
             link_t = None
             if stat.S_ISLNK(st.st_mode):
                 try:
-                    link_t = Path(fp).readlink()
+                    link_t = Path(path).readlink()
                 except OSError:
                     link_t = None
-            entries.append(Entry(fp, n, st, link_t, gitmap.get(n)))
+            entries.append(Entry(path, n, st, link_t, gitmap.get(n)))
         print_entries(entries, args)
 
 

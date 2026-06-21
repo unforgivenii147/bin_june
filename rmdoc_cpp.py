@@ -68,9 +68,9 @@ if __name__ == "__main__":
     before = sum((f.stat().st_size for f in files))
     remover = RegexCommentRemover()
     results = []
-    for i, fp in enumerate(files, 1):
-        print(f"[{i}/{len(files)}] Processing {fp.name}...")
-        result = process_file(fp, remover)
+    for i, path in enumerate(files, 1):
+        print(f"[{i}/{len(files)}] Processing {path.name}...")
+        result = process_file(path, remover)
         results.append(result)
     after = sum((f.stat().st_size for f in files if f.exists()))
     changed = sum((1 for r in results if r[0] == "changed"))

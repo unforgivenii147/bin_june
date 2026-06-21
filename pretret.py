@@ -6,14 +6,14 @@ from pathlib import Path
 from dh import mpf3, runcmd
 
 
-def process_file(fp):
+def process_file(path):
     path = Path(path)
-    if not fp.exists():
-        return (False, fp)
-    ret = runcmd(["prettier", "-w", str(fp).replace("/storage/emulated/0", "/sdcard")], show_output=True)
+    if not path.exists():
+        return (False, path)
+    ret = runcmd(["prettier", "-w", str(path).replace("/storage/emulated/0", "/sdcard")], show_output=True)
     if not ret:
-        return (True, fp)
-    return (False, fp)
+        return (True, path)
+    return (False, path)
 
 
 def main() -> None:

@@ -94,7 +94,7 @@ if __name__ == "__main__":
     file_paths = get_files(cwd)
     all_urls = set()
     with ThreadPoolExecutor(8) as executor:
-        futures = [executor.submit(extract_urls, fp) for fp in file_paths]
+        futures = [executor.submit(extract_urls, path) for path in file_paths]
         for future in as_completed(futures):
             all_urls.update(future.result())
     with Path("urls.txt").open("w", encoding="utf-8") as f:

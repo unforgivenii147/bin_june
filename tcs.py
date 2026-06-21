@@ -20,10 +20,10 @@ def send_to_process(txt: str) -> None:
         sys.exit(1)
 
 
-def selective_copy(fp: Path, lines: list[str]) -> None:
+def selective_copy(path: Path, lines: list[str]) -> None:
     cl = [p for p in lines if p != "-s"]
     selected = []
-    nl = fp.read_text(encoding="utf-8").splitlines()
+    nl = path.read_text(encoding="utf-8").splitlines()
     total = len(nl)
     for k in cl:
         if 0 <= k <= total:

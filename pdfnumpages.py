@@ -8,20 +8,19 @@ import pdfplumber
 from fastwalk import walk_files
 
 
-def process_file(fp) -> None:
+def process_file(path) -> None:
     path = Path(path)
-    fp = Path(fp)
-    if fp.exists() and (not fp.is_symlink()):
-        with pdfplumber.open(fp) as pdf:
+    if path.exists() and (not path.is_symlink()):
+        with pdfplumber.open(path) as pdf:
             numpages = len(pdf.pages)
-            new_name = fp.stem + str(numpages) + ".pdf"
+            new_name = path.stem + str(numpages) + ".pdf"
             print(new_name)
-            np = Path(f"{fp.parent}/{new_name}")
-            if str(numpages) in fp.stem:
+            np = Path(f"{path.parent}/{new_name}")
+            if str(numpages) in path.stem:
                 return
             if not np.exists():
-                Path(fp).rename(np)
-                print(f"{fp.name} --> {np.name}")
+                Path(path).rename(np)
+                print(f"{path.name} --> {np.name}")
             else:
                 print(f"{np.name} exists.")
     return

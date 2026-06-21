@@ -44,19 +44,19 @@ def rename_files(directory: str) -> None:
         for future in tqdm(as_completed(futures), total=len(unique_names_to_translate), desc="Translating filenames"):
             original, translated = future.result()
             translation_map[original] = translated
-    for fp in sorted(paths, key=lambda x: len(x.parts), reverse=True):
-        if fp.name not in translation_map:
+    for path in sorted(paths, key=lambda x: len(x.parts), reverse=True):
+        if path.name not in translation_map:
             continue
-        new_name = translation_map[fp.name]
-        if new_name == fp.name:
+        new_name = translation_map[path.name]
+        if new_name == path.name:
             continue
-        new_fp = fp.with_name(new_name)
-        new_fp = unique_path(new_fp)
+        new_path = path.with_name(new_name)
+        new_path = unique_path(new_path)
         try:
-            Path(fp).rename(new_fp)
-            print(f"Renamed: {fp.name} -> {new_fp.name}")
+            Path(path).rename(new_path)
+            print(f"Renamed: {path.name} -> {new_path.name}")
         except OSError as e:
-            print(f"Error renaming {fp.name}: {e}")
+            print(f"Error renaming {path.name}: {e}")
 
 
 if __name__ == "__main__":

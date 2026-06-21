@@ -1,178 +1,233 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-import json
 import re
-import sys
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
 
-DEFAULT_FILE = "README.md"
-ENV_FILE = Path.home() / ".env"
+# Mapping of tokens to model names (from your provided list)
+MODEL_MAPPINGS = {
+    "COBUDDY_TOKEN": "baidu/cobuddy:free",
+    "CLAUDE_TOKEN": "claude-opus-4-7",
+    "DEEPSEEK_CHAT_TOKEN": "deepseek-chat",
+    "DEEPSEEK_V4F_TOKEN": "deepseek-v4-flash",
+    "DEEPSEEK_V4P_TOKEN": "deepseek-v4-pro",
+    "GEMINI_F_TOKEN": "gemini-2.5-flash",
+    "GEMINI_LITE_TOKEN": "google/gemini-3.1-flash-lite",
+    "GRANITE_TOKEN": "ibm-granite/granite-4.1-8b",
+    "LING_TOKEN": "inclusionai/ling-2.6-1t:free",
+    "RING_TOKEN": "inclusionai/ring-2.6-1t",
+    "RING_FREE_TOKEN": "inclusionai/ring-2.6-1t:free",
+    "KIMI_TOKEN": "kimi-k2.5",
+    "MISTRAL_M_TOKEN": "mistralai/mistral-medium-3-5",
+    "NEMOTRON_TOKEN": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+    "OPENAI_GPT55_TOKEN": "openai/gpt-5.5",
+    "OPENAI_GPT55P_TOKEN": "openai/gpt-5.5-pro",
+    "OPENAI_GPT_CHAT_TOKEN": "openai/gpt-chat-latest",
+    "OPENROUTER_TOKEN": "openrouter/owl-alpha",
+    "PERCEPTRON_TOKEN": "perceptron/perceptron-mk1",
+    "LAGUNA_M_TOKEN": "poolside/laguna-m.1:free",
+    "LAGUNA_XS_TOKEN": "poolside/laguna-xs.2:free",
+    "QWEN35P_TOKEN": "qwen/qwen3.5-plus-20260420",
+    "QWEN36_27B_TOKEN": "qwen/qwen3.6-27b",
+    "QWEN36_35B_TOKEN": "qwen/qwen3.6-35b-a3b",
+    "QWEN36_F_TOKEN": "qwen/qwen3.6-flash",
+    "QWEN36_MAX_TOKEN": "qwen/qwen3.6-max-preview",
+    "SMART_TOKEN": "smart-chat",
+    "TEXT_EMBEDDING_TOKEN": "text-embedding-3-small",
+    "GROK_TOKEN": "x-ai/grok-4.3",
+}
+
+# Reverse mapping: model name -> token variable name
+MODEL_TO_TOKEN_NAME = {v: k for k, v in MODEL_MAPPINGS.items()}
 
 
-def parse_api_keys_from_table(text: str):
-    lines = text.strip().split("\n")
-    header_line = None
-    data_start = 0
-    for i, line in enumerate(lines):
-        if "| Key | Model |" in line or ("Key" in line and "Model" in line):
-            header_line = i
-            data_start = i + 2
-            break
-    if header_line is None:
-        data_start = 0
-    pattern = "\\|\\s*`([^`]+)`\\s*\\|\\s*([^\\s|]+)\\s*\\|"
+def extract_tokens_with_models(text):
+    """
+    Extract API keys/tokens with their corresponding models.
+    Returns a list of tuples (model, token).
+    """
+    # Split the text into table sections
+    sections = re.split(r"###\s+", text)
 
-    env_vars = defaultdict(list)
-    model_list = []
+    tokens_with_models = []
 
-    for line in lines[data_start:]:
-        if not line.strip() or line.strip().startswith("|--"):
+    for section in sections:
+        if not section.strip():
             continue
-        match = re.search(pattern, line)
-        if match:
-            api_key = match.group(1)
-            model = match.group(2).lower()
-            model_list.append(model)
 
-            # Determine token type based on model
-            if "deepseek" in model:
-                token_type = "DEEPSEEK_TOKEN"
-            elif "gemini" in model:
-                token_type = "GEMINI_TOKEN"
-            elif "openai" in model or "gpt" in model:
-                token_type = "OPENAI_TOKEN"
-            elif "claude" in model or "anthropic" in model:
-                token_type = "ANTHROPIC_TOKEN"
-            else:
-                # Clean up model name for token variable
-                cleaned_name = model.upper().replace("-", "_")
-                if "/" in cleaned_name:
-                    cleaned_name = cleaned_name[: cleaned_name.index("/")]
-                # Remove any trailing/leading underscores
-                cleaned_name = cleaned_name.strip("_")
-                token_type = f"{cleaned_name}_TOKEN"
+        # Extract model name from the first line
+        lines = section.strip().split("\n")
+        if not lines:
+            continue
 
-            # Store all values, preserving duplicates
-            env_vars[token_type].append(api_key)
+        # The model name is in the first line (or after the ###)
+        first_line = lines[0].strip()
+        # Remove the date/time stamp if present (format: `06-22 05:07`)
+        model_name = re.sub(r"`\d{2}-\d{2} \d{2}:\d{2}`", "", first_line).strip()
+        # If model name contains '|', take the part before it
+        if "|" in model_name:
+            model_name = model_name.split("|")[0].strip()
+        # Remove any remaining backticks
+        model_name = model_name.strip("`").strip()
 
-    # Save model list for reference
-    with open("model_list", "w") as f:
-        json.dump(model_list, f, ensure_ascii=False, indent=2)
+        # Find all tokens in this section (tokens start with 'sk-')
+        token_pattern = r"sk-[a-zA-Z0-9]+"
+        tokens = re.findall(token_pattern, section)
 
-    return env_vars
+        # Add each token with its model
+        for token in tokens:
+            tokens_with_models.append((model_name if model_name else "unknown", token))
+
+    return tokens_with_models
 
 
-def append_to_env_file(env_vars, env_file=ENV_FILE):
-    """Append new tokens to ~/.env, preserving existing entries"""
+def get_model_variable_name(model_name):
+    """
+    Get the environment variable name for a given model.
+    Uses the MODEL_MAPPINGS to find the correct variable name.
+    """
+    # Try exact match first
+    if model_name in MODEL_TO_TOKEN_NAME:
+        return MODEL_TO_TOKEN_NAME[model_name]
 
-    # Read existing .env file if it exists
-    existing_lines = []
-    if env_file.exists():
-        with open(env_file, "r") as f:
-            existing_lines = f.readlines()
+    # Try fuzzy matching
+    model_lower = model_name.lower()
+    for key, value in MODEL_MAPPINGS.items():
+        if value.lower() in model_lower or model_lower in value.lower():
+            return key
 
-    # Parse existing tokens to avoid duplicates
-    existing_tokens = defaultdict(list)
-    current_section = "default"
-
-    for line in existing_lines:
-        line = line.strip()
-        if line and not line.startswith("#"):
-            if "=" in line:
-                key, value = line.split("=", 1)
-                if key.endswith("_TOKEN"):
-                    existing_tokens[key].append(value)
-
-    # Prepare new content
-    new_lines = []
-
-    # Add a separator comment if there are existing entries
-    if existing_lines and any(not l.strip().startswith("#") for l in existing_lines):
-        new_lines.append("\n# === New tokens added by script ===\n")
-
-    # Track how many new tokens were added
-    added_count = 0
-
-    for token_type, values in env_vars.items():
-        # Check if these values already exist
-        existing_values = set(existing_tokens.get(token_type, []))
-        new_values = [v for v in values if v not in existing_values]
-
-        if new_values:
-            # Append all new values for this token type
-            for value in new_values:
-                new_lines.append(f"{token_type}={value}\n")
-                added_count += 1
-            # Store for future duplicate checking
-            existing_tokens[token_type].extend(new_values)
-
-    # Write back to file
-    if new_lines:
-        with open(env_file, "a") as f:
-            f.writelines(new_lines)
-        print(f"✅ Appended {added_count} new token(s) to {env_file}")
-    else:
-        print(f"ℹ️ No new tokens to add (all already in {env_file})")
-
-    return added_count
+    # If no match found, generate a safe variable name
+    safe_name = model_name.upper().replace(" ", "_").replace("-", "_").replace(".", "_")
+    safe_name = re.sub(r"[^A-Z0-9_]", "", safe_name)
+    return f"{safe_name}_TOKEN"
 
 
-def print_token_summary(env_vars):
-    """Display summary of extracted tokens"""
-    print("\n📋 Extracted tokens from table:")
-    total_tokens = sum(len(values) for values in env_vars.values())
-    print(f"Found {total_tokens} token(s) across {len(env_vars)} type(s):")
+def save_tokens_to_files(tokens_data):
+    """
+    Save tokens to tokens.txt and .env files.
+    """
+    if not tokens_data:
+        print("No tokens found in README.md")
+        return False
 
-    for token_type, values in env_vars.items():
-        masked_values = []
-        for value in values:
-            if len(value) > 12:
-                masked = value[:8] + "..." + value[-4:]
-            else:
-                masked = "***"
-            masked_values.append(masked)
-        print(f"  {token_type}: {', '.join(masked_values)}")
+    # Remove duplicates while preserving order
+    seen = set()
+    unique_tokens = []
+    for model, token in tokens_data:
+        if token not in seen:
+            seen.add(token)
+            unique_tokens.append((model, token))
 
-
-def main() -> None:
-    # Get input file
-    if len(sys.argv) > 1:
-        fn = Path(sys.argv[1])
-    else:
-        fn = Path(DEFAULT_FILE)
-
-    if not fn.exists():
-        print(f"❌ File not found: {fn}")
-        sys.exit(1)
-
-    # Parse table
+    # Save to tokens.txt (formatted table)
     try:
-        table_data = fn.read_text(encoding="utf-8")
+        with open("tokens.txt", "w", encoding="utf-8") as f:
+            f.write(f"{'Model':<40} {'Token'}\n")
+            f.write("-" * 80 + "\n")
+            for model, token in unique_tokens:
+                f.write(f"{model[:40]:<40} {token}\n")
+
+        print(f"✅ Saved {len(unique_tokens)} tokens to tokens.txt")
     except Exception as e:
-        print(f"❌ Error reading {fn}: {e}")
-        sys.exit(1)
+        print(f"❌ Error saving tokens.txt: {e}")
+        return False
 
-    env_vars = parse_api_keys_from_table(table_data)
+    # Save to .env format with custom mappings
+    try:
+        # Group tokens by model
+        model_tokens = defaultdict(list)
+        for model, token in unique_tokens:
+            model_tokens[model].append(token)
+        env_path = Path.home() / ".env_dynamic"
+        with open(env_path, "a", encoding="utf-8") as f:
+            for model, tokens in model_tokens.items():
+                var_name = get_model_variable_name(model)
 
-    if env_vars:
-        # Show what was found
-        print_token_summary(env_vars)
+                if len(tokens) == 1:
+                    f.write(f"{var_name}={tokens[0]}\n")
+                else:
+                    for i, token in enumerate(tokens, 1):
+                        f.write(f"{var_name}_{i}={token}\n")
 
-        # Append to ~/.env
-        added = append_to_env_file(env_vars)
+            # Add a mapping reference
+            f.write("\n# Model mappings used:\n")
+            for token_var, model_name in MODEL_MAPPINGS.items():
+                if model_name in model_tokens:
+                    f.write(f"# {token_var} -> {model_name}\n")
 
-        if added > 0:
-            print(f"\n✅ Successfully added {added} new token(s) to {ENV_FILE}")
-            print("📝 You can now select the desired token manually in your .env file")
-            print("   (comment out or remove ones you don't want to use)")
-        else:
-            print("\nℹ️ No new tokens were added (all already present)")
-    else:
-        print("❌ No API keys found in the input")
-        print("Expected format: | `api-key-here` | model-name | ...")
-        print("Example: | `sk-abc123...` | gpt-4 |")
+            # Add a JSON summary
+            f.write("\n# JSON summary of extracted tokens:\n")
+            json_data = {}
+            for model, tokens in model_tokens.items():
+                var_name = get_model_variable_name(model)
+                json_data[var_name] = {"model": model, "tokens": tokens}
+            import json
+
+            f.write(f"# {json.dumps(json_data, indent=2)}")
+
+        print(f"✅ Saved environment variables to .env with custom mappings")
+
+        # Print summary
+        print("\n📊 Summary by model:")
+        model_counts = defaultdict(int)
+        for model, _ in unique_tokens:
+            model_counts[model] += 1
+
+        for model, count in sorted(model_counts.items()):
+            var_name = get_model_variable_name(model)
+            print(f"  • {model} -> {var_name}: {count} token(s)")
+
+        # Show first few tokens as preview
+        print("\n🔑 First 3 tokens (preview):")
+        for i, (model, token) in enumerate(unique_tokens[:3], 1):
+            # Mask the token for security
+            masked = token[:10] + "..." + token[-6:] if len(token) > 16 else token
+            var_name = get_model_variable_name(model)
+            print(f"  {i}. {var_name}: {masked}")
+        if len(unique_tokens) > 3:
+            print(f"  ... and {len(unique_tokens) - 3} more")
+
+        return True
+
+    except Exception as e:
+        print(f"❌ Error saving .env file: {e}")
+        return False
+
+
+def main():
+    """
+    Main function - reads README.md and extracts tokens.
+    """
+    input_file = "README.md"
+
+    # Check if README.md exists
+    if not Path(input_file).exists():
+        print(f"❌ Error: '{input_file}' not found in the current directory.")
+        print(f"Current directory: {Path.cwd()}")
+        return False
+
+    # Read the file
+    try:
+        with open(input_file, "r", encoding="utf-8") as f:
+            text = f.read()
+        print(f"✅ Read {len(text)} characters from {input_file}")
+    except Exception as e:
+        print(f"❌ Error reading {input_file}: {e}")
+        return False
+
+    # Extract tokens
+    tokens_data = extract_tokens_with_models(text)
+
+    if not tokens_data:
+        print("⚠️  No tokens found in README.md")
+        return False
+
+    # Save to files
+    return save_tokens_to_files(tokens_data)
 
 
 if __name__ == "__main__":
-    main()
+    print("🚀 Extracting API tokens from README.md...\n")
+    success = main()
+    if success:
+        print("\n✅ Done! Check tokens.txt and .env files.")
+    else:
+        print("\n❌ Failed to extract tokens.")

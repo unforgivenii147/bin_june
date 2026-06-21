@@ -11,17 +11,17 @@ total_size = 0
 for dirpath, dirnames, filenames in os.walk(cwd):
     dir_size = 0
     for f in filenames:
-        fp = os.path.join(dirpath, f)
+        path = os.path.join(dirpath, f)
         with contextlib.suppress(OSError):
-            dir_size += os.path.getsize(fp)
+            dir_size += os.path.getsize(path)
     if dirpath != cwd:
         subdir_sizes[dirpath] = dir_size
         total_size += dir_size
     else:
         for f in filenames:
-            fp = os.path.join(dirpath, f)
+            path = os.path.join(dirpath, f)
             with contextlib.suppress(OSError):
-                total_size += os.path.getsize(fp)
+                total_size += os.path.getsize(path)
 subdir_percentages = {}
 for subdir, size in subdir_sizes.items():
     if total_size > 0:

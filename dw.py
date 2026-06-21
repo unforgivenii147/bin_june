@@ -23,9 +23,9 @@ def get_all_files(folder):
     try:
         for root, dirs, filenames in os.walk(folder):
             for fname in filenames:
-                fpath = os.path.join(root, fname)
+                path = os.path.join(root, fname)
                 try:
-                    files[fpath] = os.stat(fpath).st_mtime
+                    files[path] = os.stat(path).st_mtime
                 except (IOError, OSError):
                     pass
     except (IOError, OSError) as e:
@@ -76,25 +76,25 @@ def main():
             current_files = get_all_files(folder)
 
             # Check for new or modified files
-            for fpath, current_mtime in current_files.items():
-                last_mtime = file_mtimes.get(fpath)
+            for path, current_mtime in current_files.items():
+                last_mtime = file_mtimes.get(path)
 
                 # New file or modified file
                 if last_mtime is None or current_mtime > last_mtime:
-                    file_mtimes[fpath] = current_mtime
+                    file_mtimes[path] = current_mtime
 
                     # Only report changes (not initial scan)
                     if last_mtime is not None:
-                        rel_path = os.path.relpath(fpath, folder)
+                        rel_path = os.path.relpath(path, folder)
                         event = "CREATED" if last_mtime is None else "MODIFIED"
                         print(f"[{event}] {rel_path}")
 
                         # Copy file if enabled
                         if copy_enabled:
-                            copy_file(fpath, copy_dest)
+                            copy_file(path, copy_dest)
 
                         # Check for bootstrap completion
-                        lines = tail_file(fpath, n=10)
+                        lines = tail_file(path, n=10)
                         tail_text = "".join(lines)
                         if "boostraped 100%" in tail_text:
                             print(f"\n✓ Bootstrap complete detected! Exiting...\n")
@@ -102,10 +102,10 @@ def main():
 
             # Detect deleted files
             deleted = set(file_mtimes.keys()) - set(current_files.keys())
-            for fpath in deleted:
-                rel_path = os.path.relpath(fpath, folder)
+            for path in deleted:
+                rel_path = os.path.relpath(path, folder)
                 print(f"[DELETED] {rel_path}")
-                del file_mtimes[fpath]
+                del file_mtimes[path]
 
             time.sleep(1)
 

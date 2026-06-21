@@ -30,10 +30,10 @@ def get_dir_size(start_path: str) -> int:
     try:
         for dirpath, dirnames, filenames in os.walk(start_path):
             for f in filenames:
-                fp = os.path.join(dirpath, f)
-                if not os.path.islink(fp):
+                path = os.path.join(dirpath, f)
+                if not os.path.islink(path):
                     with contextlib.suppress(OSError):
-                        total_size += os.path.getsize(fp)
+                        total_size += os.path.getsize(path)
     except Exception as e:
         print(f"Error walking directory {start_path}: {e}", file=sys.stderr)
     return total_size

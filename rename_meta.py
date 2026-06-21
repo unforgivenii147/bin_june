@@ -8,13 +8,13 @@ from dh import cprint, get_files, unique_path
 OUT_PATH = Path("/data/data/com.termux/files/home/tmp/metadata")
 
 
-def process_file(fp: Path) -> bool | None:
+def process_file(path: Path) -> bool | None:
     pkgname = ""
     path = Path(path)
     pkgversion = ""
-    if not fp.exists():
+    if not path.exists():
         return False
-    content = fp.read_text(encoding="utf-8")
+    content = path.read_text(encoding="utf-8")
     lines = content.splitlines()
     line1 = lines[1]
     line2 = lines[2]
@@ -34,14 +34,14 @@ def process_file(fp: Path) -> bool | None:
     elif pkgname and (not pkgversion):
         outfn = Path(pkgname + ".metadata")
         outpath = OUT_PATH / outfn
-        content = fp.read_text(encoding="utf-8")
+        content = path.read_text(encoding="utf-8")
         if outpath.exists():
             outpath = unique_path(outpath)
-        content = fp.read_text(encoding="utf-8")
+        content = path.read_text(encoding="utf-8")
         outpath.write_text(content, encoding="utf-8")
         cprint(f"{outfn} created.", "yellow")
     elif not pkgname and (not pkgversion):
-        cprint(f"no data{fp}", "cyan")
+        cprint(f"no data{path}", "cyan")
         input("what u wanna do?")
     return None
 

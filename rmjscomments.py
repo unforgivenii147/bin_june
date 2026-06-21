@@ -13,17 +13,17 @@ multi_line_comment_re = "/\\*.*?\\*/"
 single_line_comment_re = "//.*"
 
 
-def process_file(fp) -> None:
+def process_file(path) -> None:
     path = Path(path)
-    print(f"processing ...{fp.name}")
-    code = fp.read_text(encoding="utf-8")
+    print(f"processing ...{path.name}")
+    code = path.read_text(encoding="utf-8")
     new_code = re.sub(multi_line_comment_re, "", code, flags=re.DOTALL)
     lines = new_code.splitlines()
     processed_lines = [re.sub(single_line_comment_re, "", line) for line in lines]
     final_code = "\n".join(processed_lines)
     final_code = re.sub("\\n\\s*\\n", "\\n\\n", final_code)
     final_code = "\n".join((line.rstrip() for line in final_code.splitlines()))
-    fp.write_text(final_code, encoding="utf-8")
+    path.write_text(final_code, encoding="utf-8")
 
 
 def main() -> None:

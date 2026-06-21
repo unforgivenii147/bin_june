@@ -12,22 +12,22 @@ MAX_QUEUE = 4
 REMOVE_ORIG = False
 
 
-def process_file(fp) -> bool | None:
+def process_file(path) -> bool | None:
     path = Path(path)
-    if not fp.exists():
+    if not path.exists():
         return False
-    if ".git" in fp.parts:
+    if ".git" in path.parts:
         return None
-    if fp.is_dir():
-        for f in fp.rglob("*.py"):
+    if path.is_dir():
+        for f in path.rglob("*.py"):
             process_file(f)
-    if fp.is_file() and (not fp.is_symlink()):
-        pyc_file = fp.with_suffix(".pyc")
+    if path.is_file() and (not path.is_symlink()):
+        pyc_file = path.with_suffix(".pyc")
         if pyc_file.exists():
             pyc_file.unlink()
-        compileall.compile_file(fp, optimize=0)
+        compileall.compile_file(path, optimize=0)
         if REMOVE_ORIG:
-            fp.unlink()
+            path.unlink()
         return True
     return False
 

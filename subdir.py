@@ -54,7 +54,11 @@ def main() -> None:
     for item in cwd.iterdir():
         if not item.is_file():
             continue
-        base_dir = cwd / item.stem[:10]
+        if "_" in item.stem:
+            indx = item.stem.index("_")
+        else:
+            indx = 8
+        base_dir = cwd / item.stem[:indx]
         target_dir = safe_mkdir(base_dir)
         moved_file = target_dir / item.name
         shutil.move(str(item), moved_file)
