@@ -1,9 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/python
-from github import Github
-from dotenv import load_dotenv
+import argparse
 import os
 import sys
-import argparse
+
+from dotenv import load_dotenv
+from github import Github
 
 load_dotenv()
 

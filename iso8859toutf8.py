@@ -1,0 +1,23 @@
+#!/data/data/com.termux/files/usr/bin/python
+import codecs
+import shutil
+from pathlib import Path
+
+
+def convert_in_place(filename):
+    """Convert file in-place (creates backup first)"""
+    # Create backup
+    backup = f"{filename}.bak"
+    shutil.copy2(filename, backup)
+
+    # Read and convert
+    with codecs.open(backup, "r", encoding="iso-8859-1") as f:
+        content = f.read()
+
+    with codecs.open(filename, "w", encoding="utf-8") as f:
+        f.write(content)
+    print(f"Converted {filename} (backup saved as {backup})")
+
+
+if __name__ == "__main__":
+    convert_in_place("script.sh")

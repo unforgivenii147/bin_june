@@ -1,15 +1,16 @@
 #!/data/data/com.termux/files/usr/bin/python
-import os
-import pathlib
-import multiprocessing as mp
-import tarfile
-import zipfile
+import bz2
 import gzip
 import lzma
-import bz2
-import py7zr
-import lz4.frame
+import multiprocessing as mp
+import os
+import pathlib
+import tarfile
+import zipfile
+
 import brotli
+import lz4.frame
+import py7zr
 import zstandard as zstd
 
 # Supported extensions

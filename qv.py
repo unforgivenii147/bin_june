@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/python
-import sys
 import pathlib
 import pydoc
+import sys
 
 
 def view_file(file_path):

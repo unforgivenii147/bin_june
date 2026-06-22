@@ -6,10 +6,11 @@ Requires: pip install fonttools brotli
 """
 
 import sys
-from pathlib import Path
 from multiprocessing import Pool
-from fontTools.ttLib import TTFont
+from pathlib import Path
+
 from fontTools.pens.ttGlyphPen import TTGlyphPen
+from fontTools.ttLib import TTFont
 
 
 def convert_otf_to_ttf(otf_path: Path) -> dict:

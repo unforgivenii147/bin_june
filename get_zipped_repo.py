@@ -1,12 +1,13 @@
 #!/data/data/com.termux/files/usr/bin/python
-from github import Github
-from dotenv import load_dotenv
+import argparse
 import os
 import sys
-import argparse
-import requests
-from tqdm import tqdm
 from pathlib import Path
+
+import requests
+from dotenv import load_dotenv
+from github import Github
+from tqdm import tqdm
 
 env_path = Path.home() / ".env"
 

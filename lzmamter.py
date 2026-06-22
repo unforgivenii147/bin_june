@@ -16,14 +16,14 @@ directly. Falls back gracefully to stdlib lzma if lzmamt is unavailable.
 """
 
 import argparse
+import lzma
 import multiprocessing
+import shutil
 import sys
 import tarfile
 import time
-import shutil
-import lzma
-from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
 
 try:
     import lzmamt  # pip install lzmamt

@@ -10,12 +10,12 @@ so each worker process also leverages intra-file parallelism.
 import argparse
 import multiprocessing
 import os
+import shutil
 import sys
 import tarfile
 import time
-import shutil
-from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
 
 import zstandard as zstd
 

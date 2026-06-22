@@ -1,8 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/python
-from pathlib import Path
-from joblib import Parallel, delayed
 import os
 import sys
+from pathlib import Path
+
+from joblib import Parallel, delayed
 
 
 def is_text_file(file_path):

@@ -1,12 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/python
-import zipfile
 import multiprocessing
-import time
-import sys
 import os
+import sys
 import threading
-from itertools import islice
+import time
+import zipfile
 from collections import deque
+from itertools import islice
 
 
 class StatusReporter:

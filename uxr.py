@@ -9,6 +9,7 @@ import subprocess
 import sys
 from pathlib import Path
 from typing import List, Optional, Tuple
+
 import joblib
 import py7zr
 from joblib import Parallel, delayed
@@ -164,8 +165,8 @@ class ArchiveExtractor:
             if output_name.endswith(".tar"):
                 output_name = output_name[:-4]
                 output_file = output_dir / output_name
-                import tempfile
                 import tarfile
+                import tempfile
 
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".tar") as tmp:
                     temp_path = Path(tmp.name)

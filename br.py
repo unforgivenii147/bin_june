@@ -13,8 +13,8 @@ import os
 import sys
 import tarfile
 import time
-from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
 
 import brotlicffi as brotli
 
