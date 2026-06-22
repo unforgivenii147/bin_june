@@ -3,6 +3,7 @@
 unused_imports.py — detect (and optionally fix) unused imports in Python files.
 
 Supports:
+  • Multiple file(s) and/or directory(s) as input
   • Recursive directory scanning via pathlib
   • Parallel processing via multiprocessing
   • .whl and .tar.zst archive scanning
@@ -293,38 +294,63 @@ def print_report(reports: list[FileReport], verbose: bool, use_colour: bool) -> 
     return total
 
 
-def collect_tasks(root: Path) -> tuple[list[tuple[str, str]], list[tuple[str, str]]]:
+def collect_tasks(paths: list[Path]) -> tuple[list[tuple[str, str]], list[tuple[str, str]]]:
+    """Collect tasks from multiple paths (files and/or directories)."""
     file_tasks: list[tuple[str, str]] = []
     source_tasks: list[tuple[str, str]] = []
-    for p in root.rglob("*"):
-        if not p.is_file():
-            continue
-        suffix = p.suffix.lower()
-        name = p.name.lower()
-        if suffix == ".py":
-            file_tasks.append((str(p), str(p)))
-        elif suffix == ".whl":
-            source_tasks.extend(_extract_py_from_whl(p))
-        elif name.endswith(".tar.zst"):
-            source_tasks.extend(_extract_py_from_tar_zst(p))
+
+    for path in paths:
+        if path.is_file():
+            # Handle individual files
+            suffix = path.suffix.lower()
+            name = path.name.lower()
+            if suffix == ".py":
+                file_tasks.append((str(path), str(path)))
+            elif suffix == ".whl":
+                source_tasks.extend(_extract_py_from_whl(path))
+            elif name.endswith(".tar.zst"):
+                source_tasks.extend(_extract_py_from_tar_zst(path))
+            # Skip non-Python files silently
+        elif path.is_dir():
+            # Handle directories recursively
+            for p in path.rglob("*"):
+                if not p.is_file():
+                    continue
+                suffix = p.suffix.lower()
+                name = p.name.lower()
+                if suffix == ".py":
+                    file_tasks.append((str(p), str(p)))
+                elif suffix == ".whl":
+                    source_tasks.extend(_extract_py_from_whl(p))
+                elif name.endswith(".tar.zst"):
+                    source_tasks.extend(_extract_py_from_tar_zst(p))
+        else:
+            # Path doesn't exist
+            print(f"Warning: '{path}' does not exist, skipping.", file=sys.stderr)
+
     return file_tasks, source_tasks
 
 
-def run(root: Path, workers: int, autofix: bool, dry_run: bool, verbose: bool) -> int:
+def run(paths: list[Path], workers: int, autofix: bool, dry_run: bool, verbose: bool) -> int:
     use_colour = sys.stdout.isatty()
     if verbose:
-        print(f"Scanning {root} with {workers} worker(s) …\n")
-    file_tasks, source_tasks = collect_tasks(root)
+        print(f"Scanning {len(paths)} path(s) with {workers} worker(s) …\n")
+
+    file_tasks, source_tasks = collect_tasks(paths)
+
     if verbose:
         print(f"  {len(file_tasks)} .py file(s), {len(source_tasks)} archive member(s) queued.\n")
+
     reports: list[FileReport] = []
     with multiprocessing.Pool(processes=workers) as pool:
         if file_tasks:
             reports.extend(pool.map(_process_file, file_tasks))
         if source_tasks:
             reports.extend(pool.map(_process_source_tuple, source_tasks))
+
     reports.sort(key=lambda r: r.path)
     total = print_report(reports, verbose=verbose, use_colour=use_colour)
+
     if autofix and total > 0:
         fixed_count = 0
         for report in reports:
@@ -365,6 +391,7 @@ def run(root: Path, workers: int, autofix: bool, dry_run: bool, verbose: bool) -
         print(f"\n{action.capitalize()} {fixed_count} file(s).")
     elif dry_run and total == 0:
         print("Nothing to fix.")
+
     return 1 if total > 0 else 0
 
 
@@ -376,12 +403,17 @@ def build_parser() -> argparse.ArgumentParser:
 Examples:
   %(prog)s                          # scan current directory
   %(prog)s src/                     # scan a specific directory
+  %(prog)s file1.py file2.py        # scan specific files
+  %(prog)s src/ tests/              # scan multiple directories
+  %(prog)s file.py src/             # mix files and directories
   %(prog)s -a                       # autofix in-place (with .bak)
   %(prog)s -a --dry-run             # preview fixes without writing
   %(prog)s -v --workers 4           # verbose output, 4 workers
 """,
     )
-    parser.add_argument("directory", nargs="?", default=".", help="Root directory to scan (default: current directory)")
+    parser.add_argument(
+        "paths", nargs="*", default=["."], help="Files and/or directories to scan (default: current directory)"
+    )
     parser.add_argument(
         "-a", "--autofix", action="store_true", help="Remove unused imports in-place; creates .bak backups"
     )
@@ -396,13 +428,32 @@ Examples:
 def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
-    root = Path(args.directory).resolve()
-    if not root.is_dir():
-        parser.error(f"Not a directory: {root}")
+
+    # Resolve all paths
+    paths = [Path(p).resolve() for p in args.paths]
+
+    # Filter out non-existent paths with warning
+    valid_paths = []
+    for p in paths:
+        if p.exists():
+            valid_paths.append(p)
+        else:
+            print(f"Warning: '{p}' does not exist, skipping.", file=sys.stderr)
+
+    if not valid_paths:
+        parser.error("No valid files or directories to scan.")
+
     if args.dry_run and not args.autofix:
         args.autofix = True
+
     sys.exit(
-        run(root=root, workers=max(1, args.workers), autofix=args.autofix, dry_run=args.dry_run, verbose=args.verbose)
+        run(
+            paths=valid_paths,
+            workers=max(1, args.workers),
+            autofix=args.autofix,
+            dry_run=args.dry_run,
+            verbose=args.verbose,
+        )
     )
 
 
