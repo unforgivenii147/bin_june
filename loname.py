@@ -1,12 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/python
-
 import sys
 from multiprocessing import get_context
 from pathlib import Path
 
 
 def mpf3(func, files):
-    p = get_context("spawn").Pool(16)
+    p = get_context("spawn").Pool(8)
     for f in files:
         p.apply_async(func, (f,))
     p.close()
@@ -36,6 +35,7 @@ def unique_path(path: Path | str) -> Path:
 
 
 def process_file(path) -> None:
+    path = Path(path)
     if not path.exists():
         path = Path(str(path).lower())
         if not path.exists():
@@ -53,5 +53,5 @@ def process_file(path) -> None:
 if __name__ == "__main__":
     cwd = Path.cwd()
     args = sys.argv[1:]
-    files = list(cwd.glob("*")) if args else list(cwd.rglob("*"))
+    files = list(cwd.glob("*")) if not args else list(cwd.rglob("*"))
     mpf3(process_file, files)
