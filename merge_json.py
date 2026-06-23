@@ -18,7 +18,7 @@ def load_json_file(file_path):
             if isinstance(data, list):
                 return data
             else:
-                return [data]  # Оборачиваем один объект в список для единообразия
+                return [data]  # Wrap one object in a list for consistency
     except json.JSONDecodeError as e:
         print(f"Ошибка декодирования JSON в файле {file_path}: {e}")
         return []
@@ -28,10 +28,8 @@ def load_json_file(file_path):
 
 
 def merge_json_files(input_paths):
-    """
-    Объединяет JSON-файлы из указанных путей.
-    Использует multiprocessing для параллельной загрузки.
-    """
+    """Merges JSON files from specified paths.
+    Uses multiprocessing for parallel loading."""
     json_files = []
     for path_str in input_paths:
         path = Path(path_str)
@@ -50,15 +48,15 @@ def merge_json_files(input_paths):
     print(f"Найдено {len(json_files)} JSON-файлов для обработки.")
 
     # Используем Pool для параллельной загрузки файлов
-    # Количество процессов по умолчанию равно количеству ядер ЦП
+    # The default number of processes is equal to the number of CPU cores
     with multiprocessing.Pool(os.cpu_count()) as pool:
-        # map применяет load_json_file к каждому элементу в json_files
-        # и возвращает список результатов
+        # map applies load_json_file to each element in json_files
+        # and returns a list of results
         list_of_data_lists = pool.map(load_json_file, json_files)
 
     merged_data = []
     for data_list in list_of_data_lists:
-        merged_data.extend(data_list)  # Объединяем все списки в один
+        merged_data.extend(data_list)  # Combining all lists into one
 
     return merged_data
 
@@ -76,7 +74,7 @@ def main():
 
     args = parser.parse_args()
 
-    # Если аргументы не переданы, обрабатываем текущую директорию
+    # If no arguments are passed, we process the current directory
     if not args.input_paths:
         input_paths_to_process = ["."]
     else:
@@ -96,7 +94,7 @@ def main():
         except Exception as e:
             print(f"Ошибка при записи объединенных данных в файл '{output_file_path}': {e}")
     else:
-        print("Нет данных для записи в выходной файл.")
+        print("There is no data to write to the output file.")
 
 
 if __name__ == "__main__":

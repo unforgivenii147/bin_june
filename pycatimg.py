@@ -226,7 +226,7 @@ def main() -> None:
         print("\nFor system dependencies (Linux):", file=sys.stderr)
         print("  Ubuntu/Debian: sudo apt-get install libcairo2-dev", file=sys.stderr)
         print("  Fedora: sudo dnf install cairo-devel", file=sys.stderr)
-        print("  Arch: sudo pacman -S cairo", file=sys.stderr)
+        print("Arch: sudo pacman -S cairo", file=sys.stderr)
         sys.exit(1)
 
     catimg(args.image, args.width, args.height, use_half_blocks=not args.no_half_blocks)

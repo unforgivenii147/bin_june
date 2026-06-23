@@ -43,7 +43,7 @@ def get_github_client():
     if not token:
         print("\nGitHub token required")
         print("Please add to ~/.env file:")
-        print("  GITHUB_TOKEN=your_token_here")
+        print("GITHUB_TOKEN=your_token_here")
         print("\nOr set environment variable:")
         print("  export GITHUB_TOKEN=your_token_here")
         print("\nGet a token at: https://github.com/settings/tokens")

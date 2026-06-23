@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 """
 Text replacer for Python files in current directory.
 Replaces exact text matches in all .py files.

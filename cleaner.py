@@ -2,6 +2,7 @@
 import re
 import sys
 from pathlib import Path
+from dh import get_files, mpf3
 
 
 def process_file(path) -> None:
@@ -9,29 +10,29 @@ def process_file(path) -> None:
 
     # More comprehensive ANSI escape sequence regex
     ansi_re = re.compile(
-        b"\x1b"  # ESC
-        b"\["  # [
-        b"[?]?"  # optional ?
-        b"[0-9;]*"  # optional parameters (numbers and semicolons)
-        b"[a-zA-Z]"  # final character
+        rb"\x1b"  # ESC
+        rb"\["  # [
+        rb"[?]?"  # optional ?
+        rb"[0-9;]*"  # optional parameters (numbers and semicolons)
+        rb"[a-zA-Z]"  # final character
     )
 
     # Additional patterns for other escape sequences
     osc_re = re.compile(
-        b"\x1b\]"  # OSC sequences (ESC ])
-        b"[^\x07\x1b]*"  # content
-        b"[\x07\x1b]"  # terminator
+        rb"\x1b\]"  # OSC sequences (ESC ])
+        rb"[^\x07\x1b]*"  # content
+        rb"[\x07\x1b]"  # terminator
     )
 
     # DCS and other sequences
     misc_escape_re = re.compile(
-        b"\x1b[PX^_][^\x1b]*\x1b\\\\"  # DCS, SOS, PM, APC
-        b"|\x1b[@-_]"  # Other ESC sequences
+        rb"\x1b[PX^_][^\x1b]*\x1b\\"  # DCS, SOS, PM, APC
+        rb"|\x1b[@-_]"  # Other ESC sequences
     )
 
     # Carriage returns
-    cr_re = re.compile(b"\r\n?|\n\r?")
-    charset_re = re.compile(b"\x1b[()][0-9a-zA-Z]")
+    cr_re = re.compile(rb"\r\n?|\n\r?")
+    charset_re = re.compile(rb"\x1b[()][0-9a-zA-Z]")
     try:
         content = path.read_bytes()
 
@@ -63,16 +64,14 @@ def process_file(path) -> None:
         return
 
 
-def get_files(path):
-    return [p for p in path.glob("*.txt") if p.is_file()]
-
-
 def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
-    files = [Path(p) for p in args] if args else get_files(cwd)
-    for f in files:
-        process_file(f)
+    files = [Path(p) for p in args] if args else get_files(cwd, ext=[".log", ".txt", ".md"])
+    if len(files) == 1:
+        process_file(files[0])
+        sys.exit(1)
+    mpf3(process_file, files)
 
 
 if __name__ == "__main__":

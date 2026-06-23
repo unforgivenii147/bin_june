@@ -43,4 +43,4 @@ if __name__ == "__main__":
     inf = Path(sys.argv[1])
     outf = inf.with_stem(inf.stem + "_fixed")
     if not fix_python_indentation(inf, outf):
-        print("اصلاح فایل با خطا مواجه شد.")
+        print("There was an error modifying the file.")

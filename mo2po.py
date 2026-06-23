@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 """
 Convert .mo files to .po files in-place using GNU gettext utilities.
 Original .mo files are removed only if conversion succeeds.

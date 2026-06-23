@@ -92,7 +92,7 @@ def main() -> None:
         print("Error: pandoc is not installed. Install it with:")
         print("  - Termux: pkg install pandoc")
         print("  - Ubuntu/Debian: sudo apt install pandoc")
-        print("  - macOS: brew install pandoc")
+        print("- macOS: brew install pandoc")
         sys.exit(1)
 
     backup = not args.no_backup

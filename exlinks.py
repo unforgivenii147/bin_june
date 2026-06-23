@@ -217,7 +217,7 @@ if __name__ == "__main__":
                 fo.write(f"{url}\n")
     else:
         print("No URLs found.")
-    print("\n--- Extracted GitHub URLs ---")
+    print("--- Extracted GitHub URLs ---")
     if unique_github_urls:
         with Path("giturls").open("a", encoding="utf-8") as fg:
             for url in unique_github_urls:

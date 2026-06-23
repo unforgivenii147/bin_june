@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 """
 Convert HTML entities in HTML files recursively.
 Converts &lt; to <, &gt; to >, and other common entities.

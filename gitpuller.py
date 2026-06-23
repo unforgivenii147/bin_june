@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 """
 Script to run git pull on all git repositories in current directory and subdirectories.
 Requires gitpython library: pip install gitpython

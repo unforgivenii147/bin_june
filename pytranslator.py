@@ -12,8 +12,11 @@ import tokenize
 import multiprocessing
 from pathlib import Path
 
-import pycld2
 from deep_translator import GoogleTranslator
+from langdetect import detect, DetectorFactory
+
+DetectorFactory.seed = 0  # Make results deterministic
+
 
 # ── config ────────────────────────────────────────────────────────────────────
 TARGET_LANG = "en"
@@ -66,19 +69,13 @@ def should_skip(text: str) -> bool:
 
 
 def is_non_english(text: str) -> bool:
-    """Return True if pycld2 thinks the text is not English."""
     clean = text.strip()
     if not clean or len(clean) < 4:
         return False
-
-    # NEW: Skip known non-translatable patterns
-    if should_skip(clean):
+    if should_skip(clean):  # still use the skip function
         return False
-
     try:
-        _, _, details = pycld2.detect(clean)
-        lang_code = details[0][1]
-        return lang_code != "en" and lang_code != "un"
+        return detect(clean) != "en"
     except Exception:
         return False
 

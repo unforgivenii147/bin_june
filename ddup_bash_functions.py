@@ -177,7 +177,7 @@ def main() -> None:
         if backup:
             print(f"Backup saved at: {backup}")
         print("\nPlease reload your bash configuration:")
-        print("  source ~/.bashrc")
+        print("source ~/.bashrc")
         print("  # or")
         print("  exec $SHELL")
     else:

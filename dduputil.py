@@ -1,13 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-"""
-dedup_utils.py
+"""dedup_utils.py
 
 Usage:
   python dedup_utils.py --copy
   python dedup_utils.py --move
-  python dedup_utils.py --help
-"""
+  python dedup_utils.py --help"""
 
 from __future__ import annotations
 

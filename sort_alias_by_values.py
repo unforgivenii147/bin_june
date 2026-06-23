@@ -143,7 +143,7 @@ def main() -> None:
     display_aliases(sorted_preview)
 
     print("\n✓ Done! Reload your shell to use the sorted aliases:")
-    print("  source ~/.bashrc")
+    print("source ~/.bashrc")
     print("  # or")
     print("  exec $SHELL")
 

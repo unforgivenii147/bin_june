@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 """
 Script to run git pull on all git repositories recursively.
 If a repo has no remote, create a new public repo on GitHub and set it as origin.
