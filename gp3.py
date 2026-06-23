@@ -76,7 +76,7 @@ def fork_and_update_remote(repo: Repo, github_token: str) -> bool:
     try:
         origin = repo.remote("origin")
         origin_url = origin.url
-    except GitExc.NoSuchRemoteError:
+    except GitExc.NoSuchPathError:
         print("No remote 'origin' found.", file=sys.stderr)
         return False
 
@@ -118,7 +118,7 @@ def ensure_remote_repo(repo: Repo, github_token: str) -> bool:
     """Ensure remote repo exists on user's account. Returns True if newly created/forked."""
     try:
         repo.remote("origin")
-    except GitExc.NoSuchRemoteError:
+    except GitExc.NoSuchPathError:
         return create_new_remote_repo(repo, github_token)
 
     try:

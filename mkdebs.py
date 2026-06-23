@@ -6,6 +6,7 @@ import shutil
 import subprocess
 import tarfile
 from pathlib import Path
+import unix_ar
 
 BASE_DIR = Path.home() / "debs"
 BASE_DIR.mkdir(parents=True, exist_ok=True)
@@ -49,13 +50,19 @@ def build_tar_xz(source_dir, output_path) -> None:
 
 
 def build_deb(pkg_dir, output_deb: Path) -> None:
-    debian_binary = pkg_dir / "debian-binary"
-    debian_binary.write_text("2.0\n")
-    control_tar = pkg_dir / "control.tar.xz"
-    data_tar = pkg_dir / "data.tar.xz"
-    build_tar_xz(pkg_dir / "DEBIAN", control_tar)
-    build_tar_xz(pkg_dir / "files", data_tar)
-    subprocess.run(f"ar r {output_deb} {debian_binary} {control_tar} {data_tar}", shell=True, check=True)
+    debian_binary_content = b"2.0\n"
+    control_tar_path = pkg_dir / "control.tar.xz"
+    data_tar_path = pkg_dir / "data.tar.xz"
+    build_tar_xz(pkg_dir / "DEBIAN", control_tar_path)
+    build_tar_xz(pkg_dir / "files", data_tar_path)
+    with open(control_tar_path, "rb") as f:
+        control_data = f.read()
+    with open(data_tar_path, "rb") as f:
+        data_data = f.read()
+    with unix_ar.open(str(output_deb), "w") as ar:
+        ar.add_file("debian-binary", debian_binary_content)
+        ar.add_file("control.tar.xz", control_data)
+        ar.add_file("data.tar.xz", data_data)
 
 
 def process_pkg(pkg) -> str | None:
