@@ -147,25 +147,6 @@ def save_tokens_to_files(tokens_data):
                     for i, token in enumerate(tokens, 1):
                         f.write(f"{var_name}_{i}={token}\n")
 
-            # Add a mapping reference
-            f.write("\n# Model mappings used:\n")
-            for token_var, model_name in MODEL_MAPPINGS.items():
-                if model_name in model_tokens:
-                    f.write(f"# {token_var} -> {model_name}\n")
-
-            # Add a JSON summary
-            f.write("\n# JSON summary of extracted tokens:\n")
-            json_data = {}
-            for model, tokens in model_tokens.items():
-                var_name = get_model_variable_name(model)
-                json_data[var_name] = {"model": model, "tokens": tokens}
-            import json
-
-            f.write(f"# {json.dumps(json_data, indent=2)}")
-
-        print(f"✅ Saved environment variables to .env with custom mappings")
-
-        # Print summary
         print("\n📊 Summary by model:")
         model_counts = defaultdict(int)
         for model, _ in unique_tokens:

@@ -9,6 +9,8 @@ from dh import get_files, mpf3, rrs, runcmd
 
 def process_file(path) -> None:
     path = Path(path)
+    if "lazy" in path.parts:
+        return
     if not path.exists():
         return
     before = path.stat().st_size

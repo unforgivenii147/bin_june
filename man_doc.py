@@ -7,6 +7,7 @@ from dh import cprint, get_files, mpf3, runcmd
 
 
 def safe_run(path) -> bool:
+    path = Path(path)
     cmd = ["mandoc", "-T", "html", str(path)]
     res, txt, err = runcmd(cmd, show_output=False)
     if res != 0:
@@ -14,15 +15,16 @@ def safe_run(path) -> bool:
         return False
     outpath = path.with_suffix(".html")
     outpath.write_text(txt, encoding="utf8")
+    path.unlink()
     return True
 
 
-def process_file(fp) -> bool:
+def process_file(path) -> bool:
     path = Path(path)
-    if not fp.exists():
+    if not path.exists():
         return False
-    print(f"{fp.name}", end=" ")
-    res = safe_run(fp)
+    print(f"{path.name}", end=" ")
+    res = safe_run(path)
     if res:
         cprint(f"[✓] ", "cyan")
         return True
@@ -36,9 +38,11 @@ def main() -> None:
     files = (
         [Path(p) for p in args]
         if args
-        else get_files(cwd, ext=[".1", ".2", ".3", ".4", ".5", ".6", ".7", ".8", ".9", ".n", ".gz"])
+        else get_files(
+            cwd, ext=[".1", ".3", ".3am", ".3form", ".3menu", ".3ncurses", ".3readline", ".3t", ".4", ".5", ".7", ".8"]
+        )
     )
-    _ = mpf3(process_file, files)
+    mpf3(process_file, files)
 
 
 if __name__ == "__main__":

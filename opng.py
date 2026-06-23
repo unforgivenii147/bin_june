@@ -13,21 +13,20 @@ def process_file(path: str | Path) -> None:
     path = Path(path)
     before = gsz(path)
     try:
-        for i in range(1, 7):
-            cmd = ["optipng", f"-o{str(i)}", str(path)]
-            ret, txt, err = runcmd(cmd, show_output=False)
-            if "skipping" in txt.lower():
-                print(f" Skipped: {path.name}")
-                return
-            after = gsz(path)
-            dz = before - after
-            if not dz:
-                print(f"✅ : {path.name} : (no change)")
-                return
-            ratio = after / before * 100
-            print(f"✅ : {path.name}", end=" | ")
-            cprint(f"{ratio:.1f} %")
+        cmd = ["optipng", f"-o7", str(path)]
+        ret, txt, err = runcmd(cmd, show_output=True)
+        if "skipping" in txt.lower():
+            print(f" Skipped: {path.name}")
             return
+        after = gsz(path)
+        dz = before - after
+        if not dz:
+            print(f"✅ : {path.name} : (no change)")
+            return
+        ratio = after / before * 100
+        print(f"✅ : {path.name}", end=" | ")
+        cprint(f"{ratio:.1f} %")
+        return
     except FileNotFoundError:
         print(
             "❌ Error: 'pngquant' command not found. Please ensure the 'pngquant' binary is installed and in your system PATH."

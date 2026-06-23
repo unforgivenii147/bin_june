@@ -48,7 +48,6 @@ def detect_language(content: str) -> str:
         elif "bash" in first_line.lower() or "sh" in first_line.lower():
             return "bash"
 
-    # Heuristic detection
     python_indicators = ["import ", "from ", "def ", "class ", "if __name__", "print("]
     bash_indicators = ["echo ", "cd ", "export ", "if [", "for ", "while ", "$("]
 
@@ -64,17 +63,14 @@ def replace_shebang(content: str, lang: str) -> str:
     """Replace or add appropriate Termux shebang."""
     lines = content.splitlines()
 
-    # Remove existing shebang if present
     if lines and lines[0].startswith("#!"):
         lines.pop(0)
 
-    # Add Termux shebang
     if lang == "python":
         lines.insert(0, TERMUX_SHEBANGS["python"])
     else:
         lines.insert(0, TERMUX_SHEBANGS["bash"])
 
-    # Ensure trailing newline
     result = "\n".join(lines)
     return result if result.endswith("\n") else result + "\n"
 
@@ -95,7 +91,6 @@ def create_symlink(script_path: Path) -> None:
 def main() -> None:
     if len(sys.argv) != 2:
         print(f"Usage: {sys.argv[0]} <filename>", file=sys.stderr)
-        print(f"Example: {sys.argv[0]} myscript.py", file=sys.stderr)
         sys.exit(1)
 
     filename = sys.argv[1]
@@ -103,7 +98,6 @@ def main() -> None:
     cwd = Path.cwd()
     is_script_dir = cwd in SCRIPT_DIRS
 
-    # Get clipboard content
     content = get_clipboard_content()
 
     if not content.strip():
@@ -112,13 +106,11 @@ def main() -> None:
         if is_script_dir:
             content = TERMUX_SHEBANGS["bash"] + "\n\n" + content
     else:
-        # Replace shebang if in script directory
         if is_script_dir:
             lang = detect_language(content)
             content = replace_shebang(content, lang)
             print(f"✓ Added {lang} shebang")
 
-    # Write file
     try:
         output_path.write_text(content)
         print(f"✓ Created: {output_path}")
@@ -126,10 +118,8 @@ def main() -> None:
         print(f"Error writing file: {e}", file=sys.stderr)
         sys.exit(1)
 
-    # Set executable permissions and create symlink if in script directory
-    if is_script_dir:
+    if is_script_dir or cwd.name == "bin":
         output_path.chmod(0o755)
-        print(f"✓ Made executable")
         create_symlink(output_path)
 
 

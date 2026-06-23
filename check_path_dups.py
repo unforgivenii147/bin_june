@@ -10,7 +10,8 @@ from dh import cprint, get_sha256
 def get_path_dirs() -> list[Path]:
     found = []
     path_env = os.environ.get("PATH", "").split(":")
-    found = [Path(p).expanduser() for p in path_env]
+    masonbin = "/data/data/com.termux/files/home/.local/share/nvim/mason/bin"
+    found = [Path(p).expanduser() for p in path_env if p != masonbin]
     return found
 
 

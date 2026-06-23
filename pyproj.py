@@ -28,11 +28,9 @@ def write_file_if_missing(path: Path, content: str = "") -> None:
         path.write_text(content)
 
 
-def create_project_structure(pkg: str, author: str, email: str, url: str) -> None:
+def create_project_structure(pkg: str, author: str, email: str, url: str, simple_cli: bool = False) -> None:
     """Create the project directory structure and configuration files."""
     cwd = Path.cwd()
-
-    # Version can be customized as needed
     version = "1.4.7"
 
     # Create README.md
@@ -43,6 +41,20 @@ def create_project_structure(pkg: str, author: str, email: str, url: str) -> Non
     src_pkg = cwd / "src" / pkg
     src_pkg.mkdir(parents=True, exist_ok=True)
     write_file_if_missing(src_pkg / "__init__.py")
+
+    # Create __main__.py if simple_cli is True
+    if simple_cli:
+        main_py = src_pkg / "__main__.py"
+        write_file_if_missing(
+            main_py,
+            '''def main() -> None:
+    """CLI entry point."""
+    print("Hello from ", __package__)
+
+if __name__ == "__main__":
+    main()
+''',
+        )
 
     # Create tests package structure
     tests_path = cwd / "tests"
@@ -98,6 +110,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Initialize a Python project structure")
     parser.add_argument("name", help="Package name")
     parser.add_argument("--version", default="1.4.7", help="Initial version (default: 1.4.7)")
+    parser.add_argument("-s", "--simple-cli", action="store_true", help="Create with simple CLI entry point")
     args = parser.parse_args()
 
     # Extract user info with defaults
@@ -108,7 +121,7 @@ def main() -> None:
     # Construct GitHub URL if username is available
     url = f"https://github.com/{github_user}/{args.name}" if github_user else ""
 
-    create_project_structure(args.name, author, email, url)
+    create_project_structure(args.name, author, email, url, args.simple_cli)
 
 
 if __name__ == "__main__":
