@@ -6,12 +6,12 @@ Example: python run_script.py .svg svgo
          python run_script.py .svg svgo -c config.json -o output/
 """
 
-import sys
-import subprocess
-from pathlib import Path
-from multiprocessing import Pool, cpu_count
-from functools import partial
 import os
+import subprocess
+import sys
+from functools import partial
+from multiprocessing import Pool, cpu_count
+from pathlib import Path
 
 
 def process_file(cli_app, cli_args, file_path):

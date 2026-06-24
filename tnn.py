@@ -30,6 +30,9 @@ def main() -> None:
                 files.extend(get_nobinary(p))
     else:
         files = get_nobinary(cwd)
+    if len(files) == 1:
+        process_file(files[0])
+        sys.exit(1)
 
     mpf3(process_file, files)
 

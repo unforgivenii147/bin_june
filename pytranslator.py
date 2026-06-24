@@ -6,15 +6,15 @@ in Python files recursively from the current directory.
 
 import ast
 import io
+import multiprocessing
 import re
 import time
 import tokenize
-import multiprocessing
 from pathlib import Path
 
 from deep_translator import GoogleTranslator
-from langdetect import detect, DetectorFactory
 from dh import DOC_TH1, DOC_TH2
+from langdetect import DetectorFactory, detect
 
 DetectorFactory.seed = 0  # Make results deterministic
 

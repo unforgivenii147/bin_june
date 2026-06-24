@@ -24,9 +24,13 @@ def main() -> None:
         [Path(f) for f in args]
         if args
         else get_files(
-            cwd, e=[".html", ".htm", ".js", ".jsx", ".ts", ".tsx", ".css", ".md", ".jsm", ".scss", ".tsm", ".coffee"]
+            cwd, e=[".html", ".htm", ".js", ".jsx", ".ts", ".tsx", ".md", ".jsm", ".scss", ".tsm", ".coffee"]
         )
     )
+    if len(files) == 1:
+        process_file(files[0])
+        sys.exit(1)
+
     mpf3(process_file, files)
 
 

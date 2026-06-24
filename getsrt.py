@@ -1,21 +1,20 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-import os
 import subprocess
+import sys
 from pathlib import Path
 
 
-def extract_subtitles(input_file: str, output_file=None, subtitle_index=0) -> None:
-    if not Path(input_file).exists():
-        raise FileNotFoundError(msg)
-    if output_file is None:
-        output_file = os.path.splitext(input_file)[0] + ".srt"
-    cmd = ["ffmpeg", "-i", input_file, "-map", f"0:s:{subtitle_index}", "-y", output_file]
+def extract_subtitles(path) -> None:
+    if not path.exists():
+        return
+    output_path = path.with_suffix(".srt")
+    cmd = ["ffmpeg", "-i", str(path), "-map", f"0:s:0", "-y", str(output_path)]
     try:
         subprocess.run(cmd, check=True)
-        print(f"Subtitles extracted to: {output_file}")
-    except subprocess.CalledProcessError as e:
-        print(f"Error extracting subtitles: {e}")
+    except:
+        print(f"Error")
 
 
-extract_subtitles("your_movie.mkv")
+if __name__ == "__main__":
+    fn = Path(sys.argv[1].strip())
+    extract_subtitles(fn)

@@ -1,8 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/python
 import argparse
+import os
 import subprocess
 import sys
-import os
 
 
 def check_or_fix_imports(file_path, autofix=False):

@@ -1,10 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/python
+import hashlib
 import os
 import pathlib
-import hashlib
-import xxhash
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
+
+import xxhash
 
 
 def get_file_hash(filepath):

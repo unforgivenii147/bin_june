@@ -3,7 +3,7 @@
 import sys
 from pathlib import Path
 
-from dh import fsz, get_files, gsz, mpf3, unique_path
+from dh import cprint, fsz, get_files, gsz, mpf3, rss, unique_path
 
 try:
     import cv2
@@ -14,25 +14,25 @@ except ImportError:
     from PIL import Image
 
     USE_CV2 = False
-IGNORED_DIRS = {".git"}
 
 
-def process_file(path: str) -> bool:
+def process_file(path):
     path = Path(path)
     if not path.is_file():
         print(f"Skipping: {path.name} (Unsupported format or not a file)")
-        return False
+        return
     if path.suffix.lower() == ".jpg":
-        return True
+        return
     output_path = path.with_suffix(".jpg")
     if output_path.exists():
-        unique_path(output_path)
+        output_path = unique_path(output_path)
+    before = gsz(path)
     try:
         if USE_CV2:
             img = cv2.imread(str(path), cv2.IMREAD_UNCHANGED)
             if img is None:
                 print(f"Error: Could not decode {path.name}")
-                return False
+                return
             if img.shape[2] == 4:
                 b, g, r, a = cv2.split(img)
                 white_bg = np.full(img.shape[:2], 255, dtype=np.uint8)
@@ -56,27 +56,25 @@ def process_file(path: str) -> bool:
             success = True
         if success:
             path.unlink()
-            print(f"Successfully converted '{path.name}' to jpg.")
-            return True
-        print(f"Failed to write '{output_path.name}'")
-        return False
+            after = gsz(output_path)
+            rss(patj, before, after)
+            return
+        return
     except Exception as e:
-        print(f"Error converting '{path.name}': {e}")
-        return False
+        return
 
 
 def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
     args = sys.argv[1:]
-    files = [Path(f) for f in args] if args else get_files(cwd, ext=[".webp", ".bmp", ".jpeg", ".png", ".tiff", ".svg"])
-    if not files:
-        print("No image files detected.")
-        return
-    print(f"converting {len(files)} files...")
+    files = [Path(f) for f in args] if args else get_files(cwd, ext=[".webp", ".bmp", ".jpeg", ".png", ".tiff", "PNG"])
+    if len(files) == 1:
+        process_file(files[0])
+        sys.exit(1)
     mpf3(process_file, files)
     diffsize = before - gsz(cwd)
-    print(f"{fsz(diffsize)}")
+    cprint(f"space freed: {fsz(diffsize)}")
 
 
 if __name__ == "__main__":

@@ -2,11 +2,11 @@
 
 import os
 import subprocess
-from multiprocessing import cpu_count, Pool
+from multiprocessing import Pool, cpu_count
 from pathlib import Path
 
-from rich.progress import Progress
 from dh import get_files
+from rich.progress import Progress
 
 
 def optimize_png(path) -> int:

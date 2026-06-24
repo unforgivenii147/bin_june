@@ -16,7 +16,8 @@ import sys
 import time
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Tuple, Set
+from typing import Dict, List, Set, Tuple
+
 from joblib import Parallel, delayed
 
 

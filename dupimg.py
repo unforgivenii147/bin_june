@@ -1,0 +1,310 @@
+#!/data/data/com.termux/files/usr/bin/python
+"""
+Find and organize duplicate images in the current directory into subfolders.
+Same image content detection works even with different resolutions.
+
+Method:
+- Compute a perceptual hash (phash) after resizing/normalizing images.
+- Group images by hash (near-duplicates caught with a configurable threshold).
+- Move duplicate groups into numbered subfolders (duplicates_001, duplicates_002, etc).
+- Use multiprocessing for parallel hash computation.
+- Use OpenCV (cv2) for faster image loading and processing.
+
+Usage:
+  python find_dupes.py
+Optional:
+  Set environment variables:
+    DUP_HASH_THRESHOLD (default: 4)
+    NUM_WORKERS (default: CPU count)
+    VERBOSE (default: 1, set to 0 to suppress detailed output)
+    OUTPUT_DIR_PREFIX (default: "duplicates")
+    DRY_RUN (default: 0, set to 1 to preview without moving files)
+"""
+
+import os
+import sys
+import time
+import shutil
+from pathlib import Path
+from collections import defaultdict
+from multiprocessing import Pool, cpu_count
+from typing import List, Tuple, Optional
+
+import cv2
+import numpy as np
+
+
+IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tif", ".tiff", ".gif"}
+HASH_SIZE = 16
+
+
+def log_verbose(msg: str, level: str = "INFO") -> None:
+    """Print verbose output if VERBOSE env var is set."""
+    if os.environ.get("VERBOSE", "1") == "1":
+        print(f"[{level}] {msg}")
+
+
+def log_action(msg: str) -> None:
+    """Print action messages (always shown unless redirected)."""
+    print(msg)
+
+
+def is_image(path: Path) -> bool:
+    """Check if file is a supported image format."""
+    return path.suffix.lower() in IMAGE_EXTS
+
+
+def load_image_cv2(path: str) -> Optional[np.ndarray]:
+    """Load image using OpenCV and convert to RGB."""
+    try:
+        img = cv2.imread(path)
+        if img is None:
+            return None
+        # OpenCV loads in BGR, convert to RGB
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        return img
+    except Exception as e:
+        log_verbose(f"Failed to load {path}: {e}", "WARN")
+        return None
+
+
+def phash_cv2(img: np.ndarray, hash_size: int = HASH_SIZE) -> str:
+    """
+    Compute perceptual hash using OpenCV.
+
+    Steps:
+    1. Resize to hash_size x hash_size
+    2. Convert to grayscale
+    3. Compute DCT
+    4. Average top-left 8x8 DCT coefficients
+    5. Generate binary hash
+    """
+    if img is None:
+        return None
+
+    # Resize
+    resized = cv2.resize(img, (hash_size, hash_size), interpolation=cv2.INTER_AREA)
+
+    # Grayscale
+    gray = cv2.cvtColor(resized, cv2.COLOR_RGB2GRAY)
+
+    # DCT
+    dct = cv2.dct(np.float32(gray))
+
+    # Average of top-left 8x8 region
+    avg = np.mean(dct[:8, :8])
+
+    # Binary hash
+    hash_bits = (dct[:8, :8] > avg).flatten()
+    hash_str = "".join(hash_bits.astype(int).astype(str))
+
+    return hash_str
+
+
+def hamming_distance(hash1: str, hash2: str) -> int:
+    """Calculate Hamming distance between two hash strings."""
+    if hash1 is None or hash2 is None:
+        return float("inf")
+    return sum(c1 != c2 for c1, c2 in zip(hash1, hash2))
+
+
+def compute_hash(file_path: Path) -> Tuple[str, Optional[str]]:
+    """
+    Load image and compute perceptual hash.
+
+    Returns: (filename, hash_string)
+    """
+    img = load_image_cv2(str(file_path))
+    if img is None:
+        return (file_path.name, None)
+
+    hash_str = phash_cv2(img)
+    return (file_path.name, hash_str)
+
+
+def find_duplicates(hashes: List[Tuple[str, str]], threshold: int) -> List[List[str]]:
+    """
+    Group images by similar hash using Hamming distance.
+
+    O(n²) clustering: simple but adequate for typical directory sizes.
+    """
+    groups = []
+    used = set()
+
+    for i, (file_i, hash_i) in enumerate(hashes):
+        if file_i in used:
+            continue
+
+        group = [file_i]
+        used.add(file_i)
+
+        for j in range(i + 1, len(hashes)):
+            file_j, hash_j = hashes[j]
+            if file_j in used:
+                continue
+
+            distance = hamming_distance(hash_i, hash_j)
+            if distance <= threshold:
+                group.append(file_j)
+                used.add(file_j)
+
+        if len(group) > 1:
+            groups.append(group)
+
+    return groups
+
+
+def get_file_info(file_path: Path) -> str:
+    """Get file size and dimensions."""
+    try:
+        size_mb = file_path.stat().st_size / (1024 * 1024)
+        img = load_image_cv2(str(file_path))
+        if img is not None:
+            height, width = img.shape[:2]
+            return f"{file_path.name:<50} ({width}x{height}, {size_mb:.2f} MB)"
+        else:
+            return f"{file_path.name:<50} ({size_mb:.2f} MB)"
+    except Exception:
+        return file_path.name
+
+
+def move_duplicates_to_folders(
+    groups: List[List[str]], current_dir: Path, output_prefix: str, dry_run: bool = False
+) -> Tuple[int, int]:
+    """
+    Move duplicate groups to numbered subfolders.
+
+    Returns: (folders_created, files_moved)
+    """
+    folders_created = 0
+    files_moved = 0
+
+    for group_idx, group in enumerate(sorted(groups, key=len, reverse=True), 1):
+        # Create subfolder name
+        folder_name = f"{output_prefix}_{group_idx:03d}"
+        folder_path = current_dir / folder_name
+
+        # Create folder
+        if not dry_run:
+            folder_path.mkdir(exist_ok=True)
+            log_verbose(f"Created folder: {folder_name}")
+            folders_created += 1
+        else:
+            log_verbose(f"[DRY RUN] Would create folder: {folder_name}", "INFO")
+            folders_created += 1
+
+        # Move files
+        for filename in group:
+            src = current_dir / filename
+            dst = folder_path / filename
+
+            if not src.exists():
+                log_verbose(f"Source file not found: {filename}", "WARN")
+                continue
+
+            try:
+                if not dry_run:
+                    shutil.move(str(src), str(dst))
+                    log_verbose(f"Moved: {filename} → {folder_name}/")
+                    files_moved += 1
+                else:
+                    log_verbose(f"[DRY RUN] Would move: {filename} → {folder_name}/", "INFO")
+                    files_moved += 1
+
+            except Exception as e:
+                log_verbose(f"Failed to move {filename}: {e}", "ERROR")
+
+    return folders_created, files_moved
+
+
+def main():
+    # Configuration
+    threshold = int(os.environ.get("DUP_HASH_THRESHOLD", "4"))
+    num_workers = int(os.environ.get("NUM_WORKERS", cpu_count()))
+    verbose = os.environ.get("VERBOSE", "1") == "1"
+    output_prefix = os.environ.get("OUTPUT_DIR_PREFIX", "duplicates")
+    dry_run = os.environ.get("DRY_RUN", "0") == "1"
+
+    log_verbose(f"Starting duplicate image finder and organizer")
+    log_verbose(f"Threshold: {threshold}, Workers: {num_workers}")
+    if dry_run:
+        log_verbose("DRY RUN MODE - No files will be moved", "WARN")
+    log_verbose(f"Output folder prefix: {output_prefix}")
+
+    # Find image files
+    current_dir = Path.cwd()
+    files = [f for f in current_dir.glob("*") if f.is_file() and is_image(f)]
+
+    if not files:
+        log_action("No images found in the current directory.")
+        sys.exit(0)
+
+    log_verbose(f"Found {len(files)} image file(s)")
+    if verbose:
+        for f in files:
+            log_verbose(f"  - {f.name}")
+
+    # Compute hashes in parallel
+    log_verbose(f"Computing hashes with {num_workers} worker(s)...")
+    start_time = time.time()
+
+    with Pool(num_workers) as pool:
+        hashes = pool.map(compute_hash, files)
+
+    elapsed = time.time() - start_time
+    log_verbose(f"Hash computation completed in {elapsed:.2f}s")
+
+    # Filter out failed hashes
+    valid_hashes = [(name, h) for name, h in hashes if h is not None]
+    failed_count = len(hashes) - len(valid_hashes)
+
+    if failed_count > 0:
+        log_verbose(f"{failed_count} file(s) could not be processed", "WARN")
+
+    if not valid_hashes:
+        log_action("No readable images found.")
+        sys.exit(0)
+
+    # Find duplicate groups
+    log_verbose(f"Grouping {len(valid_hashes)} image(s) by hash similarity...")
+    groups = find_duplicates(valid_hashes, threshold)
+
+    # Print results and move files
+    if not groups:
+        log_action("✓ No duplicates (near-duplicates) found.")
+        sys.exit(0)
+
+    log_action(f"\n{'=' * 80}")
+    log_action(f"✗ Found {len(groups)} duplicate group(s) (threshold={threshold})")
+    log_action(f"{'=' * 80}\n")
+
+    for group_idx, group in enumerate(sorted(groups, key=len, reverse=True), 1):
+        log_action(f"Group #{group_idx} ({len(group)} file(s)):")
+        log_action("-" * 80)
+        for filename in sorted(group):
+            file_path = current_dir / filename
+            log_action(f"  • {get_file_info(file_path)}")
+        log_action()
+
+    # Move duplicates to folders
+    if dry_run:
+        log_action(f"\n{'=' * 80}")
+        log_action("[DRY RUN] Preview of operations:")
+        log_action(f"{'=' * 80}\n")
+
+    folders_created, files_moved = move_duplicates_to_folders(groups, current_dir, output_prefix, dry_run=dry_run)
+
+    # Summary
+    log_action(f"\n{'=' * 80}")
+    if dry_run:
+        log_action(f"[DRY RUN] Would create {folders_created} folder(s) and move {files_moved} file(s)")
+    else:
+        log_action(f"✓ Created {folders_created} folder(s) and moved {files_moved} file(s)")
+
+    total_dupes = sum(len(g) for g in groups)
+    log_action(f"Summary: {len(groups)} group(s), {total_dupes} duplicate file(s)")
+    log_action(f"{'=' * 80}\n")
+
+
+if __name__ == "__main__":
+    main()

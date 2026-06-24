@@ -1,12 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/python
 """Check for Python packages with missing console scripts in system bin directory."""
 
-import sys
 import multiprocessing as mp
-from pathlib import Path
-from datetime import datetime
+import sys
 from configparser import ConfigParser
-from typing import List, Tuple, Dict, Optional
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
 
 def find_site_packages() -> Optional[Path]:

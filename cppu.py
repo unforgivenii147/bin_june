@@ -3,51 +3,40 @@
 import sys
 from pathlib import Path
 
-from dh import cprint, fsz, get_files, gsz, mpf3, runcmd
+from dh import cprint, fsz, get_files, gsz, mpf3, runcmd, rss
 
-MAX_QUEUE = 16
 EXT = [".java", ".c", ".cpp", ".cxx", ".cc", ".h", ".hh", ".hpp", ".hxx", ".js", ".json"]
 
 
-def process_file(path) -> bool:
+def process_file(path):
     path = Path(path)
     before = gsz(path)
-    print(f"{path.name} ", end=" ")
     try:
         runcmd(["clang-format", "-i", "--style=LLVM", str(path)], show_output=False)
-        size_diff = before - gsz(path)
-        if not size_diff:
-            cprint("[NO CHANGE]", "magenta")
-        elif size_diff > 0:
-            cprint(f"+ {fsz(size_diff)}", "cyan")
-        elif size_diff < 0:
-            cprint(f"- {fsz(size_diff)}", "green")
-        del size_diff
-        del before
-        return True
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        del res
-        del size_diff
-        del before
-        cprint(f"[ERR] {res.stderr!s}", "yellow")
-        return False
+        after = gsz(path)
+        rss(path, before, after)
+        del before, after
+        return
+    except:
+        del before, after
+        return
 
 
 def main() -> None:
-    cfiles: list = []
+    files: list = []
     cwd = Path.cwd()
     before = gsz(cwd)
     args = sys.argv[1:]
-    cfiles = [Path(arg) for arg in args] if args else get_files(cwd, ext=EXT)
-    all_count = len(cfiles)
+    files = [Path(arg) for arg in args] if args else get_files(cwd, ext=EXT)
+    all_count = len(files)
     cprint(f"{all_count} files found", "cyan")
     if all_count == 1:
-        process_file(cfiles[0])
-        sys.exit(0)
-    mpf3(process_file, cfiles)
+        process_file(files[0])
+        sys.exit(1)
+    mpf3(process_file, files)
     after = gsz(cwd)
-    diffsize = before - gsz(cwd)
-    print(f"space change: {fsz(diffsize)}")
+    dsz = before - after
+    print(f"space change: {fsz(dsz)}")
 
 
 if __name__ == "__main__":

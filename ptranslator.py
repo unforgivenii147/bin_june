@@ -6,10 +6,10 @@ in Python files recursively from the current directory.
 
 import ast
 import io
+import multiprocessing
 import re
 import time
 import tokenize
-import multiprocessing
 from pathlib import Path
 
 import pycld2

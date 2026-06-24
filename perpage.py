@@ -7,7 +7,7 @@ from dh import get_files, mpf3
 from PyPDF2 import PdfReader
 
 
-def process_file(path: Path) -> None:
+def process_file(path) -> None:
     path = Path(path)
     if not path.is_file() or path.suffix.lower() != ".pdf":
         print(f"Error: Invalid PDF file path provided: {path}")

@@ -20,7 +20,7 @@ import argparse
 import json
 import sys
 from dataclasses import dataclass
-from typing import TextIO, Optional
+from typing import Optional, TextIO
 
 try:
     import yaml

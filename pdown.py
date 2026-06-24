@@ -1,13 +1,14 @@
 #!/data/data/com.termux/files/usr/bin/python
 from __future__ import annotations
+
+import concurrent.futures
+import json
 import pathlib
 import sys
-import json
-import urllib.request
-import urllib.error
-from typing import Optional, Dict, List, Tuple
-import concurrent.futures
 import time
+import urllib.error
+import urllib.request
+from typing import Dict, List, Optional, Tuple
 
 
 def get_pypi_json(package: str, timeout: int = 10) -> Optional[Dict]:

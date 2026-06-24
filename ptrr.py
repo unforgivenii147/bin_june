@@ -5,8 +5,8 @@ import shutil
 import sys
 import tarfile
 import tempfile
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 
 import zstandard as zstd
 

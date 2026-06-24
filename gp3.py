@@ -1,11 +1,13 @@
 #!/data/data/com.termux/files/usr/bin/python
-from pathlib import Path
-from datetime import datetime
 import os
-import sys
 import re
+import sys
+from datetime import datetime
+from pathlib import Path
+
 from dotenv import load_dotenv
-from git import Repo, exc as GitExc
+from git import Repo
+from git import exc as GitExc
 from github import Github, GithubException
 
 # Load GITHUB_TOKEN from ~/.env

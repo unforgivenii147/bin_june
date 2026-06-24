@@ -1,0 +1,219 @@
+#!/data/data/com.termux/files/usr/bin/python
+import cv2
+import sys
+from pathlib import Path
+from multiprocessing import Pool, cpu_count
+from typing import Tuple
+from tqdm import tqdm
+import os
+
+
+class ImageDimensionRenamer:
+    def __init__(self, root_dir: str = ".", separator: str = "_"):
+        """
+        Initialize the image dimension renamer.
+
+        Args:
+            root_dir: Root directory to search for images (default: current directory)
+            separator: Separator between filename and dimensions (default: "_")
+        """
+        self.root_dir = Path(root_dir)
+        self.separator = separator
+        self.supported_formats = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".gif", ".webp"}
+
+        print("=" * 70)
+        print("IMAGE DIMENSION RENAMER")
+        print("=" * 70)
+        print(f"[INIT] Root directory: {self.root_dir.resolve()}")
+        print(f"[INIT] Separator: '{separator}'")
+        print(f"[INIT] CPU cores available: {cpu_count()}")
+
+    def get_all_images(self) -> list:
+        """Recursively find all image files in the root directory."""
+        print("\n[SCAN] Scanning for image files...")
+        image_files = []
+
+        for fmt in self.supported_formats:
+            # Search for both lowercase and uppercase extensions
+            image_files.extend(self.root_dir.rglob(f"*{fmt}"))
+            image_files.extend(self.root_dir.rglob(f"*{fmt.upper()}"))
+
+        # Remove duplicates while preserving list type
+        image_files = list(set(image_files))
+        image_files = sorted(image_files)
+
+        print(f"[SCAN] Found {len(image_files)} image file(s)")
+        if image_files:
+            print(f"[SCAN] Sample paths:")
+            for img_path in image_files[:3]:
+                print(f"       - {img_path.relative_to(self.root_dir)}")
+            if len(image_files) > 3:
+                print(f"       ... and {len(image_files) - 3} more")
+
+        return image_files
+
+    @staticmethod
+    def has_dimensions_in_name(filename: str) -> bool:
+        """
+        Check if filename already contains dimensions (e.g., 1920x1080).
+
+        Args:
+            filename: The filename to check
+
+        Returns:
+            True if dimensions pattern found, False otherwise
+        """
+        import re
+
+        # Pattern: digits x digits (case insensitive)
+        pattern = r"\d+[xX]\d+"
+        return bool(re.search(pattern, filename))
+
+    def rename_image(self, args: Tuple[Path, str, str]) -> Tuple[Path, bool, str]:
+        """
+        Extract dimensions from image and rename file.
+
+        Args:
+            args: Tuple of (image_path, separator, root_dir_str)
+
+        Returns:
+            Tuple of (image_path, success, message)
+        """
+        image_path, separator, root_dir_str = args
+        root_dir = Path(root_dir_str)
+
+        try:
+            # Read image to get dimensions
+            img = cv2.imread(str(image_path))
+
+            if img is None:
+                return image_path, False, f"Failed to read image"
+
+            # Get dimensions
+            height, width = img.shape[:2]
+            dimensions = f"{width}x{height}"
+
+            # Check if already has dimensions in filename
+            if self.has_dimensions_in_name(image_path.stem):
+                message = f"Already has dimensions in name"
+                return image_path, False, message
+
+            # Build new filename
+            stem = image_path.stem
+            suffix = image_path.suffix
+            new_filename = f"{stem}{separator}{dimensions}{suffix}"
+            new_path = image_path.parent / new_filename
+
+            # Check if new filename already exists
+            if new_path.exists() and new_path != image_path:
+                return image_path, False, f"Target filename already exists: {new_filename}"
+
+            # Rename file
+            image_path.rename(new_path)
+
+            rel_old = image_path.relative_to(root_dir)
+            rel_new = new_path.relative_to(root_dir)
+            message = f"{rel_old.name} → {rel_new.name} ({dimensions})"
+
+            return new_path, True, message
+
+        except Exception as e:
+            return image_path, False, f"Error: {str(e)}"
+
+    def process_images(self, image_paths: list) -> None:
+        """
+        Rename all images with dimensions using parallel processing.
+
+        Args:
+            image_paths: List of image paths to process
+        """
+        if not image_paths:
+            print("[WARN] No images to process!")
+            return
+
+        print(f"\n[PROCESS] Renaming {len(image_paths)} image(s) with {cpu_count()} process(es)...")
+
+        # Prepare arguments for parallel processing
+        root_dir_str = str(self.root_dir.resolve())
+        args_list = [(img_path, self.separator, root_dir_str) for img_path in image_paths]
+
+        # Process images in parallel with progress bar
+        successful = 0
+        failed = 0
+        already_processed = 0
+
+        with Pool(processes=cpu_count()) as pool:
+            results = list(
+                tqdm(
+                    pool.imap_unordered(self.rename_image, args_list),
+                    total=len(image_paths),
+                    desc="Processing",
+                    unit="img",
+                    ncols=80,
+                )
+            )
+
+        # Display results
+        print("\n[RESULTS]")
+        print("-" * 70)
+
+        for image_path, success, message in results:
+            if success:
+                successful += 1
+                status = "✓ OK"
+            elif "Already has dimensions" in message:
+                already_processed += 1
+                status = "⊘ SKIP"
+            else:
+                failed += 1
+                status = "✗ FAIL"
+
+            try:
+                rel_path = image_path.relative_to(self.root_dir)
+                path_str = str(rel_path)
+            except ValueError:
+                path_str = str(image_path)
+
+            print(f"{status}  {path_str:<50} {message}")
+
+        print("-" * 70)
+        print(
+            f"[SUMMARY] Renamed: {successful} | Skipped: {already_processed} | Failed: {failed} | Total: {len(image_paths)}"
+        )
+
+    def run(self) -> None:
+        """Execute the full pipeline."""
+        # Get all images
+        image_paths = self.get_all_images()
+
+        if not image_paths:
+            print("\n[WARN] No images found in directory!")
+            return
+
+        # Process images
+        self.process_images(image_paths)
+
+        print("\n" + "=" * 70)
+        print("PROCESS COMPLETE - Images renamed with dimensions")
+        print("=" * 70)
+
+
+def main():
+    """Main entry point with command-line argument parsing."""
+
+    separator = "_"  # Default separator
+
+    # Parse separator from command line if provided
+    if len(sys.argv) > 1:
+        separator = sys.argv[1]
+        if len(separator) > 1:
+            print(f"[WARN] Separator should be single character, using first character: '{separator[0]}'")
+            separator = separator[0]
+
+    # Create renamer and run
+    renamer = ImageDimensionRenamer(root_dir=".", separator=separator)
+    renamer.run()
+
+
+if __name__ == "__main__":
+    main()

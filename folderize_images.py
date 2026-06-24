@@ -53,8 +53,6 @@ def folderize_by_similarity(
     hash_func: str,
     hash_size: int,
     threshold: int,
-    move: bool,
-    copy_duplicates_to_group_only: bool,
 ) -> None:
     out_dir = root / out_dir_name
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -80,7 +78,7 @@ def folderize_by_similarity(
         if not placed:
             groups.append({"rep": item.h, "members": [item]})
     group_idx = 0
-    moved_or_copied = 0
+    moved = 0
     for g in groups:
         members = g["members"]
         if len(members) < 2:
@@ -100,33 +98,24 @@ def folderize_by_similarity(
                         dest = dest2
                         break
                     k += 1
-            if move:
-                shutil.move(str(member.path), str(dest))
-            else:
-                shutil.copy2(str(member.path), str(dest))
-            moved_or_copied += 1
-    print(f"Found {len(groups)} groups (including singletons).")
-    print(f"Action complete: {moved_or_copied} files {('moved' if move else 'copied')} into {out_dir}.")
+            shutil.move(str(member.path), str(dest))
+            moved += 1
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Folderize images by similarity using imagehash.")
-    parser.add_argument("--root", type=str, default=".", help="Root directory to scan (default: current dir)")
     parser.add_argument("--out", type=str, default="_similar_groups", help="Output folder name")
     parser.add_argument("--hash-func", type=str, default="phash", choices=["phash", "dhash", "ahash"])
     parser.add_argument("--hash-size", type=int, default=16, help="Hash size (bigger = more sensitive).")
     parser.add_argument("--threshold", type=int, default=8, help="Max Hamming distance to consider similar.")
-    parser.add_argument("--move", action="store_true", help="Move files instead of copying")
     args = parser.parse_args()
-    root = Path(args.root).resolve()
+    cwd = Path.cwd()
     folderize_by_similarity(
-        root=root,
+        root=cwd,
         out_dir_name=args.out,
         hash_func=args.hash_func,
         hash_size=args.hash_size,
         threshold=args.threshold,
-        move=args.move,
-        copy_duplicates_to_group_only=False,
     )
 
 
