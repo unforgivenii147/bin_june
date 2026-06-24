@@ -14,6 +14,7 @@ from pathlib import Path
 
 import pycld2
 from deep_translator import GoogleTranslator
+from dh import DOC_TH1, DOC_TH2
 
 # ── config ────────────────────────────────────────────────────────────────────
 TARGET_LANG = "en"
@@ -210,7 +211,7 @@ def process_file(path: Path) -> bool:
         raw = tok.string  # e.g.  '"سلام"'  or  '"""داکسترینگ"""'
 
         # detect quote style
-        if raw.startswith('"""') or raw.startswith("'''"):
+        if raw.startswith(DOC_TH1) or raw.startswith(DOC_TH2):
             quote = raw[:3]
         elif raw.startswith('"'):
             quote = '"'
@@ -257,11 +258,11 @@ def process_file(path: Path) -> bool:
 
 def process_file_wrapper(path_str: str):
     path = Path(path_str)
-    print(f"\n{'=' * 60}\nProcessing: {path}")
+    #    print(f"\n{'=' * 60}\nProcessing: {path}")
     try:
         changed = process_file(path)
         status = "updated" if changed else "no changes"
-        print(f"  → {status}")
+    #        print(f"  → {status}")
     except Exception as exc:
         print(f"  [error] {path}: {exc}")
 

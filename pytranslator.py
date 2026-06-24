@@ -14,6 +14,7 @@ from pathlib import Path
 
 from deep_translator import GoogleTranslator
 from langdetect import detect, DetectorFactory
+from dh import DOC_TH1, DOC_TH2
 
 DetectorFactory.seed = 0  # Make results deterministic
 
@@ -23,7 +24,7 @@ TARGET_LANG = "en"
 DELAY_SECONDS = 0.5  # pause between translator calls (per worker)
 MAX_WORKERS = 4  # parallel file workers
 # ─────────────────────────────────────────────────────────────────────────────
-# Add near the top of the file, after imports
+
 SHEBANG_PREFIX = "#!/"
 KNOWN_ENGLISH_TOKENS = {
     "TODO",
@@ -39,7 +40,137 @@ KNOWN_ENGLISH_TOKENS = {
     "coding:",
     "encoding:",
     "charset:",
+    "DRYRUN",
+    "DRY-RUN",
+    "RESCURSIVE MODE ENABLED",
+    ".gitignore",
 }
+
+# Unicode ranges for non-Latin scripts (scripts that don't use Latin alphabet)
+NON_LATIN_UNICODE_RANGES = [
+    # Arabic & Persian (Arabic script) - NO Latin characters
+    (0x0600, 0x06FF),  # Arabic
+    (0x0750, 0x077F),  # Arabic Supplement
+    (0x08A0, 0x08FF),  # Arabic Extended-A
+    (0xFB50, 0xFDFF),  # Arabic Presentation Forms-A
+    (0xFE70, 0xFEFF),  # Arabic Presentation Forms-B
+    (0x1EE00, 0x1EEFF),  # Arabic Mathematical Alphabetic Symbols
+    # Russian, Ukrainian, etc. (Cyrillic) - NO Latin characters
+    (0x0400, 0x04FF),  # Cyrillic
+    (0x0500, 0x052F),  # Cyrillic Supplement
+    # Japanese (Hiragana, Katakana, Kanji) - NO Latin characters
+    (0x3040, 0x309F),  # Hiragana
+    (0x30A0, 0x30FF),  # Katakana
+    (0x31F0, 0x31FF),  # Katakana Phonetic Extensions
+    (0x4E00, 0x9FFF),  # CJK Unified Ideographs
+    (0x3400, 0x4DBF),  # CJK Unified Ideographs Extension A
+    (0x20000, 0x2A6DF),  # CJK Unified Ideographs Extension B
+    # Chinese (Hanzi) - NO Latin characters
+    (0x4E00, 0x9FFF),  # CJK Unified Ideographs
+    (0x3400, 0x4DBF),  # CJK Unified Ideographs Extension A
+    (0x20000, 0x2A6DF),  # CJK Unified Ideographs Extension B
+    # Korean (Hangul) - NO Latin characters
+    (0xAC00, 0xD7AF),  # Hangul Syllables
+    (0x1100, 0x11FF),  # Hangul Jamo
+    (0x3130, 0x318F),  # Hangul Compatibility Jamo
+    (0xA960, 0xA97F),  # Hangul Jamo Extended-A
+    (0xD7B0, 0xD7FF),  # Hangul Jamo Extended-B
+    # Hebrew - NO Latin characters
+    (0x0590, 0x05FF),  # Hebrew
+    # Greek - NO Latin characters (though Greek uses a different alphabet)
+    (0x0370, 0x03FF),  # Greek and Coptic
+    # Thai - NO Latin characters
+    (0x0E00, 0x0E7F),  # Thai
+    # Devanagari (Hindi, Sanskrit, etc.) - NO Latin characters
+    (0x0900, 0x097F),  # Devanagari
+    # Other South Asian scripts (no Latin)
+    (0x0980, 0x09FF),  # Bengali
+    (0x0A00, 0x0A7F),  # Gurmukhi
+    (0x0A80, 0x0AFF),  # Gujarati
+    (0x0B00, 0x0B7F),  # Oriya
+    (0x0B80, 0x0BFF),  # Tamil
+    (0x0C00, 0x0C7F),  # Telugu
+    (0x0C80, 0x0CFF),  # Kannada
+    (0x0D00, 0x0D7F),  # Malayalam
+    (0x0D80, 0x0DFF),  # Sinhala
+    (0x0E80, 0x0EFF),  # Lao
+    # Georgian
+    (0x10A0, 0x10FF),  # Georgian
+    # Armenian
+    (0x0530, 0x058F),  # Armenian
+    # Ethiopic
+    (0x1200, 0x137F),  # Ethiopic
+    # Cherokee
+    (0x13A0, 0x13FF),  # Cherokee
+    # Canadian Aboriginal Syllabics
+    (0x1400, 0x167F),  # Canadian Aboriginal Syllabics
+    # Mongolian
+    (0x1800, 0x18AF),  # Mongolian
+    # Tifinagh (Berber)
+    (0x2D30, 0x2D7F),  # Tifinagh
+    # Myanmar (Burmese)
+    (0x1000, 0x109F),  # Myanmar
+    # Khmer (Cambodian)
+    (0x1780, 0x17FF),  # Khmer
+    # Other scripts without Latin
+    (0x10300, 0x1032F),  # Old Italic
+    (0x10330, 0x1034F),  # Gothic
+    (0x10400, 0x1044F),  # Deseret
+    (0x10800, 0x1083F),  # Cypriot Syllabary
+    (0x10900, 0x1091F),  # Phoenician
+    (0x10A00, 0x10A5F),  # Kharoshthi
+    (0x10C00, 0x10C4F),  # Old Turkic
+]
+
+# Unicode range for Latin script (to explicitly exclude)
+LATIN_RANGES = [
+    (0x0000, 0x007F),  # Basic Latin
+    (0x0080, 0x00FF),  # Latin-1 Supplement
+    (0x0100, 0x017F),  # Latin Extended-A
+    (0x0180, 0x024F),  # Latin Extended-B
+    (0x1E00, 0x1EFF),  # Latin Extended Additional
+    (0x2C60, 0x2C7F),  # Latin Extended-C
+    (0xA720, 0xA7FF),  # Latin Extended-D
+    (0xAB30, 0xAB6F),  # Latin Extended-E
+]
+
+# Vietnamese uses Latin script with diacritics - we should NOT translate it
+# as it uses the Latin alphabet
+
+
+def is_english_alphabet(text: str) -> bool:
+    """Check if text contains only Latin/English alphabet characters."""
+    for char in text:
+        # If it has a Unicode character that's definitely not Latin
+        code_point = ord(char)
+
+        # Check if it's in Latin ranges
+        is_latin = False
+        for start, end in LATIN_RANGES:
+            if start <= code_point <= end:
+                is_latin = True
+                break
+
+        # If it's not in Latin ranges and it's an alphabetic character, it's non-English
+        if not is_latin and char.isalpha():
+            return False
+
+        # If it's a digit or punctuation, it's fine
+        if not char.isalpha() and not char.isspace():
+            continue
+
+    return True
+
+
+def has_non_latin_alphabet(text: str) -> bool:
+    """
+    Check if text contains alphabetic characters from non-Latin scripts.
+    Returns True if there's at least one non-Latin alphabetic character.
+    """
+    for char in text:
+        if char.isalpha() and not is_english_alphabet(char):
+            return True
+    return False
 
 
 def should_skip(text: str) -> bool:
@@ -50,18 +181,16 @@ def should_skip(text: str) -> bool:
     if clean.startswith(SHEBANG_PREFIX):
         return True
 
-    # Skip if it's purely ASCII (likely English or code)
-    if clean.isascii():
-        # But check for known non-English ASCII patterns
-        # (e.g., romanized Persian like "salam" would be ASCII)
-        # For safety, only skip if it looks like English words
-        if any(word in clean.upper() for word in KNOWN_ENGLISH_TOKENS):
-            return True
-        # Skip if it's a single word or very short
-        if len(clean.split()) <= 2 and len(clean) < 30:
-            return True
+    # Skip if it contains only English/Latin characters (this is the key change)
+    if is_english_alphabet(clean):
+        # If it's all English alphabet, it's English text
+        return True
 
-    # Skip if it's just punctuation/symbols
+    # Skip known tokens (even if they have mixed scripts)
+    if any(word in clean.upper() for word in KNOWN_ENGLISH_TOKENS):
+        return True
+
+    # Skip if it's just punctuation/symbols with no alphabetic characters
     if not any(c.isalpha() for c in clean):
         return True
 
@@ -69,15 +198,38 @@ def should_skip(text: str) -> bool:
 
 
 def is_non_english(text: str) -> bool:
+    """
+    Strict check for non-English text - only translates if there are
+    non-Latin alphabetic characters present.
+    """
     clean = text.strip()
-    if not clean or len(clean) < 4:
+
+    # Quick rejections
+    if not clean or len(clean) < 2:
         return False
-    if should_skip(clean):  # still use the skip function
+
+    # Check if it has non-Latin alphabet characters
+    if not has_non_latin_alphabet(clean):
+        return False  # No non-Latin characters, so it's English/Latin
+
+    # Check skip conditions
+    if should_skip(clean):
         return False
+
+    # Double-check with langdetect to confirm
     try:
-        return detect(clean) != "en"
+        detected_lang = detect(clean)
+        # Only return True if langdetect confirms it's not English
+        # and it has non-Latin characters
+        if detected_lang != "en":
+            # But also verify it actually has non-Latin characters
+            if has_non_latin_alphabet(clean):
+                return True
     except Exception:
-        return False
+        # If langdetect fails, but we have non-Latin characters, it's likely non-English
+        return has_non_latin_alphabet(clean)
+
+    return False
 
 
 def translate_text(text: str) -> str:
@@ -204,10 +356,10 @@ def process_file(path: Path) -> bool:
         if not (is_print_arg or is_docstring):
             continue
 
-        raw = tok.string  # e.g.  '"سلام"'  or  '"""داکسترینگ"""'
+        raw = tok.string
 
         # detect quote style
-        if raw.startswith('"""') or raw.startswith("'''"):
+        if raw.startswith(DOC_TH1) or raw.startswith(DOC_TH2):
             quote = raw[:3]
         elif raw.startswith('"'):
             quote = '"'
@@ -254,11 +406,9 @@ def process_file(path: Path) -> bool:
 
 def process_file_wrapper(path_str: str):
     path = Path(path_str)
-    print(f"\n{'=' * 60}\nProcessing: {path}")
     try:
         changed = process_file(path)
         status = "updated" if changed else "no changes"
-        print(f"  → {status}")
     except Exception as exc:
         print(f"  [error] {path}: {exc}")
 
@@ -274,8 +424,6 @@ def main():
 
     with multiprocessing.Pool(processes=MAX_WORKERS) as pool:
         pool.map(process_file_wrapper, py_files)
-
-    print("\nDone.")
 
 
 if __name__ == "__main__":

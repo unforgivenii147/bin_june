@@ -46,3 +46,11 @@ def extract_subtitles(video_path) -> None:
         subprocess.run(ffmpeg_cmd, check=True, capture_output=True)
         count += 1
     print("Done.")
+
+
+if __name__ == "__main__":
+    import sys
+
+    fn = sys.argv[1].strip()
+
+    extract_subtitles(fn)

@@ -3,17 +3,17 @@
 import sys
 from pathlib import Path
 
-from dh import get_files
+from dh import get_files, mpf3
 from PyPDF2 import PdfReader
 
 
-def process_file(pdf_path: Path) -> None:
+def process_file(path: Path) -> None:
     path = Path(path)
-    if not pdf_path.is_file() or pdf_path.suffix.lower() != ".pdf":
-        print(f"Error: Invalid PDF file path provided: {pdf_path}")
+    if not path.is_file() or path.suffix.lower() != ".pdf":
+        print(f"Error: Invalid PDF file path provided: {path}")
         return
-    pdf_filename_base = pdf_path.stem
-    output_folder = pdf_path.parent / pdf_filename_base
+    filename_base = path.stem
+    output_folder = path.parent / filename_base
     try:
         output_folder.mkdir(parents=True, exist_ok=True)
         print(f"Saving page text files to: {output_folder}")
@@ -21,12 +21,12 @@ def process_file(pdf_path: Path) -> None:
         print(f"Error creating output directory {output_folder}: {e}")
         return
     try:
-        reader = PdfReader(pdf_path)
+        reader = PdfReader(path)
     except Exception as e:
-        print(f"Error opening PDF file {pdf_path}: {e}")
+        print(f"Error opening PDF file {path}: {e}")
         return
     num_pages = len(reader.pages)
-    print(f"Processing PDF: {pdf_path.name} ({num_pages} pages)")
+    print(f"Processing PDF: {path.name} ({num_pages} pages)")
     for page_num in range(num_pages):
         if 100 <= num_pages < 1000:
             if 0 <= page_num + 1 < 10:
@@ -42,7 +42,7 @@ def process_file(pdf_path: Path) -> None:
                 pad = ""
         elif 0 < num_pages < 10:
             pad = ""
-        page_filename = f"{pdf_filename_base}_{pad}{page_num + 1}.txt"
+        page_filename = f"{filename_base}_{pad}{page_num + 1}.txt"
         output_filepath = output_folder / page_filename
         if output_filepath.exists():
             continue
@@ -64,5 +64,7 @@ if __name__ == "__main__":
     cwd = Path.cwd()
     args = sys.argv[1:]
     files = [Path(p) for p in args] if args else get_files(cwd, ext=[".pdf", ".PDF"])
-    for f in files:
-        process_file(f)
+    if len(files) == 1:
+        process_file(files[0])
+        sys.exit(1)
+    mpf3(process_file, files)
