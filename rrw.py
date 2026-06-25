@@ -11,29 +11,29 @@ from dh import get_files, is_binary
 BACKUP = False
 
 
-def process_file(fn: Path) -> None:
+def process_file(path) -> None:
     path = Path(path)
-    if is_binary(fn):
+    if is_binary(path):
         return
     try:
-        content = fn.read_text(encoding="utf-8", errors="ignore")
+        content = path.read_text(encoding="utf-8", errors="ignore")
         if BACKUP:
-            backup_file = fn.with_suffix(fn.suffix + ".bak")
+            backup_file = path.with_suffix(path.suffix + ".bak")
             backup_file.write_text(content, encoding="utf-8")
         new_content = content
-        if fn.suffix == ".py":
+        if path.suffix == ".py":
             try:
                 tree = ast.parse(content)
                 new_content = astor.to_source(tree)
-                fn.write_text(new_content, encoding="utf-8")
-                print(f"\x1b[0m[ \x1b[6;96m✓\x1b[0m ] {fn.name} ")
+                path.write_text(new_content, encoding="utf-8")
+                print(f"\x1b[0m[ \x1b[6;96m✓\x1b[0m ] {path.name} ")
                 return
             except:
-                print(f"\x1b[0m[ \x1b[6;96m✘\x1b[0m ] {fn.name} ")
+                print(f"\x1b[0m[ \x1b[6;96m✘\x1b[0m ] {path.name} ")
                 return
         else:
             new_content = unicodedata.normalize("NFD", content)
-            fn.write_text(new_content, encoding="utf-8")
+            path.write_text(new_content, encoding="utf-8")
     except:
         return
 

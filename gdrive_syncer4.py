@@ -67,7 +67,13 @@ class GoogleDriveSync:
 
             # Save tokens
             with open(self.token_file, "wb") as f:
-                pickle.dump({"access_token": self.access_token, "refresh_token": self.refresh_token}, f)
+                pickle.dump(
+                    {
+                        "access_token": self.access_token,
+                        "refresh_token": self.refresh_token,
+                    },
+                    f,
+                )
             return True
 
         return False
@@ -117,7 +123,13 @@ class GoogleDriveSync:
 
         # Save tokens
         with open(self.token_file, "wb") as f:
-            pickle.dump({"access_token": self.access_token, "refresh_token": self.refresh_token}, f)
+            pickle.dump(
+                {
+                    "access_token": self.access_token,
+                    "refresh_token": self.refresh_token,
+                },
+                f,
+            )
 
         print("\n✓ Authentication successful!\n")
 
@@ -198,7 +210,11 @@ class GoogleDriveSync:
                     downloaded += len(chunk)
                     if total_size > 0:
                         percent = (downloaded / total_size) * 100
-                        print(f"\rDownloading {file_name}: {percent:.1f}%", end="", flush=True)
+                        print(
+                            f"\rDownloading {file_name}: {percent:.1f}%",
+                            end="",
+                            flush=True,
+                        )
 
         print(f"\n✓ Downloaded: {file_name}")
         return True
@@ -214,7 +230,13 @@ class GoogleDriveSync:
             return response.json()
         return None
 
-    def sync_folder(self, drive_folder_id: str, local_folder_path, folder_name: str = "root", depth=0) -> None:
+    def sync_folder(
+        self,
+        drive_folder_id: str,
+        local_folder_path,
+        folder_name: str = "root",
+        depth=0,
+    ) -> None:
         """Recursively sync a folder"""
         indent = "  " * depth
         print(f"{indent}📁 Syncing: {folder_name}")

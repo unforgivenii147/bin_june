@@ -1,9 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/python
-import os
 import shutil
 import sys
 import tarfile
-import time
 from pathlib import Path
 
 import zstandard as zstd
@@ -137,7 +135,11 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Create compressed tar.zst archive of current directory")
     parser.add_argument("--verify", action="store_true", help="Verify archive after creation")
-    parser.add_argument("--no-remove", action="store_true", help="Don't prompt to remove original directory")
+    parser.add_argument(
+        "--no-remove",
+        action="store_true",
+        help="Don't prompt to remove original directory",
+    )
     args = parser.parse_args()
 
     create_archive_streaming_optimized()

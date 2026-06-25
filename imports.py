@@ -5,7 +5,6 @@ import ast
 import importlib.metadata
 import importlib.util
 import numbers
-import sys
 import time
 from collections import defaultdict
 from pathlib import Path
@@ -18,7 +17,8 @@ try:
 except ImportError:
     HAS_JOBLIB = False
 
-from dh import STDLIB, get_files, get_installed_pkgs
+from dh import STDLIB, get_installed_pkgs
+import imp
 
 # Directories to always skip
 SKIP_DIRS = {
@@ -233,7 +233,10 @@ def get_valid_subdirs(start_path: Path) -> list:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate requirements.txt by inspecting Python files")
     parser.add_argument(
-        "-s", "--save-separate", action="store_true", help="Save separate requirements.txt for each subdirectory"
+        "-s",
+        "--save-separate",
+        action="store_true",
+        help="Save separate requirements.txt for each subdirectory",
     )
     args = parser.parse_args()
 
@@ -264,7 +267,11 @@ def main() -> None:
         for idx, subdir in enumerate(subdirs, 1):
             dir_start = time.time()
 
-            print(f"[{idx}/{len(subdirs)}] Processing {subdir.name}... ", end="", flush=True)
+            print(
+                f"[{idx}/{len(subdirs)}] Processing {subdir.name}... ",
+                end="",
+                flush=True,
+            )
 
             # Find imports for this subdirectory
             modules = find_imports_for_directory(subdir, cwd, std_libs, all_local_packages)

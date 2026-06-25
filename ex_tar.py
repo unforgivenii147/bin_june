@@ -45,7 +45,12 @@ def extract_tar_xz(archive_path, extract_path) -> None:
         tar.extractall(path=extract_path, filter="data")
 
 
-def process_archive(archive_path: Path, dry_run: bool = False, keep_original: bool = False, quiet: bool = False):
+def process_archive(
+    archive_path: Path,
+    dry_run: bool = False,
+    keep_original: bool = False,
+    quiet: bool = False,
+):
     if not archive_path.exists():
         if not quiet:
             print(f"Error: File {archive_path} does not exist")
@@ -114,13 +119,22 @@ def main() -> int:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
-        "target", nargs="?", default=None, help="File to extract or directory to search (default: current directory)"
+        "target",
+        nargs="?",
+        default=None,
+        help="File to extract or directory to search (default: current directory)",
     )
     parser.add_argument(
-        "--dry-run", "-n", action="store_true", help="Show what would be done without actually extracting"
+        "--dry-run",
+        "-n",
+        action="store_true",
+        help="Show what would be done without actually extracting",
     )
     parser.add_argument(
-        "--keep-original", "-k", action="store_true", help="Keep original archive files after extraction"
+        "--keep-original",
+        "-k",
+        action="store_true",
+        help="Keep original archive files after extraction",
     )
     parser.add_argument("--quiet", "-q", action="store_true", help="Suppress progress output")
     args = parser.parse_args()

@@ -21,7 +21,10 @@ CSS_PROPS_TEXT = "\nalignment-adjust alignment-baseline animation animation-dela
 
 
 def _compile_props(props_text: str, grouped: bool = False) -> tuple:
-    props, prefixes = ([], ["-webkit-", "-khtml-", "-epub-", "-moz-", "-ms-", "-o-", ""])
+    props, prefixes = (
+        [],
+        ["-webkit-", "-khtml-", "-epub-", "-moz-", "-ms-", "-o-", ""],
+    )
     for propline in props_text.strip().lower().splitlines():
         props += [pre + pro for pro in propline.split(" ") for pre in prefixes]
     props = filter(lambda line: not line.startswith("#"), props)
@@ -90,7 +93,9 @@ def remove_empty_rules(css: str) -> str:
 
 def condense_zero_units(css: str) -> str:
     return re.sub(
-        "([\\s:])(0)(px|em|%|in|q|ch|cm|mm|pc|pt|ex|rem|s|ms|deg|grad|rad|turn|vw|vh|vmin|vmax|fr)", "\\1\\2", css
+        "([\\s:])(0)(px|em|%|in|q|ch|cm|mm|pc|pt|ex|rem|s|ms|deg|grad|rad|turn|vw|vh|vmin|vmax|fr)",
+        "\\1\\2",
+        css,
     )
 
 
@@ -285,16 +290,41 @@ def make_arguments_parser() -> Namespace:
         epilog="CSS-HTML-Prettify:\n    Takes file or folder full path string and process all CSS/SCSS/HTML found.\n    If argument is not file/folder will fail. Check Updates works on Python3.\n    StdIn to StdOut is deprecated since may fail with unicode characters.\n    CSS Properties are AlphaSorted,to help spot cloned ones,Selectors not.\n    Watch works for whole folders, with minimum of ~60 Secs between runs.",
     )
     parser.add_argument("--version", action="version", version=__version__)
-    parser.add_argument("fullpath", metavar="fullpath", type=str, help="Full path to local file or folder.")
+    parser.add_argument(
+        "fullpath",
+        metavar="fullpath",
+        type=str,
+        help="Full path to local file or folder.",
+    )
     parser.add_argument("--prefix", type=str, help="Prefix string to prepend on output filenames.")
-    parser.add_argument("--timestamp", action="store_true", help="Add a Time Stamp on all CSS/SCSS output files.")
+    parser.add_argument(
+        "--timestamp",
+        action="store_true",
+        help="Add a Time Stamp on all CSS/SCSS output files.",
+    )
     parser.add_argument("--quiet", action="store_true", help="Quiet, Silent, force disable all Logging.")
     parser.add_argument("--after", type=str, help="Command to execute after run (Experimental).")
     parser.add_argument("--before", type=str, help="Command to execute before run (Experimental).")
-    parser.add_argument("--watch", action="store_true", help="Re-Compress if file changes (Experimental).")
-    parser.add_argument("--group", action="store_true", help="Group Alphabetically CSS Poperties by name.")
-    parser.add_argument("--justify", action="store_true", help="Right Justify CSS Properties (Experimental).")
-    parser.add_argument("--extraline", action="store_true", help="Add 1 New Line for each New Line (Experimental)")
+    parser.add_argument(
+        "--watch",
+        action="store_true",
+        help="Re-Compress if file changes (Experimental).",
+    )
+    parser.add_argument(
+        "--group",
+        action="store_true",
+        help="Group Alphabetically CSS Poperties by name.",
+    )
+    parser.add_argument(
+        "--justify",
+        action="store_true",
+        help="Right Justify CSS Properties (Experimental).",
+    )
+    parser.add_argument(
+        "--extraline",
+        action="store_true",
+        help="Add 1 New Line for each New Line (Experimental)",
+    )
     global args
     args = parser.parse_args()
     return args

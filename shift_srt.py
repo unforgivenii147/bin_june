@@ -41,7 +41,13 @@ def process_file(path: Path, shift_ms: int) -> None:
 def main() -> None:
     ap = argparse.ArgumentParser(description="Shift SRT subtitles inplace (batch folder supported)")
     ap.add_argument("path", nargs="?", default=".", help="SRT file or folder (default: current dir)")
-    ap.add_argument("-s", "--shift", type=float, default=-1.0, help="Seconds to shift (negative = back, default: -1.0)")
+    ap.add_argument(
+        "-s",
+        "--shift",
+        type=float,
+        default=-1.0,
+        help="Seconds to shift (negative = back, default: -1.0)",
+    )
     ap.add_argument("-r", "--recursive", action="store_true", help="Process subdirectories")
     args = ap.parse_args()
     shift_ms = int(args.shift * 1000)

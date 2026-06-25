@@ -133,7 +133,12 @@ class ChangeHandler(FileSystemEventHandler):
                         size_str = "unknown-size"
                     print(f"-  /{rel_path.as_posix()} | {reason} | {size_str}")
                     if self.copy_enabled:
-                        safe_copy_file(src=src_path, dst_root=self.dest_dir, rel_path=rel_path, errors=self._errors)
+                        safe_copy_file(
+                            src=src_path,
+                            dst_root=self.dest_dir,
+                            rel_path=rel_path,
+                            errors=self._errors,
+                        )
                 elif not src_path.exists():
                     print(f"-  /{rel_path.as_posix()} | {reason} | deleted")
                     if self.copy_enabled:
@@ -184,9 +189,17 @@ def build_parser() -> argparse.ArgumentParser:
         description="Watch a folder recursively, print changes, and optionally copy changed/created files."
     )
     p.add_argument(
-        "folder", nargs="?", default=str(Path.cwd()), help="Folder to watch (default: current working directory)."
+        "folder",
+        nargs="?",
+        default=str(Path.cwd()),
+        help="Folder to watch (default: current working directory).",
     )
-    p.add_argument("-c", "--copy", action="store_true", help="Copy changed/created files to destination.")
+    p.add_argument(
+        "-c",
+        "--copy",
+        action="store_true",
+        help="Copy changed/created files to destination.",
+    )
     p.add_argument(
         "-d",
         "--dest",
@@ -213,7 +226,9 @@ def build_parser() -> argparse.ArgumentParser:
         help="Watch interval (seconds) for batching/printing and copying (default: 1.0).",
     )
     p.add_argument(
-        "--no-recursive", action="store_true", help="Disable recursive watching (watch only top-level directory)."
+        "--no-recursive",
+        action="store_true",
+        help="Disable recursive watching (watch only top-level directory).",
     )
     return p
 

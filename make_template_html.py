@@ -57,7 +57,9 @@ def merge_html_content(html_files: list[Path]) -> str:
 
 
 def create_template_html(
-    html_files: list[Path], output_file: str = "template.html", title: str = "Merged HTML Template"
+    html_files: list[Path],
+    output_file: str = "template.html",
+    title: str = "Merged HTML Template",
 ) -> bool:
     if not html_files:
         print("No HTML files found")

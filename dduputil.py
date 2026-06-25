@@ -41,7 +41,16 @@ try:
     import brotli
 except Exception:
     HAS_BROTLI = False
-RECOGNIZED_ARCHIVE_EXTS = {".zip", ".tar", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz"}
+RECOGNIZED_ARCHIVE_EXTS = {
+    ".zip",
+    ".tar",
+    ".tar.gz",
+    ".tgz",
+    ".tar.bz2",
+    ".tbz2",
+    ".tar.xz",
+    ".txz",
+}
 SINGLE_COMPRESSED = {".gz", ".bz2", ".xz", ".zst", ".br"}
 PY_EXT = ".py"
 UTILS_DIR = Path("utils")
@@ -159,7 +168,12 @@ def iter_python_sources(root: Path) -> Iterable[SourceFile]:
                                 except UnicodeDecodeError:
                                     text = data.decode("latin-1")
                                 virtual_path = Path(p.name) / Path(name)
-                                yield SourceFile(path=p, relpath=virtual_path, text=text, origin=f"{p}:{name}")
+                                yield SourceFile(
+                                    path=p,
+                                    relpath=virtual_path,
+                                    text=text,
+                                    origin=f"{p}:{name}",
+                                )
                     except Exception as e:
                         logger.error("error reading zip {}: {}", p, e)
                 else:
@@ -180,7 +194,12 @@ def iter_python_sources(root: Path) -> Iterable[SourceFile]:
                                 except UnicodeDecodeError:
                                     text = data.decode("latin-1")
                                 virtual_path = Path(p.name) / Path(name)
-                                yield SourceFile(path=p, relpath=virtual_path, text=text, origin=f"{p}:{name}")
+                                yield SourceFile(
+                                    path=p,
+                                    relpath=virtual_path,
+                                    text=text,
+                                    origin=f"{p}:{name}",
+                                )
                     except Exception as e:
                         logger.error("error reading tar {}: {}", p, e)
                 continue
@@ -197,7 +216,12 @@ def iter_python_sources(root: Path) -> Iterable[SourceFile]:
                                 txt = bytes_decomp.decode("latin-1")
                             if ".py" in p.name or ("def " in txt or "class " in txt):
                                 virtual = Path(p.name).with_suffix("")
-                                yield SourceFile(path=p, relpath=virtual, text=txt, origin=f"{p}:{p.name}")
+                                yield SourceFile(
+                                    path=p,
+                                    relpath=virtual,
+                                    text=txt,
+                                    origin=f"{p}:{p.name}",
+                                )
                     except Exception as e:
                         logger.debug("decompress attempt failed for {}: {}", p, e)
                     break
@@ -205,7 +229,9 @@ def iter_python_sources(root: Path) -> Iterable[SourceFile]:
             logger.exception("error iterating {}: {}", p, exc)
 
 
-def extract_defs_from_source(srcfile: Tuple[str, str, str, str]) -> Tuple[str, List[Dict]]:
+def extract_defs_from_source(
+    srcfile: Tuple[str, str, str, str],
+) -> Tuple[str, List[Dict]]:
     path_str, relpath_str, text, origin = srcfile
     results = []
     try:
@@ -221,11 +247,23 @@ def extract_defs_from_source(srcfile: Tuple[str, str, str, str]) -> Tuple[str, L
                     continue
                 code = node_to_code(node)
                 h = sha256_text(code)
-                results.append({"kind": "func", "name": node.name, "hash": h, "code": code, "imports": imports})
+                results.append({
+                    "kind": "func",
+                    "name": node.name,
+                    "hash": h,
+                    "code": code,
+                    "imports": imports,
+                })
             elif isinstance(node, ast.ClassDef):
                 code = node_to_code(node)
                 h = sha256_text(code)
-                results.append({"kind": "class", "name": node.name, "hash": h, "code": code, "imports": imports})
+                results.append({
+                    "kind": "class",
+                    "name": node.name,
+                    "hash": h,
+                    "code": code,
+                    "imports": imports,
+                })
             elif isinstance(node, ast.Assign) and is_constant_assign(node):
                 names = []
                 for t in node.targets:
@@ -238,7 +276,13 @@ def extract_defs_from_source(srcfile: Tuple[str, str, str, str]) -> Tuple[str, L
                 name = names[0] if names else "CONST"
                 code = node_to_code(node)
                 h = sha256_text(code)
-                results.append({"kind": "const", "name": name, "hash": h, "code": code, "imports": imports})
+                results.append({
+                    "kind": "const",
+                    "name": name,
+                    "hash": h,
+                    "code": code,
+                    "imports": imports,
+                })
         except Exception as exc:
             logger.exception("error extracting node in {}: {}", origin, exc)
     return (path_str, results)
@@ -351,12 +395,30 @@ def validate_python_source(text: str) -> bool:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Deduplicate top-level funcs/classes/constants into utils/*")
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("-m", "--move", action="store_true", help="move duplicated objects (default off)")
-    group.add_argument("-c", "--copy", action="store_true", help="copy duplicated objects (default off)")
-    parser.add_argument(
-        "--min-occurs", type=int, default=2, help="minimum occurrences to consider duplicate (default 2)"
+    group.add_argument(
+        "-m",
+        "--move",
+        action="store_true",
+        help="move duplicated objects (default off)",
     )
-    parser.add_argument("--jobs", type=int, default=max(1, cpu_count() - 1), help="multiprocessing workers")
+    group.add_argument(
+        "-c",
+        "--copy",
+        action="store_true",
+        help="copy duplicated objects (default off)",
+    )
+    parser.add_argument(
+        "--min-occurs",
+        type=int,
+        default=2,
+        help="minimum occurrences to consider duplicate (default 2)",
+    )
+    parser.add_argument(
+        "--jobs",
+        type=int,
+        default=max(1, cpu_count() - 1),
+        help="multiprocessing workers",
+    )
     parser.add_argument("--verbose", action="store_true")
     args = parser.parse_args()
     if args.verbose:
@@ -404,7 +466,12 @@ def main() -> None:
                 if disk_path and disk_path.exists() and disk_path.suffixes:
                     target_path = sf.path if sf.path.exists() else None
                 d = modifications.setdefault(
-                    sf.path, {"remove_snippets": [], "add_imports": set(), "preserve_imports": []}
+                    sf.path,
+                    {
+                        "remove_snippets": [],
+                        "add_imports": set(),
+                        "preserve_imports": [],
+                    },
                 )
                 d["remove_snippets"].append(code)
                 if kind == "func":
@@ -452,7 +519,10 @@ def main() -> None:
     append_unique_to_file(CONST_FILE, consts_to_write, seen_const_hashes)
     logger.info("written utils files under {}", UTILS_DIR)
     if args.move:
-        logger.info("applying move modifications to original files ({} targets)", len(modifications))
+        logger.info(
+            "applying move modifications to original files ({} targets)",
+            len(modifications),
+        )
         for src_path, mod in modifications.items():
             try:
                 if not src_path or not Path(src_path).exists():
@@ -464,7 +534,10 @@ def main() -> None:
                 import_lines = sorted(mod["add_imports"])
                 new_text = add_imports_to_source(new_text, import_lines)
                 if not validate_python_source(new_text):
-                    logger.error("after modifications, file {} has syntax errors; skipping write", p)
+                    logger.error(
+                        "after modifications, file {} has syntax errors; skipping write",
+                        p,
+                    )
                     continue
                 with tempfile.NamedTemporaryFile("w", delete=False, encoding="utf-8") as tf:
                     tf.write(new_text)

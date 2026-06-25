@@ -85,7 +85,11 @@ def _merge_subtitles(subtitles: list[dict], gap_threshold: float = 1.0) -> list[
 
 
 def extract_burned_subs_ocr(
-    video_path: str, output_srt_path: str, lang: str = "fas", sample_fps: float = 2.0, workers: int | None = None
+    video_path: str,
+    output_srt_path: str,
+    lang: str = "fas",
+    sample_fps: float = 2.0,
+    workers: int | None = None,
 ) -> None:
     """
     Extract burned-in subtitles via OCR and write an SRT file.

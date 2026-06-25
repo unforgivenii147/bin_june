@@ -4,7 +4,6 @@ Convert OTF to TTF recursively using FontForge Python bindings.
 Usage: fontforge -script otf2ttf_fontforge.py [directory]
 """
 
-import os
 import sys
 from pathlib import Path
 

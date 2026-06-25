@@ -77,7 +77,12 @@ def load_mapping(path: str) -> dict[str, str]:
 
 
 def extract_from_ast(code: str, path_hint: str | None = None) -> dict[str, set[str]]:
-    result = {"imports": set(), "star_modules": set(), "dynamic": set(), "relative": set()}
+    result = {
+        "imports": set(),
+        "star_modules": set(),
+        "dynamic": set(),
+        "relative": set(),
+    }
     try:
         tree = ast.parse(code)
     except Exception:
@@ -133,7 +138,12 @@ def process_noext_python_script(path: Path) -> dict[str, list[str]]:
         with Path(path).open(encoding="utf-8", errors="ignore") as f:
             first = f.readline()
             if "#!" not in first or "python" not in first.lower():
-                return {"imports": [], "star_modules": [], "dynamic": [], "relative": []}
+                return {
+                    "imports": [],
+                    "star_modules": [],
+                    "dynamic": [],
+                    "relative": [],
+                }
             code = f.read()
     except Exception:
         return {"imports": [], "star_modules": [], "dynamic": [], "relative": []}
@@ -186,7 +196,12 @@ def process_zip_file(path: Path) -> dict[str, list[str]]:
                         pass
     except Exception:
         pass
-    return {"imports": sorted(imports), "star_modules": sorted(stars), "dynamic": sorted(dyn), "relative": sorted(rel)}
+    return {
+        "imports": sorted(imports),
+        "star_modules": sorted(stars),
+        "dynamic": sorted(dyn),
+        "relative": sorted(rel),
+    }
 
 
 def process_tar_file(path: Path) -> dict[str, list[str]]:
@@ -213,7 +228,12 @@ def process_tar_file(path: Path) -> dict[str, list[str]]:
                         pass
     except Exception:
         pass
-    return {"imports": sorted(imports), "star_modules": sorted(stars), "dynamic": sorted(dyn), "relative": sorted(rel)}
+    return {
+        "imports": sorted(imports),
+        "star_modules": sorted(stars),
+        "dynamic": sorted(dyn),
+        "relative": sorted(rel),
+    }
 
 
 def process_raw(path: str) -> dict[str, list[str]]:
@@ -296,7 +316,11 @@ def trace_star_module(module: str, project_map: dict[str, list[str]]) -> set[str
 
 
 def resolve_packages(
-    imports: set[str], stdlib: set[str], mapping: dict[str, str], pip_available: set[str], project_toplevels: set[str]
+    imports: set[str],
+    stdlib: set[str],
+    mapping: dict[str, str],
+    pip_available: set[str],
+    project_toplevels: set[str],
 ) -> set[str]:
     out = set()
     for imp in imports:
@@ -342,11 +366,18 @@ def scan_sources(ignore_dirs: set[str]) -> list[str]:
 def main() -> None:
     p = argparse.ArgumentParser(description="Offline requirements.txt generator (static + heuristics).")
     p.add_argument(
-        "--ignore", nargs="*", default=[".venv", ".git", ".ipynb_checkpoints"], help="Directories to ignore during scan"
+        "--ignore",
+        nargs="*",
+        default=[".venv", ".git", ".ipynb_checkpoints"],
+        help="Directories to ignore during scan",
     )
     p.add_argument("--no-cache", action="store_true", default=True, help="Disable cache usage")
     p.add_argument("--clear-cache", action="store_true", help="Clear cache and exit")
-    p.add_argument("--pipfile", default="/sdcard/pip.txt", help="Offline pip package list (one per line)")
+    p.add_argument(
+        "--pipfile",
+        default="/sdcard/pip.txt",
+        help="Offline pip package list (one per line)",
+    )
     p.add_argument("--cache-file", default=CACHE_FILE, help="Cache file path")
     p.add_argument("--out", default="requirements.txt", help="Output requirements file")
     p.add_argument(
@@ -390,7 +421,15 @@ def main() -> None:
             h = fast_hash(pth) if mtime is not None else "0"
             if entry.get("mtime") == mtime and entry.get("hash") == h:
                 cached_results.append(
-                    entry.get("result", {"imports": [], "star_modules": [], "dynamic": [], "relative": []})
+                    entry.get(
+                        "result",
+                        {
+                            "imports": [],
+                            "star_modules": [],
+                            "dynamic": [],
+                            "relative": [],
+                        },
+                    )
                 )
                 needs = False
         if needs:
@@ -398,7 +437,11 @@ def main() -> None:
     computed_results = []
     if tasks:
         with mp.Pool(mp.cpu_count()) as pool:
-            for res in tqdm(pool.imap_unordered(process_raw, tasks), total=len(tasks), desc="Processing"):
+            for res in tqdm(
+                pool.imap_unordered(process_raw, tasks),
+                total=len(tasks),
+                desc="Processing",
+            ):
                 computed_results.append(res)
     if not args.no_cache:
         for path, res in zip(tasks, computed_results, strict=False):

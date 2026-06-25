@@ -68,7 +68,12 @@ def convert_file(file_path: Path, dry_run: bool = False, force: bool = False) ->
     Convert a single file from CRLF to LF.
     Returns statistics about the conversion.
     """
-    result = {"file": str(file_path), "status": "unchanged", "size_diff": 0, "error": None}
+    result = {
+        "file": str(file_path),
+        "status": "unchanged",
+        "size_diff": 0,
+        "error": None,
+    }
 
     try:
         if not force and is_binary_file(file_path):
@@ -111,7 +116,14 @@ def process_files(files: list, dry_run: bool = False, force: bool = False, num_w
     Process multiple files in parallel.
     """
     if not files:
-        return {"total": 0, "converted": 0, "skipped": 0, "errors": 0, "size_saved": 0, "files": []}
+        return {
+            "total": 0,
+            "converted": 0,
+            "skipped": 0,
+            "errors": 0,
+            "size_saved": 0,
+            "files": [],
+        }
 
     if num_workers is None:
         num_workers = min(cpu_count(), len(files))
@@ -227,16 +239,36 @@ Examples:
 
     parser.add_argument("paths", nargs="+", help="Files or directories to convert")
     parser.add_argument("-r", "--recursive", action="store_true", help="Process directories recursively")
-    parser.add_argument("-f", "--force", action="store_true", help="Force conversion of binary files (not recommended)")
     parser.add_argument(
-        "-n", "--dry-run", action="store_true", help="Show what would be changed without actually converting"
+        "-f",
+        "--force",
+        action="store_true",
+        help="Force conversion of binary files (not recommended)",
     )
     parser.add_argument(
-        "-j", "--jobs", type=int, default=None, help=f"Number of parallel jobs (default: CPU count = {cpu_count()})"
+        "-n",
+        "--dry-run",
+        action="store_true",
+        help="Show what would be changed without actually converting",
     )
-    parser.add_argument("--no-hidden", action="store_true", default=True, help="Exclude hidden files/directories")
     parser.add_argument(
-        "--include-hidden", dest="no_hidden", action="store_false", help="Include hidden files/directories"
+        "-j",
+        "--jobs",
+        type=int,
+        default=None,
+        help=f"Number of parallel jobs (default: CPU count = {cpu_count()})",
+    )
+    parser.add_argument(
+        "--no-hidden",
+        action="store_true",
+        default=True,
+        help="Exclude hidden files/directories",
+    )
+    parser.add_argument(
+        "--include-hidden",
+        dest="no_hidden",
+        action="store_false",
+        help="Include hidden files/directories",
     )
     parser.add_argument("-q", "--quiet", action="store_true", help="Suppress per-file output")
 

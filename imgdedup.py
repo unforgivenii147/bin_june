@@ -41,7 +41,10 @@ def main() -> None:
     )
     ap.add_argument("path", help="path to image directory to scan")
     ap.add_argument(
-        "--dry-run", action="store_true", default=True, help="preview duplicates without deleting (default: True)"
+        "--dry-run",
+        action="store_true",
+        default=True,
+        help="preview duplicates without deleting (default: True)",
     )
     ap.add_argument("--remove", action="store_true", help="actually delete duplicate images")
     args = vars(ap.parse_args())

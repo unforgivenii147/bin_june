@@ -31,7 +31,10 @@ def process_file(path: str | Path, mode: str = MODE) -> bool:
                 from black import TargetVersion as _tv
                 from black import format_str
 
-                code = format_str(original_code, mode=_Mode(target_versions={_tv.PY310, _tv.PY313}, line_length=120))
+                code = format_str(
+                    original_code,
+                    mode=_Mode(target_versions={_tv.PY310, _tv.PY313}, line_length=120),
+                )
             case "autopep":
                 from autopep8 import fix_code as fix_with_autopep
 
@@ -45,7 +48,10 @@ def process_file(path: str | Path, mode: str = MODE) -> bool:
                 from black import TargetVersion as _tv
                 from black import format_str
 
-                code = format_str(original_code, mode=_Mode(target_versions={_tv.PY310, _tv.PY313}, line_length=120))
+                code = format_str(
+                    original_code,
+                    mode=_Mode(target_versions={_tv.PY310, _tv.PY313}, line_length=120),
+                )
         after = len(code)
         dsz = abs(before - after)
         etime = pff()

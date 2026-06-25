@@ -415,7 +415,11 @@ Examples:
     )
 
     parser.add_argument(
-        "-t", "--threads", type=int, default=4, help="Number of threads for parallel processing (default: 4)"
+        "-t",
+        "--threads",
+        type=int,
+        default=4,
+        help="Number of threads for parallel processing (default: 4)",
     )
 
     args = parser.parse_args()

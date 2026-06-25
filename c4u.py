@@ -128,7 +128,13 @@ class PackageStateManager:
 def get_installed_packages() -> list[tuple[str, str]]:
     """Fetch installed packages and versions via pip list."""
     try:
-        result = run(["pip", "list", "--format=json"], capture_output=True, text=True, check=True, timeout=30)
+        result = run(
+            ["pip", "list", "--format=json"],
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=30,
+        )
         packages = json.loads(result.stdout)
         logger.info(f"✓ Found {len(packages)} installed packages")
         return [(p["name"], p["version"]) for p in packages]
@@ -151,7 +157,9 @@ def query_pypi(package_name: str, installed_version: str, retries: int = 2) -> P
 
     url = f"https://pypi.org/pypi/{package_name}/json"
     pkg_info = PackageInfo(
-        pkgname=package_name, installed_version=installed_version, checked_at=time.strftime("%Y-%m-%d %H:%M:%S")
+        pkgname=package_name,
+        installed_version=installed_version,
+        checked_at=time.strftime("%Y-%m-%d %H:%M:%S"),
     )
 
     for attempt in range(retries):
@@ -249,7 +257,11 @@ def main() -> None:
         logger.info(f"🔄 Spawning {num_workers} workers to query PyPI...")
 
         with Pool(processes=num_workers) as pool:
-            results = pool.starmap(query_pypi, pending_packages, chunksize=max(1, len(pending_packages) // num_workers))
+            results = pool.starmap(
+                query_pypi,
+                pending_packages,
+                chunksize=max(1, len(pending_packages) // num_workers),
+            )
 
         # Step 5: Update state with results
         for pkg_info in results:

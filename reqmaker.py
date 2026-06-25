@@ -35,7 +35,12 @@ def save_to_req(packages) -> None:
 
 def run_pip_check():
     try:
-        result = subprocess.run([sys.executable, "-m", "pip", "check"], capture_output=True, text=True, check=True)
+        result = subprocess.run(
+            [sys.executable, "-m", "pip", "check"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
         return result.stdout.strip()
     except subprocess.CalledProcessError as e:
         return e.stdout.strip() if e.stdout else ""

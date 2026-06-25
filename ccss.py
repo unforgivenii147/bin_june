@@ -14,7 +14,14 @@ def process_file(path) -> bool:
     if len(path.read_text().splitlines()) == 1:
         return False
     print(f"{path.name}", end=" ")
-    cmd = ["cleancss", "-O2", "all:off;removeDuplicateRules:on", str(path), "-o", str(path)]
+    cmd = [
+        "cleancss",
+        "-O2",
+        "all:off;removeDuplicateRules:on",
+        str(path),
+        "-o",
+        str(path),
+    ]
     res, _, err = runcmd(cmd, show_output=True)
     if not res:
         after = gsz(path)

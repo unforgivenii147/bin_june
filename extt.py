@@ -76,7 +76,10 @@ for py in Path().rglob("*.py"):
             folder_path = py.parent
             relative_folder = get_relative_path(folder_path, Path())
             folders_found.add(str(relative_folder))
-            folder_definitions[relative_folder][py.name] = {"definitions": definitions, "path": py}
+            folder_definitions[relative_folder][py.name] = {
+                "definitions": definitions,
+                "path": py,
+            }
             processed_files_count += 1
             total_definitions += len(definitions)
     except Exception as e:

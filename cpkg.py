@@ -16,7 +16,11 @@ def find_dist_info_dir(site_packages: Path, pkg_name: str) -> Path:
     if not candidates:
         raise FileNotFoundError(msg)
     if len(candidates) > 1:
-        logger.warning("Multiple dist-info directories found for '{}', using: {}", pkg_name, candidates[0])
+        logger.warning(
+            "Multiple dist-info directories found for '{}', using: {}",
+            pkg_name,
+            candidates[0],
+        )
     return candidates[0]
 
 

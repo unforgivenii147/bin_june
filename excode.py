@@ -47,7 +47,8 @@ LANG_TO_EXT = {
     "plain": ".txt",
 }
 CODE_BLOCK_RE = re.compile(
-    "```(?P<lang>[A-Za-z0-9_+\\-.]*)[ \\t]*\\n(?P<code>.*?)(?<=\\n)```", re.DOTALL | re.IGNORECASE
+    "```(?P<lang>[A-Za-z0-9_+\\-.]*)[ \\t]*\\n(?P<code>.*?)(?<=\\n)```",
+    re.DOTALL | re.IGNORECASE,
 )
 
 

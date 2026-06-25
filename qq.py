@@ -76,7 +76,13 @@ def create_chart(target_dir: str = ".") -> None:
         ax.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=140)
         ax.set_title("Directory Size Distribution")
     elif CHART_TYPE == "circle":
-        ax.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=140, wedgeprops={"width": 0.4})
+        ax.pie(
+            sizes,
+            labels=labels,
+            autopct="%1.1f%%",
+            startangle=140,
+            wedgeprops={"width": 0.4},
+        )
         ax.set_title("Directory Size Distribution")
     else:
         print(f"Chart type '{CHART_TYPE}' is not supported.")

@@ -27,7 +27,21 @@ if __name__ == "__main__":
     files = (
         [Path(p) for p in args]
         if args
-        else get_files(cwd, ext=[".c", ".cc", ".cpp", ".cxx", ".h", ".hh", ".hpp", ".hxx", ".inc", "hpp11"])
+        else get_files(
+            cwd,
+            ext=[
+                ".c",
+                ".cc",
+                ".cpp",
+                ".cxx",
+                ".h",
+                ".hh",
+                ".hpp",
+                ".hxx",
+                ".inc",
+                "hpp11",
+            ],
+        )
     )
     results = []
     with get_context("spawn").Pool(8) as pool:

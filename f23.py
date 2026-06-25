@@ -87,7 +87,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Fix Python2 print statements and optionally apply all Py2→Py3 conversions."
     )
-    parser.add_argument("-f", "--force", action="store_true", help="Overwrite original files (no .bak backups)")
+    parser.add_argument(
+        "-f",
+        "--force",
+        action="store_true",
+        help="Overwrite original files (no .bak backups)",
+    )
     parser.add_argument("-a", "--all", action="store_true", help="Apply all Python2→Python3 fixes")
     args = parser.parse_args()
     if not any(vars(args).values()):

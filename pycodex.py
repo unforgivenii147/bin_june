@@ -13,6 +13,7 @@ from bs4 import BeautifulSoup
 from loguru import logger
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
+import keyword
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -178,7 +179,11 @@ class CodeBlockExtractor:
     def _extract_filename_from_code(self, content: str) -> str | None:
         lines = content.split("\n")
         for line in lines[:10]:
-            match = re.search("#\\s*(?:filename|name|file)\\s*:?\\s*([\\w\\-._]+\\.py)", line, re.IGNORECASE)
+            match = re.search(
+                "#\\s*(?:filename|name|file)\\s*:?\\s*([\\w\\-._]+\\.py)",
+                line,
+                re.IGNORECASE,
+            )
             if match:
                 return match.group(1)
         return None

@@ -171,7 +171,13 @@ def main():
         results = pool.map(process_file, args)
 
     # Generate summary
-    summary = {"total": len(results), "success": 0, "skipped_exists": 0, "skipped_already_ttf": 0, "failed": 0}
+    summary = {
+        "total": len(results),
+        "success": 0,
+        "skipped_exists": 0,
+        "skipped_already_ttf": 0,
+        "failed": 0,
+    }
 
     for result in results:
         if result["status"] == "success":

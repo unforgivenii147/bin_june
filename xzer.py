@@ -39,7 +39,7 @@ def compress_in_memory(infile: Path, outfile: Path) -> bool:
         data = infile.read_bytes()
         if not data:
             return False
-        compressed = compress(data, preset=9, threads=6)
+        compressed = compress(data, preset=9, threads=4)
         outfile.write_bytes(compressed)
         return True
     except (OSError, MemoryError) as e:
@@ -344,8 +344,18 @@ Examples:
         """,
     )
     group = parser.add_mutually_exclusive_group()
-    group.add_argument("-c", "--compress", action="store_true", help="Compress files and folders (default)")
-    group.add_argument("-d", "--decompress", action="store_true", help="Decompress .xz and .tar.xz files")
+    group.add_argument(
+        "-c",
+        "--compress",
+        action="store_true",
+        help="Compress files and folders (default)",
+    )
+    group.add_argument(
+        "-d",
+        "--decompress",
+        action="store_true",
+        help="Decompress .xz and .tar.xz files",
+    )
     args = parser.parse_args()
     if args.decompress:
         mode = "decompress"

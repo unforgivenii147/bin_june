@@ -148,8 +148,18 @@ def write_definitions_to_file(definitions, output_dir: Path, move=False) -> None
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Inspect Python files for repeated definitions.")
-    parser.add_argument("-m", "--move", action="store_true", help="Move repeated definitions to utils directory.")
-    parser.add_argument("-c", "--copy", action="store_true", help="Copy repeated definitions to utils directory.")
+    parser.add_argument(
+        "-m",
+        "--move",
+        action="store_true",
+        help="Move repeated definitions to utils directory.",
+    )
+    parser.add_argument(
+        "-c",
+        "--copy",
+        action="store_true",
+        help="Copy repeated definitions to utils directory.",
+    )
     args = parser.parse_args()
     cwd = Path.cwd()
     utils_dir = cwd / "utils"

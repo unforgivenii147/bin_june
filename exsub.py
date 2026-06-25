@@ -116,7 +116,10 @@ def parse_srt(filepath: str) -> list[dict]:
             i += 1
         if i < len(lines) and (not lines[i].strip()):
             i += 1
-        match = re.match("(\\d{2}:\\d{2}:\\d{2}[.,]\\d{3})\\s*-->\\s*(\\d{2}:\\d{2}:\\d{2}[.,]\\d{3})", ts_line)
+        match = re.match(
+            "(\\d{2}:\\d{2}:\\d{2}[.,]\\d{3})\\s*-->\\s*(\\d{2}:\\d{2}:\\d{2}[.,]\\d{3})",
+            ts_line,
+        )
         if match:
             start = _ts_to_seconds(match.group(1))
             end = _ts_to_seconds(match.group(2))
@@ -209,14 +212,35 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Extract burned-in subtitles from video using OCR")
     parser.add_argument("video", help="Path to the video file")
     parser.add_argument(
-        "output", nargs="?", default="extracted_subs.srt", help="Output SRT file (default: extracted_subs.srt)"
+        "output",
+        nargs="?",
+        default="extracted_subs.srt",
+        help="Output SRT file (default: extracted_subs.srt)",
     )
-    parser.add_argument("-t", "--time", dest="max_time", help="Extract only up to this time (HH:MM:SS), e.g. 00:05:00")
     parser.add_argument(
-        "-r", "--resume", action="store_true", help="Resume from a previous run (appends to existing SRT if present)"
+        "-t",
+        "--time",
+        dest="max_time",
+        help="Extract only up to this time (HH:MM:SS), e.g. 00:05:00",
     )
-    parser.add_argument("--sample_fps", type=float, default=2.0, help="Frames per second to sample (default: 2.0)")
-    parser.add_argument("--workers", type=int, default=4, help="Number of OCR worker processes (default: 4)")
+    parser.add_argument(
+        "-r",
+        "--resume",
+        action="store_true",
+        help="Resume from a previous run (appends to existing SRT if present)",
+    )
+    parser.add_argument(
+        "--sample_fps",
+        type=float,
+        default=2.0,
+        help="Frames per second to sample (default: 2.0)",
+    )
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=4,
+        help="Number of OCR worker processes (default: 4)",
+    )
     args = parser.parse_args()
     if args.output and re.match("\\d{1,2}:\\d{2}:\\d{2}", args.output) and (not args.max_time):
         args.max_time = args.output

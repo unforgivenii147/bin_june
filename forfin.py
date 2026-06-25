@@ -6,7 +6,6 @@ Example: python run_script.py .svg svgo
          python run_script.py .svg svgo -c config.json -o output/
 """
 
-import os
 import subprocess
 import sys
 from functools import partial

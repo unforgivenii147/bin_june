@@ -25,7 +25,12 @@ def main() -> None:
 
     # Copy to clipboard via pipe (more reliable)
     try:
-        subprocess.run(["termux-clipboard-set"], input=formatted_content, text=True, capture_output=True)
+        subprocess.run(
+            ["termux-clipboard-set"],
+            input=formatted_content,
+            text=True,
+            capture_output=True,
+        )
         print(f"✓ Updated and copied: {filepath}")
     except FileNotFoundError:
         print(f"✓ File updated: {filepath}")

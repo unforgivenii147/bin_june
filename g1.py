@@ -71,7 +71,17 @@ def build_clone_url(repo: Repository) -> str:
 
 def clone_repo(clone_url: str, branch: str) -> None:
     print(f"[INFO] Cloning repository from {clone_url} (branch: {branch})")
-    cmd = ["git", "clone", "--depth", "1", "--single-branch", "--branch", branch, clone_url, "--progress"]
+    cmd = [
+        "git",
+        "clone",
+        "--depth",
+        "1",
+        "--single-branch",
+        "--branch",
+        branch,
+        clone_url,
+        "--progress",
+    ]
     try:
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
         for line in process.stderr:
@@ -103,7 +113,11 @@ def init_submodules() -> None:
         return
     try:
         print("[INFO] Initializing and updating submodules...")
-        subprocess.run(["git", "submodule", "update", "--init", "--recursive"], check=True, capture_output=True)
+        subprocess.run(
+            ["git", "submodule", "update", "--init", "--recursive"],
+            check=True,
+            capture_output=True,
+        )
         print("[INFO] Submodules updated successfully.")
     except subprocess.CalledProcessError as e:
         raise Exception(f"Submodule update failed: {e}")

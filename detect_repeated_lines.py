@@ -54,7 +54,13 @@ def remove_duplicates(lines: list[str], duplicates):
     return lines_copy
 
 
-def process_file(file_path, duplicates, dry_run: bool = False, auto_yes=False, skip_blanks: bool = True):
+def process_file(
+    file_path,
+    duplicates,
+    dry_run: bool = False,
+    auto_yes=False,
+    skip_blanks: bool = True,
+):
     """Process a single file."""
     if not duplicates:
         return False, auto_yes
@@ -110,8 +116,18 @@ def main() -> None:
         description="Find and remove sequential duplicate lines in Python files",
         epilog="Blank lines are ignored by default.",
     )
-    parser.add_argument("--dry-run", "-n", action="store_true", help="Preview changes without modifying files")
-    parser.add_argument("--yes", "-y", action="store_true", help="Automatically answer yes to all prompts")
+    parser.add_argument(
+        "--dry-run",
+        "-n",
+        action="store_true",
+        help="Preview changes without modifying files",
+    )
+    parser.add_argument(
+        "--yes",
+        "-y",
+        action="store_true",
+        help="Automatically answer yes to all prompts",
+    )
     parser.add_argument(
         "--include-blanks",
         "-b",

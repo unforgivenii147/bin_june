@@ -103,7 +103,12 @@ def process_file(filepath) -> None:
                         break
                     line_idx += 1
                 doc_block = "\n".join(doc_lines)
-                doc_body = re.sub(f"^{quote_type}|{quote_type}$", "", doc_block.strip(), flags=re.MULTILINE).strip()
+                doc_body = re.sub(
+                    f"^{quote_type}|{quote_type}$",
+                    "",
+                    doc_block.strip(),
+                    flags=re.MULTILINE,
+                ).strip()
                 translated_doc_body = translate_docstring(doc_body)
                 translated_doc_block = f"{quote_type}\n{translated_doc_body}\n{quote_type}"
                 start = docstring_line + offset_map.get(docstring_line, 0)

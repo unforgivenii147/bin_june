@@ -85,7 +85,11 @@ class MmapReader(LineProcessor):
             raise OSError(msg)
 
     def read_lines(
-        self, file_path: Path, encoding: str = "utf-8", skip_empty: bool = False, use_mmap: bool = True
+        self,
+        file_path: Path,
+        encoding: str = "utf-8",
+        skip_empty: bool = False,
+        use_mmap: bool = True,
     ) -> Generator[str, None, None]:
         if use_mmap:
             yield from self.read_lines_mmap(file_path, encoding, skip_empty)
@@ -340,13 +344,33 @@ def main() -> None:
     parser.add_argument("--output", "-o", help="Output filename (default: overwrite input)")
     parser.add_argument("--sort", action="store_true", default=True, help="Sort lines (default: True)")
     parser.add_argument("--no-sort", dest="sort", action="store_false", help="Do not sort lines")
-    parser.add_argument("--unique", action="store_true", default=True, help="Remove duplicates (default: True)")
-    parser.add_argument("--no-unique", dest="unique", action="store_false", help="Do not remove duplicates")
+    parser.add_argument(
+        "--unique",
+        action="store_true",
+        default=True,
+        help="Remove duplicates (default: True)",
+    )
+    parser.add_argument(
+        "--no-unique",
+        dest="unique",
+        action="store_false",
+        help="Do not remove duplicates",
+    )
     parser.add_argument("--reverse", "-r", action="store_true", help="Sort in reverse order")
     parser.add_argument("--case-insensitive", "-i", action="store_true", help="Case-insensitive sorting")
     parser.add_argument("--skip-empty", action="store_true", help="Skip empty lines")
-    parser.add_argument("--no-backup", action="store_true", default=True, help="Do not create backup file")
-    parser.add_argument("--dry-run", action="store_true", default=False, help="Preview without modifying files")
+    parser.add_argument(
+        "--no-backup",
+        action="store_true",
+        default=True,
+        help="Do not create backup file",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        default=False,
+        help="Preview without modifying files",
+    )
     parser.add_argument("--analyze", action="store_true", help="Analyze file before processing")
     parser.add_argument("--report", "-R", metavar="FILE", help="Save report to JSON file")
     parser.add_argument("-v", "--verbose", default=True, action="store_true", help="Verbose output")

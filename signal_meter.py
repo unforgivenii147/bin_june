@@ -47,7 +47,12 @@ class SignalMonitor:
     def get_cellular_signal(self):
         """Extract cellular signal via dumpsys."""
         try:
-            result = subprocess.run(["dumpsys", "telephony.registry"], capture_output=True, text=True, timeout=2)
+            result = subprocess.run(
+                ["dumpsys", "telephony.registry"],
+                capture_output=True,
+                text=True,
+                timeout=2,
+            )
 
             # Parse signal strength (0-31, where 31 = excellent, 0 = poor)
             signal_match = re.search(r"mSignalStrength[=:]?\s*(\d+)", result.stdout)
@@ -63,7 +68,12 @@ class SignalMonitor:
 
             if state_match:
                 state_num = int(state_match.group(1))
-                states = {0: "Disconnected", 1: "Connecting", 2: "Connected", 3: "Suspended"}
+                states = {
+                    0: "Disconnected",
+                    1: "Connecting",
+                    2: "Connected",
+                    3: "Suspended",
+                }
                 self.cellular_status = states.get(state_num, "Unknown")
 
             return self.cellular_strength
@@ -92,7 +102,10 @@ class SignalMonitor:
         """Check if airplane mode is enabled."""
         try:
             result = subprocess.run(
-                ["settings", "get", "global", "airplane_mode_on"], capture_output=True, text=True, timeout=1
+                ["settings", "get", "global", "airplane_mode_on"],
+                capture_output=True,
+                text=True,
+                timeout=1,
             )
             self.is_airplane_mode = result.stdout.strip() == "1"
             return self.is_airplane_mode
@@ -110,7 +123,10 @@ class SignalMonitor:
         os.system("clear")
 
         # Header
-        header = Panel(Align.center("[bold cyan]📡 SIGNAL STRENGTH MONITOR[/bold cyan]"), border_style="cyan")
+        header = Panel(
+            Align.center("[bold cyan]📡 SIGNAL STRENGTH MONITOR[/bold cyan]"),
+            border_style="cyan",
+        )
         console.print(header)
 
         # Status indicator

@@ -102,8 +102,17 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Organize files recursively into alphabetical folders")
-    parser.add_argument("directory", nargs="?", default=".", help="Directory to organize (default: current directory)")
-    parser.add_argument("--dry-run", action="store_true", help="Show what would be moved without actually moving files")
+    parser.add_argument(
+        "directory",
+        nargs="?",
+        default=".",
+        help="Directory to organize (default: current directory)",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be moved without actually moving files",
+    )
 
     args = parser.parse_args()
     target_dir = Path(args.directory).resolve()

@@ -24,7 +24,11 @@ except:
 # Static config
 VERSION = "0.1.0"
 MYNAME = sys.argv[0].replace("./", "")
-RC_FILE_LOCS = [".bestwhoisrc", os.path.expanduser("~") + "/.bestwhoisrc", "/etc/bestwhois/bestwhoisrc"]
+RC_FILE_LOCS = [
+    ".bestwhoisrc",
+    os.path.expanduser("~") + "/.bestwhoisrc",
+    "/etc/bestwhois/bestwhoisrc",
+]
 
 
 # Utility functions
@@ -83,7 +87,9 @@ ARGS_PARSER = ArgumentParser(
 )
 # Positional argument: the domain
 ARGS_PARSER.add_argument(
-    "domainName", type=str, help="The domain to be queried. Domains with national characters can be Unicode or IDN."
+    "domainName",
+    type=str,
+    help="The domain to be queried. Domains with national characters can be Unicode or IDN.",
 )
 # Optional arguments
 ARGS_PARSER.add_argument(
@@ -92,7 +98,11 @@ ARGS_PARSER.add_argument(
     action="version",
     version=MYNAME + " ver. " + VERSION + "\n(c) WhoisXML API Inc.",
 )
-ARGS_PARSER.add_argument("--rcfile", type=str, help="Use this rc file. Will override all default ini locations.")
+ARGS_PARSER.add_argument(
+    "--rcfile",
+    type=str,
+    help="Use this rc file. Will override all default ini locations.",
+)
 ARGS_PARSER.add_argument("--apikey", type=str, help="Directly specify the API key. Overrides any ini file.")
 ARGS_PARSER.add_argument(
     "--nocolor",
@@ -114,7 +124,11 @@ ARGS_PARSER.add_argument(
     action="store_true",
     help="Print the first 128 characters of raw text fields. The default is to suppress raw texts fully.",
 )
-ARGS_PARSER.add_argument("--keep-empty", action="store_true", help="Keep and display fields with empty and null values")
+ARGS_PARSER.add_argument(
+    "--keep-empty",
+    action="store_true",
+    help="Keep and display fields with empty and null values",
+)
 ARGS_PARSER.add_argument(
     "--history",
     action="store_true",
@@ -270,7 +284,13 @@ for whoisRecord in result["records"]:
             except:
                 pass
         for subfield in whoisRecord.keys():
-            for textfield in ["rawText", "strippedText", "cleanText", "header", "footer"]:
+            for textfield in [
+                "rawText",
+                "strippedText",
+                "cleanText",
+                "header",
+                "footer",
+            ]:
                 try:
                     whoisRecord[subfield][textfield] = whoisRecord[subfield][textfield][0:64] + "..."
                 except:
@@ -282,7 +302,13 @@ for whoisRecord in result["records"]:
             except:
                 pass
         for subfield in whoisRecord.keys():
-            for textfield in ["rawText", "strippedText", "cleanText", "header", "footer"]:
+            for textfield in [
+                "rawText",
+                "strippedText",
+                "cleanText",
+                "header",
+                "footer",
+            ]:
                 try:
                     whoisRecord[subfield].pop(textfield)
                 except:

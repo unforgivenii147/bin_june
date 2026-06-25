@@ -17,7 +17,13 @@ from PIL.ImageFile import ImageFile
 SVG_SUPPORT = True
 
 
-def resize_image(img: ImageFile, terminal_width: int, terminal_height: int, max_width=None, max_height=None):
+def resize_image(
+    img: ImageFile,
+    terminal_width: int,
+    terminal_height: int,
+    max_width=None,
+    max_height=None,
+):
     """Resize image based on terminal dimensions and constraints"""
     orig_width, orig_height = img.size
 
@@ -48,7 +54,10 @@ def resize_image(img: ImageFile, terminal_width: int, terminal_height: int, max_
 def load_svg(svg_path, width=None, height=None) -> ImageFile:
     """Load SVG file and convert to PIL Image"""
     if not SVG_SUPPORT:
-        print("Error: SVG support requires 'cairosvg' library. Install with: pip install cairosvg", file=sys.stderr)
+        print(
+            "Error: SVG support requires 'cairosvg' library. Install with: pip install cairosvg",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     try:
@@ -212,10 +221,15 @@ def main() -> None:
     parser.add_argument("-w", "--width", type=int, help="Maximum width in characters")
     parser.add_argument("-H", "--height", type=int, help="Maximum height in characters")
     parser.add_argument(
-        "--no-half-blocks", action="store_true", help="Disable half-block characters (lower vertical resolution)"
+        "--no-half-blocks",
+        action="store_true",
+        help="Disable half-block characters (lower vertical resolution)",
     )
     parser.add_argument("--dpi", type=int, default=96, help="DPI for SVG rendering (default: 96)")
-    parser.add_argument("--bg-color", help='Background color for transparent areas (e.g., "black" or "#000000")')
+    parser.add_argument(
+        "--bg-color",
+        help='Background color for transparent areas (e.g., "black" or "#000000")',
+    )
 
     args = parser.parse_args()
 

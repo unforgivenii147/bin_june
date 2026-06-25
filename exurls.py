@@ -79,7 +79,10 @@ def main() -> None:
         links = extract_links(url, session)
     except requests.exceptions.HTTPError as e:
         if e.response.status_code == 403:
-            print("Access forbidden (403). The site may be blocking automated access.", file=sys.stderr)
+            print(
+                "Access forbidden (403). The site may be blocking automated access.",
+                file=sys.stderr,
+            )
         else:
             print(f"HTTP error: {e}", file=sys.stderr)
         sys.exit(1)

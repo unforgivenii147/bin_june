@@ -120,10 +120,29 @@ def main():
         "  %(prog)s folder/ --parallel  # Process folder with parallel execution\n"
         "  %(prog)s . -j 8              # Process current dir with 8 parallel jobs",
     )
-    parser.add_argument("inputs", nargs="*", help="Files or folders to process. Defaults to recursive '.' if empty.")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Print details for every image processed.")
-    parser.add_argument("--parallel", action="store_true", help="Enable multiprocessing (sequential is default).")
-    parser.add_argument("-j", "--jobs", type=int, default=None, help="Number of parallel jobs. Default is CPU count.")
+    parser.add_argument(
+        "inputs",
+        nargs="*",
+        help="Files or folders to process. Defaults to recursive '.' if empty.",
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Print details for every image processed.",
+    )
+    parser.add_argument(
+        "--parallel",
+        action="store_true",
+        help="Enable multiprocessing (sequential is default).",
+    )
+    parser.add_argument(
+        "-j",
+        "--jobs",
+        type=int,
+        default=None,
+        help="Number of parallel jobs. Default is CPU count.",
+    )
 
     args = parser.parse_args()
 

@@ -5,7 +5,6 @@ from pathlib import Path
 from multiprocessing import Pool, cpu_count
 from typing import Tuple
 from tqdm import tqdm
-import os
 
 
 class ImageDimensionRenamer:
@@ -19,7 +18,15 @@ class ImageDimensionRenamer:
         """
         self.root_dir = Path(root_dir)
         self.separator = separator
-        self.supported_formats = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".gif", ".webp"}
+        self.supported_formats = {
+            ".jpg",
+            ".jpeg",
+            ".png",
+            ".bmp",
+            ".tiff",
+            ".gif",
+            ".webp",
+        }
 
         print("=" * 70)
         print("IMAGE DIMENSION RENAMER")
@@ -106,7 +113,11 @@ class ImageDimensionRenamer:
 
             # Check if new filename already exists
             if new_path.exists() and new_path != image_path:
-                return image_path, False, f"Target filename already exists: {new_filename}"
+                return (
+                    image_path,
+                    False,
+                    f"Target filename already exists: {new_filename}",
+                )
 
             # Rename file
             image_path.rename(new_path)

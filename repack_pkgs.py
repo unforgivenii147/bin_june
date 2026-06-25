@@ -366,16 +366,31 @@ def main() -> None:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="\nExamples:\n  python repack_venv_packages.py\n  python repack_venv_packages.py --site-packages /path/to/site-packages\n  python repack_venv_packages.py --output /path/to/output\n  python repack_venv_packages.py --dry-run\n  python repack_venv_packages.py -v\n  python repack_venv_packages.py --report repack_report.json\n  python repack_venv_packages.py --list-wheels\n        ",
     )
-    parser.add_argument("--site-packages", default=None, help="Path to site-packages directory (default: current dir)")
-    parser.add_argument("--output", default=None, help="Output directory for .whl files (default: ~/tmp/whl)")
+    parser.add_argument(
+        "--site-packages",
+        default=None,
+        help="Path to site-packages directory (default: current dir)",
+    )
+    parser.add_argument(
+        "--output",
+        default=None,
+        help="Output directory for .whl files (default: ~/tmp/whl)",
+    )
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
-    parser.add_argument("--dry-run", action="store_true", help="Show what would be done without creating files")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be done without creating files",
+    )
     parser.add_argument("--report", metavar="FILE", help="Save detailed report to JSON file")
     parser.add_argument("--list-wheels", action="store_true", help="List generated .whl files")
     args = parser.parse_args()
     try:
         repacker = VenvRepacker(
-            site_packages_dir=args.site_packages, output_dir=args.output, verbose=args.verbose, dry_run=args.dry_run
+            site_packages_dir=args.site_packages,
+            output_dir=args.output,
+            verbose=args.verbose,
+            dry_run=args.dry_run,
         )
         repacker.repack_all()
         repacker.print_stats()

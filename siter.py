@@ -3,13 +3,11 @@ import argparse
 import base64
 import csv
 import hashlib
-import os
 import shutil
 import sys
 import tempfile
 import zipfile
-from functools import partial
-from multiprocessing import Pool, cpu_count
+from multiprocessing import cpu_count
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
@@ -85,7 +83,10 @@ class WheelBuilder:
                 if not row or not row[0]:
                     continue
                 path = row[0]
-                records[path] = {"hash": row[1] if len(row) > 1 else "", "size": row[2] if len(row) > 2 else ""}
+                records[path] = {
+                    "hash": row[1] if len(row) > 1 else "",
+                    "size": row[2] if len(row) > 2 else "",
+                }
         return records
 
     def _find_scripts_for_package(self, records: Dict) -> List[Path]:
@@ -414,16 +415,36 @@ Examples:
     )
 
     parser.add_argument(
-        "--output", "-o", type=Path, default=Path("./wheels"), help="Output directory for wheels (default: ./wheels)"
+        "--output",
+        "-o",
+        type=Path,
+        default=Path("./wheels"),
+        help="Output directory for wheels (default: ./wheels)",
     )
     parser.add_argument("--package", "-p", help="Build only this package (by name)")
-    parser.add_argument("--all", "-a", action="store_true", help="Repack all packages (overwrite existing wheels)")
-    parser.add_argument("--no-parallel", action="store_true", help="Disable parallel processing (use serial mode)")
     parser.add_argument(
-        "--workers", "-w", type=int, default=None, help="Number of worker processes (default: CPU count, max 8)"
+        "--all",
+        "-a",
+        action="store_true",
+        help="Repack all packages (overwrite existing wheels)",
     )
     parser.add_argument(
-        "--site-packages", "-s", type=Path, help="Path to site-packages directory (default: current directory)"
+        "--no-parallel",
+        action="store_true",
+        help="Disable parallel processing (use serial mode)",
+    )
+    parser.add_argument(
+        "--workers",
+        "-w",
+        type=int,
+        default=None,
+        help="Number of worker processes (default: CPU count, max 8)",
+    )
+    parser.add_argument(
+        "--site-packages",
+        "-s",
+        type=Path,
+        help="Path to site-packages directory (default: current directory)",
     )
 
     args = parser.parse_args()
@@ -451,7 +472,13 @@ Examples:
 
     # Create builder with parallel settings
     parallel = not args.no_parallel
-    builder = WheelBuilder(site_packages, args.output, args.all, parallel=parallel, max_workers=args.workers)
+    builder = WheelBuilder(
+        site_packages,
+        args.output,
+        args.all,
+        parallel=parallel,
+        max_workers=args.workers,
+    )
 
     # Build specific package or all
     if args.package:

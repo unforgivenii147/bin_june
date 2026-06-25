@@ -31,7 +31,13 @@ def parse_size(size_str: str) -> int:
     value = float(match.group(1))
     unit = match.group(2).upper()
 
-    multipliers = {"": 1, "K": 1024, "M": 1024 * 1024, "G": 1024 * 1024 * 1024, "T": 1024 * 1024 * 1024 * 1024}
+    multipliers = {
+        "": 1,
+        "K": 1024,
+        "M": 1024 * 1024,
+        "G": 1024 * 1024 * 1024,
+        "T": 1024 * 1024 * 1024 * 1024,
+    }
 
     return int(value * multipliers.get(unit, 1))
 
@@ -40,7 +46,12 @@ def get_all_packages():
     """Get list of all available packages using apt list"""
     try:
         print("📦 Fetching list of all available packages...")
-        result = subprocess.run(["apt", "list", "--all-versions"], capture_output=True, text=True, check=True)
+        result = subprocess.run(
+            ["apt", "list", "--all-versions"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
 
         packages = []
         lines = result.stdout.strip().split("\n")
@@ -63,7 +74,11 @@ def get_package_info(package):
     """Get download size for a single package"""
     try:
         result = subprocess.run(
-            ["apt", "show", package], capture_output=True, text=True, check=False, timeout=10
+            ["apt", "show", package],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=10,
         )  # Timeout to avoid hanging
 
         if result.returncode != 0:

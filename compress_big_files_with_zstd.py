@@ -1,0 +1,239 @@
+#!/data/data/com.termux/files/usr/bin/python
+"""
+Compress files larger than a threshold in current directory recursively.
+Usage: python compress_large_files.py <threshold_in_bytes>
+Example: python compress_large_files.py 1048576  # Compress files > 1MB
+"""
+
+import sys
+import time
+from pathlib import Path
+import zstandard as zstd
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import threading
+
+# ANSI color codes for progress display
+GREEN = "\033[92m"
+YELLOW = "\033[93m"
+BLUE = "\033[94m"
+RED = "\033[91m"
+RESET = "\033[0m"
+
+
+class ProgressDisplay:
+    def __init__(self):
+        self.lock = threading.Lock()
+        self.total_files = 0
+        self.processed_files = 0
+        self.total_size = 0
+        self.compressed_size = 0
+        self.start_time = time.time()
+
+    def update(self, file_path, original_size, compressed_size, status="compressed"):
+        with self.lock:
+            self.processed_files += 1
+            self.total_size += original_size
+            self.compressed_size += compressed_size
+
+            # Calculate percentage and speed
+            elapsed = time.time() - self.start_time
+            if self.total_files > 0:
+                percent = (self.processed_files / self.total_files) * 100
+            else:
+                percent = 0
+
+            # Calculate compression ratio
+            if self.total_size > 0:
+                ratio = self.compressed_size / self.total_size
+                savings = (1 - ratio) * 100
+            else:
+                ratio = 1
+                savings = 0
+
+            # Speed in MB/s
+            if elapsed > 0:
+                speed = (self.total_size / (1024 * 1024)) / elapsed
+            else:
+                speed = 0
+
+            # Progress bar
+            bar_length = 30
+            filled = int(bar_length * percent / 100)
+            bar = "=" * filled + ">" + "." * (bar_length - filled - 1)
+
+            # Display progress
+            status_color = GREEN if status == "compressed" else YELLOW
+            filename = Path(file_path).name
+            if len(filename) > 30:
+                filename = filename[:27] + "..."
+
+            print(
+                f"\r{status_color}{status.upper():10}{RESET} "
+                f"[{bar}] {percent:5.1f}% "
+                f"{self.processed_files}/{self.total_files} files "
+                f"({savings:5.1f}% saved, {speed:5.1f} MB/s) "
+                f"- {filename:<30}",
+                end="",
+                flush=True,
+            )
+
+    def set_total_files(self, count):
+        self.total_files = count
+
+    def finish(self):
+        elapsed = time.time() - self.start_time
+        print()  # New line after progress display
+        print(f"\n{GREEN}✓ Compression complete!{RESET}")
+        print(f"  Files processed: {self.processed_files}/{self.total_files}")
+        if self.total_size > 0:
+            orig_mb = self.total_size / (1024 * 1024)
+            comp_mb = self.compressed_size / (1024 * 1024)
+            savings = (1 - self.compressed_size / self.total_size) * 100
+            print(f"  Original size: {orig_mb:.2f} MB")
+            print(f"  Compressed size: {comp_mb:.2f} MB")
+            print(f"  Savings: {savings:.1f}%")
+            print(f"  Time: {elapsed:.1f} seconds")
+            print(f"  Average speed: {(self.total_size / (1024 * 1024)) / elapsed:.1f} MB/s")
+
+
+def should_compress_file(file_path, threshold):
+    """Check if file should be compressed based on size and extension."""
+    # Don't compress already compressed files
+    compressed_extensions = {
+        ".zst",
+        ".gz",
+        ".bz2",
+        ".xz",
+        ".zip",
+        ".rar",
+        ".7z",
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".gif",
+        ".mp4",
+        ".avi",
+        ".mkv",
+        ".mp3",
+        ".flac",
+        ".pdf",
+    }
+
+    if file_path.suffix.lower() in compressed_extensions:
+        return False
+
+    # Check file size
+    try:
+        size = file_path.stat().st_size
+        return size > threshold
+    except OSError:
+        return False
+
+
+def compress_file(file_path, progress, level=3):
+    """Compress a single file using zstandard."""
+    original_size = file_path.stat().st_size
+    compressed_path = file_path.with_suffix(file_path.suffix + ".zst")
+    temp_path = file_path.with_suffix(file_path.suffix + ".zst.tmp")
+
+    try:
+        # Compress the file
+        cctx = zstd.ZstdCompressor(level=level, threads=4)
+
+        # Read input file
+        with open(file_path, "rb") as f_in:
+            data = f_in.read()
+
+        # Compress data
+        compressed_data = cctx.compress(data)
+        compressed_size = len(compressed_data)
+
+        # Only keep compressed file if it's smaller than original
+        if compressed_size < original_size:
+            # Write to temporary file first
+            with open(temp_path, "wb") as f_out:
+                f_out.write(compressed_data)
+
+            # Rename to final name
+            temp_path.rename(compressed_path)
+
+            # Remove original file
+            file_path.unlink()
+
+            progress.update(file_path, original_size, compressed_size, "compressed")
+            return True, file_path, compressed_path, compressed_size
+        else:
+            # Compression didn't help, skip
+            progress.update(file_path, original_size, original_size, "skipped")
+            return False, file_path, None, original_size
+
+    except Exception as e:
+        # Clean up temp file if it exists
+        if temp_path.exists():
+            temp_path.unlink()
+        progress.update(file_path, original_size, original_size, f"error: {str(e)[:20]}")
+        return False, file_path, None, original_size
+
+
+def main():
+    if len(sys.argv) != 2:
+        print(f"{RED}Usage: python {sys.argv[0]} <threshold_in_bytes>{RESET}")
+        print(f"Example: python {sys.argv[0]} 1048576  # Compress files > 1MB")
+        print(f"Example: python {sys.argv[0]} 5242880  # Compress files > 5MB")
+        sys.exit(1)
+
+    try:
+        threshold = int(sys.argv[1])
+        if threshold <= 0:
+            print(f"{RED}Threshold must be positive{RESET}")
+            sys.exit(1)
+    except ValueError:
+        print(f"{RED}Invalid threshold. Please provide a number in bytes.{RESET}")
+        sys.exit(1)
+
+    # Display threshold in human-readable format
+    if threshold >= 1024 * 1024 * 1024:
+        threshold_str = f"{threshold / (1024 * 1024 * 1024):.1f} GB"
+    elif threshold >= 1024 * 1024:
+        threshold_str = f"{threshold / (1024 * 1024):.1f} MB"
+    elif threshold >= 1024:
+        threshold_str = f"{threshold / 1024:.1f} KB"
+    else:
+        threshold_str = f"{threshold} bytes"
+
+    print(f"{BLUE}Compressing files larger than {threshold_str}{RESET}")
+    print(f"{YELLOW}Scanning current directory...{RESET}")
+
+    # Scan for files to compress
+    current_dir = Path.cwd()
+    files_to_compress = []
+
+    for file_path in current_dir.rglob("*"):
+        if file_path.is_file() and should_compress_file(file_path, threshold):
+            files_to_compress.append(file_path)
+
+    if not files_to_compress:
+        print(f"{YELLOW}No files found larger than {threshold_str}{RESET}")
+        return
+
+    print(f"{GREEN}Found {len(files_to_compress)} files to compress{RESET}")
+
+    # Initialize progress display
+    progress = ProgressDisplay()
+    progress.set_total_files(len(files_to_compress))
+
+    # Compress files in parallel
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        futures = {executor.submit(compress_file, f, progress): f for f in files_to_compress}
+
+        for future in as_completed(futures):
+            try:
+                future.result()  # This will raise any exceptions
+            except Exception as e:
+                print(f"\n{RED}Error processing file: {e}{RESET}")
+
+    progress.finish()
+
+
+if __name__ == "__main__":
+    main()

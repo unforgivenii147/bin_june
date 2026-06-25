@@ -6,7 +6,16 @@ import tokenize
 from io import StringIO
 from pathlib import Path
 
-python_keywords = {"def", "class", "import", "from", "lambda", "yield", "async", "await"}
+python_keywords = {
+    "def",
+    "class",
+    "import",
+    "from",
+    "lambda",
+    "yield",
+    "async",
+    "await",
+}
 
 
 def is_probably_python(lines: str) -> bool:

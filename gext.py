@@ -34,12 +34,30 @@ if not HERE:
 else:
     OUTPUT_DIR = Path.home() / "tmp" / "output"
 
-ARCHIVE_EXTENSIONS = (".whl", ".zip", ".tar.gz", ".tgz", ".tar.zst", ".tar.xz", ".tar", ".zst")
+ARCHIVE_EXTENSIONS = (
+    ".whl",
+    ".zip",
+    ".tar.gz",
+    ".tgz",
+    ".tar.zst",
+    ".tar.xz",
+    ".tar",
+    ".zst",
+)
 ALLOWED_PYTHON_EXTENSIONS = ".py"
 
 # Common imports mapping for dependency resolution
 COMMON_IMPORTS = {
-    "typing": ["List", "Dict", "Optional", "Union", "Tuple", "Any", "Callable", "TypeVar"],
+    "typing": [
+        "List",
+        "Dict",
+        "Optional",
+        "Union",
+        "Tuple",
+        "Any",
+        "Callable",
+        "TypeVar",
+    ],
     "dataclasses": ["dataclass", "field"],
     "enum": ["Enum", "auto"],
     "abc": ["ABC", "abstractmethod"],
@@ -457,7 +475,13 @@ def process_archive(path: Path) -> Tuple[List[Dict[str, Any]], List[str]]:
 
     # Handle TAR files
     elif any(path.name.endswith(ext) for ext in [".tar", ".tar.gz", ".tgz", ".tar.zst", ".tar.xz"]):
-        mode_map = {".tar.gz": "r:gz", ".tgz": "r:gz", ".tar.zst": "r:zst", ".tar.xz": "r:xz", ".tar": "r"}
+        mode_map = {
+            ".tar.gz": "r:gz",
+            ".tgz": "r:gz",
+            ".tar.zst": "r:zst",
+            ".tar.xz": "r:xz",
+            ".tar": "r",
+        }
         mode = next((mode_map[ext] for ext in mode_map if path.name.endswith(ext)), "r")
 
         try:

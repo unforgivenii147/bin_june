@@ -35,7 +35,14 @@ def get_wheel_tags() -> str:
 
 def get_package_info(pkg_path):
     """Extract package metadata."""
-    info = {"name": pkg_path.name, "version": "0.0.0", "files": [], "data_files": [], "scripts": [], "has_so": False}
+    info = {
+        "name": pkg_path.name,
+        "version": "0.0.0",
+        "files": [],
+        "data_files": [],
+        "scripts": [],
+        "has_so": False,
+    }
 
     # Try to read metadata from dist-info or egg-info
     for dist_dir in pkg_path.parent.glob(f"{pkg_path.name}*.dist-info"):
@@ -205,7 +212,14 @@ def get_packages(site_packages_dir: Path, package_names=None):
     packages = []
 
     # Ignore special directories
-    ignore_dirs = {"__pycache__", "pip", "setuptools", "wheel", "_distutils_hack", "pkg_resources"}
+    ignore_dirs = {
+        "__pycache__",
+        "pip",
+        "setuptools",
+        "wheel",
+        "_distutils_hack",
+        "pkg_resources",
+    }
 
     for item in site_packages_dir.iterdir():
         if item.name in ignore_dirs:
@@ -258,8 +272,17 @@ def repack_parallel(packages, wheels_dir: Path, dryrun, verbose) -> list[bool]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Repack site-packages packages as wheel files")
-    parser.add_argument("-a", "--all", action="store_true", help="Repack all packages (uses multiprocessing)")
-    parser.add_argument("--dryrun", action="store_true", help="Show what would be done without actual repacking")
+    parser.add_argument(
+        "-a",
+        "--all",
+        action="store_true",
+        help="Repack all packages (uses multiprocessing)",
+    )
+    parser.add_argument(
+        "--dryrun",
+        action="store_true",
+        help="Show what would be done without actual repacking",
+    )
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     parser.add_argument("packages", nargs="*", help="Package names to repack (sequential mode)")
 

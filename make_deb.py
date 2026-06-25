@@ -6,7 +6,7 @@ import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import List, Set
+from typing import List
 
 # Configuration
 DEB_DIR = Path.home() / "debs"
@@ -91,7 +91,12 @@ def create_deb_for_package(pkg_name: str) -> bool:
         logger.info(f"⟳ Creating .deb for {pkg_name}...")
 
         # Download the .deb file using apt
-        result = subprocess.run(["apt", "download", pkg_name], capture_output=True, text=True, cwd=str(DEB_DIR))
+        result = subprocess.run(
+            ["apt", "download", pkg_name],
+            capture_output=True,
+            text=True,
+            cwd=str(DEB_DIR),
+        )
 
         if result.returncode != 0:
             logger.error(f"✗ Failed to download {pkg_name}: {result.stderr.strip()}")

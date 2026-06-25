@@ -1,7 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 from pathlib import Path
 
-import cv2
 from dh import cprint, get_files, mpf3
 from nudenet import NudeDetector
 

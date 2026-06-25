@@ -10,7 +10,10 @@ def process_file(path):
     path = Path(path)
     if not path.exists():
         return (False, path)
-    ret = runcmd(["prettier", "-w", str(path).replace("/storage/emulated/0", "/sdcard")], show_output=True)
+    ret = runcmd(
+        ["prettier", "-w", str(path).replace("/storage/emulated/0", "/sdcard")],
+        show_output=True,
+    )
     if not ret:
         return (True, path)
     return (False, path)
@@ -22,7 +25,21 @@ def main() -> None:
     files = (
         [Path(f) for f in args]
         if args
-        else get_files(cwd, extensions=[".html", ".htm", ".js", ".jsx", ".ts", ".tsx", ".css", ".md", ".jsm", ".scss"])
+        else get_files(
+            cwd,
+            extensions=[
+                ".html",
+                ".htm",
+                ".js",
+                ".jsx",
+                ".ts",
+                ".tsx",
+                ".css",
+                ".md",
+                ".jsm",
+                ".scss",
+            ],
+        )
     )
     mpf3(process_file, files)
 

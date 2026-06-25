@@ -44,7 +44,11 @@ def refactor_file(file_path):
         content = re.sub(os_path_func, pathlib_replacement, content)
 
     # Handle os.path.join with multiple arguments
-    content = re.sub(r"Path\(([^)]+)\)", lambda m: f"Path({m.group(1).replace(' ', '').replace(',', ', ')})", content)
+    content = re.sub(
+        r"Path\(([^)]+)\)",
+        lambda m: f"Path({m.group(1).replace(' ', '').replace(',', ', ')})",
+        content,
+    )
 
     # Handle os.path.join with variables
     content = re.sub(r"Path\(([^)]+)\)", lambda m: f"Path({m.group(1)})", content)

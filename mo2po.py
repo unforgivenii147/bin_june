@@ -13,7 +13,12 @@ from pathlib import Path
 def check_msgunfmt() -> bool:
     """Check if msgunfmt is available."""
     try:
-        subprocess.run(["msgunfmt", "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+        subprocess.run(
+            ["msgunfmt", "--version"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=True,
+        )
         return True
     except (subprocess.CalledProcessError, FileNotFoundError):
         return False
@@ -49,7 +54,11 @@ def mo_to_po(mo_path, remove_orig: bool = True, verbose: bool = False) -> bool:
         # Run msgunfmt to convert .mo to .po
         with open(po_path, "w", encoding="utf-8") as po_file:
             result = subprocess.run(
-                ["msgunfmt", str(mo_path)], stdout=po_file, stderr=subprocess.PIPE, text=True, check=True
+                ["msgunfmt", str(mo_path)],
+                stdout=po_file,
+                stderr=subprocess.PIPE,
+                text=True,
+                check=True,
             )
 
         # Verify the output file has content
@@ -161,7 +170,11 @@ def mo_to_po_python_only(mo_path, remove_orig: bool = True, verbose: bool = Fals
 
 
 def process_directory(
-    directory: Path, recursive: bool = False, remove_orig: bool = True, verbose: bool = False, fallback: bool = False
+    directory: Path,
+    recursive: bool = False,
+    remove_orig: bool = True,
+    verbose: bool = False,
+    fallback: bool = False,
 ) -> None:
     """Process all .mo files in a directory."""
     directory = Path(directory)
@@ -210,14 +223,21 @@ Examples:
 
     parser.add_argument("path", help="Path to .mo file or directory containing .mo files")
 
-    parser.add_argument("-k", "--keep", action="store_true", help="Keep original .mo files (don't remove)")
+    parser.add_argument(
+        "-k",
+        "--keep",
+        action="store_true",
+        help="Keep original .mo files (don't remove)",
+    )
 
     parser.add_argument("-r", "--recursive", action="store_true", help="Process directories recursively")
 
     parser.add_argument("-v", "--verbose", action="store_true", help="Show detailed progress messages")
 
     parser.add_argument(
-        "--fallback", action="store_true", help="Use pure Python fallback method (doesn't require gettext utilities)"
+        "--fallback",
+        action="store_true",
+        help="Use pure Python fallback method (doesn't require gettext utilities)",
     )
 
     args = parser.parse_args()

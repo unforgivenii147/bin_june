@@ -3,6 +3,7 @@
 import ast
 from ast import AST
 from pathlib import Path
+import os
 
 output_dir = Path("output")
 output_dir.mkdir(exist_ok=True)

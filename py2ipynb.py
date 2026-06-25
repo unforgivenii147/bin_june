@@ -58,7 +58,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Convert a Python script to a Jupyter notebook")
     parser.add_argument("input", help="Input Python file (.py)")
     parser.add_argument("output", nargs="?", help="Output notebook file (.ipynb) (optional)")
-    parser.add_argument("--no-split", action="store_true", help="Don't split code into multiple cells (one cell only)")
+    parser.add_argument(
+        "--no-split",
+        action="store_true",
+        help="Don't split code into multiple cells (one cell only)",
+    )
     args = parser.parse_args()
     if args.no_split:
         code = Path(args.input).read_text(encoding="utf-8")

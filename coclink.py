@@ -21,7 +21,12 @@ def get_videos(youtube: Resource, channel_id: str):
     past_date = (datetime.now(UTC) - timedelta(days=30)).isoformat()
     videos = []
     request = youtube.search().list(
-        part="snippet", channelId=channel_id, publishedAfter=past_date, maxResults=50, order="date", type="video"
+        part="snippet",
+        channelId=channel_id,
+        publishedAfter=past_date,
+        maxResults=50,
+        order="date",
+        type="video",
     )
     while request:
         response = request.execute()
@@ -74,7 +79,11 @@ def main() -> None:
         for v in vids:
             links = extract_th18_links(v["description"])
             if links:
-                results.append({"title": v["title"], "video_url": v["url"], "links": list(set(links))})
+                results.append({
+                    "title": v["title"],
+                    "video_url": v["url"],
+                    "links": list(set(links)),
+                })
         if results:
             create_html(name, results)
         else:

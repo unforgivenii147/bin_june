@@ -41,7 +41,10 @@ def symlink_global_gitignore() -> None:
 
 def get_repo_info_from_url(url: str) -> tuple[str, str] | None:
     """Extract (owner, repo_name) from GitHub URL (HTTPS or SSH)."""
-    patterns = [r"https://github\.com/([^/]+)/([^/]+?)(?:\.git)?$", r"git@github\.com:([^/]+)/([^/]+?)(?:\.git)?$"]
+    patterns = [
+        r"https://github\.com/([^/]+)/([^/]+?)(?:\.git)?$",
+        r"git@github\.com:([^/]+)/([^/]+?)(?:\.git)?$",
+    ]
     for pattern in patterns:
         match = re.match(pattern, url)
         if match:

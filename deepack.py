@@ -6,7 +6,6 @@ Skips pure Python packages and .pyc files, uses parallel processing.
 
 import argparse
 import importlib.metadata
-import json
 import logging
 import shutil
 import site
@@ -20,7 +19,11 @@ from typing import List, Optional, Tuple
 import pkg_resources
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 logger = logging.getLogger(__name__)
 
 
@@ -106,7 +109,9 @@ def get_package_path(package_name: str, site_paths: List[Path]) -> Optional[Path
     return None
 
 
-def repack_package(args_tuple: Tuple[str, str, Path, List[Path]]) -> Tuple[str, bool, Optional[str]]:
+def repack_package(
+    args_tuple: Tuple[str, str, Path, List[Path]],
+) -> Tuple[str, bool, Optional[str]]:
     """Repack a single package into a wheel file."""
     package_name, version, output_dir, site_paths = args_tuple
 
@@ -219,7 +224,11 @@ Root-Is-Purelib: false
                     else:
                         return (package_name, False, "Wheel created but not found")
                 else:
-                    return (package_name, False, f"Wheel command failed: {result.stderr[:100]}")
+                    return (
+                        package_name,
+                        False,
+                        f"Wheel command failed: {result.stderr[:100]}",
+                    )
 
             except Exception as e:
                 return (package_name, False, f"Error running wheel: {str(e)}")
@@ -231,10 +240,16 @@ Root-Is-Purelib: false
 def main():
     parser = argparse.ArgumentParser(description="Repack installed Python packages into wheel files")
     parser.add_argument(
-        "-o", "--output", default="~/tmp/.whl", help="Output directory for wheel files (default: ~/tmp/.whl)"
+        "-o",
+        "--output",
+        default="~/tmp/.whl",
+        help="Output directory for wheel files (default: ~/tmp/.whl)",
     )
     parser.add_argument(
-        "-p", "--packages", nargs="+", help="Specific packages to repack (default: all non-pure packages)"
+        "-p",
+        "--packages",
+        nargs="+",
+        help="Specific packages to repack (default: all non-pure packages)",
     )
     parser.add_argument("-j", "--jobs", type=int, default=4, help="Number of parallel jobs (default: 4)")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")

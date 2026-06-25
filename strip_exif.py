@@ -193,18 +193,32 @@ Examples:
     )
 
     parser.add_argument(
-        "paths", nargs="*", default=["."], help="Files or directories to process (default: current directory)"
+        "paths",
+        nargs="*",
+        default=["."],
+        help="Files or directories to process (default: current directory)",
     )
 
     parser.add_argument(
-        "-b", "--backup", action="store_true", help="Create backup files (.backup) before stripping EXIF"
+        "-b",
+        "--backup",
+        action="store_true",
+        help="Create backup files (.backup) before stripping EXIF",
     )
 
     parser.add_argument(
-        "-j", "--jobs", type=int, default=None, help=f"Number of parallel workers (default: CPU count = {cpu_count()})"
+        "-j",
+        "--jobs",
+        type=int,
+        default=None,
+        help=f"Number of parallel workers (default: CPU count = {cpu_count()})",
     )
 
-    parser.add_argument("--no-recursive", action="store_true", help="Do not process subdirectories recursively")
+    parser.add_argument(
+        "--no-recursive",
+        action="store_true",
+        help="Do not process subdirectories recursively",
+    )
 
     parser.add_argument(
         "--extensions",
@@ -213,7 +227,12 @@ Examples:
         help="File extensions to process (default: .jpg .jpeg .png .tiff .tif .bmp .webp)",
     )
 
-    parser.add_argument("-v", "--verbose", action="store_true", help="Show detailed output for each file")
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Show detailed output for each file",
+    )
 
     parser.add_argument("--no-size-report", action="store_true", help="Skip folder size change report")
 

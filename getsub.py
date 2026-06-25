@@ -5,13 +5,11 @@ Usage: python get_sub.py "movie_or_series_name"
 Example: python get_sub.py outcast_s01
 """
 
-import json
 import re
 import sys
 from urllib.parse import quote
 
 import requests
-from bs4 import BeautifulSoup
 
 
 class SubtitleDownloader:

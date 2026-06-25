@@ -97,10 +97,23 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Randomize lines in a file")
     parser.add_argument("input_file", help="Input file to shuffle")
     parser.add_argument(
-        "-o", "--output", help="Output file prefix (default: will append method name to input file name)"
+        "-o",
+        "--output",
+        help="Output file prefix (default: will append method name to input file name)",
     )
-    parser.add_argument("-r", "--repeats", type=int, default=3, help="Number of shuffle passes per method (default: 3)")
-    parser.add_argument("-t", "--test", action="store_true", help="Test randomness of the 'crypto' method")
+    parser.add_argument(
+        "-r",
+        "--repeats",
+        type=int,
+        default=3,
+        help="Number of shuffle passes per method (default: 3)",
+    )
+    parser.add_argument(
+        "-t",
+        "--test",
+        action="store_true",
+        help="Test randomness of the 'crypto' method",
+    )
     args = parser.parse_args()
     output_prefix = args.output
     if output_prefix and (not output_prefix.endswith((".txt", ".TXT"))):
@@ -108,7 +121,12 @@ def main() -> None:
     if args.test:
         test_randomness(args.input_file)
     else:
-        enhanced_shuffle(args.input_file, output_prefix, methods=["basic", "crypto", "shuffle3"], repeats=args.repeats)
+        enhanced_shuffle(
+            args.input_file,
+            output_prefix,
+            methods=["basic", "crypto", "shuffle3"],
+            repeats=args.repeats,
+        )
 
 
 if __name__ == "__main__":

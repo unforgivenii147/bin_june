@@ -4,6 +4,7 @@ Auto typo fixer with pattern learning.
 Learns from common substitution errors (b→n, 8→i, etc.) and user corrections.
 """
 
+import shutil
 import argparse
 import json
 import re
@@ -97,7 +98,10 @@ class PatternLearner:
                     self.learned_corrections = data.get("corrections", {})
                     self.error_frequency.update(data.get("frequencies", {}))
                     self.context_rules = data.get("context_rules", [])
-                print(f"Loaded {len(self.learned_corrections)} learned corrections", file=sys.stderr)
+                print(
+                    f"Loaded {len(self.learned_corrections)} learned corrections",
+                    file=sys.stderr,
+                )
             except Exception as e:
                 print(f"Error loading learning DB: {e}", file=sys.stderr)
 
@@ -163,7 +167,10 @@ class PatternLearner:
                     # If pattern appears frequently, add to substitution patterns
                     if self.error_frequency[pattern] > 2:
                         self.substitution_patterns[w_char] = c_char
-                        print(f"  Learned pattern: '{w_char}' → '{c_char}'", file=sys.stderr)
+                        print(
+                            f"  Learned pattern: '{w_char}' → '{c_char}'",
+                            file=sys.stderr,
+                        )
 
         # Learn length-based corrections (missing/extra letters)
         elif len(wrong) == len(correct) + 1:  # extra letter
@@ -366,7 +373,10 @@ class TypoFixerWithLearning:
                     if correction:
                         changes += 1
                         if self.preview:
-                            print(f"  Line {line_num}: '{word}' → '{correction}'", file=sys.stderr)
+                            print(
+                                f"  Line {line_num}: '{word}' → '{correction}'",
+                                file=sys.stderr,
+                            )
                         return correction
                     elif self.interactive_mode:
                         correction = self.interactive_fix(word, line)
@@ -405,8 +415,14 @@ class TypoFixerWithLearning:
                     self.fix_file(filepath)
 
         print(f"\nSummary: Processed {self.files_processed} files", file=sys.stderr)
-        print(f"Active patterns: {len(self.learner.substitution_patterns)}", file=sys.stderr)
-        print(f"Learned corrections: {len(self.learner.learned_corrections)}", file=sys.stderr)
+        print(
+            f"Active patterns: {len(self.learner.substitution_patterns)}",
+            file=sys.stderr,
+        )
+        print(
+            f"Learned corrections: {len(self.learner.learned_corrections)}",
+            file=sys.stderr,
+        )
 
         if self.changes_made > 0:
             self.learner.save()
@@ -415,7 +431,11 @@ class TypoFixerWithLearning:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Auto-fix typos with pattern learning")
     parser.add_argument("--apply", action="store_true", help="Actually apply fixes")
-    parser.add_argument("--interactive", action="store_true", help="Interactive mode (learn from each fix)")
+    parser.add_argument(
+        "--interactive",
+        action="store_true",
+        help="Interactive mode (learn from each fix)",
+    )
     parser.add_argument("--dir", type=str, default=".", help="Directory to process")
     parser.add_argument("--db", type=str, default="typo_patterns.json", help="Learning database file")
     parser.add_argument("--show-patterns", action="store_true", help="Show learned patterns and exit")

@@ -10,7 +10,19 @@ def fix_python_indentation(input_file_path: Path, output_file_path: Path | None 
         return False
     fixed_lines = []
     current_indent_level = 0
-    block_starters = ["def", "class", "if", "for", "while", "with", "try", "except", "finally", "elif", "else"]
+    block_starters = [
+        "def",
+        "class",
+        "if",
+        "for",
+        "while",
+        "with",
+        "try",
+        "except",
+        "finally",
+        "elif",
+        "else",
+    ]
     block_enders = ["return", "break", "continue", "pass", "raise"]
     with Path(input_file_path).open(encoding="utf-8") as f:
         lines = f.readlines()

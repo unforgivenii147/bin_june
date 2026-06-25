@@ -3,7 +3,6 @@ import bz2
 import gzip
 import lzma
 import multiprocessing as mp
-import os
 import pathlib
 import tarfile
 import zipfile
@@ -27,7 +26,16 @@ SUPPORTED_EXTENSIONS = {
 }
 
 # Tar file extensions
-TAR_EXTENSIONS = ["tar.gz", "tar.xz", "tar.bz2", "tar.7z", "tar.zst", "tar.br", "tar.lz4", "tar"]
+TAR_EXTENSIONS = [
+    "tar.gz",
+    "tar.xz",
+    "tar.bz2",
+    "tar.7z",
+    "tar.zst",
+    "tar.br",
+    "tar.lz4",
+    "tar",
+]
 
 
 def extract_file(file_path):

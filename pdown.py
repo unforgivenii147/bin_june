@@ -4,11 +4,9 @@ from __future__ import annotations
 import concurrent.futures
 import json
 import pathlib
-import sys
-import time
 import urllib.error
 import urllib.request
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 
 def get_pypi_json(package: str, timeout: int = 10) -> Optional[Dict]:
@@ -132,7 +130,10 @@ def main():
     parser.add_argument("--python", default="3.13", help="Python version (default: 3.13)")
     parser.add_argument("--workers", type=int, default=4, help="Number of download workers (default: 4)")
     parser.add_argument(
-        "--output", type=pathlib.Path, default=pathlib.Path("wheels"), help="Output directory (default: wheels)"
+        "--output",
+        type=pathlib.Path,
+        default=pathlib.Path("wheels"),
+        help="Output directory (default: wheels)",
     )
     args = parser.parse_args()
 

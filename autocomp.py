@@ -115,7 +115,15 @@ def compress_all(data: bytes, base_name: str, output_dir="."):
             comp_size = len(compressed)
             ratio = comp_size / original_size
 
-            results.append(CompressionResult(name=name, size=comp_size, ratio=ratio, time=elapsed, path=output_path))
+            results.append(
+                CompressionResult(
+                    name=name,
+                    size=comp_size,
+                    ratio=ratio,
+                    time=elapsed,
+                    path=output_path,
+                )
+            )
 
             print(f"✓ {name:10} | Size: {comp_size:12,} | Ratio: {ratio:.4f} | Time: {elapsed:.3f}s")
 

@@ -148,10 +148,16 @@ def main():
     parser.add_argument("directory", type=Path, help="Root directory to scan recursively")
     parser.add_argument("--target-lang", default="en", help="Target language code (default: en)")
     parser.add_argument(
-        "--delay", type=float, default=1.0, help="Delay in seconds between chunk translations (default: 1.0)"
+        "--delay",
+        type=float,
+        default=1.0,
+        help="Delay in seconds between chunk translations (default: 1.0)",
     )
     parser.add_argument(
-        "--workers", type=int, default=os.cpu_count(), help="Number of parallel worker processes (default: CPU count)"
+        "--workers",
+        type=int,
+        default=os.cpu_count(),
+        help="Number of parallel worker processes (default: CPU count)",
     )
     parser.add_argument(
         "--output-dir",
@@ -185,7 +191,10 @@ def main():
     # Process files in parallel
     with Pool(processes=args.workers) as pool:
         # Use starmap to pass multiple arguments to translate_file
-        pool.starmap(translate_file, [(f, args.target_lang, args.delay, args.output_dir) for f in files])
+        pool.starmap(
+            translate_file,
+            [(f, args.target_lang, args.delay, args.output_dir) for f in files],
+        )
 
     print("\nAll files processed.")
 

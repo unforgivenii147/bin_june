@@ -167,7 +167,12 @@ def main() -> None:
 
     if out_html.exists():
         out_html = unique_path(out_html)
-    html_text = re.sub(r"(src|href)=[\"'](data:[^\"']+)[\"']", data_uri_replacer, html_text, flags=re.IGNORECASE)
+    html_text = re.sub(
+        r"(src|href)=[\"'](data:[^\"']+)[\"']",
+        data_uri_replacer,
+        html_text,
+        flags=re.IGNORECASE,
+    )
     with open(out_html, "w", encoding="utf-8") as f:
         f.write(html_text)
     print(f"Done.")

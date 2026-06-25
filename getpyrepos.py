@@ -65,7 +65,12 @@ def get_top_trending_users() -> List[Dict]:
     week_ago = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
 
     url = "https://api.github.com/search/users"
-    params = {"q": f"language:python created:>{week_ago}", "sort": "followers", "order": "desc", "per_page": 10}
+    params = {
+        "q": f"language:python created:>{week_ago}",
+        "sort": "followers",
+        "order": "desc",
+        "per_page": 10,
+    }
 
     try:
         response = requests.get(url, params=params)
@@ -112,7 +117,11 @@ def main():
 
         if repos:
             # Save individual user repos
-            output = {"username": username, "total_python_repos": len(repos), "repositories": repos}
+            output = {
+                "username": username,
+                "total_python_repos": len(repos),
+                "repositories": repos,
+            }
             filename = f"{username}_python_repos.json"
             save_to_json(output, filename)
             print(f"Found {len(repos)} Python repositories")
@@ -125,7 +134,10 @@ def main():
 
         if trending_data:
             # Add timestamp
-            output = {"timestamp": datetime.now().isoformat(), "trending_users": trending_data}
+            output = {
+                "timestamp": datetime.now().isoformat(),
+                "trending_users": trending_data,
+            }
             save_to_json(output, "trending_github_python_users.json")
             print(f"Found {len(trending_data)} trending users")
 

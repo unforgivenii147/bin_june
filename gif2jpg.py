@@ -95,7 +95,8 @@ def extract_unique_frames(gif_path: Path) -> list[np.ndarray]:
                 # Static image treated as single-frame GIF
                 canvas = Image.new("RGB", img.size, (255, 255, 255))
                 canvas.paste(
-                    img.convert("RGBA"), mask=img.convert("RGBA").split()[3] if img.mode in ("RGBA", "P") else None
+                    img.convert("RGBA"),
+                    mask=img.convert("RGBA").split()[3] if img.mode in ("RGBA", "P") else None,
                 )
                 frames.append(np.asarray(canvas))
                 return frames
@@ -125,7 +126,11 @@ def extract_unique_frames(gif_path: Path) -> list[np.ndarray]:
                 arr = np.asarray(canvas.convert("RGB"))
 
                 if frames and frames_are_similar(frames[-1], arr):
-                    log.debug("  Skipping near-duplicate frame %d in %s", frame_idx, gif_path.name)
+                    log.debug(
+                        "  Skipping near-duplicate frame %d in %s",
+                        frame_idx,
+                        gif_path.name,
+                    )
                     continue
 
                 frames.append(arr)
@@ -177,7 +182,13 @@ def convert_gif(gif_path: Path) -> tuple[Path, int, int]:
         except OSError as exc:
             log.error("Failed to save %s: %s", out_path, exc)
 
-    log.info("%-50s  %d/%d frames kept → %d JPG(s)", str(gif_path), len(frames), total_in_gif, saved)
+    log.info(
+        "%-50s  %d/%d frames kept → %d JPG(s)",
+        str(gif_path),
+        len(frames),
+        total_in_gif,
+        saved,
+    )
     return gif_path, total_in_gif, saved
 
 
@@ -214,7 +225,12 @@ def main() -> None:
     total_gifs = len(results)
     total_frames = sum(r[1] for r in results)
     total_saved = sum(r[2] for r in results)
-    log.info("Done. %d GIF(s) processed — %d/%d frames saved as JPG.", total_gifs, total_saved, total_frames)
+    log.info(
+        "Done. %d GIF(s) processed — %d/%d frames saved as JPG.",
+        total_gifs,
+        total_saved,
+        total_frames,
+    )
 
 
 if __name__ == "__main__":

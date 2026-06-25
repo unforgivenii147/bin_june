@@ -82,7 +82,13 @@ def copy_files_to_temp(files: list[Path], site_packages: Path, temp_dir: Path) -
             shutil.copytree(file_path, dest_path, dirs_exist_ok=True)
 
 
-def create_wheel(pkg_name: str, pkg_version: str, temp_dir: Path, output_dir: Path, wheel_tag: str | None) -> bool:
+def create_wheel(
+    pkg_name: str,
+    pkg_version: str,
+    temp_dir: Path,
+    output_dir: Path,
+    wheel_tag: str | None,
+) -> bool:
     try:
         wheel_name = f"{pkg_name}-{pkg_version}"
         if wheel_tag:
@@ -90,7 +96,15 @@ def create_wheel(pkg_name: str, pkg_version: str, temp_dir: Path, output_dir: Pa
         else:
             wheel_name += "-py3-none-any"
         wheel_file = output_dir / f"{wheel_name}.whl"
-        cmd = [sys.executable, "-m", "wheel", "pack", str(temp_dir), "-d", str(output_dir)]
+        cmd = [
+            sys.executable,
+            "-m",
+            "wheel",
+            "pack",
+            str(temp_dir),
+            "-d",
+            str(output_dir),
+        ]
         result = subprocess.run(cmd, check=False, capture_output=True, text=True)
         if result.returncode == 0:
             return True

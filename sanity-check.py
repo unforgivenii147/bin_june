@@ -7,7 +7,10 @@ from dh import runcmd
 
 def get_installed_packages() -> list[str]:
     try:
-        ret, txt, _err = runcmd(["dpkg-query", "-W", "-f='${Package}\t${Status}\t${Version}\n'"], show_output=True)
+        ret, txt, _err = runcmd(
+            ["dpkg-query", "-W", "-f='${Package}\t${Status}\t${Version}\n'"],
+            show_output=True,
+        )
         return txt.splitlines()
     except:
         print(f"Error listing installed packages")

@@ -18,11 +18,17 @@ from pathlib import Path
 from typing import List, Optional, Tuple
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 logger = logging.getLogger(__name__)
 
 
-def convert_zip_time_to_timestamp(date_time: Tuple[int, int, int, int, int, int]) -> float:
+def convert_zip_time_to_timestamp(
+    date_time: Tuple[int, int, int, int, int, int],
+) -> float:
     """Convert ZIP file's date_time tuple to Unix timestamp."""
     try:
         dt = datetime(*date_time)
@@ -137,7 +143,11 @@ def convert_whl_to_tarxz(path: Path, remove_original: bool = False) -> Tuple[boo
                     logger.info(f"Removed original: {path.name}")
                 except Exception as e:
                     logger.error(f"Failed to remove original file {path.name}: {e}")
-                    return False, f"Conversion succeeded but failed to remove original: {e}", output_path
+                    return (
+                        False,
+                        f"Conversion succeeded but failed to remove original: {e}",
+                        output_path,
+                    )
 
             return True, f"Converted {converted_count} files to tar.xz", output_path
         else:
@@ -190,7 +200,11 @@ def convert_tarxz_to_whl(path: Path, remove_original: bool = False) -> Tuple[boo
                             file_content.close()
                     except Exception as e:
                         logger.error(f"Failed to convert {member.name}: {e}")
-                        return False, f"Failed to convert member {member.name}: {e}", None
+                        return (
+                            False,
+                            f"Failed to convert member {member.name}: {e}",
+                            None,
+                        )
 
         # Verify output
         if output_path.exists() and output_path.stat().st_size > 0:
@@ -210,7 +224,11 @@ def convert_tarxz_to_whl(path: Path, remove_original: bool = False) -> Tuple[boo
                     logger.info(f"Removed original: {path.name}")
                 except Exception as e:
                     logger.error(f"Failed to remove original file {path.name}: {e}")
-                    return False, f"Conversion succeeded but failed to remove original: {e}", output_path
+                    return (
+                        False,
+                        f"Conversion succeeded but failed to remove original: {e}",
+                        output_path,
+                    )
 
             return True, f"Converted {converted_count} files to wheel", output_path
         else:
@@ -236,7 +254,11 @@ def process_file(path: Path, remove_original: bool = False) -> Tuple[bool, str, 
         logger.info(f"Converting tar.xz to wheel: {path.name}")
         return convert_tarxz_to_whl(path, remove_original)
     else:
-        return False, f"Unsupported file type: {path.suffix} (only .whl or .tar.xz)", None
+        return (
+            False,
+            f"Unsupported file type: {path.suffix} (only .whl or .tar.xz)",
+            None,
+        )
 
 
 def find_convertible_files(directory: Path, recursive: bool = False) -> List[Path]:
@@ -282,13 +304,24 @@ Examples:
     )
 
     parser.add_argument(
-        "paths", nargs="*", default=["."], help="Files or directories to process (default: current directory)"
+        "paths",
+        nargs="*",
+        default=["."],
+        help="Files or directories to process (default: current directory)",
     )
     parser.add_argument("-r", "--recursive", action="store_true", help="Search directories recursively")
     parser.add_argument(
-        "--remove-original", action="store_true", help="Remove original files after successful conversion"
+        "--remove-original",
+        action="store_true",
+        help="Remove original files after successful conversion",
     )
-    parser.add_argument("-j", "--jobs", type=int, default=None, help="Number of parallel jobs (default: CPU count)")
+    parser.add_argument(
+        "-j",
+        "--jobs",
+        type=int,
+        default=None,
+        help="Number of parallel jobs (default: CPU count)",
+    )
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose logging")
     parser.add_argument("-q", "--quiet", action="store_true", help="Suppress non-error output")
 

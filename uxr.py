@@ -5,10 +5,9 @@ Extracts archives recursively in current directory using joblib parallelism.
 Supported: .gz, .xz, .zip, .whl, .br, .zst, .7z, and tarballs (.tar.gz, .tar.xz, etc.)
 """
 
-import subprocess
 import sys
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Optional, Tuple
 
 import joblib
 import py7zr
@@ -70,7 +69,12 @@ class ArchiveExtractor:
             "RESET": "\x1b[0m",
         }
         color = colors.get(status.upper(), colors["RESET"])
-        icon = {"SUCCESS": "✅", "FAILED": "❌", "SKIPPED": "⏭️", "PROCESSING": "🔄"}.get(status.upper(), "➡️")
+        icon = {
+            "SUCCESS": "✅",
+            "FAILED": "❌",
+            "SKIPPED": "⏭️",
+            "PROCESSING": "🔄",
+        }.get(status.upper(), "➡️")
         msg = f"{icon} {archive.name:<40} [{status:<8}]"
         if details:
             msg += f" {details}"
@@ -183,7 +187,11 @@ class ArchiveExtractor:
                     except Exception as e:
                         temp_path.unlink()
                         if self.verbose:
-                            self._print_status(archive, "FAILED", f"Tar extraction from .zst failed: {e}")
+                            self._print_status(
+                                archive,
+                                "FAILED",
+                                f"Tar extraction from .zst failed: {e}",
+                            )
                         return False
             else:
                 output_file = output_dir / output_name
@@ -316,9 +324,25 @@ def main():
 
     parser = argparse.ArgumentParser(description="Extract archive files recursively with parallel processing")
     parser.add_argument("-d", "--dir", default=".", help="Root directory to search (default: current)")
-    parser.add_argument("-k", "--keep", action="store_true", help="Keep original archive files after extraction")
-    parser.add_argument("-q", "--quiet", action="store_true", help="Reduce verbosity (only show summary)")
-    parser.add_argument("-j", "--jobs", type=int, default=-1, help="Number of parallel jobs (-1 for all cores)")
+    parser.add_argument(
+        "-k",
+        "--keep",
+        action="store_true",
+        help="Keep original archive files after extraction",
+    )
+    parser.add_argument(
+        "-q",
+        "--quiet",
+        action="store_true",
+        help="Reduce verbosity (only show summary)",
+    )
+    parser.add_argument(
+        "-j",
+        "--jobs",
+        type=int,
+        default=-1,
+        help="Number of parallel jobs (-1 for all cores)",
+    )
     args = parser.parse_args()
     root_dir = Path(args.dir).resolve()
     if not root_dir.exists():

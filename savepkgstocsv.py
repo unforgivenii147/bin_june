@@ -30,7 +30,12 @@ FORMAT = "${binary:Package}\t${Version}\t${Architecture}\t${Status}\t${Priority}
 
 def query_packages() -> list[list[str]]:
     try:
-        proc = subprocess.run(["dpkg-query", "-W", f"-f={FORMAT}"], check=True, capture_output=True, text=True)
+        proc = subprocess.run(
+            ["dpkg-query", "-W", f"-f={FORMAT}"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
     except FileNotFoundError:
         sys.exit("dpkg-query not found (not a Debian-based system)")
     except subprocess.CalledProcessError as exc:

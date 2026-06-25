@@ -23,7 +23,10 @@ def setup_logging() -> None:
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(processName)s %(message)s",
-        handlers=[logging.FileHandler(LOG_FILE, encoding="utf-8"), logging.StreamHandler()],
+        handlers=[
+            logging.FileHandler(LOG_FILE, encoding="utf-8"),
+            logging.StreamHandler(),
+        ],
     )
 
 
@@ -72,7 +75,9 @@ def compress_dir_to_tar_then_7z(dir_path: str) -> tuple[str, bool, str]:
         if out_path.exists():
             out_path.unlink()
         with py7zr.SevenZipFile(
-            out_path, mode="w", filters=[{"id": py7zr.FILTER_LZMA2, "preset": PY7ZR_PRESET}]
+            out_path,
+            mode="w",
+            filters=[{"id": py7zr.FILTER_LZMA2, "preset": PY7ZR_PRESET}],
         ) as archive:
             archive.write(tar_path, arcname=tar_path.name)
         shutil.rmtree(src)
@@ -95,7 +100,9 @@ def compress_file_to_7z(file_path: str) -> tuple[str, bool, str]:
         if out_path.exists():
             out_path.unlink()
         with py7zr.SevenZipFile(
-            out_path, mode="w", filters=[{"id": py7zr.FILTER_LZMA2, "preset": PY7ZR_PRESET}]
+            out_path,
+            mode="w",
+            filters=[{"id": py7zr.FILTER_LZMA2, "preset": PY7ZR_PRESET}],
         ) as archive:
             archive.write(src, arcname=src.name)
         src.unlink()

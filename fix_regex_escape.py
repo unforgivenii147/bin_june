@@ -6,7 +6,17 @@ from pathlib import Path
 
 from dh import get_pyfiles
 
-TARGET_FUNCS = {"compile", "search", "match", "fullmatch", "findall", "finditer", "split", "sub", "subn"}
+TARGET_FUNCS = {
+    "compile",
+    "search",
+    "match",
+    "fullmatch",
+    "findall",
+    "finditer",
+    "split",
+    "sub",
+    "subn",
+}
 
 
 class RegexFixer(ast.NodeTransformer):

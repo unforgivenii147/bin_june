@@ -92,10 +92,16 @@ def main() -> None:
         description="Move empty .whl files (only dist-info, no Python code) to a subdirectory"
     )
     parser.add_argument(
-        "directory", nargs="?", default=".", help="Directory containing .whl files (default: current directory)"
+        "directory",
+        nargs="?",
+        default=".",
+        help="Directory containing .whl files (default: current directory)",
     )
     parser.add_argument(
-        "-d", "--dest", default="empty_wheels", help="Destination subdirectory name (default: 'empty_wheels')"
+        "-d",
+        "--dest",
+        default="empty_wheels",
+        help="Destination subdirectory name (default: 'empty_wheels')",
     )
     parser.add_argument("-v", "--verbose", action="store_true", help="Show detailed output")
 

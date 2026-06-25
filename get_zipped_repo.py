@@ -26,7 +26,10 @@ def download_repo_zip(username, repo, branch="main", output_name=None):
 
     # Get the token for authentication
     token = os.getenv("GITHUB_TOKEN")
-    headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3.raw"}
+    headers = {
+        "Authorization": f"token {token}",
+        "Accept": "application/vnd.github.v3.raw",
+    }
 
     # Stream the download with progress bar
     response = requests.get(zip_url, headers=headers, stream=True)

@@ -1,7 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 import codecs
 import shutil
-from pathlib import Path
 
 
 def convert_in_place(filename):

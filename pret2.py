@@ -7,7 +7,19 @@ from pathlib import Path
 
 from dh import get_files, unique_path
 
-EXT = [".js", ".css", ".html", ".json", ".mjs", ".cjs", ".ts", ".jsx", ".tsx", ".tsm", ".jsm"]
+EXT = [
+    ".js",
+    ".css",
+    ".html",
+    ".json",
+    ".mjs",
+    ".cjs",
+    ".ts",
+    ".jsx",
+    ".tsx",
+    ".tsm",
+    ".jsm",
+]
 EXCLUDE_PATTERNS = {}
 
 
@@ -40,7 +52,12 @@ def move_to_error_folder(path: Path) -> None:
 
 def format_file(path: Path) -> tuple[Path, bool, str | None]:
     try:
-        result = subprocess.run(["prettier", "--write", str(path)], capture_output=True, text=True, timeout=900)
+        result = subprocess.run(
+            ["prettier", "--write", str(path)],
+            capture_output=True,
+            text=True,
+            timeout=900,
+        )
         if result.returncode == 0:
             return (path, True, None)
         return (path, False, result.stderr or result.stdout or "Unknown error")

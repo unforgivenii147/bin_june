@@ -3,7 +3,7 @@
 import sys
 from pathlib import Path
 
-from dh import cprint, fsz, get_files, gsz, mpf3, rss, unique_path
+from dh import cprint, fsz, get_files, gsz, mpf3, rrs, unique_path
 
 try:
     import cv2
@@ -57,7 +57,7 @@ def process_file(path):
         if success:
             path.unlink()
             after = gsz(output_path)
-            rss(patj, before, after)
+            rrs(path, before, after)
             return
         return
     except Exception as e:

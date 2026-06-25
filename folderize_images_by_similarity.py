@@ -6,8 +6,6 @@ from multiprocessing import Pool, cpu_count
 from typing import Tuple, Dict, List
 import shutil
 from tqdm import tqdm
-import hashlib
-import os
 
 
 class ImageSimilarityOrganizer:

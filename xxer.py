@@ -13,7 +13,6 @@ from dataclasses import dataclass
 from gzip import GzipFile
 from lzma import LZMAFile
 from pathlib import Path
-from tempfile import _TemporaryFileWrapper
 from typing import BinaryIO, Optional, Tuple, list
 
 from _io import TextIOWrapper
@@ -122,7 +121,14 @@ def has_compressed_suffix(path: Path) -> bool:
 
 def output_name_for_file(path: Path, mode: str) -> Path:
     """Generate output filename for single file compression"""
-    ext_map = {"xz": ".xz", "gz": ".gz", "bz2": ".bz2", "brotli": ".br", "zstd": ".zst", "7z": ".7z"}
+    ext_map = {
+        "xz": ".xz",
+        "gz": ".gz",
+        "bz2": ".bz2",
+        "brotli": ".br",
+        "zstd": ".zst",
+        "7z": ".7z",
+    }
     if mode not in ext_map:
         raise ValueError(f"Unsupported mode: {mode}")
     return path.with_name(path.name + ext_map[mode])
@@ -235,7 +241,11 @@ def compress_file_7z(src: Path, dst: Path) -> None:
     """7z compression"""
     if py7zr is None:
         raise RuntimeError("py7zr not installed")
-    with py7zr.SevenZipFile(dst, "w", filters=[{"id": py7zr.FILTER_LZMA2, "preset": COMPRESSION_LEVELS["7z"]}]) as zf:
+    with py7zr.SevenZipFile(
+        dst,
+        "w",
+        filters=[{"id": py7zr.FILTER_LZMA2, "preset": COMPRESSION_LEVELS["7z"]}],
+    ) as zf:
         zf.write(src, arcname=src.name)
 
 

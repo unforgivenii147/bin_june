@@ -19,7 +19,10 @@ from tqdm import tqdm
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
-    handlers=[logging.FileHandler(Path.home() / "face_detection.log"), logging.StreamHandler()],
+    handlers=[
+        logging.FileHandler(Path.home() / "face_detection.log"),
+        logging.StreamHandler(),
+    ],
 )
 logger = logging.getLogger(__name__)
 try:
@@ -67,7 +70,11 @@ def create_face_detector(cascade_path):
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             gray = cv2.equalizeHist(gray)
             faces = face_cascade.detectMultiScale(
-                gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30), flags=cv2.CASCADE_SCALE_IMAGE
+                gray,
+                scaleFactor=1.1,
+                minNeighbors=5,
+                minSize=(30, 30),
+                flags=cv2.CASCADE_SCALE_IMAGE,
             )
             return len(faces) > 0
         except Exception as e:

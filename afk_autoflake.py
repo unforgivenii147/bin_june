@@ -2,7 +2,6 @@
 import argparse
 import os
 import subprocess
-import sys
 
 
 def check_or_fix_imports(file_path, autofix=False):
@@ -16,7 +15,12 @@ def check_or_fix_imports(file_path, autofix=False):
     # Base command for autoflake
     # --remove-all-unused-imports: removes all unused imports
     # --ignore-init-module-imports: ensures __init__.py files aren't broken
-    command = ["autoflake", "--remove-all-unused-imports", "--ignore-init-module-imports", file_path]
+    command = [
+        "autoflake",
+        "--remove-all-unused-imports",
+        "--ignore-init-module-imports",
+        file_path,
+    ]
 
     if autofix:
         # If autofix is enabled, we write the changes back to the file
@@ -48,7 +52,12 @@ def check_or_fix_imports(file_path, autofix=False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Check or fix unused imports in a Python file.")
     parser.add_argument("file", help="Path to the Python file")
-    parser.add_argument("-a", "--autofix", action="store_true", help="Automatically remove unused imports")
+    parser.add_argument(
+        "-a",
+        "--autofix",
+        action="store_true",
+        help="Automatically remove unused imports",
+    )
 
     args = parser.parse_args()
 

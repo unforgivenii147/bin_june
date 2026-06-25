@@ -11,7 +11,10 @@ def process_file(path: str | Path) -> tuple[bool, Path]:
 
     if not path.exists() or not path.stat().st_size:
         return (False, path)
-    ret = runcmd(["prettier", "-w", str(path).replace("/storage/emulated/0", "/sdcard")], show_output=True)
+    ret = runcmd(
+        ["prettier", "-w", str(path).replace("/storage/emulated/0", "/sdcard")],
+        show_output=True,
+    )
     if not ret:
         return (True, path)
     return (False, path)
@@ -24,7 +27,20 @@ def main() -> None:
         [Path(f) for f in args]
         if args
         else get_files(
-            cwd, e=[".html", ".htm", ".js", ".jsx", ".ts", ".tsx", ".md", ".jsm", ".scss", ".tsm", ".coffee"]
+            cwd,
+            e=[
+                ".html",
+                ".htm",
+                ".js",
+                ".jsx",
+                ".ts",
+                ".tsx",
+                ".md",
+                ".jsm",
+                ".scss",
+                ".tsm",
+                ".coffee",
+            ],
         )
     )
     if len(files) == 1:

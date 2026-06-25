@@ -1,6 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 from pathlib import Path
-
+import sys
 import cv2
 import nude
 from dh import cprint, get_files, mpf3

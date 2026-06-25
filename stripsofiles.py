@@ -9,7 +9,10 @@ from dh import SoFileStripper
 class BatchStripper:
     @staticmethod
     def strip_by_size_threshold(
-        directory: str, min_size_mb: float = 1.0, verbose: bool = False, verify: bool = True
+        directory: str,
+        min_size_mb: float = 1.0,
+        verbose: bool = False,
+        verify: bool = True,
     ) -> dict:
         print(f"\nStripping .so files larger than {min_size_mb} MB...")
         so_files = list(Path(directory).rglob("*.so*"))
@@ -22,7 +25,10 @@ class BatchStripper:
 
     @staticmethod
     def strip_by_extension(
-        directory: str, extensions: list[str] | None = None, verbose: bool = False, verify: bool = True
+        directory: str,
+        extensions: list[str] | None = None,
+        verbose: bool = False,
+        verify: bool = True,
     ) -> dict:
         if extensions is None:
             e = [".so", ".so.1", ".so.6"]
@@ -38,7 +44,10 @@ class BatchStripper:
 
     @staticmethod
     def strip_exclude_patterns(
-        directory: str, exclude_patterns: list[str] | None = None, verbose: bool = False, verify: bool = True
+        directory: str,
+        exclude_patterns: list[str] | None = None,
+        verbose: bool = False,
+        verify: bool = True,
     ) -> dict:
         if exclude_patterns is None:
             exclude_patterns = ["test", "debug", "profile"]

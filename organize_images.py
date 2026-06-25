@@ -101,7 +101,12 @@ def simple_clustering(features: ndarray, paths, n_clusters=10, threshold=0.7) ->
     return labels
 
 
-def organize_photos(source_dir: str = ".", n_clusters: int = 10, move: bool = False, threshold: float = 0.7) -> None:
+def organize_photos(
+    source_dir: str = ".",
+    n_clusters: int = 10,
+    move: bool = False,
+    threshold: float = 0.7,
+) -> None:
     print(f"Scanning directory: {source_dir}")
     image_paths = get_all_images(source_dir)
     print(f"Found {len(image_paths)} images")
@@ -159,6 +164,12 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--directory", default=".", help="Source directory (default: current)")
     parser.add_argument("-k", "--clusters", type=int, default=10, help="Number of groups (default: 10)")
     parser.add_argument("-m", "--move", action="store_true", help="Move files instead of copy")
-    parser.add_argument("-t", "--threshold", type=float, default=0.7, help="Similarity threshold (default: 0.7)")
+    parser.add_argument(
+        "-t",
+        "--threshold",
+        type=float,
+        default=0.7,
+        help="Similarity threshold (default: 0.7)",
+    )
     args = parser.parse_args()
     organize_photos(args.directory, args.clusters, args.move, args.threshold)

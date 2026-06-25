@@ -35,8 +35,22 @@ from loguru import logger
 HAS_ZST = True
 
 HAS_BR = True
-ARCHIVE_EXTENSIONS = {".zip", ".tar", ".gz", ".bz2", ".xz", ".tgz", ".tbz2", ".zst", ".br"}
-UTILS_MAP: dict[str, str] = {"func": "funcs.py", "class": "classes.py", "const": "const.py"}
+ARCHIVE_EXTENSIONS = {
+    ".zip",
+    ".tar",
+    ".gz",
+    ".bz2",
+    ".xz",
+    ".tgz",
+    ".tbz2",
+    ".zst",
+    ".br",
+}
+UTILS_MAP: dict[str, str] = {
+    "func": "funcs.py",
+    "class": "classes.py",
+    "const": "const.py",
+}
 CONSTANT_CALL_NAMES = {"TypeVar", "NewType", "ParamSpec", "TypeVarTuple"}
 
 
@@ -186,7 +200,12 @@ def analyse_source(source: str, origin: str) -> list[PyObject]:
                         )
                     )
         except Exception as exc:
-            logger.error("Failed to process node '{}' in {}: {}", getattr(node, "name", "?"), origin, exc)
+            logger.error(
+                "Failed to process node '{}' in {}: {}",
+                getattr(node, "name", "?"),
+                origin,
+                exc,
+            )
     return objects
 
 
@@ -431,7 +450,11 @@ def remove_and_patch(objects_to_remove: list[PyObject], utils_dir: Path, cwd: Pa
             continue
         try:
             path.write_text(new_source, encoding="utf-8")
-            logger.success("Patched {}: removed {} definition(s), added imports", filepath, len(objs))
+            logger.success(
+                "Patched {}: removed {} definition(s), added imports",
+                filepath,
+                len(objs),
+            )
         except Exception as exc:
             logger.error("Cannot write patched {}: {}", filepath, exc)
 
@@ -444,7 +467,9 @@ def collect_all_paths(root: Path) -> list[Path]:
     return [p for p in paths if not str(p).startswith(str(utils_dir))]
 
 
-def find_duplicates(all_objects: list[PyObject]) -> tuple[dict[str, list[PyObject]], dict[str, list[PyObject]]]:
+def find_duplicates(
+    all_objects: list[PyObject],
+) -> tuple[dict[str, list[PyObject]], dict[str, list[PyObject]]]:
     """
     Return:
       duplicates  — hash → [PyObject, …]  (only hashes seen > 1 time)
@@ -485,7 +510,12 @@ def run(cwd: Path, mode: Optional[str], workers: int) -> None:
     if mode is None:
         for kind, objs in grouped.items():
             for obj in objs:
-                logger.info("[{}] '{}' duplicated in {} file(s)", kind, obj.name, len(duplicates[obj.content_hash]))
+                logger.info(
+                    "[{}] '{}' duplicated in {} file(s)",
+                    kind,
+                    obj.name,
+                    len(duplicates[obj.content_hash]),
+                )
         return
     dry_run = mode not in {"copy", "move"}
     write_utils(grouped, utils_dir, dry_run=dry_run)
@@ -504,13 +534,22 @@ def _parse_args() -> argparse.Namespace:
     )
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
-        "-c", "--copy", action="store_true", help="Copy duplicate definitions to utils/ (originals untouched)"
+        "-c",
+        "--copy",
+        action="store_true",
+        help="Copy duplicate definitions to utils/ (originals untouched)",
     )
     group.add_argument(
-        "-m", "--move", action="store_true", help="Move duplicate definitions to utils/ and patch original files"
+        "-m",
+        "--move",
+        action="store_true",
+        help="Move duplicate definitions to utils/ and patch original files",
     )
     parser.add_argument(
-        "--dir", type=Path, default=Path("."), help="Root directory to scan (default: current directory)"
+        "--dir",
+        type=Path,
+        default=Path("."),
+        help="Root directory to scan (default: current directory)",
     )
     parser.add_argument(
         "--workers",
@@ -536,7 +575,13 @@ def main() -> None:
         format="<green>{time:HH:mm:ss}</green> | <level>{level:<8}</level> | {message}",
         colorize=True,
     )
-    logger.add("refactor_utils.log", level="DEBUG", rotation="5 MB", retention=3, encoding="utf-8")
+    logger.add(
+        "refactor_utils.log",
+        level="DEBUG",
+        rotation="5 MB",
+        retention=3,
+        encoding="utf-8",
+    )
     root = args.dir.resolve()
     if not root.is_dir():
         logger.error("'{}' is not a directory", root)
@@ -546,7 +591,12 @@ def main() -> None:
         mode = "copy"
     elif args.move:
         mode = "move"
-    logger.info("Root: {}  |  mode: {}  |  workers: {}", root, mode or "report-only", args.workers)
+    logger.info(
+        "Root: {}  |  mode: {}  |  workers: {}",
+        root,
+        mode or "report-only",
+        args.workers,
+    )
     run(root, mode, args.workers)
 
 

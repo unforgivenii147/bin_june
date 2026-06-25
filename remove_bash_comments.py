@@ -39,7 +39,12 @@ class BashCommentRemover:
                         check=False,
                     )
                     build_result = subprocess.run(
-                        ["npx", "tree-sitter", "build", "node_modules/tree-sitter-bash"],
+                        [
+                            "npx",
+                            "tree-sitter",
+                            "build",
+                            "node_modules/tree-sitter-bash",
+                        ],
                         cwd=tmpdir,
                         capture_output=True,
                         text=True,
@@ -105,9 +110,21 @@ class BashCommentRemover:
         except:
             pass
         try:
-            result = subprocess.run(["shfmt", "-f"], input=content, text=True, capture_output=True, check=False)
+            result = subprocess.run(
+                ["shfmt", "-f"],
+                input=content,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
             if result.returncode != 0:
-                result = subprocess.run(["bash", "-n"], input=content, text=True, capture_output=True, check=False)
+                result = subprocess.run(
+                    ["bash", "-n"],
+                    input=content,
+                    text=True,
+                    capture_output=True,
+                    check=False,
+                )
                 return result.returncode == 0
             return True
         except FileNotFoundError:
@@ -184,11 +201,21 @@ class BashCommentRemover:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Remove comments from bash files using tree-sitter")
     parser.add_argument(
-        "files", nargs="*", help="Files to process. If none given, process current directory recursively"
+        "files",
+        nargs="*",
+        help="Files to process. If none given, process current directory recursively",
     )
     parser.add_argument("-r", "--recursive", action="store_true", help="Process directories recursively")
-    parser.add_argument("--dry-run", action="store_true", help="Show what would be done without making changes")
-    parser.add_argument("--no-validate", action="store_true", help="Skip syntax validation (not recommended)")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be done without making changes",
+    )
+    parser.add_argument(
+        "--no-validate",
+        action="store_true",
+        help="Skip syntax validation (not recommended)",
+    )
     args = parser.parse_args()
     remover = BashCommentRemover()
     paths_to_process = []

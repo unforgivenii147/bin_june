@@ -9,7 +9,6 @@ so each worker process also leverages intra-file parallelism.
 
 import argparse
 import multiprocessing
-import os
 import shutil
 import sys
 import tarfile
@@ -67,7 +66,11 @@ def status_line(ok: bool, name: str, elapsed_ms: float, before: int, after: int)
 
 
 def compress_file(
-    src: Path, dry_run: bool, verbose: bool, level: int | None = None, threads: int = DEFAULT_THREADS
+    src: Path,
+    dry_run: bool,
+    verbose: bool,
+    level: int | None = None,
+    threads: int = DEFAULT_THREADS,
 ) -> dict:
     result = {"src": src, "ok": False, "line": "", "msg": ""}
 
@@ -237,7 +240,12 @@ def do_compress(root: Path, tar_subdirs: bool, dry_run: bool, verbose: bool, thr
             run_parallel(
                 tar_files,
                 compress_file,
-                {"dry_run": dry_run, "verbose": verbose, "level": LEVEL_LARGE, "threads": threads},
+                {
+                    "dry_run": dry_run,
+                    "verbose": verbose,
+                    "level": LEVEL_LARGE,
+                    "threads": threads,
+                },
             )
             compressed = {tp for tp in tar_files if (tp.with_suffix(tp.suffix + ZSTD_EXT)).exists() or dry_run}
             for sd, tp in tar_paths:
@@ -248,7 +256,11 @@ def do_compress(root: Path, tar_subdirs: bool, dry_run: bool, verbose: bool, thr
         if loose:
             if verbose:
                 print(f"Compressing {len(loose)} loose file(s) …")
-            run_parallel(loose, compress_file, {"dry_run": dry_run, "verbose": verbose, "threads": threads})
+            run_parallel(
+                loose,
+                compress_file,
+                {"dry_run": dry_run, "verbose": verbose, "threads": threads},
+            )
     else:
         files = [p for p in root.rglob("*") if p.is_file() and p.suffix != ZSTD_EXT]
         if not files:
@@ -256,7 +268,11 @@ def do_compress(root: Path, tar_subdirs: bool, dry_run: bool, verbose: bool, thr
             return
         if verbose:
             print(f"Compressing {len(files)} file(s) with {WORKERS} processes × {threads} zstd threads each …")
-        ok, err = run_parallel(files, compress_file, {"dry_run": dry_run, "verbose": verbose, "threads": threads})
+        ok, err = run_parallel(
+            files,
+            compress_file,
+            {"dry_run": dry_run, "verbose": verbose, "threads": threads},
+        )
         elapsed = time.perf_counter() - start
         print(f"\nDone — {ok} compressed, {err} error(s) [{elapsed:.2f}s]")
         return
@@ -273,7 +289,11 @@ def do_decompress(root: Path, dry_run: bool, verbose: bool, threads: int) -> Non
         return
     if verbose:
         print(f"Decompressing {len(files)} file(s) with {WORKERS} workers …")
-    ok, err = run_parallel(files, decompress_file, {"dry_run": dry_run, "verbose": verbose, "threads": threads})
+    ok, err = run_parallel(
+        files,
+        decompress_file,
+        {"dry_run": dry_run, "verbose": verbose, "threads": threads},
+    )
     elapsed = time.perf_counter() - start
     print(f"\nDone — {ok} decompressed, {err} error(s) [{elapsed:.2f}s]")
 
@@ -290,7 +310,12 @@ def build_parser() -> argparse.ArgumentParser:
     mode = p.add_mutually_exclusive_group()
     mode.add_argument("-c", "--compress", action="store_true")
     mode.add_argument("-d", "--decompress", action="store_true")
-    p.add_argument("-t", "--tar-subdirs-first", action="store_true", help="Tar subdirs before compressing.")
+    p.add_argument(
+        "-t",
+        "--tar-subdirs-first",
+        action="store_true",
+        help="Tar subdirs before compressing.",
+    )
     p.add_argument(
         "--threads",
         type=int,
@@ -324,7 +349,10 @@ def main() -> None:
         do_compress(root, args.tar_subdirs_first, args.dry_run, args.verbose, args.threads)
     else:
         if args.tar_subdirs_first:
-            print("Note: --tar-subdirs-first ignored during decompression.", file=sys.stderr)
+            print(
+                "Note: --tar-subdirs-first ignored during decompression.",
+                file=sys.stderr,
+            )
         do_decompress(root, args.dry_run, args.verbose, args.threads)
 
 

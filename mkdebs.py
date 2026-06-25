@@ -29,7 +29,13 @@ def get_package_files(pkg) -> list[str]:
 def get_package_metadata(pkg) -> dict[str, str]:
     fmt = "${Package}\n${Version}\n${Architecture}\n${Maintainer}\n${Description}\n"
     out = run(f"dpkg-query -W -f='{fmt}' {pkg}").splitlines()
-    return {"Package": out[0], "Version": out[1], "Architecture": out[2], "Maintainer": out[3], "Description": out[4]}
+    return {
+        "Package": out[0],
+        "Version": out[1],
+        "Architecture": out[2],
+        "Maintainer": out[3],
+        "Description": out[4],
+    }
 
 
 def create_control_file(path, meta: dict[str, str]) -> None:

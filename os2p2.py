@@ -335,7 +335,11 @@ def main() -> int:
                 for trans in result["transformations_applied"]:
                     cprint(f"     • {trans}", "cyan", attrs=["dark"])
             if result["backup_path"]:
-                cprint(f"     📦 Backup: {result['backup_path'].name}", "white", attrs=["dark"])
+                cprint(
+                    f"     📦 Backup: {result['backup_path'].name}",
+                    "white",
+                    attrs=["dark"],
+                )
         elif args.verbose:
             cprint(f"  ⏭️  No changes needed", "white", attrs=["dark"])
 

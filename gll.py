@@ -7,7 +7,8 @@ from pathlib import Path
 def main() -> int:
     if len(sys.argv) < 3:
         print(
-            f"get from line X to Y of a file:\nUsage: {sys.argv[0]} <filename> <start_line> [end_line]", file=sys.stderr
+            f"get from line X to Y of a file:\nUsage: {sys.argv[0]} <filename> <start_line> [end_line]",
+            file=sys.stderr,
         )
         return 1
     filename = sys.argv[1]

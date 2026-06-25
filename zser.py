@@ -127,7 +127,11 @@ def decompress_file(path: Path) -> dict:
                     "decompressed": len(decompressed),
                 }
             except Exception as e:
-                return {"status": "error", "path": str(path), "error": f"tar extract: {e}"}
+                return {
+                    "status": "error",
+                    "path": str(path),
+                    "error": f"tar extract: {e}",
+                }
 
         # Normal file
         path.unlink()
@@ -198,8 +202,20 @@ def main():
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-c", "--compress", action="store_true", help="Compress mode (default)")
     group.add_argument("-d", "--decompress", action="store_true", help="Decompress .zst files")
-    parser.add_argument("-l", "--level", type=int, default=21, help="Compression level (1-22, default 3)")
-    parser.add_argument("-w", "--workers", type=int, default=MAX_WORKERS, help="Number of parallel workers")
+    parser.add_argument(
+        "-l",
+        "--level",
+        type=int,
+        default=21,
+        help="Compression level (1-22, default 3)",
+    )
+    parser.add_argument(
+        "-w",
+        "--workers",
+        type=int,
+        default=MAX_WORKERS,
+        help="Number of parallel workers",
+    )
     parser.add_argument("-p", "--path", type=Path, default=Path.cwd(), help="Target directory")
     parser.add_argument("--no-dirs", action="store_true", help="Skip directory compression")
     parser.add_argument("--sequential", action="store_true", help="Disable parallelism")

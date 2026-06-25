@@ -413,11 +413,25 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Find repeated top-level Python objects and optionally move/copy them to utils.py"
     )
-    parser.add_argument("-m", "--move", action="store_true", help="Move duplicate objects to utils.py and add imports")
     parser.add_argument(
-        "-c", "--copy", action="store_true", help="Copy duplicate objects to utils.py without modifying source files"
+        "-m",
+        "--move",
+        action="store_true",
+        help="Move duplicate objects to utils.py and add imports",
     )
-    parser.add_argument("-j", "--jobs", type=int, default=max(1, mp.cpu_count() - 1), help="Worker process count")
+    parser.add_argument(
+        "-c",
+        "--copy",
+        action="store_true",
+        help="Copy duplicate objects to utils.py without modifying source files",
+    )
+    parser.add_argument(
+        "-j",
+        "--jobs",
+        type=int,
+        default=max(1, mp.cpu_count() - 1),
+        help="Worker process count",
+    )
     parser.add_argument("--log-level", default="INFO", help="DEBUG, INFO, WARNING, ERROR")
     args = parser.parse_args()
     if args.move and args.copy:

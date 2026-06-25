@@ -8,7 +8,7 @@ from dh import get_filez, read_lines
 
 EMPTYIT = "-e" in sys.argv
 RMIT = "-r" in sys.argv
-junk_path = "/sdcard/data/junk"
+junk_path = Path("/sdcard/data/junk")
 SKIP_DIRS = ["lazy", ".git"]
 
 
@@ -31,11 +31,20 @@ def load_junk() -> list[str]:
 def main() -> None:
     cwd = Path.cwd()
     junk_files = load_junk()
+    junkset = set(junk_files)
     c = 0
     for path in get_filez(cwd):
         if ".git" in path.parts or "lazy" in path.parts or "var" in path.parts:
             continue
         loname = path.name.lower()
+        if loname in junkset:
+            path.unlink()
+            print(f"{path.name} removed.")
+            continue
+        if loname == "copying":
+            path.unlink()
+            print(f"{path.name} removed.")
+            continue
         if loname.endswith((".tmp", ".bak", ".log")):
             remove_it(path)
             print(path.relative_to(cwd))

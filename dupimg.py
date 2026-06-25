@@ -26,7 +26,6 @@ import sys
 import time
 import shutil
 from pathlib import Path
-from collections import defaultdict
 from multiprocessing import Pool, cpu_count
 from typing import List, Tuple, Optional
 
@@ -169,7 +168,10 @@ def get_file_info(file_path: Path) -> str:
 
 
 def move_duplicates_to_folders(
-    groups: List[List[str]], current_dir: Path, output_prefix: str, dry_run: bool = False
+    groups: List[List[str]],
+    current_dir: Path,
+    output_prefix: str,
+    dry_run: bool = False,
 ) -> Tuple[int, int]:
     """
     Move duplicate groups to numbered subfolders.

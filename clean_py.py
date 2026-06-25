@@ -136,7 +136,11 @@ def worker(args):
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Remove unused functions, classes, variables, and imports.")
-    parser.add_argument("--dry-run", action="store_true", help="Show what would change without modifying files.")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would change without modifying files.",
+    )
     parser.add_argument("--workers", type=int, default=mp.cpu_count(), help="Number of processes")
     args = parser.parse_args()
     root = Path()

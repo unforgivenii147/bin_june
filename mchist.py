@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 from pathlib import Path
+import cmd
 
 if __name__ == "__main__":
     input_file = Path("/data/data/com.termux/files/home/.local/share/mc/history")

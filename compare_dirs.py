@@ -45,7 +45,7 @@ def main() -> None:
     second = Path(dir2).expanduser() if "~" in dir2 else Path(dir2)
     f_files = [p.name for p in first.glob("*") if p.is_file()]
     f_dirs = [p.name for p in first.glob("*") if p.is_dir()]
-    s_files = [p.name for p in second.glob("*") if p.is_file()]
+    s_files = [p.name for p in second.glob("*") if p.exists() and p.is_file()]
     s_dirs = [p.name for p in second.glob("*") if p.is_dir()]
     common1 = [Path(dir1).resolve() / p for p in f_files if p in s_files]
     common2 = {str(Path(dir1).resolve() / p): str(Path(dir2).resolve() / p) for p in f_files if p in s_files}

@@ -16,7 +16,16 @@ pause_event.set()
 results_queue = Queue()
 DEFAULT_EXCLUDED_DIRS = {".git"}
 DEFAULT_SKIPPED_EXTS = {".pyc", ".bak"}
-ARCHIVE_EXTENSIONS = (".tar.gz", ".tar", ".tar.xz", ".tar.zst", ".tar.bz2", ".zip", ".whl", ".apk")
+ARCHIVE_EXTENSIONS = (
+    ".tar.gz",
+    ".tar",
+    ".tar.xz",
+    ".tar.zst",
+    ".tar.bz2",
+    ".zip",
+    ".whl",
+    ".apk",
+)
 
 
 def setup_keyboard_listener() -> bool:
@@ -135,7 +144,12 @@ def main() -> None:
     parser.add_argument("-c", "--content", action="store_true")
     parser.add_argument("-d", "--directory", default=".")
     parser.add_argument("-o", "--output", default="output")
-    parser.add_argument("--exclude", action="append", default=[], help="Exclude dir or glob (repeatable)")
+    parser.add_argument(
+        "--exclude",
+        action="append",
+        default=[],
+        help="Exclude dir or glob (repeatable)",
+    )
     args = parser.parse_args()
     excluded_dirs = DEFAULT_EXCLUDED_DIRS | {e for e in args.exclude if not any((ch in e for ch in "*?[]"))}
     excluded_patterns = {e for e in args.exclude if any((ch in e for ch in "*?[]"))}

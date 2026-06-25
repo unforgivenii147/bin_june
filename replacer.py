@@ -76,7 +76,11 @@ if __name__ == "__main__":
         help="Search text and optional replacement text. If only one string is provided, it will be removed.",
     )
     parser.add_argument("--dry-run", action="store_true", help="Show changes without applying them")
-    parser.add_argument("-f", "--file", help="Process only the specified file instead of recursive directory search")
+    parser.add_argument(
+        "-f",
+        "--file",
+        help="Process only the specified file instead of recursive directory search",
+    )
     args = parser.parse_args()
     if len(args.strings) == 2:
         search_text, replace_text = args.strings

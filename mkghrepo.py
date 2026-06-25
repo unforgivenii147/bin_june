@@ -28,7 +28,10 @@ def load_env_file(env_path):
 def create_github_repo(token, repo_name, description, public=True):
     """Create a GitHub repository using the API"""
     url = "https://api.github.com/user/repos"
-    headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
+    headers = {
+        "Authorization": f"token {token}",
+        "Accept": "application/vnd.github.v3+json",
+    }
     data = {
         "name": repo_name,
         "description": description,

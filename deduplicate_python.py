@@ -348,7 +348,11 @@ def remove_snippets_from_code(code: str, objects) -> str:
         return code
     if all((o.get("start_byte") is not None and o.get("end_byte") is not None for o in objects)):
         encoded = code.encode("utf-8")
-        spans = sorted([(o["start_byte"], o["end_byte"]) for o in objects], key=lambda x: x[0], reverse=True)
+        spans = sorted(
+            [(o["start_byte"], o["end_byte"]) for o in objects],
+            key=lambda x: x[0],
+            reverse=True,
+        )
         for start, end in spans:
             encoded = encoded[:start] + encoded[end:]
         return encoded.decode("utf-8")
@@ -388,11 +392,25 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Find repeated top-level Python objects and optionally move/copy them to utils.py"
     )
-    parser.add_argument("-m", "--move", action="store_true", help="Move duplicate objects to utils.py and add imports")
     parser.add_argument(
-        "-c", "--copy", action="store_true", help="Copy duplicate objects to utils.py without changing source files"
+        "-m",
+        "--move",
+        action="store_true",
+        help="Move duplicate objects to utils.py and add imports",
     )
-    parser.add_argument("-j", "--jobs", type=int, default=mp.cpu_count(), help="Number of worker processes")
+    parser.add_argument(
+        "-c",
+        "--copy",
+        action="store_true",
+        help="Copy duplicate objects to utils.py without changing source files",
+    )
+    parser.add_argument(
+        "-j",
+        "--jobs",
+        type=int,
+        default=mp.cpu_count(),
+        help="Number of worker processes",
+    )
     args = parser.parse_args()
     if args.move and args.copy:
         logger.error("Use either --move or --copy, not both.")

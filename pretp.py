@@ -9,14 +9,29 @@ from tqdm import tqdm
 
 def format_file(file_path) -> str | None:
     try:
-        subprocess.run(["npx", "prettier", "--write", file_path], capture_output=True, text=True, check=True)
+        subprocess.run(
+            ["npx", "prettier", "--write", file_path],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
         return None
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
         return f"{file_path}: {(e.stderr if hasattr(e, 'stderr') else e)!s}"
 
 
 def main() -> None:
-    target_extensions = (".js", ".css", ".htm", ".html", ".ts", ".jsx", ".tsx", ".xml", ".json")
+    target_extensions = (
+        ".js",
+        ".css",
+        ".htm",
+        ".html",
+        ".ts",
+        ".jsx",
+        ".tsx",
+        ".xml",
+        ".json",
+    )
     exclude_dirs = {".git"}
     exclude_extensions = (".min.js", ".min.css")
     files_to_format = []

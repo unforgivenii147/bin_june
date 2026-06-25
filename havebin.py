@@ -29,7 +29,11 @@ def find_packages_with_bin_scripts(output_file: str = "have_scripts.txt") -> Non
                     errors="ignore",
                 )
                 lines = result.stdout.split("\n")
-                bin_indicators = [os.path.join(os.sep, "bin", ""), os.path.join("bin", ""), os.path.join("scripts", "")]
+                bin_indicators = [
+                    os.path.join(os.sep, "bin", ""),
+                    os.path.join("bin", ""),
+                    os.path.join("scripts", ""),
+                ]
                 found_script_in_bin = False
                 for line in lines:
                     line = line.strip()
@@ -49,7 +53,12 @@ def find_packages_with_bin_scripts(output_file: str = "have_scripts.txt") -> Non
                                 not any(
                                     (
                                         exclude_part in line
-                                        for exclude_part in ["__pycache__", ".dist-info", ".egg-info", ".pth"]
+                                        for exclude_part in [
+                                            "__pycache__",
+                                            ".dist-info",
+                                            ".egg-info",
+                                            ".pth",
+                                        ]
                                     )
                                 )
                             )

@@ -28,7 +28,17 @@ def strip_comments_and_docstrings(file_path_str) -> bool:
     cleaned_content = DOCSTRING_START_REGEX.sub("\x01", original_content, count=3)
 
     def replace_comments(match):
-        _indent1, comment1, quote1, _indent2, _quote2, fn_type, indent3, quote3, quote4 = match.groups()
+        (
+            _indent1,
+            comment1,
+            quote1,
+            _indent2,
+            _quote2,
+            fn_type,
+            indent3,
+            quote3,
+            quote4,
+        ) = match.groups()
         if comment1:
             return ""
         if quote1:

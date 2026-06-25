@@ -67,11 +67,23 @@ def read_file_contents(filepath: str):
                 continue
         with Path(filepath).open("rb") as f:
             content = f.read()
-            return {"content": content, "is_binary": True, "original_size": len(content)}
+            return {
+                "content": content,
+                "is_binary": True,
+                "original_size": len(content),
+            }
     except PermissionError:
-        return {"content": error_msg, "is_binary": False, "original_size": len(error_msg)}
+        return {
+            "content": error_msg,
+            "is_binary": False,
+            "original_size": len(error_msg),
+        }
     except Exception as e:
-        return {"content": error_msg, "is_binary": False, "original_size": len(error_msg)}
+        return {
+            "content": error_msg,
+            "is_binary": False,
+            "original_size": len(error_msg),
+        }
 
 
 def get_files_in_cwd():

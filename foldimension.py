@@ -19,7 +19,17 @@ try:
 except ImportError:
     print("Error: This script requires Pillow. Install it with: pip install Pillow")
     exit(1)
-IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".tif", ".webp", ".ico"}
+IMAGE_EXTENSIONS = {
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".gif",
+    ".bmp",
+    ".tiff",
+    ".tif",
+    ".webp",
+    ".ico",
+}
 
 
 def collect_images(root: Path):

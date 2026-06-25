@@ -5,7 +5,6 @@ from pathlib import Path
 
 from dh import cprint, get_pyfiles, mpf3
 
-DRY_RUN = not "-m" in sys.argv
 cwd = Path.cwd()
 err_dir = cwd / "error"
 counter = 0
@@ -16,18 +15,14 @@ def process_file(path: Path) -> None:
     path = Path(path)
     counter += 1
     print(f"{counter} {path.name}")
-    content = path.read_text(encoding="utf-8")
     try:
-        ast.parse(content)
-        del content
+        ast.parse(path.read_text(encoding="utf-8"))
         return
     except Exception as e:
         print(f"{path} | {e}")
-        if not DRY_RUN:
-            err_dir.mkdir(exist_ok=True)
-            newpath = err_dir / path.name
-            newpath.write_text(content, encoding="utf-8")
-            del content
+        err_dir.mkdir(exist_ok=True)
+        newpath = err_dir / path.name
+        path.rename(newpath)
             return
         else:
             print(f"{path.name} ast parse error")

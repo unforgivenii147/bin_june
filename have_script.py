@@ -3,7 +3,6 @@ import argparse
 import os
 import sys
 import zipfile
-from pathlib import Path
 
 
 def find_whl_files(directory):
@@ -48,10 +47,23 @@ def get_whl_info(whl_path):
 def main():
     parser = argparse.ArgumentParser(description="Find .whl files that contain entry_points.txt")
     parser.add_argument(
-        "directory", nargs="?", default=".", help="Directory to search for .whl files (default: current directory)"
+        "directory",
+        nargs="?",
+        default=".",
+        help="Directory to search for .whl files (default: current directory)",
     )
-    parser.add_argument("-v", "--verbose", action="store_true", help="Show verbose output with all files checked")
-    parser.add_argument("-q", "--quiet", action="store_true", help="Only show files with entry_points.txt")
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Show verbose output with all files checked",
+    )
+    parser.add_argument(
+        "-q",
+        "--quiet",
+        action="store_true",
+        help="Only show files with entry_points.txt",
+    )
 
     args = parser.parse_args()
 

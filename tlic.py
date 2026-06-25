@@ -236,7 +236,10 @@ def main() -> None:
     """Main entry point."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "-r", "--remove", action="store_true", help="Remove found repeated multi-line blocks from files"
+        "-r",
+        "--remove",
+        action="store_true",
+        help="Remove found repeated multi-line blocks from files",
     )
     parser.add_argument(
         "--min-lines",
@@ -259,7 +262,10 @@ def main() -> None:
     blocks = collect_blocks_parallel(root, args.min_lines, args.jobs)
 
     scan_time = time.time() - start_time
-    print(f"Scan completed in {scan_time:.2f}s, found {len(blocks)} unique blocks", file=sys.stderr)
+    print(
+        f"Scan completed in {scan_time:.2f}s, found {len(blocks)} unique blocks",
+        file=sys.stderr,
+    )
 
     repeated = find_repeated_blocks(blocks)
 

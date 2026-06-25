@@ -13,7 +13,8 @@ from packaging.version import Version
 MOVE_MODE = "-m" in sys.argv
 
 WHEEL_PATTERN = re.compile(
-    "^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])-([^-]+)-(\\d[^-]*)-([^-]+)-([^-]+)-([^-]+)\\.whl$", re.IGNORECASE
+    r"^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])-([^-]+)-(\d[^-]*)-([^-]+)-([^-]+)-([^-]+)\.whl$",
+    re.IGNORECASE,
 )
 
 

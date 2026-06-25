@@ -15,7 +15,10 @@ def format_python_file(filepath: Path) -> None:
     content = ""
     backup_filepath = filepath.with_name(filepath.name + ".bak")
     try:
-        with filepath.open("r", encoding="utf-8") as f_in, backup_filepath.open("w", encoding="utf-8") as f_bak:
+        with (
+            filepath.open("r", encoding="utf-8") as f_in,
+            backup_filepath.open("w", encoding="utf-8") as f_bak,
+        ):
             content = f_in.read()
             f_bak.write(content)
     except OSError as e:
@@ -111,7 +114,8 @@ def format_python_file(filepath: Path) -> None:
         temp_file = Path("temporary.py")
         temp_file.write_text(final_formatted_content, encoding="utf-8")
         print(
-            f"Error: Formatted code is not parsable by AST. Aborting write operation for {filepath}.", file=sys.stderr
+            f"Error: Formatted code is not parsable by AST. Aborting write operation for {filepath}.",
+            file=sys.stderr,
         )
         print(f"AST Syntax Error: {e}", file=sys.stderr)
         Path(backup_filepath).replace(filepath)

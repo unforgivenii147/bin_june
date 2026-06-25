@@ -80,10 +80,16 @@ def main() -> None:
     try:
         text = inp.read_text(encoding="utf-8")
     except Exception as exc:
-        print(f"Failed to read input file with encoding {args.encoding}: {exc}", file=sys.stderr)
+        print(
+            f"Failed to read input file with encoding {args.encoding}: {exc}",
+            file=sys.stderr,
+        )
         sys.exit(2)
     if len(text) < DEFAULT_MAX:
-        print(f"File has fewer than {DEFAULT_MAX} characters ({len(text)}). Skipping.", file=sys.stderr)
+        print(
+            f"File has fewer than {DEFAULT_MAX} characters ({len(text)}). Skipping.",
+            file=sys.stderr,
+        )
         sys.exit(0)
     chunks = chunk_text_with_nltk(text, DEFAULT_MAX)
     if not chunks:

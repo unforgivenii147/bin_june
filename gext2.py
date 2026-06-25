@@ -11,7 +11,16 @@ from pathlib import Path
 from typing import Any
 
 OUTPUT_DIR = Path("output")
-ARCHIVE_EXTENSIONS = (".whl", ".zip", ".tar.gz", ".tgz", ".tar.zst", ".tar.xz", ".tar", ".zst")
+ARCHIVE_EXTENSIONS = (
+    ".whl",
+    ".zip",
+    ".tar.gz",
+    ".tgz",
+    ".tar.zst",
+    ".tar.xz",
+    ".tar",
+    ".zst",
+)
 ALLOWED_PYTHON_EXTENSIONS = (".py", "")
 
 
@@ -166,7 +175,13 @@ def process_archive(path: Path) -> list[dict[str, Any]]:
         except Exception as e:
             print(f"Error processing ZIP/WHL archive {path}: {e}")
     elif any((path.name.endswith(ext) for ext in [".tar", ".tar.gz", ".tgz", ".tar.zst", ".tar.xz"])):
-        mode_map = {".tar.gz": "r:gz", ".tgz": "r:gz", ".tar.zst": "r:zst", ".tar.xz": "r:xz", ".tar": "r"}
+        mode_map = {
+            ".tar.gz": "r:gz",
+            ".tgz": "r:gz",
+            ".tar.zst": "r:zst",
+            ".tar.xz": "r:xz",
+            ".tar": "r",
+        }
         mode = next((mode_map[ext] for ext in mode_map if path.name.endswith(ext)), "r")
         try:
             with tarfile.open(path, mode) as tf:

@@ -233,11 +233,21 @@ def main() -> None:
     )
 
     parser.add_argument(
-        "directory", nargs="?", default=".", help="Directory containing .whl files (default: current directory)"
+        "directory",
+        nargs="?",
+        default=".",
+        help="Directory containing .whl files (default: current directory)",
     )
-    parser.add_argument("--execute", "-e", action="store_true", help="Actually rename files (dry run by default)")
     parser.add_argument(
-        "--no-backup", action="store_true", help="Skip creating backups (backups are created by default)"
+        "--execute",
+        "-e",
+        action="store_true",
+        help="Actually rename files (dry run by default)",
+    )
+    parser.add_argument(
+        "--no-backup",
+        action="store_true",
+        help="Skip creating backups (backups are created by default)",
     )
     parser.add_argument(
         "--parallel",
@@ -246,7 +256,12 @@ def main() -> None:
         metavar="N",
         help="Use parallel processing with N workers (only for info extraction)",
     )
-    parser.add_argument("--info-only", "-i", action="store_true", help="Only show extracted info without renaming")
+    parser.add_argument(
+        "--info-only",
+        "-i",
+        action="store_true",
+        help="Only show extracted info without renaming",
+    )
 
     args = parser.parse_args()
 
@@ -266,7 +281,11 @@ def main() -> None:
                     print(f"  Version: {metadata['version']}")
                     print(f"  Should be: {proper_name}")
     else:
-        fix_whl_files_by_metadata(directory=args.directory, dry_run=not args.execute, backup=not args.no_backup)
+        fix_whl_files_by_metadata(
+            directory=args.directory,
+            dry_run=not args.execute,
+            backup=not args.no_backup,
+        )
 
 
 if __name__ == "__main__":

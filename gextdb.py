@@ -199,7 +199,12 @@ def process_single_file(path: Path) -> list[dict[str, Any]]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Extract Python entities and save to database.")
-    parser.add_argument("-db", "--database", action="store_true", help="Save extracted entities to the database")
+    parser.add_argument(
+        "-db",
+        "--database",
+        action="store_true",
+        help="Save extracted entities to the database",
+    )
     args = parser.parse_args()
     print(f"Starting analysis in {Path.cwd()}...")
     create_database()

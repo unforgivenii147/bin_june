@@ -16,7 +16,8 @@ def file_to_json(filepath: Path, delimiter: str):
                 parts = line.split(delimiter, 1)
                 if len(parts) != 2:
                     print(
-                        f"Warning: Line {line_num} doesn't contain delimiter '{delimiter}': {line!r}", file=sys.stderr
+                        f"Warning: Line {line_num} doesn't contain delimiter '{delimiter}': {line!r}",
+                        file=sys.stderr,
                     )
                     continue
                 key, value = parts

@@ -120,7 +120,8 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Find latest ARMv7 wheels from URL list", epilog="Example: python3 filter_armv7.py urls.txt"
+        description="Find latest ARMv7 wheels from URL list",
+        epilog="Example: python3 filter_armv7.py urls.txt",
     )
     parser.add_argument("input", nargs="?", default=None, help="Input file with URLs (one per line)")
     parser.add_argument("--output", "-o", help="Output file to save URLs (one per line)")

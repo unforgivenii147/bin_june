@@ -268,7 +268,16 @@ def should_compress(path: Path) -> bool:
             return False
 
         # Skip already compressed files
-        compressed_extensions = (".zst", ".xz", ".gz", ".bz2", ".br", ".7z", ".zip", ".tar")
+        compressed_extensions = (
+            ".zst",
+            ".xz",
+            ".gz",
+            ".bz2",
+            ".br",
+            ".7z",
+            ".zip",
+            ".tar",
+        )
         if path.suffix in compressed_extensions:
             return False
 
@@ -460,9 +469,17 @@ Zstandard Settings:
     # Create mutually exclusive group for compress/decompress
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
-        "-c", "--compress", action="store_true", help="Compress files and folders with Zstandard (default)"
+        "-c",
+        "--compress",
+        action="store_true",
+        help="Compress files and folders with Zstandard (default)",
     )
-    group.add_argument("-d", "--decompress", action="store_true", help="Decompress .zst and .tar.zst files")
+    group.add_argument(
+        "-d",
+        "--decompress",
+        action="store_true",
+        help="Decompress .zst and .tar.zst files",
+    )
 
     args = parser.parse_args()
 

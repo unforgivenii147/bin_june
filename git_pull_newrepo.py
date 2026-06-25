@@ -34,8 +34,16 @@ def create_github_repo(repo_name: str, github_token: str) -> str | None:
     Returns the clone URL if successful, None otherwise.
     """
     url = "https://api.github.com/user/repos"
-    headers = {"Authorization": f"token {github_token}", "Accept": "application/vnd.github.v3+json"}
-    data = {"name": repo_name, "description": f"Repository for {repo_name}", "private": False, "auto_init": False}
+    headers = {
+        "Authorization": f"token {github_token}",
+        "Accept": "application/vnd.github.v3+json",
+    }
+    data = {
+        "name": repo_name,
+        "description": f"Repository for {repo_name}",
+        "private": False,
+        "auto_init": False,
+    }
 
     try:
         response = requests.post(url, headers=headers, json=data)
@@ -128,7 +136,10 @@ def process_repository(repo_path: Path, github_token: str) -> tuple[bool, str]:
             except GitCommandError as e:
                 if "merge conflict" in str(e).lower():
                     return (False, "Merge conflicts detected")
-                return (False, f"Pull failed: {e.stderr.strip() if e.stderr else str(e)}")
+                return (
+                    False,
+                    f"Pull failed: {e.stderr.strip() if e.stderr else str(e)}",
+                )
         else:
             # No remote - create GitHub repo and push
             print(f"\n📁 {rel_path} (no remote configured)")

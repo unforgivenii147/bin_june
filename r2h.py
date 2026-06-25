@@ -19,7 +19,11 @@ def rst_to_html(content: str) -> str:
         parts = publish_parts(
             source=content,
             writer_name="html",
-            settings_overrides={"initial_header_level": 2, "warning_stream": None, "report_level": 5},
+            settings_overrides={
+                "initial_header_level": 2,
+                "warning_stream": None,
+                "report_level": 5,
+            },
         )
         html_content = parts["html_body"]
         #        from mistletoe import Document

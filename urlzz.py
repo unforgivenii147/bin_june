@@ -82,7 +82,12 @@ def extract_urls(filepath):
         return extract_urls_from_file(filepath)
     if path.suffix in {".zip", ".whl"}:
         return extract_urls_from_zip(filepath)
-    if path.suffix.startswith(".tar") or path.suffix in {".tar.gz", ".tar.xz", ".tar.zst", ".tar.7z"}:
+    if path.suffix.startswith(".tar") or path.suffix in {
+        ".tar.gz",
+        ".tar.xz",
+        ".tar.zst",
+        ".tar.7z",
+    }:
         return extract_urls_from_tar(filepath)
     if path.suffix == ".7z":
         return extract_urls_from_7z(filepath)

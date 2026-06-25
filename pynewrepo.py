@@ -20,7 +20,13 @@ class GitHubRepoManager:
         self, command: list, cwd: Path | None = None, capture_output: bool = False
     ) -> tuple[int, str, str]:
         try:
-            result = subprocess.run(command, check=False, cwd=cwd or self.cwd, capture_output=capture_output, text=True)
+            result = subprocess.run(
+                command,
+                check=False,
+                cwd=cwd or self.cwd,
+                capture_output=capture_output,
+                text=True,
+            )
             stdout = result.stdout.strip() if result.stdout else ""
             stderr = result.stderr.strip() if result.stderr else ""
             return (result.returncode, stdout, stderr)
@@ -43,7 +49,8 @@ class GitHubRepoManager:
 
     def _repo_exists_on_github(self) -> bool:
         returncode, _, _ = self._run_command(
-            ["gh", "repo", "view", f"{self.github_username}/{self.repo_name}"], capture_output=True
+            ["gh", "repo", "view", f"{self.github_username}/{self.repo_name}"],
+            capture_output=True,
         )
         return returncode == 0
 
@@ -67,7 +74,16 @@ class GitHubRepoManager:
             print(f"✓ Repository {self.repo_name} already exists on GitHub")
             return True
         returncode, stdout, stderr = self._run_command(
-            ["gh", "repo", "create", self.repo_name, "--source=.", "--remote=origin", "--public"], capture_output=True
+            [
+                "gh",
+                "repo",
+                "create",
+                self.repo_name,
+                "--source=.",
+                "--remote=origin",
+                "--public",
+            ],
+            capture_output=True,
         )
         if returncode != 0:
             print("Error creating repository on GitHub")
@@ -128,7 +144,10 @@ class GitHubRepoManager:
                 print("✓ Remote 'origin' already configured correctly")
                 return
             print(f"Updating remote URL from {current_url} to {self.repo_url}")
-            self._run_command(["git", "remote", "set-url", "origin", self.repo_url], capture_output=True)
+            self._run_command(
+                ["git", "remote", "set-url", "origin", self.repo_url],
+                capture_output=True,
+            )
             return
         returncode, _, stderr = self._run_command(
             ["git", "remote", "add", "origin", self.repo_url], capture_output=True
@@ -237,9 +256,17 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Create a GitHub repository using gh CLI and auto-commit with current date/time"
     )
-    parser.add_argument("-n", "--name", help="Repository name (default: current directory name)", type=str)
     parser.add_argument(
-        "-m", "--message", help="Custom commit message (default: auto-generated with timestamp)", type=str
+        "-n",
+        "--name",
+        help="Repository name (default: current directory name)",
+        type=str,
+    )
+    parser.add_argument(
+        "-m",
+        "--message",
+        help="Custom commit message (default: auto-generated with timestamp)",
+        type=str,
     )
     args = parser.parse_args()
     try:

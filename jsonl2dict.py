@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 import json
+import sys
 
 
 def jsonl_to_dict_list(filepath):

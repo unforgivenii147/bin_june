@@ -47,11 +47,20 @@ def delete_empty_dirs_iterative(root: Path, dry_run: bool = False, verbose: bool
                 else:
                     print(f"  (Dry Run) Would remove: {path.relative_to(root)}")
         except PermissionError:
-            print(f"[ERROR] Permission denied for: {path.relative_to(root)}", file=sys.stderr)
+            print(
+                f"[ERROR] Permission denied for: {path.relative_to(root)}",
+                file=sys.stderr,
+            )
         except OSError as e:
-            print(f"[ERROR] Could not process {path.relative_to(root)}: {e}", file=sys.stderr)
+            print(
+                f"[ERROR] Could not process {path.relative_to(root)}: {e}",
+                file=sys.stderr,
+            )
         except Exception as e:
-            print(f"[ERROR] An unexpected error occurred with {path.relative_to(root)}: {e}", file=sys.stderr)
+            print(
+                f"[ERROR] An unexpected error occurred with {path.relative_to(root)}: {e}",
+                file=sys.stderr,
+            )
     return (removed_count, removed_dirs_list)
 
 
@@ -70,12 +79,18 @@ def main() -> None:
         help="Perform a dry run: show what would be deleted without actually deleting.",
     )
     parser.add_argument(
-        "-v", "--verbose", action="store_true", help="Enable verbose output, showing skipped and found directories."
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Enable verbose output, showing skipped and found directories.",
     )
     args = parser.parse_args()
     root_path = args.path.resolve()
     if not root_path.is_dir():
-        print(f"Error: The provided path '{root_path}' is not a valid directory.", file=sys.stderr)
+        print(
+            f"Error: The provided path '{root_path}' is not a valid directory.",
+            file=sys.stderr,
+        )
         sys.exit(1)
     if args.dry_run:
         print("--- DRY RUN MODE (no changes will be made) ---")

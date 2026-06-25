@@ -17,9 +17,9 @@ from typing import Callable, Tuple
 import brotlicffi as brotli
 import py7zr
 import zstandard as zstd
-from _io import BufferedReader, BufferedWriter
 from dh import cprint, fsz, gsz, mpf3
 from loguru import logger
+import shutil
 
 SUPPORTED_EXTS = {
     ".tar",
@@ -89,7 +89,14 @@ def has_compressed_suffix(path: Path) -> bool:
 
 def output_name_for_file(path: Path, mode: str) -> Path:
     """Generate output filename for a single file."""
-    ext_map = {"xz": ".xz", "gz": ".gz", "brotli": ".br", "zstd": ".zst", "7z": ".7z", "zip": ".zip"}
+    ext_map = {
+        "xz": ".xz",
+        "gz": ".gz",
+        "brotli": ".br",
+        "zstd": ".zst",
+        "7z": ".7z",
+        "zip": ".zip",
+    }
     if mode not in ext_map:
         raise ValueError(f"Unsupported mode: {mode}")
     return path.with_name(path.name + ext_map[mode])
@@ -146,7 +153,10 @@ def compress_streaming(src: Path, dst: Path, compress_func: Callable, is_dir: bo
 
 def compress_file_xz(src: Path, dst: Path) -> None:
     """Compress with LZMA using streaming."""
-    with src.open("rb") as fin, lzma.open(dst, "wb", preset=9 | lzma.PRESET_EXTREME) as fout:
+    with (
+        src.open("rb") as fin,
+        lzma.open(dst, "wb", preset=9 | lzma.PRESET_EXTREME) as fout,
+    ):
         copy_chunks(fin, fout)
 
 
@@ -343,7 +353,10 @@ def decompress_one(path_str: str) -> Result:
                     break
 
         elif name.endswith((".7z", ".zip")):
-            ext_map = {".7z": (py7zr.SevenZipFile(src, "r"), src.stem), ".zip": (zipfile.ZipFile(src, "r"), src.stem)}
+            ext_map = {
+                ".7z": (py7zr.SevenZipFile(src, "r"), src.stem),
+                ".zip": (zipfile.ZipFile(src, "r"), src.stem),
+            }
 
             for ext, (archive, extract_name) in ext_map.items():
                 if name.endswith(ext):

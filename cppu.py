@@ -3,9 +3,21 @@
 import sys
 from pathlib import Path
 
-from dh import cprint, fsz, get_files, gsz, mpf3, runcmd, rss
+from dh import cprint, fsz, get_files, gsz, mpf3, runcmd, rrs
 
-EXT = [".java", ".c", ".cpp", ".cxx", ".cc", ".h", ".hh", ".hpp", ".hxx", ".js", ".json"]
+EXT = [
+    ".java",
+    ".c",
+    ".cpp",
+    ".cxx",
+    ".cc",
+    ".h",
+    ".hh",
+    ".hpp",
+    ".hxx",
+    ".js",
+    ".json",
+]
 
 
 def process_file(path):
@@ -14,7 +26,7 @@ def process_file(path):
     try:
         runcmd(["clang-format", "-i", "--style=LLVM", str(path)], show_output=False)
         after = gsz(path)
-        rss(path, before, after)
+        rrs(path, before, after)
         del before, after
         return
     except:

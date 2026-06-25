@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
 import csv
-import os
 import zipfile
 from pathlib import Path
 
@@ -16,7 +15,10 @@ def is_empty_wheel(wheel_path: str) -> bool:
                 if name.endswith(".dist-info/") or name == name.rstrip("/") + "/" and name.endswith(".dist-info")
             ]
             # Simpler: just check for any name containing .dist-info
-            dist_info = next((name.rstrip("/") for name in z.namelist() if ".dist-info" in name), None)
+            dist_info = next(
+                (name.rstrip("/") for name in z.namelist() if ".dist-info" in name),
+                None,
+            )
 
             if not dist_info:
                 return False

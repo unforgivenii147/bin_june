@@ -1,13 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/python
 import ast
 import io
-import re
 import sys
 import tokenize
 from pathlib import Path
-from tokenize import TokenInfo, untokenize
+from tokenize import untokenize
 
-from dh import cprint, get_files, mpf3
+from dh import get_files, mpf3
 
 
 def process_file(path):

@@ -233,11 +233,29 @@ def main() -> int:
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-d", "--deb", action="store_true", help="Check .deb files")
     group.add_argument("-w", "--wheel", action="store_true", help="Check .whl files")
-    group.add_argument("-a", "--all", action="store_true", help="Check all package types (.whl and .deb)")
+    group.add_argument(
+        "-a",
+        "--all",
+        action="store_true",
+        help="Check all package types (.whl and .deb)",
+    )
 
-    parser.add_argument("--dry-run", action="store_true", help="Simulate deletion without actually removing files")
-    parser.add_argument("--dir", type=str, default=".", help="Directory to scan (default: current directory)")
-    parser.add_argument("--verbose", action="store_true", help="Show detailed information about each file")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Simulate deletion without actually removing files",
+    )
+    parser.add_argument(
+        "--dir",
+        type=str,
+        default=".",
+        help="Directory to scan (default: current directory)",
+    )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Show detailed information about each file",
+    )
 
     args = parser.parse_args()
 

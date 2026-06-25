@@ -12,7 +12,10 @@ MMAP_THRESHOLD_BYTES = 1 * 1024 * 1024
 
 def get_line_offsets(file_path: Path):
     offsets = []
-    with file_path.open("rb") as f, mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm:
+    with (
+        file_path.open("rb") as f,
+        mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm,
+    ):
         offset = 0
         while True:
             offsets.append(offset)

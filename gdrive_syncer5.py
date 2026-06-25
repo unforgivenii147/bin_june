@@ -67,7 +67,13 @@ class GoogleDriveSync:
 
                 # Save tokens
                 with open(self.token_file, "wb") as f:
-                    pickle.dump({"access_token": self.access_token, "refresh_token": self.refresh_token}, f)
+                    pickle.dump(
+                        {
+                            "access_token": self.access_token,
+                            "refresh_token": self.refresh_token,
+                        },
+                        f,
+                    )
                 return True
         except Exception as e:
             print(f"Token refresh error: {e}")
@@ -81,10 +87,17 @@ class GoogleDriveSync:
         print("=" * 60)
 
         # Step 1: Get device code
-        device_data = {"client_id": self.client_id, "scope": "https://www.googleapis.com/auth/drive.readonly"}
+        device_data = {
+            "client_id": self.client_id,
+            "scope": "https://www.googleapis.com/auth/drive.readonly",
+        }
 
         try:
-            response = requests.post("https://oauth2.googleapis.com/device/code", data=device_data, timeout=10)
+            response = requests.post(
+                "https://oauth2.googleapis.com/device/code",
+                data=device_data,
+                timeout=10,
+            )
 
             if response.status_code != 200:
                 raise Exception(f"Failed to get device code: {response.text}")
@@ -111,7 +124,11 @@ class GoogleDriveSync:
                 time.sleep(interval)
 
                 try:
-                    token_response = requests.post("https://oauth2.googleapis.com/token", data=poll_data, timeout=10)
+                    token_response = requests.post(
+                        "https://oauth2.googleapis.com/token",
+                        data=poll_data,
+                        timeout=10,
+                    )
 
                     if token_response.status_code == 200:
                         token_data = token_response.json()
@@ -120,7 +137,13 @@ class GoogleDriveSync:
 
                         # Save tokens
                         with open(self.token_file, "wb") as f:
-                            pickle.dump({"access_token": self.access_token, "refresh_token": self.refresh_token}, f)
+                            pickle.dump(
+                                {
+                                    "access_token": self.access_token,
+                                    "refresh_token": self.refresh_token,
+                                },
+                                f,
+                            )
 
                         print("\n✓ Authentication successful!\n")
                         return
@@ -235,7 +258,13 @@ class GoogleDriveSync:
 
         # Save tokens
         with open(self.token_file, "wb") as f:
-            pickle.dump({"access_token": self.access_token, "refresh_token": self.refresh_token}, f)
+            pickle.dump(
+                {
+                    "access_token": self.access_token,
+                    "refresh_token": self.refresh_token,
+                },
+                f,
+            )
 
         print("\n✓ Authentication successful!\n")
 
@@ -320,7 +349,10 @@ class GoogleDriveSync:
         total_size = int(response.headers.get("content-length", 0))
         downloaded = 0
 
-        os.makedirs(os.path.dirname(local_path) if os.path.dirname(local_path) else ".", exist_ok=True)
+        os.makedirs(
+            os.path.dirname(local_path) if os.path.dirname(local_path) else ".",
+            exist_ok=True,
+        )
 
         with open(local_path, "wb") as f:
             for chunk in response.iter_content(chunk_size=8192):
@@ -329,7 +361,11 @@ class GoogleDriveSync:
                     downloaded += len(chunk)
                     if total_size > 0:
                         percent = (downloaded / total_size) * 100
-                        print(f"\rDownloading {file_name}: {percent:.1f}%", end="", flush=True)
+                        print(
+                            f"\rDownloading {file_name}: {percent:.1f}%",
+                            end="",
+                            flush=True,
+                        )
 
         print(f"\n✓ Downloaded: {file_name}")
         return True
@@ -345,7 +381,13 @@ class GoogleDriveSync:
             return response.json()
         return None
 
-    def sync_folder(self, drive_folder_id: str, local_folder_path, folder_name: str = "root", depth=0) -> None:
+    def sync_folder(
+        self,
+        drive_folder_id: str,
+        local_folder_path,
+        folder_name: str = "root",
+        depth=0,
+    ) -> None:
         """Recursively sync a folder"""
         indent = "  " * depth
         print(f"{indent}📁 Syncing: {folder_name}")

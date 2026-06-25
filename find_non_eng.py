@@ -58,7 +58,11 @@ class LanguageDetector:
                     continue
                 self.stats["total_files"] += 1
                 if show_progress:
-                    print(f"\n{filepath} [Files: {self.stats['total_files']}]", end="", flush=True)
+                    print(
+                        f"\n{filepath} [Files: {self.stats['total_files']}]",
+                        end="",
+                        flush=True,
+                    )
                 if not self.is_text_file(filepath):
                     self.stats["skipped_binary"] += 1
                     continue
@@ -118,19 +122,39 @@ class LanguageDetector:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Recursively find non-English files using pycld2")
-    parser.add_argument("directory", nargs="?", default=".", help="Directory to scan (default: current directory)")
     parser.add_argument(
-        "--min-bytes", type=int, default=100, help="Minimum bytes to read for language detection (default: 100)"
+        "directory",
+        nargs="?",
+        default=".",
+        help="Directory to scan (default: current directory)",
     )
     parser.add_argument(
-        "--max-bytes", type=int, default=10000, help="Maximum bytes to read from each file (default: 10000)"
+        "--min-bytes",
+        type=int,
+        default=100,
+        help="Minimum bytes to read for language detection (default: 100)",
     )
-    parser.add_argument("--all", "-a", action="store_true", help="Report all files, including English ones")
+    parser.add_argument(
+        "--max-bytes",
+        type=int,
+        default=10000,
+        help="Maximum bytes to read from each file (default: 10000)",
+    )
+    parser.add_argument(
+        "--all",
+        "-a",
+        action="store_true",
+        help="Report all files, including English ones",
+    )
     parser.add_argument("--no-progress", "-np", action="store_true", help="Don't show progress")
     parser.add_argument("--output", "-o", type=str, help="Output results to file")
     args = parser.parse_args()
     detector = LanguageDetector(min_bytes=args.min_bytes, max_bytes=args.max_bytes)
-    detector.scan_directory(args.directory, show_progress=not args.no_progress, only_report_non_english=not args.all)
+    detector.scan_directory(
+        args.directory,
+        show_progress=not args.no_progress,
+        only_report_non_english=not args.all,
+    )
     if args.output:
         from contextlib import redirect_stdout
 

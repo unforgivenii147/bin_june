@@ -34,7 +34,12 @@ def update_file(file_path, reverse: bool = False) -> str | None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Recursively swap 'import re' with 'import regex as re'")
-    parser.add_argument("-r", "--reverse", action="store_true", help="Reverse the replacement (regex as re -> re)")
+    parser.add_argument(
+        "-r",
+        "--reverse",
+        action="store_true",
+        help="Reverse the replacement (regex as re -> re)",
+    )
     args = parser.parse_args()
     cwd = Path.cwd()
     py_files = get_pyfiles(cwd)

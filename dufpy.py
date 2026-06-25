@@ -9,7 +9,10 @@ from xxhash import xxh64_hexdigest
 
 def process_file(path) -> tuple[str, Path]:
     path = Path(path)
-    return (xxh64_hexdigest(ast.unparse(ast.parse(path.read_text(encoding="utf-8")))), path)
+    return (
+        xxh64_hexdigest(ast.unparse(ast.parse(path.read_text(encoding="utf-8")))),
+        path,
+    )
 
 
 def main() -> None:

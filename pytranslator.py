@@ -7,7 +7,6 @@ in Python files recursively from the current directory.
 import ast
 import io
 import multiprocessing
-import re
 import time
 import tokenize
 from pathlib import Path

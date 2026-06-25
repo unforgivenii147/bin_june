@@ -116,7 +116,11 @@ COMPRESSORS = {
         "available": HAS_LZ4,
         "compress": None,
         "decompress": None,
-        "settings": {"compression_level": 9, "mode": "high_compression", "acceleration": 1},
+        "settings": {
+            "compression_level": 9,
+            "mode": "high_compression",
+            "acceleration": 1,
+        },
     },
 }
 
@@ -134,7 +138,9 @@ def setup_compressors() -> None:
     # Brotli
     if HAS_BROTLI:
         COMPRESSORS["brotli"]["compress"] = lambda data: brotli.compress(
-            data, quality=COMPRESSORS["brotli"]["settings"]["quality"], lgwin=COMPRESSORS["brotli"]["settings"]["lgwin"]
+            data,
+            quality=COMPRESSORS["brotli"]["settings"]["quality"],
+            lgwin=COMPRESSORS["brotli"]["settings"]["lgwin"],
         )
         COMPRESSORS["brotli"]["decompress"] = brotli.decompress
 
@@ -514,7 +520,17 @@ def should_compress(path: Path, compressor: str) -> bool:
             return False
 
         # Skip already compressed files (various formats)
-        compressed_extensions = (".xz", ".gz", ".bz2", ".br", ".zst", ".7z", ".zip", ".rar", ".lz4")
+        compressed_extensions = (
+            ".xz",
+            ".gz",
+            ".bz2",
+            ".br",
+            ".zst",
+            ".7z",
+            ".zip",
+            ".rar",
+            ".lz4",
+        )
         if path.suffix in compressed_extensions:
             return False
 

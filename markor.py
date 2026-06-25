@@ -354,7 +354,8 @@ class TextEditor:
         if not name:
             return
         format_choice = self.gui.show_menu(
-            "Select Format", ["Markdown (.md)", "Todo List (.txt)", "Plain Text (.txt)", "JSON (.json)"]
+            "Select Format",
+            ["Markdown (.md)", "Todo List (.txt)", "Plain Text (.txt)", "JSON (.json)"],
         )
         formats = ["markdown", "todo", "text", "json"]
         format_type = formats[format_choice] if 0 <= format_choice < len(formats) else "markdown"
@@ -391,7 +392,9 @@ class TextEditor:
             return
         search_content = (
             self.gui.show_dialog(
-                "Search Scope", "Search in filenames only or file content?", ["Filenames Only", "Content Too"]
+                "Search Scope",
+                "Search in filenames only or file content?",
+                ["Filenames Only", "Content Too"],
             )
             == 1
         )
@@ -549,7 +552,9 @@ class TextEditor:
     def close_document(self) -> None:
         if self.is_modified:
             save_choice = self.gui.show_dialog(
-                "Save Changes?", "Document has unsaved changes", ["Save", "Don't Save", "Cancel"]
+                "Save Changes?",
+                "Document has unsaved changes",
+                ["Save", "Don't Save", "Cancel"],
             )
             if save_choice == 0:
                 self.save_document()
@@ -558,7 +563,14 @@ class TextEditor:
         self.current_document = None
 
     def show_settings(self) -> None:
-        settings_menu = ["Theme (Dark/Light)", "Auto-save", "Font Size", "Word Wrap", "Show Line Numbers", "Back"]
+        settings_menu = [
+            "Theme (Dark/Light)",
+            "Auto-save",
+            "Font Size",
+            "Word Wrap",
+            "Show Line Numbers",
+            "Back",
+        ]
         choice = self.gui.show_menu("Settings", settings_menu)
         if choice >= 0 and choice < 5:
             self.gui.show_toast(f"Setting {choice}: Not yet implemented")

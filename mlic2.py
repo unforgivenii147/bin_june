@@ -48,7 +48,9 @@ def collect_comments(root: Path) -> Dict[str, List[Tuple[Path, int, str]]]:
     return comments
 
 
-def find_repeated(comments: Dict[str, List[Tuple[Path, int, str]]]) -> Dict[str, List[Tuple[Path, int, str]]]:
+def find_repeated(
+    comments: Dict[str, List[Tuple[Path, int, str]]],
+) -> Dict[str, List[Tuple[Path, int, str]]]:
     """Return only those comment lines that appear more than once."""
     return {line: occurrences for line, occurrences in comments.items() if len(occurrences) >= 2}
 
@@ -103,7 +105,12 @@ def remove_repeated(repeated: Dict[str, List[Tuple[Path, int, str]]]) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("-r", "--remove", action="store_true", help="Remove found repeated comment lines from files")
+    parser.add_argument(
+        "-r",
+        "--remove",
+        action="store_true",
+        help="Remove found repeated comment lines from files",
+    )
     args = parser.parse_args()
     root = Path.cwd()
     comments = collect_comments(root)

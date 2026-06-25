@@ -21,7 +21,11 @@ def make_raw_string(source: str) -> str:
     Convert a simple string literal source to a raw string literal if possible.
     This preserves the original quote style when feasible.
     """
-    m = re.match("^([rubfRUBF]*)?(?P<quote>\"\"\"|\\'\\'\\'|\"|\\')(?P<body>.*)(?P=quote)$", source, re.S)
+    m = re.match(
+        "^([rubfRUBF]*)?(?P<quote>\"\"\"|\\'\\'\\'|\"|\\')(?P<body>.*)(?P=quote)$",
+        source,
+        re.S,
+    )
     if not m:
         return source
     prefix = m.group(1) or ""

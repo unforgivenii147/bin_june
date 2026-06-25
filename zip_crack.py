@@ -5,7 +5,6 @@ import sys
 import threading
 import time
 import zipfile
-from collections import deque
 from itertools import islice
 
 
@@ -294,16 +293,31 @@ Examples:
     )
     parser.add_argument("zip_file", help="Path to the zip file")
     parser.add_argument(
-        "-w", "--wordlist", default="wordlist.txt", help="Path to wordlist file (default: wordlist.txt)"
+        "-w",
+        "--wordlist",
+        default="wordlist.txt",
+        help="Path to wordlist file (default: wordlist.txt)",
     )
     parser.add_argument(
-        "-p", "--processes", type=int, default=None, help="Number of processes to use (default: CPU count)"
+        "-p",
+        "--processes",
+        type=int,
+        default=None,
+        help="Number of processes to use (default: CPU count)",
     )
     parser.add_argument(
-        "-b", "--batch-size", type=int, default=1000, help="Number of passwords per batch (default: 1000)"
+        "-b",
+        "--batch-size",
+        type=int,
+        default=1000,
+        help="Number of passwords per batch (default: 1000)",
     )
     parser.add_argument(
-        "-i", "--update-interval", type=int, default=60, help="Status update interval in seconds (default: 60)"
+        "-i",
+        "--update-interval",
+        type=int,
+        default=60,
+        help="Status update interval in seconds (default: 60)",
     )
 
     args = parser.parse_args()

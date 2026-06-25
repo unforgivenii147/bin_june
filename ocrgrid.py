@@ -85,7 +85,11 @@ def main() -> None:
                     txt_path.write_text(result["text"], encoding="utf-8")
                     meta_path.write_text(
                         json.dumps(
-                            {"image_variant": variant_name, "source_file": str(args.fname), "tesseract": result},
+                            {
+                                "image_variant": variant_name,
+                                "source_file": str(args.fname),
+                                "tesseract": result,
+                            },
                             indent=2,
                         ),
                         encoding="utf-8",

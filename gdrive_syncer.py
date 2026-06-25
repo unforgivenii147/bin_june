@@ -13,7 +13,11 @@ SCOPES = ["https://www.googleapis.com/auth/drive.readonly"]
 
 
 class GoogleDriveSyncer:
-    def __init__(self, credentials_file: str = "credentials.json", token_file: str = "token.pickle") -> None:
+    def __init__(
+        self,
+        credentials_file: str = "credentials.json",
+        token_file: str = "token.pickle",
+    ) -> None:
         self.credentials_file = credentials_file
         self.token_file = token_file
         self.service = self.authenticate()

@@ -128,10 +128,23 @@ def reverse_symlinks(backup_file: str = BACKUP_FILE) -> bool:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Find duplicate files and replace with symlinks (reversible)")
-    parser.add_argument("directory", nargs="?", default=".", help="Directory to scan (default: current directory)")
-    parser.add_argument("--dry-run", action="store_true", help="Show what would be done without making changes")
+    parser.add_argument(
+        "directory",
+        nargs="?",
+        default=".",
+        help="Directory to scan (default: current directory)",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be done without making changes",
+    )
     parser.add_argument("--reverse", action="store_true", help="Reverse previous symlinking operation")
-    parser.add_argument("--backup-file", default=BACKUP_FILE, help=f"Backup file path (default: {BACKUP_FILE})")
+    parser.add_argument(
+        "--backup-file",
+        default=BACKUP_FILE,
+        help=f"Backup file path (default: {BACKUP_FILE})",
+    )
     args = parser.parse_args()
     if args.reverse:
         reverse_symlinks(args.backup_file)

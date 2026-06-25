@@ -128,7 +128,10 @@ def compress_chunked(in_path: Path, out_path: Path, file_size: int) -> bool:
     try:
         chunk_count = (file_size + CHUNK_SIZE - 1) // CHUNK_SIZE
 
-        with in_path.open("rb") as fin, mmap.mmap(fin.fileno(), length=0, access=mmap.ACCESS_READ) as mm:
+        with (
+            in_path.open("rb") as fin,
+            mmap.mmap(fin.fileno(), length=0, access=mmap.ACCESS_READ) as mm,
+        ):
             # Create chunks lazily to save memory
             chunks = [mm[i * CHUNK_SIZE : min((i + 1) * CHUNK_SIZE, file_size)] for i in range(chunk_count)]
 
@@ -286,7 +289,16 @@ def should_compress(path: Path) -> bool:
             return False
 
         # Skip already compressed files
-        compressed_extensions = (".7z", ".xz", ".gz", ".bz2", ".br", ".zst", ".zip", ".rar")
+        compressed_extensions = (
+            ".7z",
+            ".xz",
+            ".gz",
+            ".bz2",
+            ".br",
+            ".zst",
+            ".zip",
+            ".rar",
+        )
         if path.suffix in compressed_extensions:
             return False
 
@@ -463,7 +475,12 @@ Examples:
 
     # Create mutually exclusive group for compress/decompress
     group = parser.add_mutually_exclusive_group()
-    group.add_argument("-c", "--compress", action="store_true", help="Compress files and folders with 7-Zip (default)")
+    group.add_argument(
+        "-c",
+        "--compress",
+        action="store_true",
+        help="Compress files and folders with 7-Zip (default)",
+    )
     group.add_argument("-d", "--decompress", action="store_true", help="Decompress .7z files")
 
     args = parser.parse_args()

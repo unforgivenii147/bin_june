@@ -75,8 +75,18 @@ def main() -> None:
     parser.add_argument("filename", help="Path to file")
     parser.add_argument("start_line", type=int, help="Start line (1-based)")
     parser.add_argument("end_line", type=int, help="End line (1-based, inclusive)")
-    parser.add_argument("-u", "--unique", action="store_true", help="Remove duplicate lines within range")
-    parser.add_argument("-c", "--comments", action="store_true", help="Include comment lines in sorting and uniqueness")
+    parser.add_argument(
+        "-u",
+        "--unique",
+        action="store_true",
+        help="Remove duplicate lines within range",
+    )
+    parser.add_argument(
+        "-c",
+        "--comments",
+        action="store_true",
+        help="Include comment lines in sorting and uniqueness",
+    )
     args = parser.parse_args()
     file_path = Path(args.filename)
     if not file_path.exists():

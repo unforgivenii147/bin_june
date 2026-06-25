@@ -264,7 +264,16 @@ def should_compress(path: Path) -> bool:
             return False
 
         # Skip already compressed files
-        compressed_extensions = (".bz2", ".xz", ".gz", ".br", ".zst", ".7z", ".zip", ".rar")
+        compressed_extensions = (
+            ".bz2",
+            ".xz",
+            ".gz",
+            ".br",
+            ".zst",
+            ".7z",
+            ".zip",
+            ".rar",
+        )
         if path.suffix in compressed_extensions:
             return False
 
@@ -458,8 +467,18 @@ Bzip2 Settings:
 
     # Create mutually exclusive group for compress/decompress
     group = parser.add_mutually_exclusive_group()
-    group.add_argument("-c", "--compress", action="store_true", help="Compress files and folders with bzip2 (default)")
-    group.add_argument("-d", "--decompress", action="store_true", help="Decompress .bz2 and .tar.bz2 files")
+    group.add_argument(
+        "-c",
+        "--compress",
+        action="store_true",
+        help="Compress files and folders with bzip2 (default)",
+    )
+    group.add_argument(
+        "-d",
+        "--decompress",
+        action="store_true",
+        help="Decompress .bz2 and .tar.bz2 files",
+    )
 
     args = parser.parse_args()
 

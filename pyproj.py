@@ -110,7 +110,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Initialize a Python project structure")
     parser.add_argument("name", help="Package name")
     parser.add_argument("--version", default="1.4.7", help="Initial version (default: 1.4.7)")
-    parser.add_argument("-s", "--simple-cli", action="store_true", help="Create with simple CLI entry point")
+    parser.add_argument(
+        "-s",
+        "--simple-cli",
+        action="store_true",
+        help="Create with simple CLI entry point",
+    )
     args = parser.parse_args()
 
     # Extract user info with defaults

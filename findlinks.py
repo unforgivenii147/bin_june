@@ -70,7 +70,14 @@ def crawl_for_ext(start_url: str, max_pages: int, delay: float, ext: str):
                     if not any(
                         (
                             full_url.lower().endswith(extension)
-                            for extension in (".jpg", ".jpeg", ".png", ".gif", ".css", ".js")
+                            for extension in (
+                                ".jpg",
+                                ".jpeg",
+                                ".png",
+                                ".gif",
+                                ".css",
+                                ".js",
+                            )
                         )
                     ):
                         queue.append(full_url)

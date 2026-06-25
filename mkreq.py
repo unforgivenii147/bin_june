@@ -124,8 +124,18 @@ def main() -> None:
     import argparse
 
     parser = argparse.ArgumentParser(description="Generate requirements.txt by scanning Python files")
-    parser.add_argument("-d", "--dir", default=".", help="Root directory to scan (default: current directory)")
-    parser.add_argument("-o", "--output", default="requirements.txt", help="Output file (default: requirements.txt)")
+    parser.add_argument(
+        "-d",
+        "--dir",
+        default=".",
+        help="Root directory to scan (default: current directory)",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        default="requirements.txt",
+        help="Output file (default: requirements.txt)",
+    )
     parser.add_argument("-v", "--verbose", action="store_true", help="Show debug info")
     args = parser.parse_args()
     packages = collect_requirements(args.dir, verbose=args.verbose)

@@ -10,7 +10,10 @@ OUTPUT_FILE = Path("installed_packages_deb.txt")
 def get_installed_debian_packages() -> list[str]:
     try:
         result = subprocess.run(
-            ["dpkg-query", "-W", "-f=${binary:Package}\n"], check=True, capture_output=True, text=True
+            ["dpkg-query", "-W", "-f=${binary:Package}\n"],
+            check=True,
+            capture_output=True,
+            text=True,
         )
     except FileNotFoundError:
         sys.exit("dpkg-query not found. Are you on a Debian-based system?")

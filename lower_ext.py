@@ -44,7 +44,12 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Find files with uppercase extensions in current directory recursively"
     )
-    parser.add_argument("-a", "--autofix", action="store_true", help="Convert uppercase extensions to lowercase")
+    parser.add_argument(
+        "-a",
+        "--autofix",
+        action="store_true",
+        help="Convert uppercase extensions to lowercase",
+    )
     args = parser.parse_args()
     search_dir = Path.cwd()
     print(f"Searching for files with uppercase extensions in: {search_dir}")

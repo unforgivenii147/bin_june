@@ -49,7 +49,10 @@ def get_installed_packages():
     """Get list of installed packages using pip"""
     try:
         result = subprocess.run(
-            [sys.executable, "-m", "pip", "list", "--format=freeze"], capture_output=True, text=True, check=True
+            [sys.executable, "-m", "pip", "list", "--format=freeze"],
+            capture_output=True,
+            text=True,
+            check=True,
         )
 
         installed = {}
@@ -66,7 +69,11 @@ def get_installed_packages():
 def check_pip_show(package_name):
     """Use pip show to get detailed package info"""
     try:
-        result = subprocess.run([sys.executable, "-m", "pip", "show", package_name], capture_output=True, text=True)
+        result = subprocess.run(
+            [sys.executable, "-m", "pip", "show", package_name],
+            capture_output=True,
+            text=True,
+        )
         if result.returncode == 0:
             info = {}
             for line in result.stdout.strip().split("\n"):
@@ -79,11 +86,15 @@ def check_pip_show(package_name):
     return None
 
 
-def check_package_location(package_name: str) -> tuple[str | None, bool] | tuple[None, bool]:
+def check_package_location(
+    package_name: str,
+) -> tuple[str | None, bool] | tuple[None, bool]:
     """Try to find where a package is installed"""
     try:
         result = subprocess.run(
-            [sys.executable, "-m", "pip", "show", "-f", package_name], capture_output=True, text=True
+            [sys.executable, "-m", "pip", "show", "-f", package_name],
+            capture_output=True,
+            text=True,
         )
         if result.returncode == 0:
             lines = result.stdout.strip().split("\n")
@@ -235,14 +246,26 @@ def main() -> None:
         description="Identify and move empty .whl files, with detection of potentially installed ones"
     )
     parser.add_argument(
-        "directory", nargs="?", default=".", help="Directory containing .whl files (default: current directory)"
+        "directory",
+        nargs="?",
+        default=".",
+        help="Directory containing .whl files (default: current directory)",
     )
     parser.add_argument(
-        "-d", "--dest", default="empty_wheels", help="Destination subdirectory name (default: 'empty_wheels')"
+        "-d",
+        "--dest",
+        default="empty_wheels",
+        help="Destination subdirectory name (default: 'empty_wheels')",
     )
-    parser.add_argument("--no-install-check", action="store_true", help="Skip checking installed packages")
     parser.add_argument(
-        "--auto-move-all", action="store_true", help="Automatically move all empty wheels without prompting"
+        "--no-install-check",
+        action="store_true",
+        help="Skip checking installed packages",
+    )
+    parser.add_argument(
+        "--auto-move-all",
+        action="store_true",
+        help="Automatically move all empty wheels without prompting",
     )
 
     args = parser.parse_args()

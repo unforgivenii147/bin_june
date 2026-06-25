@@ -19,14 +19,30 @@ def parse_args() -> argparse.Namespace:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     group = parser.add_mutually_exclusive_group()
-    group.add_argument("-c", "--compress", action="store_true", help="Compress files (default if no op specified)")
+    group.add_argument(
+        "-c",
+        "--compress",
+        action="store_true",
+        help="Compress files (default if no op specified)",
+    )
     group.add_argument("-d", "--decompress", action="store_true", help="Decompress .br files")
     parser.add_argument(
-        "-f", "--files", nargs="+", metavar="FILE", help="Files to process (default: recursive current dir)"
+        "-f",
+        "--files",
+        nargs="+",
+        metavar="FILE",
+        help="Files to process (default: recursive current dir)",
     )
-    parser.add_argument("-k", "--keep", action="store_true", help="Keep original files (default: remove after success)")
     parser.add_argument(
-        "--no-tar", action="store_true", help="Disable tar-based subdir compression (process files individually)"
+        "-k",
+        "--keep",
+        action="store_true",
+        help="Keep original files (default: remove after success)",
+    )
+    parser.add_argument(
+        "--no-tar",
+        action="store_true",
+        help="Disable tar-based subdir compression (process files individually)",
     )
     parser.add_argument("-v", "--verbose", action="store_true", help="Show detailed progress")
     return parser.parse_args()

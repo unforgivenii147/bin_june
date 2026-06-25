@@ -283,7 +283,17 @@ def should_compress(path: Path) -> bool:
             return False
 
         # Skip already compressed files
-        compressed_extensions = (".lz4", ".xz", ".gz", ".bz2", ".br", ".zst", ".7z", ".zip", ".rar")
+        compressed_extensions = (
+            ".lz4",
+            ".xz",
+            ".gz",
+            ".bz2",
+            ".br",
+            ".zst",
+            ".7z",
+            ".zip",
+            ".rar",
+        )
         if path.suffix in compressed_extensions:
             return False
 
@@ -483,8 +493,18 @@ LZ4 Settings:
 
     # Create mutually exclusive group for compress/decompress
     group = parser.add_mutually_exclusive_group()
-    group.add_argument("-c", "--compress", action="store_true", help="Compress files and folders with LZ4 (default)")
-    group.add_argument("-d", "--decompress", action="store_true", help="Decompress .lz4 and .tar.lz4 files")
+    group.add_argument(
+        "-c",
+        "--compress",
+        action="store_true",
+        help="Compress files and folders with LZ4 (default)",
+    )
+    group.add_argument(
+        "-d",
+        "--decompress",
+        action="store_true",
+        help="Decompress .lz4 and .tar.lz4 files",
+    )
 
     args = parser.parse_args()
 

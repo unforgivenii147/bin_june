@@ -13,7 +13,10 @@ def sync_branch_with_upstream(repo_path: str = ".") -> bool:
     try:
         repo = Repo(repo_path)
         if repo.active_branch.name != "master":
-            print("Warning: Not on master branch. Current branch:", repo.active_branch.name)
+            print(
+                "Warning: Not on master branch. Current branch:",
+                repo.active_branch.name,
+            )
             response = input("Continue anyway? (y/n): ")
             if response.lower() != "y":
                 return False
@@ -34,14 +37,23 @@ def sync_branch_with_upstream(repo_path: str = ".") -> bool:
         current_branch = repo.active_branch
         original_head = repo.head.commit
         try:
-            repo.git.rebase("--onto", upstream_commit, original_head, current_branch, allow_unrelated_histories=True)
+            repo.git.rebase(
+                "--onto",
+                upstream_commit,
+                original_head,
+                current_branch,
+                allow_unrelated_histories=True,
+            )
             print("Rebase successful")
         except Exception as e:
             print(f"Rebase failed: {e}")
             repo.git.rebase("--abort")
             return False
         print(f"Pushing to origin/{current_branch.name} with force-with-lease...")
-        origin.push(refspec=f"{current_branch.name}:{current_branch.name}", force_with_lease=True)
+        origin.push(
+            refspec=f"{current_branch.name}:{current_branch.name}",
+            force_with_lease=True,
+        )
         print("Successfully synced branch!")
         return True
     except Exception as e:

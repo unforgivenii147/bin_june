@@ -39,7 +39,10 @@ REPORT_WIDTH: Final[int] = 70
 COMPRESSORS: Final[dict[str, tuple[CompressorFunc, str]]] = {
     "brotli": (lambda d: brotli.compress(d, quality=BROTLI_QUALITY_MAX), ".br"),
     "zstd": (lambda d: zstd.ZstdCompressor(level=ZSTD_LEVEL_MAX).compress(d), ".zst"),
-    "xz": (lambda d: lzma.compress(d, preset=COMPRESSION_LEVEL_MAX, format=lzma.FORMAT_XZ), ".xz"),
+    "xz": (
+        lambda d: lzma.compress(d, preset=COMPRESSION_LEVEL_MAX, format=lzma.FORMAT_XZ),
+        ".xz",
+    ),
     "bz2": (lambda d: bz2.compress(d, compresslevel=COMPRESSION_LEVEL_MAX), ".bz2"),
     "gzip": (lambda d: gzip.compress(d, compresslevel=COMPRESSION_LEVEL_MAX), ".gz"),
     "lz4": (

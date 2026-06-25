@@ -9,7 +9,6 @@ saturates cores with no chunking overhead or custom framing required.
 
 import argparse
 import multiprocessing
-import os
 import sys
 import tarfile
 import time
@@ -344,7 +343,10 @@ def main() -> None:
         do_compress(root, args.tar_subdirs_first, args.dry_run, args.verbose)
     else:
         if args.tar_subdirs_first:
-            print("Note: --tar-subdirs-first is ignored during decompression.", file=sys.stderr)
+            print(
+                "Note: --tar-subdirs-first is ignored during decompression.",
+                file=sys.stderr,
+            )
         do_decompress(root, args.dry_run, args.verbose)
 
 

@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/python
-import os
 from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor
 from deep_translator import GoogleTranslator

@@ -255,7 +255,11 @@ class PathlibTransformer(ast.NodeTransformer):
             return self._transform_walk(node)
         elif func_name == "getcwd":
             new_node = ast.Call(
-                func=ast.Attribute(value=ast.Name(id="Path", ctx=ast.Load()), attr="cwd", ctx=ast.Load()),
+                func=ast.Attribute(
+                    value=ast.Name(id="Path", ctx=ast.Load()),
+                    attr="cwd",
+                    ctx=ast.Load(),
+                ),
                 args=[],
                 keywords=[],
             )
@@ -279,7 +283,11 @@ class PathlibTransformer(ast.NodeTransformer):
             return ast.copy_location(new_node, node)
         elif func_name == "rename" or func_name == "replace":
             new_node = ast.Call(
-                func=ast.Attribute(value=self._ensure_path(node.args[0]), attr=func_name, ctx=ast.Load()),
+                func=ast.Attribute(
+                    value=self._ensure_path(node.args[0]),
+                    attr=func_name,
+                    ctx=ast.Load(),
+                ),
                 args=[self._ensure_path(node.args[1])],
                 keywords=[],
             )
@@ -371,7 +379,13 @@ class PathlibTransformer(ast.NodeTransformer):
             elts=[
                 ast.Call(
                     func=ast.Name(id="str", ctx=ast.Load()),
-                    args=[ast.Attribute(value=self._ensure_path(path_arg), attr="parent", ctx=ast.Load())],
+                    args=[
+                        ast.Attribute(
+                            value=self._ensure_path(path_arg),
+                            attr="parent",
+                            ctx=ast.Load(),
+                        )
+                    ],
                     keywords=[],
                 ),
                 ast.Attribute(value=self._ensure_path(path_arg), attr="name", ctx=ast.Load()),
@@ -403,7 +417,11 @@ class PathlibTransformer(ast.NodeTransformer):
         return ast.Call(
             func=ast.Attribute(
                 value=ast.Call(
-                    func=ast.Attribute(value=self._ensure_path(path_arg), attr="resolve", ctx=ast.Load()),
+                    func=ast.Attribute(
+                        value=self._ensure_path(path_arg),
+                        attr="resolve",
+                        ctx=ast.Load(),
+                    ),
                     args=[],
                     keywords=[],
                 ),
@@ -412,7 +430,11 @@ class PathlibTransformer(ast.NodeTransformer):
             ),
             args=[
                 ast.Call(
-                    func=ast.Attribute(value=self._ensure_path(start_arg), attr="resolve", ctx=ast.Load()),
+                    func=ast.Attribute(
+                        value=self._ensure_path(start_arg),
+                        attr="resolve",
+                        ctx=ast.Load(),
+                    ),
                     args=[],
                     keywords=[],
                 )
@@ -448,7 +470,11 @@ class PathlibTransformer(ast.NodeTransformer):
         stat_attr, stat_field = target
         return ast.Attribute(
             value=ast.Call(
-                func=ast.Attribute(value=self._ensure_path(node.args[0]), attr=stat_attr, ctx=ast.Load()),
+                func=ast.Attribute(
+                    value=self._ensure_path(node.args[0]),
+                    attr=stat_attr,
+                    ctx=ast.Load(),
+                ),
                 args=[],
                 keywords=[],
             ),
@@ -519,7 +545,11 @@ class PathlibTransformer(ast.NodeTransformer):
             func=ast.Name(id="list", ctx=ast.Load()),
             args=[
                 ast.Call(
-                    func=ast.Attribute(value=self._ensure_path(path_arg), attr="iterdir", ctx=ast.Load()),
+                    func=ast.Attribute(
+                        value=self._ensure_path(path_arg),
+                        attr="iterdir",
+                        ctx=ast.Load(),
+                    ),
                     args=[],
                     keywords=[],
                 )
@@ -534,7 +564,9 @@ class PathlibTransformer(ast.NodeTransformer):
         self.warnings.append("os.scandir -> Path.iterdir() returns DirEntry-like objects, check attribute access")
 
         return ast.Call(
-            func=ast.Attribute(value=self._ensure_path(path_arg), attr="iterdir", ctx=ast.Load()), args=[], keywords=[]
+            func=ast.Attribute(value=self._ensure_path(path_arg), attr="iterdir", ctx=ast.Load()),
+            args=[],
+            keywords=[],
         )
 
     def _transform_walk(self, node: ast.Call) -> ast.AST:
@@ -650,7 +682,10 @@ def process_file(
             cprint(f"  ⚠️ {warning}", "yellow")
 
         if transformer.infos or transformer.warnings:
-            cprint(f"{'📝' if dry_run else '✓'} Refactored: {file_path.name}", "green" if not dry_run else "yellow")
+            cprint(
+                f"{'📝' if dry_run else '✓'} Refactored: {file_path.name}",
+                "green" if not dry_run else "yellow",
+            )
 
         return (new_content, True, transformer.warnings, transformer.infos)
 
@@ -747,7 +782,11 @@ Examples:
                 if not args.no_backup:
                     backup_path = file_path.with_suffix(file_path.suffix + ".bak")
                     backup_path.write_text(file_path.read_text(encoding="utf-8"), encoding="utf-8")
-                    cprint(f"  📦 Backup created: {backup_path.name}", "white", attrs=["dark"])
+                    cprint(
+                        f"  📦 Backup created: {backup_path.name}",
+                        "white",
+                        attrs=["dark"],
+                    )
                 file_path.write_text(new_content, encoding="utf-8")
                 modified_count += 1
             else:
@@ -760,9 +799,15 @@ Examples:
     cprint("\n" + "=" * 60, "cyan")
     cprint("📊 REFACTORING SUMMARY", "cyan", attrs=["bold"])
     cprint(f"  Files processed: {len(python_files)}", "white")
-    cprint(f"  Files modified: {modified_count}", "green" if modified_count > 0 else "white")
+    cprint(
+        f"  Files modified: {modified_count}",
+        "green" if modified_count > 0 else "white",
+    )
     cprint(f"  Total changes: {total_changes}", "green" if total_changes > 0 else "white")
-    cprint(f"  Total warnings: {total_warnings}", "yellow" if total_warnings > 0 else "white")
+    cprint(
+        f"  Total warnings: {total_warnings}",
+        "yellow" if total_warnings > 0 else "white",
+    )
     cprint(f"  Space change: {fsz(size_diff)}", "cyan")
 
     if args.dry_run and modified_count > 0:

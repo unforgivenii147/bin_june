@@ -107,7 +107,12 @@ def main() -> None:
     parser.add_argument("--out", type=str, default="_similar_groups", help="Output folder name")
     parser.add_argument("--hash-func", type=str, default="phash", choices=["phash", "dhash", "ahash"])
     parser.add_argument("--hash-size", type=int, default=16, help="Hash size (bigger = more sensitive).")
-    parser.add_argument("--threshold", type=int, default=8, help="Max Hamming distance to consider similar.")
+    parser.add_argument(
+        "--threshold",
+        type=int,
+        default=8,
+        help="Max Hamming distance to consider similar.",
+    )
     args = parser.parse_args()
     cwd = Path.cwd()
     folderize_by_similarity(

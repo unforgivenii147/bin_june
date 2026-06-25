@@ -348,9 +348,18 @@ def main() -> int:
         description="Apply all available 2to3 fixes to Python files using lib2to3 and multiprocessing"
     )
     parser.add_argument("paths", nargs="+", help="Files or directories to process")
-    parser.add_argument("-d", "--dry-run", action="store_true", help="Preview changes without applying them")
     parser.add_argument(
-        "-e", "--extensions", nargs="+", default=[".py"], help="File extensions to process (default: .py)"
+        "-d",
+        "--dry-run",
+        action="store_true",
+        help="Preview changes without applying them",
+    )
+    parser.add_argument(
+        "-e",
+        "--extensions",
+        nargs="+",
+        default=[".py"],
+        help="File extensions to process (default: .py)",
     )
 
     args = parser.parse_args()

@@ -171,10 +171,18 @@ def main() -> None:
     import argparse
 
     parser = argparse.ArgumentParser(description="Find non-English files in directory recursively using pycld2")
-    parser.add_argument("directory", nargs="?", default=".", help="Directory to scan (default: current directory)")
+    parser.add_argument(
+        "directory",
+        nargs="?",
+        default=".",
+        help="Directory to scan (default: current directory)",
+    )
     parser.add_argument("-v", "--verbose", action="store_true", help="Show detailed file listing")
     parser.add_argument(
-        "-l", "--list-languages", action="store_true", help="List all detected languages and their counts"
+        "-l",
+        "--list-languages",
+        action="store_true",
+        help="List all detected languages and their counts",
     )
     args = parser.parse_args()
     try:

@@ -248,7 +248,13 @@ def process_file(src: Path, out_dir: Path | None = None) -> Path | None:
         log.error("Cannot write %s: %s", dest, exc)
         return None
 
-    log.info("  Winner → %s (algo=%s level=%d size=%s)", dest.name, w_name, w_level, human(len(w_bytes)))
+    log.info(
+        "  Winner → %s (algo=%s level=%d size=%s)",
+        dest.name,
+        w_name,
+        w_level,
+        human(len(w_bytes)),
+    )
     return dest
 
 

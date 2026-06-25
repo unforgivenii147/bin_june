@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 import os
+import re
 
 
 def count_lines_of_code(file_path: str, lang) -> tuple[int, int, int]:

@@ -3,9 +3,8 @@ import cv2
 import sys
 from pathlib import Path
 from multiprocessing import Pool, cpu_count
-from typing import Tuple, Optional
+from typing import Tuple
 from tqdm import tqdm
-import os
 
 
 class ImageDownscaler:
@@ -19,7 +18,15 @@ class ImageDownscaler:
         """
         self.root_dir = Path(root_dir)
         self.scale_factor = scale_factor
-        self.supported_formats = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".gif", ".webp"}
+        self.supported_formats = {
+            ".jpg",
+            ".jpeg",
+            ".png",
+            ".bmp",
+            ".tiff",
+            ".gif",
+            ".webp",
+        }
 
         print("=" * 70)
         print("IMAGE DOWNSCALER")

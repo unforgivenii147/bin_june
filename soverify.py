@@ -44,7 +44,12 @@ class CtypesVerifier:
 
     def verify_with_symbols(self, file_path: Path) -> tuple[bool, dict]:
         can_load, msg = self.verify_so_file(file_path)
-        symbol_info = {"can_load": can_load, "message": msg, "has_symbols": False, "symbol_count": 0}
+        symbol_info = {
+            "can_load": can_load,
+            "message": msg,
+            "has_symbols": False,
+            "symbol_count": 0,
+        }
         if not can_load:
             return (can_load, symbol_info)
         try:

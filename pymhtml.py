@@ -157,7 +157,12 @@ def process_file(path) -> None:
             f.write(raw)
         return f'{attr}="{os.path.basename(out_dir)}/{fname}"'
 
-    html_text = re.sub(r"(src|href)=[\\\"'](data:[^\\\"']+)[\\\"']", data_uri_replacer, html_text, flags=re.IGNORECASE)
+    html_text = re.sub(
+        r"(src|href)=[\\\"'](data:[^\\\"']+)[\\\"']",
+        data_uri_replacer,
+        html_text,
+        flags=re.IGNORECASE,
+    )
     with open(out_html, "w", encoding="utf-8") as f:
         f.write(html_text)
     print("Done.")

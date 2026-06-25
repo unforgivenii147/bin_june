@@ -13,7 +13,7 @@ import io
 import sys
 import tokenize
 from pathlib import Path
-from typing import List, Tuple
+from typing import List
 
 FUNC_NAMES = {"sub", "search", "find", "findall", "match", "finditer", "subn", "split"}
 SKIP_TYPES = {
