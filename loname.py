@@ -53,5 +53,5 @@ def process_file(path) -> None:
 if __name__ == "__main__":
     cwd = Path.cwd()
     args = sys.argv[1:]
-    files = list(cwd.glob("*")) if not args else list(cwd.rglob("*"))
+    files = list(cwd.glob("*")) if not args else list([p for p in cwd.rglob("*") if not".git" in p.parts and not p.is_symlink()])
     mpf3(process_file, files)

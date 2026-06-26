@@ -18,7 +18,6 @@ except ImportError:
     HAS_JOBLIB = False
 
 from dh import STDLIB, get_installed_pkgs
-import imp
 
 # Directories to always skip
 SKIP_DIRS = {

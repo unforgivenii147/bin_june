@@ -3,7 +3,9 @@
 import sys
 from pathlib import Path
 
-from dh import cprint, fsz, gsz, runcmd
+from dh import cprint, fsz, get_files, gsz, mpf3, runcmd
+
+EXT = [".js", ".jsx", ".jsm", ".jsc"]
 
 
 def safe_run(path: Path) -> bool:
@@ -19,37 +21,35 @@ def safe_run(path: Path) -> bool:
 def process_file(path) -> bool:
     path = Path(path)
     if "site-packages" in path.parts and "notebook" in path.parts:
-        return False
+        return
     before = gsz(path)
     if not path.exists() or not before:
-        return False
+        return
     if len(path.read_text().splitlines()) == 1:
-        return False
-    print(f"{path.name}", end=" ")
-    res = safe_run(path)
-    if res:
-        after = gsz(path)
-        diffsize = before - after
-        if not diffsize:
-            cprint("[NO CHANGE]", "white")
-        if diffsize:
-            ratio = diffsize / before * 100
-            cprint(f"[OK] + {fsz(diffsize)} {abs(ratio):.1f}%", "cyan")
-        return True
-    cprint("[ERROR]", "red")
-    return False
+        return
+    rrs(path, before, after)
+    return
 
 
-def main() -> None:
-    from dh import get_files, mpf3
-
-    args = sys.argv[1:]
+def main():
     cwd = Path.cwd()
-    before = gsz(cwd)
-    files = [Path(p) for p in args] if args else get_files(cwd, ext=[".js", ".cjs", ".mjs", ".jsx", ".tsx"])
-    _ = mpf3(process_file, files)
-    diff_size = before - gsz(cwd)
-    cprint(f"space freed : {fsz(diff_size)}", "green")
+    args = sys.argv[1:]
+    files = []
+
+    if args:
+        for arg in args:
+            p = Path(arg)
+            if p.is_file():
+                files.append(p)
+            elif p.is_dir():
+                files.extend(get_files(p), ext=EXT)
+    else:
+        files = get_files(cwd, ext=EXT)
+    if len(files) == 1:
+        process_file(files[0])
+        sys.exit(1)
+
+    mpf3(process_file, files)
 
 
 if __name__ == "__main__":

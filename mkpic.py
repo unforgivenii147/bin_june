@@ -2,13 +2,10 @@
 
 import compileall
 import sys
-from collections import deque
-from multiprocessing import get_context
 from pathlib import Path
 
-from dh import get_files, gsz
+from dh import get_pyfiles, mpf3
 
-MAX_QUEUE = 4
 REMOVE_ORIG = False
 
 
@@ -25,27 +22,33 @@ def process_file(path) -> bool | None:
         pyc_file = path.with_suffix(".pyc")
         if pyc_file.exists():
             pyc_file.unlink()
-        compileall.compile_file(path, optimize=0)
+        compileall.compile_file(path, optimize=2)
         if REMOVE_ORIG:
             path.unlink()
         return True
     return False
 
 
-def main() -> None:
+def main():
     cwd = Path.cwd()
-    before = gsz(cwd)
     args = sys.argv[1:]
-    files = [Path(f) for f in args] if args else get_files(cwd, ext=[".py"])
-    with get_context("spawn").Pool(4) as pool:
-        pending = deque()
-        for f in files:
-            pending.append(pool.apply_async(process_file, (f,)))
-            if len(pending) > MAX_QUEUE:
-                pending.popleft().get()
-        while pending:
-            pending.popleft().get()
+    files = []
+
+    if args:
+        for arg in args:
+            p = Path(arg)
+            if p.is_file():
+                files.append(p)
+            elif p.is_dir():
+                files.extend(get_pyfiles(p))
+    else:
+        files = get_pyfiles(cwd)
+    if len(files) == 1:
+        process_file(files[0])
+        sys.exit(1)
+
+    mpf3(process_file, files)
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

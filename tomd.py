@@ -11,7 +11,7 @@ from markdownify import markdownify as md
 remove_orig = True
 
 
-def process_file(path: str | Path) -> tuple[Path, bool]:
+def process_file(path) -> tuple[Path, bool]:
     path = Path(path)
     md_file = path.with_suffix(".md")
     if md_file.exists():
@@ -38,8 +38,7 @@ if __name__ == "__main__":
     cwd = Path.cwd()
     args = sys.argv[1:]
     files = [Path(p) for p in args] if args else get_files(cwd, ext=[".html", ".htm", ".xhtml", ".xhtm"])
-    numf = len(files)
-    if numf == 1:
+    if len(files) == 1:
         process_file(files[0])
         sys.exit(0)
     mpf3(process_file, files)

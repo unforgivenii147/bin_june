@@ -31,9 +31,9 @@ def load_junk() -> list[str]:
 def main() -> None:
     cwd = Path.cwd()
     junk_files = load_junk()
-    junkset = set(junk_files)
+    junkset = set([p.strip() for p in junk_files])
     c = 0
-    for path in get_filez(cwd):
+    for path in cwd.rglob("*"):
         if ".git" in path.parts or "lazy" in path.parts or "var" in path.parts:
             continue
         loname = path.name.lower()
@@ -41,7 +41,16 @@ def main() -> None:
             path.unlink()
             print(f"{path.name} removed.")
             continue
-        if loname == "copying":
+        if loname in {
+            "copying",
+            "license",
+            "license.md",
+            "license.txt",
+            "license.rst",
+            "license.mit",
+            "author",
+            "contributing",
+        }:
             path.unlink()
             print(f"{path.name} removed.")
             continue
@@ -68,7 +77,7 @@ def main() -> None:
             c += 1
             print(path.relative_to(cwd))
             continue
-        if any((loname == junk for junk in junk_files)):
+        if any(p in loname for p in junkset):
             if RMIT:
                 path.unlink()
                 print(path.relative_to(cwd))

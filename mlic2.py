@@ -1,37 +1,17 @@
-#!/data/data/com.termux/files/usr/bin/python
-
-"""
-Detect and optionally remove repeated comment lines (starting with '#')
-in Python files under the current directory.
-Repeated means the exact same comment line appears in at least two places
-(across files or within the same file). This is intended to catch license
-headers and similar boilerplate that developers paste into many files.
-Excluded lines:
-  - Shebang lines (e.g.,
-  - Lines starting with '# type', '# fmt', '# pylint', '# ruff', '# mypy'
-"""
-
 import argparse
 import sys
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Tuple
 
-EXCLUDED_PREFIXES = ["#!", "# type", "# fmt", "# pylint", "# ruff", "# mypy"]
-
 
 def is_comment_line(stripped: str) -> bool:
-    """Return True if the stripped line is a comment that should be checked for repetition."""
     if not stripped.startswith("#"):
         return False
     return not any((stripped.startswith(prefix) for prefix in EXCLUDED_PREFIXES))
 
 
 def collect_comments(root: Path) -> Dict[str, List[Tuple[Path, int, str]]]:
-    """
-    Walk *root* recursively and collect all comment lines from .py files.
-    Returns a dict mapping stripped comment text -> list of (file, line_number, original_line).
-    """
     comments: Dict[str, List[Tuple[Path, int, str]]] = defaultdict(list)
     for py_file in root.rglob("*.py"):
         try:
@@ -48,15 +28,11 @@ def collect_comments(root: Path) -> Dict[str, List[Tuple[Path, int, str]]]:
     return comments
 
 
-def find_repeated(
-    comments: Dict[str, List[Tuple[Path, int, str]]],
-) -> Dict[str, List[Tuple[Path, int, str]]]:
-    """Return only those comment lines that appear more than once."""
+def find_repeated(comments: Dict[str, List[Tuple[Path, int, str]]]) -> Dict[str, List[Tuple[Path, int, str]]]:
     return {line: occurrences for line, occurrences in comments.items() if len(occurrences) >= 2}
 
 
 def report(repeated: Dict[str, List[Tuple[Path, int, str]]]) -> None:
-    """Print the repeated comment lines and their locations."""
     if not repeated:
         print("No repeated comment lines found.")
         return
@@ -68,7 +44,6 @@ def report(repeated: Dict[str, List[Tuple[Path, int, str]]]) -> None:
 
 
 def remove_repeated(repeated: Dict[str, List[Tuple[Path, int, str]]]) -> None:
-    """Remove all occurrences of the given repeated comment lines from their files."""
     lines_to_remove = set(repeated.keys())
     files_to_process = {filepath for occurrences in repeated.values() for filepath, _, _ in occurrences}
     removed_total = 0
@@ -105,12 +80,7 @@ def remove_repeated(repeated: Dict[str, List[Tuple[Path, int, str]]]) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "-r",
-        "--remove",
-        action="store_true",
-        help="Remove found repeated comment lines from files",
-    )
+    parser.add_argument("-r", "--remove", action="store_true", help="Remove found repeated comment lines from files")
     args = parser.parse_args()
     root = Path.cwd()
     comments = collect_comments(root)
@@ -126,3 +96,20 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+- optimize the script to search all kind of text-based files
+- consider repeated multiline strings now are not just comments
+ and can be found inside one file too
+ example:
+
+ this is a 
+ multiline repeated 
+ text
+
+ and
+ 
+ this is a 
+ multiline repeated 
+ text
+- use pathlib.walk for traversal 
+- use mp for speed up
+- copy found multiline repeated strings to output.txt
