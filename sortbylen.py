@@ -9,7 +9,6 @@ def sort_by_length(lines: list[str]) -> list[str]:
 
 
 if __name__ == "__main__":
-
     path = Path(sys.argv[1].strip())
     lines = read_lines(path, ke=True)
     sorted_lines = sort_by_length(lines)

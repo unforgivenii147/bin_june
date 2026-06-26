@@ -26,7 +26,7 @@ BROTLI_WINDOW_BITS = 24  # max window (16 MB) — best ratio
 BROTLI_BLOCK_BITS = 0  # 0 = encoder decides
 BROTLI_MODE = brotli.MODE_GENERIC
 WORKERS = max(1, multiprocessing.cpu_count())
-
+CHUMK_SIZE = 32768
 
 # ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -68,19 +68,21 @@ def compress_file(src: Path, dry_run: bool, verbose: bool, level: int | None = N
         return result
 
     try:
-        data = src.read_bytes()
-        compressed = brotli.compress(
-            data,
+        ctx = brotli.Compressor(
             quality=effective_level,
             lgwin=BROTLI_WINDOW_BITS,
             lgblock=BROTLI_BLOCK_BITS,
             mode=BROTLI_MODE,
         )
-        dst.write_bytes(compressed)
+        with open(src, "rb") as f_in, open(dst, "wb") as f_out:
+            while chunk := f_in.read(CHUNK_SIZE):
+                f_out.write(ctx.compress(chunk))
 
-        orig_sz = len(data)
-        comp_sz = len(compressed)
-        ratio = (1 - comp_sz / orig_sz) * 100 if orig_sz else 0.0
+            f_out.write(ctx.finish())
+
+        orig_sz = src.stat().st_size
+        comp_sz = dst.stat().st_size
+        ratio = (comp_sz / orig_sz) * 100 if orig_sz else 0.0
 
         src.unlink()
         result["ok"] = True

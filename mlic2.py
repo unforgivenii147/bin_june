@@ -1,115 +1,348 @@
+#!/data/data/com.termux/files/usr/bin/python
 import argparse
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Set
+import multiprocessing as mp
+from functools import partial
+import re
+
+# Common text file extensions to scan
+TEXT_EXTENSIONS = {
+    ".py",
+    ".txt",
+    ".md",
+    ".rst",
+    ".json",
+    ".yaml",
+    ".yml",
+    ".toml",
+    ".ini",
+    ".cfg",
+    ".conf",
+    ".csv",
+    ".html",
+    ".css",
+    ".js",
+    ".ts",
+    ".jsx",
+    ".tsx",
+    ".xml",
+    ".svg",
+    ".sh",
+    ".bash",
+    ".zsh",
+    ".fish",
+    ".ps1",
+    ".bat",
+    ".cmd",
+    ".c",
+    ".cpp",
+    ".h",
+    ".hpp",
+    ".java",
+    ".go",
+    ".rs",
+    ".rb",
+    ".php",
+    ".lua",
+    ".r",
+    ".swift",
+    ".kt",
+    ".scala",
+    ".clj",
+    ".groovy",
+}
+
+# Extensions to exclude (binary or generated files)
+EXCLUDED_EXTENSIONS = {
+    ".pyc",
+    ".pyo",
+    ".pyd",
+    ".so",
+    ".dll",
+    ".dylib",
+    ".exe",
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".gif",
+    ".bmp",
+    ".ico",
+    ".webp",
+    ".mp3",
+    ".mp4",
+    ".avi",
+    ".mov",
+    ".mkv",
+    ".flv",
+    ".wmv",
+    ".zip",
+    ".tar",
+    ".gz",
+    ".bz2",
+    ".xz",
+    ".7z",
+    ".rar",
+    ".pdf",
+    ".doc",
+    ".docx",
+    ".xls",
+    ".xlsx",
+    ".ppt",
+    ".pptx",
+}
 
 
-def is_comment_line(stripped: str) -> bool:
-    if not stripped.startswith("#"):
+def is_text_file(filepath: Path) -> bool:
+    """Check if a file is likely a text file based on extension and content."""
+    if filepath.suffix in EXCLUDED_EXTENSIONS:
         return False
-    return not any((stripped.startswith(prefix) for prefix in EXCLUDED_PREFIXES))
 
+    # If it has a known text extension, accept it
+    if filepath.suffix in TEXT_EXTENSIONS:
+        return True
 
-def collect_comments(root: Path) -> Dict[str, List[Tuple[Path, int, str]]]:
-    comments: Dict[str, List[Tuple[Path, int, str]]] = defaultdict(list)
-    for py_file in root.rglob("*.py"):
+    # Check for files without extension (like scripts, configs)
+    if "." not in filepath.name:
         try:
-            with open(py_file, encoding="utf-8") as f:
+            # Try to read first 1KB and check if it's printable text
+            with open(filepath, "rb") as f:
+                sample = f.read(1024)
+                # If sample is empty, treat as text
+                if not sample:
+                    return True
+                # Check if sample is mostly printable ASCII or UTF-8
+                text_chars = sum(1 for b in sample if 32 <= b <= 126 or b in (9, 10, 13))
+                return text_chars / len(sample) > 0.8
+        except (OSError, IOError):
+            return False
+
+    return False
+
+
+def read_file_content(filepath: Path) -> Tuple[Path, List[str], str]:
+    """Read file content and return path, lines, and full text."""
+    try:
+        # Try UTF-8 first
+        with open(filepath, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+        return filepath, lines, "".join(lines)
+    except UnicodeDecodeError:
+        try:
+            # Fallback to latin-1
+            with open(filepath, "r", encoding="latin-1") as f:
                 lines = f.readlines()
+            return filepath, lines, "".join(lines)
         except (OSError, UnicodeDecodeError) as e:
-            print(f"Warning: cannot read {py_file}: {e}", file=sys.stderr)
-            continue
-        for lineno, raw_line in enumerate(lines, start=1):
-            original = raw_line.rstrip("\n\r")
-            stripped = original.strip()
-            if is_comment_line(stripped):
-                comments[stripped].append((py_file, lineno, original))
-    return comments
+            print(f"Warning: cannot read {filepath}: {e}", file=sys.stderr)
+            return filepath, [], ""
+    except OSError as e:
+        print(f"Warning: cannot read {filepath}: {e}", file=sys.stderr)
+        return filepath, [], ""
 
 
-def find_repeated(comments: Dict[str, List[Tuple[Path, int, str]]]) -> Dict[str, List[Tuple[Path, int, str]]]:
-    return {line: occurrences for line, occurrences in comments.items() if len(occurrences) >= 2}
+def find_multiline_blocks(text: str, min_lines: int = 3) -> Dict[str, List[Tuple[int, str]]]:
+    """
+    Find repeated multiline blocks in text.
+    Returns dict of block -> list of (line_number, context)
+    """
+    lines = text.splitlines()
+    if len(lines) < min_lines:
+        return {}
+
+    blocks = defaultdict(list)
+    seen_blocks = set()
+
+    # Look for repeated blocks of varying lengths
+    for start in range(len(lines) - min_lines + 1):
+        for end in range(start + min_lines, len(lines) + 1):
+            block = "\n".join(lines[start:end])
+            block_stripped = block.strip()
+
+            # Skip empty or very short blocks
+            if not block_stripped or len(block_stripped) < 10:
+                continue
+
+            # Skip if block contains only whitespace
+            if not any(c.isalnum() for c in block_stripped):
+                continue
+
+            block_key = block_stripped
+
+            # Only process each block once
+            if block_key in seen_blocks:
+                continue
+
+            # Find all occurrences of this block
+            occurrences = []
+            pos = text.find(block)
+            while pos != -1:
+                # Count line number
+                line_no = text.count("\n", 0, pos) + 1
+                # Get context (the actual text with original indentation)
+                end_pos = pos + len(block)
+                # Find start of line
+                line_start = text.rfind("\n", 0, pos) + 1
+                line_end = text.find("\n", end_pos)
+                if line_end == -1:
+                    line_end = len(text)
+                context = text[line_start:line_end]
+                occurrences.append((line_no, context.strip()))
+                pos = text.find(block, end_pos)
+
+            if len(occurrences) >= 2:
+                blocks[block_key] = occurrences
+                seen_blocks.add(block_key)
+
+            # Limit block size to avoid huge blocks
+            if len(block_key) > 5000:
+                break
+
+    return dict(blocks)
+
+
+def scan_file(filepath: Path, min_lines: int = 3) -> Dict[str, List[Tuple[Path, int, str]]]:
+    """Scan a single file for repeated multiline blocks."""
+    if not is_text_file(filepath):
+        return {}
+
+    filepath, lines, text = read_file_content(filepath)
+    if not text:
+        return {}
+
+    blocks = find_multiline_blocks(text, min_lines)
+
+    # Convert to expected format
+    result = {}
+    for block, occurrences in blocks.items():
+        # Store file path and line numbers for each occurrence
+        result[block] = [(filepath, line_no, context) for line_no, context in occurrences]
+
+    return result
+
+
+def collect_multiline_repeats(
+    root: Path, min_lines: int = 3, num_workers: int = None
+) -> Dict[str, List[Tuple[Path, int, str]]]:
+    """Collect repeated multiline strings from all text files."""
+    if num_workers is None:
+        num_workers = mp.cpu_count()
+
+    # Collect all text files
+    text_files = []
+    for filepath in root.rglob("*"):
+        if filepath.is_file() and is_text_file(filepath) and not filepath.is_symlink() and not ".git" in filepath.parts:
+            text_files.append(filepath)
+
+    if not text_files:
+        return {}
+
+    print(f"Scanning {len(text_files)} text files using {num_workers} workers...")
+
+    # Use multiprocessing to scan files
+    with mp.Pool(processes=num_workers) as pool:
+        scan_func = partial(scan_file, min_lines=min_lines)
+        results = pool.map(scan_func, text_files)
+
+    # Combine results
+    combined = defaultdict(list)
+    for result in results:
+        for block, occurrences in result.items():
+            combined[block].extend(occurrences)
+
+    # Filter to only blocks that appear in multiple files or multiple times in same file
+    filtered = {}
+    for block, occurrences in combined.items():
+        # Group by file to check duplicates within same file
+        file_occurrences = defaultdict(list)
+        for filepath, line_no, context in occurrences:
+            file_occurrences[filepath].append((line_no, context))
+
+        # Keep if appears in multiple files OR multiple times in same file
+        if len(file_occurrences) >= 2 or any(len(occ) >= 2 for occ in file_occurrences.values()):
+            filtered[block] = occurrences
+
+    return filtered
 
 
 def report(repeated: Dict[str, List[Tuple[Path, int, str]]]) -> None:
+    """Report findings to console."""
     if not repeated:
-        print("No repeated comment lines found.")
+        print("No repeated multiline blocks found.")
         return
-    print("Found repeated comment lines:")
-    for line, occurrences in repeated.items():
-        print(f"\n  {line!r}")
-        for filepath, lineno, _ in occurrences:
-            print(f"    {filepath}:{lineno}")
+
+    print(f"Found {len(repeated)} repeated multiline blocks:")
+    for i, (block, occurrences) in enumerate(repeated.items(), 1):
+        print(f"\n--- Block {i} ---")
+        print(block[:200] + ("..." if len(block) > 200 else ""))
+        print(f"Found in {len(occurrences)} locations:")
+        for filepath, lineno, context in occurrences:
+            print(f"  {filepath}:{lineno} -> {context[:100]}...")
+        print("-" * 40)
 
 
-def remove_repeated(repeated: Dict[str, List[Tuple[Path, int, str]]]) -> None:
-    lines_to_remove = set(repeated.keys())
-    files_to_process = {filepath for occurrences in repeated.values() for filepath, _, _ in occurrences}
-    removed_total = 0
-    files_changed = 0
-    for filepath in files_to_process:
-        try:
-            with open(filepath, encoding="utf-8") as f:
-                original_lines = f.readlines()
-        except OSError as e:
-            print(f"Warning: cannot read {filepath} for removal: {e}", file=sys.stderr)
-            continue
-        new_lines = []
-        file_removed = 0
-        for raw_line in original_lines:
-            original = raw_line.rstrip("\n\r")
-            stripped = original.strip()
-            if stripped in lines_to_remove:
-                file_removed += 1
-                continue
-            new_lines.append(raw_line)
-        if file_removed == 0:
-            continue
-        try:
-            with open(filepath, "w", encoding="utf-8") as f:
-                f.writelines(new_lines)
-        except OSError as e:
-            print(f"Error: cannot write {filepath}: {e}", file=sys.stderr)
-            continue
-        removed_total += file_removed
-        files_changed += 1
-        print(f"Removed {file_removed} line(s) from {filepath}")
-    print(f"\nDone. Removed {removed_total} repeated comment line(s) from {files_changed} file(s).")
+def save_to_file(repeated: Dict[str, List[Tuple[Path, int, str]]], output_file: Path) -> None:
+    """Save findings to output.txt."""
+    if not repeated:
+        return
+
+    try:
+        with open(output_file, "w", encoding="utf-8") as f:
+            f.write(f"REPEATED MULTILINE BLOCKS FOUND\n")
+            f.write(f"{'=' * 50}\n\n")
+
+            for block_num, (block, occurrences) in enumerate(repeated.items(), 1):
+                f.write(f"BLOCK #{block_num}\n")
+                f.write(f"{'-' * 40}\n")
+                f.write(block)
+                f.write(f"\n\nLOCATIONS:\n")
+                for filepath, lineno, context in occurrences:
+                    f.write(f"  {filepath}:{lineno}\n")
+                    f.write(f"    -> {context}\n")
+                f.write(f"\n{'=' * 50}\n\n")
+
+        print(f"Results saved to {output_file}")
+    except OSError as e:
+        print(f"Error writing to {output_file}: {e}", file=sys.stderr)
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("-r", "--remove", action="store_true", help="Remove found repeated comment lines from files")
+    parser = argparse.ArgumentParser(
+        description="Find repeated multiline blocks in text files",
+        epilog="Example: python script.py -m 4 -o output.txt",
+    )
+    parser.add_argument(
+        "-m", "--min-lines", type=int, default=3, help="Minimum lines for a block to be considered (default: 3)"
+    )
+    parser.add_argument(
+        "-o", "--output", type=str, default="output.txt", help="Output file for findings (default: output.txt)"
+    )
+    parser.add_argument(
+        "-w", "--workers", type=int, default=None, help="Number of worker processes (default: CPU count)"
+    )
+    parser.add_argument(
+        "-d", "--directory", type=str, default=".", help="Directory to scan (default: current directory)"
+    )
     args = parser.parse_args()
-    root = Path.cwd()
-    comments = collect_comments(root)
-    repeated = find_repeated(comments)
-    if args.remove:
-        if not repeated:
-            print("No repeated comment lines to remove.")
-        else:
-            remove_repeated(repeated)
-    else:
-        report(repeated)
+
+    root = Path(args.directory)
+    if not root.exists():
+        print(f"Error: Directory {root} does not exist", file=sys.stderr)
+        sys.exit(1)
+
+    print(f"Scanning directory: {root}")
+    print(f"Minimum block size: {args.min_lines} lines")
+    print(f"Using {args.workers or mp.cpu_count()} workers")
+    print()
+
+    repeated = collect_multiline_repeats(root, args.min_lines, args.workers)
+
+    output_path = Path(args.output)
+    save_to_file(repeated, output_path)
+    report(repeated)
 
 
 if __name__ == "__main__":
     main()
-- optimize the script to search all kind of text-based files
-- consider repeated multiline strings now are not just comments
- and can be found inside one file too
- example:
-
- this is a 
- multiline repeated 
- text
-
- and
- 
- this is a 
- multiline repeated 
- text
-- use pathlib.walk for traversal 
-- use mp for speed up
-- copy found multiline repeated strings to output.txt
