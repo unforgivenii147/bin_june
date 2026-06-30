@@ -2,25 +2,27 @@
 
 """
 Termux script creator - Creates executable scripts from clipboard content.
+Archives existing files to ~/isaac/may/scripts/ instead of overwriting.
 """
 
 import subprocess
 import sys
+import shutil
 from pathlib import Path
+from datetime import datetime
 
-# Termux specific shebangs
 TERMUX_SHEBANGS = {
-    "python": "#!/data/data/com.termux/files/usr/bin/python",
-    "bash": "#!/data/data/com.termux/files/usr/bin/bash",
-    "sh": "#!/data/data/com.termux/files/usr/bin/sh",
+    "python": "#!/data/data/com.termux/files/usr/bin/env python",
+    "bash": "#!/data/data/com.termux/files/usr/bin/env bash",
+    "sh": "#!/data/data/com.termux/files/usr/bin/env sh",
 }
 
-# Directories where scripts get auto-symlinked
 SCRIPT_DIRS = {Path.home() / "bin", Path.home() / "bashbin"}
+
+ARCHIVE_DIR = Path.home() / "isaac" / "may" / "scripts"
 
 
 def get_clipboard_content() -> str:
-    """Retrieve content from Termux clipboard."""
     try:
         result = subprocess.run(
             ["termux-clipboard-get"],
@@ -38,10 +40,8 @@ def get_clipboard_content() -> str:
 
 
 def detect_language(content: str) -> str:
-    """Detect if content is Python or bash/sh."""
     first_line = content.lstrip().split("\n")[0] if content else ""
 
-    # Check for explicit shebang
     if first_line.startswith("#!"):
         if "python" in first_line.lower():
             return "python"
@@ -51,7 +51,7 @@ def detect_language(content: str) -> str:
     python_indicators = ["import ", "from ", "def ", "class ", "if __name__", "print("]
     bash_indicators = ["echo ", "cd ", "export ", "if [", "for ", "while ", "$("]
 
-    preview = content[:500].lower()
+    preview = content.lower()
 
     python_score = sum(1 for ind in python_indicators if ind in preview)
     bash_score = sum(1 for ind in bash_indicators if ind in preview)
@@ -60,7 +60,6 @@ def detect_language(content: str) -> str:
 
 
 def replace_shebang(content: str, lang: str) -> str:
-    """Replace or add appropriate Termux shebang."""
     lines = content.splitlines()
 
     if lines and lines[0].startswith("#!"):
@@ -75,10 +74,39 @@ def replace_shebang(content: str, lang: str) -> str:
     return result if result.endswith("\n") else result + "\n"
 
 
+def archive_existing_file(file_path: Path) -> None:
+    if not file_path.exists():
+        return
+
+    ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    archive_name = f"{file_path.stem}_{timestamp}{file_path.suffix}"
+    archive_path = ARCHIVE_DIR / archive_name
+
+    counter = 1
+    while archive_path.exists():
+        archive_name = f"{file_path.stem}_{timestamp}_{counter}{file_path.suffix}"
+        archive_path = ARCHIVE_DIR / archive_name
+        counter += 1
+
+    try:
+        shutil.move(str(file_path), str(archive_path))
+        print(f"📦 Archived existing file to: {archive_path}")
+    except OSError as e:
+        print(f"❌ Failed to archive file: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
 def create_symlink(script_path: Path) -> None:
-    """Create symlink without extension in script directories."""
     if script_path.suffix:
         symlink_path = script_path.parent / script_path.stem
+
+        if symlink_path.exists() and symlink_path.is_symlink():
+            try:
+                symlink_path.unlink()
+            except OSError as e:
+                print(f"  ⚠️  Failed to remove old symlink: {e}", file=sys.stderr)
 
         if not symlink_path.exists():
             try:
@@ -96,7 +124,10 @@ def main() -> None:
     filename = sys.argv[1]
     output_path = Path(filename)
     cwd = Path.cwd()
-    is_script_dir = cwd in SCRIPT_DIRS
+    is_script_dir = cwd in SCRIPT_DIRS or cwd.name == "bin"
+
+    if output_path.exists():
+        archive_existing_file(output_path)
 
     content = get_clipboard_content()
 
@@ -118,7 +149,7 @@ def main() -> None:
         print(f"Error writing file: {e}", file=sys.stderr)
         sys.exit(1)
 
-    if is_script_dir or cwd.name == "bin":
+    if is_script_dir:
         output_path.chmod(0o755)
         create_symlink(output_path)
 

@@ -3,7 +3,7 @@
 """Normalize file and directory permissions with multiprocessing.
 
 - Directories -> 0o755
-- Regular files -> 0o644
+- Regular files -> 0o664
 - Skips: .git, __pycache__, and any path containing bin, sbin, libexec
 - Leaves untouched: executable files that are binary or have a shebang (#!).
 """
@@ -13,7 +13,7 @@ from multiprocessing import Pool, cpu_count
 from pathlib import Path
 
 DIR_PERM = 0o755
-FILE_PERM = 0o644
+FILE_PERM = 0o664
 
 
 SKIP_NAMES = {".git", "__pycache__", "bin", "sbin", "libexec"}

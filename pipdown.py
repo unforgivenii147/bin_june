@@ -1,0 +1,137 @@
+#!/data/data/com.termux/files/usr/bin/python
+import requests
+import json
+import sys
+import os
+from urllib.parse import urlparse
+import argparse
+
+
+def get_package_url(package_name, version=None):
+    """
+    Get the download URL for a package from PyPI
+
+    Args:
+        package_name: Name of the package
+        version: Specific version (optional)
+
+    Returns:
+        Tuple of (download_url, filename)
+    """
+    # API endpoint
+    url = f"https://pypi.org/pypi/{package_name}/json"
+
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+
+        releases = data.get("releases", {})
+
+        if not releases:
+            raise ValueError(f"No releases found for {package_name}")
+
+        # If version specified, get that version
+        if version:
+            if version not in releases:
+                raise ValueError(f"Version {version} not found for {package_name}")
+            version_data = releases[version]
+        else:
+            # Get latest version
+            latest_version = data.get("info", {}).get("version")
+            version_data = releases.get(latest_version, [])
+
+        if not version_data:
+            raise ValueError(f"No downloadable files found")
+
+        # Prefer wheel files, then source distributions
+        # Skip Python version compatibility check by accepting any wheel
+        for file_info in version_data:
+            if file_info.get("packagetype") == "bdist_wheel":
+                return file_info["url"], file_info["filename"]
+
+        # If no wheel, get source distribution
+        for file_info in version_data:
+            if file_info.get("packagetype") == "sdist":
+                return file_info["url"], file_info["filename"]
+
+        # If neither, get any available file
+        if version_data:
+            return version_data[0]["url"], version_data[0]["filename"]
+
+        raise ValueError("No downloadable files found")
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching package information: {e}")
+        sys.exit(1)
+
+
+def download_package(url, filename, output_dir="."):
+    """
+    Download a package from the given URL
+
+    Args:
+        url: Download URL
+        filename: Output filename
+        output_dir: Directory to save the file
+    """
+    try:
+        # Ensure output directory exists
+        os.makedirs(output_dir, exist_ok=True)
+
+        output_path = os.path.join(output_dir, filename)
+
+        print(f"Downloading {filename}...")
+
+        # Stream download with progress
+        response = requests.get(url, stream=True)
+        response.raise_for_status()
+
+        total_size = int(response.headers.get("content-length", 0))
+        downloaded = 0
+
+        with open(output_path, "wb") as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                if chunk:
+                    f.write(chunk)
+                    downloaded += len(chunk)
+
+                    # Show progress
+                    if total_size > 0:
+                        percent = (downloaded / total_size) * 100
+                        print(f"\rProgress: {percent:.1f}% ({downloaded}/{total_size} bytes)", end="")
+
+        print(f"\n✓ Downloaded to: {output_path}")
+        return output_path
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error downloading package: {e}")
+        sys.exit(1)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Download a Python package from PyPI.org (skips Python version compatibility check)"
+    )
+    parser.add_argument("package", help="Package name to download")
+    parser.add_argument("-v", "--version", help="Specific version to download (default: latest)")
+    parser.add_argument("-o", "--output", default=".", help="Output directory (default: current directory)")
+
+    args = parser.parse_args()
+
+    try:
+        print(f"Fetching {args.package} (version: {args.version or 'latest'})...")
+        download_url, filename = get_package_url(args.package, args.version)
+
+        print(f"Found: {filename}")
+        print(f"URL: {download_url}")
+
+        download_package(download_url, filename, args.output)
+
+    except Exception as e:
+        print(f"Error: {e}")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

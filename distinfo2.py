@@ -11,6 +11,9 @@ major, minor, _, _, _ = sys.version_info
 py_version = f"{major}.{minor}"
 ALLOWED = ["METADATA", "RECORD", "WHEEL", "top_level.txt"]
 NOT_ALLOWED = [
+    "REQUESTED",
+    "INSTALLER",
+    "direct_url.json",
     "AUTHORS",
     "AUTHORS.md",
     "AUTHORS.rst",
@@ -42,6 +45,9 @@ NOT_ALLOWED = [
     "gpl-3-0.txt",
     "pbr.json",
     "toplevel.txt",
+    "LICENSE",
+    "LICENSE.md",
+    "LICENSE.txt",
 ]
 
 

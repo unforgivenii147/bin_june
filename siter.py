@@ -239,7 +239,7 @@ class WheelBuilder:
                         dest = tmp_path / path_str
 
                     dest.parent.mkdir(parents=True, exist_ok=True)
-                    shutil.copy2(src, dest)
+                    shutil.move(src, dest)
 
                     rel_path = dest.relative_to(tmp_path)
                     file_hash = self._compute_hash(dest)

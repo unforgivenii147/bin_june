@@ -4,30 +4,24 @@ import sys
 from pathlib import Path
 
 from bs4 import BeautifulSoup
-from dh import cprint, fsz, get_files
+from dh import cprint, fsz, get_files, gsz, rrs
 
 
-def process_file(path: Path) -> None:
+def process_file(path) -> None:
     path = Path(path)
     content = path.read_text(encoding="utf-8")
     soup = BeautifulSoup(content, parser="lxml.parser", features="lxml")
-    before = len(content)
+    before = gsz(path)
     new_content = soup.prettify()
     after = len(new_content)
-    dsz = before - after
-    print(f"{path.name}", end=" | ")
-    if dsz:
-        ratio = after / before * 100
-        cprint(f"{fsz(dsz)} | {ratio:.1f}%", "cyan")
-        path.write_text(new_content, encoding="utf-8")
-        return
-    else:
-        cprint("no change", "grey")
+    rrs(path, before, after)
 
 
 if __name__ == "__main__":
     cwd = Path.cwd()
     args = sys.argv[1:]
     files = [Path(p) for p in args] if args else get_files(cwd, ext=[".html", ".htm", ".xhtml"])
-    for f in files:
-        process_file(f)
+    if len(files) == 1:
+        process_file(files[0])
+        sys.exit(0)
+    mpf3(process_file, files)
