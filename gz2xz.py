@@ -10,7 +10,6 @@ import gzip
 import sys
 from pathlib import Path
 from typing import Tuple
-
 from dh import get_files, mpf3
 from lzma_mt import compress
 
@@ -28,17 +27,13 @@ def process_file(path: Path) -> Tuple[str, bool, str]:
             original_size = path.stat().st_size if path.exists() else 0
             new_size = xz_path.stat().st_size
             ratio = new_size / original_size * 100 if original_size > 0 else 0
-            return (
-                str(path),
-                True,
-                f"Converted to {xz_path.name} ({original_size} -> {new_size} bytes, {ratio:.1f}%)",
-            )
+            return (str(path), True, f"Converted to {xz_path.name} ({original_size} -> {new_size} bytes, {ratio:.1f}%)")
         else:
-            return (str(path), False, "Output file is empty or missing")
+            return str(path), False, "Output file is empty or missing"
     except Exception as e:
         if xz_path.exists():
             xz_path.unlink()
-        return (str(path), False, f"Error: {str(e)}")
+        return str(path), False, f"Error: {str(e)}"
 
 
 def main() -> None:

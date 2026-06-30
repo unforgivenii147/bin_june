@@ -6,7 +6,10 @@ from pathlib import Path
 L1 = "[egg_info]"
 L2 = "tag_build = "
 L3 = "tag_date = 0"
-SETUPCFG = "[egg_info]\ntag_build =\ntag_date = 0\n"
+SETUPCFG = """[egg_info]
+tag_build =
+tag_date = 0
+"""
 
 
 def is_setupcfg(fn: Path) -> bool:
@@ -14,7 +17,7 @@ def is_setupcfg(fn: Path) -> bool:
     if content == SETUPCFG:
         return True
     lines = content.splitlines(keepends=False)
-    return bool(lines[0] == L1 and lines[1] == L2 and (lines[2] == L3))
+    return bool(lines[0] == L1 and lines[1] == L2 and lines[2] == L3)
 
 
 if __name__ == "__main__":

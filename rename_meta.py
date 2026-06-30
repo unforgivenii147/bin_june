@@ -2,7 +2,6 @@
 
 import sys
 from pathlib import Path
-
 from dh import cprint, get_files, unique_path
 
 OUT_PATH = Path("/data/data/com.termux/files/home/tmp/metadata")
@@ -31,7 +30,7 @@ def process_file(path: Path) -> bool | None:
             outpath = unique_path(outpath)
         outpath.write_text(content, encoding="utf-8")
         cprint(f"{outfn} created.", "green")
-    elif pkgname and (not pkgversion):
+    elif pkgname and not pkgversion:
         outfn = Path(pkgname + ".metadata")
         outpath = OUT_PATH / outfn
         content = path.read_text(encoding="utf-8")
@@ -40,7 +39,7 @@ def process_file(path: Path) -> bool | None:
         content = path.read_text(encoding="utf-8")
         outpath.write_text(content, encoding="utf-8")
         cprint(f"{outfn} created.", "yellow")
-    elif not pkgname and (not pkgversion):
+    elif not pkgname and not pkgversion:
         cprint(f"no data{path}", "cyan")
         input("what u wanna do?")
     return None

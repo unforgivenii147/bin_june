@@ -3,7 +3,6 @@
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
 from dh import cprint, fsz, gsz
 from xxhash import xxh64_hexdigest
 
@@ -13,22 +12,22 @@ def should_skip(path: Path) -> bool:
     return bool(
         path.is_symlink()
         or not path.stat().st_size
-        or any((pat in path.parts for pat in (".git", "__pycache__", ".mypy_cache", ".ruff_cache")))
+        or any(pat in path.parts for pat in (".git", "__pycache__", ".mypy_cache", ".ruff_cache"))
     )
 
 
 def get_hash_file(path):
     if not path.exists() or not path.stat().st_size:
-        return ("", path)
+        return "", path
     with path.open("rb") as f:
-        return (xxh64_hexdigest(f.read()), path)
+        return xxh64_hexdigest(f.read()), path
 
 
 def find_duplicates() -> None:
     cwd = Path.cwd()
     files_by_hash = defaultdict(list)
     duplicate_count = 0
-    ptp = [path for path in cwd.rglob("*") if path.is_file() and (not should_skip(path))]
+    ptp = [path for path in cwd.rglob("*") if path.is_file() and not should_skip(path)]
     files_by_size = {}
     for p in ptp:
         try:

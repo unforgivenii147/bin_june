@@ -7,12 +7,12 @@ import sys
 import tempfile
 from pathlib import Path
 
-COMMENT_PREFIXES = ("#", "//", "--")
+COMMENT_PREFIXES = "#", "//", "--"
 
 
 def is_comment(line: str) -> bool:
     stripped = line.lstrip()
-    return any((stripped.startswith(prefix) for prefix in COMMENT_PREFIXES))
+    return any(stripped.startswith(prefix) for prefix in COMMENT_PREFIXES)
 
 
 def process_lines(lines: list[str], start_idx, end_idx, unique=False, sort_comments=False):
@@ -31,7 +31,7 @@ def process_lines(lines: list[str], start_idx, end_idx, unique=False, sort_comme
                     removed_lines.append(line.rstrip("\n"))
             working_lines = unique_lines
         working_lines.sort()
-        return (working_lines, removed_lines)
+        return working_lines, removed_lines
         sortable_lines = []
     comment_positions = {}
     for i, line in enumerate(target_slice):
@@ -59,7 +59,7 @@ def process_lines(lines: list[str], start_idx, end_idx, unique=False, sort_comme
         else:
             rebuilt.append(sortable_lines[sort_idx])
             sort_idx += 1
-    return (rebuilt, removed_lines)
+    return rebuilt, removed_lines
 
 
 def main() -> None:

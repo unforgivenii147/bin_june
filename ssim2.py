@@ -6,7 +6,6 @@ import os
 import shutil
 import sys
 from pathlib import Path
-
 import ssdeep
 
 try:
@@ -60,7 +59,7 @@ def group_similar_files(hashes, threshold: int):
                 continue
             score = ssdeep.compare(hashes[f1], hashes[f2])
             if score >= threshold:
-                matrx[score] = (f1, f2)
+                matrx[score] = f1, f2
                 group.append(f2)
                 visited.add(f2)
         if len(group) > 1:
@@ -145,7 +144,7 @@ def write_matrix(hashes, threshold: int, output_dir="output", pretty=False) -> N
             print("-" * len(header))
             for row in table[1:]:
                 formatted = [row[0]] + [colorize_score(cell, threshold) for cell in row[1:]]
-                print(" | ".join((str(x) if x else "." for x in formatted)))
+                print(" | ".join(str(x) if x else "." for x in formatted))
 
 
 def main() -> None:

@@ -67,9 +67,9 @@ class CompressionResult:
 
 
 class CompressionManager:
-    __slots__ = ("output_dir", "temp_dir")
+    __slots__ = "output_dir", "temp_dir"
 
-    def __init__(self, output_dir: str | Path = ".", *, keep_temp: bool = False) -> None:
+    def __init__(self, output_dir: (str | Path) = ".", *, keep_temp: bool = False) -> None:
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.temp_dir = tempfile.mkdtemp(prefix="compress_")
@@ -81,13 +81,13 @@ class CompressionManager:
             pass
 
     @staticmethod
-    def prepare_input(target_path: str | Path) -> tuple[bytes, str]:
+    def prepare_input(target_path: (str | Path)) -> tuple[bytes, str]:
         target = Path(target_path)
         if not target.exists():
             raise FileNotFoundError(f"Target not found: {target_path}")
         if target.is_file():
             data = target.read_bytes()
-            return (data, target.name)
+            return data, target.name
         if target.is_dir():
             tar_name = f"{target.name}.tar"
             tar_path = Path(tempfile.gettempdir()) / tar_name
@@ -95,7 +95,7 @@ class CompressionManager:
                 with tarfile.open(tar_path, "w") as tar:
                     tar.add(target, arcname=target.name)
                 data = tar_path.read_bytes()
-                return (data, tar_name)
+                return data, tar_name
             finally:
                 try:
                     tar_path.unlink(missing_ok=True)

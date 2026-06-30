@@ -2,7 +2,6 @@
 
 import os
 from pathlib import Path
-
 import lz4.frame
 
 CHUNK_THRESHOLD = 5 * 1024 * 1024

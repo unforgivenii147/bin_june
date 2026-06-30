@@ -2,7 +2,6 @@
 
 from collections import defaultdict
 from pathlib import Path
-
 import tree_sitter_python as tsp
 from tree_sitter import Language, Parser, Tree
 
@@ -64,7 +63,7 @@ processed_files_count = 0
 folders_found = set()
 total_definitions = 0
 for py in Path().rglob("*.py"):
-    if any((part.startswith(".") for part in py.parts)) or "site-packages" in py.parts:
+    if any(part.startswith(".") for part in py.parts) or "site-packages" in py.parts:
         continue
     if OUT_DIR in py.parents:
         continue
@@ -76,10 +75,7 @@ for py in Path().rglob("*.py"):
             folder_path = py.parent
             relative_folder = get_relative_path(folder_path, Path())
             folders_found.add(str(relative_folder))
-            folder_definitions[relative_folder][py.name] = {
-                "definitions": definitions,
-                "path": py,
-            }
+            folder_definitions[relative_folder][py.name] = {"definitions": definitions, "path": py}
             processed_files_count += 1
             total_definitions += len(definitions)
     except Exception as e:
@@ -137,16 +133,17 @@ for folder, files_dict in folder_definitions.items():
     content = "\n".join(content_parts)
     header = "#!/usr/bin/env python\n"
     out_file.write_text(header + content)
-    total_defs_in_folder = sum((len(f["definitions"]) for f in files_dict.values()))
+    total_defs_in_folder = sum(len(f["definitions"]) for f in files_dict.values())
     print(f"✅ saved: {out_file}")
     print(f"   📊 {len(files_dict)} files, {total_defs_in_folder} definitions")
     print(f"   📁 {folder}")
 print(
-    f"\n✨ Done! Processed {processed_files_count} files with {total_definitions} total definitions in {len(folder_definitions)} folder(s)"
+    f"""
+✨ Done! Processed {processed_files_count} files with {total_definitions} total definitions in {len(folder_definitions)} folder(s)"""
 )
 if folders_found:
     print("📁 Folders:")
     for folder in sorted(folders_found):
-        def_count = sum((len(f["definitions"]) for f in folder_definitions[Path(folder)].values()))
+        def_count = sum(len(f["definitions"]) for f in folder_definitions[Path(folder)].values())
         file_count = len(folder_definitions[Path(folder)])
         print(f"   • {folder}: {file_count} files, {def_count} definitions")

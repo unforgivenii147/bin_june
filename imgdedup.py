@@ -2,7 +2,6 @@
 
 import argparse
 from pathlib import Path
-
 import cv2
 import numpy as np
 from imutils import paths
@@ -12,7 +11,7 @@ def dhash(image, hashSize=8) -> int:
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     resized = cv2.resize(gray, (hashSize + 1, hashSize))
     diff = resized[:, 1:] > resized[:, :-1]
-    return sum((2**i for i, v in enumerate(diff.flatten()) if v))
+    return sum(2**i for i, v in enumerate(diff.flatten()) if v)
 
 
 def compute_hashes(dataset_path, hashSize=8):
@@ -37,14 +36,15 @@ def main() -> None:
         prog="imgdedup",
         description="Find and remove visually duplicate images using perceptual hashing.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="\nExamples:\n  imgdedup ./photos\n  imgdedup ./photos --remove\n        ",
+        epilog="""
+Examples:
+  imgdedup ./photos
+  imgdedup ./photos --remove
+        """,
     )
     ap.add_argument("path", help="path to image directory to scan")
     ap.add_argument(
-        "--dry-run",
-        action="store_true",
-        default=True,
-        help="preview duplicates without deleting (default: True)",
+        "--dry-run", action="store_true", default=True, help="preview duplicates without deleting (default: True)"
     )
     ap.add_argument("--remove", action="store_true", help="actually delete duplicate images")
     args = vars(ap.parse_args())

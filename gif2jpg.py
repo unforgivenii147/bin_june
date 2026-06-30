@@ -74,7 +74,7 @@ def convert_gif(gif_path: Path) -> tuple[Path, int, int]:
     frames = extract_unique_frames(gif_path)
     if not frames:
         log.warning("No usable frames in %s", gif_path)
-        return (gif_path, 0, 0)
+        return gif_path, 0, 0
     total_in_gif = 0
     try:
         with Image.open(gif_path) as probe:
@@ -101,7 +101,7 @@ def convert_gif(gif_path: Path) -> tuple[Path, int, int]:
         except OSError as exc:
             log.error("Failed to save %s: %s", out_path, exc)
     log.info("%-50s  %d/%d frames kept → %d JPG(s)", str(gif_path), len(frames), total_in_gif, saved)
-    return (gif_path, total_in_gif, saved)
+    return gif_path, total_in_gif, saved
 
 
 def main() -> None:
@@ -122,10 +122,10 @@ def main() -> None:
         len(unique_gifs),
         "all CPUs" if N_JOBS == -1 else str(N_JOBS),
     )
-    results = Parallel(n_jobs=N_JOBS, backend="loky", verbose=0)((delayed(convert_gif)(p) for p in unique_gifs))
+    results = Parallel(n_jobs=N_JOBS, backend="loky", verbose=0)(delayed(convert_gif)(p) for p in unique_gifs)
     total_gifs = len(results)
-    total_frames = sum((r[1] for r in results))
-    total_saved = sum((r[2] for r in results))
+    total_frames = sum(r[1] for r in results)
+    total_saved = sum(r[2] for r in results)
     log.info("Done. %d GIF(s) processed — %d/%d frames saved as JPG.", total_gifs, total_saved, total_frames)
 
 

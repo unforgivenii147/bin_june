@@ -19,7 +19,7 @@ def countdown(timeout: int) -> None:
     sys.stdout.flush()
 
 
-def get_repos(username: str, token: str | None = None, timeout: int = 60) -> list:
+def get_repos(username: str, token: (str | None) = None, timeout: int = 60) -> list:
     countdown_thread = threading.Thread(target=countdown, args=(timeout,), daemon=True)
     countdown_thread.start()
     try:

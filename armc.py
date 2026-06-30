@@ -3,10 +3,9 @@ import ast
 import re
 import sys
 from pathlib import Path
-
 from dh import cprint, fsz, get_pyfiles, get_removed_lines, gsz, mpf3
 
-SPECIAL_COMMENT_RE = re.compile(r"#\s*(type:|fmt:|pylint|mypy)", re.IGNORECASE)
+SPECIAL_COMMENT_RE = re.compile("#\\s*(type:|fmt:|pylint|mypy)", re.IGNORECASE)
 cwd = Path.cwd()
 
 
@@ -28,11 +27,11 @@ def strip_comments(source: str) -> str:
         j = 0
         while j < len(line):
             char = line[j]
-            if char == "'" and (not in_double):
+            if char == "'" and not in_double:
                 in_single = not in_single
-            elif char == '"' and (not in_single):
+            elif char == '"' and not in_single:
                 in_double = not in_double
-            if not in_single and (not in_double) and (char == "#"):
+            if not in_single and not in_double and char == "#":
                 comment_text = line[j:]
                 if SPECIAL_COMMENT_RE.search(comment_text):
                     new_line += comment_text
@@ -43,7 +42,7 @@ def strip_comments(source: str) -> str:
     return "\n".join(cleaned_lines).rstrip() + "\n"
 
 
-def process_file(path: str | Path) -> None:
+def process_file(path: (str | Path)) -> None:
     path = Path(path)
     before = gsz(path)
     if not before:

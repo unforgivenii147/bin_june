@@ -2,7 +2,6 @@
 
 import sys
 from pathlib import Path
-
 import cv2
 
 
@@ -32,13 +31,7 @@ def cut_video(input_file: str, start_time_str: str, duration_str: str) -> None:
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
     output_filename = f"cut_{Path(input_file).name}"
     out = cv2.VideoWriter(
-        output_filename,
-        fourcc,
-        fps,
-        (
-            int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
-            int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
-        ),
+        output_filename, fourcc, fps, (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
     )
     if not out.isOpened():
         print(f"Error: Could not create video writer for '{output_filename}'.")

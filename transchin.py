@@ -3,7 +3,6 @@
 import re
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-
 from deep_translator import GoogleTranslator
 from dh import is_text_file
 from fastwalk import walk_files

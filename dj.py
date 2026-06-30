@@ -1,98 +1,129 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 import shutil
 import sys
 from pathlib import Path
 
-from dh import get_filez, read_lines
+EMPTY_MODE = "-e" in sys.argv
+REMOVE_MODE = "-r" in sys.argv
+SKIP_DIRS = {"lazy", ".git", "var"}
 
-EMPTYIT = "-e" in sys.argv
-RMIT = "-r" in sys.argv
-junk_path = Path("/sdcard/data/junk")
-SKIP_DIRS = ["lazy", ".git"]
+JUNK_FILES = {"license.md", "license.txt"}
+
+REMOVABLE_EXTENSIONS = {".txt", ".md"}
+
+JUNK_EXTENSIONS = {".tmp", ".bak", ".log", ".pyc"}
 
 
 def empty_it(path: Path) -> None:
-    path.write_text("", encoding="utf-8")
+    try:
+        path.write_text("", encoding="utf-8")
+    except OSError as e:
+        print(f"Error emptying {path}: {e}", file=sys.stderr)
 
 
-def remove_it(fp: Path) -> None:
-    if fp.exists():
-        if fp.is_dir():
-            shutil.rmtree(fp)
+def remove_it(path: Path) -> None:
+    try:
+        if path.is_dir():
+            shutil.rmtree(path)
         else:
-            fp.unlink()
+            path.unlink()
+    except OSError as e:
+        print(f"Error removing {path}: {e}", file=sys.stderr)
 
 
-def load_junk() -> list[str]:
-    return read_lines(junk_path)
+def should_skip(path: Path) -> bool:
+    return any(skip_dir in path.parts for skip_dir in SKIP_DIRS)
+
+
+def has_multiple_suffixes(path: Path) -> bool:
+    return len(path.suffixes) > 1
 
 
 def main() -> None:
     cwd = Path.cwd()
-    junk_files = load_junk()
-    junkset = set([p.strip() for p in junk_files])
-    c = 0
+    removed_count = 0
+
     for path in cwd.rglob("*"):
-        if ".git" in path.parts or "lazy" in path.parts or "var" in path.parts:
+        if should_skip(path):
             continue
         loname = path.name.lower()
-        if loname in junkset:
-            path.unlink()
-            print(f"{path.name} removed.")
-            continue
-        if loname in {
-            "copying",
-            "license",
-            "license.md",
-            "license.txt",
-            "license.rst",
-            "license.mit",
-            "author",
-            "contributing",
-        }:
-            path.unlink()
-            print(f"{path.name} removed.")
-            continue
-        if loname.endswith((".tmp", ".bak", ".log")):
-            remove_it(path)
-            print(path.relative_to(cwd))
-            c += 1
-            continue
-        if loname in {
-            ".travis.yml",
-            "third_party_notices",
-            ".gitkeep",
-            ".dirinfo",
+        if path.is_file() and loname in {
             ".pyformat_cache.json",
             "simz.json",
+            "changelog.md",
+            "changelog.txt",
+            "license.rst",
+            "license.md",
+            "license.txt",
+            "license.mit",
+            "authors.md",
+            "changelog",
+            "license",
+            "author",
+            "authors",
+            "copying",
+            ".gitkeep",
+            ".dirinfo",
             "copyright",
+            "contributing",
+            ".travis.yml",
+            "third_party_notices",
         }:
-            path.unlink()
-            print(path.relative_to(cwd))
-            c += 1
+            remove_it(path)
+            print(f"{path.relative_to(cwd)} removed")
             continue
-        if loname.endswith("license.txt") or loname == "license":
-            path.unlink()
-            c += 1
-            print(path.relative_to(cwd))
+        rel_path = path.relative_to(cwd)
+
+        if loname in JUNK_FILES:
+            suffix = path.suffix.lower()
+            if suffix in REMOVABLE_EXTENSIONS and not has_multiple_suffixes(path):
+                remove_it(path)
+                print(f"{rel_path} removed.")
+                removed_count += 1
+            elif suffix in REMOVABLE_EXTENSIONS:
+                print(f"{rel_path} skipped (multiple suffixes detected).")
             continue
-        if any(p in loname for p in junkset):
-            if RMIT:
-                path.unlink()
-                print(path.relative_to(cwd))
-                c += 1
+
+        # Check file extensions for temp/backup files (always remove, safe to assume single suffix)
+        if path.is_file() and any(loname.endswith(ext) for ext in JUNK_EXTENSIONS):
+            remove_it(path)
+            print(rel_path)
+            removed_count += 1
+            continue
+
+        # Check for licenses directory in dist-info
+        if path.is_dir() and loname == "licenses" and "dist-info" in path.parent.name:
+            remove_it(path)
+            print(rel_path)
+            removed_count += 1
+            continue
+
+        # Handle partial matches (e.g., "license" in filename)
+        # Only if file has .txt or .md extension and single suffix
+        if any(junk in loname for junk in JUNK_FILES):
+            suffix = path.suffix.lower()
+
+            # Skip if not a removable extension
+            if suffix not in REMOVABLE_EXTENSIONS:
                 continue
+
+            # Skip if multiple suffixes detected
+            if has_multiple_suffixes(path):
+                print(f"{rel_path} skipped (multiple suffixes detected).")
+                continue
+
+            # Safe to process
+            if REMOVE_MODE:
+                remove_it(path)
             else:
                 empty_it(path)
-                print(path.relative_to(cwd))
-                c += 1
-        if path.is_dir() and path.name == "licenses" and ("dist-info" in path.parent.name):
-            remove_it(path)
-            print(path.relative_to(cwd))
-            c += 1
-    if c:
-        print(f"{c} item removed")
+            print(rel_path)
+            removed_count += 1
+
+    if removed_count:
+        print(f"\n{removed_count} item(s) removed")
+    return 0
 
 
 if __name__ == "__main__":

@@ -23,7 +23,7 @@ def walk_files(directory: Path, pattern: str = "*") -> Iterator[Tuple[Path, Path
         if output_path.exists():
             print(f"Skipping {file_path} - output already exists", file=sys.stderr)
             continue
-        yield (file_path, output_path)
+        yield file_path, output_path
 
 
 def compress_file(
@@ -119,9 +119,9 @@ def main():
         print(f"Error: '{root_dir}' is not a directory", file=sys.stderr)
         sys.exit(1)
     remove_original = not args.keep_original
-    print(f"{('Decompressing' if args.decompress else 'Compressing')} files in: {root_dir}")
+    print(f"{'Decompressing' if args.decompress else 'Compressing'} files in: {root_dir}")
     print(f"Pattern: {args.pattern}")
-    print(f"Remove original: {('Yes' if remove_original else 'No')}")
+    print(f"Remove original: {'Yes' if remove_original else 'No'}")
     if not args.decompress:
         print(f"Level: {args.level}, Threads: {args.threads}")
     processed = 0
@@ -129,7 +129,7 @@ def main():
     if args.decompress:
         for file_path, _ in walk_files(root_dir, f"*{args.pattern}*.zst"):
             if args.dry_run:
-                print(f"[DRY RUN] Would decompress & {('remove' if remove_original else 'keep')}: {file_path}")
+                print(f"[DRY RUN] Would decompress & {'remove' if remove_original else 'keep'}: {file_path}")
             elif decompress_file(file_path, chunk_size=args.chunk_size, remove_original=remove_original):
                 processed += 1
             else:
@@ -138,7 +138,7 @@ def main():
         for input_path, output_path in walk_files(root_dir, args.pattern):
             if args.dry_run:
                 print(
-                    f"[DRY RUN] Would compress & {('remove' if remove_original else 'keep')}: {input_path} -> {output_path}"
+                    f"[DRY RUN] Would compress & {'remove' if remove_original else 'keep'}: {input_path} -> {output_path}"
                 )
             elif compress_file(
                 input_path,
@@ -152,7 +152,7 @@ def main():
             else:
                 failed += 1
     print(f"\n{'=' * 50}")
-    print(f"Completed: {processed} files {('decompressed' if args.decompress else 'compressed')}")
+    print(f"Completed: {processed} files {'decompressed' if args.decompress else 'compressed'}")
     if failed > 0:
         print(f"Failed: {failed} files")
     return 0 if failed == 0 else 1

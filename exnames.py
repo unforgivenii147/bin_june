@@ -19,13 +19,7 @@ def load_names(names_filepath):
                         pattern_str = f"{first_initial_pattern}[\\w\\s\\-']+\\s+{last_initial_pattern}[\\w\\s\\-']+"
                         names.add((name, re.compile(pattern_str, re.IGNORECASE)))
                     else:
-                        names.add((
-                            name,
-                            re.compile(
-                                re.escape(name[0].upper()) + "[\\w\\s\\-']+",
-                                re.IGNORECASE,
-                            ),
-                        ))
+                        names.add((name, re.compile(re.escape(name[0].upper()) + "[\\w\\s\\-']+", re.IGNORECASE)))
     except FileNotFoundError:
         print(f"Error: Names file not found at {names_filepath}")
         sys.exit(1)
@@ -69,10 +63,7 @@ def find_names_in_files(names_db_path: str = "names.txt") -> None:
                             ):
                                 if original_name not in found_names:
                                     found_names[original_name] = []
-                                entry = {
-                                    "file": str(filepath.relative_to(cwd)),
-                                    "match": matched_text,
-                                }
+                                entry = {"file": str(filepath.relative_to(cwd)), "match": matched_text}
                                 if entry not in found_names[original_name]:
                                     found_names[original_name].append(entry)
             except Exception as e:

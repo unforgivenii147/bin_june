@@ -13,16 +13,12 @@ import sys
 import time
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-
 from tqdm import tqdm
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.FileHandler(Path.home() / "face_detection.log"),
-        logging.StreamHandler(),
-    ],
+    handlers=[logging.FileHandler(Path.home() / "face_detection.log"), logging.StreamHandler()],
 )
 logger = logging.getLogger(__name__)
 try:
@@ -36,13 +32,7 @@ except ImportError:
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp"}
 MAX_DIMENSION = 640
 CASCADE_DIR = "/data/data/com.termux/files/home/.local/share/opencv4/haarcascades/"
-
-cascade_path = [
-    "frontalface_default.xml",
-    "frontalface_alt.xml",
-    "frontalface_alt2.xml",
-    "frontalface_alt_tree.xml",
-]
+cascade_path = ["frontalface_default.xml", "frontalface_alt.xml", "frontalface_alt2.xml", "frontalface_alt_tree.xml"]
 
 
 def is_image_file(filepath: Path) -> bool:
@@ -65,16 +55,12 @@ def create_face_detector(cascade_path):
             max_dim = max(h, w)
             if max_dim > MAX_DIMENSION:
                 scale = MAX_DIMENSION / max_dim
-                new_w, new_h = (int(w * scale), int(h * scale))
+                new_w, new_h = int(w * scale), int(h * scale)
                 image = cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_AREA)
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             gray = cv2.equalizeHist(gray)
             faces = face_cascade.detectMultiScale(
-                gray,
-                scaleFactor=1.1,
-                minNeighbors=5,
-                minSize=(30, 30),
-                flags=cv2.CASCADE_SCALE_IMAGE,
+                gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30), flags=cv2.CASCADE_SCALE_IMAGE
             )
             return len(faces) > 0
         except Exception as e:
@@ -88,10 +74,10 @@ def process_image_batch(args):
     image_path, current_dir, noface_dir, cascade_path = args
     detect_face = create_face_detector(cascade_path)
     if detect_face is None:
-        return (image_path, None, False, True)
+        return image_path, None, False, True
     try:
         if not image_path.exists():
-            return (image_path, None, False, True)
+            return image_path, None, False, True
         has_face = detect_face(image_path)
         if not has_face:
             try:
@@ -101,12 +87,12 @@ def process_image_batch(args):
             destination = noface_dir / relative_path
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.move(str(image_path), str(destination))
-            return (image_path, destination, True, has_face)
+            return image_path, destination, True, has_face
         else:
-            return (image_path, None, False, has_face)
+            return image_path, None, False, has_face
     except Exception as e:
         logger.error(f"Error processing {image_path.name}: {e}")
-        return (image_path, None, False, True)
+        return image_path, None, False, True
 
 
 def collect_images(directory: Path, exclude_dir: Path) -> list:
@@ -157,8 +143,8 @@ def process_images(num_workers: int = None):
             results.append(process_image_batch(args))
     elapsed_time = time.time() - start_time
     total = len(results)
-    moved = sum((1 for _, _, moved, _ in results if moved))
-    noface_count = sum((1 for _, _, _, has_face in results if not has_face))
+    moved = sum(1 for _, _, moved, _ in results if moved)
+    noface_count = sum(1 for _, _, _, has_face in results if not has_face)
     has_face_count = total - noface_count
     print("\n" + "=" * 50)
     print("📊 SUMMARY")
@@ -191,7 +177,6 @@ def main():
     print("Images WITH faces → stay in place")
     print("Images WITHOUT faces → moved to 'noface/'")
     print("=" * 50)
-
     num_workers = None
     if len(sys.argv) > 1:
         try:

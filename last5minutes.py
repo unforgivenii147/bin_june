@@ -1,7 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 import sys
-
 from moviepy import AudioFileClip
 
 if __name__ == "__main__":

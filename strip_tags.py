@@ -3,7 +3,6 @@
 import re
 import sys
 from pathlib import Path
-
 from dh import get_removed_lines, read_lines
 
 INPLACE = "-w" in sys.argv

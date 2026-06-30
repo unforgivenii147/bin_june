@@ -10,7 +10,7 @@ from typing import Any
 
 OUTPUT_DIR = Path("output")
 DB_PATH = Path("/sdcard/ext.db")
-ALLOWED_PYTHON_EXTENSIONS = (".py", "")
+ALLOWED_PYTHON_EXTENSIONS = ".py", ""
 
 
 class EntityExtractor(ast.NodeVisitor):
@@ -133,7 +133,19 @@ def create_database() -> None:
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute(
-        "\n        CREATE TABLE IF NOT EXISTS entities (\n            id INTEGER PRIMARY KEY AUTOINCREMENT,\n            name TEXT,\n            full_name TEXT,\n            type TEXT,\n            code TEXT,\n            path TEXT,\n            is_constant BOOLEAN,\n            is_class BOOLEAN,\n            is_function BOOLEAN\n        )\n    "
+        """
+        CREATE TABLE IF NOT EXISTS entities (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            full_name TEXT,
+            type TEXT,
+            code TEXT,
+            path TEXT,
+            is_constant BOOLEAN,
+            is_class BOOLEAN,
+            is_function BOOLEAN
+        )
+    """
     )
     conn.commit()
     conn.close()
@@ -143,7 +155,10 @@ def save_entity_to_db(entity: dict[str, Any]) -> None:
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute(
-        "\n        INSERT INTO entities (name, full_name, type, code, path, is_constant, is_class, is_function)\n        VALUES (?, ?, ?, ?, ?, ?, ?, ?)\n    ",
+        """
+        INSERT INTO entities (name, full_name, type, code, path, is_constant, is_class, is_function)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """,
         (
             entity["name"],
             entity["full_name"],
@@ -199,12 +214,7 @@ def process_single_file(path: Path) -> list[dict[str, Any]]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Extract Python entities and save to database.")
-    parser.add_argument(
-        "-db",
-        "--database",
-        action="store_true",
-        help="Save extracted entities to the database",
-    )
+    parser.add_argument("-db", "--database", action="store_true", help="Save extracted entities to the database")
     args = parser.parse_args()
     print(f"Starting analysis in {Path.cwd()}...")
     create_database()

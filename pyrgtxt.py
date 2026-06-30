@@ -30,7 +30,7 @@ def search_in_file(file_path, search_string):
 
 def search_in_directory(directory, search_string, n_jobs=-1):
     files = [f for f in directory.rglob("*") if f.is_file()]
-    results = Parallel(n_jobs=n_jobs)((delayed(search_in_file)(file, search_string) for file in files))
+    results = Parallel(n_jobs=n_jobs)(delayed(search_in_file)(file, search_string) for file in files)
     matches = [match for sublist in results for match in sublist]
     return matches
 

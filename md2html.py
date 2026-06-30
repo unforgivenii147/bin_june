@@ -5,7 +5,6 @@ import re
 import shutil
 import sys
 from pathlib import Path
-
 import markdown
 from bs4 import BeautifulSoup
 
@@ -31,18 +30,8 @@ def modify_classes(html_content: str) -> str:
 
 
 def convert_latex_format(text: str) -> str:
-    text = re.sub(
-        "\\\\\\[(.*?)\\\\\\]",
-        '<div class="latex-display">\\1</div>',
-        text,
-        flags=re.DOTALL,
-    )
-    return re.sub(
-        "\\\\\\((.*?)\\\\\\)",
-        '<span class="latex-inline">\\1</span>',
-        text,
-        flags=re.DOTALL,
-    )
+    text = re.sub("\\\\\\[(.*?)\\\\\\]", '<div class="latex-display">\\1</div>', text, flags=re.DOTALL)
+    return re.sub("\\\\\\((.*?)\\\\\\)", '<span class="latex-inline">\\1</span>', text, flags=re.DOTALL)
 
 
 def read_markdown_file(file_path: str) -> str:
@@ -59,11 +48,32 @@ def convert_markdown(md_path: str) -> str:
     temp_html_path = os.path.join("/sdcard/tmp", f"{base_name}.html")
     final_output_path = md_path.replace(".md", ".html")
     html_content = markdown.markdown(
-        markdown_text,
-        ext=["md_in_html", "fenced_code", "codehilite", "toc", "attr_list", "tables"],
+        markdown_text, ext=["md_in_html", "fenced_code", "codehilite", "toc", "attr_list", "tables"]
     )
     html_content = modify_classes(html_content)
-    html_template = f'\n    <!DOCTYPE html>\n    <html lang="en" class="scroll-smooth bg-gray-50 text-gray-900 antialiased">\n        <head>\n            <meta charset="UTF-8">\n            <meta name="viewport" content="width=device-width, initial-scale=1.0">\n            <title>{base_name}</title>\n            <link rel="stylesheet" href="/sdcard/_static/katex/tailwind.min.css">\n            <link rel="stylesheet" href="/sdcard/_static/katex/custom.css">\n            <link rel="stylesheet" href="/sdcard/_static/katex/katex.min.css">\n            <script src="/sdcard/_static/katex/tex.js"></script>\n            <script src="/sdcard/_static/katex/auto-render.min.js"></script>\n            <script src="/sdcard/_static/katex/katex.min.js"></script>\n        </head>\n        <body for="html-export" class="min-h-screen flex flex-col justify-between">\n            <main class="flex-1">\n                <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 prose prose-lg prose-slate">\n                    {html_content}\n                </div>\n            </main>\n        </body>\n    </html>\n    '
+    html_template = f"""
+    <!DOCTYPE html>
+    <html lang="en" class="scroll-smooth bg-gray-50 text-gray-900 antialiased">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>{base_name}</title>
+            <link rel="stylesheet" href="/sdcard/_static/katex/tailwind.min.css">
+            <link rel="stylesheet" href="/sdcard/_static/katex/custom.css">
+            <link rel="stylesheet" href="/sdcard/_static/katex/katex.min.css">
+            <script src="/sdcard/_static/katex/tex.js"></script>
+            <script src="/sdcard/_static/katex/auto-render.min.js"></script>
+            <script src="/sdcard/_static/katex/katex.min.js"></script>
+        </head>
+        <body for="html-export" class="min-h-screen flex flex-col justify-between">
+            <main class="flex-1">
+                <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 prose prose-lg prose-slate">
+                    {html_content}
+                </div>
+            </main>
+        </body>
+    </html>
+    """
     Path(temp_html_path).write_text(html_template, encoding="utf-8")
     shutil.copy(temp_html_path, final_output_path)
     return final_output_path

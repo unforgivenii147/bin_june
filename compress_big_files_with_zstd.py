@@ -127,15 +127,15 @@ def compress_file(file_path, progress, level=3):
             temp_path.rename(compressed_path)
             file_path.unlink()
             progress.update(file_path, original_size, compressed_size, "compressed")
-            return (True, file_path, compressed_path, compressed_size)
+            return True, file_path, compressed_path, compressed_size
         else:
             progress.update(file_path, original_size, original_size, "skipped")
-            return (False, file_path, None, original_size)
+            return False, file_path, None, original_size
     except Exception as e:
         if temp_path.exists():
             temp_path.unlink()
         progress.update(file_path, original_size, original_size, f"error: {str(e)[:20]}")
-        return (False, file_path, None, original_size)
+        return False, file_path, None, original_size
 
 
 def main():

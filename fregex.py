@@ -4,7 +4,6 @@ import os
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
 from tqdm import tqdm
 
 
@@ -29,7 +28,7 @@ def process_file(file_path, output_dir):
         output_file = output_dir / f"{relative_path.replace(os.sep, '_')}.txt"
         output_file.parent.mkdir(parents=True, exist_ok=True)
         Path(output_file).write_text("\n".join(patterns), encoding="utf-8")
-    return (file_path, len(patterns))
+    return file_path, len(patterns)
 
 
 def find_regex_in_dir(start_dir: Path, output_dir: str, max_workers=4) -> None:

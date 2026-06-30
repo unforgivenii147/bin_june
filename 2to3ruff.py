@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/usr/bin/python
 
 
 """
@@ -21,7 +21,7 @@ def fix_print_statements_manually(content):
         if not stripped or stripped.startswith("#"):
             new_lines.append(line)
             continue
-        if re.search("\\bprint\\s+", line) and (not is_in_string(line, "print")):
+        if re.search("\\bprint\\s+", line) and not is_in_string(line, "print"):
             if ">>" in line:
                 line = re.sub("print\\s+>>\\s*(\\w+)\\s*,\\s*(.+?)(?:\\s*#.*)?$", "print(\\2, file=\\1)", line)
             else:

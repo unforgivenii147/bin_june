@@ -3,47 +3,29 @@
 import concurrent.futures
 import os
 import subprocess
-
 from tqdm import tqdm
 
 
 def format_file(file_path) -> str | None:
     try:
-        subprocess.run(
-            ["npx", "prettier", "--write", file_path],
-            capture_output=True,
-            text=True,
-            check=True,
-        )
+        subprocess.run(["npx", "prettier", "--write", file_path], capture_output=True, text=True, check=True)
         return None
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
-        return f"{file_path}: {(e.stderr if hasattr(e, 'stderr') else e)!s}"
+        return f"{file_path}: {e.stderr if hasattr(e, 'stderr') else e!s}"
 
 
 def main() -> None:
-    target_extensions = (
-        ".js",
-        ".css",
-        ".htm",
-        ".html",
-        ".ts",
-        ".jsx",
-        ".tsx",
-        ".xml",
-        ".json",
-    )
+    target_extensions = (".js", ".css", ".htm", ".html", ".ts", ".jsx", ".tsx", ".xml", ".json")
     exclude_dirs = {".git"}
-    exclude_extensions = (".min.js", ".min.css")
+    exclude_extensions = ".min.js", ".min.css"
     files_to_format = []
     print("Scanning directory for files...")
     for root, dirs, files in os.walk("."):
         dirs[:] = [d for d in dirs if d not in exclude_dirs]
         files_to_format.extend(
-            (
-                os.path.join(root, file)
-                for file in files
-                if file.endswith(target_extensions) and (not file.endswith(exclude_extensions))
-            )
+            os.path.join(root, file)
+            for file in files
+            if file.endswith(target_extensions) and not file.endswith(exclude_extensions)
         )
     if not files_to_format:
         print("No matching files found.")

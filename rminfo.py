@@ -1,7 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 from pathlib import Path
-
 from fastwalk import walk_files
 
 
@@ -16,7 +15,7 @@ def is_python_file(path: str) -> bool:
             if first.startswith("#!") and "python" in first:
                 return True
             sample = f.read(200)
-            return any((tok in sample for tok in ("def ", "class ", "import ", "from ")))
+            return any(tok in sample for tok in ("def ", "class ", "import ", "from "))
     except Exception:
         return False
 

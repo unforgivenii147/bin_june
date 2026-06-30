@@ -121,16 +121,16 @@ class PathlibTransformer(ast.NodeTransformer):
         return (
             isinstance(node, ast.Attribute)
             and isinstance(node.value, ast.Name)
-            and (node.value.id == self.os_var_name)
-            and (node.attr == "path")
+            and node.value.id == self.os_var_name
+            and node.attr == "path"
         )
 
     def _is_os_call(self, node: ast.Call, func_name: str) -> bool:
         return (
             isinstance(node.func, ast.Attribute)
             and isinstance(node.func.value, ast.Name)
-            and (node.func.value.id == self.os_var_name)
-            and (node.func.attr == func_name)
+            and node.func.value.id == self.os_var_name
+            and node.func.attr == func_name
         )
 
     def _is_os_path_call(self, node: ast.Call, func_name: str) -> bool:
@@ -138,16 +138,16 @@ class PathlibTransformer(ast.NodeTransformer):
             isinstance(node.func, ast.Attribute)
             and isinstance(node.func.value, ast.Attribute)
             and isinstance(node.func.value.value, ast.Name)
-            and (node.func.value.value.id == self.os_var_name)
-            and (node.func.value.attr == "path")
-            and (node.func.attr == func_name)
+            and node.func.value.value.id == self.os_var_name
+            and node.func.value.attr == "path"
+            and node.func.attr == func_name
         ):
             return True
         if (
             isinstance(node.func, ast.Attribute)
             and isinstance(node.func.value, ast.Name)
-            and (node.func.value.id == self.os_path_var_name)
-            and (node.func.attr == func_name)
+            and node.func.value.id == self.os_path_var_name
+            and node.func.attr == func_name
         ):
             return True
         return False
@@ -191,7 +191,7 @@ class PathlibTransformer(ast.NodeTransformer):
             return self._transform_stat_call(node, target)
         elif target == "samefile":
             return self._transform_samefile(node)
-        elif isinstance(target, str) and (not isinstance(target, tuple)):
+        elif isinstance(target, str) and not isinstance(target, tuple):
             new_node = ast.Attribute(
                 value=self._ensure_path(node.args[0] if node.args else ast.Constant(value=".")),
                 attr=target,
@@ -282,7 +282,7 @@ class PathlibTransformer(ast.NodeTransformer):
             if (
                 isinstance(node.func, ast.Attribute)
                 and isinstance(node.func.value, ast.Name)
-                and (node.func.value.id in self.pathlib_imports)
+                and node.func.value.id in self.pathlib_imports
             ):
                 return node
         return ast.Call(func=ast.Name(id="Path", ctx=ast.Load()), args=[node], keywords=[])
@@ -450,7 +450,11 @@ class PathlibTransformer(ast.NodeTransformer):
         if not node.args:
             return node
         path_arg = node.args[0]
-        walk_code = f"(\n            (str(root), [d.name for d in root.iterdir() if d.is_dir()], \n             [f.name for f in root.iterdir() if f.is_file()])\n            for root in Path({ast.unparse(path_arg)}).rglob('*') if root.is_dir()\n        )"
+        walk_code = f"""(
+            (str(root), [d.name for d in root.iterdir() if d.is_dir()], 
+             [f.name for f in root.iterdir() if f.is_file()])
+            for root in Path({ast.unparse(path_arg)}).rglob('*') if root.is_dir()
+        )"""
         self.warnings.append(f"os.walk converted to simplified generator - verify correctness")
         try:
             walk_ast = ast.parse(walk_code, mode="eval")
@@ -523,18 +527,18 @@ def process_file(
         for warning in transformer.warnings:
             cprint(f"  ⚠️ {warning}", "yellow")
         if transformer.infos or transformer.warnings:
-            cprint(f"{('📝' if dry_run else '✓')} Refactored: {file_path.name}", "green" if not dry_run else "yellow")
-        return (new_content, True, transformer.warnings, transformer.infos)
+            cprint(f"{'📝' if dry_run else '✓'} Refactored: {file_path.name}", "green" if not dry_run else "yellow")
+        return new_content, True, transformer.warnings, transformer.infos
     except SyntaxError as e:
         cprint(f"✗ Syntax error in {file_path.name}: {e}", "red")
         if verbose:
             traceback.print_exc()
-        return (None, False, [], [])
+        return None, False, [], []
     except Exception as e:
         cprint(f"✗ Error processing {file_path.name}: {e}", "red")
         if verbose:
             traceback.print_exc()
-        return (None, False, [], [])
+        return None, False, [], []
 
 
 def main() -> int:
@@ -542,7 +546,14 @@ def main() -> int:
 
     parser = argparse.ArgumentParser(
         description="Refactor Python files from os/path to pathlib",
-        epilog="\nExamples:\n  %(prog)s                    # Process all Python files in current directory\n  %(prog)s script.py          # Process a single file\n  %(prog)s src/               # Process all Python files in src directory\n  %(prog)s --dry-run .        # Preview changes without modifying\n  %(prog)s --verbose file.py  # Show detailed output\n        ",
+        epilog="""
+Examples:
+  %(prog)s                    # Process all Python files in current directory
+  %(prog)s script.py          # Process a single file
+  %(prog)s src/               # Process all Python files in src directory
+  %(prog)s --dry-run .        # Preview changes without modifying
+  %(prog)s --verbose file.py  # Show detailed output
+        """,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("paths", nargs="*", help="Files or directories to process")
@@ -580,14 +591,14 @@ def main() -> int:
             file_path = future_to_file[future]
             try:
                 new_content, success, warnings, infos = future.result()
-                results[file_path] = (new_content, success, warnings, infos)
+                results[file_path] = new_content, success, warnings, infos
                 total_warnings += len(warnings)
                 total_changes += len(infos)
             except Exception as e:
                 cprint(f"✗ Failed to process {file_path.name}: {e}", "red")
                 if args.verbose:
                     traceback.print_exc()
-                results[file_path] = (None, False, [], [])
+                results[file_path] = None, False, [], []
     modified_count = 0
     for file_path, (new_content, success, warnings, infos) in results.items():
         if success and new_content and (infos or warnings):

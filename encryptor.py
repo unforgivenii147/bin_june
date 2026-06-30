@@ -5,7 +5,6 @@ import os
 import random
 import string
 from pathlib import Path
-
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
@@ -15,7 +14,7 @@ AES_BLOCK_SIZE = 128
 
 
 def random_key(length: int = 32) -> LiteralString:
-    return "".join((random.choice(string.ascii_letters + string.digits) for _ in range(length)))
+    return "".join(random.choice(string.ascii_letters + string.digits) for _ in range(length))
 
 
 def encrypt_file(file_path, key) -> None:

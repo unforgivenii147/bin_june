@@ -4,7 +4,6 @@ import shutil
 import sys
 import time
 from pathlib import Path
-
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
@@ -26,7 +25,6 @@ ALLOWED_EXTENSIONS = (
 
 
 def copy_if_match(src: Path) -> None:
-
     if any(str(src).endswith(ext) for ext in ALLOWED_EXTENSIONS):
         try:
             DEST_DIR.mkdir(parents=True, exist_ok=True)
@@ -55,21 +53,16 @@ class CopyEventHandler(FileSystemEventHandler):
 
 if __name__ == "__main__":
     watch_path = Path(sys.argv[1]).expanduser() if len(sys.argv) > 1 else TEMPDIR
-
     if not watch_path.exists():
         print(f"Error: Path {watch_path} does not exist")
         sys.exit(1)
-
     print(f"Watching: {watch_path}")
     print(f"Destination: {DEST_DIR}")
-
     startup_scan(watch_path)
-
     event_handler = CopyEventHandler()
     observer = Observer()
     observer.schedule(event_handler, str(watch_path), recursive=True)
     observer.start()
-
     try:
         while True:
             time.sleep(1)

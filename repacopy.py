@@ -5,14 +5,9 @@ import logging
 import shutil
 import sys
 from pathlib import Path
-
 from loguru import logger
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 logger = logging.getLogger(__name__)
 
 
@@ -43,10 +38,7 @@ class PackageRepacker:
                                     if site_pkg.exists() and site_pkg.is_dir():
                                         if site_pkg not in site_packages_dirs:
                                             site_packages_dirs.append(site_pkg)
-                                            print(
-                                                "Found virtualenv site-packages: %s",
-                                                site_pkg,
-                                            )
+                                            print("Found virtualenv site-packages: %s", site_pkg)
                 for site_pkg in search_path.rglob("site-packages"):
                     if site_pkg.is_dir() and site_pkg not in site_packages_dirs:
                         site_packages_dirs.append(site_pkg)
@@ -106,10 +98,7 @@ class PackageRepacker:
             platform_tag = "any"
             root_is_purelib = "true"
         else:
-            print(
-                "Detected C extensions for %s; generating platform-specific tags.",
-                package_name,
-            )
+            print("Detected C extensions for %s; generating platform-specific tags.", package_name)
             root_is_purelib = "false"
             try:
                 from packaging.tags import sys_tags
@@ -118,12 +107,7 @@ class PackageRepacker:
                 python_tag = best_tag.interpreter
                 abi_tag = best_tag.abi
                 platform_tag = best_tag.platform
-                logger.debug(
-                    "Using 'packaging' lib. Tags: %s-%s-%s",
-                    python_tag,
-                    abi_tag,
-                    platform_tag,
-                )
+                logger.debug("Using 'packaging' lib. Tags: %s-%s-%s", python_tag, abi_tag, platform_tag)
             except ImportError:
                 logger.warning("`packaging` library not found. (Install with: pip install packaging)")
                 logger.warning("Falling back to best-guess tags based on current system.")
@@ -190,7 +174,7 @@ class PackageRepacker:
             with Path(record_file).open(encoding="utf-8") as f:
                 for line in f:
                     file_path_str = line.split(",")[0].strip()
-                    if file_path_str and (not file_path_str.endswith(".dist-info/RECORD")):
+                    if file_path_str and not file_path_str.endswith(".dist-info/RECORD"):
                         if file_path_str.endswith(".so"):
                             is_pure_python = False
                         full_path = site_packages_path / file_path_str
@@ -200,13 +184,7 @@ class PackageRepacker:
                 logger.warning("No files found for package %s", package_name)
                 return False
             package_structure_path = self.create_wheel_structure(
-                package_name,
-                metadata,
-                files_to_include,
-                site_packages_path,
-                output_dir,
-                dist_info_dir,
-                is_pure_python,
+                package_name, metadata, files_to_include, site_packages_path, output_dir, dist_info_dir, is_pure_python
             )
             if package_structure_path:
                 print("Copied package files to: %s", package_structure_path)
@@ -245,17 +223,10 @@ class PackageRepacker:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Automatically find and copy Python packages to a wheel structure")
-    parser.add_argument(
-        "--output",
-        "-o",
-        default="~/tmp/repack",
-        help="Output directory (default: ~/tmp/repack)",
-    )
+    parser.add_argument("--output", "-o", default="~/tmp/repack", help="Output directory (default: ~/tmp/repack)")
     parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose output")
     parser.add_argument(
-        "--skip-scan",
-        action="store_true",
-        help="Skip local scan and use current active environment only",
+        "--skip-scan", action="store_true", help="Skip local scan and use current active environment only"
     )
     args = parser.parse_args()
     if args.verbose:

@@ -54,14 +54,14 @@ class PersianDateConverter:
         days += persian_day - 1
         ref_date = datetime.date(622, 3, 19)
         result_date = ref_date + datetime.timedelta(days=days)
-        return (result_date.year, result_date.month, result_date.day)
+        return result_date.year, result_date.month, result_date.day
 
     @staticmethod
     def days_since(gregorian_year, gregorian_month, gregorian_day):
         input_date = datetime.date(gregorian_year, gregorian_month, gregorian_day)
         today = datetime.date.today()
         delta = today - input_date
-        return (delta.days, input_date, today)
+        return delta.days, input_date, today
 
     @staticmethod
     def format_days_since(days):

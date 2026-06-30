@@ -1,11 +1,11 @@
-#!/data/data/com.termux/files/usr/bin/python3
+#!/data/data/com.termux/files/usr/bin/python
+
 
 import shutil
 import sys
 import tarfile
 import zipfile
 from pathlib import Path
-
 import py7zr
 
 
@@ -45,14 +45,7 @@ def unzip_file(archive: Path, target_dir: Path) -> bool:
             with zipfile.ZipFile(archive, "r") as zip_ref:
                 zip_ref.extractall(target_dir)
             return True
-    except (
-        tarfile.TarError,
-        zipfile.BadZipFile,
-        py7zr.exceptions.Bad7zFile,
-        OSError,
-        EOFError,
-        FileNotFoundError,
-    ):
+    except (tarfile.TarError, zipfile.BadZipFile, py7zr.exceptions.Bad7zFile, OSError, EOFError, FileNotFoundError):
         return False
 
 

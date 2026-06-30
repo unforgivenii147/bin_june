@@ -149,7 +149,7 @@ def topological_sort(modules: Dict[str, ModuleInfo]) -> Tuple[List[str], List[Se
         remaining = set(edges) - set(ordered)
         ordered += sorted(remaining)
         cycles = [remaining]
-    return (ordered, cycles)
+    return ordered, cycles
 
 
 def build_merged_source(modules: Dict[str, ModuleInfo], ordered: List[str], out_module_name: str) -> str:
@@ -239,7 +239,7 @@ def main():
         sys.exit(2)
     package_mode = (root / "__init__.py").exists()
     package_name = args.package_name if args.package_name else root.name if package_mode else None
-    if len(files) > args.max_files and (not args.force):
+    if len(files) > args.max_files and not args.force:
         print(f"Found {len(files)} files which is > {args.max_files}. Use --force to override.", file=sys.stderr)
         sys.exit(2)
     full_map_candidates: Dict[str, Path] = {}

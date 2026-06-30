@@ -2,7 +2,6 @@
 
 import sys
 from pathlib import Path
-
 from PIL import Image
 
 
@@ -18,10 +17,10 @@ def analyze_image(path: Path, dark_threshold=50, ratio_threshold=0.6) -> tuple[s
                 dark_count += 1
         dark_ratio = dark_count / total
         if dark_ratio > ratio_threshold:
-            return ("Mostly Dark", dark_ratio)
+            return "Mostly Dark", dark_ratio
         if dark_ratio < 1 - ratio_threshold:
-            return ("Mostly Bright", dark_ratio)
-        return ("Mixed", dark_ratio)
+            return "Mostly Bright", dark_ratio
+        return "Mixed", dark_ratio
 
 
 if __name__ == "__main__":

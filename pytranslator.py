@@ -116,14 +116,14 @@ def is_english_alphabet(text: str) -> bool:
                 break
         if not is_latin and char.isalpha():
             return False
-        if not char.isalpha() and (not char.isspace()):
+        if not char.isalpha() and not char.isspace():
             continue
     return True
 
 
 def has_non_latin_alphabet(text: str) -> bool:
     for char in text:
-        if char.isalpha() and (not is_english_alphabet(char)):
+        if char.isalpha() and not is_english_alphabet(char):
             return True
     return False
 
@@ -134,9 +134,9 @@ def should_skip(text: str) -> bool:
         return True
     if is_english_alphabet(clean):
         return True
-    if any((word in clean.upper() for word in KNOWN_ENGLISH_TOKENS)):
+    if any(word in clean.upper() for word in KNOWN_ENGLISH_TOKENS):
         return True
-    if not any((c.isalpha() for c in clean)):
+    if not any(c.isalpha() for c in clean):
         return True
     return False
 
@@ -179,7 +179,7 @@ def find_print_string_tokens(source: str):
     for line in lines:
         offsets.append(offsets[-1] + len(line.encode()))
     for node in ast.walk(tree):
-        if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and (node.func.id == "print")):
+        if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "print"):
             continue
         for arg in node.args:
             if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
@@ -199,7 +199,7 @@ def process_file(path: Path) -> bool:
     lines = source.splitlines(keepends=True)
 
     def line_col_to_offset(lineno, col):
-        return sum((len(lines[i]) for i in range(lineno - 1))) + col
+        return sum(len(lines[i]) for i in range(lineno - 1)) + col
 
     replacements = []
     for tok in tokens:
@@ -222,7 +222,7 @@ def process_file(path: Path) -> bool:
         return False
     print_arg_positions = set()
     for node in ast.walk(tree):
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and (node.func.id == "print"):
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "print":
             for arg in node.args:
                 if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
                     print_arg_positions.add((arg.col_offset, arg.lineno))

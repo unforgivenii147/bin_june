@@ -12,10 +12,7 @@ MMAP_THRESHOLD_BYTES = 1 * 1024 * 1024
 
 def get_line_offsets(file_path: Path):
     offsets = []
-    with (
-        file_path.open("rb") as f,
-        mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm,
-    ):
+    with file_path.open("rb") as f, mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm:
         offset = 0
         while True:
             offsets.append(offset)
@@ -30,7 +27,7 @@ def crypto_shuffle_offsets(offsets) -> None:
     n = len(offsets)
     for i in range(n - 1, 0, -1):
         j = secrets.randbelow(i + 1)
-        offsets[i], offsets[j] = (offsets[j], offsets[i])
+        offsets[i], offsets[j] = offsets[j], offsets[i]
 
 
 def shuffle3_offsets(offsets) -> None:
@@ -38,18 +35,18 @@ def shuffle3_offsets(offsets) -> None:
     n = len(offsets)
     for i in range(n - 1, 0, -1):
         j = sys_random.randint(0, i)
-        offsets[i], offsets[j] = (offsets[j], offsets[i])
+        offsets[i], offsets[j] = offsets[j], offsets[i]
 
 
 def weighted_shuffle_offsets(offsets) -> None:
     n = len(offsets)
     for i in range(n - 1, 0, -1):
         j = random.randint(0, i)
-        offsets[i], offsets[j] = (offsets[j], offsets[i])
+        offsets[i], offsets[j] = offsets[j], offsets[i]
     if n > 1:
         for i in range(n - 1):
             swap_pos = random.randint(i + 1, n - 1)
-            offsets[i], offsets[swap_pos] = (offsets[swap_pos], offsets[i])
+            offsets[i], offsets[swap_pos] = offsets[swap_pos], offsets[i]
 
 
 def enhanced_shuffle_large_file(input_file_path: Path, output_file_path: Path) -> bool:
@@ -144,7 +141,7 @@ def crypto_shuffle(lst: list[str]) -> None:
     n = len(lst)
     for i in range(n - 1, 0, -1):
         j = secrets.randbelow(i + 1)
-        lst[i], lst[j] = (lst[j], lst[i])
+        lst[i], lst[j] = lst[j], lst[i]
 
 
 def shuffle3(lst: list[str]) -> None:
@@ -152,18 +149,18 @@ def shuffle3(lst: list[str]) -> None:
     n = len(lst)
     for i in range(n - 1, 0, -1):
         j = sys_random.randint(0, i)
-        lst[i], lst[j] = (lst[j], lst[i])
+        lst[i], lst[j] = lst[j], lst[i]
 
 
 def weighted_shuffle(lst: list[str]) -> None:
     n = len(lst)
     for i in range(n - 1, 0, -1):
         j = random.randint(0, i)
-        lst[i], lst[j] = (lst[j], lst[i])
+        lst[i], lst[j] = lst[j], lst[i]
     if n > 1:
         for i in range(n - 1):
             swap_pos = random.randint(i + 1, n - 1)
-            lst[i], lst[swap_pos] = (lst[swap_pos], lst[i])
+            lst[i], lst[swap_pos] = lst[swap_pos], lst[i]
 
 
 def main() -> None:

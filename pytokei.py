@@ -3,7 +3,6 @@
 import os
 import re
 from pathlib import Path
-
 from dh import is_binary
 
 LANG_EXTENSIONS = {
@@ -59,10 +58,10 @@ def get_language_from_shebang(file_path: str) -> str | None:
 
 def count_lines_of_code(file_path: str, lang: str) -> tuple[int, int, int]:
     if ".git" in str(file_path):
-        return (0, 0, 0)
+        return 0, 0, 0
     if is_binary(file_path):
         print(f"{file_path} is binary")
-        return (0, 0, 0)
+        return 0, 0, 0
     with Path(file_path).open(encoding="utf-8") as file:
         code_lines = 0
         comment_lines = 0
@@ -74,12 +73,10 @@ def count_lines_of_code(file_path: str, lang: str) -> tuple[int, int, int]:
                 comment_lines += 1
             else:
                 code_lines += 1
-    return (code_lines, comment_lines, blank_lines)
+    return code_lines, comment_lines, blank_lines
 
 
-def scan_directory(
-    directory: str = ".",
-) -> dict[str, dict[str, dict[str, int]] | dict[str, int]]:
+def scan_directory(directory: str = ".") -> dict[str, dict[str, dict[str, int]] | dict[str, int]]:
     stats = {
         "total": {"code": 0, "comments": 0, "blank": 0},
         "languages": {lang: {"code": 0, "comments": 0, "blank": 0} for lang in LANG_EXTENSIONS},

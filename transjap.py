@@ -75,15 +75,15 @@ class CommentDocstringTranslator(ast.NodeTransformer):
 def translate_comments_in_line(line: str) -> Tuple[str, bool]:
     comment_match = re.search("#(.*)$", line)
     if not comment_match:
-        return (line, False)
+        return line, False
     comment = comment_match.group(1)
     if not re.search("[\\u3040-\\u30ff\\u4e00-\\u9fff]", comment):
-        return (line, False)
+        return line, False
     translated_comment = translate_text(comment)
     if translated_comment != comment:
         new_line = line[: comment_match.start(1)] + translated_comment
-        return (new_line, True)
-    return (line, False)
+        return new_line, True
+    return line, False
 
 
 def translate_file(file_path: Path) -> bool:
@@ -131,7 +131,7 @@ def translate_file(file_path: Path) -> bool:
 
 
 def process_file_wrapper(file_path_str: str) -> Tuple[str, bool]:
-    return (file_path_str, translate_file(Path(file_path_str)))
+    return file_path_str, translate_file(Path(file_path_str))
 
 
 def main():
@@ -151,7 +151,7 @@ def main():
         return
     with mp.Pool(processes=mp.cpu_count()) as pool:
         results = pool.map(process_file_wrapper, [str(f) for f in py_files])
-    modified_count = sum((1 for _, modified in results if modified))
+    modified_count = sum(1 for _, modified in results if modified)
     print(f"\n{'=' * 50}")
     print(f"Completed! Modified {modified_count} out of {len(py_files)} files")
     print("\nDouble-checking for any remaining Japanese characters...")

@@ -79,19 +79,19 @@ def is_constant_assign(node: ast.Assign) -> bool:
     if not isinstance(node, ast.Assign):
         return False
 
-    def target_ok(t: Name | Tuple) -> bool:
+    def target_ok(t: (Name | Tuple)) -> bool:
         return isinstance(t, ast.Name)
 
-    if any((not target_ok(t) for t in node.targets if isinstance(t, (ast.Name, ast.Tuple)))):
+    if any(not target_ok(t) for t in node.targets if isinstance(t, (ast.Name, ast.Tuple))):
         return False
 
-    def lit_ok(n: expr | None) -> bool:
+    def lit_ok(n: (expr | None)) -> bool:
         if isinstance(n, ast.Constant):
             return True
         if isinstance(n, (ast.Tuple, ast.List, ast.Set)):
-            return all((lit_ok(e) for e in n.elts))
+            return all(lit_ok(e) for e in n.elts)
         if isinstance(n, ast.Dict):
-            return all((lit_ok(k) and lit_ok(v) for k, v in zip(n.keys, n.values)))
+            return all(lit_ok(k) and lit_ok(v) for k, v in zip(n.keys, n.values))
         return False
 
     return lit_ok(node.value)
@@ -108,20 +108,20 @@ def read_file_bytes(path: Path) -> bytes:
 def try_decompress_single(data: bytes, ext: str) -> Optional[Tuple[bytes, str]]:
     try:
         if ext == ".gz":
-            return (gzip.decompress(data), "")
+            return gzip.decompress(data), ""
         if ext == ".bz2":
-            return (bz2.decompress(data), "")
+            return bz2.decompress(data), ""
         if ext == ".xz":
-            return (lzma.decompress(data), "")
+            return lzma.decompress(data), ""
         if ext == ".zst":
             if not HAS_ZSTD:
                 raise RuntimeError("zstandard library not installed")
             dctx = zstd.ZstdDecompressor()
-            return (dctx.decompress(data), "")
+            return dctx.decompress(data), ""
         if ext == ".br":
             if not HAS_BROTLI:
                 raise RuntimeError("brotli library not installed")
-            return (brotli.decompress(data), "")
+            return brotli.decompress(data), ""
     except Exception as e:
         logger.debug("decompression failed for ext {}: {}", ext, e)
     return None
@@ -142,7 +142,7 @@ def iter_python_sources(root: Path) -> Iterable[SourceFile]:
                     text = p.read_text(encoding="latin-1")
                 yield SourceFile(path=p, relpath=p.relative_to(root), text=text, origin=str(p))
                 continue
-            if any((lower.endswith(ext) for ext in RECOGNIZED_ARCHIVE_EXTS)):
+            if any(lower.endswith(ext) for ext in RECOGNIZED_ARCHIVE_EXTS):
                 if lower.endswith(".zip"):
                     try:
                         with zipfile.ZipFile(p, "r") as z:
@@ -211,7 +211,7 @@ def extract_defs_from_source(srcfile: Tuple[str, str, str, str]) -> Tuple[str, L
         tree = ast.parse(text)
     except SyntaxError as e:
         logger.error("Syntax error parsing {}: {}:{}", origin, e.lineno, e.msg)
-        return (path_str, results)
+        return path_str, results
     imports = extract_top_level_imports(tree)
     for node in tree.body:
         try:
@@ -240,7 +240,7 @@ def extract_defs_from_source(srcfile: Tuple[str, str, str, str]) -> Tuple[str, L
                 results.append({"kind": "const", "name": name, "hash": h, "code": code, "imports": imports})
         except Exception as exc:
             logger.exception("error extracting node in {}: {}", origin, exc)
-    return (path_str, results)
+    return path_str, results
 
 
 def partition_by_hash(

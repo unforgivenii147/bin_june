@@ -6,7 +6,6 @@ import re
 import sys
 from collections.abc import Iterable
 from pathlib import Path
-
 from dh import get_nobinary
 
 OUTPUT_DIR = Path("extracted_base64")
@@ -54,7 +53,7 @@ def extract_from_html(html: str) -> Iterable[tuple[str, bytes]]:
             decoded = decode_base64(raw_data)
         except Exception:
             continue
-        yield (mime, decoded)
+        yield mime, decoded
 
 
 def save_asset(mime: str, data: bytes) -> Path:

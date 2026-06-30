@@ -1,12 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 from __future__ import annotations
-
 import argparse
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
-
 import imagehash
 from PIL import Image
 
@@ -47,13 +45,7 @@ def hash_distance(h1: imagehash.ImageHash, h2: imagehash.ImageHash) -> int:
     return int(h1 - h2)
 
 
-def folderize_by_similarity(
-    root: Path,
-    out_dir_name: str,
-    hash_func: str,
-    hash_size: int,
-    threshold: int,
-) -> None:
+def folderize_by_similarity(root: Path, out_dir_name: str, hash_func: str, hash_size: int, threshold: int) -> None:
     out_dir = root / out_dir_name
     out_dir.mkdir(parents=True, exist_ok=True)
     images: list[HashedImage] = []
@@ -107,20 +99,11 @@ def main() -> None:
     parser.add_argument("--out", type=str, default="_similar_groups", help="Output folder name")
     parser.add_argument("--hash-func", type=str, default="phash", choices=["phash", "dhash", "ahash"])
     parser.add_argument("--hash-size", type=int, default=16, help="Hash size (bigger = more sensitive).")
-    parser.add_argument(
-        "--threshold",
-        type=int,
-        default=8,
-        help="Max Hamming distance to consider similar.",
-    )
+    parser.add_argument("--threshold", type=int, default=8, help="Max Hamming distance to consider similar.")
     args = parser.parse_args()
     cwd = Path.cwd()
     folderize_by_similarity(
-        root=cwd,
-        out_dir_name=args.out,
-        hash_func=args.hash_func,
-        hash_size=args.hash_size,
-        threshold=args.threshold,
+        root=cwd, out_dir_name=args.out, hash_func=args.hash_func, hash_size=args.hash_size, threshold=args.threshold
     )
 
 

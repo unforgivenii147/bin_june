@@ -3,20 +3,9 @@
 import ast
 from ast import Call
 from pathlib import Path
-
 from dh import get_pyfiles
 
-TARGET_FUNCS = {
-    "compile",
-    "search",
-    "match",
-    "fullmatch",
-    "findall",
-    "finditer",
-    "split",
-    "sub",
-    "subn",
-}
+TARGET_FUNCS = {"compile", "search", "match", "fullmatch", "findall", "finditer", "split", "sub", "subn"}
 
 
 class RegexFixer(ast.NodeTransformer):
@@ -25,7 +14,7 @@ class RegexFixer(ast.NodeTransformer):
         if isinstance(node.func, ast.Attribute) and (
             isinstance(node.func.value, ast.Name)
             and node.func.value.id == "re"
-            and (node.func.attr in TARGET_FUNCS)
+            and node.func.attr in TARGET_FUNCS
             and node.args
         ):
             first_arg = node.args[0]

@@ -77,15 +77,15 @@ def phash_cv2(img: np.ndarray, hash_size: int = HASH_SIZE) -> str:
 def hamming_distance(hash1: str, hash2: str) -> int:
     if hash1 is None or hash2 is None:
         return float("inf")
-    return sum((c1 != c2 for c1, c2 in zip(hash1, hash2)))
+    return sum(c1 != c2 for c1, c2 in zip(hash1, hash2))
 
 
 def compute_hash(file_path: Path) -> Tuple[str, Optional[str]]:
     img = load_image_cv2(str(file_path))
     if img is None:
-        return (file_path.name, None)
+        return file_path.name, None
     hash_str = phash_cv2(img)
-    return (file_path.name, hash_str)
+    return file_path.name, hash_str
 
 
 def find_duplicates(hashes: List[Tuple[str, str]], threshold: int) -> List[List[str]]:
@@ -153,7 +153,7 @@ def move_duplicates_to_folders(
                     files_moved += 1
             except Exception as e:
                 log_verbose(f"Failed to move {filename}: {e}", "ERROR")
-    return (folders_created, files_moved)
+    return folders_created, files_moved
 
 
 def main():
@@ -214,7 +214,7 @@ def main():
         log_action(f"[DRY RUN] Would create {folders_created} folder(s) and move {files_moved} file(s)")
     else:
         log_action(f"✓ Created {folders_created} folder(s) and moved {files_moved} file(s)")
-    total_dupes = sum((len(g) for g in groups))
+    total_dupes = sum(len(g) for g in groups)
     log_action(f"Summary: {len(groups)} group(s), {total_dupes} duplicate file(s)")
     log_action(f"{'=' * 80}\n")
 

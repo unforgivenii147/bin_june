@@ -2,14 +2,13 @@
 
 import sys
 from pathlib import Path
-
 from dh import cprint, get_files, gsz, mpf3, runcmd
 
 START_DIR = Path.cwd()
 NUM_PROCESSES = 4
 
 
-def process_file(path: str | Path) -> None:
+def process_file(path: (str | Path)) -> None:
     path = Path(path)
     before = gsz(path)
     try:

@@ -43,7 +43,7 @@ def enhance_image(image_path: Path, verbose: bool = False, progress: tuple = Non
         del vibrant_img, gaussian_blur
         cv2.imwrite(str(image_path), final_enhanced)
         del final_enhanced
-        if verbose and (not progress):
+        if verbose and not progress:
             print(f"[SUCCESS] Enhanced and replaced: {image_path.name}")
         return True
     except Exception as e:
@@ -96,7 +96,11 @@ def main():
     parser = argparse.ArgumentParser(
         description="Google Photos Style Auto-Enhancer (In-place replacement)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="Examples:\n  %(prog)s                    # Process all images in current directory (sequential)\n  %(prog)s image.jpg          # Process single image (sequential)\n  %(prog)s folder/ --parallel  # Process folder with parallel execution\n  %(prog)s . -j 8              # Process current dir with 8 parallel jobs",
+        epilog="""Examples:
+  %(prog)s                    # Process all images in current directory (sequential)
+  %(prog)s image.jpg          # Process single image (sequential)
+  %(prog)s folder/ --parallel  # Process folder with parallel execution
+  %(prog)s . -j 8              # Process current dir with 8 parallel jobs""",
     )
     parser.add_argument("inputs", nargs="*", help="Files or folders to process. Defaults to recursive '.' if empty.")
     parser.add_argument("-v", "--verbose", action="store_true", help="Print details for every image processed.")
@@ -123,8 +127,12 @@ def main():
     else:
         print("[SYSTEM] Processing sequentially (default mode)...")
         results = process_sequential(tasks, args.verbose)
-    successful_runs = sum((1 for r in results if r))
-    print(f"\n[FINISHED] Done! Successfully enhanced {successful_runs}/{total_images} images in-place.\n")
+    successful_runs = sum(1 for r in results if r)
+    print(
+        f"""
+[FINISHED] Done! Successfully enhanced {successful_runs}/{total_images} images in-place.
+"""
+    )
 
 
 if __name__ == "__main__":

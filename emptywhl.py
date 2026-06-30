@@ -13,7 +13,7 @@ def is_empty_wheel(wheel_path: str) -> bool:
             dist_info_dirs = [
                 name.rstrip("/")
                 for name in z.namelist()
-                if name.endswith(".dist-info/") or (name == name.rstrip("/") + "/" and name.endswith(".dist-info"))
+                if name.endswith(".dist-info/") or name == name.rstrip("/") + "/" and name.endswith(".dist-info")
             ]
             dist_info = next((name.rstrip("/") for name in z.namelist() if ".dist-info" in name), None)
             if not dist_info:
@@ -22,7 +22,7 @@ def is_empty_wheel(wheel_path: str) -> bool:
             if record_path not in z.namelist():
                 return False
             with z.open(record_path) as f:
-                reader = csv.reader((line.decode("utf-8") for line in f))
+                reader = csv.reader(line.decode("utf-8") for line in f)
                 for row in reader:
                     if not row:
                         continue

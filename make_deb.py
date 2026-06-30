@@ -40,9 +40,9 @@ def should_exclude(pkg_name: str) -> bool:
     pkg_lower = pkg_name.lower()
     if pkg_lower in EXCLUDED_PKGS:
         return True
-    if any((exclude in pkg_lower for exclude in ["llvm", "clang"])):
+    if any(exclude in pkg_lower for exclude in ["llvm", "clang"]):
         return True
-    if any((exclude in pkg_lower for exclude in ["rust", "cargo"])):
+    if any(exclude in pkg_lower for exclude in ["rust", "cargo"]):
         return True
     return False
 
@@ -91,7 +91,7 @@ def process_packages(packages: List[str], max_workers: int = 4) -> tuple[int, in
     packages = [p for p in packages if not should_exclude(p)]
     if not packages:
         logger.warning("No packages to process (all excluded or empty list)")
-        return (0, 0)
+        return 0, 0
     logger.info(f"Processing {len(packages)} packages with {max_workers} workers...")
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         future_to_pkg = {executor.submit(create_deb_for_package, pkg): pkg for pkg in packages}
@@ -105,7 +105,7 @@ def process_packages(packages: List[str], max_workers: int = 4) -> tuple[int, in
             except Exception as e:
                 logger.error(f"✗ Unexpected error for {pkg}: {e}")
                 failed += 1
-    return (successful, failed)
+    return successful, failed
 
 
 def main():

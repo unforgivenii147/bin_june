@@ -2,7 +2,6 @@
 
 import contextlib
 import os
-
 import matplotlib.pyplot as plt
 
 cwd = os.getcwd()

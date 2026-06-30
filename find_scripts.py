@@ -1,7 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 from pathlib import Path
-
 from dh import get_filez, is_binary
 
 
@@ -12,7 +11,7 @@ def find_scripts_without_extension(directory: Path):
             continue
         if ".git" in item.parts:
             continue
-        if item.is_file() and (not item.suffix):
+        if item.is_file() and not item.suffix:
             if is_binary(item):
                 continue
             try:

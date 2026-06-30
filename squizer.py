@@ -20,7 +20,7 @@ def remove_comments_and_docstrings(source_code: str) -> str:
         _end_lineno, end_col = tok[3]
         if start_lineno > last_lineno:
             last_col = 0
-        if toktype == tokenize.COMMENT or (toktype == tokenize.STRING and prev_toktype == tokenize.INDENT):
+        if toktype == tokenize.COMMENT or toktype == tokenize.STRING and prev_toktype == tokenize.INDENT:
             pass
         else:
             if start_col > last_col:
@@ -78,5 +78,6 @@ if __name__ == "__main__":
     print("due to the high risk of breaking code and reducing AI understandability.")
     print("Please ensure you have backups before proceeding.")
     print(
-        "\nScript finished. No files were modified by default. Uncomment 'compress_python_files_in_directory('.')' to run."
+        """
+Script finished. No files were modified by default. Uncomment 'compress_python_files_in_directory('.')' to run."""
     )

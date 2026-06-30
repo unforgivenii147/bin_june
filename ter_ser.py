@@ -2,7 +2,6 @@
 
 import sys
 from pathlib import Path
-
 from dh import cprint, fsz, get_files, gsz, mpf3, runcmd
 
 EXT = [".js", ".jsx", ".jsm", ".jsc"]
@@ -35,7 +34,6 @@ def main():
     cwd = Path.cwd()
     args = sys.argv[1:]
     files = []
-
     if args:
         for arg in args:
             p = Path(arg)
@@ -48,7 +46,6 @@ def main():
     if len(files) == 1:
         process_file(files[0])
         sys.exit(1)
-
     mpf3(process_file, files)
 
 

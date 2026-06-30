@@ -19,8 +19,8 @@ def get_site_packages_dirs():
 def parse_pkg_info(dirname):
     m = re.match("(.+)-(\\d+.*?)(\\.dist-info|\\.egg-info)$", dirname)
     if m:
-        return (m.group(1).lower(), m.group(2))
-    return (None, None)
+        return m.group(1).lower(), m.group(2)
+    return None, None
 
 
 def find_multiple_versions() -> None:

@@ -3,14 +3,13 @@
 import sys
 from multiprocessing import get_context
 from pathlib import Path
-
 import pdfplumber
 from fastwalk import walk_files
 
 
 def process_file(path) -> None:
     path = Path(path)
-    if path.exists() and (not path.is_symlink()):
+    if path.exists() and not path.is_symlink():
         with pdfplumber.open(path) as pdf:
             numpages = len(pdf.pages)
             new_name = path.stem + str(numpages) + ".pdf"

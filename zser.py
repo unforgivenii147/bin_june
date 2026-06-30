@@ -159,7 +159,7 @@ def scan(path: Path, compress: bool = True) -> tuple[list[Path], list[Path]]:
                     files.append(entry)
         except (PermissionError, FileNotFoundError):
             continue
-    return (dirs, files)
+    return dirs, files
 
 
 def main():
@@ -173,7 +173,7 @@ def main():
     parser.add_argument("--no-dirs", action="store_true", help="Skip directory compression")
     parser.add_argument("--sequential", action="store_true", help="Disable parallelism")
     args = parser.parse_args()
-    if not args.compress and (not args.decompress):
+    if not args.compress and not args.decompress:
         args.compress = True
     target = args.path.resolve()
     if not target.is_dir():
@@ -207,7 +207,7 @@ def main():
             _, files = scan(target, compress=True)
         if files:
             print(f"\nfiles: {len(files)}")
-            results = Parallel(n_jobs=workers, backend="loky")((delayed(compress_file)(f) for f in files))
+            results = Parallel(n_jobs=workers, backend="loky")(delayed(compress_file)(f) for f in files)
             total_orig = total_comp = ok = 0
             for r in results:
                 if r["status"] == "ok":
@@ -237,7 +237,7 @@ def main():
             print("no .zst files")
         else:
             print(f"files: {len(files)}")
-            results = Parallel(n_jobs=workers, backend="loky")((delayed(decompress_file)(f) for f in files))
+            results = Parallel(n_jobs=workers, backend="loky")(delayed(decompress_file)(f) for f in files)
             ok = 0
             for r in results:
                 if r["status"] == "ok":

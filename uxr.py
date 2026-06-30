@@ -210,10 +210,10 @@ class ArchiveExtractor:
     def extract_single(self, archive_path: Path) -> Tuple[Path, bool, Optional[str]]:
         archive = Path(archive_path)
         if not archive.exists() or not archive.is_file():
-            return (archive, False, "File not found")
+            return archive, False, "File not found"
         format_type = self._detect_format(archive)
         if not format_type:
-            return (archive, False, f"Unsupported format: {archive.suffix}")
+            return archive, False, f"Unsupported format: {archive.suffix}"
         stem = archive.stem
         if str(archive).endswith(".tar.zst"):
             stem = archive.stem[:-4] if archive.stem.endswith(".tar") else archive.stem
@@ -238,7 +238,7 @@ class ArchiveExtractor:
         try:
             extractor = extractors.get(format_type)
             if not extractor:
-                return (archive, False, f"No extractor for {format_type}")
+                return archive, False, f"No extractor for {format_type}"
             if self.verbose:
                 self._print_status(archive, "PROCESSING", f"-> {output_dir}/")
             success = extractor(archive, output_dir)
@@ -248,9 +248,9 @@ class ArchiveExtractor:
                     self._print_status(archive, "SUCCESS", f"Removed: {archive.name}")
             elif success and self.verbose:
                 self._print_status(archive, "SUCCESS", f"Extracted to: {output_dir}")
-            return (archive, success, None if success else "Extraction failed")
+            return archive, success, None if success else "Extraction failed"
         except Exception as e:
-            return (archive, False, str(e))
+            return archive, False, str(e)
 
     def extract_recursive(self, root_dir: Path = Path.cwd(), n_jobs: int = -1) -> dict:
         self._print_header(f"ARCHIVE EXTRACTOR - {root_dir}", "=")
@@ -270,13 +270,13 @@ class ArchiveExtractor:
             print("📭 No archive files found to extract.")
             return self.stats
         print(f"📦 Found {len(archives)} archive(s) to process")
-        print(f"⚡ Using {(n_jobs if n_jobs > 0 else 'all')} CPU core(s)\n")
-        if any((str(a).endswith(".zst") for a in archives)) and zstd is None:
+        print(f"⚡ Using {n_jobs if n_jobs > 0 else 'all'} CPU core(s)\n")
+        if any(str(a).endswith(".zst") for a in archives) and zstd is None:
             print("⚠️  Warning: zstandard library not installed. Install with: pip install zstandard")
-        if any((str(a).endswith(".br") for a in archives)) and brotli_decompress is None:
+        if any(str(a).endswith(".br") for a in archives) and brotli_decompress is None:
             print("⚠️  Warning: brotli library not installed. Install with: pip install brotli")
         results = Parallel(n_jobs=n_jobs, prefer="threads")(
-            (delayed(self.extract_single)(archive) for archive in tqdm(archives, desc="Extracting"))
+            delayed(self.extract_single)(archive) for archive in tqdm(archives, desc="Extracting")
         )
         for archive, success, error in results:
             self.stats["processed"] += 1
@@ -304,7 +304,7 @@ class ArchiveExtractor:
         print(f"✅ Successful:       {success} ({success / total * 100:.1f}%)")
         print(f"❌ Failed:           {failed} ({failed / total * 100:.1f}%)")
         print(f"⏭️  Skipped:          {skipped} ({skipped / total * 100:.1f}%)")
-        print(f"🗑️  Remove original:  {('Enabled' if self.remove_after else 'Disabled')}")
+        print(f"🗑️  Remove original:  {'Enabled' if self.remove_after else 'Disabled'}")
         if failed > 0:
             print("\n⚠️  Some archives failed to extract. Check errors above.")
         self._print_header("FINISHED", "-")

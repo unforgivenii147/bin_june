@@ -154,10 +154,10 @@ def best_for_algo(
             log.debug(traceback.format_exc())
     if best_compressed is None:
         return None
-    return (name, ext, best_level, best_compressed)
+    return name, ext, best_level, best_compressed
 
 
-def process_file(src: Path, out_dir: Path | None = None) -> Path | None:
+def process_file(src: Path, out_dir: (Path | None) = None) -> Path | None:
     log.info("Processing: %s (%s)", src, human(src.stat().st_size))
     try:
         data = read_file(src)
@@ -232,7 +232,7 @@ def main() -> None:
         args = [(f, None) for f in files]
         with mp.Pool(processes=workers) as pool:
             results = pool.map(_worker, args)
-        success = sum((1 for r in results if r is not None))
+        success = sum(1 for r in results if r is not None)
         log.info("Done. %d/%d file(s) compressed successfully.", success, len(files))
     else:
         log.error("Target is neither a file nor a directory: %s", target)

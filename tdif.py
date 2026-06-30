@@ -5,7 +5,6 @@ import difflib
 import sys
 from pathlib import Path
 from typing import ClassVar
-
 from textual.app import App, ComposeResult
 from textual.color import Color
 from textual.containers import Horizontal, ScrollableContainer
@@ -13,7 +12,7 @@ from textual.widgets import Footer, Header, Label, Static
 
 
 class DiffLine(Static):
-    def __init__(self, text: str, line_type: str, line_num: int | None = None) -> None:
+    def __init__(self, text: str, line_type: str, line_num: (int | None) = None) -> None:
         self.raw_text = text
         self.line_type = line_type
         self.line_num = line_num
@@ -66,7 +65,42 @@ class DiffPanel(ScrollableContainer):
 
 
 class DiffViewerApp(App):
-    CSS = "\n    Screen {\n        background: $surface;\n    }\n    .panel-title {\n        padding: 1;\n        text-align: center;\n        background: $primary;\n        color: $text;\n        text-style: bold;\n        width: 100%;\n    }\n    DiffPanel {\n        border: solid $primary;\n        height: 100%;\n        width: 50%;\n        overflow-y: auto;\n    }\n    DiffPanel:focus {\n        border: double $secondary;\n    }\n    DiffLine {\n        padding: 0 1;\n        width: 100%;\n        height: 1;\n    }\n    Horizontal {\n        height: 1fr;\n    }\n    Header {\n        background: $primary-lighten-1;\n    }\n    Footer {\n        background: $primary-darken-1;\n    }\n    "
+    CSS = """
+    Screen {
+        background: $surface;
+    }
+    .panel-title {
+        padding: 1;
+        text-align: center;
+        background: $primary;
+        color: $text;
+        text-style: bold;
+        width: 100%;
+    }
+    DiffPanel {
+        border: solid $primary;
+        height: 100%;
+        width: 50%;
+        overflow-y: auto;
+    }
+    DiffPanel:focus {
+        border: double $secondary;
+    }
+    DiffLine {
+        padding: 0 1;
+        width: 100%;
+        height: 1;
+    }
+    Horizontal {
+        height: 1fr;
+    }
+    Header {
+        background: $primary-lighten-1;
+    }
+    Footer {
+        background: $primary-darken-1;
+    }
+    """
     BINDINGS: ClassVar = [
         ("q", "quit", "Quit"),
         ("f1", "toggle_panel", "Focus Next Panel"),
@@ -183,7 +217,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Compare two files and show their differences",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="\nExamples:\n  %(prog)s file1.txt file2.txt\n  %(prog)s --help\n        ",
+        epilog="""
+Examples:
+  %(prog)s file1.txt file2.txt
+  %(prog)s --help
+        """,
     )
     parser.add_argument("file1", help="First file to compare")
     parser.add_argument("file2", help="Second file to compare")

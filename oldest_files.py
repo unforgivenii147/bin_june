@@ -3,13 +3,12 @@
 import sys
 from datetime import datetime
 from pathlib import Path
-
 from dh import get_file_age
 
 EXCLUDED_DIRS = {".git", "__pycache__"}
 
 
-def format_time(ts: float | str) -> str:
+def format_time(ts: (float | str)) -> str:
     return datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
 
 
@@ -20,13 +19,13 @@ def main() -> None:
     N = int(sys.argv[2].strip()) if len(sys.argv) > 2 else 10
     if opt == "-g":
         for p in cwd.glob("*"):
-            if p.is_symlink() or any((part in EXCLUDED_DIRS for part in p.parts)):
+            if p.is_symlink() or any(part in EXCLUDED_DIRS for part in p.parts):
                 continue
             if p.is_file() or p.is_dir():
                 files.append(p)
     elif opt == "-r":
         for p in cwd.rglob("*"):
-            if p.is_symlink() or any((part in EXCLUDED_DIRS for part in p.parts)):
+            if p.is_symlink() or any(part in EXCLUDED_DIRS for part in p.parts):
                 continue
             if p.is_file():
                 files.append(p)

@@ -20,15 +20,15 @@ except ImportError:
 def convert_otf_to_ttf(otf_path):
     ttf_path = otf_path.with_suffix(".ttf")
     if ttf_path.exists():
-        return ("skipped", str(ttf_path))
+        return "skipped", str(ttf_path)
     try:
         font = fontforge.open(str(otf_path))
         font.generate(str(ttf_path), flags=("opentype",))
         font.close()
         otf_path.unlink()
-        return ("success", str(ttf_path))
+        return "success", str(ttf_path)
     except Exception as e:
-        return ("error", str(e))
+        return "error", str(e)
 
 
 def main():

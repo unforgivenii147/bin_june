@@ -23,11 +23,11 @@ def make_raw_string(source: str) -> str:
     body = m.group("body")
     if "r" in prefix.lower():
         return source
-    if body.endswith("\\") and (not body.endswith("\\\\")):
+    if body.endswith("\\") and not body.endswith("\\\\"):
         return source
-    if quote == '"' and '"' in body and ('"""' not in source):
+    if quote == '"' and '"' in body and '"""' not in source:
         return source
-    if quote == "'" and "'" in body and ("'''" not in source):
+    if quote == "'" and "'" in body and "'''" not in source:
         return source
     new_prefix = prefix + ("r" if "r" not in prefix.lower() else "")
     return f"{new_prefix}{quote}{body}{quote}"

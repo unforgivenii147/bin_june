@@ -74,8 +74,8 @@ def detect_script_type(content: str) -> str:
         "#!/bin/bash",
         "#!/bin/sh",
     ]
-    python_score = sum((1 for ind in python_indicators if ind in preview))
-    bash_score = sum((1 for ind in bash_indicators if ind in preview))
+    python_score = sum(1 for ind in python_indicators if ind in preview)
+    bash_score = sum(1 for ind in bash_indicators if ind in preview)
     if python_score > bash_score:
         return "python"
     elif bash_score > python_score:

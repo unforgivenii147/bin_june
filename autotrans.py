@@ -3,7 +3,6 @@
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
 from deep_translator import GoogleTranslator
 from dh import is_binary
 from fastwalk import walk_files
@@ -62,7 +61,7 @@ def process_directory(directory: str) -> None:
     files = []
     for pth in walk_files(directory):
         path = Path(pth)
-        if path.is_file() and (not is_binary(path)):
+        if path.is_file() and not is_binary(path):
             files.append(path)
             print(f"[FOUND] Text file: {path}")
     print(f"\n[INFO] Total text files found: {len(files)}")

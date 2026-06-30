@@ -77,9 +77,9 @@ def preserve_tar_metadata(tarinfo: tarfile.TarInfo, zipinfo: zipfile.ZipInfo) ->
 def convert_whl_to_tarxz(path: Path, remove_original: bool = False) -> Tuple[bool, str, Optional[Path]]:
     try:
         if not path.exists() or not path.is_file():
-            return (False, f"Invalid file: {path}", None)
+            return False, f"Invalid file: {path}", None
         if path.suffix.lower() != ".whl":
-            return (False, f"Not a wheel file: {path.name}", None)
+            return False, f"Not a wheel file: {path.name}", None
         output_path = path.with_suffix(".tar.xz")
         if output_path.exists():
             output_path = get_unique_path(output_path)
@@ -89,7 +89,7 @@ def convert_whl_to_tarxz(path: Path, remove_original: bool = False) -> Tuple[boo
         with zipfile.ZipFile(path, "r") as zip_file:
             bad_file = zip_file.testzip()
             if bad_file:
-                return (False, f"Corrupt ZIP file: {bad_file}", None)
+                return False, f"Corrupt ZIP file: {bad_file}", None
             with tarfile.open(output_path, "w:xz") as tar_file:
                 for member in zip_file.infolist():
                     if member.is_dir():
@@ -114,17 +114,17 @@ def convert_whl_to_tarxz(path: Path, remove_original: bool = False) -> Tuple[boo
                     return (False, f"Conversion succeeded but failed to remove original: {e}", output_path)
             return (True, f"Converted {converted_count} files to tar.xz", output_path)
         else:
-            return (False, "Output file is empty or missing", None)
+            return False, "Output file is empty or missing", None
     except Exception as e:
-        return (False, f"Conversion error: {e}", None)
+        return False, f"Conversion error: {e}", None
 
 
 def convert_tarxz_to_whl(path: Path, remove_original: bool = False) -> Tuple[bool, str, Optional[Path]]:
     try:
         if not path.exists() or not path.is_file():
-            return (False, f"Invalid file: {path}", None)
+            return False, f"Invalid file: {path}", None
         if not (path.suffix == ".xz" and path.stem.endswith(".tar")):
-            return (False, f"Not a tar.xz file: {path.name}", None)
+            return False, f"Not a tar.xz file: {path.name}", None
         stem = path.stem
         if stem.endswith(".tar"):
             stem = stem[:-4]
@@ -157,7 +157,7 @@ def convert_tarxz_to_whl(path: Path, remove_original: bool = False) -> Tuple[boo
                     if bad_file:
                         return (False, f"Created corrupt zip file: {bad_file}", None)
             except Exception as e:
-                return (False, f"Verification failed: {e}", None)
+                return False, f"Verification failed: {e}", None
             if remove_original:
                 try:
                     path.unlink()
@@ -167,17 +167,17 @@ def convert_tarxz_to_whl(path: Path, remove_original: bool = False) -> Tuple[boo
                     return (False, f"Conversion succeeded but failed to remove original: {e}", output_path)
             return (True, f"Converted {converted_count} files to wheel", output_path)
         else:
-            return (False, "Output file is empty or missing", None)
+            return False, "Output file is empty or missing", None
     except tarfile.TarError as e:
-        return (False, f"Tar error: {e}", None)
+        return False, f"Tar error: {e}", None
     except Exception as e:
-        return (False, f"Conversion error: {e}", None)
+        return False, f"Conversion error: {e}", None
 
 
 def process_file(path: Path, remove_original: bool = False) -> Tuple[bool, str, Optional[Path]]:
     path = Path(path)
     if not path.exists():
-        return (False, f"File not found: {path}", None)
+        return False, f"File not found: {path}", None
     if path.suffix.lower() == ".whl":
         logger.info(f"Converting wheel to tar.xz: {path.name}")
         return convert_whl_to_tarxz(path, remove_original)
@@ -202,14 +202,23 @@ def find_convertible_files(directory: Path, recursive: bool = False) -> List[Pat
 def process_single_file(args):
     file_path, remove_original = args
     success, message, output_path = process_file(file_path, remove_original)
-    return (file_path, success, message, output_path)
+    return file_path, success, message, output_path
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Bidirectional converter between .whl and .tar.xz files",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="\nExamples:\n  %(prog)s                       # Convert all .whl and .tar.xz in current dir\n  %(prog)s package.whl           # Convert single .whl to .tar.xz\n  %(prog)s package.tar.xz        # Convert single .tar.xz to .whl\n  %(prog)s *.whl                 # Convert all .whl files\n  %(prog)s /path/to/dir          # Convert all files in directory\n  %(prog)s --recursive           # Convert all files recursively\n  %(prog)s --remove-original     # Delete original files after conversion\n        ",
+        epilog="""
+Examples:
+  %(prog)s                       # Convert all .whl and .tar.xz in current dir
+  %(prog)s package.whl           # Convert single .whl to .tar.xz
+  %(prog)s package.tar.xz        # Convert single .tar.xz to .whl
+  %(prog)s *.whl                 # Convert all .whl files
+  %(prog)s /path/to/dir          # Convert all files in directory
+  %(prog)s --recursive           # Convert all files recursively
+  %(prog)s --remove-original     # Delete original files after conversion
+        """,
     )
     parser.add_argument(
         "paths", nargs="*", default=["."], help="Files or directories to process (default: current directory)"
@@ -233,7 +242,7 @@ def main() -> int:
             logger.error(f"Path does not exist: {path}")
             continue
         if path.is_file():
-            if path.suffix.lower() == ".whl" or (path.suffix == ".xz" and ".tar" in str(path)):
+            if path.suffix.lower() == ".whl" or path.suffix == ".xz" and ".tar" in str(path):
                 convertible_files.append(path)
             else:
                 logger.warning(f"Skipping unsupported file: {path}")
@@ -285,7 +294,7 @@ def main() -> int:
                 size_kb = output_path.stat().st_size / 1024
                 size_info = f" ({size_kb:.1f} KB)"
             print(
-                f"{status} {file_path.name} [{input_type}] → {(output_path.name if output_path else 'unknown')} [{output_type}]{size_info}"
+                f"{status} {file_path.name} [{input_type}] → {output_path.name if output_path else 'unknown'} [{output_type}]{size_info}"
             )
             if args.verbose:
                 print(f"   {message}")

@@ -7,7 +7,6 @@ import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-
 import requests
 from bs4 import BeautifulSoup
 from loguru import logger
@@ -132,9 +131,7 @@ class CodeBlockExtractor:
         elif isinstance(data, list):
             for item in data:
                 python_codes.extend(self._extract_from_json(item, depth + 1, max_depth))
-        elif isinstance(data, str) and any(
-            (keyword in data for keyword in ["def ", "import ", "class ", "if __name__"])
-        ):
+        elif isinstance(data, str) and any(keyword in data for keyword in ["def ", "import ", "class ", "if __name__"]):
             python_codes.append(data)
         return python_codes
 
@@ -163,7 +160,7 @@ class CodeBlockExtractor:
             "self.",
         ]
         content_lower = content.lower()
-        keyword_count = sum((1 for keyword in python_keywords if keyword.lower() in content_lower))
+        keyword_count = sum(1 for keyword in python_keywords if keyword.lower() in content_lower)
         python_patterns = [
             "\\bdef\\s+\\w+\\s*\\(",
             "\\bclass\\s+\\w+",
@@ -173,17 +170,13 @@ class CodeBlockExtractor:
             "\\breturn\\s+",
             "\\b(True|False|None)\\b",
         ]
-        pattern_matches = sum((1 for pattern in python_patterns if re.search(pattern, content)))
+        pattern_matches = sum(1 for pattern in python_patterns if re.search(pattern, content))
         return keyword_count >= 2 or pattern_matches >= 2
 
     def _extract_filename_from_code(self, content: str) -> str | None:
         lines = content.split("\n")
         for line in lines[:10]:
-            match = re.search(
-                "#\\s*(?:filename|name|file)\\s*:?\\s*([\\w\\-._]+\\.py)",
-                line,
-                re.IGNORECASE,
-            )
+            match = re.search("#\\s*(?:filename|name|file)\\s*:?\\s*([\\w\\-._]+\\.py)", line, re.IGNORECASE)
             if match:
                 return match.group(1)
         return None
@@ -261,7 +254,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Extract Python code blocks from HTML files",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="\nExamples:\n  python script.py -f document.html\n  python script.py -p /path/to/documents\n  python script.py -u https://example.com/page.html\n  python script.py\n        ",
+        epilog="""
+Examples:
+  python script.py -f document.html
+  python script.py -p /path/to/documents
+  python script.py -u https://example.com/page.html
+  python script.py
+        """,
     )
     parser.add_argument("-f", "--file", type=str, help="Path to a single HTML file")
     parser.add_argument("-p", "--path", type=str, help="Path to directory containing HTML files")

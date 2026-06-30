@@ -11,15 +11,14 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Final
-
 import astor
 from dh import cprint, fsz, get_pyfiles, gsz, mpf3
 
 SINGLE_QUOTE: Final[str] = "'"
 DOUBLE_QUOTE: Final[str] = '"'
 triplex2 = {'""""""', "''''''"}
-DOCTH = ('"""', "'''")
-PRESERVE_BEFORE_CODE = ("from ", "import ", "def ", "class ")
+DOCTH = '"""', "'''"
+PRESERVE_BEFORE_CODE = "from ", "import ", "def ", "class "
 
 
 @dataclass(slots=True)
@@ -35,7 +34,7 @@ class StringLiteralStripper:
     def _is_standalone_string(stripped: str) -> bool:
         if not stripped:
             return False
-        if stripped.startswith(DOCTH) and stripped.endswith(DOCTH) and (stripped not in triplex2):
+        if stripped.startswith(DOCTH) and stripped.endswith(DOCTH) and stripped not in triplex2:
             return True
         return False
 
@@ -47,7 +46,7 @@ class StringLiteralStripper:
         code_started = False
         for line in lines:
             stripped = line.strip()
-            if not code_started and (not stripped.startswith(PRESERVE_BEFORE_CODE)):
+            if not code_started and not stripped.startswith(PRESERVE_BEFORE_CODE):
                 new_lines.append(line)
                 continue
             code_started = True
@@ -60,10 +59,10 @@ class StringLiteralStripper:
             try:
                 ast.parse(new_code)
                 stats.was_modified = True
-                return (new_code, stats)
+                return new_code, stats
             except SyntaxError:
-                return (code, StrippingStats())
-        return (code, stats)
+                return code, StrippingStats()
+        return code, stats
 
 
 class DocstringRemover(ast.NodeTransformer):
@@ -106,7 +105,7 @@ class DocstringRemover(ast.NodeTransformer):
         return self._remove_docstring(node)
 
 
-def process_file(path: str | Path) -> bool:
+def process_file(path: (str | Path)) -> bool:
     path = Path(path)
     before_size = gsz(path)
     try:
@@ -163,7 +162,7 @@ def main() -> None:
         process_file(files[0])
     else:
         results = mpf3(process_file, files)
-        successful = sum((1 for r in results if r))
+        successful = sum(1 for r in results if r)
         print(f"\nModified {successful}/{len(files)} file(s)")
 
 

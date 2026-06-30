@@ -5,7 +5,6 @@ import os
 import re
 import sys
 from pathlib import Path
-
 from bs4 import BeautifulSoup
 from bs4.element import AttributeValueList
 
@@ -22,13 +21,8 @@ def encode_local_file_to_base64(file_path) -> str | None:
         return None
 
 
-def find_local_resource(resource_name: AttributeValueList | str, base_html_dir: Path | str):
-    search_paths = [
-        Path("/sdcard/_static"),
-        Path(base_html_dir),
-        Path.cwd(),
-        Path(base_html_dir).parent.parent,
-    ]
+def find_local_resource(resource_name: (AttributeValueList | str), base_html_dir: (Path | str)):
+    search_paths = [Path("/sdcard/_static"), Path(base_html_dir), Path.cwd(), Path(base_html_dir).parent.parent]
     normalized_resource_name = resource_name
     if normalized_resource_name.startswith("/"):
         normalized_resource_name = normalized_resource_name.lstrip("/")
@@ -47,11 +41,7 @@ def find_local_resource(resource_name: AttributeValueList | str, base_html_dir: 
             if Path(path_stripped_slash).exists():
                 print(f"Found resource '{resource_name}' (stripped slash) relative to HTML dir: {path_stripped_slash}")
                 return path_stripped_slash
-        fallback_search_dirs = [
-            Path.cwd(),
-            os.path.join(Path.cwd(), os.pardir),
-            os.path.join(base_html_dir, os.pardir),
-        ]
+        fallback_search_dirs = [Path.cwd(), os.path.join(Path.cwd(), os.pardir), os.path.join(base_html_dir, os.pardir)]
         for fallback_dir in fallback_search_dirs:
             abs_fallback_dir = Path(fallback_dir).resolve()
             potential_path = os.path.join(abs_fallback_dir, resource_name)
@@ -75,7 +65,7 @@ def make_html_standalone(path: Path) -> str:
     base_html_dir = str(path.parent)
     for img_tag in soup.find_all("img"):
         src = img_tag.get("src")
-        if src and (not src.startswith(("http://", "https://", "data:"))):
+        if src and not src.startswith(("http://", "https://", "data:")):
             local_img_path = find_local_resource(src, base_html_dir)
             if local_img_path:
                 encoded_img = encode_local_file_to_base64(local_img_path)
@@ -87,15 +77,14 @@ def make_html_standalone(path: Path) -> str:
     for link_tag in soup.find_all("link"):
         if link_tag.get("rel") == ["stylesheet"]:
             href = link_tag.get("href")
-            if href and (not href.startswith(("http://", "https://", "data:"))):
+            if href and not href.startswith(("http://", "https://", "data:")):
                 local_css_path = find_local_resource(href, base_html_dir)
                 if local_css_path:
                     print(f"Processing CSS file: {local_css_path}")
                     try:
                         css_content = Path(local_css_path).read_text(encoding="utf-8")
                         font_url_matches = re.findall(
-                            "url\\s*\\(\\s*[\\'\"]?([^\\'\"\\)]+)[\\'\"]?\\s*\\)",
-                            css_content,
+                            "url\\s*\\(\\s*[\\'\"]?([^\\'\"\\)]+)[\\'\"]?\\s*\\)", css_content
                         )
                         for font_url in font_url_matches:
                             if not font_url.startswith(("http://", "https://", "data:")):
@@ -147,7 +136,7 @@ def make_html_standalone(path: Path) -> str:
             style_tag.string = style_content
     for script_tag in soup.find_all("script"):
         src = script_tag.get("src")
-        if src and (not src.startswith(("http://", "https://", "data:"))):
+        if src and not src.startswith(("http://", "https://", "data:")):
             local_script_path = find_local_resource(src, base_html_dir)
             if local_script_path:
                 try:

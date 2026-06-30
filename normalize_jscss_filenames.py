@@ -4,18 +4,17 @@
 import os
 import re
 from pathlib import Path
-
 from dh import unique_path
 
 
 def normalize_filename(filename) -> str:
-    pattern = r"(\.(?:js|css))([?#].*)?$"
-    normalized = re.sub(pattern, r"\1", filename, flags=re.IGNORECASE)
+    pattern = "(\\.(?:js|css))([?#].*)?$"
+    normalized = re.sub(pattern, "\\1", filename, flags=re.IGNORECASE)
     return normalized
 
 
 def normalize_filenames_in_text(text: str) -> str:
-    pattern = r"\b([^\s<>\"\']*?\.(?:js|css))([?#][^\s<>\"\']*)?\b"
+    pattern = "\\b([^\\s<>\\\"\\']*?\\.(?:js|css))([?#][^\\s<>\\\"\\']*)?\\b"
 
     def replace_match(match):
         return match.group(1)
@@ -37,7 +36,7 @@ def normalize_filenames_batch(directory: Path) -> None:
     processed_count = 0
     for root, dirs, files in os.walk(directory):
         for file in files:
-            if (".js" in file or ".css" in file) and (not file.endswith((".js", ".css"))):
+            if (".js" in file or ".css" in file) and not file.endswith((".js", ".css")):
                 path = Path(root) / file
                 if path.suffix == ".json":
                     continue
@@ -47,8 +46,6 @@ def normalize_filenames_batch(directory: Path) -> None:
                     if new_path.exists():
                         new_path = unique_path(new_path)
                     print(f"{path.name}->{new_path.name}")
-                    #                    ans = input("? ")
-                    #                    if ans == "y":
                     path.rename(new_path)
                     processed_count += 1
                 except Exception as e:

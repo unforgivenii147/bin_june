@@ -148,7 +148,7 @@ def compress_lz4(data, level):
     return lz4.frame.compress(data, compression_level=level)
 
 
-def compress_data(data: bytes, algo: int | str, level, is_large: bool = False):
+def compress_data(data: bytes, algo: (int | str), level, is_large: bool = False):
     if algo == "zstd":
         return compress_zstd(data, level)
     elif algo == "brotli":
@@ -188,7 +188,9 @@ def is_already_compressed(data, sample_size=4096) -> bool:
     return False
 
 
-def choose_algorithm(file_path: Path, data: bytes | None = None, file_size: int | None = None) -> dict[str, int | str]:
+def choose_algorithm(
+    file_path: Path, data: (bytes | None) = None, file_size: (int | None) = None
+) -> dict[str, int | str]:
     ext = Path(file_path).suffix.lower()
     if ext in EXTENSION_MAP:
         return EXTENSION_MAP[ext]
@@ -283,14 +285,7 @@ def compress_multiple_files(file_paths, output_dir=None, max_workers=None, remov
     return results
 
 
-def create_tar_archive(
-    source_dir,
-    output_path=None,
-    compression="auto",
-    level=None,
-    parallel=False,
-    max_workers=None,
-):
+def create_tar_archive(source_dir, output_path=None, compression="auto", level=None, parallel=False, max_workers=None):
     start_time = time.time()
     source_dir = Path(source_dir)
     if output_path is None:
@@ -352,11 +347,7 @@ def create_tar_archive(
         print(f"\n✓ Archive created: {tar_path}")
         print(f"  Size: {total_size / 1024 / 1024:.2f} MB")
         print(f"  Time: {elapsed:.2f}s")
-        return tar_path, {
-            "file_count": file_count,
-            "original_size": total_size,
-            "time": elapsed,
-        }
+        return tar_path, {"file_count": file_count, "original_size": total_size, "time": elapsed}
 
 
 def decompress_file(compressed_path, output_dir=None, verbose: bool = False):
@@ -457,11 +448,7 @@ Examples:
         help="Compression algorithm (default: auto)",
     )
     archive_parser.add_argument("-l", "--level", type=int, help="Compression level (algorithm-specific)")
-    archive_parser.add_argument(
-        "--parallel",
-        action="store_true",
-        help="Use parallel processing for file addition",
-    )
+    archive_parser.add_argument("--parallel", action="store_true", help="Use parallel processing for file addition")
     archive_parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
     decompress_parser = subparsers.add_parser("decompress", help="Decompress files")
     decompress_parser.add_argument("files", nargs="+", help="Files to decompress")

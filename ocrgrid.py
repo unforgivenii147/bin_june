@@ -1,11 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 from __future__ import annotations
-
 import argparse
 import json
 from pathlib import Path
-
 import cv2
 import numpy as np
 import pytesseract
@@ -35,14 +33,14 @@ def deskew(img: np.ndarray) -> np.ndarray:
     angle = cv2.minAreaRect(coords)[-1]
     angle = -(90 + angle) if angle < -45 else -angle
     h, w = img.shape[:2]
-    center = (w // 2, h // 2)
+    center = w // 2, h // 2
     m = cv2.getRotationMatrix2D(center, angle, 1.0)
     return cv2.warpAffine(img, m, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
 
 
 def rotate(img: np.ndarray, angle: int) -> np.ndarray:
     h, w = img.shape[:2]
-    center = (w // 2, h // 2)
+    center = w // 2, h // 2
     m = cv2.getRotationMatrix2D(center, angle, 1.0)
     return cv2.warpAffine(img, m, (w, h), flags=cv2.INTER_CUBIC)
 
@@ -85,11 +83,7 @@ def main() -> None:
                     txt_path.write_text(result["text"], encoding="utf-8")
                     meta_path.write_text(
                         json.dumps(
-                            {
-                                "image_variant": variant_name,
-                                "source_file": str(args.fname),
-                                "tesseract": result,
-                            },
+                            {"image_variant": variant_name, "source_file": str(args.fname), "tesseract": result},
                             indent=2,
                         ),
                         encoding="utf-8",

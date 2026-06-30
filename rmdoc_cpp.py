@@ -8,8 +8,7 @@ from pathlib import Path
 class RegexCommentRemover:
     def __init__(self) -> None:
         self.pattern = re.compile(
-            "//.*?$|/\\*.*?\\*/|'(?:\\.|[^'])*'|\\\"(?:\\.|[^\\\"])*\\\"",
-            re.DOTALL | re.MULTILINE,
+            "//.*?$|/\\*.*?\\*/|'(?:\\.|[^'])*'|\\\"(?:\\.|[^\\\"])*\\\"", re.DOTALL | re.MULTILINE
         )
 
     def remove_comments(self, source: str) -> tuple[str, int]:
@@ -24,7 +23,7 @@ class RegexCommentRemover:
         comment_count = source.count("//") + source.count("/*")
         result_count = result.count("//") + result.count("/*")
         removed = comment_count - result_count
-        return (result, removed)
+        return result, removed
 
 
 def process_file(file_path: Path, remover: RegexCommentRemover):
@@ -33,7 +32,7 @@ def process_file(file_path: Path, remover: RegexCommentRemover):
         code = Path(file_path).read_text(encoding="utf-8", errors="ignore")
     except Exception as e:
         print(f"[ERROR] {file_path.name} read: {e}")
-        return ("error", file_path, 0)
+        return "error", file_path, 0
     try:
         result, comments = remover.remove_comments(code)
     except Exception as e:
@@ -41,18 +40,18 @@ def process_file(file_path: Path, remover: RegexCommentRemover):
         import traceback
 
         traceback.print_exc()
-        return ("error", file_path, 0)
+        return "error", file_path, 0
     if result != code:
         try:
             Path(file_path).write_text(result, encoding="utf-8")
             print(f"[OK] {file_path.name}: ~{comments} comment markers removed")
-            return ("changed", file_path, comments)
+            return "changed", file_path, comments
         except Exception as e:
             print(f"[ERROR] {file_path.name} write: {e}")
-            return ("error", file_path, comments)
+            return "error", file_path, comments
     else:
         print(f"[NO CHANGE] {file_path.name}")
-        return ("nochange", file_path, 0)
+        return "nochange", file_path, 0
 
 
 if __name__ == "__main__":
@@ -66,18 +65,18 @@ if __name__ == "__main__":
         print("No C/C++ files found")
         sys.exit(0)
     print(f"Found {len(files)} C/C++ files")
-    before = sum((f.stat().st_size for f in files))
+    before = sum(f.stat().st_size for f in files)
     remover = RegexCommentRemover()
     results = []
     for i, path in enumerate(files, 1):
         print(f"[{i}/{len(files)}] Processing {path.name}...")
         result = process_file(path, remover)
         results.append(result)
-    after = sum((f.stat().st_size for f in files if f.exists()))
-    changed = sum((1 for r in results if r[0] == "changed"))
+    after = sum(f.stat().st_size for f in files if f.exists())
+    changed = sum(1 for r in results if r[0] == "changed")
     errors = [r for r in results if r[0] == "error"]
-    nochg = sum((1 for r in results if r[0] == "nochange"))
-    total_comments = sum((r[2] for r in results if r[0] == "changed"))
+    nochg = sum(1 for r in results if r[0] == "nochange")
+    total_comments = sum(r[2] for r in results if r[0] == "changed")
 
     def fsz(size: int) -> str:
         for unit in ["B", "KB", "MB", "GB"]:

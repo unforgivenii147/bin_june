@@ -23,7 +23,7 @@ from pathlib import Path
 import brotlicffi
 
 
-def compress_file(input_path: Path | str, output_path: Path | str, quality=6):
+def compress_file(input_path: (Path | str), output_path: (Path | str), quality=6):
     try:
         with open(input_path, "rb") as f:
             data = f.read()
@@ -47,7 +47,7 @@ def compress_file(input_path: Path | str, output_path: Path | str, quality=6):
         return {"success": False, "input": input_path, "error": str(e)}
 
 
-def decompress_file(input_path: Path | str, output_path: Path | str):
+def decompress_file(input_path: (Path | str), output_path: (Path | str)):
     try:
         with open(input_path, "rb") as f:
             compressed_data = f.read()
@@ -206,7 +206,10 @@ def decompress_path(input_path: str, max_workers: int = 4) -> bool | None:
             if decompress_tar_br(str(tar_br_file)):
                 success_count += 1
         if regular_br_files:
-            print(f"\nDecompressing {len(regular_br_files)} regular files using {max_workers} threads...")
+            print(
+                f"""
+Decompressing {len(regular_br_files)} regular files using {max_workers} threads..."""
+            )
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
                 futures = []
                 for br_file in regular_br_files:
@@ -232,7 +235,26 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Compress or decompress files/directories using Brotli",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="\nExamples:\n  # Compress current directory (default when no args)\n  python brotli_tool.py\n  \n  # Compress a single file\n  python brotli_tool.py -c document.txt\n  \n  # Compress a directory (creates .tar.br)\n  python brotli_tool.py -c myfolder -q 11\n  \n  # Decompress a file\n  python brotli_tool.py -d document.txt.br\n  \n  # Decompress a .tar.br file (extracts to directory)\n  python brotli_tool.py -d myfolder.tar.br\n  \n  # Decompress all files in a directory\n  python brotli_tool.py -d compressed_folder -t 8\n        ",
+        epilog="""
+Examples:
+  # Compress current directory (default when no args)
+  python brotli_tool.py
+  
+  # Compress a single file
+  python brotli_tool.py -c document.txt
+  
+  # Compress a directory (creates .tar.br)
+  python brotli_tool.py -c myfolder -q 11
+  
+  # Decompress a file
+  python brotli_tool.py -d document.txt.br
+  
+  # Decompress a .tar.br file (extracts to directory)
+  python brotli_tool.py -d myfolder.tar.br
+  
+  # Decompress all files in a directory
+  python brotli_tool.py -d compressed_folder -t 8
+        """,
     )
     parser.add_argument(
         "-c",
@@ -262,7 +284,7 @@ def main() -> None:
         "-t", "--threads", type=int, default=4, help="Number of threads for parallel processing (default: 4)"
     )
     args = parser.parse_args()
-    if not args.compress and (not args.decompress):
+    if not args.compress and not args.decompress:
         print("No arguments provided. Compressing current directory...")
         args.compress = "."
     if args.compress:

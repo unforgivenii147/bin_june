@@ -1,3 +1,5 @@
+#!/data/data/com.termux/files/usr/bin/python
+
 """
 Convert .mo files to .po files in-place using GNU gettext utilities.
 Original .mo files are removed only if conversion succeeds.
@@ -143,7 +145,15 @@ def main():
     parser = argparse.ArgumentParser(
         description="Convert .mo files to .po files in-place",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="\nExamples:\n  %(prog)s file.mo                    # Convert single file\n  %(prog)s -k file.mo                 # Convert but keep .mo file\n  %(prog)s /path/to/locale/           # Convert all .mo in directory\n  %(prog)s -r /usr/share/locale/      # Recursive conversion\n  %(prog)s -v -r ./locale/            # Verbose recursive conversion\n  %(prog)s --fallback file.mo         # Use pure Python fallback method\n        ",
+        epilog="""
+Examples:
+  %(prog)s file.mo                    # Convert single file
+  %(prog)s -k file.mo                 # Convert but keep .mo file
+  %(prog)s /path/to/locale/           # Convert all .mo in directory
+  %(prog)s -r /usr/share/locale/      # Recursive conversion
+  %(prog)s -v -r ./locale/            # Verbose recursive conversion
+  %(prog)s --fallback file.mo         # Use pure Python fallback method
+        """,
     )
     parser.add_argument("path", help="Path to .mo file or directory containing .mo files")
     parser.add_argument("-k", "--keep", action="store_true", help="Keep original .mo files (don't remove)")
@@ -155,7 +165,7 @@ def main():
     args = parser.parse_args()
     path = Path(args.path)
     remove_orig = not args.keep
-    if not args.fallback and (not check_msgunfmt()):
+    if not args.fallback and not check_msgunfmt():
         print("Warning: 'msgunfmt' not found. Install gettext utilities or use --fallback")
         print("Install with: sudo apt install gettext (Debian/Ubuntu) or sudo dnf install gettext (Fedora/RHEL)")
         sys.exit(1)

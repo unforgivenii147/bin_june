@@ -6,7 +6,7 @@ from pathlib import Path
 
 def fsz(sz: int) -> str:
     sz = abs(int(sz))
-    units = ("", "K", "M", "G", "T")
+    units = "", "K", "M", "G", "T"
     if sz == 0:
         return "0 B"
     i = min(int(int(sz).bit_length() - 1) // 10, len(units) - 1)
@@ -15,7 +15,7 @@ def fsz(sz: int) -> str:
 
 
 def gsz(path: Path) -> int:
-    return sum((p.stat().st_size for p in path.rglob("*") if p.is_file()))
+    return sum(p.stat().st_size for p in path.rglob("*") if p.is_file())
 
 
 def clean_pycache(start_dir: Path = Path.cwd()) -> None:

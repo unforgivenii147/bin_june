@@ -4,7 +4,6 @@ import os
 import shutil
 import sys
 from pathlib import Path
-
 from dh import cprint
 
 major, minor, _, _, _ = sys.version_info

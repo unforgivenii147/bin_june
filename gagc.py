@@ -1,7 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 import os
 from datetime import datetime
-
 from git import Repo
 
 
@@ -10,9 +9,7 @@ def git_commit_all() -> None:
         repo = Repo(os.getcwd())
     except:
         repo = Repo.init(os.getcwd())
-
     repo.index.add("*")
-
     if repo.index.diff("HEAD"):
         commit_message = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         repo.index.commit(commit_message)

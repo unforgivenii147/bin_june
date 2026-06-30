@@ -20,7 +20,7 @@ def convert_file(filepath: Path, backup=True, remove_original=False) -> bool:
         print(f"Skipping {filepath}: not an .rst file")
         return False
     md_path = filepath.with_suffix(".md")
-    if backup and (not remove_original):
+    if backup and not remove_original:
         backup_path = filepath.with_suffix(".rst.bak")
         import shutil
 

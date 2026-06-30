@@ -117,19 +117,19 @@ def apply_2to3_fixes(file_path: str) -> Tuple[str, bool, str]:
                     message += "\n" + "\n".join(diff_lines[:5])
                 if len(diff_lines) > 5:
                     message += f"\n  ... and {len(diff_lines) - 5} more changes"
-                return (file_path, True, message)
+                return file_path, True, message
             else:
-                return (file_path, True, "No changes needed")
+                return file_path, True, "No changes needed"
         except SyntaxError as e:
-            return (file_path, False, f"Syntax error in file: {e}")
+            return file_path, False, f"Syntax error in file: {e}"
         except Exception as e:
-            return (file_path, False, f"Refactoring error: {str(e)}")
+            return file_path, False, f"Refactoring error: {str(e)}"
     except FileNotFoundError:
-        return (file_path, False, "File not found")
+        return file_path, False, "File not found"
     except PermissionError:
-        return (file_path, False, "Permission denied")
+        return file_path, False, "Permission denied"
     except Exception as e:
-        return (file_path, False, f"Unexpected error: {str(e)}")
+        return file_path, False, f"Unexpected error: {str(e)}"
 
 
 def find_python_files(paths: List[str], extensions: List[str] = None) -> List[str]:
@@ -146,7 +146,7 @@ def find_python_files(paths: List[str], extensions: List[str] = None) -> List[st
                 python_files.append(str(path_obj))
         elif path_obj.is_dir():
             for ext in extensions:
-                python_files.extend((str(p) for p in path_obj.rglob(f"*{ext}")))
+                python_files.extend(str(p) for p in path_obj.rglob(f"*{ext}"))
     return python_files
 
 
@@ -174,7 +174,7 @@ def process_files_parallel(file_paths: List[str]) -> Tuple[List[str], List[str]]
                 failed.append(file_path)
                 print(f"[{i}/{len(file_paths)}] ✗ {Path(file_path).name}")
                 print(f"    Unexpected error: {str(e)}")
-    return (successful, failed)
+    return successful, failed
 
 
 def dry_run_file(file_path: str) -> Tuple[str, str, bool]:
@@ -195,15 +195,15 @@ def dry_run_file(file_path: str) -> Tuple[str, str, bool]:
                         diff.append(f"  + {new[:80]}")
                 if len(original_lines) != len(refactored_lines):
                     diff.append(f"  (Line count changed: {len(original_lines)} -> {len(refactored_lines)})")
-                return (file_path, "\n".join(diff[:20]), True)
+                return file_path, "\n".join(diff[:20]), True
             else:
-                return (file_path, "No changes needed", False)
+                return file_path, "No changes needed", False
         except SyntaxError as e:
-            return (file_path, f"Syntax error: {e}", False)
+            return file_path, f"Syntax error: {e}", False
         except Exception as e:
-            return (file_path, f"Error: {str(e)}", False)
+            return file_path, f"Error: {str(e)}", False
     except Exception as e:
-        return (file_path, f"Error reading file: {str(e)}", False)
+        return file_path, f"Error reading file: {str(e)}", False
 
 
 def perform_dry_run(file_paths: List[str]) -> None:

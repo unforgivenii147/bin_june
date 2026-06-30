@@ -4,7 +4,6 @@ import os
 import site
 import tarfile
 from pathlib import Path
-
 from google.colab import files
 
 
@@ -36,7 +35,7 @@ def compress_small_site_packages(max_size_mb: int = 15) -> None:
                                 tar.add(full_path, arcname=arcname)
             elif Path(item_path).is_file():
                 get_size_mb = Path(item_path).stat().st_size / (1024 * 1024)
-                if get_size_mb <= max_size_mb and (not item.endswith(".pyc")):
+                if get_size_mb <= max_size_mb and not item.endswith(".pyc"):
                     print(f"Including file {item} ({get_size_mb:.2f} MB)")
                     arcname = os.path.relpath(item_path, site_packages_dir)
                     tar.add(item_path, arcname=arcname)

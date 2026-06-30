@@ -4,7 +4,6 @@ import contextlib
 import os
 from io import BytesIO
 from pathlib import Path
-
 import pycurl
 
 
@@ -13,7 +12,7 @@ def download_urls_from_file(filepath: str = "urls.txt", output_dir: str = "downl
     urls = []
     try:
         with Path(filepath).open("r", encoding="utf-8") as f:
-            urls = [line.strip() for line in f if line.strip() and (not line.startswith("#"))]
+            urls = [line.strip() for line in f if line.strip() and not line.startswith("#")]
     except FileNotFoundError:
         print(f"❌ Error: {filepath} not found.")
         return
@@ -34,7 +33,7 @@ def download_urls_from_file(filepath: str = "urls.txt", output_dir: str = "downl
                 filename = url.split("/")[-1] or "index.html"
                 with contextlib.suppress(BaseException):
                     cd_header = buffer.getvalue()
-                safe_filename = "".join((c for c in filename if c.isalnum() or c in "._- "))[:200].strip()
+                safe_filename = "".join(c for c in filename if c.isalnum() or c in "._- ")[:200].strip()
                 outpath = output_dir / safe_filename
                 if not safe_filename:
                     outpath = os.path.join(output_dir, safe_filename)

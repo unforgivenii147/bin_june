@@ -26,12 +26,12 @@ def get_commands_from_path(path_dirs: list[str]):
             for item in os.listdir(dir_path):
                 item_path = os.path.join(dir_path, item)
                 if os.path.isfile(item_path) and os.access(item_path, os.X_OK):
-                    commands[item] = (item_path, dir_path)
+                    commands[item] = item_path, dir_path
                     duplicate_commands[item].append(dir_path)
         except (PermissionError, OSError):
             continue
     conflicts = {cmd: paths for cmd, paths in duplicate_commands.items() if len(paths) > 1}
-    return (commands, conflicts)
+    return commands, conflicts
 
 
 def extract_aliases(aliases_file: Path):
@@ -103,7 +103,7 @@ def display_results(alias_conflicts, func_conflicts, path_duplicates, path_dirs:
             print(f"   ... and {len(path_duplicates) - 10} more")
     else:
         print("\n✓ No duplicate commands across PATH directories")
-    print(f"\n📋 ALIASES ({(len(alias_conflicts) if isinstance(alias_conflicts, dict) else 0)} total)")
+    print(f"\n📋 ALIASES ({len(alias_conflicts) if isinstance(alias_conflicts, dict) else 0} total)")
     if alias_conflicts:
         print(f"   ❌ Conflicts with PATH commands ({len(alias_conflicts)}):")
         for alias, (full_path, dir_path) in sorted(alias_conflicts.items()):
@@ -111,7 +111,7 @@ def display_results(alias_conflicts, func_conflicts, path_duplicates, path_dirs:
         print("\n   💡 Suggestion: Rename these aliases or remove the conflicting binaries")
     else:
         print("   ✓ No conflicts with PATH commands")
-    print(f"\n🔧 FUNCTIONS ({(len(func_conflicts) if isinstance(func_conflicts, dict) else 0)} total)")
+    print(f"\n🔧 FUNCTIONS ({len(func_conflicts) if isinstance(func_conflicts, dict) else 0} total)")
     if func_conflicts:
         print(f"   ❌ Conflicts with PATH commands ({len(func_conflicts)}):")
         for func, (full_path, dir_path) in sorted(func_conflicts.items()):
@@ -133,7 +133,7 @@ def display_results(alias_conflicts, func_conflicts, path_duplicates, path_dirs:
 
 
 def suggest_fixes(alias_conflicts, func_conflicts) -> None:
-    if not alias_conflicts and (not func_conflicts):
+    if not alias_conflicts and not func_conflicts:
         return
     print("\n🔧 SUGGESTED FIXES:")
     print("-" * 40)

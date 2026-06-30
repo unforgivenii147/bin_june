@@ -4,7 +4,6 @@ import os
 import sys
 from collections import Counter, defaultdict
 from pathlib import Path
-
 import pycld2
 from dh import TXT_EXT
 
@@ -16,16 +15,16 @@ MAX_FILE_SIZE = 1024 * 1024
 
 def detect_language(text: str) -> tuple[str | None, float]:
     if not text or len(text) < MIN_TEXT_LENGTH:
-        return (None, 0)
+        return None, 0
     try:
         reliable, _, details = pycld2.detect(text)
         if reliable and details:
             primary_lang = details[0][0]
             confidence = details[0][2]
-            return (primary_lang, confidence)
+            return primary_lang, confidence
     except Exception:
         pass
-    return (None, 0)
+    return None, 0
 
 
 def is_likely_english(text: str, threshold: float = 70.0) -> bool:
@@ -114,7 +113,7 @@ def print_results(results: dict, show_files: bool = False) -> None:
     print("=" * 70)
     total = results["total_files"]
     checked = results["checked_files"]
-    non_english_total = sum((len(files) for files in results["non_english"].values()))
+    non_english_total = sum(len(files) for files in results["non_english"].values())
     english_total = len(results["english"])
     undetermined = len(results["undetermined"])
     print(f"\n📁 Files scanned: {total}")
@@ -137,7 +136,7 @@ def print_results(results: dict, show_files: bool = False) -> None:
         dirs_with_non_english.sort(key=lambda x: x[1]["non_english"], reverse=True)
         for dir_path, stats in dirs_with_non_english[:10]:
             percentage = stats["non_english"] / stats["total"] * 100
-            print(f"   ├─ {(dir_path if dir_path != '.' else '(root)')}:")
+            print(f"   ├─ {dir_path if dir_path != '.' else '(root)'}:")
             print(f"   │   {stats['non_english']}/{stats['total']} files ({percentage:.1f}% non-English)")
     if show_files and results["non_english"]:
         print("\n📄 Non-English files by language:")
@@ -162,7 +161,7 @@ def print_results(results: dict, show_files: bool = False) -> None:
         if dirs_to_translate:
             print("\n📌 Directories to translate (by priority):")
             for dir_path, stats in sorted(dirs_to_translate, key=lambda x: x[1]["non_english"], reverse=True):
-                print(f"   └─ {(dir_path if dir_path != '.' else 'current directory')}:")
+                print(f"   └─ {dir_path if dir_path != '.' else 'current directory'}:")
                 print(f"       {stats['non_english']} non-English files to translate")
     print("=" * 70)
 
@@ -171,18 +170,10 @@ def main() -> None:
     import argparse
 
     parser = argparse.ArgumentParser(description="Find non-English files in directory recursively using pycld2")
-    parser.add_argument(
-        "directory",
-        nargs="?",
-        default=".",
-        help="Directory to scan (default: current directory)",
-    )
+    parser.add_argument("directory", nargs="?", default=".", help="Directory to scan (default: current directory)")
     parser.add_argument("-v", "--verbose", action="store_true", help="Show detailed file listing")
     parser.add_argument(
-        "-l",
-        "--list-languages",
-        action="store_true",
-        help="List all detected languages and their counts",
+        "-l", "--list-languages", action="store_true", help="List all detected languages and their counts"
     )
     args = parser.parse_args()
     try:

@@ -10,7 +10,7 @@ if __name__ == "__main__":
     backup.write_text(content, encoding="utf-8")
     lines = content.splitlines()
     lowest = "480" if "480" in content else "720"
-    nl = [line for line in lines if line.strip() and ("mkv" in line or "mp4" in line) and (lowest in line)]
+    nl = [line for line in lines if line.strip() and ("mkv" in line or "mp4" in line) and lowest in line]
     if nl:
         fn.write_text("\n".join(nl), encoding="utf-8")
     print(f"{len(nl)} links found.")

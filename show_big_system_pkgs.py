@@ -37,7 +37,7 @@ def get_all_packages():
         packages = []
         lines = result.stdout.strip().split("\n")
         for line in lines:
-            if line and (not line.startswith("Listing")) and ("/" in line):
+            if line and not line.startswith("Listing") and "/" in line:
                 pkg_name = line.split("/", 1)[0]
                 if pkg_name not in packages:
                     packages.append(pkg_name)
@@ -51,20 +51,20 @@ def get_package_info(package):
     try:
         result = subprocess.run(["apt", "show", package], capture_output=True, text=True, check=False, timeout=10)
         if result.returncode != 0:
-            return (package, 0, False)
+            return package, 0, False
         for line in result.stdout.split("\n"):
             if line.startswith("Download-Size:"):
                 size_part = line.replace("Download-Size:", "").strip()
                 size_bytes = parse_size(size_part)
-                return (package, size_bytes, True)
-        return (package, 0, False)
+                return package, size_bytes, True
+        return package, 0, False
     except subprocess.TimeoutExpired:
-        return (package, 0, False)
+        return package, 0, False
     except Exception:
-        return (package, 0, False)
+        return package, 0, False
 
 
-def process_packages_parallel(packages, threshold_bytes: int, num_processes: int | None = None):
+def process_packages_parallel(packages, threshold_bytes: int, num_processes: (int | None) = None):
     if num_processes is None:
         num_processes = min(cpu_count(), 8)
     print(f"🚀 Using {num_processes} parallel processes...")
@@ -91,10 +91,10 @@ def process_packages_parallel(packages, threshold_bytes: int, num_processes: int
             else:
                 no_size += 1
                 all_packages[pkg] = 0
-        return (large_packages, all_packages, no_size, total)
+        return large_packages, all_packages, no_size, total
 
 
-def save_json_results(data, filename: str, threshold_mb: float | int, include_all=False) -> bool:
+def save_json_results(data, filename: str, threshold_mb: (float | int), include_all=False) -> bool:
     output = {
         "metadata": {
             "threshold_mb": threshold_mb,

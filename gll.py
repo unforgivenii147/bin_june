@@ -7,7 +7,8 @@ from pathlib import Path
 def main() -> int:
     if len(sys.argv) < 3:
         print(
-            f"get from line X to Y of a file:\nUsage: {sys.argv[0]} <filename> <start_line> [end_line]",
+            f"""get from line X to Y of a file:
+Usage: {sys.argv[0]} <filename> <start_line> [end_line]""",
             file=sys.stderr,
         )
         return 1
@@ -18,7 +19,7 @@ def main() -> int:
     except ValueError:
         print("Error: start_line and end_line must be integers.", file=sys.stderr)
         return 1
-    if start < 1 or (end != -1 and end < start):
+    if start < 1 or end != -1 and end < start:
         print("Invalid range: start must be >=1 and end >= start.", file=sys.stderr)
         return 1
     path = Path(filename)

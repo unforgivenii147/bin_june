@@ -22,7 +22,7 @@ def get_file_list(directory, exclude_patterns=None):
         exclude_patterns = {".git", ".tar.zst", ".zst"}
     files = []
     for item in directory.rglob("*"):
-        if any((pattern in item.parts for pattern in exclude_patterns)):
+        if any(pattern in item.parts for pattern in exclude_patterns):
             continue
         if item.name.endswith(".tar.zst") or item.name.endswith(".zst"):
             continue

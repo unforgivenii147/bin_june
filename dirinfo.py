@@ -6,7 +6,6 @@ import os
 import sys
 from collections import defaultdict
 from pathlib import Path
-
 import matplotlib.pyplot as plt
 
 
@@ -30,7 +29,7 @@ def scan_directory(path: str = "."):
             ext = ext.lower() if ext else "(no extension)"
             extensions.add(ext)
             size_by_ext[ext] += size
-    return (total_size, file_count, folder_count, extensions, size_by_ext)
+    return total_size, file_count, folder_count, extensions, size_by_ext
 
 
 def format_size(size_in_bytes: int) -> str:
@@ -43,7 +42,7 @@ def format_size(size_in_bytes: int) -> str:
     return f"{size_in_bytes / 1024**3:.2f} GB"
 
 
-def write_summary(filename: Path | None = None) -> None:
+def write_summary(filename: (Path | None) = None) -> None:
     total_size, file_count, folder_count, extensions, size_by_ext = scan_directory()
     summary_lines = []
     summary_lines.append(f"Total size: {format_size(total_size)}\n")
@@ -77,9 +76,7 @@ def write_summary(filename: Path | None = None) -> None:
 def create_bar_chart(chart_type: str, output_filename: str = "/sdcard/dirinfo.png") -> None:
     _, _, _, _, size_by_ext = scan_directory()
     sorted_items = sorted(
-        [(ext, size) for ext, size in size_by_ext.items() if size > 0],
-        key=operator.itemgetter(1),
-        reverse=True,
+        [(ext, size) for ext, size in size_by_ext.items() if size > 0], key=operator.itemgetter(1), reverse=True
     )
     if not sorted_items:
         print("No data to plot.", file=sys.stderr)
@@ -104,10 +101,7 @@ def create_bar_chart(chart_type: str, output_filename: str = "/sdcard/dirinfo.pn
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Analyze directory information.")
     parser.add_argument(
-        "-s",
-        "--save",
-        action="store_true",
-        help="Save the report to a file named .dirinfo in the current directory.",
+        "-s", "--save", action="store_true", help="Save the report to a file named .dirinfo in the current directory."
     )
     parser.add_argument(
         "-i",

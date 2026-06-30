@@ -1,7 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 from __future__ import annotations
-
 import argparse
 import base64
 import hashlib
@@ -72,7 +71,7 @@ def parse_metadata_from_distinfo(distinfo_dir):
             if ln.startswith("[") and ln.endswith("]"):
                 section = ln[1:-1].strip()
                 continue
-            if section == "console_scripts" and ln and (not ln.startswith("#")):
+            if section == "console_scripts" and ln and not ln.startswith("#"):
                 left = ln.split("=", 1)[0].strip()
                 console.append(left)
         md["console_scripts"] = console
@@ -110,19 +109,19 @@ def compute_hash_and_size(path) -> tuple[str, str]:
         for chunk in iter(lambda: f.read(8192), b""):
             h.update(chunk)
     digest = base64.urlsafe_b64encode(h.digest()).rstrip(b"=").decode("ascii")
-    return (f"sha256={digest}", str(path.stat().st_size))
+    return f"sha256={digest}", str(path.stat().st_size)
 
 
 def detect_wheel_tags():
     impl = sys.implementation.name
-    mj, mn = (sys.version_info.major, sys.version_info.minor)
+    mj, mn = sys.version_info.major, sys.version_info.minor
     if impl == "cpython":
-        py_tag, abi_tag = (f"cp{mj}{mn}", f"cp{mj}{mn}")
+        py_tag, abi_tag = f"cp{mj}{mn}", f"cp{mj}{mn}"
     else:
         cache = getattr(sys.implementation, "cache_tag", None)
         py_tag, abi_tag = cache.split("-", 1) if cache and "-" in cache else (f"py{mj} ", "none")
     plat = sysconfig.get_platform().replace("-", "_").replace(".", "_")
-    return (py_tag, abi_tag, plat)
+    return py_tag, abi_tag, plat
 
 
 def collect_and_build(distinfo_path, prefix: Path, wheel_out_path: Path) -> None:
@@ -153,7 +152,7 @@ def collect_and_build(distinfo_path, prefix: Path, wheel_out_path: Path) -> None
         else:
             missing_files.append(rel)
     if "console_scripts" in md:
-        collected_files.extend(((sp, f"bin/{sp.name}") for sp in find_script_paths(prefix, md["console_scripts"])))
+        collected_files.extend((sp, f"bin/{sp.name}") for sp in find_script_paths(prefix, md["console_scripts"]))
     if missing_files:
         print(f"[!] Error: Missing files for {dist_name}:")
         for m in missing_files:
@@ -162,7 +161,7 @@ def collect_and_build(distinfo_path, prefix: Path, wheel_out_path: Path) -> None
         return
     py_tag, abi_tag, plat_tag = detect_wheel_tags()
     native_exts = {".so", ".pyd", ".dll", ".dylib", ".sl"}
-    is_platform = any((s.suffix.lower() in native_exts for s, _ in collected_files))
+    is_platform = any(s.suffix.lower() in native_exts for s, _ in collected_files)
     wheel_tag = f"{py_tag}-{abi_tag}-{plat_tag}" if is_platform else "py3-none-any"
     wheel_out_path.parent.mkdir(parents=True, exist_ok=True)
     record_lines = []
@@ -171,7 +170,11 @@ def collect_and_build(distinfo_path, prefix: Path, wheel_out_path: Path) -> None
             zf.write(src, arcname=rel)
             h, size = compute_hash_and_size(src)
             record_lines.append(f"{rel},{h},{size}")
-        wheel_content = f"Wheel-Version: 1.0\nGenerator: repack_tool\nRoot-Is-Purelib: {('false' if is_platform else 'true')}\nTag: {wheel_tag}\n"
+        wheel_content = f"""Wheel-Version: 1.0
+Generator: repack_tool
+Root-Is-Purelib: {"false" if is_platform else "true"}
+Tag: {wheel_tag}
+"""
         zf.writestr(f"{distinfo_path.name}/WHEEL", wheel_content)
         record_lines.extend((f"{distinfo_path.name}/WHEEL,,", f"{distinfo_path.name}/RECORD,,"))
         zf.writestr(f"{distinfo_path.name}/RECORD", "\n".join(record_lines) + "\n")

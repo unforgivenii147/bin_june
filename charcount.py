@@ -2,7 +2,6 @@
 
 import sys
 from pathlib import Path
-
 from dh import is_binary
 
 if __name__ == "__main__":

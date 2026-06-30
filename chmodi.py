@@ -65,7 +65,7 @@ def collect_paths(cwd: str) -> list[Path]:
     root = Path(cwd).resolve()
     paths = []
     for p in root.rglob("*"):
-        if any((part in SKIP_NAMES for part in p.parts)):
+        if any(part in SKIP_NAMES for part in p.parts):
             continue
         paths.append(p)
     return paths

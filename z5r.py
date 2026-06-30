@@ -80,9 +80,9 @@ def compress_folder(folder_path: Path, output_dir: Path, compression_level: int 
         compressed_size = zst_path.stat().st_size
         temp_tar_path.unlink()
         shutil.rmtree(folder_path)
-        return (True, folder_name, compressed_size, original_size, None)
+        return True, folder_name, compressed_size, original_size, None
     except Exception as e:
-        return (False, folder_path.name, 0, 0, str(e))
+        return False, folder_path.name, 0, 0, str(e)
 
 
 def decompress_file(zst_path: Path, output_dir: Path, threads: int = 2) -> tuple:
@@ -102,9 +102,9 @@ def decompress_file(zst_path: Path, output_dir: Path, threads: int = 2) -> tuple
         extracted_size = get_folder_size(extract_dir)
         tar_path.unlink()
         zst_path.unlink()
-        return (True, base_name, extracted_size, None)
+        return True, base_name, extracted_size, None
     except Exception as e:
-        return (False, zst_path.name, 0, str(e))
+        return False, zst_path.name, 0, str(e)
 
 
 def process_folders_compress(
@@ -134,11 +134,13 @@ def process_folders_compress(
                 skipped_folders += 1
     if not folders_to_compress:
         print(
-            f"\nNo folders > {min_size_mb}MB found. Scanned {total_folders} folders, skipped {skipped_folders} smaller folders, {skipped_by_name} by name."
+            f"""
+No folders > {min_size_mb}MB found. Scanned {total_folders} folders, skipped {skipped_folders} smaller folders, {skipped_by_name} by name."""
         )
         return
     print(
-        f"\nFound {len(folders_to_compress)} folders to compress (skipped {skipped_folders} folders <= {min_size_mb}MB, {skipped_by_name} by name)"
+        f"""
+Found {len(folders_to_compress)} folders to compress (skipped {skipped_folders} folders <= {min_size_mb}MB, {skipped_by_name} by name)"""
     )
     print(f"Using compression level {compression_level}, {threads} threads per worker")
     print(f"Using {max_workers} parallel workers")
@@ -234,7 +236,23 @@ def main():
     parser = argparse.ArgumentParser(
         description="Compress or decompress folders using zstandard",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="\nExamples:\n  # Compress folders >5MB in current directory\n  python script.py -c\n  \n  # Compress with custom settings\n  python script.py -c -m 10 -l 5 -t 4\n  \n  # Compress with custom skip directories\n  python script.py -c --skip-dirs .git,dist,node_modules\n  \n  # Decompress all .tar.zst files\n  python script.py -d\n  \n  # Decompress with custom threads\n  python script.py -d -t 4\n        ",
+        epilog="""
+Examples:
+  # Compress folders >5MB in current directory
+  python script.py -c
+  
+  # Compress with custom settings
+  python script.py -c -m 10 -l 5 -t 4
+  
+  # Compress with custom skip directories
+  python script.py -c --skip-dirs .git,dist,node_modules
+  
+  # Decompress all .tar.zst files
+  python script.py -d
+  
+  # Decompress with custom threads
+  python script.py -d -t 4
+        """,
     )
     parser.add_argument("-c", "--compress", action="store_true", default=True, help="Compress folders (default)")
     parser.add_argument("-d", "--decompress", action="store_true", help="Decompress .tar.zst files")
@@ -264,7 +282,7 @@ def main():
         print(f"Error: Directory not found: {target_dir}")
         sys.exit(1)
     print(f"Working directory: {target_dir}")
-    print(f"Mode: {('DECOMPRESS' if args.decompress else 'COMPRESS')}")
+    print(f"Mode: {'DECOMPRESS' if args.decompress else 'COMPRESS'}")
     if not args.decompress:
         print(f"Skip directories: {', '.join(sorted(SKIP_DIRS))}")
         print(f"Minimum size: {args.min_size}MB")

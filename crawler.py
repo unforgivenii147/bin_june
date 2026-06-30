@@ -8,7 +8,6 @@ import signal
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import Manager, cpu_count
 from urllib.parse import urljoin
-
 import requests
 from bs4 import BeautifulSoup
 
@@ -58,7 +57,7 @@ def parse_directory(url, max_size):
     subdirs = []
     html = fetch_directory(url)
     if not html:
-        return (results, subdirs)
+        return results, subdirs
     soup = BeautifulSoup(html, "html.parser")
     rows = soup.find_all("tr")
     for row in rows:
@@ -86,7 +85,7 @@ def parse_directory(url, max_size):
         if size_mb is None or size_mb > max_size:
             continue
         results.append({"url": full_url, "quality": quality, "size_mb": size_mb})
-    return (results, subdirs)
+    return results, subdirs
 
 
 def save_state(queue, visited) -> None:
@@ -97,17 +96,17 @@ def save_state(queue, visited) -> None:
 
 def load_state():
     if not os.path.exists(STATE_FILE):
-        return (None, None)
+        return None, None
     with open(STATE_FILE, encoding="utf-8") as f:
         state = json.load(f)
-    return (set(state["visited"]), state["queue"])
+    return set(state["visited"]), state["queue"]
 
 
 def append_results(results) -> None:
     with open(TXT_OUTPUT, "a", encoding="utf-8") as f:
-        f.writelines((r["url"] + "\n" for r in results))
+        f.writelines(r["url"] + "\n" for r in results)
     with open(JSON_OUTPUT, "a", encoding="utf-8") as f:
-        f.writelines((json.dumps(r) + "\n" for r in results))
+        f.writelines(json.dumps(r) + "\n" for r in results)
 
 
 def main() -> None:
@@ -130,7 +129,7 @@ def main() -> None:
     workers = cpu_count()
     print(f"🚀 Using {workers} processes")
     with ProcessPoolExecutor(max_workers=workers) as executor:
-        while queue and (not stop_flag):
+        while queue and not stop_flag:
             futures = {}
             for _ in range(min(len(queue), workers)):
                 url = queue.pop(0)

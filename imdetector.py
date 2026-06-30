@@ -26,7 +26,7 @@ def has_late_import(path: str) -> bool:
     for node in tree.body:
         if isinstance(node, ast.Expr) and isinstance(node.value, ast.Str):
             continue
-        if isinstance(node, (ast.Import, ast.ImportFrom)) and (not seen_non_import):
+        if isinstance(node, (ast.Import, ast.ImportFrom)) and not seen_non_import:
             continue
         if isinstance(node, (ast.Import, ast.ImportFrom)) and seen_non_import:
             return True
@@ -39,7 +39,7 @@ def find_files(root: str) -> list[str]:
     for dirpath, _, filenames in os.walk(root):
         for name in filenames:
             path = os.path.join(dirpath, name)
-            if not name.endswith(".py") and (not is_probably_python(path)):
+            if not name.endswith(".py") and not is_probably_python(path):
                 continue
             if has_late_import(path):
                 results.append(os.path.relpath(path, root))
@@ -49,7 +49,7 @@ def find_files(root: str) -> list[str]:
 def main() -> None:
     matches = find_files(Path.cwd())
     with Path(OUTPUT_FILE).open("w", encoding="utf-8") as f:
-        f.writelines((path + "\n" for path in matches))
+        f.writelines(path + "\n" for path in matches)
     print(f"Found {len(matches)} files with late imports.")
     print(f"Results saved to {OUTPUT_FILE}")
 

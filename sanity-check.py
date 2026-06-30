@@ -1,16 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 import sys
-
 from dh import runcmd
 
 
 def get_installed_packages() -> list[str]:
     try:
-        ret, txt, _err = runcmd(
-            ["dpkg-query", "-W", "-f='${Package}\t${Status}\t${Version}\n'"],
-            show_output=True,
-        )
+        ret, txt, _err = runcmd(["dpkg-query", "-W", "-f='${Package}\t${Status}\t${Version}\n'"], show_output=True)
         return txt.splitlines()
     except:
         print(f"Error listing installed packages")
@@ -25,10 +21,10 @@ def check_package_health(package_name: str):
             if package_name in line:
                 status = line.split()[0]
                 if status.startswith("ii"):
-                    return (True, "OK")
-                return (False, f"Status: {status}")
+                    return True, "OK"
+                return False, f"Status: {status}"
     except:
-        return (False, f"Error checking package")
+        return False, f"Error checking package"
 
 
 def check_for_updates() -> str:

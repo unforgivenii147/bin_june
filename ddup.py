@@ -110,12 +110,12 @@ def _extract_definitions(path: str, source: str) -> List[_Def]:
     defs: List[_Def] = []
     for node in tree.body:
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-            typ, name = ("func", node.name)
+            typ, name = "func", node.name
         elif isinstance(node, ast.ClassDef):
-            typ, name = ("class", node.name)
+            typ, name = "class", node.name
         elif isinstance(node, ast.Assign):
             if len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
-                typ, name = ("const", node.targets[0].id)
+                typ, name = "const", node.targets[0].id
             else:
                 continue
         else:
@@ -136,7 +136,7 @@ def _new_utils_entries(groups: Dict[str, List[_Def]], existing: Dict[str, Dict[s
     new: Dict[str, List[_Def]] = {"func": [], "class": [], "const": []}
     for hash_key, defs in groups.items():
         rep = defs[0]
-        typ, name = (rep.type, rep.name)
+        typ, name = rep.type, rep.name
         if typ not in existing:
             existing[typ] = {}
         if name in existing[typ]:
@@ -145,7 +145,7 @@ def _new_utils_entries(groups: Dict[str, List[_Def]], existing: Dict[str, Dict[s
                 continue
             logger.warning("Conflict in {}.py: '{}' exists with different content – skipping.", typ, name)
             continue
-        if any((d.name == name for d in new[typ])):
+        if any(d.name == name for d in new[typ]):
             continue
         new[typ].append(rep)
     return new
@@ -184,7 +184,7 @@ def _move_definitions(groups: Dict[str, List[_Def]]) -> None:
     to_remove: Dict[str, Set[str]] = {}
     for hash_key, defs in groups.items():
         for d in defs:
-            if not d.filepath.endswith(".py") or any((d.filepath.endswith(ext) for ext in _COMPRESSED_EXT)):
+            if not d.filepath.endswith(".py") or any(d.filepath.endswith(ext) for ext in _COMPRESSED_EXT):
                 continue
             to_remove.setdefault(d.filepath, set()).add(hash_key)
     for path, hashes in to_remove.items():
@@ -264,7 +264,7 @@ def main() -> None:
     utils_dir = Path("utils")
     existing = _read_existing_utils(utils_dir) if utils_dir.exists() else {}
     new_entries = _new_utils_entries(duplicate_groups, existing)
-    total_new = sum((len(lst) for lst in new_entries.values()))
+    total_new = sum(len(lst) for lst in new_entries.values())
     if total_new == 0:
         logger.info("All duplicates are already present in utils/ – nothing to add.")
         return

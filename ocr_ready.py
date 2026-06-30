@@ -1,7 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 from pathlib import Path
-
 import cv2
 import numpy as np
 import pytesseract
@@ -18,7 +17,7 @@ def deskew(image):
     angle = cv2.minAreaRect(coords)[-1]
     angle = -(90 + angle) if angle < -45 else -angle
     h, w = image.shape[:2]
-    center = (w // 2, h // 2)
+    center = w // 2, h // 2
     M = cv2.getRotationMatrix2D(center, angle, 1.0)
     return cv2.warpAffine(image, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
 

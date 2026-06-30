@@ -87,7 +87,7 @@ def main():
     logging.info(f"Spawning pool with {num_cores} parallel workers...\n")
     with multiprocessing.Pool(processes=num_cores) as pool:
         results = pool.map(build_wheel_worker, tasks)
-    successful_builds = sum((1 for r in results if r))
+    successful_builds = sum(1 for r in results if r)
     logging.info("\n=== REPACKING TASK COMPLETE ===")
     logging.info(f"Total evaluated packages: {len(dist_info_dirs)}")
     logging.info(f"Successfully compiled:    {successful_builds}")

@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/usr/bin/python
 
 
 """
@@ -41,7 +41,7 @@ class PIPPackageCache:
             with open(pip_list_path, "r", encoding="utf-8", errors="ignore") as f:
                 for line in f:
                     line = line.strip()
-                    if line and (not line.startswith("#")):
+                    if line and not line.startswith("#"):
                         pkg_name = re.split("[=!<>;\\[]", line)[0].strip()
                         if pkg_name:
                             self.packages.add(pkg_name.lower())

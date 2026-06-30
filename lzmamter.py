@@ -77,7 +77,7 @@ def _compress_bytes_stdlib(data: bytes, level: int) -> bytes:
 
 
 def compress_file(
-    src: Path, dry_run: bool, verbose: bool, level: int | None = None, threads: int = DEFAULT_THREADS
+    src: Path, dry_run: bool, verbose: bool, level: (int | None) = None, threads: int = DEFAULT_THREADS
 ) -> dict:
     result = {"src": src, "ok": False, "line": "", "msg": ""}
     dst = src.with_suffix(src.suffix + LZMA_EXT)
@@ -99,7 +99,7 @@ def compress_file(
             compressed = _compress_bytes_stdlib(data, effective_level)
         dst.write_bytes(compressed)
         elapsed_ms = (time.perf_counter() - t0) * 1000
-        before, after = (len(data), len(compressed))
+        before, after = len(data), len(compressed)
         src.unlink()
         result["ok"] = True
         result["line"] = status_line(True, src.name, elapsed_ms, before, after)
@@ -132,7 +132,7 @@ def decompress_file(src: Path, dry_run: bool, verbose: bool, threads: int = DEFA
         decompressed = lzma.decompress(data, format=lzma.FORMAT_XZ)
         dst.write_bytes(decompressed)
         elapsed_ms = (time.perf_counter() - t0) * 1000
-        before, after = (len(data), len(decompressed))
+        before, after = len(data), len(decompressed)
         src.unlink()
         result["ok"] = True
         result["line"] = status_line(True, src.name, elapsed_ms, before, after)
@@ -188,7 +188,7 @@ def run_parallel(tasks: list, worker_fn, extra_kwargs: dict) -> tuple[int, int]:
                 ok += 1
             else:
                 err += 1
-    return (ok, err)
+    return ok, err
 
 
 def do_compress(root: Path, tar_subdirs: bool, dry_run: bool, verbose: bool, threads: int) -> None:
@@ -254,7 +254,8 @@ def do_decompress(root: Path, dry_run: bool, verbose: bool, threads: int) -> Non
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="lzma_compress",
-        description="Recursive LZMA/XZ compression / decompression.\nUses lzmamt for real MT encoding if installed, otherwise stdlib lzma (still parallelises across files).",
+        description="""Recursive LZMA/XZ compression / decompression.
+Uses lzmamt for real MT encoding if installed, otherwise stdlib lzma (still parallelises across files).""",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     mode = p.add_mutually_exclusive_group()
@@ -285,7 +286,7 @@ def main() -> None:
     if args.verbose or args.dry_run:
         backend = "lzmamt" if HAS_LZMAMT else "stdlib lzma (single-thread fallback)"
         print(f"Root    : {root}")
-        print(f"Mode    : {('compress' if compress else 'decompress')}")
+        print(f"Mode    : {'compress' if compress else 'decompress'}")
         print(f"Backend : {backend}")
         print(f"Threads : {args.threads} (lzma) × {WORKERS} processes")
         print()

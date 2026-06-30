@@ -2,7 +2,6 @@
 
 import re
 from urllib.parse import urljoin
-
 import requests
 from bs4 import BeautifulSoup
 
@@ -20,7 +19,7 @@ def size_to_mb(size_str: str) -> float | None:
     return None
 
 
-def is_valid_movie(filename: str, size_mb: float | None) -> bool:
+def is_valid_movie(filename: str, size_mb: (float | None)) -> bool:
     if not filename.lower().endswith(".mkv"):
         return False
     if not ("480p" in filename.lower() or "720p" in filename.lower()):
@@ -66,5 +65,5 @@ def crawl(url: str) -> None:
 if __name__ == "__main__":
     crawl(BASE_URL)
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-        f.writelines((movie + "\n" for movie in found_movies))
+        f.writelines(movie + "\n" for movie in found_movies)
     print(f"\n✅ Done. {len(found_movies)} movies saved to {OUTPUT_FILE}")

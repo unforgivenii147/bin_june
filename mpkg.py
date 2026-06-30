@@ -5,7 +5,6 @@ import csv
 import shutil
 import sys
 from pathlib import Path
-
 from loguru import logger
 
 
@@ -17,11 +16,7 @@ def find_dist_info_dir(site_packages: Path, pkg_name: str) -> Path:
     if not candidates:
         raise FileNotFoundError(msg)
     if len(candidates) > 1:
-        logger.warning(
-            "Multiple dist-info directories found for '{}', using: {}",
-            pkg_name,
-            candidates[0],
-        )
+        logger.warning("Multiple dist-info directories found for '{}', using: {}", pkg_name, candidates[0])
     return candidates[0]
 
 
@@ -67,14 +62,9 @@ def copy_package_files(pkg_name: str, site_packages: Path) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Copy (or move) package files based on RECORD metadata.")
     parser.add_argument("pkg", nargs="?", help="Package name to process")
-    parser.add_argument(
-        "-a",
-        "--all",
-        action="store_true",
-        help="Process all packages in current directory",
-    )
+    parser.add_argument("-a", "--all", action="store_true", help="Process all packages in current directory")
     args = parser.parse_args()
-    if not args.pkg and (not args.all):
+    if not args.pkg and not args.all:
         parser.error("You must specify a package name or use --all")
     logger.remove()
     logger.add(sys.stderr, level="INFO", format="<green>{level}</green>|{message}")

@@ -36,7 +36,13 @@ def create_project_structure(pkg: str, author: str, email: str, url: str, simple
         main_py = src_pkg / "__main__.py"
         write_file_if_missing(
             main_py,
-            'def main() -> None:\n    """CLI entry point."""\n    print("Hello from ", __package__)\n\nif __name__ == "__main__":\n    main()\n',
+            """def main() -> None:
+    ""\"CLI entry point.""\"
+    print("Hello from ", __package__)
+
+if __name__ == "__main__":
+    main()
+""",
         )
     tests_path = cwd / "tests"
     tests_path.mkdir(exist_ok=True)
@@ -65,7 +71,10 @@ def create_project_structure(pkg: str, author: str, email: str, url: str, simple
     setup_cfg.write_text("\n".join(cfg_content))
     pyproject_path = cwd / "pyproject.toml"
     pyproject_path.write_text(
-        '[build-system]\nrequires = ["setuptools>=69.0", "wheel"]\nbuild-backend = "setuptools.build_meta"\n'
+        """[build-system]
+requires = ["setuptools>=69.0", "wheel"]
+build-backend = "setuptools.build_meta\"
+"""
     )
     print(f"Project '{pkg}' initialized in {cwd}")
 

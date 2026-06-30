@@ -2,7 +2,6 @@
 
 import stat
 from pathlib import Path
-
 from dh import is_binary, should_skip
 
 
@@ -38,7 +37,7 @@ def process_directory(cwd: Path) -> None:
         if should_skip(path):
             continue
         pardir = path.parent.name
-        if pardir in {"sbin", "bin"} and (not is_exec(path)):
+        if pardir in {"sbin", "bin"} and not is_exec(path):
             make_exec(path)
             print(f"[+] Made executable: {path.relative_to(cwd)}")
             continue

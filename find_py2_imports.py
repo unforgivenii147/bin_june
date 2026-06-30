@@ -2,7 +2,6 @@
 
 import sys
 from pathlib import Path
-
 import tree_sitter_python as tsp
 from dh import STDLIB2, cprint, get_filez
 from rapidfuzz import fuzz
@@ -31,7 +30,7 @@ def process_file(fp: Path) -> None:
                 if "." in k:
                     indx = k.index(".")
                     k = k[:indx]
-                if k not in impoz and (not k.startswith("_")):
+                if k not in impoz and not k.startswith("_"):
                     impoz.append(k + "\n")
             elif k.startswith("from "):
                 k = k.replace("from ", "")
@@ -46,7 +45,7 @@ def process_file(fp: Path) -> None:
                 if " import" in k:
                     indx = k.index(" import")
                     k = k[:indx]
-                if k not in impoz and (not k.startswith("_")):
+                if k not in impoz and not k.startswith("_"):
                     impoz.append(k + "\n")
     impoz = sorted(set(impoz))
     stdlib2 = list(STDLIB2)
@@ -61,24 +60,22 @@ def process_file(fp: Path) -> None:
             if (
                 ratio > 85
                 and len(x) > 3
-                and (len(v) > 3)
-                and (
-                    x
-                    not in {
-                        "io",
-                        "os",
-                        "pathlib",
-                        "urllib",
-                        "tkinter",
-                        "pickle",
-                        "string",
-                        "queue",
-                        "urllib3",
-                        "configparser",
-                        "copyreg",
-                        "httplib2",
-                    }
-                )
+                and len(v) > 3
+                and x
+                not in {
+                    "io",
+                    "os",
+                    "pathlib",
+                    "urllib",
+                    "tkinter",
+                    "pickle",
+                    "string",
+                    "queue",
+                    "urllib3",
+                    "configparser",
+                    "copyreg",
+                    "httplib2",
+                }
             ):
                 cprint(f"{fp.relative_to(cwd)}", "yellow")
                 cprint(f"{x} / {v} / {ratio}", "green")

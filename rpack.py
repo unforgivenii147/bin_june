@@ -6,7 +6,6 @@ import re
 import shutil
 import sysconfig
 from pathlib import Path
-
 from wheel.wheelfile import WheelFile
 
 
@@ -22,8 +21,8 @@ def list_installed_packages(site: Path):
             m = re.match("(.+)-([\\w\\.]+)", name_version)
             if not m:
                 continue
-            pkg, version = (m.group(1), m.group(2))
-            pkgs[pkg.lower()] = (pkg, version)
+            pkg, version = m.group(1), m.group(2)
+            pkgs[pkg.lower()] = pkg, version
     return pkgs
 
 

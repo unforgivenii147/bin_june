@@ -1,7 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 import sys
 from pathlib import Path
-
 from dh import cprint, get_files, mpf3, unique_path
 from fontTools.ttLib import TTFont
 
@@ -17,7 +16,6 @@ def process_file(path: Path) -> None:
         font = TTFont(path)
         font.flavor = "woff"
         font.save(woff_path)
-
         print(f"{path.name} converted.")
         path.unlink()
     except:

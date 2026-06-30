@@ -161,11 +161,11 @@ def compress_file(path: Path) -> tuple[bool, int, int]:
     out_path = path.with_suffix(path.suffix + ".bz2")
     if out_path.exists():
         print(f"Skipping {path.name} - output already exists")
-        return (False, 0, 0)
+        return False, 0, 0
     try:
         original_size = path.stat().st_size
         if not original_size:
-            return (False, 0, 0)
+            return False, 0, 0
         if original_size < CHUNK_SIZE:
             success = compress_in_memory(path, out_path)
         else:
@@ -175,28 +175,28 @@ def compress_file(path: Path) -> tuple[bool, int, int]:
             if compressed_size == 0:
                 print(f"Warning: Compressed file empty for {path.name}")
                 out_path.unlink()
-                return (False, 0, 0)
+                return False, 0, 0
             if compressed_size < original_size:
                 path.unlink()
                 reduction = (original_size - compressed_size) / original_size * 100
                 print(f"  ✓ {path.name}: {reduction:.1f}% saved ({fsz(original_size)} → {fsz(compressed_size)})")
-                return (True, original_size, compressed_size)
+                return True, original_size, compressed_size
             else:
                 print(f"  ✗ {path.name}: No space saved, removing compressed file")
                 out_path.unlink()
-                return (False, 0, 0)
+                return False, 0, 0
         else:
-            return (False, 0, 0)
+            return False, 0, 0
     except (OSError, PermissionError, EOFError) as e:
         print(f"  ✗ Failed to compress {path.name}: {e}")
-        return (False, 0, 0)
+        return False, 0, 0
 
 
 def get_files(directory: Path, mode: str = "compress") -> list[Path]:
     if mode == "compress":
-        return [p for p in directory.glob("*") if p.is_file() and (not p.is_symlink()) and should_compress(p)]
+        return [p for p in directory.glob("*") if p.is_file() and not p.is_symlink() and should_compress(p)]
     else:
-        return [p for p in directory.glob("*.bz2") if p.is_file() and (not p.is_symlink())]
+        return [p for p in directory.glob("*.bz2") if p.is_file() and not p.is_symlink()]
 
 
 def get_dirs(directory: Path) -> list[Path]:
@@ -344,7 +344,18 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Multi-threaded Bzip2 compression/decompression tool (max compression)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="\nExamples:\n  %(prog)s -c          # Compress files and folders in current directory\n  %(prog)s -d          # Decompress .bz2 and .tar.bz2 files in current directory\n  %(prog)s             # Default: compress\n\nBzip2 Settings:\n  - Level: 9 (maximum compression)\n  - Block size: 900KB\n  - Algorithm: Burrows-Wheeler transform + Move-to-front + Huffman coding\n  - Good for: Text files, source code, structured data\n        ",
+        epilog="""
+Examples:
+  %(prog)s -c          # Compress files and folders in current directory
+  %(prog)s -d          # Decompress .bz2 and .tar.bz2 files in current directory
+  %(prog)s             # Default: compress
+
+Bzip2 Settings:
+  - Level: 9 (maximum compression)
+  - Block size: 900KB
+  - Algorithm: Burrows-Wheeler transform + Move-to-front + Huffman coding
+  - Good for: Text files, source code, structured data
+        """,
     )
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-c", "--compress", action="store_true", help="Compress files and folders with bzip2 (default)")

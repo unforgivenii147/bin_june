@@ -6,22 +6,13 @@ import tokenize
 from io import StringIO
 from pathlib import Path
 
-python_keywords = {
-    "def",
-    "class",
-    "import",
-    "from",
-    "lambda",
-    "yield",
-    "async",
-    "await",
-}
+python_keywords = {"def", "class", "import", "from", "lambda", "yield", "async", "await"}
 
 
 def is_probably_python(lines: str) -> bool:
     score = 0
     for line in lines:
-        if any((kw in line for kw in python_keywords)):
+        if any(kw in line for kw in python_keywords):
             score += 1
         if re.search(":\\s*$", line):
             score += 1

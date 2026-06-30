@@ -12,7 +12,7 @@ import shutil
 def get_file_hash(filepath):
     try:
         if not filepath.exists():
-            return (filepath, None)
+            return filepath, None
         xxh = xxhash.xxh64()
         with open(filepath, "rb") as f:
             while True:
@@ -20,9 +20,9 @@ def get_file_hash(filepath):
                 if not chunk:
                     break
                 xxh.update(chunk)
-        return (filepath, xxh.hexdigest())
+        return filepath, xxh.hexdigest()
     except (OSError, PermissionError, IOError):
-        return (filepath, None)
+        return filepath, None
 
 
 def remove_duplicates(root_dir, dry_run=True):
@@ -30,7 +30,7 @@ def remove_duplicates(root_dir, dry_run=True):
     size_map = defaultdict(list)
     print("Scanning directory tree...")
     for path in root.rglob("*"):
-        if path.is_file() and (not path.is_symlink()):
+        if path.is_file() and not path.is_symlink():
             try:
                 size_map[path.stat().st_size].append(path)
             except OSError:

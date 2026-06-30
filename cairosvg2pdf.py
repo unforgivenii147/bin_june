@@ -2,7 +2,6 @@
 
 import sys
 from pathlib import Path
-
 import cairosvg
 from dh import cprint, fsz, get_files, gsz
 

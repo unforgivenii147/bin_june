@@ -1,7 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 from __future__ import annotations
-
 import argparse
 import contextlib
 import shutil
@@ -9,12 +8,11 @@ import sys
 import time
 import traceback
 from pathlib import Path
-
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
 
-def parse_csv_exts(s: str | None) -> set[str] | None:
+def parse_csv_exts(s: (str | None)) -> set[str] | None:
     if not s:
         return None
     parts = [p.strip().lower() for p in s.split(",") if p.strip()]
@@ -28,13 +26,13 @@ def parse_csv_exts(s: str | None) -> set[str] | None:
     return norm
 
 
-def file_matches_extensions(file_path: Path, allowed_exts: set[str] | None) -> bool:
+def file_matches_extensions(file_path: Path, allowed_exts: (set[str] | None)) -> bool:
     if allowed_exts is None:
         return True
     return file_path.suffix.lower() in allowed_exts
 
 
-def file_matches_exclude(file_path: Path, excluded_exts: set[str] | None) -> bool:
+def file_matches_exclude(file_path: Path, excluded_exts: (set[str] | None)) -> bool:
     if excluded_exts is None:
         return False
     return file_path.suffix.lower() in excluded_exts
@@ -68,8 +66,8 @@ class ChangeHandler(FileSystemEventHandler):
         cwd: Path,
         copy_enabled: bool,
         dest_dir: Path,
-        allowed_exts: set[str] | None,
-        excluded_exts: set[str] | None,
+        allowed_exts: (set[str] | None),
+        excluded_exts: (set[str] | None),
         interval_sec: float,
         print_lock=None,
     ) -> None:
@@ -92,13 +90,13 @@ class ChangeHandler(FileSystemEventHandler):
 
     def _should_process(self, src_path: Path) -> bool:
         if src_path.exists() and src_path.is_file():
-            if self.allowed_exts is not None and (not file_matches_extensions(src_path, self.allowed_exts)):
+            if self.allowed_exts is not None and not file_matches_extensions(src_path, self.allowed_exts):
                 return False
             if self.excluded_exts is not None and file_matches_exclude(src_path, self.excluded_exts):
                 return False
             return True
         elif not src_path.exists():
-            if self.allowed_exts is not None and (not file_matches_extensions(src_path, self.allowed_exts)):
+            if self.allowed_exts is not None and not file_matches_extensions(src_path, self.allowed_exts):
                 return False
             if self.excluded_exts is not None and file_matches_exclude(src_path, self.excluded_exts):
                 return False
@@ -133,12 +131,7 @@ class ChangeHandler(FileSystemEventHandler):
                         size_str = "unknown-size"
                     print(f"-  /{rel_path.as_posix()} | {reason} | {size_str}")
                     if self.copy_enabled:
-                        safe_copy_file(
-                            src=src_path,
-                            dst_root=self.dest_dir,
-                            rel_path=rel_path,
-                            errors=self._errors,
-                        )
+                        safe_copy_file(src=src_path, dst_root=self.dest_dir, rel_path=rel_path, errors=self._errors)
                 elif not src_path.exists():
                     print(f"-  /{rel_path.as_posix()} | {reason} | deleted")
                     if self.copy_enabled:
@@ -189,17 +182,9 @@ def build_parser() -> argparse.ArgumentParser:
         description="Watch a folder recursively, print changes, and optionally copy changed/created files."
     )
     p.add_argument(
-        "folder",
-        nargs="?",
-        default=str(Path.cwd()),
-        help="Folder to watch (default: current working directory).",
+        "folder", nargs="?", default=str(Path.cwd()), help="Folder to watch (default: current working directory)."
     )
-    p.add_argument(
-        "-c",
-        "--copy",
-        action="store_true",
-        help="Copy changed/created files to destination.",
-    )
+    p.add_argument("-c", "--copy", action="store_true", help="Copy changed/created files to destination.")
     p.add_argument(
         "-d",
         "--dest",
@@ -226,9 +211,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Watch interval (seconds) for batching/printing and copying (default: 1.0).",
     )
     p.add_argument(
-        "--no-recursive",
-        action="store_true",
-        help="Disable recursive watching (watch only top-level directory).",
+        "--no-recursive", action="store_true", help="Disable recursive watching (watch only top-level directory)."
     )
     return p
 

@@ -315,7 +315,7 @@ async def compress_folder_async(folder_path: Path, output_base_name: str, compre
 
             await loop.run_in_executor(None, compress_7z)
             if out_path.exists():
-                original_size = sum((f.stat().st_size for f in folder_path.rglob("*") if f.is_file()))
+                original_size = sum(f.stat().st_size for f in folder_path.rglob("*") if f.is_file())
                 compressed_size = out_path.stat().st_size
                 if compressed_size < original_size:
                     await loop.run_in_executor(None, shutil.rmtree, folder_path)
@@ -395,7 +395,7 @@ def decompress_archive(archive_path: Path, compressor: str) -> bool:
             with py7zr.SevenZipFile(archive_path, mode="r") as sevenz:
                 sevenz.extractall(path=extract_dir)
             original_size = archive_path.stat().st_size
-            decompressed_size = sum((f.stat().st_size for f in extract_dir.rglob("*") if f.is_file()))
+            decompressed_size = sum(f.stat().st_size for f in extract_dir.rglob("*") if f.is_file())
             print(f"  ✓ Extracted {archive_path.name}: {fsz(original_size)} → {fsz(decompressed_size)}")
             archive_path.unlink()
             return True
@@ -417,12 +417,10 @@ def decompress_archive(archive_path: Path, compressor: str) -> bool:
 
 def get_files(directory: Path, compressor: str, mode: str = "compress") -> list[Path]:
     if mode == "compress":
-        return [
-            p for p in directory.glob("*") if p.is_file() and (not p.is_symlink()) and should_compress(p, compressor)
-        ]
+        return [p for p in directory.glob("*") if p.is_file() and not p.is_symlink() and should_compress(p, compressor)]
     else:
         ext = COMPRESSORS[compressor]["ext"]
-        return [p for p in directory.glob(f"*{ext}") if p.is_file() and (not p.is_symlink())]
+        return [p for p in directory.glob(f"*{ext}") if p.is_file() and not p.is_symlink()]
 
 
 def get_dirs(directory: Path) -> list[Path]:
@@ -579,7 +577,23 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Multi-format compression/decompression tool",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="\nCompression Methods:\n  -z, --zstd     Zstandard compression (max level 22)\n  -x, --xz       LZMA/XZ compression (preset 9)\n  -7, --7z       7-Zip compression (LZMA2 max)\n  -g, --gzip     Gzip compression (level 9)\n  -b, --bz2      Bzip2 compression (level 9)\n  -l, --lz4      LZ4 compression (HC mode max)\n\nExamples:\n  %(prog)s -z              # Compress with Zstandard (default)\n  %(prog)s -x -d           # Decompress XZ files\n  %(prog)s -7              # Compress with 7-Zip\n  %(prog)s -g              # Compress with Gzip\n  %(prog)s -b -d           # Decompress Bzip2 files\n  %(prog)s -l              # Compress with LZ4\n        ",
+        epilog="""
+Compression Methods:
+  -z, --zstd     Zstandard compression (max level 22)
+  -x, --xz       LZMA/XZ compression (preset 9)
+  -7, --7z       7-Zip compression (LZMA2 max)
+  -g, --gzip     Gzip compression (level 9)
+  -b, --bz2      Bzip2 compression (level 9)
+  -l, --lz4      LZ4 compression (HC mode max)
+
+Examples:
+  %(prog)s -z              # Compress with Zstandard (default)
+  %(prog)s -x -d           # Decompress XZ files
+  %(prog)s -7              # Compress with 7-Zip
+  %(prog)s -g              # Compress with Gzip
+  %(prog)s -b -d           # Decompress Bzip2 files
+  %(prog)s -l              # Compress with LZ4
+        """,
     )
     method_group = parser.add_mutually_exclusive_group()
     method_group.add_argument("-z", "--zstd", action="store_true", help="Use Zstandard compression")

@@ -4,7 +4,6 @@ import sys
 from collections import deque
 from multiprocessing import Pool
 from pathlib import Path
-
 import cv2 as cv
 from dh import get_files
 

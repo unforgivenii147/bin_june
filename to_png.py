@@ -2,7 +2,6 @@
 
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-
 from dh import IMG_EXT, fsz, gsz, is_image
 
 try:
@@ -72,7 +71,7 @@ def main() -> None:
     files = [
         f
         for f in Path().rglob("*")
-        if f.is_file() and (not any((part in IGNORED_DIRS for part in f.parts))) and is_image(f)
+        if f.is_file() and not any(part in IGNORED_DIRS for part in f.parts) and is_image(f)
     ]
     if not files:
         print("No image files detected.")
@@ -80,7 +79,7 @@ def main() -> None:
     print(f"converting {len(files)} files...")
     with ThreadPoolExecutor(max_workers=8) as executor:
         results = list(executor.map(convert_file, files))
-    changed_count = sum((1 for r in results if r))
+    changed_count = sum(1 for r in results if r)
     print(f"Done. {changed_count} files modified.")
     result = gsz(".") - start_size
     if result < 0:

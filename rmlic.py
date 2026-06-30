@@ -2,7 +2,6 @@
 
 import re
 from pathlib import Path
-
 from dh import cprint, fsz, get_nobinary, gsz
 
 LIC_FILE = Path("/sdcard/lic")

@@ -22,13 +22,13 @@ def check_entry_points(whl_path):
             for file_info in whl.filelist:
                 if file_info.filename.endswith("entry_points.txt"):
                     dist_info_dir = os.path.dirname(file_info.filename)
-                    return (True, dist_info_dir)
-            return (False, None)
+                    return True, dist_info_dir
+            return False, None
     except zipfile.BadZipFile:
-        return (False, None)
+        return False, None
     except Exception as e:
         print(f"Error reading {whl_path}: {e}", file=sys.stderr)
-        return (False, None)
+        return False, None
 
 
 def get_whl_info(whl_path):
@@ -37,8 +37,8 @@ def get_whl_info(whl_path):
     if len(parts) >= 3:
         name = parts[0]
         version = parts[1]
-        return (name, version)
-    return (basename, "unknown")
+        return name, version
+    return basename, "unknown"
 
 
 def main():

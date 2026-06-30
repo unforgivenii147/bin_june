@@ -3,7 +3,6 @@
 import os
 import sys
 from pathlib import Path
-
 from bs4 import BeautifulSoup
 
 

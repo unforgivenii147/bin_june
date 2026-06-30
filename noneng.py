@@ -1,7 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 from pathlib import Path
-
 from dh import get_nobinary, mpf3
 from langdetect import DetectorFactory, detect
 from langdetect.lang_detect_exception import LangDetectException

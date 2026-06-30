@@ -17,7 +17,7 @@ def add_path_statement(file_path: str) -> bool:
             in_function = True
             modified_lines.append(line)
             continue
-        if in_function and (not added):
+        if in_function and not added:
             stripped = line.strip()
             if stripped and (stripped.startswith('"""') or stripped.startswith("'''")):
                 modified_lines.append(line)

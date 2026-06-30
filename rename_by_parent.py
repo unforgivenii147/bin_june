@@ -24,7 +24,7 @@ class DirectoryWalker:
                 self.index = 0
             else:
                 fullname = jn(self.directory, file)
-                if os.path.isdir(fullname) and (not os.path.islink(fullname)):
+                if os.path.isdir(fullname) and not os.path.islink(fullname):
                     self.stack.append(fullname)
                 return fullname
         return None

@@ -36,7 +36,7 @@ def parse_wheel_version(filename: str) -> Optional[Tuple[str, str]]:
     if pkg_name_parts and version_parts:
         pkg_name = "-".join(pkg_name_parts)
         version = "-".join(version_parts)
-        return (pkg_name, version)
+        return pkg_name, version
     return None
 
 
@@ -46,7 +46,7 @@ def parse_deb_version(filename: str) -> Optional[Tuple[str, str]]:
     if len(parts) >= 2:
         pkg_name = parts[0]
         version = parts[1]
-        return (pkg_name, version)
+        return pkg_name, version
     return None
 
 
@@ -76,12 +76,12 @@ def process_file(file_path: Path, file_type: str) -> Optional[Tuple[str, str, Pa
             parsed = parse_wheel_version(filename)
             if parsed:
                 pkg_name, version = parsed
-                return (pkg_name, version, file_path)
+                return pkg_name, version, file_path
         elif file_type == "deb" and filename.endswith(".deb"):
             parsed = parse_deb_version(filename)
             if parsed:
                 pkg_name, version = parsed
-                return (pkg_name, version, file_path)
+                return pkg_name, version, file_path
     except Exception as e:
         print(f"Error processing {file_path}: {e}")
     return None
@@ -124,7 +124,7 @@ def get_latest_version(versions: List[Tuple[str, Path]]) -> Tuple[str, Path]:
     latest = versions[0]
     for version, path in versions[1:]:
         if compare_versions(version, latest[0]) > 0:
-            latest = (version, path)
+            latest = version, path
     return latest
 
 

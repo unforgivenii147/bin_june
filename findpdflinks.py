@@ -5,7 +5,6 @@ import time
 from collections import deque
 from urllib.parse import urljoin, urlparse
 from urllib.robotparser import RobotFileParser
-
 import requests
 from bs4 import BeautifulSoup
 
@@ -40,7 +39,7 @@ def crawl_for_pdfs(start_url: str, max_pages: int = 100, delay: float = 1.0):
         url = queue.popleft()
         if url in visited:
             continue
-        if rp and (not can_fetch(rp, url)):
+        if rp and not can_fetch(rp, url):
             print(f"🚫 Skipping (robots.txt): {url}")
             continue
         visited.add(url)
@@ -53,7 +52,7 @@ def crawl_for_pdfs(start_url: str, max_pages: int = 100, delay: float = 1.0):
                 pdf_urls.add(url)
                 print(f"  📄 PDF (via Content-Type): {url}")
                 continue
-            if "html" not in content_type and (not url.lower().endswith((".html", ".htm"))):
+            if "html" not in content_type and not url.lower().endswith((".html", ".htm")):
                 continue
             soup = BeautifulSoup(resp.content, "html.parser")
             for a in soup.find_all("a", href=True):
@@ -68,7 +67,7 @@ def crawl_for_pdfs(start_url: str, max_pages: int = 100, delay: float = 1.0):
                     print(f"  📄 PDF (via link): {full_url}")
                 elif full_url not in visited:
                     if not any(
-                        (full_url.lower().endswith(ext) for ext in (".jpg", ".jpeg", ".png", ".gif", ".css", ".js"))
+                        full_url.lower().endswith(ext) for ext in (".jpg", ".jpeg", ".png", ".gif", ".css", ".js")
                     ):
                         queue.append(full_url)
         except requests.RequestException as e:
@@ -81,7 +80,7 @@ def crawl_for_pdfs(start_url: str, max_pages: int = 100, delay: float = 1.0):
 
 def save_urls(urls, filename="urls.txt") -> None:
     with open(filename, "w", encoding="utf-8") as f:
-        f.writelines((url + "\n" for url in urls))
+        f.writelines(url + "\n" for url in urls)
     print(f"\n✅ Saved {len(urls)} PDF URLs to '{filename}'")
 
 

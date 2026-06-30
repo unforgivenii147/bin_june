@@ -19,7 +19,7 @@ def update_summary() -> None:
     lines = summarymd.read_text(encoding="utf-8").splitlines()
     header = []
     for line in lines:
-        if line.strip() and (not line.strip().startswith("- [")):
+        if line.strip() and not line.strip().startswith("- ["):
             header.append(line)
         else:
             break

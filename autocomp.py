@@ -59,7 +59,7 @@ def prepare_input(target_path: str) -> tuple[bytes, str]:
     target = Path(target_path)
     if target.is_file():
         with open(target, "rb") as f:
-            return (f.read(), target.name)
+            return f.read(), target.name
     elif target.is_dir():
         tar_path = f"{target.name}.tar"
         with tarfile.open(tar_path, "w") as tar:
@@ -67,7 +67,7 @@ def prepare_input(target_path: str) -> tuple[bytes, str]:
         with open(tar_path, "rb") as f:
             data = f.read()
         os.remove(tar_path)
-        return (data, f"{target.name}.tar")
+        return data, f"{target.name}.tar"
     else:
         raise ValueError(f"{target_path} is neither file nor directory")
 

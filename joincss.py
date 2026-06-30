@@ -3,7 +3,6 @@
 import re
 import sys
 from pathlib import Path
-
 from dh import atomic_write
 
 LOCAL_FONT_BASE = Path("/sdcard/_static/fonts")
@@ -66,7 +65,7 @@ def read_css(files):
                 continue
             cleaned.append(line)
         chunks.append((file, "\n".join(cleaned).strip()))
-    return (charset_line, chunks)
+    return charset_line, chunks
 
 
 def join_css(files, output: str) -> None:

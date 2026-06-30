@@ -3,7 +3,6 @@
 import mmap
 import re
 from pathlib import Path
-
 from dh import mpf3
 
 LOG_EXT = ".log"
@@ -40,9 +39,9 @@ def clean_file_small(path: Path) -> tuple:
         cleaned_lines = [clean_line(line) for line in lines]
         with path.open("w", encoding="utf-8") as f:
             f.writelines(cleaned_lines)
-        return (path, True, "small file")
+        return path, True, "small file"
     except Exception as e:
-        return (path, False, str(e))
+        return path, False, str(e)
 
 
 def clean_file_large(path: Path) -> tuple:
@@ -51,16 +50,16 @@ def clean_file_large(path: Path) -> tuple:
             get_size = f.seek(0, 2)
             f.seek(0)
             if get_size == 0:
-                return (path, True, "empty file")
+                return path, True, "empty file"
             with mmap.mmap(f.fileno(), 0) as mmapped_file:
                 content = mmapped_file.read().decode("utf-8", errors="ignore")
         lines = content.splitlines(keepends=True)
         cleaned_lines = [clean_line(line) for line in lines]
         cleaned_content = "".join(cleaned_lines)
         Path(path).write_text(cleaned_content, encoding="utf-8")
-        return (path, True, "large file (mmap)")
+        return path, True, "large file (mmap)"
     except Exception as e:
-        return (path, False, str(e))
+        return path, False, str(e)
 
 
 def clean_file_worker(path: Path) -> tuple:
@@ -70,7 +69,7 @@ def clean_file_worker(path: Path) -> tuple:
             return clean_file_large(path)
         return clean_file_small(path)
     except Exception as e:
-        return (path, False, str(e))
+        return path, False, str(e)
 
 
 def main() -> None:

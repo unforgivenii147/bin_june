@@ -2,22 +2,9 @@
 
 import sys
 from pathlib import Path
-
 from dh import cprint, fsz, get_files, gsz, mpf3, runcmd, rrs
 
-EXT = [
-    ".java",
-    ".c",
-    ".cpp",
-    ".cxx",
-    ".cc",
-    ".h",
-    ".hh",
-    ".hpp",
-    ".hxx",
-    ".js",
-    ".json",
-]
+EXT = [".java", ".c", ".cpp", ".cxx", ".cc", ".h", ".hh", ".hpp", ".hxx", ".js", ".json"]
 
 
 def process_file(path):

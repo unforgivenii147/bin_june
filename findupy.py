@@ -5,7 +5,6 @@ import json
 import os
 from collections import defaultdict
 from pathlib import Path
-
 from tqdm import tqdm
 
 SKIPPED_PATHS = []
@@ -18,12 +17,7 @@ def hash_file(path: Path, chunk_size: int = 8192) -> str:
         with (
             Path(path).open("rb") as f,
             tqdm(
-                total=get_size,
-                unit="B",
-                unit_scale=True,
-                unit_divisor=1024,
-                desc=f"Hashing {path.name}",
-                leave=False,
+                total=get_size, unit="B", unit_scale=True, unit_divisor=1024, desc=f"Hashing {path.name}", leave=False
             ) as pbar,
         ):
             for chunk in iter(lambda: f.read(chunk_size), b""):

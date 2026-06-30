@@ -17,14 +17,7 @@ except ImportError:
     TQDM_AVAILABLE = False
 
     class tqdm:
-        def __init__(
-            self,
-            total=None,
-            unit: str = "B",
-            unit_scale: bool = True,
-            desc=None,
-            leave: bool = True,
-        ) -> None:
+        def __init__(self, total=None, unit: str = "B", unit_scale: bool = True, desc=None, leave: bool = True) -> None:
             self.total = total
             self.n = 0
             self.unit = unit
@@ -39,10 +32,7 @@ except ImportError:
                 bar_len = 30
                 filled = int(bar_len * self.n / self.total)
                 bar = "█" * filled + "-" * (bar_len - filled)
-                print(
-                    f"\r{self.desc}: |{bar}| {percent:3.0f}% {self.n}/{self.total} {self.unit}",
-                    end="",
-                )
+                print(f"\r{self.desc}: |{bar}| {percent:3.0f}% {self.n}/{self.total} {self.unit}", end="")
             else:
                 print(f"\r{self.desc}: {self.n} {self.unit}", end="")
 
@@ -72,7 +62,7 @@ def sanitize_filename(name: str) -> str:
     return name[:255].strip() or "downloaded_file"
 
 
-def extract_filename(url: str, headers: dict[str, str] | None = None) -> str:
+def extract_filename(url: str, headers: (dict[str, str] | None) = None) -> str:
     if headers:
         cd = headers.get("Content-Disposition", "")
         if cd:
@@ -102,11 +92,7 @@ def filename_fix_existing(filepath: Path) -> Path:
 
 
 def download(
-    url: str,
-    output: str | None = None,
-    timeout: float = 30.0,
-    resume: bool = False,
-    quiet: bool = False,
+    url: str, output: (str | None) = None, timeout: float = 30.0, resume: bool = False, quiet: bool = False
 ) -> str:
     output_path = Path(output) if output else None
     if output_path and output_path.is_dir():
@@ -168,7 +154,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Modern wget clone in Python 3.13+",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="\nExamples:\n  python wget_modern.py https://example.com/file.zip\n  python wget_modern.py https://example.com/file.zip -o mydir/\n  python wget_modern.py https://example.com/file.zip --resume\n  python wget_modern.py https://example.com/file.zip -q\n        ",
+        epilog="""
+Examples:
+  python wget_modern.py https://example.com/file.zip
+  python wget_modern.py https://example.com/file.zip -o mydir/
+  python wget_modern.py https://example.com/file.zip --resume
+  python wget_modern.py https://example.com/file.zip -q
+        """,
     )
     parser.add_argument("url", help="URL to download")
     parser.add_argument("-o", "--output", help="Output file or directory")
@@ -178,13 +170,7 @@ def main() -> None:
     parser.add_argument("--version", action="version", version="%(prog)s 1.0.0")
     vargs = parser.parse_args()
     try:
-        filename = download(
-            args.url,
-            output=args.output,
-            timeout=args.timeout,
-            resume=args.resume,
-            quiet=args.quiet,
-        )
+        filename = download(args.url, output=args.output, timeout=args.timeout, resume=args.resume, quiet=args.quiet)
     except RuntimeError as e:
         print(f"❌ {e}", file=sys.stderr)
         sys.exit(1)

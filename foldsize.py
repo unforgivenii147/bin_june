@@ -3,19 +3,18 @@
 import operator
 import shutil
 from pathlib import Path
-
 from loguru import logger
 
 
 def get_all_files(root: Path) -> list[Path]:
-    return [p for p in root.rglob("*") if p.is_file() and (not p.name.startswith(".")) and (p.name != "folderize.py")]
+    return [p for p in root.rglob("*") if p.is_file() and not p.name.startswith(".") and p.name != "folderize.py"]
 
 
 def safe_rename(src: Path, dest_dir: Path) -> Path:
     dest = dest_dir / src.name
     if not dest.exists():
         return dest
-    stem, suffix = (dest.stem, dest.suffix)
+    stem, suffix = dest.stem, dest.suffix
     i = 1
     while True:
         new_name = f"{stem}_{i}{suffix}"
@@ -43,7 +42,7 @@ def main() -> None:
     if not files:
         logger.warning("No files found to process.")
         return
-    total_size = sum((f.stat().st_size for f in files))
+    total_size = sum(f.stat().st_size for f in files)
     num_files = len(files)
     print(f"Found {num_files:,} files ({total_size:,} bytes)")
     avg_file_size = total_size / num_files if num_files else 1
@@ -66,7 +65,7 @@ def main() -> None:
         if not d["files"]:
             continue
         sizes = [f.stat().st_size for f in d["files"]]
-        min_s, max_s = (min(sizes), max(sizes))
+        min_s, max_s = min(sizes), max(sizes)
         dir_name = format_size_range(min_s, max_s)
         base_name = dir_name
         counter = 1

@@ -33,7 +33,7 @@ class PersonalDictionary:
             try:
                 with open(self.dict_path, "r", encoding="utf-8") as f:
                     data = json.load(f)
-                    self.words = set((word.lower() for word in data.get("words", [])))
+                    self.words = set(word.lower() for word in data.get("words", []))
             except (json.JSONDecodeError, IOError) as e:
                 print(f"Warning: Could not load personal dictionary: {e}", file=sys.stderr)
                 self.words = set()
@@ -56,7 +56,7 @@ class PersonalDictionary:
         return False
 
     def add_words(self, words: List[str]) -> int:
-        count = sum((1 for word in words if self.add_word(word)))
+        count = sum(1 for word in words if self.add_word(word))
         return count
 
     def remove_word(self, word: str) -> bool:
@@ -165,8 +165,8 @@ def process_file_wrapper(args: Tuple[Path, bool, PersonalDictionary]) -> Dict:
 
 def print_results(results: List[Dict]) -> None:
     total_files = len(results)
-    total_errors = sum((r.get("total_errors", 0) for r in results))
-    files_with_errors = sum((1 for r in results if r.get("total_errors", 0) > 0))
+    total_errors = sum(r.get("total_errors", 0) for r in results)
+    files_with_errors = sum(1 for r in results if r.get("total_errors", 0) > 0)
     print("\n" + "=" * 70)
     print(f"Spell Check Report: {total_files} file(s) checked")
     print("=" * 70)
@@ -208,7 +208,7 @@ def handle_dictionary_operations(args) -> None:
             print(f"Error: Could not read file {args.add_from_file}: {e}", file=sys.stderr)
             sys.exit(1)
     if args.remove_words:
-        count = sum((1 for word in args.remove_words if personal_dict.remove_word(word)))
+        count = sum(1 for word in args.remove_words if personal_dict.remove_word(word))
         print(f"✓ Removed {count} word(s) from dictionary")
         personal_dict.save()
     if args.list_dict:
@@ -236,7 +236,39 @@ def main():
     parser = argparse.ArgumentParser(
         description="Check and optionally fix spelling errors in text files with personal dictionary support.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="\nExamples:\n  # Check files in current directory recursively\n  python spell_checker.py\n\n  # Check specific file\n  python spell_checker.py document.txt\n\n  # Check and fix errors\n  python spell_checker.py -a document.txt\n\n  # Check with personal dictionary\n  python spell_checker.py -d ~/.my_words.json document.txt\n\nPersonal Dictionary Management:\n  # Add words to dictionary\n  python spell_checker.py --add-words myword1 myword2 myword3\n\n  # Add words from file (one per line)\n  python spell_checker.py --add-from-file custom_words.txt\n\n  # Remove words from dictionary\n  python spell_checker.py --remove-words word1 word2\n\n  # List all words in dictionary\n  python spell_checker.py --list-dict\n\n  # Clear entire dictionary\n  python spell_checker.py --clear-dict\n\n  # Use custom dictionary file\n  python spell_checker.py -d /path/to/dict.json -a document.txt\n        ",
+        epilog="""
+Examples:
+  # Check files in current directory recursively
+  python spell_checker.py
+
+  # Check specific file
+  python spell_checker.py document.txt
+
+  # Check and fix errors
+  python spell_checker.py -a document.txt
+
+  # Check with personal dictionary
+  python spell_checker.py -d ~/.my_words.json document.txt
+
+Personal Dictionary Management:
+  # Add words to dictionary
+  python spell_checker.py --add-words myword1 myword2 myword3
+
+  # Add words from file (one per line)
+  python spell_checker.py --add-from-file custom_words.txt
+
+  # Remove words from dictionary
+  python spell_checker.py --remove-words word1 word2
+
+  # List all words in dictionary
+  python spell_checker.py --list-dict
+
+  # Clear entire dictionary
+  python spell_checker.py --clear-dict
+
+  # Use custom dictionary file
+  python spell_checker.py -d /path/to/dict.json -a document.txt
+        """,
     )
     parser.add_argument("inputs", nargs="*", help="File(s) or folder(s) to check (default: current directory)")
     parser.add_argument("-a", "--autofix", action="store_true", help="Automatically fix misspelled words")

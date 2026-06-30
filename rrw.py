@@ -4,7 +4,6 @@ import ast
 import sys
 import unicodedata
 from pathlib import Path
-
 import astor
 from dh import get_files, is_binary
 

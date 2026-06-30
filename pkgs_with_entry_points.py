@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/usr/bin/python
 
 
 """
@@ -101,13 +101,13 @@ def is_pure_python_package(pkg_name: str, site_dir: Path) -> bool:
             for package_dir in site_dir.glob(pattern):
                 if (
                     package_dir.is_dir()
-                    and (not package_dir.name.endswith(".dist-info"))
-                    and (not package_dir.name.endswith(".egg-info"))
+                    and not package_dir.name.endswith(".dist-info")
+                    and not package_dir.name.endswith(".egg-info")
                 ):
                     for item in package_dir.rglob("*"):
                         if item.is_file() and item.suffix == ".so":
                             return False
-                        if item.is_file() and ".cpython-" in str(item) and (item.suffix == ".so"):
+                        if item.is_file() and ".cpython-" in str(item) and item.suffix == ".so":
                             return False
         return True
     except Exception:
@@ -247,7 +247,7 @@ def find_packages_categorized(site_dir: Path) -> Tuple[List[str], List[str], Lis
                 print(f"Error scanning {item}: {result['error']}", file=sys.stderr)
     except Exception as e:
         print(f"Error scanning directory {site_dir}: {e}", file=sys.stderr)
-    return (pure_without_ep, nonpure_without_ep, pure_with_ep, nonpure_with_ep)
+    return pure_without_ep, nonpure_without_ep, pure_with_ep, nonpure_with_ep
 
 
 def main():

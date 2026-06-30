@@ -5,7 +5,6 @@ import json
 from collections import defaultdict
 from datetime import UTC, datetime
 from pathlib import Path
-
 import xxhash
 
 BACKUP_FILE = ".symlink_backup.json"
@@ -128,23 +127,10 @@ def reverse_symlinks(backup_file: str = BACKUP_FILE) -> bool:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Find duplicate files and replace with symlinks (reversible)")
-    parser.add_argument(
-        "directory",
-        nargs="?",
-        default=".",
-        help="Directory to scan (default: current directory)",
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Show what would be done without making changes",
-    )
+    parser.add_argument("directory", nargs="?", default=".", help="Directory to scan (default: current directory)")
+    parser.add_argument("--dry-run", action="store_true", help="Show what would be done without making changes")
     parser.add_argument("--reverse", action="store_true", help="Reverse previous symlinking operation")
-    parser.add_argument(
-        "--backup-file",
-        default=BACKUP_FILE,
-        help=f"Backup file path (default: {BACKUP_FILE})",
-    )
+    parser.add_argument("--backup-file", default=BACKUP_FILE, help=f"Backup file path (default: {BACKUP_FILE})")
     args = parser.parse_args()
     if args.reverse:
         reverse_symlinks(args.backup_file)
@@ -154,7 +140,7 @@ def main() -> None:
             print("\n[INFO] No duplicates found!")
             return
         print(f"\n[INFO] Found {len(duplicates)} groups of duplicates")
-        print(f"[INFO] Total duplicate files: {sum((len(files) - 1 for files in duplicates.values()))}")
+        print(f"[INFO] Total duplicate files: {sum(len(files) - 1 for files in duplicates.values())}")
         if args.dry_run:
             print("\n[INFO] [DRY RUN MODE - No changes will be made]")
         create_symlinks(duplicates, dry_run=args.dry_run)

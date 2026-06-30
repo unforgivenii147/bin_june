@@ -3,7 +3,6 @@
 import sys
 import zipfile
 from pathlib import Path
-
 from wheel.archive import wheel_load
 from wheel.wheelfile import WheelFile
 
@@ -23,7 +22,7 @@ def find_dist_info_dir(pkg_dir: Path) -> Path | None:
     return candidates[0]
 
 
-def create_wheel_for_dir(pkg_dir: Path, dest_dir: Path | None = None) -> None:
+def create_wheel_for_dir(pkg_dir: Path, dest_dir: (Path | None) = None) -> None:
     dist_info = find_dist_info_dir(pkg_dir)
     if dist_info is None:
         print(f"Skipping {pkg_dir}: no *.dist-info dir found.")
@@ -60,7 +59,7 @@ def main() -> None:
         print(f"Output directory for wheels: {WHEELS_OUTPUT_DIR}")
     processed_count = 0
     for entry in UNPACKED_WHEELS_SOURCE_DIR.iterdir():
-        if entry.is_dir() and (not entry.name.endswith(".dist-info")):
+        if entry.is_dir() and not entry.name.endswith(".dist-info"):
             dist_info = find_dist_info_dir(entry)
             if dist_info:
                 try:

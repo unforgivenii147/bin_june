@@ -6,7 +6,6 @@ import tarfile
 import tempfile
 import zipfile
 from pathlib import Path
-
 from dh import is_valid_archive
 
 TARGET_FILES = {"METADATA", "PKGINFO", "PKG-INFO"}
@@ -25,7 +24,7 @@ def clean_text(text: str) -> tuple[str, list[str]]:
         else:
             cleaned.append(line)
     final_text = "\n".join(cleaned) + ("\n" if text.endswith("\n") else "")
-    return (final_text, removed)
+    return final_text, removed
 
 
 def clean_file(path: str) -> None:
@@ -73,7 +72,7 @@ def process_tar(path: str) -> None:
     shutil.rmtree(tmp_dir)
 
 
-def dispatch_archive(path: str | Path) -> None:
+def dispatch_archive(path: (str | Path)) -> None:
     if not is_valid_archive(path):
         print(f"{path} is not valid archive")
         return
@@ -96,7 +95,7 @@ def main() -> None:
     if removed_lines_accumulator:
         try:
             with Path(LOG_FILE).open("a", encoding="utf-8") as f:
-                f.writelines((line + "\n" for line in removed_lines_accumulator))
+                f.writelines(line + "\n" for line in removed_lines_accumulator)
             print(f"--- Saved {len(removed_lines_accumulator)} lines to {LOG_FILE} ---")
         except PermissionError:
             pass

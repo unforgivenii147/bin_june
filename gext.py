@@ -190,7 +190,7 @@ class ImportCollector:
                     for alias in node.names:
                         imports.append(f"import {alias.name}")
                 elif isinstance(node, ast.ImportFrom):
-                    if node.module and (not node.module.startswith(".")):
+                    if node.module and not node.module.startswith("."):
                         names = ", ".join([alias.name for alias in node.names])
                         imports.append(f"from {node.module} import {names}")
         except:
@@ -258,7 +258,7 @@ def merge_imports(existing_imports: List[str], needed_imports: Set[str]) -> List
             "random",
         }
         is_stdlib = module in stdlib_modules
-        return (0 if is_stdlib else 1, imp)
+        return 0 if is_stdlib else 1, imp
 
     return sorted(all_imports, key=import_key)
 
@@ -329,7 +329,7 @@ def is_python_file_no_extension(path: Path) -> bool:
             first_lines = "".join(f.readlines(1024))
             if re.match("#!\\s*/.*python", first_lines):
                 return True
-            if any((keyword in first_lines for keyword in ["def ", "class ", "import ", "from "])):
+            if any(keyword in first_lines for keyword in ["def ", "class ", "import ", "from "]):
                 return True
     except:
         pass
@@ -344,10 +344,10 @@ def process_single_file(path: Path) -> Tuple[List[Dict[str, Any]], List[str]]:
             content = path.read_text(encoding="utf-8", errors="ignore")
             entities = extract_entities_from_content(content, path)
             imports = ImportCollector.collect_from_file(path)
-        return (entities, imports)
+        return entities, imports
     except Exception as e:
         print(f"Error reading file {path}: {e}")
-        return ([], [])
+        return [], []
 
 
 def process_archive(path: Path) -> Tuple[List[Dict[str, Any]], List[str]]:
@@ -360,12 +360,12 @@ def process_archive(path: Path) -> Tuple[List[Dict[str, Any]], List[str]]:
                 content = dctx.decompress(path.read_bytes()).decode("utf-8", errors="ignore")
                 entities = extract_entities_from_content(content, path)
                 imports = ImportCollector.parse_imports_with_ast(content)
-                return (entities, imports)
+                return entities, imports
             except Exception as e:
                 print(f"Error decompressing ZST file {path}: {e}")
         else:
             print(f"Warning: zstd module not available, skipping {path}")
-        return ([], [])
+        return [], []
     if path.suffix in {".zip", ".whl"}:
         try:
             with zipfile.ZipFile(path, "r") as zf:
@@ -379,7 +379,7 @@ def process_archive(path: Path) -> Tuple[List[Dict[str, Any]], List[str]]:
                             all_imports.extend(ImportCollector.parse_imports_with_ast(content))
         except Exception as e:
             print(f"Error processing ZIP/WHL archive {path}: {e}")
-    elif any((path.name.endswith(ext) for ext in [".tar", ".tar.gz", ".tgz", ".tar.zst", ".tar.xz"])):
+    elif any(path.name.endswith(ext) for ext in [".tar", ".tar.gz", ".tgz", ".tar.zst", ".tar.xz"]):
         mode_map = {".tar.gz": "r:gz", ".tgz": "r:gz", ".tar.zst": "r:zst", ".tar.xz": "r:xz", ".tar": "r"}
         mode = next((mode_map[ext] for ext in mode_map if path.name.endswith(ext)), "r")
         try:
@@ -397,7 +397,7 @@ def process_archive(path: Path) -> Tuple[List[Dict[str, Any]], List[str]]:
             pass
         except Exception as e:
             print(f"Error processing TAR archive {path}: {e}")
-    return (entities, all_imports)
+    return entities, all_imports
 
 
 def worker_process(path_str: str) -> Tuple[List[Dict[str, Any]], List[str]]:
@@ -437,7 +437,7 @@ def process_files_parallel(
                 print(f"✓ Processed: {path} ({len(entities)} entities, {len(imports)} imports)")
             except Exception as e:
                 print(f"✗ Failed: {path} - {e}")
-    return (all_entities, all_imports)
+    return all_entities, all_imports
 
 
 def print_statistics(entities: List[Dict[str, Any]], imports: List[str], saved_entities: int) -> None:
@@ -474,7 +474,7 @@ def main() -> None:
     for path in files:
         if path.is_relative_to(OUTPUT_DIR):
             continue
-        is_archive = path.suffix in ARCHIVE_EXTENSIONS or any((path.name.endswith(ext) for ext in ARCHIVE_EXTENSIONS))
+        is_archive = path.suffix in ARCHIVE_EXTENSIONS or any(path.name.endswith(ext) for ext in ARCHIVE_EXTENSIONS)
         is_py = path.suffix in ALLOWED_PYTHON_EXTENSIONS or is_python_file_no_extension(path)
         if is_archive or is_py:
             files_to_process.append(str(path))
@@ -482,7 +482,7 @@ def main() -> None:
         print("❌ No Python files or archives found to process.")
         return
     all_entities, all_imports = process_files_parallel(files_to_process)
-    if not all_entities and (not all_imports):
+    if not all_entities and not all_imports:
         return
     saved_count = 0
     for idx, entity in enumerate(all_entities, 1):

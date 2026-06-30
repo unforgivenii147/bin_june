@@ -1,11 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/python
 import sys
 from pathlib import Path
-
 from dh import cprint, get_nobinary, mpf3
 
 
-def process_file(path: str | Path) -> None:
+def process_file(path: (str | Path)) -> None:
     path = Path(path)
     content = path.read_text(encoding="utf-8")
     new_content = content.replace("\t", "    ")
@@ -20,7 +19,6 @@ def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
     files = []
-
     if args:
         for arg in args:
             p = Path(arg)
@@ -33,7 +31,6 @@ def main() -> None:
     if len(files) == 1:
         process_file(files[0])
         sys.exit(1)
-
     mpf3(process_file, files)
 
 

@@ -105,7 +105,7 @@ def is_text_file(filepath: Path) -> bool:
                 sample = f.read(1024)
                 if not sample:
                     return True
-                text_chars = sum((1 for b in sample if 32 <= b <= 126 or b in (9, 10, 13)))
+                text_chars = sum(1 for b in sample if 32 <= b <= 126 or b in (9, 10, 13))
                 return text_chars / len(sample) > 0.8
         except (OSError, IOError):
             return False
@@ -116,18 +116,18 @@ def read_file_content(filepath: Path) -> Tuple[Path, List[str], str]:
     try:
         with open(filepath, "r", encoding="utf-8") as f:
             lines = f.readlines()
-        return (filepath, lines, "".join(lines))
+        return filepath, lines, "".join(lines)
     except UnicodeDecodeError:
         try:
             with open(filepath, "r", encoding="latin-1") as f:
                 lines = f.readlines()
-            return (filepath, lines, "".join(lines))
+            return filepath, lines, "".join(lines)
         except (OSError, UnicodeDecodeError) as e:
             print(f"Warning: cannot read {filepath}: {e}", file=sys.stderr)
-            return (filepath, [], "")
+            return filepath, [], ""
     except OSError as e:
         print(f"Warning: cannot read {filepath}: {e}", file=sys.stderr)
-        return (filepath, [], "")
+        return filepath, [], ""
 
 
 def find_multiline_blocks(text: str, min_lines: int = 3) -> Dict[str, List[Tuple[int, str]]]:
@@ -142,7 +142,7 @@ def find_multiline_blocks(text: str, min_lines: int = 3) -> Dict[str, List[Tuple
             block_stripped = block.strip()
             if not block_stripped or len(block_stripped) < 10:
                 continue
-            if not any((c.isalnum() for c in block_stripped)):
+            if not any(c.isalnum() for c in block_stripped):
                 continue
             block_key = block_stripped
             if block_key in seen_blocks:
@@ -187,12 +187,7 @@ def collect_multiline_repeats(
         num_workers = mp.cpu_count()
     text_files = []
     for filepath in root.rglob("*"):
-        if (
-            filepath.is_file()
-            and is_text_file(filepath)
-            and (not filepath.is_symlink())
-            and (not ".git" in filepath.parts)
-        ):
+        if filepath.is_file() and is_text_file(filepath) and not filepath.is_symlink() and not ".git" in filepath.parts:
             text_files.append(filepath)
     if not text_files:
         return {}
@@ -209,7 +204,7 @@ def collect_multiline_repeats(
         file_occurrences = defaultdict(list)
         for filepath, line_no, context in occurrences:
             file_occurrences[filepath].append((line_no, context))
-        if len(file_occurrences) >= 2 or any((len(occ) >= 2 for occ in file_occurrences.values())):
+        if len(file_occurrences) >= 2 or any(len(occ) >= 2 for occ in file_occurrences.values()):
             filtered[block] = occurrences
     return filtered
 

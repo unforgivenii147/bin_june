@@ -9,12 +9,12 @@ total = 0
 def gsz(path: Path) -> int:
     if path.is_file():
         return path.stat().st_size
-    return sum((f.stat().st_size for f in path.rglob("*") if f.is_file() and (not f.is_symlink())))
+    return sum(f.stat().st_size for f in path.rglob("*") if f.is_file() and not f.is_symlink())
 
 
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
-    units = ("", "K", "M", "G", "T")
+    units = "", "K", "M", "G", "T"
     if sz == 0:
         return "0 B"
     i = min(int(int(sz).bit_length() - 1) // 10, len(units) - 1)

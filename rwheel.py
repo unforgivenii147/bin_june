@@ -60,7 +60,7 @@ def collect_package_files(pkg_path, verbose=False):
     site_packages = pkg_path.parent
     if pkg_path.is_dir():
         for file_path in pkg_path.rglob("*"):
-            if file_path.is_file() and (not file_path.suffix == ".pyc"):
+            if file_path.is_file() and not file_path.suffix == ".pyc":
                 rel_path = file_path.relative_to(site_packages)
                 files.append((rel_path, file_path))
     elif pkg_path.is_file() and pkg_path.suffix == ".py":
@@ -110,9 +110,17 @@ def create_wheel(pkg_path, wheels_dir, dryrun: bool = False, verbose: bool = Fal
             return False
         with zipfile.ZipFile(wheel_path, "w", zipfile.ZIP_DEFLATED) as wheel:
             dist_info_dir = f"{pkg_name}-{pkg_version}.dist-info"
-            metadata = f"Metadata-Version: 2.1\nName: {pkg_name}\nVersion: {pkg_version}\nGenerator: custom-repacker\n"
+            metadata = f"""Metadata-Version: 2.1
+Name: {pkg_name}
+Version: {pkg_version}
+Generator: custom-repacker
+"""
             wheel.writestr(f"{dist_info_dir}/METADATA", metadata)
-            wheel_metadata = f"Wheel-Version: 1.0\nGenerator: custom-repacker\nRoot-Is-Purelib: {str(not pkg_info['has_so']).lower()}\nTag: {wheel_tag}\n"
+            wheel_metadata = f"""Wheel-Version: 1.0
+Generator: custom-repacker
+Root-Is-Purelib: {str(not pkg_info["has_so"]).lower()}
+Tag: {wheel_tag}
+"""
             wheel.writestr(f"{dist_info_dir}/WHEEL", wheel_metadata)
             if pkg_path.is_dir():
                 top_level = [pkg_path.name]
@@ -229,7 +237,7 @@ def main() -> None:
         results = repack_sequential(packages, wheels_dir, args.dryrun, args.verbose)
     success_count = sum(results)
     print(f"\nComplete: {success_count}/{len(packages)} packages repacked successfully")
-    if success_count > 0 and (not args.dryrun):
+    if success_count > 0 and not args.dryrun:
         print(f"\nWheels saved in: {wheels_dir}")
         wheel_files = list(wheels_dir.glob("*.whl"))
         if wheel_files:

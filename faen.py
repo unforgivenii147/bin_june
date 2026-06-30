@@ -17,19 +17,14 @@ class BidirectionalDictionary:
             if not os.path.exists(self.json_file):
                 print(f"❌ Error: {self.json_file} not found")
                 sys.exit(1)
-
             with open(self.json_file, "r", encoding="utf-8") as file:
                 data = json.load(file)
-
             self.persian_to_english = {}
             self.english_to_persian = {}
-
             for persian, english in data.items():
                 self.persian_to_english[persian] = english
                 self.english_to_persian[english.lower()] = persian
-
             print(f"✅ Loaded {len(self.persian_to_english)} entries from {self.json_file}")
-
         except json.JSONDecodeError as e:
             print(f"❌ Error: Invalid JSON format in {self.json_file}")
             print(f"   {e}")
@@ -48,17 +43,13 @@ class BidirectionalDictionary:
 
     def search(self, query: str) -> Optional[str]:
         query = query.strip()
-
         if not query:
             return None
-
         if query in self.persian_to_english:
             return f"📖 {query} → {self.persian_to_english[query]}"
-
         query_lower = query.lower()
         if query_lower in self.english_to_persian:
             return f"📖 {query} → {self.english_to_persian[query_lower]}"
-
         suggestions = self.get_suggestions(query)
         if suggestions:
             result = f"🔍 Did you mean:\n"
@@ -70,34 +61,27 @@ class BidirectionalDictionary:
                     if persian:
                         result += f"  • {persian} → {match}\n"
             return result.strip()
-
         return None
 
     def get_suggestions(self, query: str) -> List[str]:
         query_lower = query.lower()
         suggestions = []
-
         for persian in self.persian_to_english:
             if query in persian:
                 suggestions.append(persian)
-
         for english in self.english_to_persian:
             if query_lower in english:
                 suggestions.append(english)
-
         return suggestions
 
     def add_word(self, persian: str, english: str) -> None:
         persian = persian.strip()
         english = english.strip()
-
         if not persian or not english:
             print("❌ Error: Both Persian and English words are required")
             return
-
         if persian in self.persian_to_english:
             print(f"⚠️  Word '{persian}' already exists. Updating...")
-
         self.persian_to_english[persian] = english
         self.english_to_persian[english.lower()] = persian
         self.save_dictionary()
@@ -105,7 +89,6 @@ class BidirectionalDictionary:
 
     def delete_word(self, word: str) -> None:
         word = word.strip()
-
         if word in self.persian_to_english:
             english = self.persian_to_english[word]
             del self.persian_to_english[word]
@@ -125,24 +108,18 @@ class BidirectionalDictionary:
         if not self.persian_to_english:
             print("📭 Dictionary is empty")
             return
-
         sorted_items = sorted(self.persian_to_english.items())
         total = len(sorted_items)
         total_pages = (total + per_page - 1) // per_page
-
         if page < 1 or page > total_pages:
             print(f"❌ Invalid page. Total pages: {total_pages}")
             return
-
         start = (page - 1) * per_page
         end = min(start + per_page, total)
-
         print(f"\n📚 Dictionary (Page {page}/{total_pages}):")
         print("-" * 50)
-
         for i, (persian, english) in enumerate(sorted_items[start:end], start + 1):
             print(f"{i:3}. {persian:15} → {english}")
-
         print("-" * 50)
         print(f"Showing {start + 1}-{end} of {total} entries")
 
@@ -150,15 +127,11 @@ class BidirectionalDictionary:
         if not self.persian_to_english:
             print("📭 Dictionary is empty")
             return
-
         sorted_items = sorted(self.persian_to_english.items())
-
         print(f"\n📚 Dictionary ({len(sorted_items)} entries):")
         print("-" * 50)
-
         for i, (persian, english) in enumerate(sorted_items, 1):
             print(f"{i:3}. {persian:15} → {english}")
-
         print("-" * 50)
 
     def stats(self) -> Dict[str, int]:
@@ -184,7 +157,6 @@ class BidirectionalDictionary:
         if not self.persian_to_english:
             print("📭 Dictionary is empty")
             return
-
         persian = random.choice(list(self.persian_to_english.keys()))
         english = self.persian_to_english[persian]
         print(f"🎲 Random: {persian} → {english}")
@@ -193,7 +165,6 @@ class BidirectionalDictionary:
 def main():
     dict_app = BidirectionalDictionary("dic.json")
     search_history = []
-
     print("\n" + "=" * 60)
     print("📖 PERSIAN-ENGLISH BIDIRECTIONAL DICTIONARY")
     print("=" * 60)
@@ -211,22 +182,17 @@ def main():
     print("=" * 60)
     print("💡 Just type a word to search (supports Persian & English)")
     print("=" * 60 + "\n")
-
     while True:
         try:
             user_input = input(": ").strip()
-
             if not user_input:
                 continue
-
             if user_input.startswith(":"):
                 parts = user_input[1:].split(maxsplit=2)
                 command = parts[0].lower() if parts else ""
-
                 if command in ["exit", "q", "quit"]:
                     print("👋 Goodbye!")
                     break
-
                 elif command == "help":
                     print("\nCommands:")
                     print("  :add <fa> <en>    - Add a new Persian-English word pair")
@@ -241,28 +207,23 @@ def main():
                     print("  :exit/:q          - Exit the application")
                     print("\n💡 Just type a word to search (works both directions)")
                     continue
-
                 elif command == "add":
                     if len(parts) < 3:
                         print("❌ Usage: :add <persian_word> <english_word>")
                         print("   Example: :add سلام hello")
                         continue
-
                     persian_word = parts[1]
                     english_word = parts[2]
                     dict_app.add_word(persian_word, english_word)
                     continue
-
                 elif command in ["del", "delete"]:
                     if len(parts) < 2:
                         print("❌ Usage: :del <word>")
                         print("   Example: :del سلام")
                         continue
-
                     word_to_delete = parts[1]
                     dict_app.delete_word(word_to_delete)
                     continue
-
                 elif command == "list":
                     if len(parts) > 1 and parts[1] == "all":
                         dict_app.list_all_full()
@@ -270,7 +231,6 @@ def main():
                         page = int(parts[1]) if len(parts) > 1 else 1
                         dict_app.list_all(page)
                     continue
-
                 elif command == "stats":
                     stats = dict_app.stats()
                     print("\n📊 Dictionary Statistics:")
@@ -280,35 +240,28 @@ def main():
                     print(f"  English words:   {stats['english']}")
                     print("-" * 40)
                     continue
-
                 elif command == "export":
                     dict_app.export_csv()
                     continue
-
                 elif command == "random":
                     dict_app.random_word()
                     continue
-
                 elif command == "clear":
                     os.system("clear" if os.name == "posix" else "cls")
                     continue
-
                 else:
                     print(f"❌ Unknown command: :{command}")
                     print("💡 Type :help for available commands")
                     continue
-
             else:
                 query = user_input
                 search_history.append(query)
                 result = dict_app.search(query)
-
                 if result:
                     print(result)
                 else:
                     print(f"❌ '{query}' not found in dictionary")
                     print("💡 Use :list to see all words or try a different search")
-
         except KeyboardInterrupt:
             print("\n\n👋 Goodbye!")
             break

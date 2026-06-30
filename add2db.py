@@ -17,7 +17,13 @@ def folder_exists_in_db(cursor: Cursor, folder_name: str):
 
 def create_folder_table(cursor: Cursor, folder_name: str) -> None:
     cursor.execute(
-        f'\n        CREATE TABLE IF NOT EXISTS "{folder_name}" (\n            id INTEGER PRIMARY KEY AUTOINCREMENT,\n            filename TEXT NOT NULL,\n            file_contents TEXT\n        )\n    '
+        f"""
+        CREATE TABLE IF NOT EXISTS "{folder_name}" (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            filename TEXT NOT NULL,
+            file_contents TEXT
+        )
+    """
     )
 
 
@@ -55,7 +61,10 @@ def get_files_in_cwd():
 def insert_files(cursor: Cursor, folder_name: str, files) -> None:
     for file_info in files:
         cursor.execute(
-            f'\n            INSERT INTO "{folder_name}" (filename,  file_contents)\n            VALUES (?, ?)\n        ',
+            f"""
+            INSERT INTO "{folder_name}" (filename,  file_contents)
+            VALUES (?, ?)
+        """,
             (file_info["filename"], file_info["contents"]),
         )
 

@@ -5,18 +5,25 @@ import multiprocessing
 import operator
 import os
 from pathlib import Path
-
 import tree_sitter_python as tspython
 from tree_sitter import Language, Parser, Query, QueryCursor
 
 PY_LANGUAGE = Language(tspython.language())
 parser = Parser(PY_LANGUAGE)
-QUERY_STRING = "\n(comment) @comment\n(block\n  . (expression_statement\n    (string)) @docstring)\n(module\n  . (expression_statement\n    (string)) @docstring)\n"
+QUERY_STRING = """
+(comment) @comment
+(block
+  . (expression_statement
+    (string)) @docstring)
+(module
+  . (expression_statement
+    (string)) @docstring)
+"""
 
 
 def should_preserve_comment(content: str) -> bool:
     content = content.strip()
-    return any((content.startswith(p) for p in ["#!", "# type:", "# fmt:"]))
+    return any(content.startswith(p) for p in ["#!", "# type:", "# fmt:"])
 
 
 def strip_file(file_path) -> None:

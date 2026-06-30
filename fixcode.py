@@ -8,7 +8,20 @@ INDENT = " " * 4
 DEF_CLASS = re.compile("^\\s*(def|class)\\s+")
 MAIN_GUARD = re.compile("^\\s*if\\s+__name__\\s*==\\s*['\"]__main__['\"]\\s*:")
 BLOCK_START = re.compile(
-    "\n    ^\\s*\n    (\n        if\\s+|\n        elif\\s+|\n        else\\s*:|\n        for\\s+|\n        while\\s+|\n        try\\s*:|\n        except\\s+|\n        finally\\s*:|\n        with\\s+\n    )\n    ",
+    """
+    ^\\s*
+    (
+        if\\s+|
+        elif\\s+|
+        else\\s*:|
+        for\\s+|
+        while\\s+|
+        try\\s*:|
+        except\\s+|
+        finally\\s*:|
+        with\\s+
+    )
+    """,
     re.VERBOSE,
 )
 
@@ -53,7 +66,7 @@ def clean_text(text: str) -> str:
             continue
         if DEF_CLASS.match(line):
             in_code = True
-        if not in_code and (not is_code_line(line)):
+        if not in_code and not is_code_line(line):
             out.append("# " + line.strip())
             continue
         stripped = line.strip()
@@ -81,9 +94,9 @@ def clean_text(text: str) -> str:
 def ast_validate(code: str) -> tuple[bool, str | None]:
     try:
         ast.parse(code)
-        return (True, None)
+        return True, None
     except SyntaxError as e:
-        return (False, f"{e.msg} (line {e.lineno}, col {e.offset})")
+        return False, f"{e.msg} (line {e.lineno}, col {e.offset})"
 
 
 def main() -> None:

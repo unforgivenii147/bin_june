@@ -16,7 +16,6 @@ import zipfile
 from ast import Assign, AsyncFunctionDef, ClassDef, FunctionDef
 from collections import defaultdict
 from pathlib import Path
-
 from loguru import logger
 
 try:
@@ -93,7 +92,7 @@ def safe_write_text(path: Path, content: str) -> bool:
 
 def is_supported_archive(path: Path) -> bool:
     s = str(path).lower()
-    return any((s.endswith(ext) for ext in SUPPORTED_ARCHIVES))
+    return any(s.endswith(ext) for ext in SUPPORTED_ARCHIVES)
 
 
 def should_skip_dir(name: str) -> bool:
@@ -110,15 +109,15 @@ def extract_archive(path: Path) -> str:
         elif low.endswith((".tar", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz")):
             with tarfile.open(path) as tf:
                 tf.extractall(tmpdir, filter="data")
-        elif low.endswith(".gz") and (not low.endswith(".tar.gz")):
+        elif low.endswith(".gz") and not low.endswith(".tar.gz"):
             out = Path(tmpdir) / path.stem
             with gzip.open(path, "rb") as fin, open(out, "wb") as fout:
                 fout.write(fin.read())
-        elif low.endswith(".bz2") and (not low.endswith(".tar.bz2")):
+        elif low.endswith(".bz2") and not low.endswith(".tar.bz2"):
             out = Path(tmpdir) / path.stem
             with bz2.open(path, "rb") as fin, open(out, "wb") as fout:
                 fout.write(fin.read())
-        elif low.endswith(".xz") and (not low.endswith(".tar.xz")):
+        elif low.endswith(".xz") and not low.endswith(".tar.xz"):
             out = Path(tmpdir) / path.stem
             with lzma.open(path, "rb") as fin, open(out, "wb") as fout:
                 fout.write(fin.read())
@@ -166,11 +165,11 @@ def get_module_docstring_line_span(tree: ast.Module) -> tuple[int, int | None] |
         return None
     first = tree.body[0]
     if isinstance(first, ast.Expr) and isinstance(first.value, ast.Constant) and isinstance(first.value.value, str):
-        return (first.lineno, first.end_lineno)
+        return first.lineno, first.end_lineno
     return None
 
 
-def source_segment(code: str, node: Assign | AsyncFunctionDef | ClassDef | FunctionDef) -> str | None:
+def source_segment(code: str, node: (Assign | AsyncFunctionDef | ClassDef | FunctionDef)) -> str | None:
     seg = ast.get_source_segment(code, node)
     if seg is not None:
         return seg
@@ -294,7 +293,7 @@ def write_utils_file(path: Path, objects) -> bool:
     names_seen = set()
     parts = []
     for obj in objects:
-        key = (obj["hash"], obj["name"])
+        key = obj["hash"], obj["name"]
         if key in names_seen:
             continue
         names_seen.add(key)
@@ -318,7 +317,7 @@ def find_import_insertion_index(code: str) -> int:
         idx += 1
     if idx < len(lines) and _ENCODING_RE.match(lines[idx]):
         idx += 1
-    elif idx + 1 < len(lines) and _ENCODING_RE.match(lines[idx + 1]) and (idx == 0):
+    elif idx + 1 < len(lines) and _ENCODING_RE.match(lines[idx + 1]) and idx == 0:
         idx += 2
     try:
         tree = ast.parse(code)
@@ -413,25 +412,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Find repeated top-level Python objects and optionally move/copy them to utils.py"
     )
+    parser.add_argument("-m", "--move", action="store_true", help="Move duplicate objects to utils.py and add imports")
     parser.add_argument(
-        "-m",
-        "--move",
-        action="store_true",
-        help="Move duplicate objects to utils.py and add imports",
+        "-c", "--copy", action="store_true", help="Copy duplicate objects to utils.py without modifying source files"
     )
-    parser.add_argument(
-        "-c",
-        "--copy",
-        action="store_true",
-        help="Copy duplicate objects to utils.py without modifying source files",
-    )
-    parser.add_argument(
-        "-j",
-        "--jobs",
-        type=int,
-        default=max(1, mp.cpu_count() - 1),
-        help="Worker process count",
-    )
+    parser.add_argument("-j", "--jobs", type=int, default=max(1, mp.cpu_count() - 1), help="Worker process count")
     parser.add_argument("--log-level", default="INFO", help="DEBUG, INFO, WARNING, ERROR")
     args = parser.parse_args()
     if args.move and args.copy:
@@ -458,7 +443,7 @@ def main() -> None:
         logger.info("No duplicates found.")
         return
     logger.info(f"Found {len(duplicate_groups)} duplicate content groups.")
-    if not args.move and (not args.copy):
+    if not args.move and not args.copy:
         for h, group in duplicate_groups.items():
             logger.info(f"Duplicate {h[:12]}:")
             for g in group:

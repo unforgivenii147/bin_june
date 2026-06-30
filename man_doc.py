@@ -2,7 +2,6 @@
 
 import sys
 from pathlib import Path
-
 from dh import cprint, get_files, mpf3, runcmd
 
 
@@ -39,21 +38,7 @@ def main() -> None:
         [Path(p) for p in args]
         if args
         else get_files(
-            cwd,
-            ext=[
-                ".1",
-                ".3",
-                ".3am",
-                ".3form",
-                ".3menu",
-                ".3ncurses",
-                ".3readline",
-                ".3t",
-                ".4",
-                ".5",
-                ".7",
-                ".8",
-            ],
+            cwd, ext=[".1", ".3", ".3am", ".3form", ".3menu", ".3ncurses", ".3readline", ".3t", ".4", ".5", ".7", ".8"]
         )
     )
     mpf3(process_file, files)

@@ -42,7 +42,7 @@ def get_font_name_and_style(font_path):
         font = TTFont(font_path)
         name_table = font.get("name")
         if not name_table:
-            return (None, None)
+            return None, None
         family_name = subfamily_name = None
         for record in name_table.names:
             name_str = record.string.decode("utf-16-be", errors="ignore").strip()
@@ -62,16 +62,16 @@ def get_font_name_and_style(font_path):
                     break
             if style == "Regular" and subfamily_name.lower() != "regular":
                 style = subfamily_name
-        return (family_name, style)
+        return family_name, style
     except Exception as e:
         print(f"  Warning: Could not read {font_path.name}: {e}")
-        return (None, None)
+        return None, None
 
 
 def sanitize_filename(name) -> str:
     if not name:
         return "Unknown"
-    sanitized = "".join((c if c.isalnum() or c in ("-", "_", " ") else "_" for c in name))
+    sanitized = "".join(c if c.isalnum() or c in ("-", "_", " ") else "_" for c in name)
     sanitized = sanitized.replace(" ", "_").strip("_")
     while "__" in sanitized:
         sanitized = sanitized.replace("__", "_")

@@ -74,13 +74,13 @@ def process_file(path: Path) -> bool:
                 if (
                     window[-5].type == tokenize.NAME
                     and window[-5].string == "re"
-                    and (window[-4].type == tokenize.OP)
-                    and (window[-4].string == ".")
-                    and (window[-3].type == tokenize.NAME)
-                    and (window[-3].string in FUNC_NAMES)
-                    and (window[-2].type == tokenize.OP)
-                    and (window[-2].string == "(")
-                    and (window[-1].type == tokenize.STRING)
+                    and window[-4].type == tokenize.OP
+                    and window[-4].string == "."
+                    and window[-3].type == tokenize.NAME
+                    and window[-3].string in FUNC_NAMES
+                    and window[-2].type == tokenize.OP
+                    and window[-2].string == "("
+                    and window[-1].type == tokenize.STRING
                 ):
                     str_tok = window[-1]
                     new_str = make_raw_and_fix(str_tok.string)

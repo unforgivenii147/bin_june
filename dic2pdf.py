@@ -1,7 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 import re
-
 from weasyprint import HTML
 
 INPUT_FILE = "dictionary.txt"
@@ -19,7 +18,16 @@ def convert_entry_to_html(raw_line: str) -> str | None:
     html_body = re.sub("<x [^>]*>", "<span>", html_body)
     html_body = html_body.replace("</x>", "</span>")
     html_body = re.sub('<Ë M="[^"]+" ?/?>', "", html_body)
-    return f'\n    <html>\n    <body>\n        <div class="entry">\n            <h1 class="word">{word}</h1>\n            <div class="definition">{html_body}</div>\n        </div>\n    </body>\n    </html>\n    '
+    return f"""
+    <html>
+    <body>
+        <div class="entry">
+            <h1 class="word">{word}</h1>
+            <div class="definition">{html_body}</div>
+        </div>
+    </body>
+    </html>
+    """
 
 
 def main() -> None:
@@ -30,7 +38,34 @@ def main() -> None:
         html = convert_entry_to_html(line)
         if html:
             pages.append(html)
-    full_html = f"""\n    <html>\n        <head>\n            <style>\n                @font-face {{\n                    font-family: "CustomFont";\n                    src: url('{CUSTOM_FONT}');\n                }}\n                body {{\n                    font-family: "CustomFont", sans-serif;\n                    font-size: 16px;\n                }}\n                .entry {{\n                    page-break-after: always;\n                    padding: 30px;\n                }}\n                .word {{\n                    margin-top: 0;\n                    color:\n                }}\n                .definition {{\n                    margin-top: 10px;\n                    line-height: 1.5;\n                }}\n            </style>\n        </head>\n        <body>\n    """
+    full_html = f"""
+    <html>
+        <head>
+            <style>
+                @font-face {{
+                    font-family: "CustomFont";
+                    src: url('{CUSTOM_FONT}');
+                }}
+                body {{
+                    font-family: "CustomFont", sans-serif;
+                    font-size: 16px;
+                }}
+                .entry {{
+                    page-break-after: always;
+                    padding: 30px;
+                }}
+                .word {{
+                    margin-top: 0;
+                    color:
+                }}
+                .definition {{
+                    margin-top: 10px;
+                    line-height: 1.5;
+                }}
+            </style>
+        </head>
+        <body>
+    """
     for p in pages:
         full_html += p
     full_html += "</body></html>"

@@ -4,11 +4,10 @@ import json
 import sys
 from pathlib import Path
 from xml.etree.ElementTree import Element
-
 from defusedxml.ElementTree import parse as _parse
 
 
-def etree_to_dict(element: Element | None):
+def etree_to_dict(element: (Element | None)):
     d = {element.tag: {} if element.attrib else None}
     children = list(element)
     if children:

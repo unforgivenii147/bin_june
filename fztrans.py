@@ -19,7 +19,7 @@ def load_dictionary(path: Path) -> tuple[dict[str, str], dict[str, str]]:
         data = json.load(f)
     fa_en = {str(k).strip(): str(v).strip() for k, v in data.items()}
     en_fa = {v: k for k, v in fa_en.items()}
-    return (fa_en, en_fa)
+    return fa_en, en_fa
 
 
 def setup_readline(words) -> None:
@@ -43,7 +43,7 @@ def translate(word: str, fa_en: dict[str, str], en_fa: dict[str, str]):
 
 
 def prefix_search(prefix, all_words: set[str]):
-    return sorted((w for w in all_words if w.startswith(prefix)))
+    return sorted(w for w in all_words if w.startswith(prefix))
 
 
 def fuzzy_search(word, all_words: set[str], limit=5, cutoff=0.6):

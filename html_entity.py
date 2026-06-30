@@ -1,3 +1,5 @@
+#!/data/data/com.termux/files/usr/bin/python
+
 """
 Convert HTML entities in HTML files recursively.
 Converts &lt; to <, &gt; to >, and other common entities.
@@ -34,7 +36,7 @@ HTML_ENTITIES = {
     "&ldquo;": '"',
     "&rdquo;": '"',
 }
-ENTITY_PATTERN = re.compile("|".join((re.escape(k) for k in HTML_ENTITIES.keys())))
+ENTITY_PATTERN = re.compile("|".join(re.escape(k) for k in HTML_ENTITIES.keys()))
 
 
 def replace_entities(text: str) -> str:
@@ -54,9 +56,9 @@ def process_file(filepath: Path) -> tuple[Path, bool, str]:
         if changed:
             with open(filepath, "w", encoding="utf-8") as f:
                 f.write(new_content)
-        return (filepath, changed, "")
+        return filepath, changed, ""
     except Exception as e:
-        return (filepath, False, str(e))
+        return filepath, False, str(e)
 
 
 def main() -> None:

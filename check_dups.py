@@ -7,7 +7,6 @@ import sys
 from ast import AsyncFunctionDef, ClassDef, FunctionDef
 from dataclasses import dataclass
 from pathlib import Path
-
 from dh import get_pyfiles, gsz, mpf3
 
 
@@ -86,18 +85,13 @@ def build_decl_for_assign(node, lines):
     for name in names:
         decls.append(
             Decl(
-                kind="assign",
-                name=name,
-                lineno=node.lineno,
-                end_lineno=node.end_lineno,
-                source=source,
-                content_hash=h,
+                kind="assign", name=name, lineno=node.lineno, end_lineno=node.end_lineno, source=source, content_hash=h
             )
         )
     return decls
 
 
-def build_decl(node: AsyncFunctionDef | ClassDef | FunctionDef, kind: str, name: str, lines) -> Decl:
+def build_decl(node: (AsyncFunctionDef | ClassDef | FunctionDef), kind: str, name: str, lines) -> Decl:
     return Decl(
         kind=kind,
         name=name,
@@ -136,9 +130,9 @@ def process_file(src_path) -> None:
     duplicate_reasons = []
     already_marked_ranges = set()
     for decl in decls:
-        key_name = (decl.kind, decl.name)
-        key_hash = (decl.kind, decl.content_hash)
-        rng = (decl.lineno, decl.end_lineno)
+        key_name = decl.kind, decl.name
+        key_hash = decl.kind, decl.content_hash
+        rng = decl.lineno, decl.end_lineno
         is_dup = False
         reason = None
         if key_name in seen_name:

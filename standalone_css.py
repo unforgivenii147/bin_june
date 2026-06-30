@@ -5,7 +5,6 @@ import os
 import re
 import sys
 from pathlib import Path
-
 import requests
 from loguru import logger
 
@@ -18,7 +17,7 @@ def get_file_extension(url):
 
 def is_font_url(url) -> bool:
     e = [".woff", ".woff2", ".ttf", ".eot", ".svg"]
-    return any((url.lower().endswith(ext) for ext in extensions))
+    return any(url.lower().endswith(ext) for ext in extensions)
 
 
 def find_local_font(font_filename: str) -> str | None:

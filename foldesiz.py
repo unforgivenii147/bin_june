@@ -5,7 +5,6 @@ import os
 import shutil
 import sys
 from pathlib import Path
-
 from dh import should_skip, unique_path
 
 
@@ -24,7 +23,7 @@ def get_num_folders(files) -> int:
     if len(files) < 2:
         return 1
     sizes = [size for _, size in files]
-    max_size, min_size = (max(sizes), min(sizes))
+    max_size, min_size = max(sizes), min(sizes)
     range_size = max_size - min_size
     target_range_per_folder = range_size / 100
     num_folders = max(1, int(range_size / target_range_per_folder))
@@ -41,7 +40,7 @@ def create_range_folders(cwd: Path, files, num_folders: int):
         end_idx = start_idx + files_per_folder + (1 if i < remainder else 0)
         folder_files = sizes[start_idx:end_idx]
         if folder_files:
-            min_size, max_size = (min(folder_files), max(folder_files))
+            min_size, max_size = min(folder_files), max(folder_files)
 
             def fsz(size) -> str:
                 if size < 1000:

@@ -3,7 +3,6 @@
 import argparse
 import sys
 from pathlib import Path
-
 from deep_translator import GoogleTranslator
 
 CHUNK_SIZE = 2000

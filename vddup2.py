@@ -27,7 +27,7 @@ def extract_definitions(tree: Module):
             for target in node.targets:
                 if isinstance(target, ast.Name):
                     constants.append(target.id)
-    return (functions, classes, constants)
+    return functions, classes, constants
 
 
 def find_repeated_definitions(file_paths):
@@ -101,10 +101,7 @@ def main() -> None:
                 python_files.append(os.path.join(root, file))
     repeated_definitions = find_repeated_definitions(python_files)
     with Pool(cpu_count()) as pool:
-        pool.starmap(
-            process_file,
-            [(file_path, repeated_definitions, args.move) for file_path in python_files],
-        )
+        pool.starmap(process_file, [(file_path, repeated_definitions, args.move) for file_path in python_files])
 
 
 if __name__ == "__main__":

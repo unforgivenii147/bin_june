@@ -72,7 +72,7 @@ def main() -> None:
     root = Path.cwd()
     print(f"Scanning {root} for image files...")
     size_to_files = collect_images(root)
-    total_files = sum((len(v) for v in size_to_files.values()))
+    total_files = sum(len(v) for v in size_to_files.values())
     if total_files == 0:
         print("No image files found.")
         return

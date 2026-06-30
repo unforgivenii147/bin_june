@@ -30,12 +30,19 @@ def unique_destination(dest: Path) -> Path:
 
 def black_check(file_path: Path) -> tuple[Path, bool]:
     print(f"[OK] {file_path}")
-    '\n    result = subprocess.run(\n        ["black", "--check", "--quiet", str(file_path)],\n        stdout=subprocess.DEVNULL,\n        stderr=subprocess.DEVNULL,\n    )\n    return file_path, result.returncode == 0\n    '
+    """
+    result = subprocess.run(
+        ["black", "--check", "--quiet", str(file_path)],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    return file_path, result.returncode == 0
+    """
     try:
         ast.parse(file_path.read_text(encoding="utf-8"))
-        return (file_path, True)
+        return file_path, True
     except:
-        return (file_path, False)
+        return file_path, False
 
 
 def collect_python_files() -> list[Path]:
@@ -61,7 +68,7 @@ def main() -> None:
     results = []
     with ProcessPoolExecutor(max_workers=8) as executor:
         futures = [executor.submit(black_check, f) for f in files]
-        results.extend((future.result() for future in as_completed(futures)))
+        results.extend(future.result() for future in as_completed(futures))
     for file_path, passed in results:
         target_dir = OK_DIR if passed else ERROR_DIR
         dest = unique_destination(target_dir / file_path.name)

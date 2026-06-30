@@ -1,14 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 from __future__ import annotations
-
 import logging
 import multiprocessing as mp
 import shutil
 import tarfile
 from pathlib import Path
 from typing import TYPE_CHECKING
-
 import py7zr
 from dh import fsz, gsz
 
@@ -23,10 +21,7 @@ def setup_logging() -> None:
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(processName)s %(message)s",
-        handlers=[
-            logging.FileHandler(LOG_FILE, encoding="utf-8"),
-            logging.StreamHandler(),
-        ],
+        handlers=[logging.FileHandler(LOG_FILE, encoding="utf-8"), logging.StreamHandler()],
     )
 
 
@@ -39,7 +34,7 @@ def is_top_level_entry(path: Path) -> bool:
 
 def iter_top_level_dirs(root: Path) -> Iterable[Path]:
     for p in root.iterdir():
-        if p.is_dir() and (not p.is_symlink()):
+        if p.is_dir() and not p.is_symlink():
             yield p
 
 
@@ -47,8 +42,8 @@ def iter_top_level_files(root: Path) -> Iterable[Path]:
     for p in root.iterdir():
         if (
             p.is_file()
-            and (not p.is_symlink())
-            and (p.suffix not in {".7z", ".xz", ".br", ".zst", ".gz", ".zip", ".whl", ".log"})
+            and not p.is_symlink()
+            and p.suffix not in {".7z", ".xz", ".br", ".zst", ".gz", ".zip", ".whl", ".log"}
         ):
             yield p
 
@@ -75,14 +70,12 @@ def compress_dir_to_tar_then_7z(dir_path: str) -> tuple[str, bool, str]:
         if out_path.exists():
             out_path.unlink()
         with py7zr.SevenZipFile(
-            out_path,
-            mode="w",
-            filters=[{"id": py7zr.FILTER_LZMA2, "preset": PY7ZR_PRESET}],
+            out_path, mode="w", filters=[{"id": py7zr.FILTER_LZMA2, "preset": PY7ZR_PRESET}]
         ) as archive:
             archive.write(tar_path, arcname=tar_path.name)
         shutil.rmtree(src)
         tar_path.unlink(missing_ok=True)
-        return (str(src), True, f"Compressed directory -> {out_path.name}")
+        return str(src), True, f"Compressed directory -> {out_path.name}"
     except Exception as e:
         logging.exception("Error compressing directory %s", src)
         try:
@@ -90,7 +83,7 @@ def compress_dir_to_tar_then_7z(dir_path: str) -> tuple[str, bool, str]:
                 tar_path.unlink()
         except Exception:
             logging.exception("Failed to cleanup tar %s", tar_path)
-        return (str(src), False, f"{type(e).__name__}: {e}")
+        return str(src), False, f"{type(e).__name__}: {e}"
 
 
 def compress_file_to_7z(file_path: str) -> tuple[str, bool, str]:
@@ -100,13 +93,11 @@ def compress_file_to_7z(file_path: str) -> tuple[str, bool, str]:
         if out_path.exists():
             out_path.unlink()
         with py7zr.SevenZipFile(
-            out_path,
-            mode="w",
-            filters=[{"id": py7zr.FILTER_LZMA2, "preset": PY7ZR_PRESET}],
+            out_path, mode="w", filters=[{"id": py7zr.FILTER_LZMA2, "preset": PY7ZR_PRESET}]
         ) as archive:
             archive.write(src, arcname=src.name)
         src.unlink()
-        return (str(src), True, f"Compressed file -> {out_path.name}")
+        return str(src), True, f"Compressed file -> {out_path.name}"
     except Exception as e:
         logging.exception("Error compressing file %s", src)
         try:
@@ -114,7 +105,7 @@ def compress_file_to_7z(file_path: str) -> tuple[str, bool, str]:
                 out_path.unlink()
         except Exception:
             logging.exception("Failed to cleanup archive %s", out_path)
-        return (str(src), False, f"{type(e).__name__}: {e}")
+        return str(src), False, f"{type(e).__name__}: {e}"
 
 
 def main() -> None:

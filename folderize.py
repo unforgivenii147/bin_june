@@ -83,7 +83,7 @@ if __name__ == "__main__":
     target_dir = Path(args.directory).resolve()
     if args.dry_run:
         print(f"DRY RUN - Would organize files in: {target_dir}")
-        file_count = sum((1 for _ in target_dir.rglob("*") if _.is_file()))
+        file_count = sum(1 for _ in target_dir.rglob("*") if _.is_file())
         print(f"Would process {file_count} files")
         print("Folders would be created: a/, b/, c/, ..., 0-9/")
     else:

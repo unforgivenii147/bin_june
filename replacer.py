@@ -5,7 +5,6 @@ import os
 import re
 import sys
 from pathlib import Path
-
 from dh import is_binary
 
 
@@ -46,14 +45,14 @@ def replace_in_files(search_text, replace_text=None, target_file=None, dry_run=F
     files_processed = 0
     files_changed = 0
     if target_file:
-        if Path(target_file).is_file() and (not Path(target_file).is_symlink()):
+        if Path(target_file).is_file() and not Path(target_file).is_symlink():
             print(f"Processing file: {target_file}")
             if process_file(target_file, search_text, replace_text, dry_run):
                 files_changed += 1
             files_processed += 1
         else:
             print(f"Error: {target_file} is not a valid file", file=sys.stderr)
-        return (files_processed, files_changed)
+        return files_processed, files_changed
     for root, dirs, files in os.walk("."):
         dirs[:] = [d for d in dirs if d not in exclude_dirs]
         for filename in files:
@@ -65,7 +64,7 @@ def replace_in_files(search_text, replace_text=None, target_file=None, dry_run=F
                 files_changed += 1
             if files_processed % 100 == 0:
                 print(f"Processed {files_processed} files...", end="\r")
-    return (files_processed, files_changed)
+    return files_processed, files_changed
 
 
 if __name__ == "__main__":
@@ -76,11 +75,7 @@ if __name__ == "__main__":
         help="Search text and optional replacement text. If only one string is provided, it will be removed.",
     )
     parser.add_argument("--dry-run", action="store_true", help="Show changes without applying them")
-    parser.add_argument(
-        "-f",
-        "--file",
-        help="Process only the specified file instead of recursive directory search",
-    )
+    parser.add_argument("-f", "--file", help="Process only the specified file instead of recursive directory search")
     args = parser.parse_args()
     if len(args.strings) == 2:
         search_text, replace_text = args.strings

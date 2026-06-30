@@ -11,7 +11,7 @@ def get_all_packages():
         packages = []
         lines = result.stdout.split("\n")
         for line in lines:
-            if line and (not line.startswith("Listing")) and (not line.startswith("Packages")):
+            if line and not line.startswith("Listing") and not line.startswith("Packages"):
                 parts = line.split("/")[0].split()
                 if parts:
                     packages.append(parts[0])

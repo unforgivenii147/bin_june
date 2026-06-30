@@ -24,7 +24,7 @@ def extract_subtitles(video_path) -> None:
     ]
     subs_output = subprocess.run(ffprobe_cmd, capture_output=True, text=True, check=True)
     subs = subs_output.stdout.strip().split("\n")
-    if not subs or (len(subs) == 1 and subs[0] == ""):
+    if not subs or len(subs) == 1 and subs[0] == "":
         print("No subtitle streams found.")
         return
     count = 0

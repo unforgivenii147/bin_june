@@ -2,7 +2,6 @@
 
 import sys
 from pathlib import Path
-
 from dh import get_files, runcmd
 
 
@@ -10,14 +9,7 @@ def process_file(path: Path) -> bool:
     path = Path(path)
     try:
         out = path.with_suffix(".ttf")
-        cmd = [
-            "fontforge",
-            "-lang=ff",
-            "-c",
-            '"Open($1); Generate($2);"',
-            str(path),
-            str(out),
-        ]
+        cmd = ["fontforge", "-lang=ff", "-c", '"Open($1); Generate($2);"', str(path), str(out)]
         ret, _, _ = runcmd(cmd, show_output=False)
         if not ret:
             print(f"✓ {path.name}")

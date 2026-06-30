@@ -1,13 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 from __future__ import annotations
-
 import logging
 import multiprocessing as mp
 import tarfile
 from dataclasses import dataclass
 from pathlib import Path
-
 import py7zr
 
 BASE_DIR = Path.cwd()
@@ -21,10 +19,7 @@ def setup_logging() -> None:
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(processName)s %(message)s",
-        handlers=[
-            logging.FileHandler(LOG_FILE, encoding="utf-8"),
-            logging.StreamHandler(),
-        ],
+        handlers=[logging.FileHandler(LOG_FILE, encoding="utf-8"), logging.StreamHandler()],
     )
 
 
@@ -134,7 +129,7 @@ def main() -> None:
     if files:
         with mp.Pool(processes=min(MAX_WORKERS, len(files))) as pool:
             results.extend(pool.map(process_file, files))
-    success = sum((1 for r in results if r.ok))
+    success = sum(1 for r in results if r.ok)
     fail = len(results) - success
     logging.info("Completed. success=%d fail=%d", success, fail)
     for r in results:

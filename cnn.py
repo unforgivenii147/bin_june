@@ -25,7 +25,7 @@ def remove_path(path) -> None:
 def scan_and_remove(base_path: Path):
     for root, dirs, files in os.walk(base_path, topdown=True):
         for file in files:
-            if any((file.endswith(ext) for ext in FILE_EXTENSIONS)):
+            if any(file.endswith(ext) for ext in FILE_EXTENSIONS):
                 yield os.path.join(root, file)
         dirs_to_remove = [d for d in dirs if d in DIR_NAMES]
         for d in dirs_to_remove:

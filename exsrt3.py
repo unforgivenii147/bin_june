@@ -57,7 +57,7 @@ def main() -> None:
             if lang != "und":
                 filename_parts.append(lang)
             if title:
-                safe_title = "".join((c if c.isalnum() else "_" for c in title))
+                safe_title = "".join(c if c.isalnum() else "_" for c in title)
                 filename_parts.append(safe_title)
             if forced:
                 filename_parts.append("forced")
@@ -68,6 +68,27 @@ def main() -> None:
         print(f"Extracting stream index {index} (Lang: {lang}, Forced: {forced}, Codec: {codec_name}) -> {out_path}")
 
 
-'\n        try:\n            process = (\n                ffmpeg.input(input_path_str, **{"loglevel": "quiet"})\n                .output(\n                    str(out_path), map=f"0:s:{index}", c="srt", **{"force_key_frames": None}\n                )\n                .overwrite_output()\n            )\n            process.run()\n            print(f"Successfully extracted: {out_path}")\n        except ffmpeg.Error as e:\n            print(f"Error extracting stream index {index}: {e.stderr.decode(\'utf8\')}")\n        except Exception as e:\n            print(f"An unexpected error occurred during extraction of stream index {index}: {e}")\n    if extracted_files:\n        print("\n--- Extraction Complete ---")\n        print("Extracted subtitle files:")\n        for f_path in extracted_files:\n            print(f"- {f_path}")\n'
+"""
+        try:
+            process = (
+                ffmpeg.input(input_path_str, **{"loglevel": "quiet"})
+                .output(
+                    str(out_path), map=f"0:s:{index}", c="srt", **{"force_key_frames": None}
+                )
+                .overwrite_output()
+            )
+            process.run()
+            print(f"Successfully extracted: {out_path}")
+        except ffmpeg.Error as e:
+            print(f"Error extracting stream index {index}: {e.stderr.decode('utf8')}")
+        except Exception as e:
+            print(f"An unexpected error occurred during extraction of stream index {index}: {e}")
+    if extracted_files:
+        print("
+--- Extraction Complete ---")
+        print("Extracted subtitle files:")
+        for f_path in extracted_files:
+            print(f"- {f_path}")
+"""
 if __name__ == "__main__":
     main()

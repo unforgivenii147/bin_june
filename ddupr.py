@@ -51,9 +51,7 @@ class PyObject:
 
 
 def _content_hash(source: str) -> str:
-    normalised = "\n".join(
-        (line for line in source.splitlines() if line.strip() and (not line.strip().startswith("#")))
-    )
+    normalised = "\n".join(line for line in source.splitlines() if line.strip() and not line.strip().startswith("#"))
     return hashlib.sha256(normalised.encode()).hexdigest()
 
 
@@ -96,21 +94,21 @@ def _collect_imports(tree: ast.Module, node: ast.AST) -> list[str]:
 def _is_constant_node(node: ast.AST) -> tuple[bool, str]:
     if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
         name = node.target.id
-        return (True, name)
+        return True, name
     if isinstance(node, ast.Assign) and len(node.targets) == 1:
         target = node.targets[0]
         if not isinstance(target, ast.Name):
-            return (False, "")
+            return False, ""
         name = target.id
         if name.isupper():
-            return (True, name)
+            return True, name
         value = node.value
         if isinstance(value, ast.Call):
             func = value.func
             func_name = func.id if isinstance(func, ast.Name) else func.attr if isinstance(func, ast.Attribute) else ""
             if func_name in CONSTANT_CALL_NAMES:
-                return (True, name)
-    return (False, "")
+                return True, name
+    return False, ""
 
 
 def analyse_source(source: str, origin: str) -> list[PyObject]:
@@ -408,7 +406,7 @@ def find_duplicates(all_objects: list[PyObject]) -> tuple[dict[str, list[PyObjec
     for objs in duplicates.values():
         representative = objs[0]
         grouped[representative.kind].append(representative)
-    return (duplicates, grouped)
+    return duplicates, grouped
 
 
 def run(cwd: Path, mode: Optional[str], workers: int) -> None:
@@ -421,7 +419,7 @@ def run(cwd: Path, mode: Optional[str], workers: int) -> None:
             all_objects.extend(result)
     logger.info("Extracted {} top-level object(s) total", len(all_objects))
     duplicates, grouped = find_duplicates(all_objects)
-    total_dupes = sum((len(v) for v in grouped.values()))
+    total_dupes = sum(len(v) for v in grouped.values())
     logger.info(
         "Found {} duplicate group(s): {} func, {} class, {} const",
         len(duplicates),

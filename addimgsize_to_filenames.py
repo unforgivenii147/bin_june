@@ -51,12 +51,12 @@ class ImageDimensionRenamer:
         try:
             img = cv2.imread(str(image_path))
             if img is None:
-                return (image_path, False, f"Failed to read image")
+                return image_path, False, f"Failed to read image"
             height, width = img.shape[:2]
             dimensions = f"{width}x{height}"
             if self.has_dimensions_in_name(image_path.stem):
                 message = f"Already has dimensions in name"
-                return (image_path, False, message)
+                return image_path, False, message
             stem = image_path.stem
             suffix = image_path.suffix
             new_filename = f"{stem}{separator}{dimensions}{suffix}"
@@ -67,9 +67,9 @@ class ImageDimensionRenamer:
             rel_old = image_path.relative_to(root_dir)
             rel_new = new_path.relative_to(root_dir)
             message = f"{rel_old.name} → {rel_new.name} ({dimensions})"
-            return (new_path, True, message)
+            return new_path, True, message
         except Exception as e:
-            return (image_path, False, f"Error: {str(e)}")
+            return image_path, False, f"Error: {str(e)}"
 
     def process_images(self, image_paths: list) -> None:
         if not image_paths:

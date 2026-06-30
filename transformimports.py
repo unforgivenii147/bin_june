@@ -47,7 +47,7 @@ def transform_imports(tree: Module, source_lines: list[str]):
             if name in used:
                 replacements[name] = new_name
     if not replacements:
-        return (source_lines, False)
+        return source_lines, False
     new_lines = []
     in_imports = True
     for line in source_lines:
@@ -63,7 +63,7 @@ def transform_imports(tree: Module, source_lines: list[str]):
     insert_pos = 0
     for i, line in enumerate(new_lines):
         stripped = line.strip()
-        if stripped and (not stripped.startswith("#")):
+        if stripped and not stripped.startswith("#"):
             insert_pos = i
             break
     new_import_lines = []
@@ -82,15 +82,13 @@ def transform_imports(tree: Module, source_lines: list[str]):
 
     for i in range(len(new_lines)):
         stripped = new_lines[i].strip()
-        if stripped.startswith("import ") or (stripped.startswith("from ") and "import" in stripped):
+        if stripped.startswith("import ") or stripped.startswith("from ") and "import" in stripped:
             continue
         line = new_lines[i]
         new_lines[i] = re.sub(
-            "\\b(" + "|".join(map(re.escape, replacements.keys())) + ")\\b",
-            lambda m: replacements[m.group(1)],
-            line,
+            "\\b(" + "|".join(map(re.escape, replacements.keys())) + ")\\b", lambda m: replacements[m.group(1)], line
         )
-    return (new_lines, True)
+    return new_lines, True
 
 
 def main() -> None:

@@ -11,17 +11,8 @@ from pathlib import Path
 from typing import Any
 
 OUTPUT_DIR = Path("output")
-ARCHIVE_EXTENSIONS = (
-    ".whl",
-    ".zip",
-    ".tar.gz",
-    ".tgz",
-    ".tar.zst",
-    ".tar.xz",
-    ".tar",
-    ".zst",
-)
-ALLOWED_PYTHON_EXTENSIONS = (".py", "")
+ARCHIVE_EXTENSIONS = (".whl", ".zip", ".tar.gz", ".tgz", ".tar.zst", ".tar.xz", ".tar", ".zst")
+ALLOWED_PYTHON_EXTENSIONS = ".py", ""
 
 
 class EntityExtractor(ast.NodeVisitor):
@@ -174,14 +165,8 @@ def process_archive(path: Path) -> list[dict[str, Any]]:
                             entities.extend(extract_entities_from_content(content, virtual_path))
         except Exception as e:
             print(f"Error processing ZIP/WHL archive {path}: {e}")
-    elif any((path.name.endswith(ext) for ext in [".tar", ".tar.gz", ".tgz", ".tar.zst", ".tar.xz"])):
-        mode_map = {
-            ".tar.gz": "r:gz",
-            ".tgz": "r:gz",
-            ".tar.zst": "r:zst",
-            ".tar.xz": "r:xz",
-            ".tar": "r",
-        }
+    elif any(path.name.endswith(ext) for ext in [".tar", ".tar.gz", ".tgz", ".tar.zst", ".tar.xz"]):
+        mode_map = {".tar.gz": "r:gz", ".tgz": "r:gz", ".tar.zst": "r:zst", ".tar.xz": "r:xz", ".tar": "r"}
         mode = next((mode_map[ext] for ext in mode_map if path.name.endswith(ext)), "r")
         try:
             with tarfile.open(path, mode) as tf:
@@ -220,9 +205,7 @@ def main() -> None:
             path = Path(root) / name
             if path.is_relative_to(OUTPUT_DIR):
                 continue
-            is_archive = path.suffix in ARCHIVE_EXTENSIONS or any(
-                (path.name.endswith(ext) for ext in ARCHIVE_EXTENSIONS)
-            )
+            is_archive = path.suffix in ARCHIVE_EXTENSIONS or any(path.name.endswith(ext) for ext in ARCHIVE_EXTENSIONS)
             is_py = path.suffix in ALLOWED_PYTHON_EXTENSIONS or is_python_file_no_extension(path)
             if is_archive or is_py:
                 files_to_process.append(str(path))

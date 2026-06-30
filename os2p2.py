@@ -83,7 +83,7 @@ class PathlibRefactorer:
             Transformation(
                 pattern="\\bos\\.path\\.relpath\\s*\\(\\s*([^,]+)(?:,\\s*([^)]+))?\\s*\\)",
                 replacement=lambda m: (
-                    f"Path({m.group(1)}).resolve().relative_to(Path({(m.group(2) if m.group(2) else '.')}).resolve())"
+                    f"Path({m.group(1)}).resolve().relative_to(Path({m.group(2) if m.group(2) else '.'}).resolve())"
                 ),
                 type=TransformationType.FUNCTION_CALL,
                 description="Convert os.path.relpath to relative_to",
@@ -134,7 +134,7 @@ class PathlibRefactorer:
         self.transformations.append(
             Transformation(
                 pattern="\\bos\\.listdir\\s*\\(\\s*([^)]*)\\s*\\)",
-                replacement=lambda m: f"list(Path({(m.group(1) if m.group(1) else '.')}).iterdir())",
+                replacement=lambda m: f"list(Path({m.group(1) if m.group(1) else '.'}).iterdir())",
                 type=TransformationType.FUNCTION_CALL,
                 description="Convert os.listdir to Path.iterdir()",
             )
@@ -179,7 +179,7 @@ class PathlibRefactorer:
                     result = new_result
             except Exception as e:
                 cprint(f"  ⚠️ Transformation failed: {trans.description} - {e}", "yellow")
-        return (result, applied)
+        return result, applied
 
     def add_pathlib_import(self, source: str) -> str:
         if "from pathlib import Path" in source or "import pathlib" in source:
@@ -190,7 +190,7 @@ class PathlibRefactorer:
             stripped = line.strip()
             if stripped.startswith(("import ", "from ")):
                 insert_idx = i + 1
-            elif stripped and (not stripped.startswith("#")):
+            elif stripped and not stripped.startswith("#"):
                 break
         lines.insert(insert_idx, "from pathlib import Path\n")
         return "".join(lines)

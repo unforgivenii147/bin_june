@@ -1,12 +1,13 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 
-python
-import argparse
-import json
-import multiprocessing
-import os
 from pathlib import Path
+import os
+import multiprocessing
+import json
+import argparse
+
+python
 
 
 def load_json_file(file_path):

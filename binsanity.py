@@ -35,9 +35,9 @@ def is_elf(filepath: str) -> bool:
     return False
 
 
-def get_binary_files(directory: str | Path) -> List[str]:
+def get_binary_files(directory: (str | Path)) -> List[str]:
     directory = Path(directory)
-    "Get all executable binary files in a directory"
+    """Get all executable binary files in a directory"""
     binaries = []
     try:
         for path in get_filez(directory):
@@ -58,50 +58,46 @@ def test_executable(filepath: str) -> Tuple[str, Optional[str]]:
             if result.stderr:
                 error_lower = result.stderr.lower()
                 if any(
-                    (
-                        pattern in error_lower
-                        for pattern in [
-                            "error while loading shared libraries",
-                            "cannot open shared object file",
-                            "no such file",
-                            "not found",
-                            "failed to load",
-                        ]
-                    )
-                ):
-                    return (filepath, result.stderr.strip()[:200])
-            if result.returncode == 0:
-                return (filepath, None)
-        except subprocess.TimeoutExpired:
-            return (filepath, None)
-        except FileNotFoundError:
-            return (filepath, "File not found")
-        except PermissionError:
-            return (filepath, "Permission denied")
-        except OSError as e:
-            if "exec format error" in str(e):
-                return (filepath, "Exec format error (wrong architecture)")
-            return (filepath, str(e))
-    try:
-        result = subprocess.run([filepath], capture_output=True, text=True, timeout=1)
-        if result.stderr:
-            error_lower = result.stderr.lower()
-            if any(
-                (
                     pattern in error_lower
                     for pattern in [
                         "error while loading shared libraries",
                         "cannot open shared object file",
                         "no such file",
+                        "not found",
+                        "failed to load",
                     ]
-                )
+                ):
+                    return filepath, result.stderr.strip()[:200]
+            if result.returncode == 0:
+                return filepath, None
+        except subprocess.TimeoutExpired:
+            return filepath, None
+        except FileNotFoundError:
+            return filepath, "File not found"
+        except PermissionError:
+            return filepath, "Permission denied"
+        except OSError as e:
+            if "exec format error" in str(e):
+                return filepath, "Exec format error (wrong architecture)"
+            return filepath, str(e)
+    try:
+        result = subprocess.run([filepath], capture_output=True, text=True, timeout=1)
+        if result.stderr:
+            error_lower = result.stderr.lower()
+            if any(
+                pattern in error_lower
+                for pattern in [
+                    "error while loading shared libraries",
+                    "cannot open shared object file",
+                    "no such file",
+                ]
             ):
-                return (filepath, result.stderr.strip()[:200])
-        return (filepath, None)
+                return filepath, result.stderr.strip()[:200]
+        return filepath, None
     except subprocess.TimeoutExpired:
-        return (filepath, None)
+        return filepath, None
     except Exception as e:
-        return (filepath, str(e)[:200])
+        return filepath, str(e)[:200]
 
 
 def main() -> None:

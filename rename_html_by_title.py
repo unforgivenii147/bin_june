@@ -4,7 +4,6 @@ import re
 import unicodedata
 from html.parser import HTMLParser
 from pathlib import Path
-
 from dh import get_files, mpf3
 
 
@@ -100,9 +99,7 @@ def slugify(text: str) -> str:
     temp = text
     text = text.lower()
     text = re.sub(
-        "(\\?|\\|\\||\\`|\\<|\\>|\\~|\\:|\\;|\\\"|'|\\@|\\$|\\#|\\%|\\&|\\^|\\(|\\)|\\{|\\}|\\[|\\])",
-        "",
-        text,
+        "(\\?|\\|\\||\\`|\\<|\\>|\\~|\\:|\\;|\\\"|'|\\@|\\$|\\#|\\%|\\&|\\^|\\(|\\)|\\{|\\}|\\[|\\])", "", text
     )
     text = re.sub("( )+", "_", text)
     text = re.sub("(/)+", "_", text)
@@ -121,7 +118,7 @@ def unique_path(path: Path) -> Path:
     return new_path
 
 
-def process_file(path: str | Path) -> None:
+def process_file(path: (str | Path)) -> None:
     path = Path(path)
     title = extract_title(path)
     if not title:

@@ -3,7 +3,6 @@
 import sys
 from multiprocessing import get_context
 from pathlib import Path
-
 import tree_sitter_cpp as tscpp
 from dh import get_files, remove_blank_lines
 from tree_sitter import Language, Parser, Query, QueryCursor
@@ -15,7 +14,12 @@ class TSCppRemover:
     def __init__(self) -> None:
         self.language = Language(tscpp.language())
         self.parser = Parser(self.language)
-        self.query = Query(self.language, "\n            (comment) @comment\n        ")
+        self.query = Query(
+            self.language,
+            """
+            (comment) @comment
+        """,
+        )
 
     def remove_comments(self, source: str) -> tuple[str, int]:
         source_bytes = source.encode("utf-8")
@@ -45,10 +49,10 @@ class TSCppRemover:
         tree = self.parser.parse(new_source)
         if tree.root_node.has_error:
             print("Warning: Resulted code has syntax errors, returning original")
-            return (source, 0)
+            return source, 0
         cleaned = new_source.decode("utf-8")
         cleaned = remove_blank_lines(cleaned)
-        return (cleaned, comment_count)
+        return cleaned, comment_count
 
 
 def ts_remover_initializer() -> None:
@@ -64,13 +68,13 @@ def process_file(path):
         result, comments = ts_remover.remove_comments(code)
     except Exception as e:
         print(f"[ERROR] {path.name} processing: {e}")
-        return ("error", path, 0)
+        return "error", path, 0
     if comments:
         path.write_text(result, encoding="utf-8")
         print(f"[OK] {path.name}: {comments} comments removed")
-        return ("changed", path, comments)
+        return "changed", path, comments
     print(f"[NO CHANGE] {path.name}")
-    return ("nochange", path, 0)
+    return "nochange", path, 0
 
 
 if __name__ == "__main__":
@@ -85,9 +89,9 @@ if __name__ == "__main__":
     with get_context("spawn").Pool(processes=8, initializer=ts_remover_initializer) as pool:
         results = pool.map(process_file, files)
     diffsize = before - gsz(cwd)
-    changed = sum((1 for r in results if r[0] == "changed"))
+    changed = sum(1 for r in results if r[0] == "changed")
     errors = [r for r in results if r[0] == "error"]
-    nochg = sum((1 for r in results if r[0] == "nochange"))
+    nochg = sum(1 for r in results if r[0] == "nochange")
     print(f"Files: {len(files)} | Changed: {changed} | Unchanged: {nochg} | Errors: {len(errors)}")
     if errors:
         print("\nErrors in:")

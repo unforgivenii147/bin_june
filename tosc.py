@@ -7,7 +7,7 @@ from pathlib import Path
 dest = Path.home() / "isaac" / "may" / "scripts"
 
 
-def unique_path(path: Path | str) -> Path:
+def unique_path(path: (Path | str)) -> Path:
     path = Path(path)
     if not path.exists():
         return path

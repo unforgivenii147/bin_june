@@ -5,7 +5,6 @@ import sys
 import tarfile
 from contextlib import contextmanager, suppress
 from pathlib import Path
-
 from brotlicffi import Compressor, Decompressor
 
 CHUNK_SIZE = 32768
@@ -19,30 +18,14 @@ def parse_args() -> argparse.Namespace:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     group = parser.add_mutually_exclusive_group()
-    group.add_argument(
-        "-c",
-        "--compress",
-        action="store_true",
-        help="Compress files (default if no op specified)",
-    )
+    group.add_argument("-c", "--compress", action="store_true", help="Compress files (default if no op specified)")
     group.add_argument("-d", "--decompress", action="store_true", help="Decompress .br files")
     parser.add_argument(
-        "-f",
-        "--files",
-        nargs="+",
-        metavar="FILE",
-        help="Files to process (default: recursive current dir)",
+        "-f", "--files", nargs="+", metavar="FILE", help="Files to process (default: recursive current dir)"
     )
+    parser.add_argument("-k", "--keep", action="store_true", help="Keep original files (default: remove after success)")
     parser.add_argument(
-        "-k",
-        "--keep",
-        action="store_true",
-        help="Keep original files (default: remove after success)",
-    )
-    parser.add_argument(
-        "--no-tar",
-        action="store_true",
-        help="Disable tar-based subdir compression (process files individually)",
+        "--no-tar", action="store_true", help="Disable tar-based subdir compression (process files individually)"
     )
     parser.add_argument("-v", "--verbose", action="store_true", help="Show detailed progress")
     return parser.parse_args()
@@ -51,9 +34,9 @@ def parse_args() -> argparse.Namespace:
 def find_files_to_process(base_dir: Path, recursive: bool = True) -> list[Path]:
     files = []
     for p in base_dir.iterdir():
-        if p.is_file() and (not p.name.endswith(".br")) and (not p.name.startswith(".")):
+        if p.is_file() and not p.name.endswith(".br") and not p.name.startswith("."):
             files.append(p)
-        elif p.is_dir() and recursive and (p.name != "__pycache__"):
+        elif p.is_dir() and recursive and p.name != "__pycache__":
             files.extend(find_files_to_process(p, recursive))
     return sorted(files)
 
@@ -140,8 +123,8 @@ def process_directory(base_dir: Path, compress: bool, keep: bool, no_tar: bool, 
         if verbose:
             print("ℹ️  No files to process in current directory")
         return 0
-    subdirs = [d for d in base_dir.iterdir() if d.is_dir() and (not d.name.startswith("."))]
-    if subdirs and (not no_tar):
+    subdirs = [d for d in base_dir.iterdir() if d.is_dir() and not d.name.startswith(".")]
+    if subdirs and not no_tar:
         for subdir in subdirs:
             subdir_files = find_files_to_process(subdir, recursive=False)
             if subdir_files:

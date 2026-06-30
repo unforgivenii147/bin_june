@@ -15,7 +15,7 @@ def get_defined_and_called(file_path):
         with Path(file_path).open("r", encoding="utf-8") as f:
             tree = ast.parse(f.read())
     except Exception as e:
-        return (None, None, e)
+        return None, None, e
     defined = set()
     called = set()
     for node in ast.walk(tree):
@@ -26,7 +26,7 @@ def get_defined_and_called(file_path):
                 called.add(node.func.id)
             elif isinstance(node.func, ast.Attribute):
                 called.add(node.func.attr)
-    return (defined, called, None)
+    return defined, called, None
 
 
 def process_file(file_path, dry_run: bool = True) -> str | None:
@@ -34,7 +34,7 @@ def process_file(file_path, dry_run: bool = True) -> str | None:
     defined, called, err = get_defined_and_called(file_path)
     if err:
         return f"Error parsing {file_path}: {err}"
-    unused = [f for f in defined if f not in called and (not f.startswith("_"))]
+    unused = [f for f in defined if f not in called and not f.startswith("_")]
     if not unused:
         return None
     if dry_run:

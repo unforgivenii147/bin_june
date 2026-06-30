@@ -5,7 +5,6 @@ import time
 from collections import deque
 from urllib.parse import urljoin, urlparse
 from urllib.robotparser import RobotFileParser
-
 import requests
 from bs4 import BeautifulSoup
 
@@ -40,7 +39,7 @@ def crawl_for_ext(start_url: str, max_pages: int, delay: float, ext: str):
         url = queue.popleft()
         if url in visited:
             continue
-        if rp and (not can_fetch(rp, url)):
+        if rp and not can_fetch(rp, url):
             print(f"🚫 Skipping (robots.txt): {url}")
             continue
         visited.add(url)
@@ -53,7 +52,7 @@ def crawl_for_ext(start_url: str, max_pages: int, delay: float, ext: str):
                 found_urls.add(url)
                 print(f"  📄 (via Content-Type): {url}")
                 continue
-            if "html" not in content_type and (not url.lower().endswith((".html", ".htm"))):
+            if "html" not in content_type and not url.lower().endswith((".html", ".htm")):
                 continue
             soup = BeautifulSoup(resp.content, "html.parser")
             for a in soup.find_all("a", href=True):
@@ -68,17 +67,8 @@ def crawl_for_ext(start_url: str, max_pages: int, delay: float, ext: str):
                     print(f"  📄found {ext} (via link): {full_url}")
                 elif full_url not in visited:
                     if not any(
-                        (
-                            full_url.lower().endswith(extension)
-                            for extension in (
-                                ".jpg",
-                                ".jpeg",
-                                ".png",
-                                ".gif",
-                                ".css",
-                                ".js",
-                            )
-                        )
+                        full_url.lower().endswith(extension)
+                        for extension in (".jpg", ".jpeg", ".png", ".gif", ".css", ".js")
                     ):
                         queue.append(full_url)
         except requests.RequestException as e:
@@ -91,7 +81,7 @@ def crawl_for_ext(start_url: str, max_pages: int, delay: float, ext: str):
 
 def save_urls(urls, filename="urls.txt") -> None:
     with open(filename, "w", encoding="utf-8") as f:
-        f.writelines((url + "\n" for url in urls))
+        f.writelines(url + "\n" for url in urls)
     print(f"\n✅ Saved {len(urls)} URLs to '{filename}'")
 
 

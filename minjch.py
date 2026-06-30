@@ -5,7 +5,6 @@ import multiprocessing
 import os
 import re
 from pathlib import Path
-
 from rcssmin import cssmin
 
 
@@ -36,7 +35,7 @@ def process_file(path: str) -> str:
 
 
 def collect_files() -> list:
-    supported = (".css", ".json", ".html", ".htm")
+    supported = ".css", ".json", ".html", ".htm"
     out = []
     for base, _, files in os.walk(Path.cwd()):
         for name in files:

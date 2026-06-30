@@ -3,7 +3,6 @@
 import itertools
 import time
 from pathlib import Path
-
 import cv2
 import pytesseract
 from dh import IMG_EXT
@@ -40,9 +39,9 @@ def run_tesseract_on_image(
     try:
         text = pytesseract.image_to_string(img, config=config)
     except Exception as e:
-        return ("", config, 0.0, str(e))
+        return "", config, 0.0, str(e)
     duration = time.time() - start
-    return (text, config, duration, "")
+    return text, config, duration, ""
 
 
 def main() -> None:

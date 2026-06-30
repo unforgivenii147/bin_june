@@ -7,7 +7,6 @@ from pathlib import Path
 
 user_site = Path(site.getusersitepackages())
 extensions = {".so", ".pyd", ".dylib", ".dll"}
-
 for pkg in user_site.iterdir():
     if pkg.is_dir() and not pkg.name.endswith((".dist-info", ".egg-info")):
         has_compiled = False

@@ -5,7 +5,13 @@ import re
 from pathlib import Path
 
 PKG_NAME_RE = re.compile(
-    "\n    ^\\s*\n    (?:\n        -e\\s+\n    )?\n    (?P<name>[A-Za-z0-9_.\\-]+)\n    ",
+    """
+    ^\\s*
+    (?:
+        -e\\s+
+    )?
+    (?P<name>[A-Za-z0-9_.\\-]+)
+    """,
     re.VERBOSE,
 )
 

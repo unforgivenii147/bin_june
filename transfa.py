@@ -2,7 +2,6 @@
 
 import sys
 from pathlib import Path
-
 from deep_translator import GoogleTranslator
 
 

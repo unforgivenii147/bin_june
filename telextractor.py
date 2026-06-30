@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 
+import asyncio
 import re
 from telethon import TelegramClient
 from dotenv import load_dotenv
@@ -33,8 +34,6 @@ async def main():
                         f.write(url + "\n")
     await client.disconnect()
 
-
-import asyncio
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -7,7 +7,7 @@ from pathlib import Path
 def process_file(path: Path) -> None:
     path = Path(path)
     con = path.read_text()
-    nl = [line + "\n\n\n\n" for line in con.splitlines()]
+    nl = [(line + "\n\n\n\n") for line in con.splitlines()]
     newconn = "\n".join(nl)
     path.write_text(newconn)
 

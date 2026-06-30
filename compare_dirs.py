@@ -5,13 +5,12 @@ import stat
 import sys
 from hashlib import sha256
 from pathlib import Path
-
 from dh import cprint
 
 CHUNK_SIZE = 32768
 
 
-def get_sha256(path: str | Path) -> str:
+def get_sha256(path: (str | Path)) -> str:
     path = Path(path)
     h = sha256()
     with path.open("rb") as f:
@@ -31,7 +30,8 @@ def write_shell_copy(script_path: Path, src_root: Path, dst_root: Path, only_dir
             src_file = src_root / f
             parent = dst_file.parent
             sh.write(
-                f"mkdir -p {shlex.quote(str(parent))} && cp -a {shlex.quote(str(src_file))} {shlex.quote(str(dst_file))}\n"
+                f"""mkdir -p {shlex.quote(str(parent))} && cp -a {shlex.quote(str(src_file))} {shlex.quote(str(dst_file))}
+"""
             )
     st = script_path.stat()
     script_path.chmod(st.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
@@ -47,7 +47,7 @@ def main() -> None:
     f_dirs = [p.name for p in first.glob("*") if p.is_dir()]
     s_files = [p.name for p in second.glob("*") if p.exists() and p.is_file()]
     s_dirs = [p.name for p in second.glob("*") if p.is_dir()]
-    common1 = [Path(dir1).resolve() / p for p in f_files if p in s_files]
+    common1 = [(Path(dir1).resolve() / p) for p in f_files if p in s_files]
     common2 = {str(Path(dir1).resolve() / p): str(Path(dir2).resolve() / p) for p in f_files if p in s_files}
     if common1:
         for k in common1:
@@ -60,7 +60,6 @@ def main() -> None:
     common_txt = cwd / "common.txt"
     common_txt.write_text("\n".join([str(p) for p in common1]))
     ans = input(f"delete from {dir1}  ? ")
-
     if ans == "y":
         for k, v in common2.items():
             if get_sha256(k) == get_sha256(v):
@@ -68,7 +67,6 @@ def main() -> None:
                 Path(k).unlink()
             else:
                 print(f"similar name filed:\n{k}\n{v}\n")
-
     cprint("only in first")
     for p in only_files_first:
         print(p)

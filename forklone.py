@@ -49,7 +49,7 @@ def get_github_client():
         g = Github(token)
         user = g.get_user()
         print(f"✓ Authenticated as: {user.login}")
-        return (g, user)
+        return g, user
     except GithubException as e:
         print(f"Authentication failed: {e}")
         sys.exit(1)
@@ -90,7 +90,7 @@ def clone_and_setup(forked_repo, original_full_name):
     print("Fetching from upstream...")
     upstream.fetch()
     local_repo.git.branch(f"--set-upstream-to=upstream/{default_branch}", default_branch)
-    return (local_repo, default_branch)
+    return local_repo, default_branch
 
 
 def create_env_template():

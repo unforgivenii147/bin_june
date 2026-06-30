@@ -3,7 +3,6 @@
 import sys
 import tarfile
 from pathlib import Path
-
 from dh import get_files
 from lzma_mt import LZMADecompressor
 

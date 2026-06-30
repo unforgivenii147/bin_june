@@ -4,7 +4,6 @@ import argparse
 import sys
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
-
 import requests
 from bs4 import BeautifulSoup
 from requests.sessions import Session
@@ -32,7 +31,7 @@ def extract_links(url: str, session: requests.Session):
     links = set()
     for tag in soup.find_all("a", href=True):
         href = tag.get("href").strip()
-        if href and (not href.startswith("#")) and (not href.startswith("javascript:")):
+        if href and not href.startswith("#") and not href.startswith("javascript:"):
             abs_url = urljoin(url, href)
             parsed = urlparse(abs_url)
             if parsed.scheme in {"http", "https"}:
@@ -56,7 +55,7 @@ def split_internal_external(base_url, links):
             internal.append(link)
         else:
             external.append(link)
-    return (internal, external)
+    return internal, external
 
 
 def save_links(name: str, links) -> None:
@@ -79,10 +78,7 @@ def main() -> None:
         links = extract_links(url, session)
     except requests.exceptions.HTTPError as e:
         if e.response.status_code == 403:
-            print(
-                "Access forbidden (403). The site may be blocking automated access.",
-                file=sys.stderr,
-            )
+            print("Access forbidden (403). The site may be blocking automated access.", file=sys.stderr)
         else:
             print(f"HTTP error: {e}", file=sys.stderr)
         sys.exit(1)

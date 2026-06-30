@@ -4,29 +4,16 @@ import shutil
 import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
 from dh import get_files, unique_path
 
-EXT = [
-    ".js",
-    ".css",
-    ".html",
-    ".json",
-    ".mjs",
-    ".cjs",
-    ".ts",
-    ".jsx",
-    ".tsx",
-    ".tsm",
-    ".jsm",
-]
+EXT = [".js", ".css", ".html", ".json", ".mjs", ".cjs", ".ts", ".jsx", ".tsx", ".tsm", ".jsm"]
 EXCLUDE_PATTERNS = {}
 
 
 def should_format(path: Path) -> bool:
     if path.suffix not in EXTENSIONS:
         return False
-    return all((not path.name.endswith(p) for p in EXCLUDE_PATTERNS))
+    return all(not path.name.endswith(p) for p in EXCLUDE_PATTERNS)
 
 
 def get_files_to_format(cwd: str = ".") -> list[Path]:
@@ -52,24 +39,19 @@ def move_to_error_folder(path: Path) -> None:
 
 def format_file(path: Path) -> tuple[Path, bool, str | None]:
     try:
-        result = subprocess.run(
-            ["prettier", "--write", str(path)],
-            capture_output=True,
-            text=True,
-            timeout=900,
-        )
+        result = subprocess.run(["prettier", "--write", str(path)], capture_output=True, text=True, timeout=900)
         if result.returncode == 0:
-            return (path, True, None)
-        return (path, False, result.stderr or result.stdout or "Unknown error")
+            return path, True, None
+        return path, False, result.stderr or result.stdout or "Unknown error"
     except Exception as e:
-        return (path, False, str(e))
+        return path, False, str(e)
 
 
 def process_file_wrapper(path: Path) -> tuple[bool, Path, str | None]:
     path, success, error_msg = format_file(path)
     if not success:
         move_to_error_folder(path)
-    return (success, path, error_msg)
+    return success, path, error_msg
 
 
 def main() -> None:

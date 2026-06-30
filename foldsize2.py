@@ -5,14 +5,14 @@ from pathlib import Path
 
 
 def get_all_files(root: Path) -> list[Path]:
-    return [p for p in root.glob("*") if p.is_file() and (not p.name.startswith(".")) and (p.name != "folderize.py")]
+    return [p for p in root.glob("*") if p.is_file() and not p.name.startswith(".") and p.name != "folderize.py"]
 
 
 def safe_rename(src: Path, dest_dir: Path) -> Path:
     dest = dest_dir / src.name
     if not dest.exists():
         return dest
-    stem, suffix = (dest.stem, dest.suffix)
+    stem, suffix = dest.stem, dest.suffix
     i = 1
     while True:
         new_name = f"{stem}_{i}{suffix}"

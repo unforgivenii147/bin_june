@@ -17,5 +17,5 @@ for filepath in Path().rglob("*"):
             print(f"Could not process file {filepath}: {e}")
 output_filename = "env_vars.txt"
 with open(output_filename, "w", encoding="utf-8") as f:
-    f.writelines((var + "\n" for var in sorted(env_vars)))
+    f.writelines(var + "\n" for var in sorted(env_vars))
 print(f"Found {len(env_vars)} unique environment variable names. Saved to {output_filename}")

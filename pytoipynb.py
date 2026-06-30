@@ -3,11 +3,10 @@
 import json
 import sys
 from pathlib import Path
-
 import nbformat as nbf
 
 
-def simple_convert(py_file: str, ipynb_file: str | None = None) -> None:
+def simple_convert(py_file: str, ipynb_file: (str | None) = None) -> None:
     if not ipynb_file:
         ipynb_file = Path(py_file).stem + ".ipynb"
     code = Path(py_file).read_text(encoding="utf-8")

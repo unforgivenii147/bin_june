@@ -12,7 +12,7 @@ def load_env_file(env_path):
         with open(env_path, "r") as f:
             for line in f:
                 line = line.strip()
-                if line and (not line.startswith("#")):
+                if line and not line.startswith("#"):
                     key, value = line.split("=", 1)
                     env_vars[key.strip()] = value.strip()
         return env_vars

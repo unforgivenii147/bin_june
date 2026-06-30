@@ -1,19 +1,24 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 import sys
 from pathlib import Path
-
 from dh import fsz
 
 
 def main() -> None:
-    ext = sys.argv[1]
-    total_size = 0
-    count = 0
+    if len(sys.argv) < 2:
+        print("Usage: script.py <extension>")
+        print("Example: script.py py")
+        sys.exit(1)
+    ext = sys.argv[1].lstrip(".")
     cwd = Path.cwd()
-    for f in cwd.rglob(f"*.{ext}"):
-        total_size += f.stat().st_size
-        count += 1
+    files = list(cwd.rglob(f"*.{ext}"))
+    if not files:
+        print(f"No .{ext} files found in current directory")
+        sys.exit(0)
+    total_size = sum(f.stat().st_size for f in files)
+    count = len(files)
     print(f"Total number of .{ext} files: {count}")
     print(f"Total size of .{ext} files: {fsz(total_size)}")
 

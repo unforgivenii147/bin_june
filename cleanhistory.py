@@ -6,7 +6,7 @@ if __name__ == "__main__":
     fn = Path.home() / ".bash_history"
     nl = []
     with fn.open(encoding="utf-8") as f:
-        nl.extend((line for line in f if 'cd "`printf' not in line))
+        nl.extend(line for line in f if 'cd "`printf' not in line)
     nl = list(set(nl))
     with fn.open("w", encoding="utf-8") as fo:
         fo.writelines(nl)

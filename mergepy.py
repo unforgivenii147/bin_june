@@ -8,11 +8,7 @@ from pathlib import Path
 def resolve_imports(content: str, cwd: Path) -> str:
     folder_name = Path(cwd).name
     content = re.sub("from \\. import ([a-zA-Z0-9_]+)", f"from {folder_name} import \\1", content)
-    content = re.sub(
-        "from \\.([a-zA-Z0-9_]+) import ([a-zA-Z0-9_]+)",
-        f"from {folder_name}.\\1 import \\2",
-        content,
-    )
+    content = re.sub("from \\.([a-zA-Z0-9_]+) import ([a-zA-Z0-9_]+)", f"from {folder_name}.\\1 import \\2", content)
     return re.sub("import \\.", f"import {folder_name}", content)
 
 

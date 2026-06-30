@@ -6,7 +6,6 @@ import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from urllib.parse import unquote, urlparse
-
 import requests
 from tqdm import tqdm
 
@@ -78,7 +77,7 @@ def download_one(url, session, output_dir, resume_from=None):
         offset = Path(filepath).stat().st_size
         remote_size = get_filesize(url, session)
         if remote_size is not None and offset >= remote_size:
-            return (url, True, f"Already complete ({offset} bytes)")
+            return url, True, f"Already complete ({offset} bytes)"
     headers = {}
     if offset > 0:
         headers["Range"] = f"bytes={offset}-"
@@ -92,11 +91,11 @@ def download_one(url, session, output_dir, resume_from=None):
                 for chunk in r.iter_content(chunk_size=65536):
                     if chunk:
                         f.write(chunk)
-        return (url, True, filepath)
+        return url, True, filepath
     except requests.exceptions.RequestException as e:
         if MAX_RETRIES > 0:
-            return (url, False, f"Retry needed: {e}")
-        return (url, False, str(e))
+            return url, False, f"Retry needed: {e}"
+        return url, False, str(e)
 
 
 def download_urls(urls: list[str], output_dir=OUTPUT_DIR) -> None:
@@ -133,7 +132,7 @@ if __name__ == "__main__":
     urls = []
     try:
         with Path(URLS_FILE).open("r", encoding="utf-8") as f:
-            urls = [line.strip() for line in f if line.strip() and (not line.startswith("#"))]
+            urls = [line.strip() for line in f if line.strip() and not line.startswith("#")]
     except FileNotFoundError:
         print(f"❌ Error: {URLS_FILE} not found.")
         sys.exit(1)

@@ -178,11 +178,11 @@ def compress_file(path: Path) -> tuple[bool, int, int]:
     out_path = path.with_suffix(path.suffix + ".lz4")
     if out_path.exists():
         print(f"Skipping {path.name} - output already exists")
-        return (False, 0, 0)
+        return False, 0, 0
     try:
         original_size = path.stat().st_size
         if not original_size:
-            return (False, 0, 0)
+            return False, 0, 0
         if original_size < CHUNK_SIZE:
             success = compress_in_memory(path, out_path)
         else:
@@ -192,28 +192,28 @@ def compress_file(path: Path) -> tuple[bool, int, int]:
             if compressed_size == 0:
                 print(f"Warning: Compressed file empty for {path.name}")
                 out_path.unlink()
-                return (False, 0, 0)
+                return False, 0, 0
             if compressed_size < original_size:
                 path.unlink()
                 reduction = (original_size - compressed_size) / original_size * 100
                 print(f"  ✓ {path.name}: {reduction:.1f}% saved ({fsz(original_size)} → {fsz(compressed_size)})")
-                return (True, original_size, compressed_size)
+                return True, original_size, compressed_size
             else:
                 print(f"  ✗ {path.name}: No space saved, removing compressed file")
                 out_path.unlink()
-                return (False, 0, 0)
+                return False, 0, 0
         else:
-            return (False, 0, 0)
+            return False, 0, 0
     except (OSError, PermissionError, lz4.frame.LZ4FrameError) as e:
         print(f"  ✗ Failed to compress {path.name}: {e}")
-        return (False, 0, 0)
+        return False, 0, 0
 
 
 def get_files(directory: Path, mode: str = "compress") -> list[Path]:
     if mode == "compress":
-        return [p for p in directory.glob("*") if p.is_file() and (not p.is_symlink()) and should_compress(p)]
+        return [p for p in directory.glob("*") if p.is_file() and not p.is_symlink() and should_compress(p)]
     else:
-        return [p for p in directory.glob("*.lz4") if p.is_file() and (not p.is_symlink())]
+        return [p for p in directory.glob("*.lz4") if p.is_file() and not p.is_symlink()]
 
 
 def get_dirs(directory: Path) -> list[Path]:
@@ -364,7 +364,21 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Multi-threaded LZ4 compression/decompression tool (max compression)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="\nExamples:\n  %(prog)s -c          # Compress files and folders in current directory\n  %(prog)s -d          # Decompress .lz4 and .tar.lz4 files in current directory\n  %(prog)s             # Default: compress\n\nLZ4 Settings:\n  - Level: 9 (maximum high compression)\n  - Mode: High Compression (HC) for better ratios\n  - Acceleration: 1 (slowest/max compression)\n  - Block size: 4MB (maximum)\n  - Content checksum: Enabled for integrity\n  - Use case: Excellent balance of speed and compression\n  - Note: Decompression is extremely fast (often > 500 MB/s)\n        ",
+        epilog="""
+Examples:
+  %(prog)s -c          # Compress files and folders in current directory
+  %(prog)s -d          # Decompress .lz4 and .tar.lz4 files in current directory
+  %(prog)s             # Default: compress
+
+LZ4 Settings:
+  - Level: 9 (maximum high compression)
+  - Mode: High Compression (HC) for better ratios
+  - Acceleration: 1 (slowest/max compression)
+  - Block size: 4MB (maximum)
+  - Content checksum: Enabled for integrity
+  - Use case: Excellent balance of speed and compression
+  - Note: Decompression is extremely fast (often > 500 MB/s)
+        """,
     )
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-c", "--compress", action="store_true", help="Compress files and folders with LZ4 (default)")

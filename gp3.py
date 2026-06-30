@@ -44,7 +44,7 @@ def get_repo_info_from_url(url: str) -> tuple[str, str] | None:
     for pattern in patterns:
         match = re.match(pattern, url)
         if match:
-            return (match.group(1), match.group(2))
+            return match.group(1), match.group(2)
     return None
 
 

@@ -5,7 +5,6 @@ import sys
 import tokenize
 from pathlib import Path
 from tokenize import untokenize
-
 from dh import get_files, mpf3
 
 
@@ -76,7 +75,6 @@ def main():
     cwd = Path.cwd()
     args = sys.argv[1:]
     files = []
-
     if args:
         for arg in args:
             p = Path(arg)
@@ -89,7 +87,6 @@ def main():
     if len(files) == 1:
         process_file(files[0])
         sys.exit(1)
-
     mpf3(process_file, files)
 
 

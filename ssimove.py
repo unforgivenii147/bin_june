@@ -2,7 +2,6 @@
 
 import shutil
 from pathlib import Path
-
 import ssdeep
 
 SEARCH_DIR = Path.cwd()
@@ -26,7 +25,7 @@ def find_similar_files(search_dir: Path, output_dir: Path, similarity_threshold:
     output_dir.mkdir(parents=True, exist_ok=True)
     file_hashes: dict[Path, str] = {}
     for filepath in search_dir.rglob("*"):
-        if filepath.is_file() and (not filepath.is_symlink()):
+        if filepath.is_file() and not filepath.is_symlink():
             hash_value = calculate_fuzzy_hash(filepath)
             if hash_value:
                 file_hashes[filepath] = hash_value

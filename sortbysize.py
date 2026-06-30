@@ -11,7 +11,7 @@ def sort_by_size(root_folder: Path):
         if path.is_symlink():
             continue
         if path.is_dir():
-            size = sum((p.stat().st_size for p in path.rglob("*") if p.is_file() and (not p.is_symlink())))
+            size = sum(p.stat().st_size for p in path.rglob("*") if p.is_file() and not p.is_symlink())
         if path.is_file():
             size = path.stat().st_size
         items.append({"name": path.name, "size": size})

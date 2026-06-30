@@ -4,7 +4,6 @@ import ast
 import logging
 import operator
 from pathlib import Path
-
 from dh import get_pyfiles
 from joblib import Parallel, delayed
 from xxhash import xxh64
@@ -13,11 +12,7 @@ OUTPUT_DIR = Path("output")
 OUTPUT_FILE = OUTPUT_DIR / "const.py"
 LOG_FILE = OUTPUT_DIR / "error.log"
 OUTPUT_DIR.mkdir(exist_ok=True)
-logging.basicConfig(
-    filename=LOG_FILE,
-    level=logging.ERROR,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-)
+logging.basicConfig(filename=LOG_FILE, level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s")
 
 
 def get_file_hash(filepath: Path) -> str:
@@ -35,7 +30,7 @@ def extract_constants(filepath: Path) -> list[tuple[str, str, str]]:
             tree = ast.parse(f.read(), filename=str(filepath))
         for node in ast.walk(tree):
             if isinstance(node, ast.Assign):
-                is_simple_assign = all((isinstance(t, ast.Name) for t in node.targets))
+                is_simple_assign = all(isinstance(t, ast.Name) for t in node.targets)
                 if is_simple_assign and isinstance(node.value, ast.Constant):
                     for target in node.targets:
                         const_name = target.id
@@ -63,7 +58,7 @@ def process_file(filepath: Path) -> tuple[str, list[tuple[str, str, str]] | None
     file_hash = get_file_hash(filepath)
     path = Path(path)
     constants = extract_constants(filepath)
-    return (file_hash, constants)
+    return file_hash, constants
 
 
 def main() -> None:
@@ -73,7 +68,7 @@ def main() -> None:
         print("No Python files found in the current directory.")
         return
     print(f"Found {len(python_files)} Python files. Processing...")
-    results = Parallel(n_jobs=-1)((delayed(process_file)(f) for f in python_files))
+    results = Parallel(n_jobs=-1)(delayed(process_file)(f) for f in python_files)
     unique_constants = {}
     processed_hashes = set()
     all_constants_by_hash = {}
@@ -89,7 +84,7 @@ def main() -> None:
                 found = False
                 for idx, (existing_name, existing_value, _existing_type) in enumerate(all_constants_by_hash[file_hash]):
                     if existing_name == name and existing_value == value:
-                        all_constants_by_hash[file_hash][idx] = (name, value, ctype)
+                        all_constants_by_hash[file_hash][idx] = name, value, ctype
                         found = True
                         break
                 if not found:

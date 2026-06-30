@@ -2,7 +2,6 @@
 
 from collections import defaultdict
 from pathlib import Path
-
 import tree_sitter_python as tsp
 from tree_sitter import Language, Parser, Tree
 
@@ -29,7 +28,7 @@ folder_imports = defaultdict(list)
 processed_files_count = 0
 folders_found = set()
 for py in Path().rglob("*.py"):
-    if any((part.startswith(".") for part in py.parts)) or "site-packages" in py.parts:
+    if any(part.startswith(".") for part in py.parts) or "site-packages" in py.parts:
         continue
     if OUT_DIR in py.parents:
         continue
@@ -55,5 +54,8 @@ for folder, imports_list in folder_imports.items():
     header = f"# Auto-generated imports file for folder: {folder}\n"
     out_file.write_text(header + content)
     print(f"✅ saved: {out_file} ({len(imports_list)} files)")
-print(f"\n✨ Done! Processed {processed_files_count} files in {len(folder_imports)} folder(s)")
+print(
+    f"""
+✨ Done! Processed {processed_files_count} files in {len(folder_imports)} folder(s)"""
+)
 print(f"📁 Folders: {', '.join(sorted(folders_found))}")

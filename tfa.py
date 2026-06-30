@@ -2,7 +2,6 @@
 
 import json
 from pathlib import Path
-
 from deep_translator import GoogleTranslator
 
 INPUT_FILE = "words.txt"

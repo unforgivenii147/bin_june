@@ -1,7 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 from pathlib import Path
-
 from dh import cprint, runcmd
 
 if __name__ == "__main__":
@@ -15,7 +14,7 @@ if __name__ == "__main__":
             indx = stripped.index(target_char)
             cleaned = stripped[:indx]
             nl.append(cleaned)
-        elif stripped and (not "listing" in stripped.lower()):
+        elif stripped and not "listing" in stripped.lower():
             nl.append(stripped)
     file_name = Path("/sdcard/alu")
     if nl:

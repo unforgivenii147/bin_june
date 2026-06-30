@@ -20,7 +20,7 @@ def parse_aliases(filepath: Path):
         for match in pattern.finditer(content):
             name = match.group(1)
             value = match.group(2).strip()
-            if value.startswith('"') and value.endswith('"') or (value.startswith("'") and value.endswith("'")):
+            if value.startswith('"') and value.endswith('"') or value.startswith("'") and value.endswith("'"):
                 value = value[1:-1]
             aliases.append((name, value, match.group(0)))
     except FileNotFoundError:
@@ -61,8 +61,8 @@ def display_aliases(aliases, limit=None) -> None:
     sorted_aliases = sorted(aliases, key=lambda x: x[1])
     if limit:
         sorted_aliases = sorted_aliases[:limit]
-    max_name_len = max((len(name) for name, _, _ in sorted_aliases))
-    max_value_len = max((len(value) for _, value, _ in sorted_aliases))
+    max_name_len = max(len(name) for name, _, _ in sorted_aliases)
+    max_value_len = max(len(value) for _, value, _ in sorted_aliases)
     max_value_len = min(max_value_len, 60)
     print(f"\n{'ALIAS':<{max_name_len}}  {'VALUE':<{max_value_len}}")
     print("-" * (max_name_len + max_value_len + 2))

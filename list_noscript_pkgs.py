@@ -6,7 +6,7 @@ from pathlib import Path
 
 u = Path(site.getusersitepackages())
 for p in u.iterdir():
-    if p.is_dir() and (not p.name.endswith((".dist-info", ".egg-info"))):
+    if p.is_dir() and not p.name.endswith((".dist-info", ".egg-info")):
         has_entry = False
         for pattern in [f"{p.name}*.dist-info", f"{p.name}*.egg-info"]:
             for d in u.glob(pattern):

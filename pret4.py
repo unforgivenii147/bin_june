@@ -4,7 +4,6 @@ import shutil
 import subprocess
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-
 from dh import unique_path
 
 EXTENSIONS = {".js", ".css", ".html", ".json", ".mjs", ".cjs", ".ts", ".jsx", ".tsx"}
@@ -12,7 +11,7 @@ EXCLUDE_PATTERNS = {".py", ".ipynb"}
 
 
 def should_format(file_path: Path) -> bool:
-    return file_path.suffix in EXTENSIONS and (not any((file_path.name.endswith(p) for p in EXCLUDE_PATTERNS)))
+    return file_path.suffix in EXTENSIONS and not any(file_path.name.endswith(p) for p in EXCLUDE_PATTERNS)
 
 
 def get_files_to_format(cwd: str = ".") -> list[Path]:
@@ -21,17 +20,12 @@ def get_files_to_format(cwd: str = ".") -> list[Path]:
 
 def format_file(file_path: Path) -> tuple[Path, bool, str | None]:
     try:
-        result = subprocess.run(
-            ["prettier", "--write", str(file_path)],
-            capture_output=True,
-            text=True,
-            timeout=300,
-        )
+        result = subprocess.run(["prettier", "--write", str(file_path)], capture_output=True, text=True, timeout=300)
         if result.returncode == 0:
-            return (file_path, True, None)
-        return (file_path, False, result.stderr or "Unknown error")
+            return file_path, True, None
+        return file_path, False, result.stderr or "Unknown error"
     except Exception as e:
-        return (file_path, False, str(e))
+        return file_path, False, str(e)
 
 
 def main() -> None:

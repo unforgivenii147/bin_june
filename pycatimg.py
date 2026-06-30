@@ -104,9 +104,9 @@ def image_to_ansi_blocks(img) -> str:
 def get_terminal_size() -> tuple[int, int]:
     try:
         columns, rows = os.get_terminal_size()
-        return (columns, rows)
+        return columns, rows
     except:
-        return (80, 24)
+        return 80, 24
 
 
 def catimg(image_path, width=None, height=None, use_half_blocks=True, dpi=96, bg_color=None) -> None:
@@ -158,7 +158,7 @@ def main() -> None:
     parser.add_argument("--dpi", type=int, default=96, help="DPI for SVG rendering (default: 96)")
     parser.add_argument("--bg-color", help='Background color for transparent areas (e.g., "black" or "#000000")')
     args = parser.parse_args()
-    if args.image.lower().endswith(".svg") and (not SVG_SUPPORT):
+    if args.image.lower().endswith(".svg") and not SVG_SUPPORT:
         print("Warning: SVG support requires 'cairosvg'. Install with:", file=sys.stderr)
         print("  pip install cairosvg", file=sys.stderr)
         print("\nFor system dependencies (Linux):", file=sys.stderr)

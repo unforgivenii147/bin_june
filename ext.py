@@ -32,7 +32,7 @@ def discover_python_files() -> list[str]:
     return files
 
 
-def mark_parents(node: ast.AST, parent: AST | None = None) -> None:
+def mark_parents(node: ast.AST, parent: (AST | None) = None) -> None:
     for child in ast.iter_child_nodes(node):
         child._parent = node
         mark_parents(child, node)
@@ -49,10 +49,10 @@ def extract_from_file(
         source = Path(path).read_text(encoding="utf-8", errors="ignore")
         tree = ast.parse(source)
     except Exception:
-        return (path, {}, {}, {}, {}, {})
+        return path, {}, {}, {}, {}, {}
     mark_parents(tree)
-    tl_classes, tl_funcs = ({}, {})
-    nested_classes, nested_funcs = ({}, {})
+    tl_classes, tl_funcs = {}, {}
+    nested_classes, nested_funcs = {}, {}
     consts = {}
     for node in ast.walk(tree):
         if isinstance(node, (ast.ClassDef, ast.FunctionDef)):
@@ -86,12 +86,12 @@ def extract_from_file(
             src = ast.get_source_segment(source, node)
             if src:
                 consts[name] = src
-    return (path, tl_classes, tl_funcs, nested_classes, nested_funcs, consts)
+    return path, tl_classes, tl_funcs, nested_classes, nested_funcs, consts
 
 
 def write_output(path: str, data: dict[str, str]) -> None:
     with Path(path).open("w", encoding="utf-8") as f:
-        f.writelines((src.rstrip() + "\n\n" for _name, src in sorted(data.items())))
+        f.writelines(src.rstrip() + "\n\n" for _name, src in sorted(data.items()))
 
 
 def main() -> None:
@@ -102,8 +102,8 @@ def main() -> None:
         return
     with mp.Pool(mp.cpu_count()) as pool:
         results = pool.map(extract_from_file, files)
-    tl_classes, tl_funcs = ({}, {})
-    nested_classes, nested_funcs = ({}, {})
+    tl_classes, tl_funcs = {}, {}
+    nested_classes, nested_funcs = {}, {}
     const_map = {}
     for _, c, f, nc, nf, consts in results:
         tl_classes.update(c)

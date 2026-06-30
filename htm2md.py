@@ -2,7 +2,6 @@
 
 import sys
 from pathlib import Path
-
 from dh import get_files, mpf3, runcmd
 
 
@@ -11,15 +10,15 @@ def process_file(path) -> tuple[Path, bool]:
     if path.suffix.lower() in {".html", ".htm"}:
         md_file = path.with_suffix(".md")
     else:
-        return (path, False)
+        return path, False
     try:
         _, txt, _ = runcmd(["rhtml2md", str(path)], show_output=False)
         md_file.write_text(txt, encoding="utf-8")
         print(f"✓ Converted: {path.name} -> {md_file.name}")
-        return (md_file, True)
+        return md_file, True
     except Exception as e:
         print(f"✗ Unexpected error converting {path}: {e}", file=sys.stderr)
-        return (path, False)
+        return path, False
 
 
 def main() -> None:

@@ -3,7 +3,6 @@
 import ast
 from pathlib import Path
 from sys import argv
-
 from dh import run_command
 
 if __name__ == "__main__":

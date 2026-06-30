@@ -28,7 +28,7 @@ def canonical_url(u: str) -> str:
     segs = [s for s in (p.path or "/").split("/") if s]
     if "github.com" in host:
         if len(segs) >= 2:
-            owner, repo = (segs[0], segs[1])
+            owner, repo = segs[0], segs[1]
             return f"https://github.com/{owner}/{repo}"
         return "https://github.com/"
     return f"https://{host}/"
@@ -53,7 +53,7 @@ def main() -> None:
         lines = f.readlines()
     pruned = prune_urls(lines)
     with open(INPUT_FILE, "w", encoding="utf-8") as f:
-        f.writelines((u + "\n" for u in pruned))
+        f.writelines(u + "\n" for u in pruned)
 
 
 if __name__ == "__main__":

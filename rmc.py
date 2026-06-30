@@ -83,7 +83,7 @@ def extract_shebang_and_encoding(source_code: str) -> Tuple[str, str, str]:
             encoding = line
             continue
         remaining_lines.append(line)
-    return ("".join(remaining_lines), shebang, encoding)
+    return "".join(remaining_lines), shebang, encoding
 
 
 def restore_shebang_and_encoding(code: str, shebang: str, encoding: str) -> str:
@@ -113,8 +113,8 @@ def remove_comments_preserve_format(source_code: str) -> Tuple[str, int]:
         comment_start = -1
         while i < len(line):
             char = line[i]
-            if char in ('"', "'") and (not in_triple_quotes):
-                if i + 2 < len(line) and line[i + 1] == char and (line[i + 2] == char):
+            if char in ('"', "'") and not in_triple_quotes:
+                if i + 2 < len(line) and line[i + 1] == char and line[i + 2] == char:
                     if not in_string:
                         in_triple_quotes = True
                         triple_quote_char = char
@@ -127,16 +127,16 @@ def remove_comments_preserve_format(source_code: str) -> Tuple[str, int]:
                         new_line.append(char * 3)
                         i += 3
                         continue
-                if not in_string and (not in_triple_quotes):
+                if not in_string and not in_triple_quotes:
                     in_string = True
                     string_char = char
-                elif in_string and string_char == char and (not in_triple_quotes):
+                elif in_string and string_char == char and not in_triple_quotes:
                     in_string = False
                     string_char = None
                 new_line.append(char)
                 i += 1
                 continue
-            if char == "#" and (not in_string) and (not in_triple_quotes):
+            if char == "#" and not in_string and not in_triple_quotes:
                 remaining = line[i:]
                 if remaining.startswith("# type:"):
                     new_line.append(remaining)
@@ -152,17 +152,17 @@ def remove_comments_preserve_format(source_code: str) -> Tuple[str, int]:
             result_lines.append(result_line.rstrip() + "\n")
         else:
             result_lines.append("".join(new_line))
-    return ("".join(result_lines), comments_removed)
+    return "".join(result_lines), comments_removed
 
 
 def validate_python_code(code: str, path: Path) -> Tuple[bool, Optional[str]]:
     try:
         ast.parse(code)
-        return (True, None)
+        return True, None
     except SyntaxError as e:
         return (False, f"Syntax error at line {e.lineno}, column {e.offset}: {e.msg}")
     except Exception as e:
-        return (False, str(e))
+        return False, str(e)
 
 
 def process_docstrings_ast(source_code: str, preserve_module_docstring: bool = True) -> Tuple[str, int]:
@@ -172,10 +172,10 @@ def process_docstrings_ast(source_code: str, preserve_module_docstring: bool = T
         modified_tree = processor.visit(tree)
         ast.fix_missing_locations(modified_tree)
         modified_code = ast.unparse(modified_tree)
-        return (modified_code, processor.docstrings_removed)
+        return modified_code, processor.docstrings_removed
     except SyntaxError as e:
         print(f"Warning: AST parsing error - {e}")
-        return (source_code, 0)
+        return source_code, 0
 
 
 def process_python_file(path: Path, preserve_module_docstring: bool = True) -> FileResult:
@@ -184,11 +184,8 @@ def process_python_file(path: Path, preserve_module_docstring: bool = True) -> F
         orig = path.read_text(encoding="utf-8")
         code_without_header, shebang, encoding = extract_shebang_and_encoding(orig)
         code_no_comments, comments_removed = remove_comments_preserve_format(code_without_header)
-
         code_no_docstrings, docstrings_removed = process_docstrings_ast(code_no_comments, preserve_module_docstring)
-
         final_code = restore_shebang_and_encoding(code_no_docstrings, shebang, encoding)
-
         changed = comments_removed > 0 or docstrings_removed > 0
         if changed:
             is_valid, error_msg = validate_python_code(final_code, path)
@@ -201,31 +198,18 @@ def process_python_file(path: Path, preserve_module_docstring: bool = True) -> F
                     error=f"Validation failed: {error_msg}",
                 )
             with tempfile.NamedTemporaryFile(
-                mode="w",
-                encoding="utf-8",
-                dir=path.parent,
-                prefix=".tmp_",
-                delete=False,
+                mode="w", encoding="utf-8", dir=path.parent, prefix=".tmp_", delete=False
             ) as tmp:
                 tmp.write(final_code)
                 temp_file = Path(tmp.name)
             shutil.move(str(temp_file), str(path))
         return FileResult(
-            path=path,
-            comments_removed=comments_removed,
-            docstrings_removed=docstrings_removed,
-            changed=changed,
+            path=path, comments_removed=comments_removed, docstrings_removed=docstrings_removed, changed=changed
         )
     except Exception as e:
         if temp_file and temp_file.exists():
             temp_file.unlink()
-        return FileResult(
-            path=path,
-            comments_removed=0,
-            docstrings_removed=0,
-            changed=False,
-            error=str(e),
-        )
+        return FileResult(path=path, comments_removed=0, docstrings_removed=0, changed=False, error=str(e))
 
 
 def find_python_files(path: Path) -> list[Path]:
@@ -243,9 +227,9 @@ def format_result(result: FileResult) -> str:
         return f"{result.path.name} (no change)"
     parts = []
     if result.comments_removed > 0:
-        parts.append(f"{result.comments_removed} comment{('s' if result.comments_removed != 1 else '')}")
+        parts.append(f"{result.comments_removed} comment{'s' if result.comments_removed != 1 else ''}")
     if result.docstrings_removed > 0:
-        parts.append(f"{result.docstrings_removed} docstring{('s' if result.docstrings_removed != 1 else '')}")
+        parts.append(f"{result.docstrings_removed} docstring{'s' if result.docstrings_removed != 1 else ''}")
     removal_text = ", ".join(parts)
     return f"{result.path.name} ({removal_text} removed)"
 
@@ -254,12 +238,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Remove comments and docstrings from Python files (preserves formatting)"
     )
-    parser.add_argument(
-        "target",
-        nargs="?",
-        default=".",
-        help="Target file or directory (default: current directory)",
-    )
+    parser.add_argument("target", nargs="?", default=".", help="Target file or directory (default: current directory)")
     parser.add_argument("--workers", type=int, default=4, help="Number of worker processes (default: 4)")
     parser.add_argument(
         "--remove-module-docstring",
@@ -267,9 +246,7 @@ def main() -> None:
         help="Also remove module-level docstrings (preserved by default)",
     )
     parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Show what would be changed without actually modifying files",
+        "--dry-run", action="store_true", help="Show what would be changed without actually modifying files"
     )
     args = parser.parse_args()
     target_path = Path(args.target).resolve()
@@ -280,7 +257,7 @@ def main() -> None:
     if not python_files:
         print("No Python files found")
         return
-    print(f"{len(python_files)} file{('s' if len(python_files) != 1 else '')} found")
+    print(f"{len(python_files)} file{'s' if len(python_files) != 1 else ''} found")
     if args.dry_run:
         print("DRY RUN - No files will be modified")
     results = []
@@ -303,10 +280,10 @@ def main() -> None:
                 print(f"{result.path.name} (would process)")
     if not args.dry_run:
         total_files = len(results)
-        changed_files = sum((1 for r in results if r.changed))
-        total_comments = sum((r.comments_removed for r in results))
-        total_docstrings = sum((r.docstrings_removed for r in results))
-        errors = sum((1 for r in results if r.error))
+        changed_files = sum(1 for r in results if r.changed)
+        total_comments = sum(r.comments_removed for r in results)
+        total_docstrings = sum(r.docstrings_removed for r in results)
+        errors = sum(1 for r in results if r.error)
         print(f"\n{'=' * 50}")
         print(f"Summary:")
         print(f"  Total files processed: {total_files}")

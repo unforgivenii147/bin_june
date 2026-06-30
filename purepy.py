@@ -3,7 +3,6 @@
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
 import requests
 
 
@@ -11,7 +10,7 @@ def has_native_wheels(info) -> bool:
     urls = info.get("urls", [])
     for u in urls:
         filename = u.get("filename", "").lower()
-        if any((ext in filename for ext in [".so", ".pyd", ".dll", "win_amd64", "manylinux", "macosx"])):
+        if any(ext in filename for ext in [".so", ".pyd", ".dll", "win_amd64", "manylinux", "macosx"]):
             return True
     return False
 
@@ -21,13 +20,13 @@ def check_package(name) -> tuple:
     try:
         resp = requests.get(url, timeout=10)
         if resp.status_code != 200:
-            return (name, "not_found")
+            return name, "not_found"
         info = resp.json()
         if has_native_wheels(info):
-            return (name, "native")
-        return (name, "pure")
+            return name, "native"
+        return name, "pure"
     except Exception:
-        return (name, "not_found")
+        return name, "not_found"
 
 
 def main() -> None:

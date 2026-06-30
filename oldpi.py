@@ -8,7 +8,6 @@ import tokenize
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from mmap import mmap
 from pathlib import Path
-
 from _io import BufferedReader
 from dh import get_pyfiles
 from tqdm import tqdm
@@ -74,14 +73,14 @@ def autofix_file(filepath: str) -> bool:
     try:
         with Path(filepath).open(encoding="utf-8") as f:
             lines = f.readlines()
-        if any((l.strip() == "from rich import print" for l in lines)):
+        if any(l.strip() == "from rich import print" for l in lines):
             return False
         changed = False
         for i, line in enumerate(lines):
             stripped = line.lstrip()
             if stripped.rstrip() == "print":
                 continue
-            if stripped.startswith("print ") and (not stripped.startswith("print(")):
+            if stripped.startswith("print ") and not stripped.startswith("print("):
                 indent = line[: len(line) - len(stripped)]
                 content = stripped[len("print ") :].rstrip()
                 lines[i] = f"{indent}print({content})\n"
@@ -103,7 +102,7 @@ def process_file(filepath: str, autofix: bool) -> tuple[str, str] | None:
         return None
     if autofix:
         autofix_file(filepath)
-    return (filepath, confirmed)
+    return filepath, confirmed
 
 
 def main() -> None:

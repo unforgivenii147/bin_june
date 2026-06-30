@@ -2,7 +2,6 @@
 
 import sys
 from pathlib import Path
-
 from dh import get_nobinary, mpf3, runcmd
 
 
@@ -24,11 +23,11 @@ def process_file(path) -> tuple[bool, Path]:
         res, _, _ = runcmd(["shfmt", "-w", str(path)], show_output=True)
         if res != 0:
             print("  shfmt failed:", res.stderr.strip(), file=sys.stderr)
-            return (False, path)
+            return False, path
     except Exception as e:
         print("  error running shfmt:", e, file=sys.stderr)
-        return (False, path)
-    return (True, path)
+        return False, path
+    return True, path
 
 
 def main() -> None:

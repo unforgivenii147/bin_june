@@ -106,7 +106,7 @@ def test_speed() -> tuple[float | None, float | None, str | None, str | None]:
         ul_mbps = upload_bits / elapsed / 1000000.0
     except Exception as e:
         ul_error = str(e)
-    return (dl_mbps, ul_mbps, dl_error, ul_error)
+    return dl_mbps, ul_mbps, dl_error, ul_error
 
 
 def main() -> None:
@@ -134,6 +134,37 @@ def main() -> None:
         print("    No DNS servers found.")
 
 
-'\n    # --- Internet Speed ---\n    print("\n[*] Internet Speed Test:")\n    # Try using the official speedtest-cli if available (much more accurate)\n    try:\n        import speedtest\n        print("    Using speedtest-cli...")\n        st = speedtest.Speedtest()\n        st.get_best_server()\n        dl_speed = st.download() / 1e6   # Mbps\n        ul_speed = st.upload() / 1e6     # Mbps\n        print(f"    Download: {dl_speed:.2f} Mbps")\n        print(f"    Upload:   {ul_speed:.2f} Mbps")\n    except ImportError:\n        # Fallback to built‑in HTTP test\n        dl, ul, dl_err, ul_err = test_speed()\n        if dl is not None:\n            print(f"    Download: {dl:.2f} Mbps (approx.)")\n        else:\n            print(f"    Download test failed: {dl_err}")\n        if ul is not None:\n            print(f"    Upload:   {ul:.2f} Mbps (approx.)")\n        else:\n            print(f"    Upload test failed: {ul_err}")\n        print("    (Install \'speedtest-cli\' for more reliable results: pip install speedtest-cli)")\n\n    print("\n" + "=" * 50)\n\n\n'
+"""
+    # --- Internet Speed ---
+    print("
+[*] Internet Speed Test:")
+    # Try using the official speedtest-cli if available (much more accurate)
+    try:
+        import speedtest
+        print("    Using speedtest-cli...")
+        st = speedtest.Speedtest()
+        st.get_best_server()
+        dl_speed = st.download() / 1e6   # Mbps
+        ul_speed = st.upload() / 1e6     # Mbps
+        print(f"    Download: {dl_speed:.2f} Mbps")
+        print(f"    Upload:   {ul_speed:.2f} Mbps")
+    except ImportError:
+        # Fallback to built‑in HTTP test
+        dl, ul, dl_err, ul_err = test_speed()
+        if dl is not None:
+            print(f"    Download: {dl:.2f} Mbps (approx.)")
+        else:
+            print(f"    Download test failed: {dl_err}")
+        if ul is not None:
+            print(f"    Upload:   {ul:.2f} Mbps (approx.)")
+        else:
+            print(f"    Upload test failed: {ul_err}")
+        print("    (Install 'speedtest-cli' for more reliable results: pip install speedtest-cli)")
+
+    print("
+" + "=" * 50)
+
+
+"""
 if __name__ == "__main__":
     main()

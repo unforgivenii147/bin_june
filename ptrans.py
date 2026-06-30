@@ -135,7 +135,7 @@ def main():
     )
     args = parser.parse_args()
     if args.extensions:
-        extensions = {ext.lower() if ext.startswith(".") else f".{ext.lower()}" for ext in args.extensions}
+        extensions = {(ext.lower() if ext.startswith(".") else f".{ext.lower()}") for ext in args.extensions}
     else:
         extensions = DEFAULT_TEXT_EXTENSIONS
     root = args.directory.resolve()

@@ -47,8 +47,7 @@ LANG_TO_EXT = {
     "plain": ".txt",
 }
 CODE_BLOCK_RE = re.compile(
-    "```(?P<lang>[A-Za-z0-9_+\\-.]*)[ \\t]*\\n(?P<code>.*?)(?<=\\n)```",
-    re.DOTALL | re.IGNORECASE,
+    "```(?P<lang>[A-Za-z0-9_+\\-.]*)[ \\t]*\\n(?P<code>.*?)(?<=\\n)```", re.DOTALL | re.IGNORECASE
 )
 
 
@@ -98,7 +97,7 @@ def main() -> None:
     cwd = Path.cwd().resolve()
     out_dir = cwd / "output"
     out_dir.mkdir(parents=True, exist_ok=True)
-    md_files = sorted((p for p in cwd.rglob("*.md") if p.is_file()))
+    md_files = sorted(p for p in cwd.rglob("*.md") if p.is_file())
     total_blocks = 0
     all_extracted = []
     for md_file in md_files:

@@ -53,7 +53,7 @@ class ImportVisitor(ast.NodeVisitor):
 def get_local_packages(start_path: Path) -> set:
     packages = set()
     for init_file in start_path.rglob("__init__.py"):
-        if any((part in SKIP_DIRS for part in init_file.parts)):
+        if any(part in SKIP_DIRS for part in init_file.parts):
             continue
         packages.add(init_file.parent.name)
     return packages
@@ -74,13 +74,13 @@ def _process_file(file_path: Path) -> tuple:
         error = f"UnicodeDecodeError: {e}"
     except Exception as e:
         error = f"Error: {e}"
-    return (file_path, imports, error is None, error)
+    return file_path, imports, error is None, error
 
 
 def has_python_files(dir_path: Path) -> bool:
     try:
         for item in dir_path.rglob("*.py"):
-            if any((part in SKIP_DIRS for part in item.parts)):
+            if any(part in SKIP_DIRS for part in item.parts):
                 continue
             return True
     except (PermissionError, OSError):
@@ -92,14 +92,14 @@ def find_imports_for_directory(dir_path: Path, start_path: Path, std_libs: set, 
     files = []
     for py_file in dir_path.rglob("*.py"):
         if py_file.is_file():
-            if any((part in SKIP_DIRS for part in py_file.relative_to(dir_path).parts)):
+            if any(part in SKIP_DIRS for part in py_file.relative_to(dir_path).parts):
                 continue
             files.append(py_file)
     if not files:
         return []
     all_imports = set()
     if HAS_JOBLIB:
-        results = Parallel(n_jobs=-1)((delayed(_process_file)(f) for f in files))
+        results = Parallel(n_jobs=-1)(delayed(_process_file)(f) for f in files)
         for file_path, imports, success, error in results:
             if success:
                 all_imports.update(imports)
@@ -108,13 +108,13 @@ def find_imports_for_directory(dir_path: Path, start_path: Path, std_libs: set, 
             file_path, imports, success, error = _process_file(f)
             if success:
                 all_imports.update(imports)
-    local_modules = {p.stem for p in dir_path.glob("*.py") if not any((part in SKIP_DIRS for part in p.parts))}
+    local_modules = {p.stem for p in dir_path.glob("*.py") if not any(part in SKIP_DIRS for part in p.parts)}
     local_packages = get_local_packages(dir_path)
     local_names = local_modules | local_packages | all_local_packages
     result = sorted([
         imp
         for imp in all_imports
-        if imp not in std_libs and imp not in local_names and (not imp.startswith(".")) and (imp != "__future__")
+        if imp not in std_libs and imp not in local_names and not imp.startswith(".") and imp != "__future__"
     ])
     return result
 
@@ -135,20 +135,18 @@ def save_requirements_file(modules: list, output_path: Path, pkgz: set) -> bool:
     with output_path.open(encoding="utf-8") as fin:
         lines = fin.readlines()
         cleaned.extend(
-            (
-                line
-                .rstrip()
-                .replace("Not Installed", "")
-                .replace("==(NA)", "")
-                .replace("==(unknown)", "")
-                .replace("==", "")
-                for line in lines
-            )
+            line
+            .rstrip()
+            .replace("Not Installed", "")
+            .replace("==(NA)", "")
+            .replace("==(unknown)", "")
+            .replace("==", "")
+            for line in lines
         )
     seen = set()
     unique_cleaned = []
     for p in cleaned:
-        if p and p not in pkgz and (not p.startswith("_")) and (p not in seen):
+        if p and p not in pkgz and not p.startswith("_") and p not in seen:
             seen.add(p)
             unique_cleaned.append(p)
     if not unique_cleaned:
@@ -210,7 +208,10 @@ def main() -> None:
     all_local_packages = get_local_packages(cwd)
     subdirs = get_valid_subdirs(cwd)
     if args.save_separate and subdirs:
-        print(f"\n📁 Found {len(subdirs)} subdirectories with Python files - generating separate requirements files")
+        print(
+            f"""
+📁 Found {len(subdirs)} subdirectories with Python files - generating separate requirements files"""
+        )
         print("=" * 60)
         total_imports = set()
         created_count = 0
@@ -257,7 +258,7 @@ def main() -> None:
             if py_file.is_file():
                 try:
                     rel_path = py_file.relative_to(cwd)
-                    if any((part in SKIP_DIRS for part in rel_path.parts)):
+                    if any(part in SKIP_DIRS for part in rel_path.parts):
                         continue
                 except ValueError:
                     pass
@@ -289,7 +290,7 @@ def main() -> None:
             if show_progress:
                 start_time = time.time()
             if HAS_JOBLIB:
-                results = Parallel(n_jobs=-1)((delayed(_process_file)(f) for f in dir_files))
+                results = Parallel(n_jobs=-1)(delayed(_process_file)(f) for f in dir_files)
                 for file_path, imports, success, error in results:
                     if success:
                         all_imports.update(imports)
@@ -303,16 +304,13 @@ def main() -> None:
                 print(f"[{dir_count}/{len(files_by_dir)}] {subdir:<30} ({len(dir_files):>4} files, {elapsed:.2f}s)")
         if show_progress:
             print("=" * 60)
-        local_modules = {p.stem for p in cwd.glob("*.py") if not any((part in SKIP_DIRS for part in p.parts))}
+        local_modules = {p.stem for p in cwd.glob("*.py") if not any(part in SKIP_DIRS for part in p.parts)}
         local_names = local_modules | all_local_packages
         modules = sorted(
             set([
                 imp
                 for imp in all_imports
-                if imp not in std_libs
-                and imp not in local_names
-                and (not imp.startswith("."))
-                and (imp != "__future__")
+                if imp not in std_libs and imp not in local_names and not imp.startswith(".") and imp != "__future__"
             ])
         )
         if modules:

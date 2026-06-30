@@ -6,22 +6,11 @@ import tarfile
 import zipfile
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-
 import brotli
 import chardet
 from loguru import logger
 
-TARGET_EXTENSIONS = {
-    ".tar.gz",
-    ".pdf",
-    ".zip",
-    ".css",
-    ".js",
-    ".tar.xz",
-    ".7z",
-    ".whl",
-    ".html",
-}
+TARGET_EXTENSIONS = {".tar.gz", ".pdf", ".zip", ".css", ".js", ".tar.xz", ".7z", ".whl", ".html"}
 COMPRESSED_ARCHIVES = {".tar.xz", ".tar.gz", ".tar.zst", ".7z", ".br", ".zip", ".whl"}
 GITHUB_REPO_REGEX = re.compile("https?://(?:www\\.)?github\\.com/[a-zA-Z0-9\\-]+/[a-zA-Z0-9\\-]+")
 URL_REGEX = re.compile("(http|ftp|https)://([\\w_-]+(?:(?:\\.[\\w_-]+)+))([\\w.,@?^=%&:/~+#-]*[\\w@?^=%&/~+#-])?")
@@ -29,10 +18,10 @@ MAX_WORKERS = 4
 BINARY_CHECK_THRESHOLD = 0.7
 
 
-def extract_links_from_text(text: str, file_path: Path | str):
+def extract_links_from_text(text: str, file_path: (Path | str)):
     urls = URL_REGEX.findall(text)
     github_urls = GITHUB_REPO_REGEX.findall(text)
-    return (urls, github_urls)
+    return urls, github_urls
 
 
 def is_likely_binary(file_path: Path, chunk_size=1024) -> bool:
@@ -45,10 +34,8 @@ def is_likely_binary(file_path: Path, chunk_size=1024) -> bool:
             return bool(
                 (result["encoding"] is None or result["confidence"] < BINARY_CHECK_THRESHOLD)
                 and any(
-                    (
-                        not (32 <= ord(c) <= 126 or c in "\n\r\t")
-                        for c in chunk.decode(result["encoding"] or "latin-1", errors="ignore")
-                    )
+                    not (32 <= ord(c) <= 126 or c in "\n\r\t")
+                    for c in chunk.decode(result["encoding"] or "latin-1", errors="ignore")
                 )
             )
     except Exception as e:
@@ -56,15 +43,13 @@ def is_likely_binary(file_path: Path, chunk_size=1024) -> bool:
         return True
 
 
-def read_file_with_encodings(
-    file_path: Path,
-) -> tuple[str, str] | tuple[str, None] | tuple[None, None]:
+def read_file_with_encodings(file_path: Path) -> tuple[str, str] | tuple[str, None] | tuple[None, None]:
     encodings_to_try = ["utf-8", "latin-1", "iso-8859-1", "cp1252"]
     for encoding in encodings_to_try:
         try:
             content = Path(file_path).read_text(encoding=encoding)
             logger.debug(f"Successfully read {file_path} with {encoding}")
-            return (content, None)
+            return content, None
         except UnicodeDecodeError:
             continue
         except Exception as e:
@@ -78,12 +63,12 @@ def read_file_with_encodings(
             try:
                 content = raw_data.decode(detected_encoding)
                 logger.debug(f"Successfully read {file_path} with detected encoding {detected_encoding}")
-                return (content, detected_encoding)
+                return content, detected_encoding
             except Exception as e:
                 logger.warning(f"Error decoding {file_path} with detected encoding {detected_encoding}: {e}")
     except Exception as e:
         logger.error(f"Failed to read or detect encoding for {file_path}: {e}")
-    return (None, None)
+    return None, None
 
 
 def process_file(file_path):
@@ -93,7 +78,7 @@ def process_file(file_path):
     file_path = Path(file_path)
     file_extension = file_path.suffix.lower()
     if not file_path.is_file():
-        return ([], [])
+        return [], []
     try:
         if file_extension in TARGET_EXTENSIONS:
             if file_extension == ".pdf":
@@ -105,14 +90,7 @@ def process_file(file_path):
                     logger.debug(f"Extracted from PDF: {file_path}")
                 else:
                     logger.warning(f"Could not decode PDF content for {file_path}")
-            elif file_extension in {
-                ".tar.gz",
-                ".tar.xz",
-                ".tar.zst",
-                ".zip",
-                ".7z",
-                ".whl",
-            }:
+            elif file_extension in {".tar.gz", ".tar.xz", ".tar.zst", ".zip", ".7z", ".whl"}:
                 try:
                     if file_extension in {".tar.gz", ".tar.xz"}:
                         with tarfile.open(file_path, "r:*") as tar:
@@ -125,8 +103,7 @@ def process_file(file_path):
                                             member_content_str, _ = read_file_with_encodings(file_path)
                                             if member_content_str:
                                                 urls, gh_urls = extract_links_from_text(
-                                                    member_content_str,
-                                                    f"{file_path}/{member.name}",
+                                                    member_content_str, f"{file_path}/{member.name}"
                                                 )
                                                 local_urls.extend(urls)
                                                 github_urls.extend(gh_urls)
@@ -142,8 +119,7 @@ def process_file(file_path):
                                         member_content_str, _ = read_file_with_encodings(file_path)
                                         if member_content_str:
                                             urls, gh_urls = extract_links_from_text(
-                                                member_content_str,
-                                                f"{file_path}/{file_info.filename}",
+                                                member_content_str, f"{file_path}/{file_info.filename}"
                                             )
                                             local_urls.extend(urls)
                                             github_urls.extend(gh_urls)
@@ -190,7 +166,7 @@ def process_file(file_path):
         if (
             is_likely_binary(file_path)
             and file_extension not in TARGET_EXTENSIONS
-            and (file_extension not in COMPRESSED_ARCHIVES)
+            and file_extension not in COMPRESSED_ARCHIVES
         ):
             content, _ = read_file_with_encodings(file_path)
             if content:
@@ -202,7 +178,7 @@ def process_file(file_path):
         logger.error(f"File not found: {file_path}")
     except Exception as e:
         logger.error(f"Failed to process {file_path}: {e}")
-    return (list(set(local_urls)), list(set(github_urls)))
+    return list(set(local_urls)), list(set(github_urls))
 
 
 def find_files_recursively(directory: str):

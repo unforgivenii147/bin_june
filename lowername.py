@@ -3,7 +3,6 @@
 import sys
 from functools import partial
 from pathlib import Path
-
 from dh import mpf3, unique_path
 
 
@@ -26,12 +25,12 @@ def rename_item_to_lowercase(path: Path, dry_run: bool = False, verbose: bool = 
         new_path = new_path_candidate
     if dry_run:
         print(f"DRY RUN: Would rename '{path}' to '{new_path}'")
-        return (path, new_path)
+        return path, new_path
     try:
         Path(path).rename(new_path)
         if verbose:
             print(f"Renamed '{path.name}' to '{new_path.name}'")
-        return (path, new_path)
+        return path, new_path
     except OSError as e:
         print(f"Error renaming '{path.name}' to '{new_path.name}': {e}", file=sys.stderr)
         return None
@@ -64,7 +63,7 @@ def main() -> None:
     if dry_run:
         print("--- DRY RUN COMPLETE ---")
     else:
-        renamed_count = sum((1 for r in results if r is not None))
+        renamed_count = sum(1 for r in results if r is not None)
         print(f"\nSummary: Renamed {renamed_count} items.")
 
 

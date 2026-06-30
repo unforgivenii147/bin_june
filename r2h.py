@@ -9,7 +9,6 @@ Usage: python rst_to_md.py file1.rst file2.rst ...
 
 import sys
 from pathlib import Path
-
 from dh import get_files, mpf3
 from docutils.core import publish_parts
 
@@ -19,21 +18,9 @@ def rst_to_html(content: str) -> str:
         parts = publish_parts(
             source=content,
             writer_name="html",
-            settings_overrides={
-                "initial_header_level": 2,
-                "warning_stream": None,
-                "report_level": 5,
-            },
+            settings_overrides={"initial_header_level": 2, "warning_stream": None, "report_level": 5},
         )
         html_content = parts["html_body"]
-        #        from mistletoe import Document
-        #        from mistletoe.html_tokenizer import tokenize_html
-
-        #        tokens = tokenize_html(html_content)
-        #        markdown_content = ""
-        #        with HTMLRenderer() as renderer:
-        #            document = Document(tokens)
-        #            markdown_content = renderer.render(document)
         return html_content
     except Exception as e:
         print(f"Conversion error details: {e}")

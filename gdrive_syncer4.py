@@ -31,7 +31,7 @@ class GoogleDriveSync:
                 data = pickle.load(f)
                 self.access_token = data.get("access_token")
                 self.refresh_token = data.get("refresh_token")
-                if self.access_token and (not self.is_token_expired()):
+                if self.access_token and not self.is_token_expired():
                     return
         self.authenticate()
 

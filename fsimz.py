@@ -3,7 +3,6 @@
 import os
 import sys
 from collections import defaultdict
-
 from dh import get_files
 from ppdeep import hash_from_file
 
@@ -39,7 +38,7 @@ def find_dups(cwd: str):
                     print(f"Error deleting file {filetodel}: {e}")
         else:
             continue
-    return (duplicate_count, deleted_count, total_deleted_size)
+    return duplicate_count, deleted_count, total_deleted_size
 
 
 if __name__ == "__main__":

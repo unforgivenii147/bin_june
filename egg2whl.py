@@ -57,13 +57,7 @@ def convert_egg_to_wheel(egg_root_path: str) -> str | None:
         setupmeta_src = temp_path / "setupmeta"
         shutil.copytree(egg_root / "setupmeta", setupmeta_src)
         _name, _version = create_setup_py(egg_root, temp_path)
-        cmd = [
-            sys.executable,
-            "setup.py",
-            "bdist_wheel",
-            "--dist-dir",
-            str(temp_path / "dist"),
-        ]
+        cmd = [sys.executable, "setup.py", "bdist_wheel", "--dist-dir", str(temp_path / "dist")]
         result = subprocess.run(cmd, cwd=temp_path, capture_output=True, text=True)
         if result.returncode != 0:
             print("Build errors:", result.stderr)

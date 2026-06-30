@@ -7,24 +7,10 @@ import tarfile
 import zipfile
 from collections import defaultdict
 from pathlib import Path
-
 from dh import STDLIB
 
-SHEBANG_PATTERNS = [
-    "#!/data/data/com.termux/files/usr/bin/python",
-    "#!/usr/bin/env python",
-    "#! */python",
-]
-COMPRESSED_EXTS = {
-    ".tar.gz",
-    ".tgz",
-    ".tar.xz",
-    ".tar.bz2",
-    ".tar.zst",
-    ".zip",
-    ".whl",
-    ".7z",
-}
+SHEBANG_PATTERNS = ["#!/data/data/com.termux/files/usr/bin/python", "#!/usr/bin/env python", "#! */python"]
+COMPRESSED_EXTS = {".tar.gz", ".tgz", ".tar.xz", ".tar.bz2", ".tar.zst", ".zip", ".whl", ".7z"}
 PIP_LIST_PATH = Path("/sdcard/pip.txt")
 KNOWN_PACKAGES = set()
 STDLIB_MODULES = STDLIB
@@ -42,7 +28,7 @@ def load_known_packages() -> None:
             pass
 
 
-def is_python_file(path: Path | str) -> bool:
+def is_python_file(path: (Path | str)) -> bool:
     path = Path(path)
     if not path.suffix or path.suffix == ".py":
         try:
@@ -66,7 +52,7 @@ def extract_imports_from_ast(code: str):
         tree = ast.parse(code)
         for node in ast.walk(tree):
             if isinstance(node, ast.Import):
-                imports.update((alias.name.split(".")[0].lower() for alias in node.names))
+                imports.update(alias.name.split(".")[0].lower() for alias in node.names)
             elif isinstance(node, ast.ImportFrom) and node.module:
                 imports.add(node.module.split(".")[0].lower())
     except:
@@ -76,11 +62,7 @@ def extract_imports_from_ast(code: str):
 
 def extract_imports_regex(content: str):
     imports = set()
-    patterns = [
-        "^\\s*import\\s+(\\w+)",
-        "^\\s*from\\s+(\\w+)\\s+import",
-        "^\\s*import\\s+\\w+\\s+as\\s+\\w+",
-    ]
+    patterns = ["^\\s*import\\s+(\\w+)", "^\\s*from\\s+(\\w+)\\s+import", "^\\s*import\\s+\\w+\\s+as\\s+\\w+"]
     for line in content.splitlines():
         for pattern in patterns:
             match = re.search(pattern, line, re.IGNORECASE)
@@ -116,7 +98,7 @@ def handle_compressed_file(archive_path: Path):
         elif path.suffix in {".tar.gz", ".tgz"}:
             with tarfile.open(path, "r:gz") as tf:
                 for member in tf.getmembers():
-                    if is_python_file(member.name) and (not member.isdir()):
+                    if is_python_file(member.name) and not member.isdir():
                         f = tf.extractfile(member)
                         if f:
                             content = f.read().decode("utf-8", errors="ignore")
@@ -126,7 +108,7 @@ def handle_compressed_file(archive_path: Path):
         elif path.suffix == ".tar.xz":
             with tarfile.open(path, "r:xz") as tf:
                 for member in tf.getmembers():
-                    if is_python_file(member.name) and (not member.isdir()):
+                    if is_python_file(member.name) and not member.isdir():
                         f = tf.extractfile(member)
                         if f:
                             content = f.read().decode("utf-8", errors="ignore")
@@ -136,7 +118,7 @@ def handle_compressed_file(archive_path: Path):
         elif path.suffix == ".tar.bz2":
             with tarfile.open(path, "r:bz2") as tf:
                 for member in tf.getmembers():
-                    if is_python_file(member.name) and (not member.isdir()):
+                    if is_python_file(member.name) and not member.isdir():
                         f = tf.extractfile(member)
                         if f:
                             content = f.read().decode("utf-8", errors="ignore")
@@ -154,7 +136,7 @@ def handle_compressed_file(archive_path: Path):
                     tarfile.open(fileobj=reader, mode="r") as tf,
                 ):
                     for member in tf.getmembers():
-                        if is_python_file(member.name) and (not member.isdir()):
+                        if is_python_file(member.name) and not member.isdir():
                             f = tf.extractfile(member)
                             if f:
                                 content = f.read().decode("utf-8", errors="ignore")
@@ -169,7 +151,7 @@ def handle_compressed_file(archive_path: Path):
 
                 result = subprocess.run(["7z", "l", str(path)], check=False, capture_output=True, text=True)
                 for line in result.stdout.splitlines():
-                    ".py" in line or ("python" in line.lower() and "bin" not in line.lower())
+                    ".py" in line or "python" in line.lower() and "bin" not in line.lower()
             except:
                 pass
     except Exception:

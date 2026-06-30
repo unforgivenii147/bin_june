@@ -36,7 +36,7 @@ def is_binary_file(file_path: Path) -> bool:
             "text/x-ruby",
             "text/x-markdown",
         }
-        if mime not in text_mimes and (not mime.startswith("text/")):
+        if mime not in text_mimes and not mime.startswith("text/"):
             return True
     except (ImportError, Exception):
         try:
@@ -129,7 +129,7 @@ def find_files(paths: list, recursive: bool = False, exclude_hidden: bool = True
                 pattern = "**/*" if not exclude_hidden else "**/[!.]*"
                 for p in path.glob(pattern):
                     if p.is_file():
-                        if exclude_hidden and any((part.startswith(".") for part in p.parts)):
+                        if exclude_hidden and any(part.startswith(".") for part in p.parts):
                             continue
                         files.append(p)
             else:
@@ -149,7 +149,7 @@ def find_files(paths: list, recursive: bool = False, exclude_hidden: bool = True
 
 def print_stats(stats: dict, dry_run: bool = False) -> None:
     print(f"\n{'=' * 60}")
-    print(f"{('DRY RUN' if dry_run else 'CONVERSION COMPLETE')}")
+    print(f"{'DRY RUN' if dry_run else 'CONVERSION COMPLETE'}")
     print(f"{'=' * 60}")
     print(f"Total files processed: {stats['total']}")
     print(f"  - Converted: {stats['converted']}")
@@ -170,7 +170,14 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Convert CRLF (Windows) line endings to LF (Unix)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="\nExamples:\n  %(prog)s file.txt                    # Convert single file\n  %(prog)s -r directory/               # Convert all files in directory recursively\n  %(prog)s -r --force directory/       # Force convert binary files too\n  %(prog)s -r --dry-run directory/     # Preview changes without converting\n  %(prog)s file1.txt file2.txt file3.txt  # Multiple files\n        ",
+        epilog="""
+Examples:
+  %(prog)s file.txt                    # Convert single file
+  %(prog)s -r directory/               # Convert all files in directory recursively
+  %(prog)s -r --force directory/       # Force convert binary files too
+  %(prog)s -r --dry-run directory/     # Preview changes without converting
+  %(prog)s file1.txt file2.txt file3.txt  # Multiple files
+        """,
     )
     parser.add_argument("paths", nargs="+", help="Files or directories to convert")
     parser.add_argument("-r", "--recursive", action="store_true", help="Process directories recursively")
@@ -203,7 +210,7 @@ def main() -> int:
         for result in stats["files"]:
             if result["status"] == "converted":
                 print(f"  ✓ {result['file']} (saved {result['size_diff']} bytes)")
-            elif result["status"] == "skipped_binary" and (not args.quiet):
+            elif result["status"] == "skipped_binary" and not args.quiet:
                 print(f"  ⊘ {result['file']} (binary, skipped)")
             elif result["status"] == "error":
                 print(f"  ✗ {result['file']}: {result['error']}")

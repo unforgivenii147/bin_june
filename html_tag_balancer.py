@@ -66,18 +66,18 @@ def check_html_file(path: Path) -> tuple[bool, list[str]]:
     try:
         source = path.read_text(encoding="utf-8", errors="replace")
     except Exception as e:
-        return (False, [f"⚠️  Could not read file: {e}"])
+        return False, [f"⚠️  Could not read file: {e}"]
     parser = TagBalanceChecker()
     parser.set_source(source)
     try:
         parser.feed(source)
     except Exception as e:
-        return (False, [f"⚠️  Parsing error: {e}"])
+        return False, [f"⚠️  Parsing error: {e}"]
     missing_closings = [f"Missing </{tag}> (opened at line {pos[0]}, col {pos[1]})" for tag, pos in parser.stack]
     unexpected_closings = [f"Unexpected </{tag}> at line {pos[0]}, col {pos[1]}" for _, tag, pos in parser.errors]
     issues = missing_closings + unexpected_closings
     is_balanced = len(issues) == 0
-    return (is_balanced, issues)
+    return is_balanced, issues
 
 
 def fix_html_file(path: Path) -> bool:
@@ -168,7 +168,7 @@ def fix_html_file(path: Path) -> bool:
     merged = []
     for r in ranges_to_remove:
         if merged and r[0] <= merged[-1][1]:
-            merged[-1] = (merged[-1][0], max(merged[-1][1], r[1]))
+            merged[-1] = merged[-1][0], max(merged[-1][1], r[1])
         else:
             merged.append(r)
     new_source = source
@@ -185,7 +185,7 @@ def fix_html_file(path: Path) -> bool:
             insert_pos = idx_end + 1 if idx_end != -1 else idx + len(end_tag)
             break
     if missing_tags:
-        closing_html = "".join((f"</{tag}>" for tag in missing_tags))
+        closing_html = "".join(f"</{tag}>" for tag in missing_tags)
         new_source = new_source[:insert_pos] + closing_html + new_source[insert_pos:]
     try:
         path.write_text(new_source, encoding="utf-8")

@@ -3,7 +3,6 @@
 import re
 import sys
 from pathlib import Path
-
 from dh import get_files, mpf, unique_path
 from fontTools.ttLib import TTFont
 from fontTools.ttLib.ttFont import TTFont
@@ -11,11 +10,11 @@ from termcolor import cprint
 
 
 def is_ascii_printable(s: str) -> bool:
-    return all((32 <= ord(c) <= 126 for c in s))
+    return all(32 <= ord(c) <= 126 for c in s)
 
 
 def clean_filename(s: str) -> str:
-    s = re.sub(r"[^\w\\-\.]", "", s)
+    s = re.sub("[^\\w\\\\-\\.]", "", s)
     return s.strip("_-.")
 
 
@@ -40,12 +39,12 @@ def get_font_names(path) -> tuple[str, str] | tuple[None, None]:
     family = get_best_name(font, 1)
     subfamily = get_best_name(font, 2)
     if not family:
-        return (None, None)
+        return None, None
     family = clean_filename(family)
     subfamily = "Regular" if not subfamily else clean_filename(subfamily)
     if subfamily.lower() == family.lower():
         subfamily = "Regular"
-    return (family, subfamily)
+    return family, subfamily
 
 
 def process_file(fn: Path) -> int:

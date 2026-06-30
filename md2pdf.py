@@ -1,7 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 import sys
-
 from markdown2 import markdown, markdown_path
 from weasyprint import CSS, HTML
 

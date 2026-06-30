@@ -11,7 +11,7 @@ def get_packages_with_size():
         result = subprocess.run(["apt", "list", "--installed"], capture_output=True, text=True)
         packages = []
         for line in result.stdout.split("\n"):
-            if line and (not line.startswith("Listing")):
+            if line and not line.startswith("Listing"):
                 parts = line.split()
                 if parts:
                     pkg_name = parts[0].split("/")[0]

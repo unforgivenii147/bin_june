@@ -14,14 +14,12 @@ def is_empty_wheel(wheel_path: Path) -> bool:
     try:
         with zipfile.ZipFile(wheel_path, "r") as zip_ref:
             all_files = zip_ref.namelist()
-            has_py_files = any((file.endswith(".py") for file in all_files))
+            has_py_files = any(file.endswith(".py") for file in all_files)
             has_code_dirs = any(
-                (
-                    not (file.startswith("dist-info/") or file.startswith("__pycache__/"))
-                    and (not file.endswith("/"))
-                    and (not file.endswith(".dist-info/"))
-                    for file in all_files
-                )
+                not (file.startswith("dist-info/") or file.startswith("__pycache__/"))
+                and not file.endswith("/")
+                and not file.endswith(".dist-info/")
+                for file in all_files
             )
             return not (has_py_files or has_code_dirs)
     except Exception as e:
@@ -36,8 +34,8 @@ def extract_package_info(wheel_path: Path) -> tuple[str, str] | tuple[None, None
         name = parts[0]
         version = parts[1]
         name = name.replace("_", "-")
-        return (name, version)
-    return (None, None)
+        return name, version
+    return None, None
 
 
 def get_installed_packages():
@@ -86,16 +84,14 @@ def check_package_location(package_name: str) -> tuple[str | None, bool] | tuple
                 elif line.startswith("Files:"):
                     files_section = line
                     if any(
-                        (
-                            file_line.strip() and (not ".dist-info" in file_line)
-                            for file_line in lines[lines.index(line) + 1 : lines.index(line) + 10]
-                        )
+                        file_line.strip() and not ".dist-info" in file_line
+                        for file_line in lines[lines.index(line) + 1 : lines.index(line) + 10]
                     ):
                         has_files = True
-            return (location, has_files)
+            return location, has_files
     except Exception:
         pass
-    return (None, False)
+    return None, False
 
 
 def analyze_wheels(source_dir, dest_dir_name: str = "empty_wheels", check_installed=True) -> None:
@@ -145,7 +141,10 @@ def analyze_wheels(source_dir, dest_dir_name: str = "empty_wheels", check_instal
     print(f"Valid wheels: {len(valid_wheels)}")
     print(f"Empty wheels: {len(empty_wheels)}")
     if installed_empty_wheels:
-        print(f"\n⚠ CRITICAL: {len(installed_empty_wheels)} empty wheels correspond to INSTALLED packages!")
+        print(
+            f"""
+⚠ CRITICAL: {len(installed_empty_wheels)} empty wheels correspond to INSTALLED packages!"""
+        )
         for item in installed_empty_wheels:
             print(f"  - {item['wheel'].name} -> {item['package']}=={item['version']}")
         print("\nRECOMMENDATIONS:")
@@ -158,10 +157,16 @@ def analyze_wheels(source_dir, dest_dir_name: str = "empty_wheels", check_instal
     if empty_wheels:
         print(f"\nFound {len(empty_wheels)} empty wheel(s) total")
         if installed_empty_wheels:
-            response = input("\nSome empty wheels are INSTALLED. Move ONLY the uninstalled empty wheels? (y/n): ")
+            response = input(
+                """
+Some empty wheels are INSTALLED. Move ONLY the uninstalled empty wheels? (y/n): """
+            )
             wheels_to_move = [w for w in empty_wheels if w not in [item["wheel"] for item in installed_empty_wheels]]
         else:
-            response = input(f"\nMove all {len(empty_wheels)} empty wheels to '{dest_dir_name}/'? (y/n): ")
+            response = input(
+                f"""
+Move all {len(empty_wheels)} empty wheels to '{dest_dir_name}/'? (y/n): """
+            )
             wheels_to_move = empty_wheels if response.lower() == "y" else []
         if wheels_to_move:
             dest_path.mkdir(exist_ok=True)

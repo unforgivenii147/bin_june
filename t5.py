@@ -3,12 +3,19 @@
 import ast
 import sys
 from pathlib import Path
-
 import tree_sitter_python as tspython
 from dh import get_pyfiles, mpf, remove_blank_lines
 from tree_sitter import Language, Parser, Query, QueryCursor
 
-QUERY_STRING = "\n(comment) @comment\n(block\n  . (expression_statement\n    (string)) @docstring)\n(module\n  . (expression_statement\n    (string)) @docstring)\n"
+QUERY_STRING = """
+(comment) @comment
+(block
+  . (expression_statement
+    (string)) @docstring)
+(module
+  . (expression_statement
+    (string)) @docstring)
+"""
 
 
 class TSRemover:
@@ -47,7 +54,7 @@ class TSRemover:
             new_source = new_source[:start] + new_source[end:]
         cleaned = new_source.decode("utf-8")
         cleaned = remove_blank_lines(cleaned)
-        return (cleaned, comment_count, docstring_count)
+        return cleaned, comment_count, docstring_count
 
 
 def process_file(path) -> None:

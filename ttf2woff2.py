@@ -1,7 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 import sys
 from pathlib import Path
-
 from dh import cprint, get_files, mpf3, unique_path
 from fontTools.ttLib import woff2
 

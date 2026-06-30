@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
 from pathlib import Path
-
 from dh import get_pyfiles, runcmd
 
 fixes = [

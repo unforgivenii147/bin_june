@@ -41,7 +41,7 @@ def extract_function_names(filepath: Path):
 
 
 def find_duplicates(functions):
-    name_counts = Counter((name for name, _, _ in functions))
+    name_counts = Counter(name for name, _, _ in functions)
     duplicates = {name: count for name, count in name_counts.items() if count > 1}
     return duplicates
 
@@ -49,7 +49,7 @@ def find_duplicates(functions):
 def display_results(functions, duplicates, filepath: Path) -> bool:
     if not duplicates:
         print("✓ No duplicate function names found!")
-        print(f"✓ Total unique functions: {len(set((name for name, _, _ in functions)))}")
+        print(f"✓ Total unique functions: {len(set(name for name, _, _ in functions))}")
         return True
     print(f"✗ Found {len(duplicates)} function name(s) defined multiple times:")
     print("=" * 60)
@@ -65,7 +65,7 @@ def display_results(functions, duplicates, filepath: Path) -> bool:
 
 def show_statistics(functions, duplicates) -> None:
     total_definitions = len(functions)
-    unique_functions = len(set((name for name, _, _ in functions)))
+    unique_functions = len(set(name for name, _, _ in functions))
     duplicate_count = len(duplicates)
     duplicate_definitions = sum(duplicates.values()) - len(duplicates)
     print("\n📊 Statistics:")
@@ -139,7 +139,12 @@ def main():
     functions = extract_function_names(functions_file)
     if not functions:
         print("\n⚠ No function definitions found in file.")
-        print(f"   Make sure the file contains functions like:\n   function_name() {{\n       commands\n   }}")
+        print(
+            f"""   Make sure the file contains functions like:
+   function_name() {{
+       commands
+   }}"""
+        )
         sys.exit(0)
     duplicates = find_duplicates(functions)
     is_clean = display_results(functions, duplicates, functions_file)

@@ -2,7 +2,6 @@
 
 import sys
 from pathlib import Path
-
 from dh import cprint, read_lines
 
 
@@ -21,7 +20,9 @@ def process_files(path1: Path, path2: Path) -> None:
         for line in only_in_second:
             cprint(f"  - {line}", "yellow")
     cprint(
-        f"common lines: {len(common_lines)}\nonly in {path1.name}: {len(only_in_first)}\nonly in {path2.name}: {len(only_in_second)}",
+        f"""common lines: {len(common_lines)}
+only in {path1.name}: {len(only_in_first)}
+only in {path2.name}: {len(only_in_second)}""",
         "blue",
     )
 

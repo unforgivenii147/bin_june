@@ -6,7 +6,6 @@ import os
 import shutil
 import sys
 from pathlib import Path
-
 import ssdeep
 
 try:
@@ -139,7 +138,7 @@ def write_matrix(hashes, threshold: int, output_dir="output", pretty=False) -> N
             print("-" * len(header))
             for row in table[1:]:
                 formatted = [row[0]] + [colorize_score(cell, threshold) for cell in row[1:]]
-                print(" | ".join((str(x) if x else "." for x in formatted)))
+                print(" | ".join(str(x) if x else "." for x in formatted))
 
 
 def main() -> None:

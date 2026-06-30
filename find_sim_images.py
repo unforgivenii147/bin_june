@@ -33,7 +33,21 @@ if __name__ == "__main__":
 
     def usage():
         sys.stderr.write(
-            f"SYNOPSIS: {sys.argv[0]} [ahash|phash|dhash|...] [<directory>]\n\nIdentifies similar images in the directory.\n\nMethod:\n  ahash:          Average hash\n  phash:          Perceptual hash\n  dhash:          Difference hash\n  whash-haar:     Haar wavelet hash\n  whash-db4:      Daubechies wavelet hash\n  colorhash:      HSV color hash\n  crop-resistant: Crop-resistant hash\n\n(C) Johannes Buchner, 2013-2017\n"
+            f"""SYNOPSIS: {sys.argv[0]} [ahash|phash|dhash|...] [<directory>]
+
+Identifies similar images in the directory.
+
+Method:
+  ahash:          Average hash
+  phash:          Perceptual hash
+  dhash:          Difference hash
+  whash-haar:     Haar wavelet hash
+  whash-db4:      Daubechies wavelet hash
+  colorhash:      HSV color hash
+  crop-resistant: Crop-resistant hash
+
+(C) Johannes Buchner, 2013-2017
+"""
         )
         sys.exit(1)
 

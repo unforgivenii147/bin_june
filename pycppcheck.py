@@ -4,7 +4,6 @@ import sys
 from collections import deque
 from multiprocessing import get_context
 from pathlib import Path
-
 from dh import cprint, get_files, run_command
 
 c_files = {".c", ".h", ".inc"}
@@ -18,7 +17,7 @@ def validate_cpp(path: Path) -> tuple[bool, str]:
     if path.suffix in cpp_files:
         cmd = "clang++ -fsyntax-only str(path)"
     ret, txt, err = run_command(cmd)
-    return (path, ret, txt, err)
+    return path, ret, txt, err
 
 
 if __name__ == "__main__":
@@ -27,21 +26,7 @@ if __name__ == "__main__":
     files = (
         [Path(p) for p in args]
         if args
-        else get_files(
-            cwd,
-            ext=[
-                ".c",
-                ".cc",
-                ".cpp",
-                ".cxx",
-                ".h",
-                ".hh",
-                ".hpp",
-                ".hxx",
-                ".inc",
-                "hpp11",
-            ],
-        )
+        else get_files(cwd, ext=[".c", ".cc", ".cpp", ".cxx", ".h", ".hh", ".hpp", ".hxx", ".inc", "hpp11"])
     )
     results = []
     with get_context("spawn").Pool(8) as pool:

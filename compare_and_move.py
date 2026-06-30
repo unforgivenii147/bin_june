@@ -72,7 +72,10 @@ def compare_and_move_common(source_dir: str, target_dir: str) -> None:
     print("\n" + "=" * 50)
     print(f"Summary: Successfully moved {moved_count} of {len(common_files)} common file(s)")
     if size_mismatches:
-        print(f"\n⚠ Warning: {len(size_mismatches)} file(s) had different sizes in source vs target:")
+        print(
+            f"""
+⚠ Warning: {len(size_mismatches)} file(s) had different sizes in source vs target:"""
+        )
         for filename in size_mismatches:
             print(f"  - {filename}")
         print("  (Files were still moved, but verify they are correct versions)")

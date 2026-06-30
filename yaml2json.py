@@ -56,8 +56,8 @@ class ConversionArgs:
 
 
 def convert_yaml_to_json(
-    yaml_input: str | TextIO,
-    indent: int | None = None,
+    yaml_input: (str | TextIO),
+    indent: (int | None) = None,
     compact: bool = False,
     sort_keys: bool = False,
     ensure_ascii: bool = True,
@@ -95,7 +95,16 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Convert YAML to JSON",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="Examples:\n  %(prog)s config.yaml                    # Pretty print to stdout\n  %(prog)s config.yaml -o config.json     # Save to file\n  cat config.yaml | %(prog)s              # Read from stdin\n  %(prog)s config.yaml --indent 4         # 4-space indentation\n  %(prog)s config.yaml --compact          # Minified output\n  %(prog)s config.yaml --sort-keys        # Sorted keys\n  %(prog)s config.yaml --no-ensure-ascii  # Preserve unicode\n  %(prog)s config.yaml --strict           # Strict YAML mode\n        ",
+        epilog="""Examples:
+  %(prog)s config.yaml                    # Pretty print to stdout
+  %(prog)s config.yaml -o config.json     # Save to file
+  cat config.yaml | %(prog)s              # Read from stdin
+  %(prog)s config.yaml --indent 4         # 4-space indentation
+  %(prog)s config.yaml --compact          # Minified output
+  %(prog)s config.yaml --sort-keys        # Sorted keys
+  %(prog)s config.yaml --no-ensure-ascii  # Preserve unicode
+  %(prog)s config.yaml --strict           # Strict YAML mode
+        """,
     )
     io_group = parser.add_argument_group("Input/Output")
     io_group.add_argument(

@@ -29,12 +29,12 @@ def get_package_url(package_name, version=None):
             raise ValueError(f"No downloadable files found")
         for file_info in version_data:
             if file_info.get("packagetype") == "bdist_wheel":
-                return (file_info["url"], file_info["filename"])
+                return file_info["url"], file_info["filename"]
         for file_info in version_data:
             if file_info.get("packagetype") == "sdist":
-                return (file_info["url"], file_info["filename"])
+                return file_info["url"], file_info["filename"]
         if version_data:
-            return (version_data[0]["url"], version_data[0]["filename"])
+            return version_data[0]["url"], version_data[0]["filename"]
         raise ValueError("No downloadable files found")
     except requests.exceptions.RequestException as e:
         print(f"Error fetching package information: {e}")

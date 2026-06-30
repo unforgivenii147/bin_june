@@ -162,11 +162,11 @@ def compress_file(path: Path) -> tuple[bool, int, int]:
     out_path = path.with_suffix(path.suffix + ".br")
     if out_path.exists():
         print(f"Skipping {path.name} - output already exists")
-        return (False, 0, 0)
+        return False, 0, 0
     try:
         original_size = path.stat().st_size
         if not original_size:
-            return (False, 0, 0)
+            return False, 0, 0
         if original_size < CHUNK_SIZE:
             success = compress_in_memory(path, out_path)
         else:
@@ -176,28 +176,28 @@ def compress_file(path: Path) -> tuple[bool, int, int]:
             if compressed_size == 0:
                 print(f"Warning: Compressed file empty for {path.name}")
                 out_path.unlink()
-                return (False, 0, 0)
+                return False, 0, 0
             if compressed_size < original_size:
                 path.unlink()
                 reduction = (original_size - compressed_size) / original_size * 100
                 print(f"  ✓ {path.name}: {reduction:.1f}% saved ({fsz(original_size)} → {fsz(compressed_size)})")
-                return (True, original_size, compressed_size)
+                return True, original_size, compressed_size
             else:
                 print(f"  ✗ {path.name}: No space saved, removing compressed file")
                 out_path.unlink()
-                return (False, 0, 0)
+                return False, 0, 0
         else:
-            return (False, 0, 0)
+            return False, 0, 0
     except (OSError, PermissionError, brotli.error) as e:
         print(f"  ✗ Failed to compress {path.name}: {e}")
-        return (False, 0, 0)
+        return False, 0, 0
 
 
 def get_files(directory: Path, mode: str = "compress") -> list[Path]:
     if mode == "compress":
-        return [p for p in directory.glob("*") if p.is_file() and (not p.is_symlink()) and should_compress(p)]
+        return [p for p in directory.glob("*") if p.is_file() and not p.is_symlink() and should_compress(p)]
     else:
-        return [p for p in directory.glob("*.br") if p.is_file() and (not p.is_symlink())]
+        return [p for p in directory.glob("*.br") if p.is_file() and not p.is_symlink()]
 
 
 def get_dirs(directory: Path) -> list[Path]:
@@ -344,7 +344,17 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Multi-threaded Brotli compression/decompression tool (max compression)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="\nExamples:\n  %(prog)s -c          # Compress files and folders in current directory\n  %(prog)s -d          # Decompress .br and .tar.br files in current directory\n  %(prog)s             # Default: compress\n\nBrotli Settings:\n  - Quality: 11/11 (maximum compression)\n  - Window size: 16MB (lgwin=24)\n  - Mode: Generic\n        ",
+        epilog="""
+Examples:
+  %(prog)s -c          # Compress files and folders in current directory
+  %(prog)s -d          # Decompress .br and .tar.br files in current directory
+  %(prog)s             # Default: compress
+
+Brotli Settings:
+  - Quality: 11/11 (maximum compression)
+  - Window size: 16MB (lgwin=24)
+  - Mode: Generic
+        """,
     )
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-c", "--compress", action="store_true", help="Compress files and folders with Brotli (default)")

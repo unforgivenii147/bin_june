@@ -2,7 +2,6 @@
 
 from collections import defaultdict
 from pathlib import Path
-
 import tree_sitter_python as tsp
 from tree_sitter import Language, Parser, Tree
 
@@ -10,7 +9,15 @@ parser = Parser()
 parser.language = Language(tsp.language())
 OUT_DIR = Path("output")
 OUT_DIR.mkdir(exist_ok=True)
-VALID = {"\n(expression_statement\n  (assignment_expression\n    (=( _ )@name value:value )\n  )\n  (\n)"}
+VALID = {
+    """
+(expression_statement
+  (assignment_expression
+    (=( _ )@name value:value )
+  )
+  (
+)"""
+}
 
 
 def get_node_text(src: bytes, node) -> str:
@@ -52,10 +59,12 @@ def extract_docstring(src: bytes, node) -> str | None:
     return None
 
 
-def format_definition_with_metadata(def_text: str, file_name: str, line_num: int, docstring: str | None = None) -> str:
+def format_definition_with_metadata(
+    def_text: str, file_name: str, line_num: int, docstring: (str | None) = None
+) -> str:
     lines = [f"# From: {file_name}:{line_num}"]
     if docstring:
-        lines.append(f"# Docstring: {docstring[:50]}{('...' if len(docstring) > 50 else '')}")
+        lines.append(f"# Docstring: {docstring[:50]}{'...' if len(docstring) > 50 else ''}")
     lines.append(def_text)
     return "\n".join(lines)
 
@@ -66,7 +75,7 @@ folders_found = set()
 total_definitions = 0
 cwd = Path.cwd()
 for py in cwd.rglob("*.py"):
-    if any((part.startswith(".") for part in py.parts)) or "site-packages" in py.parts:
+    if any(part.startswith(".") for part in py.parts) or "site-packages" in py.parts:
         continue
     if OUT_DIR in py.parents:
         continue
@@ -97,13 +106,12 @@ for folder, defs_list in folder_definitions.items():
     content = "\n".join(defs_list)
     header = "#!/usr/bin/env python\n"
     out_file.write_text(header + content)
-    folder_def_count = len([
-        d for d in defs_list if d.strip() and (not d.startswith("#")) and (not d.startswith("\n#"))
-    ])
+    folder_def_count = len([d for d in defs_list if d.strip() and not d.startswith("#") and not d.startswith("\n#")])
     print(
         f"✅ saved: {out_file} ({folder_def_count} definitions from {len([f for f in defs_list if 'File:' in f])} files)"
     )
 print(
-    f"\n✨ Done! Processed {processed_files_count} files with {total_definitions} total definitions in {len(folder_definitions)} folder(s)"
+    f"""
+✨ Done! Processed {processed_files_count} files with {total_definitions} total definitions in {len(folder_definitions)} folder(s)"""
 )
 print(f"📁 Folders: {', '.join(sorted(folders_found))}")

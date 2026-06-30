@@ -48,28 +48,31 @@ class ImageDownscaler:
         try:
             img = cv2.imread(str(image_path))
             if img is None:
-                return (image_path, False, f"Failed to read image")
+                return image_path, False, f"Failed to read image"
             height, width = img.shape[:2]
-            original_size = (width, height)
+            original_size = width, height
             new_width = int(width * scale_factor)
             new_height = int(height * scale_factor)
-            new_size = (new_width, new_height)
+            new_size = new_width, new_height
             if new_width < 1 or new_height < 1:
-                return (image_path, False, f"New size too small ({new_size})")
+                return image_path, False, f"New size too small ({new_size})"
             downscaled = cv2.resize(img, new_size, interpolation=cv2.INTER_AREA)
             success = cv2.imwrite(str(image_path), downscaled)
             if not success:
-                return (image_path, False, f"Failed to write image")
+                return image_path, False, f"Failed to write image"
             message = f"{original_size} → {new_size}"
-            return (image_path, True, message)
+            return image_path, True, message
         except Exception as e:
-            return (image_path, False, f"Error: {str(e)}")
+            return image_path, False, f"Error: {str(e)}"
 
     def process_images(self, image_paths: list) -> None:
         if not image_paths:
             print("[WARN] No images to process!")
             return
-        print(f"\n[PROCESS] Downscaling {len(image_paths)} image(s) with {cpu_count()} process(es)...")
+        print(
+            f"""
+[PROCESS] Downscaling {len(image_paths)} image(s) with {cpu_count()} process(es)..."""
+        )
         args_list = [(img_path, self.scale_factor) for img_path in image_paths]
         successful = 0
         failed = 0

@@ -17,39 +17,101 @@ except ImportError:
     BeautifulSoup = None
     print("BeautifulSoup4 Not Found, use: pip install BeautifulSoup4")
 start_time = datetime.now()
-CSS_PROPS_TEXT = "\nalignment-adjust alignment-baseline animation animation-delay\nanimation-direction animation-duration animation-iteration-count\nanimation-name animation-play-state animation-timing-function appearance\nazimuth\nbackface-visibility background background-blend-mode background-attachment\nbackground-clip background-color background-image background-origin\nbackground-position background-position-block background-position-inline\nbackground-position-x background-position-y background-repeat background-size\nbaseline-shift bikeshedding bookmark-label bookmark-level bookmark-state\nbookmark-target border border-bottom border-bottom-color\nborder-bottom-left-radius border-bottom-parts border-bottom-right-radius\nborder-bottom-style border-bottom-width border-clip border-clip-top\nborder-clip-right border-clip-bottom border-clip-left border-collapse\nborder-color border-corner-shape border-image border-image-outset\nborder-image-repeat border-image-slice border-image-source border-image-width\nborder-left border-left-color border-left-style border-left-parts\nborder-left-width border-limit border-parts border-radius border-right\nborder-right-color border-right-style border-right-width border-right-parts\nborder-spacing border-style border-top border-top-color border-top-left-radius\nborder-top-parts border-top-right-radius border-top-style border-top-width\nborder-width bottom box-decoration-break box-shadow box-sizing\ncaption-side clear clip color column-count column-fill column-gap column-rule\ncolumn-rule-color column-rule-style column-rule-width column-span column-width\ncolumns content counter-increment counter-reset corners corner-shape\ncue cue-after cue-before cursor\ndirection display drop-initial-after-adjust drop-initial-after-align\ndrop-initial-before-adjust drop-initial-before-align drop-initial-size\ndrop-initial-value\nelevation empty-cells\nflex flex-basis flex-direction flex-flow flex-grow flex-shrink flex-wrap fit\nfit-position float font font-family font-size font-size-adjust font-stretch\nfont-style font-variant font-weight\ngrid-columns grid-rows\njustify-content\nhanging-punctuation height hyphenate-character hyphenate-resource hyphens\nicon image-orientation image-resolution inline-box-align\nleft letter-spacing line-height line-stacking line-stacking-ruby\nline-stacking-shift line-stacking-strategy linear-gradient list-style\nlist-style-image list-style-position list-style-type\nmargin margin-bottom margin-left margin-right margin-top marquee-direction\nmarquee-loop marquee-speed marquee-style max-height max-width min-height\nmin-width\nnav-index\nopacity orphans outline outline-color outline-offset outline-style\noutline-width overflow overflow-style overflow-x overflow-y\npadding padding-bottom padding-left padding-right padding-top page\npage-break-after page-break-before page-break-inside pause pause-after\npause-before perspective perspective-origin pitch pitch-range play-during\nposition presentation-level\nquotes\nresize rest rest-after rest-before richness right rotation rotation-point\nruby-align ruby-overhang ruby-position ruby-span\nsize speak speak-header speak-numeral speak-punctuation speech-rate src\nstress string-set\ntable-layout target target-name target-new target-position text-align\ntext-align-last text-decoration text-emphasis text-indent text-justify\ntext-outline text-shadow text-transform text-wrap top transform\ntransform-origin transition transition-delay transition-duration\ntransition-property transition-timing-function\nunicode-bidi unicode-range\nvertical-align visibility voice-balance voice-duration voice-family\nvoice-pitch voice-range voice-rate voice-stress voice-volume volume\nwhite-space widows width word-break word-spacing word-wrap\nz-index\n"
+CSS_PROPS_TEXT = """
+alignment-adjust alignment-baseline animation animation-delay
+animation-direction animation-duration animation-iteration-count
+animation-name animation-play-state animation-timing-function appearance
+azimuth
+backface-visibility background background-blend-mode background-attachment
+background-clip background-color background-image background-origin
+background-position background-position-block background-position-inline
+background-position-x background-position-y background-repeat background-size
+baseline-shift bikeshedding bookmark-label bookmark-level bookmark-state
+bookmark-target border border-bottom border-bottom-color
+border-bottom-left-radius border-bottom-parts border-bottom-right-radius
+border-bottom-style border-bottom-width border-clip border-clip-top
+border-clip-right border-clip-bottom border-clip-left border-collapse
+border-color border-corner-shape border-image border-image-outset
+border-image-repeat border-image-slice border-image-source border-image-width
+border-left border-left-color border-left-style border-left-parts
+border-left-width border-limit border-parts border-radius border-right
+border-right-color border-right-style border-right-width border-right-parts
+border-spacing border-style border-top border-top-color border-top-left-radius
+border-top-parts border-top-right-radius border-top-style border-top-width
+border-width bottom box-decoration-break box-shadow box-sizing
+caption-side clear clip color column-count column-fill column-gap column-rule
+column-rule-color column-rule-style column-rule-width column-span column-width
+columns content counter-increment counter-reset corners corner-shape
+cue cue-after cue-before cursor
+direction display drop-initial-after-adjust drop-initial-after-align
+drop-initial-before-adjust drop-initial-before-align drop-initial-size
+drop-initial-value
+elevation empty-cells
+flex flex-basis flex-direction flex-flow flex-grow flex-shrink flex-wrap fit
+fit-position float font font-family font-size font-size-adjust font-stretch
+font-style font-variant font-weight
+grid-columns grid-rows
+justify-content
+hanging-punctuation height hyphenate-character hyphenate-resource hyphens
+icon image-orientation image-resolution inline-box-align
+left letter-spacing line-height line-stacking line-stacking-ruby
+line-stacking-shift line-stacking-strategy linear-gradient list-style
+list-style-image list-style-position list-style-type
+margin margin-bottom margin-left margin-right margin-top marquee-direction
+marquee-loop marquee-speed marquee-style max-height max-width min-height
+min-width
+nav-index
+opacity orphans outline outline-color outline-offset outline-style
+outline-width overflow overflow-style overflow-x overflow-y
+padding padding-bottom padding-left padding-right padding-top page
+page-break-after page-break-before page-break-inside pause pause-after
+pause-before perspective perspective-origin pitch pitch-range play-during
+position presentation-level
+quotes
+resize rest rest-after rest-before richness right rotation rotation-point
+ruby-align ruby-overhang ruby-position ruby-span
+size speak speak-header speak-numeral speak-punctuation speech-rate src
+stress string-set
+table-layout target target-name target-new target-position text-align
+text-align-last text-decoration text-emphasis text-indent text-justify
+text-outline text-shadow text-transform text-wrap top transform
+transform-origin transition transition-delay transition-duration
+transition-property transition-timing-function
+unicode-bidi unicode-range
+vertical-align visibility voice-balance voice-duration voice-family
+voice-pitch voice-range voice-rate voice-stress voice-volume volume
+white-space widows width word-break word-spacing word-wrap
+z-index
+"""
 
 
 def _compile_props(props_text: str, grouped: bool = False) -> tuple:
-    props, prefixes = (
-        [],
-        ["-webkit-", "-khtml-", "-epub-", "-moz-", "-ms-", "-o-", ""],
-    )
+    props, prefixes = [], ["-webkit-", "-khtml-", "-epub-", "-moz-", "-ms-", "-o-", ""]
     for propline in props_text.strip().lower().splitlines():
-        props += [pre + pro for pro in propline.split(" ") for pre in prefixes]
+        props += [(pre + pro) for pro in propline.split(" ") for pre in prefixes]
     props = filter(lambda line: not line.startswith("#"), props)
     if not grouped:
         props = list(filter(None, props))
-        return (props, [0] * len(props))
-    final_props, groups, g_id = ([], [], 0)
+        return props, [0] * len(props)
+    final_props, groups, g_id = [], [], 0
     for prop in props:
         if prop.strip():
             final_props.append(prop)
             groups.append(g_id)
         else:
             g_id += 1
-    return (final_props, groups)
+    return final_props, groups
 
 
 def _prioritify(line_of_css: str, css_props_text_as_list: tuple) -> tuple:
     sorted_css_properties, groups_by_alphabetic_order = css_props_text_as_list
-    priority_integer, group_integer = (9999, 0)
+    priority_integer, group_integer = 9999, 0
     for css_property in sorted_css_properties:
         if css_property.lower() == line_of_css.split(":", maxsplit=1)[0].lower().strip():
             priority_integer = sorted_css_properties.index(css_property)
             group_integer = groups_by_alphabetic_order[priority_integer]
             break
-    return (priority_integer, group_integer)
+    return priority_integer, group_integer
 
 
 def _props_grouper(props, pgs):
@@ -72,7 +134,7 @@ def sort_properties(css_unsorted_string: str) -> str:
     css_pgs = _compile_props(CSS_PROPS_TEXT, grouped=bool(args.group))
     pattern = re.compile("(.*?{\\r?\\n?)(.*?)(}.*?)|(.*)", re.DOTALL + re.MULTILINE)
     matched_patterns = pattern.findall(css_unsorted_string)
-    sorted_patterns, sorted_buffer = ([], css_unsorted_string)
+    sorted_patterns, sorted_buffer = [], css_unsorted_string
     RE_prop = re.compile("((?:.*?)(?:;)(?:.*?\\n)|(?:.*))", re.DOTALL + re.MULTILINE)
     if len(matched_patterns) != 0:
         for matched_groups in matched_patterns:
@@ -93,9 +155,7 @@ def remove_empty_rules(css: str) -> str:
 
 def condense_zero_units(css: str) -> str:
     return re.sub(
-        "([\\s:])(0)(px|em|%|in|q|ch|cm|mm|pc|pt|ex|rem|s|ms|deg|grad|rad|turn|vw|vh|vmin|vmax|fr)",
-        "\\1\\2",
-        css,
+        "([\\s:])(0)(px|em|%|in|q|ch|cm|mm|pc|pt|ex|rem|s|ms|deg|grad|rad|turn|vw|vh|vmin|vmax|fr)", "\\1\\2", css
     )
 
 
@@ -105,7 +165,7 @@ def condense_semicolons(css: str) -> str:
 
 def wrap_css_lines(css: str, line_length: int = 80) -> str:
     print(f"Wrapping lines to ~{line_length} max line lenght.")
-    lines, line_start = ([], 0)
+    lines, line_start = [], 0
     for i, char in enumerate(css):
         if char == "}" and i - line_start >= line_length:
             lines.append(css[line_start : i + 1])
@@ -133,7 +193,7 @@ def normalize_whitespace(css: str) -> str:
 
 
 def justify_right(css: str) -> str:
-    max_indent, right_justified_css = (1, "")
+    max_indent, right_justified_css = 1, ""
     for css_line in css.splitlines():
         c_1 = len(css_line.split(":")) == 2 and css_line.strip().endswith(";")
         c_2 = "{" not in css_line and "}" not in css_line and len(css_line)
@@ -230,7 +290,7 @@ def walk2list(
         Path(os.path.join(r, f)).resolve()
         for r, d, fs in oswalk
         for f in fs
-        if not f.startswith(() if showhidden else ".") and (not f.endswith(omit)) and f.endswith(target)
+        if not f.startswith(() if showhidden else ".") and not f.endswith(omit) and f.endswith(target)
     ]
 
 
@@ -287,44 +347,24 @@ def process_single_html_file(html_file_path: str) -> str:
 def make_arguments_parser() -> Namespace:
     parser = ArgumentParser(
         description=__doc__,
-        epilog="CSS-HTML-Prettify:\n    Takes file or folder full path string and process all CSS/SCSS/HTML found.\n    If argument is not file/folder will fail. Check Updates works on Python3.\n    StdIn to StdOut is deprecated since may fail with unicode characters.\n    CSS Properties are AlphaSorted,to help spot cloned ones,Selectors not.\n    Watch works for whole folders, with minimum of ~60 Secs between runs.",
+        epilog="""CSS-HTML-Prettify:
+    Takes file or folder full path string and process all CSS/SCSS/HTML found.
+    If argument is not file/folder will fail. Check Updates works on Python3.
+    StdIn to StdOut is deprecated since may fail with unicode characters.
+    CSS Properties are AlphaSorted,to help spot cloned ones,Selectors not.
+    Watch works for whole folders, with minimum of ~60 Secs between runs.""",
     )
     parser.add_argument("--version", action="version", version=__version__)
-    parser.add_argument(
-        "fullpath",
-        metavar="fullpath",
-        type=str,
-        help="Full path to local file or folder.",
-    )
+    parser.add_argument("fullpath", metavar="fullpath", type=str, help="Full path to local file or folder.")
     parser.add_argument("--prefix", type=str, help="Prefix string to prepend on output filenames.")
-    parser.add_argument(
-        "--timestamp",
-        action="store_true",
-        help="Add a Time Stamp on all CSS/SCSS output files.",
-    )
+    parser.add_argument("--timestamp", action="store_true", help="Add a Time Stamp on all CSS/SCSS output files.")
     parser.add_argument("--quiet", action="store_true", help="Quiet, Silent, force disable all Logging.")
     parser.add_argument("--after", type=str, help="Command to execute after run (Experimental).")
     parser.add_argument("--before", type=str, help="Command to execute before run (Experimental).")
-    parser.add_argument(
-        "--watch",
-        action="store_true",
-        help="Re-Compress if file changes (Experimental).",
-    )
-    parser.add_argument(
-        "--group",
-        action="store_true",
-        help="Group Alphabetically CSS Poperties by name.",
-    )
-    parser.add_argument(
-        "--justify",
-        action="store_true",
-        help="Right Justify CSS Properties (Experimental).",
-    )
-    parser.add_argument(
-        "--extraline",
-        action="store_true",
-        help="Add 1 New Line for each New Line (Experimental)",
-    )
+    parser.add_argument("--watch", action="store_true", help="Re-Compress if file changes (Experimental).")
+    parser.add_argument("--group", action="store_true", help="Group Alphabetically CSS Poperties by name.")
+    parser.add_argument("--justify", action="store_true", help="Right Justify CSS Properties (Experimental).")
+    parser.add_argument("--extraline", action="store_true", help="Add 1 New Line for each New Line (Experimental)")
     global args
     args = parser.parse_args()
     return args
@@ -357,7 +397,10 @@ def main() -> None:
     if args.after and getoutput:
         print(getoutput(str(args.after)))
     print(f"\n {'-' * 80} \n Files Processed: {list_of_files}.")
-    print(f"Number of Files Processed:\n          {(len(list_of_files) if isinstance(list_of_files, tuple) else 1)}")
+    print(
+        f"""Number of Files Processed:
+          {len(list_of_files) if isinstance(list_of_files, tuple) else 1}"""
+    )
 
 
 if __name__ in "__main__":

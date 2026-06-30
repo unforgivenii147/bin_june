@@ -5,7 +5,6 @@ import tarfile
 import zipfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
 import py7zr
 from dh import BIN_EXT, TXT_EXT, get_files
 
@@ -82,12 +81,7 @@ def extract_urls(filepath):
         return extract_urls_from_file(filepath)
     if path.suffix in {".zip", ".whl"}:
         return extract_urls_from_zip(filepath)
-    if path.suffix.startswith(".tar") or path.suffix in {
-        ".tar.gz",
-        ".tar.xz",
-        ".tar.zst",
-        ".tar.7z",
-    }:
+    if path.suffix.startswith(".tar") or path.suffix in {".tar.gz", ".tar.xz", ".tar.zst", ".tar.7z"}:
         return extract_urls_from_tar(filepath)
     if path.suffix == ".7z":
         return extract_urls_from_7z(filepath)
@@ -103,5 +97,5 @@ if __name__ == "__main__":
         for future in as_completed(futures):
             all_urls.update(future.result())
     with Path("urls.txt").open("w", encoding="utf-8") as f:
-        f.writelines((url + "\n" for url in sorted(all_urls)))
+        f.writelines(url + "\n" for url in sorted(all_urls))
     print(f"Extracted {len(all_urls)} unique URLs to urls.txt")

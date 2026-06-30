@@ -29,7 +29,7 @@ def normalize_import(import_line: str) -> str | None:
             module = module[: module.index(" as ")]
         if "." in module:
             module = module[: module.index(".")]
-        return module if module and (not module.startswith("_")) else None
+        return module if module and not module.startswith("_") else None
     elif line.startswith("from "):
         module = line[5:]
         if module.startswith("."):
@@ -40,7 +40,7 @@ def normalize_import(import_line: str) -> str | None:
             module = module[: module.index(" as ")]
         if "." in module:
             module = module[: module.index(".")]
-        return module if module and (not module.startswith("_")) else None
+        return module if module and not module.startswith("_") else None
     return None
 
 

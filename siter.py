@@ -115,7 +115,7 @@ class WheelBuilder:
         for item in self.share_dir.rglob("*"):
             if not item.is_file():
                 continue
-            if any((pkg_normalized in p.name.lower() for p in item.parents)):
+            if any(pkg_normalized in p.name.lower() for p in item.parents):
                 try:
                     rel_path = item.relative_to(self.share_dir)
                     data_files.append((item, str(rel_path)))
@@ -128,7 +128,7 @@ class WheelBuilder:
             from packaging.tags import sys_tags
 
             tag = next(sys_tags())
-            return (tag.interpreter, tag.abi, tag.platform)
+            return tag.interpreter, tag.abi, tag.platform
         except ImportError:
             import platform
 
@@ -138,10 +138,10 @@ class WheelBuilder:
             plat = platform.system().lower()
             machine = platform.machine().lower()
             platform_tag = f"{plat}_{machine}"
-            return (python_tag, abi_tag, platform_tag)
+            return python_tag, abi_tag, platform_tag
 
     def _detect_purity(self, records: Dict) -> bool:
-        return all((not path.endswith((".so", ".pyd", ".dll")) for path in records))
+        return all(not path.endswith((".so", ".pyd", ".dll")) for path in records)
 
     def build_wheel(self, dist_info_dir: Path) -> Optional[Path]:
         if not dist_info_dir.is_dir():
@@ -163,7 +163,7 @@ class WheelBuilder:
             return None
         is_pure = self._detect_purity(records)
         if is_pure:
-            python_tag, abi_tag, platform_tag = ("py3", "none", "any")
+            python_tag, abi_tag, platform_tag = "py3", "none", "any"
         else:
             python_tag, abi_tag, platform_tag = self._get_wheel_tags()
         scripts = self._find_scripts_for_package(records)
@@ -174,7 +174,7 @@ class WheelBuilder:
             print(f"  📁 Found {len(data_files)} data file(s)")
         wheel_name = f"{pkg_name.replace('-', '_')}-{version}-{python_tag}-{abi_tag}-{platform_tag}.whl"
         wheel_path = self.output_dir / wheel_name
-        if wheel_path.exists() and (not self.force_all):
+        if wheel_path.exists() and not self.force_all:
             print(f"  ⏭️  Skipping {wheel_path.name} (already exists)")
             return wheel_path
         try:
@@ -230,7 +230,7 @@ class WheelBuilder:
                 with wheel_file.open("w", encoding="utf-8") as f:
                     f.write("Wheel-Version: 1.0\n")
                     f.write("Generator: wheel-builder 1.0\n")
-                    f.write(f"Root-Is-Purelib: {('true' if is_pure else 'false')}\n")
+                    f.write(f"Root-Is-Purelib: {'true' if is_pure else 'false'}\n")
                     f.write(f"Tag: {python_tag}-{abi_tag}-{platform_tag}\n")
                 rel_path = wheel_file.relative_to(tmp_path)
                 file_hash = self._compute_hash(wheel_file)
@@ -256,10 +256,10 @@ class WheelBuilder:
     def _build_wheel_worker(self, dist_info: Path) -> Tuple[str, Optional[Path]]:
         try:
             result = self.build_wheel(dist_info)
-            return (dist_info.name, result)
+            return dist_info.name, result
         except Exception as e:
             print(f"❌ Worker failed for {dist_info.name}: {e}")
-            return (dist_info.name, None)
+            return dist_info.name, None
 
     def build_all(self) -> int:
         dist_infos = sorted(self.site_packages.glob("*.dist-info"))
@@ -296,7 +296,7 @@ class WheelBuilder:
         build_func = self._build_wheel_worker
         with ctx.Pool(processes=self.max_workers) as pool:
             results = pool.map(build_func, dist_infos)
-        built = sum((1 for _, result in results if result is not None))
+        built = sum(1 for _, result in results if result is not None)
         print(f"\n✅ Built {built}/{len(dist_infos)} wheels in {self.output_dir}")
         return built
 
@@ -305,7 +305,30 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Build proper wheel files from installed packages (run from site-packages)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="\nExamples:\n  # Run from inside site-packages directory:\n  cd /path/to/venv/lib/python3.x/site-packages\n  python /path/to/script.py\n  \n  # Force rebuild all packages with parallel processing (default)\n  python /path/to/script.py -a\n  \n  # Build with serial processing (no parallel)\n  python /path/to/script.py --no-parallel\n  \n  # Build specific package\n  python /path/to/script.py -p requests\n  \n  # Force rebuild specific package\n  python /path/to/script.py -a -p requests\n  \n  # Specify number of workers\n  python /path/to/script.py -a -w 4\n  \n  # Specify output directory\n  python /path/to/script.py -o /path/to/wheels\n        ",
+        epilog="""
+Examples:
+  # Run from inside site-packages directory:
+  cd /path/to/venv/lib/python3.x/site-packages
+  python /path/to/script.py
+  
+  # Force rebuild all packages with parallel processing (default)
+  python /path/to/script.py -a
+  
+  # Build with serial processing (no parallel)
+  python /path/to/script.py --no-parallel
+  
+  # Build specific package
+  python /path/to/script.py -p requests
+  
+  # Force rebuild specific package
+  python /path/to/script.py -a -p requests
+  
+  # Specify number of workers
+  python /path/to/script.py -a -w 4
+  
+  # Specify output directory
+  python /path/to/script.py -o /path/to/wheels
+        """,
     )
     parser.add_argument(
         "--output", "-o", type=Path, default=Path("./wheels"), help="Output directory for wheels (default: ./wheels)"

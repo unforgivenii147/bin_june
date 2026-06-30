@@ -4,7 +4,6 @@ import json
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
 from deep_translator import GoogleTranslator
 
 INPUT_FILE = "words.txt"

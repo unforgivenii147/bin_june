@@ -17,9 +17,9 @@ def fix_py2_to_py3_all(line):
     m = EXCEPT_PATTERN.match(line.strip())
     if m:
         indent = line[: len(line) - len(line.lstrip())]
-        exc_type, exc_var = (m.group(1), m.group(2))
+        exc_type, exc_var = m.group(1), m.group(2)
         line = f"{indent}except {exc_type} as {exc_var}:\n"
-    return (line, line != original)
+    return line, line != original
 
 
 def fix_print_statements(text: str) -> tuple[str, bool]:
@@ -41,7 +41,7 @@ def fix_print_statements(text: str) -> tuple[str, bool]:
             changed = True
             continue
         new_lines.append(line)
-    return ("".join(new_lines), changed)
+    return "".join(new_lines), changed
 
 
 def apply_all_fixes(text: str):
@@ -53,7 +53,7 @@ def apply_all_fixes(text: str):
         new_line2, c2 = fix_print_statements(new_line)
         changed = changed or c1 or c2
         new_lines.append(new_line2)
-    return ("".join(new_lines), changed)
+    return "".join(new_lines), changed
 
 
 changed_files = []
@@ -87,12 +87,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Fix Python2 print statements and optionally apply all Py2→Py3 conversions."
     )
-    parser.add_argument(
-        "-f",
-        "--force",
-        action="store_true",
-        help="Overwrite original files (no .bak backups)",
-    )
+    parser.add_argument("-f", "--force", action="store_true", help="Overwrite original files (no .bak backups)")
     parser.add_argument("-a", "--all", action="store_true", help="Apply all Python2→Python3 fixes")
     args = parser.parse_args()
     if not any(vars(args).values()):

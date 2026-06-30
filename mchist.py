@@ -21,4 +21,4 @@ if __name__ == "__main__":
             cmdline_section.append(cleaned_line)
     soniq = list(set(cmdline_section))
     with output_file.open("a", encoding="utf-8") as file:
-        file.writelines((cmd + "\n" for cmd in soniq))
+        file.writelines(cmd + "\n" for cmd in soniq)

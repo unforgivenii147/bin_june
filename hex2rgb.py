@@ -8,7 +8,7 @@ def hex_to_rgb(value: str) -> tuple[int, int, int]:
     r = int(hex_color[0:2], 16)
     g = int(hex_color[2:4], 16)
     b = int(hex_color[4:6], 16)
-    return (r, g, b)
+    return r, g, b
 
 
 def hex_to_rgb_shorthand(value: str) -> tuple[int, int, int]:
@@ -21,7 +21,7 @@ def hex_to_rgb_shorthand(value: str) -> tuple[int, int, int]:
         r = int(hex_color[0:2], 16)
         g = int(hex_color[2:4], 16)
         b = int(hex_color[4:6], 16)
-    return (r, g, b)
+    return r, g, b
 
 
 def hex_to_rgb_dict(value: str) -> dict:

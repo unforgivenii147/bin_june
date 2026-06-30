@@ -2,7 +2,6 @@
 
 import sys
 from pathlib import Path
-
 from dh import read_lines
 
 if __name__ == "__main__":

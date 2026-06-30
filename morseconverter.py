@@ -98,7 +98,7 @@ def main() -> None:
     args = parser.parse_args()
     if args.encrypt and args.decrypt:
         sys.exit(1)
-    if not args.encrypt and (not args.decrypt):
+    if not args.encrypt and not args.decrypt:
         sys.exit(1)
     if args.encrypt:
         encrypt_file(args.input_file, args.output_file)

@@ -16,9 +16,9 @@ def _ocr_worker(frame_data: tuple, ocr_config: str) -> tuple[float, str]:
         _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
         text = pytesseract.image_to_string(binary, config=ocr_config).strip()
         print(text)
-        return (time_pos, text)
+        return time_pos, text
     except Exception:
-        return (time_pos, "")
+        return time_pos, ""
 
 
 def _frames_are_similar(a: np.ndarray, b: np.ndarray, threshold: float = 0.97) -> bool:
@@ -74,7 +74,7 @@ def _merge_subtitles(subtitles: list[dict], gap_threshold: float = 1.0) -> list[
 
 
 def extract_burned_subs_ocr(
-    video_path: str, output_srt_path: str, lang: str = "fas", sample_fps: float = 2.0, workers: int | None = None
+    video_path: str, output_srt_path: str, lang: str = "fas", sample_fps: float = 2.0, workers: (int | None) = None
 ) -> None:
     if workers is None:
         workers = max(1, multiprocessing.cpu_count() - 1)

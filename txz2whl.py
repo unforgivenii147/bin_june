@@ -4,11 +4,10 @@ import sys
 import tarfile
 import zipfile
 from pathlib import Path
-
 from dh import get_files, mpf3, unique_path
 
 
-def process_file(path: str | Path) -> None:
+def process_file(path: (str | Path)) -> None:
     path = Path(path)
     new_name = ""
     if path.name.endswith(".txz"):
@@ -22,10 +21,7 @@ def process_file(path: str | Path) -> None:
         print(f"[SKIP] {target.name} already exists")
         target = unique_path(target)
     try:
-        with (
-            tarfile.open(path, "r:xz") as tf,
-            zipfile.ZipFile(target, "w", compression=zipfile.ZIP_DEFLATED) as zf,
-        ):
+        with tarfile.open(path, "r:xz") as tf, zipfile.ZipFile(target, "w", compression=zipfile.ZIP_DEFLATED) as zf:
             for member in tf.getmembers():
                 if member.isdir():
                     continue

@@ -2,7 +2,6 @@
 
 import sys
 from pathlib import Path
-
 from dh import cprint, fsz, get_files, gext, gsz, mpf
 from rcssmin import cssmin
 

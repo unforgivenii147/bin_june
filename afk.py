@@ -45,7 +45,7 @@ class FileReport:
 def _dotted(name: str, asname: Optional[str]) -> tuple[str, str]:
     bound = asname if asname else name.split(".")[0]
     full = asname if asname else name
-    return (bound, full)
+    return bound, full
 
 
 def _collect_names(node: ast.AST) -> set[str]:
@@ -99,7 +99,8 @@ def _is_under_type_checking(node: ast.AST, tree: ast.AST) -> bool:
             if (
                 isinstance(test, ast.Name)
                 and test.id == "TYPE_CHECKING"
-                or (isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING")
+                or isinstance(test, ast.Attribute)
+                and test.attr == "TYPE_CHECKING"
             ):
                 return True
         current = parent.get(id(current))
@@ -159,7 +160,7 @@ def analyse_source(source: str, display_path: str) -> FileReport:
                 if bound not in used_names and (not is_init or bound not in re_exports):
                     unused_names.append(alias.asname or alias.name)
         elif isinstance(node, ast.ImportFrom):
-            if is_init and node.level and (node.level > 0):
+            if is_init and node.level and node.level > 0:
                 continue
             for alias in node.names:
                 if alias.name == "*":
@@ -179,7 +180,7 @@ def analyse_source(source: str, display_path: str) -> FileReport:
 
 def _remove_names_from_import(line: str, names_to_remove: set[str]) -> Optional[str]:
     stripped = line.strip()
-    if stripped.startswith("import ") and (not stripped.startswith("from ")):
+    if stripped.startswith("import ") and not stripped.startswith("from "):
         parts = stripped[len("import ") :].split(",")
         kept = []
         for part in parts:
@@ -394,7 +395,7 @@ def collect_tasks(
                     source_tasks.extend(_extract_py_from_tar_zst(p))
         else:
             print(f"Warning: '{path}' does not exist, skipping.", file=sys.stderr)
-    return (file_tasks, source_tasks)
+    return file_tasks, source_tasks
 
 
 def run(
@@ -474,7 +475,19 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Report (and optionally remove) unused imports in Python files.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog='\nExamples:\n  %(prog)s                          # scan current directory\n  %(prog)s src/                     # scan a specific directory\n  %(prog)s file1.py file2.py        # scan specific files\n  %(prog)s src/ tests/              # scan multiple directories\n  %(prog)s file.py src/             # mix files and directories\n  %(prog)s -a                       # autofix in-place (with .bak)\n  %(prog)s -a --dry-run             # preview fixes without writing\n  %(prog)s -v --workers 4           # verbose output, 4 workers\n  %(prog)s --exclude "test_.*"      # exclude test files\n  %(prog)s --exclude "venv" --exclude ".git"  # exclude multiple patterns\n',
+        epilog="""
+Examples:
+  %(prog)s                          # scan current directory
+  %(prog)s src/                     # scan a specific directory
+  %(prog)s file1.py file2.py        # scan specific files
+  %(prog)s src/ tests/              # scan multiple directories
+  %(prog)s file.py src/             # mix files and directories
+  %(prog)s -a                       # autofix in-place (with .bak)
+  %(prog)s -a --dry-run             # preview fixes without writing
+  %(prog)s -v --workers 4           # verbose output, 4 workers
+  %(prog)s --exclude "test_.*"      # exclude test files
+  %(prog)s --exclude "venv" --exclude ".git"  # exclude multiple patterns
+""",
     )
     parser.add_argument(
         "paths", nargs="*", default=["."], help="Files and/or directories to scan (default: current directory)"
@@ -510,7 +523,7 @@ def main() -> None:
             print(f"Warning: '{p}' does not exist, skipping.", file=sys.stderr)
     if not valid_paths:
         parser.error("No valid files or directories to scan.")
-    if args.dry_run and (not args.autofix):
+    if args.dry_run and not args.autofix:
         args.autofix = True
     if args.no_color:
         global RESET, BOLD, YELLOW, RED, CYAN, GREEN

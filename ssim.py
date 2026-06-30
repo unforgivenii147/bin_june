@@ -6,7 +6,6 @@ import shutil
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
 import ssdeep
 import xxhash
 from tqdm import tqdm
@@ -32,9 +31,9 @@ class FileSimilarityDetector:
     def hash_file(path: Path):
         try:
             data = path.read_bytes()
-            return (str(path), xxhash.xxh64(data).hexdigest(), ssdeep.hash(data))
+            return str(path), xxhash.xxh64(data).hexdigest(), ssdeep.hash(data)
         except Exception:
-            return (str(path), None, None)
+            return str(path), None, None
 
     def process_files(self, files: list[Path]) -> None:
         files = list(files)
@@ -106,10 +105,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Detect duplicate and similar files")
     parser.add_argument("threshold", type=int, default=70, help="Similarity threshold (0-100)")
     parser.add_argument(
-        "-m",
-        "--move",
-        action="store_true",
-        help="Keep one file per similarity group and delete the rest",
+        "-m", "--move", action="store_true", help="Keep one file per similarity group and delete the rest"
     )
     parser.add_argument("-o", "--output", default="output", help="Output directory (copy mode only)")
     args = parser.parse_args()

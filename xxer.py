@@ -106,7 +106,7 @@ def format_size(size_bytes: int) -> str:
 
 def has_compressed_suffix(path: Path) -> bool:
     name = path.name.lower()
-    return any((name.endswith(ext) for ext in SUPPORTED_EXTS))
+    return any(name.endswith(ext) for ext in SUPPORTED_EXTS)
 
 
 def output_name_for_file(path: Path, mode: str) -> Path:
@@ -482,7 +482,7 @@ def collect_items(base: Path) -> list[Tuple[Path, bool]]:
         for p in base.iterdir():
             if p.name == ".git":
                 continue
-            if p.is_file() and (not has_compressed_suffix(p)):
+            if p.is_file() and not has_compressed_suffix(p):
                 items.append((p, False))
             elif p.is_dir():
                 items.append((p, True))
@@ -514,9 +514,9 @@ def main() -> None:
     method_group.add_argument("-b", "--brotli", action="store_true", help="Use Brotli")
     method_group.add_argument("--bz2", action="store_true", help="Use Bzip2")
     args = parser.parse_args()
-    if not args.compress and (not args.decompress):
+    if not args.compress and not args.decompress:
         args.compress = True
-    if args.compress and (not (args.use_7z or args.zstd or args.xz or args.gz or args.brotli or args.bz2)):
+    if args.compress and not (args.use_7z or args.zstd or args.xz or args.gz or args.brotli or args.bz2):
         args.zstd = True
     overall_original_size = 0
     overall_new_size = 0

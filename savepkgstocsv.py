@@ -25,17 +25,13 @@ FIELDS = [
     "Origin",
     "Bugs",
 ]
-FORMAT = "${binary:Package}\t${Version}\t${Architecture}\t${Status}\t${Priority}\t${Section}\t${Installed-Size}\t${Maintainer}\t${Homepage}\t${binary:Summary}\t${Source}\t${Essential}\t${Multi-Arch}\t${Origin}\t${Bugs}\n"
+FORMAT = """${binary:Package}	${Version}	${Architecture}	${Status}	${Priority}	${Section}	${Installed-Size}	${Maintainer}	${Homepage}	${binary:Summary}	${Source}	${Essential}	${Multi-Arch}	${Origin}	${Bugs}
+"""
 
 
 def query_packages() -> list[list[str]]:
     try:
-        proc = subprocess.run(
-            ["dpkg-query", "-W", f"-f={FORMAT}"],
-            check=True,
-            capture_output=True,
-            text=True,
-        )
+        proc = subprocess.run(["dpkg-query", "-W", f"-f={FORMAT}"], check=True, capture_output=True, text=True)
     except FileNotFoundError:
         sys.exit("dpkg-query not found (not a Debian-based system)")
     except subprocess.CalledProcessError as exc:

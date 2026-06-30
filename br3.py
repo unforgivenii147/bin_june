@@ -6,7 +6,6 @@ import shutil
 import sys
 import tempfile
 from pathlib import Path
-
 import brotlicffi
 
 _executor = asyncio.Semaphore(4)
@@ -23,10 +22,7 @@ def fsz(size: int) -> str:
 async def compress_folder_async(folder_path: Path, output_base_name: str, format="tar") -> bool:
     loop = asyncio.get_running_loop()
     try:
-        await loop.run_in_executor(
-            None,
-            lambda: shutil.make_archive(output_base_name, format, str(folder_path)),
-        )
+        await loop.run_in_executor(None, lambda: shutil.make_archive(output_base_name, format, str(folder_path)))
         return True
     except Exception as e:
         print(f"Failed to compress folder {folder_path} → {output_base_name}: {e}")
@@ -121,8 +117,7 @@ async def compress_file_async(path: Path) -> bool:
 async def get_files_async(directory: Path) -> list[Path]:
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(
-        None,
-        lambda: [p for p in directory.glob("*") if p.is_file() and (not p.is_symlink()) and should_compress(p)],
+        None, lambda: [p for p in directory.glob("*") if p.is_file() and not p.is_symlink() and should_compress(p)]
     )
 
 
@@ -137,7 +132,7 @@ def should_compress(path: Path) -> bool | int:
             return False
         if not path.is_file():
             return False
-        compressed_extensions = (".xz", ".br", ".7z", ".gz", ".zip", ".bz2")
+        compressed_extensions = ".xz", ".br", ".7z", ".gz", ".zip", ".bz2"
         if path.suffix in compressed_extensions:
             return False
         return path.stat().st_size

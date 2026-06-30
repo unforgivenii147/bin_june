@@ -8,7 +8,6 @@ import zipfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from queue import Queue
-
 from fastwalk import walk_files
 
 pause_event = threading.Event()
@@ -16,16 +15,7 @@ pause_event.set()
 results_queue = Queue()
 DEFAULT_EXCLUDED_DIRS = {".git"}
 DEFAULT_SKIPPED_EXTS = {".pyc", ".bak"}
-ARCHIVE_EXTENSIONS = (
-    ".tar.gz",
-    ".tar",
-    ".tar.xz",
-    ".tar.zst",
-    ".tar.bz2",
-    ".zip",
-    ".whl",
-    ".apk",
-)
+ARCHIVE_EXTENSIONS = (".tar.gz", ".tar", ".tar.xz", ".tar.zst", ".tar.bz2", ".zip", ".whl", ".apk")
 
 
 def setup_keyboard_listener() -> bool:
@@ -36,7 +26,7 @@ def setup_keyboard_listener() -> bool:
             if event.name in {"space", "p"} and pause_event.is_set():
                 pause_event.clear()
                 print("\n[PAUSED] Press 'c' to continue...")
-            elif event.name == "c" and (not pause_event.is_set()):
+            elif event.name == "c" and not pause_event.is_set():
                 pause_event.set()
                 print("\n[RESUMED] Searching...")
 
@@ -51,7 +41,7 @@ def is_excluded(path: Path, excluded_dirs, excluded_patterns) -> bool:
     for part in path.parts:
         if part in excluded_dirs:
             return True
-    return any((fnmatch.fnmatch(path.name, pattern) for pattern in excluded_patterns))
+    return any(fnmatch.fnmatch(path.name, pattern) for pattern in excluded_patterns)
 
 
 def should_skip_file(path: Path) -> bool:
@@ -144,19 +134,14 @@ def main() -> None:
     parser.add_argument("-c", "--content", action="store_true")
     parser.add_argument("-d", "--directory", default=".")
     parser.add_argument("-o", "--output", default="output")
-    parser.add_argument(
-        "--exclude",
-        action="append",
-        default=[],
-        help="Exclude dir or glob (repeatable)",
-    )
+    parser.add_argument("--exclude", action="append", default=[], help="Exclude dir or glob (repeatable)")
     args = parser.parse_args()
-    excluded_dirs = DEFAULT_EXCLUDED_DIRS | {e for e in args.exclude if not any((ch in e for ch in "*?[]"))}
-    excluded_patterns = {e for e in args.exclude if any((ch in e for ch in "*?[]"))}
+    excluded_dirs = DEFAULT_EXCLUDED_DIRS | {e for e in args.exclude if not any(ch in e for ch in "*?[]")}
+    excluded_patterns = {e for e in args.exclude if any(ch in e for ch in "*?[]")}
     setup_keyboard_listener()
     root = Path(args.directory).resolve()
     print(f"[INFO] Root: {root}")
-    print(f"[INFO] Mode: {('content' if args.content else 'filename')}")
+    print(f"[INFO] Mode: {'content' if args.content else 'filename'}")
     print(f"[INFO] Excluded dirs: {sorted(excluded_dirs)}")
     print(f"[INFO] Excluded patterns: {sorted(excluded_patterns)}")
     print("=" * 80)

@@ -52,7 +52,7 @@ class PackageDetector:
             if file_path.suffix.lower() in binary_extensions:
                 has_binary = True
                 break
-        return (is_pure_python, has_c_extension, has_binary)
+        return is_pure_python, has_c_extension, has_binary
 
     def get_python_version(self) -> str:
         major, minor = sys.version_info[:2]
@@ -176,14 +176,27 @@ class WheelBuilder:
                 if source_dir.is_dir():
                     shutil.copytree(source_dir, pkg_dest)
                 else:
-                    return (False, f"Source directory not found: {source_dir}")
+                    return False, f"Source directory not found: {source_dir}"
                 normalized_name = package_info.name.lower().replace("-", "_").replace(".", "_")
                 dist_info_name = f"{normalized_name}-{package_info.version}.dist-info"
                 dist_info_dir = temp_path / dist_info_name
                 dist_info_dir.mkdir(parents=True, exist_ok=True)
-                wheel_content = f"Wheel-Version: 1.0\nGenerator: repack_venv_packages\nRoot-Is-Purelib: {('true' if package_info.is_pure_python else 'false')}\nTag: {package_info.py_version}-{package_info.abi_tag}-{package_info.platform_tag}\n"
+                wheel_content = f"""Wheel-Version: 1.0
+Generator: repack_venv_packages
+Root-Is-Purelib: {"true" if package_info.is_pure_python else "false"}
+Tag: {package_info.py_version}-{package_info.abi_tag}-{package_info.platform_tag}
+"""
                 (dist_info_dir / "WHEEL").write_text(wheel_content)
-                metadata_content = f"Metadata-Version: {package_info.metadata_version}\nName: {package_info.name}\nVersion: {package_info.version}\nSummary: Repacked wheel from site-packages\nHome-page: UNKNOWN\nAuthor: UNKNOWN\nAuthor-email: UNKNOWN\nLicense: UNKNOWN\nPlatform: UNKNOWN\n"
+                metadata_content = f"""Metadata-Version: {package_info.metadata_version}
+Name: {package_info.name}
+Version: {package_info.version}
+Summary: Repacked wheel from site-packages
+Home-page: UNKNOWN
+Author: UNKNOWN
+Author-email: UNKNOWN
+License: UNKNOWN
+Platform: UNKNOWN
+"""
                 (dist_info_dir / "METADATA").write_text(metadata_content)
                 top_level = pkg_name.split("-")[0]
                 (dist_info_dir / "top_level.txt").write_text(top_level + "\n")
@@ -207,16 +220,16 @@ class WheelBuilder:
                 temp_wheel.unlink()
             size_mb = wheel_path.stat().st_size / (1024 * 1024)
             self.log(f"Wheel created successfully: {wheel_path} ({size_mb:.2f} MB)")
-            return (True, f"Successfully created {package_info.wheel_filename}")
+            return True, f"Successfully created {package_info.wheel_filename}"
         except Exception as e:
-            return (False, f"Error creating wheel: {e!s}")
+            return False, f"Error creating wheel: {e!s}"
 
 
 class VenvRepacker:
     def __init__(
         self,
-        site_packages_dir: str | None = None,
-        output_dir: str | None = None,
+        site_packages_dir: (str | None) = None,
+        output_dir: (str | None) = None,
         verbose: bool = False,
         dry_run: bool = False,
     ) -> None:
@@ -251,7 +264,7 @@ class VenvRepacker:
     def find_packages(self) -> list[str]:
         packages = set()
         for item in self.site_packages.iterdir():
-            if item.is_dir() and (not item.name.startswith(".")):
+            if item.is_dir() and not item.name.startswith("."):
                 if not item.name.endswith((".dist-info", ".egg-info", ".egg", "__pycache__")):
                     packages.add(item.name)
         self.log(f"Found {len(packages)} packages")
@@ -261,18 +274,18 @@ class VenvRepacker:
         try:
             package_info = self.detector.analyze_package(self.site_packages, package_name)
             if not package_info:
-                return (False, "Failed to analyze package", None)
+                return False, "Failed to analyze package", None
             self.log(f"Repacking: {package_name} v{package_info.version}")
-            self.log(f"  Type: {('Pure Python' if package_info.is_pure_python else 'With C extensions')}")
+            self.log(f"  Type: {'Pure Python' if package_info.is_pure_python else 'With C extensions'}")
             self.log(f"  Wheel: {package_info.wheel_filename}")
             if self.dry_run:
                 self.log("DRY RUN: Would create wheel")
-                return (True, "Dry run - wheel not created", package_info)
+                return True, "Dry run - wheel not created", package_info
             package_dir = self.site_packages / package_name
             success, message = self.builder.create_wheel(package_info, package_dir, self.output_dir)
-            return (success, message, package_info)
+            return success, message, package_info
         except Exception as e:
-            return (False, f"Error: {e!s}", None)
+            return False, f"Error: {e!s}", None
 
     def repack_all(self) -> dict:
         print("\n╔════════════════════════════════════════════════════════════╗")
@@ -280,7 +293,7 @@ class VenvRepacker:
         print("╚════════════════════════════════════════════════════════════╝\n")
         print(f"Site-packages: {self.site_packages}")
         print(f"Output directory: {self.output_dir}")
-        print(f"Mode: {('DRY RUN' if self.dry_run else 'NORMAL')}")
+        print(f"Mode: {'DRY RUN' if self.dry_run else 'NORMAL'}")
         print("-" * 60)
         self.output_dir.mkdir(parents=True, exist_ok=True)
         packages = self.find_packages()
@@ -364,33 +377,27 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Repack Python packages from site-packages into .whl files",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="\nExamples:\n  python repack_venv_packages.py\n  python repack_venv_packages.py --site-packages /path/to/site-packages\n  python repack_venv_packages.py --output /path/to/output\n  python repack_venv_packages.py --dry-run\n  python repack_venv_packages.py -v\n  python repack_venv_packages.py --report repack_report.json\n  python repack_venv_packages.py --list-wheels\n        ",
+        epilog="""
+Examples:
+  python repack_venv_packages.py
+  python repack_venv_packages.py --site-packages /path/to/site-packages
+  python repack_venv_packages.py --output /path/to/output
+  python repack_venv_packages.py --dry-run
+  python repack_venv_packages.py -v
+  python repack_venv_packages.py --report repack_report.json
+  python repack_venv_packages.py --list-wheels
+        """,
     )
-    parser.add_argument(
-        "--site-packages",
-        default=None,
-        help="Path to site-packages directory (default: current dir)",
-    )
-    parser.add_argument(
-        "--output",
-        default=None,
-        help="Output directory for .whl files (default: ~/tmp/whl)",
-    )
+    parser.add_argument("--site-packages", default=None, help="Path to site-packages directory (default: current dir)")
+    parser.add_argument("--output", default=None, help="Output directory for .whl files (default: ~/tmp/whl)")
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Show what would be done without creating files",
-    )
+    parser.add_argument("--dry-run", action="store_true", help="Show what would be done without creating files")
     parser.add_argument("--report", metavar="FILE", help="Save detailed report to JSON file")
     parser.add_argument("--list-wheels", action="store_true", help="List generated .whl files")
     args = parser.parse_args()
     try:
         repacker = VenvRepacker(
-            site_packages_dir=args.site_packages,
-            output_dir=args.output,
-            verbose=args.verbose,
-            dry_run=args.dry_run,
+            site_packages_dir=args.site_packages, output_dir=args.output, verbose=args.verbose, dry_run=args.dry_run
         )
         repacker.repack_all()
         repacker.print_stats()

@@ -18,7 +18,7 @@ def find_uppercase_extensions(directory: Path, autofix: bool = False):
             continue
         if file_path.suffix:
             extension = file_path.suffix[1:]
-            if any((c.isupper() for c in extension)):
+            if any(c.isupper() for c in extension):
                 uppercase_files.append(file_path)
                 if autofix:
                     new_extension = "." + extension.lower()

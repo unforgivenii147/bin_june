@@ -37,14 +37,14 @@ def get_function_content_hash_manual(filename, function_node):
         func_lines = lines[start_line:end_line]
         body_start = 1
         for i, line in enumerate(func_lines):
-            if line.strip() and (not line.strip().startswith("@")):
+            if line.strip() and not line.strip().startswith("@"):
                 if ":" in line:
                     body_start = i + 1
                     break
         body_lines = func_lines[body_start:]
         if body_lines:
-            min_indent = min((len(line) - len(line.lstrip()) for line in body_lines if line.strip()))
-            normalized_body = "\n".join((line[min_indent:] if line.strip() else line for line in body_lines))
+            min_indent = min(len(line) - len(line.lstrip()) for line in body_lines if line.strip())
+            normalized_body = "\n".join(line[min_indent:] if line.strip() else line for line in body_lines)
         else:
             normalized_body = ""
         signature = f"args={ast.dump(function_node.args)}"

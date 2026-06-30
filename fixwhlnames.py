@@ -48,11 +48,11 @@ def extract_wheel_tags(filename: str) -> Optional[Tuple[str, str, str]]:
     for pattern in patterns:
         match = re.search(pattern, filename)
         if match:
-            return (match.group(1), match.group(2), match.group(3))
+            return match.group(1), match.group(2), match.group(3)
     if "cp3" in filename:
         py_match = re.search("cp3[0-9]", filename)
         if py_match:
-            return (py_match.group(0), "none", "any")
+            return py_match.group(0), "none", "any"
     return None
 
 
@@ -92,7 +92,7 @@ def fix_whl_files_by_metadata(directory: str = ".", dry_run: bool = True, backup
     renamed_count = 0
     failed_files = []
     backup_dir = None
-    if backup and (not dry_run):
+    if backup and not dry_run:
         backup_dir = path / "whl_backup"
         backup_dir.mkdir(exist_ok=True)
         print(f"Backups will be saved to: {backup_dir}")
@@ -137,7 +137,7 @@ def fix_whl_files_by_metadata(directory: str = ".", dry_run: bool = True, backup
         print(f"  Would skip/error: {len(failed_files)}")
     if dry_run and renamed_count > 0:
         print("\n✓ Dry run complete. Run with --execute to apply changes.")
-    return (renamed_count, failed_files)
+    return renamed_count, failed_files
 
 
 def batch_fix_with_parallel(directory: str = ".", max_workers: int = 4) -> None:
@@ -158,7 +158,7 @@ def batch_fix_with_parallel(directory: str = ".", max_workers: int = 4) -> None:
                 metadata = future.result()
                 if metadata:
                     proper_name = reconstruct_wheel_name(file_path, metadata, file_path.name)
-                    results[file_path.name] = (metadata, proper_name)
+                    results[file_path.name] = metadata, proper_name
             except Exception as e:
                 print(f"Error processing {file_path.name}: {e}")
     print("\nExtracted information:")

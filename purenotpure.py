@@ -25,7 +25,7 @@ def is_in_system_site_packages(dist: metadata.Distribution) -> bool:
                     site_paths.add(Path(p).resolve())
                 except Exception:
                     pass
-        return any((str(loc).startswith(str(sp)) for sp in site_paths))
+        return any(str(loc).startswith(str(sp)) for sp in site_paths)
     except Exception:
         return False
 

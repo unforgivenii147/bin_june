@@ -106,7 +106,12 @@ def get_package_metadata(pkg_name: str) -> dict[str, str]:
 
 
 def create_control_file(path: Path, meta: dict[str, str]) -> None:
-    control_content = f"Package: {meta['Package']}\nVersion: {meta['Version']}\nArchitecture: {meta['Architecture']}\nMaintainer: {meta['Maintainer']}\nDescription: {meta['Description']}\n"
+    control_content = f"""Package: {meta["Package"]}
+Version: {meta["Version"]}
+Architecture: {meta["Architecture"]}
+Maintainer: {meta["Maintainer"]}
+Description: {meta["Description"]}
+"""
     (path / "control").write_text(control_content)
 
 

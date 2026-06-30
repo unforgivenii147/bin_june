@@ -5,7 +5,6 @@ import json
 import re
 import time
 from pathlib import Path
-
 import requests
 from dh import cprint, get_installed_packages
 from packaging.version import Version
@@ -30,8 +29,7 @@ def get_latest_version(pkg_name: str) -> str | None:
     except:
         return None
     wheel_pattern = re.compile(
-        f"{re.escape(pkg_name)}-([0-9][A-Za-z0-9\\.\\-_]*)\\.(?:whl|tar\\.gz|zip)",
-        re.IGNORECASE,
+        f"{re.escape(pkg_name)}-([0-9][A-Za-z0-9\\.\\-_]*)\\.(?:whl|tar\\.gz|zip)", re.IGNORECASE
     )
     versions = []
     print(html[:-100])
@@ -51,10 +49,7 @@ def load_previous_results() -> dict[str, dict]:
             with Path(RESULTS_FILE).open(encoding="utf-8") as f:
                 return json.load(f)
         except json.JSONDecodeError:
-            cprint(
-                f"Warning: Corrupted results file '{RESULTS_FILE}'. Starting fresh.",
-                "red",
-            )
+            cprint(f"Warning: Corrupted results file '{RESULTS_FILE}'. Starting fresh.", "red")
             return {}
     return {}
 
@@ -112,10 +107,7 @@ if __name__ == "__main__":
                     "yellow",
                 )
         else:
-            cprint(
-                f"[{i + 1}/{len(packages_to_check)}] {pkg_name}: Could not get latest version from PyPI.",
-                "yellow",
-            )
+            cprint(f"[{i + 1}/{len(packages_to_check)}] {pkg_name}: Could not get latest version from PyPI.", "yellow")
         if (i + 1) % 10 == 0 or i + 1 == len(packages_to_check):
             save_results(current_results)
             cprint("Results saved periodically.", "blue")
@@ -124,7 +116,8 @@ if __name__ == "__main__":
         for pkg, installed_ver, latest_ver in updatable_pkgs_info:
             cprint(f"{pkg}: {installed_ver} -> {latest_ver}", "magenta")
         cprint(
-            f"\nTo update these packages, you can use: pip install --upgrade {' '.join([p[0] for p in updatable_pkgs_info])}",
+            f"""
+To update these packages, you can use: pip install --upgrade {" ".join([p[0] for p in updatable_pkgs_info])}""",
             "yellow",
         )
     else:

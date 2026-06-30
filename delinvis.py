@@ -24,7 +24,7 @@ def find_unprintable_positions(text: str):
 
 def clean_text(text: str) -> str:
     allowed = set(string.printable) | {"\n", "\r", "\t"}
-    return "".join((ch for ch in text if ch in allowed))
+    return "".join(ch for ch in text if ch in allowed)
 
 
 def clean_file(path: str) -> None:

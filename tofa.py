@@ -3,7 +3,6 @@
 import sys
 import time
 from pathlib import Path
-
 from deep_translator import GoogleTranslator
 from tqdm import tqdm
 
@@ -65,7 +64,7 @@ def translate_chunk(text: str, source_lang="auto"):
         try:
             translator = GoogleTranslator(source=source_lang, target="fa")
             translated = translator.translate(text)
-            return (translated, source_lang)
+            return translated, source_lang
         except Exception as e:
             print(f"[WARN] Translation failed (attempt {attempt + 1}/3): {e}")
             time.sleep(1 + attempt)

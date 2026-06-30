@@ -24,7 +24,7 @@ def is_python_file(path: str) -> bool:
             if first_line.startswith("#!"):
                 return "python" in first_line
             sample = f.read(200)
-            return any((tok in sample for tok in ("def ", "class ", "import ", "from ")))
+            return any(tok in sample for tok in ("def ", "class ", "import ", "from "))
     except Exception:
         return False
 
@@ -32,7 +32,12 @@ def is_python_file(path: str) -> bool:
 def build_header(info: dict) -> str:
     now = datetime.datetime.now()
     timestamp = now.strftime("%a %d %b %Y | %H:%M:%S")
-    return f"# Author : {info.get('name', '')}\n# Email  : {info.get('email', '')}\n# Time   : {timestamp}\n\n\n"
+    return f"""# Author : {info.get("name", "")}
+# Email  : {info.get("email", "")}
+# Time   : {timestamp}
+
+
+"""
 
 
 def file_already_has_header(contents: str) -> bool:

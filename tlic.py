@@ -74,7 +74,7 @@ def collect_blocks_parallel(
         batch_end = min(batch_start + batch_size, total_files)
         batch_files = all_files[batch_start:batch_end]
         results = Parallel(n_jobs=n_jobs, prefer="threads", verbose=0)(
-            (delayed(extract_blocks_from_file)(fp, min_lines) for fp in batch_files)
+            delayed(extract_blocks_from_file)(fp, min_lines) for fp in batch_files
         )
         for filepath, blocks in zip(batch_files, results):
             for block_text, start_lineno, original_lines in blocks:
@@ -96,7 +96,10 @@ def report(repeated: Dict[str, List[Tuple[Path, int, List[str]]]], root: Path) -
     for i, (block_text, occurrences) in enumerate(repeated.items(), 1):
         line_count = block_text.count("\n") + 1
         unique_files = {occ[0] for occ in occurrences}
-        print(f"\n--- Block {i} ({len(occurrences)} occurrences in {len(unique_files)} files, {line_count} lines) ---")
+        print(
+            f"""
+--- Block {i} ({len(occurrences)} occurrences in {len(unique_files)} files, {line_count} lines) ---"""
+        )
         for line in block_text.split("\n"):
             print(f"  {line}")
         print("  Found in:")
@@ -114,18 +117,18 @@ def process_file_removal(filepath: Path, removals: List[Tuple[int, List[str]]], 
             original_lines = f.readlines()
     except OSError as e:
         print(f"Warning: cannot read {filepath}: {e}", file=sys.stderr)
-        return (filepath, 0, False)
+        return filepath, 0, False
     lines_to_remove: Set[int] = set()
     for start_lineno, block_lines in removals:
         for offset in range(len(block_lines)):
             lines_to_remove.add(start_lineno + offset - 1)
-    if any((idx >= len(original_lines) for idx in lines_to_remove)):
+    if any(idx >= len(original_lines) for idx in lines_to_remove):
         print(f"Warning: Invalid line numbers in {filepath}", file=sys.stderr)
-        return (filepath, 0, False)
+        return filepath, 0, False
     new_lines = [line for idx, line in enumerate(original_lines) if idx not in lines_to_remove]
     removed_count = len(original_lines) - len(new_lines)
     if removed_count == 0:
-        return (filepath, 0, False)
+        return filepath, 0, False
     if filepath.suffix == ".py":
         try:
             ast.parse("".join(new_lines))
@@ -135,14 +138,14 @@ def process_file_removal(filepath: Path, removals: List[Tuple[int, List[str]]], 
             except ValueError:
                 rel_path = filepath
             print(f"Warning: Removing blocks from {rel_path} would create invalid Python: {e}", file=sys.stderr)
-            return (filepath, 0, False)
+            return filepath, 0, False
     try:
         with open(filepath, "w", encoding="utf-8") as f:
             f.writelines(new_lines)
-        return (filepath, removed_count, True)
+        return filepath, removed_count, True
     except OSError as e:
         print(f"Error: cannot write {filepath}: {e}", file=sys.stderr)
-        return (filepath, 0, False)
+        return filepath, 0, False
 
 
 def remove_repeated_blocks(repeated: Dict[str, List[Tuple[Path, int, List[str]]]], root: Path, n_jobs: int = 8) -> None:
@@ -155,7 +158,7 @@ def remove_repeated_blocks(repeated: Dict[str, List[Tuple[Path, int, List[str]]]
         return
     print(f"Removing blocks from {len(file_removals)} files...", file=sys.stderr)
     results = Parallel(n_jobs=n_jobs, prefer="threads", verbose=0)(
-        (delayed(process_file_removal)(fp, removals, root) for fp, removals in file_removals.items())
+        delayed(process_file_removal)(fp, removals, root) for fp, removals in file_removals.items()
     )
     removed_total = 0
     files_changed = 0

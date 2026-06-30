@@ -21,7 +21,7 @@ if __name__ == "__main__":
     cwd = Path.cwd()
     bcount = 0
     for path in get_files(cwd):
-        if path.is_symlink() and (not path.exists()):
+        if path.is_symlink() and not path.exists():
             try:
                 path.unlink()
                 bcount += 1

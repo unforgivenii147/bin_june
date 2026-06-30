@@ -8,7 +8,7 @@ from pathlib import Path
 
 
 class GitHubRepoManager:
-    def __init__(self, repo_name: str | None = None) -> None:
+    def __init__(self, repo_name: (str | None) = None) -> None:
         self.cwd = Path.cwd()
         self.repo_name = repo_name or self.cwd.name
         self.github_username = "unforgivenii147"
@@ -17,23 +17,17 @@ class GitHubRepoManager:
         self.repo_url = f"https://github.com/{self.github_username}/{self.repo_name}.git"
 
     def _run_command(
-        self, command: list, cwd: Path | None = None, capture_output: bool = False
+        self, command: list, cwd: (Path | None) = None, capture_output: bool = False
     ) -> tuple[int, str, str]:
         try:
-            result = subprocess.run(
-                command,
-                check=False,
-                cwd=cwd or self.cwd,
-                capture_output=capture_output,
-                text=True,
-            )
+            result = subprocess.run(command, check=False, cwd=cwd or self.cwd, capture_output=capture_output, text=True)
             stdout = result.stdout.strip() if result.stdout else ""
             stderr = result.stderr.strip() if result.stderr else ""
-            return (result.returncode, stdout, stderr)
+            return result.returncode, stdout, stderr
         except Exception as e:
             print(f"Error executing command: {' '.join(command)}")
             print(f"Exception: {e}")
-            return (1, "", str(e))
+            return 1, "", str(e)
 
     def _check_gh_cli_installed(self) -> bool:
         returncode, _, _ = self._run_command(["gh", "--version"], capture_output=True)
@@ -49,8 +43,7 @@ class GitHubRepoManager:
 
     def _repo_exists_on_github(self) -> bool:
         returncode, _, _ = self._run_command(
-            ["gh", "repo", "view", f"{self.github_username}/{self.repo_name}"],
-            capture_output=True,
+            ["gh", "repo", "view", f"{self.github_username}/{self.repo_name}"], capture_output=True
         )
         return returncode == 0
 
@@ -61,7 +54,7 @@ class GitHubRepoManager:
     def _init_local_repo(self) -> None:
         print(f"\n📦 Initializing local git repository in {self.cwd}...")
         returncode, _stdout, stderr = self._run_command(["git", "init"], capture_output=True)
-        if returncode != 0 and "Reinitialized" not in stderr and ("Initialized" not in stderr):
+        if returncode != 0 and "Reinitialized" not in stderr and "Initialized" not in stderr:
             print(f"Error initializing git repo:    {stderr}")
             sys.exit(1)
         self._run_command(["git", "config", "user.name", self.git_user], capture_output=True)
@@ -74,16 +67,7 @@ class GitHubRepoManager:
             print(f"✓ Repository {self.repo_name} already exists on GitHub")
             return True
         returncode, stdout, stderr = self._run_command(
-            [
-                "gh",
-                "repo",
-                "create",
-                self.repo_name,
-                "--source=.",
-                "--remote=origin",
-                "--public",
-            ],
-            capture_output=True,
+            ["gh", "repo", "create", self.repo_name, "--source=.", "--remote=origin", "--public"], capture_output=True
         )
         if returncode != 0:
             print("Error creating repository on GitHub")
@@ -112,13 +96,16 @@ class GitHubRepoManager:
             readme = self.cwd / "README.md"
             if not readme.exists():
                 readme.write_text(
-                    f"# {self.repo_name}\n\nRepository initialized on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+                    f"""# {self.repo_name}
+
+Repository initialized on {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+"""
                 )
                 print("✓ Created README.md")
                 return True
         return has_content
 
-    def _commit_changes(self, message: str | None = None) -> bool:
+    def _commit_changes(self, message: (str | None) = None) -> bool:
         if not message:
             message = self._generate_commit_message()
         print(f"\n💾 Committing changes with message: '{message}'")
@@ -144,10 +131,7 @@ class GitHubRepoManager:
                 print("✓ Remote 'origin' already configured correctly")
                 return
             print(f"Updating remote URL from {current_url} to {self.repo_url}")
-            self._run_command(
-                ["git", "remote", "set-url", "origin", self.repo_url],
-                capture_output=True,
-            )
+            self._run_command(["git", "remote", "set-url", "origin", self.repo_url], capture_output=True)
             return
         returncode, _, stderr = self._run_command(
             ["git", "remote", "add", "origin", self.repo_url], capture_output=True
@@ -176,7 +160,7 @@ class GitHubRepoManager:
         returncode, current_branch, _ = self._run_command(
             ["git", "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True
         )
-        if returncode == 0 and current_branch and (current_branch != "main"):
+        if returncode == 0 and current_branch and current_branch != "main":
             print(f"\n🔄 Renaming branch from '{current_branch}' to 'main'...")
             returncode, _, stderr = self._run_command(["git", "branch", "-M", "main"], capture_output=True)
             if returncode != 0:
@@ -256,17 +240,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Create a GitHub repository using gh CLI and auto-commit with current date/time"
     )
+    parser.add_argument("-n", "--name", help="Repository name (default: current directory name)", type=str)
     parser.add_argument(
-        "-n",
-        "--name",
-        help="Repository name (default: current directory name)",
-        type=str,
-    )
-    parser.add_argument(
-        "-m",
-        "--message",
-        help="Custom commit message (default: auto-generated with timestamp)",
-        type=str,
+        "-m", "--message", help="Custom commit message (default: auto-generated with timestamp)", type=str
     )
     args = parser.parse_args()
     try:

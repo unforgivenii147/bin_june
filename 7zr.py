@@ -156,7 +156,7 @@ async def compress_folder_async(folder_path: Path, output_path: Path) -> bool:
 
         await loop.run_in_executor(None, compress)
         if output_path.exists():
-            original_size = sum((f.stat().st_size for f in folder_path.rglob("*") if f.is_file()))
+            original_size = sum(f.stat().st_size for f in folder_path.rglob("*") if f.is_file())
             compressed_size = output_path.stat().st_size
             if compressed_size < original_size:
                 await loop.run_in_executor(None, shutil.rmtree, folder_path)
@@ -179,11 +179,11 @@ def compress_file(path: Path) -> tuple[bool, int, int]:
     out_path = path.with_suffix(path.suffix + ".7z")
     if out_path.exists():
         print(f"Skipping {path.name} - output already exists")
-        return (False, 0, 0)
+        return False, 0, 0
     try:
         original_size = path.stat().st_size
         if not original_size:
-            return (False, 0, 0)
+            return False, 0, 0
         if original_size < CHUNK_SIZE:
             success = compress_in_memory(path, out_path)
         else:
@@ -193,28 +193,28 @@ def compress_file(path: Path) -> tuple[bool, int, int]:
             if compressed_size == 0:
                 print(f"Warning: Compressed file empty for {path.name}")
                 out_path.unlink()
-                return (False, 0, 0)
+                return False, 0, 0
             if compressed_size < original_size:
                 path.unlink()
                 reduction = (original_size - compressed_size) / original_size * 100
                 print(f"  ✓ {path.name}: {reduction:.1f}% saved ({fsz(original_size)} → {fsz(compressed_size)})")
-                return (True, original_size, compressed_size)
+                return True, original_size, compressed_size
             else:
                 print(f"  ✗ {path.name}: No space saved, removing compressed file")
                 out_path.unlink()
-                return (False, 0, 0)
+                return False, 0, 0
         else:
-            return (False, 0, 0)
+            return False, 0, 0
     except (OSError, PermissionError, py7zr.Bad7zFile) as e:
         print(f"  ✗ Failed to compress {path.name}: {e}")
-        return (False, 0, 0)
+        return False, 0, 0
 
 
 def get_files(directory: Path, mode: str = "compress") -> list[Path]:
     if mode == "compress":
-        return [p for p in directory.glob("*") if p.is_file() and (not p.is_symlink()) and should_compress(p)]
+        return [p for p in directory.glob("*") if p.is_file() and not p.is_symlink() and should_compress(p)]
     else:
-        return [p for p in directory.glob("*.7z") if p.is_file() and (not p.is_symlink())]
+        return [p for p in directory.glob("*.7z") if p.is_file() and not p.is_symlink()]
 
 
 def get_dirs(directory: Path) -> list[Path]:
@@ -300,7 +300,7 @@ async def process_decompress() -> None:
         try:
             with py7zr.SevenZipFile(path, mode="r") as sevenz:
                 file_list = sevenz.getnames()
-                if len(file_list) == 1 and "/" not in file_list[0] and ("\\" not in file_list[0]):
+                if len(file_list) == 1 and "/" not in file_list[0] and "\\" not in file_list[0]:
                     out_path = path.with_suffix("")
                 else:
                     out_path = path.with_suffix("")
@@ -313,7 +313,7 @@ async def process_decompress() -> None:
                 if out_path.is_file():
                     decompressed_size = out_path.stat().st_size
                 else:
-                    decompressed_size = sum((f.stat().st_size for f in out_path.rglob("*") if f.is_file()))
+                    decompressed_size = sum(f.stat().st_size for f in out_path.rglob("*") if f.is_file())
                 total_decompressed += decompressed_size
                 print(f"  ✓ Decompressed {path.name}: {fsz(original_size)} → {fsz(decompressed_size)}")
                 path.unlink()
@@ -343,7 +343,19 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Multi-threaded 7-Zip compression/decompression tool (max compression)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="\nExamples:\n  %(prog)s -c          # Compress files and folders in current directory\n  %(prog)s -d          # Decompress .7z files in current directory\n  %(prog)s             # Default: compress\n\n7-Zip Settings:\n  - Format: 7z with LZMA2\n  - Compression level: 9 (maximum)\n  - Dictionary size: 256 MB\n  - Solid compression: Enabled\n  - Header compression: Enabled\n        ",
+        epilog="""
+Examples:
+  %(prog)s -c          # Compress files and folders in current directory
+  %(prog)s -d          # Decompress .7z files in current directory
+  %(prog)s             # Default: compress
+
+7-Zip Settings:
+  - Format: 7z with LZMA2
+  - Compression level: 9 (maximum)
+  - Dictionary size: 256 MB
+  - Solid compression: Enabled
+  - Header compression: Enabled
+        """,
     )
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-c", "--compress", action="store_true", help="Compress files and folders with 7-Zip (default)")

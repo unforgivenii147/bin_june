@@ -60,8 +60,8 @@ def list_dir(path: str = ".") -> None:
             size = 0
             color = CYAN
         items.append((size, entry, color))
-    size_col_width = max((len(human_readable_size(s)) for s, _, _ in items))
-    name_col_width = max((len(n) for _, n, _ in items))
+    size_col_width = max(len(human_readable_size(s)) for s, _, _ in items)
+    name_col_width = max(len(n) for _, n, _ in items)
     print(f"{'size'.ljust(size_col_width)}  {'name'}")
     print("-" * (size_col_width + name_col_width + 2))
     for size, name, color in sorted(items, key=operator.itemgetter(0)):

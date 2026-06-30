@@ -45,7 +45,8 @@ def inspect_and_move_wheels(root_dir="."):
         except Exception as e:
             print(f"⚠️  Error processing {whl_path.name}: {e}")
     print(
-        f"\nScan complete. Moved {bad_wheels_count} misconfigured wheel(s) to './suspicious/' out of {len(wheel_files)} total checked."
+        f"""
+Scan complete. Moved {bad_wheels_count} misconfigured wheel(s) to './suspicious/' out of {len(wheel_files)} total checked."""
     )
 
 

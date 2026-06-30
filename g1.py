@@ -3,14 +3,13 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-
 from github import Github
 from github.GithubException import GithubException, UnknownObjectException
 from github.Repository import Repository
 from tqdm import tqdm
 
 
-def get_github_client(token: str | None = None) -> Github:
+def get_github_client(token: (str | None) = None) -> Github:
     if token:
         return Github(token)
     return Github()
@@ -26,7 +25,7 @@ def parse_repo_url(txt: str) -> tuple[str, str]:
         txt = txt.split("github.com/", 1)[-1]
     parts = txt.split("/")
     if len(parts) >= 2:
-        return (parts[-2], parts[-1])
+        return parts[-2], parts[-1]
     raise ValueError(f"Invalid repository format: {txt}")
 
 
@@ -71,17 +70,7 @@ def build_clone_url(repo: Repository) -> str:
 
 def clone_repo(clone_url: str, branch: str) -> None:
     print(f"[INFO] Cloning repository from {clone_url} (branch: {branch})")
-    cmd = [
-        "git",
-        "clone",
-        "--depth",
-        "1",
-        "--single-branch",
-        "--branch",
-        branch,
-        clone_url,
-        "--progress",
-    ]
+    cmd = ["git", "clone", "--depth", "1", "--single-branch", "--branch", branch, clone_url, "--progress"]
     try:
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
         for line in process.stderr:
@@ -113,11 +102,7 @@ def init_submodules() -> None:
         return
     try:
         print("[INFO] Initializing and updating submodules...")
-        subprocess.run(
-            ["git", "submodule", "update", "--init", "--recursive"],
-            check=True,
-            capture_output=True,
-        )
+        subprocess.run(["git", "submodule", "update", "--init", "--recursive"], check=True, capture_output=True)
         print("[INFO] Submodules updated successfully.")
     except subprocess.CalledProcessError as e:
         raise Exception(f"Submodule update failed: {e}")

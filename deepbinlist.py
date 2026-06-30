@@ -74,10 +74,10 @@ def check_package(args_tuple: Tuple[str, str, List[Path]]) -> Tuple[str, str, bo
     package_name, version, site_paths = args_tuple
     try:
         is_pure = is_pure_python(package_name, site_paths)
-        return (package_name, version, is_pure)
+        return package_name, version, is_pure
     except Exception as e:
         logger.error(f"Error checking {package_name}: {e}")
-        return (package_name, version, True)
+        return package_name, version, True
 
 
 def main():

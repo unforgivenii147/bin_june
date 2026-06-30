@@ -44,7 +44,7 @@ def human(n: int) -> str:
     return f"{n:.1f} TB"
 
 
-def compress_file(src: Path, dry_run: bool, verbose: bool, level: int | None = None) -> dict:
+def compress_file(src: Path, dry_run: bool, verbose: bool, level: (int | None) = None) -> dict:
     result = {"src": src, "ok": False, "msg": ""}
     dst = src.with_suffix(src.suffix + BROTLI_EXT)
     if dst.exists():
@@ -146,7 +146,7 @@ def run_parallel(tasks: list, worker_fn, extra_kwargs: dict, verbose: bool) -> t
             else:
                 err += 1
                 print(f"  ✗ {res['msg']}", file=sys.stderr)
-    return (ok, err)
+    return ok, err
 
 
 def do_compress(root: Path, tar_subdirs: bool, dry_run: bool, verbose: bool) -> None:
@@ -207,7 +207,8 @@ def do_decompress(root: Path, dry_run: bool, verbose: bool) -> None:
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="brotli_compress",
-        description="Recursive brotli compression / decompression.\nDefault (no flags): compress files in CWD individually at level 11.",
+        description="""Recursive brotli compression / decompression.
+Default (no flags): compress files in CWD individually at level 11.""",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     mode = p.add_mutually_exclusive_group()
@@ -238,7 +239,7 @@ def main() -> None:
         print("[dry-run mode — no files will be modified]")
     if args.verbose or args.dry_run:
         print(f"Root : {root}")
-        print(f"Mode : {('compress' if compress else 'decompress')}")
+        print(f"Mode : {'compress' if compress else 'decompress'}")
         if compress:
             print(f"Tar subdirs : {args.tar_subdirs_first}")
         print(f"Workers     : {WORKERS}")

@@ -78,7 +78,7 @@ class DuplicateFunctionRemover:
             start_line = node.decorator_list[0].lineno
         else:
             start_line = node.lineno
-        return (start_line, end_line)
+        return start_line, end_line
 
     def _extract_function_code(self, func_info: FunctionInfo) -> str:
         start_line, end_line = self._get_function_lines(func_info)

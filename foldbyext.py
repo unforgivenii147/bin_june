@@ -56,11 +56,11 @@ def folderize_by_extension(cwd: Path):
         total_size += stats["total_size"]
         ext_display = ext or "no_extension"
         size_str = get_size_str(stats["total_size"])
-        print(f"{ext_display:<15} : {stats['count']:4} file{('s' if stats['count'] != 1 else ' ')}  {size_str:>8}")
+        print(f"{ext_display:<15} : {stats['count']:4} file{'s' if stats['count'] != 1 else ' '}  {size_str:>8}")
     print("-" * 50)
     print(f"{'TOTAL':<15} : {total_files:4} files  {get_size_str(total_size):>8}")
     print("=" * 50)
-    return (created_dirs, extension_stats)
+    return created_dirs, extension_stats
 
 
 if __name__ == "__main__":

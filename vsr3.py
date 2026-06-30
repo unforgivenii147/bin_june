@@ -31,14 +31,14 @@ def get_package_name_version(dist_dir: Path) -> tuple:
         name = name[:-9]
     parts = name.rsplit("-", 1)
     if len(parts) == 2:
-        return (parts[0], parts[1])
-    return (parts[0], "0.0.0")
+        return parts[0], parts[1]
+    return parts[0], "0.0.0"
 
 
 def read_record_file(dist_dir: Path, site_packages: Path) -> tuple[list[Path], set[Path]]:
     record_file = dist_dir / "RECORD"
     if not record_file.exists():
-        return ([], set())
+        return [], set()
     existing_files = []
     missing_files = set()
     with Path(record_file).open(newline="", encoding="utf-8") as f:
@@ -54,7 +54,7 @@ def read_record_file(dist_dir: Path, site_packages: Path) -> tuple[list[Path], s
                 existing_files.append(full_path)
             else:
                 missing_files.add(full_path)
-    return (existing_files, missing_files)
+    return existing_files, missing_files
 
 
 def get_wheel_tag(dist_dir: Path) -> str | None:
@@ -82,13 +82,7 @@ def copy_files_to_temp(files: list[Path], site_packages: Path, temp_dir: Path) -
             shutil.copytree(file_path, dest_path, dirs_exist_ok=True)
 
 
-def create_wheel(
-    pkg_name: str,
-    pkg_version: str,
-    temp_dir: Path,
-    output_dir: Path,
-    wheel_tag: str | None,
-) -> bool:
+def create_wheel(pkg_name: str, pkg_version: str, temp_dir: Path, output_dir: Path, wheel_tag: (str | None)) -> bool:
     try:
         wheel_name = f"{pkg_name}-{pkg_version}"
         if wheel_tag:
@@ -96,15 +90,7 @@ def create_wheel(
         else:
             wheel_name += "-py3-none-any"
         wheel_file = output_dir / f"{wheel_name}.whl"
-        cmd = [
-            sys.executable,
-            "-m",
-            "wheel",
-            "pack",
-            str(temp_dir),
-            "-d",
-            str(output_dir),
-        ]
+        cmd = [sys.executable, "-m", "wheel", "pack", str(temp_dir), "-d", str(output_dir)]
         result = subprocess.run(cmd, check=False, capture_output=True, text=True)
         if result.returncode == 0:
             return True
@@ -127,7 +113,7 @@ def repack_package(dist_dir: Path, site_packages: Path, output_dir: Path, not_re
     existing_files, missing_files = read_record_file(dist_dir, site_packages)
     if not existing_files:
         return False
-    has_missing_critical = any((f.suffix in {".py", ""} or f.is_dir() for f in missing_files))
+    has_missing_critical = any(f.suffix in {".py", ""} or f.is_dir() for f in missing_files)
     if has_missing_critical:
         pkg_not_repacked = not_repacked_dir / pkg_name
         pkg_not_repacked.mkdir(parents=True, exist_ok=True)
@@ -154,9 +140,18 @@ def main() -> None:
     parser.add_argument("packages", nargs="*", help="Package names to repack")
     parser.add_argument("-a", "--all", action="store_true", help="Repack all installed packages")
     args = parser.parse_args()
-    if not args.all and (not args.packages):
+    if not args.all and not args.packages:
         parser.error("Specify package names or use -a/--all")
-    "\n    site_packages = (\n        Path(sys.prefix)\n        / 'lib'\n        / f'python{sys.version_info.major}.{sys.version_info.minor}'\n        / 'site-packages'\n    )\n    if not site_packages.exists():\n        site_packages = Path(sys.prefix) / 'Lib' / 'site-packages'\n    "
+    """
+    site_packages = (
+        Path(sys.prefix)
+        / 'lib'
+        / f'python{sys.version_info.major}.{sys.version_info.minor}'
+        / 'site-packages'
+    )
+    if not site_packages.exists():
+        site_packages = Path(sys.prefix) / 'Lib' / 'site-packages'
+    """
     site_packages = Path.cwd()
     output_dir = Path.home() / "tmp" / "whl"
     not_repacked_dir = Path.home() / "tmp" / "not_repacked"

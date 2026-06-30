@@ -5,7 +5,6 @@ import re
 import shutil
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
-
 from dh import DOC_TH1, DOC_TH2, get_pyfiles
 
 COMMENT_AND_DOCSTRING_REGEX = re.compile(
@@ -28,17 +27,7 @@ def strip_comments_and_docstrings(file_path_str) -> bool:
     cleaned_content = DOCSTRING_START_REGEX.sub("\x01", original_content, count=3)
 
     def replace_comments(match):
-        (
-            _indent1,
-            comment1,
-            quote1,
-            _indent2,
-            _quote2,
-            fn_type,
-            indent3,
-            quote3,
-            quote4,
-        ) = match.groups()
+        (_indent1, comment1, quote1, _indent2, _quote2, fn_type, indent3, quote3, quote4) = match.groups()
         if comment1:
             return ""
         if quote1:
@@ -95,7 +84,8 @@ def process_directory(directory: str) -> None:
             except Exception as e:
                 print(f"Error processing future for {file_path}: {e}")
     print(
-        f"\nFinished processing. Successfully stripped comments/docstrings from {processed_count}/{len(python_files)} files."
+        f"""
+Finished processing. Successfully stripped comments/docstrings from {processed_count}/{len(python_files)} files."""
     )
 
 

@@ -8,12 +8,11 @@ import sys
 import tempfile
 import tokenize
 from pathlib import Path
-
 from deep_translator import GoogleTranslator
 from dh import DOC_TH1, DOC_TH2, get_files, mpf3
 
 cwd = Path.cwd()
-non_english_pattern = re.compile(r"[^\x00-\x7F]")
+non_english_pattern = re.compile("[^\\x00-\\x7F]")
 
 
 def is_english(text: str) -> bool:
@@ -52,7 +51,7 @@ def extract_docstrings(tree: ast.AST) -> dict[int, str]:
     for node in ast.walk(tree):
         if isinstance(node, (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
             doc = ast.get_docstring(node, clean=False)
-            if doc and (not is_english(doc)):
+            if doc and not is_english(doc):
                 docstrings[id(node)] = doc
     return docstrings
 
@@ -65,18 +64,18 @@ def translate_python_file(source: str) -> str:
         print(f"  Found {len(docstrings)} non-English docstrings")
     tokens = list(tokenize.generate_tokens(io.StringIO(source).readline))
     result = []
-    prev_end = (1, 0)
+    prev_end = 1, 0
     translated_count = 0
     for i, token in enumerate(tokens):
         tok_type, tok_str, start, end, _line = token
         if start > prev_end:
             lines_between = source.splitlines()[prev_end[0] - 1 : start[0]]
             if len(lines_between) > 1:
-                result.extend((line_content + "\n" for line_content in lines_between[:-1]))
+                result.extend(line_content + "\n" for line_content in lines_between[:-1])
                 result.append(lines_between[-1][: start[1]])
             elif lines_between:
                 result.append(lines_between[0][prev_end[1] : start[1]])
-        if tok_type == tokenize.COMMENT and (not is_english(tok_str)):
+        if tok_type == tokenize.COMMENT and not is_english(tok_str):
             comment_text = tok_str[1:].strip()
             print(f"  Translating comment: {comment_text[:50]}...")
             translated = translate_text(comment_text)
@@ -84,7 +83,7 @@ def translate_python_file(source: str) -> str:
             translated_count += 1
         elif tok_type == tokenize.STRING:
             stripped = tok_str.strip("'\"")
-            if stripped and (not is_english(stripped)) and (len(stripped) > 10):
+            if stripped and not is_english(stripped) and len(stripped) > 10:
                 try:
                     print(f"  Translating string: {stripped[:50]}...")
                     translated = translate_text(stripped)
@@ -107,7 +106,7 @@ def translate_python_file(source: str) -> str:
     return "".join(result)
 
 
-def process_file(path: str | Path) -> None:
+def process_file(path: (str | Path)) -> None:
     path = Path(path)
     try:
         original = path.read_text(encoding="utf-8", errors="ignore")

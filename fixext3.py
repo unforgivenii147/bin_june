@@ -121,17 +121,13 @@ def get_current_extension(filepath: Path) -> str | None:
     return filepath.suffix.lower()
 
 
-def find_files_recursively(
-    directory: Path,
-    ignored_dirs: list[str] | None = None,
-    follow_symlinks: bool = False,
-):
+def find_files_recursively(directory: Path, ignored_dirs: (list[str] | None) = None, follow_symlinks: bool = False):
     if ignored_dirs is None:
         ignored_dirs = [".git", "__pycache__", "node_modules", ".venv", "venv"]
     for item in directory.rglob("*"):
-        if item.is_dir() and any((ignored_dir == item.name for ignored_dir in ignored_dirs)):
+        if item.is_dir() and any(ignored_dir == item.name for ignored_dir in ignored_dirs):
             continue
-        if item.is_symlink() and (not follow_symlinks):
+        if item.is_symlink() and not follow_symlinks:
             continue
         if item.is_file():
             yield item
@@ -159,26 +155,10 @@ def detect_and_fix_mismatches(
             continue
         detected_ext = get_file_extension_from_type(file_type_desc)
         is_generic_text = any(
-            (
-                text_type in file_type_desc.lower()
-                for text_type in [
-                    "ascii text",
-                    "utf-8 unicode text",
-                    "iso-8859 text",
-                    "plain text",
-                ]
-            )
+            text_type in file_type_desc.lower()
+            for text_type in ["ascii text", "utf-8 unicode text", "iso-8859 text", "plain text"]
         )
-        if is_generic_text and current_ext in {
-            ".txt",
-            ".log",
-            ".csv",
-            ".md",
-            ".ini",
-            ".cfg",
-            ".yml",
-            ".yaml",
-        }:
+        if is_generic_text and current_ext in {".txt", ".log", ".csv", ".md", ".ini", ".cfg", ".yml", ".yaml"}:
             continue
         if not detected_ext:
             continue
@@ -229,7 +209,10 @@ def detect_and_fix_mismatches(
                     print(f"  ERROR renaming '{op['source']}' to '{op['destination']}': {e}")
                 except Exception as e:
                     print(f"  UNEXPECTED ERROR renaming '{op['source']}' to '{op['destination']}': {e}")
-            print(f"\nSuccessfully renamed {renamed_count} out of {len(rename_operations)} planned operations.")
+            print(
+                f"""
+Successfully renamed {renamed_count} out of {len(rename_operations)} planned operations."""
+            )
         else:
             print("Rename operation cancelled by user.")
     print("\n--- Script Finished ---")

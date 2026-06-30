@@ -98,7 +98,7 @@ def process_image_file(image_path, backup=False, verbose=False):
 
 def find_image_files(paths, extensions, recursive=True):
     image_files = []
-    extensions = [ext if ext.startswith(".") else f".{ext}" for ext in extensions]
+    extensions = [(ext if ext.startswith(".") else f".{ext}") for ext in extensions]
     extensions_lower = [ext.lower() for ext in extensions]
     extensions_upper = [ext.upper() for ext in extensions]
     all_extensions = set(extensions_lower + extensions_upper)
@@ -130,7 +130,15 @@ def main():
     parser = argparse.ArgumentParser(
         description="Strip EXIF data from image files with parallel processing",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="\nExamples:\n  %(prog)s                         # Process all images in current directory recursively\n  %(prog)s image1.jpg image2.png   # Process specific files\n  %(prog)s /path/to/images         # Process a directory\n  %(prog)s file.jpg -b             # Process with backup\n  %(prog)s . -j 4                  # Process with 4 parallel workers\n  %(prog)s . --no-recursive        # Process current directory only (no subdirs)\n        ",
+        epilog="""
+Examples:
+  %(prog)s                         # Process all images in current directory recursively
+  %(prog)s image1.jpg image2.png   # Process specific files
+  %(prog)s /path/to/images         # Process a directory
+  %(prog)s file.jpg -b             # Process with backup
+  %(prog)s . -j 4                  # Process with 4 parallel workers
+  %(prog)s . --no-recursive        # Process current directory only (no subdirs)
+        """,
     )
     parser.add_argument(
         "paths", nargs="*", default=["."], help="Files or directories to process (default: current directory)"
@@ -169,8 +177,8 @@ def main():
             initial_sizes[dir_path] = get_folder_size(dir_path)
     print(f"📸 Found {len(image_files)} image file(s)")
     print(f"🔧 Using {max_workers} parallel worker(s)")
-    print(f"💾 Backup: {('Yes' if args.backup else 'No')}")
-    print(f"📁 Recursive: {('Yes' if recursive else 'No')}")
+    print(f"💾 Backup: {'Yes' if args.backup else 'No'}")
+    print(f"📁 Recursive: {'Yes' if recursive else 'No'}")
     print("-" * 60)
     results = []
     processed = 0
@@ -184,12 +192,12 @@ def main():
             try:
                 result = future.result()
                 results.append(result)
-                if not args.verbose and (not result["success"]):
+                if not args.verbose and not result["success"]:
                     print(f"❌ {img.name}: {result['message']}")
                 elif not args.verbose and result["success"]:
                     progress = f"[{processed}/{len(image_files)}]"
                     size_change = result["new_size"] - result["original_size"]
-                    print(f"  {progress} {('✅' if result['success'] else '❌')} {img.name}")
+                    print(f"  {progress} {'✅' if result['success'] else '❌'} {img.name}")
             except Exception as e:
                 print(f"❌ {img.name}: Unexpected error: {str(e)}")
                 results.append({
@@ -201,10 +209,10 @@ def main():
                     "backup_created": False,
                 })
     print("-" * 60)
-    successful = sum((1 for r in results if r["success"]))
+    successful = sum(1 for r in results if r["success"])
     failed = len(results) - successful
-    total_original = sum((r["original_size"] for r in results))
-    total_new = sum((r["new_size"] for r in results))
+    total_original = sum(r["original_size"] for r in results)
+    total_new = sum(r["new_size"] for r in results)
     total_change = total_new - total_original
     print(f"\n📊 Summary:")
     print(f"   Total files: {len(results)}")

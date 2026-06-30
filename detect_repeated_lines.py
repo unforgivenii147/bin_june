@@ -1,3 +1,5 @@
+#!/data/data/com.termux/files/usr/bin/python
+
 """
 Skip blank lines option with dry run and auto-fix modes.
 """
@@ -47,13 +49,13 @@ def remove_duplicates(lines: list[str], duplicates):
 
 def process_file(file_path, duplicates, dry_run: bool = False, auto_yes=False, skip_blanks: bool = True):
     if not duplicates:
-        return (False, auto_yes)
-    print(f"\n{('[DRY RUN] ' if dry_run else '')}📄 {file_path.name}")
+        return False, auto_yes
+    print(f"\n{'[DRY RUN] ' if dry_run else ''}📄 {file_path.name}")
     for line_num, content in duplicates:
         print(f"  Line {line_num}: {content}")
         print(f"  Line {line_num + 1}: {content}")
     if dry_run:
-        return (False, auto_yes)
+        return False, auto_yes
     if not auto_yes:
         response = input(f"\n  Remove duplicates from {file_path.name}? (y/n/a/q): ").strip().lower()
         if response == "q":
@@ -77,9 +79,9 @@ def process_file(file_path, duplicates, dry_run: bool = False, auto_yes=False, s
         with open(file_path, "w", encoding="utf-8") as f:
             f.writelines(new_lines)
         print(f"  ✅ Fixed (backup: {backup.name})")
-        return (True, auto_yes)
+        return True, auto_yes
     print(f"  ⏭️  Skipped")
-    return (False, auto_yes)
+    return False, auto_yes
 
 
 def main() -> None:
@@ -100,7 +102,7 @@ def main() -> None:
     print("=" * 70)
     if args.dry_run:
         print("🔍 DRY RUN MODE - No files will be modified")
-    print(f"📝 {('Ignoring' if skip_blanks else 'Including')} blank lines in duplicate detection")
+    print(f"📝 {'Ignoring' if skip_blanks else 'Including'} blank lines in duplicate detection")
     print("=" * 70)
     cwd = Path.cwd()
     py_files = get_pyfiles(cwd)

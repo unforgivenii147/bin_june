@@ -11,7 +11,7 @@ def get_all_files_in_root_only(root_path: Path):
     files_info = []
     try:
         for path in root_path.rglob("*"):
-            if path.is_file() and (not path.is_symlink()):
+            if path.is_file() and not path.is_symlink():
                 try:
                     size = path.stat().st_size
                     files_info.append({"path": path, "name": path.name, "size": size})
@@ -121,9 +121,9 @@ def organize_files_in_root(root_path: str = ".", target_folders: int = 4, max_ge
             continue
         min_size = folder_files[0]["size"]
         max_size = folder_files[-1]["size"]
-        total_size = sum((f["size"] for f in folder_files))
+        total_size = sum(f["size"] for f in folder_files)
         folder_name = f"{convert_size(min_size)}-{convert_size(max_size)}"
-        folder_name = "".join((c for c in folder_name if c not in '<>:"/\\|?*'))
+        folder_name = "".join(c for c in folder_name if c not in '<>:"/\\|?*')
         folder_path = os.path.join(root_path, folder_name)
         try:
             Path(folder_path).mkdir(exist_ok=True, parents=True)

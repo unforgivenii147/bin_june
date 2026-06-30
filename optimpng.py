@@ -4,23 +4,22 @@ import os
 import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
 from tqdm import tqdm
 
 
 def find_png_files(directory: Path):
     png_files = []
     for root, _, files in os.walk(directory):
-        png_files.extend((os.path.join(root, file) for file in files if file.lower().endswith(".png")))
+        png_files.extend(os.path.join(root, file) for file in files if file.lower().endswith(".png"))
     return png_files
 
 
 def optimize_png(file_path):
     try:
         subprocess.run(["optipng", "-o7", str(file_path)], check=True)
-        return (True, file_path)
+        return True, file_path
     except subprocess.CalledProcessError as e:
-        return (False, file_path, str(e))
+        return False, file_path, str(e)
 
 
 def main() -> None:
@@ -37,7 +36,7 @@ def main() -> None:
             for future in as_completed(futures):
                 results.append(future.result())
                 pbar.update(1)
-    success = sum((1 for r in results if r[0]))
+    success = sum(1 for r in results if r[0])
     print(f"\nOptimization complete. Success: {success}/{len(png_files)} files.")
 
 

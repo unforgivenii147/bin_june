@@ -3,7 +3,6 @@
 import os
 import shutil
 from pathlib import Path
-
 import cv2
 import numpy as np
 from numpy import ndarray
@@ -80,11 +79,11 @@ def simple_clustering(features: ndarray, paths, n_clusters=10, threshold=0.7) ->
         cluster_ids = list(clusters.keys())
         for i in range(len(cluster_ids)):
             for j in range(i + 1, len(cluster_ids)):
-                id1, id2 = (cluster_ids[i], cluster_ids[j])
+                id1, id2 = cluster_ids[i], cluster_ids[j]
                 sim = compute_similarity(cluster_centers[id1], cluster_centers[id2])
                 if sim > max_sim:
                     max_sim = sim
-                    merge_pair = (id1, id2)
+                    merge_pair = id1, id2
         if merge_pair is None or max_sim < threshold:
             break
         id1, id2 = merge_pair
@@ -101,12 +100,7 @@ def simple_clustering(features: ndarray, paths, n_clusters=10, threshold=0.7) ->
     return labels
 
 
-def organize_photos(
-    source_dir: str = ".",
-    n_clusters: int = 10,
-    move: bool = False,
-    threshold: float = 0.7,
-) -> None:
+def organize_photos(source_dir: str = ".", n_clusters: int = 10, move: bool = False, threshold: float = 0.7) -> None:
     print(f"Scanning directory: {source_dir}")
     image_paths = get_all_images(source_dir)
     print(f"Found {len(image_paths)} images")
@@ -164,12 +158,6 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--directory", default=".", help="Source directory (default: current)")
     parser.add_argument("-k", "--clusters", type=int, default=10, help="Number of groups (default: 10)")
     parser.add_argument("-m", "--move", action="store_true", help="Move files instead of copy")
-    parser.add_argument(
-        "-t",
-        "--threshold",
-        type=float,
-        default=0.7,
-        help="Similarity threshold (default: 0.7)",
-    )
+    parser.add_argument("-t", "--threshold", type=float, default=0.7, help="Similarity threshold (default: 0.7)")
     args = parser.parse_args()
     organize_photos(args.directory, args.clusters, args.move, args.threshold)

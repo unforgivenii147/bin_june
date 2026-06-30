@@ -3,7 +3,6 @@
 import operator
 import sys
 from pathlib import Path
-
 from dh import fsz, get_files
 
 cwd = Path.cwd()
@@ -28,7 +27,7 @@ def main() -> None:
     if not top_files:
         print("No files found.")
         return
-    max_path_len = max((len(str(path)) for path, size in top_files))
+    max_path_len = max(len(str(path)) for path, size in top_files)
     max_path_len = min(max_path_len, 80)
     print(f"{'No.':<4} {'File Path':<{max_path_len}} {'Size':>12}")
     print("-" * (max_path_len + 20))

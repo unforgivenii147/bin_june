@@ -1,16 +1,13 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 from pathlib import Path
-
 from dh import cprint
 
 
 def main() -> None:
     root = Path.cwd()
     kp = {}
-    files = [
-        p for p in root.rglob("*") if p.is_file() and p.exists() and (not p.is_symlink()) and (".git" not in p.parts)
-    ]
+    files = [p for p in root.rglob("*") if p.is_file() and p.exists() and not p.is_symlink() and ".git" not in p.parts]
     for f in files:
         path = Path(root / f)
         psz = gsz(path)

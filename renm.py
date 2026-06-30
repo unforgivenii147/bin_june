@@ -4,7 +4,6 @@ import os
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
 from deep_translator import GoogleTranslator
 from dh import unique_path
 from fastwalk import walk_files
@@ -24,15 +23,15 @@ translation_cache = {}
 def translate_name(name):
     base, ext = os.path.splitext(name)
     if is_english(base):
-        return (name, name)
+        return name, name
     if base in translation_cache:
-        return (name, translation_cache[base] + ext)
+        return name, translation_cache[base] + ext
     try:
         translated = GoogleTranslator(source="auto", target="en").translate(base)
         translation_cache[base] = translated
-        return (name, translated + ext)
+        return name, translated + ext
     except Exception:
-        return (name, name)
+        return name, name
 
 
 def rename_files(directory: str) -> None:
@@ -41,11 +40,7 @@ def rename_files(directory: str) -> None:
     translation_map = {}
     with ThreadPoolExecutor(8) as executor:
         futures = [executor.submit(translate_name, name) for name in unique_names_to_translate]
-        for future in tqdm(
-            as_completed(futures),
-            total=len(unique_names_to_translate),
-            desc="Translating filenames",
-        ):
+        for future in tqdm(as_completed(futures), total=len(unique_names_to_translate), desc="Translating filenames"):
             original, translated = future.result()
             translation_map[original] = translated
     for path in sorted(paths, key=lambda x: len(x.parts), reverse=True):

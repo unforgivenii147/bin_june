@@ -103,7 +103,7 @@ def main():
         results = pool.map(check_package, args)
     packages_with_entry_points = [r for r in results if r["has_entry_points"]]
     packages_with_missing = [r for r in results if r["missing_scripts"]]
-    total_missing = sum((len(r["missing_scripts"]) for r in packages_with_missing))
+    total_missing = sum(len(r["missing_scripts"]) for r in packages_with_missing)
     print()
     print("=" * 80)
     print("SCAN RESULTS")
@@ -163,7 +163,10 @@ def main():
     except Exception as e:
         print(f"\nError saving report: {e}")
     if packages_with_missing:
-        print(f"\n⚠️  Found {total_missing} missing script(s) in {len(packages_with_missing)} package(s).")
+        print(
+            f"""
+⚠️  Found {total_missing} missing script(s) in {len(packages_with_missing)} package(s)."""
+        )
         print("These packages may need to be reinstalled.")
         sys.exit(1)
     else:

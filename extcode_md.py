@@ -92,7 +92,7 @@ def main() -> None:
     cwd = Path.cwd().resolve()
     out_dir = cwd / "output"
     out_dir.mkdir(parents=True, exist_ok=True)
-    md_files = sorted((p for p in cwd.rglob("*.md") if p.is_file()))
+    md_files = sorted(p for p in cwd.rglob("*.md") if p.is_file())
     total_blocks = 0
     for md in md_files:
         total_blocks += extract_code_blocks(md, out_dir)

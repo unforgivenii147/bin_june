@@ -39,12 +39,7 @@ class BashCommentRemover:
                         check=False,
                     )
                     build_result = subprocess.run(
-                        [
-                            "npx",
-                            "tree-sitter",
-                            "build",
-                            "node_modules/tree-sitter-bash",
-                        ],
+                        ["npx", "tree-sitter", "build", "node_modules/tree-sitter-bash"],
                         cwd=tmpdir,
                         capture_output=True,
                         text=True,
@@ -79,7 +74,7 @@ class BashCommentRemover:
 
             collect_comments(root_node)
             if not comments_to_remove:
-                return (content, False)
+                return content, False
             lines = content.splitlines(True)
             modified_lines = lines.copy()
             comments_to_remove.sort(key=lambda n: n.start_point[0], reverse=True)
@@ -97,10 +92,10 @@ class BashCommentRemover:
             import re
 
             modified_content = re.sub("\\n\\s*\\n\\s*\\n", "\\n\\n", modified_content)
-            return (modified_content, True)
+            return modified_content, True
         except Exception as e:
             print(f"Error processing content: {e}")
-            return (content, False)
+            return content, False
 
     def validate_syntax(self, content: str) -> bool:
         try:
@@ -110,21 +105,9 @@ class BashCommentRemover:
         except:
             pass
         try:
-            result = subprocess.run(
-                ["shfmt", "-f"],
-                input=content,
-                text=True,
-                capture_output=True,
-                check=False,
-            )
+            result = subprocess.run(["shfmt", "-f"], input=content, text=True, capture_output=True, check=False)
             if result.returncode != 0:
-                result = subprocess.run(
-                    ["bash", "-n"],
-                    input=content,
-                    text=True,
-                    capture_output=True,
-                    check=False,
-                )
+                result = subprocess.run(["bash", "-n"], input=content, text=True, capture_output=True, check=False)
                 return result.returncode == 0
             return True
         except FileNotFoundError:
@@ -141,26 +124,26 @@ class BashCommentRemover:
             original_size = len(original_content.encode("utf-8"))
             if (
                 filepath.suffix not in {".sh", ".bash"}
-                and (not original_content.startswith("#!/bin/bash"))
-                and (not original_content.startswith("#!/usr/bin/env bash"))
+                and not original_content.startswith("#!/bin/bash")
+                and not original_content.startswith("#!/usr/bin/env bash")
             ):
-                return (True, original_size, original_size)
+                return True, original_size, original_size
             modified_content, was_modified = self.remove_comments(original_content)
             if not was_modified:
-                return (True, original_size, original_size)
+                return True, original_size, original_size
             if not self.validate_syntax(modified_content):
                 print(f"  ⚠️  Syntax error detected in {filepath}, skipping")
-                return (False, original_size, original_size)
+                return False, original_size, original_size
             new_size = len(modified_content.encode("utf-8"))
             if not dry_run:
                 Path(filepath).write_text(modified_content, encoding="utf-8")
                 print(f"  ✓ Processed: {filepath} ({original_size} -> {new_size} bytes)")
             else:
                 print(f"  ✓ Would process: {filepath} ({original_size} -> {new_size} bytes)")
-            return (True, original_size, new_size)
+            return True, original_size, new_size
         except Exception as e:
             print(f"  ✗ Error processing {filepath}: {e}")
-            return (False, 0, 0)
+            return False, 0, 0
 
     def process_path(self, path: Path, recursive: bool = False, dry_run: bool = False) -> tuple[int, int, int]:
         success_count = 0
@@ -193,29 +176,19 @@ class BashCommentRemover:
                     success_count += 1
                     total_original += orig
                     total_new += new
-        elif path.is_dir() and (not recursive):
+        elif path.is_dir() and not recursive:
             print(f"Error: {path} is a directory. Use --recursive to process directories.")
-        return (success_count, total_original, total_new)
+        return success_count, total_original, total_new
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Remove comments from bash files using tree-sitter")
     parser.add_argument(
-        "files",
-        nargs="*",
-        help="Files to process. If none given, process current directory recursively",
+        "files", nargs="*", help="Files to process. If none given, process current directory recursively"
     )
     parser.add_argument("-r", "--recursive", action="store_true", help="Process directories recursively")
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Show what would be done without making changes",
-    )
-    parser.add_argument(
-        "--no-validate",
-        action="store_true",
-        help="Skip syntax validation (not recommended)",
-    )
+    parser.add_argument("--dry-run", action="store_true", help="Show what would be done without making changes")
+    parser.add_argument("--no-validate", action="store_true", help="Skip syntax validation (not recommended)")
     args = parser.parse_args()
     remover = BashCommentRemover()
     paths_to_process = []
@@ -233,7 +206,7 @@ def main() -> None:
     total_original = 0
     total_new = 0
     for path in paths_to_process:
-        if path.is_file() or (path.is_dir() and args.recursive):
+        if path.is_file() or path.is_dir() and args.recursive:
             print(f"\nProcessing: {path}")
             success, orig, new = remover.process_path(path, args.recursive, args.dry_run)
             total_success += success

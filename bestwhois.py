@@ -55,7 +55,7 @@ def dictstr(structure, ntabs: int) -> None:
 
 
 def is_empty_field(field):
-    return field is None or field == "" or field == {} or (field == [])
+    return field is None or field == "" or field == {} or field == []
 
 
 def purge_empty_fields(structure):
@@ -78,7 +78,11 @@ ARGS_PARSER.add_argument(
     "--version",
     help="Print version information and exit.",
     action="version",
-    version=MYNAME + " ver. " + VERSION + "\n(c) WhoisXML API Inc.",
+    version=MYNAME
+    + " ver. "
+    + VERSION
+    + """
+(c) WhoisXML API Inc.""",
 )
 ARGS_PARSER.add_argument("--rcfile", type=str, help="Use this rc file. Will override all default ini locations.")
 ARGS_PARSER.add_argument("--apikey", type=str, help="Directly specify the API key. Overrides any ini file.")
@@ -169,8 +173,12 @@ if apiKey is None:
     raise ValueError("No API key found. Check rc files or specify directly.")
 if IDN:
     domain_name = idna.encode(ARGS.domainName).decode("utf-8")
-elif not all((ord(char) < 128 for char in ARGS.domainName)):
-    sys.stderr.write('Please install the "idna" Python package to query non-ASCII unicode domain names.\nExiting.\n')
+elif not all(ord(char) < 128 for char in ARGS.domainName):
+    sys.stderr.write(
+        """Please install the "idna" Python package to query non-ASCII unicode domain names.
+Exiting.
+"""
+    )
     exit(3)
 else:
     domain_name = ARGS.domainName
@@ -178,10 +186,10 @@ if ARGS.history or (
     ARGS.since_date is not None
     or ARGS.created_date_from is not None
     or ARGS.created_date_to is not None
-    or (ARGS.updated_date_from is not None)
-    or (ARGS.updated_date_to is not None)
-    or (ARGS.expired_date_from is not None)
-    or (ARGS.expired_date_to is not None)
+    or ARGS.updated_date_from is not None
+    or ARGS.updated_date_to is not None
+    or ARGS.expired_date_from is not None
+    or ARGS.expired_date_to is not None
 ):
     API = "https://whois-history-api.whoisxmlapi.com/api/v1?" + "apiKey=" + apiKey + "&outputformat=JSON&mode=purchase"
     ARGS.history = True

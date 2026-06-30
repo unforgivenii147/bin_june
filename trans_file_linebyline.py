@@ -37,7 +37,10 @@ def translate_line(line: str, translator: GoogleTranslator, target_lang="en"):
 
 def process_file(filepath: str, show_translation: bool = True) -> None:
     path = Path(path)
-    "\n    Process the file: detect non-English lines, translate them,\n    and update the file in-place showing translations.\n    "
+    """
+    Process the file: detect non-English lines, translate them,
+    and update the file in-place showing translations.
+    """
     backup_path = filepath + ".backup"
     try:
         with open(filepath, "r", encoding="utf-8") as f:

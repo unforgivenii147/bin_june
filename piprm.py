@@ -3,7 +3,6 @@
 import subprocess
 import sys
 from pathlib import Path
-
 from dh import get_file_age, get_ipkgs
 from rapidfuzz import fuzz
 

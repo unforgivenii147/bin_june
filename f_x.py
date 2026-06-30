@@ -15,7 +15,7 @@ def check_file_age(file_path):
         age_minutes = (current_time - mod_time) / 60
         if age_minutes <= n_minutes:
             mod_datetime = datetime.fromtimestamp(mod_time)
-            return (str(file_path), mod_datetime)
+            return str(file_path), mod_datetime
     except (OSError, PermissionError):
         pass
     return None
@@ -35,7 +35,7 @@ def main():
         print("Error: minutes must be a non-negative number")
         sys.exit(1)
     cwd = Path.cwd()
-    all_files = [p for p in cwd.rglob("*") if p.is_file() and (not p.is_symlink()) and (not ".git" in p.parts)]
+    all_files = [p for p in cwd.rglob("*") if p.is_file() and not p.is_symlink() and not ".git" in p.parts]
     if not all_files:
         print("No files found in current directory")
         return

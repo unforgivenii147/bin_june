@@ -53,7 +53,7 @@ def main():
         results = pool.map(process_func, files)
     print("-" * 50)
     print("\n".join(results))
-    success_count = sum((1 for r in results if r.startswith("✅")))
+    success_count = sum(1 for r in results if r.startswith("✅"))
     failure_count = len(results) - success_count
     print("-" * 50)
     print(f"Summary: {success_count} successful, {failure_count} failed")

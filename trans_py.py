@@ -8,7 +8,6 @@ import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from re import Match
-
 from deep_translator import GoogleTranslator
 from dh import DOC_TH1, DOC_TH2, get_pyfiles
 
@@ -34,7 +33,7 @@ def translate_line(line: str):
     if is_non_english(line.strip()):
         try:
             trans = get_translator().translate(line.strip())
-            if trans and trans.strip() and (trans.strip() != line.strip()):
+            if trans and trans.strip() and trans.strip() != line.strip():
                 return trans
         except Exception as e:
             print(f"Translation error: {e} -- Line: {line}")
@@ -103,12 +102,7 @@ def process_file(filepath) -> None:
                         break
                     line_idx += 1
                 doc_block = "\n".join(doc_lines)
-                doc_body = re.sub(
-                    f"^{quote_type}|{quote_type}$",
-                    "",
-                    doc_block.strip(),
-                    flags=re.MULTILINE,
-                ).strip()
+                doc_body = re.sub(f"^{quote_type}|{quote_type}$", "", doc_block.strip(), flags=re.MULTILINE).strip()
                 translated_doc_body = translate_docstring(doc_body)
                 translated_doc_block = f"{quote_type}\n{translated_doc_body}\n{quote_type}"
                 start = docstring_line + offset_map.get(docstring_line, 0)

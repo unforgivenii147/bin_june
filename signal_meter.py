@@ -53,7 +53,7 @@ class SignalMonitor:
                     self.cellular_strength = None
             if state_match:
                 state_num = int(state_match.group(1))
-                states = {0: "Disconnected", 1: "Connecting", 2: "Connected", 3: "Suspended"}
+                states = {(0): "Disconnected", (1): "Connecting", (2): "Connected", (3): "Suspended"}
                 self.cellular_status = states.get(state_num, "Unknown")
             return self.cellular_strength
         except Exception as e:
@@ -62,12 +62,12 @@ class SignalMonitor:
 
     def strength_to_bars(self, strength_db, max_db=-30, min_db=-120) -> tuple[str, int]:
         if strength_db is None:
-            return ("N/A", 0)
+            return "N/A", 0
         clamped = max(min_db, min(max_db, strength_db))
         percentage = (clamped - min_db) / (max_db - min_db) * 100
         bars = int(percentage / 100 * 5)
         bars = max(0, min(5, bars))
-        return (f"{'█' * bars}{'░' * (5 - bars)}", int(percentage))
+        return f"{'█' * bars}{'░' * (5 - bars)}", int(percentage)
 
     def get_airplane_mode(self) -> bool:
         try:

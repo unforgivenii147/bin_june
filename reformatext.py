@@ -17,10 +17,7 @@ def restructure_text_file(filepath: Path) -> None:
         return
     bak_filepath = filepath.with_suffix(filepath.suffix + ".bak")
     try:
-        with (
-            filepath.open("r", encoding="utf-8") as src,
-            bak_filepath.open("w", encoding="utf-8") as dst,
-        ):
+        with filepath.open("r", encoding="utf-8") as src, bak_filepath.open("w", encoding="utf-8") as dst:
             dst.write(src.read())
         print(f"Backup created at: {bak_filepath}")
     except Exception as e:

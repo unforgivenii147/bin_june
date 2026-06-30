@@ -12,7 +12,7 @@ def get_all_dist_info_dirs():
     for site_dir in [*site.getsitepackages(), site.getusersitepackages()]:
         if Path(site_dir).exists():
             dist_info_dirs.extend(
-                (os.path.join(site_dir, item) for item in os.listdir(site_dir) if item.endswith(".dist-info"))
+                os.path.join(site_dir, item) for item in os.listdir(site_dir) if item.endswith(".dist-info")
             )
     return dist_info_dirs
 
@@ -25,7 +25,7 @@ def check_package_binary(dist_info_path) -> str | None:
             with Path(record_file).open(encoding="utf-8") as f:
                 reader = csv.reader(f)
                 for row in reader:
-                    if row and any((row[0].endswith(ext) for ext in [".so", ".pyd"])):
+                    if row and any(row[0].endswith(ext) for ext in [".so", ".pyd"]):
                         return pkg_name
         except:
             pass
@@ -50,7 +50,7 @@ def clean_requirements_txt(requirements_file: str = "requirements.txt") -> None:
     with Path(requirements_file).open(encoding="utf-8") as f:
         lines = [line.rstrip() for line in f]
     comments = [line for line in lines if line.startswith("#")]
-    requirements = [line for line in lines if line and (not line.startswith("#"))]
+    requirements = [line for line in lines if line and not line.startswith("#")]
     pure_python = []
     removed = []
     for req in requirements:
@@ -60,8 +60,8 @@ def clean_requirements_txt(requirements_file: str = "requirements.txt") -> None:
         else:
             pure_python.append(req)
     with Path(requirements_file).open("w", encoding="utf-8") as f:
-        f.writelines((f"{comment}\n" for comment in comments))
-        f.writelines((f"{pkg}\n" for pkg in sorted(pure_python)))
+        f.writelines(f"{comment}\n" for comment in comments)
+        f.writelines(f"{pkg}\n" for pkg in sorted(pure_python))
     if removed:
         print(f"\n🗑️  Removed binary packages ({len(removed)}):")
         for pkg in sorted(removed):

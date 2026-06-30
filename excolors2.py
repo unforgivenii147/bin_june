@@ -1,23 +1,43 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 from __future__ import annotations
-
 import contextlib
 import os
 import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
-
 from dh import TXT_EXT, is_binary
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
 HEX_RE = re.compile(
-    "\n    (?<![0-9A-Fa-f])\n    \\\n        [0-9A-Fa-f]{3}\n        |[0-9A-Fa-f]{6}\n        |[0-9A-Fa-f]{8}\n    )\n    (?![0-9A-Fa-f])\n    ",
+    """
+    (?<![0-9A-Fa-f])
+    \\
+        [0-9A-Fa-f]{3}
+        |[0-9A-Fa-f]{6}
+        |[0-9A-Fa-f]{8}
+    )
+    (?![0-9A-Fa-f])
+    """,
     re.VERBOSE,
 )
 RGBA_RE = re.compile(
-    "\n    \\b\n    rgba?\n    \\(\n        \\s*\n        (?P<r>\\d{1,3})\n        \\s*,\\s*\n        (?P<g>\\d{1,3})\n        \\s*,\\s*\n        (?P<b>\\d{1,3})\n        (?: \\s*,\\s*(?P<a>[\\d\\.]+) )?\n        \\s*\n    \\)\n    \\b\n    ",
+    """
+    \\b
+    rgba?
+    \\(
+        \\s*
+        (?P<r>\\d{1,3})
+        \\s*,\\s*
+        (?P<g>\\d{1,3})
+        \\s*,\\s*
+        (?P<b>\\d{1,3})
+        (?: \\s*,\\s*(?P<a>[\\d\\.]+) )?
+        \\s*
+    \\)
+    \\b
+    """,
     re.VERBOSE | re.IGNORECASE,
 )
 
@@ -30,7 +50,7 @@ class Color:
     a: float = 1.0
 
     def as_tuple(self) -> tuple[int, int, int, float]:
-        return (self.r, self.g, self.b, self.a)
+        return self.r, self.g, self.b, self.a
 
 
 def clamp01(x: float) -> float:
@@ -65,7 +85,7 @@ def parse_rgba_match(m: re.Match) -> Color | None:
     g = int(m.group("g"))
     b = int(m.group("b"))
     a_str = m.groupdict().get("a")
-    if not (0 <= r <= 255 and 0 <= g <= 255 and (0 <= b <= 255)):
+    if not (0 <= r <= 255 and 0 <= g <= 255 and 0 <= b <= 255):
         return None
     if a_str is None:
         a = 1.0

@@ -40,7 +40,8 @@ class DirectoryBuilder:
     def read_from_photo(self, image_path: str) -> List[str]:
         if not PHOTO_SUPPORT:
             raise ImportError(
-                "Photo support requires: pip install Pillow pytesseract\nAlso install tesseract: https://github.com/UB-Mannheim/tesseract/wiki"
+                """Photo support requires: pip install Pillow pytesseract
+Also install tesseract: https://github.com/UB-Mannheim/tesseract/wiki"""
             )
         try:
             image = Image.open(image_path)
@@ -99,16 +100,16 @@ class DirectoryBuilder:
                     for fname in files:
                         fpath = path.parent / fname
                         fpath.touch()
-                        return (fpath, is_file, "created")
+                        return fpath, is_file, "created"
                 else:
                     path.parent.mkdir(parents=True, exist_ok=True)
                     path.touch()
-                    return (path, is_file, "created")
+                    return path, is_file, "created"
             else:
                 path.mkdir(parents=True, exist_ok=True)
-                return (path, is_file, "created")
+                return path, is_file, "created"
         except Exception as e:
-            return (path, is_file, f"error: {e}")
+            return path, is_file, f"error: {e}"
 
     def create_structure(self, base_dir: str = ".", num_workers: int = None) -> None:
         if not self.items_to_create:
@@ -125,7 +126,7 @@ class DirectoryBuilder:
                 results = pool.map(self._create_item, items)
         else:
             results = [self._create_item(item) for item in items]
-        created = sum((1 for _, _, status in results if status == "created"))
+        created = sum(1 for _, _, status in results if status == "created")
         errors = [r for r in results if "error" in r[2]]
         print(f"✓ Created: {created} items")
         if errors:

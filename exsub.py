@@ -19,9 +19,9 @@ def _ocr_worker(frame_data: tuple, ocr_config: str) -> tuple[float, str]:
         text = pytesseract.image_to_string(binary, config=ocr_config).strip()
         if text:
             print(f"[{format_time(time_pos)}] {text}")
-        return (time_pos, text)
+        return time_pos, text
     except Exception:
-        return (time_pos, "")
+        return time_pos, ""
 
 
 def _frames_are_similar(a: np.ndarray, b: np.ndarray, threshold: float = 0.97) -> bool:
@@ -36,8 +36,8 @@ def extract_frames(
     video_path: str,
     sample_fps: float = 2.0,
     subtitle_top_ratio: float = 0.75,
-    start_time: float | None = None,
-    end_time: float | None = None,
+    start_time: (float | None) = None,
+    end_time: (float | None) = None,
 ) -> list[tuple[float, np.ndarray]]:
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
@@ -102,7 +102,7 @@ def parse_srt(filepath: str) -> list[dict]:
         while i < len(lines) and lines[i].strip():
             text_lines.append(lines[i].strip())
             i += 1
-        if i < len(lines) and (not lines[i].strip()):
+        if i < len(lines) and not lines[i].strip():
             i += 1
         match = re.match("(\\d{2}:\\d{2}:\\d{2}[.,]\\d{3})\\s*-->\\s*(\\d{2}:\\d{2}:\\d{2}[.,]\\d{3})", ts_line)
         if match:
@@ -142,9 +142,9 @@ def extract_burned_subs_ocr(
     output_srt_path: str,
     lang: str = "fas",
     sample_fps: float = 2.0,
-    workers: int | None = None,
-    start_time: float | None = None,
-    end_time: float | None = None,
+    workers: (int | None) = None,
+    start_time: (float | None) = None,
+    end_time: (float | None) = None,
     resume: bool = False,
 ) -> None:
     if workers is None:
@@ -153,7 +153,7 @@ def extract_burned_subs_ocr(
         existing_subs = parse_srt(output_srt_path)
         if existing_subs:
             if start_time is None:
-                start_time = max((sub["end"] for sub in existing_subs))
+                start_time = max(sub["end"] for sub in existing_subs)
             print(f"Resuming from {format_time(start_time)}")
     time_range_msg = ""
     if start_time is not None and end_time is not None:
@@ -208,12 +208,7 @@ if __name__ == "__main__":
     parser.add_argument("--sample_fps", type=float, default=2.0, help="Frames per second to sample (default: 2.0)")
     parser.add_argument("--workers", type=int, default=4, help="Number of OCR worker processes (default: 4)")
     args = parser.parse_args()
-    if (
-        args.output
-        and re.match("\\d{1,2}:\\d{2}:\\d{2}", args.output)
-        and (not args.start_time)
-        and (not args.end_time)
-    ):
+    if args.output and re.match("\\d{1,2}:\\d{2}:\\d{2}", args.output) and not args.start_time and not args.end_time:
         args.end_time = args.output
         args.output = "extracted_subs.srt"
     start_time = parse_time(args.start_time) if args.start_time else None

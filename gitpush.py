@@ -56,7 +56,7 @@ def main() -> None:
     ensure_gitignore()
     python_files = []
     for root, _, files in os.walk("."):
-        python_files.extend((os.path.join(root, f) for f in files if f.endswith(".py")))
+        python_files.extend(os.path.join(root, f) for f in files if f.endswith(".py"))
     python_files.extend(find_python_scripts_without_extension())
     if not python_files:
         print("No Python files found.")

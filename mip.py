@@ -9,7 +9,7 @@ from pathlib import Path
 
 def parse_version_tuple(version_str: str) -> tuple:
     try:
-        return tuple((int(x) for x in version_str.split(".") if x.isdigit()))
+        return tuple(int(x) for x in version_str.split(".") if x.isdigit())
     except Exception:
         return (version_str,)
 
@@ -27,7 +27,7 @@ def get_wheel_package_info(path: Path) -> tuple[str, str] | tuple[None, None]:
         with zipfile.ZipFile(path, "r") as zip_ref:
             metadata_file = next((f for f in zip_ref.namelist() if f.endswith("METADATA")), None)
             if metadata_file:
-                pkg_name, pkg_version = (None, None)
+                pkg_name, pkg_version = None, None
                 with zip_ref.open(metadata_file) as f:
                     for line in f:
                         line_str = line.decode("utf-8", errors="ignore")
@@ -36,10 +36,10 @@ def get_wheel_package_info(path: Path) -> tuple[str, str] | tuple[None, None]:
                         elif line_str.startswith("Version:"):
                             pkg_version = line_str.split(":", 1)[1].strip()
                         if pkg_name and pkg_version:
-                            return (pkg_name, pkg_version)
+                            return pkg_name, pkg_version
     except Exception as e:
         print(f"Error reading {path.name}: {e}")
-    return (None, None)
+    return None, None
 
 
 def main() -> None:

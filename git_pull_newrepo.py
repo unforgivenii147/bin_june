@@ -1,3 +1,5 @@
+#!/data/data/com.termux/files/usr/bin/python
+
 """
 Script to run git pull on all git repositories recursively.
 If a repo has no remote, create a new public repo on GitHub and set it as origin.
@@ -16,7 +18,7 @@ load_dotenv()
 def find_git_repos(root_path: Path) -> list[Path]:
     repos = []
     for item in root_path.iterdir():
-        if item.is_dir() and (not item.name.startswith(".")):
+        if item.is_dir() and not item.name.startswith("."):
             if (item / ".git").exists():
                 repos.append(item)
             else:
@@ -77,7 +79,7 @@ def setup_remote_and_push(repo: Repo, repo_path: Path, remote_url: str) -> bool:
         print(f"   ✅ Pushed branch '{current_branch}' to GitHub")
         return True
     except GitCommandError as e:
-        print(f"   ❌ Git error: {(e.stderr.strip() if e.stderr else str(e))}")
+        print(f"   ❌ Git error: {e.stderr.strip() if e.stderr else str(e)}")
         return False
     except Exception as e:
         print(f"   ❌ Error: {e}")
@@ -94,23 +96,23 @@ def process_repository(repo_path: Path, github_token: str) -> tuple[bool, str]:
             try:
                 repo.remotes.origin.pull()
                 print(f"   ✅ Pull successful")
-                return (True, "Pulled successfully")
+                return True, "Pulled successfully"
             except GitCommandError as e:
                 if "merge conflict" in str(e).lower():
-                    return (False, "Merge conflicts detected")
-                return (False, f"Pull failed: {(e.stderr.strip() if e.stderr else str(e))}")
+                    return False, "Merge conflicts detected"
+                return (False, f"Pull failed: {e.stderr.strip() if e.stderr else str(e)}")
         else:
             print(f"\n📁 {rel_path} (no remote configured)")
             print(f"   Creating GitHub repository: {repo_path.name}")
             remote_url = create_github_repo(repo_path.name, github_token)
             if not remote_url:
-                return (False, "Failed to create GitHub repository")
+                return False, "Failed to create GitHub repository"
             if setup_remote_and_push(repo, repo_path, remote_url):
-                return (True, f"Created and pushed to {remote_url}")
+                return True, f"Created and pushed to {remote_url}"
             else:
-                return (False, "Failed to push to GitHub")
+                return False, "Failed to push to GitHub"
     except Exception as e:
-        return (False, f"Error: {str(e)}")
+        return False, f"Error: {str(e)}"
 
 
 def main() -> None:

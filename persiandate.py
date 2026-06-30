@@ -4,20 +4,7 @@ import datetime
 import string
 
 weekdays = ["دوشنبه", "سه\u200cشنبه", "چهارشنبه", "پنجشنبه", "جمعه", "شنبه", "یکشنبه"]
-months = [
-    "فروردین",
-    "اردیبهشت",
-    "خرداد",
-    "تیر",
-    "مرداد",
-    "شهریور",
-    "مهر",
-    "آبان",
-    "آذر",
-    "دی",
-    "بهمن",
-    "اسفند",
-]
+months = ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"]
 
 
 def gregorian_to_jalali(g: int, m: int, d: int):
@@ -42,7 +29,7 @@ def gregorian_to_jalali(g: int, m: int, d: int):
             jd = j_day_no + 1
             break
         j_day_no -= 31 if i < 6 else 30
-    return (jy, jm, jd)
+    return jy, jm, jd
 
 
 now = datetime.datetime()

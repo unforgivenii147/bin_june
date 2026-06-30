@@ -30,7 +30,7 @@ def get_filez(p):
     if not p.is_dir():
         yield p
     for f in p.iterdir():
-        if f.is_file() and (not f.is_symlink()):
+        if f.is_file() and not f.is_symlink():
             yield f
         if f.is_dir():
             yield f
@@ -53,7 +53,7 @@ def normalize_permissions(cwd: Path) -> None:
                     Path(path).chmod(DIR_PERM)
                     print(f"{path.relative_to(cwd)} {oct(current_perm)} : {oct(DIR_PERM)}")
             elif path.is_file():
-                if path.suffix in {".sh", ".so"} and (not is_exec(path)):
+                if path.suffix in {".sh", ".so"} and not is_exec(path):
                     mkx(path)
                     continue
                 if current_perm != FILE_PERM:

@@ -6,7 +6,6 @@ import os
 import tarfile
 import zipfile
 from pathlib import Path
-
 from dh import PKG_MAPPING, STDLIB
 
 STD_LIB = STDLIB
@@ -19,13 +18,12 @@ except FileNotFoundError:
 
 
 def is_python_file(file_path):
-    return file_path.suffix == ".py" or (
-        not file_path.suffix
+    return (
+        file_path.suffix == ".py"
+        or not file_path.suffix
         and any(
-            (
-                line.startswith(("import ", "from ", "#!/usr/bin/env python"))
-                for line in Path(file_path).open(encoding="utf-8", errors="ignore")
-            )
+            line.startswith(("import ", "from ", "#!/usr/bin/env python"))
+            for line in Path(file_path).open(encoding="utf-8", errors="ignore")
         )
     )
 
@@ -53,19 +51,15 @@ def get_imports(file_path):
         if isinstance(node, ast.Import):
             for alias in node.names:
                 module = alias.name.split(".")[0]
-                if (
-                    module not in STD_LIB
-                    and (not module.startswith("."))
-                    and (not file_path.parent.match(f"*{module}*"))
-                ):
+                if module not in STD_LIB and not module.startswith(".") and not file_path.parent.match(f"*{module}*"):
                     imports.add(MAPPING.get(module, module))
         elif isinstance(node, ast.ImportFrom):
             module = node.module.split(".")[0] if node.module else ""
             if (
                 module
                 and module not in STD_LIB
-                and (not module.startswith("."))
-                and (not file_path.parent.match(f"*{module}*"))
+                and not module.startswith(".")
+                and not file_path.parent.match(f"*{module}*")
             ):
                 imports.add(MAPPING.get(module, module))
     return imports
@@ -100,7 +94,7 @@ def main() -> None:
     all_imports = set().union(*results)
     requirements = sorted(all_imports & PIP_PACKAGES)
     with Path("requirements.txt").open("w", encoding="utf-8") as f:
-        f.writelines((f"{req}\n" for req in requirements))
+        f.writelines(f"{req}\n" for req in requirements)
 
 
 if __name__ == "__main__":

@@ -90,12 +90,12 @@ def is_media_file(path: Path) -> bool:
 def get_files_to_process(root_dir: Path, compress: bool) -> Generator[Path, None, None]:
     if compress:
         for file in root_dir.rglob("*"):
-            if file.is_file() and (not should_exclude(file)):
-                if file.suffix.lower() not in ARCHIVE_EXTENSIONS and (not is_media_file(file)):
+            if file.is_file() and not should_exclude(file):
+                if file.suffix.lower() not in ARCHIVE_EXTENSIONS and not is_media_file(file):
                     yield file
     else:
         for file in root_dir.rglob("*"):
-            if file.is_file() and (not should_exclude(file)):
+            if file.is_file() and not should_exclude(file):
                 if file.suffix.lower() == ".xz":
                     yield file
 
@@ -118,13 +118,13 @@ def compress_file(
             space_freed = original_size
         return (filepath, True, f"Compressed to {output_path.name}", original_size, space_freed)
     except Exception as e:
-        return (filepath, False, f"Error: {str(e)}", 0, 0)
+        return filepath, False, f"Error: {str(e)}", 0, 0
 
 
 def decompress_file(filepath: Path, remove_orig: bool = True) -> Tuple[Path, bool, str, int, int]:
     try:
         if filepath.suffix.lower() != ".xz":
-            return (filepath, False, "Error: Not an .xz file", 0, 0)
+            return filepath, False, "Error: Not an .xz file", 0, 0
         with open(filepath, "rb") as f:
             data = f.read()
         compressed_size = len(data)
@@ -138,7 +138,7 @@ def decompress_file(filepath: Path, remove_orig: bool = True) -> Tuple[Path, boo
             space_freed = compressed_size
         return (filepath, True, f"Decompressed to {output_path.name}", compressed_size, space_freed)
     except Exception as e:
-        return (filepath, False, f"Error: {str(e)}", 0, 0)
+        return filepath, False, f"Error: {str(e)}", 0, 0
 
 
 def format_bytes(bytes_val: int) -> str:
@@ -160,7 +160,7 @@ def process_files(root_dir: Path, compress: bool, preset: int, threads: int, rem
     total_original_size = 0
     processed = 0
     files_generator = get_files_to_process(root_dir, compress)
-    total_files = sum((1 for _ in files_generator))
+    total_files = sum(1 for _ in files_generator)
     if total_files == 0:
         action = "compress" if compress else "decompress"
         print(f"No files found to {action}")
@@ -196,7 +196,18 @@ def main():
         description="Recursively compress or decompress files using lzma_mt",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=textwrap.dedent(
-            "\n            Examples:\n              python compress_files.py\n              python compress_files.py -c --preset 6 --threads 8\n              python compress_files.py -d /path/to/files\n              python compress_files.py --keep-orig\n            \n            Excluded by default:\n              - Directories: .git, __pycache__, .venv, venv, node_modules\n              - Archives: .zip, .br, .xz, .gz, .bz2, .bz3, .zst, .7z, .lz4, etc.\n              - Media: .mp4, .mkv, .mp3, .jpg, .png, .pdf, .exe, etc.\n        "
+            """
+            Examples:
+              python compress_files.py
+              python compress_files.py -c --preset 6 --threads 8
+              python compress_files.py -d /path/to/files
+              python compress_files.py --keep-orig
+            
+            Excluded by default:
+              - Directories: .git, __pycache__, .venv, venv, node_modules
+              - Archives: .zip, .br, .xz, .gz, .bz2, .bz3, .zst, .7z, .lz4, etc.
+              - Media: .mp4, .mkv, .mp3, .jpg, .png, .pdf, .exe, etc.
+        """
         ),
     )
     parser.add_argument("-c", "--compress", action="store_true", help="Compress files (default if no -d specified)")

@@ -61,7 +61,7 @@ def find_unused_symbols(source: str):
     try:
         tree = ast.parse(source)
     except SyntaxError:
-        return ({}, ["SyntaxError while parsing file"])
+        return {}, ["SyntaxError while parsing file"]
     annotate_parents(tree)
     analyzer = UsageAnalyzer()
     analyzer.visit(tree)
@@ -74,7 +74,7 @@ def find_unused_symbols(source: str):
     unused["classes"] = sorted(unused_classes)
     unused["variables"] = sorted(unused_vars)
     unused["imports"] = unused_imports
-    return (unused, [])
+    return unused, []
 
 
 def remove_unused(source: str, unused) -> str:
@@ -88,11 +88,11 @@ def remove_unused(source: str, unused) -> str:
             continue
         if isinstance(node, ast.Assign) and isinstance(node.parent, ast.Module):
             targets = [t.id for t in node.targets if isinstance(t, ast.Name)]
-            if all((t in unused["variables"] for t in targets)):
+            if all(t in unused["variables"] for t in targets):
                 continue
         if isinstance(node, (ast.Import, ast.ImportFrom)):
-            names = [alias.asname or alias.name for alias in node.names]
-            if all((n in unused["imports"] for n in names)):
+            names = [(alias.asname or alias.name) for alias in node.names]
+            if all(n in unused["imports"] for n in names):
                 continue
         new_body.append(node)
     tree.body = new_body
@@ -106,24 +106,24 @@ def process_file(filepath, dry_run: bool = False):
     try:
         source = filepath.read_text(encoding="utf-8")
     except Exception as e:
-        return (filepath, {}, [f"Error reading file: {e}"])
+        return filepath, {}, [f"Error reading file: {e}"]
     unused, parse_errors = find_unused_symbols(source)
     errors.extend(parse_errors)
     nothing_to_remove = (
-        not unused["functions"] and (not unused["classes"]) and (not unused["variables"]) and (not unused["imports"])
+        not unused["functions"] and not unused["classes"] and not unused["variables"] and not unused["imports"]
     )
     if nothing_to_remove:
-        return (filepath, unused, errors)
+        return filepath, unused, errors
     try:
         new_source = remove_unused(source, unused)
     except Exception:
         errors.append("Error rewriting file:\n" + traceback.format_exc())
-        return (filepath, unused, errors)
+        return filepath, unused, errors
     if not dry_run:
         backup_path = filepath.with_suffix(filepath.suffix + ".bak")
         shutil.copy2(filepath, backup_path)
         filepath.write_text(new_source, encoding="utf-8")
-    return (filepath, unused, errors)
+    return filepath, unused, errors
 
 
 def gather_python_files(root: Path) -> list[Path]:
@@ -136,11 +136,7 @@ def worker(args):
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Remove unused functions, classes, variables, and imports.")
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Show what would change without modifying files.",
-    )
+    parser.add_argument("--dry-run", action="store_true", help="Show what would change without modifying files.")
     parser.add_argument("--workers", type=int, default=mp.cpu_count(), help="Number of processes")
     args = parser.parse_args()
     root = Path()

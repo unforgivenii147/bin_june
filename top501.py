@@ -17,7 +17,7 @@ def process_file(file_path, text_extensions):
         return Counter()
     try:
         with Path(file_path).open(encoding="utf-8") as f:
-            return Counter((line.strip() for line in f if line.strip()))
+            return Counter(line.strip() for line in f if line.strip())
     except (UnicodeDecodeError, PermissionError):
         return Counter()
 
@@ -27,7 +27,7 @@ def collect_top_lines(directory: str, text_extensions: set[str], top_n=500) -> N
         print(f"\nProcessing {ext} files...")
         lines_counter = Counter()
         file_paths = [
-            Path(root) / file
+            (Path(root) / file)
             for root, _, files in os.walk(directory)
             for file in files
             if is_text_file(Path(root) / file, {ext})
@@ -44,7 +44,7 @@ def collect_top_lines(directory: str, text_extensions: set[str], top_n=500) -> N
         output_file = f"/sdcard/top500{ext}.txt"
         with Path(output_file).open("w", encoding="utf-8") as f:
             f.write(f"Top {top_n} most frequent lines for {ext} files:\n\n")
-            f.writelines((f"{count}: {line}\n" for line, count in lines_counter.most_common(top_n)))
+            f.writelines(f"{count}: {line}\n" for line, count in lines_counter.most_common(top_n))
         elapsed = time.time() - start_time
         print(f"Saved top {top_n} lines for {ext} files to {output_file} (took {elapsed:.2f} seconds)")
 

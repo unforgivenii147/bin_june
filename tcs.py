@@ -7,27 +7,16 @@ from pathlib import Path
 
 def send_to_process(txt: str) -> None:
     try:
-        process = subprocess.Popen(
-            ["termux-clipboard-set"],
-            stdin=subprocess.PIPE,
-            text=True,
-            stderr=subprocess.PIPE,
-        )
+        process = subprocess.Popen(["termux-clipboard-set"], stdin=subprocess.PIPE, text=True, stderr=subprocess.PIPE)
         _stdout, stderr = process.communicate(input=txt)
         if process.returncode != 0:
             print(f"Error: Failed to copy to clipboard. STDERR: {stderr}", file=sys.stderr)
             sys.exit(1)
     except FileNotFoundError:
-        print(
-            "Error: 'termux-clipboard-set' command not found. Is Termux:API installed?",
-            file=sys.stderr,
-        )
+        print("Error: 'termux-clipboard-set' command not found. Is Termux:API installed?", file=sys.stderr)
         sys.exit(1)
     except Exception as e:
-        print(
-            f"An unexpected error occurred while copying to clipboard: {e}",
-            file=sys.stderr,
-        )
+        print(f"An unexpected error occurred while copying to clipboard: {e}", file=sys.stderr)
         sys.exit(1)
 
 
@@ -43,7 +32,7 @@ def selective_copy(path: Path, lines: list[str]) -> None:
     send_to_process(content)
 
 
-def copy_lines_to_clipboard(path: str | Path, start_line: int | None = None, end_line: int | None = None) -> None:
+def copy_lines_to_clipboard(path: (str | Path), start_line: (int | None) = None, end_line: (int | None) = None) -> None:
     content = ""
     path = Path(path)
     if not path.is_file():
@@ -68,7 +57,7 @@ def copy_lines_to_clipboard(path: str | Path, start_line: int | None = None, end
         if not 0 <= end_index <= total_lines:
             end_index = total_lines
         if start_index >= end_index:
-            start_index, end_index = (end_index, start_index)
+            start_index, end_index = end_index, start_index
         selected_lines = lines[start_index:end_index]
         content = "".join(selected_lines)
     if not content:
@@ -106,7 +95,7 @@ def main() -> None:
         except ValueError:
             print("Error: <end_line> must be an integer.", file=sys.stderr)
             sys.exit(1)
-    if start_line is not None and end_line is None and (len(sys.argv) == 3):
+    if start_line is not None and end_line is None and len(sys.argv) == 3:
         if not path.is_file():
             print(f"Error: File not found at '{path}'", file=sys.stderr)
             sys.exit(1)
@@ -115,8 +104,7 @@ def main() -> None:
                 total_lines = len(f.readlines())
             if not 1 <= start_line <= total_lines:
                 print(
-                    f"Error: Start line ({start_line}) is out of bounds. File has {total_lines} lines.",
-                    file=sys.stderr,
+                    f"Error: Start line ({start_line}) is out of bounds. File has {total_lines} lines.", file=sys.stderr
                 )
                 sys.exit(1)
         except OSError as e:

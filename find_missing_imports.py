@@ -137,11 +137,9 @@ class ImportAnalyzer(ast.NodeVisitor):
             base_name = node.module.split(".")[0]
             self.imported_names.add(base_name)
             self.import_lines[base_name] = node.lineno
-
         for alias in node.names:
             if alias.name != "*":
                 self.imported_names.add(alias.name)
-
         self.generic_visit(node)
 
     def visit_Assign(self, node: ast.Assign) -> None:
@@ -226,7 +224,6 @@ class ImportAnalyzer(ast.NodeVisitor):
 
 def get_stdlib_modules() -> Set[str]:
     stdlib = set(sys.builtin_module_names)
-
     common_stdlib = {
         "abc",
         "argparse",
@@ -421,7 +418,6 @@ def get_stdlib_modules() -> Set[str]:
         "zlib",
         "zoneinfo",
     }
-
     stdlib.update(common_stdlib)
     return stdlib
 
@@ -430,14 +426,11 @@ def analyze_file(filepath: Path) -> Tuple[Path, List[Tuple[str, int]]]:
     try:
         with open(filepath, "r", encoding="utf-8") as f:
             content = f.read()
-
         tree = ast.parse(content, str(filepath))
         analyzer = ImportAnalyzer()
         analyzer.visit(tree)
-
         stdlib = get_stdlib_modules()
         missing_imports = []
-
         for name in analyzer.used_names:
             if (
                 name not in analyzer.imported_names
@@ -452,9 +445,7 @@ def analyze_file(filepath: Path) -> Tuple[Path, List[Tuple[str, int]]]:
                         line_num = node.lineno
                         break
                 missing_imports.append((name, line_num or 1))
-
         return filepath, missing_imports
-
     except (SyntaxError, UnicodeDecodeError):
         return filepath, []
 
@@ -462,16 +453,12 @@ def analyze_file(filepath: Path) -> Tuple[Path, List[Tuple[str, int]]]:
 def autofix_imports(filepath: Path, missing_imports: List[Tuple[str, int]]) -> bool:
     if not missing_imports:
         return False
-
     try:
         with open(filepath, "r", encoding="utf-8") as f:
             lines = f.readlines()
-
         unique_imports = sorted(set(imp[0] for imp in missing_imports))
-
         insert_idx = 0
         in_imports = True
-
         for i, line in enumerate(lines):
             stripped = line.lstrip()
             if not stripped or stripped.startswith("#"):
@@ -480,16 +467,11 @@ def autofix_imports(filepath: Path, missing_imports: List[Tuple[str, int]]) -> b
                 insert_idx = i + 1
             elif in_imports and not stripped.startswith(("import ", "from ")):
                 in_imports = False
-
         new_imports = [f"import {imp}\n" for imp in unique_imports]
-
         lines[insert_idx:insert_idx] = new_imports
-
         with open(filepath, "w", encoding="utf-8") as f:
             f.writelines(lines)
-
         return True
-
     except Exception:
         return False
 
@@ -498,79 +480,56 @@ def main():
     parser = argparse.ArgumentParser(
         description="Find and fix missing stdlib imports in Python files",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=textwrap.dedent("""
+        epilog=textwrap.dedent(
+            """
             Examples:
               python find_missing_imports.py
               python find_missing_imports.py --autofix
               python find_missing_imports.py --workers 8
-        """),
+        """
+        ),
     )
-
     parser.add_argument("-a", "--autofix", action="store_true", help="Automatically add missing imports")
     parser.add_argument(
-        "-w",
-        "--workers",
-        type=int,
-        default=None,
-        help="Number of worker processes (default: CPU count)",
+        "-w", "--workers", type=int, default=None, help="Number of worker processes (default: CPU count)"
     )
-    parser.add_argument(
-        "directory",
-        nargs="?",
-        default=".",
-        help="Directory to scan (default: current directory)",
-    )
-
+    parser.add_argument("directory", nargs="?", default=".", help="Directory to scan (default: current directory)")
     args = parser.parse_args()
     root_dir = Path(args.directory).resolve()
-
     if not root_dir.is_dir():
         print(f"Error: {root_dir} is not a directory")
         sys.exit(1)
-
     py_files = list(root_dir.glob("**/*.py"))
-
     if not py_files:
         print(f"No Python files found in {root_dir}")
         sys.exit(0)
-
     print(f"Scanning {len(py_files)} Python files with {args.workers or 'default'} workers...")
-
     total_missing = 0
     fixed_files = 0
-
     with ProcessPoolExecutor(max_workers=args.workers) as executor:
         futures = {executor.submit(analyze_file, py_file): py_file for py_file in py_files}
-
         completed = 0
         for future in as_completed(futures):
             completed += 1
             filepath, missing_imports = future.result()
-
-            pct = (completed / len(py_files)) * 100
+            pct = completed / len(py_files) * 100
             print(f"[{pct:5.1f}%] {completed}/{len(py_files)}", end="\r", flush=True)
-
             if missing_imports:
                 total_missing += len(missing_imports)
                 rel_path = filepath.relative_to(root_dir)
-
                 print(f"\n{rel_path}:")
                 for module, lineno in sorted(set(missing_imports)):
                     print(f"  Line {lineno}: missing `import {module}`")
-
                 if args.autofix:
                     if autofix_imports(filepath, missing_imports):
                         print(f"  ✓ Fixed")
                         fixed_files += 1
                     else:
                         print(f"  ✗ Failed to fix")
-
     print(f"\n{'─' * 60}")
     print(f"Total missing imports found: {total_missing}")
-
     if args.autofix:
         print(f"Files fixed: {fixed_files}")
-
     sys.exit(1 if total_missing > 0 else 0)
 
 

@@ -21,7 +21,7 @@ def parse_wheel_url(url: str) -> Optional[Tuple[str, str, Tuple[int, ...], str]]
         package = match.group(1)
         version = tuple(map(int, match.group(2).split(".")))
         arch = match.group(3)
-        return (package, "android", version, arch, url)
+        return package, "android", version, arch, url
     match = re.search(linux_pattern, url)
     if match:
         package = match.group(1)
@@ -29,13 +29,13 @@ def parse_wheel_url(url: str) -> Optional[Tuple[str, str, Tuple[int, ...], str]]
         arch = match.group(3)
         py_match = re.search("python3\\.(\\d+)", url)
         python_version = py_match.group(1) if py_match else "unknown"
-        return (package, python_version, version, arch, url)
+        return package, python_version, version, arch, url
     return None
 
 
 def is_armv7_arch(arch: str) -> bool:
     armv7_patterns = ["armeabi_v7a", "armv7l", "linux_arm", "arm"]
-    return any((pattern in arch.lower() for pattern in armv7_patterns))
+    return any(pattern in arch.lower() for pattern in armv7_patterns)
 
 
 def filter_latest_for_armv7(urls_file=None):
@@ -57,9 +57,9 @@ def filter_latest_for_armv7(urls_file=None):
         if parsed:
             package, py_version, version, arch, url = parsed
             if is_armv7_arch(arch):
-                key = (package, py_version)
+                key = package, py_version
                 if arch not in packages[key] or version > packages[key][arch][0]:
-                    packages[key][arch] = (version, url)
+                    packages[key][arch] = version, url
     print("=" * 80)
     print("LATEST ARMv7 (armeabi_v7a/armv7l/linux_arm) WHEELS")
     print("=" * 80)

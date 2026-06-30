@@ -1,12 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 from __future__ import annotations
-
 import logging
 import multiprocessing as mp
 import tarfile
 from pathlib import Path
-
 import py7zr
 
 BASE_DIR = Path.cwd()
@@ -18,10 +16,7 @@ def setup_logging() -> None:
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(processName)s %(message)s",
-        handlers=[
-            logging.FileHandler(LOG_FILE, encoding="utf-8"),
-            logging.StreamHandler(),
-        ],
+        handlers=[logging.FileHandler(LOG_FILE, encoding="utf-8"), logging.StreamHandler()],
     )
 
 
@@ -64,7 +59,7 @@ def remove_path(path: Path) -> None:
 
 
 class TaskResult:
-    def __init__(self, src: str, dst: str, ok: bool, error: str | None = None) -> None:
+    def __init__(self, src: str, dst: str, ok: bool, error: (str | None) = None) -> None:
         self.src = src
         self.dst = dst
         self.ok = ok
@@ -102,7 +97,7 @@ def main() -> None:
     if archives:
         with mp.Pool(processes=min(MAX_WORKERS, len(archives))) as pool:
             results.extend(pool.map(process_archive, archives))
-    success = sum((1 for r in results if r.ok))
+    success = sum(1 for r in results if r.ok)
     fail = len(results) - success
     logging.info("Completed. success=%d fail=%d", success, fail)
     for r in results:

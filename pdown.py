@@ -50,7 +50,7 @@ def find_wheel_url(package_data: Dict, python_version: str = "3.13") -> Optional
     if not wheels:
         return None
     _, best_wheel = max(wheels, key=lambda x: x[0])
-    return (best_wheel["url"], best_wheel["size"])
+    return best_wheel["url"], best_wheel["size"]
 
 
 def download_file(url: str, destination: pathlib.Path, expected_size: int, chunk_size: int = 8192) -> Tuple[bool, str]:
@@ -72,16 +72,16 @@ def download_file(url: str, destination: pathlib.Path, expected_size: int, chunk
                         end="\r",
                     )
             print(f"    ✅ Downloaded {destination.name} ({downloaded / 1024 / 1024:.2f} MB)")
-            return (True, "")
+            return True, ""
     except Exception as e:
-        return (False, f"Failed: {str(e)}")
+        return False, f"Failed: {str(e)}"
 
 
 def download_package(package: str, wheels_dir: pathlib.Path, python_version: str = "3.13") -> Tuple[str, bool, str]:
     print(f"🔍 Fetching info for: {package}")
     package_data = get_pypi_json(package)
     if not package_data:
-        return (package, False, "Failed to fetch package info from PyPI")
+        return package, False, "Failed to fetch package info from PyPI"
     wheel_info = find_wheel_url(package_data, python_version)
     if not wheel_info:
         return (package, False, "No compatible wheel found for Python " + python_version)
@@ -92,7 +92,7 @@ def download_package(package: str, wheels_dir: pathlib.Path, python_version: str
     print(f"  🔗 URL: {url}")
     print(f"  💾 Size: {size / 1024 / 1024:.2f} MB")
     success, message = download_file(url, destination, size)
-    return (package, success, message)
+    return package, success, message
 
 
 def main():

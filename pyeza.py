@@ -13,7 +13,7 @@ from argparse import Namespace
 from pathlib import Path
 
 
-def colorize(text: str, mode: int, link_target: str | None = None) -> str:
+def colorize(text: str, mode: int, link_target: (str | None) = None) -> str:
     if stat.S_ISDIR(mode):
         return f"\x1b[34;1m{text}\x1b[0m"
     if stat.S_ISLNK(mode):
@@ -59,7 +59,7 @@ def get_git_status_for_dir(path: str) -> dict[str, dict[str, str]]:
         if len(parts) < 8:
             continue
         xy = parts[1].decode("utf-8")
-        x, y = (xy[0], xy[1])
+        x, y = xy[0], xy[1]
         filename = parts[-1].decode("utf-8", errors="ignore")
         result[filename] = {"index": x, "work": y, "raw": xy}
     return result
@@ -160,7 +160,7 @@ def output_columns(entries: list[Entry], icons=False, colors=True, width=None) -
         rendered.append(txt)
     for i in range(0, len(rendered), cols):
         row = rendered[i : i + cols]
-        padded = [r + " " * (col_width - real_len(r)) for r in row]
+        padded = [(r + " " * (col_width - real_len(r))) for r in row]
         print("".join(padded))
 
 

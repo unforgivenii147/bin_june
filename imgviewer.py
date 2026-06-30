@@ -1,7 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 import sys
-
 import numpy as np
 from PIL import Image
 

@@ -405,7 +405,7 @@ def scan_directory(root_dir: str, exclude_dirs: Set[str] = None) -> Dict[str, Li
         print(f"Error: Directory '{root_dir}' does not exist.", file=sys.stderr)
         return results
     python_files = list(root_path.rglob("*.py"))
-    python_files = [f for f in python_files if not any((excl in f.parts for excl in exclude_dirs))]
+    python_files = [f for f in python_files if not any(excl in f.parts for excl in exclude_dirs)]
     print(f"Scanning {len(python_files)} Python files in {root_dir}...")
     for filepath in python_files:
         missing = find_missing_imports(str(filepath), stdlib_names)
@@ -419,7 +419,7 @@ def print_results(results: Dict[str, List[Tuple[str, str]]], show_all: bool = Fa
         print("\n✅ No missing stdlib imports detected!")
         return
     total_files = len(results)
-    total_missing = sum((len(missing) for missing in results.values()))
+    total_missing = sum(len(missing) for missing in results.values())
     print(f"\n{'=' * 70}")
     print(f" Found {total_missing} potentially missing import(s) in {total_files} file(s)")
     print(f"{'=' * 70}\n")
@@ -439,7 +439,14 @@ def main():
     parser = argparse.ArgumentParser(
         description="Detect potentially missing standard library imports in Python files.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="\nExamples:\n  %(prog)s .                        # Scan current directory recursively\n  %(prog)s src/                     # Scan src directory\n  %(prog)s . --exclude tests        # Exclude tests directory\n  %(prog)s . --exclude tests,docs   # Exclude multiple directories\n  %(prog)s . --show-all             # Show all files including those without issues\n        ",
+        epilog="""
+Examples:
+  %(prog)s .                        # Scan current directory recursively
+  %(prog)s src/                     # Scan src directory
+  %(prog)s . --exclude tests        # Exclude tests directory
+  %(prog)s . --exclude tests,docs   # Exclude multiple directories
+  %(prog)s . --show-all             # Show all files including those without issues
+        """,
     )
     parser.add_argument("directory", nargs="?", default=".", help="Root directory to scan (default: current directory)")
     parser.add_argument("--exclude", "-e", default="", help="Comma-separated list of directories to exclude")
@@ -449,7 +456,7 @@ def main():
     args = parser.parse_args()
     exclude_dirs = {".git", "__pycache__", ".venv", "venv", "env", ".env", "build", "dist", "egg-info", ".tox", ".eggs"}
     if args.exclude:
-        exclude_dirs.update((d.strip() for d in args.exclude.split(",")))
+        exclude_dirs.update(d.strip() for d in args.exclude.split(","))
     print(f"🔍 Checking for missing stdlib imports in: {args.directory}")
     results = scan_directory(args.directory, exclude_dirs)
     print_results(results)
@@ -459,7 +466,7 @@ def main():
         print(f"{'=' * 70}")
         root_path = Path(args.directory)
         for filepath in sorted(root_path.rglob("*.py")):
-            if not any((excl in filepath.parts for excl in exclude_dirs)):
+            if not any(excl in filepath.parts for excl in exclude_dirs):
                 rel_path = os.path.relpath(filepath)
                 status = "❌" if str(filepath) in results else "✅"
                 print(f"  {status} {rel_path}")

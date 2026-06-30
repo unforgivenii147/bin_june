@@ -24,10 +24,10 @@ def clean_requirement(line: str) -> str:
 def group_key(name: str) -> tuple[int, str]:
     first = name[0]
     if first.isupper():
-        return (0, name)
+        return 0, name
     if first.islower():
-        return (1, name)
-    return (2, name)
+        return 1, name
+    return 2, name
 
 
 def main() -> None:
@@ -50,7 +50,7 @@ def main() -> None:
             seen.add(c)
     cleaned = sorted(cleaned, key=group_key)
     with Path(fname).open("w", encoding="utf-8") as f:
-        f.writelines((item + "\n" for item in cleaned))
+        f.writelines(item + "\n" for item in cleaned)
     print("\n=== Cleaned Requirements ===")
     for item in cleaned:
         print(item)

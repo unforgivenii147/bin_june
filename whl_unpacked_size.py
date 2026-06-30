@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/usr/bin/python
 
 
 """
@@ -26,19 +26,19 @@ def format_size(size_bytes: int) -> str:
 def get_wheel_unpacked_size(wheel_path: Path) -> Tuple[Path, int, Optional[str]]:
     try:
         if not wheel_path.exists():
-            return (wheel_path, 0, f"File not found: {wheel_path}")
+            return wheel_path, 0, f"File not found: {wheel_path}"
         if not wheel_path.is_file():
-            return (wheel_path, 0, f"Not a file: {wheel_path}")
+            return wheel_path, 0, f"Not a file: {wheel_path}"
         total_size = 0
         try:
             with ZipFile(wheel_path, "r") as whl:
                 for info in whl.filelist:
                     total_size += info.file_size
         except Exception as e:
-            return (wheel_path, 0, f"Failed to read wheel: {str(e)}")
-        return (wheel_path, total_size, None)
+            return wheel_path, 0, f"Failed to read wheel: {str(e)}"
+        return wheel_path, total_size, None
     except Exception as e:
-        return (wheel_path, 0, f"Unexpected error: {str(e)}")
+        return wheel_path, 0, f"Unexpected error: {str(e)}"
 
 
 def find_wheel_files(directory: Path, recursive: bool = False) -> list[Path]:
@@ -90,7 +90,7 @@ def main():
         results.sort(key=lambda x: x[1], reverse=True)
     else:
         results.sort(key=lambda x: x[0].name)
-    total_unpacked_size = sum((size for _, size in results))
+    total_unpacked_size = sum(size for _, size in results)
     if args.json:
         output = {
             "directory": str(args.directory),
@@ -134,7 +134,7 @@ def main():
             print(f"   Successfully processed:  {len(results)}")
             print(f"   Errors:                  {len(errors)}")
             print(
-                f"   Average size per wheel:  {(format_size(total_unpacked_size // len(results)) if results else 'N/A')}"
+                f"   Average size per wheel:  {format_size(total_unpacked_size // len(results)) if results else 'N/A'}"
             )
         if errors:
             print(f"\n⚠️  Errors ({len(errors)}):")

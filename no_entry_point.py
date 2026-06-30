@@ -96,13 +96,13 @@ def is_pure_python_package(pkg_name: str, site_dir: Path) -> bool:
             for package_dir in site_dir.glob(pattern):
                 if (
                     package_dir.is_dir()
-                    and (not package_dir.name.endswith(".dist-info"))
-                    and (not package_dir.name.endswith(".egg-info"))
+                    and not package_dir.name.endswith(".dist-info")
+                    and not package_dir.name.endswith(".egg-info")
                 ):
                     for item in package_dir.rglob("*"):
                         if item.is_file() and item.suffix == ".so":
                             return False
-                        if item.is_file() and ".cpython-" in str(item) and (item.suffix == ".so"):
+                        if item.is_file() and ".cpython-" in str(item) and item.suffix == ".so":
                             return False
         return True
     except Exception:
@@ -174,7 +174,7 @@ def find_packages_without_entry_points(site_dir: Path) -> Tuple[List[str], List[
                     items_to_scan.append(item)
         for item in items_to_scan:
             result = scan_package(item, site_dir)
-            if result["error"] is None and (not result["has_entry_points"]):
+            if result["error"] is None and not result["has_entry_points"]:
                 pkg_name = result["name"]
                 if pkg_name in processed_packages:
                     continue
@@ -187,7 +187,7 @@ def find_packages_without_entry_points(site_dir: Path) -> Tuple[List[str], List[
                 print(f"Error scanning {item}: {result['error']}", file=sys.stderr)
     except Exception as e:
         print(f"Error scanning directory {site_dir}: {e}", file=sys.stderr)
-    return (pure_packages, non_pure_packages)
+    return pure_packages, non_pure_packages
 
 
 def main():

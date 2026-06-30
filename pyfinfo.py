@@ -19,7 +19,7 @@ def cliner(fn: str) -> None:
 
 def levenshtein_distance(a: str, b: str) -> int:
     if len(a) < len(b):
-        a, b = (b, a)
+        a, b = b, a
     previous_row = list(range(len(b) + 1))
     for i, ca in enumerate(a, 1):
         current_row = [i]
@@ -59,7 +59,7 @@ def group_similar(names: list[str], threshold: float = 0.8):
 
 def main() -> None:
     cwd = Path.cwd()
-    counter = Counter((cliner(p.name) for p in cwd.rglob("*") if p.is_file() and (not p.is_symlink())))
+    counter = Counter(cliner(p.name) for p in cwd.rglob("*") if p.is_file() and not p.is_symlink())
     for name, count in counter.most_common(100):
         if count > 2:
             print(f"{name}: {count}")

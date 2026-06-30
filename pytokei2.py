@@ -6,10 +6,10 @@ import re
 
 def count_lines_of_code(file_path: str, lang) -> tuple[int, int, int]:
     if ".git" in str(file_path):
-        return (0, 0, 0)
+        return 0, 0, 0
     if is_binary(file_path):
         print(f"{file_path} is binary")
-        return (0, 0, 0)
+        return 0, 0, 0
     with Path(file_path).open(encoding="utf-8") as file:
         code_lines = 0
         comment_lines = 0
@@ -21,7 +21,7 @@ def count_lines_of_code(file_path: str, lang) -> tuple[int, int, int]:
                 comment_lines += 1
             else:
                 code_lines += 1
-    return (code_lines, comment_lines, blank_lines)
+    return code_lines, comment_lines, blank_lines
 
 
 def scan_directory(directory: str = "."):

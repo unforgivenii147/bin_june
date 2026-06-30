@@ -105,14 +105,14 @@ class SubtitleDownloader:
         if sub_info:
             content = self.download_from_opensubtitles(sub_info)
             if content:
-                return (content, "OpenSubtitles.org")
+                return content, "OpenSubtitles.org"
         print("Trying YIFY subtitles...")
         sub_url = self.search_yify_subtitles(query)
         if sub_url:
             content = self.download_srt_from_url(sub_url)
             if content:
-                return (content, "YIFY Subtitles")
-        return (None, None)
+                return content, "YIFY Subtitles"
+        return None, None
 
     def save_subtitle(self, content, filename):
         if not content:

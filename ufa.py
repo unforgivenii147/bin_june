@@ -2,7 +2,6 @@
 
 import sys
 from pathlib import Path
-
 from dh import get_nobinary, is_binary
 
 
@@ -27,7 +26,7 @@ def main() -> None:
     if args:
         for arg in args:
             p = Path(arg)
-            if p.is_file() and (not is_binary(p)):
+            if p.is_file() and not is_binary(p):
                 files.append(p)
             if p.is_dir():
                 files.extend(get_nobinary(p))

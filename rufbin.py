@@ -35,21 +35,17 @@ def is_python_file(file_path: Path):
 def format_with_ruff(file_path: Path):
     try:
         result = subprocess.run(
-            ["ruff", "format", str(file_path)],
-            check=False,
-            capture_output=True,
-            text=True,
-            timeout=30,
+            ["ruff", "format", str(file_path)], check=False, capture_output=True, text=True, timeout=30
         )
         if not result.returncode:
-            return (True, "")
-        return (False, result.stderr.strip())
+            return True, ""
+        return False, result.stderr.strip()
     except subprocess.TimeoutExpired:
-        return (False, "Timeout (30s)")
+        return False, "Timeout (30s)"
     except FileNotFoundError:
-        return (False, "ruff not installed or not in PATH")
+        return False, "ruff not installed or not in PATH"
     except Exception as e:
-        return (False, str(e))
+        return False, str(e)
 
 
 def main() -> None:

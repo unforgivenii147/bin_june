@@ -3,7 +3,6 @@
 import importlib
 import subprocess
 import sys
-
 import pkg_resources
 import re
 
@@ -15,11 +14,11 @@ def get_installed_python_packages() -> list[tuple[str, str]]:
 def check_package_importable(package_name: str) -> tuple[bool, str]:
     try:
         importlib.import_module(package_name)
-        return (True, "OK")
+        return True, "OK"
     except ImportError as e:
-        return (False, f"ImportError: {e}")
+        return False, f"ImportError: {e}"
     except Exception as e:
-        return (False, f"Unexpected error: {e}")
+        return False, f"Unexpected error: {e}"
 
 
 def get_latest_version(package_name: str) -> str:

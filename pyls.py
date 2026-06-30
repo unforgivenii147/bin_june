@@ -90,7 +90,7 @@ def scan_dir(path: Path, args: Namespace):
         return []
     if not args.a:
         if args.A:
-            entries = [e for e in entries if e.name not in {".", ".."} and (not e.name.startswith("."))]
+            entries = [e for e in entries if e.name not in {".", ".."} and not e.name.startswith(".")]
         else:
             entries = [e for e in entries if not e.name.startswith(".")]
 
@@ -120,7 +120,7 @@ def scan_dir(path: Path, args: Namespace):
 def print_columns(items: list[str], width, by_row) -> None:
     if not items:
         return
-    max_len = max((len(i) for i in items)) + 2
+    max_len = max(len(i) for i in items) + 2
     cols = max(1, width // max_len)
     rows = (len(items) + cols - 1) // cols
     for r in range(rows):
@@ -180,7 +180,7 @@ def main() -> None:
             print_columns(formatted, args.w, args.x)
         if args.R:
             for e in entries:
-                if e.is_dir() and (not e.is_symlink()):
+                if e.is_dir() and not e.is_symlink():
                     print(f"\n{e}:")
                     main()
 

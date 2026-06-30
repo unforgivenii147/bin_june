@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/python
 
 
 """
@@ -69,10 +69,10 @@ SIGNATURES = [
     (lambda b: b.startswith(b"7z\xbc\xaf'\x1c"), ".7z", "7-Zip archive"),
     (lambda b: b.startswith(b"Rar!\x1a\x07\x00"), ".rar", "RAR archive"),
     (lambda b: len(b) > 262 and b[257:262] == b"ustar", ".tar", "TAR archive"),
-    (lambda b: b.startswith(b"ID3") or (len(b) >= 2 and (b[0] == 255 and b[1] & 224 == 224)), ".mp3", "MP3 audio"),
+    (lambda b: b.startswith(b"ID3") or len(b) >= 2 and (b[0] == 255 and b[1] & 224 == 224), ".mp3", "MP3 audio"),
     (lambda b: len(b) > 8 and b[4:8] == b"ftyp", ".mp4", "MP4/ISO-BMFF"),
     (lambda b: b.startswith(b"\x1aE\xdf\xa3"), ".mkv", "Matroska (MKV/WebM)"),
-    (lambda b: b.startswith(b"RIFF") and len(b) > 8 and (b[8:12] == b"WAVE"), ".wav", "WAV audio"),
+    (lambda b: b.startswith(b"RIFF") and len(b) > 8 and b[8:12] == b"WAVE", ".wav", "WAV audio"),
     (lambda b: b.startswith(b"OggS"), ".ogg", "OGG container"),
     (lambda b: b.startswith(b"fLaC"), ".flac", "FLAC audio"),
     (
@@ -185,7 +185,7 @@ def detect_with_magic(path: Path) -> Optional[Tuple[str, str]]:
         ext = MIME_TO_EXT.get(mime.lower())
         if ext:
             canonical = PREFERRED_EXT.get(ext, ext)
-            return (canonical, f"{desc} (MIME: {mime})")
+            return canonical, f"{desc} (MIME: {mime})"
         return None
     except Exception as e:
         return None
@@ -203,7 +203,7 @@ def detect_by_signature(path: Path, nbytes: int = READ_BYTES) -> Optional[Tuple[
         try:
             if check(head):
                 canonical = PREFERRED_EXT.get(ext, ext)
-                return (canonical, desc)
+                return canonical, desc
         except Exception:
             continue
     try:
@@ -213,10 +213,10 @@ def detect_by_signature(path: Path, nbytes: int = READ_BYTES) -> Optional[Tuple[
             with zipfile.ZipFile(path, "r") as z:
                 for nm in z.namelist():
                     if nm.endswith(".dist-info/"):
-                        return (".whl", "Python wheel (zip)")
+                        return ".whl", "Python wheel (zip)"
                     if nm.endswith(".egg-info/"):
-                        return (".zip", "Python egg archive")
-            return (".zip", "ZIP archive")
+                        return ".zip", "Python egg archive"
+            return ".zip", "ZIP archive"
     except Exception:
         pass
     try:
@@ -225,8 +225,8 @@ def detect_by_signature(path: Path, nbytes: int = READ_BYTES) -> Optional[Tuple[
         if tarfile.is_tarfile(path):
             fname = path.name.lower()
             if fname.endswith((".tar.gz", ".tgz")):
-                return (".tar.gz", "TAR.GZ archive")
-            return (".tar", "TAR archive")
+                return ".tar.gz", "TAR.GZ archive"
+            return ".tar", "TAR archive"
     except Exception:
         pass
     try:
@@ -234,9 +234,9 @@ def detect_by_signature(path: Path, nbytes: int = READ_BYTES) -> Optional[Tuple[
             sample = f.read(1024)
         if not sample:
             return None
-        printable = sum((1 for c in sample if 32 <= c <= 126 or c in (9, 10, 13)))
+        printable = sum(1 for c in sample if 32 <= c <= 126 or c in (9, 10, 13))
         if printable / max(1, len(sample)) > 0.9:
-            return (".txt", "Plain text (heuristic)")
+            return ".txt", "Plain text (heuristic)"
     except Exception:
         pass
     return None
@@ -252,17 +252,17 @@ def detect_file_type(path: Path) -> Optional[Tuple[str, str]]:
 
 def safe_rename(src: Path, dst: Path) -> Tuple[bool, Optional[str]]:
     if src.samefile(dst) if dst.exists() and src.exists() else False:
-        return (False, "source and destination are identical")
+        return False, "source and destination are identical"
     if not dst.exists():
         try:
             src.rename(dst)
-            return (True, str(dst))
+            return True, str(dst)
         except OSError as exc:
             try:
                 shutil.move(str(src), str(dst))
-                return (True, str(dst))
+                return True, str(dst)
             except Exception as e:
-                return (False, f"rename/move failed: {e}")
+                return False, f"rename/move failed: {e}"
     base = dst.stem
     suff = dst.suffix
     parent = dst.parent
@@ -271,14 +271,14 @@ def safe_rename(src: Path, dst: Path) -> Tuple[bool, Optional[str]]:
         if not candidate.exists():
             try:
                 src.rename(candidate)
-                return (True, str(candidate))
+                return True, str(candidate)
             except OSError:
                 try:
                     shutil.move(str(src), str(candidate))
-                    return (True, str(candidate))
+                    return True, str(candidate)
                 except Exception as e:
-                    return (False, f"rename/move failed for candidate: {e}")
-    return (False, "failed to find non-conflicting name")
+                    return False, f"rename/move failed for candidate: {e}"
+    return False, "failed to find non-conflicting name"
 
 
 def process_file(args) -> Dict:
@@ -335,7 +335,7 @@ def gather_files(root: Path, follow_symlinks: bool = False, skip_hidden: bool = 
     for p in root.rglob("*"):
         try:
             if p.is_file():
-                if skip_hidden and any((part.startswith(".") for part in p.relative_to(root).parts)):
+                if skip_hidden and any(part.startswith(".") for part in p.relative_to(root).parts):
                     continue
                 files.append(p)
         except Exception:
@@ -373,7 +373,7 @@ def print_summary(results: List[Dict], verbose: bool = False) -> None:
 def print_header():
     print("fix_extension_mismatch.py")
     print(
-        f"  Detection: python-magic {('✓ available' if MAGIC_AVAILABLE else '✗ not available (using fallback signatures)')}"
+        f"  Detection: python-magic {'✓ available' if MAGIC_AVAILABLE else '✗ not available (using fallback signatures)'}"
     )
     if not MAGIC_AVAILABLE:
         print("    Install with: pip install python-magic (Linux/macOS) or python-magic-bin (Windows)")

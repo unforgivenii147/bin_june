@@ -5,7 +5,6 @@ import sys
 from collections import deque
 from multiprocessing import get_context
 from pathlib import Path
-
 from dh import cprint, fsz, get_files, gsz
 
 MAX_QUEUE = 16

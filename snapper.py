@@ -2,7 +2,6 @@
 
 import sys
 from pathlib import Path
-
 from dh import compress, cprint, decompress, fsz, get_files, gsz, mpf3
 
 COMPRESS = "-c" in sys.argv

@@ -1,12 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/python
 
 from __future__ import annotations
-
 import hashlib
 import os
 from dataclasses import dataclass
 from pathlib import Path
-
 from tree_sitter import Node, Parser
 from tree_sitter_languages import get_language
 
@@ -56,30 +54,14 @@ def extract_items(path: Path, parser: Parser) -> list[Item]:
                 continue
             name = node_text(src, name_node)
             code = node_text(src, node)
-            items.append(
-                Item(
-                    kind="function",
-                    name=name,
-                    source=code,
-                    path=str(path),
-                    hash=sha256_text(code),
-                )
-            )
+            items.append(Item(kind="function", name=name, source=code, path=str(path), hash=sha256_text(code)))
         elif node.type == "class_definition":
             name_node = node.child_by_field_name("name")
             if not name_node:
                 continue
             name = node_text(src, name_node)
             code = node_text(src, node)
-            items.append(
-                Item(
-                    kind="class",
-                    name=name,
-                    source=code,
-                    path=str(path),
-                    hash=sha256_text(code),
-                )
-            )
+            items.append(Item(kind="class", name=name, source=code, path=str(path), hash=sha256_text(code)))
         elif node.type in {"expression_statement", "assignment"}:
             code = node_text(src, node)
             assign_node = node
@@ -95,24 +77,12 @@ def extract_items(path: Path, parser: Parser) -> list[Item]:
             name = node_text(src, lhs)
             if not is_const_name(name):
                 continue
-            items.append(
-                Item(
-                    kind="const",
-                    name=name,
-                    source=code,
-                    path=str(path),
-                    hash=sha256_text(code),
-                )
-            )
+            items.append(Item(kind="const", name=name, source=code, path=str(path), hash=sha256_text(code)))
     return items
 
 
 def write_utils_file(dups: dict[str, Item], output: Path) -> None:
-    lines = [
-        "# Auto-generated file",
-        "# Contains duplicate top-level constants, functions, and classes.",
-        "",
-    ]
+    lines = ["# Auto-generated file", "# Contains duplicate top-level constants, functions, and classes.", ""]
     seen = set()
     for h, item in dups.items():
         if h in seen:

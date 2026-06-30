@@ -35,14 +35,14 @@ class ImageSimilarityOrganizer:
         try:
             img = cv2.imread(str(image_path), cv2.IMREAD_GRAYSCALE)
             if img is None:
-                return (image_path, None)
+                return image_path, None
             img_resized = cv2.resize(img, (hash_size, hash_size))
             avg = img_resized.mean()
             hash_array = (img_resized > avg).flatten().astype(int)
-            return (image_path, hash_array)
+            return image_path, hash_array
         except Exception as e:
             print(f"[ERROR] Failed to hash {image_path}: {str(e)}")
-            return (image_path, None)
+            return image_path, None
 
     def compute_hashes(self, image_paths: List[Path]) -> Dict[Path, np.ndarray]:
         print(f"\n[HASH] Computing perceptual hashes using {cpu_count()} processes...")

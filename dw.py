@@ -33,7 +33,7 @@ def get_all_files(folder):
     return files
 
 
-def copy_file(src, dst_folder: str | None) -> bool:
+def copy_file(src, dst_folder: (str | None)) -> bool:
     try:
         os.makedirs(dst_folder, exist_ok=True)
         shutil.copy2(src, dst_folder)

@@ -10,7 +10,7 @@ def get_dir_size(path):
     for r, _, files in os_walk(path):
         for file in files:
             path = Path(r) / file
-            if path.is_file() and (not path.is_symlink()):
+            if path.is_file() and not path.is_symlink():
                 try:
                     total += path.stat().st_size
                 except OSError:
@@ -20,7 +20,7 @@ def get_dir_size(path):
 
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
-    units = ("B", "KB", "MB", "GB", "TB")
+    units = "B", "KB", "MB", "GB", "TB"
     if sz == 0:
         return "0 B"
     i = min((int(sz).bit_length() - 1) // 10, len(units) - 1)

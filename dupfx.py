@@ -14,22 +14,22 @@ def should_skip(path: Path) -> bool:
     return bool(
         path.is_symlink()
         or not (size := path.stat().st_size)
-        or any((pat in path.parts for pat in (".git", "__pycache__", ".mypy_cache", ".ruff_cache")))
+        or any(pat in path.parts for pat in (".git", "__pycache__", ".mypy_cache", ".ruff_cache"))
     )
 
 
 def get_hash_file(path: Path) -> tuple[str, Path]:
     path = Path(path)
     if not path.exists() or not (size := path.stat().st_size):
-        return ("", path)
+        return "", path
     h = xxh64()
     try:
         with path.open("rb") as f:
             while chunk := f.read(CHUNK_SIZE):
                 h.update(chunk)
-        return (h.hexdigest(), path)
+        return h.hexdigest(), path
     except (OSError, IOError):
-        return ("", path)
+        return "", path
 
 
 def find_duplicates() -> None:
@@ -39,7 +39,7 @@ def find_duplicates() -> None:
     total_size = 0
     files_with_sizes = []
     for path in cwd.rglob("*"):
-        if path.is_file() and (not should_skip(path)):
+        if path.is_file() and not should_skip(path):
             try:
                 if size := path.stat().st_size:
                     files_with_sizes.append((path, size))

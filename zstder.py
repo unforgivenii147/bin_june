@@ -56,7 +56,7 @@ def status_line(ok: bool, name: str, elapsed_ms: float, before: int, after: int)
 
 
 def compress_file(
-    src: Path, dry_run: bool, verbose: bool, level: int | None = None, threads: int = DEFAULT_THREADS
+    src: Path, dry_run: bool, verbose: bool, level: (int | None) = None, threads: int = DEFAULT_THREADS
 ) -> dict:
     result = {"src": src, "ok": False, "line": "", "msg": ""}
     dst = src.with_suffix(src.suffix + ZSTD_EXT)
@@ -173,7 +173,7 @@ def run_parallel(tasks: list, worker_fn, extra_kwargs: dict) -> tuple[int, int]:
                 ok += 1
             else:
                 err += 1
-    return (ok, err)
+    return ok, err
 
 
 def do_compress(root: Path, tar_subdirs: bool, dry_run: bool, verbose: bool, threads: int) -> None:
@@ -266,7 +266,7 @@ def main() -> None:
         print("[dry-run mode — no files will be modified]")
     if args.verbose or args.dry_run:
         print(f"Root    : {root}")
-        print(f"Mode    : {('compress' if compress else 'decompress')}")
+        print(f"Mode    : {'compress' if compress else 'decompress'}")
         print(f"Threads : {args.threads} (zstd) × {WORKERS} processes")
         print()
     if compress:

@@ -58,7 +58,7 @@ def scan_and_update(site_packages_dirs) -> tuple[int, int]:
         for path in Path(site_dir).rglob("*"):
             if path.name == "RECORD" and update_record_file(path):
                 total_updated += 1
-    return (total_files, total_updated)
+    return total_files, total_updated
 
 
 def main() -> None:

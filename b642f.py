@@ -3,7 +3,6 @@
 import base64
 import sys
 from pathlib import Path
-
 from dh import content_hash, cprint
 
 cleanup = True

@@ -52,7 +52,7 @@ def check_package_dependencies(dist, installed_map: dict[str, str]) -> tuple[lis
     broken_deps = []
     clean_reqs_for_file = []
     if dist.requires is None:
-        return (broken_deps, clean_reqs_for_file)
+        return broken_deps, clean_reqs_for_file
     for req_str in dist.requires:
         if "extra ==" in req_str or "extra =" in req_str:
             continue
@@ -67,7 +67,7 @@ def check_package_dependencies(dist, installed_map: dict[str, str]) -> tuple[lis
         if dep_name.lower() not in installed_map:
             broken_deps.append(base_requirement)
             clean_reqs_for_file.append(base_requirement)
-    return (broken_deps, clean_reqs_for_file)
+    return broken_deps, clean_reqs_for_file
 
 
 def main():

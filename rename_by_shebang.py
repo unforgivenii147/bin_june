@@ -159,7 +159,7 @@ def dry_run() -> None:
         if not shebang:
             continue
         extension = get_extension_from_shebang(shebang)
-        if extension and (not file_path.suffix == extension):
+        if extension and not file_path.suffix == extension:
             new_name = f"{file_path.stem}{extension}"
             print(f"  Would rename: {file_path.name} -> {new_name}")
     print(f"\nRun without '--dry-run' to apply changes.")

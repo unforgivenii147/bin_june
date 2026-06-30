@@ -2,7 +2,6 @@
 
 import os
 from pathlib import Path
-
 from PIL import Image
 
 input_dir = "avif_images"

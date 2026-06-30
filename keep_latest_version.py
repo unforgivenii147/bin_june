@@ -9,7 +9,6 @@ from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
-
 from dh import get_files
 from packaging import version as pkg_version
 
@@ -19,7 +18,6 @@ def parse_wheel_version(filename: str) -> Optional[Tuple[str, str]]:
         name = filename[:-4]
     if filename.endswith(".metadata"):
         name = filename[:-9]
-
     parts = name.split("-")
     if len(parts) < 5:
         return None
@@ -54,10 +52,10 @@ def parse_targz_version(filename: str) -> Optional[Tuple[str, str]]:
         return None
     parts = name.split("-")
     for i, part in enumerate(parts):
-        if re.match(r"^\d", part):
+        if re.match("^\\d", part):
             pkg_name = "-".join(parts[:i])
             version = "-".join(parts[i:])
-            version = re.sub(r"\.(tar|tgz)$", "", version)
+            version = re.sub("\\.(tar|tgz)$", "", version)
             if pkg_name and version:
                 return pkg_name, version
     return None
@@ -116,16 +114,15 @@ def process_file(file_path: Path, file_type: str) -> Optional[Tuple[str, str, Pa
 
 def scan_directory(directory: Path, file_type: str, check_all: bool = False) -> Dict[str, List[Tuple[str, Path]]]:
     packages = defaultdict(list)
-    extensions = (".whl", ".deb", ".tar.gz", ".tgz", ".metadata")
+    extensions = ".whl", ".deb", ".tar.gz", ".tgz", ".metadata"
     if check_all:
-        extensions = (".whl", ".deb", ".tar.gz", ".tgz", ".metadata")
+        extensions = ".whl", ".deb", ".tar.gz", ".tgz", ".metadata"
     elif file_type == "wheel":
-        extensions = (".whl", ".metadata")
+        extensions = ".whl", ".metadata"
     elif file_type == "deb":
         extensions = ".deb"
     elif file_type == "targz":
-        extensions = (".tar.gz", ".tgz")
-
+        extensions = ".tar.gz", ".tgz"
     files_to_process = get_files(directory, ext=extensions)
     print(f"Found {len(files_to_process)} files to process...")
     with ThreadPoolExecutor(max_workers=4) as executor:
@@ -204,28 +201,10 @@ Examples:
     group.add_argument("-d", "--deb", action="store_true", help="Check .deb files")
     group.add_argument("-w", "--wheel", action="store_true", help="Check .whl files")
     group.add_argument("-t", "--targz", action="store_true", help="Check .tar.gz and .tgz files")
-    group.add_argument(
-        "-a",
-        "--all",
-        action="store_true",
-        help="Check all package types (.whl, .deb, .tar.gz, .tgz)",
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Simulate deletion without actually removing files",
-    )
-    parser.add_argument(
-        "--dir",
-        type=str,
-        default=".",
-        help="Directory to scan (default: current directory)",
-    )
-    parser.add_argument(
-        "--verbose",
-        action="store_true",
-        help="Show detailed information about each file",
-    )
+    group.add_argument("-a", "--all", action="store_true", help="Check all package types (.whl, .deb, .tar.gz, .tgz)")
+    parser.add_argument("--dry-run", action="store_true", help="Simulate deletion without actually removing files")
+    parser.add_argument("--dir", type=str, default=".", help="Directory to scan (default: current directory)")
+    parser.add_argument("--verbose", action="store_true", help="Show detailed information about each file")
     args = parser.parse_args()
     if not (args.deb or args.wheel or args.targz or args.all):
         args.wheel = True

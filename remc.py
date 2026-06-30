@@ -5,7 +5,6 @@ import re
 import sys
 from ast import Module
 from pathlib import Path
-
 from dh import cprint, fsz, get_files, gsz
 
 
@@ -50,7 +49,7 @@ def rm_doc(content: str) -> tuple[str, int]:
         else:
             result_lines.append(line)
             i += 1
-    return ("\n".join(result_lines), removed_count)
+    return "\n".join(result_lines), removed_count
 
 
 def rm_ast(content: str) -> tuple[str, int]:
@@ -62,7 +61,7 @@ def rm_ast(content: str) -> tuple[str, int]:
     ranges = find_docstring_ranges(tree)
     for start, end in sorted(ranges, reverse=True):
         del lines[start - 1 : end]
-    return ("\n".join(lines), len(ranges))
+    return "\n".join(lines), len(ranges)
 
 
 def find_docstring_ranges(node: Module) -> list[tuple[int, int]]:
@@ -86,7 +85,7 @@ def find_docstring_ranges(node: Module) -> list[tuple[int, int]]:
 
 def remove_blank_lines(content: str) -> str:
     content = re.sub("\\n\\n+", "\n", content)
-    return "\n".join((line.rstrip() for line in content.split("\n")))
+    return "\n".join(line.rstrip() for line in content.split("\n"))
 
 
 def process_file(file_path: Path) -> None:

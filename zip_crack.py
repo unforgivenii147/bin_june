@@ -80,7 +80,7 @@ class StatusReporter:
         print(f"\n{'=' * 60}")
         print("FINAL REPORT")
         print(f"{'=' * 60}")
-        print(f"✅ Success:       {('Yes' if success else 'No')}")
+        print(f"✅ Success:       {'Yes' if success else 'No'}")
         if success:
             print(f"🔑 Password:      {self.found_password}")
         print(f"🔢 Total tested:  {self.passwords_tested:,} passwords")
@@ -143,7 +143,7 @@ def brute_force_zip(zip_file, wordlist_file, num_processes=None, batch_size=1000
         return None
     try:
         with zipfile.ZipFile(zip_file, "r") as zf:
-            if not any((info.flag_bits & 1 for info in zf.infolist())):
+            if not any(info.flag_bits & 1 for info in zf.infolist()):
                 print("⚠️  Warning: Zip file is not password protected!")
                 return None
     except zipfile.BadZipFile:
@@ -215,7 +215,11 @@ def main():
     parser = argparse.ArgumentParser(
         description="Brute force password protected zip files using multiprocessing",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="\nExamples:\n  python zip_bruteforce.py protected.zip -w wordlist.txt\n  python zip_bruteforce.py protected.zip -w wordlist.txt -p 4 -b 500 -i 30\n        ",
+        epilog="""
+Examples:
+  python zip_bruteforce.py protected.zip -w wordlist.txt
+  python zip_bruteforce.py protected.zip -w wordlist.txt -p 4 -b 500 -i 30
+        """,
     )
     parser.add_argument("zip_file", help="Path to the zip file")
     parser.add_argument(

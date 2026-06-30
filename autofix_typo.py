@@ -194,7 +194,7 @@ class TypoFixerWithLearning:
                 nltk.data.find("corpora/words.zip")
             except LookupError:
                 nltk.download("words", quiet=True)
-            self.valid_words.update((w.lower() for w in words.words()))
+            self.valid_words.update(w.lower() for w in words.words())
             print(f"Loaded {len(self.valid_words)} dictionary words", file=sys.stderr)
         except:
             print("Warning: Could not load NLTK words", file=sys.stderr)
@@ -266,7 +266,7 @@ class TypoFixerWithLearning:
             if choice == "y" and suggestion:
                 self.learner.learn_from_correction(word, suggestion, line)
                 return suggestion
-            elif choice == "y" and (not suggestion):
+            elif choice == "y" and not suggestion:
                 manual = input("Enter correction: ")
                 self.learner.learn_from_correction(word, manual, line)
                 return manual
@@ -316,7 +316,7 @@ class TypoFixerWithLearning:
 
             fixed_line = word_pattern.sub(replace_word, line)
             fixed_lines.append(fixed_line)
-        if changes > 0 and (not self.preview):
+        if changes > 0 and not self.preview:
             backup = filepath.with_suffix(filepath.suffix + ".bak")
             shutil.copy2(filepath, backup)
             with open(filepath, "w", encoding="utf-8") as f:

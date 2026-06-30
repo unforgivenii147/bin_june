@@ -2,7 +2,6 @@
 
 import sys
 from pathlib import Path
-
 import cv2
 
 
@@ -58,7 +57,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 2:
         output_file = sys.argv[2]
     output_dir = Path(output_file).parent
-    if output_dir and (not Path(output_dir).exists()):
+    if output_dir and not Path(output_dir).exists():
         Path(output_dir).mkdir(parents=True)
         print(f"Created output directory: {output_dir}")
     detect_and_save_faces(input_file, output_file)

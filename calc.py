@@ -7,7 +7,16 @@ from textual.widgets import Button, Static
 
 
 class Display(Static):
-    DEFAULT_CSS = "\n    Display {\n        width: 1fr;\n        height: 3;\n        content-align: right middle;\n        background: $surface;\n        border: solid $primary;\n        text-style: bold;\n    }\n    "
+    DEFAULT_CSS = """
+    Display {
+        width: 1fr;
+        height: 3;
+        content-align: right middle;
+        background: $surface;
+        border: solid $primary;
+        text-style: bold;
+    }
+    """
 
     def __init__(self) -> None:
         super().__init__("0")
@@ -19,7 +28,39 @@ class Display(Static):
 
 
 class Calculator(Static):
-    DEFAULT_CSS = "\n    Calculator {\n        width: 50;\n        height: auto;\n        border: solid $accent;\n        background: $panel;\n    }\n    \n    #button-grid {\n        width: 1fr;\n        height: auto;\n        grid-size: 4 5;\n        grid-gutter: 1 1;\n        padding: 1;\n    }\n    \n    Button {\n        width: 1fr;\n        height: 3;\n    }\n    \n    Button.operator {\n        background: $accent 80%;\n    }\n    \n    Button.equals {\n        background: $success 80%;\n    }\n    \n    Button.clear {\n        background: $error 80%;\n    }\n    "
+    DEFAULT_CSS = """
+    Calculator {
+        width: 50;
+        height: auto;
+        border: solid $accent;
+        background: $panel;
+    }
+    
+    #button-grid {
+        width: 1fr;
+        height: auto;
+        grid-size: 4 5;
+        grid-gutter: 1 1;
+        padding: 1;
+    }
+    
+    Button {
+        width: 1fr;
+        height: 3;
+    }
+    
+    Button.operator {
+        background: $accent 80%;
+    }
+    
+    Button.equals {
+        background: $success 80%;
+    }
+    
+    Button.clear {
+        background: $error 80%;
+    }
+    """
 
     def __init__(self) -> None:
         super().__init__()
@@ -70,7 +111,7 @@ class Calculator(Static):
             return
         if button_id in ("plus", "minus", "multiply", "divide"):
             current_value = float(self.display_widget.value)
-            if self.left_operand is not None and self.operator is not None and (not self.new_input):
+            if self.left_operand is not None and self.operator is not None and not self.new_input:
                 result = self._calculate(self.left_operand, self.operator, current_value)
                 self.display_widget.update_display(result)
                 self.left_operand = float(result)

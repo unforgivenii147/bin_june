@@ -2,7 +2,6 @@
 
 import shutil
 from pathlib import Path
-
 import dh
 from PIL import Image
 

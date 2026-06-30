@@ -123,11 +123,11 @@ class SpaceStats:
 
     def get_savings(self):
         if self.original_size == 0:
-            return (0, 0, 0)
+            return 0, 0, 0
         saved = self.original_size - self.compressed_size
         ratio = self.compressed_size / self.original_size * 100
         percent_saved = saved / self.original_size * 100
-        return (saved, ratio, percent_saved)
+        return saved, ratio, percent_saved
 
 
 def should_skip_directory(dir_name: str) -> bool:
@@ -285,14 +285,14 @@ def compress_file(
         stats.add(original_size, compressed_size)
         if remove_original:
             input_path.unlink()
-        return (True, input_path, output_path, original_size, compressed_size)
+        return True, input_path, output_path, original_size, compressed_size
     except Exception as e:
         if output_path.exists():
             try:
                 output_path.unlink()
             except:
                 pass
-        return (False, input_path, str(e), 0, 0)
+        return False, input_path, str(e), 0, 0
 
 
 def decompress_file(input_path: Path, output_path: Path, threads: int, remove_original: bool, stats: SpaceStats):
@@ -315,7 +315,7 @@ def decompress_file(input_path: Path, output_path: Path, threads: int, remove_or
                 output_path.unlink()
             except:
                 pass
-        return (False, input_path, str(e), 0, 0)
+        return False, input_path, str(e), 0, 0
 
 
 def format_size(bytes_size: int) -> str:
@@ -338,8 +338,8 @@ def process_files(file_generator, compress: bool, level: int, threads: int, remo
     if total == 0:
         print("No files to process.")
         return
-    print(f"\n{('Compressing' if compress else 'Decompressing')} {total} files...")
-    print(f"Remove original files: {('Yes' if remove_original else 'No')}")
+    print(f"\n{'Compressing' if compress else 'Decompressing'} {total} files...")
+    print(f"Remove original files: {'Yes' if remove_original else 'No'}")
     print("-" * 60)
     with ThreadPoolExecutor(max_workers=threads) as executor:
         futures = {}
@@ -360,7 +360,7 @@ def process_files(file_generator, compress: bool, level: int, threads: int, remo
                     processed += 1
                     continue
                 future = executor.submit(decompress_file, file_path, output_path, threads, remove_original, stats)
-            futures[future] = (file_path, output_path)
+            futures[future] = file_path, output_path
         for future in as_completed(futures):
             result = future.result()
             processed += 1
@@ -388,7 +388,10 @@ def process_files(file_generator, compress: bool, level: int, threads: int, remo
     else:
         success_count = total - skipped
         if success_count > 0:
-            print(f"\n✅ Successfully {('compressed' if compress else 'decompressed')} {success_count} files!")
+            print(
+                f"""
+✅ Successfully {"compressed" if compress else "decompressed"} {success_count} files!"""
+            )
             if remove_original:
                 print("   Original files have been removed.")
 
@@ -405,7 +408,7 @@ def main():
     parser.add_argument("--dir", type=str, default=".", help="Directory to process (default: current)")
     parser.add_argument("--keep", action="store_true", help="Keep original files (default: remove on success)")
     args = parser.parse_args()
-    if not args.compress and (not args.decompress):
+    if not args.compress and not args.decompress:
         args.compress = True
         print("No action specified, defaulting to compression mode")
     base_dir = Path(args.dir).resolve()
@@ -417,11 +420,11 @@ def main():
         sys.exit(1)
     remove_original = not args.keep
     print(f"Working directory: {base_dir}")
-    print(f"Mode: {('Compression' if args.compress else 'Decompression')}")
+    print(f"Mode: {'Compression' if args.compress else 'Decompression'}")
     print(f"Threads: {args.threads}")
     if args.compress:
         print(f"Compression level: {args.level}")
-    print(f"Keep original files: {('Yes' if args.keep else 'No')}")
+    print(f"Keep original files: {'Yes' if args.keep else 'No'}")
     print("\nScanning directory tree...")
     file_generator = walk_files(base_dir, args.compress)
     process_files(file_generator, args.compress, args.level, args.threads, remove_original)

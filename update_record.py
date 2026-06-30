@@ -59,10 +59,10 @@ def get_file_size(filepath: Path) -> int:
 def parse_record_line(line: str) -> Tuple[str, str, str]:
     parts = line.strip().split(",")
     if len(parts) == 3:
-        return (parts[0], parts[1], parts[2])
+        return parts[0], parts[1], parts[2]
     if len(parts) == 2:
-        return (parts[0], parts[1], "")
-    return (parts[0], "", "")
+        return parts[0], parts[1], ""
+    return parts[0], "", ""
 
 
 def should_include_file(filepath: Path) -> bool:

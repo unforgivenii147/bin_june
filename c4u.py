@@ -168,7 +168,7 @@ def main() -> None:
     if not pending:
         logger.info("✓ All packages already checked. Skipping PyPI queries.")
     else:
-        pending_packages = [(name, next((v for n, v in installed if n == name))) for name in pending]
+        pending_packages = [(name, next(v for n, v in installed if n == name)) for name in pending]
         num_workers = min(cpu_count(), 8)
         logger.info(f"🔄 Spawning {num_workers} workers to query PyPI...")
         with Pool(processes=num_workers) as pool:

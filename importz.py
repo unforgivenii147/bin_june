@@ -9,7 +9,7 @@ import imp
 def is_python_file(path: Path) -> bool:
     if path.suffix == ".py":
         return True
-    if path.is_file() and (not path.suffix):
+    if path.is_file() and not path.suffix:
         try:
             with Path(path).open(encoding="utf-8") as f:
                 first_line = f.readline()
@@ -26,7 +26,7 @@ def get_imports_from_file(file_path: Path):
             tree = ast.parse(f.read(), filename=str(file_path))
         for node in ast.walk(tree):
             if isinstance(node, ast.Import):
-                imports.update((n.name.split(".")[0] for n in node.names))
+                imports.update(n.name.split(".")[0] for n in node.names)
             elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
                 imports.add(node.module.split(".")[0])
     except (SyntaxError, UnicodeDecodeError):
@@ -45,7 +45,7 @@ def main() -> None:
         if is_python_file(path) and path.name != "importz.txt":
             all_imports.update(get_imports_from_file(path))
     third_party = sorted([
-        imp for imp in all_imports if imp not in std_libs and imp not in local_names and (imp != "__future__")
+        imp for imp in all_imports if imp not in std_libs and imp not in local_names and imp != "__future__"
     ])
     if third_party:
         output_file.write_text("\n".join(third_party), encoding="utf-8")

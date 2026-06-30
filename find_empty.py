@@ -14,7 +14,7 @@ def main() -> None:
             path = Path(r) / f
             if path.is_symlink():
                 continue
-            if path.is_file() and (not path.stat().st_size):
+            if path.is_file() and not path.stat().st_size:
                 print(path.relative_to(cwd))
 
 

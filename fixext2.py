@@ -2,7 +2,6 @@
 
 import os
 from pathlib import Path
-
 import magic
 import cmd
 
@@ -24,21 +23,21 @@ def detect_text_based_extension(text: str):
     text = text.strip()
     if text.startswith("#!") and "python" in text:
         return "py"
-    if any((k in text for k in ["def ", "class ", "import ", "from ", "__main__"])):
+    if any(k in text for k in ["def ", "class ", "import ", "from ", "__main__"]):
         return "py"
     if text.startswith("#!") and ("sh" in text or "bash" in text):
         return "sh"
     if text.startswith(("# ", "## ")) or "---" in text:
         return "md"
-    if text.startswith("---") or (": " in text and "\n" in text):
+    if text.startswith("---") or ": " in text and "\n" in text:
         return "yaml"
-    if "=" in text and "[" in text and ("]" in text):
+    if "=" in text and "[" in text and "]" in text:
         return "toml"
     if text.startswith("[") and "]" in text:
         return "ini"
-    if any((text.lower().startswith(cmd) for cmd in ["select ", "insert ", "update ", "delete ", "create "])):
+    if any(text.lower().startswith(cmd) for cmd in ["select ", "insert ", "update ", "delete ", "create "]):
         return "sql"
-    if "{" in text and "}" in text and (":" in text):
+    if "{" in text and "}" in text and ":" in text:
         return "css"
     if "," in text and "\n" in text:
         return "csv"
@@ -68,7 +67,7 @@ def safe_rename(src: str, dst: str) -> Path:
     if not dst.exists():
         src.rename(dst)
         return dst
-    base, ext = (dst.stem, dst.suffix)
+    base, ext = dst.stem, dst.suffix
     counter = 1
     new_path = Path(f"{base} ({counter}){ext}")
     while new_path.exists():

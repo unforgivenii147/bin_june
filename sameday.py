@@ -6,11 +6,7 @@ from datetime import UTC, datetime
 
 
 class StatxTimestamp(ctypes.Structure):
-    _fields_ = [
-        ("tv_sec", ctypes.c_int64),
-        ("tv_nsec", ctypes.c_uint32),
-        ("__reserved", ctypes.c_int32),
-    ]
+    _fields_ = [("tv_sec", ctypes.c_int64), ("tv_nsec", ctypes.c_uint32), ("__reserved", ctypes.c_int32)]
 
 
 class Statx(ctypes.Structure):

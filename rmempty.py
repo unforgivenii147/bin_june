@@ -2,14 +2,13 @@
 
 import sys
 from pathlib import Path
-
 from dh import cprint
 
 TIMEOUT = 0
 
 
 def get_files(folder: Path) -> list[Path]:
-    return [p for p in folder.rglob("*") if p.is_file() and (not p.is_symlink()) and (".git" not in p.parts)]
+    return [p for p in folder.rglob("*") if p.is_file() and not p.is_symlink() and ".git" not in p.parts]
 
 
 def wait_for_keypress(timeout: int) -> bool:

@@ -42,11 +42,11 @@ def should_skip(text: str) -> bool:
     if clean.startswith(SHEBANG_PREFIX):
         return True
     if clean.isascii():
-        if any((word in clean.upper() for word in KNOWN_ENGLISH_TOKENS)):
+        if any(word in clean.upper() for word in KNOWN_ENGLISH_TOKENS):
             return True
         if len(clean.split()) <= 2 and len(clean) < 30:
             return True
-    if not any((c.isalpha() for c in clean)):
+    if not any(c.isalpha() for c in clean):
         return True
     return False
 
@@ -85,7 +85,7 @@ def find_print_string_tokens(source: str):
     for line in lines:
         offsets.append(offsets[-1] + len(line.encode()))
     for node in ast.walk(tree):
-        if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and (node.func.id == "print")):
+        if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "print"):
             continue
         for arg in node.args:
             if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
@@ -105,7 +105,7 @@ def process_file(path: Path) -> bool:
     lines = source.splitlines(keepends=True)
 
     def line_col_to_offset(lineno, col):
-        return sum((len(lines[i]) for i in range(lineno - 1))) + col
+        return sum(len(lines[i]) for i in range(lineno - 1)) + col
 
     replacements = []
     for tok in tokens:
@@ -128,7 +128,7 @@ def process_file(path: Path) -> bool:
         return False
     print_arg_positions = set()
     for node in ast.walk(tree):
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and (node.func.id == "print"):
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "print":
             for arg in node.args:
                 if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
                     print_arg_positions.add((arg.col_offset, arg.lineno))

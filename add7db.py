@@ -7,7 +7,6 @@ import sqlite3
 import sys
 from pathlib import Path
 from sqlite3 import Cursor
-
 import py7zr
 
 
@@ -30,7 +29,16 @@ def folder_exists_in_db(cursor: Cursor, folder_name):
 
 def create_folder_table(cursor: Cursor, folder_name) -> None:
     cursor.execute(
-        f'\n        CREATE TABLE IF NOT EXISTS "{folder_name}" (\n            id INTEGER PRIMARY KEY AUTOINCREMENT,\n            filename TEXT NOT NULL,\n            file_contents BLOB,\n            compressed BOOLEAN DEFAULT 0,\n            original_size INTEGER DEFAULT 0,\n            compressed_size INTEGER DEFAULT 0\n        )\n    '
+        f"""
+        CREATE TABLE IF NOT EXISTS "{folder_name}" (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            filename TEXT NOT NULL,
+            file_contents BLOB,
+            compressed BOOLEAN DEFAULT 0,
+            original_size INTEGER DEFAULT 0,
+            compressed_size INTEGER DEFAULT 0
+        )
+    """
     )
 
 
@@ -67,23 +75,11 @@ def read_file_contents(filepath: str):
                 continue
         with Path(filepath).open("rb") as f:
             content = f.read()
-            return {
-                "content": content,
-                "is_binary": True,
-                "original_size": len(content),
-            }
+            return {"content": content, "is_binary": True, "original_size": len(content)}
     except PermissionError:
-        return {
-            "content": error_msg,
-            "is_binary": False,
-            "original_size": len(error_msg),
-        }
+        return {"content": error_msg, "is_binary": False, "original_size": len(error_msg)}
     except Exception as e:
-        return {
-            "content": error_msg,
-            "is_binary": False,
-            "original_size": len(error_msg),
-        }
+        return {"content": error_msg, "is_binary": False, "original_size": len(error_msg)}
 
 
 def get_files_in_cwd():
@@ -135,7 +131,10 @@ def get_files_in_cwd():
 def insert_files(cursor: Cursor, folder_name, files) -> None:
     for file_info in files:
         cursor.execute(
-            f'\n            INSERT INTO "{folder_name}" (filename, file_contents, compressed, original_size, compressed_size)\n            VALUES (?, ?, ?, ?, ?)\n        ',
+            f"""
+            INSERT INTO "{folder_name}" (filename, file_contents, compressed, original_size, compressed_size)
+            VALUES (?, ?, ?, ?, ?)
+        """,
             (
                 file_info["filename"],
                 file_info["contents"],
@@ -179,8 +178,8 @@ def main() -> None:
     else:
         insert_files(cursor, folder_name, files)
         conn.commit()
-        total_original = sum((f.get("original_size", 0) for f in files))
-        total_compressed = sum((f.get("compressed_size", 0) for f in files))
+        total_original = sum(f.get("original_size", 0) for f in files)
+        total_compressed = sum(f.get("compressed_size", 0) for f in files)
         print(f"\n✅ Successfully added {len(files)} files to table '{folder_name}'")
         if total_compressed > 0:
             ratio = (1 - total_compressed / total_original) * 100 if total_original > 0 else 0

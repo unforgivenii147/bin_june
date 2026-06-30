@@ -17,7 +17,7 @@ for file in [func_file, classes_file, const_file, init_file]:
 
 
 def is_constant(node: AST) -> bool:
-    return isinstance(node, ast.Assign) and all((isinstance(t, ast.Name) for t in node.targets))
+    return isinstance(node, ast.Assign) and all(isinstance(t, ast.Name) for t in node.targets)
 
 
 def write_to_file(file_path: Path, content) -> None:
@@ -27,7 +27,7 @@ def write_to_file(file_path: Path, content) -> None:
 
 for root, _, files in os.walk("."):
     for file in files:
-        if file.endswith(".py") and (not file.startswith("output")):
+        if file.endswith(".py") and not file.startswith("output"):
             file_path = Path(root) / file
             content = Path(file_path).read_text(encoding="utf-8")
             tree = ast.parse(content)
@@ -49,4 +49,4 @@ func_content = func_file.read_text() if func_file.exists() else ""
 classes_content = classes_file.read_text() if classes_file.exists() else ""
 const_content = const_file.read_text() if const_file.exists() else ""
 init_content = init_file.read_text() if init_file.exists() else ""
-(func_content, classes_content, const_content, init_content)
+func_content, classes_content, const_content, init_content

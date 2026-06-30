@@ -17,7 +17,7 @@ def hex_to_hsv(hex_color: str) -> tuple[float, float, float]:
 
 def sort_key(color: str) -> tuple[float, float, float]:
     h, s, v = hex_to_hsv(color)
-    return (h, s, v)
+    return h, s, v
 
 
 def main(path: str) -> None:
@@ -25,7 +25,7 @@ def main(path: str) -> None:
         colors = [line.strip() for line in f if HEX_RE.match(line.strip())]
     colors.sort(key=sort_key)
     with Path(path).open("w", encoding="utf-8") as f:
-        f.writelines((c.lower() + "\n" for c in colors))
+        f.writelines(c.lower() + "\n" for c in colors)
 
 
 if __name__ == "__main__":

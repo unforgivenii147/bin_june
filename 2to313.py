@@ -4,7 +4,6 @@
 import sys
 from lib2to3 import refactor
 from pathlib import Path
-
 from dh import get_pyfiles, mpf3
 
 fixers = collect_fixers()
@@ -40,7 +39,6 @@ def refactor_file(filepath: Path) -> None:
 def main() -> None:
     cwd = Path.cwd()
     files = get_pyfiles(cwd)
-
     mpf3(refactor_file, files)
 
 

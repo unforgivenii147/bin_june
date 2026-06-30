@@ -46,7 +46,7 @@ def main():
     for path in sys.path:
         if "site-packages" in path or "dist-packages" in path:
             p = Path(path)
-            if p.exists() and (not str(p).startswith(str(Path.home()))):
+            if p.exists() and not str(p).startswith(str(Path.home())):
                 system_dirs.append(p)
     termux_lib = Path("/data/data/com.termux/files/usr/lib")
     if termux_lib.exists():

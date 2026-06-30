@@ -77,7 +77,7 @@ def main() -> None:
             print(f"  {whl}")
     else:
         print("\nNo empty wheel files found in current directory.")
-    if not empty_installed and (not empty_wheels):
+    if not empty_installed and not empty_wheels:
         print("\nNo empty packages or wheels found.")
 
 

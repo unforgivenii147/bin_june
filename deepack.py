@@ -87,9 +87,9 @@ def repack_package(args_tuple: Tuple[str, str, Path, List[Path]]) -> Tuple[str, 
     try:
         pkg_path = get_package_path(package_name, site_paths)
         if not pkg_path:
-            return (package_name, False, f"Package directory not found")
+            return package_name, False, f"Package directory not found"
         if is_pure_python(package_name, pkg_path.parent):
-            return (package_name, False, "Pure Python package - skipped")
+            return package_name, False, "Pure Python package - skipped"
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
             dest_path = temp_path / package_name
@@ -118,10 +118,20 @@ def repack_package(args_tuple: Tuple[str, str, Path, List[Path]]) -> Tuple[str, 
                     break
             else:
                 metadata_file = metadata_dir / "METADATA"
-                metadata_file.write_text(f"\nMetadata-Version: 2.1\nName: {package_name}\nVersion: {version}\n".strip())
+                metadata_file.write_text(
+                    f"""
+Metadata-Version: 2.1
+Name: {package_name}
+Version: {version}
+""".strip()
+                )
                 wheel_file = metadata_dir / "WHEEL"
                 wheel_file.write_text(
-                    "\nWheel-Version: 1.0\nGenerator: repack-script\nRoot-Is-Purelib: false\n".strip()
+                    """
+Wheel-Version: 1.0
+Generator: repack-script
+Root-Is-Purelib: false
+""".strip()
                 )
             wheel_cmd = [
                 sys.executable,
@@ -158,9 +168,9 @@ def repack_package(args_tuple: Tuple[str, str, Path, List[Path]]) -> Tuple[str, 
                 else:
                     return (package_name, False, f"Wheel command failed: {result.stderr[:100]}")
             except Exception as e:
-                return (package_name, False, f"Error running wheel: {str(e)}")
+                return package_name, False, f"Error running wheel: {str(e)}"
     except Exception as e:
-        return (package_name, False, f"Error: {str(e)}")
+        return package_name, False, f"Error: {str(e)}"
 
 
 def main():

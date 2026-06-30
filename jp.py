@@ -5,7 +5,6 @@ import json
 import sys
 from pathlib import Path
 from pprint import pformat
-
 import jmespath
 from jmespath import exceptions
 
@@ -18,11 +17,7 @@ def main() -> int | None:
         "--filename",
         help="The filename containing the input data.  If a filename is not given then data is read from stdin.",
     )
-    parser.add_argument(
-        "--ast",
-        action="store_true",
-        help="Pretty print the AST, do not search the data.",
-    )
+    parser.add_argument("--ast", action="store_true", help="Pretty print the AST, do not search the data.")
     args = parser.parse_args()
     expression = args.expression
     if args.ast:
