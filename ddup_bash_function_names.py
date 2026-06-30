@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
+
+
 """
 Check for duplicate function names in bash functions file.
 """
@@ -10,107 +12,80 @@ from pathlib import Path
 
 
 def extract_function_names(filepath: Path):
-    """Extract all function names and their line numbers from a bash functions file."""
-    functions = []  # List of (name, line_number, line_content)
-
-    # Pattern to match function definitions:
-    # - name() { ... }
-    # - function name { ... }
-    # - function name() { ... }
+    functions = []
     patterns = [
-        re.compile(r"^\s*([a-zA-Z_][a-zA-Z0-9_-]*)\s*\(\s*\)\s*\{"),  # name() {
-        re.compile(r"^\s*function\s+([a-zA-Z_][a-zA-Z0-9_-]*)\s*\{"),  # function name {
-        re.compile(r"^\s*function\s+([a-zA-Z_][a-zA-Z0-9_-]*)\s*\(\s*\)\s*\{"),  # function name() {
+        re.compile("^\\s*([a-zA-Z_][a-zA-Z0-9_-]*)\\s*\\(\\s*\\)\\s*\\{"),
+        re.compile("^\\s*function\\s+([a-zA-Z_][a-zA-Z0-9_-]*)\\s*\\{"),
+        re.compile("^\\s*function\\s+([a-zA-Z_][a-zA-Z0-9_-]*)\\s*\\(\\s*\\)\\s*\\{"),
     ]
-
     try:
         with open(filepath, "r", encoding="utf-8") as f:
             lines = f.readlines()
-
         for line_num, line in enumerate(lines, 1):
             line_stripped = line.strip()
             if not line_stripped or line_stripped.startswith("#"):
-                continue  # Skip empty lines and comments
-
+                continue
             for pattern in patterns:
                 match = pattern.search(line)
                 if match:
                     func_name = match.group(1)
                     functions.append((func_name, line_num, line.rstrip()))
-                    break  # Found match, stop checking other patterns
-
+                    break
     except FileNotFoundError:
         print(f"Error: Functions file not found: {filepath}")
         sys.exit(1)
     except Exception as e:
         print(f"Error reading file: {e}")
         sys.exit(1)
-
     return functions
 
 
 def find_duplicates(functions):
-    """Find duplicate function names from the list."""
-    name_counts = Counter(name for name, _, _ in functions)
+    name_counts = Counter((name for name, _, _ in functions))
     duplicates = {name: count for name, count in name_counts.items() if count > 1}
     return duplicates
 
 
 def display_results(functions, duplicates, filepath: Path) -> bool:
-    """Display duplicate information in a readable format."""
     if not duplicates:
         print("✓ No duplicate function names found!")
-        print(f"✓ Total unique functions: {len(set(name for name, _, _ in functions))}")
+        print(f"✓ Total unique functions: {len(set((name for name, _, _ in functions)))}")
         return True
-
     print(f"✗ Found {len(duplicates)} function name(s) defined multiple times:")
     print("=" * 60)
-
     for dup_name, count in sorted(duplicates.items()):
         print(f"\n📌 Duplicate function: '{dup_name}' (defined {count} times)")
         print("-" * 40)
-
-        # Find all occurrences of this duplicate
         occurrences = [(line_num, line) for name, line_num, line in functions if name == dup_name]
-
         for idx, (line_num, line) in enumerate(occurrences, 1):
             print(f"  {idx}. Line {line_num}: {line}")
-
     print("\n" + "=" * 60)
     return False
 
 
 def show_statistics(functions, duplicates) -> None:
-    """Show statistics about the functions file."""
     total_definitions = len(functions)
-    unique_functions = len(set(name for name, _, _ in functions))
+    unique_functions = len(set((name for name, _, _ in functions)))
     duplicate_count = len(duplicates)
     duplicate_definitions = sum(duplicates.values()) - len(duplicates)
-
     print("\n📊 Statistics:")
     print(f"   Total function definitions: {total_definitions}")
     print(f"   Unique function names: {unique_functions}")
     print(f"   Functions with duplicates: {duplicate_count}")
     print(f"   Extra duplicate definitions: {duplicate_definitions}")
-
     if unique_functions > 0:
-        duplication_rate = (duplicate_definitions / unique_functions) * 100
+        duplication_rate = duplicate_definitions / unique_functions * 100
         print(f"   Duplication rate: {duplication_rate:.1f}%")
 
 
 def interactive_fix(duplicates, functions, filepath: Path) -> None:
-    """Interactively help the user fix duplicates."""
     if not duplicates:
         return
-
     print("\n🔧 Would you like to fix duplicates interactively?")
     response = input("   Review and remove duplicates? [y/N]: ").strip().lower()
-
     if response != "y":
         print("   Skipping interactive fix.")
         return
-
-    # Create backup
     backup_path = f"{filepath}.backup"
     try:
         from shutil import copy2
@@ -119,23 +94,18 @@ def interactive_fix(duplicates, functions, filepath: Path) -> None:
         print(f"   ✓ Backup created: {backup_path}")
     except Exception as e:
         print(f"   ⚠ Warning: Could not create backup: {e}")
-
     print("\n   Instructions for fixing duplicates:")
     print("   1. Review the duplicate functions listed above")
     print("   2. Decide which definition(s) to keep")
     print("   3. Remove or comment out the duplicate definitions")
     print(f"   4. Edit the file: {filepath}")
     print("\n   Tip: Use 'keep' to mark a definition to keep, 'remove' to mark for deletion")
-
-    # Collect user decisions
     decisions = {}
     for dup_name in duplicates:
         print(f"\n   --- Function: {dup_name} ---")
         occurrences = [(line_num, line) for name, line_num, line in functions if name == dup_name]
-
         for idx, (line_num, line) in enumerate(occurrences, 1):
             print(f"   {idx}. Line {line_num}: {line[:80]}")
-
         while True:
             choice = input(f"   Which one to keep? (1-{len(occurrences)} or 'skip'): ").strip()
             if choice.lower() == "skip":
@@ -144,7 +114,7 @@ def interactive_fix(duplicates, functions, filepath: Path) -> None:
             try:
                 keep_idx = int(choice) - 1
                 if 0 <= keep_idx < len(occurrences):
-                    decisions[dup_name] = occurrences[keep_idx][0]  # Store line number to keep
+                    decisions[dup_name] = occurrences[keep_idx][0]
                     to_remove = [occ[0] for i, occ in enumerate(occurrences) if i != keep_idx]
                     print(f"   ✓ Will keep line {occurrences[keep_idx][0]}, remove lines: {to_remove}")
                     break
@@ -152,7 +122,6 @@ def interactive_fix(duplicates, functions, filepath: Path) -> None:
                     print(f"   Invalid choice. Enter 1-{len(occurrences)} or 'skip'")
             except ValueError:
                 print(f"   Invalid input. Enter 1-{len(occurrences)} or 'skip'")
-
     print("\n   ✓ Decisions recorded. Edit the file manually to:")
     for dup_name, keep_line in decisions.items():
         if keep_line:
@@ -162,32 +131,19 @@ def interactive_fix(duplicates, functions, filepath: Path) -> None:
 
 
 def main():
-    # Get the functions file path
     functions_file = Path.home() / ".config/bash.d/bash_functions"
-
-    # Allow command line argument for custom path
     if len(sys.argv) > 1:
         functions_file = Path(sys.argv[1])
-
     print(f"🔍 Checking for duplicate function names in: {functions_file}")
     print("=" * 60)
-
-    # Parse functions
     functions = extract_function_names(functions_file)
-
     if not functions:
         print("\n⚠ No function definitions found in file.")
         print(f"   Make sure the file contains functions like:\n   function_name() {{\n       commands\n   }}")
         sys.exit(0)
-
-    # Find duplicates
     duplicates = find_duplicates(functions)
-
-    # Display results
     is_clean = display_results(functions, duplicates, functions_file)
     show_statistics(functions, duplicates)
-
-    # Interactive fixing if duplicates exist
     if not is_clean:
         print("\n⚠ Duplicate function names can cause unexpected behavior!")
         print("   The last defined function will override previous ones.")

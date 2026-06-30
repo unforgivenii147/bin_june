@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-from __future__ import annotations
 
+from __future__ import annotations
 import sys
 import sysconfig
 from importlib import metadata
@@ -9,9 +9,6 @@ from pathlib import Path
 
 
 def is_in_system_site_packages(dist: metadata.Distribution) -> bool:
-    """
-    Return True if the distribution appears to be installed in a system site-packages directory.
-    """
     try:
         files = list(dist.files or [])
         if not files:
@@ -34,9 +31,6 @@ def is_in_system_site_packages(dist: metadata.Distribution) -> bool:
 
 
 def dist_has_c_extensions(dist: metadata.Distribution) -> bool:
-    """
-    Detect whether a distribution contains compiled extension modules (.so files).
-    """
     try:
         for f in dist.files or []:
             name = str(f).lower()

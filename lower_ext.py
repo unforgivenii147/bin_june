@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 """
 Find files with uppercase extensions in current directory recursively.
 Optionally convert them to lowercase using -a or --autofix flag.
@@ -11,16 +12,6 @@ from pathlib import Path
 
 
 def find_uppercase_extensions(directory: Path, autofix: bool = False):
-    """
-    Find files with uppercase extensions in directory recursively.
-
-    Args:
-        directory: Path object for the directory to search
-        autofix: If True, convert uppercase extensions to lowercase
-
-    Returns:
-        List of files with uppercase extensions
-    """
     uppercase_files = []
     for file_path in directory.rglob("*"):
         if not file_path.is_file():
@@ -44,12 +35,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Find files with uppercase extensions in current directory recursively"
     )
-    parser.add_argument(
-        "-a",
-        "--autofix",
-        action="store_true",
-        help="Convert uppercase extensions to lowercase",
-    )
+    parser.add_argument("-a", "--autofix", action="store_true", help="Convert uppercase extensions to lowercase")
     args = parser.parse_args()
     search_dir = Path.cwd()
     print(f"Searching for files with uppercase extensions in: {search_dir}")

@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+
 """
 Report the overall unpacked size of .whl files in the current directory.
 Uses pathlib for path handling and multiprocessing for parallel processing.
@@ -14,7 +16,6 @@ import json
 
 
 def format_size(size_bytes: int) -> str:
-    """Format bytes to human-readable format."""
     for unit in ["B", "KB", "MB", "GB", "TB"]:
         if size_bytes < 1024.0:
             return f"{size_bytes:.2f} {unit}"
@@ -23,35 +24,24 @@ def format_size(size_bytes: int) -> str:
 
 
 def get_wheel_unpacked_size(wheel_path: Path) -> Tuple[Path, int, Optional[str]]:
-    """
-    Calculate the unpacked size of a .whl file.
-    Returns: (wheel_path, total_size, error_message)
-    """
     try:
         if not wheel_path.exists():
-            return wheel_path, 0, f"File not found: {wheel_path}"
-
+            return (wheel_path, 0, f"File not found: {wheel_path}")
         if not wheel_path.is_file():
-            return wheel_path, 0, f"Not a file: {wheel_path}"
-
+            return (wheel_path, 0, f"Not a file: {wheel_path}")
         total_size = 0
-
         try:
             with ZipFile(wheel_path, "r") as whl:
                 for info in whl.filelist:
-                    # Use uncompressed size
                     total_size += info.file_size
         except Exception as e:
-            return wheel_path, 0, f"Failed to read wheel: {str(e)}"
-
-        return wheel_path, total_size, None
-
+            return (wheel_path, 0, f"Failed to read wheel: {str(e)}")
+        return (wheel_path, total_size, None)
     except Exception as e:
-        return wheel_path, 0, f"Unexpected error: {str(e)}"
+        return (wheel_path, 0, f"Unexpected error: {str(e)}")
 
 
 def find_wheel_files(directory: Path, recursive: bool = False) -> list[Path]:
-    """Find all .whl files in directory."""
     if recursive:
         return list(directory.rglob("*.whl"))
     else:
@@ -72,55 +62,36 @@ def main():
     parser.add_argument(
         "-s", "--sort", choices=["name", "size"], default="name", help="Sort output by name or size (default: name)"
     )
-
     args = parser.parse_args()
-
-    # Validate directory
     if not args.directory.exists():
         print(f"❌ Error: Directory not found: {args.directory}", file=sys.stderr)
         sys.exit(1)
-
     if not args.directory.is_dir():
         print(f"❌ Error: Not a directory: {args.directory}", file=sys.stderr)
         sys.exit(1)
-
-    # Find wheel files
     print(f"🔍 Scanning directory: {args.directory}")
     if args.recursive:
         print("   (recursive mode)")
-
     wheels = find_wheel_files(args.directory, args.recursive)
-
     if not wheels:
         print("⚠️  No .whl files found!")
         sys.exit(0)
-
     print(f"✓ Found {len(wheels)} .whl file(s)\n")
-
-    # Process wheels in parallel
     print(f"⚙️  Processing wheels ({args.jobs} workers)...\n")
-
     results = []
     errors = []
-
     with Pool(args.jobs) as pool:
         for wheel_path, size, error in pool.imap_unordered(get_wheel_unpacked_size, wheels):
             if error:
                 errors.append((wheel_path, error))
             else:
                 results.append((wheel_path, size))
-
-    # Sort results
     if args.sort == "size":
         results.sort(key=lambda x: x[1], reverse=True)
     else:
         results.sort(key=lambda x: x[0].name)
-
-    # Calculate totals
-    total_unpacked_size = sum(size for _, size in results)
-
+    total_unpacked_size = sum((size for _, size in results))
     if args.json:
-        # JSON output
         output = {
             "directory": str(args.directory),
             "recursive": args.recursive,
@@ -133,7 +104,6 @@ def main():
             },
             "wheels": [],
         }
-
         for wheel_path, size in results:
             output["wheels"].append({
                 "name": wheel_path.name,
@@ -141,45 +111,35 @@ def main():
                 "size_bytes": size,
                 "size_formatted": format_size(size),
             })
-
         if errors:
             output["errors"] = []
             for wheel_path, error in errors:
                 output["errors"].append({"path": str(wheel_path), "error": error})
-
         print(json.dumps(output, indent=2))
-
     else:
-        # Text output
         print("=" * 80)
         print(f"{'Wheel File':<50} {'Unpacked Size':>20}")
         print("=" * 80)
-
         for wheel_path, size in results:
             name = wheel_path.name
             if len(name) > 45:
                 name = "..." + name[-42:]
             print(f"{name:<50} {format_size(size):>20}")
-
         print("=" * 80)
         print(f"{'TOTAL':<50} {format_size(total_unpacked_size):>20}")
         print("=" * 80)
-
         if args.verbose:
             print(f"\n📊 Summary:")
             print(f"   Total wheels found:      {len(wheels)}")
             print(f"   Successfully processed:  {len(results)}")
             print(f"   Errors:                  {len(errors)}")
             print(
-                f"   Average size per wheel:  {format_size(total_unpacked_size // len(results)) if results else 'N/A'}"
+                f"   Average size per wheel:  {(format_size(total_unpacked_size // len(results)) if results else 'N/A')}"
             )
-
-        # Show errors if any
         if errors:
             print(f"\n⚠️  Errors ({len(errors)}):")
             for wheel_path, error in errors:
                 print(f"   • {wheel_path.name}: {error}")
-
     print()
 
 

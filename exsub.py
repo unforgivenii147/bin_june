@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 import argparse
 import multiprocessing
 import os
@@ -46,21 +47,16 @@ def extract_frames(
     frames: list[tuple[float, np.ndarray]] = []
     prev_region: np.ndarray | None = None
     frame_count = 0
-
-    # Seek to start_time if specified
     if start_time is not None and start_time > 0:
         cap.set(cv2.CAP_PROP_POS_FRAMES, int(start_time * native_fps))
         frame_count = int(start_time * native_fps)
-
     while True:
         ret, frame = cap.read()
         if not ret:
             break
         timestamp = frame_count / native_fps
-
         if end_time is not None and timestamp > end_time:
             break
-
         if frame_count % frame_interval == 0:
             h = frame.shape[0]
             region = frame[int(h * subtitle_top_ratio) :].copy()
@@ -153,16 +149,12 @@ def extract_burned_subs_ocr(
 ) -> None:
     if workers is None:
         workers = max(1, multiprocessing.cpu_count() - 1)
-
-    # Handle resume with start_time override
     if resume and os.path.isfile(output_srt_path):
         existing_subs = parse_srt(output_srt_path)
         if existing_subs:
-            # If start_time is not specified, use the last existing subtitle's end time
             if start_time is None:
                 start_time = max((sub["end"] for sub in existing_subs))
             print(f"Resuming from {format_time(start_time)}")
-
     time_range_msg = ""
     if start_time is not None and end_time is not None:
         time_range_msg = f" from {format_time(start_time)} to {format_time(end_time)}"
@@ -170,24 +162,18 @@ def extract_burned_subs_ocr(
         time_range_msg = f" from {format_time(start_time)} to end"
     elif end_time is not None:
         time_range_msg = f" from start to {format_time(end_time)}"
-
     print(f"[1/3] Extracting frames ({sample_fps} fps sample{time_range_msg})…")
     frames = extract_frames(video_path, sample_fps=sample_fps, start_time=start_time, end_time=end_time)
     print(f"      {len(frames)} unique frames queued for OCR")
-
     ocr_config = f"--oem 3 --psm 6 -l {lang}"
     worker_fn = partial(_ocr_worker, ocr_config=ocr_config)
     print(f"[2/3] Running OCR with {workers} worker(s)…")
     with multiprocessing.Pool(processes=workers) as pool:
         results: list[tuple[float, str]] = pool.map(worker_fn, frames)
-
     new_subs = [{"start": t, "end": t + 1.0 / sample_fps, "text": txt} for t, txt in results if txt]
-
-    # Handle resume with existing subs
     if resume and os.path.isfile(output_srt_path):
         existing_subs = parse_srt(output_srt_path)
         if existing_subs:
-            # Keep only subtitles that don't overlap with the new extraction range
             if start_time is not None:
                 kept = [s for s in existing_subs if s["end"] <= start_time]
                 all_subs = kept + new_subs
@@ -197,10 +183,8 @@ def extract_burned_subs_ocr(
             all_subs = new_subs
     else:
         all_subs = new_subs
-
     all_subs.sort(key=lambda s: s["start"])
     subtitles = _merge_subtitles(all_subs)
-
     print(f"[3/3] Writing {len(subtitles)} subtitle(s) → {output_srt_path}")
     with open(output_srt_path, "w", encoding="utf-8") as f:
         for i, sub in enumerate(subtitles, 1):
@@ -224,16 +208,16 @@ if __name__ == "__main__":
     parser.add_argument("--sample_fps", type=float, default=2.0, help="Frames per second to sample (default: 2.0)")
     parser.add_argument("--workers", type=int, default=4, help="Number of OCR worker processes (default: 4)")
     args = parser.parse_args()
-
-    # Handle backward compatibility for old -t flag
-    # If output looks like a time and there's no explicit start/end, treat it as end time
-    if args.output and re.match("\\d{1,2}:\\d{2}:\\d{2}", args.output) and not args.start_time and not args.end_time:
+    if (
+        args.output
+        and re.match("\\d{1,2}:\\d{2}:\\d{2}", args.output)
+        and (not args.start_time)
+        and (not args.end_time)
+    ):
         args.end_time = args.output
         args.output = "extracted_subs.srt"
-
     start_time = parse_time(args.start_time) if args.start_time else None
     end_time = parse_time(args.end_time) if args.end_time else None
-
     extract_burned_subs_ocr(
         video_path=args.video,
         output_srt_path=args.output,

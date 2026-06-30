@@ -1,4 +1,3 @@
-# !/usr/bin/env python3
 """
 Skip blank lines option with dry run and auto-fix modes.
 """
@@ -6,35 +5,28 @@ Skip blank lines option with dry run and auto-fix modes.
 import argparse
 import sys
 from pathlib import Path
-
 from dh import get_pyfiles
 
 
 def is_blank_line(line: str):
-    """Check if a line is blank or contains only whitespace."""
     return line.strip() == ""
 
 
 def find_duplicates(file_path: Path, skip_blanks: bool = True):
-    """Find sequentially repeated lines (optionally skipping blanks)."""
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             lines = f.readlines()
-
         duplicates = []
         i = 0
         while i < len(lines) - 1:
             current = lines[i]
             next_line = lines[i + 1]
-
-            # Skip blank lines if requested
             if skip_blanks and (is_blank_line(current) or is_blank_line(next_line)):
                 i += 1
                 continue
-
             if current == next_line:
                 duplicates.append((i + 1, current.rstrip("\n")))
-                i += 1  # Skip next line to avoid triple duplicates counting twice
+                i += 1
             i += 1
         return duplicates
     except Exception as e:
@@ -43,7 +35,6 @@ def find_duplicates(file_path: Path, skip_blanks: bool = True):
 
 
 def remove_duplicates(lines: list[str], duplicates):
-    """Remove duplicate lines."""
     lines_copy = lines.copy()
     removed = 0
     for line_num, _ in reversed(duplicates):
@@ -54,29 +45,17 @@ def remove_duplicates(lines: list[str], duplicates):
     return lines_copy
 
 
-def process_file(
-    file_path,
-    duplicates,
-    dry_run: bool = False,
-    auto_yes=False,
-    skip_blanks: bool = True,
-):
-    """Process a single file."""
+def process_file(file_path, duplicates, dry_run: bool = False, auto_yes=False, skip_blanks: bool = True):
     if not duplicates:
-        return False, auto_yes
-
-    print(f"\n{'[DRY RUN] ' if dry_run else ''}📄 {file_path.name}")
-
+        return (False, auto_yes)
+    print(f"\n{('[DRY RUN] ' if dry_run else '')}📄 {file_path.name}")
     for line_num, content in duplicates:
         print(f"  Line {line_num}: {content}")
         print(f"  Line {line_num + 1}: {content}")
-
     if dry_run:
-        return False, auto_yes
-
+        return (False, auto_yes)
     if not auto_yes:
         response = input(f"\n  Remove duplicates from {file_path.name}? (y/n/a/q): ").strip().lower()
-
         if response == "q":
             sys.exit(0)
         elif response == "a":
@@ -88,27 +67,19 @@ def process_file(
             should_fix = False
     else:
         should_fix = True
-
     if should_fix:
         with open(file_path, "r", encoding="utf-8") as f:
             lines = f.readlines()
-
         new_lines = remove_duplicates(lines, duplicates)
-
-        # Create backup
         backup = file_path.with_suffix(file_path.suffix + ".bak")
         with open(backup, "w", encoding="utf-8") as f:
             f.writelines(lines)
-
-        # Write changes
         with open(file_path, "w", encoding="utf-8") as f:
             f.writelines(new_lines)
-
         print(f"  ✅ Fixed (backup: {backup.name})")
-        return True, auto_yes
-
+        return (True, auto_yes)
     print(f"  ⏭️  Skipped")
-    return False, auto_yes
+    return (False, auto_yes)
 
 
 def main() -> None:
@@ -116,57 +87,38 @@ def main() -> None:
         description="Find and remove sequential duplicate lines in Python files",
         epilog="Blank lines are ignored by default.",
     )
-    parser.add_argument(
-        "--dry-run",
-        "-n",
-        action="store_true",
-        help="Preview changes without modifying files",
-    )
-    parser.add_argument(
-        "--yes",
-        "-y",
-        action="store_true",
-        help="Automatically answer yes to all prompts",
-    )
+    parser.add_argument("--dry-run", "-n", action="store_true", help="Preview changes without modifying files")
+    parser.add_argument("--yes", "-y", action="store_true", help="Automatically answer yes to all prompts")
     parser.add_argument(
         "--include-blanks",
         "-b",
         action="store_true",
         help="Include blank lines when checking for duplicates (default: skip blanks)",
     )
-
     args = parser.parse_args()
-
     skip_blanks = not args.include_blanks
-
     print("=" * 70)
     if args.dry_run:
         print("🔍 DRY RUN MODE - No files will be modified")
-    print(f"📝 {'Ignoring' if skip_blanks else 'Including'} blank lines in duplicate detection")
+    print(f"📝 {('Ignoring' if skip_blanks else 'Including')} blank lines in duplicate detection")
     print("=" * 70)
     cwd = Path.cwd()
     py_files = get_pyfiles(cwd)
     files_with_dups = {}
-
     for py_file in py_files:
         dups = find_duplicates(py_file, skip_blanks)
         if dups:
             files_with_dups[py_file] = dups
-
     if not files_with_dups:
         print("\n✓ No non-blank sequential duplicates found!")
         return
-
     print(f"\nFound {len(files_with_dups)} file(s) with sequential duplicates\n")
-
     auto_yes = args.yes
     fixed_count = 0
-
     for file_path, dups in files_with_dups.items():
         fixed, auto_yes = process_file(file_path, dups, args.dry_run, auto_yes, skip_blanks)
         if fixed:
             fixed_count += 1
-
     print("\n" + "=" * 70)
     if args.dry_run:
         print("🔍 Dry run complete. Run without --dry-run to apply changes.")

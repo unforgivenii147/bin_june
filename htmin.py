@@ -1,8 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 import sys
 from pathlib import Path
-
 import htmlmin
 from dh import get_files, mpf3
 
@@ -11,10 +11,7 @@ def process_file(path: str | Path) -> None:
     path = Path(path)
     try:
         orig = path.read_text(encoding="utf-8")
-        #        print(len(orig))
-        #        code = orig
         code = htmlmin.minify(orig, remove_comments=True)
-        #        print(len(code))
         if len(code) != len(orig):
             path.write_text(code, encoding="utf-8")
             print(f"[OK] {path.name}")

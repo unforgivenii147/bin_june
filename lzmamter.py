@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
+
+
 """
 lzma_compress.py — Recursive LZMA multithreaded compression/decompression.
 
@@ -26,22 +28,17 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
 try:
-    import lzmamt  # pip install lzmamt
+    import lzmamt
 
     HAS_LZMAMT = True
 except ImportError:
     HAS_LZMAMT = False
-
-# ── constants ────────────────────────────────────────────────────────────────
 LARGE_FILE_THRESHOLD = 5 * 1024 * 1024
-LEVEL_DEFAULT = 9  # LZMA preset 9 (extreme)
-LEVEL_LARGE = 6  # balanced for large files / tar
+LEVEL_DEFAULT = 9
+LEVEL_LARGE = 6
 LZMA_EXT = ".xz"
 DEFAULT_THREADS = 4
 WORKERS = max(1, multiprocessing.cpu_count())
-
-
-# ── helpers ──────────────────────────────────────────────────────────────────
 
 
 def choose_level(path: Path) -> int:
@@ -71,55 +68,38 @@ def status_line(ok: bool, name: str, elapsed_ms: float, before: int, after: int)
 
 
 def _compress_bytes_lzmamt(data: bytes, level: int, threads: int) -> bytes:
-    """Use lzmamt for real parallel LZMA2 encoding."""
     return lzmamt.compress(data, preset=level, threads=threads)
 
 
 def _compress_bytes_stdlib(data: bytes, level: int) -> bytes:
-    """Fallback: stdlib lzma, FORMAT_XZ, preset + EXTREME flag."""
     preset = level | lzma.PRESET_EXTREME if level == 9 else level
     return lzma.compress(data, format=lzma.FORMAT_XZ, preset=preset)
 
 
-# ── single-file workers ───────────────────────────────────────────────────────
-
-
 def compress_file(
-    src: Path,
-    dry_run: bool,
-    verbose: bool,
-    level: int | None = None,
-    threads: int = DEFAULT_THREADS,
+    src: Path, dry_run: bool, verbose: bool, level: int | None = None, threads: int = DEFAULT_THREADS
 ) -> dict:
     result = {"src": src, "ok": False, "line": "", "msg": ""}
-
     dst = src.with_suffix(src.suffix + LZMA_EXT)
     if dst.exists():
         result["line"] = f"[–] {src.name} (skipped — {dst.name} exists)"
         return result
-
     effective_level = level if level is not None else choose_level(src)
-
     if dry_run:
         backend = "lzmamt" if HAS_LZMAMT else "stdlib lzma"
         result["ok"] = True
         result["line"] = f"[dry-run] {src.name} → {dst.name} (level {effective_level}, threads {threads}, {backend})"
         return result
-
     t0 = time.perf_counter()
     try:
         data = src.read_bytes()
-
         if HAS_LZMAMT:
             compressed = _compress_bytes_lzmamt(data, effective_level, threads)
         else:
-            # stdlib lzma is single-threaded; we note it in verbose output
             compressed = _compress_bytes_stdlib(data, effective_level)
-
         dst.write_bytes(compressed)
         elapsed_ms = (time.perf_counter() - t0) * 1000
-        before, after = len(data), len(compressed)
-
+        before, after = (len(data), len(compressed))
         src.unlink()
         result["ok"] = True
         result["line"] = status_line(True, src.name, elapsed_ms, before, after)
@@ -130,37 +110,29 @@ def compress_file(
         elapsed_ms = (time.perf_counter() - t0) * 1000
         result["line"] = status_line(False, src.name, elapsed_ms, 0, 0)
         result["msg"] = f"  ERROR: {exc}"
-
     return result
 
 
 def decompress_file(src: Path, dry_run: bool, verbose: bool, threads: int = DEFAULT_THREADS) -> dict:
     result = {"src": src, "ok": False, "line": "", "msg": ""}
-
     if src.suffix != LZMA_EXT:
         result["line"] = f"[–] {src.name} (skipped — not a .xz file)"
         return result
-
     dst = src.with_suffix("")
     if dst.exists():
         result["line"] = f"[–] {src.name} (skipped — {dst.name} exists)"
         return result
-
     if dry_run:
         result["ok"] = True
         result["line"] = f"[dry-run] {src.name} → {dst.name}"
         return result
-
     t0 = time.perf_counter()
     try:
         data = src.read_bytes()
-        # lzma decompression is always single-threaded in liblzma
         decompressed = lzma.decompress(data, format=lzma.FORMAT_XZ)
-
         dst.write_bytes(decompressed)
         elapsed_ms = (time.perf_counter() - t0) * 1000
-        before, after = len(data), len(decompressed)
-
+        before, after = (len(data), len(decompressed))
         src.unlink()
         result["ok"] = True
         result["line"] = status_line(True, src.name, elapsed_ms, before, after)
@@ -170,11 +142,7 @@ def decompress_file(src: Path, dry_run: bool, verbose: bool, threads: int = DEFA
         elapsed_ms = (time.perf_counter() - t0) * 1000
         result["line"] = status_line(False, src.name, elapsed_ms, 0, 0)
         result["msg"] = f"  ERROR: {exc}"
-
     return result
-
-
-# ── tar-subdirs helper ───────────────────────────────────────────────────────
 
 
 def tar_subdir(subdir: Path, dry_run: bool, verbose: bool) -> Path | None:
@@ -207,9 +175,6 @@ def remove_subdir(subdir: Path, dry_run: bool, verbose: bool) -> None:
         print(f"  WARNING — could not remove {subdir}: {exc}", file=sys.stderr)
 
 
-# ── parallel dispatcher ───────────────────────────────────────────────────────
-
-
 def run_parallel(tasks: list, worker_fn, extra_kwargs: dict) -> tuple[int, int]:
     ok = err = 0
     with ProcessPoolExecutor(max_workers=WORKERS) as pool:
@@ -223,19 +188,14 @@ def run_parallel(tasks: list, worker_fn, extra_kwargs: dict) -> tuple[int, int]:
                 ok += 1
             else:
                 err += 1
-    return ok, err
-
-
-# ── main operations ───────────────────────────────────────────────────────────
+    return (ok, err)
 
 
 def do_compress(root: Path, tar_subdirs: bool, dry_run: bool, verbose: bool, threads: int) -> None:
     start = time.perf_counter()
-
     if not HAS_LZMAMT and verbose:
         print("⚠ lzmamt not found — falling back to stdlib lzma (single-threaded per file).")
         print("  Install with: pip install lzmamt\n")
-
     if tar_subdirs:
         subdirs = [p for p in root.iterdir() if p.is_dir()]
         if verbose:
@@ -245,7 +205,6 @@ def do_compress(root: Path, tar_subdirs: bool, dry_run: bool, verbose: bool, thr
             tp = tar_subdir(sd, dry_run, verbose)
             if tp:
                 tar_paths.append((sd, tp))
-
         tar_files = [tp for _, tp in tar_paths]
         if tar_files:
             if verbose:
@@ -253,27 +212,17 @@ def do_compress(root: Path, tar_subdirs: bool, dry_run: bool, verbose: bool, thr
             run_parallel(
                 tar_files,
                 compress_file,
-                {
-                    "dry_run": dry_run,
-                    "verbose": verbose,
-                    "level": LEVEL_LARGE,
-                    "threads": threads,
-                },
+                {"dry_run": dry_run, "verbose": verbose, "level": LEVEL_LARGE, "threads": threads},
             )
-            compressed = {tp for tp in tar_files if (tp.with_suffix(tp.suffix + LZMA_EXT)).exists() or dry_run}
+            compressed = {tp for tp in tar_files if tp.with_suffix(tp.suffix + LZMA_EXT).exists() or dry_run}
             for sd, tp in tar_paths:
                 if tp in compressed:
                     remove_subdir(sd, dry_run, verbose)
-
         loose = [p for p in root.iterdir() if p.is_file() and p.suffix != LZMA_EXT]
         if loose:
             if verbose:
                 print(f"Compressing {len(loose)} loose file(s) …")
-            run_parallel(
-                loose,
-                compress_file,
-                {"dry_run": dry_run, "verbose": verbose, "threads": threads},
-            )
+            run_parallel(loose, compress_file, {"dry_run": dry_run, "verbose": verbose, "threads": threads})
     else:
         files = [p for p in root.rglob("*") if p.is_file() and p.suffix != LZMA_EXT]
         if not files:
@@ -281,15 +230,10 @@ def do_compress(root: Path, tar_subdirs: bool, dry_run: bool, verbose: bool, thr
             return
         if verbose:
             print(f"Compressing {len(files)} file(s) with {WORKERS} processes × {threads} lzma threads each …")
-        ok, err = run_parallel(
-            files,
-            compress_file,
-            {"dry_run": dry_run, "verbose": verbose, "threads": threads},
-        )
+        ok, err = run_parallel(files, compress_file, {"dry_run": dry_run, "verbose": verbose, "threads": threads})
         elapsed = time.perf_counter() - start
         print(f"\nDone — {ok} compressed, {err} error(s) [{elapsed:.2f}s]")
         return
-
     elapsed = time.perf_counter() - start
     print(f"\nDone [{elapsed:.2f}s]")
 
@@ -302,37 +246,21 @@ def do_decompress(root: Path, dry_run: bool, verbose: bool, threads: int) -> Non
         return
     if verbose:
         print(f"Decompressing {len(files)} file(s) with {WORKERS} workers …")
-    ok, err = run_parallel(
-        files,
-        decompress_file,
-        {"dry_run": dry_run, "verbose": verbose, "threads": threads},
-    )
+    ok, err = run_parallel(files, decompress_file, {"dry_run": dry_run, "verbose": verbose, "threads": threads})
     elapsed = time.perf_counter() - start
     print(f"\nDone — {ok} decompressed, {err} error(s) [{elapsed:.2f}s]")
-
-
-# ── CLI ───────────────────────────────────────────────────────────────────────
 
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="lzma_compress",
-        description=(
-            "Recursive LZMA/XZ compression / decompression.\n"
-            "Uses lzmamt for real MT encoding if installed, "
-            "otherwise stdlib lzma (still parallelises across files)."
-        ),
+        description="Recursive LZMA/XZ compression / decompression.\nUses lzmamt for real MT encoding if installed, otherwise stdlib lzma (still parallelises across files).",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     mode = p.add_mutually_exclusive_group()
     mode.add_argument("-c", "--compress", action="store_true")
     mode.add_argument("-d", "--decompress", action="store_true")
-    p.add_argument(
-        "-t",
-        "--tar-subdirs-first",
-        action="store_true",
-        help="Tar subdirs before compressing.",
-    )
+    p.add_argument("-t", "--tar-subdirs-first", action="store_true", help="Tar subdirs before compressing.")
     p.add_argument(
         "--threads",
         type=int,
@@ -351,19 +279,16 @@ def main() -> None:
     root = Path(args.directory).resolve()
     if not root.is_dir():
         parser.error(f"Not a directory: {root}")
-
-    compress = args.compress or (not args.decompress)
-
+    compress = args.compress or not args.decompress
     if args.dry_run:
         print("[dry-run mode — no files will be modified]")
     if args.verbose or args.dry_run:
         backend = "lzmamt" if HAS_LZMAMT else "stdlib lzma (single-thread fallback)"
         print(f"Root    : {root}")
-        print(f"Mode    : {'compress' if compress else 'decompress'}")
+        print(f"Mode    : {('compress' if compress else 'decompress')}")
         print(f"Backend : {backend}")
         print(f"Threads : {args.threads} (lzma) × {WORKERS} processes")
         print()
-
     if compress:
         do_compress(root, args.tar_subdirs_first, args.dry_run, args.verbose, args.threads)
     else:

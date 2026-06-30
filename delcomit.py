@@ -1,18 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 import sys
 from datetime import datetime, timedelta
-
 from git import Repo
 
 
 def delete_commits_older_than_week(repo_path: str = ".", branch: str = "master") -> bool:
-    """
-    Fetch from remote, then delete local commits older than one week.
-    Args:
-        repo_path: Path to git repository
-        branch: Branch to clean (default: 'master')
-    """
     try:
         repo = Repo(repo_path)
         origin = repo.remotes.origin
@@ -70,13 +64,6 @@ def delete_commits_older_than_week(repo_path: str = ".", branch: str = "master")
 
 
 def delete_commits_interactive(repo_path: str = ".", branch: str = "master", days_old: int = 7) -> bool:
-    """
-    Interactive version with confirmation before deletion.
-    Args:
-        repo_path: Path to git repository
-        branch: Branch to clean
-        days_old: Delete commits older than this many days
-    """
     try:
         repo = Repo(repo_path)
         origin = repo.remotes.origin
@@ -135,10 +122,6 @@ def delete_commits_interactive(repo_path: str = ".", branch: str = "master", day
 
 
 def delete_commits_with_rebase(repo_path: str = ".", branch: str = "master", days_old: int = 7) -> bool | None:
-    """
-    Alternative method using interactive rebase to remove old commits.
-    More precise but more complex.
-    """
     try:
         repo = Repo(repo_path)
         origin = repo.remotes.origin

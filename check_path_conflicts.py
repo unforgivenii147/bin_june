@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
+
+
 """
 Check if bash aliases and functions conflict with existing scripts and binaries in PATH.
 """
@@ -11,69 +13,53 @@ from pathlib import Path
 
 
 def get_path_dirs() -> list[str]:
-    """Get all directories in PATH."""
     path_dirs = os.environ.get("PATH", "").split(os.pathsep)
-    # Filter out non-existent directories
     existing_dirs = [d for d in path_dirs if os.path.exists(d)]
     return existing_dirs
 
 
 def get_commands_from_path(path_dirs: list[str]):
-    """Get all executable commands from PATH directories."""
-    commands = {}  # command -> (full_path, dir)
+    commands = {}
     duplicate_commands = defaultdict(list)
-
     for dir_path in path_dirs:
         try:
             for item in os.listdir(dir_path):
                 item_path = os.path.join(dir_path, item)
-                # Check if it's a file and executable
                 if os.path.isfile(item_path) and os.access(item_path, os.X_OK):
                     commands[item] = (item_path, dir_path)
                     duplicate_commands[item].append(dir_path)
         except (PermissionError, OSError):
-            continue  # Skip directories we can't read
-
-    # Filter out duplicates (commands found in multiple PATH dirs)
+            continue
     conflicts = {cmd: paths for cmd, paths in duplicate_commands.items() if len(paths) > 1}
-
-    return commands, conflicts
+    return (commands, conflicts)
 
 
 def extract_aliases(aliases_file: Path):
-    """Extract alias names from bash aliases file."""
     aliases = {}
-    alias_pattern = re.compile(r"^\s*alias\s+([a-zA-Z_][a-zA-Z0-9_-]*)\s*=", re.MULTILINE)
-
+    alias_pattern = re.compile("^\\s*alias\\s+([a-zA-Z_][a-zA-Z0-9_-]*)\\s*=", re.MULTILINE)
     if not aliases_file.exists():
         return {}
-
     try:
         with open(aliases_file, "r", encoding="utf-8") as f:
             content = f.read()
-            # Handle line continuations
-            content = re.sub(r"\\\n", "", content)
+            content = re.sub("\\\\\\n", "", content)
             matches = alias_pattern.findall(content)
             for match in matches:
                 aliases[match] = True
     except Exception as e:
         print(f"Warning: Could not read aliases file: {e}")
-
     return aliases
 
 
 def extract_functions(functions_file: Path):
-    """Extract function names from bash functions file."""
     functions = {}
     patterns = [
-        re.compile(r"^\s*([a-zA-Z_][a-zA-Z0-9_-]*)\s*\(\s*\)\s*\{"),  # name() {
-        re.compile(r"^\s*function\s+([a-zA-Z_][a-zA-Z0-9_-]*)\s*\{"),  # function name {
-        re.compile(r"^\s*function\s+([a-zA-Z_][a-zA-Z0-9_-]*)\s*\(\s*\)\s*\{"),  # function name() {
+        re.compile("^\\s*([a-zA-Z_][a-zA-Z0-9_-]*)\\s*\\(\\s*\\)\\s*\\{"),
+        re.compile("^\\s*function\\s+([a-zA-Z_][a-zA-Z0-9_-]*)\\s*\\{"),
+        re.compile("^\\s*function\\s+([a-zA-Z_][a-zA-Z0-9_-]*)\\s*\\(\\s*\\)\\s*\\{"),
     ]
-
     if not functions_file.exists():
         return {}
-
     try:
         with open(functions_file, "r", encoding="utf-8") as f:
             for line in f:
@@ -87,12 +73,10 @@ def extract_functions(functions_file: Path):
                         break
     except Exception as e:
         print(f"Warning: Could not read functions file: {e}")
-
     return functions
 
 
 def check_conflicts(names, path_commands, name_type: str):
-    """Check for conflicts between names and PATH commands."""
     conflicts = {}
     for name in names:
         if name in path_commands:
@@ -101,19 +85,14 @@ def check_conflicts(names, path_commands, name_type: str):
 
 
 def display_results(alias_conflicts, func_conflicts, path_duplicates, path_dirs: list[str]) -> None:
-    """Display conflict results in a formatted way."""
     print("=" * 80)
     print("🔍 PATH CONFLICT ANALYSIS")
     print("=" * 80)
-
-    # Show PATH directories
     print(f"\n📁 PATH directories scanned ({len(path_dirs)}):")
     for i, dir_path in enumerate(path_dirs[:10], 1):
         print(f"   {i}. {dir_path}")
     if len(path_dirs) > 10:
         print(f"   ... and {len(path_dirs) - 10} more")
-
-    # Show duplicate commands in PATH
     if path_duplicates:
         print(f"\n⚠️  WARNING: Commands found in multiple PATH locations ({len(path_duplicates)}):")
         for cmd, paths in sorted(path_duplicates.items())[:10]:
@@ -124,9 +103,7 @@ def display_results(alias_conflicts, func_conflicts, path_duplicates, path_dirs:
             print(f"   ... and {len(path_duplicates) - 10} more")
     else:
         print("\n✓ No duplicate commands across PATH directories")
-
-    # Show alias conflicts
-    print(f"\n📋 ALIASES ({len(alias_conflicts) if isinstance(alias_conflicts, dict) else 0} total)")
+    print(f"\n📋 ALIASES ({(len(alias_conflicts) if isinstance(alias_conflicts, dict) else 0)} total)")
     if alias_conflicts:
         print(f"   ❌ Conflicts with PATH commands ({len(alias_conflicts)}):")
         for alias, (full_path, dir_path) in sorted(alias_conflicts.items()):
@@ -134,9 +111,7 @@ def display_results(alias_conflicts, func_conflicts, path_duplicates, path_dirs:
         print("\n   💡 Suggestion: Rename these aliases or remove the conflicting binaries")
     else:
         print("   ✓ No conflicts with PATH commands")
-
-    # Show function conflicts
-    print(f"\n🔧 FUNCTIONS ({len(func_conflicts) if isinstance(func_conflicts, dict) else 0} total)")
+    print(f"\n🔧 FUNCTIONS ({(len(func_conflicts) if isinstance(func_conflicts, dict) else 0)} total)")
     if func_conflicts:
         print(f"   ❌ Conflicts with PATH commands ({len(func_conflicts)}):")
         for func, (full_path, dir_path) in sorted(func_conflicts.items()):
@@ -144,84 +119,57 @@ def display_results(alias_conflicts, func_conflicts, path_duplicates, path_dirs:
         print("\n   💡 Suggestion: Rename these functions or use 'command' prefix")
     else:
         print("   ✓ No conflicts with PATH commands")
-
-    # Show summary
     total_conflicts = (len(alias_conflicts) if isinstance(alias_conflicts, dict) else 0) + (
         len(func_conflicts) if isinstance(func_conflicts, dict) else 0
     )
-
     print("\n" + "=" * 80)
     print(f"📊 SUMMARY: {total_conflicts} total conflict(s) found")
-
     if total_conflicts > 0:
         print("\n⚠️  Conflicts can cause unexpected behavior!")
         print("   Bash will use aliases/functions over PATH binaries")
         print("   To use the binary instead, prefix with 'command' or '\\'")
         print("   Example: command ls  or  \\ls")
-
     print("=" * 80)
 
 
 def suggest_fixes(alias_conflicts, func_conflicts) -> None:
-    """Suggest fixes for conflicts."""
-    if not alias_conflicts and not func_conflicts:
+    if not alias_conflicts and (not func_conflicts):
         return
-
     print("\n🔧 SUGGESTED FIXES:")
     print("-" * 40)
-
     if alias_conflicts:
         print("\nFor alias conflicts:")
         for conflict in sorted(alias_conflicts.keys())[:5]:
             print(f"   • Rename alias: alias {conflict}_alias='...'")
             print(f"   • Or use in scripts: \\{conflict} (escapes alias)")
-
     if func_conflicts:
         print("\nFor function conflicts:")
         for conflict in sorted(func_conflicts.keys())[:5]:
             print(f"   • Rename function: {conflict}_func() {{ ... }}")
             print(f"   • Or use in scripts: command {conflict}")
-
     print("\nTo see all conflicts in detail, run with --verbose flag")
 
 
 def main():
-    # Parse command line arguments
     verbose = "--verbose" in sys.argv or "-v" in sys.argv
     check_all = "--all" in sys.argv or "-a" in sys.argv
-
-    # Define file paths
     config_dir = Path.home() / ".config/bash.d"
     aliases_file = config_dir / "bash_aliases"
     functions_file = config_dir / "bash_functions3"
-
     print("🔍 Scanning for conflicts between bash aliases/functions and PATH binaries...")
-
-    # Get PATH information
     path_dirs = get_path_dirs()
     path_commands, path_duplicates = get_commands_from_path(path_dirs)
-
     print(f"✓ Found {len(path_commands)} unique commands in PATH")
     print(f"✓ Found {len(path_duplicates)} commands with duplicates across PATH")
-
-    # Extract aliases and functions
     aliases = extract_aliases(aliases_file)
     functions = extract_functions(functions_file)
-
     print(f"✓ Found {len(aliases)} aliases")
     print(f"✓ Found {len(functions)} functions")
-
-    # Check for conflicts
     alias_conflicts = check_conflicts(aliases.keys(), path_commands, "aliases")
     func_conflicts = check_conflicts(functions.keys(), path_commands, "functions")
-
-    # Display results
     display_results(alias_conflicts, func_conflicts, path_duplicates, path_dirs)
-
     if verbose:
         suggest_fixes(alias_conflicts, func_conflicts)
-
-    # Return exit code based on conflicts
     if alias_conflicts or func_conflicts:
         sys.exit(1)
     else:

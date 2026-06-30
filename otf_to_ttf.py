@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
+
+
 """
 Convert OTF to TTF recursively using FontForge Python bindings.
 Usage: fontforge -script otf2ttf_fontforge.py [directory]
@@ -16,57 +18,31 @@ except ImportError:
 
 
 def convert_otf_to_ttf(otf_path):
-    """Convert a single OTF file to TTF."""
     ttf_path = otf_path.with_suffix(".ttf")
-
-    # Skip if TTF already exists
     if ttf_path.exists():
-        return "skipped", str(ttf_path)
-
+        return ("skipped", str(ttf_path))
     try:
-        # Open the font
         font = fontforge.open(str(otf_path))
-
-        # Remove hints and references (optional)
-        # font.selection.all()
-        # font.removeOverlap()
-
-        # Generate TTF
         font.generate(str(ttf_path), flags=("opentype",))
         font.close()
-
-        # Remove original OTF file
         otf_path.unlink()
-
-        return "success", str(ttf_path)
-
+        return ("success", str(ttf_path))
     except Exception as e:
-        return "error", str(e)
+        return ("error", str(e))
 
 
 def main():
-    # Get directory from argument or use current
     root_dir = Path(sys.argv[1]) if len(sys.argv) > 1 else Path.cwd()
-
     print(f"Searching for OTF files in: {root_dir}")
-
-    # Find all OTF files recursively
     otf_files = list(root_dir.rglob("*.otf"))
-
     if not otf_files:
         print("No OTF files found.")
         return
-
     print(f"Found {len(otf_files)} OTF file(s)\n")
-
-    # Process files
     stats = {"success": 0, "skipped": 0, "error": 0}
-
     for otf_path in otf_files:
         print(f"Processing: {otf_path}")
-
         status, message = convert_otf_to_ttf(otf_path)
-
         if status == "success":
             print(f"  ✓ Converted: {message} (original removed)")
             stats["success"] += 1
@@ -76,8 +52,6 @@ def main():
         else:
             print(f"  ✗ Failed: {message}")
             stats["error"] += 1
-
-    # Summary
     print(f"\n{'=' * 50}")
     print(f"Summary: {stats['success']} converted, {stats['skipped']} skipped, {stats['error']} failed")
 

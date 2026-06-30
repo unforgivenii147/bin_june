@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 """A command-line utility for WhoisXML API services
 (c) WhoisXML API Inc. 2019.
 """
@@ -9,7 +10,6 @@ import json
 import os.path
 import sys
 from argparse import ArgumentParser
-
 import requests
 from pygments import highlight
 from pygments.formatters import TerminalFormatter
@@ -20,20 +20,12 @@ try:
     import idna
 except:
     IDN = False
-
-# Static config
 VERSION = "0.1.0"
 MYNAME = sys.argv[0].replace("./", "")
-RC_FILE_LOCS = [
-    ".bestwhoisrc",
-    os.path.expanduser("~") + "/.bestwhoisrc",
-    "/etc/bestwhois/bestwhoisrc",
-]
+RC_FILE_LOCS = [".bestwhoisrc", os.path.expanduser("~") + "/.bestwhoisrc", "/etc/bestwhois/bestwhoisrc"]
 
 
-# Utility functions
 def valid_date(s):
-    """Function for validation of date arguments, but return strings"""
     try:
         _ = datetime.datetime.strptime(s, "%Y-%m-%d")
         return s
@@ -43,7 +35,6 @@ def valid_date(s):
 
 
 def dictstr(structure, ntabs: int) -> None:
-    """Print parsed JSON dict in WHOIS-like textual format"""
     global raw_str
     for field in structure.keys():
         tabs = ""
@@ -64,14 +55,10 @@ def dictstr(structure, ntabs: int) -> None:
 
 
 def is_empty_field(field):
-    """True if field is empty string, empty list, empty dict or None"""
-    return field is None or field == "" or field == {} or field == []
+    return field is None or field == "" or field == {} or (field == [])
 
 
 def purge_empty_fields(structure):
-    """Recusively eliminate empty string valued or None fields from a
-    dictionary
-    """
     for field in structure.copy().keys():
         if isinstance(structure[field], dict):
             structure[field] = purge_empty_fields(structure[field])
@@ -80,29 +67,20 @@ def purge_empty_fields(structure):
     return structure
 
 
-# Handling arguments
 ARGS_PARSER = ArgumentParser(
     description="Command-line utility to query domains in the WhoisXML API WHOIS service similarly to the whois command.",
     prog=MYNAME,
 )
-# Positional argument: the domain
 ARGS_PARSER.add_argument(
-    "domainName",
-    type=str,
-    help="The domain to be queried. Domains with national characters can be Unicode or IDN.",
+    "domainName", type=str, help="The domain to be queried. Domains with national characters can be Unicode or IDN."
 )
-# Optional arguments
 ARGS_PARSER.add_argument(
     "--version",
     help="Print version information and exit.",
     action="version",
     version=MYNAME + " ver. " + VERSION + "\n(c) WhoisXML API Inc.",
 )
-ARGS_PARSER.add_argument(
-    "--rcfile",
-    type=str,
-    help="Use this rc file. Will override all default ini locations.",
-)
+ARGS_PARSER.add_argument("--rcfile", type=str, help="Use this rc file. Will override all default ini locations.")
 ARGS_PARSER.add_argument("--apikey", type=str, help="Directly specify the API key. Overrides any ini file.")
 ARGS_PARSER.add_argument(
     "--nocolor",
@@ -124,11 +102,7 @@ ARGS_PARSER.add_argument(
     action="store_true",
     help="Print the first 128 characters of raw text fields. The default is to suppress raw texts fully.",
 )
-ARGS_PARSER.add_argument(
-    "--keep-empty",
-    action="store_true",
-    help="Keep and display fields with empty and null values",
-)
+ARGS_PARSER.add_argument("--keep-empty", action="store_true", help="Keep and display fields with empty and null values")
 ARGS_PARSER.add_argument(
     "--history",
     action="store_true",
@@ -176,13 +150,9 @@ ARGS_PARSER.add_argument(
     metavar="YYYY-MM-DD",
     type=valid_date,
 )
-# Parsing arguments
 ARGS = ARGS_PARSER.parse_args()
-
-# Adding rc file with priority if specified
 if ARGS.rcfile is not None:
     RC_FILE_LOCS = [ARGS.rcfile] + RC_FILE_LOCS
-# Setting API key from ini
 apiKey = None
 if ARGS.apikey is None:
     for rc_file_name in RC_FILE_LOCS:
@@ -195,40 +165,29 @@ if ARGS.apikey is None:
             pass
 else:
     apiKey = ARGS.apikey
-
 if apiKey is None:
     raise ValueError("No API key found. Check rc files or specify directly.")
-
-# Fix the domain name IDN-wise
-
 if IDN:
     domain_name = idna.encode(ARGS.domainName).decode("utf-8")
+elif not all((ord(char) < 128 for char in ARGS.domainName)):
+    sys.stderr.write('Please install the "idna" Python package to query non-ASCII unicode domain names.\nExiting.\n')
+    exit(3)
 else:
-    if not all(ord(char) < 128 for char in ARGS.domainName):
-        sys.stderr.write(
-            'Please install the "idna" Python package to query non-ASCII unicode domain names.\nExiting.\n'
-        )
-        exit(3)
-    else:
-        domain_name = ARGS.domainName
-
-# Deciding which API to use
+    domain_name = ARGS.domainName
 if ARGS.history or (
     ARGS.since_date is not None
     or ARGS.created_date_from is not None
     or ARGS.created_date_to is not None
-    or ARGS.updated_date_from is not None
-    or ARGS.updated_date_to is not None
-    or ARGS.expired_date_from is not None
-    or ARGS.expired_date_to is not None
+    or (ARGS.updated_date_from is not None)
+    or (ARGS.updated_date_to is not None)
+    or (ARGS.expired_date_from is not None)
+    or (ARGS.expired_date_to is not None)
 ):
     API = "https://whois-history-api.whoisxmlapi.com/api/v1?" + "apiKey=" + apiKey + "&outputformat=JSON&mode=purchase"
     ARGS.history = True
 else:
     API = "https://www.whoisxmlapi.com/whoisserver/WhoisService?" + "apiKey=" + apiKey + "&outputformat=JSON&ip=1"
-
 URL = API + "&domainName=" + domain_name
-# Processing optional API arguments for history API if given
 if ARGS.history:
     if ARGS.since_date is not None:
         URL += "&sinceDate=%s" % ARGS.since_date
@@ -244,20 +203,17 @@ if ARGS.history:
         URL += "&expiredDateFrom=%s" % ARGS.expired_date_from
     if ARGS.expired_date_to is not None:
         URL += "&expiredDateTo=%s" % ARGS.expired_date_to
-
 try:
     result = requests.get(URL).json()
 except Exception as e:
     sys.stderr.write("Error invoking API. The API key or the domain name is probably invalid.\n")
     sys.stderr.write("Error text: %s\n" % str(e))
     exit(1)
-
 if ARGS.history:
     try:
         recordCount = result["recordsCount"]
     except:
         recordCount = 0
-
     if recordCount == 0:
         print("No records found. The output of the API was:")
         print(json.dumps(result, indent=1, sort_keys=False))
@@ -270,8 +226,6 @@ else:
         print(json.dumps(result, indent=1, sort_keys=False))
         exit(2)
     result["records"] = [theRecord.copy()]
-
-
 recordno = 0
 for whoisRecord in result["records"]:
     recordno += 1
@@ -284,13 +238,7 @@ for whoisRecord in result["records"]:
             except:
                 pass
         for subfield in whoisRecord.keys():
-            for textfield in [
-                "rawText",
-                "strippedText",
-                "cleanText",
-                "header",
-                "footer",
-            ]:
+            for textfield in ["rawText", "strippedText", "cleanText", "header", "footer"]:
                 try:
                     whoisRecord[subfield][textfield] = whoisRecord[subfield][textfield][0:64] + "..."
                 except:
@@ -302,18 +250,11 @@ for whoisRecord in result["records"]:
             except:
                 pass
         for subfield in whoisRecord.keys():
-            for textfield in [
-                "rawText",
-                "strippedText",
-                "cleanText",
-                "header",
-                "footer",
-            ]:
+            for textfield in ["rawText", "strippedText", "cleanText", "header", "footer"]:
                 try:
                     whoisRecord[subfield].pop(textfield)
                 except:
                     pass
-
     json_str = json.dumps(whoisRecord, indent=1, sort_keys=False)
     if ARGS.history:
         print("Historic record no. %d of %d for %s:\n------------\n" % (recordno, recordCount, ARGS.domainName))
@@ -325,5 +266,4 @@ for whoisRecord in result["records"]:
         print(json_str)
     else:
         print(highlight(json_str, JsonLexer(), TerminalFormatter()))
-
 exit(0)

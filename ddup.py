@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 """
 AST-based duplicate definition extractor.
 Finds repeated functions, classes, and constant assignments across all
@@ -30,18 +31,10 @@ except ImportError:
 
     logger = logging.getLogger(__name__)
     logging.basicConfig(level=logging.INFO)
-_COMPRESSED_EXT: Dict[str, object] = {
-    ".gz": gzip,
-    ".bz2": gzip,
-    ".xz": lzma,
-    ".lzma": lzma,
-    ".zst": None,
-    ".br": None,
-}
+_COMPRESSED_EXT: Dict[str, object] = {".gz": gzip, ".bz2": gzip, ".xz": lzma, ".lzma": lzma, ".zst": None, ".br": None}
 
 
 def _decompress_file(path: Path) -> Optional[str]:
-    """Return decompressed source if *path* is a compressed ``.py`` file, else ``None``."""
     suffix = path.suffix.lower()
     if suffix not in _COMPRESSED_EXT:
         return None
@@ -77,10 +70,6 @@ def _decompress_file(path: Path) -> Optional[str]:
 
 
 def _find_files(root: str = ".") -> List[Tuple[str, Optional[str]]]:
-    """Walk *root* recursively; return ``(path, source_or_None)`` tuples.
-    For plain ``.py`` files ``source`` is ``None`` (deferred read).
-    For compressed files the decompressed source is returned directly.
-    """
     results: List[Tuple[str, Optional[str]]] = []
     root_path = Path(root).resolve()
     utils_path = root_path / "utils"
@@ -100,7 +89,6 @@ def _find_files(root: str = ".") -> List[Tuple[str, Optional[str]]]:
 
 
 def _hash(source: str) -> str:
-    """SHA-256 hex digest of *source*."""
     return hashlib.sha256(source.encode("utf-8")).hexdigest()
 
 
@@ -114,7 +102,6 @@ class _Def:
 
 
 def _extract_definitions(path: str, source: str) -> List[_Def]:
-    """Parse *source* and return top-level function/class/constant definitions."""
     try:
         tree = ast.parse(source, filename=path)
     except SyntaxError as exc:
@@ -141,20 +128,11 @@ def _extract_definitions(path: str, source: str) -> List[_Def]:
         if segment is None:
             continue
         segment = segment.strip("\n")
-        defs.append(
-            _Def(
-                type=typ,
-                name=name,
-                source_code=segment,
-                content_hash=_hash(segment),
-                filepath=path,
-            )
-        )
+        defs.append(_Def(type=typ, name=name, source_code=segment, content_hash=_hash(segment), filepath=path))
     return defs
 
 
 def _new_utils_entries(groups: Dict[str, List[_Def]], existing: Dict[str, Dict[str, _Def]]) -> Dict[str, List[_Def]]:
-    """Determine which duplicate groups should be added to the utils files."""
     new: Dict[str, List[_Def]] = {"func": [], "class": [], "const": []}
     for hash_key, defs in groups.items():
         rep = defs[0]
@@ -165,11 +143,7 @@ def _new_utils_entries(groups: Dict[str, List[_Def]], existing: Dict[str, Dict[s
             if existing[typ][name].content_hash == rep.content_hash:
                 logger.debug("Already in {}.py: {}", typ, name)
                 continue
-            logger.warning(
-                "Conflict in {}.py: '{}' exists with different content – skipping.",
-                typ,
-                name,
-            )
+            logger.warning("Conflict in {}.py: '{}' exists with different content – skipping.", typ, name)
             continue
         if any((d.name == name for d in new[typ])):
             continue
@@ -178,13 +152,8 @@ def _new_utils_entries(groups: Dict[str, List[_Def]], existing: Dict[str, Dict[s
 
 
 def _read_existing_utils(utils_dir: Path) -> Dict[str, Dict[str, _Def]]:
-    """Parse existing ``utils/*.py`` and return ``{type: {name: _Def}}``."""
     existing: Dict[str, Dict[str, _Def]] = {"func": {}, "class": {}, "const": {}}
-    for typ, fname in [
-        ("func", "func.py"),
-        ("class", "class.py"),
-        ("const", "const.py"),
-    ]:
+    for typ, fname in [("func", "func.py"), ("class", "class.py"), ("const", "const.py")]:
         path = utils_dir / fname
         if path.is_file():
             try:
@@ -197,13 +166,8 @@ def _read_existing_utils(utils_dir: Path) -> Dict[str, Dict[str, _Def]]:
 
 
 def _write_utils_files(utils_dir: Path, new: Dict[str, List[_Def]]) -> None:
-    """Append new definitions to the appropriate utils files."""
     utils_dir.mkdir(exist_ok=True)
-    for typ, fname in [
-        ("func", "func.py"),
-        ("class", "class.py"),
-        ("const", "const.py"),
-    ]:
+    for typ, fname in [("func", "func.py"), ("class", "class.py"), ("const", "const.py")]:
         if not new[typ]:
             continue
         path = utils_dir / fname
@@ -217,12 +181,6 @@ def _write_utils_files(utils_dir: Path, new: Dict[str, List[_Def]]) -> None:
 
 
 def _move_definitions(groups: Dict[str, List[_Def]]) -> None:
-    """
-    Remove moved definitions from regular ``.py`` files.
-    Only plain files are modified (compressed archives are left untouched).
-    The resulting source is validated with ``ast.parse``; if a syntax error
-    occurs the file is **not** overwritten.
-    """
     to_remove: Dict[str, Set[str]] = {}
     for hash_key, defs in groups.items():
         for d in defs:
@@ -269,12 +227,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Copy/move repeated Python definitions to utils/")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("-c", "--copy", action="store_true", help="Copy duplicates to utils/")
-    group.add_argument(
-        "-m",
-        "--move",
-        action="store_true",
-        help="Move duplicates to utils/ and remove from originals",
-    )
+    group.add_argument("-m", "--move", action="store_true", help="Move duplicates to utils/ and remove from originals")
     args = parser.parse_args()
     action = "copy" if args.copy else "move"
     logger.info("Action: {}", action)

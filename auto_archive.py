@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
+
+
 """
 auto_compress.py
 Benchmark multiple compression algorithms on a file or directory,
@@ -16,40 +18,26 @@ import traceback
 from io import BytesIO
 from pathlib import Path
 
-# Third-party — install via pip: zstandard brotli lz4 py7zr
 try:
     import zstandard as zstd
 except ImportError:
     zstd = None
-
 try:
     import brotli
 except ImportError:
     brotli = None
-
 try:
     import lz4.frame as lz4frame
 except ImportError:
     lz4frame = None
-
 try:
     import py7zr
 except ImportError:
     py7zr = None
-
-# ---------------------------------------------------------------------------
-# Logging
-# ---------------------------------------------------------------------------
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[logging.StreamHandler()],
+    level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler()]
 )
 log = logging.getLogger(__name__)
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
 
 
 def read_file(path: Path) -> bytes:
@@ -62,11 +50,6 @@ def human(n: int) -> str:
             return f"{n:.1f} {unit}"
         n /= 1024
     return f"{n:.1f} TB"
-
-
-# ---------------------------------------------------------------------------
-# Per-algorithm streaming compressors → bytes
-# ---------------------------------------------------------------------------
 
 
 def compress_zstd(data: bytes, level: int) -> bytes:
@@ -90,7 +73,6 @@ def compress_brotli(data: bytes, level: int) -> bytes:
 def compress_lz4(data: bytes, level: int) -> bytes:
     if lz4frame is None:
         raise RuntimeError("lz4 not installed")
-    # lz4 levels: 0=fast, 1-9 high-compression (HC mode)
     return lz4frame.compress(data, compression_level=level)
 
 
@@ -110,7 +92,6 @@ def compress_xz(data: bytes, level: int) -> bytes:
 
 
 def compress_7z(data: bytes, level: int, src_name: str) -> bytes:
-    """py7zr works on files, so we use a temp file approach."""
     if py7zr is None:
         raise RuntimeError("py7zr not installed")
     with tempfile.TemporaryDirectory() as td:
@@ -124,58 +105,39 @@ def compress_7z(data: bytes, level: int, src_name: str) -> bytes:
         return archive.read_bytes()
 
 
-# ---------------------------------------------------------------------------
-# Algorithm registry
-# ---------------------------------------------------------------------------
-# Each entry: (name, ext, compress_fn, min_level, max_level)
-
-
 def _make_algorithms():
     algos = []
-
     if zstd:
         algos.append(("zstd", ".zst", compress_zstd, 1, 21))
     else:
         log.warning("zstandard not available — skipping")
-
     if brotli:
         algos.append(("brotli", ".br", compress_brotli, 1, 11))
     else:
         log.warning("brotli not available — skipping")
-
     algos.append(("gz", ".gz", compress_gz, 1, 9))
     algos.append(("bz2", ".bz2", compress_bz2, 1, 9))
     algos.append(("xz", ".xz", compress_xz, 1, 9))
-
     if lz4frame:
         algos.append(("lz4", ".lz4", compress_lz4, 1, 9))
     else:
         log.warning("lz4 not available — skipping")
-
     if py7zr:
-        algos.append(("7z", ".7z", None, 1, 9))  # handled specially
+        algos.append(("7z", ".7z", None, 1, 9))
     else:
         log.warning("py7zr not available — skipping")
-
     return algos
 
 
 ALGORITHMS = _make_algorithms()
 
 
-# ---------------------------------------------------------------------------
-# Benchmark one algorithm across all its levels
-# ---------------------------------------------------------------------------
-
-
 def best_for_algo(
     data: bytes, name: str, ext: str, fn, min_l: int, max_l: int, src_name: str = "data"
 ) -> tuple[str, str, int, bytes] | None:
-    """Return (name, ext, best_level, best_bytes) or None on error."""
     best_size = None
     best_level = min_l
     best_compressed = None
-
     for level in range(min_l, max_l + 1):
         try:
             if name == "7z":
@@ -190,33 +152,20 @@ def best_for_algo(
         except Exception as exc:
             log.error("Error compressing with %s level=%d: %s", name, level, exc)
             log.debug(traceback.format_exc())
-
     if best_compressed is None:
         return None
     return (name, ext, best_level, best_compressed)
 
 
-# ---------------------------------------------------------------------------
-# Compress a single file, compare all algorithms, keep winner
-# ---------------------------------------------------------------------------
-
-
 def process_file(src: Path, out_dir: Path | None = None) -> Path | None:
-    """
-    Compress `src` with all algorithms at all levels.
-    Write the winning archive next to the source (or into out_dir).
-    Returns the path of the winner, or None on total failure.
-    """
     log.info("Processing: %s (%s)", src, human(src.stat().st_size))
     try:
         data = read_file(src)
     except Exception as exc:
         log.error("Cannot read %s: %s", src, exc)
         return None
-
     original_size = len(data)
     results: list[tuple[str, str, int, bytes]] = []
-
     for name, ext, fn, min_l, max_l in ALGORITHMS:
         result = best_for_algo(data, name, ext, fn, min_l, max_l, src_name=src.name)
         if result:
@@ -230,37 +179,20 @@ def process_file(src: Path, out_dir: Path | None = None) -> Path | None:
                 100 * len(r_bytes) / original_size,
             )
             results.append(result)
-
     if not results:
         log.error("All algorithms failed for %s", src)
         return None
-
-    # Pick smallest
     winner = min(results, key=lambda r: len(r[3]))
     w_name, w_ext, w_level, w_bytes = winner
-
     dest_dir = out_dir if out_dir else src.parent
     dest = dest_dir / (src.name + w_ext)
-
     try:
         dest.write_bytes(w_bytes)
     except Exception as exc:
         log.error("Cannot write %s: %s", dest, exc)
         return None
-
-    log.info(
-        "  Winner → %s (algo=%s level=%d size=%s)",
-        dest.name,
-        w_name,
-        w_level,
-        human(len(w_bytes)),
-    )
+    log.info("  Winner → %s (algo=%s level=%d size=%s)", dest.name, w_name, w_level, human(len(w_bytes)))
     return dest
-
-
-# ---------------------------------------------------------------------------
-# Worker for multiprocessing (must be top-level picklable)
-# ---------------------------------------------------------------------------
 
 
 def _worker(args) -> Path | None:
@@ -272,68 +204,35 @@ def _worker(args) -> Path | None:
         return None
 
 
-# ---------------------------------------------------------------------------
-# Collect files from a directory
-# ---------------------------------------------------------------------------
-
-# Extensions we never re-compress (already compressed formats)
-SKIP_EXTENSIONS = {
-    ".zst",
-    ".br",
-    ".gz",
-    ".bz2",
-    ".xz",
-    ".lz4",
-    ".7z",
-    ".zip",
-    ".rar",
-    ".zstd",
-    ".lzma",
-}
+SKIP_EXTENSIONS = {".zst", ".br", ".gz", ".bz2", ".xz", ".lz4", ".7z", ".zip", ".rar", ".zstd", ".lzma"}
 
 
 def collect_files(root: Path) -> list[Path]:
     return [p for p in root.rglob("*") if p.is_file() and p.suffix.lower() not in SKIP_EXTENSIONS]
 
 
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
-
-
 def main() -> None:
     target = Path(sys.argv[1]) if len(sys.argv) > 1 else Path.cwd()
-
     if not target.exists():
         log.error("Path does not exist: %s", target)
         sys.exit(1)
-
     if target.is_file():
-        # Single file mode
         result = process_file(target)
         if result is None:
             sys.exit(1)
-
     elif target.is_dir():
         files = collect_files(target)
         if not files:
             log.info("No compressible files found in %s", target)
             sys.exit(0)
-
         log.info("Found %d file(s) in %s", len(files), target)
-
-        # Use multiprocessing; each worker gets (src_path, None)
-        # out_dir=None means output sits next to source
         cpu_count = mp.cpu_count() or 1
         workers = min(cpu_count, len(files))
         log.info("Using %d worker(s)", workers)
-
         args = [(f, None) for f in files]
-
         with mp.Pool(processes=workers) as pool:
             results = pool.map(_worker, args)
-
-        success = sum(1 for r in results if r is not None)
+        success = sum((1 for r in results if r is not None))
         log.info("Done. %d/%d file(s) compressed successfully.", success, len(files))
     else:
         log.error("Target is neither a file nor a directory: %s", target)

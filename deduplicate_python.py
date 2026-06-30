@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 import argparse
 import ast
 import bz2
@@ -14,7 +15,6 @@ import tempfile
 import zipfile
 from collections import defaultdict
 from pathlib import Path
-
 from loguru import logger
 
 try:
@@ -75,13 +75,6 @@ def normalize_newlines(s: str) -> str:
 
 
 def extract_with_tree_sitter(code: str):
-    """
-    Returns list of dicts:
-      {
-        name, kind, snippet, start_byte, end_byte
-      }
-    Only top-level functions, classes, and simple constant assignments.
-    """
     objects = []
     try:
         parser = Parser()
@@ -127,9 +120,6 @@ def extract_with_tree_sitter(code: str):
 
 
 def extract_with_ast(code: str):
-    """
-    AST fallback. Returns same shape as extract_with_tree_sitter.
-    """
     objects = []
     try:
         tree = ast.parse(code)
@@ -340,19 +330,11 @@ def insert_import_after_shebang(code: str, import_line: str) -> str:
 
 
 def remove_snippets_from_code(code: str, objects) -> str:
-    """
-    Removes object snippets by byte range if available, otherwise by source lines.
-    Removal is done in reverse order.
-    """
     if not objects:
         return code
     if all((o.get("start_byte") is not None and o.get("end_byte") is not None for o in objects)):
         encoded = code.encode("utf-8")
-        spans = sorted(
-            [(o["start_byte"], o["end_byte"]) for o in objects],
-            key=lambda x: x[0],
-            reverse=True,
-        )
+        spans = sorted([(o["start_byte"], o["end_byte"]) for o in objects], key=lambda x: x[0], reverse=True)
         for start, end in spans:
             encoded = encoded[:start] + encoded[end:]
         return encoded.decode("utf-8")
@@ -392,25 +374,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Find repeated top-level Python objects and optionally move/copy them to utils.py"
     )
+    parser.add_argument("-m", "--move", action="store_true", help="Move duplicate objects to utils.py and add imports")
     parser.add_argument(
-        "-m",
-        "--move",
-        action="store_true",
-        help="Move duplicate objects to utils.py and add imports",
+        "-c", "--copy", action="store_true", help="Copy duplicate objects to utils.py without changing source files"
     )
-    parser.add_argument(
-        "-c",
-        "--copy",
-        action="store_true",
-        help="Copy duplicate objects to utils.py without changing source files",
-    )
-    parser.add_argument(
-        "-j",
-        "--jobs",
-        type=int,
-        default=mp.cpu_count(),
-        help="Number of worker processes",
-    )
+    parser.add_argument("-j", "--jobs", type=int, default=mp.cpu_count(), help="Number of worker processes")
     args = parser.parse_args()
     if args.move and args.copy:
         logger.error("Use either --move or --copy, not both.")

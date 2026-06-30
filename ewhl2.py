@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 import argparse
 import os
 import shutil
@@ -10,51 +11,40 @@ from pathlib import Path
 
 
 def is_empty_wheel(wheel_path: Path) -> bool:
-    """Check if a .whl file is empty (only contains dist-info directory)"""
     try:
         with zipfile.ZipFile(wheel_path, "r") as zip_ref:
             all_files = zip_ref.namelist()
-
-            has_py_files = any(file.endswith(".py") for file in all_files)
-
+            has_py_files = any((file.endswith(".py") for file in all_files))
             has_code_dirs = any(
-                not (file.startswith("dist-info/") or file.startswith("__pycache__/"))
-                and not file.endswith("/")
-                and not file.endswith(".dist-info/")
-                for file in all_files
+                (
+                    not (file.startswith("dist-info/") or file.startswith("__pycache__/"))
+                    and (not file.endswith("/"))
+                    and (not file.endswith(".dist-info/"))
+                    for file in all_files
+                )
             )
-
             return not (has_py_files or has_code_dirs)
-
     except Exception as e:
         print(f"  Error reading {wheel_path}: {e}")
         return False
 
 
 def extract_package_info(wheel_path: Path) -> tuple[str, str] | tuple[None, None]:
-    """Extract package name and version from wheel filename"""
     wheel_name = Path(wheel_path).stem
-
     parts = wheel_name.split("-")
     if len(parts) >= 2:
         name = parts[0]
         version = parts[1]
-
         name = name.replace("_", "-")
-        return name, version
-    return None, None
+        return (name, version)
+    return (None, None)
 
 
 def get_installed_packages():
-    """Get list of installed packages using pip"""
     try:
         result = subprocess.run(
-            [sys.executable, "-m", "pip", "list", "--format=freeze"],
-            capture_output=True,
-            text=True,
-            check=True,
+            [sys.executable, "-m", "pip", "list", "--format=freeze"], capture_output=True, text=True, check=True
         )
-
         installed = {}
         for line in result.stdout.strip().split("\n"):
             if "==" in line:
@@ -67,13 +57,8 @@ def get_installed_packages():
 
 
 def check_pip_show(package_name):
-    """Use pip show to get detailed package info"""
     try:
-        result = subprocess.run(
-            [sys.executable, "-m", "pip", "show", package_name],
-            capture_output=True,
-            text=True,
-        )
+        result = subprocess.run([sys.executable, "-m", "pip", "show", package_name], capture_output=True, text=True)
         if result.returncode == 0:
             info = {}
             for line in result.stdout.strip().split("\n"):
@@ -86,15 +71,10 @@ def check_pip_show(package_name):
     return None
 
 
-def check_package_location(
-    package_name: str,
-) -> tuple[str | None, bool] | tuple[None, bool]:
-    """Try to find where a package is installed"""
+def check_package_location(package_name: str) -> tuple[str | None, bool] | tuple[None, bool]:
     try:
         result = subprocess.run(
-            [sys.executable, "-m", "pip", "show", "-f", package_name],
-            capture_output=True,
-            text=True,
+            [sys.executable, "-m", "pip", "show", "-f", package_name], capture_output=True, text=True
         )
         if result.returncode == 0:
             lines = result.stdout.strip().split("\n")
@@ -106,56 +86,46 @@ def check_package_location(
                 elif line.startswith("Files:"):
                     files_section = line
                     if any(
-                        file_line.strip() and not ".dist-info" in file_line
-                        for file_line in lines[lines.index(line) + 1 : lines.index(line) + 10]
+                        (
+                            file_line.strip() and (not ".dist-info" in file_line)
+                            for file_line in lines[lines.index(line) + 1 : lines.index(line) + 10]
+                        )
                     ):
                         has_files = True
-            return location, has_files
+            return (location, has_files)
     except Exception:
         pass
-    return None, False
+    return (None, False)
 
 
 def analyze_wheels(source_dir, dest_dir_name: str = "empty_wheels", check_installed=True) -> None:
-    """Scan and analyze wheels, checking if they might be installed"""
     source_path = Path(source_dir)
     dest_path = source_path / dest_dir_name
-
     installed_packages = get_installed_packages() if check_installed else {}
-
     wheel_files = list(source_path.glob("*.whl"))
-
     if not wheel_files:
         print(f"No .whl files found in {source_dir}")
         return
-
     print(f"Found {len(wheel_files)} wheel files to check")
     if check_installed:
         print(f"Found {len(installed_packages)} installed packages in current environment\n")
-
     empty_wheels = []
     installed_empty_wheels = []
     valid_wheels = []
-
     for wheel_file in wheel_files:
         print(f"Checking {wheel_file.name}...")
-
         if is_empty_wheel(wheel_file):
             print(f"  ✓ EMPTY wheel")
-
             pkg_name, pkg_version = extract_package_info(wheel_file)
-
             if check_installed and pkg_name:
                 installed_version = installed_packages.get(pkg_name.lower())
                 if installed_version:
                     print(f"  ⚠ WARNING: Package '{pkg_name}' is INSTALLED (version {installed_version})")
-
                     location, has_files = check_package_location(pkg_name)
                     if location:
                         print(f"  📍 Installed at: {location}")
                         if not has_files:
                             print(f"  ⚠ Installation appears incomplete!")
-
                     installed_empty_wheels.append({
                         "wheel": wheel_file,
                         "package": pkg_name,
@@ -163,26 +133,21 @@ def analyze_wheels(source_dir, dest_dir_name: str = "empty_wheels", check_instal
                     })
                 else:
                     print(f"  ℹ Package '{pkg_name}' not found in installed packages")
-
             empty_wheels.append(wheel_file)
         else:
             print(f"  ✓ VALID wheel (contains code)")
             valid_wheels.append(wheel_file)
-
         print()
-
     print("=" * 60)
     print("SUMMARY")
     print("=" * 60)
     print(f"Total wheels: {len(wheel_files)}")
     print(f"Valid wheels: {len(valid_wheels)}")
     print(f"Empty wheels: {len(empty_wheels)}")
-
     if installed_empty_wheels:
         print(f"\n⚠ CRITICAL: {len(installed_empty_wheels)} empty wheels correspond to INSTALLED packages!")
         for item in installed_empty_wheels:
             print(f"  - {item['wheel'].name} -> {item['package']}=={item['version']}")
-
         print("\nRECOMMENDATIONS:")
         print("  1. DO NOT move/delete these wheels if you need the packages")
         print("  2. The packages are likely broken installs")
@@ -190,21 +155,17 @@ def analyze_wheels(source_dir, dest_dir_name: str = "empty_wheels", check_instal
         for item in installed_empty_wheels:
             print(f"     pip uninstall {item['package']} -y")
             print(f"     pip install {item['package']}")
-
     if empty_wheels:
         print(f"\nFound {len(empty_wheels)} empty wheel(s) total")
-
         if installed_empty_wheels:
             response = input("\nSome empty wheels are INSTALLED. Move ONLY the uninstalled empty wheels? (y/n): ")
             wheels_to_move = [w for w in empty_wheels if w not in [item["wheel"] for item in installed_empty_wheels]]
         else:
             response = input(f"\nMove all {len(empty_wheels)} empty wheels to '{dest_dir_name}/'? (y/n): ")
             wheels_to_move = empty_wheels if response.lower() == "y" else []
-
         if wheels_to_move:
             dest_path.mkdir(exist_ok=True)
             moved_count = 0
-
             for wheel_file in wheels_to_move:
                 dest_file = dest_path / wheel_file.name
                 if dest_file.exists():
@@ -212,15 +173,12 @@ def analyze_wheels(source_dir, dest_dir_name: str = "empty_wheels", check_instal
                     while dest_file.exists():
                         dest_file = dest_path / f"{wheel_file.stem}_{counter}{wheel_file.suffix}"
                         counter += 1
-
                 shutil.move(str(wheel_file), str(dest_file))
                 print(f"Moved: {wheel_file.name} -> {dest_dir_name}/{dest_file.name}")
                 moved_count += 1
-
             print(f"\nMoved {moved_count} empty wheels to {dest_dir_name}/")
         else:
             print("No wheels were moved.")
-
     if installed_empty_wheels:
         print("\n" + "=" * 60)
         print("IMPORTANT ACTIONS TO TAKE")
@@ -228,7 +186,6 @@ def analyze_wheels(source_dir, dest_dir_name: str = "empty_wheels", check_instal
         print("These packages were installed from empty wheels and are likely broken:")
         for item in installed_empty_wheels:
             print(f"  - {item['package']} (version {item['version']})")
-
         print("\nTo fix them:")
         print("1. Check if the packages work correctly")
         print("2. If broken, reinstall with valid wheels:")
@@ -246,34 +203,19 @@ def main() -> None:
         description="Identify and move empty .whl files, with detection of potentially installed ones"
     )
     parser.add_argument(
-        "directory",
-        nargs="?",
-        default=".",
-        help="Directory containing .whl files (default: current directory)",
+        "directory", nargs="?", default=".", help="Directory containing .whl files (default: current directory)"
     )
     parser.add_argument(
-        "-d",
-        "--dest",
-        default="empty_wheels",
-        help="Destination subdirectory name (default: 'empty_wheels')",
+        "-d", "--dest", default="empty_wheels", help="Destination subdirectory name (default: 'empty_wheels')"
     )
+    parser.add_argument("--no-install-check", action="store_true", help="Skip checking installed packages")
     parser.add_argument(
-        "--no-install-check",
-        action="store_true",
-        help="Skip checking installed packages",
+        "--auto-move-all", action="store_true", help="Automatically move all empty wheels without prompting"
     )
-    parser.add_argument(
-        "--auto-move-all",
-        action="store_true",
-        help="Automatically move all empty wheels without prompting",
-    )
-
     args = parser.parse_args()
-
     if not os.path.exists(args.directory):
         print(f"Error: Directory '{args.directory}' does not exist")
         return
-
     analyze_wheels(args.directory, args.dest, check_installed=not args.no_install_check)
 
 
@@ -283,5 +225,4 @@ if __name__ == "__main__":
     except ImportError:
         print("Note: 'packaging' module not found. Install it with: pip install packaging")
         print("Continuing with limited version parsing...\n")
-
     main()

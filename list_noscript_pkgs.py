@@ -1,12 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/python
+
+
 import site
 from pathlib import Path
 
 u = Path(site.getusersitepackages())
-
 for p in u.iterdir():
-    if p.is_dir() and not p.name.endswith((".dist-info", ".egg-info")):
-        # Check if any entry_points.txt exists for this package
+    if p.is_dir() and (not p.name.endswith((".dist-info", ".egg-info"))):
         has_entry = False
         for pattern in [f"{p.name}*.dist-info", f"{p.name}*.egg-info"]:
             for d in u.glob(pattern):
@@ -15,6 +15,5 @@ for p in u.iterdir():
                     break
             if has_entry:
                 break
-
         if not has_entry:
             print(p.name)

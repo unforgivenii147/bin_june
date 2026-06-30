@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 """
 Termux script creator - Creates executable scripts from clipboard content.
 """
@@ -9,30 +10,17 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-# Termux specific shebangs
 TERMUX_SHEBANGS = {
     "python": "#!/data/data/com.termux/files/usr/bin/python",
     "bash": "#!/data/data/com.termux/files/usr/bin/bash",
     "sh": "#!/data/data/com.termux/files/usr/bin/sh",
 }
-
-# Directories where scripts get auto-symlinked and shebang replaced
-SCRIPT_DIRS = {
-    Path.home() / "bin",
-    Path.home() / "bashbin",
-    Path.home() / ".local" / "bin",  # Added ~/.local/bin
-}
+SCRIPT_DIRS = {Path.home() / "bin", Path.home() / "bashbin", Path.home() / ".local" / "bin"}
 
 
 def get_clipboard_content() -> str:
-    """Retrieve content from Termux clipboard."""
     try:
-        result = subprocess.run(
-            ["termux-clipboard-get"],
-            capture_output=True,
-            text=True,
-            check=True,
-        )
+        result = subprocess.run(["termux-clipboard-get"], capture_output=True, text=True, check=True)
         return result.stdout
     except subprocess.CalledProcessError as e:
         print(f"Failed to read clipboard: {e}", file=sys.stderr)
@@ -43,16 +31,9 @@ def get_clipboard_content() -> str:
 
 
 def detect_script_type(content: str) -> str:
-    """
-    Detect if content is Python or bash/sh script.
-    Returns: 'python', 'bash', or 'unknown'
-    """
     if not content.strip():
         return "unknown"
-
     first_line = content.lstrip().split("\n")[0] if content else ""
-
-    # Check for explicit shebang first
     if first_line.startswith("#!"):
         if "python" in first_line.lower():
             return "python"
@@ -60,11 +41,7 @@ def detect_script_type(content: str) -> str:
             return "bash"
         elif "sh" in first_line.lower():
             return "bash"
-
-    # Heuristic detection based on content
     preview = content[:500].lower()
-
-    # Python indicators (stronger signals)
     python_indicators = [
         "import ",
         "from ",
@@ -77,8 +54,6 @@ def detect_script_type(content: str) -> str:
         "async def",
         "await ",
     ]
-
-    # Bash indicators
     bash_indicators = [
         "echo ",
         "cd ",
@@ -99,70 +74,47 @@ def detect_script_type(content: str) -> str:
         "#!/bin/bash",
         "#!/bin/sh",
     ]
-
-    python_score = sum(1 for ind in python_indicators if ind in preview)
-    bash_score = sum(1 for ind in bash_indicators if ind in preview)
-
-    # Check for common file extensions in filename (if available)
-    # This is handled by the caller passing filename info
-
+    python_score = sum((1 for ind in python_indicators if ind in preview))
+    bash_score = sum((1 for ind in bash_indicators if ind in preview))
     if python_score > bash_score:
         return "python"
     elif bash_score > python_score:
         return "bash"
     else:
-        # Default to bash if uncertain
         return "bash"
 
 
 def get_shebang_from_filename(filename: str) -> Optional[str]:
-    """Infer script type from filename extension."""
     path = Path(filename)
     suffix = path.suffix.lower()
-
     if suffix in [".py", ".pyw"]:
         return "python"
     elif suffix in [".sh", ".bash"]:
         return "bash"
     elif suffix in [".rb", ".pl", ".js", ".go", ".rs"]:
-        # For non-bash/python scripts, use bash as fallback
         return "bash"
     return None
 
 
 def replace_shebang(content: str, script_type: str) -> str:
-    """
-    Replace or add appropriate Termux shebang based on script type.
-    Returns content with correct shebang.
-    """
     lines = content.splitlines()
-
-    # Remove any existing shebang lines (first line only)
     if lines and lines[0].startswith("#!"):
         lines.pop(0)
-        # Also remove any second shebang if present (edge case)
         if lines and lines[0].startswith("#!"):
             lines.pop(0)
-
-    # Add appropriate Termux shebang
     if script_type == "python":
         lines.insert(0, TERMUX_SHEBANGS["python"])
     elif script_type == "bash":
         lines.insert(0, TERMUX_SHEBANGS["bash"])
     else:
-        # Default to bash
         lines.insert(0, TERMUX_SHEBANGS["bash"])
-
-    # Ensure trailing newline
     result = "\n".join(lines)
     return result if result.endswith("\n") else result + "\n"
 
 
 def create_symlink(script_path: Path) -> None:
-    """Create symlink without extension in script directories."""
     if script_path.suffix:
         symlink_path = script_path.parent / script_path.stem
-
         if not symlink_path.exists():
             try:
                 symlink_path.symlink_to(script_path)
@@ -181,58 +133,39 @@ def main() -> None:
         print(f"Example: {sys.argv[0]} myscript.py", file=sys.stderr)
         print(f"Example: {sys.argv[0]} mytool", file=sys.stderr)
         sys.exit(1)
-
     filename = sys.argv[1]
     output_path = Path(filename)
     cwd = Path.cwd()
     is_script_dir = cwd in SCRIPT_DIRS
-
-    # Get clipboard content
     content = get_clipboard_content()
-
     if not content.strip():
         print("⚠️  Clipboard is empty, creating empty file")
         content = "\n"
-        # Still need to decide shebang for empty file
         if is_script_dir:
-            # Try to infer from filename
             script_type = get_shebang_from_filename(filename) or "bash"
             content = replace_shebang(content, script_type)
             print(f"✓ Added {script_type} shebang (inferred from filename)")
     else:
-        # Detect script type
         script_type = None
-
-        # First, try to infer from filename if in script directory
         if is_script_dir:
             script_type = get_shebang_from_filename(filename)
-
-            # If filename doesn't indicate type, detect from content
             if not script_type:
                 script_type = detect_script_type(content)
                 print(f"✓ Detected {script_type} script from content")
             else:
                 print(f"✓ Detected {script_type} script from filename extension")
-
-        # Replace shebang if in script directory
         if is_script_dir and script_type:
             content = replace_shebang(content, script_type)
-
-    # Write file
     try:
         output_path.write_text(content)
         print(f"✓ Created: {output_path}")
     except OSError as e:
         print(f"Error writing file: {e}", file=sys.stderr)
         sys.exit(1)
-
-    # Set executable permissions and create symlink if in script directory
     if is_script_dir:
-        output_path.chmod(0o755)
+        output_path.chmod(493)
         print(f"✓ Made executable (755)")
         create_symlink(output_path)
-
-    # Show first few lines for verification
     if content.strip():
         first_line = content.split("\n")[0]
         if first_line.startswith("#!"):

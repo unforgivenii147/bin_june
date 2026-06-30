@@ -1,8 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 import sys
 from pathlib import Path
-
 import html2text
 from readability import Document
 from dh import get_files, mpf3
@@ -17,20 +17,14 @@ def process_file(path: str | Path) -> tuple[Path, bool]:
         return (md_file, True)
     try:
         html_content = path.read_text(encoding="utf-8", errors="ignore")
-
-        # readability extracts main content from HTML
         doc = Document(html_content)
-        main_content = doc.summary()  # Returns cleaned HTML of main content
-
-        # Convert cleaned HTML to markdown
+        main_content = doc.summary()
         h = html2text.HTML2Text()
         h.ignore_links = False
         h.ignore_images = False
         h.ignore_tables = False
-        h.body_width = 0  # Don't wrap lines
-
+        h.body_width = 0
         markdown = h.handle(main_content)
-
         if markdown and markdown.strip():
             md_file.write_text(markdown, encoding="utf-8")
             print(f"✓ Converted: {path.name} -> {md_file.name}")

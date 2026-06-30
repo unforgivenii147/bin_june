@@ -1,18 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 import subprocess
 
 
 def extract_subtitles(video_path) -> None:
-    """Extracts subtitle streams from a video file using ffmpeg.
-    Args:
-        video_path (str): The path to the input video file.
-    Returns:
-        None: Prints extraction progress and completion messages.
-    Raises:
-        FileNotFoundError: If ffmpeg is not installed.
-        RuntimeError: If no subtitle streams are found or extraction fails.
-    """
     try:
         subprocess.run(["ffmpeg", "-version"], check=True, capture_output=True)
     except FileNotFoundError:
@@ -42,15 +34,7 @@ def extract_subtitles(video_path) -> None:
             lang = "und"
         out_filename = f"{basename}.sub{count}.{lang}.srt"
         print(f"Extracting subtitle stream {index} -> {out_filename}")
-        ffmpeg_cmd = [
-            "ffmpeg",
-            "-y",
-            "-i",
-            video_path,
-            "-map",
-            f"0:s:{count}",
-            out_filename,
-        ]
+        ffmpeg_cmd = ["ffmpeg", "-y", "-i", video_path, "-map", f"0:s:{count}", out_filename]
         subprocess.run(ffmpeg_cmd, check=True, capture_output=True)
         count += 1
     print("Done.")
@@ -60,5 +44,4 @@ if __name__ == "__main__":
     import sys
 
     fn = sys.argv[1].strip()
-
     extract_subtitles(fn)

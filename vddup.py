@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 import argparse
 import ast
 import bz2
@@ -12,7 +13,6 @@ import zipfile
 from ast import Module
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-
 import brotli
 import zstandard as zstd
 from loguru import logger
@@ -22,7 +22,6 @@ COMPRESSED_EXTENSIONS = [".zip", ".tar", ".gz", ".bz2", ".xz", ".zst", ".br"]
 
 
 def copy_chunks(src, dst, chunk_size: int = 1024 * 1024) -> None:
-    """Copy data from source to destination in chunks."""
     while True:
         chunk = src.read(chunk_size)
         if not chunk:
@@ -31,12 +30,10 @@ def copy_chunks(src, dst, chunk_size: int = 1024 * 1024) -> None:
 
 
 def hash_content(content: str) -> str:
-    """Generate a hash for the given content."""
     return hashlib.sha256(content.encode("utf-8")).hexdigest()
 
 
 def extract_archive(file_path, extract_to) -> None:
-    """Extract compressed archives to a temporary directory."""
     try:
         if file_path.suffix == ".zip":
             with zipfile.ZipFile(file_path, "r") as z:
@@ -71,7 +68,6 @@ def extract_archive(file_path, extract_to) -> None:
 
 
 def parse_python_file(file_path) -> Module | None:
-    """Parse a Python file and return its AST."""
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             return ast.parse(f.read(), filename=str(file_path))
@@ -81,7 +77,6 @@ def parse_python_file(file_path) -> Module | None:
 
 
 def find_repeated_definitions(ast_tree: Module):
-    """Find repeated functions, classes, and constants in an AST."""
     definitions = {"functions": {}, "classes": {}, "constants": {}}
     for node in ast.walk(ast_tree):
         if isinstance(node, ast.FunctionDef):
@@ -105,7 +100,7 @@ def find_repeated_definitions(ast_tree: Module):
 
 def process_file(file_path):
     path = Path(path)
-    """Process a single file to find repeated definitions."""
+    "Process a single file to find repeated definitions."
     ast_tree = parse_python_file(file_path)
     if ast_tree:
         return find_repeated_definitions(ast_tree)
@@ -113,7 +108,6 @@ def process_file(file_path):
 
 
 def process_directory(directory):
-    """Process all Python files in a directory recursively."""
     repeated_definitions = {"functions": {}, "classes": {}, "constants": {}}
     for root, _, files in os.walk(directory):
         for file in files:
@@ -129,7 +123,6 @@ def process_directory(directory):
 
 
 def write_definitions_to_file(definitions, output_dir: Path, move=False) -> None:
-    """Write repeated definitions to separate files."""
     for def_type, items in definitions.items():
         file_name = f"{def_type[:-1]}.py"
         output_file = output_dir / file_name
@@ -148,18 +141,8 @@ def write_definitions_to_file(definitions, output_dir: Path, move=False) -> None
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Inspect Python files for repeated definitions.")
-    parser.add_argument(
-        "-m",
-        "--move",
-        action="store_true",
-        help="Move repeated definitions to utils directory.",
-    )
-    parser.add_argument(
-        "-c",
-        "--copy",
-        action="store_true",
-        help="Copy repeated definitions to utils directory.",
-    )
+    parser.add_argument("-m", "--move", action="store_true", help="Move repeated definitions to utils directory.")
+    parser.add_argument("-c", "--copy", action="store_true", help="Copy repeated definitions to utils directory.")
     args = parser.parse_args()
     cwd = Path.cwd()
     utils_dir = cwd / "utils"

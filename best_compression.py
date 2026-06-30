@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 import bz2
 import gzip
 import hashlib
@@ -12,7 +13,6 @@ import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
-
 import brotli
 import py7zr
 import zstandard as zstd
@@ -26,7 +26,6 @@ except Exception:
 
 
 def copy_chunks(src, dst, chunk_size: int = 1024 * 1024) -> None:
-    """Copy data from source to destination in chunks."""
     while True:
         chunk = src.read(chunk_size)
         if not chunk:
@@ -155,23 +154,12 @@ def run_single(algo: str, in_path: Path, tmpdir: Path) -> Result:
         elapsed = time.perf_counter() - t0
         out_size = out_path.stat().st_size
         return Result(
-            algo=algo,
-            input_path=str(in_path),
-            out_path=str(out_path),
-            out_size=out_size,
-            elapsed_s=elapsed,
-            ok=True,
+            algo=algo, input_path=str(in_path), out_path=str(out_path), out_size=out_size, elapsed_s=elapsed, ok=True
         )
     except Exception as e:
         logger.exception(f"[{algo}] failed: {e}")
         return Result(
-            algo=algo,
-            input_path=str(in_path),
-            out_path="",
-            out_size=0,
-            elapsed_s=0.0,
-            ok=False,
-            error=str(e),
+            algo=algo, input_path=str(in_path), out_path="", out_size=0, elapsed_s=0.0, ok=False, error=str(e)
         )
 
 
@@ -278,13 +266,7 @@ def mp_compress_chunks(algo: str, in_path: Path, tmpdir: Path, chunk_size: int, 
     except Exception as e:
         logger.exception(f"[mp_{algo}] failed: {e}")
         return Result(
-            algo=f"mp_{algo}",
-            input_path=str(in_path),
-            out_path="",
-            out_size=0,
-            elapsed_s=0.0,
-            ok=False,
-            error=str(e),
+            algo=f"mp_{algo}", input_path=str(in_path), out_path="", out_size=0, elapsed_s=0.0, ok=False, error=str(e)
         )
 
 
@@ -297,7 +279,6 @@ def choose_best(results: List[Result]) -> Optional[Result]:
 
 
 def copy_file(src: Path, dst: Path, chunk_size: int = 1024 * 1024) -> None:
-    """Copy file from source to destination in chunks."""
     with src.open("rb") as fin, dst.open("wb") as fout:
         copy_chunks(fin, fout, chunk_size)
 
@@ -317,17 +298,7 @@ def main() -> None:
         logger.warning("Could not compute SHA256")
     with tempfile.TemporaryDirectory(prefix="compress_bench_") as td:
         tmpdir = Path(td)
-        single_algos = [
-            "7z",
-            "gz",
-            "lzma",
-            "bz2",
-            "zip",
-            "brotli",
-            "huffman",
-            "snappy",
-            "zstd",
-        ]
+        single_algos = ["7z", "gz", "lzma", "bz2", "zip", "brotli", "huffman", "snappy", "zstd"]
         results_single: List[Result] = []
         logger.info("=== Single-process benchmark ===")
         for algo in single_algos:

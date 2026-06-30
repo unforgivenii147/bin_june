@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 """
 Convert pyproject.toml → setup.py, preserving setup.cfg & MANIFEST.in.
 Handles C-extensions: setuptools, scikit-build-core, meson-python.
@@ -53,7 +54,6 @@ def extract_metadata(toml_data: dict) -> Dict[str, Any]:
 
 
 def parse_setup_cfg(setup_cfg_text: str) -> Dict[str, List[str]]:
-    """Parse setup.cfg sections used by setup.py generation."""
     if not setup_cfg_text:
         return {}
     cp = configparser.ConfigParser()
@@ -80,10 +80,6 @@ def parse_setup_cfg(setup_cfg_text: str) -> Dict[str, List[str]]:
 
 
 def has_c_extension(tool: Dict[str, Any]) -> Tuple[bool, str]:
-    """
-    Detect C-extension build method.
-    Returns (has_cext, method_name)
-    """
     setuptools_tool = tool.get("setuptools", {})
     if setuptools_tool.get("ext-modules"):
         return (True, "setuptools")
@@ -99,10 +95,7 @@ def has_c_extension(tool: Dict[str, Any]) -> Tuple[bool, str]:
 
 
 def generate_setup_py(
-    metadata: Dict[str, Any],
-    setup_cfg_text: Optional[str],
-    manifest_text: Optional[str],
-    force: bool = False,
+    metadata: Dict[str, Any], setup_cfg_text: Optional[str], manifest_text: Optional[str], force: bool = False
 ) -> str:
     cfg = parse_setup_cfg(setup_cfg_text)
     has_cext, cext_method = has_c_extension(metadata["tool"])
@@ -204,7 +197,7 @@ def generate_setup_py(
             cext_extension = "from setuptools import Extension\n\n" + "\n".join(ext_list) if ext_list else ""
             cext_imports = "from setuptools import Extension\n"
             cext_build = (
-                f"""    ext_modules=[{", ".join([f'''Extension("{e.get("name", "")}", sources={e.get("sources", [])})''' for e in ext_modules])}],\n"""
+                f"""    ext_modules=[{", ".join([f'''Extension("{e.get('name', '')}", sources={e.get('sources', [])})''' for e in ext_modules])}],\n"""
                 if ext_modules
                 else ""
             )
@@ -228,10 +221,7 @@ def main() -> None:
     )
     parser.add_argument("--force", action="store_true", help="Overwrite existing setup.py")
     parser.add_argument(
-        "toml_path",
-        nargs="?",
-        default="pyproject.toml",
-        help="Path to pyproject.toml (default: ./pyproject.toml)",
+        "toml_path", nargs="?", default="pyproject.toml", help="Path to pyproject.toml (default: ./pyproject.toml)"
     )
     args = parser.parse_args()
     toml_path = Path(args.toml_path).resolve()

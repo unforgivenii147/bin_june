@@ -1,47 +1,39 @@
 #!/data/data/com.termux/files/usr/bin/python
+
+
 import subprocess
 import json
 import re
 
 
 def get_packages_with_size():
-    """Get packages with their sizes using apt"""
     try:
-        # Use apt to get package sizes
         result = subprocess.run(["apt", "list", "--installed"], capture_output=True, text=True)
-
         packages = []
         for line in result.stdout.split("\n"):
-            if line and not line.startswith("Listing"):
-                # Parse apt output: package/version/arch [installed]
+            if line and (not line.startswith("Listing")):
                 parts = line.split()
                 if parts:
                     pkg_name = parts[0].split("/")[0]
                     packages.append(pkg_name)
-
         pkg_sizes = []
         for pkg in packages:
             try:
-                # Get package info
                 info = subprocess.run(["apt", "show", pkg], capture_output=True, text=True)
-
                 for line in info.stdout.split("\n"):
                     if line.startswith("Installed-Size:"):
-                        size_kb = int(re.search(r"\d+", line).group())
+                        size_kb = int(re.search("\\d+", line).group())
                         pkg_sizes.append((pkg, size_kb * 1024))
                         break
             except:
                 continue
-
         return sorted(pkg_sizes, key=lambda x: x[1], reverse=True)
-
     except Exception as e:
         print(f"Error: {e}")
         return []
 
 
 def format_size(bytes_size):
-    """Format bytes to human readable format"""
     for unit in ["B", "KB", "MB", "GB"]:
         if bytes_size < 1024.0:
             return f"{bytes_size:.1f} {unit}"
@@ -52,20 +44,16 @@ def format_size(bytes_size):
 def main():
     print("Fetching package sizes...")
     packages = get_packages_with_size()
-
     if not packages:
         print("No packages found or error occurred")
         return
-
     print("\n" + "=" * 60)
     print(f"{'Package':<30} {'Size':>20}")
     print("=" * 60)
-
     total = 0
     for pkg, size in packages:
         print(f"{pkg:<30} {format_size(size):>20}")
         total += size
-
     print("=" * 60)
     print(f"{'TOTAL':<30} {format_size(total):>20}")
 

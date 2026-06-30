@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 """
 Recursively rename font files based on their internal metadata (name and style).
 Uses fontTools to extract font family name and style (Regular, Bold, Italic, etc.).
@@ -12,7 +13,6 @@ If the target filename already exists, appends _1, _2, etc. to avoid overwriting
 """
 
 from pathlib import Path
-
 from dh import FONT_EXT, unique_path
 from fontTools.ttLib import TTFont
 
@@ -37,7 +37,6 @@ STYLE_MAPPING = {
 
 
 def get_font_name_and_style(font_path):
-    """Extract font family name and style from a font file using fontTools."""
     ext = font_path.suffix.lower()
     try:
         font = TTFont(font_path)
@@ -70,7 +69,6 @@ def get_font_name_and_style(font_path):
 
 
 def sanitize_filename(name) -> str:
-    """Sanitize a string for use as a filename."""
     if not name:
         return "Unknown"
     sanitized = "".join((c if c.isalnum() or c in ("-", "_", " ") else "_" for c in name))
@@ -81,7 +79,6 @@ def sanitize_filename(name) -> str:
 
 
 def rename_font_file(font_path: Path) -> str | None:
-    """Rename a single font file based on its metadata."""
     family_name, style = get_font_name_and_style(font_path)
     if not family_name:
         print(f"  Skipping {font_path.name}: Could not extract font family name")
@@ -105,7 +102,6 @@ def rename_font_file(font_path: Path) -> str | None:
 
 
 def process_directory(directory: Path, recursive=True) -> int:
-    """Process all font files in a directory (and subdirectories if recursive)."""
     directory = Path(directory)
     renamed_count = 0
     for item in directory.iterdir():

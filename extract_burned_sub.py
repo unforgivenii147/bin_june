@@ -1,16 +1,15 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 import multiprocessing
 import sys
 from functools import partial
-
 import cv2
 import numpy as np
 import pytesseract
 
 
 def _ocr_worker(frame_data: tuple, ocr_config: str) -> tuple[float, str]:
-    """Process one subtitle region. Returns (timestamp, text)."""
     time_pos, subtitle_region = frame_data
     try:
         gray = cv2.cvtColor(subtitle_region, cv2.COLOR_BGR2GRAY)
@@ -23,7 +22,6 @@ def _ocr_worker(frame_data: tuple, ocr_config: str) -> tuple[float, str]:
 
 
 def _frames_are_similar(a: np.ndarray, b: np.ndarray, threshold: float = 0.97) -> bool:
-    """Quick perceptual similarity check to skip redundant OCR."""
     small_a = cv2.resize(a, (64, 32))
     small_b = cv2.resize(b, (64, 32))
     diff = cv2.absdiff(small_a, small_b)
@@ -34,11 +32,6 @@ def _frames_are_similar(a: np.ndarray, b: np.ndarray, threshold: float = 0.97) -
 def extract_frames(
     video_path: str, sample_fps: float = 2.0, subtitle_top_ratio: float = 0.75
 ) -> list[tuple[float, np.ndarray]]:
-    """
-    Sample frames at `sample_fps` and return only the subtitle strip
-    (bottom `1 - subtitle_top_ratio` of the frame).
-    Consecutive visually identical strips are deduplicated to cut OCR load.
-    """
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
         raise IOError(f"Cannot open video: {video_path}")
@@ -64,10 +57,6 @@ def extract_frames(
 
 
 def _merge_subtitles(subtitles: list[dict], gap_threshold: float = 1.0) -> list[dict]:
-    """
-    Merge consecutive entries that share the same text and are close in time.
-    Produces tighter, cleaner SRT output.
-    """
     if not subtitles:
         return []
     merged: list[dict] = []
@@ -85,22 +74,8 @@ def _merge_subtitles(subtitles: list[dict], gap_threshold: float = 1.0) -> list[
 
 
 def extract_burned_subs_ocr(
-    video_path: str,
-    output_srt_path: str,
-    lang: str = "fas",
-    sample_fps: float = 2.0,
-    workers: int | None = None,
+    video_path: str, output_srt_path: str, lang: str = "fas", sample_fps: float = 2.0, workers: int | None = None
 ) -> None:
-    """
-    Extract burned-in subtitles via OCR and write an SRT file.
-    Parameters
-    ----------
-    video_path      : path to the source video
-    output_srt_path : where to write the .srt file
-    lang            : Tesseract language code (default: Farsi)
-    sample_fps      : how many frames per second to sample (default: 2)
-    workers         : OCR worker processes (default: cpu_count - 1)
-    """
     if workers is None:
         workers = max(1, multiprocessing.cpu_count() - 1)
     print(f"[1/3] Extracting frames  ({sample_fps} fps sample)…")
@@ -124,7 +99,6 @@ def extract_burned_subs_ocr(
 
 
 def format_time(seconds: float) -> str:
-    """Convert a float number of seconds to SRT timestamp format."""
     h = int(seconds // 3600)
     m = int(seconds % 3600 // 60)
     s = seconds % 60

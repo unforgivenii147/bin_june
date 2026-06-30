@@ -1,13 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 import sys
 from pathlib import Path
-
 from dh import partial_ratio
 from pip._internal.cli.main import main as pip_main
 
 WHL_DIR = Path.cwd()
-
 WILDCARD = "-w" in sys.argv
 
 
@@ -67,6 +66,3 @@ if __name__ == "__main__":
     if candidates is not None:
         for pkg in candidates:
             install_whl(pkg)
-#            if WILDCARD:
-#                install_by_wildcard(pkg)
-#            else:

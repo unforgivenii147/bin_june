@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 """
 Recursively extract embedded base64 data URIs from .css, .js, and .html files
 in the current directory, save the decoded assets to an `assets/` folder,
@@ -14,17 +15,14 @@ import mimetypes
 import os
 import re
 from pathlib import Path
-
 from dh import MIME2EXT
 
-# DATA_URI_PATTERN = re.compile(r"data:(?P<mime>[^;,]*)(?P<params>(?:;[^;,]+=[^;,]+)*);base64,(?P<data>[A-Za-z0-9+/=]+)")
 DATA_URI_PATTERN = re.compile(
-    r"data:(?P<mime>[^;,]*)(?P<params>(?:;[^;,]+=[^;,]+)*?);base64,\s*(?P<data>[A-Za-z0-9+/=]+)"
+    "data:(?P<mime>[^;,]*)(?P<params>(?:;[^;,]+=[^;,]+)*?);base64,\\s*(?P<data>[A-Za-z0-9+/=]+)"
 )
 
 
 def get_extension(mime: str) -> str:
-    """Return a file extension (with leading dot) for the given MIME type."""
     if mime:
         if mime in MIME2EXT.keys():
             return MIME2EXT.get(mime)[0]
@@ -38,11 +36,6 @@ def get_extension(mime: str) -> str:
 
 
 def process_file(file_path: Path, assets_dir: Path, processed: dict) -> None:
-    """
-    path = Path(path)
-    Find all data URIs in *file_path*, save the decoded assets, and
-    replace the URIs with relative links to the `assets/` directory.
-    """
     try:
         content = file_path.read_text(encoding="utf-8")
     except Exception as e:
@@ -80,7 +73,6 @@ def process_file(file_path: Path, assets_dir: Path, processed: dict) -> None:
 
 
 def main() -> None:
-    """Main entry point: walk the current directory and process target files."""
     mimetypes.init()
     assets_dir = Path("assets")
     assets_dir.mkdir(parents=True, exist_ok=True)

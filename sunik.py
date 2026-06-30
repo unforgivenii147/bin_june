@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 import argparse
 import shutil
 import sys
@@ -11,19 +12,10 @@ COMMENT_PREFIXES = ("#", "//", "--")
 
 def is_comment(line: str) -> bool:
     stripped = line.lstrip()
-    return any(stripped.startswith(prefix) for prefix in COMMENT_PREFIXES)
+    return any((stripped.startswith(prefix) for prefix in COMMENT_PREFIXES))
 
 
 def process_lines(lines: list[str], start_idx, end_idx, unique=False, sort_comments=False):
-    """
-    Sort and optionally deduplicate lines in the given index range.
-    If sort_comments is False:
-        - comment lines are preserved in their original positions
-        - only non-comment lines are sorted / deduplicated
-    If sort_comments is True:
-        - all lines in the range are sorted together
-        - comment lines are treated like normal lines
-    """
     target_slice = lines[start_idx:end_idx]
     if sort_comments:
         working_lines = target_slice[:]
@@ -75,18 +67,8 @@ def main() -> None:
     parser.add_argument("filename", help="Path to file")
     parser.add_argument("start_line", type=int, help="Start line (1-based)")
     parser.add_argument("end_line", type=int, help="End line (1-based, inclusive)")
-    parser.add_argument(
-        "-u",
-        "--unique",
-        action="store_true",
-        help="Remove duplicate lines within range",
-    )
-    parser.add_argument(
-        "-c",
-        "--comments",
-        action="store_true",
-        help="Include comment lines in sorting and uniqueness",
-    )
+    parser.add_argument("-u", "--unique", action="store_true", help="Remove duplicate lines within range")
+    parser.add_argument("-c", "--comments", action="store_true", help="Include comment lines in sorting and uniqueness")
     args = parser.parse_args()
     file_path = Path(args.filename)
     if not file_path.exists():

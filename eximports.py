@@ -1,9 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/python
-# create requirements.txt actually importz.txt
+
+
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-
 import tree_sitter_python as tsp
 from dh import STDLIB, cprint, get_installed_pkgs, get_pyfiles
 from tree_sitter import Language, Parser
@@ -14,7 +14,6 @@ VALID = {"import_statement", "import_from_statement"}
 
 
 def process_file(fp: Path) -> list[str]:
-    """Extract import statements from a single file."""
     path = Path(path)
     src = fp.read_bytes()
     tree = parser.parse(src)
@@ -23,19 +22,16 @@ def process_file(fp: Path) -> list[str]:
 
 
 def normalize_import(import_line: str) -> str | None:
-    """Normalize an import line to its root module name."""
     line = import_line.lower().strip()
-
     if line.startswith("import "):
-        module = line[7:]  # len("import ")
+        module = line[7:]
         if " as " in module:
             module = module[: module.index(" as ")]
         if "." in module:
             module = module[: module.index(".")]
-        return module if module and not module.startswith("_") else None
-
+        return module if module and (not module.startswith("_")) else None
     elif line.startswith("from "):
-        module = line[5:]  # len("from ")
+        module = line[5:]
         if module.startswith("."):
             return None
         if " import" in module:
@@ -44,18 +40,14 @@ def normalize_import(import_line: str) -> str | None:
             module = module[: module.index(" as ")]
         if "." in module:
             module = module[: module.index(".")]
-        return module if module and not module.startswith("_") else None
-
+        return module if module and (not module.startswith("_")) else None
     return None
 
 
 def process_files_parallel(files: list[Path]) -> set[str]:
-    """Process files in parallel using ProcessPoolExecutor."""
     all_imports = set()
-
     with ProcessPoolExecutor() as executor:
         future_to_file = {executor.submit(process_file, fp): fp for fp in files}
-
         for future in as_completed(future_to_file):
             try:
                 imports = future.result()
@@ -63,43 +55,29 @@ def process_files_parallel(files: list[Path]) -> set[str]:
             except Exception as e:
                 fp = future_to_file[future]
                 cprint(f"Error processing {fp}: {e}", "yellow")
-
     return all_imports
 
 
 def filter_imports(imports: set[str]) -> list[str]:
-    """Filter imports to only those not in stdlib or installed packages."""
-    # Pre-compute the set of excluded packages
     stdlib_set = set(STDLIB)
     installed_pkgs = {pkg.replace("-", "_").lower() for pkg in get_installed_pkgs()}
     excluded = stdlib_set | installed_pkgs
-
-    # Filter and normalize imports
     filtered = []
     for imp in imports:
         normalized = normalize_import(imp)
         if normalized and normalized not in excluded:
             filtered.append(normalized + "\n")
-
     return sorted(set(filtered))
 
 
 def main() -> None:
     outfile = Path("importz.txt")
     cwd = Path.cwd()
-
-    # Get all Python files
     pyfiles = get_pyfiles(cwd)
     cprint(f"{len(pyfiles)} python files found", "green")
-
-    # Extract imports in parallel
     all_imports = process_files_parallel(pyfiles)
-
-    # Filter and write results
     filtered_imports = filter_imports(all_imports)
     outfile.write_text("".join(filtered_imports), encoding="utf-8")
-
-    # Display filtered imports
     for imp in filtered_imports:
         print(imp.strip())
 

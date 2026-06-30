@@ -1,22 +1,16 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 import json
 import re
 import sys
 
 
 def bytes_to_hex(data: bytes) -> str:
-    """Convert bytes to hex string (uppercase, no spaces)."""
     return data.hex().upper()
 
 
 def parse_magic_line(line: str):
-    """
-    Parse a magic rule line like:
-        >0=�\x05<?xml
-        1>0=�\x19-//OASIS...
-    Returns (offset, mask, value_bytes) or None if invalid.
-    """
     match = re.match("^(?:(\\d+?)>)?(\\d+)=", line)
     if not match:
         return None
@@ -27,19 +21,10 @@ def parse_magic_line(line: str):
         value_bytes = value_part.encode("latin-1")
     except UnicodeEncodeError:
         value_bytes = value_part.encode("latin-1", errors="replace")
-    return {
-        "rule_index": rule_index,
-        "offset": offset,
-        "value_bytes": value_bytes,
-        "hex": bytes_to_hex(value_bytes),
-    }
+    return {"rule_index": rule_index, "offset": offset, "value_bytes": value_bytes, "hex": bytes_to_hex(value_bytes)}
 
 
 def parse_magic_file(filepath: str, encoding="latin-1"):
-    """
-    Parse a magic-file-like input.
-    Returns dict: {mimetype: [rules...]}
-    """
     result = {}
     current_mimetype = None
     with open(filepath, "rb") as f:
@@ -61,11 +46,7 @@ def parse_magic_file(filepath: str, encoding="latin-1"):
             continue
         parsed = parse_magic_line(line)
         if parsed:
-            rule = {
-                "offset": parsed["offset"],
-                "value_hex": parsed["hex"],
-                "length": len(parsed["value_bytes"]),
-            }
+            rule = {"offset": parsed["offset"], "value_hex": parsed["hex"], "length": len(parsed["value_bytes"])}
             if parsed["rule_index"] is not None:
                 rule["rule_index"] = parsed["rule_index"]
             result[current_mimetype].append(rule)

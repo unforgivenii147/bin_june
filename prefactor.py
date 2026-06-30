@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
+
+
 """
 merge_to_single.py
 
@@ -37,7 +39,6 @@ class ModuleInfo:
     deps: Set[str]
 
 
-# ---------- file discovery & naming ----------
 def find_py_files(root: Path, exclude: Optional[Path] = None) -> List[Path]:
     files = []
     for p in sorted(root.rglob("*.py")):
@@ -63,15 +64,13 @@ def module_fullname_for_path(root: Path, file_path: Path, package_mode: bool, pa
             return package_name if package_name else root.name
         else:
             return ".".join(parts) if parts else root.name
+    elif package_mode:
+        prefix = package_name if package_name else root.name
+        return ".".join([prefix] + parts)
     else:
-        if package_mode:
-            prefix = package_name if package_name else root.name
-            return ".".join([prefix] + parts)
-        else:
-            return ".".join(parts)
+        return ".".join(parts)
 
 
-# ---------- import analysis ----------
 def resolve_relative_import(curr_fullname: str, module: Optional[str], level: int) -> Optional[str]:
     if level == 0:
         return module
@@ -93,9 +92,7 @@ def analyze_file(args) -> ModuleInfo:
     try:
         tree = ast.parse(src)
     except SyntaxError:
-        # keep source but no AST deps
         return ModuleInfo(path=file_path, fullname="", source=src, deps=set())
-
     fullname = module_fullname_for_path(root, file_path, package_mode, package_name)
     deps: Set[str] = set()
     for node in ast.walk(tree):
@@ -116,12 +113,10 @@ def analyze_file(args) -> ModuleInfo:
             resolved = resolve_relative_import(fullname, mod, level)
             if resolved:
                 deps.add(resolved)
-            else:
-                if package_mode and mod:
-                    prefix = package_name if package_name else root.name
-                    if mod == prefix or mod.startswith(prefix + "."):
-                        deps.add(mod)
-    # normalize deps to actual module fullnames present in project
+            elif package_mode and mod:
+                prefix = package_name if package_name else root.name
+                if mod == prefix or mod.startswith(prefix + "."):
+                    deps.add(mod)
     normalized: Set[str] = set()
     for d in deps:
         if d in full_map:
@@ -154,24 +149,15 @@ def topological_sort(modules: Dict[str, ModuleInfo]) -> Tuple[List[str], List[Se
         remaining = set(edges) - set(ordered)
         ordered += sorted(remaining)
         cycles = [remaining]
-    return ordered, cycles
+    return (ordered, cycles)
 
 
-# ---------- merged-file generation ----------
 def build_merged_source(modules: Dict[str, ModuleInfo], ordered: List[str], out_module_name: str) -> str:
-    """
-    Emit the merged file that:
-    - embeds original sources in _orig_sources (safe Python literals)
-    - creates ModuleType objects and inserts into sys.modules
-    - executes modules in _order
-    - exposes get_original_source(name) to fetch original source at runtime
-    """
     lines: List[str] = []
     lines.append("# Auto-generated single-file package by merge_to_single.py")
     lines.append(f"# Reconstructed modules: {', '.join(ordered)}")
     lines.append("import sys, types")
     lines.append("")
-    # embed original sources as Python string literals (safe using !r)
     lines.append("_orig_sources = {")
     for name in ordered:
         src = modules[name].source
@@ -182,7 +168,6 @@ def build_merged_source(modules: Dict[str, ModuleInfo], ordered: List[str], out_
     lines.append('    """Return the original source (as a string) for a merged module, or None."""')
     lines.append("    return _orig_sources.get(module_name)")
     lines.append("")
-    # Pre-create ModuleType objects and register in sys.modules so intra-imports work
     lines.append("# Pre-create module objects and insert into sys.modules")
     lines.append("for _name in _orig_sources:")
     lines.append("    mod = types.ModuleType(_name)")
@@ -190,7 +175,6 @@ def build_merged_source(modules: Dict[str, ModuleInfo], ordered: List[str], out_
     lines.append("    mod.__package__ = _name.rpartition('.')[0]")
     lines.append("    sys.modules[_name] = mod")
     lines.append("")
-    # Execution order
     lines.append("_order = [")
     for name in ordered:
         lines.append(f"    {name!r},")
@@ -202,7 +186,6 @@ def build_merged_source(modules: Dict[str, ModuleInfo], ordered: List[str], out_
     lines.append("    # compile with a synthetic filename so tracebacks mention the original module name")
     lines.append("    exec(compile(src, f\"<merged:{_name}>\", 'exec'), mod.__dict__)")
     lines.append("")
-    # If package __init__ exists, import it and optionally re-export public names at top-level of merged file
     if out_module_name in modules:
         lines.append("try:")
         lines.append(f"    import {out_module_name} as _top")
@@ -218,7 +201,6 @@ def build_merged_source(modules: Dict[str, ModuleInfo], ordered: List[str], out_
     return "\n".join(lines)
 
 
-# ---------- CLI ----------
 def main():
     parser = argparse.ArgumentParser(description="Merge a small Python library into a single-file package.")
     parser.add_argument(
@@ -245,58 +227,45 @@ def main():
         "-j", "--jobs", type=int, default=0, help="Number of worker processes to use (default: auto cpu count)."
     )
     args = parser.parse_args()
-
     root: Path = args.input.resolve()
     if not root.exists() or not root.is_dir():
         print("Input must be an existing directory.", file=sys.stderr)
         sys.exit(2)
-
     out_dir: Path = args.output_dir.resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
-
     files = find_py_files(root, exclude=out_dir)
     if not files:
         print("No Python files found under input directory.", file=sys.stderr)
         sys.exit(2)
-
     package_mode = (root / "__init__.py").exists()
-    package_name = args.package_name if args.package_name else (root.name if package_mode else None)
-
-    if len(files) > args.max_files and not args.force:
+    package_name = args.package_name if args.package_name else root.name if package_mode else None
+    if len(files) > args.max_files and (not args.force):
         print(f"Found {len(files)} files which is > {args.max_files}. Use --force to override.", file=sys.stderr)
         sys.exit(2)
-
-    # map candidate fullnames -> path
     full_map_candidates: Dict[str, Path] = {}
     for p in files:
         name = module_fullname_for_path(root, p, package_mode, package_name)
         full_map_candidates[name] = p
-
     pool_args = [(p, root, package_mode, package_name, full_map_candidates) for p in files]
     if args.jobs and args.jobs > 0:
         workers = min(args.jobs, max(1, len(files)))
     else:
         workers = min(cpu_count(), max(1, len(files)))
-
     if workers == 1:
         results = list(map(analyze_file, pool_args))
     else:
         with Pool(processes=workers) as pool:
             results = pool.map(analyze_file, pool_args)
-
     modules: Dict[str, ModuleInfo] = {}
     for mi in results:
         if not mi.fullname:
             mi.fullname = module_fullname_for_path(root, mi.path, package_mode, package_name)
         modules[mi.fullname] = mi
-
     ordered, cycles = topological_sort(modules)
     if cycles:
         print("Warning: cycles detected among modules; attempting best-effort merge.", file=sys.stderr)
-
-    out_name = args.out_name or f"{(package_name or root.name)}_single.py"
+    out_name = args.out_name or f"{package_name or root.name}_single.py"
     out_path = out_dir / out_name
-
     merged = build_merged_source(modules, ordered, package_name or root.name)
     out_path.write_text(merged, encoding="utf8")
     print(f"Wrote merged file to: {out_path}")

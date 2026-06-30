@@ -1,9 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 import html
 from pathlib import Path
 from urllib.parse import quote
-
 from dh import fsz
 
 cwd = Path.cwd()
@@ -38,7 +38,6 @@ def create_font_face(path, font_id: str) -> str:
 
 
 def generate_preview(fonts) -> str:
-    """Generate complete HTML with font previews."""
     styles = []
     sections = []
     for i, font_path in enumerate(fonts, 1):
@@ -60,7 +59,6 @@ def generate_preview(fonts) -> str:
 
 
 def main() -> None:
-    """Main execution function."""
     fonts = find_fonts()
     if not fonts:
         print("❌ No font files found in current directory.")

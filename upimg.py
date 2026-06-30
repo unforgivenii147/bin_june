@@ -1,7 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/python
+
+
 import sys
 from pathlib import Path
-
 import cv2
 from dh import get_files
 
@@ -23,11 +24,10 @@ def process_file(path) -> None:
     elif w > 2000:
         del w, h, img
         return
-    print(f"[\u2713] {path.name}:{h}X{w} -> {h * FACTOR}X{w * FACTOR}")
+    print(f"[✓] {path.name}:{h}X{w} -> {h * FACTOR}X{w * FACTOR}")
     try:
         resized = cv2.resize(img, (w * FACTOR, h * FACTOR), interpolation=cv2.INTER_LANCZOS4)
         del img, h, w
-        # blurred = cv2.GaussianBlur(lanczos, (0,0), 3)
         sharpened = cv2.addWeighted(resized, 1.5, resized, -0.5, 0)
         del resized
         cv2.imwrite(path, sharpened)
@@ -41,7 +41,6 @@ if __name__ == "__main__":
     cwd = Path.cwd()
     args = sys.argv[1:]
     files = [Path(p) for p in args] if args else get_files(cwd, ext=[".webp", ".jpg", ".jpeg", ".png"])
-
     c = 0
     for f in files:
         c += 1

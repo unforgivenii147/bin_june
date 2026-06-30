@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
+
+
 """
 Convert YAML to JSON with various formatting options.
 
@@ -15,7 +17,6 @@ Examples:
 """
 
 from __future__ import annotations
-
 import argparse
 import json
 import sys
@@ -31,8 +32,6 @@ except ImportError:
 
 @dataclass
 class ConversionArgs:
-    """Arguments for YAML to JSON conversion."""
-
     input: TextIO
     output: TextIO
     indent: int | None
@@ -44,7 +43,6 @@ class ConversionArgs:
 
     @classmethod
     def from_namespace(cls, ns: argparse.Namespace) -> ConversionArgs:
-        """Create ConversionArgs from argparse namespace."""
         return cls(
             input=ns.input,
             output=ns.output,
@@ -66,46 +64,20 @@ def convert_yaml_to_json(
     strict: bool = False,
     allow_unicode: bool = False,
 ) -> str:
-    """Convert YAML string to JSON string.
-
-    Args:
-        yaml_input: YAML string or file-like object
-        indent: Number of spaces for indentation (None for compact)
-        compact: Remove all unnecessary whitespace
-        sort_keys: Sort dictionary keys alphabetically
-        ensure_ascii: Escape non-ASCII characters
-        strict: Use strict YAML parsing (disallow duplicate keys)
-        allow_unicode: Allow unicode characters in output
-
-    Returns:
-        JSON string
-
-    Raises:
-        yaml.YAMLError: If YAML parsing fails
-        ValueError: If JSON serialization fails
-    """
-    # Parse YAML
     try:
         if strict:
-            # Strict mode: disallow duplicate keys
             loader = yaml.SafeLoader
             data = yaml.load(yaml_input, Loader=loader)
         else:
             data = yaml.safe_load(yaml_input)
     except yaml.YAMLError as e:
         raise yaml.YAMLError(f"YAML parsing error: {e}") from e
-
-    # Validate data is JSON-serializable
     try:
         json.dumps(data, ensure_ascii=ensure_ascii, allow_nan=False)
     except (TypeError, ValueError) as e:
         raise ValueError(f"Data cannot be serialized to JSON: {e}") from e
-
-    # Set formatting options
     separators = (",", ":") if compact else None
     json_indent = None if compact else indent
-
-    # Convert to JSON
     try:
         return json.dumps(
             data,
@@ -120,28 +92,11 @@ def convert_yaml_to_json(
 
 
 def main() -> int:
-    """Main entry point.
-
-    Returns:
-        Exit code (0 for success, 1 for errors)
-    """
     parser = argparse.ArgumentParser(
         description="Convert YAML to JSON",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""\
-Examples:
-  %(prog)s config.yaml                    # Pretty print to stdout
-  %(prog)s config.yaml -o config.json     # Save to file
-  cat config.yaml | %(prog)s              # Read from stdin
-  %(prog)s config.yaml --indent 4         # 4-space indentation
-  %(prog)s config.yaml --compact          # Minified output
-  %(prog)s config.yaml --sort-keys        # Sorted keys
-  %(prog)s config.yaml --no-ensure-ascii  # Preserve unicode
-  %(prog)s config.yaml --strict           # Strict YAML mode
-        """,
+        epilog="Examples:\n  %(prog)s config.yaml                    # Pretty print to stdout\n  %(prog)s config.yaml -o config.json     # Save to file\n  cat config.yaml | %(prog)s              # Read from stdin\n  %(prog)s config.yaml --indent 4         # 4-space indentation\n  %(prog)s config.yaml --compact          # Minified output\n  %(prog)s config.yaml --sort-keys        # Sorted keys\n  %(prog)s config.yaml --no-ensure-ascii  # Preserve unicode\n  %(prog)s config.yaml --strict           # Strict YAML mode\n        ",
     )
-
-    # Input/Output options
     io_group = parser.add_argument_group("Input/Output")
     io_group.add_argument(
         "input",
@@ -157,8 +112,6 @@ Examples:
         default=sys.stdout,
         help="Output JSON file (default: stdout)",
     )
-
-    # Formatting options
     format_group = parser.add_argument_group("Formatting")
     format_group.add_argument(
         "-i",
@@ -168,19 +121,9 @@ Examples:
         help="Indentation spaces for pretty printing (default: 2, use 0 for compact)",
     )
     format_group.add_argument(
-        "-c",
-        "--compact",
-        action="store_true",
-        help="Compact output (minified, overrides --indent)",
+        "-c", "--compact", action="store_true", help="Compact output (minified, overrides --indent)"
     )
-    format_group.add_argument(
-        "-s",
-        "--sort-keys",
-        action="store_true",
-        help="Sort dictionary keys alphabetically",
-    )
-
-    # Encoding options
+    format_group.add_argument("-s", "--sort-keys", action="store_true", help="Sort dictionary keys alphabetically")
     encoding_group = parser.add_argument_group("Encoding")
     encoding_group.add_argument(
         "--no-ensure-ascii",
@@ -190,49 +133,27 @@ Examples:
         help="Allow non-ASCII characters in output (default: escape them)",
     )
     encoding_group.add_argument(
-        "-u",
-        "--allow-unicode",
-        action="store_true",
-        help="Keep unicode characters as-is (alias for --no-ensure-ascii)",
+        "-u", "--allow-unicode", action="store_true", help="Keep unicode characters as-is (alias for --no-ensure-ascii)"
     )
-
-    # Parsing options
     parsing_group = parser.add_argument_group("Parsing")
     parsing_group.add_argument(
-        "--strict",
-        action="store_true",
-        help="Strict YAML parsing (disallow duplicate keys, etc.)",
+        "--strict", action="store_true", help="Strict YAML parsing (disallow duplicate keys, etc.)"
     )
-    parsing_group.add_argument(
-        "--validate-only",
-        action="store_true",
-        help="Only validate YAML, don't output JSON",
-    )
-
+    parsing_group.add_argument("--validate-only", action="store_true", help="Only validate YAML, don't output JSON")
     args = parser.parse_args()
-
-    # Handle unicode flag
     if args.allow_unicode:
         args.ensure_ascii = False
-
-    # Create typed arguments
     conv_args = ConversionArgs.from_namespace(args)
-
-    # Read YAML input
     try:
         if conv_args.input is sys.stdin and sys.stdin.isatty():
             print("Enter YAML content (Ctrl+D to finish):", file=sys.stderr)
-
         yaml_content = conv_args.input.read()
     except Exception as e:
         print(f"Error reading input: {e}", file=sys.stderr)
         return 1
-
     if not yaml_content.strip():
         print("Error: Empty YAML input", file=sys.stderr)
         return 1
-
-    # Convert YAML to JSON
     try:
         json_output = convert_yaml_to_json(
             yaml_content,
@@ -249,23 +170,17 @@ Examples:
     except ValueError as e:
         print(f"Conversion Error: {e}", file=sys.stderr)
         return 1
-
-    # Output result
     if not args.validate_only:
         try:
             conv_args.output.write(json_output)
-
-            # Add trailing newline for stdout
             if conv_args.output is sys.stdout:
                 conv_args.output.write("\n")
-
             conv_args.output.flush()
         except Exception as e:
             print(f"Error writing output: {e}", file=sys.stderr)
             return 1
     else:
         print("✓ YAML is valid", file=sys.stderr)
-
     return 0
 
 

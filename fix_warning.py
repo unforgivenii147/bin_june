@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 import io
 import re
 import sys
@@ -10,22 +11,11 @@ INVALID_ESCAPE_RE = re.compile("\\\\(?![\\\\\\'\"abfnrtv0-7xuUNN])")
 
 
 def has_invalid_escape(s: str) -> bool:
-    """
-    Detect invalid backslash escapes in a Python string literal source text.
-    """
     return bool(INVALID_ESCAPE_RE.search(s))
 
 
 def make_raw_string(source: str) -> str:
-    """
-    Convert a simple string literal source to a raw string literal if possible.
-    This preserves the original quote style when feasible.
-    """
-    m = re.match(
-        "^([rubfRUBF]*)?(?P<quote>\"\"\"|\\'\\'\\'|\"|\\')(?P<body>.*)(?P=quote)$",
-        source,
-        re.S,
-    )
+    m = re.match("^([rubfRUBF]*)?(?P<quote>\"\"\"|\\'\\'\\'|\"|\\')(?P<body>.*)(?P=quote)$", source, re.S)
     if not m:
         return source
     prefix = m.group(1) or ""
@@ -44,10 +34,6 @@ def make_raw_string(source: str) -> str:
 
 
 def fix_file(path: Path) -> bool:
-    """
-    Rewrite file if it contains string literals with invalid escapes.
-    Returns True if modified.
-    """
     try:
         text = path.read_text(encoding="utf-8")
     except Exception:

@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
+
+
 import argparse
 import asyncio
 import mmap
@@ -7,11 +9,10 @@ import sys
 import tarfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
 from lzma_mt import compress, decompress
 
 MAX_WORKERS = 4
-CHUNK_SIZE = 1048576  # 524288
+CHUNK_SIZE = 1048576
 
 
 def decompress_file(path: Path) -> bool:
@@ -159,11 +160,11 @@ def compress_file(path: Path) -> tuple[bool, int, int]:
     out_path = path.with_name(path.name + ".xz")
     if out_path.exists():
         print(f"Skipping {path.name} - output already exists")
-        return False, 0, 0
+        return (False, 0, 0)
     try:
         original_size = path.stat().st_size
         if not original_size:
-            return False, 0, 0
+            return (False, 0, 0)
         if original_size < CHUNK_SIZE:
             success = compress_in_memory(path, out_path)
         else:
@@ -173,28 +174,28 @@ def compress_file(path: Path) -> tuple[bool, int, int]:
             if compressed_size == 0:
                 print(f"Warning: Compressed file empty for {path.name}")
                 out_path.unlink()
-                return False, 0, 0
+                return (False, 0, 0)
             if compressed_size < original_size:
                 reduction = (original_size - compressed_size) / original_size * 100
                 print(f"  ✓ {path.name}: {reduction:.1f}% saved ({fsz(original_size)} → {fsz(compressed_size)})")
                 path.unlink()
-                return True, original_size, compressed_size
+                return (True, original_size, compressed_size)
             else:
                 print(f"  ✗ {path.name}: No space saved, removing compressed file")
                 out_path.unlink()
-                return False, 0, 0
+                return (False, 0, 0)
         else:
-            return False, 0, 0
+            return (False, 0, 0)
     except (OSError, PermissionError) as e:
         print(f"  ✗ Failed to compress {path.name}: {e}")
-        return False, 0, 0
+        return (False, 0, 0)
 
 
 def get_files(directory: Path, mode: str = "compress") -> list[Path]:
     if mode == "compress":
-        return [p for p in directory.glob("*") if p.is_file() and not p.is_symlink() and should_compress(p)]
+        return [p for p in directory.glob("*") if p.is_file() and (not p.is_symlink()) and should_compress(p)]
     else:
-        return [p for p in directory.glob("*.xz") if p.is_file() and not p.is_symlink()]
+        return [p for p in directory.glob("*.xz") if p.is_file() and (not p.is_symlink())]
 
 
 def get_dirs(directory: Path) -> list[Path]:
@@ -205,7 +206,7 @@ def should_compress(path: Path) -> bool:
     try:
         if not path.is_file() or path.is_symlink():
             return False
-        compressed_extensions = ".xz", ".br", ".7z", ".gz", ".zip", ".tar"
+        compressed_extensions = (".xz", ".br", ".7z", ".gz", ".zip", ".tar")
         if path.suffix in compressed_extensions:
             return False
         size = path.stat().st_size
@@ -336,26 +337,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Multi-threaded compression/decompression tool",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  %(prog)s -c
-  %(prog)s -d
-  %(prog)s
-        """,
+        epilog="\nExamples:\n  %(prog)s -c\n  %(prog)s -d\n  %(prog)s\n        ",
     )
     group = parser.add_mutually_exclusive_group()
-    group.add_argument(
-        "-c",
-        "--compress",
-        action="store_true",
-        help="Compress files and folders (default)",
-    )
-    group.add_argument(
-        "-d",
-        "--decompress",
-        action="store_true",
-        help="Decompress .xz and .tar.xz files",
-    )
+    group.add_argument("-c", "--compress", action="store_true", help="Compress files and folders (default)")
+    group.add_argument("-d", "--decompress", action="store_true", help="Decompress .xz and .tar.xz files")
     args = parser.parse_args()
     if args.decompress:
         mode = "decompress"

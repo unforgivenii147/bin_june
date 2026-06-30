@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
+
+
 """
 Rewrite of the RECORD updater with multiprocessing support.
 Recalculates file hashes and sizes for installed packages,
@@ -14,17 +16,11 @@ import sys
 from pathlib import Path
 from typing import Tuple
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    stream=sys.stderr,
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s", stream=sys.stderr)
 logger = logging.getLogger(__name__)
 
 
 def find_site_packages() -> Path | None:
-    """Locate the first site-packages directory."""
     try:
         dirs = site.getsitepackages()
     except Exception:
@@ -39,11 +35,9 @@ def find_site_packages() -> Path | None:
 
 
 def calculate_file_hash(filepath: Path) -> str:
-    """Return url-safe base64 sha256 hash of a file, prefixed with 'sha256='."""
     sha256_hash = hashlib.sha256()
     try:
         with filepath.open("rb") as f:
-            # Read in chunks to handle large files efficiently
             for chunk in iter(lambda: f.read(65536), b""):
                 sha256_hash.update(chunk)
         raw_hash = sha256_hash.digest()
@@ -55,7 +49,6 @@ def calculate_file_hash(filepath: Path) -> str:
 
 
 def get_file_size(filepath: Path) -> int:
-    """Return file size in bytes, or 0 on error."""
     try:
         return filepath.stat().st_size
     except Exception:
@@ -64,17 +57,15 @@ def get_file_size(filepath: Path) -> int:
 
 
 def parse_record_line(line: str) -> Tuple[str, str, str]:
-    """Split a RECORD line into (path, hash, size)."""
     parts = line.strip().split(",")
     if len(parts) == 3:
-        return parts[0], parts[1], parts[2]
+        return (parts[0], parts[1], parts[2])
     if len(parts) == 2:
-        return parts[0], parts[1], ""
-    return parts[0], "", ""
+        return (parts[0], parts[1], "")
+    return (parts[0], "", "")
 
 
 def should_include_file(filepath: Path) -> bool:
-    """Return True if the file should be included in the new RECORD."""
     name = filepath.name
     return not (
         filepath.suffix == ".pyc" or name.endswith(".pyc") or name in ("direct_url.json", "INSTALLER", "RECORD")
@@ -82,23 +73,17 @@ def should_include_file(filepath: Path) -> bool:
 
 
 def process_dist_info(dist_info_dir: Path) -> bool:
-    """
-    Update the RECORD file inside a .dist-info directory.
-    Returns True on success.
-    """
     record_path = dist_info_dir / "RECORD"
     logger.info("Processing %s", record_path)
     if not record_path.exists():
         logger.error("RECORD not found: %s", record_path)
         return False
-
     try:
         with record_path.open("r", encoding="utf-8") as f:
             lines = f.readlines()
     except Exception:
         logger.exception("Failed to read %s", record_path)
         return False
-
     new_lines = []
     missing_files = []
     for raw_line in lines:
@@ -123,32 +108,19 @@ def process_dist_info(dist_info_dir: Path) -> bool:
             continue
         new_size = get_file_size(full_path)
         new_lines.append(f"{relative_path},{new_hash},{new_size}")
-
-    # Append the RECORD entry itself (empty hash/size for now)
     record_relative = str(record_path.relative_to(dist_info_dir.parent))
     new_lines.append(f"{record_relative},,")
-
     if missing_files:
-        logger.warning(
-            "%d missing files in %s: %s",
-            len(missing_files),
-            dist_info_dir.name,
-            ", ".join(missing_files),
-        )
-
-    # Write the new RECORD file
+        logger.warning("%d missing files in %s: %s", len(missing_files), dist_info_dir.name, ", ".join(missing_files))
     try:
         record_path.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
         logger.info("Updated %s", record_path)
     except Exception:
         logger.exception("Failed to write %s", record_path)
         return False
-
-    # Update the RECORD's own hash and size
     try:
         record_hash = calculate_file_hash(record_path)
         record_size = get_file_size(record_path)
-        # Replace the last line
         with record_path.open("r", encoding="utf-8") as f:
             final_lines = f.readlines()
         if final_lines:
@@ -159,7 +131,6 @@ def process_dist_info(dist_info_dir: Path) -> bool:
         logger.debug("Self-hash updated for %s", record_path)
     except Exception:
         logger.exception("Failed to update self-hash for %s", record_path)
-        # Non‑fatal, the main content is correct
     return True
 
 
@@ -168,28 +139,21 @@ def main() -> None:
     site_packages = find_site_packages()
     if not site_packages:
         sys.exit(1)
-
     dist_info_dirs = sorted(site_packages.glob("*.dist-info"))
     if not dist_info_dirs:
         logger.warning("No .dist-info directories found in %s", site_packages)
         sys.exit(0)
-
     logger.info("Found %d distribution(s)", len(dist_info_dirs))
-
-    # Use a pool of workers; leave one core free if possible.
     num_workers = max(1, multiprocessing.cpu_count() - 1)
     logger.info("Using %d worker processes", num_workers)
-
     updated = 0
     failed = 0
     with multiprocessing.Pool(processes=num_workers) as pool:
-        # imap_unordered gives results as they complete
         for success in pool.imap_unordered(process_dist_info, dist_info_dirs):
             if success:
                 updated += 1
             else:
                 failed += 1
-
     logger.info("Summary: %d updated, %d failed", updated, failed)
 
 

@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
+
+
 """
 Check recursively for empty wheels in the current directory.
 An empty wheel is a .whl file (ZIP archive) that contains no .py files.
@@ -9,15 +11,9 @@ from pathlib import Path
 
 
 def is_empty_wheel(whl_path: Path) -> bool | None:
-    """
-    Return True if the wheel contains no .py files, False otherwise.
-    Returns None if the file cannot be read as a ZIP archive.
-    """
     try:
         with zipfile.ZipFile(whl_path, "r") as zf:
-            # Check all entries; .py files may appear anywhere inside the archive.
             for name in zf.namelist():
-                # Directories end with '/', ignore them; check case-insensitively.
                 if name.lower().endswith((".py", ".so", ".pyi")):
                     return False
     except zipfile.BadZipFile:
@@ -35,8 +31,6 @@ def main() -> None:
             is_empty = is_empty_wheel(whl)
             if is_empty:
                 empty_wheels.append(whl)
-    #                print(f"Empty wheel: {whl}")
-
     if empty_wheels:
         print(f"\nFound {len(empty_wheels)} empty wheel(s).")
         target.mkdir(exist_ok=True)

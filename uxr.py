@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
+
+
 """
 Parallel Archive Extractor
 Extracts archives recursively in current directory using joblib parallelism.
@@ -8,7 +10,6 @@ Supported: .gz, .xz, .zip, .whl, .br, .zst, .7z, and tarballs (.tar.gz, .tar.xz,
 import sys
 from pathlib import Path
 from typing import Optional, Tuple
-
 import joblib
 import py7zr
 from joblib import Parallel, delayed
@@ -25,7 +26,6 @@ except ImportError:
 
 
 def copy_chunks(src, dst, chunk_size: int = 1024 * 1024) -> None:
-    """Copy data from source to destination in chunks."""
     while True:
         chunk = src.read(chunk_size)
         if not chunk:
@@ -69,12 +69,7 @@ class ArchiveExtractor:
             "RESET": "\x1b[0m",
         }
         color = colors.get(status.upper(), colors["RESET"])
-        icon = {
-            "SUCCESS": "✅",
-            "FAILED": "❌",
-            "SKIPPED": "⏭️",
-            "PROCESSING": "🔄",
-        }.get(status.upper(), "➡️")
+        icon = {"SUCCESS": "✅", "FAILED": "❌", "SKIPPED": "⏭️", "PROCESSING": "🔄"}.get(status.upper(), "➡️")
         msg = f"{icon} {archive.name:<40} [{status:<8}]"
         if details:
             msg += f" {details}"
@@ -187,11 +182,7 @@ class ArchiveExtractor:
                     except Exception as e:
                         temp_path.unlink()
                         if self.verbose:
-                            self._print_status(
-                                archive,
-                                "FAILED",
-                                f"Tar extraction from .zst failed: {e}",
-                            )
+                            self._print_status(archive, "FAILED", f"Tar extraction from .zst failed: {e}")
                         return False
             else:
                 output_file = output_dir / output_name
@@ -219,10 +210,10 @@ class ArchiveExtractor:
     def extract_single(self, archive_path: Path) -> Tuple[Path, bool, Optional[str]]:
         archive = Path(archive_path)
         if not archive.exists() or not archive.is_file():
-            return archive, False, "File not found"
+            return (archive, False, "File not found")
         format_type = self._detect_format(archive)
         if not format_type:
-            return archive, False, f"Unsupported format: {archive.suffix}"
+            return (archive, False, f"Unsupported format: {archive.suffix}")
         stem = archive.stem
         if str(archive).endswith(".tar.zst"):
             stem = archive.stem[:-4] if archive.stem.endswith(".tar") else archive.stem
@@ -247,7 +238,7 @@ class ArchiveExtractor:
         try:
             extractor = extractors.get(format_type)
             if not extractor:
-                return archive, False, f"No extractor for {format_type}"
+                return (archive, False, f"No extractor for {format_type}")
             if self.verbose:
                 self._print_status(archive, "PROCESSING", f"-> {output_dir}/")
             success = extractor(archive, output_dir)
@@ -257,9 +248,9 @@ class ArchiveExtractor:
                     self._print_status(archive, "SUCCESS", f"Removed: {archive.name}")
             elif success and self.verbose:
                 self._print_status(archive, "SUCCESS", f"Extracted to: {output_dir}")
-            return archive, success, None if success else "Extraction failed"
+            return (archive, success, None if success else "Extraction failed")
         except Exception as e:
-            return archive, False, str(e)
+            return (archive, False, str(e))
 
     def extract_recursive(self, root_dir: Path = Path.cwd(), n_jobs: int = -1) -> dict:
         self._print_header(f"ARCHIVE EXTRACTOR - {root_dir}", "=")
@@ -279,13 +270,13 @@ class ArchiveExtractor:
             print("📭 No archive files found to extract.")
             return self.stats
         print(f"📦 Found {len(archives)} archive(s) to process")
-        print(f"⚡ Using {n_jobs if n_jobs > 0 else 'all'} CPU core(s)\n")
-        if any(str(a).endswith(".zst") for a in archives) and zstd is None:
+        print(f"⚡ Using {(n_jobs if n_jobs > 0 else 'all')} CPU core(s)\n")
+        if any((str(a).endswith(".zst") for a in archives)) and zstd is None:
             print("⚠️  Warning: zstandard library not installed. Install with: pip install zstandard")
-        if any(str(a).endswith(".br") for a in archives) and brotli_decompress is None:
+        if any((str(a).endswith(".br") for a in archives)) and brotli_decompress is None:
             print("⚠️  Warning: brotli library not installed. Install with: pip install brotli")
         results = Parallel(n_jobs=n_jobs, prefer="threads")(
-            delayed(self.extract_single)(archive) for archive in tqdm(archives, desc="Extracting")
+            (delayed(self.extract_single)(archive) for archive in tqdm(archives, desc="Extracting"))
         )
         for archive, success, error in results:
             self.stats["processed"] += 1
@@ -313,7 +304,7 @@ class ArchiveExtractor:
         print(f"✅ Successful:       {success} ({success / total * 100:.1f}%)")
         print(f"❌ Failed:           {failed} ({failed / total * 100:.1f}%)")
         print(f"⏭️  Skipped:          {skipped} ({skipped / total * 100:.1f}%)")
-        print(f"🗑️  Remove original:  {'Enabled' if self.remove_after else 'Disabled'}")
+        print(f"🗑️  Remove original:  {('Enabled' if self.remove_after else 'Disabled')}")
         if failed > 0:
             print("\n⚠️  Some archives failed to extract. Check errors above.")
         self._print_header("FINISHED", "-")
@@ -324,25 +315,9 @@ def main():
 
     parser = argparse.ArgumentParser(description="Extract archive files recursively with parallel processing")
     parser.add_argument("-d", "--dir", default=".", help="Root directory to search (default: current)")
-    parser.add_argument(
-        "-k",
-        "--keep",
-        action="store_true",
-        help="Keep original archive files after extraction",
-    )
-    parser.add_argument(
-        "-q",
-        "--quiet",
-        action="store_true",
-        help="Reduce verbosity (only show summary)",
-    )
-    parser.add_argument(
-        "-j",
-        "--jobs",
-        type=int,
-        default=-1,
-        help="Number of parallel jobs (-1 for all cores)",
-    )
+    parser.add_argument("-k", "--keep", action="store_true", help="Keep original archive files after extraction")
+    parser.add_argument("-q", "--quiet", action="store_true", help="Reduce verbosity (only show summary)")
+    parser.add_argument("-j", "--jobs", type=int, default=-1, help="Number of parallel jobs (-1 for all cores)")
     args = parser.parse_args()
     root_dir = Path(args.dir).resolve()
     if not root_dir.exists():

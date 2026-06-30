@@ -1,11 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 import sys
 from pathlib import Path
 
 
 def is_binary_file(path: Path, sample_size: int = 8192) -> bool:
-    """Return True if the file looks binary."""
     with path.open("rb") as f:
         chunk = f.read(sample_size)
     return b"\x00" in chunk

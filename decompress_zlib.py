@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
+
+
 import sys
 import zlib
 
@@ -7,10 +9,8 @@ def main():
     if len(sys.argv) < 2:
         print("Usage: python decompress_zlib.py <input.zlib> [output.file]")
         sys.exit(1)
-
     in_fname = sys.argv[1]
     out_fname = sys.argv[2] if len(sys.argv) > 2 else in_fname + ".decompressed"
-
     try:
         with open(in_fname, "rb") as fin, open(out_fname, "wb") as fout:
             decomp = zlib.decompressobj()
@@ -20,7 +20,6 @@ def main():
                 out = decomp.decompress(chunk)
                 if out:
                     fout.write(out)
-            # flush any remaining decompressed data
             rem = decomp.flush()
             if rem:
                 fout.write(rem)

@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 import csv
 import os
 import sysconfig
@@ -24,19 +25,15 @@ def is_empty_package(dist_info_path) -> bool:
 
 
 def is_empty_whl(whl_path: Path) -> bool:
-    """Check if a wheel file contains any files outside its .dist-info directory"""
     try:
         with zipfile.ZipFile(whl_path, "r") as zf:
             dist_info_dirs = [name for name in zf.namelist() if ".dist-info/" in name]
             if not dist_info_dirs:
                 return False
-
             dist_info_dir = dist_info_dirs[0].split("/")[0] + "/"
-
             for file_name in zf.namelist():
                 if file_name.endswith("/"):
                     continue
-
                 if not file_name.startswith(dist_info_dir):
                     return False
             return True
@@ -56,7 +53,6 @@ def find_empty_packages(site_packages: str):
 
 
 def find_empty_wheels(cwd: Path) -> list:
-    """Find empty wheel files in the current directory"""
     empty_wheels = []
     for file in cwd.glob("*.whl"):
         if is_empty_whl(file):
@@ -66,27 +62,22 @@ def find_empty_wheels(cwd: Path) -> list:
 
 def main() -> None:
     site_packages = sysconfig.get_paths()["purelib"]
-
     empty_installed = find_empty_packages(site_packages)
-
     cwd = Path.cwd()
     empty_wheels = find_empty_wheels(cwd)
-
     if empty_installed:
         print("\n=== Empty installed packages (site-packages) ===")
         for pkg in empty_installed:
             print(f"  {pkg}")
     else:
         print("\nNo empty installed packages found.")
-
     if empty_wheels:
         print("\n=== Empty wheel files in current directory ===")
         for whl in empty_wheels:
             print(f"  {whl}")
     else:
         print("\nNo empty wheel files found in current directory.")
-
-    if not empty_installed and not empty_wheels:
+    if not empty_installed and (not empty_wheels):
         print("\nNo empty packages or wheels found.")
 
 

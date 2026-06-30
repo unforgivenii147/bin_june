@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 import argparse
 import shutil
 import sys
@@ -15,13 +16,6 @@ def is_comment(line: str) -> bool:
 
 
 def process_lines(lines: list[str], start_idx, end_idx, unique=False, comments=True):
-    """
-    Sort and optionally deduplicate lines in the given index range.
-    comments=False:
-        Keep comment lines in place, sort only non-comment lines.
-    comments=True:
-        Include comment lines in sorting and uniqueness.
-    """
     target_slice = lines[start_idx:end_idx]
     if comments:
         working = target_slice[:]
@@ -73,19 +67,9 @@ def main() -> None:
     parser.add_argument("filename", help="Path to file")
     parser.add_argument("start_line", type=int, help="Start line (1-based)")
     parser.add_argument("end_line", type=int, help="End line (1-based, inclusive)")
+    parser.add_argument("-c", "--comments", action="store_true", default=True, help="Include comment lines in sorting")
     parser.add_argument(
-        "-c",
-        "--comments",
-        action="store_true",
-        default=True,
-        help="Include comment lines in sorting",
-    )
-    parser.add_argument(
-        "-u",
-        "--unique",
-        action="store_true",
-        default=False,
-        help="Remove duplicate lines within range",
+        "-u", "--unique", action="store_true", default=False, help="Remove duplicate lines within range"
     )
     args = parser.parse_args()
     file_path = Path(args.filename)
@@ -100,10 +84,7 @@ def main() -> None:
             lines = f.readlines()
         total_lines = len(lines)
         if args.end_line > total_lines:
-            print(
-                f"Error: end line {args.end_line} exceeds file length {total_lines}.",
-                file=sys.stderr,
-            )
+            print(f"Error: end line {args.end_line} exceeds file length {total_lines}.", file=sys.stderr)
             sys.exit(1)
         start_idx = args.start_line - 1
         end_idx = args.end_line

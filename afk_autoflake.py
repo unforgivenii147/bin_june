@@ -1,40 +1,22 @@
 #!/data/data/com.termux/files/usr/bin/python
+
+
 import argparse
 import os
 import subprocess
 
 
 def check_or_fix_imports(file_path, autofix=False):
-    """
-    Checks for or removes unused imports in the given file.
-    """
     if not os.path.exists(file_path):
         print(f"Error: The file `{file_path}` does not exist.")
         return
-
-    # Base command for autoflake
-    # --remove-all-unused-imports: removes all unused imports
-    # --ignore-init-module-imports: ensures __init__.py files aren't broken
-    command = [
-        "autoflake",
-        "--remove-all-unused-imports",
-        "--ignore-init-module-imports",
-        file_path,
-    ]
-
+    command = ["autoflake", "--remove-all-unused-imports", "--ignore-init-module-imports", file_path]
     if autofix:
-        # If autofix is enabled, we write the changes back to the file
         command.append("--in-place")
     else:
-        # If checking only, we just run it; if it exits with status 1,
-        # it means there are unused imports.
-        # We append --check to verify without modifying.
         command.append("--check")
-
     try:
-        # Run the command
         result = subprocess.run(command, capture_output=True, text=True)
-
         if result.returncode == 0:
             print("No unused imports found.")
         elif result.returncode == 1:
@@ -44,7 +26,6 @@ def check_or_fix_imports(file_path, autofix=False):
                 print(f"Unused imports found in `{file_path}`. Run with -a to fix.")
         else:
             print(f"An error occurred: {result.stderr}")
-
     except FileNotFoundError:
         print("Error: `autoflake` is not installed. Run `pip install autoflake`.")
 
@@ -52,13 +33,6 @@ def check_or_fix_imports(file_path, autofix=False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Check or fix unused imports in a Python file.")
     parser.add_argument("file", help="Path to the Python file")
-    parser.add_argument(
-        "-a",
-        "--autofix",
-        action="store_true",
-        help="Automatically remove unused imports",
-    )
-
+    parser.add_argument("-a", "--autofix", action="store_true", help="Automatically remove unused imports")
     args = parser.parse_args()
-
     check_or_fix_imports(args.file, args.autofix)

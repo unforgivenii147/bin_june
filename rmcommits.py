@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 """
 Delete commits older than n days from a Git repository.
 WARNING: This is a destructive operation. Use with caution!
@@ -7,17 +8,11 @@ WARNING: This is a destructive operation. Use with caution!
 
 import sys
 from datetime import datetime, timedelta, timezone
-
 import git
 from git import GitCommandError, Repo
 
 
 def delete_old_commits(days: int) -> None:
-    """
-    Delete commits older than specified days from the repository.
-    Args:
-        days (int): Number of days to keep commits for
-    """
     try:
         repo = Repo(".")
         if repo.head.is_detached:

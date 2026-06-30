@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
+
+
 import os
 import re
 from pathlib import Path
@@ -7,7 +9,6 @@ from typing import List, Tuple
 import argparse
 import sys
 
-# Try to import PIL for photo support
 try:
     from PIL import Image
     import pytesseract
@@ -18,9 +19,6 @@ except ImportError:
 
 
 class DirectoryBuilder:
-    """Build directory structure from tree.txt or photo"""
-
-    # Tree characters
     TREE_CHARS = {"├──": "├", "└──": "└", "│": "│", " ": " "}
 
     def __init__(self, use_multiprocessing: bool = True):
@@ -28,29 +26,22 @@ class DirectoryBuilder:
         self.items_to_create: List[Tuple[Path, bool]] = []
 
     def read_tree_file(self, filepath: str) -> List[str]:
-        """Read and parse tree.txt file"""
         tree_file = Path(filepath)
         if not tree_file.exists():
             raise FileNotFoundError(f"File not found: {filepath}")
-
         lines = []
         with open(tree_file, "r", encoding="utf-8") as f:
             for line in f:
-                # Remove comments
                 line = line.split("#")[0].rstrip()
                 if line.strip():
                     lines.append(line)
-
         return lines
 
     def read_from_photo(self, image_path: str) -> List[str]:
-        """Extract directory structure from photo using OCR"""
         if not PHOTO_SUPPORT:
             raise ImportError(
-                "Photo support requires: pip install Pillow pytesseract\n"
-                "Also install tesseract: https://github.com/UB-Mannheim/tesseract/wiki"
+                "Photo support requires: pip install Pillow pytesseract\nAlso install tesseract: https://github.com/UB-Mannheim/tesseract/wiki"
             )
-
         try:
             image = Image.open(image_path)
             text = pytesseract.image_to_string(image)
@@ -59,45 +50,24 @@ class DirectoryBuilder:
             raise ValueError(f"Failed to extract text from photo: {e}")
 
     def parse_tree_lines(self, lines: List[str]) -> List[Tuple[Path, bool]]:
-        """
-        Parse tree structure and return list of (path, is_directory)
-
-        Returns:
-            List of tuples: (Path, is_file)
-        """
         items = []
-        stack = [Path(".")]  # Stack to track current directory depth
-
+        stack = [Path(".")]
         for line in lines:
-            # Calculate depth by counting leading spaces/tree chars
             depth = self._calculate_depth(line)
-
-            # Extract the actual name (remove tree characters)
             name = self._extract_name(line)
-
             if not name:
                 continue
-
-            # Adjust stack based on depth
             while len(stack) > depth + 1:
                 stack.pop()
-
-            # Determine if it's a file or directory
             is_file = self._is_file(name)
-
-            # Build full path
             current_path = stack[-1] / name
             items.append((current_path, is_file))
-
-            # If directory, add to stack for next level
             if not is_file:
                 stack.append(current_path)
-
         self.items_to_create = items
         return items
 
     def _calculate_depth(self, line: str) -> int:
-        """Calculate nesting depth from indentation"""
         depth = 0
         i = 0
         while i < len(line):
@@ -111,28 +81,21 @@ class DirectoryBuilder:
         return int(depth)
 
     def _extract_name(self, line: str) -> str:
-        """Extract filename/dirname from tree line"""
-        # Remove tree characters
-        cleaned = re.sub(r"[├└│─\s]+", "", line)
-        # Handle pyproject.toml / setup.cfg / setup.py format
+        cleaned = re.sub("[├└│─\\s]+", "", line)
         return cleaned.strip()
 
     def _is_file(self, name: str) -> bool:
-        """Determine if item is a file based on extension or pattern"""
-        if "/" in name:  # Multiple option like "pyproject.toml / setup.cfg"
+        if "/" in name:
             return True
         return "." in name.split("/")[-1]
 
     @staticmethod
     def _create_item(item_data: Tuple[Path, bool]) -> Tuple[Path, bool, str]:
-        """Worker function for multiprocessing"""
         path, is_file = item_data
         try:
             if is_file:
-                # Handle multiple file options
                 if "/" in str(path.name):
                     files = [f.strip() for f in str(path.name).split("/")]
-                    # Create first available option
                     for fname in files:
                         fpath = path.parent / fname
                         fpath.touch()
@@ -148,32 +111,22 @@ class DirectoryBuilder:
             return (path, is_file, f"error: {e}")
 
     def create_structure(self, base_dir: str = ".", num_workers: int = None) -> None:
-        """Create directory structure"""
         if not self.items_to_create:
             print("No items to create. Parse tree first.")
             return
-
         base_path = Path(base_dir)
         base_path.mkdir(parents=True, exist_ok=True)
-
-        # Adjust paths to base directory
         items = [(base_path / item[0], item[1]) for item in self.items_to_create]
-
         if self.use_multiprocessing and num_workers is None:
             num_workers = max(1, cpu_count() - 1)
-
         print(f"Creating {len(items)} items...")
-
         if self.use_multiprocessing and num_workers > 1:
             with Pool(num_workers) as pool:
                 results = pool.map(self._create_item, items)
         else:
             results = [self._create_item(item) for item in items]
-
-        # Print results
-        created = sum(1 for _, _, status in results if status == "created")
+        created = sum((1 for _, _, status in results if status == "created"))
         errors = [r for r in results if "error" in r[2]]
-
         print(f"✓ Created: {created} items")
         if errors:
             print(f"✗ Errors: {len(errors)}")
@@ -181,7 +134,6 @@ class DirectoryBuilder:
                 print(f"  - {path}: {status}")
 
     def print_structure(self) -> None:
-        """Print parsed structure"""
         for path, is_file in self.items_to_create:
             marker = "📄" if is_file else "📁"
             depth = len(path.parts) - 1
@@ -200,30 +152,18 @@ def main():
     )
     parser.add_argument("--no-multiprocessing", action="store_true", help="Disable multiprocessing")
     parser.add_argument("--preview", action="store_true", help="Preview structure without creating")
-
     args = parser.parse_args()
-
-    # Create builder
     builder = DirectoryBuilder(use_multiprocessing=not args.no_multiprocessing)
-
-    # Detect source type
     source_path = Path(args.source)
-
     print(f"Reading from: {args.source}")
-
     if source_path.suffix.lower() in [".png", ".jpg", ".jpeg", ".bmp", ".gif"]:
         print("Detected photo format. Using OCR...")
         lines = builder.read_from_photo(args.source)
     else:
         lines = builder.read_tree_file(args.source)
-
     print(f"Found {len(lines)} lines")
-
-    # Parse structure
     items = builder.parse_tree_lines(lines)
     print(f"Parsed {len(items)} items")
-
-    # Preview or create
     if args.preview:
         print("\nPreview:")
         builder.print_structure()

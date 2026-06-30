@@ -1,17 +1,16 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 import os
 import sys
 import threading
 import time
 from pathlib import Path
-
 from dotenv import load_dotenv
 from github import Auth, Github, GithubException
 
 
 def countdown(timeout: int) -> None:
-    """Display a countdown timer."""
     for remaining in range(timeout, 0, -1):
         sys.stdout.write(f"\rTimeout in {remaining:2d} seconds... ")
         sys.stdout.flush()
@@ -21,30 +20,20 @@ def countdown(timeout: int) -> None:
 
 
 def get_repos(username: str, token: str | None = None, timeout: int = 60) -> list:
-    """Fetch repositories for a GitHub user with optional authentication."""
-
-    # Start countdown in a separate thread
     countdown_thread = threading.Thread(target=countdown, args=(timeout,), daemon=True)
     countdown_thread.start()
-
     try:
-        # Initialize GitHub client with new auth method
         if token:
             auth = Auth.Token(token)
             g = Github(auth=auth, timeout=timeout)
         else:
             g = Github(timeout=timeout)
-
-        # Get user and their repositories
         user = g.get_user(username)
         repos = list(user.get_repos())
-
         if not repos:
             print(f"\nNo public repositories found for user '{username}'.")
             return []
-
         return repos
-
     except GithubException as e:
         if e.status == 404:
             print(f"\nError: User '{username}' not found.")
@@ -67,21 +56,15 @@ def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: script.py <username>")
         sys.exit(1)
-
-    # Load environment variables from .env file
     env_path = Path("~/.env").expanduser()
     load_dotenv(env_path)
     token = os.getenv("GITHUB_TOKEN")
-
     username = sys.argv[1]
-
     if token:
         print("Using authenticated access (rate limit: 5000 requests/hour)")
     else:
         print("No token found in .env, using unauthenticated access (rate limit: 60 requests/hour)")
-
     repos = get_repos(username, token=token, timeout=60)
-
     print(f"\nRepositories of '{username}':")
     for repo in repos:
         stars = repo.stargazers_count
@@ -89,8 +72,6 @@ def main() -> None:
         description = repo.description or "No description"
         print(f"- {repo.name}")
         print(f"  ⭐ {stars} | 🔤 {language} | {description[:80]}")
-
-    # Save to file
     with Path(f"{username}.txt").open("w", encoding="utf-8") as f:
         f.write(f"Repositories of '{username}':\n")
         f.write("=" * 50 + "\n\n")

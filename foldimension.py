@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 """
 folderize_images.py
 Recursively find all image files in the current directory,
@@ -19,24 +20,10 @@ try:
 except ImportError:
     print("Error: This script requires Pillow. Install it with: pip install Pillow")
     exit(1)
-IMAGE_EXTENSIONS = {
-    ".jpg",
-    ".jpeg",
-    ".png",
-    ".gif",
-    ".bmp",
-    ".tiff",
-    ".tif",
-    ".webp",
-    ".ico",
-}
+IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".tif", ".webp", ".ico"}
 
 
 def collect_images(root: Path):
-    """
-    Walk root and return a dict mapping (width, height) -> list of Path objects.
-    Files that cannot be opened or are not valid images are skipped with a warning.
-    """
     size_to_files = defaultdict(list)
     for file_path in root.rglob("*"):
         if not file_path.is_file():
@@ -53,10 +40,6 @@ def collect_images(root: Path):
 
 
 def unique_destination(dest: Path) -> Path:
-    """
-    If dest already exists, append a counter before the extension
-    until a free name is found.
-    """
     if not dest.exists():
         return dest
     stem = dest.stem
@@ -71,10 +54,6 @@ def unique_destination(dest: Path) -> Path:
 
 
 def organize_images(root: Path, size_to_files: dict) -> None:
-    """
-    For each resolution group, create a folder (or use 'other') and move
-    the files there. Print a summary of the moves.
-    """
     for (width, height), files in size_to_files.items():
         if len(files) == 1:
             folder = "other"

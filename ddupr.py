@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 """
 refactor_utils.py — AST-based duplicate extractor.
 
@@ -13,7 +14,6 @@ Usage
 """
 
 from __future__ import annotations
-
 import argparse
 import ast
 import hashlib
@@ -26,31 +26,15 @@ from dataclasses import dataclass, field
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 from typing import Optional
-
 import brotlicffi as brotli
 import lzma_mt
 import zstandard as zstd
 from loguru import logger
 
 HAS_ZST = True
-
 HAS_BR = True
-ARCHIVE_EXTENSIONS = {
-    ".zip",
-    ".tar",
-    ".gz",
-    ".bz2",
-    ".xz",
-    ".tgz",
-    ".tbz2",
-    ".zst",
-    ".br",
-}
-UTILS_MAP: dict[str, str] = {
-    "func": "funcs.py",
-    "class": "classes.py",
-    "const": "const.py",
-}
+ARCHIVE_EXTENSIONS = {".zip", ".tar", ".gz", ".bz2", ".xz", ".tgz", ".tbz2", ".zst", ".br"}
+UTILS_MAP: dict[str, str] = {"func": "funcs.py", "class": "classes.py", "const": "const.py"}
 CONSTANT_CALL_NAMES = {"TypeVar", "NewType", "ParamSpec", "TypeVarTuple"}
 
 
@@ -67,7 +51,6 @@ class PyObject:
 
 
 def _content_hash(source: str) -> str:
-    """SHA-256 of source with blank lines and comments stripped."""
     normalised = "\n".join(
         (line for line in source.splitlines() if line.strip() and (not line.strip().startswith("#")))
     )
@@ -75,10 +58,6 @@ def _content_hash(source: str) -> str:
 
 
 def _node_source(source: str, node: ast.AST) -> str:
-    """
-    Use ast.get_source_segment when available (3.8+), fall back to
-    line-slice + dedent.
-    """
     seg = ast.get_source_segment(source, node)
     if seg is not None:
         return seg
@@ -89,10 +68,6 @@ def _node_source(source: str, node: ast.AST) -> str:
 
 
 def _collect_imports(tree: ast.Module, node: ast.AST) -> list[str]:
-    """
-    Return import statements from the module that are referenced inside node.
-    Handles both `import x` and `from x import y` forms.
-    """
     used: set[str] = set()
     for n in ast.walk(node):
         if isinstance(n, ast.Name):
@@ -119,13 +94,6 @@ def _collect_imports(tree: ast.Module, node: ast.AST) -> list[str]:
 
 
 def _is_constant_node(node: ast.AST) -> tuple[bool, str]:
-    """
-    Return (is_constant, name).
-    Matches:
-      - ALL_CAPS names
-      - TypeVar / NewType / ParamSpec / TypeVarTuple calls
-      - Annotated assignments at module level (e.g. X: Final[int] = 1)
-    """
     if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
         name = node.target.id
         return (True, name)
@@ -146,7 +114,6 @@ def _is_constant_node(node: ast.AST) -> tuple[bool, str]:
 
 
 def analyse_source(source: str, origin: str) -> list[PyObject]:
-    """Parse source and return top-level functions, classes, and constants."""
     objects: list[PyObject] = []
     try:
         tree = ast.parse(source)
@@ -200,17 +167,11 @@ def analyse_source(source: str, origin: str) -> list[PyObject]:
                         )
                     )
         except Exception as exc:
-            logger.error(
-                "Failed to process node '{}' in {}: {}",
-                getattr(node, "name", "?"),
-                origin,
-                exc,
-            )
+            logger.error("Failed to process node '{}' in {}: {}", getattr(node, "name", "?"), origin, exc)
     return objects
 
 
 def _read_zip(path: Path) -> list[tuple[str, str]]:
-    """Yield (virtual_path, source) pairs from a zip archive."""
     results = []
     try:
         with zipfile.ZipFile(path) as zf:
@@ -228,7 +189,6 @@ def _read_zip(path: Path) -> list[tuple[str, str]]:
 
 
 def _read_tar(path: Path) -> list[tuple[str, str]]:
-    """Yield (virtual_path, source) pairs from a tar-based archive."""
     results = []
     try:
         with tarfile.open(path) as tf:
@@ -286,10 +246,6 @@ def _read_xz(path: Path) -> list[tuple[str, str]]:
 
 
 def read_file_sources(path: Path) -> list[tuple[str, str]]:
-    """
-    Return a list of (origin_label, source_code) from a path.
-    Handles plain .py files and all supported archive formats.
-    """
     ext = path.suffix.lower()
     if ext == ".py":
         try:
@@ -311,7 +267,6 @@ def read_file_sources(path: Path) -> list[tuple[str, str]]:
 
 
 def _worker(path: Path) -> list[PyObject]:
-    """Top-level worker: read all sources from a path and analyse each."""
     results: list[PyObject] = []
     for origin, source in read_file_sources(path):
         results.extend(analyse_source(source, origin))
@@ -319,10 +274,6 @@ def _worker(path: Path) -> list[PyObject]:
 
 
 def _build_utils_source(objects: list[PyObject]) -> str:
-    """
-    Assemble a complete Python module from a list of PyObjects.
-    Deduplicates imports and separates sections with blank lines.
-    """
     all_imports: list[str] = []
     for obj in objects:
         all_imports.extend(obj.imports)
@@ -336,7 +287,6 @@ def _build_utils_source(objects: list[PyObject]) -> str:
 
 
 def _validate_source(source: str, dest: Path) -> bool:
-    """Return True if source parses without errors."""
     try:
         ast.parse(source)
         return True
@@ -346,10 +296,6 @@ def _validate_source(source: str, dest: Path) -> bool:
 
 
 def write_utils(grouped: dict[str, list[PyObject]], utils_dir: Path, *, dry_run: bool = False) -> dict[str, Path]:
-    """
-    Write utils/{func,class,const}.py.
-    Returns a mapping of kind → written path.
-    """
     utils_dir.mkdir(parents=True, exist_ok=True)
     written: dict[str, Path] = {}
     for kind, filename in UTILS_MAP.items():
@@ -389,21 +335,12 @@ def write_utils(grouped: dict[str, list[PyObject]], utils_dir: Path, *, dry_run:
 
 
 def _build_import_line(utils_dir: Path, cwd: Path, kind: str) -> str:
-    """
-    Build a relative import statement pointing to the correct utils module.
-    e.g.  from utils.func import foo, bar
-    """
     rel = utils_dir.relative_to(cwd)
     module_path = ".".join(rel.parts) + "." + UTILS_MAP[kind].removesuffix(".py")
     return f"from {module_path} import {{names}}"
 
 
 def remove_and_patch(objects_to_remove: list[PyObject], utils_dir: Path, cwd: Path) -> None:
-    """
-    Remove duplicate definitions from their origin files and inject
-    the required import so the file still resolves the names.
-    Only operates on real .py files (not archive members).
-    """
     by_file: dict[str, list[PyObject]] = defaultdict(list)
     for obj in objects_to_remove:
         if "::" in obj.origin_file:
@@ -450,31 +387,19 @@ def remove_and_patch(objects_to_remove: list[PyObject], utils_dir: Path, cwd: Pa
             continue
         try:
             path.write_text(new_source, encoding="utf-8")
-            logger.success(
-                "Patched {}: removed {} definition(s), added imports",
-                filepath,
-                len(objs),
-            )
+            logger.success("Patched {}: removed {} definition(s), added imports", filepath, len(objs))
         except Exception as exc:
             logger.error("Cannot write patched {}: {}", filepath, exc)
 
 
 def collect_all_paths(root: Path) -> list[Path]:
-    """Recursively collect .py files and supported archives under root."""
     all_exts = {".py"} | ARCHIVE_EXTENSIONS
     paths = [p for p in root.rglob("*") if p.suffix.lower() in all_exts and p.is_file()]
     utils_dir = root / "utils"
     return [p for p in paths if not str(p).startswith(str(utils_dir))]
 
 
-def find_duplicates(
-    all_objects: list[PyObject],
-) -> tuple[dict[str, list[PyObject]], dict[str, list[PyObject]]]:
-    """
-    Return:
-      duplicates  — hash → [PyObject, …]  (only hashes seen > 1 time)
-      grouped     — kind → [one representative PyObject per duplicate hash]
-    """
+def find_duplicates(all_objects: list[PyObject]) -> tuple[dict[str, list[PyObject]], dict[str, list[PyObject]]]:
     by_hash: dict[str, list[PyObject]] = defaultdict(list)
     for obj in all_objects:
         by_hash[obj.content_hash].append(obj)
@@ -510,12 +435,7 @@ def run(cwd: Path, mode: Optional[str], workers: int) -> None:
     if mode is None:
         for kind, objs in grouped.items():
             for obj in objs:
-                logger.info(
-                    "[{}] '{}' duplicated in {} file(s)",
-                    kind,
-                    obj.name,
-                    len(duplicates[obj.content_hash]),
-                )
+                logger.info("[{}] '{}' duplicated in {} file(s)", kind, obj.name, len(duplicates[obj.content_hash]))
         return
     dry_run = mode not in {"copy", "move"}
     write_utils(grouped, utils_dir, dry_run=dry_run)
@@ -534,22 +454,13 @@ def _parse_args() -> argparse.Namespace:
     )
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
-        "-c",
-        "--copy",
-        action="store_true",
-        help="Copy duplicate definitions to utils/ (originals untouched)",
+        "-c", "--copy", action="store_true", help="Copy duplicate definitions to utils/ (originals untouched)"
     )
     group.add_argument(
-        "-m",
-        "--move",
-        action="store_true",
-        help="Move duplicate definitions to utils/ and patch original files",
+        "-m", "--move", action="store_true", help="Move duplicate definitions to utils/ and patch original files"
     )
     parser.add_argument(
-        "--dir",
-        type=Path,
-        default=Path("."),
-        help="Root directory to scan (default: current directory)",
+        "--dir", type=Path, default=Path("."), help="Root directory to scan (default: current directory)"
     )
     parser.add_argument(
         "--workers",
@@ -575,13 +486,7 @@ def main() -> None:
         format="<green>{time:HH:mm:ss}</green> | <level>{level:<8}</level> | {message}",
         colorize=True,
     )
-    logger.add(
-        "refactor_utils.log",
-        level="DEBUG",
-        rotation="5 MB",
-        retention=3,
-        encoding="utf-8",
-    )
+    logger.add("refactor_utils.log", level="DEBUG", rotation="5 MB", retention=3, encoding="utf-8")
     root = args.dir.resolve()
     if not root.is_dir():
         logger.error("'{}' is not a directory", root)
@@ -591,12 +496,7 @@ def main() -> None:
         mode = "copy"
     elif args.move:
         mode = "move"
-    logger.info(
-        "Root: {}  |  mode: {}  |  workers: {}",
-        root,
-        mode or "report-only",
-        args.workers,
-    )
+    logger.info("Root: {}  |  mode: {}  |  workers: {}", root, mode or "report-only", args.workers)
     run(root, mode, args.workers)
 
 

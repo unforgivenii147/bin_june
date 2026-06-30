@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
+
+
 """
 GitHub Python Repositories Fetcher
 Usage: python script.py [username]
@@ -9,28 +11,21 @@ import json
 import sys
 from datetime import datetime, timedelta
 from typing import Dict, List
-
 import requests
 
 
 def get_user_repos(username: str) -> List[Dict]:
-    """Fetch all Python repositories for a given GitHub user"""
     repos = []
     page = 1
-
     while True:
         url = f"https://api.github.com/users/{username}/repos"
         params = {"page": page, "per_page": 100, "sort": "updated"}
-
         try:
             response = requests.get(url, params=params)
             response.raise_for_status()
-
             page_repos = response.json()
             if not page_repos:
                 break
-
-            # Filter for Python repos
             for repo in page_repos:
                 if repo.get("language") == "Python":
                     repos.append({
@@ -45,46 +40,29 @@ def get_user_repos(username: str) -> List[Dict]:
                         "updated_at": repo["updated_at"],
                         "private": repo["private"],
                     })
-
-            # Check if we've fetched all pages
             if len(page_repos) < 100:
                 break
-
             page += 1
-
         except requests.exceptions.RequestException as e:
             print(f"Error fetching repos for {username}: {e}", file=sys.stderr)
             break
-
     return repos
 
 
 def get_top_trending_users() -> List[Dict]:
-    """Fetch top trending GitHub users based on recent activity"""
-    # Search for users with Python repositories created in the last week
     week_ago = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
-
     url = "https://api.github.com/search/users"
-    params = {
-        "q": f"language:python created:>{week_ago}",
-        "sort": "followers",
-        "order": "desc",
-        "per_page": 10,
-    }
-
+    params = {"q": f"language:python created:>{week_ago}", "sort": "followers", "order": "desc", "per_page": 10}
     try:
         response = requests.get(url, params=params)
         response.raise_for_status()
         data = response.json()
-
         trending_users = []
         for user in data.get("items", []):
-            # Get full user details
             user_url = user["url"]
             user_response = requests.get(user_url)
             user_response.raise_for_status()
             user_data = user_response.json()
-
             trending_users.append({
                 "username": user_data["login"],
                 "name": user_data.get("name", ""),
@@ -93,55 +71,37 @@ def get_top_trending_users() -> List[Dict]:
                 "html_url": user_data["html_url"],
                 "repositories": get_user_repos(user_data["login"]),
             })
-
         return trending_users
-
     except requests.exceptions.RequestException as e:
         print(f"Error fetching trending users: {e}", file=sys.stderr)
         return []
 
 
 def save_to_json(data: any, filename: str = "github_repos.json") -> None:
-    """Save data to JSON file"""
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
     print(f"Data saved to {filename}")
 
 
 def main():
-    # Get username from command line arguments
     if len(sys.argv) > 1:
         username = sys.argv[1]
         print(f"Fetching Python repositories for user: {username}")
         repos = get_user_repos(username)
-
         if repos:
-            # Save individual user repos
-            output = {
-                "username": username,
-                "total_python_repos": len(repos),
-                "repositories": repos,
-            }
+            output = {"username": username, "total_python_repos": len(repos), "repositories": repos}
             filename = f"{username}_python_repos.json"
             save_to_json(output, filename)
             print(f"Found {len(repos)} Python repositories")
         else:
             print(f"No Python repositories found for user {username}")
-
     else:
         print("No username provided. Fetching top trending GitHub users with Python repos...")
         trending_data = get_top_trending_users()
-
         if trending_data:
-            # Add timestamp
-            output = {
-                "timestamp": datetime.now().isoformat(),
-                "trending_users": trending_data,
-            }
+            output = {"timestamp": datetime.now().isoformat(), "trending_users": trending_data}
             save_to_json(output, "trending_github_python_users.json")
             print(f"Found {len(trending_data)} trending users")
-
-            # Print summary
             for user in trending_data:
                 print(f"\n👤 {user['username']} ({user['name']})")
                 print(f"   Followers: {user['followers']}")

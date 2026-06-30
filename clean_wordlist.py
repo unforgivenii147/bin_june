@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 import mmap
 import os
 import sys
@@ -7,7 +8,6 @@ from collections import defaultdict
 
 
 def get_lines(file_path) -> list[str]:
-    """Reads lines using mmap for large files (>5MB) or standard read for smaller ones."""
     file_size = os.path.getsize(file_path)
     if file_size > 5 * 1024 * 1024:
         print(f"[Info] Large file detected ({file_size / (1024 * 1024):.2f} MB). Using mmap...")

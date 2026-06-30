@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+
 import requests
 import json
 import sys
@@ -9,7 +11,6 @@ def check_package(pkg_name):
     response = requests.get(url)
     if response.status_code == 200:
         data = response.json()
-        # Check latest version
         latest = data["info"]["version"]
         for release in data["releases"][latest]:
             if "pure" in release:

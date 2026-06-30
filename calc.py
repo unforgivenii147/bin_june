@@ -1,13 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 from textual.app import App, ComposeResult
 from textual.containers import Grid
 from textual.widgets import Button, Static
 
 
 class Display(Static):
-    """Calculator display showing current value."""
-
     DEFAULT_CSS = "\n    Display {\n        width: 1fr;\n        height: 3;\n        content-align: right middle;\n        background: $surface;\n        border: solid $primary;\n        text-style: bold;\n    }\n    "
 
     def __init__(self) -> None:
@@ -15,14 +14,11 @@ class Display(Static):
         self.value = "0"
 
     def update_display(self, text: str) -> None:
-        """Update display text."""
         self.value = text
         self.update(text)
 
 
 class Calculator(Static):
-    """Calculator application."""
-
     DEFAULT_CSS = "\n    Calculator {\n        width: 50;\n        height: auto;\n        border: solid $accent;\n        background: $panel;\n    }\n    \n    #button-grid {\n        width: 1fr;\n        height: auto;\n        grid-size: 4 5;\n        grid-gutter: 1 1;\n        padding: 1;\n    }\n    \n    Button {\n        width: 1fr;\n        height: 3;\n    }\n    \n    Button.operator {\n        background: $accent 80%;\n    }\n    \n    Button.equals {\n        background: $success 80%;\n    }\n    \n    Button.clear {\n        background: $error 80%;\n    }\n    "
 
     def __init__(self) -> None:
@@ -55,7 +51,6 @@ class Calculator(Static):
             yield Button("", disabled=True)
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        """Handle button presses."""
         button_id = event.button.id
         button_label = str(event.button.label)
         if button_id == "clear":
@@ -102,7 +97,6 @@ class Calculator(Static):
                     self.display_widget.update_display(current + button_label)
 
     def _calculate(self, left: float, operator: str, right: float) -> str:
-        """Perform the calculation and return result as string."""
         try:
             if operator == "+":
                 result = left + right

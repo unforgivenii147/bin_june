@@ -1,16 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 import sys
 from pathlib import Path
-
 import ffmpeg
 
 
 def get_subtitle_streams_info(input_path: str) -> list[dict]:
-    """
-    Uses ffprobe via ffmpeg-python to get detailed info about subtitle streams.
-    This is generally more reliable for stream mapping than pymediainfo alone.
-    """
     try:
         probe_data = ffmpeg.probe(input_path, select_streams="s")
         streams_info = []
