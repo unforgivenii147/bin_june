@@ -2,18 +2,22 @@
 """
 Convert escaped regex strings back to raw string format.
 Handles all re module functions (compile, sub, findall, match, search, etc.).
-Processes Python files recursively with parallel processing.
+Processes Python files with parallel processing.
+
+Usage:
+    python script.py                    # Process current directory recursively
+    python script.py file.py            # Process single file
+    python script.py folder1 folder2    # Process multiple folders
+    python script.py file.py folder/    # Mix files and folders
 """
 
 import ast
 import re
+import sys
 from pathlib import Path
 from multiprocessing import Pool
 from typing import Optional, Tuple, List
-import sys
 
-
-# Common re module functions that accept regex patterns
 RE_FUNCTIONS = {
     "compile",
     "search",
@@ -28,206 +32,181 @@ RE_FUNCTIONS = {
     "purge",
     "Pattern",
 }
-
-# Pattern to find re.FUNCTION() calls with string arguments
-# Matches: re.func(...) with various argument patterns
-RE_CALL_PATTERN = re.compile(r"\bre\.(" + "|".join(RE_FUNCTIONS) + r")\s*\(", re.IGNORECASE)
+RE_CALL_PATTERN = re.compile("\\bre\\.(" + "|".join(RE_FUNCTIONS) + ")\\s*\\(", re.IGNORECASE)
 
 
 def needs_raw_string(string_content: str) -> bool:
-    """
-    Check if a string should be converted to raw format.
-    Heuristics: contains backslash escape sequences typical of regex.
-    """
-    # Count backslash escape sequences
-    escape_sequences = re.findall(r'\\[\\abfnrtv"\']', string_content)
+    """Check if a string should be converted to raw string format."""
+    escape_sequences = re.findall("\\\\[\\\\abfnrtv\"\\']", string_content)
     escape_count = len(escape_sequences)
-
-    # Common regex patterns
     regex_indicators = [
-        r"\d",
-        r"\w",
-        r"\s",
-        r"\S",
-        r"\W",
-        r"\D",  # character classes
-        r"\[",
-        r"\]",  # bracket expressions
-        r"\(",
-        r"\)",  # groups
-        r"\|",
-        r"\^",
-        r"\$",  # alternation, anchors
-        r"\+",
-        r"\*",
-        r"\?",  # quantifiers
-        r"\{",
-        r"\}",  # repetition
-        r"\.",
-        r"\b",
-        r"\B",  # special chars
+        "\\d", "\\w", "\\s", "\\S", "\\W", "\\D",
+        "\\[", "\\]", "\\(", "\\)", "\\|", "\\^",
+        "\\$", "\\+", "\\*", "\\?", "\\{", "\\}",
+        "\\.", "\\b", "\\B",
     ]
-
     has_regex_pattern = any(pattern in string_content for pattern in regex_indicators)
-
-    # Need raw string if: multiple backslashes OR (has backslash AND regex pattern)
     return escape_count >= 2 or (escape_count >= 1 and has_regex_pattern)
 
 
 def extract_and_convert_strings(content: str) -> Optional[str]:
-    """
-    Extract re.function() calls and convert their regex string arguments.
-    Returns converted content or None if no changes made.
-    """
+    """Parse AST and convert escaped regex strings to raw strings."""
     original_content = content
-
-    # Parse with AST to find re.function calls
     try:
         tree = ast.parse(content)
     except SyntaxError:
-        return None  # Can't parse, skip
-
-    # Collect all string nodes and their positions
+        return None
+    
     string_positions = {}
 
     class StringVisitor(ast.NodeVisitor):
         def visit_Call(self, node: ast.Call) -> None:
-            # Check if this is a re.FUNCTION call
             if isinstance(node.func, ast.Attribute):
                 if (
                     isinstance(node.func.value, ast.Name)
                     and node.func.value.id == "re"
                     and node.func.attr in RE_FUNCTIONS
                 ):
-                    # Check first argument(s) for string patterns
                     if node.args:
                         arg = node.args[0]
                         if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
-                            # Store position and string info
                             string_positions[arg.end_col_offset] = {
                                 "value": arg.value,
                                 "lineno": arg.lineno,
                                 "col_offset": arg.col_offset,
                                 "end_col": arg.end_col_offset,
                             }
-
             self.generic_visit(node)
 
     visitor = StringVisitor()
     visitor.visit(tree)
-
+    
     if not string_positions:
         return None
-
-    # Convert strings that need raw format
+    
     lines = content.split("\n")
     converted = False
-
+    
     for end_col, info in string_positions.items():
         string_val = info["value"]
-        lineno = info["lineno"] - 1  # 0-indexed
-
+        lineno = info["lineno"] - 1
+        
         if needs_raw_string(string_val):
-            # Find the string in the line and convert it
             line = lines[lineno]
             col_offset = info["col_offset"]
             end_col_offset = info["end_col"]
-
-            # Extract the original string literal
             original_literal = line[col_offset:end_col_offset]
-
-            # Determine quote style
-            if original_literal.startswith('"""') or original_literal.startswith("'''"):
-                continue  # Skip triple-quoted strings
-
+            
+            # Skip triple-quoted strings
+            if original_literal.startswith(('"""', "'''")):
+                continue
+            
+            # Skip already raw strings
             quote_char = original_literal[0]
-
-            # Check if already raw
             if original_literal.startswith(('r"', "r'", 'r"""', "r'''")):
                 continue
-
-            # Convert to raw string
+            
             try:
-                # Unescape to get raw content
                 unescaped = string_val
                 new_literal = f"r{quote_char}{unescaped}{quote_char}"
-
-                # Replace in line
                 new_line = line[:col_offset] + new_literal + line[end_col_offset:]
                 lines[lineno] = new_line
                 converted = True
             except Exception:
                 continue
-
+    
     if not converted:
         return None
-
+    
     return "\n".join(lines)
 
 
 def validate_python_file(content: str) -> bool:
-    """Validate that content is valid Python using AST."""
+    """Validate that content is valid Python syntax."""
     try:
         ast.parse(content)
         return True
     except SyntaxError as e:
-        print(f"  ✗ Syntax error: {e}", file=sys.stderr)
         return False
 
 
 def process_file(filepath: Path) -> Tuple[Path, bool, str]:
-    """
-    Process a single Python file.
-    Returns (filepath, success, message).
-    """
+    """Process a single Python file for regex conversion."""
     try:
         content = filepath.read_text(encoding="utf-8")
     except Exception as e:
-        return filepath, False, f"Failed to read: {e}"
-
+        return (filepath, False, f"Failed to read: {e}")
+    
     converted_content = extract_and_convert_strings(content)
-
+    
     if converted_content is None:
-        return filepath, True, "No changes needed"
-
-    # Validate converted content
+        return (filepath, True, "No changes needed")
+    
     if not validate_python_file(converted_content):
-        return filepath, False, "Validation failed, skipping"
-
+        return (filepath, False, "Validation failed, skipping")
+    
     try:
         filepath.write_text(converted_content, encoding="utf-8")
-        return filepath, True, "✓ Converted and saved"
+        return (filepath, True, "✓ Converted and saved")
     except Exception as e:
-        return filepath, False, f"Failed to write: {e}"
+        return (filepath, False, f"Failed to write: {e}")
+
+
+def collect_python_files(inputs: List[Path]) -> List[Path]:
+    """Collect all Python files from given paths (files and folders)."""
+    python_files = []
+    
+    for input_path in inputs:
+        if not input_path.exists():
+            print(f"Warning: Path does not exist: {input_path}", file=sys.stderr)
+            continue
+        
+        if input_path.is_file():
+            if input_path.suffix == ".py":
+                python_files.append(input_path)
+            else:
+                print(f"Warning: Not a Python file: {input_path}", file=sys.stderr)
+        elif input_path.is_dir():
+            # Recursively find all .py files
+            python_files.extend(input_path.rglob("*.py"))
+    
+    return sorted(set(python_files))  # Remove duplicates and sort
 
 
 def main():
     """Main entry point."""
-    current_dir = Path.cwd()
-    python_files = list(current_dir.rglob("*.py"))
-
+    # Parse command-line arguments
+    if len(sys.argv) > 1:
+        input_paths = [Path(arg).resolve() for arg in sys.argv[1:]]
+    else:
+        # Default to current directory
+        input_paths = [Path.cwd()]
+    
+    # Collect all Python files
+    python_files = collect_python_files(input_paths)
+    
     if not python_files:
-        print("No Python files found in current directory")
+        print("No Python files found in the specified paths")
         return
-
+    
     print(f"Found {len(python_files)} Python files")
     print(f"Processing with parallel workers...")
     print(f"Target re functions: {', '.join(sorted(RE_FUNCTIONS))}\n")
-
+    
     # Process files in parallel
     with Pool() as pool:
         results = pool.map(process_file, python_files)
-
-    # Report results
+    
+    # Collect statistics
     successful = sum(1 for _, success, _ in results if success)
     changed = sum(1 for _, success, msg in results if success and "✓" in msg)
-
+    
+    # Print results
     print("\n" + "=" * 70)
     for filepath, success, message in results:
         status = "✓" if success else "✗"
-        rel_path = filepath.relative_to(current_dir)
+        rel_path = filepath.relative_to(Path.cwd())
         print(f"{status} {rel_path}: {message}")
-
     print("=" * 70)
     print(f"\nSummary: {successful}/{len(python_files)} processed successfully")
     print(f"         {changed} files converted")
