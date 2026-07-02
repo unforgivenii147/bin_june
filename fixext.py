@@ -8,25 +8,25 @@ from dh import MIME2EXT, cprint, is_binary, runcmd, unique_path
 CONFIRM = "-y" in sys.argv
 
 
-def fix_by_shebang(fp) -> bool:
-    if is_binary(fp) or not fp.stat().st_size:
+def fix_by_shebang(path) -> bool:
+    if is_binary(path) or not path.stat().st_size:
         return False
     try:
-        content = fp.read_text(encoding="utf8")
+        content = path.read_text(encoding="utf8")
     except:
         return False
     fl = content.splitlines()[0]
     if fl.startswith("#!") and ("bash" in fl or "/bin/sh" in fl):
-        new_path = fp.with_suffix(".sh")
+        new_path = path.with_suffix(".sh")
         if new_path.exists():
             new_path = unique_path(new_path)
-        fp.rename(new_path)
+        path.rename(new_path)
         return True
     if fl.startswith("#!") and "python" in fl:
-        new_path = fp.with_suffix(".py")
+        new_path = path.with_suffix(".py")
         if new_path.exists():
             new_path = unique_path(new_path)
-        fp.rename(new_path)
+        path.rename(new_path)
         return True
     return False
 

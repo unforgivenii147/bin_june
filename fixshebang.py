@@ -13,7 +13,7 @@ import os
 from typing import Optional
 
 NEW_SHEBANG = "#!/data/data/com.termux/files/usr/bin/python"
-SHEBANG_PATTERN = re.compile("^#!.*python[23]?(?:\\.\\d+)?(?:[ \\t]+.*)?$", re.MULTILINE)
+SHEBANG_PATTERN = re.compile(r"^#!.*python[23]?(?:\.\d+)?(?:[ \t]+.*)?$", re.MULTILINE)
 PYTHON_EXTENSIONS = {".py", ".pyw", ".pyx", ".pxd", ".pyi"}
 COMMON_PYTHON_NAMES = {
     "setup",

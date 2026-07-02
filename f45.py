@@ -27,5 +27,5 @@ def fold_file(path: Path, width=35) -> None:
 
 
 if __name__ == "__main__":
-    fp = Path(sys.argv[1])
-    fold_file(fp)
+    path = Path(sys.argv[1])
+    fold_file(path)

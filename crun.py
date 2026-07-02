@@ -5,14 +5,14 @@ from pathlib import Path
 from dh import fsz, get_filez, gsz, mpf3, run_command
 
 
-def process_file(fp):
+def process_file(path):
     path = Path(path)
-    if not fp.exists():
+    if not path.exists():
         return False
-    if fp.suffix == ".c":
-        cmd = f"clang {fp!s} -o {fp.with_suffix('')!s}"
-    if fp.suffix == ".cpp":
-        cmd = f"clang++ {fp!s} -o {fp.with_suffix('')!s}"
+    if path.suffix == ".c":
+        cmd = f"clang {path!s} -o {path.with_suffix('')!s}"
+    if path.suffix == ".cpp":
+        cmd = f"clang++ {path!s} -o {path.with_suffix('')!s}"
     ret, txt, _err = run_command(cmd)
     print(txt)
     return ret

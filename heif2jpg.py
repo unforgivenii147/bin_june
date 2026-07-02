@@ -6,13 +6,13 @@ import pillow_heif as ph
 from fastwalk import walk_files
 
 
-def process_file(fp) -> bool:
+def process_file(path) -> bool:
     path = Path(path)
-    if not fp.exists():
+    if not path.exists():
         return False
-    print(f"[OK] {fp.name}")
-    img = ph.open_heif(fp)
-    outfile = fp.with_suffix(".jpg")
+    print(f"[OK] {path.name}")
+    img = ph.open_heif(path)
+    outfile = path.with_suffix(".jpg")
     img.save(outfile)
     return True
 

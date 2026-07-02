@@ -131,7 +131,7 @@ class SpellCheckProcessor:
     def _collect_errors(self, lines: List[str]) -> List[Dict]:
         errors = {}
         for line in lines:
-            words = re.findall("\\b[a-zA-Z]+\\b", line)
+            words = re.findall(r"\b[a-zA-Z]+\b", line)
             misspelled = self.spell_checker.unknown(words)
             misspelled = [word for word in misspelled if not self.personal_dict.contains(word)]
             for word in misspelled:

@@ -13,9 +13,9 @@ parser.language = Language(tsp.language())
 VALID = {"import_statement", "import_from_statement"}
 
 
-def process_file(fp: Path) -> None:
+def process_file(path: Path) -> None:
     path = Path(path)
-    src = fp.read_bytes()
+    src = path.read_bytes()
     tree = parser.parse(src)
     root = tree.root_node
     impoz = []
@@ -52,7 +52,7 @@ def process_file(fp: Path) -> None:
     for x in impoz:
         x = x.strip().lower()
         if x in STDLIB2 and x not in {"io", "os", "pathlib", "ast", "urllib"}:
-            cprint(f"{fp.relative_to(cwd)}", "cyan")
+            cprint(f"{path.relative_to(cwd)}", "cyan")
             continue
         for v in stdlib2:
             v = v.lower()
@@ -77,7 +77,7 @@ def process_file(fp: Path) -> None:
                     "httplib2",
                 }
             ):
-                cprint(f"{fp.relative_to(cwd)}", "yellow")
+                cprint(f"{path.relative_to(cwd)}", "yellow")
                 cprint(f"{x} / {v} / {ratio}", "green")
                 continue
 

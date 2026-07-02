@@ -84,7 +84,7 @@ def find_docstring_ranges(node: Module) -> list[tuple[int, int]]:
 
 
 def remove_blank_lines(content: str) -> str:
-    content = re.sub("\\n\\n+", "\n", content)
+    content = re.sub(r"\n\n+", "\n", content)
     return "\n".join(line.rstrip() for line in content.split("\n"))
 
 

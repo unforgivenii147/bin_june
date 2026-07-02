@@ -95,7 +95,7 @@ def man_to_markdown(content: str) -> str:
             continue
         if line.startswith("."):
             continue
-        if re.match("^\\s*\\$", line) or re.match("^\\s*(ls|cat|grep|echo|pwd|cd|mkdir|rm|touch|man)\\b", line):
+        if re.match("^\\s*\\$", line) or re.match(r"^\s*(ls|cat|grep|echo|pwd|cd|mkdir|rm|touch|man)\b", line):
             if not in_code_block:
                 md_lines.append("```sh")
                 in_code_block = True
@@ -104,7 +104,7 @@ def man_to_markdown(content: str) -> str:
         if in_code_block:
             md_lines.append("```")
             in_code_block = False
-        line = re.sub("\\b(ls|cat|grep|echo|pwd|cd|mkdir|rm|touch|man)\\b", "`\\1`", line)
+        line = re.sub(r"\b(ls|cat|grep|echo|pwd|cd|mkdir|rm|touch|man)\b", "`\\1`", line)
         md_lines.append(line)
     if in_code_block:
         md_lines.append("```")

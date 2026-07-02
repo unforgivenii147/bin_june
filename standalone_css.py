@@ -114,8 +114,8 @@ def make_css_standalone(input_css_path: Path, output_css_path: Path) -> None:
     except Exception as e:
         print(f"Error reading input CSS file {input_css_path}: {e}")
         return
-    import_pattern = re.compile("@import\\s+(?:url\\()?([\\\"\\'])(.*?)\\1\\)?;", re.IGNORECASE)
-    font_url_pattern = re.compile("url\\(([\\\"\\']?)([^)\\\"\\'\\s]+?)\\1?\\)", re.IGNORECASE)
+    import_pattern = re.compile(r"@import\s+(?:url\()?([\"\'])(.*?)\1\)?;", re.IGNORECASE)
+    font_url_pattern = re.compile(r"url\(([\"\']?)([^)\"\'\s]+?)\1?\)", re.IGNORECASE)
     processed_content = content
     import_urls_to_process = []
     for match in import_pattern.finditer(content):

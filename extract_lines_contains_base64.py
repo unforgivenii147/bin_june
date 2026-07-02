@@ -5,9 +5,9 @@ from pathlib import Path
 from dh import get_nobinary
 
 
-def process_file(fp: Path) -> None:
+def process_file(path: Path) -> None:
     path = Path(path)
-    lines = fp.read_text(encoding="utf-8").splitlines()
+    lines = path.read_text(encoding="utf-8").splitlines()
     nl = []
     found = 0
     for line in lines:
@@ -26,7 +26,7 @@ def process_file(fp: Path) -> None:
                 cleaned = cleaned[:end_indx]
             nl.append(cleaned)
     if found:
-        print(f"{fp.name} : {found}")
+        print(f"{path.name} : {found}")
         with Path("b64").open("a", encoding="utf-8") as f:
             f.write("\n")
             f.writelines(f"{k}\n" for k in nl)

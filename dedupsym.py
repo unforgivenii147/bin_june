@@ -43,18 +43,18 @@ def build_groups(root: Path, cache: dict):
     groups = defaultdict(list)
     for dirpath, _dirnames, filenames in os.walk(root):
         for name in filenames:
-            fp = Path(dirpath) / name
-            if ".git" in fp.parts:
+            path = Path(dirpath) / name
+            if ".git" in path.parts:
                 continue
-            if fp.is_symlink():
+            if path.is_symlink():
                 continue
             try:
-                st = fp.stat()
+                st = path.stat()
             except Exception:
                 continue
-            if not fp.is_file():
+            if not path.is_file():
                 continue
-            key = str(fp)
+            key = str(path)
             size = st.st_size
             mtime = st.st_mtime
             cached = cache.get(key)
@@ -62,11 +62,11 @@ def build_groups(root: Path, cache: dict):
                 h = cached["hash"]
             else:
                 try:
-                    h = xxh64_of_path(fp)
+                    h = xxh64_of_path(path)
                 except Exception:
                     continue
                 cache[key] = {"size": size, "mtime": mtime, "hash": h}
-            groups[h].append(fp)
+            groups[h].append(path)
     return groups
 
 

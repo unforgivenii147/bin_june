@@ -7,7 +7,7 @@ from pathlib import Path
 
 def compress_python_file(filepath: str) -> None:
     content = Path(filepath).read_text(encoding="utf-8")
-    content = re.sub("\\\"\\\"\\\".*?\\\"\\\"\\\"|'''.*?'''", "", content, flags=re.DOTALL)
+    content = re.sub(r"\"\"\".*?\"\"\"|'''.*?'''", "", content, flags=re.DOTALL)
     content = re.sub("#.*", "", content)
     lines = content.splitlines()
     non_empty_lines = [line.strip() for line in lines if line.strip()]

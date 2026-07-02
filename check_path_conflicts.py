@@ -36,13 +36,13 @@ def get_commands_from_path(path_dirs: list[str]):
 
 def extract_aliases(aliases_file: Path):
     aliases = {}
-    alias_pattern = re.compile("^\\s*alias\\s+([a-zA-Z_][a-zA-Z0-9_-]*)\\s*=", re.MULTILINE)
+    alias_pattern = re.compile(r"^\s*alias\s+([a-zA-Z_][a-zA-Z0-9_-]*)\s*=", re.MULTILINE)
     if not aliases_file.exists():
         return {}
     try:
         with open(aliases_file, "r", encoding="utf-8") as f:
             content = f.read()
-            content = re.sub("\\\\\\n", "", content)
+            content = re.sub(r"\\\n", "", content)
             matches = alias_pattern.findall(content)
             for match in matches:
                 aliases[match] = True
@@ -154,8 +154,8 @@ def main():
     verbose = "--verbose" in sys.argv or "-v" in sys.argv
     check_all = "--all" in sys.argv or "-a" in sys.argv
     config_dir = Path.home() / ".config/bash.d"
-    aliases_file = config_dir / "bash_aliases"
-    functions_file = config_dir / "bash_functions3"
+    aliases_file = config_dir / "aliases.sh"
+    functions_file = config_dir / "functions.sh"
     print("🔍 Scanning for conflicts between bash aliases/functions and PATH binaries...")
     path_dirs = get_path_dirs()
     path_commands, path_duplicates = get_commands_from_path(path_dirs)

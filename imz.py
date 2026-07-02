@@ -79,7 +79,7 @@ def extract_from_ast(code: str, path_hint: (str | None) = None) -> dict[str, set
     try:
         tree = ast.parse(code)
     except Exception:
-        for m in re.finditer("(?:import_module|__import__)\\(\\s*['\\\"]([\\w\\.]+)['\\\"]\\s*\\)", code):
+        for m in re.finditer(r"(?:import_module|__import__)\(\s*['\"]([\w\.]+)['\"]\s*\)", code):
             result["dynamic"].add(m.group(1).split(".", 1)[0])
         return result
     for node in ast.walk(tree):
@@ -232,13 +232,13 @@ def process_raw(path: str) -> dict[str, list[str]]:
 
 def build_project_module_map(sources: list[str]) -> dict[str, list[str]]:
     mapping: dict[str, list[str]] = {}
-    for fp in sources:
-        p = Path(fp)
+    for path in sources:
+        p = Path(path)
         if not p.exists():
             continue
         if p.suffix != ".py":
             continue
-        rel = os.path.normpath(fp).lstrip("./")
+        rel = os.path.normpath(path).lstrip("./")
         parts = rel.split(os.sep)
         if parts[-1] == "__init__.py":
             mod = ".".join(parts[:-1]) if parts[:-1] else parts[-2] if len(parts) > 1 else ""
@@ -247,8 +247,8 @@ def build_project_module_map(sources: list[str]) -> dict[str, list[str]]:
         if not mod:
             continue
         top = mod.split(".", 1)[0]
-        mapping.setdefault(mod, []).append(fp)
-        mapping.setdefault(top, [*mapping.get(top, []), fp])
+        mapping.setdefault(mod, []).append(path)
+        mapping.setdefault(top, [*mapping.get(top, []), path])
     return mapping
 
 
@@ -261,12 +261,12 @@ def trace_star_module(module: str, project_map: dict[str, list[str]]) -> set[str
     if top in project_map:
         candidates += project_map[top]
     candidates = list(dict.fromkeys(candidates))
-    for fp in candidates:
+    for path in candidates:
         try:
-            text = Path(fp).read_text(encoding="utf-8", errors="ignore")
+            text = Path(path).read_text(encoding="utf-8", errors="ignore")
         except Exception:
             continue
-        d = extract_from_ast(text, fp)
+        d = extract_from_ast(text, path)
         found_imports |= d["imports"]
         found_imports |= {m.split(".", 1)[0] for m in d["dynamic"]}
         try:
@@ -328,10 +328,13 @@ def scan_sources(ignore_dirs: set[str]) -> list[str]:
     for root, dirs, files in os.walk("."):
         dirs[:] = [d for d in dirs if d not in ignore_dirs]
         for f in files:
-            fp = os.path.join(root, f)
+            path = os.path.join(root, f)
             lower = f.lower()
-            if lower.endswith((".py", ".ipynb", ".whl", ".zip", ".tar.gz", ".tgz", ".tar.xz")) or Path(fp).suffix == "":
-                out.append(fp)
+            if (
+                lower.endswith((".py", ".ipynb", ".whl", ".zip", ".tar.gz", ".tgz", ".tar.xz"))
+                or Path(path).suffix == ""
+            ):
+                out.append(path)
     return out
 
 

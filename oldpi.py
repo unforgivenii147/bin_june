@@ -13,7 +13,7 @@ from dh import get_pyfiles
 from tqdm import tqdm
 
 SIZE_THRESHOLD = 1 * 1024 * 1024
-OLD_PRINT_RE = re.compile("(?m)^[ \\t]*print[ \\t]+[^(\\n]")
+OLD_PRINT_RE = re.compile(r"(?m)^[ \t]*print[ \t]+[^(\n]")
 
 
 def _open_source(filepath: str) -> BufferedReader | mmap:

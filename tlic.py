@@ -63,7 +63,7 @@ def extract_blocks_from_file(filepath: Path, min_lines: int = 2) -> List[Tuple[s
 def collect_blocks_parallel(
     root: Path, min_lines: int = 2, n_jobs: int = 8
 ) -> Dict[str, List[Tuple[Path, int, List[str]]]]:
-    all_files = [fp for fp in root.rglob("*") if fp.is_file() and is_text_file(fp)]
+    all_files = [path for path in root.rglob("*") if path.is_file() and is_text_file(path)]
     total_files = len(all_files)
     if not total_files:
         return defaultdict(list)
@@ -74,7 +74,7 @@ def collect_blocks_parallel(
         batch_end = min(batch_start + batch_size, total_files)
         batch_files = all_files[batch_start:batch_end]
         results = Parallel(n_jobs=n_jobs, prefer="threads", verbose=0)(
-            delayed(extract_blocks_from_file)(fp, min_lines) for fp in batch_files
+            delayed(extract_blocks_from_file)(path, min_lines) for path in batch_files
         )
         for filepath, blocks in zip(batch_files, results):
             for block_text, start_lineno, original_lines in blocks:
@@ -158,7 +158,7 @@ def remove_repeated_blocks(repeated: Dict[str, List[Tuple[Path, int, List[str]]]
         return
     print(f"Removing blocks from {len(file_removals)} files...", file=sys.stderr)
     results = Parallel(n_jobs=n_jobs, prefer="threads", verbose=0)(
-        delayed(process_file_removal)(fp, removals, root) for fp, removals in file_removals.items()
+        delayed(process_file_removal)(path, removals, root) for path, removals in file_removals.items()
     )
     removed_total = 0
     files_changed = 0

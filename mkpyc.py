@@ -10,13 +10,13 @@ from dh import fsz, get_files, gsz
 MAX_QUEUE = 16
 
 
-def process_file(fp) -> bool | None:
+def process_file(path) -> bool | None:
     path = Path(path)
-    if not fp.exists():
+    if not path.exists():
         return False
-    if ".git" in fp.parts:
+    if ".git" in path.parts:
         return None
-    compileall.compile_file(fp, legacy=True, optimize=2)
+    compileall.compile_file(path, legacy=True, optimize=2)
     return True
 
 

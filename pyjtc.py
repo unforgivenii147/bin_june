@@ -15,7 +15,7 @@ def remove_comments_and_strings(content: str, filetype: str, keep_strings=False)
             content = re.sub("'[^']*'", "", content)
     elif filetype == "py":
         content = re.sub("#.*", "", content)
-        content = re.sub('\\"\\"\\"[\\s\\S]*?\\"\\"\\"', "", content)
+        content = re.sub(r"\"\"\"[\s\S]*?\"\"\"", "", content)
         content = re.sub("'''[\\s\\S]*?'''", "", content)
         if not keep_strings:
             content = re.sub('\\"[^\\"]*\\"', "", content)
@@ -23,7 +23,7 @@ def remove_comments_and_strings(content: str, filetype: str, keep_strings=False)
     elif filetype == "sh":
         content = re.sub("#.*", "", content)
         if not keep_strings:
-            content = re.sub('\\"[^\\"]*\\"', "", content)
+            content = re.sub(r"\"[^\"]*\"", "", content)
             content = re.sub("'[^']*'", "", content)
     return content
 

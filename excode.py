@@ -46,9 +46,7 @@ LANG_TO_EXT = {
     "txt": ".txt",
     "plain": ".txt",
 }
-CODE_BLOCK_RE = re.compile(
-    "```(?P<lang>[A-Za-z0-9_+\\-.]*)[ \\t]*\\n(?P<code>.*?)(?<=\\n)```", re.DOTALL | re.IGNORECASE
-)
+CODE_BLOCK_RE = re.compile(r"```(?P<lang>[A-Za-z0-9_+\-.]*)[ \t]*\n(?P<code>.*?)(?<=\n)```", re.DOTALL | re.IGNORECASE)
 
 
 def get_extension(lang: str) -> str:

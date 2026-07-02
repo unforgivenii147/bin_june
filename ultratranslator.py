@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 import ast
 import io
@@ -9,10 +9,10 @@ import tempfile
 import tokenize
 from pathlib import Path
 from deep_translator import GoogleTranslator
-from dh import DOC_TH1, DOC_TH2, get_files, mpf3
+from dh import DOC_TH1, DOC_TH2, get_nobinary, mpf_async
 
 cwd = Path.cwd()
-non_english_pattern = re.compile("[^\\x00-\\x7F]")
+non_english_pattern = re.compile(r"[^\x00-\x7F]")
 
 
 def is_english(text: str) -> bool:
@@ -20,23 +20,33 @@ def is_english(text: str) -> bool:
 
 
 def chunk_text(text: str, size: int = 800) -> list[str]:
-    return [text[i : i + size] for i in range(0, len(text), size)]
+    if not text or size <= 0:
+        return [text] if text else []
+    chunks = []
+    for i in range(0, len(text), size):
+        chunks.append(text[i : i + size])
+    return chunks
 
 
 def translate_chunk(chunk: str) -> str:
+    if not chunk or is_english(chunk):
+        return chunk
     try:
         result = GoogleTranslator(source="auto", target="en").translate(chunk)
-        return result or chunk
+        print("*" * 35)
+        print(result)
+        print("*" * 35)
+        return result if result else chunk
     except Exception as e:
-        print(f"  Translation error for chunk: {e}")
+        print(f"  Translation error: {e}")
         return chunk
 
 
 def translate_text(text: str) -> str:
+    if not text or is_english(text):
+        return text
     chunks = chunk_text(text)
-    for chunk in chunks:
-        translated += translate_chunk(chunk)
-    return translated
+    return "".join(translate_chunk(chunk) for chunk in chunks)
 
 
 def safe_overwrite(filepath: Path, content: str) -> None:
@@ -46,85 +56,98 @@ def safe_overwrite(filepath: Path, content: str) -> None:
     shutil.move(tmp_path, filepath)
 
 
-def extract_docstrings(tree: ast.AST) -> dict[int, str]:
-    docstrings = {}
-    for node in ast.walk(tree):
-        if isinstance(node, (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
-            doc = ast.get_docstring(node, clean=False)
-            if doc and not is_english(doc):
-                docstrings[id(node)] = doc
-    return docstrings
-
-
 def translate_python_file(source: str) -> str:
     print("  Analyzing Python structure...")
-    tree = ast.parse(source)
-    docstrings = extract_docstrings(tree)
-    if docstrings:
-        print(f"  Found {len(docstrings)} non-English docstrings")
-    tokens = list(tokenize.generate_tokens(io.StringIO(source).readline))
+    try:
+        tree = ast.parse(source)
+    except SyntaxError as e:
+        print(f"  Syntax error: {e}")
+        return source
+
     result = []
-    prev_end = 1, 0
     translated_count = 0
-    for i, token in enumerate(tokens):
-        tok_type, tok_str, start, end, _line = token
-        if start > prev_end:
-            lines_between = source.splitlines()[prev_end[0] - 1 : start[0]]
-            if len(lines_between) > 1:
-                result.extend(line_content + "\n" for line_content in lines_between[:-1])
-                result.append(lines_between[-1][: start[1]])
-            elif lines_between:
-                result.append(lines_between[0][prev_end[1] : start[1]])
+
+    try:
+        tokens = list(tokenize.generate_tokens(io.StringIO(source).readline))
+    except tokenize.TokenError:
+        return translate_text(source)
+
+    source_lines = source.splitlines(keepends=True)
+    prev_end = (1, 0)
+
+    for token in tokens:
+        tok_type, tok_str, start, end, line = token
+
+        if start[0] > prev_end[0]:
+            result.extend(source_lines[prev_end[0] : start[0]])
+            result.append(line[: start[1]])
+        elif start[1] > prev_end[1]:
+            result.append(line[prev_end[1] : start[1]])
+
         if tok_type == tokenize.COMMENT and not is_english(tok_str):
             comment_text = tok_str[1:].strip()
             print(f"  Translating comment: {comment_text[:50]}...")
             translated = translate_text(comment_text)
             result.append(f"# {translated}")
             translated_count += 1
+
         elif tok_type == tokenize.STRING:
             stripped = tok_str.strip("'\"")
             if stripped and not is_english(stripped) and len(stripped) > 10:
                 try:
                     print(f"  Translating string: {stripped[:50]}...")
                     translated = translate_text(stripped)
+
                     if tok_str.startswith((DOC_TH1, DOC_TH2)):
                         quote_char = tok_str[:3]
-                        tok_str = f"{quote_char}{translated}{quote_char}"
                     else:
                         quote_char = tok_str[0]
-                        tok_str = f"{quote_char}{translated}{quote_char}"
+
+                    result.append(f"{quote_char}{translated}{quote_char}")
                     translated_count += 1
                 except Exception as e:
                     print(f"  Error translating string: {e}")
-            result.append(tok_str)
+                    result.append(tok_str)
+            else:
+                result.append(tok_str)
         else:
             result.append(tok_str)
+
         prev_end = end
-        if (i + 1) % 50 == 0:
-            print(f"  Processed {i + 1} tokens...")
+
     print(f"  Translated {translated_count} items")
     return "".join(result)
 
 
-def process_file(path: (str | Path)) -> None:
+def process_file(path: str | Path) -> None:
     path = Path(path)
     try:
         original = path.read_text(encoding="utf-8", errors="ignore")
     except Exception as e:
-        print(f"  Error reading file: {e}")
+        print(f"  Error reading {path}: {e}")
         return
+
     if is_english(original.strip()):
         return
-    print("  Translating content...")
+
+    print(f"  Processing {path.name}...")
     try:
-        translated = translate_python_file(original) if path.suffix == ".py" else translate_text(original)
+        if path.suffix == ".py":
+            translated = translate_python_file(original)
+        else:
+            translated = translate_text(original)
+
         if translated.strip() != original.strip():
             safe_overwrite(path, translated)
-    except:
-        return
+            print(f"  ✓ Updated {path.name}")
+    except Exception as e:
+        print(f"  Failed to process {path}: {e}")
 
 
 if __name__ == "__main__":
     args = sys.argv[1:]
-    files = [Path(p) for p in args] if args else get_files(cwd)
-    mpf3(process_file, files)
+    files = [Path(p) for p in args] if args else get_nobinary(cwd)
+    if len(files) == 1:
+        process_file(files[0])
+        sys.exit(0)
+    mpf_async(process_file, files)

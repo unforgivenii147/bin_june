@@ -8,13 +8,13 @@ SIZE_THRESHOLD = 100
 LINE_THRESHOLD = 3
 
 
-def process_file(fp: Path) -> None:
+def process_file(path: Path) -> None:
     path = Path(path)
-    if not fp.exists():
+    if not path.exists():
         return
-    if fp.stat().st_size < SIZE_THRESHOLD and len(fp.read_text().splitlines()) < LINE_THRESHOLD:
-        fp.unlink()
-        print(f"{fp.name} removed")
+    if path.stat().st_size < SIZE_THRESHOLD and len(path.read_text().splitlines()) < LINE_THRESHOLD:
+        path.unlink()
+        print(f"{path.name} removed")
 
 
 def main() -> None:

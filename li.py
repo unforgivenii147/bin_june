@@ -29,9 +29,9 @@ def get_dir_size(path: str) -> int:
     for root, _dirs, files in os.walk(path, onerror=lambda e: None):
         for f in files:
             try:
-                fp = os.path.join(root, f)
-                if Path(fp).is_file():
-                    total += Path(fp).stat().st_size
+                path = os.path.join(root, f)
+                if Path(path).is_file():
+                    total += Path(path).stat().st_size
             except Exception:
                 pass
     return total

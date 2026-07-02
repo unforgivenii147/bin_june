@@ -5,8 +5,8 @@ from pathlib import Path
 from print_persian import print_persian as pp
 
 
-def ylines(fp: Path):
-    with fp.open(encoding="utf-8") as f:
+def ylines(path: Path):
+    with path.open(encoding="utf-8") as f:
         for line in f:
             yield line
 

@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 """
 Termux script creator - Creates executable scripts from clipboard content.
@@ -15,8 +15,10 @@ TERMUX_SHEBANGS = {
     "python": "#!/data/data/com.termux/files/usr/bin/env python",
     "bash": "#!/data/data/com.termux/files/usr/bin/env bash",
     "sh": "#!/data/data/com.termux/files/usr/bin/env sh",
+    "rust": "#!/data/data/com.termux/files/usr/bin/env rust-script",
 }
-SCRIPT_DIRS = {Path.home() / "bin", Path.home() / "bashbin"}
+
+SCRIPT_DIRS = {Path.home() / "bin", Path.home() / "bashbin", Path.home() / ".cargo" / "bin"}
 ARCHIVE_DIR = Path.home() / "isaac" / "may" / "scripts"
 
 
@@ -39,22 +41,27 @@ def detect_language(content: str) -> str:
             return "python"
         elif "bash" in first_line.lower() or "sh" in first_line.lower():
             return "bash"
+        elif "rust" in first_line.lower():
+            return "rust"
+
+    rust_indicators = ["fn main()", "fn ", "let ", "mut ", "struct ", "impl ", "use ", "cargo"]
     python_indicators = ["import ", "from ", "def ", "class ", "if __name__", "print("]
     bash_indicators = ["echo ", "cd ", "export ", "if [", "for ", "while ", "$("]
+
     preview = content.lower()
+    rust_score = sum(1 for ind in rust_indicators if ind in preview)
     python_score = sum(1 for ind in python_indicators if ind in preview)
     bash_score = sum(1 for ind in bash_indicators if ind in preview)
-    return "python" if python_score >= bash_score else "bash"
+
+    scores = {"rust": rust_score, "python": python_score, "bash": bash_score}
+    return max(scores, key=scores.get)
 
 
 def replace_shebang(content: str, lang: str) -> str:
     lines = content.splitlines()
     if lines and lines[0].startswith("#!"):
         lines.pop(0)
-    if lang == "python":
-        lines.insert(0, TERMUX_SHEBANGS["python"])
-    else:
-        lines.insert(0, TERMUX_SHEBANGS["bash"])
+    lines.insert(0, TERMUX_SHEBANGS[lang])
     result = "\n".join(lines)
     return result if result.endswith("\n") else result + "\n"
 
@@ -81,6 +88,8 @@ def archive_existing_file(file_path: Path) -> None:
 
 def create_symlink(script_path: Path) -> None:
     if script_path.suffix:
+        if script_path.suffix == ".rs":
+            return
         symlink_path = script_path.parent / script_path.stem
         if symlink_path.exists() and symlink_path.is_symlink():
             try:

@@ -14,7 +14,7 @@ def is_ascii_printable(s: str) -> bool:
 
 
 def clean_filename(s: str) -> str:
-    s = re.sub("[^\\w\\\\-\\.]", "", s)
+    s = re.sub(r"[^\w\\-\.]", "", s)
     return s.strip("_-.")
 
 

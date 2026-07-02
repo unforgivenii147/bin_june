@@ -6,10 +6,10 @@ from dh import get_files, mpf3
 from markdownify import markdownify
 
 
-def process_file(fp) -> None:
+def process_file(path) -> None:
     path = Path(path)
-    md_path = fp.with_suffix(".md")
-    content = fp.read_text(encoding="utf8")
+    md_path = path.with_suffix(".md")
+    content = path.read_text(encoding="utf8")
     md = markdownify(content)
     md_path.write_text(md_content, encoding="utf-8")
 

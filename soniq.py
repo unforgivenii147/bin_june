@@ -1,75 +1,112 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 import mmap
 import sys
-from multiprocessing import get_context
+from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from binaryornot import is_binary
+
+
+def is_binary(path: Path) -> bool:
+    try:
+        with open(path, "rb") as f:
+            chunk = f.read(1024)
+            return b"\x00" in chunk
+    except:
+        return True
+
 
 THRESHOLD = 1024 * 1024
 
 
 def _process_chunk(chunk: list[str]) -> list[str]:
-    return [p.strip() for p in chunk if p.strip()]
+    return [line.strip() for line in chunk if line.strip()]
 
 
 def read_lines(path: Path) -> list[str]:
     sz = path.stat().st_size
-    if sz > THRESHOLD:
-        with (
-            path.open("r", encoding="utf-8", errors="ignore") as f,
-            mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm,
-        ):
-            data = mm.read().decode("utf-8", "ignore")
-            return data.splitlines()
-    else:
-        return path.read_text(encoding="utf-8", errors="ignore").splitlines()
+    try:
+        if sz > THRESHOLD:
+            with open(path, "r", encoding="utf-8", errors="ignore") as f:
+                with mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm:
+                    data = mm.read().decode("utf-8", "ignore")
+                    return data.splitlines()
+        else:
+            return path.read_text(encoding="utf-8", errors="ignore").splitlines()
+    except (UnicodeDecodeError, ValueError) as e:
+        print(f"Warning: Could not read file as text: {e}")
+        return []
 
 
-def sort_uniq(path: Path, show_diff: bool = False) -> int:
+def sort_uniq(path: Path) -> tuple[int, list[str]]:
     lines = read_lines(path)
     original_count = len(lines)
     if not original_count:
-        return 0
+        return (0, [])
+
     if original_count > 1000:
-        chunk_size = len(lines) // 5
+        chunk_size = max(1, len(lines) // cpu_count())
         chunks = [lines[i : i + chunk_size] for i in range(0, len(lines), chunk_size)]
-        with get_context("spawn").Pool(4) as pool:
-            processed = pool.map(_process_chunk, chunks)
-        all_lines = [line for group in processed for line in group]
+        with Pool(processes=min(cpu_count(), len(chunks))) as pool:
+            processed_chunks = pool.map(_process_chunk, chunks)
+        all_lines = [line for chunk in processed_chunks for line in chunk]
     else:
-        all_lines = [p.strip() for p in lines if p.strip()]
-    unique_sorted = sorted(set(all_lines))
-    diff_lines = set(all_lines) - set(unique_sorted)
-    lines_removed = original_count - len(unique_sorted)
-    path.write_text("\n".join(unique_sorted), encoding="utf-8")
-    if show_diff and diff_lines:
-        print("\nDuplicate lines removed:")
-        for line in sorted(diff_lines)[:50]:
-            print("  " + line)
-        if len(diff_lines) > 50:
-            print(f"... ({len(diff_lines) - 50} more not shown)")
-    return lines_removed
+        all_lines = [line.strip() for line in lines if line.strip()]
+
+    seen = set()
+    duplicates = set()
+    for line in all_lines:
+        if line in seen:
+            duplicates.add(line)
+        else:
+            seen.add(line)
+
+    unique_sorted = sorted(seen)
+    lines_removed = len(all_lines) - len(unique_sorted)
+
+    # Always write back the sorted unique lines, even if no duplicates were removed
+    if lines_removed > 0 or original_count != len(unique_sorted):
+        path.write_text("\n".join(unique_sorted), encoding="utf-8")
+
+    return (lines_removed, list(duplicates))
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python sort_uniq_mp.py <filename> [--diff]")
-        sys.exit(1)
-    show_diff = True
-    filename_arg = next((a for a in sys.argv[1:] if not a.startswith("--")), None)
+    args = sys.argv[1:]
+    quiet = "--quiet" in args or "-q" in args
+    filename_arg = next((a for a in args if not a.startswith("--")), None)
+
     if not filename_arg:
-        print("Error: missing filename argument.")
+        print("Usage: python sort_uniq_mp.py <filename> [--quiet|-q]")
+        print("  --quiet, -q : Only show count, not the actual duplicate lines")
         sys.exit(1)
+
     path = Path(filename_arg)
     if not path.exists():
-        print(f"File not found: {path}")
+        print(f"Error: File not found: {path}")
+        sys.exit(1)
+    if path.is_dir():
+        print(f"Error: {path} is a directory, not a file")
         sys.exit(1)
     if is_binary(path):
-        print(f"{path.name} is binary. Skipped.")
+        print(f"Skipping binary file: {path.name}")
         sys.exit(0)
-    removed = sort_uniq(path, show_diff)
-    if removed > 0:
-        print(f"\nRemoved {removed} duplicate lines.")
-    else:
-        print("No change.")
+
+    try:
+        removed, duplicates = sort_uniq(path)
+        if removed > 0:
+            print(f"\n✓ {removed} duplicate{'s' if removed != 1 else ''} removed and file sorted")
+            if not quiet and duplicates:
+                print("\nDuplicate lines removed:")
+                sorted_dupes = sorted(duplicates)
+                for line in sorted_dupes[:50]:
+                    print(f"  {line}")
+                if len(sorted_dupes) > 50:
+                    print(f"... ({len(sorted_dupes) - 50} more duplicate lines not shown)")
+            elif quiet:
+                print(f"  (Use without --quiet to see the actual duplicate lines)")
+        else:
+            # Check if sorting happened even without duplicates
+            print("✓ File sorted (all lines were unique)")
+    except Exception as e:
+        print(f"Error processing file: {e}")
+        sys.exit(1)

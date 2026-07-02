@@ -87,7 +87,7 @@ def main() -> None:
         if filename:
             return sanitize_filename(filename)
         cd = part.get("Content-Disposition") or ""
-        m = re.search("filename-\\*?=(?:UTF-8'')?[\\\"']?([^\\\"';]+)", cd, flags=re.IGNORECASE)
+        m = re.search(r"filename-\*?=(?:UTF-8'')?[\"']?([^\"';]+)", cd, flags=re.IGNORECASE)
         if m:
             return sanitize_filename(m.group(1))
         return None
@@ -135,7 +135,7 @@ def main() -> None:
         return match.group(0)
 
     html_text = re.sub(
-        "(src|href)=[\\\"']cid:([^\\\"']+)[\\\"']",
+        r"(src|href)=[\"']cid:([^\"']+)[\"']",
         lambda m: (
             f'{m.group(1)}="{os.path.basename(out_dir)}/{cid_to_file.get(m.group(2), m.group(2))}"'
             if m.group(2) in cid_to_file
@@ -166,7 +166,7 @@ def main() -> None:
 
     if out_html.exists():
         out_html = unique_path(out_html)
-    html_text = re.sub("(src|href)=[\\\"'](data:[^\\\"']+)[\\\"']", data_uri_replacer, html_text, flags=re.IGNORECASE)
+    html_text = re.sub(r"(src|href)=[\"'](data:[^\"']+)[\"']", data_uri_replacer, html_text, flags=re.IGNORECASE)
     with open(out_html, "w", encoding="utf-8") as f:
         f.write(html_text)
     print(f"Done.")

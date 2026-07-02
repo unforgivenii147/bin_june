@@ -31,7 +31,7 @@ def modify_classes(html_content: str) -> str:
 
 def convert_latex_format(text: str) -> str:
     text = re.sub("\\\\\\[(.*?)\\\\\\]", '<div class="latex-display">\\1</div>', text, flags=re.DOTALL)
-    return re.sub("\\\\\\((.*?)\\\\\\)", '<span class="latex-inline">\\1</span>', text, flags=re.DOTALL)
+    return re.sub(r"\\\((.*?)\\\)", '<span class="latex-inline">\\1</span>', text, flags=re.DOTALL)
 
 
 def read_markdown_file(file_path: str) -> str:

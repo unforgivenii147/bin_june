@@ -4,7 +4,7 @@ import re
 from pathlib import Path
 
 REMOTE_PREFIXES = "http://", "https://", "//"
-IMG_TAG_RE = re.compile("<img\\b[^>]*\\bsrc\\s*=\\s*[\\\"']([^\\\"']+)[\\\"'][^>]*>", re.IGNORECASE)
+IMG_TAG_RE = re.compile(r"<img\b[^>]*\bsrc\s*=\s*[\"']([^\"']+)[\"'][^>]*>", re.IGNORECASE)
 
 
 def remove_remote_html_images(text: str) -> str:

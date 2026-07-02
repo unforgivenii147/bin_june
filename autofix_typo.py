@@ -291,7 +291,7 @@ class TypoFixerWithLearning:
             return False
         fixed_lines = []
         changes = 0
-        word_pattern = re.compile("\\b([a-zA-Z]+(?:[-\\'][a-zA-Z]+)*)\\b")
+        word_pattern = re.compile(r"\b([a-zA-Z]+(?:[-\'][a-zA-Z]+)*)\b")
         for line_num, line in enumerate(lines, 1):
             fixed_line = line
 

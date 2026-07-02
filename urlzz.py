@@ -8,7 +8,7 @@ from pathlib import Path
 import py7zr
 from dh import BIN_EXT, TXT_EXT, get_files
 
-url_pattern = re.compile("https?://[^\\s\\\"\\']+")
+url_pattern = re.compile(r"https?://[^\s\"\']+")
 EXT = BIN_EXT
 EXT.update(TXT_EXT)
 

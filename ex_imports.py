@@ -12,9 +12,9 @@ parser.language = Language(tsp.language())
 VALID = {"import_statement", "import_from_statement"}
 
 
-def process_file(fp):
+def process_file(path):
     path = Path(path)
-    src = fp.read_bytes()
+    src = path.read_bytes()
     tree = parser.parse(src)
     root = tree.root_node
     return [src[node.start_byte : node.end_byte].decode() for node in root.children if node.type in VALID]

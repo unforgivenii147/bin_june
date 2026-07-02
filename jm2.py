@@ -6,21 +6,21 @@ from pathlib import Path
 from dh import cprint, fsz, get_files, gsz, mpf3
 
 
-def process_file(fp) -> None:
+def process_file(path) -> None:
     path = Path(path)
-    before = gsz(fp)
-    data = fp.read_text(encoding="utf-8")
+    before = gsz(path)
+    data = path.read_text(encoding="utf-8")
     if not before or len(data.splitlines()) == 1:
         del data, before
-        print(f"{fp.name}  | (no change)")
+        print(f"{path.name}  | (no change)")
         return
     try:
         jdata = json.loads(data)
-        with fp.open("w", encoding="utf8") as fo:
+        with path.open("w", encoding="utf8") as fo:
             json.dump(jdata, fo, ensure_ascii=False, indent=None)
-        after = gsz(fp)
+        after = gsz(path)
         diffsize = abs(before - after)
-        print(f"{fp.name}", end=" | ")
+        print(f"{path.name}", end=" | ")
         if not diffsize:
             cprint("(no change)", "grey")
             return
@@ -29,7 +29,7 @@ def process_file(fp) -> None:
         cprint(f"{ratio:.2f}% | {ratio2:.2f}%", "cyan")
         return
     except:
-        cprint(f"{fp.name} Error", "yellow")
+        cprint(f"{path.name} Error", "yellow")
         return
 
 

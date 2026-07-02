@@ -20,7 +20,7 @@ def process_file(path) -> None:
     lines = new_code.splitlines()
     processed_lines = [re.sub(single_line_comment_re, "", line) for line in lines]
     final_code = "\n".join(processed_lines)
-    final_code = re.sub("\\n\\s*\\n", "\\n\\n", final_code)
+    final_code = re.sub(r"\n\s*\n", "\\n\\n", final_code)
     final_code = "\n".join(line.rstrip() for line in final_code.splitlines())
     path.write_text(final_code, encoding="utf-8")
 

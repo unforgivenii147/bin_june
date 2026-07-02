@@ -4,15 +4,15 @@ from pathlib import Path
 from fastwalk import walk_files
 
 
-def process_file(fp: Path) -> bool:
+def process_file(path: Path) -> bool:
     path = Path(path)
-    if not fp.exists():
+    if not path.exists():
         return False
-    print(f"processing  ... {fp.name}")
+    print(f"processing  ... {path.name}")
     last_tag_pos = -1
     tags = "</svg>", "</html>", "</body>", "</script>", "</div>"
     content = []
-    with fp.open("r", encoding="utf-8") as f:
+    with path.open("r", encoding="utf-8") as f:
         for line in f:
             content.append(line)
     for i, line in reversed(list(enumerate(content))):
@@ -26,7 +26,7 @@ def process_file(fp: Path) -> bool:
     if last_tag_pos == -1:
         return True
     trimmed = "".join(content)[:last_tag_pos]
-    fp.write_text(trimmed, encoding="utf-8")
+    path.write_text(trimmed, encoding="utf-8")
     return True
 
 

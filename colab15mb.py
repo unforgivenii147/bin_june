@@ -11,9 +11,9 @@ def gsz(path: str) -> int:
     total = 0
     for root, _dirs, files in os.walk(path):
         for f in files:
-            fp = os.path.join(root, f)
-            if Path(fp).is_file():
-                total += Path(fp).stat().st_size
+            path = os.path.join(root, f)
+            if Path(path).is_file():
+                total += Path(path).stat().st_size
     return total
 
 

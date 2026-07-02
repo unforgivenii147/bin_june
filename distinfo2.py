@@ -50,13 +50,13 @@ NOT_ALLOWED = [
 ]
 
 
-def process_lic(fp: Path) -> None:
-    lic_dir = fp / "licenses"
+def process_lic(path: Path) -> None:
+    lic_dir = path / "licenses"
     if lic_dir.exists() and "dist-info" in lic_dir.parent.name:
         shutil.rmtree(lic_dir)
         print(f"{lic_dir} removed.")
     for k in NOT_ALLOWED:
-        nap = fp / k
+        nap = path / k
         if nap.exists():
             print(nap)
             nap.unlink()

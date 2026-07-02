@@ -30,11 +30,11 @@ def looks_like_python(code_block: str) -> bool | None:
 
 
 def is_python_like(line: str) -> bool:
-    if re.match("\\s*(def|class|if|elif|else|for|while|try|except|with)\\b.*:", line):
+    if re.match(r"\s*(def|class|if|elif|else|for|while|try|except|with)\b.*:", line):
         return True
     if re.match("\\s*@[A-Za-z_]\\w*", line):
         return True
-    return bool(re.match("\\s*import\\b|\\s*from\\b", line))
+    return bool(re.match(r"\s*import\b|\s*from\b", line))
 
 
 if __name__ == "__main__":

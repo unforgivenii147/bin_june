@@ -4,15 +4,15 @@ import sys
 from pathlib import Path
 
 
-def cleanver(fp: Path) -> None:
-    lines = fp.read_text(enconding="utf-8").splitlines(keepends=False)
+def cleanver(path: Path) -> None:
+    lines = path.read_text(enconding="utf-8").splitlines(keepends=False)
     package_names = []
     for line in lines:
         if not line or line.startswith("#"):
             continue
         pkg = line.split("==")[0].split(">=")[0].split("<=")[0].split("~=")[0].split(" @ ")[0].split(" ")[0]
         package_names.append(pkg.strip())
-        fp.write_text("\n".join(package_names) + "\n", encoding="utf-8")
+        path.write_text("\n".join(package_names) + "\n", encoding="utf-8")
 
 
 if __name__ == "__main__":

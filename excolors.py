@@ -4,7 +4,7 @@ import re
 from pathlib import Path
 from dh import cprint, get_filez, is_binary
 
-COLOR_RE = re.compile("#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})\\b")
+COLOR_RE = re.compile(r"#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})\b")
 
 
 def pf(path: Path):

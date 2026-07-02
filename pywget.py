@@ -66,7 +66,7 @@ def extract_filename(url: str, headers: (dict[str, str] | None) = None) -> str:
     if headers:
         cd = headers.get("Content-Disposition", "")
         if cd:
-            match = re.search('filename\\*?=(?:UTF-8\'\')?\\"?([^\\";]+)\\"?', cd, re.IGNORECASE)
+            match = re.search(r"filename\*?=(?:UTF-8" ')?"?([^";]+)"?', cd, re.IGNORECASE)
             if match:
                 return sanitize_filename(match.group(1))
     parsed = urllib.parse.urlparse(url)

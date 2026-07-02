@@ -49,7 +49,7 @@ LANG_EXT = {
     "md": ".md",
     "markdown": ".md",
 }
-FENCE_RE = re.compile("```(?P<lang>[A-Za-z0-9_+\\-\\.]*)[ \\t]*\\n(?P<code>.*?)(?<=\\n)```", re.DOTALL)
+FENCE_RE = re.compile(r"```(?P<lang>[A-Za-z0-9_+\-\.]*)[ \t]*\n(?P<code>.*?)(?<=\n)```", re.DOTALL)
 
 
 def ext_for_lang(lang: str) -> str:

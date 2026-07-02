@@ -9,11 +9,11 @@ bin_dir = Path(f"{cwd}/binary")
 bin_dir.mkdir(exist_ok=True)
 
 
-def process_file(fp) -> None:
+def process_file(path) -> None:
     path = Path(path)
-    if is_binary(fp):
-        newpath = bin_dir / fp.name
-        fp.rename(newpath)
+    if is_binary(path):
+        newpath = bin_dir / path.name
+        path.rename(newpath)
 
 
 def main() -> None:

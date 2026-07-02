@@ -216,7 +216,7 @@ def analyze_dependencies(code: str) -> Set[str]:
     for pattern, imp in IMPORT_PATTERNS.items():
         if re.search(pattern, code, re.MULTILINE):
             imports.add(imp)
-    typing_types = re.findall("\\b(List|Dict|Optional|Union|Tuple|Any|Callable|TypeVar)\\b", code)
+    typing_types = re.findall(r"\b(List|Dict|Optional|Union|Tuple|Any|Callable|TypeVar)\b", code)
     if typing_types:
         unique_types = sorted(set(typing_types))
         imports.add(f"from typing import {', '.join(unique_types)}")

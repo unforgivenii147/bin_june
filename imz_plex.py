@@ -38,7 +38,7 @@ def is_python_file(path: (Path | str)) -> bool:
                     if re.match(pattern, first_line):
                         return True
                 content = f.read(1024)
-                if re.search("\\bimport\\b|\\bfrom\\b\\s+\\w", content, re.IGNORECASE):
+                if re.search(r"\bimport\b|\bfrom\b\s+\w", content, re.IGNORECASE):
                     return True
         except:
             pass

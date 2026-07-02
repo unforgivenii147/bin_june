@@ -15,7 +15,7 @@ def parse_aliases(filepath: Path):
     try:
         with open(filepath, "r", encoding="utf-8") as f:
             content = f.read()
-        content = re.sub("\\\\\\n", "", content)
+        content = re.sub(r"\\\n", "", content)
         pattern = re.compile("^\\s*alias\\s+([a-zA-Z_][a-zA-Z0-9_-]*)\\s*=\\s*(.+?)\\s*$", re.MULTILINE)
         for match in pattern.finditer(content):
             name = match.group(1)

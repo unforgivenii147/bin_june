@@ -5,18 +5,18 @@ from pathlib import Path
 from dh import get_files
 
 
-def process_file(fp: Path) -> None:
+def process_file(path: Path) -> None:
     path = Path(path)
-    if fp.is_symlink():
+    if path.is_symlink():
         return
-    content = fp.read_text()
+    content = path.read_text()
     lines = content.splitlines()
     c = 0
     for line in lines:
         if line.startswith("#!"):
             c += 1
     if c > 1:
-        print(fp.name)
+        print(path.name)
 
 
 def main() -> None:

@@ -98,9 +98,9 @@ Also install tesseract: https://github.com/UB-Mannheim/tesseract/wiki"""
                 if "/" in str(path.name):
                     files = [f.strip() for f in str(path.name).split("/")]
                     for fname in files:
-                        fpath = path.parent / fname
-                        fpath.touch()
-                        return fpath, is_file, "created"
+                        path = path.parent / fname
+                        path.touch()
+                        return path, is_file, "created"
                 else:
                     path.parent.mkdir(parents=True, exist_ok=True)
                     path.touch()

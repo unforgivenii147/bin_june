@@ -12,7 +12,7 @@ from collections import defaultdict
 from tqdm import tqdm
 from typing import Tuple, Set
 
-URL_PATTERN = re.compile('https?://[^\\s<>"{}|\\\\^`\\[\\]]*', re.IGNORECASE)
+URL_PATTERN = re.compile(r'https?://[^\s<>"{}|\\^`\[\]]*', re.IGNORECASE)
 GIT_DOMAINS = {
     "github.com",
     "gitlab.com",

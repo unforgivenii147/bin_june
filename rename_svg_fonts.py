@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 def extract_font_id(svg_text):
-    match = re.search('<font[^>]*\\bid="([^"]+)"', svg_text, re.IGNORECASE)
+    match = re.search(r'<font[^>]*\bid="([^"]+)"', svg_text, re.IGNORECASE)
     if match:
         return match.group(1).strip()
     return None
@@ -25,7 +25,7 @@ def rename_svg_font(file_path_obj: Path) -> None:
     if not font_id:
         print(f'Skipping {file_path_obj.name}: Could not find <font id="..."> tag.')
         return
-    sanitized_font_id = re.sub('[<>:"/\\\\|?*]', "_", font_id)
+    sanitized_font_id = re.sub(r'[<>:"/\\|?*]', "_", font_id)
     if sanitized_font_id != font_id:
         print(f"Warning: Sanitized font ID for '{font_id}' in '{file_path_obj.name}' to '{sanitized_font_id}'.")
         font_id = sanitized_font_id

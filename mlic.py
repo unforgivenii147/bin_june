@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 """
 Find repeated multiline strings in text files recursively.
@@ -15,8 +15,8 @@ from pathlib import Path
 from typing import Dict, List, Set, Tuple
 import sys
 
-MIN_LINES = 2
-MIN_CHARS = 10
+MIN_LINES = 3
+MIN_CHARS = 100
 
 
 def find_multiline_strings(
@@ -106,7 +106,7 @@ def process_file(args: Tuple[Path, int, int]) -> Tuple[Path, Dict[str, List[Tupl
 
 
 def find_repeated_strings(
-    directory: Path, min_lines: int = 2, min_chars: int = 10, max_workers: int = None
+    directory: Path, min_lines: int = 2, min_chars: int = 10, max_workers: int = None, half: bool = False
 ) -> Dict[str, List[Tuple[Path, List[Tuple[int, int]]]]]:
     files = find_files(directory)
     if not files:
@@ -125,7 +125,19 @@ def find_repeated_strings(
                     all_strings[norm_str].append((file_path, positions))
             except Exception as e:
                 print(f"Error processing {file_path}: {e}", file=sys.stderr)
+
+    # Filter strings that appear in at least 50% of files if half flag is set
     repeated = {k: v for k, v in all_strings.items() if len(v) > 1}
+
+    if half:
+        total_files = len(files)
+        half_threshold = total_files / 2
+        repeated = {k: v for k, v in repeated.items() if len(v) >= half_threshold}
+        if repeated:
+            print(f"Filtered to strings appearing in at least 50% of files ({int(half_threshold)} files)")
+        else:
+            print("No strings found that appear in at least 50% of files")
+
     return repeated
 
 
@@ -186,6 +198,7 @@ def save_strings_to_file(repeated_strings: Dict[str, List[Tuple[Path, List[Tuple
                 f.write("-" * 30 + "\n")
                 f.write(norm_str)
                 f.write("\n\n")
+        print(f"Report saved to {output_file}")
     except Exception as e:
         print(f"Error saving report: {e}", file=sys.stderr)
 
@@ -200,7 +213,9 @@ def main():
         type=int,
         help="Remove found repeated strings. Optionally specify string numbers (e.g., -r 2 4 to remove strings #2 and #4)",
     )
-    parser.add_argument("-s", "--save", action="store_true", help="Save found strings to lic.txt in current directory")
+    parser.add_argument(
+        "-H", "--half", action="store_true", help="Only show strings found in at least 50 percent of files"
+    )
     parser.add_argument("--no-validate", action="store_true", help="Skip Python syntax validation (use with caution)")
     parser.add_argument(
         "--min-lines",
@@ -231,9 +246,18 @@ def main():
             return original_find_files(directory, extensions)
 
         find_files = find_files_with_ext
+
+    if args.half:
+        print("Filtering: Only strings appearing in at least 50% of files will be shown")
+
     repeated = find_repeated_strings(
-        directory, min_lines=args.min_lines, min_chars=args.min_chars, max_workers=args.workers
+        directory, min_lines=args.min_lines, min_chars=args.min_chars, max_workers=args.workers, half=args.half
     )
+
+    # Always save to lic.txt
+    output_file = Path.cwd() / "lic.txt"
+    save_strings_to_file(repeated, output_file)
+
     if not repeated:
         print("No repeated multiline strings found.")
         return
@@ -267,10 +291,6 @@ def main():
         if skipped_files:
             print(f"Skipped {len(skipped_files)} file(s) due to syntax errors.")
             print("These files were NOT modified. Review the strings manually or use --no-validate.")
-    if args.save:
-        output_file = Path.cwd() / "lic.txt"
-        print(f"\nSaving report to {output_file}...")
-        save_strings_to_file(repeated, output_file)
 
 
 if __name__ == "__main__":

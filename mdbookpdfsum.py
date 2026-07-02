@@ -155,7 +155,7 @@ def print_section_tree(root: Section) -> None:
 def parse_section_tree(md_text: str) -> Section:
     root = Section("root", "", 0, 0)
     bfs_map = {(0): [root]}
-    pattern = re.compile("( *)- ([^:\\n]+)(?:: ([^\\n]*))?\\n?")
+    pattern = re.compile(r"( *)- ([^:\n]+)(?:: ([^\n]*))?\n?")
     tmp = None
     min_indent_num = 4
     for indent, name, _value in pattern.findall(md_text):

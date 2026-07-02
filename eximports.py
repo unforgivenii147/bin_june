@@ -13,9 +13,9 @@ parser.language = Language(tsp.language())
 VALID = {"import_statement", "import_from_statement"}
 
 
-def process_file(fp: Path) -> list[str]:
+def process_file(path: Path) -> list[str]:
     path = Path(path)
-    src = fp.read_bytes()
+    src = path.read_bytes()
     tree = parser.parse(src)
     root = tree.root_node
     return [src[node.start_byte : node.end_byte].decode() for node in root.children if node.type in VALID]
@@ -47,14 +47,14 @@ def normalize_import(import_line: str) -> str | None:
 def process_files_parallel(files: list[Path]) -> set[str]:
     all_imports = set()
     with ProcessPoolExecutor() as executor:
-        future_to_file = {executor.submit(process_file, fp): fp for fp in files}
+        future_to_file = {executor.submit(process_file, path): path for path in files}
         for future in as_completed(future_to_file):
             try:
                 imports = future.result()
                 all_imports.update(imports)
             except Exception as e:
-                fp = future_to_file[future]
-                cprint(f"Error processing {fp}: {e}", "yellow")
+                path = future_to_file[future]
+                cprint(f"Error processing {path}: {e}", "yellow")
     return all_imports
 
 

@@ -1,8 +1,9 @@
-#!/data/data/com.termux/files/usr/bin/python
-
+#!/data/data/com.termux/files/usr/bin/env python
 
 """
 Recursively translate non‑English text files to English using Google Translate.
+- Accepts multiple files/directories as input (defaults to current directory).
+- Processes all text-based files without extension restrictions.
 - Splits file content into chunks < 5000 characters.
 - Validates translated Python files with ast.parse; skips writing on error.
 - Prints translated text live.
@@ -13,35 +14,32 @@ Recursively translate non‑English text files to English using Google Translate
 import argparse
 import ast
 import os
+import sys
 import time
 from multiprocessing import Pool
 from pathlib import Path
 from deep_translator import GoogleTranslator
 
-DEFAULT_TEXT_EXTENSIONS = {
-    ".txt",
-    ".py",
-    ".md",
-    ".html",
-    ".css",
-    ".js",
-    ".json",
-    ".xml",
-    ".csv",
-    ".yaml",
-    ".yml",
-    ".cfg",
-    ".ini",
-    ".sh",
-    ".bat",
-    ".tex",
-    ".rst",
-    ".log",
-    ".conf",
-}
+
+def is_text_file(path: Path) -> bool:
+    """Check if file is text-based by reading first chunk."""
+    try:
+        with open(path, "rb") as f:
+            chunk = f.read(512)
+            return not is_binary(chunk)
+    except (OSError, IOError):
+        return False
 
 
-def chunk_lines(lines, max_len=5000):
+def is_binary(chunk: bytes) -> bool:
+    """Detect if bytes chunk is binary."""
+    if not chunk:
+        return False
+    return b"\x00" in chunk[:8192]
+
+
+def chunk_lines(lines: list, max_len: int = 5000):
+    """Split lines into chunks under max_len characters."""
     current_chunk = []
     current_len = 0
     for line in lines:
@@ -57,96 +55,144 @@ def chunk_lines(lines, max_len=5000):
         yield "".join(current_chunk)
 
 
-def translate_file(file_path: Path, target_lang: str, delay: float, output_dir: Path = None) -> None:
+def translate_file(args_tuple: tuple) -> None:
+    """Translate a single file to target language."""
+    file_path, target_lang, delay, output_dir = args_tuple
+    file_path = Path(file_path)
+
     print(f"[{os.getpid()}] Processing: {file_path}")
+
     try:
-        content = file_path.read_text(encoding="utf-8")
+        content = file_path.read_text(encoding="utf-8", errors="ignore")
     except (UnicodeDecodeError, OSError) as e:
-        print(f"  Skipping (cannot read): {file_path}  ({e})")
+        print(f"  ✗ Cannot read: {file_path} ({e})")
         return
+
+    if not content.strip():
+        print(f"  ⊘ Empty file, skipping: {file_path}")
+        return
+
     lines = content.splitlines(keepends=True)
     chunks = list(chunk_lines(lines, max_len=5000))
-    if not chunks:
-        print(f"  Empty file, skipping: {file_path}")
-        return
+
     translator = GoogleTranslator(source="auto", target=target_lang)
     translated_chunks = []
+
     for i, chunk in enumerate(chunks, 1):
         try:
             translated = translator.translate(chunk)
         except Exception as e:
-            print(f"  Translation error in chunk {i}/{len(chunks)} of {file_path.name}: {e}")
+            print(f"  ✗ Translation error in chunk {i}/{len(chunks)}: {e}")
             return
-        preview = translated[:120] + ("..." if len(translated) > 120 else "")
-        print(f"    Chunk {i}/{len(chunks)}: {preview}")
+
+        preview = translated[:100] + ("…" if len(translated) > 100 else "")
+        print(f"    [{i}/{len(chunks)}] {preview}")
         translated_chunks.append(translated)
-        time.sleep(delay)
+
+        if i < len(chunks):
+            time.sleep(delay)
+
     translated_text = "".join(translated_chunks)
+
+    # Validate Python files
     if file_path.suffix.lower() == ".py":
         try:
             ast.parse(translated_text)
-        except SyntaxError as e:
-            print(f"  ✗ Syntax error in translated Python file, NOT writing: {file_path}")
-            print(f"    {e}")
-            return
-        else:
             print(f"  ✓ Python syntax valid")
+        except SyntaxError as e:
+            print(f"  ✗ Syntax error in translated Python, NOT writing: {e}")
+            return
+
+    # Determine output path
     if output_dir:
         try:
             rel_path = file_path.relative_to(Path.cwd())
         except ValueError:
             rel_path = file_path
-        out_path = output_dir / rel_path.with_suffix(file_path.suffix + f".{target_lang}")
+        out_path = (output_dir / rel_path).with_suffix(file_path.suffix + f".{target_lang}")
     else:
         out_path = file_path.with_suffix(file_path.suffix + f".{target_lang}")
+
+    # Write output
     out_path.parent.mkdir(parents=True, exist_ok=True)
     try:
         out_path.write_text(translated_text, encoding="utf-8")
-        print(f"  → Written: {out_path}")
+        print(f"  → Written: {out_path}\n")
     except OSError as e:
-        print(f"  ✗ Could not write output: {out_path}  ({e})")
+        print(f"  ✗ Cannot write output: {out_path} ({e})\n")
 
 
-def is_text_file(path: Path, extensions: set) -> bool:
-    return path.suffix.lower() in extensions
+def collect_files(paths: list) -> list:
+    """Recursively collect all text files from given paths."""
+    files = []
+
+    for path_input in paths:
+        path = Path(path_input).resolve()
+
+        if path.is_file():
+            if is_text_file(path):
+                files.append(path)
+        elif path.is_dir():
+            for file_path in path.rglob("*"):
+                if file_path.is_file() and is_text_file(file_path):
+                    files.append(file_path)
+
+    return sorted(set(files))
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Translate non‑English text files recursively using Google Translate.")
-    parser.add_argument("directory", type=Path, help="Root directory to scan recursively")
+    parser = argparse.ArgumentParser(description="Translate text files recursively using Google Translate.")
+    parser.add_argument(
+        "paths",
+        nargs="*",
+        type=str,
+        help="Files or directories to process (defaults to current directory)",
+    )
     parser.add_argument("--target-lang", default="en", help="Target language code (default: en)")
     parser.add_argument(
-        "--delay", type=float, default=1.0, help="Delay in seconds between chunk translations (default: 1.0)"
+        "--delay",
+        type=float,
+        default=1.0,
+        help="Delay in seconds between chunk translations (default: 1.0)",
     )
     parser.add_argument(
-        "--workers", type=int, default=os.cpu_count(), help="Number of parallel worker processes (default: CPU count)"
+        "--workers",
+        type=int,
+        default=None,
+        help=f"Number of parallel workers (default: {os.cpu_count()})",
     )
     parser.add_argument(
         "--output-dir",
         type=Path,
         default=None,
-        help="Directory to store translated files (default: same folder with '.en' suffix)",
+        help="Directory for translated files (default: same folder with language suffix)",
     )
-    parser.add_argument(
-        "--extensions",
-        nargs="*",
-        default=None,
-        help="File extensions to process (e.g. .py .txt .md). If omitted, a built‑in list is used.",
-    )
+
     args = parser.parse_args()
-    if args.extensions:
-        extensions = {(ext.lower() if ext.startswith(".") else f".{ext.lower()}") for ext in args.extensions}
-    else:
-        extensions = DEFAULT_TEXT_EXTENSIONS
-    root = args.directory.resolve()
-    if not root.is_dir():
-        print(f"Error: {root} is not a directory.")
+
+    # Default to current directory if no paths provided
+    paths = args.paths if args.paths else ["."]
+
+    # Set default workers
+    workers = args.workers or os.cpu_count()
+
+    # Collect files
+    files = collect_files(paths)
+
+    if not files:
+        print("No text files found.")
         return
-    files = [f for f in root.rglob("*") if f.is_file() and is_text_file(f, extensions)]
-    print(f"Found {len(files)} text files to process.\n")
-    with Pool(processes=args.workers) as pool:
-        pool.starmap(translate_file, [(f, args.target_lang, args.delay, args.output_dir) for f in files])
-    print("\nAll files processed.")
+
+    print(f"Found {len(files)} text files.\n")
+
+    # Prepare tasks
+    tasks = [(f, args.target_lang, args.delay, args.output_dir) for f in files]
+
+    # Process files in parallel
+    with Pool(processes=workers) as pool:
+        pool.map(translate_file, tasks)
+
+    print("✓ All files processed.")
 
 
 if __name__ == "__main__":

@@ -8,11 +8,11 @@ THRESHOLD = 1024 * 1024
 cwd = Path.cwd()
 
 
-def process_file(fp: Path, threshold: int = THRESHOLD) -> None:
-    sz = fp.stat().st_size
+def process_file(path: Path, threshold: int = THRESHOLD) -> None:
+    sz = path.stat().st_size
     path = Path(path)
     if sz > threshold:
-        print(f"{fp.relative_to(cwd)} : {fsz(sz)}")
+        print(f"{path.relative_to(cwd)} : {fsz(sz)}")
 
 
 def main() -> None:

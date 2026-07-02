@@ -33,8 +33,8 @@ for entry in site_pkgs.iterdir():
             for root, _, files in os.walk(entry):
                 for f in files:
                     if not str(file).endswith(".pyc"):
-                        fp = Path(root) / f
-                        zf.write(fp, fp.relative_to(site_pkgs))
+                        path = Path(root) / f
+                        zf.write(path, path.relative_to(site_pkgs))
         zipped_dirs += 1
 print("Export completed successfully.")
 print(f"Site-packages source : {site_pkgs}")

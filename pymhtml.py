@@ -86,7 +86,7 @@ def process_file(path) -> None:
         if filename:
             return sanitize_filename(filename)
         cd = part.get("Content-Disposition") or ""
-        m = re.search("filename\\*?=(?:UTF-8'')?[\\\\\\\"']?([^\\\\\\\"';]+)", cd, flags=re.IGNORECASE)
+        m = re.search(r"filename\*?=(?:UTF-8'')?[\\\"']?([^\\\"';]+)", cd, flags=re.IGNORECASE)
         if m:
             return sanitize_filename(m.group(1))
         return None
@@ -126,7 +126,7 @@ def process_file(path) -> None:
         return match.group(0)
 
     html_text = re.sub(
-        "(src|href)=[\\\\\\\"']cid:([^\\\\\\\"']+)[\\\\\\\"']",
+        r"(src|href)=[\\\"']cid:([^\\\"']+)[\\\"']",
         lambda m: (
             f'{m.group(1)}="{os.path.basename(out_dir)}/{cid_to_file.get(m.group(2), m.group(2))}"'
             if m.group(2) in cid_to_file
@@ -144,7 +144,7 @@ def process_file(path) -> None:
             return match.group(0)
         mime, raw = parsed
         ext = None
-        m = re.match("^[^/]+/([^;\\\\s]+)", mime)
+        m = re.match(r"^[^/]+/([^;\\s]+)", mime)
         if m:
             ext = m.group(1)
         if ext == "svg+xml":
@@ -156,9 +156,7 @@ def process_file(path) -> None:
             f.write(raw)
         return f'{attr}="{os.path.basename(out_dir)}/{fname}"'
 
-    html_text = re.sub(
-        "(src|href)=[\\\\\\\"'](data:[^\\\\\\\"']+)[\\\\\\\"']", data_uri_replacer, html_text, flags=re.IGNORECASE
-    )
+    html_text = re.sub(r"(src|href)=[\\\"'](data:[^\\\"']+)[\\\"']", data_uri_replacer, html_text, flags=re.IGNORECASE)
     with open(out_html, "w", encoding="utf-8") as f:
         f.write(html_text)
     print("Done.")
