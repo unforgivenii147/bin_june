@@ -21,13 +21,9 @@ from pathlib import Path
 from typing import Tuple, Optional, List
 from dataclasses import dataclass
 from multiprocessing import Pool, cpu_count
-import logging
+from loguru import logger
 from tqdm import tqdm
 from datetime import datetime
-
-# Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
-logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -56,15 +52,10 @@ class ProcessResult:
 
 
 class CommentRemover:
-    """Remove comments from C/C++ source code while preserving strings."""
+    STRING_PATTERN = r"""(?:"(?:\.|[^"\])*"|'(?:\.|[^'\])*')"""
 
-    # Regex to match strings and characters to protect them from comment removal
-    STRING_PATTERN = r"""(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')"""
-
-    # Single-line comment pattern
     SINGLE_COMMENT_PATTERN = r"//.*?(?=\n|$)"
 
-    # Multi-line comment pattern (non-greedy)
     MULTI_COMMENT_PATTERN = r"/\*.*?\*/"
 
     def __init__(self):
