@@ -159,10 +159,7 @@ def process_bytes_as_archive(b, name, max_bytes, exts, found, recursion_depth: i
                 found.update(scan_bytes_for_urls(b, max_bytes, exts, name_hint=name))
             return
 
-        if any(
-            lname.endswith(suf)
-            for suf in (".tar", ".tar.gz", ".tgz", ".tar.xz", ".txz", ".tar.bz2", ".tbz2")
-        ):
+        if any(lname.endswith(suf) for suf in (".tar", ".tar.gz", ".tgz", ".tar.xz", ".txz", ".tar.bz2", ".tbz2")):
             try:
                 bio.seek(0)
                 with tarfile.open(fileobj=bio, mode="r:*") as tf:
@@ -218,10 +215,7 @@ def process_path(path: str, max_bytes: int, exts, found, recursion_limit=999) ->
             except zipfile.BadZipFile:
                 pass
 
-        if any(
-            lname.endswith(suf)
-            for suf in (".tar", ".tar.gz", ".tgz", ".tar.xz", ".txz", ".tar.bz2", ".tbz2")
-        ):
+        if any(lname.endswith(suf) for suf in (".tar", ".tar.gz", ".tgz", ".tar.xz", ".txz", ".tar.bz2", ".tbz2")):
             try:
                 with tarfile.open(p, mode="r:*") as tf:
                     process_tarfile_obj(tf, max_bytes, exts, found, 0, recursion_limit)
@@ -312,7 +306,9 @@ def iter_files(root: Path):
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Find URLs in files and supported archives recursively and save them to a file.")
+    parser = argparse.ArgumentParser(
+        description="Find URLs in files and supported archives recursively and save them to a file."
+    )
     parser.add_argument("-o", "--output", default="urls.txt", help="Output file (one URL per line).")
     parser.add_argument(
         "-m",
@@ -327,7 +323,9 @@ def main() -> None:
         default="",
         help="Comma-separated list of file extensions to scan (e.g. .py,.md). If empty, all files are scanned. Applies to archive members too.",
     )
-    parser.add_argument("--max-recursion", type=int, default=999, help="Max nested-archive recursion depth (default 999).")
+    parser.add_argument(
+        "--max-recursion", type=int, default=999, help="Max nested-archive recursion depth (default 999)."
+    )
     args = parser.parse_args()
 
     max_bytes = int(args.max_mb * 1024 * 1024)
