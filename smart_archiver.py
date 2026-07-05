@@ -7,7 +7,6 @@ and supports parallel compression for multiple files.
 import argparse
 import json
 import multiprocessing
-import os
 import sys
 import tarfile
 import tempfile
@@ -238,7 +237,7 @@ def compress_single_file(file_path, output_path=None, remove_original: bool = Fa
         with open(output_path, "wb") as f:
             f.write(compressed_data)
         if remove_original:
-            os.remove(file_path)
+            Path(file_path).unlink()
         elapsed = time.time() - start_time
         original_size = len(data)
         compressed_size = len(compressed_data)
@@ -324,7 +323,8 @@ def create_tar_archive(source_dir, output_path=None, compression="auto", level=N
         compressed_path = Path(f"{tar_path}.{algo}")
         with open(compressed_path, "wb") as f:
             f.write(compressed_data)
-        os.remove(tar_path)
+        Path(tar_path).unlink()
+
         final_path = compressed_path
         elapsed = time.time() - start_time
         compressed_size = len(compressed_data)
@@ -398,7 +398,8 @@ def decompress_file(compressed_path, output_dir=None, verbose: bool = False):
         extract_dir.mkdir(exist_ok=True)
         with tarfile.open(output_path, "r") as tar:
             tar.extractall(extract_dir)
-        os.remove(output_path)
+        Path(output_path).unlink()
+
         if verbose:
             print(f"✓ Extracted to: {extract_dir}")
         return extract_dir
@@ -415,16 +416,12 @@ def main() -> None:
 Examples:
   # Compress a single file (auto-detects best algorithm)
   python smart_archiver.py compress document.txt
-  
   # Compress multiple files in parallel
   python smart_archiver.py compress *.log --parallel --output-dir compressed/
-  
   # Create compressed archive of a directory
   python smart_archiver.py archive myfolder/ --compression auto
-  
   # Force specific compression algorithm
   python smart_archiver.py archive myfolder/ --compression zstd --level 22
-  
   # Decompress a file
   python smart_archiver.py decompress document.txt.zstd
         """,

@@ -1,4 +1,5 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/usr/bin/python
+
 
 """
 Find repeated multiline strings in text files recursively.
@@ -8,8 +9,6 @@ Supports parallel processing, removal, and saving of found strings.
 import argparse
 import ast
 import concurrent.futures
-import hashlib
-import re
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
@@ -126,7 +125,6 @@ def find_repeated_strings(
             except Exception as e:
                 print(f"Error processing {file_path}: {e}", file=sys.stderr)
 
-    # Filter strings that appear in at least 50% of files if half flag is set
     repeated = {k: v for k, v in all_strings.items() if len(v) > 1}
 
     if half:
@@ -254,7 +252,6 @@ def main():
         directory, min_lines=args.min_lines, min_chars=args.min_chars, max_workers=args.workers, half=args.half
     )
 
-    # Always save to lic.txt
     output_file = Path.cwd() / "lic.txt"
     save_strings_to_file(repeated, output_file)
 

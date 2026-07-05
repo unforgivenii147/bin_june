@@ -1,8 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-
 """dedup_utils.py
-
 Usage:
   python dedup_utils.py --copy
   python dedup_utils.py --move
@@ -12,7 +9,6 @@ from __future__ import annotations
 import argparse
 import ast
 import hashlib
-import os
 import sys
 import tempfile
 from ast import Name, Tuple, expr
@@ -459,7 +455,7 @@ def main() -> None:
                 with tempfile.NamedTemporaryFile("w", delete=False, encoding="utf-8") as tf:
                     tf.write(new_text)
                     tmpname = tf.name
-                os.replace(tmpname, str(p))
+                Path(tmpname).replace(p)
                 logger.info("updated {}", p)
             except Exception as exc:
                 logger.exception("failed to modify {}: {}", src_path, exc)

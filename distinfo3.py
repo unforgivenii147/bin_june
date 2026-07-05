@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-import os
 import shutil
 import sys
 from pathlib import Path
@@ -12,19 +10,20 @@ py_version = f"{major}.{minor}"
 
 def process_dir(dr: Path) -> bool:
     print(dr.name)
-    if "dist-info" in str(dr.name):
-        for k in os.listdir(dr):
-            if k in {"top_level.txt", "entry_points.txt"}:
+    if "dist-info" in dr.name:
+        for k in dr.iterdir():
+            if k.name in {"top_level.txt", "entry_points.txt"}:
                 cprint(f"{dr} removed", "cyan")
                 shutil.rmtree(dr)
     return True
 
 
 def main() -> None:
-    cwd = f"/data/data/com.termux/files/usr/lib/python{py_version}/site-packages"
-    for pth in os.listdir(cwd):
-        path = Path(os.path.join(cwd, pth))
-        if path.is_dir() and len(os.listdir(path)) == 1:
+    cwd = Path(f"/data/data/com.termux/files/usr/lib/python{py_version}/site-packages")
+    if not cwd.exists():
+        return
+    for path in cwd.iterdir():
+        if path.is_dir() and len(list(path.iterdir())) == 1:
             process_dir(path)
 
 

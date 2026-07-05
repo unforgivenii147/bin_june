@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 """
 Skip blank lines option with dry run and auto-fix modes.
 """

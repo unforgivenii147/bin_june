@@ -1,16 +1,23 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-import os
 import re
+from pathlib import Path
+
+# Assuming is_binary is available from a local module 'dh' as in pytokei.py
+try:
+    from dh import is_binary
+except ImportError:
+    # Fallback or placeholder if dh is not available, though it should be if following pytokei.py
+    def is_binary(path):
+        return False
 
 
-def count_lines_of_code(file_path: str, lang) -> tuple[int, int, int]:
+def count_lines_of_code(file_path: Path, lang) -> tuple[int, int, int]:
     if ".git" in str(file_path):
         return 0, 0, 0
-    if is_binary(file_path):
+    if is_binary(str(file_path)):
         print(f"{file_path} is binary")
         return 0, 0, 0
-    with Path(file_path).open(encoding="utf-8") as file:
+    with file_path.open(encoding="utf-8") as file:
         code_lines = 0
         comment_lines = 0
         blank_lines = 0
@@ -29,31 +36,33 @@ def scan_directory(directory: str = "."):
         "total": {"code": 0, "comments": 0, "blank": 0},
         "languages": {lang: {"code": 0, "comments": 0, "blank": 0} for lang in LANG_EXTENSIONS},
     }
-    for root, _, files in os.walk(directory):
-        for file in files:
-            file_path = os.path.join(root, file)
-            file_extension = os.path.splitext(file)[1].lower()
-            if not file_extension:
-                lang = get_language_from_shebang(file_path)
-                if lang:
-                    code, comments, blanks = count_lines_of_code(file_path, lang)
-                    stats["languages"][lang]["code"] += code
-                    stats["languages"][lang]["comments"] += comments
-                    stats["languages"][lang]["blank"] += blanks
-                    stats["total"]["code"] += code
-                    stats["total"]["comments"] += comments
-                    stats["total"]["blank"] += blanks
-                    continue
-            for lang, extensions in LANG_EXTENSIONS.items():
-                if file_extension in extensions:
-                    code, comments, blanks = count_lines_of_code(file_path, lang)
-                    stats["languages"][lang]["code"] += code
-                    stats["languages"][lang]["comments"] += comments
-                    stats["languages"][lang]["blank"] += blanks
-                    stats["total"]["code"] += code
-                    stats["total"]["comments"] += comments
-                    stats["total"]["blank"] += blanks
-                    break
+    base_path = Path(directory)
+    for file_path in base_path.rglob("*"):
+        if not file_path.is_file():
+            continue
+
+        file_extension = file_path.suffix.lower()
+        if not file_extension:
+            lang = get_language_from_shebang(str(file_path))
+            if lang:
+                code, comments, blanks = count_lines_of_code(file_path, lang)
+                stats["languages"][lang]["code"] += code
+                stats["languages"][lang]["comments"] += comments
+                stats["languages"][lang]["blank"] += blanks
+                stats["total"]["code"] += code
+                stats["total"]["comments"] += comments
+                stats["total"]["blank"] += blanks
+                continue
+        for lang, extensions in LANG_EXTENSIONS.items():
+            if file_extension in extensions:
+                code, comments, blanks = count_lines_of_code(file_path, lang)
+                stats["languages"][lang]["code"] += code
+                stats["languages"][lang]["comments"] += comments
+                stats["languages"][lang]["blank"] += blanks
+                stats["total"]["code"] += code
+                stats["total"]["comments"] += comments
+                stats["total"]["blank"] += blanks
+                break
     return stats
 
 

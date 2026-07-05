@@ -8,7 +8,6 @@ Outputs results to ~/tmp/err
 """
 
 import concurrent.futures
-import os
 import subprocess
 from pathlib import Path
 from typing import List, Optional, Tuple
@@ -16,27 +15,25 @@ from binaryornot import is_binary
 from dh import get_filez
 
 
-def is_executable(filepath: str) -> bool:
-    return os.path.isfile(filepath) and os.access(filepath, os.X_OK)
+def is_executable(filepath: Path) -> bool:
+    return filepath.is_file() and filepath.stat().st_mode & 0o111 != 0
 
 
-def is_elf(filepath: str) -> bool:
-    if not is_binary(filepath):
+def is_elf(filepath: Path) -> bool:
+    if not is_binary(str(filepath)):
         return False
     try:
-        with open(filepath, "rb") as f:
-            header = f.read(4)
-            if header[:4] == b"\x7fELF":
-                return True
-            if header[:2] == b"#!":
-                return False
+        header = filepath.read_bytes()[:4]
+        if header[:4] == b"\x7fELF":
+            return True
+        if header[:2] == b"#!":
+            return False
     except (IOError, OSError):
         pass
     return False
 
 
-def get_binary_files(directory: (str | Path)) -> List[str]:
-    directory = Path(directory)
+def get_binary_files(directory: Path) -> List[Path]:
     """Get all executable binary files in a directory"""
     binaries = []
     try:
@@ -50,11 +47,11 @@ def get_binary_files(directory: (str | Path)) -> List[str]:
     return binaries
 
 
-def test_executable(filepath: str) -> Tuple[str, Optional[str]]:
+def test_executable(filepath: Path) -> Tuple[Path, Optional[str]]:
     test_args = ["--help", "-h", "--version", "-v", "--info"]
     for test_arg in test_args:
         try:
-            result = subprocess.run([filepath, test_arg], capture_output=True, text=True, timeout=2)
+            result = subprocess.run([str(filepath), test_arg], capture_output=True, text=True, timeout=2)
             if result.stderr:
                 error_lower = result.stderr.lower()
                 if any(
@@ -81,7 +78,7 @@ def test_executable(filepath: str) -> Tuple[str, Optional[str]]:
                 return filepath, "Exec format error (wrong architecture)"
             return filepath, str(e)
     try:
-        result = subprocess.run([filepath], capture_output=True, text=True, timeout=1)
+        result = subprocess.run([str(filepath)], capture_output=True, text=True, timeout=1)
         if result.stderr:
             error_lower = result.stderr.lower()
             if any(
@@ -108,8 +105,7 @@ def main() -> None:
     binaries = get_binary_files(cwd)
     if not binaries:
         print("No executable binaries found in current directory")
-        with open(output_file, "w") as f:
-            f.write("No executable binaries found in current directory\n")
+        output_file.write_text("No executable binaries found in current directory\n")
         return
     print(f"Found {len(binaries)} binaries to test")
     print("Testing binaries in parallel...")
@@ -122,37 +118,35 @@ def main() -> None:
                 filepath, error_msg = future.result()
                 if error_msg:
                     failed_binaries.append((filepath, error_msg))
-                    print(f"  [{i}/{len(binaries)}] ❌ {os.path.basename(binary)} - FAILED")
+                    print(f"  [{i}/{len(binaries)}] ❌ {binary.name} - FAILED")
                 else:
-                    print(f"  [{i}/{len(binaries)}] ✅ {os.path.basename(binary)} - OK")
+                    print(f"  [{i}/{len(binaries)}] ✅ {binary.name} - OK")
             except Exception as e:
                 failed_binaries.append((binary, f"Test exception: {str(e)[:100]}"))
-                print(f"  [{i}/{len(binaries)}] ⚠️ {os.path.basename(binary)} - ERROR")
-    cwd = Path.cwd()
+                print(f"  [{i}/{len(binaries)}] ⚠️ {binary.name} - ERROR")
     out_dir = cwd / "err"
-    for k, _ in failed_binaries:
-        p = Path(k)
-        new_path = out_dir / p.name
-        p.rename(new_path)
-    with open(output_file, "w") as f:
-        f.write(f"Binary Analysis Results\n")
-        f.write(f"Directory: {cwd}\n")
-        f.write(f"Total binaries tested: {len(binaries)}\n")
-        f.write(f"Failed binaries: {len(failed_binaries)}\n")
-        f.write("=" * 70 + "\n\n")
-        if failed_binaries:
-            for filepath, error_msg in failed_binaries:
-                f.write(f"Binary: {filepath}\n")
-                f.write(f"Error:  {error_msg}\n")
-                f.write("-" * 70 + "\n")
-        else:
-            f.write("✓ All binaries tested successfully!\n")
+    out_dir.mkdir(exist_ok=True)
+    for filepath, _ in failed_binaries:
+        new_path = out_dir / filepath.name
+        filepath.rename(new_path)
+    output_file.write_text(
+        f"Binary Analysis Results\n"
+        f"Directory: {cwd}\n"
+        f"Total binaries tested: {len(binaries)}\n"
+        f"Failed binaries: {len(failed_binaries)}\n"
+        f"{'=' * 70}\n\n"
+        + (
+            "\n".join(f"Binary: {filepath}\nError:  {error_msg}\n{'-' * 70}" for filepath, error_msg in failed_binaries)
+            if failed_binaries
+            else "✓ All binaries tested successfully!\n"
+        )
+    )
     print("\n" + "=" * 35)
     print(f"Failed: {len(failed_binaries)}")
     print(f"Success: {len(binaries) - len(failed_binaries)}")
     if failed_binaries:
         for filepath, error_msg in failed_binaries:
-            print(f"  • {os.path.basename(filepath)}")
+            print(f"  • {filepath.name}")
             print(f"    → {error_msg[:100]}")
     else:
         print(f"\n✅ All binaries are working correctly!")

@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-import os
 import re
 from pathlib import Path
 
@@ -70,28 +68,25 @@ def get_extension_from_language(language) -> str:
 
 
 def process_markdown_files(directory: str = ".") -> None:
-    for root, _, files in os.walk(directory):
-        for file in files:
-            if file.endswith((".md", ".markdown", ".metadata", "METADATA", "PKGINFO", "PKG-INFO")):
-                filepath = os.path.join(root, file)
-                try:
-                    content = Path(filepath).read_text(encoding="utf-8")
-                except Exception as e:
-                    print(f"Error reading {filepath}: {e}")
-                    continue
-                code_details = extract_code_snippets_with_details(content)
-                if code_details:
-                    base_name = os.path.splitext(file)[0]
-                    for _i, details in enumerate(code_details):
-                        line_range = f"{details['start_line']}-{details['end_line']}"
-                        language = details["language"]
-                        extension = get_extension_from_language(language)
-                        output_filename = f"output/{base_name}_lines_{line_range}{extension}"
-                        output_path = os.path.join(root, output_filename)
-                        Path(output_path).write_text(details["content"].strip(), encoding="utf-8")
-                        print(
-                            f"Saved snippet from {filepath} (Lines {line_range}, Lang: '{language}') to {output_path}"
-                        )
+    directory_path = Path(directory)
+    for path in directory_path.rglob("*"):
+        if path.suffix.lower() in {".md", ".markdown", ".metadata"} or path.name in {"METADATA", "PKGINFO", "PKG-INFO"}:
+            try:
+                content = path.read_text(encoding="utf-8")
+            except Exception as e:
+                print(f"Error reading {path}: {e}")
+                continue
+            code_details = extract_code_snippets_with_details(content)
+            if code_details:
+                base_name = path.stem
+                for details in code_details:
+                    line_range = f"{details['start_line']}-{details['end_line']}"
+                    language = details["language"]
+                    extension = get_extension_from_language(language)
+                    output_filename = f"{base_name}_lines_{line_range}{extension}"
+                    output_path = OUTPUT_DIR / output_filename
+                    output_path.write_text(details["content"].strip(), encoding="utf-8")
+                    print(f"Saved snippet from {path} (Lines {line_range}, Lang: '{language}') to {output_path}")
 
 
 if __name__ == "__main__":

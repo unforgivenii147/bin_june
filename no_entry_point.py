@@ -12,7 +12,7 @@ import sys
 import json
 from pathlib import Path
 from multiprocessing import Pool, cpu_count
-from typing import List, Tuple, Optional, Dict, Set
+from typing import List, Tuple, Dict
 import argparse
 from datetime import datetime
 import re

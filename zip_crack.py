@@ -1,8 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-
 import multiprocessing
-import os
 import sys
 import threading
 import time
@@ -135,12 +132,6 @@ def count_passwords(wordlist_file):
 
 
 def brute_force_zip(zip_file, wordlist_file, num_processes=None, batch_size=1000, update_interval=60):
-    if not os.path.exists(zip_file):
-        print(f"❌ Error: Zip file '{zip_file}' not found!")
-        return None
-    if not os.path.exists(wordlist_file):
-        print(f"❌ Error: Wordlist file '{wordlist_file}' not found!")
-        return None
     try:
         with zipfile.ZipFile(zip_file, "r") as zf:
             if not any(info.flag_bits & 1 for info in zf.infolist()):

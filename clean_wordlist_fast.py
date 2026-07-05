@@ -1,9 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/python
-
 import os
 import re
 import sys
 import tempfile
+from pathlib import Path
 
 THRESHOLD = 5 * 1024 * 1024
 RE_REPEAT = re.compile("^(.)\\1+$", re.IGNORECASE)
@@ -19,21 +19,24 @@ def main() -> None:
         print(f"Usage: {sys.argv[0]} <wordlist.txt>", file=sys.stderr)
         sys.exit(1)
     fname = sys.argv[1]
+    fpath = Path(fname)
     tmp_fd, tmp_name = tempfile.mkstemp(prefix="wordlist_", suffix=".tmp")
+    tmp_path = Path(tmp_name)
     try:
         with (
             os.fdopen(tmp_fd, "w", encoding="utf-8", errors="ignore") as out,
-            open(fname, "r", encoding="utf-8", errors="ignore") as inp,
+            fpath.open("r", encoding="utf-8", errors="ignore") as inp,
         ):
             for line in inp:
                 if not should_skip(line):
                     out.write(line)
-        os.replace(tmp_name, fname)
+        tmp_path.replace(fpath)
     except Exception:
-        try:
-            os.remove(tmp_name)
-        except OSError:
-            pass
+        if tmp_path.exists():
+            try:
+                tmp_path.unlink()
+            except OSError:
+                pass
         raise
 
 

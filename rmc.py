@@ -1,11 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-
-"""
-rmc.py - Remove comments and docstrings from Python files
-Usage: python rmc.py [target_path]
-"""
-
 import argparse
 import ast
 import shutil

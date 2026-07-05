@@ -1,7 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
-
 import argparse
-import os
 import re
 from pathlib import Path
 
@@ -29,16 +27,15 @@ def remove_comments_and_strings(content: str, filetype: str, keep_strings=False)
 
 
 def process_file(filepath, inplace=False, keep_strings=False) -> None:
-    path = Path(path)
-    _, ext = os.path.splitext(filepath)
-    ext = ext[1:].lower()
+    p = Path(filepath)
+    ext = p.suffix[1:].lower()
     if ext not in {"hpp", "h", "c", "cpp", "py", "sh"}:
         print(f"Unsupported file type: {ext}")
         return
-    content = Path(filepath).read_text(encoding="utf-8")
+    content = p.read_text(encoding="utf-8")
     cleaned = remove_comments_and_strings(content, ext, keep_strings)
     if inplace:
-        Path(filepath).write_text(cleaned, encoding="utf-8")
+        p.write_text(cleaned, encoding="utf-8")
         print(f"File {filepath} cleaned and saved in-place.")
     else:
         print(f"--- Cleaned {filepath} ---\n{cleaned}\n")

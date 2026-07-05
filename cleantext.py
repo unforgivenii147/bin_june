@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 import sys
 import unicodedata
 from pathlib import Path

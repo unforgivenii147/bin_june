@@ -1,4 +1,5 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/usr/bin/python
+
 """
 Check Python files recursively for missing imports.
 Supports parallel processing and optional auto-fix with -a flag.

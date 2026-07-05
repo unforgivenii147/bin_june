@@ -1,4 +1,5 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/usr/bin/python
+
 import json
 from collections import defaultdict
 from urllib.request import urlopen

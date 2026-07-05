@@ -1,8 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
-
 import base64
 import hashlib
-import os
 import re
 from pathlib import Path
 
@@ -26,7 +24,7 @@ def extract_images_from_file(file_path: Path, output_dir: Path) -> int:
         digest = hashlib.sha1(img_bytes).hexdigest()[:12]
         filename = f"{file_path.stem}_{digest}.{ext}"
         output_path = output_dir / filename
-        Path(output_path).write_bytes(img_bytes)
+        output_path.write_bytes(img_bytes)
         count += 1
     return count
 
@@ -36,20 +34,19 @@ def scan_and_extract(base_dir: Path, output_dir: Path) -> None:
     target_exts = {".ipynb", ".js", ".html"}
     total_found = 0
     print(f"\n🔍 Scanning: {base_dir.resolve()}\n")
-    for root, _, files in os.walk(base_dir):
-        for fname in files:
-            ext = Path(fname).suffix.lower()
-            if ext not in target_exts:
-                continue
-            path = Path(root) / fname
-            found = extract_images_from_file(path, output_dir)
-            total_found += found
-            if found:
-                print(f"📸 Extracted {found} images from {path}")
+    for path in base_dir.rglob("*"):
+        if not path.is_file():
+            continue
+        if path.suffix.lower() not in target_exts:
+            continue
+        found = extract_images_from_file(path, output_dir)
+        total_found += found
+        if found:
+            print(f"📸 Extracted {found} images from {path}")
     print(f"\n✅ Extraction complete. Total images saved: {total_found}")
 
 
 if __name__ == "__main__":
-    base_dir = Path()
+    base_dir = Path.cwd()
     output_dir = Path("extracted_images")
     scan_and_extract(base_dir, output_dir)

@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/usr/bin/python
 
 
 """
@@ -15,7 +15,7 @@ Features:
 import ast
 import sys
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Set
 from dataclasses import dataclass
 from multiprocessing import Pool, cpu_count
 from collections import defaultdict

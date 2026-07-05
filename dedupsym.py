@@ -1,8 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
-
 import argparse
 import json
-import os
 import shutil
 from collections import defaultdict
 from pathlib import Path
@@ -41,32 +39,30 @@ def xxh64_of_path(p: Path) -> str:
 
 def build_groups(root: Path, cache: dict):
     groups = defaultdict(list)
-    for dirpath, _dirnames, filenames in os.walk(root):
-        for name in filenames:
-            path = Path(dirpath) / name
-            if ".git" in path.parts:
-                continue
-            if path.is_symlink():
-                continue
+    for path in root.rglob("*"):
+        if not path.is_file():
+            continue
+        if ".git" in path.parts:
+            continue
+        if path.is_symlink():
+            continue
+        try:
+            st = path.stat()
+        except Exception:
+            continue
+        key = str(path)
+        size = st.st_size
+        mtime = st.st_mtime
+        cached = cache.get(key)
+        if cached and cached.get("size") == size and cached.get("mtime") == mtime:
+            h = cached["hash"]
+        else:
             try:
-                st = path.stat()
+                h = xxh64_of_path(path)
             except Exception:
                 continue
-            if not path.is_file():
-                continue
-            key = str(path)
-            size = st.st_size
-            mtime = st.st_mtime
-            cached = cache.get(key)
-            if cached and cached.get("size") == size and cached.get("mtime") == mtime:
-                h = cached["hash"]
-            else:
-                try:
-                    h = xxh64_of_path(path)
-                except Exception:
-                    continue
-                cache[key] = {"size": size, "mtime": mtime, "hash": h}
-            groups[h].append(path)
+            cache[key] = {"size": size, "mtime": mtime, "hash": h}
+        groups[h].append(path)
     return groups
 
 

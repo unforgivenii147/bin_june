@@ -1,13 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-
-import os
 import re
 from pathlib import Path
 from multiprocessing import Pool, cpu_count
 from typing import List, Tuple
 import argparse
-import sys
 
 try:
     from PIL import Image

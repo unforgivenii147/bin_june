@@ -1,12 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-
 """
 Script to show various extensions in current directory with total size for each extension.
 Uses pathlib and parallel processing for speedup.
 """
 
-import os
 from pathlib import Path
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -54,7 +51,6 @@ def format_size(size_bytes: int) -> str:
 
 def main():
     current_dir = "."
-    print(f"Scanning directory: {os.path.abspath(current_dir)}")
     print("-" * 60)
     print("Collecting files...")
     files = get_files_in_directory(current_dir)
@@ -62,7 +58,7 @@ def main():
         print("No files found in current directory.")
         return
     print(f"Found {len(files)} files")
-    num_workers = min(os.cpu_count() or 4, len(files))
+    num_workers = 8
     print(f"Using {num_workers} parallel workers...")
     print("-" * 60)
     batch_size = max(1, len(files) // num_workers)

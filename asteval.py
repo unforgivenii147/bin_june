@@ -1,15 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-
 import ast
 import sys
 import argparse
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import List, Optional
+from typing import List
 from multiprocessing import Pool, cpu_count
-import os
-from dh import cprint, get_pyfiles, mpf3
+from dh import get_pyfiles, mpf3
 
 
 def process_file(args: tuple) -> None:

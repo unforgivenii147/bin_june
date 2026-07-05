@@ -1,17 +1,13 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-
 """
 Find and organize duplicate images in the current directory into subfolders.
 Same image content detection works even with different resolutions.
-
 Method:
 - Compute a perceptual hash (phash) after resizing/normalizing images.
 - Group images by hash (near-duplicates caught with a configurable threshold).
 - Move duplicate groups into numbered subfolders (duplicates_001, duplicates_002, etc).
 - Use multiprocessing for parallel hash computation.
 - Use OpenCV (cv2) for faster image loading and processing.
-
 Usage:
   python find_dupes.py
 Optional:

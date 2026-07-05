@@ -1,5 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
-import os
+#!/data/data/com.termux/files/usr/bin/python
 from pathlib import Path
 import sys
 
@@ -48,7 +47,6 @@ def matches_pattern(path: Path, patterns: set) -> bool:
 
 
 def walk_directory(root_dir: Path):
-    """Generator that yields all paths in a directory recursively."""
     try:
         for entry in root_dir.iterdir():
             yield entry
@@ -59,14 +57,12 @@ def walk_directory(root_dir: Path):
 
 
 def process_path(path: Path) -> tuple[str, int]:
-    """Delete a file or directory and return its path and size."""
     try:
         if path.is_file():
             size = path.stat().st_size
             path.unlink()
             return (str(path), size)
         elif path.is_dir():
-            # Calculate total size of all files in directory
             total_size = 0
             for file_path in walk_directory(path):
                 if file_path.is_file():
@@ -81,37 +77,27 @@ def process_path(path: Path) -> tuple[str, int]:
 
 
 def find_and_remove_files(root_dir: Path = None) -> dict:
-    """Find and remove Darwin/Windows files recursively without multiprocessing."""
     if root_dir is None:
         root_dir = Path.cwd()
     else:
         root_dir = Path(root_dir)
-
     if not root_dir.exists():
         print(f"Error: {root_dir} does not exist", file=sys.stderr)
         return {}
-
     print(f"Scanning {root_dir} for Darwin/Windows files...\n")
-
-    # Find matching files using generator
     matching_paths = []
     for path in walk_directory(root_dir):
         if matches_pattern(path, ALL_PATTERNS):
             matching_paths.append(path)
-
     if not matching_paths:
         print("No matching files found.")
         return {"files_removed": 0, "total_freed_bytes": 0, "total_freed_human": "0 B"}
-
     print(f"Found {len(matching_paths)} file(s) to remove\n")
-
-    # Process files sequentially
     results = []
     for path in matching_paths:
         print(f"Removing: {path}")
         result = process_path(path)
         results.append(result)
-
     total_freed = sum((size for _, size in results))
     successful = sum((1 for _, size in results if size > 0))
 
@@ -132,7 +118,6 @@ def find_and_remove_files(root_dir: Path = None) -> dict:
 
 
 def print_report(stats: dict) -> None:
-    """Print a summary report of the removal operation."""
     print("\n" + "=" * 60)
     print("REMOVAL REPORT")
     print("=" * 60)
@@ -148,10 +133,8 @@ def main():
     parser.add_argument("directory", nargs="?", default=".", help="Directory to scan (default: current directory)")
     parser.add_argument("-v", "--verbose", action="store_true", help="Show details of each removed file")
     args = parser.parse_args()
-
     stats = find_and_remove_files(args.directory)
     print_report(stats)
-
     if args.verbose and stats.get("details"):
         print("Removed files:")
         for path, size in stats["details"]:

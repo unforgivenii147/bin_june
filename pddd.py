@@ -1,20 +1,16 @@
 #!/data/data/com.termux/files/usr/bin/python
-
 from operator import itemgetter
-from os import walk as os_walk
 from pathlib import Path
 
 
-def get_dir_size(path):
+def get_dir_size(path: Path) -> int:
     total = 0
-    for r, _, files in os_walk(path):
-        for file in files:
-            path = Path(r) / file
-            if path.is_file() and not path.is_symlink():
-                try:
-                    total += path.stat().st_size
-                except OSError:
-                    continue
+    for file_path in path.rglob("*"):
+        if file_path.is_file() and not file_path.is_symlink():
+            try:
+                total += file_path.stat().st_size
+            except OSError:
+                continue
     return total
 
 

@@ -1,8 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
-
 from __future__ import annotations
 import hashlib
-import os
 from dataclasses import dataclass
 from pathlib import Path
 from tree_sitter import Node, Parser
@@ -121,19 +119,15 @@ def main() -> None:
     all_items: dict[str, Item] = {}
     duplicates: dict[str, Item] = {}
     base_dir = Path.cwd()
-    for root, _, files in os.walk(base_dir):
-        for fname in files:
-            if not fname.endswith(".py"):
-                continue
-            if fname in SKIP_FILES:
-                continue
-            path = Path(root) / fname
-            items = extract_items_from_file(path, parser)
-            for item in items:
-                if item.hash in all_items:
-                    duplicates[item.hash] = all_items[item.hash]
-                else:
-                    all_items[item.hash] = item
+    for path in base_dir.rglob("*.py"):
+        if path.name in SKIP_FILES:
+            continue
+        items = extract_items_from_file(path, parser)
+        for item in items:
+            if item.hash in all_items:
+                duplicates[item.hash] = all_items[item.hash]
+            else:
+                all_items[item.hash] = item
     output_path = base_dir / OUTPUT_FILE
     if duplicates:
         write_utils_file(duplicates, output_path)

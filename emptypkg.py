@@ -1,25 +1,23 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-
 import csv
-import os
 import sysconfig
 import zipfile
 from pathlib import Path
 
 
 def is_empty_package(dist_info_path) -> bool:
-    record_file = os.path.join(dist_info_path, "RECORD")
-    if not Path(record_file).is_file():
+    dist_info_path = Path(dist_info_path)
+    record_file = dist_info_path / "RECORD"
+    if not record_file.is_file():
         return False
-    with Path(record_file).open(newline="", encoding="utf-8") as f:
+    with record_file.open(newline="", encoding="utf-8") as f:
         reader = csv.reader(f)
         for row in reader:
             if not row:
                 continue
             rel_path = row[0]
-            abs_path = Path(os.path.join(Path(dist_info_path).parent, rel_path)).resolve()
-            if not str(abs_path).startswith(str(Path(dist_info_path).resolve()) + os.sep):
+            abs_path = (dist_info_path.parent / rel_path).resolve()
+            if not str(abs_path).startswith(str(dist_info_path.resolve()) + "/"):
                 return False
     return True
 
@@ -43,12 +41,14 @@ def is_empty_whl(whl_path: Path) -> bool:
 
 
 def find_empty_packages(site_packages: str):
+    site_packages_path = Path(site_packages)
     empty = []
-    for entry in os.listdir(site_packages):
-        if entry.endswith(".dist-info"):
-            dist_info_path = os.path.join(site_packages, entry)
-            if is_empty_package(dist_info_path):
-                empty.append(dist_info_path)
+    if not site_packages_path.is_dir():
+        return empty
+    for entry in site_packages_path.iterdir():
+        if entry.name.endswith(".dist-info") and entry.is_dir():
+            if is_empty_package(entry):
+                empty.append(str(entry))
     return empty
 
 

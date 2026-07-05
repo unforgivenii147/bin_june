@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/python
-
 import itertools
 import os
 import re
@@ -284,44 +283,46 @@ def walk2list(
     topdown: bool = True,
     onerror: object = None,
     followlinks: bool = False,
-) -> tuple:
-    oswalk = os.walk(folder, topdown=topdown, onerror=onerror, followlinks=followlinks)
+) -> list:
     return [
-        Path(os.path.join(r, f)).resolve()
-        for r, d, fs in oswalk
-        for f in fs
-        if not f.startswith(() if showhidden else ".") and not f.endswith(omit) and f.endswith(target)
+        p.resolve()
+        for p in Path(folder).rglob("*")
+        if p.is_file()
+        and not p.name.startswith(() if showhidden else ".")
+        and not p.name.endswith(omit)
+        and p.name.endswith(target)
     ]
 
 
 def process_multiple_files(file_path) -> None:
+    file_path = Path(file_path)
     print(f"Process {os.getpid()} is processing {file_path}.")
     if args.watch:
-        previous = int(os.stat(file_path).st_mtime)
+        previous = int(file_path.stat().st_mtime)
         print(f"Process {os.getpid()} is Watching {file_path}.")
         while True:
-            actual = int(os.stat(file_path).st_mtime)
+            actual = int(file_path.stat().st_mtime)
             if previous == actual:
                 sleep(60)
             else:
                 previous = actual
                 print(f"Modification detected on {file_path}.")
-                if file_path.endswith((".css", ".scss")):
-                    process_single_css_file(file_path)
+                if file_path.suffix.lower() in (".css", ".scss"):
+                    process_single_css_file(str(file_path))
                 else:
-                    process_single_html_file(file_path)
-    elif file_path.endswith((".css", ".scss")):
-        process_single_css_file(file_path)
+                    process_single_html_file(str(file_path))
+    elif file_path.suffix.lower() in (".css", ".scss"):
+        process_single_css_file(str(file_path))
     else:
-        process_single_html_file(file_path)
+        process_single_html_file(str(file_path))
 
 
 def prefixer_extensioner(file_path: str) -> str:
-    extension = os.path.splitext(file_path)[1].lower()
-    filenames = os.path.splitext(Path(file_path).name)[0]
-    filenames = args.prefix + filenames if args.prefix else filenames
-    dir_names = Path(file_path).parent
-    return os.path.join(dir_names, filenames + extension)
+    path_obj = Path(file_path)
+    extension = path_obj.suffix.lower()
+    filename = path_obj.stem
+    filename = args.prefix + filename if args.prefix else filename
+    return str(path_obj.parent / (filename + extension))
 
 
 def process_single_css_file(css_file_path: str) -> str:

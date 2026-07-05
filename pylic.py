@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
+
 """
 Detect and optionally remove repeated multi-line comment blocks (starting with '#')
 in Python files under the current directory.

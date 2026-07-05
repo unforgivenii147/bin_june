@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-
 """
 Recursively extract embedded base64 data URIs from .css, .js, and .html files
 in the current directory, save the decoded assets to an `assets/` folder,
@@ -12,7 +10,6 @@ Duplicate assets are only saved once.
 import base64
 import hashlib
 import mimetypes
-import os
 import re
 from pathlib import Path
 from dh import MIME2EXT
@@ -41,7 +38,7 @@ def process_file(file_path: Path, assets_dir: Path, processed: dict) -> None:
     except Exception as e:
         print(f"⚠ Skipping {file_path}: {e}")
         return
-    rel_to_assets = Path(os.path.relpath(assets_dir, file_path.parent))
+    rel_to_assets = Path(assets_dir, file_path.parent)
 
     def replace_match(match: re.Match) -> str:
         full = match.group(0)

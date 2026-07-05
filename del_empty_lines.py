@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-import os
 import sys
 from pathlib import Path
 from binaryornot import is_binary
@@ -8,13 +6,9 @@ from dh import cprint
 
 
 def get_filez(cwd: Path):
-    for r, _, files in os.walk(cwd):
-        for f in files:
-            fullpath = Path(r) / f
-            if fullpath.is_symlink():
-                continue
-            if fullpath.is_file():
-                yield fullpath
+    for f in cwd.rglob("*"):
+        if f.is_file() and not f.is_symlink():
+            yield f
 
 
 def process_file(path: Path) -> None:

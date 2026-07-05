@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-
 import argparse
 import ast
 import bz2
@@ -8,7 +6,6 @@ import gzip
 import hashlib
 import lzma
 import multiprocessing as mp
-import os
 import sys
 import tarfile
 import tempfile
@@ -247,22 +244,29 @@ def should_skip_dir(path: Path) -> bool:
 
 def collect_python_files(base: Path):
     files = []
-    for root, dirs, filenames in os.walk(base):
-        root_path = Path(root)
-        dirs[:] = [d for d in dirs if not should_skip_dir(root_path / d)]
-        for filename in filenames:
-            path = root_path / filename
-            if path.suffix == ".py":
-                files.append(path)
-            elif is_supported_archive(path):
-                extracted_dir = extract_archive(path)
-                for p in Path(extracted_dir).rglob("*.py"):
-                    files.append(p)
+
+    def walk(p: Path):
+        if should_skip_dir(p):
+            return
+        try:
+            for item in p.iterdir():
+                if item.is_dir():
+                    walk(item)
+                elif item.is_file():
+                    if item.suffix == ".py":
+                        files.append(item)
+                    elif is_supported_archive(item):
+                        extracted_dir = extract_archive(item)
+                        for py_file in Path(extracted_dir).rglob("*.py"):
+                            files.append(py_file)
+        except PermissionError:
+            logger.warning(f"Permission denied: {p}")
+
+    walk(base)
     return files
 
 
 def process_file(path_str: str):
-    path = Path(path)
     path = Path(path_str)
     code = safe_read_text(path)
     if not code:

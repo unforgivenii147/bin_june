@@ -12,7 +12,6 @@ Compress or decompress folders using zstandard compression.
 - Skips specified directories
 """
 
-import os
 import sys
 import tarfile
 import argparse

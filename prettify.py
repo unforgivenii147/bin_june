@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-import os
 from pathlib import Path
 import cssbeautifier
 import yapf
@@ -43,21 +41,27 @@ def beautify_js(file_path) -> bool:
 
 def beautify_directory(directory: str) -> None:
     failed_files = []
-    for root, _dirs, files in os.walk(directory):
-        for file in files:
-            file_path = os.path.join(root, file)
-            success = False
-            if file.endswith(".html"):
-                print(f"Beautifying HTML: {file_path}")
-                success = beautify_html(file_path)
-            elif file.endswith(".css"):
-                print(f"Beautifying CSS: {file_path}")
-                success = beautify_css(file_path)
-            elif file.endswith(".js"):
-                print(f"Beautifying JS: {file_path}")
-                success = beautify_js(file_path)
-            if not success:
-                failed_files.append(file_path)
+    base_path = Path(directory)
+    for file_path in base_path.rglob("*"):
+        if not file_path.is_file():
+            continue
+
+        file = file_path.name
+        success = False
+        if file.endswith(".html"):
+            print(f"Beautifying HTML: {file_path}")
+            success = beautify_html(file_path)
+        elif file.endswith(".css"):
+            print(f"Beautifying CSS: {file_path}")
+            success = beautify_css(file_path)
+        elif file.endswith(".js"):
+            print(f"Beautifying JS: {file_path}")
+            success = beautify_js(file_path)
+        else:
+            continue
+
+        if not success:
+            failed_files.append(str(file_path))
     if failed_files:
         print("\nThe following files failed to be beautified:")
         for failed_file in failed_files:

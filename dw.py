@@ -1,11 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-
 import argparse
-import os
 import shutil
 import sys
 import time
+from pathlib import Path
 
 
 def tail_file(fname, n=10):
@@ -21,11 +19,11 @@ def tail_file(fname, n=10):
 def get_all_files(folder):
     files = {}
     try:
-        for root, dirs, filenames in os.walk(folder):
-            for fname in filenames:
-                path = os.path.join(root, fname)
+        base = Path(folder)
+        for p in base.rglob("*"):
+            if p.is_file():
                 try:
-                    files[path] = os.stat(path).st_mtime
+                    files[str(p)] = p.stat().st_mtime
                 except (IOError, OSError):
                     pass
     except (IOError, OSError) as e:
@@ -33,10 +31,11 @@ def get_all_files(folder):
     return files
 
 
-def copy_file(src, dst_folder: (str | None)) -> bool:
+def copy_file(src, dst_folder: (Path | None)) -> bool:
     try:
-        os.makedirs(dst_folder, exist_ok=True)
-        shutil.copy2(src, dst_folder)
+        if dst_folder:
+            dst_folder.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(src, dst_folder)
         return True
     except (IOError, OSError) as e:
         print(f"Error copying file: {e}", file=sys.stderr)
@@ -48,14 +47,14 @@ def main():
     parser.add_argument("folder", help="Folder to watch")
     parser.add_argument("-c", "--copy", action="store_true", help="Copy changed files to ~/tmp/tmp")
     args = parser.parse_args()
-    folder = args.folder
+    folder = Path(args.folder)
     copy_enabled = args.copy
-    if not os.path.isdir(folder):
+    if not folder.is_dir():
         print(f"Error: Folder '{folder}' not found", file=sys.stderr)
         sys.exit(1)
     copy_dest = None
     if copy_enabled:
-        copy_dest = os.path.expanduser("~/tmp/tmp")
+        copy_dest = Path.home() / "tmp" / "tmp"
         print(f"Copy mode enabled. Destination: {copy_dest}\n")
     file_mtimes = get_all_files(folder)
     print(f"Watching folder '{folder}' recursively...")
@@ -64,12 +63,16 @@ def main():
     try:
         while True:
             current_files = get_all_files(folder)
-            for path, current_mtime in current_files.items():
-                last_mtime = file_mtimes.get(path)
+            for path_str, current_mtime in current_files.items():
+                path = Path(path_str)
+                last_mtime = file_mtimes.get(path_str)
                 if last_mtime is None or current_mtime > last_mtime:
-                    file_mtimes[path] = current_mtime
+                    file_mtimes[path_str] = current_mtime
                     if last_mtime is not None:
-                        rel_path = os.path.relpath(path, folder)
+                        try:
+                            rel_path = path.relative_to(folder)
+                        except ValueError:
+                            rel_path = path
                         event = "CREATED" if last_mtime is None else "MODIFIED"
                         print(f"[{event}] {rel_path}")
                         if copy_enabled:
@@ -80,10 +83,14 @@ def main():
                             print(f"\n✓ Bootstrap complete detected! Exiting...\n")
                             sys.exit(0)
             deleted = set(file_mtimes.keys()) - set(current_files.keys())
-            for path in deleted:
-                rel_path = os.path.relpath(path, folder)
+            for path_str in deleted:
+                path = Path(path_str)
+                try:
+                    rel_path = path.relative_to(folder)
+                except ValueError:
+                    rel_path = path
                 print(f"[DELETED] {rel_path}")
-                del file_mtimes[path]
+                del file_mtimes[path_str]
             time.sleep(1)
     except KeyboardInterrupt:
         print("\n\nWatcher stopped.")

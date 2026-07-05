@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-import os
 from pathlib import Path
 from dh import FONT_EXT
 
@@ -9,12 +7,10 @@ OUTPUT_HTML = "fa_fonts_preview.html"
 FONT_SIZES = [14, 22]
 
 
-def find_fonts(cwd: str = "."):
+def find_fonts(cwd: Path = Path.cwd()):
     fonts = []
-    for dirpath, _, filenames in os.walk(cwd):
-        fonts.extend(
-            os.path.join(dirpath, filename) for filename in filenames if filename.lower().endswith(FONT_EXTENSIONS)
-        )
+    for dirpath, _, filenames in cwd.walk():
+        fonts.extend(Path(dirpath) / filename for filename in filenames if filename.lower().endswith(FONT_EXTENSIONS))
     return fonts
 
 

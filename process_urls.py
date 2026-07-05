@@ -1,8 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-import os
 import re
 import sys
+from pathlib import Path
 from urllib.parse import urlparse
 
 
@@ -91,18 +90,15 @@ def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: python script_name.py <input_file>")
         sys.exit(1)
-    input_file = sys.argv[1]
-    if not os.path.exists(input_file):
-        print(f"Error: Input file '{input_file}' not found.")
+    input_file_path = Path(sys.argv[1])
+    if not input_file_path.exists():
+        print(f"Error: Input file '{input_file_path}' not found.")
         sys.exit(1)
     try:
-        with open(input_file, "r", encoding="utf-8") as f:
-            lines = f.readlines()
+        lines = input_file_path.read_text(encoding="utf-8").splitlines()
         pruned_urls = prune_subaddresses(lines)
-        with open(input_file, "w", encoding="utf-8") as f:
-            for url in pruned_urls:
-                f.write(url + "\n")
-        print(f"Successfully pruned URLs in '{input_file}'. {len(lines) - len(pruned_urls)} URLs removed.")
+        input_file_path.write_text("\n".join(pruned_urls) + "\n", encoding="utf-8")
+        print(f"Successfully pruned URLs in '{input_file_path}'. {len(lines) - len(pruned_urls)} URLs removed.")
     except Exception as e:
         print(f"An error occurred: {e}", file=sys.stderr)
         sys.exit(1)

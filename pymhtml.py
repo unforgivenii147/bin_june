@@ -1,7 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
-
 import base64
-import os
 import re
 import sys
 from email import policy
@@ -36,9 +34,9 @@ def process_file(path) -> None:
     base_name = ""
     fname = ""
     out_html = path.with_suffix(".html")
-    out_dir = path.stem + "_files"
-    os.makedirs(out_dir, exist_ok=True)
-    with open(path, "rb") as f:
+    out_dir = Path(path.stem + "_files")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    with path.open("rb") as f:
         raw = f.read()
     msg = BytesParser(policy=policy.default).parsebytes(raw)
     parts = []
@@ -104,31 +102,32 @@ def process_file(path) -> None:
         if ext == "svg+xml":
             base_name = get_name_from_headers(part) or cid or "resource"
         base_name = sanitize_filename(base_name)
-        fname = (f"{base_name}.{ext}" if not os.path.splitext(base_name)[1] else base_name) if ext else base_name
-        out_path = os.path.join(out_dir, fname)
-        if os.path.exists(out_path):
-            stem, suffix = os.path.splitext(fname)
+        fname = (f"{base_name}.{ext}" if not Path(base_name).suffix else base_name) if ext else base_name
+        out_path = out_dir / fname
+        if out_path.exists():
+            p_fname = Path(fname)
+            stem, suffix = p_fname.stem, p_fname.suffix
             i = 1
             while True:
-                cand = os.path.join(out_dir, f"{stem}_{i}{suffix}")
-                if not os.path.exists(cand):
+                cand = out_dir / f"{stem}_{i}{suffix}"
+                if not cand.exists():
                     out_path = cand
-                    fname = os.path.basename(cand)
+                    fname = cand.name
                     break
                 i += 1
-        with open(out_path, "wb") as f:
+        with out_path.open("wb") as f:
             f.write(payload)
 
     def repl_cid(match):
         cid = match.group(1)
         if cid in cid_to_file:
-            return f'src="{os.path.basename(out_dir)}/{cid_to_file[cid]}"'
+            return f'src="{out_dir.name}/{cid_to_file[cid]}"'
         return match.group(0)
 
     html_text = re.sub(
         r"(src|href)=[\\\"']cid:([^\\\"']+)[\\\"']",
         lambda m: (
-            f'{m.group(1)}="{os.path.basename(out_dir)}/{cid_to_file.get(m.group(2), m.group(2))}"'
+            f'{m.group(1)}="{out_dir.name}/{cid_to_file.get(m.group(2), m.group(2))}"'
             if m.group(2) in cid_to_file
             else m.group(0)
         ),
@@ -151,13 +150,13 @@ def process_file(path) -> None:
             fname = f"data_resource_{abs(hash(data_url)) % 10**8}.{ext or 'bin'}"
         else:
             fname = f"data_resource_{abs(hash(data_url)) % 10**8}.{bin}"
-        out_path = os.path.join(out_dir, fname)
-        with open(out_path, "wb") as f:
+        out_path = out_dir / fname
+        with out_path.open("wb") as f:
             f.write(raw)
-        return f'{attr}="{os.path.basename(out_dir)}/{fname}"'
+        return f'{attr}="{out_dir.name}/{fname}"'
 
     html_text = re.sub(r"(src|href)=[\\\"'](data:[^\\\"']+)[\\\"']", data_uri_replacer, html_text, flags=re.IGNORECASE)
-    with open(out_html, "w", encoding="utf-8") as f:
+    with out_html.open("w", encoding="utf-8") as f:
         f.write(html_text)
     print("Done.")
     print(f"HTML: {out_html}")

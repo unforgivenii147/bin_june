@@ -1,34 +1,33 @@
 #!/data/data/com.termux/files/usr/bin/python
-
 import ast
 import multiprocessing as mp
-import os
 from ast import AST
 from pathlib import Path
 
-OUTPUT_DIR = "output"
+OUTPUT_DIR = Path("output")
 EXCLUDE_DIRS = {"test", "tests", "examples", "output"}
 
 
-def is_python_script(path: str) -> bool:
-    if path.endswith(".py"):
+def is_python_script(path: Path) -> bool:
+    if path.suffix == ".py":
         return True
     try:
-        with Path(path).open(encoding="utf-8", errors="ignore") as f:
+        with path.open(encoding="utf-8", errors="ignore") as f:
             line = f.readline()
         return line.startswith("#!") and "python" in line.lower()
     except Exception:
         return False
 
 
-def discover_python_files() -> list[str]:
+def discover_python_files() -> list[Path]:
     files = []
-    for root, dirs, fnames in os.walk("."):
-        dirs[:] = [d for d in dirs if d not in EXCLUDE_DIRS]
-        for fname in fnames:
-            p = os.path.join(root, fname)
-            if is_python_script(p):
-                files.append(p)
+    base_path = Path(".")
+    for path in base_path.rglob("*"):
+        # Check if any part of the path is in EXCLUDE_DIRS
+        if any(part in EXCLUDE_DIRS for part in path.parts):
+            continue
+        if path.is_file() and is_python_script(path):
+            files.append(path)
     return files
 
 
@@ -43,10 +42,10 @@ def is_constant_name(name: str) -> bool:
 
 
 def extract_from_file(
-    path: str,
-) -> tuple[str, dict[str, str], dict[str, str], dict[str, str], dict[str, str], dict[str, str]]:
+    path: Path,
+) -> tuple[Path, dict[str, str], dict[str, str], dict[str, str], dict[str, str], dict[str, str]]:
     try:
-        source = Path(path).read_text(encoding="utf-8", errors="ignore")
+        source = path.read_text(encoding="utf-8", errors="ignore")
         tree = ast.parse(source)
     except Exception:
         return path, {}, {}, {}, {}, {}
@@ -89,13 +88,13 @@ def extract_from_file(
     return path, tl_classes, tl_funcs, nested_classes, nested_funcs, consts
 
 
-def write_output(path: str, data: dict[str, str]) -> None:
-    with Path(path).open("w", encoding="utf-8") as f:
+def write_output(path: Path, data: dict[str, str]) -> None:
+    with path.open("w", encoding="utf-8") as f:
         f.writelines(src.rstrip() + "\n\n" for _name, src in sorted(data.items()))
 
 
 def main() -> None:
-    Path(OUTPUT_DIR).mkdir(exist_ok=True, parents=True)
+    OUTPUT_DIR.mkdir(exist_ok=True, parents=True)
     files = discover_python_files()
     if not files:
         print("No Python files found.")
@@ -111,11 +110,11 @@ def main() -> None:
         nested_classes.update(nc)
         nested_funcs.update(nf)
         const_map.update(consts)
-    write_output(os.path.join(OUTPUT_DIR, "classes.py"), tl_classes)
-    write_output(os.path.join(OUTPUT_DIR, "functions.py"), tl_funcs)
-    write_output(os.path.join(OUTPUT_DIR, "nested_classes.py"), nested_classes)
-    write_output(os.path.join(OUTPUT_DIR, "nested_functions.py"), nested_funcs)
-    write_output(os.path.join(OUTPUT_DIR, "const.py"), const_map)
+    write_output(OUTPUT_DIR / "classes.py", tl_classes)
+    write_output(OUTPUT_DIR / "functions.py", tl_funcs)
+    write_output(OUTPUT_DIR / "nested_classes.py", nested_classes)
+    write_output(OUTPUT_DIR / "nested_functions.py", nested_funcs)
+    write_output(OUTPUT_DIR / "const.py", const_map)
     print("\n=== Top-Level Classes ===")
     for n in sorted(tl_classes):
         print(" -", n)

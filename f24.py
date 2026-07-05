@@ -1,7 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
-
 import operator
-import os
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
@@ -14,9 +12,9 @@ EXCLUDE_DIRS = {".git"}
 
 def iter_files(root: Path) -> list[Path]:
     files: list[Path] = []
-    for dirpath, dirnames, filenames in os.walk(root, followlinks=False):
+    for dirpath, dirnames, filenames in root.walk(follow_symlinks=False):
         dirnames[:] = [d for d in dirnames if d not in EXCLUDE_DIRS]
-        files.extend(Path(dirpath) / fname for fname in filenames)
+        files.extend(dirpath / fname for fname in filenames)
     return files
 
 

@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/python
-
 import argparse
 import ast
 import bz2
@@ -7,7 +6,6 @@ import gzip
 import hashlib
 import lzma
 import multiprocessing as mp
-import os
 import re
 import sys
 import tarfile
@@ -147,16 +145,24 @@ def extract_archive(path: Path) -> str:
 
 def collect_python_files(base: Path):
     files = []
-    for root, dirs, filenames in os.walk(base):
-        dirs[:] = [d for d in dirs if not should_skip_dir(d)]
-        rootp = Path(root)
-        for fn in filenames:
-            p = rootp / fn
-            if p.suffix == ".py":
-                files.append(p)
-            elif is_supported_archive(p):
-                tmp = extract_archive(p)
-                files.extend(Path(tmp).rglob("*.py"))
+
+    def walk(p: Path):
+        if should_skip_dir(p.name):
+            return
+        try:
+            for item in p.iterdir():
+                if item.is_dir():
+                    walk(item)
+                elif item.is_file():
+                    if item.suffix == ".py":
+                        files.append(item)
+                    elif is_supported_archive(item):
+                        tmp = extract_archive(item)
+                        files.extend(Path(tmp).rglob("*.py"))
+        except PermissionError:
+            logger.warning(f"Permission denied: {p}")
+
+    walk(base)
     return files
 
 
@@ -254,7 +260,6 @@ def extract_objects(code: str):
 
 
 def process_file(path_str: str):
-    path = Path(path)
     path = Path(path_str)
     code = safe_read_text(path)
     if code is None:

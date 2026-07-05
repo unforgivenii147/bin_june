@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-
 """
 AST-based duplicate definition extractor.
 Finds repeated functions, classes, and constant assignments across all
@@ -18,7 +16,6 @@ import concurrent.futures
 import gzip
 import hashlib
 import lzma
-import os
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -73,12 +70,11 @@ def _find_files(root: str = ".") -> List[Tuple[str, Optional[str]]]:
     results: List[Tuple[str, Optional[str]]] = []
     root_path = Path(root).resolve()
     utils_path = root_path / "utils"
-    for dirpath, _, filenames in os.walk(root):
+    for dirpath, _, filenames in Path(root).walk():
         if Path(dirpath).resolve() == utils_path:
             continue
         for fname in filenames:
-            full = os.path.join(dirpath, fname)
-            path = Path(full)
+            path = Path(dirpath) / fname
             if path.suffix == ".py":
                 results.append((full, None))
             else:

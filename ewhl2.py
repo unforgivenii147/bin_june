@@ -1,8 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-
 import argparse
-import os
 import shutil
 import subprocess
 import sys
@@ -28,7 +25,7 @@ def is_empty_wheel(wheel_path: Path) -> bool:
 
 
 def extract_package_info(wheel_path: Path) -> tuple[str, str] | tuple[None, None]:
-    wheel_name = Path(wheel_path).stem
+    wheel_name = wheel_path.stem
     parts = wheel_name.split("-")
     if len(parts) >= 2:
         name = parts[0]
@@ -78,15 +75,11 @@ def check_package_location(package_name: str) -> tuple[str | None, bool] | tuple
             lines = result.stdout.strip().split("\n")
             location = None
             has_files = False
-            for line in lines:
+            for i, line in enumerate(lines):
                 if line.startswith("Location:"):
                     location = line.split(":", 1)[1].strip()
                 elif line.startswith("Files:"):
-                    files_section = line
-                    if any(
-                        file_line.strip() and not ".dist-info" in file_line
-                        for file_line in lines[lines.index(line) + 1 : lines.index(line) + 10]
-                    ):
+                    if any(file_line.strip() and not ".dist-info" in file_line for file_line in lines[i + 1 : i + 10]):
                         has_files = True
             return location, has_files
     except Exception:
@@ -218,7 +211,8 @@ def main() -> None:
         "--auto-move-all", action="store_true", help="Automatically move all empty wheels without prompting"
     )
     args = parser.parse_args()
-    if not os.path.exists(args.directory):
+    directory_path = Path(args.directory)
+    if not directory_path.exists():
         print(f"Error: Directory '{args.directory}' does not exist")
         return
     analyze_wheels(args.directory, args.dest, check_installed=not args.no_install_check)

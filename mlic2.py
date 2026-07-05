@@ -5,10 +5,9 @@ import argparse
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Tuple, Set
+from typing import Dict, List, Tuple
 import multiprocessing as mp
 from functools import partial
-import re
 
 TEXT_EXTENSIONS = {
     ".py",

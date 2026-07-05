@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/python
-
 import os
 from collections import defaultdict
 from pathlib import Path
@@ -7,7 +6,7 @@ from pathlib import Path
 
 def find_path_duplicates() -> None:
     path_env = os.environ.get("PATH", "")
-    directories = [Path(d) for d in path_env.split(":") if d and Path(d).exists()]
+    directories = [Path(d) for d in path_env.split("/") if d and Path(d).exists()]
     app_map = defaultdict(list)
     print(f"--- Scanning directories in PATH \n")
     for directory in directories:
@@ -16,7 +15,7 @@ def find_path_duplicates() -> None:
         try:
             for item in directory.iterdir():
                 if item.is_file() and os.access(item, os.X_OK):
-                    app_map[str(item)].append(str(directory))
+                    app_map[item.name].append(str(directory))
         except PermissionError:
             print(f"Permission denied: {directory}")
             continue

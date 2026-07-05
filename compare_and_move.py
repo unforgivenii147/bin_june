@@ -1,16 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-
-import os
 import shutil
 import sys
 from pathlib import Path
 
 
-def expand_path(path) -> Path:
-    expanded_path = os.path.expanduser(path)
-    expanded_path = os.path.expandvars(expanded_path)
-    return Path(expanded_path).resolve()
+def expand_path(path_str: str) -> Path:
+    expanded = Path(path_str).expandvars()
+    return Path(expanded).expanduser().resolve()
 
 
 def compare_and_move_common(source_dir: str, target_dir: str) -> None:
@@ -55,7 +51,8 @@ def compare_and_move_common(source_dir: str, target_dir: str) -> None:
         if source_path.stat().st_size != target_path.stat().st_size:
             size_mismatches.append(filename)
         if dest_path.exists():
-            base, ext = os.path.splitext(filename)
+            base = dest_path.stem
+            ext = dest_path.suffix
             counter = 1
             while dest_path.exists():
                 new_name = f"{base}_common{counter}{ext}"
@@ -63,7 +60,7 @@ def compare_and_move_common(source_dir: str, target_dir: str) -> None:
                 counter += 1
             print(f"\n  Note: '{filename}' will be renamed to '{dest_path.name}' to avoid conflict")
         try:
-            shutil.move(str(source_path), str(dest_path))
+            shutil.move(source_path, dest_path)
             print(f"  ✓ Moved: {filename} -> {dest_path.name}")
             moved_count += 1
         except Exception as e:
@@ -72,10 +69,7 @@ def compare_and_move_common(source_dir: str, target_dir: str) -> None:
     print("\n" + "=" * 50)
     print(f"Summary: Successfully moved {moved_count} of {len(common_files)} common file(s)")
     if size_mismatches:
-        print(
-            f"""
-⚠ Warning: {len(size_mismatches)} file(s) had different sizes in source vs target:"""
-        )
+        print(f"\n⚠ Warning: {len(size_mismatches)} file(s) had different sizes in source vs target:")
         for filename in size_mismatches:
             print(f"  - {filename}")
         print("  (Files were still moved, but verify they are correct versions)")

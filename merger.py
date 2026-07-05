@@ -18,7 +18,7 @@ def read_file(path: Path):
 def merge_files():
     cwd = Path.cwd()
     output_file = cwd / f"{get_random_filename()}.txt"
-    files = get_nobinary(cwd)
+    files = sorted(get_nobinary(cwd))
     try:
         with output_file.open("w", encoding="utf-8") as fo:
             for i, file_path in enumerate(files):

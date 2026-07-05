@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 """
 Convert HTML entities in HTML files recursively.
 Converts &lt; to <, &gt; to >, and other common entities.

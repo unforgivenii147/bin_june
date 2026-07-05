@@ -1,5 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
-import os
+#!/data/data/com.termux/files/usr/bin/python
 import re
 from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed

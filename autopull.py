@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-import os
 import subprocess
 from pathlib import Path
 
@@ -17,13 +15,22 @@ def git_pull(repo_path: Path) -> None:
         print(f"⚠️  git pull failed in: {repo_path}")
 
 
+def walk_and_pull(path: Path) -> None:
+    if is_git_repo(path):
+        git_pull(path)
+        return  # Don't recurse into .git or sub-repos if already pulled at root
+
+    try:
+        for item in path.iterdir():
+            if item.is_dir() and item.name != ".git":
+                walk_and_pull(item)
+    except PermissionError:
+        pass
+
+
 def main() -> None:
     root = Path.cwd()
-    for dirpath, dirnames, _filenames in os.walk(root):
-        current = Path(dirpath)
-        if is_git_repo(current):
-            git_pull(current)
-            dirnames[:] = [d for d in dirnames if d != ".git"]
+    walk_and_pull(root)
     print("\nDone.")
 
 

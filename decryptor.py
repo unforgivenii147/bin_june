@@ -1,8 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
-
 import argparse
-import glob
-import os
 import random
 import string
 from pathlib import Path
@@ -18,8 +15,10 @@ def random_key(length: int = 32) -> LiteralString:
 
 
 def encrypt_file(file_path, key) -> None:
+    from os import urandom
+
     backend = default_backend()
-    iv = os.urandom(AES_BLOCK_SIZE)
+    iv = urandom(AES_BLOCK_SIZE)
     cipher = Cipher(algorithms.AES(key.encode()), modes.CBC(iv), backend=backend)
     encryptor = cipher.encryptor()
     data = Path(file_path).read_bytes()
@@ -54,13 +53,15 @@ def main() -> None:
         action = encrypt_file
     elif args.decrypt:
         if not args.key:
-            raise SystemExit(msg)
+            print("Error: Decryption key is required.")
+            return
         key = args.key
         action = decrypt_file
     else:
-        raise SystemExit(msg)
-    for file_path in glob.glob("*"):
-        if Path(file_path).is_file():
+        print("Error: Specify either --encrypt or --decrypt.")
+        return
+    for file_path in Path.cwd().glob("*"):
+        if file_path.is_file() and file_path.name != Path(__file__).name:
             print(f"Processing {file_path}...")
             action(file_path, key)
 

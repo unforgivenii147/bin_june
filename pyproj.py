@@ -63,7 +63,7 @@ if __name__ == "__main__":
         "package_dir =",
         "    = src",
         "packages = find:",
-        "python_requires = >=3.13",
+        "python_requires = >=3.11",
         "",
         "[options.packages.find]",
         "where = src",

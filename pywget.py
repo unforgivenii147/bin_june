@@ -1,11 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/python
-
 import argparse
-import os
 import re
 import sys
 import urllib.parse
 import urllib.request
+from os import get_terminal_size
 from pathlib import Path
 from typing import Self
 
@@ -51,7 +50,7 @@ except ImportError:
 
 def get_console_width() -> int:
     try:
-        return os.get_terminal_size().columns
+        return get_terminal_size().columns
     except (OSError, AttributeError):
         return 80
 

@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 import re
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -18,7 +19,11 @@ def split_into_chunks(text: str, size: int) -> list[str]:
 
 def translate_chunk(chunk: str) -> str:
     try:
-        return GoogleTranslator(source="auto", target="en").translate(chunk)
+        result = GoogleTranslator(source="auto", target="en").translate(chunk)
+        print(result)
+        print("*" * 33)
+        print()
+        return result
     except Exception as e:
         print(f"Chunk translation error: {e}")
         return chunk
@@ -36,11 +41,9 @@ def translate_file(path: Path) -> None:
     with ThreadPoolExecutor(max_workers=8) as executor:
         translated_chunks = list(executor.map(translate_chunk, chunks))
     translated_text = "".join(translated_chunks)
-    new_name = f"{path.stem}_eng{path.suffix}"
-    new_path = path.parent / new_name
     try:
-        Path(new_path).write_text(translated_text, encoding="utf-8")
-        print(f"Translated → {new_path.name}")
+        path.write_text(translated_text, encoding="utf-8")
+        print(f"Translated → {path.name}")
     except Exception as e:
         print(f"Error writing {new_path}: {e}")
 

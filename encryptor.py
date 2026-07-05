@@ -1,7 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
-
 import argparse
-import os
 import random
 import string
 from pathlib import Path
@@ -13,33 +11,35 @@ from fastwalk import walk_files
 AES_BLOCK_SIZE = 128
 
 
-def random_key(length: int = 32) -> LiteralString:
-    return "".join(random.choice(string.ascii_letters + string.digits) for _ in range(length))
+def random_key(length: int = 32) -> str:
+    return "".join((random.choice(string.ascii_letters + string.digits) for _ in range(length)))
 
 
-def encrypt_file(file_path, key) -> None:
+def encrypt_file(file_path: Path, key: str) -> None:
+    from os import urandom
+
     backend = default_backend()
-    iv = os.urandom(16)
+    iv = urandom(16)
     cipher = Cipher(algorithms.AES(key.encode()), modes.CBC(iv), backend=backend)
     encryptor = cipher.encryptor()
-    data = Path(file_path).read_bytes()
+    data = file_path.read_bytes()
     padder = padding.PKCS7(128).padder()
     padded_data = padder.update(data) + padder.finalize()
     encrypted_data = encryptor.update(padded_data) + encryptor.finalize()
-    Path(file_path).write_bytes(iv + encrypted_data)
+    file_path.write_bytes(iv + encrypted_data)
 
 
-def decrypt_file(file_path, key) -> None:
+def decrypt_file(file_path: Path, key: str) -> None:
     backend = default_backend()
-    raw = Path(file_path).read_bytes()
-    iv = raw[:AES_BLOCK_SIZE]
-    ciphertext = raw[AES_BLOCK_SIZE:]
+    raw = file_path.read_bytes()
+    iv = raw[:16]
+    ciphertext = raw[16:]
     cipher = Cipher(algorithms.AES(key.encode()), modes.CBC(iv), backend=backend)
     decryptor = cipher.decryptor()
     padded_data = decryptor.update(ciphertext) + decryptor.finalize()
     unpadder = padding.PKCS7(128).unpadder()
     data = unpadder.update(padded_data) + unpadder.finalize()
-    Path(file_path).write_bytes(data)
+    file_path.write_bytes(data)
 
 
 def main() -> None:
@@ -48,6 +48,7 @@ def main() -> None:
     parser.add_argument("--decrypt", action="store_true")
     parser.add_argument("--key", help="Encryption/decryption key")
     args = parser.parse_args()
+    msg = "Please specify --encrypt or --decrypt with --key if decrypting"
     if args.encrypt:
         key = random_key()
         print(f"Encryption key: {key}")
@@ -58,15 +59,14 @@ def main() -> None:
     elif args.decrypt:
         if not args.key:
             raise SystemExit(msg)
-        with Path("key").open(encoding="utf-8") as f:
-            key = f.read().strip()
+        key = args.key
         action = decrypt_file
     else:
         raise SystemExit(msg)
-    for file_path in walk_files("."):
-        path = Path(file_path)
-        if path.exists():
-            action(file_path, key)
+    for file_path_str in walk_files("."):
+        path = Path(file_path_str)
+        if path.is_file() and path.name != "key":
+            action(path, key)
 
 
 if __name__ == "__main__":

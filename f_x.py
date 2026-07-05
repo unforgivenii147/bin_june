@@ -4,8 +4,8 @@
 import sys
 import time
 from pathlib import Path
-from multiprocessing import Pool, cpu_count
-from datetime import datetime, timedelta
+from multiprocessing import Pool
+from datetime import datetime
 
 
 def check_file_age(file_path):

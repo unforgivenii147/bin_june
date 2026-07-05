@@ -1,30 +1,29 @@
 #!/data/data/com.termux/files/usr/bin/python
-
 import hashlib
-import os
 import sys
 from pathlib import Path
 
 
-def file_hash(path, block_size=65536) -> str:
+def file_hash(path: Path, block_size=65536) -> str:
     h = hashlib.sha256()
-    with Path(path).open("rb") as f:
+    with path.open("rb") as f:
         while chunk := f.read(block_size):
             h.update(chunk)
     return h.hexdigest()
 
 
-def build_hash_map(root):
+def build_hash_map(root_path: Path):
     hash_map = {}
-    for base, _dirs, files in os.walk(root):
-        for f in files:
-            full = os.path.join(base, f)
-            rel = os.path.relpath(full, root)
-            hash_map[rel] = file_hash(full)
+    for item in root_path.rglob("*"):
+        if item.is_file():
+            rel = item.relative_to(root_path)
+            hash_map[str(rel)] = file_hash(item)
     return hash_map
 
 
-def compare_dirs(dir1: str, dir2: str) -> None:
+def compare_dirs(dir1_str: str, dir2_str: str) -> None:
+    dir1 = Path(dir1_str)
+    dir2 = Path(dir2_str)
     map1 = build_hash_map(dir1)
     map2 = build_hash_map(dir2)
     changed = []
@@ -43,6 +42,9 @@ def compare_dirs(dir1: str, dir2: str) -> None:
 
 
 if __name__ == "__main__":
+    if len(sys.argv) < 3:
+        print("Usage: python compare_dirz.py <dir1> <dir2>")
+        sys.exit(1)
     DIR1 = sys.argv[1]
     DIR2 = sys.argv[2]
     compare_dirs(DIR1, DIR2)

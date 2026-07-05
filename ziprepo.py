@@ -1,17 +1,16 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-
 import argparse
-import os
+from os import getenv
 import sys
 from dotenv import load_dotenv
 from github import Github
 
-load_dotenv()
+env_path = Path.home() / ".env"
+load_dotenv(env_path)
 
 
 def download_repo_zip(username, repo, branch="main", output_name=None):
-    g = Github(os.getenv("GITHUB_TOKEN"))
+    g = Github(getenv("GITHUB_TOKEN"))
     repo_obj = g.get_repo(f"{username}/{repo}")
     zip_data = repo_obj.get_zipball(branch)
     size_mb = len(zip_data) / (1024 * 1024)

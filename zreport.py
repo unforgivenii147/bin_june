@@ -6,8 +6,6 @@ Report uncompressed sizes of Zstandard (.zst) files in the current directory
 and calculate total disk space needed for extraction.
 """
 
-import os
-import sys
 from pathlib import Path
 import zstandard as zstd
 

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-import os
+from os import chdir as os_chdir
 import sys
 from pathlib import Path
 from dh import get_files, mpf3
@@ -12,7 +11,7 @@ NUM_PROCESSES = 4
 def process_file(path) -> None:
     path = Path(path)
     pardir = path.parent
-    os.chdir(pardir)
+    os_chdir(pardir)
     os.system(f"cythonize {path.name}")
 
 

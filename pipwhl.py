@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-import os
 import subprocess
 import sys
 from pathlib import Path
@@ -11,14 +9,14 @@ from bs4 import BeautifulSoup
 LOCAL_MIRROR_URL = "https://mirror-pypi.runflare.com"
 
 
-def download_file(url, dest_folder: str = ".") -> str | None:
+def download_file(url: str, dest_folder: str = ".") -> Path | None:
     try:
         response = requests.get(url, stream=True)
         response.raise_for_status()
         parsed_url = urlparse(url)
         filename = Path(parsed_url.path).name
-        filepath = os.path.join(dest_folder, filename)
-        with Path(filepath).open("wb") as f:
+        filepath = Path(dest_folder) / filename
+        with filepath.open("wb") as f:
             f.writelines(response.iter_content(chunk_size=8192))
         print(f"Downloaded: {filename}")
         return filepath

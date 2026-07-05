@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/usr/bin/python
 
 
 """
@@ -20,14 +20,12 @@ import sys
 import tarfile
 import tempfile
 import shutil
-import os
 
 try:
     from rich.console import Console
     from rich.table import Table
     from rich.progress import Progress, SpinnerColumn, BarColumn, TextColumn, TimeElapsedColumn
     from rich.panel import Panel
-    from rich.live import Live
     from rich.text import Text
     from rich import box
 

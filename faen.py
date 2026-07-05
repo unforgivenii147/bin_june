@@ -3,21 +3,22 @@ import json
 import os
 import sys
 from typing import Dict, List, Optional
+from pathlib import Path
 
 
 class BidirectionalDictionary:
     def __init__(self, json_file: str = "/sdcard/dic/dic.json"):
-        self.json_file = json_file
+        self.json_file = Path(json_file)
         self.persian_to_english: Dict[str, str] = {}
         self.english_to_persian: Dict[str, str] = {}
         self.load_dictionary()
 
     def load_dictionary(self) -> None:
         try:
-            if not os.path.exists(self.json_file):
+            if not self.json_file.exists():
                 print(f"❌ Error: {self.json_file} not found")
                 sys.exit(1)
-            with open(self.json_file, "r", encoding="utf-8") as file:
+            with self.json_file.open("r", encoding="utf-8") as file:
                 data = json.load(file)
             self.persian_to_english = {}
             self.english_to_persian = {}

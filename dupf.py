@@ -1,10 +1,13 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from dh import cprint, fsz, gsz
-from xxhash import xxh64_hexdigest
+from xxhash import xxh64
+
+CHUNKSIZE = 32768
 
 
 def should_skip(path: Path) -> bool:
@@ -19,8 +22,14 @@ def should_skip(path: Path) -> bool:
 def get_hash_file(path):
     if not path.exists() or not path.stat().st_size:
         return "", path
-    with path.open("rb") as f:
-        return xxh64_hexdigest(f.read()), path
+    h = xxh64()
+    try:
+        with path.open("rb") as f:
+            while chunk := f.read(CHUNKSIZE):
+                h.update(chunk)
+        return h.hexdigest(), path
+    except (OSError, IOError):
+        return "", path
 
 
 def find_duplicates() -> None:

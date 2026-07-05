@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-import os
 import shutil
 import site
 import zipfile
@@ -30,11 +28,9 @@ for entry in site_pkgs.iterdir():
     elif entry.is_dir():
         zip_path = out_dir / f"{name}.zip"
         with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
-            for root, _, files in os.walk(entry):
-                for f in files:
-                    if not str(file).endswith(".pyc"):
-                        path = Path(root) / f
-                        zf.write(path, path.relative_to(site_pkgs))
+            for path in entry.rglob("*"):
+                if path.is_file() and path.suffix != ".pyc":
+                    zf.write(path, path.relative_to(site_pkgs))
         zipped_dirs += 1
 print("Export completed successfully.")
 print(f"Site-packages source : {site_pkgs}")

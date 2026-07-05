@@ -1,9 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-
 import bz2
 import lzma
-import os
 import sys
 import tarfile
 import time
@@ -58,15 +55,15 @@ def compress_py7zr(input_path: str, output_path: str) -> None:
 def prepare_input(target_path: str) -> tuple[bytes, str]:
     target = Path(target_path)
     if target.is_file():
-        with open(target, "rb") as f:
+        with target.open("rb") as f:
             return f.read(), target.name
     elif target.is_dir():
-        tar_path = f"{target.name}.tar"
+        tar_path = Path(f"{target.name}.tar")
         with tarfile.open(tar_path, "w") as tar:
             tar.add(target, arcname=target.name)
-        with open(tar_path, "rb") as f:
+        with tar_path.open("rb") as f:
             data = f.read()
-        os.remove(tar_path)
+        tar_path.unlink()
         return data, f"{target.name}.tar"
     else:
         raise ValueError(f"{target_path} is neither file nor directory")
@@ -85,34 +82,36 @@ def compress_all(data: bytes, base_name: str, output_dir="."):
         ("blosc", lambda d: compress_blosc(d), ".blosc"),
     ]
     for name, compress_func, ext in compressors:
-        output_path = os.path.join(output_dir, f"{base_name}{ext}")
+        output_path = Path(output_dir) / f"{base_name}{ext}"
         try:
             start = time.time()
             compressed = compress_func(data)
             elapsed = time.time() - start
-            with open(output_path, "wb") as f:
+            with output_path.open("wb") as f:
                 f.write(compressed)
             comp_size = len(compressed)
             ratio = comp_size / original_size
-            results.append(CompressionResult(name=name, size=comp_size, ratio=ratio, time=elapsed, path=output_path))
+            results.append(
+                CompressionResult(name=name, size=comp_size, ratio=ratio, time=elapsed, path=str(output_path))
+            )
             print(f"✓ {name:10} | Size: {comp_size:12,} | Ratio: {ratio:.4f} | Time: {elapsed:.3f}s")
         except Exception as e:
             print(f"✗ {name:10} | Error: {e}")
-            if os.path.exists(output_path):
-                os.remove(output_path)
+            if output_path.exists():
+                output_path.unlink()
     try:
-        output_path = os.path.join(output_dir, f"{base_name}.7z")
+        output_path = Path(output_dir) / f"{base_name}.7z"
         start = time.time()
-        temp_file = f"_temp_{base_name}"
-        with open(temp_file, "wb") as f:
+        temp_file = Path(f"_temp_{base_name}")
+        with temp_file.open("wb") as f:
             f.write(data)
-        compress_py7zr(temp_file, output_path)
+        compress_py7zr(str(temp_file), str(output_path))
         elapsed = time.time() - start
-        comp_size = os.path.getsize(output_path)
+        comp_size = output_path.stat().st_size
         ratio = comp_size / original_size
-        results.append(CompressionResult(name="7z", size=comp_size, ratio=ratio, time=elapsed, path=output_path))
+        results.append(CompressionResult(name="7z", size=comp_size, ratio=ratio, time=elapsed, path=str(output_path)))
         print(f"✓ {'7z':10} | Size: {comp_size:12,} | Ratio: {ratio:.4f} | Time: {elapsed:.3f}s")
-        os.remove(temp_file)
+        temp_file.unlink()
     except Exception as e:
         print(f"✗ {'7z':10} | Error: {e}")
     return sorted(results, key=lambda x: x.ratio)
@@ -129,7 +128,7 @@ def report_results(results, original_size: int) -> None:
     print(f"\n✓ Keeping best: {best.name} ({best.path})")
     for result in results[1:]:
         try:
-            os.remove(result.path)
+            Path(result.path).unlink()
             print(f"✗ Deleted: {result.name}")
         except Exception as e:
             print(f"⚠ Failed to delete {result.name}: {e}")
@@ -140,7 +139,7 @@ def main() -> None:
         print("Usage: python script.py <file_or_directory>")
         sys.exit(1)
     target = sys.argv[1]
-    if not os.path.exists(target):
+    if not Path(target).exists():
         print(f"Error: {target} not found")
         sys.exit(1)
     print(f"📦 Compressing: {target}\n")

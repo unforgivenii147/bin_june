@@ -1,4 +1,5 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/usr/bin/python
+
 
 import mmap
 import sys
@@ -42,7 +43,6 @@ def sort_uniq(path: Path) -> tuple[int, list[str]]:
     original_count = len(lines)
     if not original_count:
         return (0, [])
-
     if original_count > 1000:
         chunk_size = max(1, len(lines) // cpu_count())
         chunks = [lines[i : i + chunk_size] for i in range(0, len(lines), chunk_size)]
@@ -51,7 +51,6 @@ def sort_uniq(path: Path) -> tuple[int, list[str]]:
         all_lines = [line for chunk in processed_chunks for line in chunk]
     else:
         all_lines = [line.strip() for line in lines if line.strip()]
-
     seen = set()
     duplicates = set()
     for line in all_lines:
@@ -59,14 +58,10 @@ def sort_uniq(path: Path) -> tuple[int, list[str]]:
             duplicates.add(line)
         else:
             seen.add(line)
-
     unique_sorted = sorted(seen)
     lines_removed = len(all_lines) - len(unique_sorted)
-
-    # Always write back the sorted unique lines, even if no duplicates were removed
     if lines_removed > 0 or original_count != len(unique_sorted):
         path.write_text("\n".join(unique_sorted), encoding="utf-8")
-
     return (lines_removed, list(duplicates))
 
 
@@ -74,12 +69,10 @@ if __name__ == "__main__":
     args = sys.argv[1:]
     quiet = "--quiet" in args or "-q" in args
     filename_arg = next((a for a in args if not a.startswith("--")), None)
-
     if not filename_arg:
         print("Usage: python sort_uniq_mp.py <filename> [--quiet|-q]")
         print("  --quiet, -q : Only show count, not the actual duplicate lines")
         sys.exit(1)
-
     path = Path(filename_arg)
     if not path.exists():
         print(f"Error: File not found: {path}")
@@ -90,11 +83,10 @@ if __name__ == "__main__":
     if is_binary(path):
         print(f"Skipping binary file: {path.name}")
         sys.exit(0)
-
     try:
         removed, duplicates = sort_uniq(path)
         if removed > 0:
-            print(f"\n✓ {removed} duplicate{'s' if removed != 1 else ''} removed and file sorted")
+            print(f"\n✓ {removed} duplicate{('s' if removed != 1 else '')} removed and file sorted")
             if not quiet and duplicates:
                 print("\nDuplicate lines removed:")
                 sorted_dupes = sorted(duplicates)
@@ -105,7 +97,6 @@ if __name__ == "__main__":
             elif quiet:
                 print(f"  (Use without --quiet to see the actual duplicate lines)")
         else:
-            # Check if sorting happened even without duplicates
             print("✓ File sorted (all lines were unique)")
     except Exception as e:
         print(f"Error processing file: {e}")

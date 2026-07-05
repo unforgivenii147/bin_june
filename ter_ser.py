@@ -1,8 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 import sys
 from pathlib import Path
-from dh import cprint, fsz, get_files, gsz, mpf3, runcmd
+from dh import get_files, gsz, mpf3, runcmd
 
 EXT = [".js", ".jsx", ".jsm", ".jsc"]
 

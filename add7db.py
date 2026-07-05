@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/python
-
 import base64
 import io
 import os
@@ -86,18 +85,17 @@ def get_files_in_cwd():
     cwd = Path.cwd()
     files = []
     try:
-        for item in sorted(os.listdir(cwd)):
-            item_path = os.path.join(cwd, item)
-            if Path(item_path).is_file():
-                get_size = Path(item_path).stat().st_size
+        for item_path in sorted(cwd.iterdir()):
+            if item_path.is_file():
+                get_size = item_path.stat().st_size
                 size_str = f"{get_size / 1024:.1f}KB" if get_size < 1024 * 1024 else f"{get_size / 1024 / 1024:.1f}MB"
-                print(f"  Processing: {item} ({size_str})")
-                file_data = read_file_contents(item_path)
+                print(f"  Processing: {item_path.name} ({size_str})")
+                file_data = read_file_contents(str(item_path))
                 if file_data["is_binary"]:
                     compressed = compress_data(file_data["content"])
                     if compressed:
                         files.append({
-                            "filename": item,
+                            "filename": item_path.name,
                             "contents": compressed,
                             "compressed": 1,
                             "original_size": file_data["original_size"],
@@ -108,7 +106,7 @@ def get_files_in_cwd():
                         )
                     else:
                         files.append({
-                            "filename": item,
+                            "filename": item_path.name,
                             "contents": "[Binary file - compression failed]",
                             "compressed": 0,
                             "original_size": file_data["original_size"],
@@ -116,7 +114,7 @@ def get_files_in_cwd():
                         })
                 else:
                     files.append({
-                        "filename": item,
+                        "filename": item_path.name,
                         "contents": file_data["content"],
                         "compressed": 0,
                         "original_size": file_data["original_size"],

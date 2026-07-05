@@ -1,61 +1,39 @@
-#!/data/data/com.termux/files/usr/bin/env python
-"""
-Normalize file and directory permissions with multiprocessing.
-
-Features:
-- Directories -> 0o755 (rwxr-xr-x)
-- Regular files -> 0o664 (rw-rw-r--)
-- Files in bin/sbin/.bin dirs -> 0o755 (add +x executable bit)
-- Skips: .git, __pycache__
-- Preserves: executable binary files and files with shebang (#!)
-- Multiprocessing for performance
-- Better error handling and reporting
-"""
-
+#!/data/data/com.termux/files/usr/bin/python
 import os
 import stat
 import sys
 import time
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from collections import defaultdict
 import logging
 
-# Permission constants
 DIR_PERM = 0o755
 FILE_PERM = 0o664
 EXEC_PERM = 0o755
 
-# Skip directories
 SKIP_NAMES = {".git", "__pycache__", ".idea", "node_modules", ".venv", "venv"}
-
-# Directories where files should be executable
 EXECUTABLE_DIRS = {"bin", "sbin", ".bin", "libexec", "scripts", "tools"}
 
-# Logging setup
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
 
 def is_executable(mode: int) -> bool:
-    """Check if file has any execute bit set."""
     return bool(mode & (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH))
 
 
 def is_binary(file_path: Path) -> bool:
-    """Detect binary files by looking for null bytes in first chunk."""
     try:
-        with open(file_path, "rb") as f:
-            chunk = f.read(1024)  # Increased chunk size
+        with file_path.open("rb") as f:
+            chunk = f.read(1024)
         return b"\x00" in chunk
     except (OSError, IOError):
         return False
 
 
 def has_shebang(file_path: Path) -> bool:
-    """Check if file starts with shebang (#!)."""
     try:
-        with open(file_path, "rb") as f:
+        with file_path.open("rb") as f:
             first_line = f.readline()
         return first_line.startswith(b"#!")
     except (OSError, IOError):
@@ -63,7 +41,6 @@ def has_shebang(file_path: Path) -> bool:
 
 
 def is_symlink(path: Path) -> bool:
-    """Check if path is a symbolic link."""
     try:
         return path.is_symlink()
     except OSError:
@@ -71,66 +48,36 @@ def is_symlink(path: Path) -> bool:
 
 
 def should_skip_path(path: Path) -> bool:
-    """Determine if path should be skipped based on name patterns."""
-    for part in path.parts:
-        if part in SKIP_NAMES:
-            return True
-    return False
+    return any(part in SKIP_NAMES for part in path.parts)
 
 
 def is_in_executable_dir(path: Path) -> bool:
-    """Check if file is in a bin/sbin/.bin/libexec directory."""
     return any(part in EXECUTABLE_DIRS for part in path.parts)
 
 
 def can_write(path: Path) -> bool:
-    """Check if we have write permission on the path."""
     try:
-        # Try to access the parent directory for write operations
         parent = path.parent
-        return os.access(str(parent), os.W_OK)
+        return parent.exists() and os.access(str(parent), os.W_OK)
     except (OSError, PermissionError):
         return False
 
 
-def get_target_permission(path: Path, current_mode: int) -> tuple[int, str]:
-    """
-    Determine target permission and reason.
-
-    Returns:
-        tuple: (target_mode, reason) or (None, reason) to skip
-    """
-    # Skip symlinks
+def get_target_permission(path: Path, current_mode: int) -> tuple[int | None, str]:
     if is_symlink(path):
-        return None, "symbolic link"
-
-    # Directories always get 0o755
+        return (None, "symbolic link")
     if path.is_dir():
-        return DIR_PERM, "directory"
-
-    # Check if file is already executable
+        return (DIR_PERM, "directory")
     if is_executable(current_mode):
-        # If it's binary or has shebang, leave it alone
         if is_binary(path) or has_shebang(path):
-            return None, "executable binary/script (preserved)"
-        # Otherwise normalize to FILE_PERM
-        return FILE_PERM, "executable (normalizing to 664)"
-
-    # Files in bin/sbin/.bin/libexec should be executable
+            return (None, "executable binary/script (preserved)")
+        return (FILE_PERM, "executable (normalizing to 664)")
     if is_in_executable_dir(path):
-        return EXEC_PERM, "file in executable directory"
-
-    # Regular files get FILE_PERM
-    return FILE_PERM, "regular file"
+        return (EXEC_PERM, "file in executable directory")
+    return (FILE_PERM, "regular file")
 
 
 def process_path(path: Path) -> dict:
-    """
-    Process a single path and return statistics.
-
-    Returns:
-        dict: Statistics about what was changed
-    """
     result = {
         "dirs_changed": 0,
         "files_changed": 0,
@@ -141,14 +88,11 @@ def process_path(path: Path) -> dict:
         "other_errors": 0,
         "messages": [],
     }
-
     try:
-        # Skip if needed
         if should_skip_path(path):
             result["skipped"] += 1
             return result
 
-        # Check if path still exists
         try:
             current_mode = stat.S_IMODE(path.stat().st_mode)
         except FileNotFoundError:
@@ -158,74 +102,60 @@ def process_path(path: Path) -> dict:
             result["errors"] += 1
             return result
 
-        # Get target permission
         target_perm, reason = get_target_permission(path, current_mode)
-
         if target_perm is None:
             result["skipped"] += 1
             return result
 
-        # Apply permissions if different
         if current_mode == target_perm:
             return result
 
-        # Check if we can modify the permission
         if not can_write(path):
             result["permission_errors"] += 1
             result["errors"] += 1
             return result
 
-        # Try to change permissions
         try:
             path.chmod(target_perm)
         except PermissionError:
             result["permission_errors"] += 1
             result["errors"] += 1
             return result
-        except OSError as e:
+        except OSError:
             result["other_errors"] += 1
             result["errors"] += 1
             return result
 
-        # Categorize the change
         if path.is_dir():
             result["dirs_changed"] += 1
             result["messages"].append(f"[DIR]  {str(path)[:60]} {oct(current_mode)} -> {oct(target_perm)}")
-        elif is_in_executable_dir(path) and not is_executable(current_mode):
+        elif is_in_executable_dir(path) and (not is_executable(current_mode)):
             result["files_made_exec"] += 1
             result["messages"].append(f"[EXEC] {str(path)[:60]} {oct(current_mode)} -> {oct(target_perm)} ({reason})")
         else:
             result["files_changed"] += 1
             result["messages"].append(f"[FILE] {str(path)[:60]} {oct(current_mode)} -> {oct(target_perm)}")
-
     except Exception as e:
         result["other_errors"] += 1
         result["errors"] += 1
         result["messages"].append(f"[ERR]  {str(path)[:60]}: {type(e).__name__}: {e}")
-
     return result
 
 
 def collect_paths(cwd: str) -> list[Path]:
-    """Recursively collect all paths under cwd."""
     root = Path(cwd).resolve()
-
     if not root.exists():
         print(f"❌ Error: Path does not exist: {cwd}", file=sys.stderr)
         sys.exit(1)
 
-    # Use os.walk for better performance and error handling
-    paths = []
+    paths: list[Path] = []
     try:
-        for dirpath, dirnames, filenames in os.walk(str(root)):
-            # Filter out skip directories
+        for current_dir, dirnames, filenames in os.walk(str(root), topdown=True, followlinks=False):
             dirnames[:] = [d for d in dirnames if d not in SKIP_NAMES]
-
-            current_dir = Path(dirpath)
-            paths.append(current_dir)
-
-            for filename in filenames:
-                paths.append(current_dir / filename)
+            cd = Path(current_dir)
+            paths.append(cd)
+            for name in filenames:
+                paths.append(cd / name)
     except PermissionError as e:
         print(f"⚠️  Warning: Permission denied during traversal: {e}", file=sys.stderr)
 
@@ -233,7 +163,6 @@ def collect_paths(cwd: str) -> list[Path]:
 
 
 def merge_results(all_results: list[dict]) -> dict:
-    """Merge results from all workers."""
     merged = {
         "dirs_changed": 0,
         "files_changed": 0,
@@ -244,7 +173,6 @@ def merge_results(all_results: list[dict]) -> dict:
         "other_errors": 0,
         "messages": [],
     }
-
     for result in all_results:
         merged["dirs_changed"] += result["dirs_changed"]
         merged["files_changed"] += result["files_changed"]
@@ -254,12 +182,10 @@ def merge_results(all_results: list[dict]) -> dict:
         merged["permission_errors"] += result.get("permission_errors", 0)
         merged["other_errors"] += result.get("other_errors", 0)
         merged["messages"].extend(result["messages"])
-
     return merged
 
 
 def print_summary(results: dict, total_items: int, elapsed_time: float) -> None:
-    """Print a summary of changes."""
     print("\n" + "=" * 80)
     print("📊 PERMISSION NORMALIZATION SUMMARY")
     print("=" * 80)
@@ -276,8 +202,6 @@ def print_summary(results: dict, total_items: int, elapsed_time: float) -> None:
     if results.get("other_errors", 0) > 0:
         print(f"   └─ Other errors:       {results['other_errors']}")
     print("=" * 80)
-
-    # Provide recommendations
     if results.get("permission_errors", 0) > 0:
         print("\n💡 Tip: Permission errors can be fixed by:")
         print("   - Running with appropriate privileges (sudo/root)")
@@ -286,20 +210,15 @@ def print_summary(results: dict, total_items: int, elapsed_time: float) -> None:
 
 
 def print_details(results: dict, verbose: bool = False) -> None:
-    """Print detailed changes if verbose mode."""
     if not verbose or not results["messages"]:
         return
-
     print("\n📝 DETAILED CHANGES:")
     print("-" * 80)
-
-    # Group messages by type for better readability
     dir_msgs = [m for m in results["messages"] if m.startswith("[DIR]")]
     exec_msgs = [m for m in results["messages"] if m.startswith("[EXEC]")]
     file_msgs = [m for m in results["messages"] if m.startswith("[FILE]")]
     err_msgs = [m for m in results["messages"] if m.startswith("[ERR]")]
 
-    # Print changes
     for msgs, label in [
         (dir_msgs, "Directory changes"),
         (exec_msgs, "Files made executable"),
@@ -307,12 +226,11 @@ def print_details(results: dict, verbose: bool = False) -> None:
     ]:
         if msgs:
             print(f"\n{label}:")
-            for msg in msgs[:50]:  # Limit per category
+            for msg in msgs[:50]:
                 print(f"  {msg}")
             if len(msgs) > 50:
                 print(f"  ... and {len(msgs) - 50} more")
 
-    # Print errors
     if err_msgs:
         print(f"\n❌ Errors ({len(err_msgs)}):")
         for msg in err_msgs[:20]:
@@ -322,90 +240,53 @@ def print_details(results: dict, verbose: bool = False) -> None:
 
 
 def normalize_permissions(cwd: str = ".", verbose: bool = False) -> None:
-    """
-    Main function to normalize permissions.
-
-    Args:
-        cwd: Current working directory to start from
-        verbose: Print detailed changes
-    """
     start_time = time.time()
-
     print(f"🔍 Scanning: {Path(cwd).resolve()}")
     all_paths = collect_paths(cwd)
     total = len(all_paths)
-
     if total == 0:
         print("⚠️  No files found to process.")
         return
 
-    workers = min(cpu_count(), 4)  # Limit workers to avoid system strain
+    workers = min(cpu_count(), 4)
     print(f"📦 Found {total} items to process")
     print(f"⚙️  Using {workers} worker processes")
-    print(f"🚀 Processing...\n")
+    print("🚀 Processing...\n")
 
     try:
-        # Use a context manager for the pool
         with Pool(processes=workers) as pool:
-            # Process in chunks for better performance
             chunksize = max(1000, total // (workers * 10))
             results_list = pool.imap_unordered(process_path, all_paths, chunksize=chunksize)
 
-            # Collect all results with progress
-            all_results = []
+            all_results: list[dict] = []
             processed = 0
             for result in results_list:
                 all_results.append(result)
                 processed += 1
-
-                # Progress indicator
                 if processed % 500 == 0 or processed == total:
                     print(f"  Progress: {processed:,}/{total:,} ({100 * processed / total:.1f}%)")
-
     except KeyboardInterrupt:
         print("\n⚠️  Interrupted by user!")
-        # Clean up pool
         pool.terminate()
         pool.join()
         sys.exit(1)
 
-    # Merge and display results
     final_results = merge_results(all_results)
     elapsed = time.time() - start_time
-
     print_summary(final_results, total, elapsed)
     print_details(final_results, verbose=verbose)
-
     print("\n✅ Done!")
 
 
 def main():
-    """Main entry point with argument parsing."""
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Normalize file and directory permissions.",
-        epilog="Example: python3 normalize_perms.py . -v",
+        description="Normalize file and directory permissions.", epilog="Example: python3 normalize_perms.py . -v"
     )
-    parser.add_argument(
-        "path",
-        nargs="?",
-        default=".",
-        help="Path to start normalization (default: current directory)",
-    )
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="Print detailed changes",
-    )
-    parser.add_argument(
-        "-q",
-        "--quiet",
-        action="store_true",
-        help="Suppress progress output",
-    )
-
+    parser.add_argument("path", nargs="?", default=".", help="Path to start normalization (default: current directory)")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Print detailed changes")
+    parser.add_argument("-q", "--quiet", action="store_true", help="Suppress progress output")
     args = parser.parse_args()
 
     try:

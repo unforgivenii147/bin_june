@@ -1,4 +1,5 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/usr/bin/python
+
 """
 Remove comments and docstrings from Python files using tree-sitter.
 Supports parallel processing, AST validation, and performance comparison.
@@ -8,7 +9,6 @@ Requirements:
 """
 
 import ast
-import re
 import sys
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Optional
 
 try:
-    from tree_sitter import Language, Parser, Node
+    from tree_sitter import Parser, Node
     from tree_sitter_python import language as python_language
 except ImportError:
     print("ERROR: Install tree-sitter==0.25.2 and tree-sitter-python==0.25.0")

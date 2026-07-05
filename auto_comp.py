@@ -11,7 +11,6 @@ only the best result based on compression ratio.
 import bz2
 import gzip
 import lzma
-import os
 import shutil
 import sys
 import tarfile
@@ -219,9 +218,6 @@ def main() -> None:
         sys.exit(1)
     target = sys.argv[1]
     output_dir = sys.argv[2] if len(sys.argv) > 2 else "."
-    if not os.path.exists(target):
-        print(f"Error: Target not found: {target}")
-        sys.exit(1)
     print(f"📦 Compressing: {target}")
     print(f"📁 Output directory: {output_dir}\n")
     try:

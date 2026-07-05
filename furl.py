@@ -1,4 +1,5 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/usr/bin/python
+
 """
 Extract URLs from files in current directory recursively.
 Separates git links into a separate file and shows progress.
@@ -8,7 +9,6 @@ Uses pathlib and parallel processing for efficiency.
 import re
 from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from collections import defaultdict
 from tqdm import tqdm
 from typing import Tuple, Set
 

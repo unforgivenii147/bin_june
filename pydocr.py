@@ -1,9 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/python
-
 import ast
 import importlib
 import inspect
-import os
 import sys
 from collections import deque
 from multiprocessing import get_context
@@ -81,24 +79,23 @@ def extract_from_importable(name: str):
 
 def module_to_md_paths(name: str) -> tuple[str, str]:
     parts = name.split(".")
-    folder = os.path.join(BASE_DIR, *parts[:-1])
+    folder = BASE_DIR.joinpath(*parts[:-1])
     filename = f"{parts[-1]}.md"
-    return folder, os.path.join(folder, filename)
+    return str(folder), str(folder / filename)
 
 
 def file_to_md_paths(py_file: str, root: str) -> tuple[str, str]:
-    rel = os.path.relpath(py_file, root)
-    parts = rel.split(os.sep)
+    rel = Path(py_file).relative_to(root)
+    parts = list(rel.parts)
     parts[-1] = parts[-1].replace(".py", ".md")
-    folder = os.path.join(BASE_DIR, *parts[:-1])
-    outfile = os.path.join(BASE_DIR, *parts)
-    return folder, outfile
+    outfile = BASE_DIR.joinpath(*parts)
+    return str(outfile.parent), str(outfile)
 
 
 def save_markdown(folder: str, path: str, content: str) -> None:
     folderpath = Path(folder)
     if not folderpath.exists():
-        folderpath.mkdir(exist_ok=True)
+        folderpath.mkdir(parents=True, exist_ok=True)
     outpath = Path(path)
     if outpath.exists():
         outpath = unique_path(outpath)
@@ -124,8 +121,8 @@ def process_file_task(py_file) -> None:
     if not result:
         return
     module_doc, functions, classes = result
-    rel = os.path.relpath(py_file)
-    module_name = rel.replace(os.sep, ".").replace(".py", "")
+    rel = filepath.resolve().relative_to(Path.cwd().resolve())
+    module_name = ".".join(rel.with_suffix("").parts)
     folder, out_path = file_to_md_paths(py_file, root)
     md = format_markdown(module_name, module_doc, functions, classes)
     save_markdown(folder, out_path, md)

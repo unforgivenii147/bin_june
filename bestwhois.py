@@ -7,7 +7,6 @@
 
 import datetime
 import json
-import os.path
 import sys
 from argparse import ArgumentParser
 import requests
@@ -22,7 +21,11 @@ except:
     IDN = False
 VERSION = "0.1.0"
 MYNAME = sys.argv[0].replace("./", "")
-RC_FILE_LOCS = [".bestwhoisrc", os.path.expanduser("~") + "/.bestwhoisrc", "/etc/bestwhois/bestwhoisrc"]
+RC_FILE_LOCS = [
+    ".bestwhoisrc",
+    Path("~/.bestwhoisrc").expanduser(),
+    "data/data/com.termux/files/usr/etc/bestwhois/bestwhoisrc",
+]
 
 
 def valid_date(s):

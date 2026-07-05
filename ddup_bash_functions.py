@@ -1,11 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-
 """
 Check for bash functions that also exist as aliases and remove the aliases.
 """
 
-import os
 import re
 import sys
 from pathlib import Path
@@ -89,8 +86,6 @@ def remove_aliases(aliases_to_remove, aliases_file: Path) -> int:
 
 
 def create_backup(filepath: Path) -> str | None:
-    if not os.path.exists(filepath):
-        return None
     backup_path = f"{filepath}.backup"
     try:
         import shutil

@@ -1,16 +1,15 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-import os
 from pathlib import Path
 from PIL import Image
 
-input_dir = "avif_images"
-output_dir = "jpg_images"
-Path(output_dir).mkdir(exist_ok=True, parents=True)
-for filename in os.listdir(input_dir):
-    if filename.lower().endswith((".avif", ".aviff")):
-        input_path = os.path.join(input_dir, filename)
-        output_path = os.path.join(output_dir, os.path.splitext(filename)[0] + ".jpg")
-        with Image.open(input_path) as img:
-            img = img.convert("RGB")
-            img.save(output_path, "JPEG", quality=95)
+input_dir = Path("avif_images")
+output_dir = Path("jpg_images")
+output_dir.mkdir(exist_ok=True, parents=True)
+
+if input_dir.exists() and input_dir.is_dir():
+    for file in input_dir.iterdir():
+        if file.is_file() and file.suffix.lower() in (".avif", ".aviff"):
+            output_path = output_dir / (file.stem + ".jpg")
+            with Image.open(file) as img:
+                img = img.convert("RGB")
+                img.save(output_path, "JPEG", quality=95)

@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 import stat
 from pathlib import Path
 from dh import is_binary, should_skip

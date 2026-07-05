@@ -1,5 +1,5 @@
-#!/data/data/com.termux/files/usr/bin/env python
-import sys
+#!/data/data/com.termux/files/usr/bin/python
+
 import argparse
 import ast
 import tokenize

@@ -1,12 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/python
-
 import argparse
 import json
-import os
 import re
 import signal
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import Manager, cpu_count
+from pathlib import Path
 from urllib.parse import urljoin
 import requests
 from bs4 import BeautifulSoup
@@ -95,7 +94,7 @@ def save_state(queue, visited) -> None:
 
 
 def load_state():
-    if not os.path.exists(STATE_FILE):
+    if not Path(STATE_FILE).exists():
         return None, None
     with open(STATE_FILE, encoding="utf-8") as f:
         state = json.load(f)
@@ -151,8 +150,8 @@ def main() -> None:
     if stop_flag:
         print("💾 Progress saved. Run again to continue.")
     else:
-        if os.path.exists(STATE_FILE):
-            os.remove(STATE_FILE)
+        if Path(STATE_FILE).exists():
+            Path(STATE_FILE).unlink()
         print("✅ Crawl completed successfully.")
 
 

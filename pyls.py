@@ -1,9 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/python
-
 import argparse
 import datetime
 import grp
-import os
 import pwd
 import stat
 import sys
@@ -83,8 +81,7 @@ def format_entry(entry, args: Namespace, color_enabled: bool) -> str:
 
 def scan_dir(path: Path, args: Namespace):
     try:
-        with os.scandir(path) as it:
-            entries = [Path(e.path) for e in it]
+        entries = list(path.iterdir())
     except PermissionError:
         print(f"ls: cannot open directory '{path}'", file=sys.stderr)
         return []

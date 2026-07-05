@@ -1,16 +1,18 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-import os
 import sys
 from pathlib import Path
 
 
 def main() -> None:
-    cwd = Path.cwd()
-    req = sys.argv[1].strip()
-    found = [f for f in os.listdir(cwd) if f.startswith(req)]
-    for k in found:
-        print(k)
+    prefix = sys.argv[1].strip() if len(sys.argv) > 1 else ""
+    if not prefix:
+        print("Usage: python script.py <prefix>", file=sys.stderr)
+        sys.exit(1)
+
+    # Using iterdir with manual filtering (fastest for simple prefix checks)
+    for entry in Path.cwd().iterdir():
+        if entry.name.startswith(prefix):
+            print(entry.name)
 
 
 if __name__ == "__main__":

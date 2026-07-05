@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 """
 Script to run git pull on all git repositories in current directory and subdirectories.
 Requires gitpython library: pip install gitpython

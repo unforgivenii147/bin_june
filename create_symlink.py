@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 
+
 from pathlib import Path
 
 BASHBIN: Path = Path.home() / "bashbin"

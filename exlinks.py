@@ -1,12 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-import os
 import re
 import tarfile
 import zipfile
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-import brotli
 import chardet
 from loguru import logger
 
@@ -26,7 +23,7 @@ def extract_links_from_text(text: str, file_path: (Path | str)):
 
 def is_likely_binary(file_path: Path, chunk_size=1024) -> bool:
     try:
-        with Path(file_path).open("rb") as f:
+        with file_path.open("rb") as f:
             chunk = f.read(chunk_size)
             if not chunk:
                 return False
@@ -47,7 +44,7 @@ def read_file_with_encodings(file_path: Path) -> tuple[str, str] | tuple[str, No
     encodings_to_try = ["utf-8", "latin-1", "iso-8859-1", "cp1252"]
     for encoding in encodings_to_try:
         try:
-            content = Path(file_path).read_text(encoding=encoding)
+            content = file_path.read_text(encoding=encoding)
             logger.debug(f"Successfully read {file_path} with {encoding}")
             return content, None
         except UnicodeDecodeError:
@@ -56,7 +53,7 @@ def read_file_with_encodings(file_path: Path) -> tuple[str, str] | tuple[str, No
             logger.warning(f"Error reading {file_path} with {encoding}: {e}")
             continue
     try:
-        raw_data = Path(file_path).read_bytes()
+        raw_data = file_path.read_bytes()
         result = chardet.detect(raw_data)
         detected_encoding = result["encoding"]
         if detected_encoding:
@@ -71,11 +68,10 @@ def read_file_with_encodings(file_path: Path) -> tuple[str, str] | tuple[str, No
     return None, None
 
 
-def process_file(file_path):
-    path = Path(path)
+def process_file(file_path_str: str):
+    file_path = Path(file_path_str)
     local_urls = []
     github_urls = []
-    file_path = Path(file_path)
     file_extension = file_path.suffix.lower()
     if not file_path.is_file():
         return [], []
@@ -100,7 +96,10 @@ def process_file(file_path):
                                         f = tar.extractfile(member)
                                         if f:
                                             member_content_bytes = f.read()
-                                            member_content_str, _ = read_file_with_encodings(file_path)
+                                            result = chardet.detect(member_content_bytes)
+                                            enc = result["encoding"] or "utf-8"
+                                            member_content_str = member_content_bytes.decode(enc, errors="ignore")
+
                                             if member_content_str:
                                                 urls, gh_urls = extract_links_from_text(
                                                     member_content_str, f"{file_path}/{member.name}"
@@ -116,7 +115,9 @@ def process_file(file_path):
                                 if not file_info.is_dir():
                                     with zip_ref.open(file_info) as f:
                                         member_content_bytes = f.read()
-                                        member_content_str, _ = read_file_with_encodings(file_path)
+                                        result = chardet.detect(member_content_bytes)
+                                        enc = result["encoding"] or "utf-8"
+                                        member_content_str = member_content_bytes.decode(enc, errors="ignore")
                                         if member_content_str:
                                             urls, gh_urls = extract_links_from_text(
                                                 member_content_str, f"{file_path}/{file_info.filename}"
@@ -136,15 +137,6 @@ def process_file(file_path):
                                 github_urls.extend(gh_urls)
                         else:
                             logger.warning(f"File {file_path} identified as text, but couldn't extract from 7z.")
-                except (
-                    tarfile.TarError,
-                    zipfile.BadZipFile,
-                    zstandard.ZstdError,
-                    brotli.Error,
-                    EOFError,
-                    ValueError,
-                ) as e:
-                    logger.warning(f"Could not open/read archive {file_path}: {e}")
                 except Exception as e:
                     logger.error(f"Unexpected error processing archive {file_path}: {e}")
             elif file_extension in {".css", ".js", ".html"}:
@@ -181,18 +173,18 @@ def process_file(file_path):
     return list(set(local_urls)), list(set(github_urls))
 
 
-def find_files_recursively(directory: str):
-    for root, _, files in os.walk(directory):
-        for file in files:
-            yield os.path.join(root, file)
+def find_files_recursively(directory: Path):
+    for path in directory.rglob("*"):
+        if path.is_file():
+            yield str(path)
 
 
 if __name__ == "__main__":
-    cwdectory = "."
+    base_dir = Path(".")
     all_extracted_urls = []
     all_github_urls = []
-    print(f"Starting URL extraction in directory: {Path(cwdectory).resolve()}")
-    files_to_process = list(find_files_recursively(cwdectory))
+    print(f"Starting URL extraction in directory: {base_dir.resolve()}")
+    files_to_process = list(find_files_recursively(base_dir))
     print(f"Found {len(files_to_process)} files to process.")
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         futures = {executor.submit(process_file, file_path): file_path for file_path in files_to_process}

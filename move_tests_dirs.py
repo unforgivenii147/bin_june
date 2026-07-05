@@ -1,4 +1,5 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/usr/bin/python
+
 import shutil
 from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed

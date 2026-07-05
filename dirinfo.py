@@ -1,8 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
-
 import argparse
 import operator
-import os
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -15,18 +13,18 @@ def scan_directory(path: str = "."):
     folder_count = 0
     extensions = set()
     size_by_ext = defaultdict(int)
-    for root, dirs, files in os.walk(path):
-        folder_count += len(dirs)
-        for filename in files:
+    base_path = Path(path)
+    for p in base_path.rglob("*"):
+        if p.is_dir():
+            folder_count += 1
+        elif p.is_file():
             file_count += 1
-            full_path = Path(root) / filename
             try:
-                size = full_path.stat().st_size
+                size = p.stat().st_size
             except OSError:
                 size = 0
             total_size += size
-            ext = full_path.suffix
-            ext = ext.lower() if ext else "(no extension)"
+            ext = p.suffix.lower() if p.suffix else "(no extension)"
             extensions.add(ext)
             size_by_ext[ext] += size
     return total_size, file_count, folder_count, extensions, size_by_ext

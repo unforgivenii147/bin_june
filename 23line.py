@@ -1,37 +1,39 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-from __future__ import annotations
-import os
 from pathlib import Path
 from dh import gext
 
-EXT = [".py", ".h", ".c", ".cpp", ".cc", ".cxx", ".hh", ".hpp", ".h", ".hxx"]
+EXT = {".py", ".h", ".c", ".cpp", ".cc", ".cxx", ".hh", ".hpp", ".h", ".hxx"}
 
 
-def get_first_13(path: str) -> str:
-    with Path(path).open(encoding="utf-8", errors="ignore") as f:
-        lines = f.readlines()
-    return "".join(lines[:13])
+def get_first_13(path: Path) -> str:
+    """Read first 13 lines from a file."""
+    try:
+        lines = path.read_text(encoding="utf-8", errors="ignore").splitlines(keepends=True)
+        return "".join(lines[:23])
+    except (IOError, OSError):
+        return ""
 
 
 def main() -> None:
-    output_path = "all.txt"
+    output_path = Path("all.txt").resolve()
     collected = []
-    for base, _, files in os.walk(Path.cwd()):
-        for name in files:
-            ext = gext(name)
-            if ext not in EXT:
-                continue
-            path = os.path.join(base, name)
-            if Path(path).resolve() == Path(output_path).resolve():
-                continue
-            snippet = get_first_13(path)
+
+    for file_path in Path.cwd().rglob("*"):
+        if not file_path.is_file():
+            continue
+        if file_path.suffix not in EXT:
+            continue
+        if file_path.resolve() == output_path:
+            continue
+
+        snippet = get_first_13(file_path)
+        if snippet:  # Only add non-empty snippets
             collected.append(snippet)
+
     unique_collected = list(set(collected))
-    with Path(output_path).open("w", encoding="utf-8") as out:
-        for snippet in unique_collected:
-            out.write(snippet)
-            out.write("\n\n\n")
+
+    output_path.write_text("\n\n\n".join(unique_collected), encoding="utf-8")
+
     print(f"Unique snippets saved → {output_path}")
     print(f"Total unique blocks: {len(unique_collected)}")
 

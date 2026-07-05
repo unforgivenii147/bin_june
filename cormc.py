@@ -1,4 +1,5 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/usr/bin/python
+
 """
 Strip comments and docstrings from Python files recursively (in-place).
 
@@ -17,7 +18,6 @@ Behavior:
 
 from __future__ import annotations
 import ast
-import io
 import sys
 from pathlib import Path
 from typing import List, Tuple, Optional

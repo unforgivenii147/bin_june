@@ -1,8 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-
 import ast
-import os
 import re
 import sys
 import tarfile
@@ -10,6 +7,7 @@ import zipfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
+from collections import Counter
 
 try:
     import tree_sitter_python as tsp
@@ -18,7 +16,6 @@ try:
     HAS_TREE_SITTER = True
 except ImportError:
     HAS_TREE_SITTER = False
-from dh import get_files, unique_path
 
 try:
     import zstd
@@ -26,13 +23,44 @@ try:
     HAS_ZSTD = True
 except ImportError:
     HAS_ZSTD = False
+
+
+# Helper functions (replacing dh import)
+def get_files(directory: Path) -> List[Path]:
+    """Recursively get all files in a directory."""
+    files = []
+    try:
+        for path in directory.rglob("*"):
+            if path.is_file():
+                files.append(path)
+    except PermissionError:
+        pass
+    return files
+
+
+def unique_path(path: Path) -> Path:
+    """Get a unique path by adding a number if it exists."""
+    if not path.exists():
+        return path
+    stem = path.stem
+    suffix = path.suffix
+    counter = 1
+    while True:
+        new_path = path.with_name(f"{stem}_{counter}{suffix}")
+        if not new_path.exists():
+            return new_path
+        counter += 1
+
+
 HERE = "-t" in sys.argv
 if not HERE:
     OUTPUT_DIR = Path.cwd() / "output"
 else:
     OUTPUT_DIR = Path.home() / "tmp" / "output"
+
 ARCHIVE_EXTENSIONS = (".whl", ".zip", ".tar.gz", ".tgz", ".tar.zst", ".tar.xz", ".tar", ".zst")
 ALLOWED_PYTHON_EXTENSIONS = ".py"
+
 COMMON_IMPORTS = {
     "typing": ["List", "Dict", "Optional", "Union", "Tuple", "Any", "Callable", "TypeVar"],
     "dataclasses": ["dataclass", "field"],
@@ -45,6 +73,7 @@ COMMON_IMPORTS = {
     "functools": ["lru_cache", "wraps", "partial", "reduce"],
     "typing_extensions": ["Literal", "TypedDict", "Protocol"],
 }
+
 IMPORT_PATTERNS = {
     "\\bList\\b|\\bDict\\b|\\bOptional\\b|\\bUnion\\b|\\bTuple\\b|\\bAny\\b|\\bCallable\\b": "from typing import List, Dict, Optional, Union, Tuple, Any, Callable",
     "\\bTypeVar\\b": "from typing import TypeVar",
@@ -281,25 +310,12 @@ def enhance_entity_code(entity: Dict[str, Any]) -> str:
     return header + code
 
 
-def get_unique_filepath(base_path: Path) -> Path:
-    if not base_path.exists():
-        return base_path
-    name = base_path.stem
-    suffix = base_path.suffix
-    i = 1
-    while True:
-        new_path = base_path.with_name(f"{name}_{i}{suffix}")
-        if not new_path.exists():
-            return new_path
-        i += 1
-
-
-def save_entity(entity: Dict[str, Any]) -> Path | None:
+def save_entity(entity: Dict[str, Any]) -> Optional[Path]:
     filename_base = f"{entity['full_name']}.py"
     output_path_base = OUTPUT_DIR / entity["type"] / filename_base.lower()
     output_path_base.parent.mkdir(parents=True, exist_ok=True)
     enhanced_code = enhance_entity_code(entity)
-    final_py_path = get_unique_filepath(output_path_base)
+    final_py_path = unique_path(output_path_base)
     try:
         final_py_path.write_text(enhanced_code, encoding="utf-8")
         return final_py_path
@@ -325,7 +341,7 @@ def is_python_file_no_extension(path: Path) -> bool:
     if path.suffix:
         return False
     try:
-        with Path(path).open(encoding="utf-8", errors="ignore") as f:
+        with path.open(encoding="utf-8", errors="ignore") as f:
             first_lines = "".join(f.readlines(1024))
             if re.match("#!\\s*/.*python", first_lines):
                 return True
@@ -353,6 +369,7 @@ def process_single_file(path: Path) -> Tuple[List[Dict[str, Any]], List[str]]:
 def process_archive(path: Path) -> Tuple[List[Dict[str, Any]], List[str]]:
     entities = []
     all_imports = []
+
     if path.suffix == ".zst":
         if HAS_ZSTD:
             try:
@@ -366,6 +383,7 @@ def process_archive(path: Path) -> Tuple[List[Dict[str, Any]], List[str]]:
         else:
             print(f"Warning: zstd module not available, skipping {path}")
         return [], []
+
     if path.suffix in {".zip", ".whl"}:
         try:
             with zipfile.ZipFile(path, "r") as zf:
@@ -379,6 +397,7 @@ def process_archive(path: Path) -> Tuple[List[Dict[str, Any]], List[str]]:
                             all_imports.extend(ImportCollector.parse_imports_with_ast(content))
         except Exception as e:
             print(f"Error processing ZIP/WHL archive {path}: {e}")
+
     elif any(path.name.endswith(ext) for ext in [".tar", ".tar.gz", ".tgz", ".tar.zst", ".tar.xz"]):
         mode_map = {".tar.gz": "r:gz", ".tgz": "r:gz", ".tar.zst": "r:zst", ".tar.xz": "r:xz", ".tar": "r"}
         mode = next((mode_map[ext] for ext in mode_map if path.name.endswith(ext)), "r")
@@ -397,6 +416,7 @@ def process_archive(path: Path) -> Tuple[List[Dict[str, Any]], List[str]]:
             pass
         except Exception as e:
             print(f"Error processing TAR archive {path}: {e}")
+
     return entities, all_imports
 
 
@@ -407,7 +427,7 @@ def worker_process(path_str: str) -> Tuple[List[Dict[str, Any]], List[str]]:
     return process_single_file(path)
 
 
-def save_global_imports(all_imports: List[str], source_dir: Path) -> Path:
+def save_global_imports(all_imports: List[str], source_dir: Path) -> Optional[Path]:
     if not all_imports:
         return None
     unique_imports = sorted(set(all_imports))
@@ -425,7 +445,11 @@ def process_files_parallel(
     all_entities = []
     all_imports = []
     if max_workers is None:
+        # Use pathlib and cpu_count from os (still need os for this one function)
+        import os
+
         max_workers = min(os.cpu_count() or 4, 8)
+
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         future_to_path = {executor.submit(worker_process, path): path for path in file_paths}
         for future in as_completed(future_to_path):
@@ -444,13 +468,14 @@ def print_statistics(entities: List[Dict[str, Any]], imports: List[str], saved_e
     print("\n" + "=" * 35)
     print("PROCESSING STATISTICS")
     print("=" * 35)
+
     entity_types = {}
     for entity in entities:
         etype = entity["type"]
         entity_types[etype] = entity_types.get(etype, 0) + 1
+
     for etype, count in sorted(entity_types.items()):
         print(f"  • {etype.capitalize()}s: {count}")
-    from collections import Counter
 
     import_modules = Counter()
     for imp in imports:
@@ -460,41 +485,54 @@ def print_statistics(entities: List[Dict[str, Any]], imports: List[str], saved_e
         elif imp.startswith("from "):
             module = imp.split()[1].split(".")[0]
             import_modules[module] += 1
+
     if import_modules:
         print("\n📖 Most Common Imports:")
         for module, count in import_modules.most_common(10):
             print(f"  • {module}: {count} times")
 
+    print(f"\n💾 Saved Entities: {saved_entities}")
 
-def main() -> None:
+
+def main() -> int:
     cwd = Path.cwd()
     files = get_files(cwd)
     files_to_process = []
+
     print("\n🔎 Finding Python files and archives...")
     for path in files:
         if path.is_relative_to(OUTPUT_DIR):
             continue
-        is_archive = path.suffix in ARCHIVE_EXTENSIONS or any(path.name.endswith(ext) for ext in ARCHIVE_EXTENSIONS)
+        is_archive = any(path.name.endswith(ext) for ext in ARCHIVE_EXTENSIONS)
         is_py = path.suffix in ALLOWED_PYTHON_EXTENSIONS or is_python_file_no_extension(path)
         if is_archive or is_py:
             files_to_process.append(str(path))
+
     if not files_to_process:
         print("❌ No Python files or archives found to process.")
-        return
+        return 1
+
+    print(f"Found {len(files_to_process)} files to process.")
     all_entities, all_imports = process_files_parallel(files_to_process)
+
     if not all_entities and not all_imports:
-        return
+        print("❌ No entities or imports extracted.")
+        return 1
+
     saved_count = 0
     for idx, entity in enumerate(all_entities, 1):
         if save_entity(entity):
             saved_count += 1
         if idx % 100 == 0:
             print(f"  Progress: {idx}/{len(all_entities)} entities processed")
+
     if all_imports:
         imports_file = save_global_imports(all_imports, cwd)
         if imports_file:
             print(f"✓ Imports saved to: {imports_file}")
+
     print_statistics(all_entities, all_imports, saved_count)
+    return 0
 
 
 if __name__ == "__main__":

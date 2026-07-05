@@ -1,11 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/python
-
-
 import requests
-import json
 import sys
-import os
-from urllib.parse import urlparse
+from pathlib import Path
 import argparse
 
 
@@ -43,14 +39,14 @@ def get_package_url(package_name, version=None):
 
 def download_package(url, filename, output_dir="."):
     try:
-        os.makedirs(output_dir, exist_ok=True)
-        output_path = os.path.join(output_dir, filename)
+        output_path = Path(output_dir) / filename
+        output_path.parent.mkdir(parents=True, exist_ok=True)
         print(f"Downloading {filename}...")
         response = requests.get(url, stream=True)
         response.raise_for_status()
         total_size = int(response.headers.get("content-length", 0))
         downloaded = 0
-        with open(output_path, "wb") as f:
+        with output_path.open("wb") as f:
             for chunk in response.iter_content(chunk_size=8192):
                 if chunk:
                     f.write(chunk)
