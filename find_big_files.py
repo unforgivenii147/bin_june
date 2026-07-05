@@ -1,0 +1,27 @@
+#!/data/data/com.termux/files/usr/bin/python
+
+
+import sys
+from pathlib import Path
+from dh import fsz, get_filez
+
+THRESHOLD = 1024 * 1024
+cwd = Path.cwd()
+
+
+def process_file(path: Path, threshold: int = THRESHOLD) -> None:
+    sz = path.stat().st_size
+    path = Path(path)
+    if sz > threshold:
+        print(f"{path.relative_to(cwd)} : {fsz(sz)}")
+
+
+def main() -> None:
+    threshold = int(sys.argv[1]) * 1024 * 1024 if len(sys.argv) > 1 else THRESHOLD
+    for path in get_filez(cwd):
+        if not path.is_symlink():
+            process_file(path, threshold)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
