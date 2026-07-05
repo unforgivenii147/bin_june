@@ -175,7 +175,7 @@ def get_module_docstring_line_span(tree: ast.Module) -> tuple[int, int | None] |
     return None
 
 
-def source_segment(code: str, node: (Assign | AsyncFunctionDef | ClassDef | FunctionDef)) -> str | None:
+def source_segment(code: str, node: Assign | AsyncFunctionDef | ClassDef | FunctionDef) -> str | None:
     seg = ast.get_source_segment(code, node)
     if seg is not None:
         return seg

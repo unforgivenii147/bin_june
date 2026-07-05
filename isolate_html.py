@@ -20,7 +20,7 @@ def encode_local_file_to_base64(file_path) -> str | None:
         return None
 
 
-def find_local_resource(resource_name: (AttributeValueList | str), base_html_dir: (Path | str)):
+def find_local_resource(resource_name: AttributeValueList | str, base_html_dir: Path | str):
     search_paths = [Path("/sdcard/_static"), Path(base_html_dir), Path.cwd(), Path(base_html_dir).parent.parent]
     normalized_resource_name = resource_name
     if normalized_resource_name.startswith("/"):

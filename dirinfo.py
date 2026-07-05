@@ -40,7 +40,7 @@ def format_size(size_in_bytes: int) -> str:
     return f"{size_in_bytes / 1024**3:.2f} GB"
 
 
-def write_summary(filename: (Path | None) = None) -> None:
+def write_summary(filename: Path | None = None) -> None:
     total_size, file_count, folder_count, extensions, size_by_ext = scan_directory()
     summary_lines = []
     summary_lines.append(f"Total size: {format_size(total_size)}\n")

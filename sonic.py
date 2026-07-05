@@ -180,7 +180,7 @@ class FileSorter(LineProcessor):
     def process_file(
         self,
         file_path: str,
-        output_path: (str | None) = None,
+        output_path: str | None = None,
         sort: bool = True,
         unique: bool = True,
         reverse: bool = False,
@@ -269,7 +269,7 @@ class FileSorter(LineProcessor):
         print(f"Speed: {stats['lines_per_second']:,.0f} lines/second")
         print("=" * 60)
 
-    def save_report(self, stats: dict, report_file: (str | None) = None) -> None:
+    def save_report(self, stats: dict, report_file: str | None = None) -> None:
         if report_file is None:
             import json
         report = {"timestamp": datetime.now(tz=UTC).isoformat(), "statistics": stats}

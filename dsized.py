@@ -46,7 +46,7 @@ def download_file(url: str, dest_dir: Path) -> None:
         print(f"Failed to download {url}: {e}")
 
 
-def process_url(url: str, download_dir: (Path | None) = None) -> str:
+def process_url(url: str, download_dir: Path | None = None) -> str:
     try:
         size = fetch_content_length(url)
         if size is None:

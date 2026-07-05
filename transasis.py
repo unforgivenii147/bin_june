@@ -27,7 +27,7 @@ def translate_text(text: str):
         return text
 
 
-def translate_file(filepath: (Path | str)) -> None:
+def translate_file(filepath: Path | str) -> None:
     content = Path(filepath).read_text(encoding="utf-8")
     if not non_english_pattern.search(content):
         print(f"No non-English content found in {filepath}, skipping.")

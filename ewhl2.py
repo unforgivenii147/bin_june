@@ -134,10 +134,8 @@ def analyze_wheels(source_dir, dest_dir_name: str = "empty_wheels", check_instal
     print(f"Valid wheels: {len(valid_wheels)}")
     print(f"Empty wheels: {len(empty_wheels)}")
     if installed_empty_wheels:
-        print(
-            f"""
-⚠ CRITICAL: {len(installed_empty_wheels)} empty wheels correspond to INSTALLED packages!"""
-        )
+        print(f"""
+⚠ CRITICAL: {len(installed_empty_wheels)} empty wheels correspond to INSTALLED packages!""")
         for item in installed_empty_wheels:
             print(f"  - {item['wheel'].name} -> {item['package']}=={item['version']}")
         print("\nRECOMMENDATIONS:")
@@ -150,16 +148,12 @@ def analyze_wheels(source_dir, dest_dir_name: str = "empty_wheels", check_instal
     if empty_wheels:
         print(f"\nFound {len(empty_wheels)} empty wheel(s) total")
         if installed_empty_wheels:
-            response = input(
-                """
-Some empty wheels are INSTALLED. Move ONLY the uninstalled empty wheels? (y/n): """
-            )
+            response = input("""
+Some empty wheels are INSTALLED. Move ONLY the uninstalled empty wheels? (y/n): """)
             wheels_to_move = [w for w in empty_wheels if w not in [item["wheel"] for item in installed_empty_wheels]]
         else:
-            response = input(
-                f"""
-Move all {len(empty_wheels)} empty wheels to '{dest_dir_name}/'? (y/n): """
-            )
+            response = input(f"""
+Move all {len(empty_wheels)} empty wheels to '{dest_dir_name}/'? (y/n): """)
             wheels_to_move = empty_wheels if response.lower() == "y" else []
         if wheels_to_move:
             dest_path.mkdir(exist_ok=True)

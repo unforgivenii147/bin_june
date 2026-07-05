@@ -9,7 +9,7 @@ from dh import get_file_age
 EXCLUDED_DIRS = {".git", "__pycache__"}
 
 
-def format_time(ts: (float | str)) -> str:
+def format_time(ts: float | str) -> str:
     return datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
 
 

@@ -191,7 +191,7 @@ class JalaliDate:
 
 
 class JalaliCalendar:
-    def __init__(self, year: (int | None) = None, month: (int | None) = None) -> None:
+    def __init__(self, year: int | None = None, month: int | None = None) -> None:
         today = JalaliDate.today()
         self.year = year if year is not None else today.year
         self.month = month if month is not None else today.month
@@ -302,7 +302,7 @@ class JalaliDateFormatter:
         return output.replace("%S", f"{now.second:02d}")
 
 
-def jcal(month: (int | None) = None, year: (int | None) = None, language: str = "en") -> str:
+def jcal(month: int | None = None, year: int | None = None, language: str = "en") -> str:
     if year is None or month is None:
         today = JalaliDate.today()
         if year is None:
@@ -313,7 +313,7 @@ def jcal(month: (int | None) = None, year: (int | None) = None, language: str = 
     return calendar.print_month(language=language)
 
 
-def jdate(fmt: (str | None) = None, language: str = "en") -> str:
+def jdate(fmt: str | None = None, language: str = "en") -> str:
     jdate, now = JalaliDate.today_with_time()
     if fmt is None:
         fmt = "%A %d %B %Y %H:%M:%S"

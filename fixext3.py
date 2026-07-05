@@ -122,7 +122,7 @@ def get_current_extension(filepath: Path) -> str | None:
     return filepath.suffix.lower()
 
 
-def find_files_recursively(directory: Path, ignored_dirs: (list[str] | None) = None, follow_symlinks: bool = False):
+def find_files_recursively(directory: Path, ignored_dirs: list[str] | None = None, follow_symlinks: bool = False):
     if ignored_dirs is None:
         ignored_dirs = [".git", "__pycache__", "node_modules", ".venv", "venv"]
     for item in directory.rglob("*"):
@@ -210,10 +210,8 @@ def detect_and_fix_mismatches(
                     print(f"  ERROR renaming '{op['source']}' to '{op['destination']}': {e}")
                 except Exception as e:
                     print(f"  UNEXPECTED ERROR renaming '{op['source']}' to '{op['destination']}': {e}")
-            print(
-                f"""
-Successfully renamed {renamed_count} out of {len(rename_operations)} planned operations."""
-            )
+            print(f"""
+Successfully renamed {renamed_count} out of {len(rename_operations)} planned operations.""")
         else:
             print("Rename operation cancelled by user.")
     print("\n--- Script Finished ---")

@@ -76,7 +76,5 @@ if __name__ == "__main__":
     print("docstrings, and whitespace. It DOES NOT perform aggressive variable renaming")
     print("due to the high risk of breaking code and reducing AI understandability.")
     print("Please ensure you have backups before proceeding.")
-    print(
-        """
-Script finished. No files were modified by default. Uncomment 'compress_python_files_in_directory('.')' to run."""
-    )
+    print("""
+Script finished. No files were modified by default. Uncomment 'compress_python_files_in_directory('.')' to run.""")

@@ -64,7 +64,7 @@ def get_package_info(package):
         return package, 0, False
 
 
-def process_packages_parallel(packages, threshold_bytes: int, num_processes: (int | None) = None):
+def process_packages_parallel(packages, threshold_bytes: int, num_processes: int | None = None):
     if num_processes is None:
         num_processes = min(cpu_count(), 8)
     print(f"🚀 Using {num_processes} parallel processes...")
@@ -94,7 +94,7 @@ def process_packages_parallel(packages, threshold_bytes: int, num_processes: (in
         return large_packages, all_packages, no_size, total
 
 
-def save_json_results(data, filename: str, threshold_mb: (float | int), include_all=False) -> bool:
+def save_json_results(data, filename: str, threshold_mb: float | int, include_all=False) -> bool:
     output = {
         "metadata": {
             "threshold_mb": threshold_mb,

@@ -73,7 +73,7 @@ def load_mapping(path: str) -> dict[str, str]:
     return out
 
 
-def extract_from_ast(code: str, path_hint: (str | None) = None) -> dict[str, set[str]]:
+def extract_from_ast(code: str, path_hint: str | None = None) -> dict[str, set[str]]:
     result = {"imports": set(), "star_modules": set(), "dynamic": set(), "relative": set()}
     try:
         tree = ast.parse(code)
@@ -112,7 +112,7 @@ def extract_from_ast(code: str, path_hint: (str | None) = None) -> dict[str, set
     return result
 
 
-def process_py_file_content(code: str, path_hint: (str | None) = None) -> dict[str, list[str]]:
+def process_py_file_content(code: str, path_hint: str | None = None) -> dict[str, list[str]]:
     d = extract_from_ast(code, path_hint)
     return {k: sorted(v) for k, v in d.items()}
 

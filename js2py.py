@@ -32,7 +32,7 @@ def convert_with_js2py(js_file: Path, outfile: Path) -> bool:
         return False, f"js2py conversion error: {e!s}"
 
 
-def convert_with_openai(js_code: str, api_key: (str | None) = None) -> tuple[bool, str]:
+def convert_with_openai(js_code: str, api_key: str | None = None) -> tuple[bool, str]:
     try:
         import openai
     except ImportError:
@@ -101,7 +101,7 @@ def simple_js_to_python(js_code: str) -> str:
 
 
 def convert_file(
-    input_file: Path, output_file: (Path | None) = None, method: str = "js2py", api_key: (str | None) = None
+    input_file: Path, output_file: Path | None = None, method: str = "js2py", api_key: str | None = None
 ) -> bool:
     try:
         js_code = Path(input_file).read_text(encoding="utf-8")

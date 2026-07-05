@@ -13,7 +13,7 @@ def get_file_age(filepath: str) -> float:
     return current_time - file_creation_time
 
 
-def move_recent_files(start_dir: (Path | str) = ".") -> None:
+def move_recent_files(start_dir: Path | str = ".") -> None:
     target_dir = os.path.join(start_dir, "5min")
     Path(target_dir).mkdir(exist_ok=True, parents=True)
     moved_count = 0

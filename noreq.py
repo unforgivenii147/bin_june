@@ -71,7 +71,7 @@ def process_tar(path: str) -> None:
     shutil.rmtree(tmp_dir)
 
 
-def dispatch_archive(path: (str | Path)) -> None:
+def dispatch_archive(path: str | Path) -> None:
     if not is_valid_archive(path):
         print(f"{path} is not valid archive")
         return

@@ -71,7 +71,7 @@ def find_extensions(root: Path) -> list[str]:
 def generate_setup_py(meta: dict, extensions: list[str], entry_points: dict[str, list[str]]) -> str:
     ext_block = (
         "from setuptools import Extension\n\next_modules = [\n"
-        + "\n".join((f'''    Extension("{m}", sources=["{m.replace(".", "/")}.*"]),''' for m in extensions))
+        + "\n".join((f"""    Extension("{m}", sources=["{m.replace(".", "/")}.*"]),""" for m in extensions))
         + "\n]\n"
         if extensions
         else "ext_modules = []\n"
@@ -86,7 +86,7 @@ def generate_setup_py(meta: dict, extensions: list[str], entry_points: dict[str,
             formatted += "        ],\n"
         formatted += "    }"
         ep_block = f"    entry_points={formatted},\n"
-    return f'''from setuptools import setup, find_packages\n{ext_block}\nsetup(\n    name="{meta["name"]}",\n    version="{meta["version"]}",\n    description="{meta["summary"]}",\n    packages=find_packages() or ["."],\n    install_requires={meta["install_requires"]},\n    ext_modules=ext_modules,\n{ep_block})\n'''
+    return f"""from setuptools import setup, find_packages\n{ext_block}\nsetup(\n    name="{meta["name"]}",\n    version="{meta["version"]}",\n    description="{meta["summary"]}",\n    packages=find_packages() or ["."],\n    install_requires={meta["install_requires"]},\n    ext_modules=ext_modules,\n{ep_block})\n"""
 
 
 def generate_pyproject_toml() -> str:

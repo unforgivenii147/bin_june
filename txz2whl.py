@@ -8,7 +8,7 @@ from pathlib import Path
 from dh import get_files, mpf3, unique_path
 
 
-def process_file(path: (str | Path)) -> None:
+def process_file(path: str | Path) -> None:
     path = Path(path)
     new_name = ""
     if path.name.endswith(".txz"):

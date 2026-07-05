@@ -227,8 +227,8 @@ Platform: UNKNOWN
 class VenvRepacker:
     def __init__(
         self,
-        site_packages_dir: (str | None) = None,
-        output_dir: (str | None) = None,
+        site_packages_dir: str | None = None,
+        output_dir: str | None = None,
         verbose: bool = False,
         dry_run: bool = False,
     ) -> None:

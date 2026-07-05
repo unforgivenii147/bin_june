@@ -481,14 +481,12 @@ def main():
     parser = argparse.ArgumentParser(
         description="Find and fix missing stdlib imports in Python files",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=textwrap.dedent(
-            """
+        epilog=textwrap.dedent("""
             Examples:
               python find_missing_imports.py
               python find_missing_imports.py --autofix
               python find_missing_imports.py --workers 8
-        """
-        ),
+        """),
     )
     parser.add_argument("-a", "--autofix", action="store_true", help="Automatically add missing imports")
     parser.add_argument(

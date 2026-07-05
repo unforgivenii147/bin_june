@@ -33,8 +33,7 @@ if __name__ == "__main__":
     import sys
 
     def usage():
-        sys.stderr.write(
-            f"""SYNOPSIS: {sys.argv[0]} [ahash|phash|dhash|...] [<directory>]
+        sys.stderr.write(f"""SYNOPSIS: {sys.argv[0]} [ahash|phash|dhash|...] [<directory>]
 
 Identifies similar images in the directory.
 
@@ -48,8 +47,7 @@ Method:
   crop-resistant: Crop-resistant hash
 
 (C) Johannes Buchner, 2013-2017
-"""
-        )
+""")
         sys.exit(1)
 
     hashmethod = sys.argv[1] if len(sys.argv) > 1 else usage()

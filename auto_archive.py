@@ -157,7 +157,7 @@ def best_for_algo(
     return name, ext, best_level, best_compressed
 
 
-def process_file(src: Path, out_dir: (Path | None) = None) -> Path | None:
+def process_file(src: Path, out_dir: Path | None = None) -> Path | None:
     log.info("Processing: %s (%s)", src, human(src.stat().st_size))
     try:
         data = read_file(src)

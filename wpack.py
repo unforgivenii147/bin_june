@@ -25,7 +25,7 @@ def find_dist_info_dir(pkg_dir: Path) -> Path | None:
     return candidates[0]
 
 
-def create_wheel_for_dir_sync(pkg_dir: Path, dest_dir: (Path | None) = None) -> tuple[str, bool]:
+def create_wheel_for_dir_sync(pkg_dir: Path, dest_dir: Path | None = None) -> tuple[str, bool]:
     dist_info = find_dist_info_dir(pkg_dir)
     if dist_info is None:
         print(f"Skipping {pkg_dir}: no *.dist-info dir found.")
@@ -53,7 +53,7 @@ def create_wheel_for_dir_sync(pkg_dir: Path, dest_dir: (Path | None) = None) -> 
         return wheel_filename, False
 
 
-async def process_package_async(pkg_dir: Path, dest_dir: (Path | None), task_queue: asyncio.Queue):
+async def process_package_async(pkg_dir: Path, dest_dir: Path | None, task_queue: asyncio.Queue):
     loop = asyncio.get_running_loop()
     wheel_filename, success = await loop.run_in_executor(None, create_wheel_for_dir_sync, pkg_dir, dest_dir)
     await task_queue.put_nowait((wheel_filename, success))

@@ -131,8 +131,7 @@ class EntityExtractor(ast.NodeVisitor):
 def create_database() -> None:
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute(
-        """
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS entities (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT,
@@ -144,8 +143,7 @@ def create_database() -> None:
             is_class BOOLEAN,
             is_function BOOLEAN
         )
-    """
-    )
+    """)
     conn.commit()
     conn.close()
 

@@ -34,8 +34,8 @@ def extract_frames(
     video_path: str,
     sample_fps: float = 2.0,
     subtitle_top_ratio: float = 0.75,
-    start_time: (float | None) = None,
-    end_time: (float | None) = None,
+    start_time: float | None = None,
+    end_time: float | None = None,
 ) -> list[tuple[float, np.ndarray]]:
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
@@ -140,9 +140,9 @@ def extract_burned_subs_ocr(
     output_srt_path: str,
     lang: str = "fas",
     sample_fps: float = 2.0,
-    workers: (int | None) = None,
-    start_time: (float | None) = None,
-    end_time: (float | None) = None,
+    workers: int | None = None,
+    start_time: float | None = None,
+    end_time: float | None = None,
     resume: bool = False,
 ) -> None:
     if workers is None:

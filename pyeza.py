@@ -12,7 +12,7 @@ from argparse import Namespace
 from pathlib import Path
 
 
-def colorize(text: str, mode: int, link_target: (str | None) = None) -> str:
+def colorize(text: str, mode: int, link_target: str | None = None) -> str:
     if stat.S_ISDIR(mode):
         return f"\x1b[34;1m{text}\x1b[0m"
     if stat.S_ISLNK(mode):
@@ -163,7 +163,7 @@ def output_columns(entries: list[Entry], icons=False, colors=True, width=None) -
         print("".join(padded))
 
 
-def print_tree(base: (str | Path), prefix: str = "", icons=False, colors=True) -> None:
+def print_tree(base: str | Path, prefix: str = "", icons=False, colors=True) -> None:
     base_path = Path(base)
     try:
         entries = sorted(list(base_path.iterdir()), key=lambda e: e.name)
@@ -188,7 +188,7 @@ def print_tree(base: (str | Path), prefix: str = "", icons=False, colors=True) -
             print_tree(entry, new_prefix, icons, colors)
 
 
-def list_recursive(base: (str | Path), args: Namespace, depth=0) -> None:
+def list_recursive(base: str | Path, args: Namespace, depth=0) -> None:
     base_path = Path(base)
     if depth > 0:
         print(f"\n{base}:")

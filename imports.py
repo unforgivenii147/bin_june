@@ -208,10 +208,8 @@ def main() -> None:
     all_local_packages = get_local_packages(cwd)
     subdirs = get_valid_subdirs(cwd)
     if args.save_separate and subdirs:
-        print(
-            f"""
-📁 Found {len(subdirs)} subdirectories with Python files - generating separate requirements files"""
-        )
+        print(f"""
+📁 Found {len(subdirs)} subdirectories with Python files - generating separate requirements files""")
         print("=" * 60)
         total_imports = set()
         created_count = 0
