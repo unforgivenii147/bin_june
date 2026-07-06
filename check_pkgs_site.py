@@ -2,7 +2,7 @@
 
 
 """
-Simple package duplicate checker for Termux (Python 3.13+)
+Simple package duplicate checker for Termux (Python 3.12+)
 """
 
 import site

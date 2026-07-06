@@ -3,7 +3,7 @@
 
 """
 Repack site-packages packages into wheel files.
-Works in Termux with Python 3.13.
+Works in Termux with Python 3.12.
 """
 
 import argparse

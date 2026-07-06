@@ -20,7 +20,7 @@ def get_pypi_json(package: str, timeout: int = 10) -> Optional[Dict]:
         return None
 
 
-def find_wheel_url(package_data: Dict, python_version: str = "3.13") -> Optional[Tuple[str, int]]:
+def find_wheel_url(package_data: Dict, python_version: str = "3.12") -> Optional[Tuple[str, int]]:
     releases = package_data.get("releases", {})
     if not releases:
         return None
@@ -77,7 +77,7 @@ def download_file(url: str, destination: pathlib.Path, expected_size: int, chunk
         return False, f"Failed: {str(e)}"
 
 
-def download_package(package: str, wheels_dir: pathlib.Path, python_version: str = "3.13") -> Tuple[str, bool, str]:
+def download_package(package: str, wheels_dir: pathlib.Path, python_version: str = "3.12") -> Tuple[str, bool, str]:
     print(f"🔍 Fetching info for: {package}")
     package_data = get_pypi_json(package)
     if not package_data:
@@ -100,7 +100,7 @@ def main():
 
     parser = argparse.ArgumentParser(description="Download Python packages from PyPI as wheels")
     parser.add_argument("packages", nargs="+", help="Package name(s) to download")
-    parser.add_argument("--python", default="3.13", help="Python version (default: 3.13)")
+    parser.add_argument("--python", default="3.12", help="Python version (default: 3.12)")
     parser.add_argument("--workers", type=int, default=4, help="Number of download workers (default: 4)")
     parser.add_argument(
         "--output", type=pathlib.Path, default=pathlib.Path("wheels"), help="Output directory (default: wheels)"

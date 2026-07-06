@@ -151,7 +151,7 @@ def download(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Modern wget clone in Python 3.13+",
+        description="Modern wget clone in Python 3.12+",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:

@@ -459,6 +459,7 @@ def main():
     output_path = Path(args.output)
     with output_path.open("w") as f:
         for package in sorted_packages:
+            print(f" -  {package}")
             f.write(f"{package}\n")
     logger.info(f"Requirements written to {args.output}")
     if args.verbose:
