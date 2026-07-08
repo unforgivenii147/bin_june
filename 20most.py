@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 import re
@@ -10,7 +10,8 @@ from dh import get_nobinary
 
 
 def extract_words(text: str):
-    return re.findall("[a-z]{3,}", text.lower())
+    splt = text.strip().lower().replace("/", " ")
+    return re.findall("[a-z]{3,}", splt)
 
 
 def process_file(path: Path) -> None:

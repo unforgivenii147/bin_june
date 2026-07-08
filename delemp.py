@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 import sys
@@ -7,7 +7,7 @@ from pathlib import Path
 from dh import cprint, fsz, get_nobinary, gsz, mpf3
 
 
-def process_file(path: str | Path) -> int:
+def process_file(path: (str | Path)) -> int:
     path = Path(path)
     if path.is_symlink() or path.suffix == ".bak" or gsz(path) == 0:
         return 0

@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 import re
@@ -117,7 +117,7 @@ def unique_path(path: Path) -> Path:
     return new_path
 
 
-def process_file(path: str | Path) -> None:
+def process_file(path: (str | Path)) -> None:
     path = Path(path)
     title = extract_title(path)
     if not title:

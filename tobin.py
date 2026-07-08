@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 import sys
@@ -9,7 +9,7 @@ CHUNK_SIZE = 32768
 dest = Path.home() / "sbin"
 
 
-def get_sha256(path: str | Path) -> str:
+def get_sha256(path: (str | Path)) -> str:
     path = Path(path)
     h = sha256()
     with path.open("rb") as f:

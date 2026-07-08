@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 """
@@ -56,8 +56,8 @@ class ConversionArgs:
 
 
 def convert_yaml_to_json(
-    yaml_input: str | TextIO,
-    indent: int | None = None,
+    yaml_input: (str | TextIO),
+    indent: (int | None) = None,
     compact: bool = False,
     sort_keys: bool = False,
     ensure_ascii: bool = True,

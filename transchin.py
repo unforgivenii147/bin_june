@@ -1,15 +1,15 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 import re
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from deep_translator import GoogleTranslator
-from dh import is_text_file
-from fastwalk import walk_files
+from dh import get_nobinary
 
 DIRECTORY = "."
 CHUNK_SIZE = 2000
+
 non_english_pattern = re.compile("[^\\x00-\\x7F]")
 
 
@@ -38,7 +38,7 @@ def translate_file(path: Path) -> None:
     if not non_english_pattern.search(content):
         return
     chunks = split_into_chunks(content, CHUNK_SIZE)
-    with ThreadPoolExecutor(max_workers=8) as executor:
+    with ThreadPoolExecutor(max_workers=16) as executor:
         translated_chunks = list(executor.map(translate_chunk, chunks))
     translated_text = "".join(translated_chunks)
     try:
@@ -49,10 +49,9 @@ def translate_file(path: Path) -> None:
 
 
 def process_directory(directory: str) -> None:
-    for pth in walk_files(directory):
-        path = Path(pth)
-        if path.is_file() and is_text_file(path):
-            translate_file(path)
+    files = get_nobinary(directory)
+    for f in files:
+        translate_file(f)
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 import re
@@ -32,7 +32,9 @@ def process_directory(directory: Path) -> None:
 
 if __name__ == "__main__":
     cwd = Path()
-    print(f"""Starting to remove meta tags from HTML files in '{cwd.resolve()}' and its subdirectories...
-""")
+    print(
+        f"""Starting to remove meta tags from HTML files in '{cwd.resolve()}' and its subdirectories...
+"""
+    )
     process_directory(cwd)
     print("\nFinished processing. Meta tags have been removed from applicable HTML files.")

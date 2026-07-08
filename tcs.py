@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 import subprocess
@@ -33,7 +33,7 @@ def selective_copy(path: Path, lines: list[str]) -> None:
     send_to_process(content)
 
 
-def copy_lines_to_clipboard(path: str | Path, start_line: int | None = None, end_line: int | None = None) -> None:
+def copy_lines_to_clipboard(path: (str | Path), start_line: (int | None) = None, end_line: (int | None) = None) -> None:
     content = ""
     path = Path(path)
     if not path.is_file():

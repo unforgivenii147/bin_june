@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 """
 Recursively extract embedded base64 data URIs from .css, .js, and .html files
 in the current directory, save the decoded assets to an `assets/` folder,

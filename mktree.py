@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 import re
 from pathlib import Path
 from multiprocessing import Pool, cpu_count
@@ -35,8 +35,10 @@ class DirectoryBuilder:
 
     def read_from_photo(self, image_path: str) -> List[str]:
         if not PHOTO_SUPPORT:
-            raise ImportError("""Photo support requires: pip install Pillow pytesseract
-Also install tesseract: https://github.com/UB-Mannheim/tesseract/wiki""")
+            raise ImportError(
+                """Photo support requires: pip install Pillow pytesseract
+Also install tesseract: https://github.com/UB-Mannheim/tesseract/wiki"""
+            )
         try:
             image = Image.open(image_path)
             text = pytesseract.image_to_string(image)

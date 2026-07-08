@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 """
@@ -44,7 +44,7 @@ def human(n: int) -> str:
     return f"{n:.1f} TB"
 
 
-def compress_file(src: Path, dry_run: bool, verbose: bool, level: int | None = None) -> dict:
+def compress_file(src: Path, dry_run: bool, verbose: bool, level: (int | None) = None) -> dict:
     result = {"src": src, "ok": False, "msg": ""}
     dst = src.with_suffix(src.suffix + BROTLI_EXT)
     if dst.exists():

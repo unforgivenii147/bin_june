@@ -1,9 +1,9 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 import datetime
 from dh import georgian_to_hijri
-from print_persian import print_persian as pp
+from faprint import faprint
 
 
 def get_current_ymd() -> tuple[int, int, int]:
@@ -12,4 +12,4 @@ def get_current_ymd() -> tuple[int, int, int]:
 
 
 y, m, d = get_current_ymd()
-print(pp(f"{georgian_to_hijri(y, m, d)}"))
+faprint(f"{georgian_to_hijri(y, m, d)}")

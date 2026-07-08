@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 import re
@@ -20,7 +20,7 @@ def size_to_mb(size_str: str) -> float | None:
     return None
 
 
-def is_valid_movie(filename: str, size_mb: float | None) -> bool:
+def is_valid_movie(filename: str, size_mb: (float | None)) -> bool:
     if not filename.lower().endswith(".mkv"):
         return False
     if not ("480p" in filename.lower() or "720p" in filename.lower()):

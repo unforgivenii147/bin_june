@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 """
@@ -54,8 +54,10 @@ def delete_old_commits(days: int) -> None:
             print(f"  ... and {len(commits_to_delete) - preview_count} more")
         new_head_commit = commits_to_keep[0]
         print(f"\nNew HEAD will be: {new_head_commit.hexsha[:8]} - {new_head_commit.summary}")
-        response = input("""
-This operation will PERMANENTLY DELETE these commits. Continue? (yes/no): """)
+        response = input(
+            """
+This operation will PERMANENTLY DELETE these commits. Continue? (yes/no): """
+        )
         if response.lower() != "yes":
             print("Operation cancelled.")
             return
@@ -66,8 +68,10 @@ This operation will PERMANENTLY DELETE these commits. Continue? (yes/no): """)
         repo.git.reset("--hard", new_head_commit.hexsha)
         print(f"\nSuccessfully deleted {len(commits_to_delete)} commits older than {days} days.")
         print(f"Backup branch '{backup_branch}' contains the original commits.")
-        print("""
-NOTE: If you've already pushed the old commits to a remote, you'll need to force push:""")
+        print(
+            """
+NOTE: If you've already pushed the old commits to a remote, you'll need to force push:"""
+        )
         print(f"  git push --force origin {current_branch}")
         print("\nTo restore the original commits:")
         print(f"  git reset --hard {backup_branch}")

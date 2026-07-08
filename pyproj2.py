@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 import argparse
@@ -48,11 +48,13 @@ def create_project_structure(pkg: str, author: str, email: str, url: str, simple
     ])
     setup_cfg.write_text("\n".join(cfg_content))
     pyproject_path = cwd / "pyproject.toml"
-    pyproject_path.write_text("""[build-system]
+    pyproject_path.write_text(
+        """[build-system]
 requires = ["setuptools>=69.0", "wheel"]
 build-backend = "setuptools.build_meta\"
 [project.scripts]
-""")
+"""
+    )
     print(f"Project '{pkg}' initialized in {cwd}")
 
 

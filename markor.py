@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 import operator
@@ -15,7 +15,7 @@ class GUIFramework:
         self.session_id = None
         self.dialogs = {}
 
-    def show_dialog(self, title: str, message: str, buttons: list[str] | None = None) -> int:
+    def show_dialog(self, title: str, message: str, buttons: (list[str] | None) = None) -> int:
         if buttons is None:
             buttons = ["OK"]
         print(f"\n{'=' * 50}")
@@ -42,7 +42,7 @@ class GUIFramework:
             return "\n".join(lines) if lines else None
         return input("Input: ").strip() or None
 
-    def show_file_picker(self, initial_path: str | None = None) -> str | None:
+    def show_file_picker(self, initial_path: (str | None) = None) -> str | None:
         if initial_path is None:
             initial_path = str(Path.home())
         return input(f"Enter file path (starting from {initial_path}): ").strip() or None
@@ -57,7 +57,7 @@ class GUIFramework:
         choice = input("Select: ").strip()
         return int(choice) if choice.isdigit() else -1
 
-    def show_snackbar(self, message: str, action: str | None = None) -> None:
+    def show_snackbar(self, message: str, action: (str | None) = None) -> None:
         msg = f"[Snackbar] {message}"
         if action:
             msg += f" [{action}]"
@@ -194,7 +194,7 @@ class Document:
     def get_quick_actions(self) -> list[str]:
         return self.format_handler.get_format_actions()
 
-    def insert_text(self, text: str, position: int | None = None) -> None:
+    def insert_text(self, text: str, position: (int | None) = None) -> None:
         if position is None:
             position = len(self.content)
         self.content = self.content[:position] + text + self.content[position:]
@@ -227,13 +227,13 @@ class Document:
 
 
 class FileManager:
-    def __init__(self, root_path: str | None = None) -> None:
+    def __init__(self, root_path: (str | None) = None) -> None:
         if root_path is None:
             root_path = str(Path.home() / "Documents" / "Markor")
         self.root_path = Path(root_path)
         self.root_path.mkdir(parents=True, exist_ok=True)
 
-    def create_document(self, name: str, format_type: str = "markdown", parent_dir: str | None = None) -> Document:
+    def create_document(self, name: str, format_type: str = "markdown", parent_dir: (str | None) = None) -> Document:
         file_path = self.root_path / f"{name}.md" if parent_dir is None else self.root_path / parent_dir / f"{name}.md"
         doc = Document(str(file_path), format_type=format_type)
         doc.save()
@@ -261,7 +261,7 @@ class FileManager:
             return True
         return False
 
-    def list_documents(self, folder: str | None = None, recursive: bool = False) -> list[dict[str, Any]]:
+    def list_documents(self, folder: (str | None) = None, recursive: bool = False) -> list[dict[str, Any]]:
         search_path = self.root_path / folder if folder else self.root_path
         if not search_path.exists():
             return []
@@ -278,12 +278,12 @@ class FileManager:
         ]
         return sorted(documents, key=operator.itemgetter("name"))
 
-    def create_folder(self, name: str, parent_dir: str | None = None) -> bool:
+    def create_folder(self, name: str, parent_dir: (str | None) = None) -> bool:
         folder_path = self.root_path / parent_dir / name if parent_dir else self.root_path / name
         folder_path.mkdir(parents=True, exist_ok=True)
         return True
 
-    def list_folders(self, parent_dir: str | None = None) -> list[str]:
+    def list_folders(self, parent_dir: (str | None) = None) -> list[str]:
         search_path = self.root_path / parent_dir if parent_dir else self.root_path
         if not search_path.exists():
             return []

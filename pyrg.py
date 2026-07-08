@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 import argparse
@@ -44,13 +44,13 @@ def matches_any_glob(path: Path, patterns: Iterable[str]) -> bool:
 
 
 def search_file_text_mode(
-    path: str | Path,
-    regex: re.Pattern | None,
+    path: (str | Path),
+    regex: (re.Pattern | None),
     fixed: str,
     ignore_case: bool,
     show_line_numbers: bool,
     color: bool,
-    max_matches: int | None = None,
+    max_matches: (int | None) = None,
 ) -> tuple[str, list[tuple[int, str, list[tuple[int, int]]]]]:
     matches = []
     path = Path(path)
@@ -100,7 +100,7 @@ def build_argparser() -> argparse.ArgumentParser:
     return p
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(argv: (list[str] | None) = None) -> int:
     cwd = Path.cwd()
     args = build_argparser().parse_args(argv)
     pattern = args.pattern_e or args.pattern

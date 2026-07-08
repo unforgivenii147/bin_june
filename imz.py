@@ -1,11 +1,9 @@
-#!/data/data/com.termux/files/usr/bin/python
-from __future__ import annotations
+#!/data/data/com.termux/files/usr/bin/env python
 import argparse
 import ast
 import contextlib
 import json
 import multiprocessing as mp
-import os
 import re
 import sys
 import tarfile
@@ -24,7 +22,7 @@ def fast_hash(path: Path) -> str:
         stat = path.stat()
         h.update(str(stat.st_size).encode())
         h.update(str(int(stat.st_mtime)).encode())
-        with Path(path).open("rb") as f:
+        with path.open("rb") as f:
             h.update(f.read())
         return h.hexdigest()
     except Exception:
@@ -33,14 +31,14 @@ def fast_hash(path: Path) -> str:
 
 def load_json(path: Path) -> dict:
     try:
-        with Path(path).open(encoding="utf-8", errors="ignore") as f:
+        with path.open(encoding="utf-8", errors="ignore") as f:
             return json.load(f)
     except Exception:
         return {}
 
 
 def save_json(path: Path, obj: dict) -> None:
-    with Path(path).open("w", encoding="utf-8") as f:
+    with path.open("w", encoding="utf-8") as f:
         json.dump(obj, f, indent=2, sort_keys=True)
 
 
@@ -73,7 +71,7 @@ def load_mapping(path: str) -> dict[str, str]:
     return out
 
 
-def extract_from_ast(code: str, path_hint: str | None = None) -> dict[str, set[str]]:
+def extract_from_ast(code: str, path_hint: (str | None) = None) -> dict[str, set[str]]:
     result = {"imports": set(), "star_modules": set(), "dynamic": set(), "relative": set()}
     try:
         tree = ast.parse(code)
@@ -112,7 +110,7 @@ def extract_from_ast(code: str, path_hint: str | None = None) -> dict[str, set[s
     return result
 
 
-def process_py_file_content(code: str, path_hint: str | None = None) -> dict[str, list[str]]:
+def process_py_file_content(code: str, path_hint: (str | None) = None) -> dict[str, list[str]]:
     d = extract_from_ast(code, path_hint)
     return {k: sorted(v) for k, v in d.items()}
 
@@ -127,7 +125,7 @@ def process_py_file(path: Path) -> dict[str, list[str]]:
 
 def process_noext_python_script(path: Path) -> dict[str, list[str]]:
     try:
-        with Path(path).open(encoding="utf-8", errors="ignore") as f:
+        with path.open(encoding="utf-8", errors="ignore") as f:
             first = f.readline()
             if "#!" not in first or "python" not in first.lower():
                 return {"imports": [], "star_modules": [], "dynamic": [], "relative": []}
@@ -140,7 +138,7 @@ def process_noext_python_script(path: Path) -> dict[str, list[str]]:
 def process_ipynb(path: Path) -> dict[str, list[str]]:
     out = {"imports": [], "star_modules": [], "dynamic": [], "relative": []}
     try:
-        with Path(path).open(encoding="utf-8", errors="ignore") as f:
+        with path.open(encoding="utf-8", errors="ignore") as f:
             nb = json.load(f)
     except Exception:
         return out
@@ -191,7 +189,7 @@ def process_tar_file(path: Path) -> dict[str, list[str]]:
     stars = set()
     dyn = set()
     rel = set()
-    mode = "r:xz" if str(path).endswith(".xz") else "r:gz"
+    mode = "r:xz" if path.suffix == ".xz" else "r:gz"
     try:
         with tarfile.open(path, mode) as t:
             for m in t.getmembers():
@@ -237,17 +235,18 @@ def build_project_module_map(sources: list[str]) -> dict[str, list[str]]:
             continue
         if p.suffix != ".py":
             continue
-        rel = os.path.normpath(path).lstrip("./")
-        parts = rel.split(os.sep)
+        # Normalize path using pathlib
+        rel = p.resolve().relative_to(Path.cwd().resolve())
+        parts = rel.parts
         if parts[-1] == "__init__.py":
             mod = ".".join(parts[:-1]) if parts[:-1] else parts[-2] if len(parts) > 1 else ""
         else:
-            mod = ".".join(parts)[:-3] if rel.endswith(".py") else ".".join(parts)
+            mod = ".".join(parts)[:-3] if rel.name.endswith(".py") else ".".join(parts)
         if not mod:
             continue
         top = mod.split(".", 1)[0]
-        mapping.setdefault(mod, []).append(path)
-        mapping.setdefault(top, [*mapping.get(top, []), path])
+        mapping.setdefault(mod, []).append(str(p))
+        mapping.setdefault(top, [*mapping.get(top, []), str(p)])
     return mapping
 
 
@@ -324,16 +323,15 @@ def resolve_packages(
 
 def scan_sources(ignore_dirs: set[str]) -> list[str]:
     out = []
-    for root, dirs, files in os.walk("."):
-        dirs[:] = [d for d in dirs if d not in ignore_dirs]
-        for f in files:
-            path = os.path.join(root, f)
-            lower = f.lower()
-            if (
-                lower.endswith((".py", ".ipynb", ".whl", ".zip", ".tar.gz", ".tgz", ".tar.xz"))
-                or Path(path).suffix == ""
-            ):
-                out.append(path)
+    cwd = Path.cwd()
+    for path in cwd.rglob("*"):
+        # Check if any parent directory should be ignored
+        if any(part in ignore_dirs for part in path.relative_to(cwd).parts):
+            continue
+        if path.is_file():
+            lower = path.name.lower()
+            if lower.endswith((".py", ".ipynb", ".whl", ".zip", ".tar.gz", ".tgz", ".tar.xz")) or path.suffix == "":
+                out.append(str(path))
     return out
 
 
@@ -377,7 +375,7 @@ def main() -> None:
     cached_results = []
     for path in sources:
         pth = Path(path)
-        key = os.path.normpath(path)
+        key = str(pth.resolve())
         needs = True
         if not args.no_cache and key in cache:
             entry = cache[key]
@@ -400,7 +398,7 @@ def main() -> None:
                 computed_results.append(res)
     if not args.no_cache:
         for path, res in zip(tasks, computed_results, strict=False):
-            key = os.path.normpath(path)
+            key = str(Path(path).resolve())
             try:
                 mtime = Path(path).stat().st_mtime
             except Exception:

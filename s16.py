@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 CHUNKSIZE = 15850
 
@@ -15,9 +15,7 @@ def process_file(path):
                 outpath = path.with_stem(path.stem + "_" + str(part_num))
                 outpath.write_text(chunk, encoding="utf-8")
 
-                print(f"Saved part {part_num} to '{output_path}'")
                 part_num += 1
-        print(f"File splitting complete. {part_num} parts created in '{output_dir}'.")
     except Exception as e:
         print(f"An error occurred during file splitting: {e}")
 

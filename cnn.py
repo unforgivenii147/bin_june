@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 import shutil
 from multiprocessing import Pool, cpu_count
 from pathlib import Path

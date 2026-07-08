@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 """dedup_utils.py
 Usage:
   python dedup_utils.py --copy
@@ -75,13 +75,13 @@ def is_constant_assign(node: ast.Assign) -> bool:
     if not isinstance(node, ast.Assign):
         return False
 
-    def target_ok(t: Name | Tuple) -> bool:
+    def target_ok(t: (Name | Tuple)) -> bool:
         return isinstance(t, ast.Name)
 
     if any(not target_ok(t) for t in node.targets if isinstance(t, (ast.Name, ast.Tuple))):
         return False
 
-    def lit_ok(n: expr | None) -> bool:
+    def lit_ok(n: (expr | None)) -> bool:
         if isinstance(n, ast.Constant):
             return True
         if isinstance(n, (ast.Tuple, ast.List, ast.Set)):

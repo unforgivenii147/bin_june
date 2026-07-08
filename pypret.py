@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 import json
 from pathlib import Path
 import jsbeautifier
@@ -29,7 +29,7 @@ def beautify_code_file(file_path: str, beautify_function, asset_type: str) -> bo
         return False
 
 
-def beautify_files_in_directory(cwd: Path | str = ".") -> None:
+def beautify_files_in_directory(cwd: (Path | str) = ".") -> None:
     processed_count = 0
     errors_count = 0
     beautifier_map = {

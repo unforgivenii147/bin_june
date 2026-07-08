@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 """
 AST-based duplicate definition extractor.
 Finds repeated functions, classes, and constant assignments across all

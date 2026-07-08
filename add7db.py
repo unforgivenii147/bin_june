@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 import base64
 import io
 import os
@@ -27,7 +27,8 @@ def folder_exists_in_db(cursor: Cursor, folder_name):
 
 
 def create_folder_table(cursor: Cursor, folder_name) -> None:
-    cursor.execute(f"""
+    cursor.execute(
+        f"""
         CREATE TABLE IF NOT EXISTS "{folder_name}" (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             filename TEXT NOT NULL,
@@ -36,7 +37,8 @@ def create_folder_table(cursor: Cursor, folder_name) -> None:
             original_size INTEGER DEFAULT 0,
             compressed_size INTEGER DEFAULT 0
         )
-    """)
+    """
+    )
 
 
 def compress_data(data_bytes) -> str | None:

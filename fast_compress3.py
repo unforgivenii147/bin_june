@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 """
@@ -388,8 +388,10 @@ def process_files(file_generator, compress: bool, level: int, threads: int, remo
     else:
         success_count = total - skipped
         if success_count > 0:
-            print(f"""
-✅ Successfully {"compressed" if compress else "decompressed"} {success_count} files!""")
+            print(
+                f"""
+✅ Successfully {"compressed" if compress else "decompressed"} {success_count} files!"""
+            )
             if remove_original:
                 print("   Original files have been removed.")
 

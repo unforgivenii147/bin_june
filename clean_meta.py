@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 import re
@@ -10,7 +10,7 @@ blank_line = "\n"
 IMAGE_RE = re.compile("^\\s*(\\.\\.\\s+image::|:target:|:alt:)", re.IGNORECASE)
 
 
-def process_file(path: str | Path) -> None:
+def process_file(path: (str | Path)) -> None:
     path = Path(path)
     print(f"Processing {path.name}")
     try:

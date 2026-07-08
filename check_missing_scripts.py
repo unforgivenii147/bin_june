@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 """Check for Python packages with missing console scripts in system bin directory."""
@@ -163,8 +163,10 @@ def main():
     except Exception as e:
         print(f"\nError saving report: {e}")
     if packages_with_missing:
-        print(f"""
-⚠️  Found {total_missing} missing script(s) in {len(packages_with_missing)} package(s).""")
+        print(
+            f"""
+⚠️  Found {total_missing} missing script(s) in {len(packages_with_missing)} package(s)."""
+        )
         print("These packages may need to be reinstalled.")
         sys.exit(1)
     else:

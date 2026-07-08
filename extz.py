@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 """
 Script to show various extensions in current directory with total size for each extension.
 Uses pathlib and parallel processing for speedup.

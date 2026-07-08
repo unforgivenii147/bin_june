@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 import itertools
 import os
 import re
@@ -398,8 +398,10 @@ def main() -> None:
     if args.after and getoutput:
         print(getoutput(str(args.after)))
     print(f"\n {'-' * 80} \n Files Processed: {list_of_files}.")
-    print(f"""Number of Files Processed:
-          {len(list_of_files) if isinstance(list_of_files, tuple) else 1}""")
+    print(
+        f"""Number of Files Processed:
+          {len(list_of_files) if isinstance(list_of_files, tuple) else 1}"""
+    )
 
 
 if __name__ in "__main__":

@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 from __future__ import annotations
@@ -60,7 +60,7 @@ def remove_path(path: Path) -> None:
 
 
 class TaskResult:
-    def __init__(self, src: str, dst: str, ok: bool, error: str | None = None) -> None:
+    def __init__(self, src: str, dst: str, ok: bool, error: (str | None) = None) -> None:
         self.src = src
         self.dst = dst
         self.ok = ok

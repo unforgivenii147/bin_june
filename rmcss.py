@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 """
 Remove HTML comments (<!-- ... -->) from HTML and CSS files recursively.
 Processes files in parallel and updates them in-place.

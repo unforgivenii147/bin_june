@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 """
 Termux script creator - Creates executable scripts from clipboard content.
 Archives existing files to ~/isaac/may/scripts/ instead of overwriting.

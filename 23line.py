@@ -1,6 +1,5 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 from pathlib import Path
-from dh import gext
 
 EXT = {".py", ".h", ".c", ".cpp", ".cc", ".cxx", ".hh", ".hpp", ".h", ".hxx"}
 

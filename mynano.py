@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 import readline
@@ -14,7 +14,7 @@ from textual.widgets import Footer, Header, TextEditor
 class BasicEditor(App):
     BINDINGS = [("o", "open_file", "Open"), ("s", "save_file", "Save"), ("q", "app_quit", "Quit")]
 
-    def __init__(self, filename: str | None = None) -> None:
+    def __init__(self, filename: (str | None) = None) -> None:
         super().__init__()
         self.filename = filename
         self.is_dirty = False

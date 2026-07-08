@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 import sys
@@ -26,6 +26,6 @@ def strip_installed_from_requirements(fname: str) -> None:
 
 if __name__ == "__main__":
     fn = "requirements.txt"
-    if len(sys.argv) > 0:
+    if len(sys.argv) > 1:
         fn = sys.argv[1]
     strip_installed_from_requirements(fn)

@@ -1,10 +1,10 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 """
 Recursive file compression/decompression tool using Zstandard.
 Compresses files in current directory recursively, skipping certain extensions and .git folders.
-Uses Path.walk() for memory-efficient traversal (Python 3.12+).
+Uses Path.walk() for memory-efficient traversal (Python 3.13+).
 """
 
 import argparse
@@ -391,9 +391,9 @@ def process_files(file_generator, compress: bool, level: int = 3, threads: int =
         for future in as_completed(futures):
             result = future.result()
             if compress:
-                success, path, output_path, original_size, compressed_size = result
+                (success, path, output_path, original_size, compressed_size) = result
             else:
-                success, path, output_path, decompressed_size, compressed_size = result
+                (success, path, output_path, decompressed_size, compressed_size) = result
             completed += 1
             progress = int(completed / total_files * 50)
             bar = "█" * progress + "░" * (50 - progress)
@@ -417,8 +417,10 @@ def process_files(file_generator, compress: bool, level: int = 3, threads: int =
     else:
         success_count = total_files - skipped
         if success_count > 0:
-            print(f"""
-✅ Successfully {"compressed" if compress else "decompressed"} {success_count} files!""")
+            print(
+                f"""
+✅ Successfully {"compressed" if compress else "decompressed"} {success_count} files!"""
+            )
             if remove_original:
                 print(f"   Original files have been removed.")
         else:

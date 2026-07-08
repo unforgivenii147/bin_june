@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 import imagehash
@@ -13,7 +13,7 @@ def find_similar_images(userpaths, hashfunc=imagehash.average_hash) -> None:
 
     image_filenames = []
     for userpath in userpaths:
-        image_filenames += [os.path.join(userpath, path) for path in os.listdir(userpath) if is_image(path)]
+        image_filenames += [path for path in Path(userpath).iterdir() if is_image(path)]
     images = {}
     for img in sorted(image_filenames):
         try:
@@ -29,11 +29,11 @@ def find_similar_images(userpaths, hashfunc=imagehash.average_hash) -> None:
 
 
 if __name__ == "__main__":
-    import os
     import sys
 
     def usage():
-        sys.stderr.write(f"""SYNOPSIS: {sys.argv[0]} [ahash|phash|dhash|...] [<directory>]
+        sys.stderr.write(
+            f"""SYNOPSIS: {sys.argv[0]} [ahash|phash|dhash|...] [<directory>]
 
 Identifies similar images in the directory.
 
@@ -47,7 +47,8 @@ Method:
   crop-resistant: Crop-resistant hash
 
 (C) Johannes Buchner, 2013-2017
-""")
+"""
+        )
         sys.exit(1)
 
     hashmethod = sys.argv[1] if len(sys.argv) > 1 else usage()

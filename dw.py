@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 import argparse
 import shutil
 import sys
@@ -31,7 +31,7 @@ def get_all_files(folder):
     return files
 
 
-def copy_file(src, dst_folder: Path | None) -> bool:
+def copy_file(src, dst_folder: (Path | None)) -> bool:
     try:
         if dst_folder:
             dst_folder.mkdir(parents=True, exist_ok=True)

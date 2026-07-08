@@ -1,5 +1,5 @@
-#!/data/data/com.termux/files/usr/bin/python
-import os
+#!/data/data/com.termux/files/usr/bin/env python
+from os import getenv
 import sys
 import threading
 import time
@@ -17,7 +17,7 @@ def countdown(timeout: int) -> None:
     sys.stdout.flush()
 
 
-def get_repos(username: str, token: str | None = None, timeout: int = 60) -> list:
+def get_repos(username: str, token: (str | None) = None, timeout: int = 60) -> list:
     countdown_thread = threading.Thread(target=countdown, args=(timeout,), daemon=True)
     countdown_thread.start()
     try:
@@ -56,7 +56,7 @@ def main() -> None:
         sys.exit(1)
     env_path = Path("~/.env").expanduser()
     load_dotenv(env_path)
-    token = os.getenv("GITHUB_TOKEN")
+    token = getenv("GITHUB_TOKEN")
     username = sys.argv[1]
     if token:
         print("Using authenticated access (rate limit: 5000 requests/hour)")

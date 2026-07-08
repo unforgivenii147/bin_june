@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 import subprocess
@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 
-def copy_lines_to_clipboard(filename: str, start_line: int, end_line: int | None = None) -> None:
+def copy_lines_to_clipboard(filename: str, start_line: int, end_line: (int | None) = None) -> None:
     input_file = Path(filename)
     if not input_file.is_file():
         print(f"Error: File not found at '{filename}'", file=sys.stderr)

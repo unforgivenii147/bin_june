@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 from collections import defaultdict
@@ -55,6 +55,8 @@ for folder, imports_list in folder_imports.items():
     header = f"# Auto-generated imports file for folder: {folder}\n"
     out_file.write_text(header + content)
     print(f"✅ saved: {out_file} ({len(imports_list)} files)")
-print(f"""
-✨ Done! Processed {processed_files_count} files in {len(folder_imports)} folder(s)""")
+print(
+    f"""
+✨ Done! Processed {processed_files_count} files in {len(folder_imports)} folder(s)"""
+)
 print(f"📁 Folders: {', '.join(sorted(folders_found))}")

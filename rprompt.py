@@ -1,9 +1,11 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 import io
-import os
 import re
-import tokenize
+import sys
 from pathlib import Path
+
+from dh import cprint, get_pyfiles, mpf3
+import tokenize
 
 
 def remove_comments_and_docstrings(source_code: str) -> str:
@@ -38,8 +40,9 @@ def shorten_variable_name(name):
     return "".join([char for char in name if char not in vowels])
 
 
-def compress_python_file_aggressively(filepath: str) -> None:
-    content = Path(filepath).read_text(encoding="utf-8")
+def process_file(path) -> None:
+    path = Path(path)
+    content = path.read_text(encoding="utf-8")
     content_no_comments = remove_comments_and_docstrings(content)
     lines = content_no_comments.splitlines()
     non_empty_lines = [line.strip() for line in lines if line.strip()]
@@ -57,24 +60,30 @@ def compress_python_file_aggressively(filepath: str) -> None:
     content_no_multiline_strings = re.sub(r"'''.*?'''|\"\"\".*?\"\"\"", "", content, flags=re.DOTALL)
     content_no_comments_single = re.sub("#.*", "", content_no_multiline_strings)
     lines = content_no_comments_single.splitlines()
+
     non_empty_lines = [line.strip() for line in lines if line.strip()]
     final_content = "\n".join(non_empty_lines)
-    Path(filepath).write_text(final_content, encoding="utf-8")
 
-
-def compress_python_files_in_directory(directory: str = ".") -> None:
-    for filename in os.listdir(directory):
-        if filename.endswith(".py"):
-            filepath = os.path.join(directory, filename)
-            print(f"Compressing {filepath} (removing comments, docstrings, whitespace)...")
-            compress_python_file_aggressively(filepath)
-    print("Compression complete.")
+    compressed_path = path.with_stem(path.stem + "_compressed")
+    compressed_path.write_text(final_content, encoding="utf-8")
 
 
 if __name__ == "__main__":
-    print("WARNING: This script will modify your Python files by removing comments,")
-    print("docstrings, and whitespace. It DOES NOT perform aggressive variable renaming")
-    print("due to the high risk of breaking code and reducing AI understandability.")
-    print("Please ensure you have backups before proceeding.")
-    print("""
-Script finished. No files were modified by default. Uncomment 'compress_python_files_in_directory('.')' to run.""")
+    cwd = Path.cwd()
+    args = sys.argv[1:]
+    files = []
+
+    if args:
+        for arg in args:
+            p = Path(arg)
+            if p.is_file():
+                files.append(p)
+            elif p.is_dir():
+                files.extend(get_pyfiles(p))
+    else:
+        files = get_pyfiles(cwd)
+    if len(files) == 1:
+        process_file(files[0])
+        sys.exit(1)
+
+    mpf3(process_file, files)

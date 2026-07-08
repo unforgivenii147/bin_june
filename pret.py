@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 import sys
@@ -6,7 +6,7 @@ from pathlib import Path
 from dh import get_files, mpf3, runcmd
 
 
-def process_file(path: str | Path) -> tuple[bool, Path]:
+def process_file(path: (str | Path)) -> tuple[bool, Path]:
     path = Path(path)
     if not path.exists() or not path.stat().st_size:
         return False, path

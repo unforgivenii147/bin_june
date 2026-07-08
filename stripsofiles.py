@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 import time
@@ -22,7 +22,7 @@ class BatchStripper:
 
     @staticmethod
     def strip_by_extension(
-        directory: str, extensions: list[str] | None = None, verbose: bool = False, verify: bool = True
+        directory: str, extensions: (list[str] | None) = None, verbose: bool = False, verify: bool = True
     ) -> dict:
         if extensions is None:
             e = [".so", ".so.1", ".so.6"]
@@ -38,7 +38,7 @@ class BatchStripper:
 
     @staticmethod
     def strip_exclude_patterns(
-        directory: str, exclude_patterns: list[str] | None = None, verbose: bool = False, verify: bool = True
+        directory: str, exclude_patterns: (list[str] | None) = None, verbose: bool = False, verify: bool = True
     ) -> dict:
         if exclude_patterns is None:
             exclude_patterns = ["test", "debug", "profile"]

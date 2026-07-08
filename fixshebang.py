@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 """
 Change Python shebang in all Python files to Termux path.
 If a file has no shebang, add one at the beginning.
@@ -11,7 +11,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 import sys
 from typing import Optional, Tuple
 
-NEW_SHEBANG = "#!/data/data/com.termux/files/usr/bin/python"
+NEW_SHEBANG = "#!/data/data/com.termux/files/usr/bin/env python"
 SHEBANG_PATTERN = re.compile("^#!.*python[23]?(?:\\.\\d+)?(?:[ \\t]+.*)?$", re.MULTILINE)
 PYTHON_EXTENSIONS = {".py", ".pyw", ".pyx", ".pxd", ".pyi"}
 COMMON_PYTHON_NAMES = {

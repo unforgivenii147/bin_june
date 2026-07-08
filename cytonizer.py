@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 from os import chdir as os_chdir
 import sys
 from pathlib import Path

@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 """Commit all files in current directory to a local git repository.
@@ -227,8 +227,10 @@ def main() -> None:
     if repo.remotes and args.remote_name in [r.name for r in repo.remotes]:
         push_to_remote(repo, args.remote_name, token)
     elif repo.remotes:
-        print(f"""
-⚠️ Remote '{args.remote_name}' not found. Available remotes: {[r.name for r in repo.remotes]}""")
+        print(
+            f"""
+⚠️ Remote '{args.remote_name}' not found. Available remotes: {[r.name for r in repo.remotes]}"""
+        )
         print("Changes committed locally only.")
     else:
         print("\n⚠️ No remote configured. Changes committed locally only.")

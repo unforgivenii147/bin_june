@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 """
@@ -96,8 +96,10 @@ def report(repeated: Dict[str, List[Tuple[Path, int, List[str]]]], root: Path) -
     for i, (block_text, occurrences) in enumerate(repeated.items(), 1):
         line_count = block_text.count("\n") + 1
         unique_files = {occ[0] for occ in occurrences}
-        print(f"""
---- Block {i} ({len(occurrences)} occurrences in {len(unique_files)} files, {line_count} lines) ---""")
+        print(
+            f"""
+--- Block {i} ({len(occurrences)} occurrences in {len(unique_files)} files, {line_count} lines) ---"""
+        )
         for line in block_text.split("\n"):
             print(f"  {line}")
         print("  Found in:")

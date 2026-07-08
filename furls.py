@@ -333,7 +333,7 @@ def main() -> None:
     found = set()
 
     for p in iter_files(Path(".")):
-        print(f"processing {p.relative_to(Path('.'))}")
+        print(f"processing {p.name}")
         process_path(str(p), max_bytes, exts, found, recursion_limit=args.max_recursion)
 
     if not found:

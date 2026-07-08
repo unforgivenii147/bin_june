@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 import shlex
@@ -11,7 +11,7 @@ from dh import cprint
 CHUNK_SIZE = 32768
 
 
-def get_sha256(path: str | Path) -> str:
+def get_sha256(path: (str | Path)) -> str:
     path = Path(path)
     h = sha256()
     with path.open("rb") as f:

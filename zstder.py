@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 """
@@ -56,7 +56,7 @@ def status_line(ok: bool, name: str, elapsed_ms: float, before: int, after: int)
 
 
 def compress_file(
-    src: Path, dry_run: bool, verbose: bool, level: int | None = None, threads: int = DEFAULT_THREADS
+    src: Path, dry_run: bool, verbose: bool, level: (int | None) = None, threads: int = DEFAULT_THREADS
 ) -> dict:
     result = {"src": src, "ok": False, "line": "", "msg": ""}
     dst = src.with_suffix(src.suffix + ZSTD_EXT)

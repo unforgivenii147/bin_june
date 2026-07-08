@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 # !/data/data/com.termux/files/usr/bin/python
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed

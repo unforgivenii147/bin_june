@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 import requests
@@ -57,7 +57,7 @@ def save_to_html(all_bases, output_file="th18_bases.html"):
     )
     if all_bases:
         for i, base in enumerate(all_bases, 1):
-            html_content += f"""            <div class="base-card">\n                <div class="base-title">Base #{i}: {base["title"]}</div>\n                <a href="{base["url"]}" class="base-link" target="_blank">🔗 Open Base</a>\n                <div class="base-source"><strong>Source:</strong> {base["source"]}</div>\n            </div>\n"""
+            html_content += f'''            <div class="base-card">\n                <div class="base-title">Base #{i}: {base["title"]}</div>\n                <a href="{base["url"]}" class="base-link" target="_blank">🔗 Open Base</a>\n                <div class="base-source"><strong>Source:</strong> {base["source"]}</div>\n            </div>\n'''
     else:
         html_content += '            <div class="empty">\n                <p>No TH18 bases found. Make sure your links.txt contains valid URLs and the websites have TH18 bases.</p>\n            </div>\n'
     html_content += '        </div>\n        \n        <div class="footer">\n            <p>Generated automatically | Clash of Clans Base Scraper</p>\n        </div>\n    </div>\n</body>\n</html>\n'

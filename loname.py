@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 import sys
 from multiprocessing import get_context
@@ -13,7 +13,7 @@ def mpf3(func, files):
     p.join()
 
 
-def unique_path(path: Path | str) -> Path:
+def unique_path(path: (Path | str)) -> Path:
     path = Path(path)
     if not path.exists():
         return path

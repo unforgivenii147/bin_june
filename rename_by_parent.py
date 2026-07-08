@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 import os
 from os.path import dirname as dirn
 from os.path import isfile as isf

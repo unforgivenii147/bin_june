@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 import argparse
@@ -13,7 +13,7 @@ from textual.widgets import Footer, Header, Label, Static
 
 
 class DiffLine(Static):
-    def __init__(self, text: str, line_type: str, line_num: int | None = None) -> None:
+    def __init__(self, text: str, line_type: str, line_num: (int | None) = None) -> None:
         self.raw_text = text
         self.line_type = line_type
         self.line_num = line_num

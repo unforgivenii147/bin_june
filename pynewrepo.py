@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 import argparse
@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 class GitHubRepoManager:
-    def __init__(self, repo_name: str | None = None) -> None:
+    def __init__(self, repo_name: (str | None) = None) -> None:
         self.cwd = Path.cwd()
         self.repo_name = repo_name or self.cwd.name
         self.github_username = "unforgivenii147"
@@ -18,7 +18,7 @@ class GitHubRepoManager:
         self.repo_url = f"https://github.com/{self.github_username}/{self.repo_name}.git"
 
     def _run_command(
-        self, command: list, cwd: Path | None = None, capture_output: bool = False
+        self, command: list, cwd: (Path | None) = None, capture_output: bool = False
     ) -> tuple[int, str, str]:
         try:
             result = subprocess.run(command, check=False, cwd=cwd or self.cwd, capture_output=capture_output, text=True)
@@ -96,15 +96,17 @@ class GitHubRepoManager:
             print("📄 No files found, creating initial README.md...")
             readme = self.cwd / "README.md"
             if not readme.exists():
-                readme.write_text(f"""# {self.repo_name}
+                readme.write_text(
+                    f"""# {self.repo_name}
 
 Repository initialized on {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
-""")
+"""
+                )
                 print("✓ Created README.md")
                 return True
         return has_content
 
-    def _commit_changes(self, message: str | None = None) -> bool:
+    def _commit_changes(self, message: (str | None) = None) -> bool:
         if not message:
             message = self._generate_commit_message()
         print(f"\n💾 Committing changes with message: '{message}'")

@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 """
 Find and organize duplicate images in the current directory into subfolders.
 Same image content detection works even with different resolutions.

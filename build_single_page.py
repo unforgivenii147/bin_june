@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 import base64
@@ -38,7 +38,7 @@ def save_hashed_asset(content: bytes, mime_type: str):
     return path
 
 
-def extract_base64(data_url: AttributeValueList | str | None):
+def extract_base64(data_url: (AttributeValueList | str | None)):
     m = re.match("data:(.*?);base64,(.*)", data_url, re.DOTALL)
     if not m:
         return None
@@ -47,7 +47,7 @@ def extract_base64(data_url: AttributeValueList | str | None):
     return save_hashed_asset(content, mime_type)
 
 
-def download_external(url: AttributeValueList | str):
+def download_external(url: (AttributeValueList | str)):
     try:
         r = requests.get(url, timeout=TIMEOUT)
         if r.status_code != 200:

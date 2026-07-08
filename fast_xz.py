@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/usr/bin/env python
 
 
 import argparse
@@ -130,13 +130,15 @@ def main():
     parser = argparse.ArgumentParser(
         description="Compress or decompress files using lzma_mt with parallel processing",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=textwrap.dedent("""
+        epilog=textwrap.dedent(
+            """
             Examples:
               python compress_files.py
               python compress_files.py -c --preset 6 --threads 8
               python compress_files.py -d /path/to/files
               python compress_files.py -c /path/to/files --num-workers 8
-        """),
+        """
+        ),
     )
     parser.add_argument("-c", "--compress", action="store_true", help="Compress files (default if no -d specified)")
     parser.add_argument("-d", "--decompress", action="store_true", help="Decompress .xz files")
