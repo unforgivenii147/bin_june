@@ -13,7 +13,7 @@ def process_file(path) -> None:
     path = Path(path)
     before = gsz(path)
     src = path.read_text(encoding="utf-8")
-    pattern = re.compile("<!--[\\s\\S]*?-->", re.MULTILINE)
+    pattern = re.compile(r"<!--[\s\S]*?-->", re.MULTILINE)
     out = pattern.sub("", src)
     if out != src:
         code = out.replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&")

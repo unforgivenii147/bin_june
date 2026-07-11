@@ -12,7 +12,7 @@ def normalize_url(u: str) -> str:
     u = u.strip()
     if not u:
         return ""
-    if not re.match("^https?://", u, re.IGNORECASE):
+    if not re.match(r"^https?://", u, re.IGNORECASE):
         u = "https://" + u
     p = urlparse(u)
     scheme = "https"

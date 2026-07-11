@@ -14,7 +14,7 @@ found_movies = []
 
 
 def size_to_mb(size_str: str) -> float | None:
-    match = re.search("([\\d.]+)\\s*Mi?B", size_str)
+    match = re.search(r"([\d.]+)\s*Mi?B", size_str)
     if match:
         return float(match.group(1))
     return None

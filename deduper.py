@@ -312,7 +312,7 @@ def write_utils_file(path: Path, objects) -> bool:
     return safe_write_text(path, content)
 
 
-_ENCODING_RE = re.compile("^#.*coding[:=]\\s*([-\\w.]+)")
+_ENCODING_RE = re.compile(r"^#.*coding[:=]\s*([-\w.]+)")
 
 
 def find_import_insertion_index(code: str) -> int:
@@ -373,7 +373,7 @@ def remove_line_ranges(code: str, ranges) -> str:
         cursor = e + 1
     out.extend(lines[cursor:])
     text = "".join(out)
-    text = re.sub("\\n{3,}", "\n\n", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
     return text
 
 

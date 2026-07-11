@@ -65,7 +65,7 @@ def ext_for_lang(lang: str) -> str:
 
 
 def safe_stem(s: str, max_len: int = 120) -> str:
-    s = re.sub("[^\\w\\-\\.]+", "_", s)
+    s = re.sub(r"[^\w\-\.]+", "_", s)
     return s[:max_len].rstrip("_") or "file"
 
 

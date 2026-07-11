@@ -21,16 +21,16 @@ def fix_escape_sequences(directory: Path) -> None:
         if not path.is_symlink():
             try:
                 content = path.read_text(encoding="utf-8")
-                pattern = re.compile("^(\\s*\\w+\\s*=\\s*)([\"\\'])(?![rR])(.*?)\\2", re.MULTILINE)
+                pattern = re.compile(r"^(\s*\w+\s*=\s*)([\"\'])(?![rR])(.*?)\2", re.MULTILINE)
 
                 def replacer(match):
                     var_name_part = match.group(1)
                     quote_char = match.group(2)
                     string_content = match.group(3)
                     needs_raw_conversion = False
-                    if re.search("\\\\(?![\"\\\\ntrvaf0x\\'])", string_content) or "\\\\" in string_content:
+                    if re.search(r"\\(?![\"\\ntrvaf0x\'])", string_content) or "\\\\" in string_content:
                         needs_raw_conversion = True
-                    if re.search("\\\\(?![\\\\\\'\"ntr\\x00-\\x1f_])", string_content):
+                    if re.search(r"\\(?![\\\'\"ntr\x00-\x1f_])", string_content):
                         needs_raw_conversion = True
                     if "\\\\" in string_content:
                         needs_raw_conversion = True

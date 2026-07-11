@@ -43,7 +43,7 @@ def convert_html_to_md(html_file: Path, options: Options | None = None) -> tuple
         markdown_content = "\n".join(line for line in markdown_content.split("\n") if line.strip() or line == "")
         import re
 
-        markdown_content = re.sub("\\n{3,}", "\n\n", markdown_content)
+        markdown_content = re.sub(r"\n{3,}", "\n\n", markdown_content)
         md_file = html_file.with_suffix(".md")
         md_file.write_text(markdown_content, encoding="utf-8")
         print(f"✓ Converted: {html_file.name} -> {md_file.name}")

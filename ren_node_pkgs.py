@@ -10,7 +10,7 @@ from pathlib import Path
 def sanitize_pkg_name(name: str) -> str:
     name = name.lstrip("@")
     name = name.replace("/", "__")
-    return re.sub("[^\\w.-]", "_", name)
+    return re.sub(r"[^\w.-]", "_", name)
 
 
 def rename_package_dirs(cwd: Path, dry_run: bool = False) -> None:

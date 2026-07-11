@@ -28,7 +28,7 @@ class FunctionInfo:
     def _normalize_body(body: str) -> str:
         lines = []
         for line in body.split("\n"):
-            line_without_comments = re.sub("(?<![\"\\'])#.*$", "", line)
+            line_without_comments = re.sub(r"(?<![\"\'])#.*$", "", line)
             lines.append(line_without_comments)
         body = "\n".join(lines)
         lines = [line.strip() for line in body.split("\n") if line.strip()]

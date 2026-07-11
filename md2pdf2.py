@@ -24,7 +24,7 @@ TOC_HTML = """
 
 def pygments_highlight(html: str) -> str:
     formatter = HtmlFormatter(cssclass="highlight")
-    code_block_re = re.compile('<pre><code class="language-(\\w+)">(.*?)</code></pre>', re.DOTALL)
+    code_block_re = re.compile(r'<pre><code class="language-(\w+)">(.*?)</code></pre>', re.DOTALL)
 
     def repl(match) -> str:
         lang = match.group(1)

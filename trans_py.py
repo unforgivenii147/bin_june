@@ -25,7 +25,7 @@ def get_translator():
 
 
 def is_non_english(line: str) -> Match[str] | None:
-    return re.search("[^\\x00-\\x7F]", line)
+    return re.search(r"[^\x00-\x7F]", line)
 
 
 def translate_line(line: str):
@@ -118,7 +118,7 @@ def process_file(filepath) -> None:
         if stripped.startswith("#") and is_non_english(stripped[1:]):
             trans = translate_line(stripped[1:].strip())
             if trans:
-                indentation = re.match("\\s*", line).group(0)
+                indentation = re.match(r"\s*", line).group(0)
                 final_lines.append(f"{indentation}# {trans}")
     Path(filepath).write_text("\n".join(final_lines) + "\n", encoding="utf-8")
     print(f"Translated: {filepath}")

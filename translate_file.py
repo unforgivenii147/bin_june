@@ -6,9 +6,7 @@ from concurrent.futures import ProcessPoolExecutor
 from deep_translator import GoogleTranslator
 import re
 
-LANGUAGE_PATTERN = re.compile(
-    "[\\u0600-\\u06FF\\u4E00-\\u9FFF\\u3040-\\u309F\\u30A0-\\u30FF\\uAC00-\\uD7AF\\u0400-\\u04FF]"
-)
+LANGUAGE_PATTERN = re.compile(r"[\u0600-\u06FF\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF\u0400-\u04FF]")
 
 
 def is_foreign_line(line):

@@ -134,7 +134,7 @@ def sort_properties(css_unsorted_string: str) -> str:
     pattern = re.compile(r"(.*?{\r?\n?)(.*?)(}.*?)|(.*)", re.DOTALL + re.MULTILINE)
     matched_patterns = pattern.findall(css_unsorted_string)
     sorted_patterns, sorted_buffer = [], css_unsorted_string
-    RE_prop = re.compile("((?:.*?)(?:;)(?:.*?\\n)|(?:.*))", re.DOTALL + re.MULTILINE)
+    RE_prop = re.compile(r"((?:.*?)(?:;)(?:.*?\n)|(?:.*))", re.DOTALL + re.MULTILINE)
     if len(matched_patterns) != 0:
         for matched_groups in matched_patterns:
             sorted_patterns += matched_groups[0].splitlines(True)
@@ -149,17 +149,17 @@ def sort_properties(css_unsorted_string: str) -> str:
 
 
 def remove_empty_rules(css: str) -> str:
-    return re.sub("[^\\}\\{]+\\{\\}", "", css)
+    return re.sub(r"[^\}\{]+\{\}", "", css)
 
 
 def condense_zero_units(css: str) -> str:
     return re.sub(
-        "([\\s:])(0)(px|em|%|in|q|ch|cm|mm|pc|pt|ex|rem|s|ms|deg|grad|rad|turn|vw|vh|vmin|vmax|fr)", "\\1\\2", css
+        r"([\s:])(0)(px|em|%|in|q|ch|cm|mm|pc|pt|ex|rem|s|ms|deg|grad|rad|turn|vw|vh|vmin|vmax|fr)", "\\1\\2", css
     )
 
 
 def condense_semicolons(css: str) -> str:
-    return re.sub(";;+", ";", css)
+    return re.sub(r";;+", ";", css)
 
 
 def wrap_css_lines(css: str, line_length: int = 80) -> str:
@@ -183,11 +183,11 @@ def normalize_whitespace(css: str) -> str:
     for line_of_css in css.splitlines():
         css_no_trailing_whitespace += line_of_css.rstrip() + "\n"
     css = css_no_trailing_whitespace
-    css = re.sub("\\n{3}", "\n\n\n", css)
-    css = re.sub("\\n{5}", "\n\n\n\n\n", css)
-    css = re.sub("\\n{6,}", f"\n\n\n/*{'-' * 72}*/\n\n\n", css)
+    css = re.sub(r"\n{3}", "\n\n\n", css)
+    css = re.sub(r"\n{5}", "\n\n\n\n\n", css)
+    css = re.sub(r"\n{6,}", f"\n\n\n/*{'-' * 72}*/\n\n\n", css)
     css = css.replace(" ;\n", ";\n").replace("{\n", " {\n")
-    css = re.sub("\\s{2,}{\n", " {\n", css)
+    css = re.sub(r"\s{2,}{\n", " {\n", css)
     return css.replace("\t", "    ").rstrip() + "\n"
 
 
@@ -252,7 +252,7 @@ def css_prettify(css: str, justify: bool = False, extraline: bool = False) -> st
 
 if BeautifulSoup:
     orig_prettify = BeautifulSoup.prettify
-    regez = re.compile("^(\\s*)", re.MULTILINE)
+    regez = re.compile(r"^(\s*)", re.MULTILINE)
 
     def prettify(self, encoding=None, formatter: str = "minimal", indent_width: int = 4) -> str:
         print("Monkey Patching BeautifulSoup on-the-fly to process HTML...")

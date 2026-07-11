@@ -15,9 +15,9 @@ def is_probably_python(lines: str) -> bool:
     for line in lines:
         if any(kw in line for kw in python_keywords):
             score += 1
-        if re.search(":\\s*$", line):
+        if re.search(r":\s*$", line):
             score += 1
-        if re.match("\\s{4}", line):
+        if re.match(r"\s{4}", line):
             score += 1
     return score >= 2
 
@@ -33,7 +33,7 @@ def looks_like_python(code_block: str) -> bool | None:
 def is_python_like(line: str) -> bool:
     if re.match(r"\s*(def|class|if|elif|else|for|while|try|except|with)\b.*:", line):
         return True
-    if re.match("\\s*@[A-Za-z_]\\w*", line):
+    if re.match(r"\s*@[A-Za-z_]\w*", line):
         return True
     return bool(re.match(r"\s*import\b|\s*from\b", line))
 

@@ -37,7 +37,7 @@ def strip_comments_and_docstrings(file_path_str) -> bool:
             return f"{fn_type}{indent3}"
         return match.group(0)
 
-    no_single_line_comments = re.sub("^\\s*#.*$", "", original_content, flags=re.MULTILINE)
+    no_single_line_comments = re.sub(r"^\s*#.*$", "", original_content, flags=re.MULTILINE)
     try:
         tree = ast.parse(no_single_line_comments)
         cleaned_content_heuristic = DOCSTRING_START_REGEX.sub("\x01", no_single_line_comments, count=3)

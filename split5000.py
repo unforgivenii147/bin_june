@@ -12,7 +12,7 @@ BINARY_SAMPLE = 4096
 
 
 def split_long_by_words(segment: str, max_chars: int = DEFAULT_MAX):
-    words = re.findall("\\S+\\s*", segment, flags=re.DOTALL)
+    words = re.findall(r"\S+\s*", segment, flags=re.DOTALL)
     parts = []
     cur = ""
     for w in words:

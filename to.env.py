@@ -40,7 +40,7 @@ MODEL_TO_TOKEN_NAME = {v: k for k, v in MODEL_MAPPINGS.items()}
 
 
 def extract_tokens_with_models(text):
-    sections = re.split("###\\s+", text)
+    sections = re.split(r"###\s+", text)
     tokens_with_models = []
     for section in sections:
         if not section.strip():
@@ -49,7 +49,7 @@ def extract_tokens_with_models(text):
         if not lines:
             continue
         first_line = lines[0].strip()
-        model_name = re.sub("`\\d{2}-\\d{2} \\d{2}:\\d{2}`", "", first_line).strip()
+        model_name = re.sub(r"`\d{2}-\d{2} \d{2}:\d{2}`", "", first_line).strip()
         if "|" in model_name:
             model_name = model_name.split("|")[0].strip()
         model_name = model_name.strip("`").strip()
@@ -68,7 +68,7 @@ def get_model_variable_name(model_name):
         if value.lower() in model_lower or model_lower in value.lower():
             return key
     safe_name = model_name.upper().replace(" ", "_").replace("-", "_").replace(".", "_")
-    safe_name = re.sub("[^A-Z0-9_]", "", safe_name)
+    safe_name = re.sub(r"[^A-Z0-9_]", "", safe_name)
     return f"{safe_name}_TOKEN"
 
 

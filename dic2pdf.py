@@ -15,10 +15,10 @@ def convert_entry_to_html(raw_line: str) -> str | None:
     except ValueError:
         return None
     html_body = html_body.replace("<br />", "<br>")
-    html_body = re.sub("</?[CFINEË]+[^>]*>", "", html_body)
-    html_body = re.sub("<x [^>]*>", "<span>", html_body)
+    html_body = re.sub(r"</?[CFINEË]+[^>]*>", "", html_body)
+    html_body = re.sub(r"<x [^>]*>", "<span>", html_body)
     html_body = html_body.replace("</x>", "</span>")
-    html_body = re.sub('<Ë M="[^"]+" ?/?>', "", html_body)
+    html_body = re.sub(r'<Ë M="[^"]+" ?/?>', "", html_body)
     return f"""
     <html>
     <body>

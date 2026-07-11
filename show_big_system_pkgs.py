@@ -21,7 +21,7 @@ def format_size(bytes_size) -> str:
 
 def parse_size(size_str: str) -> int:
     size_str = size_str.strip()
-    match = re.match("([\\d.]+)\\s*([KMGT]?)B?", size_str, re.IGNORECASE)
+    match = re.match(r"([\d.]+)\s*([KMGT]?)B?", size_str, re.IGNORECASE)
     if not match:
         return 0
     value = float(match.group(1))

@@ -11,14 +11,14 @@ def should_skip(so_path):
     name = so_path.name
     if name.endswith(".0") or name.endswith(".1"):
         return True
-    if re.search("\\.so\\.\\d+(\\.\\d+)+$", name):
+    if re.search(r"\.so\.\d+(\.\d+)+$", name):
         return True
     return False
 
 
 def get_base_name(so_path):
     name = so_path.name
-    match = re.match("(.+\\.so)(?:\\.\\d+)*$", name)
+    match = re.match(r"(.+\.so)(?:\.\d+)*$", name)
     if match:
         return match.group(1)
     return name

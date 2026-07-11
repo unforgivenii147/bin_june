@@ -18,7 +18,7 @@ def list_installed_packages(site: Path):
     for item in site.iterdir():
         if item.name.endswith(".dist-info"):
             name_version = item.name[:-10]
-            m = re.match("(.+)-([\\w\\.]+)", name_version)
+            m = re.match(r"(.+)-([\w\.]+)", name_version)
             if not m:
                 continue
             pkg, version = m.group(1), m.group(2)

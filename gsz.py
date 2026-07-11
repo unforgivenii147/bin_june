@@ -8,7 +8,7 @@ import requests
 
 def get_repo_size(input_str: str) -> None:
     if input_str.startswith("https://github.com/"):
-        match = re.search("github\\.com/([^/]+)/([^/]+)", input_str)
+        match = re.search(r"github\.com/([^/]+)/([^/]+)", input_str)
         if not match:
             print("Invalid GitHub URL format.")
             return

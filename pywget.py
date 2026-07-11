@@ -57,7 +57,7 @@ def get_console_width() -> int:
 
 def sanitize_filename(name: str) -> str:
     name = urllib.parse.unquote(name)
-    name = re.sub('[<>:"|?*]', "_", name)
+    name = re.sub(r'[<>:"|?*]', "_", name)
     return name[:255].strip() or "downloaded_file"
 
 

@@ -11,7 +11,7 @@ def add_path_statement(file_path: str) -> bool:
     function_indent = None
     added = False
     for i, line in enumerate(lines):
-        if re.match("^\\s*def process_file\\(", line):
+        if re.match(r"^\s*def process_file\(", line):
             in_function = True
             modified_lines.append(line)
             continue
@@ -27,11 +27,11 @@ def add_path_statement(file_path: str) -> bool:
                     continue
             if function_indent is None:
                 for j in range(i - 1, -1, -1):
-                    if re.match("^\\s*def process_file\\(", modified_lines[j]):
+                    if re.match(r"^\s*def process_file\(", modified_lines[j]):
                         func_line = modified_lines[j]
-                        function_indent = re.match("^(\\s*)", func_line).group(1) + "    "
+                        function_indent = re.match(r"^(\s*)", func_line).group(1) + "    "
                         break
-            current_indent = re.match("^(\\s*)", line).group(1)
+            current_indent = re.match(r"^(\s*)", line).group(1)
             if current_indent.startswith(function_indent.rstrip()) and stripped:
                 modified_lines.append(f"{function_indent}path = Path(path)\n")
                 print(f"Added 'path = Path(path)' to {file_path}")
@@ -60,7 +60,7 @@ def add_path_statement_simple(file_path: str) -> bool:
     def replacement(match):
         full_match = match.group(0)
         func_line = match.group(1)
-        indent = re.match("^(\\s*)", func_line).group(1) + "    "
+        indent = re.match(r"^(\s*)", func_line).group(1) + "    "
         return f"{func_line}\n{indent}path = Path(path)\n" + full_match[len(func_line) :]
 
     new_content = re.sub(pattern, replacement, content, count=1)
@@ -68,7 +68,7 @@ def add_path_statement_simple(file_path: str) -> bool:
         pattern = "(def process_file\\([^:]*:)\\s*\\n\\s*"
 
         def replacement2(match) -> str:
-            indent = re.match("^(\\s*)", match.group(1)).group(1) + "    "
+            indent = re.match(r"^(\s*)", match.group(1)).group(1) + "    "
             return f"{match.group(1)}\n{indent}path = Path(path)\n"
 
         new_content = re.sub(pattern, replacement2, content, count=1)

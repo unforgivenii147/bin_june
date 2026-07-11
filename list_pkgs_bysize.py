@@ -21,7 +21,7 @@ def get_packages_with_size():
                 info = subprocess.run(["apt", "show", pkg], capture_output=True, text=True)
                 for line in info.stdout.split("\n"):
                     if line.startswith("Installed-Size:"):
-                        size_kb = int(re.search("\\d+", line).group())
+                        size_kb = int(re.search(r"\d+", line).group())
                         pkg_sizes.append((pkg, size_kb * 1024))
                         break
             except:

@@ -10,7 +10,7 @@ BREAK_PUNCTS = [",", ";", ":", "?"]
 
 
 def split_sentences(text: str):
-    pattern = re.compile("[^.!]+[.!]", re.MULTILINE | re.DOTALL)
+    pattern = re.compile(r"[^.!]+[.!]", re.MULTILINE | re.DOTALL)
     sentences = pattern.findall(text)
     return [s.strip() for s in sentences if s.strip()]
 

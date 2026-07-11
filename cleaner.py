@@ -24,7 +24,7 @@ def process_file(path) -> None:
         text = content.decode("utf-8", errors="replace")
         cleaned_lines = []
         for line in text.splitlines(keepends=True):
-            cleaned_line = re.sub("[\\x00-\\x08\\x0b\\x0c\\x0e-\\x1f\\x7f]", "", line)
+            cleaned_line = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", line)
             cleaned_lines.append(cleaned_line)
         result = "".join(cleaned_lines)
         path.write_text(result, encoding="utf-8")

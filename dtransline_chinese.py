@@ -23,7 +23,7 @@ except ImportError:
 
 
 def contains_chinese(text: str) -> bool:
-    chinese_pattern = re.compile("[一-鿿㐀-䶿\u20000-⩭F⩰0-⭳F\u2b740-⮁F⮂0-⳪F豈-\ufaff⾀0-⾡F]")
+    chinese_pattern = re.compile(r"[一-鿿㐀-䶿\u20000-⩭F⩰0-⭳F\u2b740-⮁F⮂0-⳪F豈-\ufaff⾀0-⾡F]")
     return bool(chinese_pattern.search(text))
 
 
@@ -34,7 +34,7 @@ def is_chinese_text(text: str, threshold: float = 0.3) -> bool:
     total_chars = len([c for c in text if not c.isspace()])
     if total_chars == 0:
         return False
-    chinese_chars = len(re.findall("[一-鿿㐀-䶿\u20000-⩭F⩰0-⭳F\u2b740-⮁F⮂0-⳪F豈-\ufaff⾀0-⾡F]", text))
+    chinese_chars = len(re.findall(r"[一-鿿㐀-䶿\u20000-⩭F⩰0-⭳F\u2b740-⮁F⮂0-⳪F豈-\ufaff⾀0-⾡F]", text))
     return chinese_chars / total_chars >= threshold
 
 

@@ -28,7 +28,7 @@ EXCLUDE = load_user_stopwords(USER_STOPWORDS_FILE)
 
 
 def extract_words(text: str):
-    return re.findall("[a-z]{3,}", text.lower())
+    return re.findall(r"[a-z]{3,}", text.lower())
 
 
 def main() -> None:

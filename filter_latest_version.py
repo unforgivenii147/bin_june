@@ -27,7 +27,7 @@ def parse_wheel_url(url: str) -> Optional[Tuple[str, str, Tuple[int, ...], str]]
         package = match.group(1)
         version = tuple(map(int, match.group(2).split(".")))
         arch = match.group(3)
-        py_match = re.search("python3\\.(\\d+)", url)
+        py_match = re.search(r"python3\.(\d+)", url)
         python_version = py_match.group(1) if py_match else "unknown"
         return package, python_version, version, arch, url
     return None

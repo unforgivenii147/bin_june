@@ -11,7 +11,7 @@ from dh import get_nobinary
 
 def extract_words(text: str):
     splt = text.strip().lower().replace("/", " ")
-    return re.findall("[a-z]{3,}", splt)
+    return re.findall(r"[a-z]{3,}", splt)
 
 
 def process_file(path: Path) -> None:

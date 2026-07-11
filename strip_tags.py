@@ -15,7 +15,7 @@ if __name__ == "__main__":
     for line in lines:
         if "<:" in line or ">:" in line:
             continue
-        text = re.sub("<[^>]*>", "", line)
+        text = re.sub(r"<[^>]*>", "", line)
         nl.append(text)
     new_content = "\n".join(nl)
     removed, _added = get_removed_lines(content, new_content)

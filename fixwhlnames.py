@@ -50,7 +50,7 @@ def extract_wheel_tags(filename: str) -> Optional[Tuple[str, str, str]]:
         if match:
             return match.group(1), match.group(2), match.group(3)
     if "cp3" in filename:
-        py_match = re.search("cp3[0-9]", filename)
+        py_match = re.search(r"cp3[0-9]", filename)
         if py_match:
             return py_match.group(0), "none", "any"
     return None
@@ -72,7 +72,7 @@ def reconstruct_wheel_name(wheel_path: Path, metadata: Dict[str, str], original_
                     for line in content.split("\n"):
                         if line.startswith("Root-Is-Purelib: true"):
                             platform_tag = "any"
-                            py_match = re.search("Tag: (.*?)-(.*?)-", content)
+                            py_match = re.search(r"Tag: (.*?)-(.*?)-", content)
                             if py_match:
                                 python_tag = py_match.group(1)
                                 abi_tag = py_match.group(2) if len(py_match.groups()) > 1 else "none"

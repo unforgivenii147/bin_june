@@ -29,8 +29,8 @@ class SignalMonitor:
     def get_wifi_signal(self):
         try:
             result = subprocess.run(["dumpsys", "wifi"], capture_output=True, text=True, timeout=2)
-            rssi_match = re.search("mRssi[=:]?\\s*(-?\\d+)", result.stdout)
-            ssid_match = re.search("ssid[=:]?\\s*([\"\\']?)([^\"\\']*?)\\1", result.stdout)
+            rssi_match = re.search(r"mRssi[=:]?\s*(-?\d+)", result.stdout)
+            ssid_match = re.search(r"ssid[=:]?\s*([\"\']?)([^\"\']*?)\1", result.stdout)
             if rssi_match:
                 self.wifi_strength = int(rssi_match.group(1))
             if ssid_match:
@@ -43,8 +43,8 @@ class SignalMonitor:
     def get_cellular_signal(self):
         try:
             result = subprocess.run(["dumpsys", "telephony.registry"], capture_output=True, text=True, timeout=2)
-            signal_match = re.search("mSignalStrength[=:]?\\s*(\\d+)", result.stdout)
-            state_match = re.search("mDataConnectionState[=:]?\\s*(\\d+)", result.stdout)
+            signal_match = re.search(r"mSignalStrength[=:]?\s*(\d+)", result.stdout)
+            state_match = re.search(r"mDataConnectionState[=:]?\s*(\d+)", result.stdout)
             if signal_match:
                 asu = int(signal_match.group(1))
                 if 0 <= asu <= 31:

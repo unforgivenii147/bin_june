@@ -11,7 +11,7 @@ def bytes_to_hex(data: bytes) -> str:
 
 
 def parse_magic_line(line: str):
-    match = re.match("^(?:(\\d+?)>)?(\\d+)=", line)
+    match = re.match(r"^(?:(\d+?)>)?(\d+)=", line)
     if not match:
         return None
     rule_index = int(match.group(1)) if match.group(1) else None

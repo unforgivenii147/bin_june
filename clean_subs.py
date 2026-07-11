@@ -12,11 +12,9 @@ except ImportError:
     print("pip install termcolor")
     sys.exit(1)
 VIDEO_EXTS = {".srt"}
-LEADING_JUNK = re.compile("^\\s*[\\d\\s\\.-]{6,}", re.IGNORECASE)
-EPISODE_PATTERNS = [re.compile("S\\d{2}E(\\d{2})", re.IGNORECASE), re.compile("(\\d{1,2})x(\\d{2})", re.IGNORECASE)]
-TRASH = re.compile(
-    "(HDTV|WEB[-\\. ]?DL|WEBRIP|BLURAY|IMOVIE[-\\. ]?DL|ELKA|PARISA|KILLERS|FUM|TURBO|FA)", re.IGNORECASE
-)
+LEADING_JUNK = re.compile(r"^\s*[\d\s\.-]{6,}", re.IGNORECASE)
+EPISODE_PATTERNS = [re.compile(r"S\d{2}E(\d{2})", re.IGNORECASE), re.compile(r"(\d{1,2})x(\d{2})", re.IGNORECASE)]
+TRASH = re.compile(r"(HDTV|WEB[-\. ]?DL|WEBRIP|BLURAY|IMOVIE[-\. ]?DL|ELKA|PARISA|KILLERS|FUM|TURBO|FA)", re.IGNORECASE)
 
 
 def extract_episode(name: str):

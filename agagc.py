@@ -64,7 +64,7 @@ def get_github_username(token: str) -> str | None:
 
 def get_cwd_name() -> str:
     dir_name = Path.cwd().name
-    dir_name = re.sub("[^\\w\\-\\.]", "-", dir_name)
+    dir_name = re.sub(r"[^\w\-\.]", "-", dir_name)
     return dir_name.lower()
 
 

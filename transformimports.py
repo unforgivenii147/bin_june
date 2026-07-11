@@ -87,7 +87,7 @@ def transform_imports(tree: Module, source_lines: list[str]):
             continue
         line = new_lines[i]
         new_lines[i] = re.sub(
-            "\\b(" + "|".join(map(re.escape, replacements.keys())) + ")\\b", lambda m: replacements[m.group(1)], line
+            r"\b(" + "|".join(map(re.escape, replacements.keys())) + ")\\b", lambda m: replacements[m.group(1)], line
         )
     return new_lines, True
 

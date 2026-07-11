@@ -6,7 +6,7 @@ import re
 import sys
 from pathlib import Path
 
-HEX_RE = re.compile("^#([0-9a-fA-F]{6})$")
+HEX_RE = re.compile(r"^#([0-9a-fA-F]{6})$")
 
 
 def hex_to_hsv(hex_color: str) -> tuple[float, float, float]:

@@ -29,8 +29,8 @@ def man_to_markdown(content: str) -> str:
             subheader = line[3:].strip()
             md_lines.append(f"## {subheader.title()}")
             continue
-        line = re.sub("\\.B\\s+(.+)", "**\\1**", line)
-        line = re.sub("\\.I\\s+(.+)", "*\\1*", line)
+        line = re.sub(r"\.B\s+(.+)", "**\\1**", line)
+        line = re.sub(r"\.I\s+(.+)", "*\\1*", line)
         if line.startswith(".BR"):
             parts = line.split(maxsplit=1)
             if len(parts) > 1:
@@ -94,7 +94,7 @@ def man_to_markdown(content: str) -> str:
             continue
         if line.startswith("."):
             continue
-        if re.match("^\\s*\\$", line) or re.match(r"^\s*(ls|cat|grep|echo|pwd|cd|mkdir|rm|touch|man)\b", line):
+        if re.match(r"^\s*\$", line) or re.match(r"^\s*(ls|cat|grep|echo|pwd|cd|mkdir|rm|touch|man)\b", line):
             if not in_code_block:
                 md_lines.append("```sh")
                 in_code_block = True

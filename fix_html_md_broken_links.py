@@ -8,7 +8,7 @@ static_dir = "/sdcard/_static"
 
 def fix_links(file_path: Path) -> None:
     content: str = file_path.read_text(encoding="utf-8", errors="replace")
-    links = re.findall("href=[\\'\"]?([^\\'\" >]+)", content)
+    links = re.findall(r"href=[\'\"]?([^\'\" >]+)", content)
     for link in links:
         if not Path(link).exists():
             static_file = static_dir / link

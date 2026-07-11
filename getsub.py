@@ -117,8 +117,8 @@ class SubtitleDownloader:
     def save_subtitle(self, content, filename):
         if not content:
             return False
-        filename = re.sub("[^\\w\\s-]", "", filename)
-        filename = re.sub("[-\\s]+", "_", filename)
+        filename = re.sub(r"[^\w\s-]", "", filename)
+        filename = re.sub(r"[-\s]+", "_", filename)
         if not filename.endswith(".srt"):
             filename += ".srt"
         try:

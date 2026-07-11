@@ -18,9 +18,9 @@ def fix_print_statements_manually(content):
             continue
         if re.search(r"\bprint\s+", line) and not is_in_string(line, "print"):
             if ">>" in line:
-                line = re.sub("print\\s+>>\\s*(\\w+)\\s*,\\s*(.+?)(?:\\s*#.*)?$", "print(\\2, file=\\1)", line)
+                line = re.sub(r"print\s+>>\s*(\w+)\s*,\s*(.+?)(?:\s*#.*)?$", "print(\\2, file=\\1)", line)
             else:
-                line = re.sub("print\\s+(.+?)(?:\\s*#.*)?$", "print(\\1)", line)
+                line = re.sub(r"print\s+(.+?)(?:\s*#.*)?$", "print(\\1)", line)
             new_lines.append(line)
         else:
             new_lines.append(line)

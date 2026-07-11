@@ -7,7 +7,7 @@ import sys
 import tokenize
 from pathlib import Path
 
-INVALID_ESCAPE_RE = re.compile("\\\\(?![\\\\\\'\"abfnrtv0-7xuUNN])")
+INVALID_ESCAPE_RE = re.compile(r"\\(?![\\\'\"abfnrtv0-7xuUNN])")
 
 
 def has_invalid_escape(s: str) -> bool:
@@ -15,7 +15,7 @@ def has_invalid_escape(s: str) -> bool:
 
 
 def make_raw_string(source: str) -> str:
-    m = re.match("^([rubfRUBF]*)?(?P<quote>\"\"\"|\\'\\'\\'|\"|\\')(?P<body>.*)(?P=quote)$", source, re.S)
+    m = re.match(r"^([rubfRUBF]*)?(?P<quote>\"\"\"|\'\'\'|\"|\')(?P<body>.*)(?P=quote)$", source, re.S)
     if not m:
         return source
     prefix = m.group(1) or ""

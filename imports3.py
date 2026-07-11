@@ -41,7 +41,7 @@ class PIPPackageCache:
                 for line in f:
                     line = line.strip()
                     if line and not line.startswith("#"):
-                        pkg_name = re.split("[=!<>;\\[]", line)[0].strip()
+                        pkg_name = re.split(r"[=!<>;\[]", line)[0].strip()
                         if pkg_name:
                             self.packages.add(pkg_name.lower())
                             self.package_lower_map[pkg_name.lower()] = pkg_name

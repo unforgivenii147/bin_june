@@ -63,11 +63,11 @@ python code:"""
         )
         python_code = response.choices[0].message.content
         if "```python" in python_code:
-            python_code = re.search("```python\\n(.*?)```", python_code, re.DOTALL)
+            python_code = re.search(r"```python\n(.*?)```", python_code, re.DOTALL)
             if python_code:
                 python_code = python_code.group(1)
         elif "```" in python_code:
-            python_code = re.search("```\\n(.*?)```", python_code, re.DOTALL)
+            python_code = re.search(r"```\n(.*?)```", python_code, re.DOTALL)
             if python_code:
                 python_code = python_code.group(1)
         return True, python_code.strip()
@@ -77,24 +77,24 @@ python code:"""
 
 def simple_js_to_python(js_code: str) -> str:
     python_code = js_code
-    python_code = re.sub("\\b(let|const|var)\\s+", "", python_code)
-    python_code = re.sub("console\\.log\\s*\\(", "print(", python_code)
-    python_code = re.sub("\\btrue\\b", "True", python_code)
-    python_code = re.sub("\\bfalse\\b", "False", python_code)
+    python_code = re.sub(r"\b(let|const|var)\s+", "", python_code)
+    python_code = re.sub(r"console\.log\s*\(", "print(", python_code)
+    python_code = re.sub(r"\btrue\b", "True", python_code)
+    python_code = re.sub(r"\bfalse\b", "False", python_code)
     python_code = re.sub(r"\b(null|undefined)\b", "None", python_code)
     python_code = re.sub(r"\bfunction\s+(\w+)\s*\((.*?)\)\s*{", "def \\1(\\2):", python_code)
-    python_code = re.sub("const\\s+(\\w+)\\s*=\\s*\\((.*?)\\)\\s*=>\\s*{", "def \\1(\\2):", python_code)
-    python_code = re.sub("(\\w+)\\s*=\\s*\\((.*?)\\)\\s*=>\\s*{", "def \\1(\\2):", python_code)
+    python_code = re.sub(r"const\s+(\w+)\s*=\s*\((.*?)\)\s*=>\s*{", "def \\1(\\2):", python_code)
+    python_code = re.sub(r"(\w+)\s*=\s*\((.*?)\)\s*=>\s*{", "def \\1(\\2):", python_code)
     python_code = python_code.replace("//", "#")
-    python_code = re.sub(";$", "", python_code, flags=re.MULTILINE)
-    python_code = re.sub("\\s*{\\s*$", ":", python_code, flags=re.MULTILINE)
-    python_code = re.sub("^\\s*}\\s*$", "", python_code, flags=re.MULTILINE)
+    python_code = re.sub(r";$", "", python_code, flags=re.MULTILINE)
+    python_code = re.sub(r"\s*{\s*$", ":", python_code, flags=re.MULTILINE)
+    python_code = re.sub(r"^\s*}\s*$", "", python_code, flags=re.MULTILINE)
     python_code = re.sub(r"\bif\s*\((.*?)\)\s*{", "if \\1:", python_code)
     python_code = re.sub(r"\belse\s+if\s*\((.*?)\)\s*{", "elif \\1:", python_code)
     python_code = re.sub(r"\belse\s*{", "else:", python_code)
     python_code = re.sub(r"\bwhile\s*\((.*?)\)\s*{", "while \\1:", python_code)
     return re.sub(
-        "for\\s*\\(\\s*let\\s+(\\w+)\\s*=\\s*(\\d+)\\s*;\\s*\\1\\s*<\\s*(\\w+)\\s*;\\s*\\1\\+\\+\\s*\\)\\s*{",
+        r"for\s*\(\s*let\s+(\w+)\s*=\s*(\d+)\s*;\s*\1\s*<\s*(\w+)\s*;\s*\1\+\+\s*\)\s*{",
         "for \\1 in range(\\2, \\3):",
         python_code,
     )

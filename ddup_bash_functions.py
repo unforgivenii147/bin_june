@@ -10,7 +10,7 @@ from pathlib import Path
 
 def extract_function_names(filepath: Path):
     functions = set()
-    function_pattern = re.compile("^\\s*([a-zA-Z_][a-zA-Z0-9_-]*)\\s*\\(\\s*\\)\\s*\\{", re.MULTILINE)
+    function_pattern = re.compile(r"^\s*([a-zA-Z_][a-zA-Z0-9_-]*)\s*\(\s*\)\s*\{", re.MULTILINE)
     try:
         with open(filepath, "r", encoding="utf-8") as f:
             content = f.read()
@@ -27,7 +27,7 @@ def extract_function_names(filepath: Path):
 
 def extract_alias_names(filepath: Path):
     aliases = {}
-    alias_pattern = re.compile("^\\s*alias\\s+([a-zA-Z_][a-zA-Z0-9_-]*)=", re.MULTILINE)
+    alias_pattern = re.compile(r"^\s*alias\s+([a-zA-Z_][a-zA-Z0-9_-]*)=", re.MULTILINE)
     try:
         with open(filepath, "r", encoding="utf-8") as f:
             lines = f.readlines()

@@ -70,7 +70,7 @@ class EntityExtractor(ast.NodeVisitor):
     def visit_Assign(self, node: ast.Assign) -> None:
         if not self.scope_stack and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
             target_name = node.targets[0].id
-            if re.match("^[A-Z_][A-Z0-9_]*$", target_name):
+            if re.match(r"^[A-Z_][A-Z0-9_]*$", target_name):
                 self._extract_and_save(node, "constant", target_name)
 
     def generic_visit(self, node: ast.AST) -> None:
@@ -122,7 +122,7 @@ def is_python_file_no_extension(path: Path) -> bool:
     try:
         with Path(path).open(encoding="utf-8", errors="ignore") as f:
             first_lines = "".join(f.readlines(1024))
-            if re.match("#!\\s*/.*python", first_lines):
+            if re.match(r"#!\s*/.*python", first_lines):
                 return True
             if "def " in first_lines or "class " in first_lines or "import " in first_lines:
                 return True

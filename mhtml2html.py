@@ -13,13 +13,13 @@ from dh import unique_path
 def sanitize_filename(name: str) -> str:
     name = name.strip().strip('"').strip("'")
     name = name.replace("\\\\", "/").split("/")[-1]
-    return re.sub("[^A-Za-z0-9._-]+", "_", name) or "resource"
+    return re.sub(r"[^A-Za-z0-9._-]+", "_", name) or "resource"
 
 
 def split_data_url(src: str):
     if not src or not src.startswith("data:"):
         return None
-    m = re.match("data:([^;]+);base64,(.*)$", src, flags=re.IGNORECASE | re.DOTALL)
+    m = re.match(r"data:([^;]+);base64,(.*)$", src, flags=re.IGNORECASE | re.DOTALL)
     if not m:
         return None
     mime = m.group(1)
@@ -97,7 +97,7 @@ def main() -> None:
         if ctype == "text/html":
             continue
         ext = None
-        m = re.match("^[^/]+/([^;\\s]+)", ctype)
+        m = re.match(r"^[^/]+/([^;\s]+)", ctype)
         if m:
             ext = m.group(1)
         if ext == "svg+xml":
@@ -152,7 +152,7 @@ def main() -> None:
             return match.group(0)
         mime, raw = parsed
         ext = None
-        m = re.match("^[^/]+/([^;\\s]+)", mime)
+        m = re.match(r"^[^/]+/([^;\s]+)", mime)
         if m:
             ext = m.group(1)
         if ext == "svg+xml":

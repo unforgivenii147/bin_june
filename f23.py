@@ -6,9 +6,9 @@ import re
 import shutil
 from pathlib import Path
 
-PRINT_PATTERN = re.compile("^\\s*print\\s+(?!\\()(.+)$")
-PRINT_BARE_PATTERN = re.compile("^\\s*print\\s*$")
-EXCEPT_PATTERN = re.compile("^\\s*except\\s+(\\S+)\\s*,\\s*(\\S+)\\s*:")
+PRINT_PATTERN = re.compile(r"^\s*print\s+(?!\()(.+)$")
+PRINT_BARE_PATTERN = re.compile(r"^\s*print\s*$")
+EXCEPT_PATTERN = re.compile(r"^\s*except\s+(\S+)\s*,\s*(\S+)\s*:")
 
 
 def fix_py2_to_py3_all(line):

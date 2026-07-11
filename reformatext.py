@@ -30,7 +30,7 @@ def restructure_text_file(filepath: Path) -> None:
         if not paragraph.strip():
             restructured_lines.append("")
             continue
-        sentences = re.split("(?<!\\w\\.\\w.)(?<![A-Z][a-z]\\.)(?<=\\.|\\?|!)\\s+", paragraph)
+        sentences = re.split(r"(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|!)\s+", paragraph)
         for sentence in sentences:
             if not sentence.strip():
                 continue

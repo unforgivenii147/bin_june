@@ -15,7 +15,7 @@ class TextSummarizer:
         self.stop_words = set(stopwords.words(language))
 
     def _preprocess_text(self, text: str) -> str:
-        text = re.sub("\\s+", " ", text).strip()
+        text = re.sub(r"\s+", " ", text).strip()
         return text
 
     def _tokenize_sentences(self, text: str) -> list[str]:

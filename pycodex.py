@@ -177,7 +177,7 @@ class CodeBlockExtractor:
     def _extract_filename_from_code(self, content: str) -> str | None:
         lines = content.split("\n")
         for line in lines[:10]:
-            match = re.search("#\\s*(?:filename|name|file)\\s*:?\\s*([\\w\\-._]+\\.py)", line, re.IGNORECASE)
+            match = re.search(r"#\s*(?:filename|name|file)\s*:?\s*([\w\-._]+\.py)", line, re.IGNORECASE)
             if match:
                 return match.group(1)
         return None

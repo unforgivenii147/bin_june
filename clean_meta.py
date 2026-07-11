@@ -7,7 +7,7 @@ from pathlib import Path
 from dh import cprint, fsz, get_files, gsz, mpf3
 
 blank_line = "\n"
-IMAGE_RE = re.compile("^\\s*(\\.\\.\\s+image::|:target:|:alt:)", re.IGNORECASE)
+IMAGE_RE = re.compile(r"^\s*(\.\.\s+image::|:target:|:alt:)", re.IGNORECASE)
 
 
 def process_file(path: str | Path) -> None:

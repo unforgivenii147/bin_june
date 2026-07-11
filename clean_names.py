@@ -35,7 +35,7 @@ def common_suffix(strings):
 def apply_regex(name) -> str:
     for rule in REGEX_RULES:
         name = re.sub(rule, "", name, flags=re.IGNORECASE)
-    return re.sub("\\.+", ".", name).strip(". ")
+    return re.sub(r"\.+", ".", name).strip(". ")
 
 
 def collect_files(path: Path, recursive):
@@ -62,7 +62,7 @@ def main() -> None:
         core = name[len(prefix) : len(name) - len(suffix)]
         core = apply_regex(core)
         new_name = f"{f.stem.split('.')[0]}.{core}{f.suffix}"
-        new_name = re.sub("\\.+", ".", new_name)
+        new_name = re.sub(r"\.+", ".", new_name)
         if name == new_name:
             continue
         print(colored("OLD:", "red"), name, colored("-> NEW:", "green"), new_name)

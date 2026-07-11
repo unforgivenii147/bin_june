@@ -9,7 +9,7 @@ from fastwalk import walk_files
 from tqdm import tqdm
 
 DIRECTORY = "."
-non_english_pattern = re.compile("[^\\x00-\\x7F]")
+non_english_pattern = re.compile(r"[^\x00-\x7F]")
 
 
 def is_english(text: str) -> bool:

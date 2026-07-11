@@ -8,8 +8,8 @@ from rcssmin import cssmin
 
 
 def minify_html(html: str) -> str:
-    html = re.sub(">\\s+<", "><", html)
-    html = re.sub("\\s{2,}", " ", html)
+    html = re.sub(r">\s+<", "><", html)
+    html = re.sub(r"\s{2,}", " ", html)
     return html.strip()
 
 

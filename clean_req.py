@@ -5,7 +5,7 @@ import re
 import sys
 from pathlib import Path
 
-_VERSION_OP_RE = re.compile("\\s*(?:===|==|!=|>=|<=|~=|>|<)\\s*")
+_VERSION_OP_RE = re.compile(r"\s*(?:===|==|!=|>=|<=|~=|>|<)\s*")
 
 
 def clean_requirement(line: str) -> str:
@@ -15,7 +15,7 @@ def clean_requirement(line: str) -> str:
     line = line.split(";", 1)[0].strip()
     if not line:
         return ""
-    line = re.sub("\\[.*?\\]", "", line).strip()
+    line = re.sub(r"\[.*?\]", "", line).strip()
     if not line:
         return ""
     parts = _VERSION_OP_RE.split(line, maxsplit=1)

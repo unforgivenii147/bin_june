@@ -77,7 +77,7 @@ def clone_repo(clone_url: str, branch: str) -> None:
         for line in process.stderr:
             line = line.strip()
             if "Receiving objects:" in line or "Resolving deltas:" in line:
-                progress = re.search("(\\d+)%.*?(\\d+\\.?\\d*)\\s*([KM]iB)", line)
+                progress = re.search(r"(\d+)%.*?(\d+\.?\d*)\s*([KM]iB)", line)
                 if progress:
                     percent, size, unit = progress.groups()
                     tqdm.write(f"[PROGRESS] {percent}% ({size} {unit})")

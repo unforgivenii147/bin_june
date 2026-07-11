@@ -62,7 +62,7 @@ def get_extension(lang: str) -> str:
 
 
 def sanitize_filename(name: str, max_len: int = 200) -> str:
-    safe = re.sub("[^\\w\\-.]", "_", name)
+    safe = re.sub(r"[^\w\-.]", "_", name)
     return safe[:max_len].rstrip("_") or "code_block"
 
 

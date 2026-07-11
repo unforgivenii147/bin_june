@@ -37,7 +37,7 @@ HTML_ENTITIES = {
     "&ldquo;": '"',
     "&rdquo;": '"',
 }
-ENTITY_PATTERN = re.compile("|".join(re.escape(k) for k in HTML_ENTITIES.keys()))
+ENTITY_PATTERN = re.compile(r"|".join(re.escape(k) for k in HTML_ENTITIES.keys()))
 
 
 def replace_entities(text: str) -> str:

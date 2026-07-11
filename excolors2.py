@@ -10,7 +10,7 @@ from dh import TXT_EXT, is_binary
 if TYPE_CHECKING:
     from collections.abc import Iterable
 HEX_RE = re.compile(
-    """
+    r"""
     (?<![0-9A-Fa-f])
     (?:
         [0-9A-Fa-f]{3}
@@ -22,20 +22,20 @@ HEX_RE = re.compile(
     re.VERBOSE,
 )
 RGBA_RE = re.compile(
-    """
-    \\b
+    r"""
+    \b
     rgba?
-    \\(
-        \\s*
-        (?P<r>\\d{1,3})
-        \\s*,\\s*
-        (?P<g>\\d{1,3})
-        \\s*,\\s*
-        (?P<b>\\d{1,3})
-        (?: \\s*,\\s*(?P<a>[\\d\\.]+) )?
-        \\s*
-    \\)
-    \\b
+    \(
+        \s*
+        (?P<r>\d{1,3})
+        \s*,\s*
+        (?P<g>\d{1,3})
+        \s*,\s*
+        (?P<b>\d{1,3})
+        (?: \s*,\s*(?P<a>[\d\.]+) )?
+        \s*
+    \)
+    \b
     """,
     re.VERBOSE | re.IGNORECASE,
 )

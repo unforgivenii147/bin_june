@@ -76,7 +76,7 @@ Also install tesseract: https://github.com/UB-Mannheim/tesseract/wiki""")
         return int(depth)
 
     def _extract_name(self, line: str) -> str:
-        cleaned = re.sub("[├└│─\\s]+", "", line)
+        cleaned = re.sub(r"[├└│─\s]+", "", line)
         return cleaned.strip()
 
     def _is_file(self, name: str) -> bool:

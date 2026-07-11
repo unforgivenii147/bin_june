@@ -29,12 +29,12 @@ SAFE_EXTENSIONS = [
     "\\.tar\\.(gz|xz|zst|bz2|lzma|7z)$",
     "\\.zip$",
 ]
-EXT_PATTERN = re.compile("|".join(SAFE_EXTENSIONS), re.IGNORECASE)
+EXT_PATTERN = re.compile(r"|".join(SAFE_EXTENSIONS), re.IGNORECASE)
 
 
 def sanitize_filename(name) -> str:
     name = unquote(name)
-    name = re.sub('[<>:"|?*]', "_", name)
+    name = re.sub(r'[<>:"|?*]', "_", name)
     return name[:255].strip() or "downloaded_file"
 
 
@@ -45,7 +45,7 @@ def extract_filename(url) -> str:
     filename = filename.split("#")[0]
     filename = filename.split("?")[0]
     filename = sanitize_filename(filename)
-    if not re.search("\\.[a-zA-Z0-9]+$", filename):
+    if not re.search(r"\.[a-zA-Z0-9]+$", filename):
         filename += ".dat"
     return filename
 

@@ -30,7 +30,7 @@ def get_latest_version(package_name: str) -> str:
             text=True,
             check=True,
         )
-        match = re.search("would be installed \\(([^)]+)\\)", result.stdout)
+        match = re.search(r"would be installed \(([^)]+)\)", result.stdout)
         if match:
             return match.group(1)
     except subprocess.CalledProcessError:

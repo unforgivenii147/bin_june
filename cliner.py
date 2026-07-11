@@ -30,7 +30,7 @@ def clean_line(line: str) -> str:
     cleaned = line
     for pattern in COMPILED_PATTERNS:
         cleaned = pattern.sub("", cleaned)
-    return re.sub(" {2,}", " ", cleaned)
+    return re.sub(r" {2,}", " ", cleaned)
 
 
 def clean_file_small(path: Path) -> tuple:

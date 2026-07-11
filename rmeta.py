@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 from bs4 import BeautifulSoup
 
-meta_tag_pattern = re.compile("<meta[^>]*>", re.IGNORECASE)
+meta_tag_pattern = re.compile(r"<meta[^>]*>", re.IGNORECASE)
 
 
 def remove_meta_tags(filepath: Path) -> None:

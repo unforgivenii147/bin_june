@@ -56,9 +56,7 @@ class PathlibRefactorer:
             self.transformations.append(
                 Transformation(
                     pattern=pattern,
-                    replacement=lambda m, r=replacement: re.sub(
-                        "\\\\\\\\(\\\\d+)", lambda x: m.group(int(x.group(1))), r
-                    ),
+                    replacement=lambda m, r=replacement: re.sub(r"\\\\(\\d+)", lambda x: m.group(int(x.group(1))), r),
                     type=TransformationType.SIMPLE_REPLACE,
                     description=f"Replace {pattern}",
                 )

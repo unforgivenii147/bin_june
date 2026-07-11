@@ -25,7 +25,7 @@ def clean_line(line: str) -> str:
     cleaned = line
     for pattern in PATTERNS:
         cleaned = re.sub(pattern, "", cleaned)
-    return re.sub(" {2,}", " ", cleaned)
+    return re.sub(r" {2,}", " ", cleaned)
 
 
 def clean_file(file_path: Path) -> None:

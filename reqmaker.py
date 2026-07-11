@@ -43,7 +43,7 @@ def run_pip_check():
 
 
 def parse_pip_check(output):
-    pattern = re.compile("^(\\S+)\\s+.*requires\\s+([^,]+),\\s+which is not installed\\.$", re.MULTILINE)
+    pattern = re.compile(r"^(\S+)\s+.*requires\s+([^,]+),\s+which is not installed\.$", re.MULTILINE)
     missing_deps = defaultdict(list)
     for line in output.splitlines():
         match = pattern.match(line.strip())

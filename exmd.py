@@ -29,7 +29,7 @@ def extract_code_snippets_with_details(markdown_content: str):
             else:
                 in_code_block = True
                 start_line_num = i + 1
-                match = re.match("```(\\w*)", line.strip())
+                match = re.match(r"```(\w*)", line.strip())
                 language = match.group(1).lower() if match and match.group(1) else ""
                 current_block_lines = []
         elif in_code_block:

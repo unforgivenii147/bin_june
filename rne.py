@@ -6,7 +6,7 @@ from deep_translator import GoogleTranslator
 from fastwalk import walk_files
 
 DIRECTORY = "."
-non_english_pattern = re.compile("[^\\x00-\\x7F]")
+non_english_pattern = re.compile(r"[^\x00-\x7F]")
 
 
 def is_english(text: str) -> bool:

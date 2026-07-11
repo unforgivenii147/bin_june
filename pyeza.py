@@ -138,14 +138,14 @@ def output_columns(entries: list[Entry], icons=False, colors=True, width=None) -
     def real_len(s: str) -> int:
         import re
 
-        return len(re.sub("\\x1b\\[[0-9;]*m", "", s))
+        return len(re.sub(r"\x1b\[[0-9;]*m", "", s))
 
     def truncate(text: str, max_len: int) -> str:
         if real_len(text) <= max_len:
             return text
         import regex as re
 
-        plain = re.sub("\\x1b\\[[0-9;]*m", "", text)
+        plain = re.sub(r"\x1b\[[0-9;]*m", "", text)
         return plain[: max_len - 1] + "…"
 
     rendered = []

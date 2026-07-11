@@ -93,7 +93,7 @@ class SpellCheckProcessor:
         lines = content.split("\n")
         error_map = {}
         for line_num, line in enumerate(lines, 1):
-            words = re.findall("\\b[a-zA-Z]+\\b", line)
+            words = re.findall(r"\b[a-zA-Z]+\b", line)
             misspelled = self.spell_checker.unknown(words)
             misspelled = [word for word in misspelled if not self.personal_dict.contains(word)]
             for word in misspelled:
@@ -119,7 +119,7 @@ class SpellCheckProcessor:
             word = error["word"]
             suggestion = self.spell_checker.correction(word)
             if isinstance(suggestion, str):
-                fixed_content = re.sub("\\b" + re.escape(word) + "\\b", suggestion, fixed_content, flags=re.IGNORECASE)
+                fixed_content = re.sub(r"\b" + re.escape(word) + "\\b", suggestion, fixed_content, flags=re.IGNORECASE)
         try:
             with open(file_path, "w", encoding="utf-8") as f:
                 f.write(fixed_content)

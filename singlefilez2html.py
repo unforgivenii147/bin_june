@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 def extract_embedded_html(text: str) -> str | None:
-    m = re.search("__SINGLEFILE(?:_Z)?__\\s*=\\s*(\\{.*?\\})\\s*;?", text, re.DOTALL)
+    m = re.search(r"__SINGLEFILE(?:_Z)?__\s*=\s*(\{.*?\})\s*;?", text, re.DOTALL)
     if m:
         try:
             obj = json.loads(m.group(1))
@@ -23,13 +23,13 @@ def extract_embedded_html(text: str) -> str | None:
                             return val
         except Exception:
             pass
-    m = re.search("data:text/html;charset=[^;]+;base64,([A-Za-z0-9+/=\\s]+)", text, re.DOTALL)
+    m = re.search(r"data:text/html;charset=[^;]+;base64,([A-Za-z0-9+/=\s]+)", text, re.DOTALL)
     if not m:
-        m = re.search("data:text/html;base64,([A-Za-z0-9+/=\\s]+)", text, re.DOTALL)
+        m = re.search(r"data:text/html;base64,([A-Za-z0-9+/=\s]+)", text, re.DOTALL)
     if m:
-        b64 = re.sub("\\s+", "", m.group(1))
+        b64 = re.sub(r"\s+", "", m.group(1))
         return base64.b64decode(b64).decode("utf-8", errors="replace")
-    m = re.search('(?:const|let|var)\\s+content\\s*=\\s*"((?:\\.|[^"])*)"', text, re.DOTALL)
+    m = re.search(r'(?:const|let|var)\s+content\s*=\s*"((?:\.|[^"])*)"', text, re.DOTALL)
     if m:
         try:
             return bytes(m.group(1), "utf-8").decode("unicode_escape")

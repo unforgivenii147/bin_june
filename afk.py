@@ -66,7 +66,7 @@ def _collect_string_uses(tree: ast.AST) -> set[str]:
     tokens: set[str] = set()
     for node in ast.walk(tree):
         if isinstance(node, ast.Constant) and isinstance(node.value, str):
-            for tok in re.split("[,.;:\\s\\[\\](){}\"\\'<>]+", node.value):
+            for tok in re.split(r"[,.;:\s\[\](){}\"\'<>]+", node.value):
                 tok = tok.strip()
                 if tok and tok.isidentifier():
                     tokens.add(tok)
@@ -366,7 +366,7 @@ def collect_tasks(
     source_tasks: list[tuple[str, str]] = []
     if exclude_patterns is None:
         exclude_patterns = []
-    exclude_re = re.compile("|".join(exclude_patterns)) if exclude_patterns else None
+    exclude_re = re.compile(r"|".join(exclude_patterns)) if exclude_patterns else None
     for path in paths:
         if path.is_file():
             if exclude_re and exclude_re.search(str(path)):

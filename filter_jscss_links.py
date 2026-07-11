@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 
 INPUT_FILE = Path("urls.txt")
 OUTPUT_FILE = Path("filtered_urls.txt")
-EXT_PATTERN = re.compile("\\.(min\\.)?(js|css)$", re.IGNORECASE)
+EXT_PATTERN = re.compile(r"\.(min\.)?(js|css)$", re.IGNORECASE)
 
 
 def is_static_asset(url: str) -> bool:

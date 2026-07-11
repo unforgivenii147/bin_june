@@ -47,10 +47,10 @@ def get_package_name_from_path(path: Path) -> str:
         name = name[:-10]
     elif name.endswith(".egg-info"):
         name = name[:-9]
-    name = re.sub("-\\d+\\.\\d+\\.\\d+.*$", "", name)
-    name = re.sub("-\\d+\\.\\d+.*$", "", name)
-    name = re.sub("-py\\d+\\.\\d+$", "", name)
-    name = re.sub("-py\\d+$", "", name)
+    name = re.sub(r"-\d+\.\d+\.\d+.*$", "", name)
+    name = re.sub(r"-\d+\.\d+.*$", "", name)
+    name = re.sub(r"-py\d+\.\d+$", "", name)
+    name = re.sub(r"-py\d+$", "", name)
     return name
 
 

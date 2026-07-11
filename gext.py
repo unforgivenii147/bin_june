@@ -182,7 +182,7 @@ class EntityExtractor(ast.NodeVisitor):
     def visit_Assign(self, node: ast.Assign) -> None:
         if not self.scope_stack and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
             target_name = node.targets[0].id
-            if re.match("^[A-Z_][A-Z0-9_]*$", target_name):
+            if re.match(r"^[A-Z_][A-Z0-9_]*$", target_name):
                 self._extract_and_save(node, "const", target_name)
 
 
@@ -249,9 +249,9 @@ def analyze_dependencies(code: str) -> Set[str]:
     if typing_types:
         unique_types = sorted(set(typing_types))
         imports.add(f"from typing import {', '.join(unique_types)}")
-    if re.search("field\\(", code):
+    if re.search(r"field\(", code):
         imports.add("from dataclasses import field")
-    if re.search("auto\\(\\)", code):
+    if re.search(r"auto\(\)", code):
         imports.add("from enum import auto")
     return imports
 
@@ -343,7 +343,7 @@ def is_python_file_no_extension(path: Path) -> bool:
     try:
         with path.open(encoding="utf-8", errors="ignore") as f:
             first_lines = "".join(f.readlines(1024))
-            if re.match("#!\\s*/.*python", first_lines):
+            if re.match(r"#!\s*/.*python", first_lines):
                 return True
             if any(keyword in first_lines for keyword in ["def ", "class ", "import ", "from "]):
                 return True

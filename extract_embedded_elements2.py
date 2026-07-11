@@ -32,7 +32,7 @@ def save_asset(content: bytes, mime_type: str, file_hint="asset") -> Path:
 
 
 def extract_base64_data(data_url: AttributeValueList | str | None, file_hint: str = "asset") -> Path | None:
-    m = re.match("data:(.*?);base64,(.*)", data_url, re.DOTALL)
+    m = re.match(r"data:(.*?);base64,(.*)", data_url, re.DOTALL)
     if not m:
         return None
     mime_type, encoded = m.groups()
@@ -84,7 +84,7 @@ def process_file(path: Path) -> None:
             path = download_external_url(src, f"{file_prefix}_img_remote")
             if path:
                 img["src"] = str(path.relative_to(OUTPUT_DIR))
-    bg_re = re.compile('url\\("(data:.*?)"\\)')
+    bg_re = re.compile(r'url\("(data:.*?)"\)')
     for tag in soup.find_all(style=True):
         style = tag["style"]
         m = bg_re.search(style)
@@ -103,7 +103,7 @@ def process_file(path: Path) -> None:
         if not style.string:
             continue
         new_css = style.string
-        fonts = re.findall('url\\("(data:font\\/.+?)"\\)', new_css)
+        fonts = re.findall(r'url\("(data:font\/.+?)"\)', new_css)
         for f in fonts:
             path = extract_base64_data(f, f"{file_prefix}_font")
             if path:

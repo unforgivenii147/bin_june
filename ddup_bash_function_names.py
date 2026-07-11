@@ -14,9 +14,9 @@ from pathlib import Path
 def extract_function_names(filepath: Path):
     functions = []
     patterns = [
-        re.compile("^\\s*([a-zA-Z_][a-zA-Z0-9_-]*)\\s*\\(\\s*\\)\\s*\\{"),
-        re.compile("^\\s*function\\s+([a-zA-Z_][a-zA-Z0-9_-]*)\\s*\\{"),
-        re.compile("^\\s*function\\s+([a-zA-Z_][a-zA-Z0-9_-]*)\\s*\\(\\s*\\)\\s*\\{"),
+        re.compile(r"^\s*([a-zA-Z_][a-zA-Z0-9_-]*)\s*\(\s*\)\s*\{"),
+        re.compile(r"^\s*function\s+([a-zA-Z_][a-zA-Z0-9_-]*)\s*\{"),
+        re.compile(r"^\s*function\s+([a-zA-Z_][a-zA-Z0-9_-]*)\s*\(\s*\)\s*\{"),
     ]
     try:
         with open(filepath, "r", encoding="utf-8") as f:

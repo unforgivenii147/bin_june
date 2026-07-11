@@ -6,7 +6,7 @@ import tempfile
 from pathlib import Path
 
 THRESHOLD = 5 * 1024 * 1024
-RE_REPEAT = re.compile("^(.)\\1+$", re.IGNORECASE)
+RE_REPEAT = re.compile(r"^(.)\1+$", re.IGNORECASE)
 
 
 def should_skip(line: str) -> bool:

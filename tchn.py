@@ -9,7 +9,7 @@ from dh import walker
 
 DIRECTORY = "."
 CHUNK_SIZE = 2000
-non_english_pattern = re.compile("[^\\x00-\\x7F]")
+non_english_pattern = re.compile(r"[^\x00-\x7F]")
 
 
 def is_text_file(path: Path) -> bool:

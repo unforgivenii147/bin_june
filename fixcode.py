@@ -6,21 +6,21 @@ import re
 from pathlib import Path
 
 INDENT = " " * 4
-DEF_CLASS = re.compile("^\\s*(def|class)\\s+")
-MAIN_GUARD = re.compile("^\\s*if\\s+__name__\\s*==\\s*['\"]__main__['\"]\\s*:")
+DEF_CLASS = re.compile(r"^\s*(def|class)\s+")
+MAIN_GUARD = re.compile(r"^\s*if\s+__name__\s*==\s*['\"]__main__['\"]\s*:")
 BLOCK_START = re.compile(
-    """
-    ^\\s*
+    r"""
+    ^\s*
     (
-        if\\s+|
-        elif\\s+|
-        else\\s*:|
-        for\\s+|
-        while\\s+|
-        try\\s*:|
-        except\\s+|
-        finally\\s*:|
-        with\\s+
+        if\s+|
+        elif\s+|
+        else\s*:|
+        for\s+|
+        while\s+|
+        try\s*:|
+        except\s+|
+        finally\s*:|
+        with\s+
     )
     """,
     re.VERBOSE,

@@ -10,7 +10,7 @@ from pathlib import Path
 from dh import get_nobinary
 
 OUTPUT_DIR = Path("extracted_base64")
-DATA_URL_RE = re.compile("data:(?P<mime>[-\\w.+/]+);base64,(?P<data>[A-Za-z0-9+/=\\s]+)", re.IGNORECASE)
+DATA_URL_RE = re.compile(r"data:(?P<mime>[-\w.+/]+);base64,(?P<data>[A-Za-z0-9+/=\s]+)", re.IGNORECASE)
 MIME_EXTENSION_MAP: dict[str, str] = {
     "image/png": "png",
     "image/jpeg": "jpg",
