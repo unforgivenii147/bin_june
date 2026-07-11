@@ -77,7 +77,7 @@ def _compress_bytes_stdlib(data: bytes, level: int) -> bytes:
 
 
 def compress_file(
-    src: Path, dry_run: bool, verbose: bool, level: (int | None) = None, threads: int = DEFAULT_THREADS
+    src: Path, dry_run: bool, verbose: bool, level: int | None = None, threads: int = DEFAULT_THREADS
 ) -> dict:
     result = {"src": src, "ok": False, "line": "", "msg": ""}
     dst = src.with_suffix(src.suffix + LZMA_EXT)

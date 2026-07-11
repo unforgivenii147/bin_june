@@ -141,8 +141,7 @@ def generate_preview(fonts) -> str:
         escaped_sample = html.escape(SAMPLE_TEXT)
         file_size = font_path.stat().st_size if font_path.exists() else 0
         size_str = f"{fsz(file_size)}"
-        sections.append(
-            f"""
+        sections.append(f"""
 <section>
   <h1 style="font-family: 'font_{font_id}';">{html.escape(font_name)} <small style="font-size:0.6em;opacity:0.7">({font_format})</small></h1>
   <textarea
@@ -151,8 +150,7 @@ def generate_preview(fonts) -> str:
     placeholder="Type to test font..."
   >{escaped_sample}</textarea>
   <p class="note">{html.escape(str(font_path.name))} | {size_str}</p>
-</section>"""
-        )
+</section>""")
     style_block = "\n".join(styles)
     sections_block = "".join(sections)
     html_content = HTML_START.replace("</style>", f"\n{style_block}\n</style>")

@@ -23,7 +23,7 @@ def find_dist_info_dir(pkg_dir: Path) -> Path | None:
     return candidates[0]
 
 
-def create_wheel_for_dir(pkg_dir: Path, dest_dir: (Path | None) = None) -> None:
+def create_wheel_for_dir(pkg_dir: Path, dest_dir: Path | None = None) -> None:
     dist_info = find_dist_info_dir(pkg_dir)
     if dist_info is None:
         print(f"Skipping {pkg_dir}: no *.dist-info dir found.")

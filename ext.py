@@ -31,7 +31,7 @@ def discover_python_files() -> list[Path]:
     return files
 
 
-def mark_parents(node: ast.AST, parent: (AST | None) = None) -> None:
+def mark_parents(node: ast.AST, parent: AST | None = None) -> None:
     for child in ast.iter_child_nodes(node):
         child._parent = node
         mark_parents(child, node)

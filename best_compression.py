@@ -335,10 +335,8 @@ def main() -> None:
         print("-" * 40)
         for r in ok_single:
             print(f"{r.algo:<10} {human(r.out_size):>15} {r.elapsed_s:>12.4f}")
-        print(
-            f"""
-Best overall: {best_overall.algo} size={human(best_overall.out_size)} time={best_overall.elapsed_s:.4f}s"""
-        )
+        print(f"""
+Best overall: {best_overall.algo} size={human(best_overall.out_size)} time={best_overall.elapsed_s:.4f}s""")
         if best_overall.algo.startswith("mp_"):
             base_algo = best_overall.algo[len("mp_") :]
         else:

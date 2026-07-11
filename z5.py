@@ -980,3 +980,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+# script leaves .tar files behind, fix it

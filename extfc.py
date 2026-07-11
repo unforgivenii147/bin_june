@@ -60,9 +60,7 @@ def extract_docstring(src: bytes, node) -> str | None:
     return None
 
 
-def format_definition_with_metadata(
-    def_text: str, file_name: str, line_num: int, docstring: (str | None) = None
-) -> str:
+def format_definition_with_metadata(def_text: str, file_name: str, line_num: int, docstring: str | None = None) -> str:
     lines = [f"# From: {file_name}:{line_num}"]
     if docstring:
         lines.append(f"# Docstring: {docstring[:50]}{'...' if len(docstring) > 50 else ''}")

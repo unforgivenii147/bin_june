@@ -4,6 +4,11 @@ import argparse
 from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor
 from loguru import logger
+import sys
+from pathlib import Path
+
+from dh import cprint, get_files, mpf3
+
 
 SKIP_DIRS = {".git", "__pycache__", ".ruff_cache", ".pytest_cache"}
 
@@ -23,19 +28,9 @@ def strip_bash_comments(line):
     return line, 0
 
 
-def is_bash_script(path: Path) -> bool:
-    if path.suffix == ".sh":
-        return True
-    try:
-        with path.open("r") as f:
-            first_line = f.readline()
-            return first_line.startswith("#!")
-    except Exception:
-        return False
-
-
 def process_file(args):
     path, root = args
+    path = Path(path)
     try:
         rel_path = path.relative_to(root)
         lines = path.read_text().splitlines(keepends=True)
@@ -60,30 +55,29 @@ def process_file(args):
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("targets", nargs="*", type=str)
-    args = parser.parse_args()
+    cwd = Path.cwd()
+    args = sys.argv[1:]
+    files = []
 
-    root = Path.cwd().resolve()
-    targets = [Path(t).resolve() for t in args.targets] if args.targets else [root]
-    files_to_process = []
+    if args:
+        for arg in args:
+            p = Path(arg)
+            if p.is_file():
+                files.append(p)
+            elif p.is_dir():
+                files.extend(get_files(p))
+    else:
+        files = get_files(cwd)
+    if len(files) == 1:
+        process_file(files[0])
+        sys.exit(1)
 
-    for target in targets:
-        if target.is_file():
-            if not any(part in SKIP_DIRS for part in target.parts) and is_bash_script(target):
-                files_to_process.append((target, root))
-        elif target.is_dir():
-            for path in target.rglob("*"):
-                if path.is_file() and not any(part in SKIP_DIRS for part in path.parts):
-                    if is_bash_script(path):
-                        files_to_process.append((path.resolve(), root))
-
-    with ProcessPoolExecutor() as executor:
-        results = list(executor.map(process_file, files_to_process))
-
-    total_comments_global = sum(results)
-    logger.success(f"Cleanup complete. Total comments removed: {total_comments_global}")
+    results = mpf3(process_file, files)
+    total = 0
+    for res in results:
+        total += res
+    print(f"{total} comments removed")
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

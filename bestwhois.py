@@ -177,11 +177,9 @@ if apiKey is None:
 if IDN:
     domain_name = idna.encode(ARGS.domainName).decode("utf-8")
 elif not all(ord(char) < 128 for char in ARGS.domainName):
-    sys.stderr.write(
-        """Please install the "idna" Python package to query non-ASCII unicode domain names.
+    sys.stderr.write("""Please install the "idna" Python package to query non-ASCII unicode domain names.
 Exiting.
-"""
-    )
+""")
     exit(3)
 else:
     domain_name = ARGS.domainName

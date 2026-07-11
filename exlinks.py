@@ -15,7 +15,7 @@ MAX_WORKERS = 4
 BINARY_CHECK_THRESHOLD = 0.7
 
 
-def extract_links_from_text(text: str, file_path: (Path | str)):
+def extract_links_from_text(text: str, file_path: Path | str):
     urls = URL_REGEX.findall(text)
     github_urls = GITHUB_REPO_REGEX.findall(text)
     return urls, github_urls

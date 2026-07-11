@@ -24,7 +24,7 @@ def clean_html(html_content: str) -> str:
     return str(soup)
 
 
-def convert_html_to_md(html_file: Path, options: (Options | None) = None) -> tuple[Path, bool]:
+def convert_html_to_md(html_file: Path, options: Options | None = None) -> tuple[Path, bool]:
     if html_file.suffix.lower() not in {".html", ".htm"}:
         print(f"Warning: {html_file} doesn't have .html/.htm extension, skipping.")
         return html_file, False

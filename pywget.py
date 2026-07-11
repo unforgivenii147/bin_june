@@ -61,7 +61,7 @@ def sanitize_filename(name: str) -> str:
     return name[:255].strip() or "downloaded_file"
 
 
-def extract_filename(url: str, headers: (dict[str, str] | None) = None) -> str:
+def extract_filename(url: str, headers: dict[str, str] | None = None) -> str:
     if headers:
         cd = headers.get("Content-Disposition", "")
         if cd:
@@ -91,7 +91,7 @@ def filename_fix_existing(filepath: Path) -> Path:
 
 
 def download(
-    url: str, output: (str | None) = None, timeout: float = 30.0, resume: bool = False, quiet: bool = False
+    url: str, output: str | None = None, timeout: float = 30.0, resume: bool = False, quiet: bool = False
 ) -> str:
     output_path = Path(output) if output else None
     if output_path and output_path.is_dir():

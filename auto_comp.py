@@ -68,7 +68,7 @@ class CompressionResult:
 class CompressionManager:
     __slots__ = "output_dir", "temp_dir"
 
-    def __init__(self, output_dir: (str | Path) = ".", *, keep_temp: bool = False) -> None:
+    def __init__(self, output_dir: str | Path = ".", *, keep_temp: bool = False) -> None:
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.temp_dir = tempfile.mkdtemp(prefix="compress_")
@@ -80,7 +80,7 @@ class CompressionManager:
             pass
 
     @staticmethod
-    def prepare_input(target_path: (str | Path)) -> tuple[bytes, str]:
+    def prepare_input(target_path: str | Path) -> tuple[bytes, str]:
         target = Path(target_path)
         if not target.exists():
             raise FileNotFoundError(f"Target not found: {target_path}")

@@ -17,7 +17,6 @@ import bz2
 import struct
 import io
 
-
 # ── optional dependency probes ────────────────────────────────────────────────
 
 

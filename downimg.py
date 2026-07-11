@@ -69,10 +69,8 @@ class ImageDownscaler:
         if not image_paths:
             print("[WARN] No images to process!")
             return
-        print(
-            f"""
-[PROCESS] Downscaling {len(image_paths)} image(s) with {cpu_count()} process(es)..."""
-        )
+        print(f"""
+[PROCESS] Downscaling {len(image_paths)} image(s) with {cpu_count()} process(es)...""")
         args_list = [(img_path, self.scale_factor) for img_path in image_paths]
         successful = 0
         failed = 0

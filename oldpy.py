@@ -6,14 +6,13 @@ import re
 import tokenize
 from mmap import mmap
 from pathlib import Path
-from _io import BufferedReader
 from dh import get_files, mpf3
 
 SIZE_THRESHOLD = 1 * 1024 * 1024
 OLD_PRINT_RE = re.compile(r"(?m)^[ \t]*print[ \t]+[^(\n]")
 
 
-def _open_source(filepath: str) -> BufferedReader | mmap:
+def _open_source(filepath: str):
     size = Path(filepath).stat().st_size
     f = Path(filepath).open("rb")
     if size > SIZE_THRESHOLD:

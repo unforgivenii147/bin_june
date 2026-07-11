@@ -128,11 +128,9 @@ def main():
         print("[SYSTEM] Processing sequentially (default mode)...")
         results = process_sequential(tasks, args.verbose)
     successful_runs = sum(1 for r in results if r)
-    print(
-        f"""
+    print(f"""
 [FINISHED] Done! Successfully enhanced {successful_runs}/{total_images} images in-place.
-"""
-    )
+""")
 
 
 if __name__ == "__main__":

@@ -3,15 +3,7 @@
 
 import sys
 from pathlib import Path
-from dh import runcmd
-
-
-def human_size(num_bytes: int) -> str:
-    for unit in ("B", "KB", "MB", "GB"):
-        if num_bytes < 1024:
-            return f"{num_bytes:.2f} {unit}"
-        num_bytes /= 1024
-    return f"{num_bytes:.2f} TB"
+from dh import runcmd, mpf_async, get_files, fsz
 
 
 def process_file(path: Path) -> None:
@@ -21,17 +13,17 @@ def process_file(path: Path) -> None:
         sys.exit(1)
     temp_qpdf = path.with_name(f"temp_qpdf_{path.name}")
     before = path.stat().st_size
-    print(f"Before : {human_size(before)}")
+    print(f"{path.name} Before : {fsz(before)}")
     qpdf_cmd = ["qpdf", "--linearize", "--object-streams=generate", str(path), str(temp_qpdf)]
     runcmd(qpdf_cmd, show_output=True)
     if temp_qpdf.exists():
         after = temp_qpdf.stat().st_size
-        print(f"After  : {human_size(after)}")
+        print(f"{path.name} After  : {fsz(after)}")
         diff = before - after
         sign = "-" if diff >= 0 else "+"
         if after < before:
             temp_qpdf.replace(path)
-            print(f"Saved  : {sign}{human_size(abs(diff))}")
+            print(f"Saved  : {sign}{fsz(abs(diff))}")
         else:
             print("original file is smaller")
             temp_qpdf.unlink(missing_ok=True)
@@ -40,13 +32,11 @@ def process_file(path: Path) -> None:
 def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
-    if args:
-        files = [Path(p) for p in args]
-        for path in files:
-            process_file(path)
+    files = [Path(p) for p in args] if args else get_files(cwd, ext=[".pdf"])
+    if len(files) == 1:
+        process_file(files[0])
         sys.exit(0)
-    for path in cwd.rglob("*.pdf"):
-        process_file(path)
+    mpf_async(process_file, files)
 
 
 if __name__ == "__main__":

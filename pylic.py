@@ -86,10 +86,8 @@ def report(repeated: Dict[str, List[Tuple[Path, int, List[str]]]]) -> None:
         return
     print(f"Found {len(repeated)} repeated multi-line comment block(s):")
     for i, (block_text, occurrences) in enumerate(repeated.items(), 1):
-        print(
-            f"""
---- Block {i} ({len(occurrences)} occurrences, {block_text.count(chr(10)) + 1} lines) ---"""
-        )
+        print(f"""
+--- Block {i} ({len(occurrences)} occurrences, {block_text.count(chr(10)) + 1} lines) ---""")
         for line in block_text.split("\n"):
             print(f"  {line}")
         print(f"  Found in:")

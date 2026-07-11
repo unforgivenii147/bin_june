@@ -31,7 +31,7 @@ def save_asset(content: bytes, mime_type: str, file_hint="asset") -> Path:
     return path
 
 
-def extract_base64_data(data_url: (AttributeValueList | str | None), file_hint: str = "asset") -> Path | None:
+def extract_base64_data(data_url: AttributeValueList | str | None, file_hint: str = "asset") -> Path | None:
     m = re.match("data:(.*?);base64,(.*)", data_url, re.DOTALL)
     if not m:
         return None
@@ -40,7 +40,7 @@ def extract_base64_data(data_url: (AttributeValueList | str | None), file_hint: 
     return save_asset(content, mime_type, file_hint)
 
 
-def download_external_url(url: (AttributeValueList | str | None), file_hint: str = "remote") -> Path | None:
+def download_external_url(url: AttributeValueList | str | None, file_hint: str = "remote") -> Path | None:
     try:
         print("Downloading:", url)
         r = requests.get(url, timeout=TIMEOUT)

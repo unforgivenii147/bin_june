@@ -1,6 +1,3 @@
-#!/data/data/com.termux/files/usr/bin/env python
-
-
 import ast
 import io
 import re

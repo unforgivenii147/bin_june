@@ -60,9 +60,25 @@ def install_whl(pkg: str) -> None:
         return
 
 
+def installwhl(pkgs):
+    install(pkgs)
+    for pkg in pkgs:
+        p = Path(pkg)
+        if p.exists():
+            p.unlink()
+            print(f"{p.name} removed")
+
+
 if __name__ == "__main__":
     args = sys.argv[1:]
+    for k in args:
+        installwhl(k)
+
+
+"""
     candidates = [p.strip() for p in args if p.strip() != "-w"] if args else None
     if candidates is not None:
         for pkg in candidates:
             install_whl(pkg)
+
+"""

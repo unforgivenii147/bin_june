@@ -11,7 +11,10 @@ from pytesseract import image_to_string
 
 def extract_text(image_path: Path) -> bytes | dict[str, bytes | str] | str:
     img = Image.open(image_path)
-    return image_to_string(img, lang="eng", config="--oem 1 --psm 6")
+    result = image_to_string(img, lang="eng", config="--oem 1 --psm 6")
+    print("*" * 35)
+    print(result)
+    return result
 
 
 def process_file(path: Path) -> None:

@@ -2,27 +2,47 @@
 import sys
 from pathlib import Path
 
+RM = "-r" in sys.argv
+
 
 def get_files(directory: Path):
-    for fullpath in directory.rglob("*"):
-        if ".git" in fullpath.parts:
+    for path in directory.rglob("*"):
+        if ".git" in path.parts:
             continue
-        if fullpath.is_symlink():
-            yield fullpath
+        if path.is_symlink():
+            yield path
 
 
 if __name__ == "__main__":
     cwd = Path.cwd()
     bcount = 0
+    broken_links = []
+
     for path in get_files(cwd):
         if not path.exists():
-            try:
-                path.unlink()
-                bcount += 1
-                print(f"{path.relative_to(cwd)}")
-            except Exception as e:
-                print(f"Error deleting {path}: {e}")
+            print(path.name)
+            bcount += 1
+            broken_links.append(str(path.relative_to(cwd)))
+            if RM:
+                try:
+                    path.unlink()
+                    print(f"Removed: {path.relative_to(cwd)}")
+                except Exception as e:
+                    print(f"Error deleting {path}: {e}")
+
+    # Save broken links to blink.txt
+    if broken_links:
+        blink_file = cwd / "blink.txt"
+        with open(blink_file, "w") as f:
+            for link in broken_links:
+                f.write(f"{link}\n")
+        print(f"\nBroken links saved to: {blink_file}")
+
     if not bcount:
         print("no broken link found.")
         sys.exit(0)
-    print(f"{bcount} broken link removed.")
+
+    if RM:
+        print(f"{bcount} broken link removed.")
+    else:
+        print(f"{bcount} broken link found. Use -r to remove them.")

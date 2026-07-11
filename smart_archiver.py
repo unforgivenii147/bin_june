@@ -147,7 +147,7 @@ def compress_lz4(data, level):
     return lz4.frame.compress(data, compression_level=level)
 
 
-def compress_data(data: bytes, algo: (int | str), level, is_large: bool = False):
+def compress_data(data: bytes, algo: int | str, level, is_large: bool = False):
     if algo == "zstd":
         return compress_zstd(data, level)
     elif algo == "brotli":
@@ -187,9 +187,7 @@ def is_already_compressed(data, sample_size=4096) -> bool:
     return False
 
 
-def choose_algorithm(
-    file_path: Path, data: (bytes | None) = None, file_size: (int | None) = None
-) -> dict[str, int | str]:
+def choose_algorithm(file_path: Path, data: bytes | None = None, file_size: int | None = None) -> dict[str, int | str]:
     ext = Path(file_path).suffix.lower()
     if ext in EXTENSION_MAP:
         return EXTENSION_MAP[ext]

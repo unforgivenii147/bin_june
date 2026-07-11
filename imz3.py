@@ -6,7 +6,7 @@ from pathlib import Path
 from dh import STDLIB, get_files
 
 
-def extract_imports_from_py(code: str, base_path: (Path | None) = None) -> set[str]:
+def extract_imports_from_py(code: str, base_path: Path | None = None) -> set[str]:
     results = set()
     try:
         tree = ast.parse(code)

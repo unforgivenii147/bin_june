@@ -1,14 +1,14 @@
 #!/data/data/com.termux/files/usr/bin/env python
-
 import argparse
 import ast
 import shutil
 import sys
 import tempfile
+import zipfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 
 
 @dataclass
@@ -206,26 +206,93 @@ def process_python_file(path: Path, preserve_module_docstring: bool = True) -> F
         return FileResult(path=path, comments_removed=0, docstrings_removed=0, changed=False, error=str(e))
 
 
+def process_wheel_file(
+    whl_path: Path, preserve_module_docstring: bool = True, dry_run: bool = False
+) -> List[FileResult]:
+    """Process all Python files inside a .whl file."""
+    results = []
+    temp_dir = None
+
+    try:
+        # Create temporary directory for extraction
+        temp_dir = Path(tempfile.mkdtemp(prefix="whl_processing_"))
+        extract_dir = temp_dir / "extracted"
+        extract_dir.mkdir()
+
+        # Extract wheel file
+        with zipfile.ZipFile(whl_path, "r") as whl:
+            whl.extractall(extract_dir)
+
+        # Find and process all Python files
+        python_files = list(extract_dir.rglob("*.py"))
+
+        for py_file in python_files:
+            if not dry_run:
+                result = process_python_file(py_file, preserve_module_docstring)
+            else:
+                result = FileResult(py_file, 0, 0, False, None)
+
+            # Adjust path to show relative path within wheel
+            relative_path = py_file.relative_to(extract_dir)
+            result.path = Path(f"{whl_path.name}::{relative_path}")
+            results.append(result)
+
+        # Repack wheel if there were changes and not dry run
+        if not dry_run and any(r.changed for r in results):
+            new_whl_path = whl_path.with_suffix(".tmp.whl")
+            with zipfile.ZipFile(new_whl_path, "w", zipfile.ZIP_DEFLATED) as new_whl:
+                for file_path in extract_dir.rglob("*"):
+                    if file_path.is_file():
+                        arcname = file_path.relative_to(extract_dir)
+                        new_whl.write(file_path, arcname)
+
+            # Replace original wheel
+            shutil.move(str(new_whl_path), str(whl_path))
+
+    except zipfile.BadZipFile:
+        results.append(
+            FileResult(
+                path=whl_path,
+                comments_removed=0,
+                docstrings_removed=0,
+                changed=False,
+                error="Invalid or corrupted wheel file",
+            )
+        )
+    except Exception as e:
+        results.append(FileResult(path=whl_path, comments_removed=0, docstrings_removed=0, changed=False, error=str(e)))
+    finally:
+        # Cleanup temporary directory
+        if temp_dir and temp_dir.exists():
+            shutil.rmtree(temp_dir, ignore_errors=True)
+
+    return results
+
+
 def find_python_files(path: Path) -> list[Path]:
     if path.is_file():
-        if path.suffix == ".py":
+        if path.suffix in (".py", ".whl"):
             return [path]
         return []
-    return list(path.rglob("*.py"))
+    return list(path.rglob("*.py")) + list(path.rglob("*.whl"))
+
+
+def is_wheel_file(path: Path) -> bool:
+    return path.suffix.lower() == ".whl"
 
 
 def format_result(result: FileResult) -> str:
     if result.error:
-        return f"{result.path.name} (error: {result.error})"
+        return f"{result.path} (error: {result.error})"
     if not result.changed:
-        return f"{result.path.name} (no change)"
+        return f"{result.path} (no change)"
     parts = []
     if result.comments_removed > 0:
         parts.append(f"{result.comments_removed} comment{'s' if result.comments_removed != 1 else ''}")
     if result.docstrings_removed > 0:
         parts.append(f"{result.docstrings_removed} docstring{'s' if result.docstrings_removed != 1 else ''}")
     removal_text = ", ".join(parts)
-    return f"{result.path.name} ({removal_text} removed)"
+    return f"{result.path} ({removal_text} removed)"
 
 
 def main() -> None:
@@ -244,40 +311,70 @@ def main() -> None:
     )
     args = parser.parse_args()
     target_path = Path(args.target).resolve()
+
     if not target_path.exists():
         print(f"Error: {target_path} does not exist")
         sys.exit(1)
+
     python_files = find_python_files(target_path)
+
     if not python_files:
-        print("No Python files found")
+        print("No Python files or wheel files found")
         return
-    print(f"{len(python_files)} file{'s' if len(python_files) != 1 else ''} found")
+
+    # Separate regular Python files and wheel files
+    wheel_files = [f for f in python_files if is_wheel_file(f)]
+    regular_files = [f for f in python_files if not is_wheel_file(f)]
+
+    print(
+        f"Found: {len(regular_files)} Python file{'s' if len(regular_files) != 1 else ''}, "
+        f"{len(wheel_files)} wheel file{'s' if len(wheel_files) != 1 else ''}"
+    )
+
     if args.dry_run:
         print("DRY RUN - No files will be modified")
+
     results = []
     preserve_module_docstring = not args.remove_module_docstring
-    with ProcessPoolExecutor(max_workers=args.workers) as executor:
-        future_to_file = {
-            executor.submit(
-                process_python_file if not args.dry_run else lambda p: FileResult(p, 0, 0, False, "dry run"),
-                path,
-                preserve_module_docstring,
-            ): path
-            for path in python_files
-        }
-        for future in as_completed(future_to_file):
-            result = future.result()
-            results.append(result)
-            if not args.dry_run:
-                print(format_result(result))
-            else:
-                print(f"{result.path.name} (would process)")
-    if not args.dry_run:
+
+    # Process regular Python files
+    if regular_files:
+        with ProcessPoolExecutor(max_workers=args.workers) as executor:
+            future_to_file = {
+                executor.submit(
+                    process_python_file if not args.dry_run else lambda p: FileResult(p, 0, 0, False, "dry run"),
+                    path,
+                    preserve_module_docstring,
+                ): path
+                for path in regular_files
+            }
+            for future in as_completed(future_to_file):
+                result = future.result()
+                results.append(result)
+                if not args.dry_run:
+                    print(format_result(result))
+                else:
+                    print(f"{result.path.name} (would process)")
+
+    # Process wheel files
+    for wheel_path in wheel_files:
+        print(f"\nProcessing wheel file: {wheel_path.name}")
+        wheel_results = process_wheel_file(wheel_path, preserve_module_docstring, args.dry_run)
+        results.extend(wheel_results)
+
+        if args.dry_run:
+            print(f"  Would process {len(wheel_results)} files inside {wheel_path.name}")
+        else:
+            for result in wheel_results:
+                print(f"  {format_result(result)}")
+
+    if not args.dry_run and results:
         total_files = len(results)
         changed_files = sum(1 for r in results if r.changed)
         total_comments = sum(r.comments_removed for r in results)
         total_docstrings = sum(r.docstrings_removed for r in results)
         errors = sum(1 for r in results if r.error)
+
         print(f"\n{'=' * 50}")
         print(f"Summary:")
         print(f"  Total files processed: {total_files}")

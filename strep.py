@@ -3,7 +3,7 @@
 
 import sys
 from pathlib import Path
-from dh import cprint, get_files, mpf3, runcmd
+from dh import cprint, get_files, mpf3, runcmd, gsz, fsz, rrs
 
 
 def process_file(path) -> None:
@@ -20,6 +20,7 @@ def process_file(path) -> None:
 
 if __name__ == "__main__":
     cwd = Path.cwd()
+    before = gsz(cwd)
     args = sys.argv[1:]
     files = (
         [Path(p) for p in args]
@@ -42,3 +43,7 @@ if __name__ == "__main__":
         )
     )
     mpf3(process_file, files)
+    after = gsz(cwd)
+    dsz = before - after
+    if dsz:
+        print(f"space freed: {fsz(dsz)}")

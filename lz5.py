@@ -85,7 +85,7 @@ def decompress_file(file_path):
         decompressed = lz4.frame.decompress(compressed_data)
         tar_buffer = io.BytesIO(decompressed)
         with tarfile.open(fileobj=tar_buffer, mode="r") as tar:
-            tar.extractall(path=file.parent)
+            tar.extractall(path=file.parent, filter="data")
         file.unlink()
         return f"Decompressed: {file} -> {folder_path}"
     except Exception as e:

@@ -10,7 +10,7 @@ from github.Repository import Repository
 from tqdm import tqdm
 
 
-def get_github_client(token: (str | None) = None) -> Github:
+def get_github_client(token: str | None = None) -> Github:
     if token:
         return Github(token)
     return Github()

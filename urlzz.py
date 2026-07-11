@@ -1,21 +1,21 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
+import sys
 import re
 import tarfile
 import zipfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 import py7zr
-from dh import BIN_EXT, TXT_EXT, get_files
+from dh import get_nobinary, URL_RE, cprint, is_valid_url
 
 url_pattern = re.compile(r"https?://[^\s\"\']+")
-EXT = BIN_EXT
-EXT.update(TXT_EXT)
 
 
 def extract_urls_from_text(content: str):
-    return set(url_pattern.findall(content))
+    result = set(url_pattern.findall(content))
+    cprint(result)
+    return result
 
 
 def extract_urls_from_file(filepath):
@@ -78,25 +78,27 @@ def extract_urls_from_7z(filepath):
 
 def extract_urls(filepath):
     path = Path(filepath)
-    if path.suffix in EXT:
-        return extract_urls_from_file(filepath)
     if path.suffix in {".zip", ".whl"}:
         return extract_urls_from_zip(filepath)
     if path.suffix.startswith(".tar") or path.suffix in {".tar.gz", ".tar.xz", ".tar.zst", ".tar.7z"}:
         return extract_urls_from_tar(filepath)
     if path.suffix == ".7z":
         return extract_urls_from_7z(filepath)
+    else:
+        return extract_urls_from_file(filepath)
     return set()
 
 
 if __name__ == "__main__":
     cwd = Path.cwd()
-    file_paths = get_files(cwd)
+    args = sys.argv[1:]
+    file_paths = [Path(p) for p in args] if args else get_nobinary(cwd)
     all_urls = set()
     with ThreadPoolExecutor(8) as executor:
         futures = [executor.submit(extract_urls, path) for path in file_paths]
         for future in as_completed(futures):
             all_urls.update(future.result())
-    with Path("urls.txt").open("w", encoding="utf-8") as f:
+    with Path("/sdcard/data/urlzz.txt").open("a", encoding="utf-8") as f:
+        f.write("\n")
         f.writelines(url + "\n" for url in sorted(all_urls))
     print(f"Extracted {len(all_urls)} unique URLs to urls.txt")

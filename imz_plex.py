@@ -29,7 +29,7 @@ def load_known_packages() -> None:
             pass
 
 
-def is_python_file(path: (Path | str)) -> bool:
+def is_python_file(path: Path | str) -> bool:
     path = Path(path)
     if not path.suffix or path.suffix == ".py":
         try:
