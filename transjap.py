@@ -26,7 +26,7 @@ def get_translator():
 def translate_text(text: str) -> str:
     if not text or not text.strip():
         return text
-    if not re.search("[\\u3040-\\u30ff\\u4e00-\\u9fff]", text):
+    if not re.search(r"[\u3040-\u30ff\u4e00-\u9fff]", text):
         return text
     try:
         translated = get_translator().translate(text)
@@ -43,7 +43,7 @@ class CommentDocstringTranslator(ast.NodeTransformer):
 
     def translate_docstring(self, node) -> Optional[str]:
         docstring = ast.get_docstring(node)
-        if docstring and re.search("[\\u3040-\\u30ff\\u4e00-\\u9fff]", docstring):
+        if docstring and re.search(r"[\u3040-\u30ff\u4e00-\u9fff]", docstring):
             translated = translate_text(docstring)
             if translated != docstring:
                 self.modified = True
@@ -73,11 +73,11 @@ class CommentDocstringTranslator(ast.NodeTransformer):
 
 
 def translate_comments_in_line(line: str) -> Tuple[str, bool]:
-    comment_match = re.search("#(.*)$", line)
+    comment_match = re.search(r"#(.*)$", line)
     if not comment_match:
         return line, False
     comment = comment_match.group(1)
-    if not re.search("[\\u3040-\\u30ff\\u4e00-\\u9fff]", comment):
+    if not re.search(r"[\u3040-\u30ff\u4e00-\u9fff]", comment):
         return line, False
     translated_comment = translate_text(comment)
     if translated_comment != comment:
@@ -106,7 +106,7 @@ def translate_file(file_path: Path) -> bool:
             new_content = ast.unparse(new_tree)
             docstrings_modified = transformer.modified
             if comments_modified or docstrings_modified:
-                if re.search("[\\u3040-\\u30ff\\u4e00-\\u9fff]", new_content):
+                if re.search(r"[\u3040-\u30ff\u4e00-\u9fff]", new_content):
                     print(f"Warning: Some Japanese characters remain in {file_path}")
 
                     def aggressive_translate(match):
@@ -158,7 +158,7 @@ def main():
     remaining = []
     for file_path in py_files:
         content = file_path.read_text(encoding="utf-8")
-        if re.search("[\\u3040-\\u30ff\\u4e00-\\u9fff]", content):
+        if re.search(r"[\u3040-\u30ff\u4e00-\u9fff]", content):
             remaining.append(file_path)
     if remaining:
         print(f"⚠ Warning: Japanese characters found in {len(remaining)} files:")

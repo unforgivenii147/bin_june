@@ -3,7 +3,7 @@
 
 import sys
 from pathlib import Path
-from dh import get_files, gsz, mpf3, runcmd
+from dh import get_files, gsz, mpf3, runcmd, rrs
 
 EXT = [".js", ".jsx", ".jsm", ".jsc"]
 
@@ -18,7 +18,7 @@ def safe_run(path: Path) -> bool:
     return True
 
 
-def process_file(path) -> bool:
+def process_file(path):
     path = Path(path)
     if "site-packages" in path.parts and "notebook" in path.parts:
         return
@@ -27,7 +27,9 @@ def process_file(path) -> bool:
         return
     if len(path.read_text().splitlines()) == 1:
         return
-    rrs(path, before, after)
+    if safe_run(path):
+        after = gsz(path)
+        rrs(path, before, after)
     return
 
 
@@ -46,7 +48,7 @@ def main():
         files = get_files(cwd, ext=EXT)
     if len(files) == 1:
         process_file(files[0])
-        sys.exit(1)
+        sys.exit(0)
     mpf3(process_file, files)
 
 
