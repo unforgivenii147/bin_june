@@ -17,6 +17,13 @@ TERMUX_SHEBANGS = {
     "rust": "#!/data/data/com.termux/files/usr/bin/env rust-script",
 }
 
+EXTENSION_MAP = {
+    ".py": "python",
+    ".sh": "bash",
+    ".bash": "bash",
+    ".rs": "rust",
+}
+
 SCRIPT_DIRS = {Path.home() / "bin", Path.home() / "bashbin", Path.home() / ".cargo" / "bin"}
 ARCHIVE_DIR = Path.home() / "isaac" / "may" / "scripts"
 
@@ -33,27 +40,11 @@ def get_clipboard_content() -> str:
         sys.exit(1)
 
 
-def detect_language(content: str) -> str:
-    first_line = content.lstrip().split("\n")[0] if content else ""
-    if first_line.startswith("#!"):
-        if "python" in first_line.lower():
-            return "python"
-        elif "bash" in first_line.lower() or "sh" in first_line.lower():
-            return "bash"
-        elif "rust" in first_line.lower():
-            return "rust"
-
-    rust_indicators = ["fn main()", "fn ", "let ", "mut ", "struct ", "impl ", "use ", "cargo"]
-    python_indicators = ["import ", "from ", "def ", "class ", "if __name__", "print("]
-    bash_indicators = ["echo ", "cd ", "export ", "if [", "for ", "while ", "$("]
-
-    preview = content.lower()
-    rust_score = sum(1 for ind in rust_indicators if ind in preview)
-    python_score = sum(1 for ind in python_indicators if ind in preview)
-    bash_score = sum(1 for ind in bash_indicators if ind in preview)
-
-    scores = {"rust": rust_score, "python": python_score, "bash": bash_score}
-    return max(scores, key=scores.get)
+def get_language_from_extension(filename: str) -> str:
+    """Determine language based on file extension."""
+    path = Path(filename)
+    ext = path.suffix.lower()
+    return EXTENSION_MAP.get(ext, "bash")  # Default to bash if unknown extension
 
 
 def replace_shebang(content: str, lang: str) -> str:
@@ -86,51 +77,69 @@ def archive_existing_file(file_path: Path) -> None:
 
 
 def create_symlink(script_path: Path) -> None:
-    if script_path.suffix:
-        if script_path.suffix == ".rs":
-            return
-        symlink_path = script_path.parent / script_path.stem
-        if symlink_path.exists() and symlink_path.is_symlink():
-            try:
-                symlink_path.unlink()
-            except OSError as e:
-                print(f"  ⚠️  Failed to remove old symlink: {e}", file=sys.stderr)
-        if not symlink_path.exists():
-            try:
-                symlink_path.symlink_to(script_path)
-                print(f"  → Created symlink: {symlink_path.name}")
-            except OSError as e:
-                print(f"  ⚠️  Failed to create symlink: {e}", file=sys.stderr)
+    # Don't create symlinks for .rs files
+    if script_path.suffix.lower() == ".rs":
+        return
+
+    symlink_path = script_path.parent / script_path.stem
+    if symlink_path.exists() and symlink_path.is_symlink():
+        try:
+            symlink_path.unlink()
+        except OSError as e:
+            print(f"  ⚠️  Failed to remove old symlink: {e}", file=sys.stderr)
+    if not symlink_path.exists():
+        try:
+            symlink_path.symlink_to(script_path)
+            print(f"  → Created symlink: {symlink_path.name}")
+        except OSError as e:
+            print(f"  ⚠️  Failed to create symlink: {e}", file=sys.stderr)
 
 
 def main() -> None:
     if len(sys.argv) != 2:
         print(f"Usage: {sys.argv[0]} <filename>", file=sys.stderr)
         sys.exit(1)
+
     filename = sys.argv[1]
     output_path = Path(filename)
     cwd = Path.cwd()
+
+    # Check if we're in a bin directory
     is_script_dir = cwd in SCRIPT_DIRS or cwd.name == "bin"
+
+    # Archive existing file if it exists
     if output_path.exists():
         archive_existing_file(output_path)
+
+    # Get clipboard content
     content = get_clipboard_content()
+
     if not content.strip():
+        # Empty clipboard
         print("⚠️  Clipboard is empty, creating empty file")
-        content = "\n"
         if is_script_dir:
-            content = TERMUX_SHEBANGS["bash"] + "\n\n" + content
+            lang = get_language_from_extension(filename)
+            content = TERMUX_SHEBANGS[lang] + "\n\n"
+        else:
+            content = "\n"
     elif is_script_dir:
-        lang = detect_language(content)
+        # Determine language from file extension
+        lang = get_language_from_extension(filename)
         content = replace_shebang(content, lang)
         print(f"✓ Added {lang} shebang")
+
+    # Write the file
     try:
         output_path.write_text(content)
         print(f"✓ Created: {output_path}")
     except OSError as e:
         print(f"Error writing file: {e}", file=sys.stderr)
         sys.exit(1)
+
+    # Make executable if in a bin directory
     if is_script_dir:
-        output_path.chmod(493)
+        output_path.chmod(0o755)  # rwxr-xr-x
+        print(f"✓ Made executable: {output_path}")
         create_symlink(output_path)
 
 
