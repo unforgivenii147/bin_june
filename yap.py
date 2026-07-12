@@ -8,6 +8,28 @@ from pathlib import Path
 from time import perf_counter as pff
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+def is_python_file(path: (str | Path)) -> bool:
+    from ast import parse as ast_parse
+
+    path = Path(path)
+    if is_binary(path):
+        return False
+    if not path.stat().st_size:
+        return False
+    if path.is_file() and path.suffix == ".py":
+        return True
+    if not path.suffix:
+        content = path.read_text(encoding="utf-8")
+        if not content:
+            return False
+        if content.startswith("#!") and "python" in content[:100]:
+            return True
+        try:
+            _ = ast_parse(content)
+            return True
+        except:
+            return False
+    return False
 
 
 def mpf3(process_function: Callable, files: list[Path], **kwargs):

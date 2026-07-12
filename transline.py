@@ -4,7 +4,7 @@ Translate Chinese characters in text files in-place.
 Optimized for speed using parallel processing.
 Only translates Chinese characters (not punctuation), preserving everything else.
 """
-
+import re
 import json
 import logging
 import signal
@@ -19,14 +19,19 @@ from deep_translator import GoogleTranslator
 from dh import get_nobinary
 from tenacity import before_sleep_log, retry, retry_if_exception_type, stop_after_attempt, wait_exponential_jitter
 
+CHUNK_SIZE = 32768
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
+CHINESE_PATTERN = re.compile(r"[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]+")
+ZERO_DOT_THREE =0.3
 MAX_WORKERS = 10
 MAX_RETRIES = 3
 PROGRESS_SAVE_EVERY = 20
+
 logging.basicConfig(level=logging.WARNING)
 log = logging.getLogger(__name__)
+
 _interrupted = False
+
 
 
 def is_binary(path: (Path | str)) -> bool:
@@ -80,19 +85,6 @@ def get_files(path: str | Path, include_hidden: bool = True, ext: list[str] | No
 
     return sorted(files)
 
-
-# This regex pattern explicitly matches ANY Han (Chinese) character,
-# completely ignoring brackets, spaces, or English characters automatically.
-CHINESE_PATTERN = re.compile(r"[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]+")
-
-MAX_WORKERS = 10
-MAX_RETRIES = 3
-PROGRESS_SAVE_EVERY = 20
-
-logging.basicConfig(level=logging.WARNING)
-log = logging.getLogger(__name__)
-
-_interrupted = False
 
 
 def _sigint_handler(sig, frame):
