@@ -39,18 +39,16 @@ class EntityExtractor(ast.NodeVisitor):
         entity_code = self._get_source_slice(node)
         scope_prefix = "_".join(self.scope_stack)
         full_name = f"{scope_prefix}_{name}" if scope_prefix else name
-        self.entities.append(
-            {
-                "name": name,
-                "full_name": full_name,
-                "type": entity_type,
-                "code": entity_code,
-                "path": str(self.original_path),
-                "is_constant": entity_type in "constant",
-                "is_class": entity_type in "class",
-                "is_function": entity_type in {"function", "method"},
-            }
-        )
+        self.entities.append({
+            "name": name,
+            "full_name": full_name,
+            "type": entity_type,
+            "code": entity_code,
+            "path": str(self.original_path),
+            "is_constant": entity_type in "constant",
+            "is_class": entity_type in "class",
+            "is_function": entity_type in {"function", "method"},
+        })
 
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
         entity_type = "method" if self.scope_stack and self.scope_stack[-1].startswith("class_") else "function"

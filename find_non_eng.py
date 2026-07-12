@@ -85,15 +85,13 @@ class LanguageDetector:
                 self.stats["languages"][lang_name] += 1
                 if lang_code != "en" or not only_report_non_english:
                     if lang_code == "en" and not is_reliable and only_report_non_english or lang_code != "en":
-                        self.stats["non_english"].append(
-                            {
-                                "file": filepath,
-                                "language": lang_name,
-                                "code": lang_code,
-                                "reliable": is_reliable,
-                                "confidence": percent,
-                            }
-                        )
+                        self.stats["non_english"].append({
+                            "file": filepath,
+                            "language": lang_name,
+                            "code": lang_code,
+                            "reliable": is_reliable,
+                            "confidence": percent,
+                        })
         print("\n" + "=" * 60)
         self.report_results(only_report_non_english)
 

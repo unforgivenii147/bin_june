@@ -14,13 +14,15 @@ parser = Parser()
 parser.language = Language(tsp.language())
 OUT_DIR = Path("output")
 OUT_DIR.mkdir(exist_ok=True)
-VALID = {"""
+VALID = {
+    """
 (expression_statement
   (assignment_expression
     (=( _ )@name value:value )
   )
   (
-)"""}
+)"""
+}
 
 
 def get_node_text(src: bytes, node) -> str:

@@ -43,14 +43,12 @@ def extract_functions_and_classes(src: bytes, tree: Tree):
                 prev_node = prev_node.prev_sibling
             if decorators:
                 node_text = "\n".join(reversed(decorators)) + "\n" + node_text
-            definitions.append(
-                {
-                    "type": node.type.replace("_definition", ""),
-                    "name": name,
-                    "text": node_text,
-                    "line": node.start_point.row + 1,
-                }
-            )
+            definitions.append({
+                "type": node.type.replace("_definition", ""),
+                "name": name,
+                "text": node_text,
+                "line": node.start_point.row + 1,
+            })
         for child in node.children:
             traverse(child)
 
@@ -106,14 +104,12 @@ for folder, files_dict in folder_definitions.items():
         content_parts.append("")
     content_parts.extend(("#" + "=" * 78, "# DEFINITIONS", "#" + "=" * 78, ""))
     for file_name, file_data in sorted(files_dict.items()):
-        content_parts.extend(
-            (
-                f"\n# {'=' * 76}",
-                f"# File: {file_name}",
-                f"# Path: {file_data['path']}",
-                f"# {'=' * 76}\n",
-            )
-        )
+        content_parts.extend((
+            f"\n# {'=' * 76}",
+            f"# File: {file_name}",
+            f"# Path: {file_data['path']}",
+            f"# {'=' * 76}\n",
+        ))
         classes = [d for d in file_data["definitions"] if d["type"] == "class"]
         functions = [d for d in file_data["definitions"] if d["type"] == "function"]
         if classes:

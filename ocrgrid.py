@@ -93,15 +93,13 @@ def main() -> None:
                         ),
                         encoding="utf-8",
                     )
-                    report_index.append(
-                        {
-                            "variant": variant_name,
-                            "psm": psm,
-                            "oem": oem,
-                            "dpi": dpi,
-                            "text_file": str(txt_path),
-                        }
-                    )
+                    report_index.append({
+                        "variant": variant_name,
+                        "psm": psm,
+                        "oem": oem,
+                        "dpi": dpi,
+                        "text_file": str(txt_path),
+                    })
     (args.out / "index.json").write_text(json.dumps(report_index, indent=2), encoding="utf-8")
 
 

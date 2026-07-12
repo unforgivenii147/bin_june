@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
-
+"""
+downloads a pkg from pypi.org
+"""
 
 import argparse
 from pathlib import Path

@@ -44,7 +44,8 @@ class GoogleDriveSyncer:
         while True:
             try:
                 results = (
-                    self.service.files()
+                    self.service
+                    .files()
                     .list(
                         q=f"'{folder_id}' in parents and trashed=false",
                         pageSize=1000,

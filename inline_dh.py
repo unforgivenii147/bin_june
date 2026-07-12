@@ -6,12 +6,31 @@ import sys
 from concurrent.futures import ThreadPoolExecutor
 from os.path import join
 from pathlib import Path
-from dh import get_pyfiles
-
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 DH_SRC_DIR = Path("~/isaac/pkgs/dh/src/dh").expanduser()
+
+
+def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
+    path = Path(path)
+    skip_dirs = {".git", "__pycache__"}
+    queue = deque([path])
+    files = []
+    while queue:
+        current = queue.popleft()
+        try:
+            entries = current.iterdir()
+        except (PermissionError, OSError):
+            continue
+        for item in entries:
+            if item.is_symlink():
+                continue
+            if item.is_dir() and item.name not in skip_dirs:
+                queue.append(item)
+            elif item.is_file():
+                if ext is None or item.suffix in ext:
+                    files.append(item)
+    return files
 
 
 def build_dh_mapping(dh_path: Path) -> dict:
@@ -207,7 +226,7 @@ def main():
     cwd = Path.cwd()
     args = sys.argv[1:]
 
-    py_files = [Path(p) for p in args] if args else get_pyfiles(cwd)
+    py_files = [Path(p) for p in args] if args else get_files(cwd, ext=[".py"])
 
     with ThreadPoolExecutor() as executor:
         executor.map(lambda p: process_file(p, mapping), py_files)

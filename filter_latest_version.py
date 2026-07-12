@@ -73,15 +73,13 @@ def filter_latest_for_armv7(urls_file=None):
             print(f"   Arch: {arch}")
             print(f"   Version: {version_str}")
             print(f"   URL: {url}")
-            results.append(
-                {
-                    "package": package,
-                    "python_version": py_version,
-                    "arch": arch,
-                    "version": version_str,
-                    "url": url,
-                }
-            )
+            results.append({
+                "package": package,
+                "python_version": py_version,
+                "arch": arch,
+                "version": version_str,
+                "url": url,
+            })
     print("\n" + "=" * 80)
     print(f"SUMMARY: Found {len(results)} ARMv7 wheel(s)")
     print("=" * 80)

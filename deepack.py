@@ -122,17 +122,21 @@ def repack_package(args_tuple: Tuple[str, str, Path, List[Path]]) -> Tuple[str, 
                     break
             else:
                 metadata_file = metadata_dir / "METADATA"
-                metadata_file.write_text(f"""
+                metadata_file.write_text(
+                    f"""
 Metadata-Version: 2.1
 Name: {package_name}
 Version: {version}
-""".strip())
+""".strip()
+                )
                 wheel_file = metadata_dir / "WHEEL"
-                wheel_file.write_text("""
+                wheel_file.write_text(
+                    """
 Wheel-Version: 1.0
 Generator: repack-script
 Root-Is-Purelib: false
-""".strip())
+""".strip()
+                )
             wheel_cmd = [
                 sys.executable,
                 "-m",

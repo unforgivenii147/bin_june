@@ -168,13 +168,11 @@ def find_imports_for_directory(dir_path: Path, start_path: Path, std_libs: set, 
     local_modules = {p.stem for p in dir_path.glob("*.py") if not any(part in SKIP_DIRS for part in p.parts)}
     local_packages = get_local_packages(dir_path)
     local_names = local_modules | local_packages | all_local_packages
-    result = sorted(
-        [
-            imp
-            for imp in all_imports
-            if imp not in std_libs and imp not in local_names and not imp.startswith(".") and imp != "__future__"
-        ]
-    )
+    result = sorted([
+        imp
+        for imp in all_imports
+        if imp not in std_libs and imp not in local_names and not imp.startswith(".") and imp != "__future__"
+    ])
     return result
 
 
@@ -194,7 +192,8 @@ def save_requirements_file(modules: list, output_path: Path, pkgz: set) -> bool:
     with output_path.open(encoding="utf-8") as fin:
         lines = fin.readlines()
         cleaned.extend(
-            line.rstrip()
+            line
+            .rstrip()
             .replace("Not Installed", "")
             .replace("==(NA)", "")
             .replace("==(unknown)", "")
@@ -363,16 +362,11 @@ def main() -> None:
         local_modules = {p.stem for p in cwd.glob("*.py") if not any(part in SKIP_DIRS for part in p.parts)}
         local_names = local_modules | all_local_packages
         modules = sorted(
-            set(
-                [
-                    imp
-                    for imp in all_imports
-                    if imp not in std_libs
-                    and imp not in local_names
-                    and not imp.startswith(".")
-                    and imp != "__future__"
-                ]
-            )
+            set([
+                imp
+                for imp in all_imports
+                if imp not in std_libs and imp not in local_names and not imp.startswith(".") and imp != "__future__"
+            ])
         )
         if modules:
             print(f"\n{'Module':<20} | {'Version':<15}")

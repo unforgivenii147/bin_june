@@ -20,14 +20,12 @@ def extract_code_snippets_with_details(markdown_content: str):
     for i, line in enumerate(lines):
         if line.strip().startswith("```"):
             if in_code_block:
-                snippets_data.append(
-                    {
-                        "language": language,
-                        "start_line": start_line_num,
-                        "end_line": i,
-                        "content": "\n".join(current_block_lines),
-                    }
-                )
+                snippets_data.append({
+                    "language": language,
+                    "start_line": start_line_num,
+                    "end_line": i,
+                    "content": "\n".join(current_block_lines),
+                })
                 in_code_block = False
                 current_block_lines = []
                 language = ""
@@ -40,14 +38,12 @@ def extract_code_snippets_with_details(markdown_content: str):
         elif in_code_block:
             current_block_lines.append(line)
     if in_code_block:
-        snippets_data.append(
-            {
-                "language": language,
-                "start_line": start_line_num,
-                "end_line": len(lines),
-                "content": "\n".join(current_block_lines),
-            }
-        )
+        snippets_data.append({
+            "language": language,
+            "start_line": start_line_num,
+            "end_line": len(lines),
+            "content": "\n".join(current_block_lines),
+        })
     return snippets_data
 
 

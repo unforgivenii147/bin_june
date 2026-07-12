@@ -81,13 +81,11 @@ def compare_files(file_paths: list[Path], similarity_threshold: int = 70):
             try:
                 score = ssdeep.compare(hash1, hash2)
                 if score >= similarity_threshold:
-                    similarities.append(
-                        {
-                            "file1": str(Path(filepath1_str).relative_to(cwd)),
-                            "file2": str(Path(filepath2_str).relative_to(cwd)),
-                            "similarity_score": score,
-                        }
-                    )
+                    similarities.append({
+                        "file1": str(Path(filepath1_str).relative_to(cwd)),
+                        "file2": str(Path(filepath2_str).relative_to(cwd)),
+                        "similarity_score": score,
+                    })
             except ssdeep.error as e:
                 print(f"Error comparing hashes for {filepath1_str} and {filepath2_str}: {e}")
             except Exception as e:
