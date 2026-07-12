@@ -1,0 +1,229 @@
+#!/usr/bin/env python3
+"""
+Translate non-English comments, docstrings, and print() strings in Python files.
+Recursively processes Python files from the current directory.
+Optimized for Python 3.12.
+"""
+
+import ast
+import io
+import logging
+import multiprocessing
+import time
+import tokenize
+from collections.abc import Generator, Iterable
+from pathlib import Path
+from typing import Final
+
+from deep_translator import GoogleTranslator
+from dh import DOC_TH1, DOC_TH2
+from langdetect import DetectorFactory, detect
+
+# Configuration
+SKIP_DIRS: Final[frozenset[str]] = frozenset({
+    "lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"
+})
+DetectorFactory.seed = 0
+TARGET_LANG: Final[str] = "en"
+DELAY_SECONDS: Final[float] = 0.5
+MAX_WORKERS: Final[int] = multiprocessing.cpu_count()
+SHEBANG_PREFIX: Final[str] = "#!/"
+
+KNOWN_ENGLISH_TOKENS: Final[frozenset[str]] = frozenset({
+    "TODO", "FIXME", "HACK", "XXX", "NOTE", "BUG", "pylint", "noqa",
+    "type: ignore", "pragma", "coding:", "encoding:", "charset:",
+    "DRYRUN", "DRY-RUN", "RESCURSIVE MODE ENABLED", ".gitignore",
+})
+
+LATIN_RANGES: Final[list[tuple[int, int]]] = [
+    (0, 127), (128, 255), (256, 383), (384, 591),
+    (7680, 7935), (11360, 11391), (42784, 43007), (43824, 43887)
+]
+
+# Setup logging
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+logger = logging.getLogger(__name__)
+
+def is_latin_char(char: str) -> bool:
+    """Checks if a character is within defined Latin/English ranges."""
+    cp = ord(char)
+    return any(start <= cp <= end for start, end in LATIN_RANGES)
+
+def is_english_alphabet(text: str) -> bool:
+    """Checks if the text contains only English/Latin characters and spaces."""
+    for char in text:
+        if char.isspace() or not char.isalpha():
+            continue
+        if not is_latin_char(char):
+            return False
+    return True
+
+def has_non_latin_alphabet(text: str) -> bool:
+    """Checks if the text contains non-Latin alphabetic characters."""
+    return any(char.isalpha() and not is_latin_char(char) for char in text)
+
+def should_skip(text: str) -> bool:
+    """Determines if a string should be skipped for translation."""
+    clean = text.strip()
+    if not clean or clean.startswith(SHEBANG_PREFIX):
+        return True
+    if is_english_alphabet(clean):
+        return True
+    if any(token in clean.upper() for token in KNOWN_ENGLISH_TOKENS):
+        return True
+    if not any(c.isalpha() for c in clean):
+        return True
+    return False
+
+def is_non_english(text: str) -> bool:
+    """Detects if a string is non-English using simple heuristics and langdetect."""
+    clean = text.strip()
+    if len(clean) < 2 or should_skip(clean):
+        return False
+    
+    if has_non_latin_alphabet(clean):
+        return True
+        
+    try:
+        return detect(clean) != "en"
+    except Exception:
+        return has_non_latin_alphabet(clean)
+
+def translate_text(text: str) -> str:
+    """Translates text to the target language with a rate-limit delay."""
+    if not text.strip():
+        return text
+    try:
+        result = GoogleTranslator(source="auto", target=TARGET_LANG).translate(text)
+        time.sleep(DELAY_SECONDS)
+        return result if result else text
+    except Exception as exc:
+        logger.warning("  [warn] translation failed: %s", exc)
+        return text
+
+def get_node_positions(tree: ast.AST) -> tuple[set[tuple[int, int]], set[tuple[int, int]]]:
+    """Extracts positions of print arguments and docstrings from an AST."""
+    print_positions = set()
+    docstring_positions = set()
+    
+    for node in ast.walk(tree):
+        # Print arguments
+        if (isinstance(node, ast.Call) and 
+            isinstance(node.func, ast.Name) and 
+            node.func.id == "print"):
+            for arg in node.args:
+                if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
+                    print_positions.add((arg.lineno, arg.col_offset))
+        
+        # Docstrings
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Module)):
+            if (node.body and 
+                isinstance(node.body[0], ast.Expr) and 
+                isinstance(node.body[0].value, ast.Constant) and 
+                isinstance(node.body[0].value.value, str)):
+                ds = node.body[0].value
+                docstring_positions.add((ds.lineno, ds.col_offset))
+                
+    return print_positions, docstring_positions
+
+def process_file(path: Path) -> bool:
+    """Processes a single Python file, translating eligible strings in-place."""
+    try:
+        source = path.read_text(encoding="utf-8")
+    except Exception as e:
+        logger.error("[error] Could not read %s: %s", path, e)
+        return False
+
+    try:
+        tokens = list(tokenize.generate_tokens(io.StringIO(source).readline))
+        tree = ast.parse(source)
+    except (tokenize.TokenError, SyntaxError) as e:
+        logger.warning("[skip] %s: Parse error - %s", path, e)
+        return False
+
+    lines = source.splitlines(keepends=True)
+    def get_offset(lineno: int, col: int) -> int:
+        return sum(len(lines[i]) for i in range(lineno - 1)) + col
+
+    print_pos, doc_pos = get_node_positions(tree)
+    replacements: list[tuple[int, int, str]] = []
+
+    for tok in tokens:
+        start_offset = get_offset(tok.start[0], tok.start[1])
+        end_offset = get_offset(tok.end[0], tok.end[1])
+
+        if tok.type == tokenize.COMMENT:
+            inner = tok.string.lstrip("#").strip()
+            if is_non_english(inner):
+                translated = translate_text(inner)
+                logger.info("  [comment] %s -> %s", inner, translated)
+                replacements.append((start_offset, end_offset, f"# {translated}"))
+        
+        elif tok.type == tokenize.STRING:
+            is_print = (tok.start[0], tok.start[1]) in print_pos
+            is_doc = (tok.start[0], tok.start[1]) in doc_pos
+            
+            if is_print or is_doc:
+                raw = tok.string
+                # Determine quoting
+                if raw.startswith((DOC_TH1, DOC_TH2)): quote = raw[:3]
+                elif raw.startswith('"'): quote = '"'
+                else: quote = "'"
+                
+                try:
+                    inner = ast.literal_eval(raw)
+                except Exception:
+                    continue
+                    
+                if isinstance(inner, str) and is_non_english(inner):
+                    translated = translate_text(inner)
+                    label = "docstring" if is_doc: else "print-str"
+                    logger.info("  [%s] %s -> %s", label, inner, translated)
+                    escaped = translated.replace("\\", "\\\\").replace(quote, f"\\{quote}")
+                    replacements.append((start_offset, end_offset, f"{quote}{escaped}{quote}"))
+
+    if not replacements:
+        return False
+
+    # Apply replacements from back to front
+    replacements.sort(key=lambda x: x[0], reverse=True)
+    src_list = list(source)
+    for start, end, new_text in replacements:
+        src_list[start:end] = list(new_text)
+    
+    new_source = "".join(src_list)
+    try:
+        ast.parse(new_source)
+        path.write_text(new_source, encoding="utf-8")
+        return True
+    except SyntaxError as e:
+        logger.error("[error] %s: Generated invalid syntax, skipping: %s", path, e)
+        return False
+
+def worker(path_str: str) -> None:
+    """Worker function for multiprocessing."""
+    path = Path(path_str)
+    try:
+        if process_file(path):
+            logger.info("[updated] %s", path)
+    except Exception as e:
+        logger.error("[failed] %s: %s", path, e)
+
+def main() -> None:
+    """Finds all Python files and processes them in parallel."""
+    files = [
+        str(p) for p in Path(".").rglob("*.py")
+        if not any(part in SKIP_DIRS for part in p.parts)
+    ]
+    
+    if not files:
+        logger.info("No Python files found.")
+        return
+
+    logger.info("Found %d files. Processing with %d workers...", len(files), MAX_WORKERS)
+    with multiprocessing.Pool(processes=MAX_WORKERS) as pool:
+        pool.map(worker, files)
+    logger.info("Done.")
+
+if __name__ == "__main__":
+    main()
