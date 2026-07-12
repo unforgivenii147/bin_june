@@ -7,12 +7,12 @@ from pathlib import Path
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
-def should_skip(path: (str | Path)) -> bool:
+def should_skip(path: str | Path) -> bool:
     path = Path(path)
     return bool(path.is_symlink() or not SKIP_DIRS.isdisjoint(path.parts))
 
 
-def is_binary(path: (Path | str)) -> bool:
+def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
         with path.open("rb") as f:

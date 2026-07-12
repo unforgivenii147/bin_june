@@ -127,7 +127,7 @@ def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
 
 
-def is_binary(path: (Path | str)) -> bool:
+def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
         with path.open("rb") as f:
@@ -143,7 +143,7 @@ def is_binary(path: (Path | str)) -> bool:
         return True
 
 
-def get_nobinary(path: (str | Path)) -> list[Path]:
+def get_nobinary(path: str | Path) -> list[Path]:
     return [f for f in get_files(path) if not is_binary(f)]
 
 

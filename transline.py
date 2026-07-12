@@ -4,6 +4,7 @@ Translate Chinese characters in text files in-place.
 Optimized for speed using parallel processing.
 Only translates Chinese characters (not punctuation), preserving everything else.
 """
+
 import re
 import json
 import logging
@@ -22,7 +23,7 @@ from tenacity import before_sleep_log, retry, retry_if_exception_type, stop_afte
 CHUNK_SIZE = 32768
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 CHINESE_PATTERN = re.compile(r"[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]+")
-ZERO_DOT_THREE =0.3
+ZERO_DOT_THREE = 0.3
 MAX_WORKERS = 10
 MAX_RETRIES = 3
 PROGRESS_SAVE_EVERY = 20
@@ -33,8 +34,7 @@ log = logging.getLogger(__name__)
 _interrupted = False
 
 
-
-def is_binary(path: (Path | str)) -> bool:
+def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
         with path.open("rb") as f:
@@ -50,7 +50,7 @@ def is_binary(path: (Path | str)) -> bool:
         return True
 
 
-def get_nobinary(path: (str | Path)) -> list[Path]:
+def get_nobinary(path: str | Path) -> list[Path]:
     return [f for f in get_files(path) if not is_binary(f)]
 
 
@@ -84,7 +84,6 @@ def get_files(path: str | Path, include_hidden: bool = True, ext: list[str] | No
             continue
 
     return sorted(files)
-
 
 
 def _sigint_handler(sig, frame):

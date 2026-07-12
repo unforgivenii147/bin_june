@@ -8,7 +8,7 @@ from pathlib import Path
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
-def is_binary(path: (Path | str)) -> bool:
+def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
         with path.open("rb") as f:

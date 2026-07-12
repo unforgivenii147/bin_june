@@ -31,12 +31,14 @@ def generate_html(font_files) -> str:
     ]
     for font_path in font_files:
         font_name = Path(font_path).name
-        html.extend((
-            "<div class='font-preview'>",
-            "<style>",
-            f"@font-face {{ font-family: '{font_name}'; src: url('{font_path}'); }}",
-            "</style>",
-        ))
+        html.extend(
+            (
+                "<div class='font-preview'>",
+                "<style>",
+                f"@font-face {{ font-family: '{font_name}'; src: url('{font_path}'); }}",
+                "</style>",
+            )
+        )
         html.extend(
             f"<h1 style='font-family: \"{font_name}\"; font-size: {size}px;'>هنر برتز از گوهر آمد پدید</h1>"
             for size in FONT_SIZES

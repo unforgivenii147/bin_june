@@ -41,13 +41,15 @@ def create_project_structure(pkg: str, author: str, email: str, url: str, simple
         cfg_content.append(f"author_email = {email}")
     if url:
         cfg_content.append(f"url = {url}")
-    cfg_content.extend([
-        "",
-        "[options]",
-        f"py_modules = {pkg}",
-        "python_requires = >=3.11",
-        "",
-    ])
+    cfg_content.extend(
+        [
+            "",
+            "[options]",
+            f"py_modules = {pkg}",
+            "python_requires = >=3.11",
+            "",
+        ]
+    )
     setup_cfg.write_text("\n".join(cfg_content))
     pyproject_path = cwd / "pyproject.toml"
     pyproject_path.write_text("""[build-system]

@@ -25,7 +25,7 @@ def is_wheel_ok(path: Path) -> bool:
         return False
 
 
-def is_valid_archive(path: (str | Path)) -> bool:
+def is_valid_archive(path: str | Path) -> bool:
     path = Path(path)
     try:
         if not path.is_file():
@@ -64,7 +64,7 @@ def is_valid_archive(path: (str | Path)) -> bool:
         return False
 
 
-def _check_tar(path: (str | Path), mode: str) -> bool:
+def _check_tar(path: str | Path, mode: str) -> bool:
     path = Path(path)
     with tarfile.open(path, mode) as tf:
         bad = tf.badfile()
@@ -74,7 +74,7 @@ def _check_tar(path: (str | Path), mode: str) -> bool:
         return True
 
 
-def _check_brotli_file(path: (str | Path)) -> bool:
+def _check_brotli_file(path: str | Path) -> bool:
     from brotlicffi import decompress as brotli_decompress
 
     path = Path(path)
@@ -86,7 +86,7 @@ def _check_brotli_file(path: (str | Path)) -> bool:
         return False
 
 
-def _check_zstd_file(path: (str | Path)) -> bool:
+def _check_zstd_file(path: str | Path) -> bool:
     from zstandard import ZstdDecompressor as zstd_ZstdDecompressor
 
     path = Path(path)
@@ -99,7 +99,7 @@ def _check_zstd_file(path: (str | Path)) -> bool:
         return False
 
 
-def _check_lz4_file(path: (str | Path)) -> bool:
+def _check_lz4_file(path: str | Path) -> bool:
     from lz4.frame import decompress as lz4_decompress
 
     path = Path(path)
@@ -111,7 +111,7 @@ def _check_lz4_file(path: (str | Path)) -> bool:
         return False
 
 
-def _check_lzma_file(path: (str | Path)) -> bool:
+def _check_lzma_file(path: str | Path) -> bool:
     from lzma import decompress as lzma_decompress
 
     path = Path(path)
@@ -123,7 +123,7 @@ def _check_lzma_file(path: (str | Path)) -> bool:
         return False
 
 
-def _check_tar_with_brotli(path: (str | Path)) -> bool:
+def _check_tar_with_brotli(path: str | Path) -> bool:
     from brotlicffi import decompress as brotli_decompress
 
     path = Path(path)
@@ -135,7 +135,7 @@ def _check_tar_with_brotli(path: (str | Path)) -> bool:
         return False
 
 
-def _check_tar_with_zstd(path: (str | Path)) -> bool:
+def _check_tar_with_zstd(path: str | Path) -> bool:
     path = Path(path).resolve()
     xpath = path.with_name(path.name.replace(".tar.zst", ""))
     try:
@@ -146,7 +146,7 @@ def _check_tar_with_zstd(path: (str | Path)) -> bool:
         return False
 
 
-def _check_tar_with_lz4(path: (str | Path)) -> bool:
+def _check_tar_with_lz4(path: str | Path) -> bool:
     from lz4.frame import decompress as lz4_decompress
 
     path = Path(path)
@@ -158,7 +158,7 @@ def _check_tar_with_lz4(path: (str | Path)) -> bool:
         return False
 
 
-def _check_tar_with_lzma(path: (str | Path)) -> bool:
+def _check_tar_with_lzma(path: str | Path) -> bool:
     from lzma import decompress as lzma_decompress
 
     path = Path(path)

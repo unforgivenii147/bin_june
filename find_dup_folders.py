@@ -11,7 +11,7 @@ from xxhash import xxh64
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
-def get_dirs(path: (str | Path)) -> list[Path]:
+def get_dirs(path: str | Path) -> list[Path]:
     path = Path(path)
     if not path.is_dir():
         return []

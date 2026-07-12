@@ -12,7 +12,7 @@ def get_removed_lines(txt1, txt2):
     return list({l for l in txt1.splitlines() if l} - {l for l in txt2.splitlines() if l})
 
 
-def read_lines(path: (str | Path), ke: bool = True) -> list[str]:
+def read_lines(path: str | Path, ke: bool = True) -> list[str]:
     path = Path(path)
     if path.stat().st_size > THRESHOLD:
         return read_lines_mmap(path, ke)

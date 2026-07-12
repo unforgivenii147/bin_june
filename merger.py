@@ -15,7 +15,7 @@ def get_random_filename(length: int = 10) -> str:
     return "".join(choice(letters) for _ in range(length))
 
 
-def is_binary(path: (Path | str)) -> bool:
+def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
         with path.open("rb") as f:
@@ -31,7 +31,7 @@ def is_binary(path: (Path | str)) -> bool:
         return True
 
 
-def get_nobinary(path: (str | Path)) -> list[Path]:
+def get_nobinary(path: str | Path) -> list[Path]:
     return [f for f in get_files(path) if not is_binary(f)]
 
 
@@ -67,7 +67,6 @@ def get_files(path: str | Path, include_hidden: bool = True, ext: list[str] | No
     return sorted(files)
 
 
-EXCLUDE_DIRS = {".git", "__pycache__", ".idea", ".vscode", "node_modules", ".env", "venv"}
 DEFAULT_OUTPUT_LEN = 8
 
 

@@ -5,6 +5,7 @@ from multiprocessing import Pool, cpu_count
 import sys
 from typing import List, Tuple
 from io import StringIO
+from dh import TXT_EXT
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -67,23 +68,7 @@ def process_file(file_path: Path) -> Tuple[str, int]:
 
 def collect_text_files(paths: List[str]) -> List[Path]:
     """Collect all text files from the given paths."""
-    text_extensions = {
-        ".txt",
-        ".md",
-        ".py",
-        ".html",
-        ".css",
-        ".js",
-        ".json",
-        ".xml",
-        ".yml",
-        ".yaml",
-        ".csv",
-        ".ini",
-        ".conf",
-        ".log",
-    }
-
+    text_extensions = TXT_EXT
     files = []
     for path in paths:
         p = Path(path)

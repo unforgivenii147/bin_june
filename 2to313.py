@@ -17,7 +17,7 @@ def mpf3(process_function: Callable, files: list[Path], **kwargs):
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
 
 
-def is_python_file(path: (str | Path)) -> bool:
+def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
 
     path = Path(path)
@@ -41,7 +41,7 @@ def is_python_file(path: (str | Path)) -> bool:
     return False
 
 
-def is_binary(path: (Path | str)) -> bool:
+def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
         with path.open("rb") as f:

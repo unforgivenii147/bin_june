@@ -1,226 +1,301 @@
 #!/data/data/com.termux/files/usr/bin/env python
-
-
 """
-dos2unix implementation in Python
-Converts CRLF (Windows) line endings to LF (Unix)
-Skips binary files automatically
-Uses multiprocessing for speed
+A Linux dos2unix command implementation in Python.
+Converts DOS/Windows line endings (CRLF) to Unix line endings (LF).
+
+Features:
+- Uses pathlib for cross-platform path handling
+- Parallel processing for memory efficiency
+- In-place file updates
+- Accepts multiple files/folders as input
+- Processes current directory recursively if no input is given
+- Memory-optimized chunk-based reading/writing
+- Automatically skips binary files and common directories
 """
 
 import argparse
 import sys
-import time
-from functools import partial
-from multiprocessing import Pool, cpu_count
 from pathlib import Path
+from multiprocessing import Pool, cpu_count
+from typing import List, Tuple, Optional
+import logging
+from dh import BIN_EXT, TXT_EXT
 
-import magic
+# Configure logging
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+logger = logging.getLogger(__name__)
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+# Configuration
+CHUNK_SIZE = 8192  # 8KB chunks for memory efficiency
+BINARY_EXTENSIONS = BIN_EXT
+# Directories to skip
+SKIP_DIRS = {".git", "__pycache__", ".pytest_cache", ".mypy_cache", ".coverage", ".egg-info", ".idea"}
+
+# Text file extensions to prioritize (None means process all text files)
+TEXT_EXTENSIONS = TXT_EXT
 
 
-def is_binary_file(file_path: Path) -> bool:
+def should_skip_dir(directory: Path) -> bool:
+    """
+    Check if a directory should be skipped.
+
+    Args:
+        directory: Path to check
+
+    Returns:
+        True if directory should be skipped
+    """
+    return directory.name in SKIP_DIRS
+
+
+def is_text_file(file_path: Path) -> bool:
+    """
+    Determine if a file is a text file using multiple detection methods.
+
+    Args:
+        file_path: Path to the file
+
+    Returns:
+        True if file is text, False if binary
+    """
+    # Check binary extensions first
+    if file_path.suffix.lower() in BINARY_EXTENSIONS:
+        return False
+
+    # If it's a known text extension, process it
+    if file_path.suffix.lower() in TEXT_EXTENSIONS:
+        return True
+
+    # Check for common non-extension patterns
+    name_lower = file_path.name.lower()
+    if name_lower in {"makefile", "dockerfile", "dockerfile.prod", "dockerfile.dev", "gemfile", "rakefile"}:
+        return True
+
+    # For unknown extensions, try to detect binary by reading first bytes
     try:
-        mime = magic.from_file(str(file_path), mime=True)
-        text_mimes = {
-            "text/plain",
-            "text/x-python",
-            "text/x-script",
-            "text/x-c",
-            "text/x-c++",
-            "text/x-java",
-            "text/html",
-            "text/xml",
-            "text/css",
-            "text/javascript",
-            "text/x-sh",
-            "text/x-perl",
-            "text/x-ruby",
-            "text/x-markdown",
-        }
-        if mime not in text_mimes and not mime.startswith("text/"):
+        with open(file_path, "rb") as f:
+            chunk = f.read(8192)
+            if not chunk:
+                return True  # Empty file is considered text
+
+            # Check for null bytes (binary indicator)
+            if b"\x00" in chunk:
+                return False
+
+            # Check for control characters (but allow common ones)
+            text_characters = bytearray({7, 8, 9, 10, 12, 13, 27} | set(range(0x20, 0x100)))
+            if not all(byte in text_characters for byte in chunk):
+                return False
+
             return True
-    except (ImportError, Exception):
+    except (IOError, OSError):
+        return False
+
+
+def convert_dos_to_unix_chunk(chunk: bytes) -> bytes:
+    """
+    Convert DOS/Windows line endings to Unix in a byte chunk.
+
+    Args:
+        chunk: Byte chunk to process
+
+    Returns:
+        Chunk with converted line endings
+    """
+    # Replace CRLF (\r\n) with LF (\n)
+    return chunk.replace(b"\r\n", b"\n")
+
+
+def convert_file(file_path: Path) -> Tuple[str, bool, str]:
+    """
+    Convert a single file from DOS to Unix line endings.
+
+    Args:
+        file_path: Path to the file to convert
+
+    Returns:
+        Tuple of (file_path, success, message)
+    """
+    try:
+        # Check if file is readable and text
+        if not file_path.is_file():
+            return (str(file_path), False, "Not a file")
+
+        if not is_text_file(file_path):
+            return (str(file_path), False, "Binary file (skipped)")
+
+        # Read file in chunks for memory efficiency
+        converted = False
+        temp_data = bytearray()
+
         try:
             with open(file_path, "rb") as f:
-                chunk = f.read(8192)
-                if b"\x00" in chunk:
-                    return True
-        except Exception:
-            return True
-    try:
-        with open(file_path, "rb") as f:
-            first_chunk = f.read(8192)
-            if b"\r\n" not in first_chunk and b"\r" not in first_chunk:
-                return True
-    except Exception:
-        return True
-    return False
+                while True:
+                    chunk = f.read(CHUNK_SIZE)
+                    if not chunk:
+                        break
 
+                    converted_chunk = convert_dos_to_unix_chunk(chunk)
+                    if converted_chunk != chunk:
+                        converted = True
 
-def convert_file(file_path: Path, dry_run: bool = False, force: bool = False) -> dict:
-    result = {"file": str(file_path), "status": "unchanged", "size_diff": 0, "error": None}
-    try:
-        if not force and is_binary_file(file_path):
-            result["status"] = "skipped_binary"
-            return result
-        with open(file_path, "rb") as f:
-            content = f.read()
-        original_size = len(content)
-        if b"\r\n" not in content and b"\r" not in content:
-            result["status"] = "unchanged"
-            return result
-        converted = content.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
-        new_size = len(converted)
-        if original_size == new_size:
-            result["status"] = "unchanged"
-            return result
-        if not dry_run:
-            with open(file_path, "wb") as f:
-                f.write(converted)
-        result["status"] = "converted"
-        result["size_diff"] = original_size - new_size
-    except Exception as e:
-        result["status"] = "error"
-        result["error"] = str(e)
-    return result
+                    temp_data.extend(converted_chunk)
 
-
-def process_files(files: list, dry_run: bool = False, force: bool = False, num_workers: int = None) -> dict:
-    if not files:
-        return {"total": 0, "converted": 0, "skipped": 0, "errors": 0, "size_saved": 0, "files": []}
-    if num_workers is None:
-        num_workers = min(cpu_count(), len(files))
-    convert_func = partial(convert_file, dry_run=dry_run, force=force)
-    stats = {
-        "total": len(files),
-        "converted": 0,
-        "skipped_binary": 0,
-        "unchanged": 0,
-        "errors": 0,
-        "size_saved": 0,
-        "files": [],
-    }
-    with Pool(processes=num_workers) as pool:
-        results = pool.map(convert_func, files)
-    for result in results:
-        stats["files"].append(result)
-        if result["status"] == "converted":
-            stats["converted"] += 1
-            stats["size_saved"] += result["size_diff"]
-        elif result["status"] == "skipped_binary":
-            stats["skipped_binary"] += 1
-        elif result["status"] == "unchanged":
-            stats["unchanged"] += 1
-        elif result["status"] == "error":
-            stats["errors"] += 1
-    return stats
-
-
-def find_files(paths: list, recursive: bool = False, exclude_hidden: bool = True) -> list:
-    files = []
-    for path_str in paths:
-        path = Path(path_str)
-        if not path.exists():
-            print(f"Warning: {path} does not exist", file=sys.stderr)
-            continue
-        if path.is_file():
-            files.append(path)
-        elif path.is_dir():
-            if recursive:
-                pattern = "**/*" if not exclude_hidden else "**/[!.]*"
-                for p in path.glob(pattern):
-                    if p.is_file():
-                        if exclude_hidden and any(part.startswith(".") for part in p.parts):
-                            continue
-                        files.append(p)
+            # Only write if changes were made
+            if converted:
+                with open(file_path, "wb") as f:
+                    f.write(temp_data)
+                return (str(file_path), True, "Converted")
             else:
-                for p in path.glob("*"):
-                    if p.is_file():
-                        if exclude_hidden and p.name.startswith("."):
-                            continue
-                        files.append(p)
-    seen = set()
-    unique_files = []
-    for f in files:
-        if f not in seen:
-            seen.add(f)
-            unique_files.append(f)
-    return unique_files
+                return (str(file_path), True, "Already Unix format")
+
+        except (IOError, OSError) as e:
+            return (str(file_path), False, f"Read/Write error: {e}")
+
+    except Exception as e:
+        return (str(file_path), False, f"Error: {e}")
 
 
-def print_stats(stats: dict, dry_run: bool = False) -> None:
-    print(f"\n{'=' * 60}")
-    print(f"{'DRY RUN' if dry_run else 'CONVERSION COMPLETE'}")
-    print(f"{'=' * 60}")
-    print(f"Total files processed: {stats['total']}")
-    print(f"  - Converted: {stats['converted']}")
-    print(f"  - Already Unix format: {stats['unchanged']}")
-    print(f"  - Skipped (binary): {stats['skipped_binary']}")
-    print(f"  - Errors: {stats['errors']}")
-    if stats["size_saved"] > 0:
-        size_saved_mb = stats["size_saved"] / (1024 * 1024)
-        print(f"\nTotal space saved: {size_saved_mb:.2f} MB")
-    if stats["errors"] > 0:
-        print("\nErrors:")
-        for result in stats["files"]:
-            if result["status"] == "error":
-                print(f"  {result['file']}: {result['error']}")
+def find_text_files(paths: List[Path]) -> List[Path]:
+    """
+    Find all text files in given paths, skipping binary files and excluded directories.
+
+    Args:
+        paths: List of file/folder paths to process
+
+    Returns:
+        List of text file paths
+    """
+    files = []
+
+    for path in paths:
+        if path.is_file():
+            if is_text_file(path):
+                files.append(path)
+        elif path.is_dir():
+            # Recursively find all text files with directory filtering
+            for text_file in path.rglob("*"):
+                # Check if any parent directory should be skipped
+                if any(should_skip_dir(parent) for parent in text_file.parents):
+                    continue
+
+                if text_file.is_file() and is_text_file(text_file):
+                    files.append(text_file)
+
+    return files
 
 
-def main() -> int:
+def get_input_paths(input_args: Optional[List[str]]) -> List[Path]:
+    """
+    Get input paths from command line arguments.
+
+    Args:
+        input_args: List of file/folder paths, or None for current directory
+
+    Returns:
+        List of Path objects
+    """
+    if not input_args:
+        # Process current directory recursively
+        return [Path.cwd()]
+
+    paths = []
+    for arg in input_args:
+        path = Path(arg).resolve()
+        if path.exists():
+            paths.append(path)
+        else:
+            logger.warning(f"Path does not exist: {arg}")
+
+    return paths
+
+
+def main():
+    """Main entry point."""
     parser = argparse.ArgumentParser(
-        description="Convert CRLF (Windows) line endings to LF (Unix)",
+        description="Convert DOS/Windows line endings (CRLF) to Unix (LF)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s file.txt                    # Convert single file
-  %(prog)s -r directory/               # Convert all files in directory recursively
-  %(prog)s -r --force directory/       # Force convert binary files too
-  %(prog)s -r --dry-run directory/     # Preview changes without converting
-  %(prog)s file1.txt file2.txt file3.txt  # Multiple files
+  %(prog)s file.txt
+  %(prog)s file1.txt file2.txt file3.txt
+  %(prog)s /path/to/folder
+  %(prog)s /path/to/folder file.txt
+  %(prog)s                    # Process current directory recursively
+
+Skip Directories: .git, __pycache__, .venv, venv, node_modules, .env, 
+                  .pytest_cache, .tox, .mypy_cache, .coverage, dist, build
         """,
     )
-    parser.add_argument("paths", nargs="+", help="Files or directories to convert")
-    parser.add_argument("-r", "--recursive", action="store_true", help="Process directories recursively")
-    parser.add_argument("-f", "--force", action="store_true", help="Force conversion of binary files (not recommended)")
+
+    parser.add_argument("paths", nargs="*", help="Files or folders to process (default: current directory)")
+
     parser.add_argument(
-        "-n", "--dry-run", action="store_true", help="Show what would be changed without actually converting"
+        "-j", "--jobs", type=int, default=cpu_count(), help=f"Number of parallel jobs (default: {cpu_count()})"
     )
-    parser.add_argument(
-        "-j", "--jobs", type=int, default=None, help=f"Number of parallel jobs (default: CPU count = {cpu_count()})"
-    )
-    parser.add_argument("--no-hidden", action="store_true", default=True, help="Exclude hidden files/directories")
-    parser.add_argument(
-        "--include-hidden", dest="no_hidden", action="store_false", help="Include hidden files/directories"
-    )
-    parser.add_argument("-q", "--quiet", action="store_true", help="Suppress per-file output")
+
+    parser.add_argument("-q", "--quiet", action="store_true", help="Suppress output messages")
+
+    parser.add_argument("-v", "--verbose", action="store_true", help="Show detailed output for each file")
+
     args = parser.parse_args()
-    print("Scanning for files...")
-    files = find_files(args.paths, args.recursive, args.no_hidden)
-    if not files:
-        print("No files found to process.")
+
+    # Get input paths
+    input_paths = get_input_paths(args.paths if args.paths else None)
+
+    if not input_paths:
+        logger.error("No valid paths provided")
         return 1
-    print(f"Found {len(files)} files to process")
-    if args.dry_run:
-        print("DRY RUN MODE: No changes will be made")
-    start_time = time.time()
-    stats = process_files(files, args.dry_run, args.force, args.jobs)
-    elapsed_time = time.time() - start_time
-    if not args.quiet:
-        print("\nConversion results:")
-        for result in stats["files"]:
-            if result["status"] == "converted":
-                print(f"  ✓ {result['file']} (saved {result['size_diff']} bytes)")
-            elif result["status"] == "skipped_binary" and not args.quiet:
-                print(f"  ⊘ {result['file']} (binary, skipped)")
-            elif result["status"] == "error":
-                print(f"  ✗ {result['file']}: {result['error']}")
-    print_stats(stats, args.dry_run)
-    print(f"\nTime elapsed: {elapsed_time:.2f} seconds")
-    print(f"Processing speed: {len(files) / elapsed_time:.1f} files/second")
-    return 0 if stats["errors"] == 0 else 1
+
+    # Find all text files
+    files_to_process = find_text_files(input_paths)
+
+    if not files_to_process:
+        if not args.quiet:
+            logger.info("No text files found to process")
+        return 0
+
+    if not args.quiet and not args.verbose:
+        logger.info(f"Processing {len(files_to_process)} file(s) with {args.jobs} worker(s)...")
+
+    # Process files in parallel
+    converted_count = 0
+    skipped_count = 0
+    error_count = 0
+
+    try:
+        with Pool(processes=args.jobs) as pool:
+            results = pool.map(convert_file, files_to_process)
+
+        for file_path, success, message in results:
+            if args.verbose:
+                status = "✓" if success else "✗"
+                print(f"{status} {file_path}: {message}")
+
+            if success:
+                if "Converted" in message:
+                    converted_count += 1
+                else:
+                    skipped_count += 1
+            else:
+                error_count += 1
+
+        # Summary
+        if not args.quiet:
+            print()
+            logger.info(f"Converted: {converted_count} file(s)")
+            logger.info(f"Already Unix format: {skipped_count} file(s)")
+            if error_count > 0:
+                logger.warning(f"Errors: {error_count} file(s)")
+
+        return 0 if error_count == 0 else 1
+
+    except KeyboardInterrupt:
+        logger.error("\nInterrupted by user")
+        return 130
+    except Exception as e:
+        logger.error(f"Fatal error: {e}")
+        return 1
 
 
 if __name__ == "__main__":

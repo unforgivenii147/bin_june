@@ -39,11 +39,13 @@ def extract_th18_bases(website_url, timeout=10):
             ):
                 absolute_url = urljoin(website_url, href)
                 if absolute_url not in th18_links:
-                    th18_links.append({
-                        "url": absolute_url,
-                        "title": text if text else "TH18 Base",
-                        "source": website_url,
-                    })
+                    th18_links.append(
+                        {
+                            "url": absolute_url,
+                            "title": text if text else "TH18 Base",
+                            "source": website_url,
+                        }
+                    )
         print(f"✓ Found {len(th18_links)} TH18 bases from {website_url}")
     except requests.exceptions.RequestException as e:
         print(f"✗ Error fetching {website_url}: {str(e)}")

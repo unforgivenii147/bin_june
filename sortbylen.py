@@ -6,7 +6,7 @@ from pathlib import Path
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
-def read_lines(path: (str | Path), ke: bool = True) -> list[str]:
+def read_lines(path: str | Path, ke: bool = True) -> list[str]:
     path = Path(path)
     if path.stat().st_size > THRESHOLD:
         return read_lines_mmap(path, ke)

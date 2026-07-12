@@ -118,7 +118,7 @@ def is_valid_url(value, public=False):
     return result and not any((result.groupdict().get(key) for key in ("private_ip", "private_host")))
 
 
-def append_text(path: (str | Path), content: str, encoding: str = "utf-8") -> bool:
+def append_text(path: str | Path, content: str, encoding: str = "utf-8") -> bool:
     path = Path(path)
     if path.is_symlink() or path.is_dir():
         return False

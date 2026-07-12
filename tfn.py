@@ -50,7 +50,6 @@ from pathlib import Path
 
 from fontTools.ttLib import TTFont
 
-
 STYLE_MAPPING = {
     "normal": "Regular",
     "regular": "Regular",

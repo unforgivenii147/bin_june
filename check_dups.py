@@ -32,7 +32,7 @@ def gsz(path: str | Path) -> int:
     return total
 
 
-def is_python_file(path: (str | Path)) -> bool:
+def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
 
     path = Path(path)
@@ -56,7 +56,7 @@ def is_python_file(path: (str | Path)) -> bool:
     return False
 
 
-def is_binary(path: (Path | str)) -> bool:
+def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
         with path.open("rb") as f:

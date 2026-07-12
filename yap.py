@@ -7,8 +7,11 @@ from os import scandir as os_scandir
 from pathlib import Path
 from time import perf_counter as pff
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-def is_python_file(path: (str | Path)) -> bool:
+from pathlib import Path
+from collections import deque
+
+
+def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
 
     path = Path(path)
@@ -30,6 +33,57 @@ def is_python_file(path: (str | Path)) -> bool:
         except:
             return False
     return False
+
+
+def is_binary(path: Path | str) -> bool:
+    path = Path(path)
+    try:
+        with path.open("rb") as f:
+            chunk = f.read(CHUNK_SIZE)
+        if not chunk:
+            return False
+        if b"\x00" in chunk:
+            return True
+        text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
+        nontext = sum(1 for b in chunk if b not in text_chars)
+        return nontext / len(chunk) > ZERO_DOT_THREE
+    except Exception:
+        return True
+
+
+def get_pyfiles(path: str | Path) -> list[Path]:
+    path = Path(path)
+    if path.is_file():
+        if path.suffix == ".py":
+            return [path]
+        if not path.suffix and not path.name.startswith(".") and is_python_file(path):
+            return [path]
+        return []
+
+    if not path.is_dir():
+        return []
+
+    pyfiles = []
+    skip_dirs = {".git", "__pycache__"}
+    queue = deque([path])
+    while queue:
+        current = queue.popleft()
+        try:
+            entries = current.iterdir()
+        except (PermissionError, OSError):
+            continue
+        for item in entries:
+            if item.is_symlink():
+                continue
+            if item.is_dir() and item.name not in skip_dirs:
+                queue.append(item)
+            elif item.is_file():
+                if item.suffix == ".py":
+                    pyfiles.append(item)
+                elif not item.suffix and is_python_file(item):
+                    pyfiles.append(item)
+
+    return sorted(pyfiles)
 
 
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
@@ -186,45 +240,6 @@ def fsz(sz: float) -> str:
         return f"{int(value)} {units[i]}"
     return f"{value:.1f} {units[i]}"
 
-
-def get_pyfiles(path: str | Path) -> list[Path]:
-    path = Path(path)
-    if path.is_file():
-        if path.suffix == ".py":
-            return [path]
-        if not path.suffix and not path.name.startswith(".") and is_python_file(path):
-            return [path]
-        return []
-
-    if not path.is_dir():
-        return []
-
-    pyfiles = []
-    stack = [path]
-
-    while stack:
-        current = stack.pop()
-        try:
-            with os_scandir(current) as entries:
-                for entry in entries:
-                    if entry.is_symlink():
-                        continue
-                    if entry.is_dir(follow_symlinks=False):
-                        if entry.name not in SKIP_DIRS:
-                            stack.append(entry)
-                    elif entry.is_file(follow_symlinks=False):
-                        p = Path(entry)
-                        if p.suffix == ".py":
-                            pyfiles.append(p)
-                        elif not p.suffix and not p.name.startswith(".") and is_python_file(p):
-                            pyfiles.append(p)
-        except (PermissionError, OSError):
-            continue
-
-    return sorted(pyfiles)
-
-
-# ===== End of inlined code =====
 
 MODE = "black"
 

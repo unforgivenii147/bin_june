@@ -167,21 +167,25 @@ def detect_and_fix_mismatches(
         if not detected_ext:
             continue
         if detected_ext.lower() != current_ext.lower():
-            mismatched_files_found.append({
-                "filepath": filepath,
-                "current_extension": current_ext,
-                "detected_type": file_type_desc,
-                "detected_extension": detected_ext,
-            })
+            mismatched_files_found.append(
+                {
+                    "filepath": filepath,
+                    "current_extension": current_ext,
+                    "detected_type": file_type_desc,
+                    "detected_extension": detected_ext,
+                }
+            )
             new_filepath = filepath.with_suffix(detected_ext)
             if new_filepath.exists():
                 print(f"  SKIP RENAME: Target file '{new_filepath}' already exists. Cannot rename '{filepath}'.")
             else:
-                rename_operations.append({
-                    "source": filepath,
-                    "destination": new_filepath,
-                    "type_description": file_type_desc,
-                })
+                rename_operations.append(
+                    {
+                        "source": filepath,
+                        "destination": new_filepath,
+                        "type_description": file_type_desc,
+                    }
+                )
                 print(
                     f"  MISMATCH FOUND: '{filepath}' detected as '{file_type_desc}' (suggested extension: {detected_ext})."
                 )

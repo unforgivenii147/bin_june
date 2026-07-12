@@ -6,7 +6,7 @@ from pathlib import Path
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
-def is_binary(path: (Path | str)) -> bool:
+def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
         with path.open("rb") as f:
@@ -146,7 +146,7 @@ def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_
 
 
 def runcmd(
-    cmd: list[str], run_silently: bool = False, show_output: bool = True, timeout: (float | None) = None
+    cmd: list[str], run_silently: bool = False, show_output: bool = True, timeout: float | None = None
 ) -> tuple[int, str, str]:
     from subprocess import DEVNULL as _DEVNULL
     from subprocess import TimeoutExpired as subprocess_TimeoutExpired

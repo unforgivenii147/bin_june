@@ -164,28 +164,30 @@ class TypoFixerWithLearning:
         self.interactive_mode = False
         self.valid_words = set()
         self._load_word_list()
-        self.valid_words.update({
-            "print",
-            "function",
-            "class",
-            "def",
-            "return",
-            "import",
-            "from",
-            "true",
-            "false",
-            "null",
-            "undefined",
-            "const",
-            "let",
-            "var",
-            "async",
-            "await",
-            "promise",
-            "callback",
-            "component",
-            "react",
-        })
+        self.valid_words.update(
+            {
+                "print",
+                "function",
+                "class",
+                "def",
+                "return",
+                "import",
+                "from",
+                "true",
+                "false",
+                "null",
+                "undefined",
+                "const",
+                "let",
+                "var",
+                "async",
+                "await",
+                "promise",
+                "callback",
+                "component",
+                "react",
+            }
+        )
 
     def _load_word_list(self) -> None:
         try:

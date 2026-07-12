@@ -132,14 +132,16 @@ def extract_and_convert_strings(content: str) -> Optional[str]:
                         # Store for conversion check
                         string_val = arg.value
                         if needs_raw_string(string_val):
-                            conversions.append({
-                                "lineno": arg.lineno,
-                                "col_offset": arg.col_offset,
-                                "end_col": arg.end_col_offset,
-                                "value": string_val,
-                                "is_raw": is_raw,
-                                "is_fstring": is_fstring,
-                            })
+                            conversions.append(
+                                {
+                                    "lineno": arg.lineno,
+                                    "col_offset": arg.col_offset,
+                                    "end_col": arg.end_col_offset,
+                                    "value": string_val,
+                                    "is_raw": is_raw,
+                                    "is_fstring": is_fstring,
+                                }
+                            )
 
             self.generic_visit(node)
 

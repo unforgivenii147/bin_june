@@ -33,7 +33,7 @@ def remove_blank_lines(text: str | Path) -> str:
     return "".join(result_lines)
 
 
-def is_binary(path: (Path | str)) -> bool:
+def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
         with path.open("rb") as f:
@@ -72,7 +72,7 @@ def gsz(path: str | Path) -> int:
     return total
 
 
-def get_nobinary(path: (str | Path)) -> list[Path]:
+def get_nobinary(path: str | Path) -> list[Path]:
     return [f for f in get_files(path) if not is_binary(f)]
 
 

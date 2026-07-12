@@ -37,7 +37,7 @@ def _clean_fname(path: Path) -> Path:
     return path.with_name(clean_name)
 
 
-def should_skip(path: (str | Path)) -> bool:
+def should_skip(path: str | Path) -> bool:
     path = Path(path)
     return bool(path.is_symlink() or not SKIP_DIRS.isdisjoint(path.parts))
 

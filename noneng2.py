@@ -132,12 +132,14 @@ def analyze_file(filepath: Path, detailed: bool = False) -> Optional[Dict]:
                         continue
                     is_en, prob = is_english(line)
                     if not is_en:
-                        non_eng_lines.append({
-                            "line_num": idx,
-                            "text": line[:200],  # Truncate for readability
-                            "confidence": prob,
-                            "full_text": line if len(line) <= 200 else f"{line[:200]}...",
-                        })
+                        non_eng_lines.append(
+                            {
+                                "line_num": idx,
+                                "text": line[:200],  # Truncate for readability
+                                "confidence": prob,
+                                "full_text": line if len(line) <= 200 else f"{line[:200]}...",
+                            }
+                        )
 
                 # Only include lines with enough non-English content
                 if non_eng_lines:
@@ -157,12 +159,14 @@ def analyze_file(filepath: Path, detailed: bool = False) -> Optional[Dict]:
                     continue
                 is_en, prob = is_english(line)
                 if not is_en:
-                    non_eng_lines.append({
-                        "line_num": idx,
-                        "text": line[:200],
-                        "confidence": prob,
-                        "full_text": line if len(line) <= 200 else f"{line[:200]}...",
-                    })
+                    non_eng_lines.append(
+                        {
+                            "line_num": idx,
+                            "text": line[:200],
+                            "confidence": prob,
+                            "full_text": line if len(line) <= 200 else f"{line[:200]}...",
+                        }
+                    )
 
             if non_eng_lines:
                 # File is mostly English but has non-English lines

@@ -41,7 +41,6 @@ import bz2
 import gzip
 import lzma
 
-
 MAX_WORKERS = 4
 CHUNK_SIZE = 524288
 COMPRESSORS = {

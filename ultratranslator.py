@@ -15,7 +15,6 @@ from typing import Any, ParamSpec, TypeVar
 from deep_translator import GoogleTranslator
 from binaryornot import is_binary
 
-
 CHUNK_SIZE = 4990
 SKIP_DIRS = [".git", "__pycache__"]
 MAX_WORKERS = 6
@@ -41,7 +40,7 @@ def mpf_async(func: Callable[[Any], Any], items: Iterable[Any]):
         return results
 
 
-def get_nobinary(path: (str | Path)) -> list[Path]:
+def get_nobinary(path: str | Path) -> list[Path]:
     return [f for f in get_files(path) if not is_binary(f)]
 
 

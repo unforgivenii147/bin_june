@@ -9,7 +9,7 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 
 def runcmd(
-    cmd: list[str], run_silently: bool = False, show_output: bool = True, timeout: (float | None) = None
+    cmd: list[str], run_silently: bool = False, show_output: bool = True, timeout: float | None = None
 ) -> tuple[int, str, str]:
     from subprocess import DEVNULL as _DEVNULL
     from subprocess import TimeoutExpired as subprocess_TimeoutExpired
@@ -56,7 +56,7 @@ def runcmd(
         return 1, "", msg
 
 
-def is_python_file(path: (str | Path)) -> bool:
+def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
 
     path = Path(path)
@@ -80,7 +80,7 @@ def is_python_file(path: (str | Path)) -> bool:
     return False
 
 
-def is_binary(path: (Path | str)) -> bool:
+def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
         with path.open("rb") as f:

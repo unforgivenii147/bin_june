@@ -6,7 +6,7 @@ from pathlib import Path
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
-def is_binary(path: (Path | str)) -> bool:
+def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
         with path.open("rb") as f:
@@ -22,7 +22,7 @@ def is_binary(path: (Path | str)) -> bool:
         return True
 
 
-def get_filez(root_dir: (str | Path)):
+def get_filez(root_dir: str | Path):
     from os import walk as os_walk
 
     visited_dirs: set[Path] = set()
@@ -44,7 +44,7 @@ def get_filez(root_dir: (str | Path)):
         yield root_dir
 
 
-def should_skip(path: (str | Path)) -> bool:
+def should_skip(path: str | Path) -> bool:
     path = Path(path)
     return bool(path.is_symlink() or not SKIP_DIRS.isdisjoint(path.parts))
 

@@ -203,14 +203,16 @@ Examples:
                     print(f"  {progress} {'✅' if result['success'] else '❌'} {img.name}")
             except Exception as e:
                 print(f"❌ {img.name}: Unexpected error: {str(e)}")
-                results.append({
-                    "path": img,
-                    "success": False,
-                    "original_size": 0,
-                    "new_size": 0,
-                    "message": f"Unexpected error: {str(e)}",
-                    "backup_created": False,
-                })
+                results.append(
+                    {
+                        "path": img,
+                        "success": False,
+                        "original_size": 0,
+                        "new_size": 0,
+                        "message": f"Unexpected error: {str(e)}",
+                        "backup_created": False,
+                    }
+                )
     print("-" * 60)
     successful = sum(1 for r in results if r["success"])
     failed = len(results) - successful

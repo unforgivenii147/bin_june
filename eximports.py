@@ -13,7 +13,7 @@ from tree_sitter import Language, Parser
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
-def is_python_file(path: (str | Path)) -> bool:
+def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
 
     path = Path(path)
@@ -37,7 +37,7 @@ def is_python_file(path: (str | Path)) -> bool:
     return False
 
 
-def is_binary(path: (Path | str)) -> bool:
+def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
         with path.open("rb") as f:
@@ -184,7 +184,7 @@ def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
 
 
-def get_file_age(path: (str | Path), str_mode: bool = False) -> float | str:
+def get_file_age(path: str | Path, str_mode: bool = False) -> float | str:
     from os import stat as os_stat
     from time import time as time_time
 

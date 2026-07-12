@@ -101,9 +101,9 @@ def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
 
 
-def read_lines(path: (str | Path), ke: bool = True) -> list[str]:
+def read_lines(path: str | Path, ke: bool = True) -> list[str]:
     path = Path(path)
-    if path.stat().st_size > THRESHOLD:
+    if path.stat().st_size > 1024 * 1024:
         return read_lines_mmap(path, ke)
     data = Path(path).read_bytes()
     text = data.decode("utf-8", errors="replace")

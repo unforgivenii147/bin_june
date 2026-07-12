@@ -30,7 +30,7 @@ def gsz(path: str | Path) -> int:
     return total
 
 
-def is_image(path: (str | Path)) -> bool:
+def is_image(path: str | Path) -> bool:
     path = Path(path)
     try:
         if not path.is_file():

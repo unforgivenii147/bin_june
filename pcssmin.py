@@ -179,7 +179,7 @@ def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
 
 
-def gext(path: (str | Path)) -> str:
+def gext(path: str | Path) -> str:
     path = Path(path)
     suffs = path.suffixes
     if not suffs:

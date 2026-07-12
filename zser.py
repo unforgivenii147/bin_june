@@ -20,24 +20,26 @@ import zstandard as zstd
 from joblib import Parallel, delayed
 
 ZST_EXT = ".zst"
-SKIP_EXTS = frozenset({
-    ".xz",
-    ".br",
-    ".7z",
-    ".zip",
-    ".gz",
-    ".bz2",
-    ".zst",
-    ".whl",
-    ".mp4",
-    ".mp3",
-    ".jpg",
-    ".jpeg",
-    ".png",
-    ".gif",
-    ".webp",
-    ".webm",
-})
+SKIP_EXTS = frozenset(
+    {
+        ".xz",
+        ".br",
+        ".7z",
+        ".zip",
+        ".gz",
+        ".bz2",
+        ".zst",
+        ".whl",
+        ".mp4",
+        ".mp3",
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".gif",
+        ".webp",
+        ".webm",
+    }
+)
 SKIP_DIRS = frozenset({".git", "__pycache__", ".ruff_cache", ".pytest_cache", ".mypy_cache"})
 MAX_WORKERS = 4
 

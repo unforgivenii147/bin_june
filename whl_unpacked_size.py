@@ -107,12 +107,14 @@ def main():
             "wheels": [],
         }
         for wheel_path, size in results:
-            output["wheels"].append({
-                "name": wheel_path.name,
-                "path": str(wheel_path),
-                "size_bytes": size,
-                "size_formatted": format_size(size),
-            })
+            output["wheels"].append(
+                {
+                    "name": wheel_path.name,
+                    "path": str(wheel_path),
+                    "size_bytes": size,
+                    "size_formatted": format_size(size),
+                }
+            )
         if errors:
             output["errors"] = []
             for wheel_path, error in errors:

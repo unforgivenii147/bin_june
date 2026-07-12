@@ -7,11 +7,13 @@ from pathlib import Path
 from multiprocessing import Pool, cpu_count
 from functools import partial
 
+
 def serialize_value(v):
     """Convert bytes (BLOB) to base64 string, leave other types as-is"""
     if isinstance(v, (bytes, bytearray)):
         return {"__blob_base64": base64.b64encode(v).decode("ascii")}
     return v
+
 
 def row_to_dict(row):
     """Convert sqlite3.Row to dict with serialized values"""
@@ -26,10 +28,13 @@ def row_to_dict(row):
             except UnicodeDecodeError:
                 # Fallback: encode as base64
                 try:
-                    result[k] = {"__blob_base64": base64.b64encode(str(row[k]).encode('utf-8', errors='replace')).decode("ascii")}
+                    result[k] = {
+                        "__blob_base64": base64.b64encode(str(row[k]).encode("utf-8", errors="replace")).decode("ascii")
+                    }
                 except:
                     result[k] = {"__decode_error": "Could not process value"}
         return result
+
 
 def fetch_table_data(args):
     """Fetch data from a single table (for parallel processing)"""
@@ -39,14 +44,14 @@ def fetch_table_data(args):
         conn = sqlite3.connect(db_path)
         conn.row_factory = sqlite3.Row
         cur = conn.cursor()
-        
+
         # Validate table exists
         cur.execute(f'PRAGMA table_info("{table_name}");')
         cols = cur.fetchall()
         if not cols:
             conn.close()
             return table_name, [], f"Table '{table_name}' has no columns"
-        
+
         try:
             cur.execute(f'SELECT * FROM "{table_name}";')
             rows = [row_to_dict(row) for row in cur.fetchall()]
@@ -54,13 +59,13 @@ def fetch_table_data(args):
             return table_name, rows, None
         except UnicodeDecodeError as decode_err:
             conn.close()
-            
+
             # Second attempt: replace invalid UTF-8 bytes with hex encoding
             conn = sqlite3.connect(db_path)
-            conn.text_factory = lambda x: x.decode('utf-8', errors='replace') if isinstance(x, bytes) else x
+            conn.text_factory = lambda x: x.decode("utf-8", errors="replace") if isinstance(x, bytes) else x
             conn.row_factory = sqlite3.Row
             cur = conn.cursor()
-            
+
             try:
                 cur.execute(f'SELECT * FROM "{table_name}";')
                 rows = [row_to_dict(row) for row in cur.fetchall()]
@@ -68,12 +73,12 @@ def fetch_table_data(args):
                 return table_name, rows, f"UTF-8 decoding errors replaced in '{table_name}'"
             except Exception as e2:
                 conn.close()
-                
+
                 # Third attempt: fetch as BLOB and encode to base64
                 conn = sqlite3.connect(db_path)
                 conn.row_factory = sqlite3.Row
                 cur = conn.cursor()
-                
+
                 try:
                     cur.execute(f'SELECT * FROM "{table_name}";')
                     rows = []
@@ -86,10 +91,14 @@ def fetch_table_data(args):
                             elif isinstance(val, str):
                                 # Try to encode as UTF-8, if fails encode the whole string as base64
                                 try:
-                                    val.encode('utf-8')
+                                    val.encode("utf-8")
                                     row_dict[k] = val
                                 except UnicodeEncodeError:
-                                    row_dict[k] = {"__blob_base64": base64.b64encode(val.encode('utf-8', errors='surrogateescape')).decode("ascii")}
+                                    row_dict[k] = {
+                                        "__blob_base64": base64.b64encode(
+                                            val.encode("utf-8", errors="surrogateescape")
+                                        ).decode("ascii")
+                                    }
                             else:
                                 row_dict[k] = val
                         rows.append(row_dict)
@@ -98,9 +107,10 @@ def fetch_table_data(args):
                 except Exception as e3:
                     conn.close()
                     return table_name, [], f"Error processing table '{table_name}': {str(e3)}"
-    
+
     except Exception as e:
         return table_name, [], f"Error processing table '{table_name}': {str(e)}"
+
 
 def main():
     if len(sys.argv) < 2:
@@ -132,14 +142,14 @@ def main():
     # Process tables in parallel
     num_processes = min(cpu_count(), len(tables))
     print(f"Processing {len(tables)} tables using {num_processes} processes...")
-    
+
     with Pool(processes=num_processes) as pool:
         results = pool.map(fetch_table_data, [(db_path, table) for table in tables])
 
     # Compile output and collect warnings
     output = {}
     warnings = []
-    
+
     for table_name, rows, warning in results:
         output[table_name] = rows
         if warning:
@@ -159,6 +169,7 @@ def main():
         print("\n⚠ Warnings:")
         for warning in warnings:
             print(f"  - {warning}")
+
 
 if __name__ == "__main__":
     main()

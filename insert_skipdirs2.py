@@ -15,17 +15,19 @@ SKIP_DIRS_DEF = (
     'SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})\n'
 )
 
-IGNORE_DIRS = frozenset({
-    "lazy",
-    ".git",
-    "__pycache__",
-    ".mypy_cache",
-    ".ruff_cache",
-    ".pytest_cache",
-    ".venv",
-    "venv",
-    "node_modules",
-})
+IGNORE_DIRS = frozenset(
+    {
+        "lazy",
+        ".git",
+        "__pycache__",
+        ".mypy_cache",
+        ".ruff_cache",
+        ".pytest_cache",
+        ".venv",
+        "venv",
+        "node_modules",
+    }
+)
 
 
 def check_skip_dirs_usage(tree: ast.AST) -> bool:
