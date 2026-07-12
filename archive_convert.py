@@ -14,6 +14,8 @@ import lz4.frame
 import py7zr  # pip install py7zr
 import zstandard as zstd  # pip install zstandard
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 CHUNK = 1024 * 1024
 XZ_PRESET_9 = 9
 

@@ -4,13 +4,12 @@
 import ast
 import sys
 import unicodedata
+from os import scandir as os_scandir
 from pathlib import Path
 
 import astor
 
-
-from pathlib import Path
-from os import scandir as os_scandir
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def is_binary(path: (Path | str)) -> bool:

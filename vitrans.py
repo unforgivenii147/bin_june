@@ -18,6 +18,9 @@ from pathlib import Path
 from deep_translator import GoogleTranslator
 from tenacity import before_sleep_log, retry, retry_if_exception_type, stop_after_attempt, wait_exponential_jitter
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 # ── config ────────────────────────────────────────────────────────────────────
 
 MAX_CHUNK_CHARS = 4800  # safely under the 5000-char API limit

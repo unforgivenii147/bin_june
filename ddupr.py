@@ -33,6 +33,9 @@ import lzma_mt
 import zstandard as zstd
 from loguru import logger
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 HAS_ZST = True
 HAS_BR = True
 ARCHIVE_EXTENSIONS = {".zip", ".tar", ".gz", ".bz2", ".xz", ".tgz", ".tbz2", ".zst", ".br"}

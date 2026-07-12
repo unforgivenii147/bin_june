@@ -6,6 +6,8 @@ from pathlib import Path
 
 import ssdeep
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def get_all_files(root: str = "."):
     file_paths = []

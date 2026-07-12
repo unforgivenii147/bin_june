@@ -9,6 +9,8 @@ from pathlib import Path
 
 from loguru import logger
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def find_dist_info_dir(site_packages: Path, pkg_name: str) -> Path:
     candidates = list(site_packages.glob(f"{pkg_name}-*.dist-info"))

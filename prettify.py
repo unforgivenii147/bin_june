@@ -5,6 +5,8 @@ import cssbeautifier
 import yapf
 from bs4 import BeautifulSoup
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def beautify_html(file_path) -> bool:
     try:

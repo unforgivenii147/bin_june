@@ -6,6 +6,8 @@ from urllib.parse import urlparse
 
 import requests
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def runcmd(
     cmd: list[str], run_silently: bool = False, show_output: bool = True, timeout: (float | None) = None

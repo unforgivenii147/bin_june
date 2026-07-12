@@ -26,6 +26,8 @@ import tokenize
 from pathlib import Path
 from typing import List, Optional, Tuple
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 class DocstringStripper(ast.NodeTransformer):
     def _maybe_strip_first_docstring(self, node: ast.AST) -> ast.AST:

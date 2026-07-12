@@ -4,14 +4,13 @@
 import ast
 import logging
 import operator
+from os import scandir as os_scandir
 from pathlib import Path
 
 from joblib import Parallel, delayed
 from xxhash import xxh64
 
-
-from pathlib import Path
-from os import scandir as os_scandir
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def is_python_file(path: (str | Path)) -> bool:

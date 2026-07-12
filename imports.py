@@ -11,9 +11,6 @@ from collections import defaultdict
 from pathlib import Path
 
 
-from pathlib import Path
-
-
 def get_file_age(path: (str | Path), str_mode: bool = False) -> float | str:
     from os import stat as os_stat
     from time import time as time_time

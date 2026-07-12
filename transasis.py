@@ -8,6 +8,9 @@ from pathlib import Path
 from deep_translator import GoogleTranslator
 from fastwalk import walk_files
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 DIRECTORY = "."
 CHUNK_SIZE = 2000
 TARGET_LANGUAGE = "en"

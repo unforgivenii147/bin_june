@@ -5,6 +5,8 @@ import os
 import shutil
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def get_all_files_in_root_only(root_path: Path):
     files_info = []

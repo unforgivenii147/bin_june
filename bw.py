@@ -6,6 +6,8 @@ from pathlib import Path
 
 from PIL import Image
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def analyze_image(path: Path, dark_threshold=50, ratio_threshold=0.6) -> tuple[str, float]:
     with Image.open(path) as img:

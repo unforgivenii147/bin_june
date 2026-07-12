@@ -15,8 +15,11 @@ import shutil
 from collections import defaultdict
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 try:
     from PIL import Image
+
 except ImportError:
     print("Error: This script requires Pillow. Install it with: pip install Pillow")
     exit(1)

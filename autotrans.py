@@ -8,8 +8,7 @@ from pathlib import Path
 from deep_translator import GoogleTranslator
 from fastwalk import walk_files
 
-
-from pathlib import Path
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def is_binary(path: (Path | str)) -> bool:

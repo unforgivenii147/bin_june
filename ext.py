@@ -4,6 +4,9 @@ import multiprocessing as mp
 from ast import AST
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 OUTPUT_DIR = Path("output")
 EXCLUDE_DIRS = {"test", "tests", "examples", "output"}
 

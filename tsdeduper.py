@@ -9,6 +9,9 @@ from pathlib import Path
 from tree_sitter import Node, Parser
 from tree_sitter_languages import get_language
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 OUTPUT_FILE = "utils.py"
 
 

@@ -9,8 +9,11 @@ Usage: fontforge -script otf2ttf_fontforge.py [directory]
 import sys
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 try:
     import fontforge
+
 except ImportError:
     print("This script must be run with FontForge's Python interpreter:")
     print("  fontforge -script otf2ttf_fontforge.py")

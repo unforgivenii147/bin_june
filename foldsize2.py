@@ -4,6 +4,8 @@
 import shutil
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def get_all_files(root: Path) -> list[Path]:
     return [p for p in root.glob("*") if p.is_file() and not p.name.startswith(".") and p.name != "folderize.py"]

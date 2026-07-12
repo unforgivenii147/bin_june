@@ -5,6 +5,8 @@ import re
 import sys
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def extract_font_id(svg_text):
     match = re.search(r'<font[^>]*\bid="([^"]+)"', svg_text, re.IGNORECASE)

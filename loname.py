@@ -4,6 +4,8 @@ import sys
 from multiprocessing import get_context
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def mpf3(func, files):
     p = get_context("spawn").Pool(8)

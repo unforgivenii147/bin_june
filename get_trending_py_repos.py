@@ -9,6 +9,9 @@ from pathlib import Path
 import requests
 from bs4 import BeautifulSoup
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 BASE_URL = "https://github.com/trending/python"
 TIMEFRAMES = ["daily", "weekly", "monthly"]
 OUTPUT_DIR = Path("trending_repos")

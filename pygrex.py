@@ -4,6 +4,9 @@
 import re
 import sys
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 if len(sys.argv) != 2:
     print("Usage: python script.py <filename>")
     sys.exit(1)

@@ -4,6 +4,8 @@
 import re
 import subprocess
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def get_packages_with_size():
     try:

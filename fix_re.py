@@ -27,6 +27,8 @@ from multiprocessing import Pool, cpu_count
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 # Core re functions that take regex patterns as first argument
 RE_FUNCTIONS = {"compile", "search", "match", "fullmatch", "split", "findall", "finditer", "sub", "subn"}
 

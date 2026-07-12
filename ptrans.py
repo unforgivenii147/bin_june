@@ -21,6 +21,8 @@ from pathlib import Path
 
 from deep_translator import GoogleTranslator
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def is_text_file(path: Path) -> bool:
     try:

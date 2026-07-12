@@ -3,6 +3,8 @@ import shutil
 import time
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 TIME_THRESHOLD = 8 * 60  # 8 minutes in seconds
 
 

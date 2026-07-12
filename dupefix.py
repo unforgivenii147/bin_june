@@ -8,6 +8,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import xxhash
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def get_file_hash(filepath):
     try:

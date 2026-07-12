@@ -40,6 +40,8 @@ from multiprocessing import Pool, cpu_count
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 READ_BYTES = 8192
 MAGIC_AVAILABLE = False
 try:

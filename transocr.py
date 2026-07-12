@@ -10,6 +10,9 @@ from deep_translator import GoogleTranslator
 from langdetect import DetectorFactory, detect
 from PIL import Image, ImageEnhance, ImageFilter
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 DetectorFactory.seed = 0
 TEXT_EXT = {".txt", ".md", ".csv", ".json", ".py"}
 IMAGE_EXT = {".jpg", ".jpeg", ".png"}

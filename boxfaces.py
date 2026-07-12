@@ -6,6 +6,8 @@ from pathlib import Path
 
 import cv2
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def detect_and_save_faces(input_video_path: str, output_video_path: str = "out.mp4") -> None:
     if not Path(input_video_path).exists():

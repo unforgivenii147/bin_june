@@ -1,13 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
-import re
-from pathlib import Path
-
-
-from pathlib import Path
 import os
+import re
 import sys
+from pathlib import Path
+
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
 

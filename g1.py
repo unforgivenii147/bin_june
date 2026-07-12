@@ -10,6 +10,8 @@ from github.GithubException import GithubException, UnknownObjectException
 from github.Repository import Repository
 from tqdm import tqdm
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def get_github_client(token: str | None = None) -> Github:
     if token:

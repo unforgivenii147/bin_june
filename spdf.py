@@ -2,14 +2,13 @@
 
 
 import sys
-from pathlib import Path
-
-
+from collections.abc import Callable, Iterable
+from multiprocessing import get_context
+from os import scandir as os_scandir
 from pathlib import Path
 from typing import Any, ParamSpec, TypeVar
-from collections.abc import Callable, Iterable
-from os import scandir as os_scandir
-from multiprocessing import get_context
+
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def mpf_async(func: Callable[[Any], Any], items: Iterable[Any]):

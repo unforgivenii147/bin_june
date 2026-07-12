@@ -6,6 +6,8 @@ from pathlib import Path
 
 import PyPDF2
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def extract_text_from_pdf(pdf_filename: str):
     with Path(pdf_filename).open("rb") as file:

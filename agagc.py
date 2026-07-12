@@ -18,6 +18,8 @@ import requests
 from dotenv import load_dotenv
 from git import InvalidGitRepositoryError, Repo
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def parse_arguments() -> Namespace:
     parser = argparse.ArgumentParser(description="Commit and push all files to git repository")

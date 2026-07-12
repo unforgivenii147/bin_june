@@ -5,6 +5,8 @@ from pathlib import Path
 
 import requests
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def get_package_url(package_name, version=None):
     url = f"https://pypi.org/pypi/{package_name}/json"

@@ -4,8 +4,11 @@ import argparse
 import ast
 import sys
 from concurrent.futures import ThreadPoolExecutor
-from pathlib import Path
 from os.path import join
+from pathlib import Path
+
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 paths = [
     "2to313.py",

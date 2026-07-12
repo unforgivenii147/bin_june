@@ -5,6 +5,8 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def parse_pkg_info(egg_info_dir):
     pkg_info_path = egg_info_dir / "PKG-INFO"

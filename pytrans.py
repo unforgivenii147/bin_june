@@ -12,6 +12,9 @@ from deep_translator import GoogleTranslator
 from langdetect import DetectorFactory
 from tqdm import tqdm
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 DetectorFactory.seed = 0
 MAX_CHARS = 5000
 TIMEOUT_PER_FILE = 60

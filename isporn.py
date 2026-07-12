@@ -1,16 +1,15 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
+import os
+import sys
+from collections.abc import Callable, Iterable
+from os import scandir as os_scandir
 from pathlib import Path
 
 from nudenet import NudeDetector
 
-
-from pathlib import Path
-from collections.abc import Callable, Iterable
-import sys
-from os import scandir as os_scandir
-import os
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def mpf3(process_function: Callable, files: list[Path], **kwargs):

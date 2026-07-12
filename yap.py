@@ -7,6 +7,8 @@ from os import scandir as os_scandir
 from pathlib import Path
 from time import perf_counter as pff
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
@@ -14,8 +16,6 @@ def mpf3(process_function: Callable, files: list[Path], **kwargs):
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
 
-
-SKIP_DIRS = [".git", ".ruff_cache", "__pycache__"]
 
 ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
 

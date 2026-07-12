@@ -5,6 +5,8 @@ import argparse
 import csv
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def sort_packages_by_size(filename: str) -> None:
     with Path(filename).open(newline="", encoding="utf-8") as f:

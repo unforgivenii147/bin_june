@@ -5,6 +5,8 @@ import datetime
 
 from faprint import faprint
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def georgian_to_hijri(year: int, month: int, day: int) -> str:
     from datetime import date as datetime_date

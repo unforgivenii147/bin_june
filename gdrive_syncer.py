@@ -8,6 +8,8 @@ from googleapiclient.discovery import Resource, build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 SCOPES = ["https://www.googleapis.com/auth/drive.readonly"]
 
 

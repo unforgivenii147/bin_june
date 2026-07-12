@@ -19,6 +19,8 @@ from pathlib import Path
 from subprocess import CalledProcessError, run
 from typing import Any, Dict, Optional
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def setup_logging(verbose: bool = True) -> logging.Logger:
     logger = logging.getLogger("pkg_updater")

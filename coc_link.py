@@ -7,6 +7,8 @@ from urllib.parse import urljoin
 import requests
 from bs4 import BeautifulSoup
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def read_links_from_file(filename="links.txt"):
     try:

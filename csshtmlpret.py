@@ -10,8 +10,11 @@ from pathlib import Path
 from subprocess import getoutput
 from time import sleep
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 try:
     from bs4 import BeautifulSoup
+
 except ImportError:
     BeautifulSoup = None
     print("BeautifulSoup4 Not Found, use: pip install BeautifulSoup4")

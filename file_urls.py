@@ -5,6 +5,9 @@ from pathlib import Path
 
 from dh import BIN_EXT, TXT_EXT
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 EXCLUDED = {
     ".net",
     ".ai",

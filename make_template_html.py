@@ -5,6 +5,8 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def find_html_files(cwd: str = ".") -> list[Path]:
     root_path = Path(cwd).resolve()

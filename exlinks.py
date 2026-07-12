@@ -8,6 +8,9 @@ from pathlib import Path
 import chardet
 from loguru import logger
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 TARGET_EXTENSIONS = {".tar.gz", ".pdf", ".zip", ".css", ".js", ".tar.xz", ".7z", ".whl", ".html"}
 COMPRESSED_ARCHIVES = {".tar.xz", ".tar.gz", ".tar.zst", ".7z", ".br", ".zip", ".whl"}
 GITHUB_REPO_REGEX = re.compile(r"https?://(?:www\.)?github\.com/[a-zA-Z0-9\-]+/[a-zA-Z0-9\-]+")

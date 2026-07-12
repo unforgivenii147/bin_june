@@ -9,6 +9,8 @@ from pathlib import Path
 import numpy as np
 import pytesseract
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 SUPPORTED_EXT = {".jpg", ".jpeg", ".png", ".tiff", ".bmp", ".webp"}
 BASE_DIR = Path.cwd()
 

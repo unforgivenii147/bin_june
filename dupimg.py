@@ -30,6 +30,9 @@ from typing import List, Optional, Tuple
 import cv2
 import numpy as np
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tif", ".tiff", ".gif"}
 HASH_SIZE = 16
 

@@ -9,6 +9,8 @@ from pathlib import Path
 import ssdeep
 from ppdeep import compare, hash_from_file
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 try:
     from tabulate import tabulate
 

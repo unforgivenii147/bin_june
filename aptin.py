@@ -5,6 +5,8 @@ import re
 import subprocess
 import sys
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def get_all_packages():
     try:

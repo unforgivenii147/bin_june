@@ -5,6 +5,8 @@ import json
 import re
 import sys
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def bytes_to_hex(data: bytes) -> str:
     return data.hex().upper()

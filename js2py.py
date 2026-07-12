@@ -5,6 +5,8 @@ import re
 import sys
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def install_js2py() -> bool:
     try:
@@ -35,6 +37,7 @@ def convert_with_js2py(js_file: Path, outfile: Path) -> bool:
 def convert_with_openai(js_code: str, api_key: str | None = None) -> tuple[bool, str]:
     try:
         import openai
+
     except ImportError:
         return (False, "OpenAI library not installed. Install with: pip install openai")
     api_key = api_key or os.getenv("OPENAI_API_KEY")

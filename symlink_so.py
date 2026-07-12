@@ -4,6 +4,8 @@ import os
 import re
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def should_skip(so_path):
     if so_path.is_symlink():

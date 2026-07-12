@@ -6,6 +6,8 @@ from pathlib import Path
 
 from fastwalk import walk_files
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def extract_requirements(metadata_path: Path) -> None:
     with Path(metadata_path).open(encoding="utf-8") as f:

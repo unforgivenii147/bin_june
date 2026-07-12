@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def process_file(fname) -> None:
     path = Path(path)

@@ -5,6 +5,9 @@ import argparse
 import sys
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 EXCLUDED_NAMES: set[str] = {"tmp", "cache", "bin", ".git", "etc", "config", "var"}
 EXCLUDED_PATH_COMPONENTS: set[str] = {".git", "tmp", "etc", "var", "config"}
 

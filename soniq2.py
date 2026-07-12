@@ -6,6 +6,9 @@ import tempfile
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 MB_5 = 5 * 1024 * 1024
 
 

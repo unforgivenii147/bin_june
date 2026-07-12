@@ -12,6 +12,8 @@ from textual.color import Color
 from textual.containers import Horizontal, ScrollableContainer
 from textual.widgets import Footer, Header, Label, Static
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 class DiffLine(Static):
     def __init__(self, text: str, line_type: str, line_num: int | None = None) -> None:

@@ -4,6 +4,9 @@ from pathlib import Path
 
 import lz4.frame
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 CHUNK_THRESHOLD = 5 * 1024 * 1024
 COMPRESSED_EXT = ".lz4"
 EXT = {".gz", ".br", ".xz", ".zst", ".bz2", ".zip", ".whl", ".lz4"}

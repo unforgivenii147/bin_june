@@ -1,24 +1,21 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+import os
 import re
 import sys
 import tarfile
 import zipfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from functools import wraps
+from inspect import getfullargspec
+from itertools import chain
+from os import scandir as os_scandir
 from pathlib import Path
+from typing import Any, Callable, Dict
 
 import py7zr
 
-
-from pathlib import Path
-from os import scandir as os_scandir
-from itertools import chain
-import re
-from typing import Any, Callable, Dict
-from functools import wraps
-import sys
-import os
-from inspect import getfullargspec
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 ip_middle_octet = r"(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5]))"
 

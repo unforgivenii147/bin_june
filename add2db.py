@@ -2,6 +2,8 @@
 import sqlite3
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def get_current_folder_name() -> str:
     return Path.cwd().name

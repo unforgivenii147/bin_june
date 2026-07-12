@@ -5,6 +5,8 @@ import difflib
 import re
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def show_diff(text1: str, text2: str) -> None:
     diff = difflib.unified_diff(text1.splitlines(keepends=True), text2.splitlines(keepends=True), lineterm="")

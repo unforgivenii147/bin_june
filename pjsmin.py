@@ -1,19 +1,17 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
+import os
 import sys
+from collections.abc import Callable, Iterable
+from multiprocessing import get_context
+from os import scandir as os_scandir
 from pathlib import Path
+from typing import Any, ParamSpec, TypeVar
 
 from rjsmin import jsmin
 
-
-from pathlib import Path
-from typing import Any, ParamSpec, TypeVar
-import sys
-from collections.abc import Callable, Iterable
-from os import scandir as os_scandir
-import os
-from multiprocessing import get_context
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def mpf_async(func: Callable[[Any], Any], items: Iterable[Any]):

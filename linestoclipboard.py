@@ -5,6 +5,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def copy_lines_to_clipboard(filename: str, start_line: int, end_line: int | None = None) -> None:
     input_file = Path(filename)

@@ -5,6 +5,9 @@ from pathlib import Path
 
 import dh
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 EXT = [".md", ".txt", ".rst"]
 
 

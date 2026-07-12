@@ -4,11 +4,10 @@
 import sys
 from collections import deque
 from multiprocessing import get_context
-from pathlib import Path
-
-
-from pathlib import Path
 from os import scandir as os_scandir
+from pathlib import Path
+
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def get_files(path: str | Path, include_hidden: bool = True, ext: list[str] | None = None) -> list[Path]:

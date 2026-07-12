@@ -14,6 +14,9 @@ from deep_translator import GoogleTranslator
 from deep_translator.google import GoogleTranslator
 from langdetect import DetectorFactory, detect
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 DetectorFactory.seed = 0
 
 

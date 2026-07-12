@@ -13,8 +13,11 @@ import tokenize
 from pathlib import Path
 from typing import Dict, List, NamedTuple, Optional, Tuple
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 try:
     import astor
+
 except Exception:
     print("This script requires the 'astor' package. Install with: pip install astor", file=sys.stderr)
     sys.exit(2)

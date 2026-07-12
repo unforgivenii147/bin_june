@@ -7,8 +7,7 @@ from pathlib import Path
 
 from rapidfuzz import fuzz
 
-
-from pathlib import Path
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def get_file_age(path: (str | Path), str_mode: bool = False) -> float | str:

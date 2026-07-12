@@ -9,6 +9,8 @@ from pathlib import Path
 from bs4 import BeautifulSoup
 from html_to_markdown import Options, convert
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def clean_html(html_content: str) -> str:
     soup = BeautifulSoup(html_content, "html.parser")

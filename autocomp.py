@@ -13,6 +13,8 @@ import lz4.frame
 import py7zr
 import zstandard as zstd
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 CompressionResult = namedtuple("CompressionResult", ["name", "size", "ratio", "time", "path"])
 
 

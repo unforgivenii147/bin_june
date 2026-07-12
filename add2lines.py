@@ -2,6 +2,9 @@
 import sys
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 if __name__ == "__main__":
     if len(sys.argv) != 3:
         print(f"Usage: {sys.argv[0]} <filename> <prefix_string>", file=sys.stderr)

@@ -8,6 +8,8 @@ from pathlib import Path
 import langdetect
 from deep_translator import GoogleTranslator
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def chunk_file(file_path, chunk_size=4500):
     chunks = []

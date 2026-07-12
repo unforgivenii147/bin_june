@@ -17,6 +17,8 @@ from pathlib import Path
 
 import magic
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def is_binary_file(file_path: Path) -> bool:
     try:

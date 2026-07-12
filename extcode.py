@@ -6,6 +6,9 @@ from pathlib import Path
 import tree_sitter_python as tsp
 from tree_sitter import Language, Parser
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 LANG = Language(tsp)
 parser = Parser()
 parser.set_language(LANG)

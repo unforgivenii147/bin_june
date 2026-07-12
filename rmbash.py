@@ -1,18 +1,14 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 import argparse
+import os
 import sys
+from collections.abc import Callable, Iterable
 from concurrent.futures import ProcessPoolExecutor
+from os import scandir as os_scandir
 from pathlib import Path
 
 from loguru import logger
-
-
-from pathlib import Path
-from collections.abc import Callable, Iterable
-import sys
-from os import scandir as os_scandir
-import os
 
 
 def mpf3(process_function: Callable, files: list[Path], **kwargs):

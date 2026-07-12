@@ -3,6 +3,8 @@
 
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def unique_path(path: Path | str) -> Path:
     path = _clean_fname(Path(path))
@@ -47,6 +49,7 @@ If the target filename already exists, appends _1, _2, etc. to avoid overwriting
 from pathlib import Path
 
 from fontTools.ttLib import TTFont
+
 
 STYLE_MAPPING = {
     "normal": "Regular",

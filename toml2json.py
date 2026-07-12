@@ -7,6 +7,8 @@ from pathlib import Path
 
 import toml
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def toml_to_json(fname: str) -> None:
     try:

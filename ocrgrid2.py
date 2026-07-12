@@ -9,6 +9,9 @@ import cv2
 import pytesseract
 from dh import IMG_EXT
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 OUTPUT_DIR = Path("ocr_results")
 OUTPUT_DIR.mkdir(exist_ok=True)
 OEM_OPTIONS = [0, 1, 2, 3]

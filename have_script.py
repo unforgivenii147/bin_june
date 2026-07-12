@@ -4,6 +4,8 @@ import os
 import sys
 import zipfile
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def find_whl_files(directory):
     whl_files = []

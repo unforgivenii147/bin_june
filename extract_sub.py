@@ -6,6 +6,8 @@ import json
 import subprocess
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def run(cmd) -> str:
     result = subprocess.run(cmd, check=False, capture_output=True, text=True)

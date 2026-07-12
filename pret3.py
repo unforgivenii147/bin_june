@@ -3,6 +3,8 @@ from pathlib import Path
 
 import jsbeautifier
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def beautify_file(file_path: Path) -> None:
     content = file_path.read_text(encoding="utf-8")

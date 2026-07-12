@@ -10,6 +10,9 @@ from typing import List, Tuple
 
 import lzma_mt
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 ARCHIVE_EXTENSIONS = {
     ".zip",
     ".br",

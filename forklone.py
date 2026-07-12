@@ -19,6 +19,8 @@ from git import Repo
 from github import Github
 from github.GithubException import GithubException, UnknownObjectException
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def load_env_token():
     env_path = Path.home() / ".env"

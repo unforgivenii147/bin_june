@@ -8,6 +8,8 @@ from pathlib import Path
 
 from wheel.wheelfile import WheelFile
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def find_site_packages() -> Path:
     return Path(sysconfig.get_paths()["purelib"])

@@ -17,6 +17,9 @@ import pycld2
 from deep_translator import GoogleTranslator
 from dh import DOC_TH1, DOC_TH2
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 TARGET_LANG = "en"
 DELAY_SECONDS = 0.5
 MAX_WORKERS = 4

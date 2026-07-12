@@ -7,8 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-
-from pathlib import Path
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def is_binary(path: (Path | str)) -> bool:
@@ -29,6 +28,7 @@ def is_binary(path: (Path | str)) -> bool:
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
+
 HEX_RE = re.compile(
     r"""
     (?<![0-9A-Fa-f])

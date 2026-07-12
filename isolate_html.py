@@ -8,6 +8,8 @@ from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from bs4.element import AttributeValueList
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 class HTMLStandaloneMaker:
     """Create standalone HTML files with embedded resources."""

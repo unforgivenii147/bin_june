@@ -1,15 +1,13 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
-import sys
-from pathlib import Path
-
-
-from pathlib import Path
+import os
 import sys
 from collections.abc import Callable, Iterable
 from os import scandir as os_scandir
-import os
+from pathlib import Path
+
+SKIP_DIRS = [".git"]
 
 
 def fsz(sz: float) -> str:

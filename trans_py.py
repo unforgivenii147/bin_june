@@ -5,14 +5,13 @@ import re
 import shutil
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from os import scandir as os_scandir
 from pathlib import Path
 from re import Match
 
 from deep_translator import GoogleTranslator
 
-
-from pathlib import Path
-from os import scandir as os_scandir
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def is_python_file(path: (str | Path)) -> bool:

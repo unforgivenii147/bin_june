@@ -9,6 +9,8 @@ from typing import Tuple
 import cv2
 from tqdm import tqdm
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 class ImageDownscaler:
     def __init__(self, root_dir: str = ".", scale_factor: float = 0.5):

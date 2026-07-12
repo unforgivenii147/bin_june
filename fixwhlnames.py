@@ -13,6 +13,8 @@ from email.parser import HeaderParser
 from pathlib import Path
 from typing import Dict, Optional, Tuple
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def extract_metadata_from_wheel(wheel_path: Path) -> Optional[Dict[str, str]]:
     try:

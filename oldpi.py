@@ -5,13 +5,12 @@ import re
 import tokenize
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from mmap import mmap
+from os import scandir as os_scandir
 from pathlib import Path
 
 from tqdm import tqdm
 
-
-from pathlib import Path
-from os import scandir as os_scandir
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def is_python_file(path: (str | Path)) -> bool:

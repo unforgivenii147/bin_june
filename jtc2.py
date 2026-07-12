@@ -5,6 +5,8 @@ import ast
 from pathlib import Path
 from sys import argv
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 # WARNING: Source code for 'run_command' not found.
 

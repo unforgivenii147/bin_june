@@ -9,6 +9,8 @@ import cv2
 import numpy as np
 import pytesseract
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def _ocr_worker(frame_data: tuple, ocr_config: str) -> tuple[float, str]:
     time_pos, subtitle_region = frame_data

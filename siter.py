@@ -13,6 +13,8 @@ from multiprocessing import cpu_count
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 class WheelBuilder:
     def __init__(

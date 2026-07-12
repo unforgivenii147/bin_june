@@ -5,6 +5,8 @@ import sys
 
 import requests
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def check_package(pkg_name):
     url = f"https://pypi.org/pypi/{pkg_name}/json"

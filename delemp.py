@@ -1,147 +1,148 @@
 #!/data/data/com.termux/files/usr/bin/env python
 import argparse
+from pathlib import Path
+from multiprocessing import Pool, cpu_count
 import sys
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from pathlib import Path
+from typing import List, Tuple
+from io import StringIO
+
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
-from pathlib import Path
-from os import scandir as os_scandir
-
-
-def is_binary(path: (Path | str)) -> bool:
-    path = Path(path)
+def process_file(file_path: Path) -> Tuple[str, int]:
+    """Process a single file and return (file_path, blank_lines_removed)."""
+    blank_lines_removed = 0
     try:
-        with path.open("rb") as f:
-            chunk = f.read(CHUNK_SIZE)
-        if not chunk:
-            return False
-        if b"\x00" in chunk:
-            return True
-        text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
-        nontext = sum(1 for b in chunk if b not in text_chars)
-        return nontext / len(chunk) > ZERO_DOT_THREE
-    except Exception:
-        return True
+        # Read file into memory-efficient buffer
+        with file_path.open("r", encoding="utf-8", errors="replace") as infile:
+            lines = infile.readlines()
 
+        if not lines:
+            return (str(file_path), 0)
 
-def get_nobinary(path: (str | Path)) -> list[Path]:
-    return [f for f in get_files(path) if not is_binary(f)]
+        # Process lines to remove consecutive blank lines
+        output_lines = []
+        consecutive_blanks = 0
 
+        for line in lines:
+            is_blank = not line.strip()
 
-def get_files(path: str | Path, include_hidden: bool = True, ext: list[str] | None = None) -> list[Path]:
-    path = Path(path)
-    if not path.exists():
-        raise FileNotFoundError(f"Path does not exist: {path}")
-    if not path.is_dir():
-        raise NotADirectoryError(f"Path is not a directory: {path}")
-
-    ext = tuple(ext) if ext else None
-    files = []
-    stack = [path]
-
-    while stack:
-        current = stack.pop()
-        try:
-            with os_scandir(current) as entries:
-                for entry in entries:
-                    if entry.is_symlink():
-                        continue
-                    if entry.is_dir(follow_symlinks=False):
-                        if entry.name not in SKIP_DIRS:
-                            stack.append(entry)
-                    elif entry.is_file(follow_symlinks=False):
-                        if not include_hidden and entry.name.startswith("."):
-                            continue
-                        if ext is None or entry.name.endswith(ext):
-                            files.append(Path(entry.path))
-        except (PermissionError, OSError):
-            continue
-
-    return sorted(files)
-
-
-# ANSI escape codes for coloring terminal text
-CYAN = "\033[36m"
-RESET = "\033[0m"
-
-
-def process_file(path: Path, max_blank_keep: int) -> tuple[Path, int]:
-    try:
-        text = path.read_text(encoding="utf-8")
-    except Exception:
-        return (path, 0)
-
-    lines = text.splitlines()
-    new_lines = []
-    blank_run = 0
-    removed = 0
-
-    for line in lines:
-        if not line.strip():
-            blank_run += 1
-            if blank_run <= max_blank_keep:
-                new_lines.append("")
+            if is_blank:
+                consecutive_blanks += 1
+                # Only keep the first blank in a sequence
+                if consecutive_blanks == 1:
+                    output_lines.append("\n")
             else:
-                removed += 1
-        else:
-            blank_run = 0
-            new_lines.append(line)
+                # Count skipped blank lines
+                if consecutive_blanks > 1:
+                    blank_lines_removed += consecutive_blanks - 1
+                consecutive_blanks = 0
+                output_lines.append(line.rstrip("\n") + "\n")
 
-    if removed > 0:
-        output_text = "\n".join(new_lines) + ("\n" if new_lines else "")
-        path.write_text(output_text, encoding="utf-8")
+        # Handle trailing blank lines
+        if consecutive_blanks > 1:
+            blank_lines_removed += consecutive_blanks - 1
 
-    return (path, removed)
+        # Remove trailing newline if original file didn't have one
+        if output_lines and lines and not lines[-1].endswith("\n"):
+            output_lines[-1] = output_lines[-1].rstrip("\n")
+
+        # Write back atomically using temp file
+        temp_file = file_path.with_suffix(file_path.suffix + ".tmp")
+        try:
+            with temp_file.open("w", encoding="utf-8", errors="replace") as outfile:
+                outfile.writelines(output_lines)
+            temp_file.replace(file_path)
+        except Exception:
+            temp_file.unlink(missing_ok=True)
+            raise
+
+        print(f"Processed: {file_path} - Removed {blank_lines_removed} blank lines", file=sys.stderr)
+        return (str(file_path), blank_lines_removed)
+
+    except Exception as e:
+        print(f"Error processing {file_path}: {str(e)}", file=sys.stderr)
+        return (str(file_path), -1)  # -1 indicates error
 
 
-def print_result(path: Path, cwd: Path, removed: int):
-    # Try to get the path relative to the current directory
-    try:
-        rel_path = path.relative_to(cwd)
-    except ValueError:
-        rel_path = path  # Fallback to absolute if it's outside the cwd
+def collect_text_files(paths: List[str]) -> List[Path]:
+    """Collect all text files from the given paths."""
+    text_extensions = {
+        ".txt",
+        ".md",
+        ".py",
+        ".html",
+        ".css",
+        ".js",
+        ".json",
+        ".xml",
+        ".yml",
+        ".yaml",
+        ".csv",
+        ".ini",
+        ".conf",
+        ".log",
+    }
 
-    # Format the number in cyan
-    print(f"{rel_path}  {CYAN}{removed}{RESET}")
+    files = []
+    for path in paths:
+        p = Path(path)
+        if p.is_file() and p.suffix.lower() in text_extensions:
+            files.append(p.resolve())
+        elif p.is_dir():
+            files.extend(f.resolve() for f in p.rglob("*") if f.is_file() and f.suffix.lower() in text_extensions)
+    return files
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Remove blank lines from files recursively.")
-    parser.add_argument("-n", type=int, default=1, help="Max number of consecutive blank lines to keep (default: 1).")
-    parser.add_argument("targets", nargs="*", help="Files or directories to process (defaults to current directory).")
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Remove extra blank lines from text files recursively.")
+    parser.add_argument(
+        "paths",
+        metavar="PATH",
+        nargs="*",
+        default=["."],
+        help="Files or directories to process (default: current directory)",
+    )
     args = parser.parse_args()
 
-    cwd = Path.cwd()
-    files = []
-    if args.targets:
-        for target in args.targets:
-            p = Path(target)
-            if p.is_file():
-                files.append(p.resolve())  # Use resolve to ensure path math works smoothly
-            elif p.is_dir():
-                files.extend(f.resolve() for f in get_nobinary(p))
-    else:
-        files = [f.resolve() for f in get_nobinary(cwd)]
+    # Collect all text files
+    files = collect_text_files(args.paths)
 
     if not files:
-        print("No files found to process.")
-        sys.exit(0)
+        print("No text files found to process.", file=sys.stderr)
+        return
 
-    if len(files) == 1:
-        path, removed = process_file(files[0], args.n)
-        print_result(path, cwd, removed)
-        sys.exit(0)
+    print(f"Found {len(files)} text file(s) to process.", file=sys.stderr)
 
-    total_removed = 0
-    with ThreadPoolExecutor() as exe:
-        futures = {exe.submit(process_file, f, args.n): f for f in files}
-        for fut in as_completed(futures):
-            path, removed = fut.result()
-            total_removed += removed
-            print_result(path, cwd, removed)
+    # Use multiprocessing with number of available CPUs
+    num_processes = max(1, cpu_count())
 
-    print(f"\nTotal blank lines removed: {CYAN}{total_removed}{RESET}")
+    # Process files in parallel and collect results
+    with Pool(processes=num_processes) as pool:
+        results = pool.map(process_file, files, chunksize=max(1, len(files) // (num_processes * 4)))
+
+    # Filter out error results and sort
+    valid_results = [(k, v) for k, v in results if v >= 0]
+    valid_results.sort(key=lambda x: x[0])
+
+    # Print detailed results
+    print("\nDetailed Results:")
+    print("=" * 80)
+    for file_path, blanks_removed in valid_results:
+        if blanks_removed > 0:
+            print(f"{file_path}: Removed {blanks_removed} blank lines")
+        else:
+            print(f"{file_path}: No extra blank lines found")
+
+    # Calculate and print summary
+    total_blank_lines = sum(v for _, v in valid_results)
+    failed_count = len(results) - len(valid_results)
+
+    print("=" * 80)
+    print(f"Files processed: {len(valid_results)}")
+    print(f"Files failed: {failed_count}")
+    print(f"Total blank lines removed: {total_blank_lines}")
+    print("=" * 80)
 
 
 if __name__ == "__main__":

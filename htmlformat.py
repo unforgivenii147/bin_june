@@ -2,14 +2,13 @@
 
 
 import sys
+from collections.abc import Callable, Iterable
+from os import scandir as os_scandir
 from pathlib import Path
 
 from bs4 import BeautifulSoup
 
-
-from pathlib import Path
-from os import scandir as os_scandir
-from collections.abc import Callable, Iterable
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def fsz(sz: float) -> str:

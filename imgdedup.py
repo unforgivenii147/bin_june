@@ -8,6 +8,8 @@ import cv2
 import numpy as np
 from imutils import paths
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def dhash(image, hashSize=8) -> int:
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)

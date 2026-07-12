@@ -7,6 +7,9 @@ import sqlite3
 from pathlib import Path
 from typing import Any
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 OUTPUT_DIR = Path("output")
 DB_PATH = Path("/sdcard/ext.db")
 ALLOWED_PYTHON_EXTENSIONS = ".py", ""

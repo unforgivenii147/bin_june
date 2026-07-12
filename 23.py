@@ -8,6 +8,9 @@ from pathlib import Path
 
 from fastwalk import walk_files
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 print_lock = Lock()
 
 

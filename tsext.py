@@ -1,14 +1,13 @@
 #!/data/data/com.termux/files/usr/bin/env python
 import imp
 import os
+from os import scandir as os_scandir
 from pathlib import Path
 
 import tree_sitter_python as tsp
 from tree_sitter import Language, Parser
 
-
-from pathlib import Path
-from os import scandir as os_scandir
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def is_python_file(path: (str | Path)) -> bool:

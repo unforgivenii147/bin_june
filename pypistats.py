@@ -6,6 +6,8 @@ import sys
 from collections import defaultdict
 from urllib.request import urlopen
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 PACKAGE = sys.argv[1]
 
 

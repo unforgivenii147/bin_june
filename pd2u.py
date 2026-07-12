@@ -6,6 +6,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 CHUNK_SIZE = 65536
 BINARY_BYTES = bytes(range(0, 9)) + bytes([11, 12]) + bytes(range(14, 32))
 

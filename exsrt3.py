@@ -6,6 +6,8 @@ from pathlib import Path
 
 import ffmpeg
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def get_subtitle_streams_info(input_path: str) -> list[dict]:
     try:

@@ -3,13 +3,12 @@
 
 import re
 from concurrent.futures import ThreadPoolExecutor
+from os import scandir as os_scandir
 from pathlib import Path
 
 from deep_translator import GoogleTranslator
 
-
-from pathlib import Path
-from os import scandir as os_scandir
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def is_binary(path: (Path | str)) -> bool:

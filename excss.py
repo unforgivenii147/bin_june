@@ -1,18 +1,16 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
+import os
 import sys
+from collections.abc import Callable, Iterable
+from os import scandir as os_scandir
 from pathlib import Path
 
 from bs4 import BeautifulSoup
 from bs4.element import PageElement
 
-
-from pathlib import Path
-from collections.abc import Callable, Iterable
-import sys
-from os import scandir as os_scandir
-import os
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def get_random_filename(length: int = 10) -> str:

@@ -14,6 +14,9 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 MIN_LINES = 3
 MIN_CHARS = 100
 

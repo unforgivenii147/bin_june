@@ -5,6 +5,8 @@ import sys
 
 from git import Repo
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def sync_branch_with_upstream(repo_path: str = ".") -> bool:
     try:

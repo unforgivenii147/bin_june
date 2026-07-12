@@ -7,6 +7,8 @@ from urllib.parse import urlparse
 import requests
 from bs4 import BeautifulSoup
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 LOCAL_MIRROR_URL = "https://mirror-pypi.runflare.com"
 
 
@@ -79,6 +81,7 @@ if __name__ == "__main__":
     packages_to_process = sys.argv[1:]
     try:
         from bs4 import BeautifulSoup
+
     except ImportError:
         print("The 'beautifulsoup4' library is required. Please install it: pip install beautifulsoup4")
         sys.exit(1)

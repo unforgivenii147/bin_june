@@ -9,11 +9,14 @@ from pathlib import Path
 
 import xxhash
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 BACKUP_FILE = ".symlink_backup.json"
 MIN_FILE_SIZE = 8
 
 
-def calculate_file_hash(filepath, chunk_size=8192) -> str | None:
+def calculate_file_hash(filepath, chunk_size=32768) -> str | None:
     if not filepath.is_file():
         return None
     hasher = xxhash.xxh64()

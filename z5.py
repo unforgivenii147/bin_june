@@ -24,6 +24,8 @@ from typing import List, Optional, Set, Tuple
 
 import zstandard as zstd
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 try:
     from rich import box
     from rich.console import Console
@@ -36,6 +38,7 @@ try:
 except ImportError:
     RICH_AVAILABLE = False
     print("💡 Tip: Install 'rich' for prettier output: pip install rich")
+
 EXCLUDED_EXTENSIONS = {
     ".xz",
     ".zst",
@@ -1042,4 +1045,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

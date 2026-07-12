@@ -3,14 +3,13 @@
 
 import sys
 from multiprocessing import get_context
+from os import scandir as os_scandir
 from pathlib import Path
 
 from PIL import Image
 from pytesseract import image_to_string
 
-
-from pathlib import Path
-from os import scandir as os_scandir
+SKIP_DIRS = [".git"]
 
 
 def get_files(path: str | Path, include_hidden: bool = True, ext: list[str] | None = None) -> list[Path]:
@@ -55,10 +54,12 @@ def extract_text(image_path: Path) -> bytes | dict[str, bytes | str] | str:
 
 def process_file(path: Path) -> None:
     path = Path(path)
+    txtfile = path.with_suffix(".txt")
+    if txtfile.exists():
+        return
     print(f"Processing {path.name}")
     text = extract_text(path)
     if text and len(text) > 1:
-        txtfile = path.with_suffix(".txt")
         txtfile.write_text(text, encoding="utf-8")
         print(f"{txtfile} created.")
     else:
@@ -72,7 +73,7 @@ def main() -> None:
     if len(files) == 1:
         process_file(files[0])
         sys.exit(0)
-    p = get_context("spawn").Pool(4)
+    p = get_context("spawn").Pool(8)
     for _ in p.imap_unordered(process_file, files):
         pass
     p.close()

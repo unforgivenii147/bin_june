@@ -24,6 +24,8 @@ from multiprocessing import Pool, cpu_count
 from pathlib import Path
 from typing import List, Set
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 class PIPPackageCache:
     def __init__(self, pip_list_path: str = "/sdcard/data/pip.txt"):

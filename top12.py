@@ -3,6 +3,8 @@ import heapq
 import os
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def get_top_10_largest_files_optimized(directory: str = "."):
     top_10 = []

@@ -2,6 +2,8 @@
 
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def copy_largest_file(source_dir, dest):
     largest = None

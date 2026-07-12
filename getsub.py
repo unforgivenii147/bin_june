@@ -13,6 +13,8 @@ from urllib.parse import quote
 
 import requests
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 class SubtitleDownloader:
     def __init__(self):

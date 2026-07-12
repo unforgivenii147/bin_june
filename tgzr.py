@@ -6,6 +6,8 @@ import tarfile
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def remove_items_fast(items) -> None:
     with ThreadPoolExecutor(max_workers=32) as ex:

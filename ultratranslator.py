@@ -1,3 +1,4 @@
+#!/data/data/com.termux/files/usr/bin/env python
 import ast
 import io
 import re
@@ -5,16 +6,26 @@ import shutil
 import sys
 import tempfile
 import tokenize
-from pathlib import Path
-
-from deep_translator import GoogleTranslator
-
-
+from collections.abc import Callable, Iterable
+from multiprocessing import get_context
+from os import scandir as os_scandir
 from pathlib import Path
 from typing import Any, ParamSpec, TypeVar
-from collections.abc import Callable, Iterable
-from os import scandir as os_scandir
-from multiprocessing import get_context
+
+from deep_translator import GoogleTranslator
+from binaryornot import is_binary
+
+
+CHUNK_SIZE = 4990
+SKIP_DIRS = [".git", "__pycache__"]
+MAX_WORKERS = 6
+
+DOC_TH1 = '"""'
+DOC_TH2 = "'''"
+DOCTH = ('"""', "'''")
+
+cwd = Path.cwd()
+non_english_pattern = re.compile(r"[^\x00-\x7F]")
 
 
 def mpf_async(func: Callable[[Any], Any], items: Iterable[Any]):
@@ -28,22 +39,6 @@ def mpf_async(func: Callable[[Any], Any], items: Iterable[Any]):
                 print(f"Item {i} failed: {e}")
                 results.append(None)
         return results
-
-
-def is_binary(path: (Path | str)) -> bool:
-    path = Path(path)
-    try:
-        with path.open("rb") as f:
-            chunk = f.read(CHUNK_SIZE)
-        if not chunk:
-            return False
-        if b"\x00" in chunk:
-            return True
-        text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
-        nontext = sum(1 for b in chunk if b not in text_chars)
-        return nontext / len(chunk) > ZERO_DOT_THREE
-    except Exception:
-        return True
 
 
 def get_nobinary(path: (str | Path)) -> list[Path]:
@@ -82,42 +77,9 @@ def get_files(path: str | Path, include_hidden: bool = True, ext: list[str] | No
     return sorted(files)
 
 
-cwd = Path.cwd()
-non_english_pattern = re.compile(r"[^\x00-\x7F]")
-
-
-def is_english(text: str) -> bool:
-    return not non_english_pattern.search(text)
-
-
-def chunk_text(text: str, size: int = 800) -> list[str]:
-    if not text or size <= 0:
-        return [text] if text else []
-    chunks = []
-    for i in range(0, len(text), size):
-        chunks.append(text[i : i + size])
-    return chunks
-
-
-def translate_chunk(chunk: str) -> str:
-    if not chunk or is_english(chunk):
-        return chunk
-    try:
-        result = GoogleTranslator(source="auto", target="en").translate(chunk)
-        print("*" * 35)
-        print(result)
-        print("*" * 35)
-        return result if result else chunk
-    except Exception as e:
-        print(f"  Translation error: {e}")
-        return chunk
-
-
-def translate_text(text: str) -> str:
-    if not text or is_english(text):
-        return text
-    chunks = chunk_text(text)
-    return "".join(translate_chunk(chunk) for chunk in chunks)
+def translate_text(path) -> str:
+    path = Path(path)
+    return GoogleTranslator(source="auto", target="en").translate_file(path)
 
 
 def safe_overwrite(filepath: Path, content: str) -> None:
@@ -127,8 +89,10 @@ def safe_overwrite(filepath: Path, content: str) -> None:
     shutil.move(tmp_path, filepath)
 
 
-def translate_python_file(source: str) -> str:
+def translate_python_file(path) -> str:
     print("  Analyzing Python structure...")
+    path = Path(path)
+    source = path.read_text(encoding="utf-8")
     try:
         tree = ast.parse(source)
     except SyntaxError as e:
@@ -192,21 +156,12 @@ def translate_python_file(source: str) -> str:
 
 def process_file(path: str | Path) -> None:
     path = Path(path)
-    try:
-        original = path.read_text(encoding="utf-8", errors="ignore")
-    except Exception as e:
-        print(f"  Error reading {path}: {e}")
-        return
-
-    if is_english(original.strip()):
-        return
-
     print(f"  Processing {path.name}...")
     try:
         if path.suffix == ".py":
-            translated = translate_python_file(original)
+            translated = translate_python_file(path)
         else:
-            translated = translate_text(original)
+            translated = translate_text(path)
 
         if translated.strip() != original.strip():
             safe_overwrite(path, translated)

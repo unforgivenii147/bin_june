@@ -4,8 +4,7 @@
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-
-from pathlib import Path
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def fsz(sz: float) -> str:
@@ -50,6 +49,7 @@ except ImportError:
     from PIL import Image
 
     USE_CV2 = False
+
 IGNORED_DIRS = {".git", "dist", "build", "__pycache__", ".venv", "node_modules"}
 
 

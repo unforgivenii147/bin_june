@@ -14,6 +14,8 @@ import tomllib
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def load_toml(path: Path) -> dict:
     with open(path, "rb") as f:

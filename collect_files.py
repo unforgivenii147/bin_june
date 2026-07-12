@@ -5,6 +5,8 @@ import shutil
 import sys
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def unique_destination_path(dest_dir: Path, filename: str) -> Path:
     candidate = dest_dir / filename

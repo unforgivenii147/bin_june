@@ -19,6 +19,8 @@ from pathlib import Path
 
 import lz4.frame
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def get_folder_size(folder_path):
     total = 0

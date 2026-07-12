@@ -5,6 +5,8 @@ import re
 import sys
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def normalize_white_space(input_path: str) -> None:
     text = Path(input_path).read_text(encoding="utf-8", errors="ignore")

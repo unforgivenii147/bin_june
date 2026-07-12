@@ -3,6 +3,9 @@ import shutil
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 FILE_EXTENSIONS = [".pyc", ".log", ".bak"]
 DIR_NAMES = ["__pycache__", ".ruff_cache", ".mypy_cache", "dist", "build", "target"]
 

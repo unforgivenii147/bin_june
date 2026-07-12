@@ -4,6 +4,8 @@
 import imagehash
 from PIL import Image
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def find_similar_images(userpaths, hashfunc=imagehash.average_hash) -> None:
 

@@ -4,6 +4,8 @@ import sys
 from pathlib import Path
 from urllib.parse import urlparse
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def normalize_url(u: str) -> str:
     u = u.strip()

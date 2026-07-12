@@ -6,6 +6,8 @@ import sys
 import numpy as np
 from PIL import Image
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def get_ansi_color_code(r, g, b):
     if r == g and g == b:

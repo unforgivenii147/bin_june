@@ -6,6 +6,8 @@ import sys
 import zipfile
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def is_empty_wheel(wheel_path: Path) -> bool:
     try:

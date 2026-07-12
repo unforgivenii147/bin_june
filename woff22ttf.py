@@ -8,6 +8,8 @@ from pathlib import Path
 
 from fontTools.ttLib import woff2
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def get_files(path: str | Path, include_hidden: bool = True, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)

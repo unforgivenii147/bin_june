@@ -6,6 +6,8 @@ Remove duplicate entries from $PATH and update ~/.bashrc
 import os
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def get_path_entries():
     path_str = os.environ.get("PATH", "")

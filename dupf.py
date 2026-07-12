@@ -1,16 +1,15 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
+import os
+import sys
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 from xxhash import xxh64
 
-
-from pathlib import Path
-import os
-import sys
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def gsz(path: str | Path) -> int:

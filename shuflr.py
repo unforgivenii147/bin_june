@@ -6,6 +6,8 @@ import random
 import secrets
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def enhanced_shuffle(input_file, output_file_prefix=None, methods=None, repeats=3) -> None:
     if methods is None:

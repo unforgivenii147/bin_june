@@ -10,6 +10,9 @@ from packaging.tags import parse_tag
 from packaging.utils import canonicalize_name
 from packaging.version import Version
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 MOVE_MODE = "-m" in sys.argv
 WHEEL_PATTERN = re.compile(
     r"^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])-([^-]+)-(\d[^-]*)-([^-]+)-([^-]+)-([^-]+)\.whl$", re.IGNORECASE

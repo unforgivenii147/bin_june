@@ -12,6 +12,9 @@ from pathlib import Path
 
 import zstandard as zstd
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 MAX_WORKERS = 4
 CHUNK_SIZE = 524288
 ZSTD_LEVEL = 22

@@ -4,6 +4,9 @@ import os
 from ast import AST
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 output_dir = Path("output")
 output_dir.mkdir(exist_ok=True)
 func_file = output_dir / "func.py"

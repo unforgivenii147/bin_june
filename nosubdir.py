@@ -4,6 +4,8 @@ import pathlib
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from functools import partial
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def check_directory(dir_path, max_size_kb=None):
     """

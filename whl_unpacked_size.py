@@ -14,6 +14,8 @@ from pathlib import Path
 from typing import Optional, Tuple
 from zipfile import ZipFile
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def format_size(size_bytes: int) -> str:
     for unit in ["B", "KB", "MB", "GB", "TB"]:

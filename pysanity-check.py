@@ -8,6 +8,8 @@ import sys
 
 import pkg_resources
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def get_installed_python_packages() -> list[tuple[str, str]]:
     return [(d.project_name, d.version) for d in pkg_resources.working_set]

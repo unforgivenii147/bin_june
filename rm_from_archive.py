@@ -14,6 +14,8 @@ import tempfile
 
 import zstandard as zstd
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def delete_from_tar_zst(archive_path, file_to_delete):
     if not os.path.exists(archive_path):

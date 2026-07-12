@@ -9,6 +9,8 @@ Adds proper <head> section with links to style.css and script.js
 import sys
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def convert_codepen_html(html_content, title="Document", charset="UTF-8"):
     full_html = f'<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="{charset}">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>{title}</title>\n    <link rel="stylesheet" href="style.css">\n</head>\n<body>\n{html_content}\n    <script src="script.js"></script>\n</body>\n</html>\n'

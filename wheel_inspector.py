@@ -6,6 +6,8 @@ from pathlib import Path
 
 from loguru import logger
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 class WheelInspector:
     def __init__(self, verbose: bool = False) -> None:

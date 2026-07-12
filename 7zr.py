@@ -12,6 +12,9 @@ from pathlib import Path
 
 import py7zr
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 MAX_WORKERS = 2
 CHUNK_SIZE = 524288
 TEMP_DIR = Path(tempfile.gettempdir()) / "py7zr_temp"

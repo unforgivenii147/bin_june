@@ -3,10 +3,7 @@ import os
 import sys
 from pathlib import Path
 
-
-from pathlib import Path
-import os
-import sys
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def is_binary(path: (Path | str)) -> bool:

@@ -7,6 +7,9 @@ from pathlib import Path
 from dh import BIN_EXT
 from tqdm import tqdm
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 EXCLUDED_EXTENSIONS = BIN_EXT
 
 

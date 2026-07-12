@@ -13,8 +13,11 @@ from typing import TYPE_CHECKING
 import py7zr
 from dh import fsz, gsz
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 if TYPE_CHECKING:
     from collections.abc import Iterable
+
 ROOT = Path.cwd()
 LOG_FILE = ROOT / "compress.log"
 PY7ZR_PRESET = 9

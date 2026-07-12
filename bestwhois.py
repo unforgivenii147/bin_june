@@ -15,9 +15,12 @@ from pygments import highlight
 from pygments.formatters import TerminalFormatter
 from pygments.lexers import JsonLexer
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 IDN = True
 try:
     import idna
+
 except:
     IDN = False
 VERSION = "0.1.0"

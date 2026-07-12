@@ -10,6 +10,8 @@ import requests
 from bs4 import BeautifulSoup
 from requests.sessions import Session
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def create_session() -> Session:
     session = requests.Session()

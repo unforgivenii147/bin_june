@@ -8,20 +8,18 @@ import sys
 import tarfile
 import tempfile
 import zipfile
+from functools import wraps
+from inspect import getfullargspec
+from itertools import chain
 from pathlib import Path
 from tarfile import TarFile
+from typing import Any, Callable, Dict
 from urllib.parse import urlparse
 from zipfile import ZipFile
 
 import zstd
 
-
-from pathlib import Path
-from itertools import chain
-from typing import Any, Callable, Dict
-from functools import wraps
-import re
-from inspect import getfullargspec
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 class ValidationFailure(Exception):

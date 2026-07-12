@@ -8,6 +8,8 @@ import apt
 import apt_pkg
 import unix_ar
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 BASE_DIR = Path.home() / "debs"
 BASE_DIR.mkdir(parents=True, exist_ok=True)
 apt_pkg.init_system()

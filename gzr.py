@@ -11,6 +11,9 @@ import tarfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 MAX_WORKERS = 4
 CHUNK_SIZE = 524288
 GZIP_COMPRESS_LEVEL = 9

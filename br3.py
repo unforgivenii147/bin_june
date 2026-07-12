@@ -10,6 +10,9 @@ from pathlib import Path
 
 import brotlicffi
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 _executor = asyncio.Semaphore(4)
 
 

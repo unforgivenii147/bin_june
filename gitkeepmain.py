@@ -6,6 +6,8 @@ import subprocess
 import sys
 from subprocess import CompletedProcess
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def run_git_command(cmd: str, check=True, capture_output=True) -> CompletedProcess[str] | None:
     try:

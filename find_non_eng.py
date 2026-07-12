@@ -7,8 +7,7 @@ from pathlib import Path
 
 import pycld2
 
-
-from pathlib import Path
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def is_binary(path: (Path | str)) -> bool:
@@ -159,6 +158,7 @@ def main() -> None:
 if __name__ == "__main__":
     try:
         import pycld2
+
     except ImportError:
         print("Error: pycld2 is not installed. Install it with:")
         print("  pip install pycld2")

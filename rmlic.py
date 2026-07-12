@@ -1,14 +1,13 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
-import re
-from pathlib import Path
-
-
-from pathlib import Path
-from os import scandir as os_scandir
-import sys
 import os
+import re
+import sys
+from os import scandir as os_scandir
+from pathlib import Path
+
+SKIP_DIRS = [".git"]
 
 
 def gsz(path: str | Path) -> int:

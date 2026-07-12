@@ -7,6 +7,9 @@ from pathlib import Path
 
 import xxhash
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 CACHE_PATH = Path.home() / ".cache" / "dups_cache.json"
 DUPS_DIR = Path.home() / ".cache" / "dups"
 MANIFEST_PATH = DUPS_DIR / "manifest.json"

@@ -17,6 +17,9 @@ from deep_translator import GoogleTranslator
 from dh import DOC_TH1, DOC_TH2
 from langdetect import DetectorFactory, detect
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 DetectorFactory.seed = 0
 TARGET_LANG = "en"
 DELAY_SECONDS = 0.5

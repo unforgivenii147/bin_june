@@ -7,6 +7,8 @@ import time
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 DIR_PERM = 0o755
 FILE_PERM = 0o664
 EXEC_PERM = 0o755

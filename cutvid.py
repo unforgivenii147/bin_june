@@ -6,6 +6,8 @@ from pathlib import Path
 
 import cv2
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def format_time(time_str) -> int:
     h, m, s = map(int, time_str.split(":"))

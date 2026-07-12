@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
+import os
 import sys
 from pathlib import Path
 
@@ -8,10 +9,7 @@ import tree_sitter_python as tsp
 from rapidfuzz import fuzz
 from tree_sitter import Language, Parser
 
-
-from pathlib import Path
-import os
-import sys
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
 

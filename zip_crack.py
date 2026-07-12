@@ -6,6 +6,8 @@ import time
 import zipfile
 from itertools import islice
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 class StatusReporter:
     def __init__(self, total_passwords, start_time, update_interval=60):

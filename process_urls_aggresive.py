@@ -5,6 +5,9 @@ import re
 import sys
 from urllib.parse import urlparse
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 INPUT_FILE = sys.argv[1]
 
 

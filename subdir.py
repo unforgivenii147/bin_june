@@ -9,6 +9,8 @@ from pathlib import Path
 
 import py7zr
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def safe_mkdir(base: Path) -> Path:
     if not base.exists():

@@ -15,6 +15,8 @@ from pathlib import Path
 
 from PIL import Image
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def get_file_size(file_path):
     return file_path.stat().st_size

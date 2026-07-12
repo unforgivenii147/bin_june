@@ -19,6 +19,9 @@ import numpy as np
 from joblib import Parallel, delayed
 from PIL import Image, UnidentifiedImageError
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 SEARCH_ROOT = Path(".")
 JPEG_QUALITY = 90
 SIMILARITY_THRESHOLD = 8.0

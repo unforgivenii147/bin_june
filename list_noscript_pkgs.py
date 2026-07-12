@@ -4,6 +4,9 @@
 import site
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 u = Path(site.getusersitepackages())
 for p in u.iterdir():
     if p.is_dir() and not p.name.endswith((".dist-info", ".egg-info")):

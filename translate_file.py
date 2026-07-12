@@ -7,6 +7,9 @@ from pathlib import Path
 
 from deep_translator import GoogleTranslator
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 LANGUAGE_PATTERN = re.compile(r"[\u0600-\u06FF\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF\u0400-\u04FF]")
 
 

@@ -11,6 +11,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def check_msgunfmt() -> bool:
     try:

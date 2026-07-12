@@ -6,6 +6,8 @@ import json
 import sys
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def csv_to_json_map(csv_file: str) -> None:
     csv_path = Path(csv_file)

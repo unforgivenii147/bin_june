@@ -7,8 +7,11 @@ import sys
 from os.path import commonpath
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 try:
     from dh import colored
+
 except ImportError:
     print("Install termcolor: pip install termcolor")
     sys.exit(1)

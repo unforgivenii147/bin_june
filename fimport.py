@@ -7,6 +7,8 @@ import ast
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 if TYPE_CHECKING:
     from collections.abc import Iterable
 

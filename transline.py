@@ -1,8 +1,32 @@
 #!/data/data/com.termux/files/usr/bin/env python
+"""
+Translate Chinese characters in text files in-place.
+Optimized for speed using parallel processing.
+Only translates Chinese characters (not punctuation), preserving everything else.
+"""
 
-
-from pathlib import Path
+import json
+import logging
+import signal
+import sys
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime
 from os import scandir as os_scandir
+from pathlib import Path
+
+from deep_translator import GoogleTranslator
+from dh import get_nobinary
+from tenacity import before_sleep_log, retry, retry_if_exception_type, stop_after_attempt, wait_exponential_jitter
+
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+MAX_WORKERS = 10
+MAX_RETRIES = 3
+PROGRESS_SAVE_EVERY = 20
+logging.basicConfig(level=logging.WARNING)
+log = logging.getLogger(__name__)
+_interrupted = False
 
 
 def is_binary(path: (Path | str)) -> bool:
@@ -56,25 +80,6 @@ def get_files(path: str | Path, include_hidden: bool = True, ext: list[str] | No
 
     return sorted(files)
 
-
-"""
-Translate Chinese characters in text files in-place.
-Optimized for speed using parallel processing.
-Only translates Chinese characters (not punctuation), preserving everything else.
-"""
-
-import json
-import logging
-import re
-import signal
-import sys
-import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime
-from pathlib import Path
-
-from deep_translator import GoogleTranslator
-from tenacity import before_sleep_log, retry, retry_if_exception_type, stop_after_attempt, wait_exponential_jitter
 
 # This regex pattern explicitly matches ANY Han (Chinese) character,
 # completely ignoring brackets, spaces, or English characters automatically.

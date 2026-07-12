@@ -3,6 +3,8 @@
 
 from datetime import datetime
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 class JalaliDate:
     JALALI_MONTHS_EN = [

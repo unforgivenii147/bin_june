@@ -3,6 +3,8 @@ import os
 from collections import Counter
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def is_text_file(file_path, text_extensions):
     return file_path.suffix.lower() in text_extensions

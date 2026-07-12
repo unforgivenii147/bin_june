@@ -7,6 +7,8 @@ from textual.app import App, ComposeResult
 from textual.containers import Grid
 from textual.widgets import Button, Static
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 class Display(Static):
     DEFAULT_CSS = """

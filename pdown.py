@@ -10,6 +10,8 @@ import urllib.error
 import urllib.request
 from typing import Dict, Optional, Tuple
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def get_pypi_json(package: str, timeout: int = 10) -> Optional[Dict]:
     url = f"https://pypi.org/pypi/{package}/json"

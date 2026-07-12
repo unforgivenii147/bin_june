@@ -8,11 +8,10 @@ import re
 import sys
 from collections.abc import Iterable
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from pathlib import Path
-
-
-from pathlib import Path
 from os import scandir as os_scandir
+from pathlib import Path
+
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def is_binary(path: (Path | str)) -> bool:

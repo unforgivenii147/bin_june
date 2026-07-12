@@ -13,6 +13,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 # Configuration
 DH_SOURCE_PATH = Path.home() / "isaac" / "pkgs" / "dh" / "src" / "dh"
 DH_MODULE_NAME = "dh"

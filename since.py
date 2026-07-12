@@ -9,6 +9,8 @@ Converts Persian (Solar Hijri) dates to Gregorian dates and calculates days sinc
 import datetime
 import sys
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 class PersianDateConverter:
     PERSIAN_MONTHS = [

@@ -5,6 +5,9 @@ import re
 from pathlib import Path
 from urllib.parse import urlparse
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 INPUT_FILE = Path("urls.txt")
 OUTPUT_FILE = Path("filtered_urls.txt")
 EXT_PATTERN = re.compile(r"\.(min\.)?(js|css)$", re.IGNORECASE)

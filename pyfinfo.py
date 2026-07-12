@@ -3,6 +3,8 @@
 import os
 from collections import Counter, defaultdict
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def walk_file_stems(root: str = "."):
     """Yield the stem of each regular file (not symlink) outside .git directories."""

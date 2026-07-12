@@ -7,6 +7,8 @@ from pathlib import Path
 
 import nbformat as nbf
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def py_to_ipynb(input_file, output_file=None) -> bool:
     if not Path(input_file).exists():

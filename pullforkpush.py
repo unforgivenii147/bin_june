@@ -6,6 +6,8 @@ import git
 from dotenv import load_dotenv
 from github import Github, GithubException
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def setup_github_client():
     """Loads the token from ~/.env and initializes the GitHub client."""

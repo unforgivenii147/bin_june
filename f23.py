@@ -6,6 +6,9 @@ import re
 import shutil
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 PRINT_PATTERN = re.compile(r"^\s*print\s+(?!\()(.+)$")
 PRINT_BARE_PATTERN = re.compile(r"^\s*print\s*$")
 EXCEPT_PATTERN = re.compile(r"^\s*except\s+(\S+)\s*,\s*(\S+)\s*:")

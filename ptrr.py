@@ -9,6 +9,8 @@ from pathlib import Path
 
 import zstandard as zstd
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def compress_chunk(chunk_data):
     compressor = zstd.ZstdCompressor(level=3, threads=4)

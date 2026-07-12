@@ -14,6 +14,8 @@ from pathlib import Path
 from fontTools.pens.ttGlyphPen import TTGlyphPen
 from fontTools.ttLib import TTFont
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def convert_otf_to_ttf(otf_path: Path) -> dict:
     ttf_path = otf_path.with_suffix(".ttf")

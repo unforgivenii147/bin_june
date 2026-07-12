@@ -7,6 +7,8 @@ from urllib.parse import urljoin
 import requests
 from bs4 import BeautifulSoup
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def download_image(url, output_dir) -> None:
     try:

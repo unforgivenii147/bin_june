@@ -12,6 +12,8 @@ from collections.abc import Generator
 from datetime import UTC, datetime
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 class LineProcessor:
     def __init__(self, verbose: bool = False) -> None:
@@ -273,6 +275,7 @@ class FileSorter(LineProcessor):
     def save_report(self, stats: dict, report_file: str | None = None) -> None:
         if report_file is None:
             import json
+
         report = {"timestamp": datetime.now(tz=UTC).isoformat(), "statistics": stats}
         try:
             with Path(report_file).open("w", encoding="utf-8") as f:

@@ -6,6 +6,8 @@ import re
 import sys
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def sanitize_pkg_name(name: str) -> str:
     name = name.lstrip("@")

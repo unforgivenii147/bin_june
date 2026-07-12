@@ -11,6 +11,8 @@ from argparse import Namespace
 from os import getenv
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def colorize(text: str, mode: int, link_target: str | None = None) -> str:
     if stat.S_ISDIR(mode):

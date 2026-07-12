@@ -9,6 +9,8 @@ Replaces exact text matches in all .py files.
 import sys
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def replace_in_file(filepath: Path, old_text: str, new_text: str) -> bool:
     try:

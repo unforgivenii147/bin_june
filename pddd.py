@@ -2,6 +2,8 @@
 from operator import itemgetter
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def get_dir_size(path: Path) -> int:
     total = 0

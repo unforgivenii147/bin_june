@@ -6,6 +6,9 @@ from pathlib import Path
 
 import ssdeep
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 SEARCH_DIR = Path.cwd()
 OUTPUT_DIR = SEARCH_DIR / "output"
 SIMILARITY_THRESHOLD = 60

@@ -3,13 +3,12 @@
 
 import re
 import unicodedata
-from html.parser import HTMLParser
-from pathlib import Path
-
-
-from pathlib import Path
-from os import scandir as os_scandir
 from collections.abc import Callable, Iterable
+from html.parser import HTMLParser
+from os import scandir as os_scandir
+from pathlib import Path
+
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def mpf3(process_function: Callable, files: list[Path], **kwargs):

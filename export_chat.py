@@ -4,6 +4,8 @@
 import json
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def export_to_markdown(json_path: str, output_dir="exported") -> None:
     output_dir = Path(output_dir)

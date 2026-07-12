@@ -18,6 +18,8 @@ import traceback
 from io import BytesIO
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 try:
     import zstandard as zstd
 except ImportError:
@@ -32,6 +34,7 @@ except ImportError:
     lz4frame = None
 try:
     import py7zr
+
 except ImportError:
     py7zr = None
 logging.basicConfig(

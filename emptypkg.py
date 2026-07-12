@@ -4,6 +4,8 @@ import sysconfig
 import zipfile
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def is_empty_package(dist_info_path) -> bool:
     dist_info_path = Path(dist_info_path)

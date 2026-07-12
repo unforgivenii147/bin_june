@@ -4,6 +4,8 @@
 import sysconfig
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def clean_record_file(record_path: Path) -> None:
     lines = record_path.read_text(encoding="utf-8").splitlines()

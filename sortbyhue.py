@@ -6,6 +6,9 @@ import re
 import sys
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 HEX_RE = re.compile(r"^#([0-9a-fA-F]{6})$")
 
 

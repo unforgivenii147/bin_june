@@ -2,6 +2,8 @@
 import os
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def keep_one_image_per_folder(base_dir):
     base_path = Path(base_dir)

@@ -13,6 +13,9 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import List, Tuple
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 TESTS_DIR = Path.home() / "tmp" / "tests"
 MOVED_FILES_LOG = Path.home() / "tmp" / "moved_files.json"
 

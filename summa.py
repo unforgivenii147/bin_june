@@ -9,6 +9,8 @@ from pathlib import Path
 from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize, word_tokenize
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 class TextSummarizer:
     def __init__(self, language: str = "english") -> None:

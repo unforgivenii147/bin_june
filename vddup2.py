@@ -6,6 +6,8 @@ from ast import Module
 from collections import defaultdict
 from multiprocessing import Pool, cpu_count
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def parse_python_file(file_path) -> Module:
     with open(file_path, "r", encoding="utf-8") as file:

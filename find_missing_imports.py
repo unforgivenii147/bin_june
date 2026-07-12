@@ -11,6 +11,9 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 STDLIB_MODULES = set(sys.builtin_module_names)
 for module_name in list(sys.modules.keys()):
     if hasattr(importlib.util, "find_spec"):

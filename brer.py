@@ -12,6 +12,9 @@ from pathlib import Path
 
 import brotli
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 MAX_WORKERS = 8
 CHUNK_SIZE = 524288
 BROTLI_QUALITY = 11

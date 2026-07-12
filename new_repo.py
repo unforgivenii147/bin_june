@@ -7,6 +7,9 @@ import requests
 from dotenv import load_dotenv
 from git import InvalidGitRepositoryError, Repo
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 load_dotenv(os.path.expanduser("~/.env"))
 GITHUB_USERNAME = "unforgivenii147"
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")

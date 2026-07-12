@@ -12,6 +12,8 @@ import numpy as np
 import pytesseract
 from PIL import Image
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def pil_to_cv(img: Image.Image) -> np.ndarray:
     return cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)

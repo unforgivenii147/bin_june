@@ -10,6 +10,8 @@ from pathlib import Path
 
 from git import GitCommandError, Repo
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def find_git_repos(root_path: Path) -> list[Path]:
     git_repos = []

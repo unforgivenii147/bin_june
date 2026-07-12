@@ -10,6 +10,9 @@ from pathlib import Path
 
 import py7zr
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 BASE_DIR = Path.cwd()
 LOG_FILE = BASE_DIR / "decompress.log"
 MAX_WORKERS = max(1, mp.cpu_count() - 1)

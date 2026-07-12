@@ -11,6 +11,9 @@ import re
 import shutil
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 SHEBANG_MAPPING = {
     "#!/data/data/com.termux/files/usr/bin/python3?": ".py",
     "#!/data/data/com.termux/files/usr/bin/env python3?": ".py",

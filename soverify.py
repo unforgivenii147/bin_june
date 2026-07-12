@@ -2,18 +2,16 @@
 
 
 import ctypes
+import os
 import subprocess
 import sys
+from os import scandir as os_scandir
 from pathlib import Path
 from typing import List, Optional, Tuple
 
 from loguru import logger
 
-
-from pathlib import Path
-import os
-from os import scandir as os_scandir
-import sys
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
 

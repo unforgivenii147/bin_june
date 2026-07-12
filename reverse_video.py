@@ -4,6 +4,8 @@
 import subprocess
 import sys
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def reverse_video_ffmpeg(input_file, output_file="reversed.mp4"):
     cmd = [

@@ -11,6 +11,8 @@ import zipfile
 from email.parser import Parser
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def prefix_path() -> Path:
     p = os.environ.get("PREFIX")

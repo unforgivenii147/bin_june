@@ -10,6 +10,8 @@ Numbers and special chars go into '0-9/' folder.
 import shutil
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def get_target_folder_name(filename: str) -> str:
     if not filename:

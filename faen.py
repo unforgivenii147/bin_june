@@ -5,6 +5,8 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 class BidirectionalDictionary:
     def __init__(self, json_file: str = "/sdcard/dic/dic.json"):

@@ -4,6 +4,8 @@
 import sys
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def split_file_by_delimiter(fname: str, delimiter: str) -> None:
     content = Path(fname).read_text(encoding="utf-8")

@@ -7,6 +7,8 @@ from pathlib import Path
 import requests
 from packaging import tags
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def is_pure_python(requires_python):
     return requires_python is None or all(

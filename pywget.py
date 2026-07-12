@@ -8,44 +8,10 @@ from os import get_terminal_size
 from pathlib import Path
 from typing import Self
 
-try:
-    from tqdm import tqdm
 
-    TQDM_AVAILABLE = True
-except ImportError:
-    TQDM_AVAILABLE = False
+from tqdm import tqdm
 
-    class tqdm:
-        def __init__(self, total=None, unit: str = "B", unit_scale: bool = True, desc=None, leave: bool = True) -> None:
-            self.total = total
-            self.n = 0
-            self.unit = unit
-            self.unit_scale = unit_scale
-            self.desc = desc or "Downloading"
-            self.leave = leave
-
-        def update(self, n: int) -> None:
-            self.n += n
-            if self.total:
-                percent = min(100, self.n / self.total * 100)
-                bar_len = 30
-                filled = int(bar_len * self.n / self.total)
-                bar = "█" * filled + "-" * (bar_len - filled)
-                print(f"\r{self.desc}: |{bar}| {percent:3.0f}% {self.n}/{self.total} {self.unit}", end="")
-            else:
-                print(f"\r{self.desc}: {self.n} {self.unit}", end="")
-
-        def close(self) -> None:
-            if self.leave:
-                print()
-            else:
-                print()
-
-        def __enter__(self) -> Self:
-            return self
-
-        def __exit__(self, *args) -> None:
-            self.close()
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def get_console_width() -> int:

@@ -3,6 +3,8 @@ import hashlib
 import shutil
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def calculate_hash(filepath: Path, chunk_size=8192):
     sha256 = hashlib.sha256()

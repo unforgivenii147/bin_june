@@ -20,6 +20,8 @@ from typing import Dict, Iterable, List, Optional, Tuple
 
 from loguru import logger
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 try:
     import bz2
     import gzip
@@ -36,6 +38,7 @@ except Exception:
 HAS_BROTLI = True
 try:
     import brotli
+
 except Exception:
     HAS_BROTLI = False
 RECOGNIZED_ARCHIVE_EXTS = {".zip", ".tar", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz"}

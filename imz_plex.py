@@ -11,6 +11,8 @@ from pathlib import Path
 
 from dh import STDLIB
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 SHEBANG_PATTERNS = ["#!/data/data/com.termux/files/usr/bin/python", "#!/usr/bin/env python", "#! */python"]
 COMPRESSED_EXTS = {".tar.gz", ".tgz", ".tar.xz", ".tar.bz2", ".tar.zst", ".zip", ".whl", ".7z"}
 PIP_LIST_PATH = Path("/sdcard/pip.txt")

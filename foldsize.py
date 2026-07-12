@@ -7,6 +7,8 @@ from pathlib import Path
 
 from loguru import logger
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def get_all_files(root: Path) -> list[Path]:
     return [p for p in root.rglob("*") if p.is_file() and not p.name.startswith(".") and p.name != "folderize.py"]

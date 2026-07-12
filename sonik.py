@@ -2,6 +2,8 @@
 import os
 import sys
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def sort_and_dedup(file_name: str) -> None:
     file_size = os.path.getsize(file_name)

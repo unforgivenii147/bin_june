@@ -11,6 +11,8 @@ import tempfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 try:
     import zstandard as zstd
 
@@ -38,6 +40,7 @@ except ImportError:
 import bz2
 import gzip
 import lzma
+
 
 MAX_WORKERS = 4
 CHUNK_SIZE = 524288

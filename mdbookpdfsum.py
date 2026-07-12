@@ -8,6 +8,8 @@ from pathlib import Path
 import lxml.html
 import pypdf
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 class Section:
     def __init__(self, title: str, source_file: str, depth: int, index: int) -> None:

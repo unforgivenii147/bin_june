@@ -12,6 +12,9 @@ from pathlib import Path
 
 from lzma_mt import compress, decompress
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 MAX_WORKERS = 4
 CHUNK_SIZE = 1048576
 

@@ -14,6 +14,8 @@ from typing import Dict, List, Optional, Tuple
 
 from packaging import version as pkg_version
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def parse_wheel_version(filename: str) -> Optional[Tuple[str, str]]:
     name = filename[:-4]

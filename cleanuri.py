@@ -15,6 +15,9 @@ from pathlib import Path
 
 from dh import MIME2EXT
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 DATA_URI_PATTERN = re.compile(
     r"data:(?P<mime>[^;,]*)(?P<params>(?:;[^;,]+=[^;,]+)*?);base64,\s*(?P<data>[A-Za-z0-9+/=]+)"
 )

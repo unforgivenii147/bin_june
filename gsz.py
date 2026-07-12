@@ -6,6 +6,8 @@ import sys
 
 import requests
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def get_repo_size(input_str: str) -> None:
     if input_str.startswith("https://github.com/"):

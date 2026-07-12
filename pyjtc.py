@@ -3,6 +3,8 @@ import argparse
 import re
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def remove_comments_and_strings(content: str, filetype: str, keep_strings=False):
     if filetype in {"c", "cpp", "h", "hpp"}:

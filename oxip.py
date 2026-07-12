@@ -3,13 +3,12 @@
 
 import subprocess
 from multiprocessing import Pool, cpu_count
+from os import scandir as os_scandir
 from pathlib import Path
 
 from rich.progress import Progress
 
-
-from pathlib import Path
-from os import scandir as os_scandir
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def get_files(path: str | Path, include_hidden: bool = True, ext: list[str] | None = None) -> list[Path]:

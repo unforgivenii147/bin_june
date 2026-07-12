@@ -3,17 +3,16 @@
 
 import ast
 import sys
+from collections.abc import Callable, Iterable
+from multiprocessing import get_context
+from os import scandir as os_scandir
 from pathlib import Path
+from typing import Any, ParamSpec, TypeVar
 
 import tree_sitter_python as tspython
 from tree_sitter import Language, Parser, Query, QueryCursor
 
-
-from pathlib import Path
-from typing import Any, ParamSpec, TypeVar
-from os import scandir as os_scandir
-from collections.abc import Callable, Iterable
-from multiprocessing import get_context
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def remove_blank_lines(text: str | Path) -> str:

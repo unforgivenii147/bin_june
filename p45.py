@@ -8,6 +8,8 @@ from pathlib import Path
 
 from dh import DOC_TH1, DOC_TH2
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def format_python_file(filepath: Path) -> None:
     if not filepath.exists():

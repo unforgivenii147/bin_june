@@ -6,6 +6,7 @@ import gzip
 import hashlib
 import lzma
 import multiprocessing as mp
+import os
 import sys
 import tempfile
 import time
@@ -19,8 +20,7 @@ import py7zr
 import zstandard as zstd
 from loguru import logger
 
-
-import os
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 _HASH_TABLE_SIZE = 1 << 14
 

@@ -22,6 +22,8 @@ from pathlib import Path
 
 import brotlicffi
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def compress_file(input_path: Path, output_path: Path, quality: int = 6) -> dict:
     try:

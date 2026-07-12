@@ -19,6 +19,8 @@ from pathlib import Path
 
 import brotlicffi as brotli
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 LARGE_FILE_THRESHOLD = 5 * 1024 * 1024
 LEVEL_DEFAULT = 11
 LEVEL_LARGE = 3

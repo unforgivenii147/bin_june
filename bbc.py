@@ -4,6 +4,9 @@
 import shutil
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 L1 = "[egg_info]"
 L2 = "tag_build = "
 L3 = "tag_date = 0"

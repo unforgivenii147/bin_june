@@ -7,6 +7,9 @@ from pathlib import Path
 from dotenv import load_dotenv
 from googleapiclient.discovery import Resource, build
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 load_dotenv()
 API_KEY = os.getenv("YOUTUBE_API_KEY")
 CHANNELS = {

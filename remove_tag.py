@@ -5,6 +5,8 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def remove_tag_from_html_file(file_path, tag_name) -> None:
     try:

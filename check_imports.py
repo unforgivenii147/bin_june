@@ -7,6 +7,9 @@ import sys
 import traceback
 from importlib.machinery import SourceFileLoader
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 if __name__ == "__main__":
     files = sys.argv[1:]
     has_failure = False

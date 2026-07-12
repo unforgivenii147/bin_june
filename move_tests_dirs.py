@@ -5,6 +5,8 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Tuple
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def move_tests_folder(tests_path: Path, base_src: Path, base_dst: Path) -> Tuple[bool, str]:
     try:

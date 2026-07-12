@@ -13,8 +13,11 @@ import sys
 from pathlib import Path
 from typing import List, Tuple
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 try:
     from googletrans import Translator
+
 except ImportError:
     print("Please install googletrans: pip install googletrans==4.0.0rc1")
     sys.exit(1)

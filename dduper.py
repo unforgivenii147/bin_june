@@ -19,6 +19,9 @@ import zstandard as zstd
 from loguru import logger
 from tree_sitter import Language, Parser
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 TREE_SITTER_AVAILABLE = True
 SUPPORTED_ARCHIVES = (
     ".zip",

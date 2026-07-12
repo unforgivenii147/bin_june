@@ -4,6 +4,8 @@ from pathlib import Path
 from rcssmin import cssmin
 from rjsmin import jsmin
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def minify_assets_in_directory(cwd: Path | str = ".") -> None:
     """

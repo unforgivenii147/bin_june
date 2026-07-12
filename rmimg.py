@@ -1,18 +1,16 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
+import os
 import sys
 from collections import deque
 from multiprocessing import get_context
+from os import scandir as os_scandir
 from pathlib import Path
 
 from bs4 import BeautifulSoup
 
-
-from pathlib import Path
-from os import scandir as os_scandir
-import sys
-import os
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def gsz(path: str | Path) -> int:

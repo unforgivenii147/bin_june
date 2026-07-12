@@ -1,8 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
-from pathlib import Path
 from os import scandir as os_scandir
+from pathlib import Path
+
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def is_binary(path: (Path | str)) -> bool:
@@ -66,7 +68,6 @@ import multiprocessing as mp
 import re
 import sys
 from pathlib import Path
-
 
 HTML_ENTITIES = {
     "&lt;": "<",

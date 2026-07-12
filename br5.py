@@ -22,6 +22,8 @@ from typing import List, Optional, Set, Tuple
 
 import brotlicffi
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 try:
     from rich import box
     from rich.console import Console

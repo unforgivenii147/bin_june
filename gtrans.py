@@ -11,6 +11,8 @@ import time
 
 from googletrans import Translator
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def translate_text(text, target_lang="en", retries=3):
     if not text or text.strip() == "":

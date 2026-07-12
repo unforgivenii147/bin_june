@@ -1,15 +1,14 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
+import os
+import sys
 from pathlib import Path
 
 import tree_sitter_cpp as tscpp
 from tree_sitter import Language, Node, Parser
 
-
-from pathlib import Path
-import os
-import sys
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def remove_blank_lines(text: str | Path) -> str:

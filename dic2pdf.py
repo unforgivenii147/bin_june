@@ -5,6 +5,9 @@ import re
 
 from weasyprint import HTML
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 INPUT_FILE = "dictionary.txt"
 OUTPUT_FILE = "dictionary.pdf"
 CUSTOM_FONT = "custom.ttf"

@@ -15,6 +15,9 @@ from pathlib import Path
 
 import zstandard as zstd
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 GREEN = "\x1b[92m"
 YELLOW = "\x1b[93m"
 BLUE = "\x1b[94m"

@@ -4,6 +4,8 @@
 import sys
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def fix_python_indentation(input_file_path: Path, output_file_path: Path | None = None, indent_size=4) -> bool:
     if not Path(input_file_path).exists():

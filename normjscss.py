@@ -4,6 +4,9 @@
 import re
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 DIRS = [Path()]
 ver_pattern = re.compile(r"\?[a-zA-Z0-9_-]+=[^\"\'\s>]+", re.IGNORECASE)
 

@@ -16,6 +16,8 @@ from datetime import datetime
 from io import BytesIO
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 try:
     import zstandard as zstd
 except ImportError:
@@ -40,6 +42,8 @@ try:
     import lz4.frame
 except ImportError:
     lz4 = None
+
+
 EXTENSION_MAP = {
     ".txt": {"algo": "brotli", "level": 11},
     ".log": {"algo": "brotli", "level": 11},

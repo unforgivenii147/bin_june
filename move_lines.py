@@ -3,6 +3,8 @@
 
 import sys
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def move_lines(src_file: str, start_line: int, end_line: int, dest_file: str) -> None:
     try:

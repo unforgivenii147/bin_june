@@ -14,6 +14,9 @@ import xxhash
 from dh import PKG_MAPPING, STDLIB
 from tqdm import tqdm
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 CACHE_FILE = ".reqcache.json"
 
 

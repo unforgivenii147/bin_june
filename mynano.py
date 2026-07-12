@@ -11,6 +11,8 @@ from textual.containers import Container
 from textual.log import TextLog
 from textual.widgets import Footer, Header, TextEditor
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 class BasicEditor(App):
     BINDINGS = [("o", "open_file", "Open"), ("s", "save_file", "Save"), ("q", "app_quit", "Quit")]

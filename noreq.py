@@ -1,17 +1,15 @@
 #!/data/data/com.termux/files/usr/bin/env python
+import bz2
+import lzma
 import shutil
 import tarfile
 import tempfile
 import zipfile
 from pathlib import Path
 
-
-from pathlib import Path
-import zipfile
-import lzma
-import tarfile
 import brotlicffi as brotli
-import bz2
+
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def is_wheel_ok(path: Path) -> bool:

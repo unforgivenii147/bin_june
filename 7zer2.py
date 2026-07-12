@@ -11,6 +11,9 @@ from pathlib import Path
 
 import py7zr
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 BASE_DIR = Path.cwd()
 LOG_FILE = BASE_DIR / "compress.log"
 SCRIPT_NAME = Path(__file__).name if "__file__" in globals() else None

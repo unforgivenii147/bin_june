@@ -2,9 +2,12 @@
 import re
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 # Assuming is_binary is available from a local module 'dh' as in pytokei.py
 try:
     from dh import is_binary
+
 except ImportError:
     # Fallback or placeholder if dh is not available, though it should be if following pytokei.py
     def is_binary(path):

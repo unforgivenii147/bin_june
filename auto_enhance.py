@@ -8,6 +8,8 @@ from pathlib import Path
 import cv2
 import numpy as np
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def enhance_image(image_path: Path, verbose: bool = False, progress: tuple = None) -> bool:
     try:

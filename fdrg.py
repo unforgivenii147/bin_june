@@ -12,6 +12,8 @@ from queue import Queue
 
 from fastwalk import walk_files
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 pause_event = threading.Event()
 pause_event.set()
 results_queue = Queue()

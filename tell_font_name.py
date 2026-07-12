@@ -3,18 +3,17 @@
 
 import re
 import sys
+from collections.abc import Callable, Iterable
+from multiprocessing import get_context
+from os import scandir as os_scandir
 from pathlib import Path
+from typing import Any, ParamSpec, TypeVar
 
 from fontTools.ttLib import TTFont
 from fontTools.ttLib.ttFont import TTFont
 from termcolor import cprint
 
-
-from pathlib import Path
-from typing import Any, ParamSpec, TypeVar
-from collections.abc import Callable, Iterable
-from os import scandir as os_scandir
-from multiprocessing import get_context
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def unique_path(path: Path | str) -> Path:

@@ -15,6 +15,8 @@ from pathlib import Path
 
 import zstandard as zstd
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def get_dir_size(path):
     """Calculate total size of a directory."""
@@ -221,6 +223,7 @@ if __name__ == "__main__":
     # Check for required package
     try:
         import zstandard
+
     except ImportError:
         print("Error: zstandard package is required. Install it with: pip install zstandard")
         sys.exit(1)

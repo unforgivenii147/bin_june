@@ -13,6 +13,9 @@ from typing import Set, Tuple
 
 from tqdm import tqdm
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 URL_PATTERN = re.compile(r'https?://[^\s<>"{}|\\^`\[\]]*', re.IGNORECASE)
 GIT_DOMAINS = {
     "github.com",

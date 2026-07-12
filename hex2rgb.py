@@ -3,6 +3,8 @@
 
 import sys
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def hex_to_rgb(value: str) -> tuple[int, int, int]:
     hex_color = value.lstrip("#")

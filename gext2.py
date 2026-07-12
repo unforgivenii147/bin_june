@@ -9,6 +9,9 @@ from multiprocessing import cpu_count
 from pathlib import Path
 from typing import Any
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 OUTPUT_DIR = Path("output")
 ARCHIVE_EXTENSIONS = (".whl", ".zip", ".tar.gz", ".tgz", ".tar.zst", ".tar.xz", ".tar", ".zst")
 ALLOWED_PYTHON_EXTENSIONS = ".py", ""

@@ -12,6 +12,8 @@ from datetime import datetime, timedelta, timezone
 import git
 from git import GitCommandError, Repo
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def delete_old_commits(days: int) -> None:
     try:

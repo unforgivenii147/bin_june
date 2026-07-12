@@ -4,6 +4,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 
 def extract_subtitles(path) -> None:
     if not path.exists():
