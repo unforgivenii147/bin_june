@@ -4,10 +4,11 @@ QR Code Extractor using zbar (Lightweight)
 Install: pip install pyzbar pillow
 """
 
-import sys
 import os
-from PIL import Image
+import sys
+
 import pyzbar.pyzbar as pyzbar
+from PIL import Image
 
 
 def extract_qr_data_zbar(image_path):

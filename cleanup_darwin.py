@@ -1,6 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from pathlib import Path
 import sys
+from pathlib import Path
 
 DARWIN_PATTERNS = {
     ".DS_Store",

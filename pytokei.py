@@ -1,7 +1,26 @@
 #!/data/data/com.termux/files/usr/bin/env python
 import re
 from pathlib import Path
-from dh import is_binary
+
+
+from pathlib import Path
+
+
+def is_binary(path: (Path | str)) -> bool:
+    path = Path(path)
+    try:
+        with path.open("rb") as f:
+            chunk = f.read(CHUNK_SIZE)
+        if not chunk:
+            return False
+        if b"\x00" in chunk:
+            return True
+        text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
+        nontext = sum(1 for b in chunk if b not in text_chars)
+        return nontext / len(chunk) > ZERO_DOT_THREE
+    except Exception:
+        return True
+
 
 LANG_EXTENSIONS = {
     "python": [".py", ".pyi"],

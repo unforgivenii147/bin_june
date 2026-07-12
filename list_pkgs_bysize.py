@@ -1,8 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
-import subprocess
 import re
+import subprocess
 
 
 def get_packages_with_size():

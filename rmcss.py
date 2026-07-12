@@ -4,11 +4,11 @@ Remove HTML comments (<!-- ... -->) from HTML and CSS files recursively.
 Processes files in parallel and updates them in-place.
 """
 
-import re
-from pathlib import Path
-from concurrent.futures import ProcessPoolExecutor, as_completed
-import sys
 import os
+import re
+import sys
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
 
 # Compile regex for HTML comments
 # This handles multi-line comments and non-greedy matching

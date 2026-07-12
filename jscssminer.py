@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
 from pathlib import Path
+
 from rcssmin import cssmin
 from rjsmin import jsmin
 

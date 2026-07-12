@@ -7,14 +7,14 @@ Processes Python files with optimized single-threaded or parallel processing.
 """
 
 import ast
-import sys
-import shutil
-from pathlib import Path
-from multiprocessing import Pool, cpu_count
-from typing import Optional, Tuple, List, Set
-from dataclasses import dataclass
-from concurrent.futures import ThreadPoolExecutor
 import os
+import shutil
+import sys
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass
+from multiprocessing import Pool, cpu_count
+from pathlib import Path
+from typing import List, Optional, Set, Tuple
 
 # All re functions that accept regex patterns as first argument
 RE_FUNCTIONS = {"compile", "search", "match", "fullmatch", "split", "findall", "finditer", "sub", "subn"}

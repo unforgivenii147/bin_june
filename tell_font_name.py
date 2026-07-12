@@ -4,10 +4,94 @@
 import re
 import sys
 from pathlib import Path
-from dh import get_files, mpf, unique_path
+
 from fontTools.ttLib import TTFont
 from fontTools.ttLib.ttFont import TTFont
 from termcolor import cprint
+
+
+from pathlib import Path
+from typing import Any, ParamSpec, TypeVar
+from collections.abc import Callable, Iterable
+from os import scandir as os_scandir
+from multiprocessing import get_context
+
+
+def unique_path(path: Path | str) -> Path:
+    path = _clean_fname(Path(path))
+    if not path.exists():
+        return path
+    parent = path.parent
+    suffixes = path.suffixes
+    if suffixes:
+        first_suffix_index = path.name.find(suffixes[0])
+        stem = path.name[:first_suffix_index]
+        full_suffix = "".join(suffixes)
+    else:
+        stem = path.name
+        full_suffix = ""
+    counter = 1
+    while True:
+        new_name = f"{stem}_{counter}{full_suffix}"
+        new_path = parent / new_name
+        if not new_path.exists():
+            return new_path
+        counter += 1
+
+
+def _clean_fname(path: Path) -> Path:
+    from re import sub as re_sub
+
+    clean_name = re_sub(r"(_\d+)+", "", path.name)
+    return path.with_name(clean_name)
+
+
+def mpf_async(func: Callable[[Any], Any], items: Iterable[Any]):
+    with get_context("spawn").Pool(MAX_WORKERS) as p:
+        async_results = [p.apply_async(func, (item,)) for item in items]
+        results = []
+        for i, async_result in enumerate(async_results):
+            try:
+                results.append(async_result.get(timeout=30))
+            except Exception as e:
+                print(f"Item {i} failed: {e}")
+                results.append(None)
+        return results
+
+
+mpf = mpf_async
+
+
+def get_files(path: str | Path, include_hidden: bool = True, ext: list[str] | None = None) -> list[Path]:
+    path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(f"Path does not exist: {path}")
+    if not path.is_dir():
+        raise NotADirectoryError(f"Path is not a directory: {path}")
+
+    ext = tuple(ext) if ext else None
+    files = []
+    stack = [path]
+
+    while stack:
+        current = stack.pop()
+        try:
+            with os_scandir(current) as entries:
+                for entry in entries:
+                    if entry.is_symlink():
+                        continue
+                    if entry.is_dir(follow_symlinks=False):
+                        if entry.name not in SKIP_DIRS:
+                            stack.append(entry)
+                    elif entry.is_file(follow_symlinks=False):
+                        if not include_hidden and entry.name.startswith("."):
+                            continue
+                        if ext is None or entry.name.endswith(ext):
+                            files.append(Path(entry.path))
+        except (PermissionError, OSError):
+            continue
+
+    return sorted(files)
 
 
 def is_ascii_printable(s: str) -> bool:

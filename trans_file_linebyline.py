@@ -9,6 +9,7 @@ The original file is updated in-place with translations shown alongside original
 import os
 import sys
 import tempfile
+
 from deep_translator import GoogleTranslator
 from deep_translator.google import GoogleTranslator
 from langdetect import DetectorFactory, detect

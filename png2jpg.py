@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 import sys
 from pathlib import Path
+
 from PIL import Image
 
 if len(sys.argv) != 2:

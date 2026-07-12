@@ -3,17 +3,18 @@
 
 import argparse
 import json
+import keyword
 import logging
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
+
 import requests
 from bs4 import BeautifulSoup
 from loguru import logger
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-import keyword
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)

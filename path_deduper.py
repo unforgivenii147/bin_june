@@ -8,8 +8,8 @@ and saves the configuration to ~/.bashrc
 """
 
 import os
-from pathlib import Path
 from collections import OrderedDict
+from pathlib import Path
 
 
 def get_current_path():

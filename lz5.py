@@ -10,13 +10,14 @@ Usage:
 """
 
 import argparse
-import shutil
-import tarfile
-import lz4.frame
-from pathlib import Path
-from multiprocessing import Pool, cpu_count
 import io
 import os
+import shutil
+import tarfile
+from multiprocessing import Pool, cpu_count
+from pathlib import Path
+
+import lz4.frame
 
 
 def get_folder_size(folder_path):

@@ -12,6 +12,7 @@ def process_file(fname) -> None:
 if __name__ == "__main__":
     import sys
     from pathlib import Path
+
     from dh import get_pyfiles, mpf3
 
     cwd = Path.cwd()

@@ -1,8 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
-import requests
 import sys
+
+import requests
 
 
 def check_package(pkg_name):

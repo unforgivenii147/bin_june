@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 import re
-from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
 from typing import List, Tuple
 
 SECRET_PATTERNS = {

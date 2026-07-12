@@ -7,6 +7,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import Manager, cpu_count
 from pathlib import Path
 from urllib.parse import urljoin
+
 import requests
 from bs4 import BeautifulSoup
 

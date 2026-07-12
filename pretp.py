@@ -1,7 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from pathlib import Path
 import concurrent.futures
 import subprocess
+from pathlib import Path
+
 from tqdm import tqdm
 
 

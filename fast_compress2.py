@@ -8,14 +8,15 @@ Uses Path.walk() for memory-efficient traversal (Python 3.13+).
 """
 
 import argparse
-import sys
-from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import zstandard as zstd
-import threading
 import fnmatch
-import json
 import heapq
+import json
+import sys
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
+
+import zstandard as zstd
 
 SKIP_EXTENSIONS_COMPRESS = {
     ".xz",

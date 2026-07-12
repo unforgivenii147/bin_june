@@ -1,12 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
+import argparse
+import multiprocessing
 import re
 import sys
-import argparse
-from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
-import multiprocessing
+from pathlib import Path
 
 
 def has_main_guard(content):

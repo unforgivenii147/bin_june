@@ -4,16 +4,16 @@ Recursive Python file runner with parallel processing and timeout handling.
 Runs all .py files in a directory tree, continuing even if some fail.
 """
 
-import sys
-import subprocess
-import traceback
-from pathlib import Path
-from concurrent.futures import ProcessPoolExecutor, as_completed
-from typing import Dict, List, Tuple, Optional
 import argparse
 import multiprocessing
 import queue
+import subprocess
+import sys
 import time
+import traceback
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
 
 def run_python_file(file_path: Path, timeout: int = 10) -> Tuple[Path, bool, Optional[str], Optional[str]]:

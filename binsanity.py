@@ -1,6 +1,36 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
+from pathlib import Path
+
+
+def get_filez(root_dir: (str | Path)):
+    from os import walk as os_walk
+
+    visited_dirs: set[Path] = set()
+    root_dir = Path(root_dir)
+    if root_dir.is_dir():
+        for dirpath, dirnames, filenames in os_walk(root_dir, topdown=True):
+            base_path = Path(dirpath)
+            for dirname in list(dirnames):
+                full_path = base_path / dirname
+                resolved_path = full_path.resolve()
+                if should_skip(full_path) or resolved_path in visited_dirs:
+                    dirnames.remove(dirname)
+                visited_dirs.add(resolved_path)
+            for filename in filenames:
+                filepath = Path(dirpath) / filename
+                if not should_skip(filepath):
+                    yield filepath
+    else:
+        yield root_dir
+
+
+def should_skip(path: (str | Path)) -> bool:
+    path = Path(path)
+    return bool(path.is_symlink() or not SKIP_DIRS.isdisjoint(path.parts))
+
+
 """
 Binary File Analyzer - Finds executables in current directory that fail to run
 Uses concurrent.futures for parallel processing
@@ -11,8 +41,8 @@ import concurrent.futures
 import subprocess
 from pathlib import Path
 from typing import List, Optional, Tuple
+
 from binaryornot import is_binary
-from dh import get_filez
 
 
 def is_executable(filepath: Path) -> bool:

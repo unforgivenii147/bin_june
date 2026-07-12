@@ -4,6 +4,7 @@
 import sys
 from multiprocessing import get_context
 from pathlib import Path
+
 import pdfplumber
 from fastwalk import walk_files
 

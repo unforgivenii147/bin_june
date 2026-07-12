@@ -18,15 +18,16 @@ Features:
 """
 
 from __future__ import annotations
+
 import argparse
 import ast
+import shutil
 import sys
 import tempfile
 import zipfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Generator, Tuple, List
-import shutil
+from typing import Generator, List, Tuple
 
 
 class CommentRemover:

@@ -7,11 +7,11 @@ Supports parallel processing and reversible operations.
 
 import argparse
 import json
-from pathlib import Path
-from concurrent.futures import ProcessPoolExecutor, as_completed
-from typing import List, Tuple
 import shutil
 import sys
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
+from typing import List, Tuple
 
 TESTS_DIR = Path.home() / "tmp" / "tests"
 MOVED_FILES_LOG = Path.home() / "tmp" / "moved_files.json"

@@ -14,6 +14,7 @@ import time
 from functools import partial
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
+
 import magic
 
 

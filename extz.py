@@ -4,11 +4,11 @@ Script to show various extensions in current directory with total size for each 
 Uses pathlib and parallel processing for speedup.
 """
 
-from pathlib import Path
+import sys
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
 from typing import Dict, List, Tuple
-import sys
 
 
 def get_file_info(file_path: Path) -> Tuple[str, int]:

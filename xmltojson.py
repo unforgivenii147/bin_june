@@ -5,6 +5,7 @@ import json
 import sys
 from pathlib import Path
 from xml.etree.ElementTree import Element
+
 from defusedxml.ElementTree import parse as _parse
 
 

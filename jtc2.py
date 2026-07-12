@@ -4,7 +4,10 @@
 import ast
 from pathlib import Path
 from sys import argv
-from dh import run_command
+
+
+# WARNING: Source code for 'run_command' not found.
+
 
 if __name__ == "__main__":
     path = Path(argv[1])

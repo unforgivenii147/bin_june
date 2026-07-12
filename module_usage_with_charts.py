@@ -9,13 +9,14 @@ Scan ~/bin for Python scripts and count imports from:
 Save a comprehensive report to ~/dh_usage.txt and generate PNG charts.
 """
 
-from pathlib import Path
 import ast
-import sys
 import pkgutil
+import sys
 from collections import Counter, defaultdict
-import matplotlib.pyplot as plt
+from pathlib import Path
+
 import matplotlib.patches as mpatches
+import matplotlib.pyplot as plt
 
 BIN_DIR = Path.home() / "bin"
 REPORT = Path.home() / "dh_usage.txt"

@@ -6,7 +6,50 @@ import importlib.metadata
 import importlib.util
 import sys
 from pathlib import Path
-from dh import is_python_file
+
+
+from pathlib import Path
+
+
+def is_python_file(path: (str | Path)) -> bool:
+    from ast import parse as ast_parse
+
+    path = Path(path)
+    if is_binary(path):
+        return False
+    if not path.stat().st_size:
+        return False
+    if path.is_file() and path.suffix == ".py":
+        return True
+    if not path.suffix:
+        content = path.read_text(encoding="utf-8")
+        if not content:
+            return False
+        if content.startswith("#!") and "python" in content[:100]:
+            return True
+        try:
+            _ = ast_parse(content)
+            return True
+        except:
+            return False
+    return False
+
+
+def is_binary(path: (Path | str)) -> bool:
+    path = Path(path)
+    try:
+        with path.open("rb") as f:
+            chunk = f.read(CHUNK_SIZE)
+        if not chunk:
+            return False
+        if b"\x00" in chunk:
+            return True
+        text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
+        nontext = sum(1 for b in chunk if b not in text_chars)
+        return nontext / len(chunk) > ZERO_DOT_THREE
+    except Exception:
+        return True
+
 
 PACKAGE_MAPPING = {
     "cv2": "opencv-python",

@@ -20,6 +20,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Final
+
 import blosc2
 import brotli
 import lz4.frame

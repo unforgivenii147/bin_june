@@ -8,11 +8,12 @@ Example: python compress_large_files.py 1048576  # Compress files > 1MB
 """
 
 import sys
-import time
-from pathlib import Path
-import zstandard as zstd
-from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
+
+import zstandard as zstd
 
 GREEN = "\x1b[92m"
 YELLOW = "\x1b[93m"

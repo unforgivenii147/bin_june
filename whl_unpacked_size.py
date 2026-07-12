@@ -6,13 +6,13 @@ Report the overall unpacked size of .whl files in the current directory.
 Uses pathlib for path handling and multiprocessing for parallel processing.
 """
 
-import sys
-from pathlib import Path
-from multiprocessing import Pool, cpu_count
-from zipfile import ZipFile
-from typing import Tuple, Optional
 import argparse
 import json
+import sys
+from multiprocessing import Pool, cpu_count
+from pathlib import Path
+from typing import Optional, Tuple
+from zipfile import ZipFile
 
 
 def format_size(size_bytes: int) -> str:

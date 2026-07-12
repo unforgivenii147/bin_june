@@ -15,17 +15,17 @@ Usage:
 
 import ast
 import io
-import sys
-import tokenize
+import re
 import shutil
-from pathlib import Path
-from typing import List, Tuple, Optional, Set, Dict, Any
+import sys
+import time
+import tokenize
+from collections import defaultdict
+from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass, field
 from multiprocessing import Pool, cpu_count
-from concurrent.futures import ProcessPoolExecutor
-import time
-import re
-from collections import defaultdict
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 # Core re functions that take regex patterns as first argument
 RE_FUNCTIONS = {"compile", "search", "match", "fullmatch", "split", "findall", "finditer", "sub", "subn"}

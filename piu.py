@@ -3,8 +3,56 @@
 
 import sys
 from pathlib import Path
-from dh import partial_ratio
+
 from pip._internal.cli.main import main as pip_main
+
+
+def levenshtein_distance(a: str, b: str) -> int:
+    if a == b:
+        return 0
+    if not a:
+        return len(b)
+    if not b:
+        return len(a)
+    if len(a) < len(b):
+        a, b = b, a
+    previous = list(range(len(b) + 1))
+    for i, ca in enumerate(a, 1):
+        current = [i]
+        for j, cb in enumerate(b, 1):
+            ins = current[j - 1] + 1
+            dele = previous[j] + 1
+            sub = previous[j - 1] + (ca != cb)
+            current.append(min(ins, dele, sub))
+        previous = current
+    return previous[-1]
+
+
+def levenshtein_similarity(a: str, b: str) -> float:
+    if not a and not b:
+        return 1.0
+    dist = levenshtein_distance(a, b)
+    return 1.0 - dist / max(len(a), len(b), 1)
+
+
+def partial_ratio(a: str, b: str) -> float:
+    if not a and not b:
+        return 1.0
+    if not a or not b:
+        return 0.0
+    if len(a) > len(b):
+        a, b = b, a
+    best = 0.0
+    la = len(a)
+    for i in range(len(b) - la + 1):
+        sub = b[i : i + la]
+        sim = levenshtein_similarity(a, sub)
+        if sim > best:
+            best = sim
+            if best == 1.0:
+                break
+    return best * 100
+
 
 WHL_DIR = Path.cwd()
 WILDCARD = "-w" in sys.argv

@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Optional
 
 try:
-    from tree_sitter import Parser, Node
+    from tree_sitter import Node, Parser
     from tree_sitter_python import language as python_language
 except ImportError:
     print("ERROR: Install tree-sitter==0.25.2 and tree-sitter-python==0.25.0")

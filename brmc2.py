@@ -12,11 +12,11 @@ Optimized for Python 3.12+ on Linux.
 """
 
 import ast
+import logging
 import sys
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Optional
-from concurrent.futures import ProcessPoolExecutor, as_completed
-import logging
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)

@@ -4,12 +4,12 @@ TOML Comment Remover - Removes comments from TOML files using parallel processin
 Supports processing multiple files/directories recursively.
 """
 
+import re
 import sys
 import time
-import re
-from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from typing import List, Tuple, Optional
+from pathlib import Path
+from typing import List, Optional, Tuple
 
 
 def remove_toml_comments(content: str) -> str:

@@ -7,14 +7,15 @@ Usage:
   python find_noneng.py -l -o out.json  # Save to custom JSON file
 """
 
-import json
 import argparse
-from pathlib import Path
+import json
+import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import cpu_count
-import cld3
-import sys
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+
+import cld3
 
 # Extensions to check (text files only)
 TEXT_EXTENSIONS = {

@@ -3,9 +3,9 @@
 
 import sys
 import time
-from pathlib import Path
-from multiprocessing import Pool
 from datetime import datetime
+from multiprocessing import Pool
+from pathlib import Path
 
 
 def check_file_age(file_path):

@@ -1,12 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/env python
 from __future__ import annotations
 
+import lzma
 import os
-from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
 
 import zstandard as zstd
-import lzma
 
 
 def human_bytes(n: int) -> str:

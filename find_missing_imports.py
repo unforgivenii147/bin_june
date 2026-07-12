@@ -3,13 +3,13 @@
 
 import argparse
 import ast
+import importlib
+import importlib.util
 import sys
 import textwrap
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
-import importlib.util
-import importlib
 
 STDLIB_MODULES = set(sys.builtin_module_names)
 for module_name in list(sys.modules.keys()):

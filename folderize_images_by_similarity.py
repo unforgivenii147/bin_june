@@ -1,12 +1,13 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
+import shutil
+from multiprocessing import Pool, cpu_count
+from pathlib import Path
+from typing import Dict, List, Tuple
+
 import cv2
 import numpy as np
-from pathlib import Path
-from multiprocessing import Pool, cpu_count
-from typing import Tuple, Dict, List
-import shutil
 from tqdm import tqdm
 
 

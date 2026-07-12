@@ -6,10 +6,10 @@ Auto typo fixer with pattern learning.
 Learns from common substitution errors (b→n, 8→i, etc.) and user corrections.
 """
 
-import shutil
 import argparse
 import json
 import re
+import shutil
 import sys
 from collections import defaultdict
 from datetime import datetime

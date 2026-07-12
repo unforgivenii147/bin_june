@@ -1,9 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from pathlib import Path
-import os
-import multiprocessing
-import json
 import argparse
+import json
+import multiprocessing
+import os
+from pathlib import Path
 
 python
 

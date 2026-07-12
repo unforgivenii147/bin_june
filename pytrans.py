@@ -6,6 +6,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FuturesTimeoutError
 from pathlib import Path
+
 import langdetect
 from deep_translator import GoogleTranslator
 from langdetect import DetectorFactory

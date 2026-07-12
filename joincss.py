@@ -4,7 +4,10 @@
 import re
 import sys
 from pathlib import Path
-from dh import atomic_write
+
+
+# WARNING: Source code for 'atomic_write' not found.
+
 
 LOCAL_FONT_BASE = Path("/sdcard/_static/fonts")
 FONT_EXTS = {".woff", ".woff2", ".ttf", ".otf", ".eot"}

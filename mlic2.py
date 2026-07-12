@@ -2,12 +2,12 @@
 
 
 import argparse
+import multiprocessing as mp
 import sys
 from collections import defaultdict
+from functools import partial
 from pathlib import Path
 from typing import Dict, List, Tuple
-import multiprocessing as mp
-from functools import partial
 
 TEXT_EXTENSIONS = {
     ".py",

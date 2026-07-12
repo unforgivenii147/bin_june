@@ -4,8 +4,12 @@
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+
 from deep_translator import GoogleTranslator
-from dh import walker
+
+
+# WARNING: Source code for 'walker' not found.
+
 
 DIRECTORY = "."
 CHUNK_SIZE = 2000

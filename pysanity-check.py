@@ -2,10 +2,11 @@
 
 
 import importlib
+import re
 import subprocess
 import sys
+
 import pkg_resources
-import re
 
 
 def get_installed_python_packages() -> list[tuple[str, str]]:

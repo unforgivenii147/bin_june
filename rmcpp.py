@@ -4,9 +4,68 @@
 import sys
 from multiprocessing import get_context
 from pathlib import Path
+
 import tree_sitter_cpp as tscpp
-from dh import get_files, remove_blank_lines
 from tree_sitter import Language, Parser, Query, QueryCursor
+
+
+from pathlib import Path
+from os import scandir as os_scandir
+
+
+def remove_blank_lines(text: str | Path) -> str:
+    content = text
+    if isinstance(text, Path):
+        content = text.read_text(encoding="utf-8")
+
+    if not isinstance(text, (str, Path)):
+        return str(text)
+
+    if isinstance(text, str) and Path(text).exists():
+        content = Path(text).read_text(encoding="utf-8")
+    lines = content.splitlines(keepends=True)
+    result_lines = []
+    prev_blank = False
+    for line in lines:
+        is_blank = line.strip() == ""
+        if is_blank and prev_blank:
+            continue
+        result_lines.append(line)
+        prev_blank = is_blank
+    return "".join(result_lines)
+
+
+def get_files(path: str | Path, include_hidden: bool = True, ext: list[str] | None = None) -> list[Path]:
+    path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(f"Path does not exist: {path}")
+    if not path.is_dir():
+        raise NotADirectoryError(f"Path is not a directory: {path}")
+
+    ext = tuple(ext) if ext else None
+    files = []
+    stack = [path]
+
+    while stack:
+        current = stack.pop()
+        try:
+            with os_scandir(current) as entries:
+                for entry in entries:
+                    if entry.is_symlink():
+                        continue
+                    if entry.is_dir(follow_symlinks=False):
+                        if entry.name not in SKIP_DIRS:
+                            stack.append(entry)
+                    elif entry.is_file(follow_symlinks=False):
+                        if not include_hidden and entry.name.startswith("."):
+                            continue
+                        if ext is None or entry.name.endswith(ext):
+                            files.append(Path(entry.path))
+        except (PermissionError, OSError):
+            continue
+
+    return sorted(files)
+
 
 ts_remover = None
 

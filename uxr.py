@@ -10,6 +10,7 @@ Supported: .gz, .xz, .zip, .whl, .br, .zst, .7z, and tarballs (.tar.gz, .tar.xz,
 import sys
 from pathlib import Path
 from typing import Optional, Tuple
+
 import joblib
 import py7zr
 from joblib import Parallel, delayed

@@ -18,10 +18,11 @@ Features:
 
 import re
 import sys
-from pathlib import Path
-from typing import Tuple, Optional, List
 from dataclasses import dataclass
 from multiprocessing import Pool, cpu_count
+from pathlib import Path
+from typing import List, Optional, Tuple
+
 from loguru import logger
 from tqdm import tqdm
 

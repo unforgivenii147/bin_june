@@ -4,9 +4,10 @@
 import matplotlib
 
 matplotlib.use("Agg")
+import sys
+
 import matplotlib.pyplot as plt
 import numpy as np
-import sys
 
 if len(sys.argv) < 2:
     print("Usage: python script.py 'f(x)=expression'")

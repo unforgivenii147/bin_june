@@ -1,9 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/env python
 import os
 from pathlib import Path
+
+import git
 from dotenv import load_dotenv
 from github import Github, GithubException
-import git
 
 
 def setup_github_client():

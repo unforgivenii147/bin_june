@@ -3,6 +3,7 @@
 
 import sys
 from pathlib import Path
+
 from print_persian import print_persian as pp
 
 

@@ -8,12 +8,14 @@ Skips .git, __pycache__, .ruff_cache, .pytest_cache, .mypy_cache directories glo
 """
 
 from __future__ import annotations
+
 import argparse
 import shutil
 import sys
 import tarfile
 from io import BytesIO
 from pathlib import Path
+
 import zstandard as zstd
 from joblib import Parallel, delayed
 

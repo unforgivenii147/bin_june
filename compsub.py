@@ -7,11 +7,12 @@ Usage: script.py -c    # Compress subdirs to .tar.zst
 
 import argparse
 import os
+import shutil
 import sys
 import tarfile
-import shutil
-from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
+
 import zstandard as zstd
 
 

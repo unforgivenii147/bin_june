@@ -7,12 +7,12 @@ Supports multiple files, directories, multiprocessing, and personal dictionaries
 """
 
 import argparse
-import sys
-from pathlib import Path
-from multiprocessing import Pool, cpu_count
-from typing import List, Tuple, Dict, Set
-import re
 import json
+import re
+import sys
+from multiprocessing import Pool, cpu_count
+from pathlib import Path
+from typing import Dict, List, Set, Tuple
 
 try:
     from spellchecker import SpellChecker

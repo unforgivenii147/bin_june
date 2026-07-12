@@ -3,6 +3,7 @@
 
 import shutil
 from pathlib import Path
+
 import ssdeep
 
 SEARCH_DIR = Path.cwd()

@@ -1,18 +1,18 @@
 #!/data/data/com.termux/files/usr/bin/env python
 from __future__ import annotations
 
+import bz2
+import gzip
+import lzma
 import os
 import sys
-import gzip
-import bz2
-import lzma
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
+
 import brotli
 import lz4.frame
-from pathlib import Path
-from concurrent.futures import ProcessPoolExecutor, as_completed
-
-import zstandard as zstd  # pip install zstandard
 import py7zr  # pip install py7zr
+import zstandard as zstd  # pip install zstandard
 
 CHUNK = 1024 * 1024
 XZ_PRESET_9 = 9

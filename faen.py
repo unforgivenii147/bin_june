@@ -2,8 +2,8 @@
 import json
 import os
 import sys
-from typing import Dict, List, Optional
 from pathlib import Path
+from typing import Dict, List, Optional
 
 
 class BidirectionalDictionary:

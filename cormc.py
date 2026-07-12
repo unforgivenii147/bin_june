@@ -17,13 +17,14 @@ Behavior:
 """
 
 from __future__ import annotations
+
 import ast
-import sys
-from pathlib import Path
-from typing import List, Tuple, Optional
-import tokenize
 import concurrent.futures
 import multiprocessing
+import sys
+import tokenize
+from pathlib import Path
+from typing import List, Optional, Tuple
 
 
 class DocstringStripper(ast.NodeTransformer):

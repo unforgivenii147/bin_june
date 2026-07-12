@@ -1,10 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/env python
 import asyncio
-import re
-from telethon import TelegramClient
-from dotenv import load_dotenv
-from pathlib import Path
 import os
+import re
+from pathlib import Path
+
+from dotenv import load_dotenv
+from telethon import TelegramClient
 
 env_path = Path.home() / ".env"
 load_dotenv(env_path)

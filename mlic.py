@@ -9,10 +9,10 @@ Supports parallel processing, removal, and saving of found strings.
 import argparse
 import ast
 import concurrent.futures
+import sys
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
-import sys
 
 MIN_LINES = 3
 MIN_CHARS = 100

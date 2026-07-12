@@ -12,15 +12,16 @@ Compress or decompress folders using zstandard compression.
 - Skips specified directories
 """
 
-import sys
-import tarfile
 import argparse
 import multiprocessing as mp
-from pathlib import Path
+import shutil
+import sys
+import tarfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
+
 import zstandard as zstd
 from tqdm import tqdm
-import shutil
 
 SKIP_DIRS = {
     "zstandard",

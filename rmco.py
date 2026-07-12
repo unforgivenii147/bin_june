@@ -2,15 +2,16 @@
 
 
 from __future__ import annotations
-import ast
-import io
-import sys
-from pathlib import Path
-from typing import List, Tuple, Optional, Dict, NamedTuple
-import tokenize
-import concurrent.futures
-import multiprocessing
+
 import argparse
+import ast
+import concurrent.futures
+import io
+import multiprocessing
+import sys
+import tokenize
+from pathlib import Path
+from typing import Dict, List, NamedTuple, Optional, Tuple
 
 try:
     import astor

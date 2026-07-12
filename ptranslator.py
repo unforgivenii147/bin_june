@@ -12,6 +12,7 @@ import multiprocessing
 import time
 import tokenize
 from pathlib import Path
+
 import pycld2
 from deep_translator import GoogleTranslator
 from dh import DOC_TH1, DOC_TH2

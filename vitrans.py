@@ -7,21 +7,16 @@ Chunks text at ~5000 chars on paragraph/line boundaries to stay
 under the Google Translate limit.
 """
 
-from pathlib import Path
-from deep_translator import GoogleTranslator
-from tenacity import (
-    retry,
-    stop_after_attempt,
-    wait_exponential_jitter,
-    retry_if_exception_type,
-    before_sleep_log,
-)
+import json
+import logging
+import signal
 import sys
 import time
-import json
-import signal
-import logging
 from datetime import datetime
+from pathlib import Path
+
+from deep_translator import GoogleTranslator
+from tenacity import before_sleep_log, retry, retry_if_exception_type, stop_after_attempt, wait_exponential_jitter
 
 # ── config ────────────────────────────────────────────────────────────────────
 

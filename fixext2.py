@@ -1,8 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/env python
+import cmd
 import os
 from pathlib import Path
+
 import magic
-import cmd
 
 MIME_TO_EXT = {
     "text/html": "html",

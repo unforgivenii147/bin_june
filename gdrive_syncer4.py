@@ -3,6 +3,7 @@ import os
 import pickle
 from datetime import datetime
 from pathlib import Path
+
 import requests
 from dotenv import load_dotenv
 from requests.models import Response

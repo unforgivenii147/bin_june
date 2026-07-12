@@ -1,8 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
-from weasyprint import HTML
 import cairosvg
+from weasyprint import HTML
 
 
 def html_to_png_cairo(html_content, output_path, width=None):

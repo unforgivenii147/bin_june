@@ -3,8 +3,11 @@
 
 import ast
 from pathlib import Path
-from dh import run_command
+
 from fastwalk import walk_files
+
+
+# WARNING: Source code for 'run_command' not found.
 
 
 def process_file(path: str) -> bool:

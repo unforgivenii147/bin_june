@@ -16,6 +16,7 @@ import tarfile
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+
 import brotlicffi as brotli
 
 LARGE_FILE_THRESHOLD = 5 * 1024 * 1024

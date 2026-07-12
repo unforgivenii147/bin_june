@@ -1,8 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/env python
+import argparse
 import os
 import stat
+
 from tqdm import tqdm
-import argparse
 
 SKIP_DIRS = {".git", ".ruff_cache", "__pycache__"}
 

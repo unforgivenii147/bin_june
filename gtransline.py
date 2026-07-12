@@ -8,10 +8,10 @@ Requires: googletrans==4.0.0rc1 or deep-translator
 
 import argparse
 import multiprocessing as mp
-from pathlib import Path
-from typing import List, Tuple
 import re
 import sys
+from pathlib import Path
+from typing import List, Tuple
 
 try:
     from googletrans import Translator

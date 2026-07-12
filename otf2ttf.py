@@ -10,6 +10,7 @@ Requires: pip install fonttools brotli
 import sys
 from multiprocessing import Pool
 from pathlib import Path
+
 from fontTools.pens.ttGlyphPen import TTGlyphPen
 from fontTools.ttLib import TTFont
 

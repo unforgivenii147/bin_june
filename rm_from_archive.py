@@ -6,12 +6,13 @@ Delete a file from a tar.zst archive
 Usage: python script.py <archive.tar.zst> <file-to-delete>
 """
 
-import sys
 import os
-import tarfile
-import zstandard as zstd
-import tempfile
 import shutil
+import sys
+import tarfile
+import tempfile
+
+import zstandard as zstd
 
 
 def delete_from_tar_zst(archive_path, file_to_delete):

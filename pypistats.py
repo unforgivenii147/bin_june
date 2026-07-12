@@ -1,10 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 import json
-from collections import defaultdict
-from urllib.request import urlopen
 import ssl
 import sys
+from collections import defaultdict
+from urllib.request import urlopen
 
 PACKAGE = sys.argv[1]
 

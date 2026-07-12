@@ -2,6 +2,7 @@
 
 
 import re
+
 from weasyprint import HTML
 
 INPUT_FILE = "dictionary.txt"

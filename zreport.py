@@ -8,14 +8,14 @@ Supported formats: .zst, .xz, .gz, .bz2, .bz3, .br, .lz4, .7z, .zip, .whl
 and their tarred variants (.tar.zst, .tar.xz, .tar.gz, .tar.bz2, .tar.lz4, etc.)
 """
 
-from pathlib import Path
+import bz2
+import gzip
+import io
+import lzma
+import struct
 import tarfile
 import zipfile
-import lzma
-import gzip
-import bz2
-import struct
-import io
+from pathlib import Path
 
 # ── optional dependency probes ────────────────────────────────────────────────
 

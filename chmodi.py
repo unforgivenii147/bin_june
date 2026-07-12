@@ -1,11 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/env python
+import logging
 import os
 import stat
 import sys
 import time
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-import logging
 
 DIR_PERM = 0o755
 FILE_PERM = 0o664

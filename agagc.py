@@ -13,6 +13,7 @@ import sys
 from argparse import Namespace
 from datetime import datetime
 from pathlib import Path
+
 import requests
 from dotenv import load_dotenv
 from git import InvalidGitRepositoryError, Repo

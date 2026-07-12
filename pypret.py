@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 import json
 from pathlib import Path
+
 import jsbeautifier
 
 

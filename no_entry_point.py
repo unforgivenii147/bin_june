@@ -8,14 +8,14 @@ Optimized for Linux/Termux - only checks for .so files.
 Uses multiprocessing for parallel scanning and pathlib for path operations.
 """
 
-import sys
-import json
-from pathlib import Path
-from multiprocessing import Pool, cpu_count
-from typing import List, Tuple, Dict
 import argparse
-from datetime import datetime
+import json
 import re
+import sys
+from datetime import datetime
+from multiprocessing import Pool, cpu_count
+from pathlib import Path
+from typing import Dict, List, Tuple
 
 
 def get_site_packages_dirs() -> List[Path]:

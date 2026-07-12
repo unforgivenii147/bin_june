@@ -1,9 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from os import getenv
 import sys
 import threading
 import time
+from os import getenv
 from pathlib import Path
+
 from dotenv import load_dotenv
 from github import Auth, Github, GithubException
 

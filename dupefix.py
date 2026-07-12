@@ -2,10 +2,11 @@
 
 
 import pathlib
+import shutil
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
+
 import xxhash
-import shutil
 
 
 def get_file_hash(filepath):

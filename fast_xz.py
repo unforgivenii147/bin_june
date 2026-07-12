@@ -7,6 +7,7 @@ import textwrap
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import List, Tuple
+
 import lzma_mt
 
 ARCHIVE_EXTENSIONS = {

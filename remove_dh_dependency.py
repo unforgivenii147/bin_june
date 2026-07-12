@@ -4,14 +4,14 @@ Script to remove dependencies on the 'dh' custom module by inlining function cod
 Supports multiple files/folders as input with parallel processing.
 """
 
+import argparse
 import ast
 import sys
-from pathlib import Path
-from typing import Dict, List, Set, Tuple, Optional
-from concurrent.futures import ProcessPoolExecutor, as_completed
-import argparse
-from dataclasses import dataclass
 import traceback
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple
 
 # Configuration
 DH_SOURCE_PATH = Path.home() / "isaac" / "pkgs" / "dh" / "src" / "dh"

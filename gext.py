@@ -4,10 +4,10 @@ import re
 import sys
 import tarfile
 import zipfile
+from collections import Counter
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
-from collections import Counter
 
 try:
     import tree_sitter_python as tsp

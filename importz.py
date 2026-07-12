@@ -2,9 +2,9 @@
 
 
 import ast
+import imp
 import sys
 from pathlib import Path
-import imp
 
 
 def is_python_file(path: Path) -> bool:

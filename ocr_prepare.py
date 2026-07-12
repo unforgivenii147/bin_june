@@ -5,12 +5,12 @@ Processes images in-place to optimize them for Tesseract OCR.
 Supports multiple files/folders with parallel processing.
 """
 
-import sys
 import argparse
-from pathlib import Path
+import logging
+import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import cpu_count
-import logging
+from pathlib import Path
 from typing import List, Optional
 
 # Setup logging

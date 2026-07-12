@@ -7,13 +7,13 @@ Recursively scans directories and reports stdlib names that are used but not imp
 """
 
 import ast
-import os
-import sys
 import importlib
 import keyword
-from pathlib import Path
+import os
+import sys
 from collections import defaultdict
-from typing import Set, Dict, List, Tuple
+from pathlib import Path
+from typing import Dict, List, Set, Tuple
 
 STDLIB_MODULES = {
     "abc",

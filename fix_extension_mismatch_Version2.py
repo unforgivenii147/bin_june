@@ -32,12 +32,13 @@ Notes:
 """
 
 from __future__ import annotations
+
 import argparse
-import sys
-from pathlib import Path
-from typing import Optional, Tuple, List, Dict
-from multiprocessing import Pool, cpu_count
 import shutil
+import sys
+from multiprocessing import Pool, cpu_count
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
 READ_BYTES = 8192
 MAGIC_AVAILABLE = False

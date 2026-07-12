@@ -19,6 +19,7 @@ import sys
 import tarfile
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+
 import brotlicffi
 
 

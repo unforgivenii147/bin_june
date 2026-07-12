@@ -4,6 +4,7 @@
 import argparse
 import sys
 from pathlib import Path
+
 import pytesseract
 from deep_translator import GoogleTranslator
 from langdetect import DetectorFactory, detect

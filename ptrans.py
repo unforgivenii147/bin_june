@@ -18,6 +18,7 @@ import os
 import time
 from multiprocessing import Pool
 from pathlib import Path
+
 from deep_translator import GoogleTranslator
 
 

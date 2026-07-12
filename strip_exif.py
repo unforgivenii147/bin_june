@@ -12,6 +12,7 @@ import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import cpu_count
 from pathlib import Path
+
 from PIL import Image
 
 

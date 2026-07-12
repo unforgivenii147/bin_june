@@ -9,12 +9,12 @@ Scan ~/bin for Python scripts and count imports from:
 Save a comprehensive report to ~/dh_usage.txt
 """
 
-from pathlib import Path
 import ast
-import sys
-import pkgutil
 import importlib
+import pkgutil
+import sys
 from collections import Counter, defaultdict
+from pathlib import Path
 
 # ── config ────────────────────────────────────────────────────────────────────
 

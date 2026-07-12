@@ -5,13 +5,13 @@ Check Python files recursively for missing imports.
 Supports parallel processing and optional auto-fix with -a flag.
 """
 
+import argparse
 import ast
 import sys
-from pathlib import Path
-from multiprocessing import Pool, cpu_count
-from typing import List, Tuple, Set
-import argparse
 from importlib.util import find_spec
+from multiprocessing import Pool, cpu_count
+from pathlib import Path
+from typing import List, Set, Tuple
 
 
 def get_python_files(root_dir: Path) -> List[Path]:

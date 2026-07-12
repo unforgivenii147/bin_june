@@ -1,7 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
 import argparse
-from os import getenv
 import sys
+from os import getenv
+
 from dotenv import load_dotenv
 from github import Github
 

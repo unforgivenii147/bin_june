@@ -6,11 +6,12 @@ Recursive file compressor using zstandard streaming compression.
 Compresses files in place with .zst extension and removes originals.
 """
 
-import zstandard as zstd
-from pathlib import Path
-import sys
-from typing import Iterator, Tuple, Optional
 import argparse
+import sys
+from pathlib import Path
+from typing import Iterator, Optional, Tuple
+
+import zstandard as zstd
 
 
 def walk_files(directory: Path, pattern: str = "*") -> Iterator[Tuple[Path, Path]]:

@@ -3,7 +3,43 @@
 
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from dh import IMG_EXT, fsz, gsz, is_image
+
+
+from pathlib import Path
+
+
+def fsz(sz: float) -> str:
+    sz = abs(int(sz))
+    units = "B", "KB", "MB", "GB", "TB"
+    if sz == 0:
+        return "0 B"
+    i = min((int(sz).bit_length() - 1) // 10, len(units) - 1)
+    value = sz / 1024**i
+    if i == 0:
+        return f"{int(value)} {units[i]}"
+    return f"{value:.1f} {units[i]}"
+
+
+def gsz(path: str | Path) -> int:
+    path = Path(path)
+    total = 0
+    if path.is_file():
+        return path.stat().st_size
+    for file in path.rglob("*"):
+        if file.is_file():
+            total += file.stat().st_size
+    return total
+
+
+def is_image(path: (str | Path)) -> bool:
+    path = Path(path)
+    try:
+        if not path.is_file():
+            return False
+        return path.suffix in IMG_EXT
+    except Exception:
+        return False
+
 
 try:
     import cv2

@@ -6,6 +6,7 @@ import sys
 import textwrap
 from pathlib import Path
 from typing import Generator, Tuple
+
 import lzma_mt
 
 ARCHIVE_EXTENSIONS = {

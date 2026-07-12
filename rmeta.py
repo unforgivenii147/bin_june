@@ -3,6 +3,7 @@
 
 import re
 from pathlib import Path
+
 from bs4 import BeautifulSoup
 
 meta_tag_pattern = re.compile(r"<meta[^>]*>", re.IGNORECASE)

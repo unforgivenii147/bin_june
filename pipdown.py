@@ -1,8 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/env python
-import requests
+import argparse
 import sys
 from pathlib import Path
-import argparse
+
+import requests
 
 
 def get_package_url(package_name, version=None):

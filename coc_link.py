@@ -1,10 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
+import time
+from urllib.parse import urljoin
+
 import requests
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin
-import time
 
 
 def read_links_from_file(filename="links.txt"):

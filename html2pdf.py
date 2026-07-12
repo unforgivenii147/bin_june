@@ -3,6 +3,7 @@
 
 import sys
 from pathlib import Path
+
 from weasyprint import CSS, HTML
 
 

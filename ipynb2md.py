@@ -3,6 +3,7 @@
 
 import sys
 from pathlib import Path
+
 import nbformat
 
 if __name__ == "__main__":

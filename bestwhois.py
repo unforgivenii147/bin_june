@@ -9,6 +9,7 @@ import datetime
 import json
 import sys
 from argparse import ArgumentParser
+
 import requests
 from pygments import highlight
 from pygments.formatters import TerminalFormatter

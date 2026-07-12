@@ -20,12 +20,13 @@ Optional:
 """
 
 import os
+import shutil
 import sys
 import time
-import shutil
-from pathlib import Path
 from multiprocessing import Pool, cpu_count
-from typing import List, Tuple, Optional
+from pathlib import Path
+from typing import List, Optional, Tuple
+
 import cv2
 import numpy as np
 

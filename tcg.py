@@ -4,11 +4,11 @@ Termux script creator - Creates executable scripts from clipboard content.
 Archives existing files to ~/isaac/may/scripts/ instead of overwriting.
 """
 
+import shutil
 import subprocess
 import sys
-import shutil
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 TERMUX_SHEBANGS = {
     "python": "#!/data/data/com.termux/files/usr/bin/env python",

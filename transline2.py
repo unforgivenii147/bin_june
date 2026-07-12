@@ -6,8 +6,61 @@ import shutil
 import sys
 import tempfile
 from pathlib import Path
+
 from deep_translator import GoogleTranslator
-from dh import get_files, mpf_async
+
+
+from pathlib import Path
+from typing import Any, ParamSpec, TypeVar
+from collections.abc import Callable, Iterable
+from os import scandir as os_scandir
+from multiprocessing import get_context
+
+
+def mpf_async(func: Callable[[Any], Any], items: Iterable[Any]):
+    with get_context("spawn").Pool(MAX_WORKERS) as p:
+        async_results = [p.apply_async(func, (item,)) for item in items]
+        results = []
+        for i, async_result in enumerate(async_results):
+            try:
+                results.append(async_result.get(timeout=30))
+            except Exception as e:
+                print(f"Item {i} failed: {e}")
+                results.append(None)
+        return results
+
+
+def get_files(path: str | Path, include_hidden: bool = True, ext: list[str] | None = None) -> list[Path]:
+    path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(f"Path does not exist: {path}")
+    if not path.is_dir():
+        raise NotADirectoryError(f"Path is not a directory: {path}")
+
+    ext = tuple(ext) if ext else None
+    files = []
+    stack = [path]
+
+    while stack:
+        current = stack.pop()
+        try:
+            with os_scandir(current) as entries:
+                for entry in entries:
+                    if entry.is_symlink():
+                        continue
+                    if entry.is_dir(follow_symlinks=False):
+                        if entry.name not in SKIP_DIRS:
+                            stack.append(entry)
+                    elif entry.is_file(follow_symlinks=False):
+                        if not include_hidden and entry.name.startswith("."):
+                            continue
+                        if ext is None or entry.name.endswith(ext):
+                            files.append(Path(entry.path))
+        except (PermissionError, OSError):
+            continue
+
+    return sorted(files)
+
 
 cwd = Path.cwd()
 non_english_pattern = re.compile(r"[^\x00-\x7F]")

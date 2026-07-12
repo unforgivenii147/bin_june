@@ -1,8 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 import shutil
-from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
 from typing import Tuple
 
 

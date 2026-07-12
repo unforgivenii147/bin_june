@@ -7,6 +7,7 @@ Requires gitpython library: pip install gitpython
 """
 
 from pathlib import Path
+
 from git import GitCommandError, Repo
 
 

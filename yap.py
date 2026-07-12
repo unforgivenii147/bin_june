@@ -2,11 +2,10 @@
 import argparse
 import os
 import sys
+from collections.abc import Callable, Iterable
 from os import scandir as os_scandir
 from pathlib import Path
 from time import perf_counter as pff
-from pathlib import Path
-from collections.abc import Callable, Iterable
 
 
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
@@ -291,4 +290,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

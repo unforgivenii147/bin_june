@@ -4,7 +4,18 @@
 import mmap
 import re
 from pathlib import Path
-from dh import mpf3
+
+
+from pathlib import Path
+from collections.abc import Callable, Iterable
+
+
+def mpf3(process_function: Callable, files: list[Path], **kwargs):
+    from joblib import Parallel, delayed
+
+    file_strings = [str(f) for f in files]
+    return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
+
 
 LOG_EXT = ".log"
 MMAP_THRESHOLD = 1 * 1024 * 1024

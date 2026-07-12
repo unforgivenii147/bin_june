@@ -9,6 +9,7 @@ Requires: pip install gitpython requests python-dotenv
 
 import os
 from pathlib import Path
+
 import requests
 from dotenv import load_dotenv
 from git import GitCommandError, Repo

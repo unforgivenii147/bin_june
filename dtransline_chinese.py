@@ -9,11 +9,11 @@ Requires: deep-translator
 
 import argparse
 import multiprocessing as mp
-from pathlib import Path
-from typing import List, Tuple
 import re
 import sys
 import time
+from pathlib import Path
+from typing import List, Tuple
 
 try:
     from deep_translator import GoogleTranslator

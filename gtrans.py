@@ -5,10 +5,11 @@ Translate mixed-language files containing Tamil, Chinese, and English text.
 Handles auto-detection of language and provides resilient translation with retry logic.
 """
 
-from googletrans import Translator
-import sys
 import re
+import sys
 import time
+
+from googletrans import Translator
 
 
 def translate_text(text, target_lang="en", retries=3):

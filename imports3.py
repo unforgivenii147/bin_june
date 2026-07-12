@@ -12,17 +12,17 @@ Supports:
 - Works offline using pip package list
 """
 
-import os
-import sys
-import re
-import tarfile
-import zipfile
-import tempfile
 import argparse
-from pathlib import Path
-from multiprocessing import Pool, cpu_count
-from typing import Set, List
 import importlib.util
+import os
+import re
+import sys
+import tarfile
+import tempfile
+import zipfile
+from multiprocessing import Pool, cpu_count
+from pathlib import Path
+from typing import List, Set
 
 
 class PIPPackageCache:

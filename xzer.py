@@ -9,6 +9,7 @@ import sys
 import tarfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+
 from lzma_mt import compress, decompress
 
 MAX_WORKERS = 4

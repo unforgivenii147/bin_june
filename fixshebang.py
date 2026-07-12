@@ -6,9 +6,9 @@ Usage: python change_shebang.py
 """
 
 import re
-from pathlib import Path
-from concurrent.futures import ProcessPoolExecutor, as_completed
 import sys
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
 from typing import Optional, Tuple
 
 NEW_SHEBANG = "#!/data/data/com.termux/files/usr/bin/env python"

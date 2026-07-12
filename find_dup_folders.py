@@ -4,8 +4,32 @@
 import json
 from collections import defaultdict
 from pathlib import Path
-from dh import get_dirs
+
 from xxhash import xxh64
+
+
+from pathlib import Path
+from os import scandir as os_scandir
+
+
+def get_dirs(path: (str | Path)) -> list[Path]:
+    path = Path(path)
+    if not path.is_dir():
+        return []
+    dirs = []
+    stack = [path]
+    while stack:
+        current = stack.pop()
+        try:
+            with os_scandir(current) as entries:
+                for entry in entries:
+                    if entry.is_dir(follow_symlinks=False):
+                        dir_path = Path(entry.path)
+                        dirs.append(dir_path)
+                        stack.append(dir_path)
+        except (PermissionError, OSError):
+            continue
+    return dirs
 
 
 def is_nested(path1: Path, path2: Path) -> bool:

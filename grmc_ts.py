@@ -1,11 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/env python
-import sys
-import ast
 import argparse
-from pathlib import Path
+import ast
+import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from tree_sitter import Language, Parser
+from pathlib import Path
+
 import tree_sitter_python as tspython
+from tree_sitter import Language, Parser
 
 # Initialize Tree-Sitter Language and Parser
 PY_LANGUAGE = Language(tspython.language())

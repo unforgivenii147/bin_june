@@ -4,6 +4,7 @@
 import itertools
 import time
 from pathlib import Path
+
 import cv2
 import pytesseract
 from dh import IMG_EXT

@@ -12,6 +12,7 @@ import hashlib
 import mimetypes
 import re
 from pathlib import Path
+
 from dh import MIME2EXT
 
 DATA_URI_PATTERN = re.compile(

@@ -7,10 +7,11 @@ Uses pathlib and parallel processing for efficiency.
 """
 
 import re
-from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
+from typing import Set, Tuple
+
 from tqdm import tqdm
-from typing import Tuple, Set
 
 URL_PATTERN = re.compile(r'https?://[^\s<>"{}|\\^`\[\]]*', re.IGNORECASE)
 GIT_DOMAINS = {

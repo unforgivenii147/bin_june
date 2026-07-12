@@ -1,12 +1,13 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-from pathlib import Path
-import numpy as np
-import pytesseract
-from concurrent.futures import ProcessPoolExecutor, as_completed
 import multiprocessing
 import sys
 import traceback
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
+
+import numpy as np
+import pytesseract
 
 SUPPORTED_EXT = {".jpg", ".jpeg", ".png", ".tiff", ".bmp", ".webp"}
 BASE_DIR = Path.cwd()
@@ -18,8 +19,9 @@ try:
     HAS_CV2 = True
 except ImportError:
     HAS_CV2 = False
-    from PIL import Image, ImageEnhance, ImageFilter, ImageOps
     import io
+
+    from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 
 
 def deskew(image):

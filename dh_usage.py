@@ -6,10 +6,10 @@ Count how many times each function from 'dh' is imported and used,
 then save a report to ~/dh_usage.txt.
 """
 
-from pathlib import Path
 import ast
 import sys
 from collections import Counter
+from pathlib import Path
 
 # ── config ────────────────────────────────────────────────────────────────────
 

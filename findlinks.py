@@ -6,6 +6,7 @@ import time
 from collections import deque
 from urllib.parse import urljoin, urlparse
 from urllib.robotparser import RobotFileParser
+
 import requests
 from bs4 import BeautifulSoup
 

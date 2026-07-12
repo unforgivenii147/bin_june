@@ -9,25 +9,26 @@ Can optionally tar subdirectories before Brotli compression for better ratios.
 """
 
 import argparse
-import brotlicffi
 import multiprocessing as mp
-from pathlib import Path
-from typing import Tuple, Optional, List, Set
-from dataclasses import dataclass
-from concurrent.futures import ProcessPoolExecutor, as_completed
-import time
+import shutil
 import sys
 import tarfile
 import tempfile
-import shutil
+import time
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from dataclasses import dataclass
+from pathlib import Path
+from typing import List, Optional, Set, Tuple
+
+import brotlicffi
 
 try:
-    from rich.console import Console
-    from rich.table import Table
-    from rich.progress import Progress, SpinnerColumn, BarColumn, TextColumn, TimeElapsedColumn
-    from rich.panel import Panel
-    from rich.text import Text
     from rich import box
+    from rich.console import Console
+    from rich.panel import Panel
+    from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
+    from rich.table import Table
+    from rich.text import Text
 
     RICH_AVAILABLE = True
 except ImportError:

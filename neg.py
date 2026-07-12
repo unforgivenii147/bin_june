@@ -5,11 +5,12 @@ Processes images in parallel using multiprocessing.
 """
 
 import argparse
-from pathlib import Path
-from multiprocessing import Pool, cpu_count
-from functools import partial
-import sys
 import logging
+import sys
+from functools import partial
+from multiprocessing import Pool, cpu_count
+from pathlib import Path
+
 from PIL import Image
 
 # Configure logging

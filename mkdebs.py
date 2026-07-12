@@ -1,10 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/env python
+import os
 import shutil
 import tarfile
 from pathlib import Path
+
 import apt
 import apt_pkg
-import os
 import unix_ar
 
 BASE_DIR = Path.home() / "debs"

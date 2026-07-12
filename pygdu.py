@@ -1,11 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/env python
-import sys
 import os
-import tty
+import sys
 import termios
-from pathlib import Path
+import tty
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import List
 
 # --- Core Data Structures ---

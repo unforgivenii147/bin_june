@@ -5,13 +5,14 @@ Format in repos.txt: user/repo (one per line)
 Saves repository sizes to repo_sizes.json for caching
 """
 
+import json
 import os
 import subprocess
 import sys
-import requests
-import json
-from pathlib import Path
 from datetime import datetime, timedelta
+from pathlib import Path
+
+import requests
 from dotenv import load_dotenv
 
 # Load environment variables from ~/.env

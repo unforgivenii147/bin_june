@@ -13,11 +13,126 @@ import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+
 import brotli
 import py7zr
 import zstandard as zstd
-from dh import compress as snappy_compress
 from loguru import logger
+
+
+import os
+
+_HASH_TABLE_SIZE = 1 << 14
+
+_MAX_OFFSET_1 = 2047
+
+_MAX_OFFSET_2 = 65535
+
+
+def _encode_varint(value: int) -> bytes:
+    result = bytearray()
+    while value >= 128:
+        result.append(value & 127 | 128)
+        value >>= 7
+    result.append(value)
+    return bytes(result)
+
+
+def _hash_4_bytes(data: bytes, pos: int) -> int:
+    val = data[pos] | data[pos + 1] << 8 | data[pos + 2] << 16 | data[pos + 3] << 24
+    return val * 506832829 >> 32 - 14 & _HASH_TABLE_SIZE - 1
+
+
+def _emit_literal(output: bytearray, data: bytes, start: int, length: int) -> None:
+    if length <= 0:
+        return
+    if length <= 60:
+        output.append(length - 1 << 2)
+    elif length <= 256:
+        output.append(60 << 2)
+        output.append(length - 1)
+    elif length <= 65536:
+        output.append(61 << 2)
+        output.append(length - 1 & 255)
+        output.append(length - 1 >> 8 & 255)
+    elif length <= 16777216:
+        output.append(62 << 2)
+        output.append(length - 1 & 255)
+        output.append(length - 1 >> 8 & 255)
+        output.append(length - 1 >> 16 & 255)
+    else:
+        output.append(63 << 2)
+        output.append(length - 1 & 255)
+        output.append(length - 1 >> 8 & 255)
+        output.append(length - 1 >> 16 & 255)
+        output.append(length - 1 >> 24 & 255)
+    output.extend(data[start : start + length])
+
+
+def _emit_copy(output: bytearray, offset: int, length: int) -> None:
+    while length > 0:
+        if length >= 4 and length <= 11 and offset <= _MAX_OFFSET_1:
+            tag = 1 | length - 4 << 2 | offset >> 8 << 5
+            output.append(tag)
+            output.append(offset & 255)
+            return
+        if offset <= _MAX_OFFSET_2:
+            copy_len = min(length, 64)
+            tag = 2 | copy_len - 1 << 2
+            output.append(tag)
+            output.append(offset & 255)
+            output.append(offset >> 8 & 255)
+            length -= copy_len
+        else:
+            copy_len = min(length, 64)
+            tag = 3 | copy_len - 1 << 2
+            output.append(tag)
+            output.append(offset & 255)
+            output.append(offset >> 8 & 255)
+            output.append(offset >> 16 & 255)
+            output.append(offset >> 24 & 255)
+            length -= copy_len
+
+
+def compress(data: bytes) -> bytes:
+    if not data:
+        return _encode_varint(0)
+    data_len = len(data)
+    output = bytearray()
+    output.extend(_encode_varint(data_len))
+    if data_len < 4:
+        _emit_literal(output, data, 0, data_len)
+        return bytes(output)
+    hash_table = [0] * _HASH_TABLE_SIZE
+    pos = 0
+    literal_start = 0
+    while pos <= data_len - 4:
+        h = _hash_4_bytes(data, pos)
+        candidate = hash_table[h]
+        hash_table[h] = pos
+        if (
+            (candidate > 0 or (candidate == 0 and pos > 0))
+            and pos - candidate <= _MAX_OFFSET_2
+            and data[candidate : candidate + 4] == data[pos : pos + 4]
+        ):
+            if pos > literal_start:
+                _emit_literal(output, data, literal_start, pos - literal_start)
+            offset = pos - candidate
+            match_len = 4
+            max_match = min(data_len - pos, 64)
+            while match_len < max_match and data[candidate + match_len] == data[pos + match_len]:
+                match_len += 1
+            _emit_copy(output, offset, match_len)
+            pos += match_len
+            literal_start = pos
+            if pos <= data_len - 4:
+                hash_table[_hash_4_bytes(data, pos - 1)] = pos - 1
+        else:
+            pos += 1
+    if literal_start < data_len:
+        _emit_literal(output, data, literal_start, data_len - literal_start)
+    return bytes(output)
+
 
 try:
     import huffman as huffman_lib

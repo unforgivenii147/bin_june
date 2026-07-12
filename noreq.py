@@ -4,7 +4,184 @@ import tarfile
 import tempfile
 import zipfile
 from pathlib import Path
-from dh import is_valid_archive
+
+
+from pathlib import Path
+import zipfile
+import lzma
+import tarfile
+import brotlicffi as brotli
+import bz2
+
+
+def is_wheel_ok(path: Path) -> bool:
+    try:
+        with zipfile.ZipFile(path, "r") as wheel:
+            corrupt_file = wheel.testzip()
+            return not corrupt_file
+    except zipfile.BadZipFile:
+        return False
+    except FileNotFoundError:
+        return False
+    except Exception as e:
+        return False
+
+
+def is_valid_archive(path: (str | Path)) -> bool:
+    path = Path(path)
+    try:
+        if not path.is_file():
+            return False
+        if not path.stat().st_size:
+            return False
+        lower = path.name.lower()
+        if lower.endswith((".zip", ".whl")):
+            return is_wheel_ok(path)
+        if lower.endswith(".tar"):
+            return _check_tar(path, mode="r:")
+        if lower.endswith((".tar.gz", ".tgz")):
+            return _check_tar(path, mode="r:gz")
+        if lower.endswith((".tar.xz", ".txz")):
+            return _check_tar(path, mode="r:xz")
+        if lower.endswith((".tar.bz2", ".tbz2", ".tbz")):
+            return _check_tar(path, mode="r:bz2")
+        if lower.endswith(".tar.br"):
+            return _check_tar_with_brotli(path)
+        if lower.endswith(".tar.zst"):
+            return _check_tar_with_zstd(path)
+        if lower.endswith(".tar.lz4"):
+            return _check_tar_with_lz4(path)
+        if lower.endswith(".tar.lzma"):
+            return _check_tar_with_lzma(path)
+        if lower.endswith(".br"):
+            return _check_brotli_file(path)
+        if lower.endswith(".zst"):
+            return _check_zstd_file(path)
+        if lower.endswith(".lz4"):
+            return _check_lz4_file(path)
+        if lower.endswith(".lzma"):
+            return _check_lzma_file(path)
+        return False
+    except Exception:
+        return False
+
+
+def _check_tar(path: (str | Path), mode: str) -> bool:
+    path = Path(path)
+    with tarfile.open(path, mode) as tf:
+        bad = tf.badfile()
+        if bad is not None:
+            return False
+        tf.getmembers()
+        return True
+
+
+def _check_brotli_file(path: (str | Path)) -> bool:
+    from brotlicffi import decompress as brotli_decompress
+
+    path = Path(path)
+    try:
+        data = Path(path).read_bytes()
+        _ = brotli_decompress(data)
+        return True
+    except:
+        return False
+
+
+def _check_zstd_file(path: (str | Path)) -> bool:
+    from zstandard import ZstdDecompressor as zstd_ZstdDecompressor
+
+    path = Path(path)
+    try:
+        dctx = zstd_ZstdDecompressor()
+        with open(path, "rb") as f:
+            _ = dctx.decompress(f.read())
+        return True
+    except:
+        return False
+
+
+def _check_lz4_file(path: (str | Path)) -> bool:
+    from lz4.frame import decompress as lz4_decompress
+
+    path = Path(path)
+    try:
+        with open(path, "rb") as f:
+            _ = lz4_decompress(f.read())
+        return True
+    except:
+        return False
+
+
+def _check_lzma_file(path: (str | Path)) -> bool:
+    from lzma import decompress as lzma_decompress
+
+    path = Path(path)
+    try:
+        with open(path, "rb") as f:
+            _ = lzma_decompress(f.read())
+        return True
+    except:
+        return False
+
+
+def _check_tar_with_brotli(path: (str | Path)) -> bool:
+    from brotlicffi import decompress as brotli_decompress
+
+    path = Path(path)
+    try:
+        with open(path, "rb") as f:
+            raw = brotli_decompress(f.read())
+        return _check_tar_bytes(raw)
+    except:
+        return False
+
+
+def _check_tar_with_zstd(path: (str | Path)) -> bool:
+    path = Path(path).resolve()
+    xpath = path.with_name(path.name.replace(".tar.zst", ""))
+    try:
+        with tarfile.open(path, "r:zst") as f:
+            f.extractall(path=xpath, filter="data")
+        return True
+    except:
+        return False
+
+
+def _check_tar_with_lz4(path: (str | Path)) -> bool:
+    from lz4.frame import decompress as lz4_decompress
+
+    path = Path(path)
+    try:
+        with open(path, "rb") as f:
+            raw = lz4_decompress(f.read())
+        return _check_tar_bytes(raw)
+    except:
+        return False
+
+
+def _check_tar_with_lzma(path: (str | Path)) -> bool:
+    from lzma import decompress as lzma_decompress
+
+    path = Path(path)
+    try:
+        with open(path, "rb") as f:
+            raw = lzma_decompress(f.read())
+        return _check_tar_bytes(raw)
+    except:
+        return False
+
+
+def _check_tar_bytes(raw: bytes) -> bool:
+    from io import BytesIO as io_BytesIO
+
+    try:
+        with tarfile.open(fileobj=io_BytesIO(raw), mode="r:") as tf:
+            tf.getmembers()
+        return True
+    except:
+        return False
+
 
 TARGET_FILES = {"METADATA", "PKGINFO", "PKG-INFO"}
 PREFIX = "Requires-Dist:"
