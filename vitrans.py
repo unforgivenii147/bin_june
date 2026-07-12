@@ -1,10 +1,7 @@
-#!/data/data/com.termux/files/usr/bin/env python
-
+#!/usr/bin/env python3
 """
-Translate fully-Vietnamese text files to English.
-Output is saved as <original_filename>.en beside the source file.
-Chunks text at ~5000 chars on paragraph/line boundaries to stay
-under the Google Translate limit.
+Optimized version of vitrans.py for Python 3.12.
+Translates Vietnamese text files to English using Google Translate via deep_translator.
 """
 
 import json
@@ -14,32 +11,41 @@ import sys
 import time
 from datetime import datetime
 from pathlib import Path
+from typing import Final, NoReturn
 
 from deep_translator import GoogleTranslator
-from tenacity import before_sleep_log, retry, retry_if_exception_type, stop_after_attempt, wait_exponential_jitter
+from tenacity import (
+    before_sleep_log,
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential_jitter,
+)
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+# Constants
+MAX_CHUNK_CHARS: Final[int] = 4800
+DELAY_BETWEEN_CHUNKS: Final[float] = 1.2
+DELAY_BETWEEN_FILES: Final[float] = 3.0
+MAX_RETRIES: Final[int] = 5
+PROGRESS_SAVE_EVERY: Final[int] = 5
+SKIP_DIRS: Final[frozenset[str]] = frozenset({
+    "lazy",
+    ".git",
+    "__pycache__",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".pytest_cache",
+})
 
-
-# ── config ────────────────────────────────────────────────────────────────────
-
-MAX_CHUNK_CHARS = 4800  # safely under the 5000-char API limit
-DELAY_BETWEEN_CHUNKS = 1.2  # seconds between requests
-DELAY_BETWEEN_FILES = 3.0
-MAX_RETRIES = 5
-PROGRESS_SAVE_EVERY = 5  # save after every N translated chunks
-
-# ── logging ───────────────────────────────────────────────────────────────────
-
+# Logging
 logging.basicConfig(level=logging.WARNING)
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
-# ── graceful interrupt ────────────────────────────────────────────────────────
+# Graceful interrupt handling
+_interrupted: bool = False
 
-_interrupted = False
 
-
-def _sigint_handler(sig, frame):
+def _sigint_handler(sig: int, frame: object) -> None:
     global _interrupted
     print("\n⚠️  Ctrl+C — finishing current chunk then stopping.")
     _interrupted = True
@@ -47,11 +53,19 @@ def _sigint_handler(sig, frame):
 
 signal.signal(signal.SIGINT, _sigint_handler)
 
-# ── encoding-resilient reader ─────────────────────────────────────────────────
+
+class RateLimitError(Exception):
+    """Raised when the translation API rate limit is exceeded."""
+
+
+class TranslationError(Exception):
+    """Raised for general translation failures."""
 
 
 def read_text(path: Path) -> tuple[str, str]:
-    for enc in ("utf-8", "utf-8-sig", "utf-16", "cp1258", "gb18030"):
+    """Reads text with fallback encodings."""
+    encodings = ("utf-8", "utf-8-sig", "utf-16", "cp1258", "gb18030")
+    for enc in encodings:
         try:
             return path.read_text(encoding=enc, errors="strict"), enc
         except (UnicodeDecodeError, LookupError):
@@ -59,15 +73,8 @@ def read_text(path: Path) -> tuple[str, str]:
     return path.read_bytes().decode("utf-8", errors="replace"), "utf-8"
 
 
-# ── chunking ──────────────────────────────────────────────────────────────────
-
-
 def split_into_chunks(text: str, max_chars: int = MAX_CHUNK_CHARS) -> list[str]:
-    """
-    Split text into chunks that don't exceed max_chars.
-    Tries to break on double-newlines (paragraphs), then single newlines,
-    then spaces — never mid-word.
-    """
+    """Splits text into chunks, preferring paragraph/line/word boundaries."""
     if len(text) <= max_chars:
         return [text]
 
@@ -76,21 +83,16 @@ def split_into_chunks(text: str, max_chars: int = MAX_CHUNK_CHARS) -> list[str]:
 
     while len(remaining) > max_chars:
         window = remaining[:max_chars]
-
-        # prefer paragraph boundary
         cut = window.rfind("\n\n")
         if cut == -1 or cut < max_chars // 4:
-            # fall back to line boundary
             cut = window.rfind("\n")
         if cut == -1 or cut < max_chars // 4:
-            # last resort: word boundary
             cut = window.rfind(" ")
         if cut == -1:
-            # no whitespace at all — hard cut
             cut = max_chars
 
         chunks.append(remaining[:cut])
-        remaining = remaining[cut:].lstrip("\n")  # drop leading blank lines
+        remaining = remaining[cut:].lstrip("\n")
 
     if remaining:
         chunks.append(remaining)
@@ -98,59 +100,45 @@ def split_into_chunks(text: str, max_chars: int = MAX_CHUNK_CHARS) -> list[str]:
     return chunks
 
 
-# ── translation with tenacity ─────────────────────────────────────────────────
-
-
-class RateLimitError(Exception):
-    pass
-
-
-class TranslationError(Exception):
-    pass
-
-
 @retry(
     reraise=True,
     stop=stop_after_attempt(MAX_RETRIES),
     wait=wait_exponential_jitter(initial=3, max=90, jitter=4),
     retry=retry_if_exception_type((RateLimitError, TranslationError)),
-    before_sleep=before_sleep_log(log, logging.DEBUG),
+    before_sleep=before_sleep_log(logger, logging.DEBUG),
 )
 def _translate_chunk(text: str) -> str:
+    """Core translation logic with retry capability."""
     try:
         result = GoogleTranslator(source="vi", target="en").translate(text)
-        if result is None or result.strip() == "":
-            raise TranslationError("Empty result returned")
+        if not result or not result.strip():
+            raise TranslationError("Empty result returned from translator")
         return result
-    except (RateLimitError, TranslationError):
-        raise
     except Exception as e:
         msg = str(e).lower()
         if any(k in msg for k in ("429", "rate limit", "too many", "quota")):
             print("   ⏳ Rate limited — backing off…")
-            raise RateLimitError(str(e))
+            raise RateLimitError(str(e)) from e
         if any(k in msg for k in ("timeout", "timed out", "connection", "reset")):
-            raise TranslationError(str(e))
-        raise TranslationError(str(e))
+            raise TranslationError(str(e)) from e
+        raise TranslationError(str(e)) from e
 
 
 def translate_chunk_safe(text: str, idx: int) -> tuple[str, bool]:
-    """Never raises. Returns (translated, success)."""
+    """Safe wrapper for chunk translation."""
     try:
         return _translate_chunk(text), True
     except Exception as e:
         print(f"   ❌ Chunk {idx} failed after all retries: {e}")
-        return text, False  # keep original on hard failure
-
-
-# ── progress persistence ──────────────────────────────────────────────────────
+        return text, False
 
 
 def _progress_path(src: Path) -> Path:
-    return src.with_name(src.name + ".viprogress")
+    return src.with_suffix(src.suffix + ".viprogress")
 
 
 def save_progress(src: Path, done: dict[int, str], total: int) -> None:
+    """Persists translation progress to a file."""
     try:
         state = {
             "source": str(src),
@@ -164,6 +152,7 @@ def save_progress(src: Path, done: dict[int, str], total: int) -> None:
 
 
 def load_progress(src: Path) -> dict[int, str]:
+    """Loads previously saved progress."""
     p = _progress_path(src)
     if not p.exists():
         return {}
@@ -171,7 +160,7 @@ def load_progress(src: Path) -> dict[int, str]:
         state = json.loads(p.read_text(encoding="utf-8"))
         if Path(state.get("source", "")) != src:
             return {}
-        restored = {int(k): v for k, v in state["chunks"].items()}
+        restored = {int(k): v for k, v in state.get("chunks", {}).items()}
         print(f"   🔄 Resuming: {len(restored)} chunk(s) already done")
         return restored
     except Exception:
@@ -179,33 +168,23 @@ def load_progress(src: Path) -> dict[int, str]:
 
 
 def drop_progress(src: Path) -> None:
-    p = _progress_path(src)
-    try:
-        p.unlink(missing_ok=True)
-    except Exception:
-        pass
+    """Removes the progress file."""
+    _progress_path(src).unlink(missing_ok=True)
 
 
-# ── output path ───────────────────────────────────────────────────────────────
-
-
-def output_path(src: Path) -> Path:
-    """foo.txt  →  foo.txt.en
-    bar      →  bar.en"""
-    return src.with_name(src.name + ".en")
-
-
-# ── per-file processor ────────────────────────────────────────────────────────
+def get_output_path(src: Path) -> Path:
+    """Determines the output path for the translated file."""
+    return src.with_suffix(src.suffix + ".en")
 
 
 def process_file(path: Path) -> bool:
+    """Processes a single file for translation."""
     global _interrupted
-
-    out = output_path(path)
+    out = get_output_path(path)
     print(f"\n📄 {path.name}  →  {out.name}")
 
     try:
-        text, _enc = read_text(path)
+        text, _ = read_text(path)
     except Exception as e:
         print(f"   ❌ Cannot read: {e}")
         return False
@@ -218,7 +197,7 @@ def process_file(path: Path) -> bool:
     total = len(chunks)
     print(f"   📦 {total} chunk(s)  |  file size: {len(text):,} chars")
 
-    done: dict[int, str] = load_progress(path)
+    done = load_progress(path)
     failed_count = 0
 
     for i, chunk in enumerate(chunks):
@@ -233,13 +212,12 @@ def process_file(path: Path) -> bool:
 
         translated, ok = translate_chunk_safe(chunk, i)
         done[i] = translated
-
         if not ok:
             failed_count += 1
 
-        char_preview = chunk[:40].replace("\n", "↵").strip()
+        preview = chunk[:40].replace("\n", "↵").strip()
         status = "✓" if ok else "✗"
-        print(f"   [{i + 1:>3}/{total}] {status}  {char_preview!r}…")
+        print(f"   [{i + 1:>3}/{total}] {status}  {preview!r}…")
 
         if (i + 1) % PROGRESS_SAVE_EVERY == 0:
             save_progress(path, done, total)
@@ -247,23 +225,36 @@ def process_file(path: Path) -> bool:
         if i < total - 1 and not _interrupted:
             time.sleep(DELAY_BETWEEN_CHUNKS)
 
-    # assemble in order
     translated_text = "\n".join(done[i] for i in range(total))
-
     try:
         out.write_text(translated_text, encoding="utf-8")
+        drop_progress(path)
+        if failed_count:
+            print(f"   ⚠️  Done with {failed_count} chunk(s) untranslated — check {out.name}")
+        else:
+            print(f"   ✅ Saved → {out}")
+        return True
     except Exception as e:
         print(f"   ❌ Failed to write output: {e}")
         return False
 
-    drop_progress(path)
 
-    if failed_count:
-        print(f"   ⚠️  Done with {failed_count} chunk(s) untranslated — check {out.name}")
-    else:
-        print(f"   ✅ Saved → {out}")
+def main() -> None:
+    """Main entry point."""
+    paths = [p for p in Path.cwd().glob("*.txt") if p.is_file() and p.name not in SKIP_DIRS]
+    if not paths:
+        print("No .txt files found to translate.")
+        return
 
-    return True
+    for path in sorted(paths):
+        if not process_file(path):
+            break
+        time.sleep(DELAY_BETWEEN_FILES)
 
 
-# ── entry
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\n👋 Processed stopped by user.")
+        sys.exit(1)

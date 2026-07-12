@@ -1,130 +1,148 @@
-#!/data/data/com.termux/files/usr/bin/env python
-
+#!/usr/bin/env python3
 """
 Translate mixed-language files containing Tamil, Chinese, and English text.
 Handles auto-detection of language and provides resilient translation with retry logic.
+Optimized for Python 3.12.
 """
 
+import argparse
+import logging
 import re
 import sys
 import time
+from pathlib import Path
+from typing import Final
 
-from googletrans import Translator
+# Try to import translators
+try:
+    from googletrans import Translator
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+    HAS_GOOGLETRANS = True
+except ImportError:
+    HAS_GOOGLETRANS = False
 
+try:
+    from deep_translator import GoogleTranslator
 
-def translate_text(text, target_lang="en", retries=3):
-    if not text or text.strip() == "":
-        return text
+    HAS_DEEP_TRANSLATOR = True
+except ImportError:
+    HAS_DEEP_TRANSLATOR = False
 
-    translator = Translator()
-    attempt = 0
+if not (HAS_GOOGLETRANS or HAS_DEEP_TRANSLATOR):
+    print("Please install either googletrans (4.0.0rc1) or deep-translator.", file=sys.stderr)
+    sys.exit(1)
 
-    while attempt < retries:
-        try:
-            detected = translator.detect(text)
-            src_lang = detected.lang
+# Setup logging
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+logger = logging.getLogger(__name__)
 
-            if src_lang == target_lang:
-                return text
-
-            translated = translator.translate(text, src_lang=src_lang, dest=target_lang)
-            return translated.text
-
-        except Exception as e:
-            attempt += 1
-            if attempt < retries:
-                time.sleep(0.3 * attempt)
-            else:
-                print(f"Translation error after {retries} attempts: {e}", file=sys.stderr)
-                return f"[Translation failed: {text[:50]}...]"
-
-    return text
-
-
-def is_tamil(text):
-    tamil_pattern = re.compile(r"[\u0B80-\u0BFF]+")
-    return bool(tamil_pattern.search(text))
+# Configuration
+RETRY_ATTEMPTS: Final[int] = 3
+RETRY_DELAY: Final[float] = 0.5
+TAMIL_PATTERN: Final[re.Pattern] = re.compile(r"[\u0B80-\u0BFF]+")
+CHINESE_PATTERN: Final[re.Pattern] = re.compile(r"[\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF]+")
+ENGLISH_PATTERN: Final[re.Pattern] = re.compile(r'^[A-Za-z0-9\s\.,;:!?\'"()\-—]+$')
 
 
-def is_chinese(text):
-    chinese_pattern = re.compile(r"[\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF]+")
-    return bool(chinese_pattern.search(text))
+class ResilientTranslator:
+    """Handles translation with fallback and retry logic."""
+
+    def __init__(self, target_lang: str = "en"):
+        self.target_lang = target_lang
+        self.google_translator = Translator() if HAS_GOOGLETRANS else None
+        self.deep_translator = GoogleTranslator(source="auto", target=target_lang) if HAS_DEEP_TRANSLATOR else None
+
+    def translate(self, text: str) -> str:
+        if not text.strip():
+            return text
+
+        for attempt in range(RETRY_ATTEMPTS):
+            try:
+                # Preference for deep_translator as it's often more stable
+                if HAS_DEEP_TRANSLATOR:
+                    result = self.deep_translator.translate(text)
+                    if result:
+                        return result
+
+                if HAS_GOOGLETRANS:
+                    detected = self.google_translator.detect(text)
+                    if detected.lang == self.target_lang:
+                        return text
+                    result = self.google_translator.translate(text, dest=self.target_lang)
+                    if result:
+                        return result.text
+
+            except Exception as e:
+                logger.warning("Attempt %d failed: %s", attempt + 1, e)
+                if attempt < RETRY_ATTEMPTS - 1:
+                    time.sleep(RETRY_DELAY * (attempt + 1))
+
+        return f"[Translation failed: {text[:50]}...]"
 
 
-def is_english(text):
-    english_pattern = re.compile(r'^[A-Za-z0-9\s\.,;:!?\'"()\-—]+$')
-    return bool(english_pattern.match(text.strip()))
-
-
-def detect_language_type(line):
-    if not line.strip():
+def detect_language_type(line: str) -> str:
+    """Categorizes the language type of a line."""
+    stripped = line.strip()
+    if not stripped:
         return "empty"
-    if line.strip() == "%":
+    if stripped == "%":
         return "marker"
-    if is_tamil(line):
+    if TAMIL_PATTERN.search(stripped):
         return "tamil"
-    if is_chinese(line):
+    if CHINESE_PATTERN.search(stripped):
         return "chinese"
-    if is_english(line):
+    if ENGLISH_PATTERN.match(stripped):
         return "english"
     return "other"
 
 
-def process_file(input_file, output_file=None):
+def process_file(input_file: Path, output_file: Path | None = None) -> None:
+    """Reads input file, translates non-English lines, and saves/prints result."""
     try:
-        with open(input_file, "r", encoding="utf-8") as f:
-            lines = f.readlines()
-    except FileNotFoundError:
-        print(f"Error: File '{input_file}' not found.", file=sys.stderr)
-        return
+        content = input_file.read_text(encoding="utf-8")
+        lines = content.splitlines()
     except Exception as e:
-        print(f"Error reading file: {e}", file=sys.stderr)
+        logger.error("Error reading file %s: %s", input_file, e)
         return
 
-    output_lines = []
+    translator = ResilientTranslator()
+    output_lines: list[str] = []
 
     for i, line in enumerate(lines):
-        line = line.rstrip("\n")
-
         lang_type = detect_language_type(line)
 
-        if lang_type in ["empty", "marker"]:
+        if lang_type in ("empty", "marker", "english"):
             output_lines.append(line)
             continue
 
-        if lang_type == "english":
-            output_lines.append(line)
-            continue
+        logger.info("Translating line %d (%s)...", i + 1, lang_type)
+        translated = translator.translate(line)
+        output_lines.append(line)
+        output_lines.append(f"\u2192 {translated}")
+        output_lines.append("")
 
-        if lang_type in ["tamil", "chinese", "other"]:
-            print(f"Translating line {i + 1} ({lang_type})...", file=sys.stderr)
-            translated = translate_text(line)
-            output_lines.append(line)
-            output_lines.append(f"→ {translated}")
-            output_lines.append("")
-
-    output_text = "\n".join(output_lines)
+    result_text = "\n".join(output_lines)
 
     if output_file:
         try:
-            with open(output_file, "w", encoding="utf-8") as f:
-                f.write(output_text)
-            print(f"Output written to: {output_file}", file=sys.stderr)
+            output_file.write_text(result_text, encoding="utf-8")
+            logger.info("Output written to: %s", output_file)
         except Exception as e:
-            print(f"Error writing output file: {e}", file=sys.stderr)
+            logger.error("Error writing output file: %s", e)
     else:
-        print(output_text)
+        print(result_text)
 
 
-def main():
-    import argparse
-
-    parser = argparse.ArgumentParser(description="Translate Tamil/Chinese text in files to English (auto-detect mode).")
-    parser.add_argument("input_file", help="Path to the input file to translate")
-    parser.add_argument("-o", "--output", help="Path to output file (default: print to stdout)", default=None)
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Translate Tamil/Chinese text to English.")
+    parser.add_argument("input_file", type=Path, help="Input file path")
+    parser.add_argument("-o", "--output", type=Path, help="Output file path")
     args = parser.parse_args()
+
+    if not args.input_file.exists():
+        logger.error("Input file does not exist: %s", args.input_file)
+        sys.exit(1)
+
     process_file(args.input_file, args.output)
 
 

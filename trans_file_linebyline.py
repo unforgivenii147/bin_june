@@ -1,97 +1,92 @@
-#!/data/data/com.termux/files/usr/bin/env python
-
-
+#!/usr/bin/env python3
 """
-Translate non-English lines in a file line by line using deep_translator.
-The original file is updated in-place with translations shown alongside original lines.
+Optimized version of trans_file_linebyline.py for Python 3.12.
+Translates non-English lines in a file line by line in-place.
 """
 
-import os
+import logging
+import shutil
 import sys
 import tempfile
+from pathlib import Path
+from typing import Final
 
 from deep_translator import GoogleTranslator
-from deep_translator.google import GoogleTranslator
 from langdetect import DetectorFactory, detect
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
+# Configuration
 DetectorFactory.seed = 0
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+logger = logging.getLogger(__name__)
 
 
-def is_english(text: str):
-    if not text or text.strip() == "":
+def is_english(text: str) -> bool:
+    """Detects if text is English."""
+    if not (stripped := text.strip()):
         return True
     try:
-        lang = detect(text)
-        return lang == "en"
-    except:
+        return detect(stripped) == "en"
+    except Exception:
         return True
 
 
-def translate_line(line: str, translator: GoogleTranslator, target_lang="en"):
+def translate_line(line: str) -> str:
+    """Translates a single line to English."""
     try:
-        result = GoogleTranslator(source="auto", target="en").translate(line.strip())
-        print(result)
-        print("*" * 33)
-        print()
-        return result
+        translator = GoogleTranslator(source="auto", target="en")
+        result = translator.translate(line.strip())
+        return result if result else line
     except Exception as e:
-        print(f"Chunk translation error: {e}")
-        return chunk
+        logger.error("Translation error: %s", e)
+        return line
 
 
-def process_file(filepath: str, show_translation: bool = True) -> None:
-    path = Path(path)
-    """
-    Process the file: detect non-English lines, translate them,
-    and update the file in-place showing translations.
-    """
-    backup_path = filepath + ".backup"
+def process_file(filepath: Path, replace_original: bool = False) -> None:
+    """Processes a file line by line, translating non-English lines."""
+    if not filepath.exists():
+        logger.error("File not found: %s", filepath)
+        return
+
+    backup_path = filepath.with_suffix(filepath.suffix + ".backup")
+    shutil.copyfile(filepath, backup_path)
+
     try:
-        with open(filepath, "r", encoding="utf-8") as f:
-            original_lines = f.readlines()
-        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False, suffix=".tmp") as tmp_file:
-            translator = GoogleTranslator(source="auto", target="en")
-            for line_num, line in enumerate(original_lines, 1):
-                original_line = line.rstrip("\n")
-                if not is_english(original_line) and original_line.strip():
-                    print(f"\n[Line {line_num}] Original: {original_line}")
-                    translated_line = translate_line(original_line, translator)
-                    if show_translation:
-                        print(f"[Line {line_num}] Translated: {translated_line}")
-                        tmp_file.write(f"{original_line} [TRANSLATION: {translated_line}]\n")
+        lines = filepath.read_text(encoding="utf-8").splitlines(keepends=True)
+
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False, dir=filepath.parent) as tmp_file:
+            for i, line in enumerate(lines, 1):
+                stripped = line.rstrip("\n")
+                if stripped.strip() and not is_english(stripped):
+                    translated = translate_line(stripped)
+                    if not replace_original:
+                        tmp_file.write(f"{stripped} [TRANSLATION: {translated}]\n")
                     else:
-                        tmp_file.write(f"{translated_line}\n")
+                        tmp_file.write(f"{translated}\n")
+                    logger.info("Line %d translated.", i)
                 else:
                     tmp_file.write(line)
-        os.rename(filepath, backup_path)
-        os.rename(tmp_file.name, filepath)
-        print(f"\n✓ File updated successfully!")
-        print(f"✓ Backup saved as: {backup_path}")
+
+        shutil.move(tmp_file.name, filepath)
+        logger.info("✓ File updated successfully: %s", filepath.name)
+        logger.info("✓ Backup saved as: %s", backup_path.name)
+
     except Exception as e:
-        print(f"Error processing file: {e}", file=sys.stderr)
-        if os.path.exists(tmp_file.name):
-            os.unlink(tmp_file.name)
-        sys.exit(1)
+        logger.error("Error processing file %s: %s", filepath, e)
+        if "tmp_file" in locals() and Path(tmp_file.name).exists():
+            Path(tmp_file.name).unlink()
 
 
 def main() -> None:
     if len(sys.argv) < 2:
-        print("Usage: python translate_file.py <filename> [--replace]")
-        print("  --replace: Replace original lines with translations (don't show original)")
+        print("Usage: python trans_file_linebyline_optimized.py <filename> [--replace]")
+        print("  --replace: Replace original lines with translations")
         sys.exit(1)
-    filepath = sys.argv[1]
-    show_translation = True
-    if len(sys.argv) > 2 and sys.argv[2] == "--replace":
-        show_translation = False
-    if not os.path.exists(filepath):
-        print(f"Error: File '{filepath}' not found!", file=sys.stderr)
-        sys.exit(1)
-    print(f"Processing file: {filepath}")
-    print("=" * 50)
-    process_file(filepath, show_translation)
+
+    filepath = Path(sys.argv[1])
+    replace_original = "--replace" in sys.argv
+
+    logger.info("Processing file: %s", filepath)
+    process_file(filepath, replace_original)
 
 
 if __name__ == "__main__":

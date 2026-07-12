@@ -1,223 +1,173 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/usr/bin/env python3
+"""
+Optimized version of trans_py.py for Python 3.12.
+Translates docstrings and comments in Python files using AST and parallel threads.
+"""
+
 import ast
-import os
+import logging
 import re
 import shutil
-import threading
+import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from os import scandir as os_scandir
 from pathlib import Path
-from re import Match
+from typing import Final, Any
 
 from deep_translator import GoogleTranslator
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+# Constants
+SKIP_DIRS: Final[frozenset[str]] = frozenset({
+    "lazy",
+    ".git",
+    "__pycache__",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".pytest_cache",
+})
+CHUNK_SIZE: Final[int] = 5000
+NON_ASCII_PATTERN: Final[re.Pattern] = re.compile(r"[^\x00-\x7F]")
+MAX_WORKERS: Final[int] = 8
+
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+logger = logging.getLogger(__name__)
 
 
-def is_python_file(path: str | Path) -> bool:
-    from ast import parse as ast_parse
-
-    path = Path(path)
-    if is_binary(path):
-        return False
-    if not path.stat().st_size:
-        return False
-    if path.is_file() and path.suffix == ".py":
-        return True
-    if not path.suffix:
-        content = path.read_text(encoding="utf-8")
-        if not content:
-            return False
-        if content.startswith("#!") and "python" in content[:100]:
-            return True
-        try:
-            _ = ast_parse(content)
-            return True
-        except:
-            return False
-    return False
-
-
-def is_binary(path: Path | str) -> bool:
-    path = Path(path)
+def is_binary(path: Path) -> bool:
+    """Checks if a file is binary."""
     try:
         with path.open("rb") as f:
-            chunk = f.read(CHUNK_SIZE)
-        if not chunk:
-            return False
-        if b"\x00" in chunk:
-            return True
-        text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
-        nontext = sum(1 for b in chunk if b not in text_chars)
-        return nontext / len(chunk) > ZERO_DOT_THREE
+            chunk = f.read(1024)
+        return b"\x00" in chunk
     except Exception:
         return True
 
 
-def get_pyfiles(path: str | Path) -> list[Path]:
-    path = Path(path)
-    if path.is_file():
-        if path.suffix == ".py":
-            return [path]
-        if not path.suffix and not path.name.startswith(".") and is_python_file(path):
-            return [path]
-        return []
-
-    if not path.is_dir():
-        return []
-
-    pyfiles = []
-    stack = [path]
-
-    while stack:
-        current = stack.pop()
-        try:
-            with os_scandir(current) as entries:
-                for entry in entries:
-                    if entry.is_symlink():
-                        continue
-                    if entry.is_dir(follow_symlinks=False):
-                        if entry.name not in SKIP_DIRS:
-                            stack.append(entry)
-                    elif entry.is_file(follow_symlinks=False):
-                        p = Path(entry.path)
-                        if p.suffix == ".py":
-                            pyfiles.append(p)
-                        elif not p.suffix and not p.name.startswith(".") and is_python_file(p):
-                            pyfiles.append(p)
-        except (PermissionError, OSError):
+def get_pyfiles(directory: Path) -> list[Path]:
+    """Recursively retrieves Python files."""
+    pyfiles: list[Path] = []
+    for p in directory.rglob("*.py"):
+        if any(part.startswith(".") or part in SKIP_DIRS for part in p.parts):
             continue
-
+        if p.is_file() and not is_binary(p):
+            pyfiles.append(p)
     return sorted(pyfiles)
 
 
-PYTHON_EXT = ".py"
-BACKUP_EXT = ".bak"
-CHUNK_SIZE = 5000
-TARGET_LANG = "en"
-SRC_LANG = "auto"
-_thread_local = threading.local()
-
-
-def get_translator():
-    if not hasattr(_thread_local, "translator"):
-        _thread_local.translator = GoogleTranslator(source=SRC_LANG, target=TARGET_LANG)
-    return _thread_local.translator
-
-
-def is_non_english(line: str) -> Match[str] | None:
-    return re.search(r"[^\x00-\x7F]", line)
-
-
-def translate_line(line: str):
-    if is_non_english(line.strip()):
-        try:
-            trans = get_translator().translate(line.strip())
-            if trans and trans.strip() and trans.strip() != line.strip():
-                return trans
-        except Exception as e:
-            print(f"Translation error: {e} -- Line: {line}")
-            return None
-    return None
-
-
-def split_large_text_blocks(text, max_len):
-    lines = text.splitlines(keepends=True)
-    chunks = []
-    chunk = ""
-    for line in lines:
-        if len(chunk) + len(line) > max_len:
-            chunks.append(chunk)
-            chunk = ""
-        chunk += line
-    if chunk:
-        chunks.append(chunk)
-    return chunks
-
-
-def translate_docstring(docstr: str) -> str:
-    new_lines = []
-    for line in docstr.splitlines():
-        new_lines.append(line)
-        transl = translate_line(line)
-        if transl:
-            new_lines.append(transl)
-    return "\n".join(new_lines)
-
-
-def process_file(filepath) -> None:
-    path = Path(path)
-    backup_path = filepath + BACKUP_EXT
-    shutil.copyfile(filepath, backup_path)
-    code = Path(filepath).read_text(encoding="utf-8")
-    len(code) > CHUNK_SIZE
+def translate_text(text: str) -> str:
+    """Translates a text snippet to English."""
+    if not text.strip() or not NON_ASCII_PATTERN.search(text):
+        return text
     try:
-        parsed = ast.parse(code, filename=filepath, type_comments=True)
+        translator = GoogleTranslator(source="auto", target="en")
+        translated = translator.translate(text.strip())
+        return translated if translated else text
     except Exception as e:
-        print(f"Failed to parse {filepath}: {e}")
-        return
-    lines = code.splitlines(keepends=False)
-    new_lines = list(lines)
-    offset_map = {}
-    for node in ast.walk(parsed):
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Module)):
-            docstring = ast.get_docstring(node, clean=False)
-            if docstring:
-                doc_start = node.body[0].lineno - 1 if node.body else None
-                for lookback in range(3):
-                    possible = doc_start - lookback
-                    if possible >= 0 and (
-                        lines[possible].lstrip().startswith(DOC_TH1) or lines[possible].lstrip().startswith(DOC_TH2)
-                    ):
-                        docstring_line = possible
-                        break
-                else:
+        logger.debug("Translation error: %s for text: %s", e, text[:30])
+        return text
+
+
+class DocstringCommentTransformer(ast.NodeTransformer):
+    """AST Transformer to translate docstrings."""
+
+    def __init__(self):
+        self.modified = False
+
+    def _translate_node_docstring(self, node: Any) -> None:
+        docstring = ast.get_docstring(node)
+        if docstring and NON_ASCII_PATTERN.search(docstring):
+            translated = translate_text(docstring)
+            if translated != docstring:
+                self.modified = True
+                # Modern AST access for docstring
+                if (
+                    node.body
+                    and isinstance(node.body[0], ast.Expr)
+                    and isinstance(node.body[0].value, ast.Constant)
+                    and isinstance(node.body[0].value.value, str)
+                ):
+                    node.body[0].value.value = translated
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> ast.FunctionDef:
+        self._translate_node_docstring(node)
+        return self.generic_visit(node)
+
+    def visit_ClassDef(self, node: ast.ClassDef) -> ast.ClassDef:
+        self._translate_node_docstring(node)
+        return self.generic_visit(node)
+
+    def visit_Module(self, node: ast.Module) -> ast.Module:
+        self._translate_node_docstring(node)
+        return self.generic_visit(node)
+
+
+def translate_comments(content: str) -> tuple[str, bool]:
+    """Translates comments in code content."""
+    lines = content.splitlines(keepends=True)
+    new_lines = []
+    modified = False
+    for line in lines:
+        if "#" in line:
+            parts = line.split("#", 1)
+            comment = parts[1]
+            if NON_ASCII_PATTERN.search(comment):
+                translated = translate_text(comment)
+                if translated != comment:
+                    new_lines.append(f"{parts[0]}# {translated}\n")
+                    modified = True
                     continue
-                doc_lines = []
-                line_idx = docstring_line
-                quote_type = DOC_TH1 if lines[line_idx].lstrip().startswith(DOC_TH1) else DOC_TH2
-                while True:
-                    doc_lines.append(lines[line_idx])
-                    if lines[line_idx].rstrip().endswith(quote_type) and line_idx != docstring_line:
-                        break
-                    line_idx += 1
-                doc_block = "\n".join(doc_lines)
-                doc_body = re.sub(f"^{quote_type}|{quote_type}$", "", doc_block.strip(), flags=re.MULTILINE).strip()
-                translated_doc_body = translate_docstring(doc_body)
-                translated_doc_block = f"{quote_type}\n{translated_doc_body}\n{quote_type}"
-                start = docstring_line + offset_map.get(docstring_line, 0)
-                end = line_idx + 1 + offset_map.get(line_idx, 0)
-                translated_lines = translated_doc_block.splitlines()
-                new_lines[start:end] = translated_lines
-                offset = len(translated_lines) - (end - start)
-                for k in range(end, len(new_lines)):
-                    offset_map[k] = offset_map.get(k, 0) + offset
-    final_lines = []
-    for line in new_lines:
-        final_lines.append(line)
-        stripped = line.strip()
-        if stripped.startswith("#") and is_non_english(stripped[1:]):
-            trans = translate_line(stripped[1:].strip())
-            if trans:
-                indentation = re.match(r"\s*", line).group(0)
-                final_lines.append(f"{indentation}# {trans}")
-    Path(filepath).write_text("\n".join(final_lines) + "\n", encoding="utf-8")
-    print(f"Translated: {filepath}")
+        new_lines.append(line)
+    return "".join(new_lines), modified
+
+
+def process_file(filepath: Path) -> bool:
+    """Translates docstrings and comments in a Python file."""
+    try:
+        # Backup original
+        backup_path = filepath.with_suffix(filepath.suffix + ".bak")
+        shutil.copyfile(filepath, backup_path)
+
+        content = filepath.read_text(encoding="utf-8")
+
+        # 1. Translate comments
+        content_after_comments, comments_modified = translate_comments(content)
+
+        # 2. Translate docstrings
+        try:
+            tree = ast.parse(content_after_comments)
+            transformer = DocstringCommentTransformer()
+            new_tree = transformer.visit(tree)
+
+            if transformer.modified or comments_modified:
+                new_content = ast.unparse(new_tree)
+                filepath.write_text(new_content, encoding="utf-8")
+                return True
+        except SyntaxError:
+            if comments_modified:
+                filepath.write_text(content_after_comments, encoding="utf-8")
+                return True
+
+    except Exception as e:
+        logger.error("Failed to process %s: %s", filepath, e)
+    return False
 
 
 def main() -> None:
     cwd = Path.cwd()
     py_files = get_pyfiles(cwd)
     if not py_files:
-        print("No Python files found.")
+        logger.info("No Python files found.")
         return
-    with ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
-        futures = {executor.submit(process_file, f): f for f in py_files}
-        for future in as_completed(futures):
-            try:
-                future.result()
-            except Exception as e:
-                print(f"Failed processing {futures[future]}: {e}")
+
+    logger.info("Processing %d files...", len(py_files))
+    modified_count = 0
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        future_to_file = {executor.submit(process_file, f): f for f in py_files}
+        for future in as_completed(future_to_file):
+            if future.result():
+                modified_count += 1
+                logger.info("✓ Updated: %s", future_to_file[future].name)
+
+    logger.info("Done. Modified %d files.", modified_count)
 
 
 if __name__ == "__main__":

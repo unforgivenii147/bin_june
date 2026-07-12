@@ -1,114 +1,111 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/usr/bin/env python3
+"""
+Optimized version of transchin.py for Python 3.12.
+Translates non-English characters in files in-place using parallel processing.
+"""
 
-
+import logging
 import re
-from concurrent.futures import ThreadPoolExecutor
-from os import scandir as os_scandir
+import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+from typing import Final
 
 from deep_translator import GoogleTranslator
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+# Constants
+CHUNK_SIZE: Final[int] = 2000
+MAX_WORKERS: Final[int] = 16
+SKIP_DIRS: Final[frozenset[str]] = frozenset({
+    "lazy",
+    ".git",
+    "__pycache__",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".pytest_cache",
+})
+NON_ASCII_PATTERN: Final[re.Pattern] = re.compile(r"[^\x00-\x7F]")
+
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+logger = logging.getLogger(__name__)
 
 
-def is_binary(path: Path | str) -> bool:
-    path = Path(path)
-    try:
-        with path.open("rb") as f:
-            chunk = f.read(CHUNK_SIZE)
-        if not chunk:
-            return False
-        if b"\x00" in chunk:
-            return True
-        text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
-        nontext = sum(1 for b in chunk if b not in text_chars)
-        return nontext / len(chunk) > ZERO_DOT_THREE
-    except Exception:
-        return True
-
-
-def get_nobinary(path: str | Path) -> list[Path]:
-    return [f for f in get_files(path) if not is_binary(f)]
-
-
-def get_files(path: str | Path, include_hidden: bool = True, ext: list[str] | None = None) -> list[Path]:
-    path = Path(path)
-    if not path.exists():
-        raise FileNotFoundError(f"Path does not exist: {path}")
-    if not path.is_dir():
-        raise NotADirectoryError(f"Path is not a directory: {path}")
-
-    ext = tuple(ext) if ext else None
-    files = []
-    stack = [path]
-
-    while stack:
-        current = stack.pop()
-        try:
-            with os_scandir(current) as entries:
-                for entry in entries:
-                    if entry.is_symlink():
-                        continue
-                    if entry.is_dir(follow_symlinks=False):
-                        if entry.name not in SKIP_DIRS:
-                            stack.append(entry)
-                    elif entry.is_file(follow_symlinks=False):
-                        if not include_hidden and entry.name.startswith("."):
-                            continue
-                        if ext is None or entry.name.endswith(ext):
-                            files.append(Path(entry.path))
-        except (PermissionError, OSError):
-            continue
-
-    return sorted(files)
-
-
-DIRECTORY = "."
-CHUNK_SIZE = 2000
-
-non_english_pattern = re.compile(r"[^\x00-\x7F]")
-
-
-def split_into_chunks(text: str, size: int) -> list[str]:
+def split_into_chunks(text: str, size: int = CHUNK_SIZE) -> list[str]:
+    """Splits text into chunks of specified size."""
     return [text[i : i + size] for i in range(0, len(text), size)]
 
 
 def translate_chunk(chunk: str) -> str:
+    """Translates a single chunk to English."""
+    if not NON_ASCII_PATTERN.search(chunk):
+        return chunk
     try:
-        result = GoogleTranslator(source="auto", target="en").translate(chunk)
-        print(result)
-        print("*" * 33)
-        print()
-        return result
+        translator = GoogleTranslator(source="auto", target="en")
+        result = translator.translate(chunk)
+        if result:
+            logger.info("Chunk translated: %s...", result[:30].replace("\n", " "))
+            return result
+        return chunk
     except Exception as e:
-        print(f"Chunk translation error: {e}")
+        logger.error("Chunk translation error: %s", e)
         return chunk
 
 
 def translate_file(path: Path) -> None:
+    """Translates a file's content in-place."""
     try:
-        content = Path(path).read_text(encoding="utf-8")
-    except:
-        print(f"Skipping unreadable file: {path}")
+        content = path.read_text(encoding="utf-8")
+    except Exception as e:
+        logger.warning("Skipping unreadable file %s: %s", path, e)
         return
-    if not non_english_pattern.search(content):
+
+    if not NON_ASCII_PATTERN.search(content):
         return
-    chunks = split_into_chunks(content, CHUNK_SIZE)
-    with ThreadPoolExecutor(max_workers=16) as executor:
+
+    logger.info("Translating: %s", path.name)
+    chunks = split_into_chunks(content)
+
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        # Use as_completed or map; map preserves order which is essential here
         translated_chunks = list(executor.map(translate_chunk, chunks))
+
     translated_text = "".join(translated_chunks)
+
     try:
         path.write_text(translated_text, encoding="utf-8")
-        print(f"Translated → {path.name}")
+        logger.info("✓ Updated: %s", path.name)
     except Exception as e:
-        print(f"Error writing {new_path}: {e}")
+        logger.error("Error writing to %s: %s", path, e)
 
 
-def process_directory(directory: str) -> None:
-    files = get_nobinary(directory)
+def get_files(path: Path) -> list[Path]:
+    """Recursively retrieves text files from a directory."""
+    files: list[Path] = []
+    for p in path.rglob("*"):
+        if any(part.startswith(".") or part in SKIP_DIRS for part in p.parts):
+            continue
+        if p.is_file() and p.suffix.lower() in {".txt", ".md", ".py", ".json", ".csv"}:
+            files.append(p)
+    return sorted(files)
+
+
+def main() -> None:
+    directory = sys.argv[1] if len(sys.argv) > 1 else "."
+    start_path = Path(directory)
+
+    if not start_path.exists():
+        logger.error("Path does not exist: %s", directory)
+        sys.exit(1)
+
+    files = get_files(start_path)
+    if not files:
+        logger.info("No files found to process.")
+        return
+
+    logger.info("Processing %d files...", len(files))
     for f in files:
         translate_file(f)
 
 
 if __name__ == "__main__":
-    process_directory(DIRECTORY)
+    main()

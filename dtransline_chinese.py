@@ -1,226 +1,190 @@
-#!/data/data/com.termux/files/usr/bin/env python
-
-
+#!/usr/bin/env python3
 """
 Translate Chinese lines in files to English in-place using parallel processing.
-Specifically targets Chinese characters (CJK Unified Ideographs).
-Requires: deep-translator
+Optimized for Python 3.12.
 """
 
 import argparse
+import logging
 import multiprocessing as mp
 import re
 import sys
 import time
 from pathlib import Path
-from typing import List, Tuple
+from typing import Final
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+from deep_translator import GoogleTranslator
 
-try:
-    from deep_translator import GoogleTranslator
-except ImportError:
-    print("Please install deep-translator: pip install deep-translator")
-    sys.exit(1)
+# Setup logging
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+logger = logging.getLogger(__name__)
 
+# Configuration
+SKIP_DIRS: Final[frozenset[str]] = frozenset({
+    "lazy",
+    ".git",
+    "__pycache__",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".pytest_cache",
+})
 
-def contains_chinese(text: str) -> bool:
-    chinese_pattern = re.compile(r"[一-鿿㐀-䶿\u20000-⩭F⩰0-⭳F\u2b740-⮁F⮂0-⳪F豈-\ufaff⾀0-⾡F]")
-    return bool(chinese_pattern.search(text))
+CHINESE_PATTERN: Final[re.Pattern] = re.compile(
+    r"[\u4e00-\u9fff\u3400-\u4dbf\u20000-\u2a6df\u2a700-\u2b73f\u2b740-\u2b81f\u2b820-\u2ceaf\uf900-\ufaff]"
+)
 
 
 def is_chinese_text(text: str, threshold: float = 0.3) -> bool:
-    text = text.strip()
-    if not text:
+    """Checks if text contains a significant portion of Chinese characters."""
+    clean_text = "".join(text.split())
+    if not clean_text:
         return False
-    total_chars = len([c for c in text if not c.isspace()])
-    if total_chars == 0:
-        return False
-    chinese_chars = len(re.findall(r"[一-鿿㐀-䶿\u20000-⩭F⩰0-⭳F\u2b740-⮁F⮂0-⳪F豈-\ufaff⾀0-⾡F]", text))
-    return chinese_chars / total_chars >= threshold
+
+    chinese_chars = len(CHINESE_PATTERN.findall(clean_text))
+    return (chinese_chars / len(clean_text)) >= threshold
 
 
-def translate_chinese_text(text: str, translator: GoogleTranslator, max_retries: int = 3) -> str:
-    if not text.strip() or not contains_chinese(text):
+def translate_line(text: str, translator: GoogleTranslator, max_retries: int = 3) -> str:
+    """Translates a single line of text with retry logic."""
+    if not text.strip():
         return text
+
     for attempt in range(max_retries):
         try:
-            translated = translator.translate(text)
-            print(translated)
-            time.sleep(0.1)
-            return translated
+            result = translator.translate(text)
+            if result:
+                time.sleep(0.05)  # Slight throttle
+                return result
         except Exception as e:
             if attempt < max_retries - 1:
                 wait_time = (attempt + 1) * 1.5
-                print(f"  Retry {attempt + 1}/{max_retries} after {wait_time}s: {e}", file=sys.stderr)
+                logger.warning("  Retry %d/%d after %.1fs: %s", attempt + 1, max_retries, wait_time, e)
                 time.sleep(wait_time)
             else:
-                print(f"  Translation failed after {max_retries} attempts: {e}", file=sys.stderr)
-                return text
+                logger.error("  Translation failed after %d attempts: %s", max_retries, e)
+    return text
 
 
-def process_file(file_path: Path, dry_run: bool = False) -> dict:
+def process_file(file_path: Path, dry_run: bool = False, threshold: float = 0.3) -> dict:
+    """Processes a file, translating lines that meet the Chinese threshold."""
     stats = {"file": str(file_path), "total_lines": 0, "chinese_lines": 0, "translated_lines": 0, "errors": 0}
-    print(f"{('[DRY RUN] ' if dry_run else '')}Processing: {file_path}")
+
+    prefix = "[DRY RUN] " if dry_run else ""
+    logger.info("%sProcessing: %s", prefix, file_path)
+
     try:
-        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
-            lines = f.readlines()
+        content = file_path.read_text(encoding="utf-8", errors="ignore")
+        lines = content.splitlines(keepends=True)
         stats["total_lines"] = len(lines)
-        translator = None if dry_run else GoogleTranslator(source="auto", target="en")
-        translated_lines = []
-        chinese_found = False
-        for i, line in enumerate(lines):
-            if is_chinese_text(line):
+
+        translator = GoogleTranslator(source="auto", target="en")
+        new_lines: list[str] = []
+        found_chinese = False
+
+        for line in lines:
+            if is_chinese_text(line, threshold):
                 stats["chinese_lines"] += 1
-                chinese_found = True
+                found_chinese = True
+
                 if dry_run:
-                    translated_lines.append(f"[CHINESE] {line}")
+                    new_lines.append(line)
                 else:
                     leading_ws = line[: len(line) - len(line.lstrip())]
                     trailing_ws = line[len(line.rstrip()) :]
-                    stripped_line = line.strip()
-                    translated_text = translate_chinese_text(stripped_line, translator)
-                    translated_lines.append(leading_ws + translated_text + trailing_ws)
+                    translated = translate_line(line.strip(), translator)
+                    new_lines.append(f"{leading_ws}{translated}{trailing_ws}")
                     stats["translated_lines"] += 1
+
                     if stats["translated_lines"] % 10 == 0:
-                        print(
-                            f"  Progress: {stats['translated_lines']}/{stats['chinese_lines']} Chinese lines translated"
-                        )
+                        logger.info("  Progress: %d Chinese lines translated", stats["translated_lines"])
             else:
-                translated_lines.append(line)
-        if not dry_run and chinese_found:
-            with open(file_path, "w", encoding="utf-8") as f:
-                f.writelines(translated_lines)
-            print(f"  ✓ Completed: {stats['translated_lines']} lines translated to English")
-        elif dry_run and chinese_found:
-            print(f"  ℹ Found {stats['chinese_lines']} lines with Chinese text (dry run)")
-        else:
-            print(f"  No Chinese text found, skipping.")
+                new_lines.append(line)
+
+        if not dry_run and found_chinese:
+            file_path.write_text("".join(new_lines), encoding="utf-8")
+            logger.info("  \u2713 Completed: %d lines translated", stats["translated_lines"])
+        elif dry_run and found_chinese:
+            logger.info("  \u2139 Found %d lines with Chinese text", stats["chinese_lines"])
+        elif not found_chinese:
+            logger.info("  No Chinese text found, skipping.")
+
     except Exception as e:
-        print(f"  ✗ Error processing {file_path}: {e}", file=sys.stderr)
+        logger.error("  \u2717 Error processing %s: %s", file_path, e)
         stats["errors"] += 1
+
     return stats
 
 
-def worker(args: Tuple[Path, bool]) -> dict:
-    file_path, dry_run = args
-    return process_file(file_path, dry_run)
+def worker(args: tuple[Path, bool, float]) -> dict:
+    """Worker function for pool mapping."""
+    return process_file(*args)
 
 
-def collect_files(file_patterns: List[str], extensions: List[str], exclude_patterns: List[str]) -> List[Path]:
-    files_to_process = []
-    exclude_paths = [Path(p).resolve() for p in exclude_patterns]
-    for file_pattern in file_patterns:
-        path = Path(file_pattern)
-        if not path.exists():
-            print(f"Warning: {path} does not exist", file=sys.stderr)
-            continue
-        if path.is_file():
-            if path.resolve() not in exclude_paths:
-                if not extensions or path.suffix in extensions:
-                    files_to_process.append(path)
-        elif path.is_dir():
-            for ext in extensions if extensions else ["*"]:
-                pattern = f"*{ext}" if ext != "*" else "*"
-                for file_path in path.rglob(pattern):
-                    if file_path.is_file():
-                        if file_path.resolve() in exclude_paths:
-                            continue
-                        if any((part.startswith(".") for part in file_path.parts)):
-                            continue
-                        if file_path.suffix in [".pyc", ".pyo", ".so", ".dll", ".exe", ".bin"]:
-                            continue
-                        files_to_process.append(file_path)
-    seen = set()
-    unique_files = []
-    for f in files_to_process:
-        if f.resolve() not in seen:
-            seen.add(f.resolve())
-            unique_files.append(f)
-    return unique_files
-
-
-def main():
-    parser = argparse.ArgumentParser(
-        description="Translate Chinese lines in files to English in-place",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="\nExamples:\n  # Check for Chinese text in a file (dry run)\n  %(prog)s document.txt --dry-run\n  \n  # Translate Chinese text in multiple files\n  %(prog)s file1.txt file2.py file3.md\n  \n  # Translate all files in a directory\n  %(prog)s ./my_project/ --extensions .py .txt .md\n  \n  # Process with limited workers\n  %(prog)s ./docs/ --workers 2 --extensions .txt .md\n  \n  # Exclude certain directories\n  %(prog)s ./ --exclude ./node_modules ./venv ./.git\n        ",
-    )
-    parser.add_argument("files", nargs="+", type=str, help="Files or directories to process")
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Translate Chinese lines in-place.")
+    parser.add_argument("files", nargs="+", help="Files or directories to process")
     parser.add_argument(
         "--extensions",
         "-e",
         nargs="+",
         default=[".txt", ".md", ".py", ".js", ".html", ".css", ".json", ".xml", ".csv"],
-        help="File extensions to process (default: .txt .md .py .js .html .css .json .xml .csv)",
+        help="Extensions to process",
     )
     parser.add_argument(
-        "--workers",
-        "-w",
-        type=int,
-        default=mp.cpu_count(),
-        help=f"Number of parallel workers (default: {mp.cpu_count()})",
+        "--workers", "-w", type=int, default=mp.cpu_count(), help=f"Number of workers (default: {mp.cpu_count()})"
     )
-    parser.add_argument("--exclude", "-x", nargs="+", default=[], help="Files or directories to exclude")
-    parser.add_argument(
-        "--dry-run", "-d", action="store_true", help="Detect Chinese text without translating (no files modified)"
-    )
-    parser.add_argument(
-        "--threshold",
-        "-t",
-        type=float,
-        default=0.3,
-        help="Minimum ratio of Chinese characters to consider a line as Chinese (default: 0.3)",
-    )
+    parser.add_argument("--exclude", "-x", nargs="+", default=[], help="Paths to exclude")
+    parser.add_argument("--dry-run", "-d", action="store_true", help="Detection only")
+    parser.add_argument("--threshold", "-t", type=float, default=0.3, help="Chinese character threshold")
+
     args = parser.parse_args()
-    global is_chinese_text
-    original_is_chinese_text = is_chinese_text
+    exclude_paths = {Path(p).resolve() for p in args.exclude}
 
-    def threshold_is_chinese_text(text: str) -> bool:
-        return original_is_chinese_text(text, threshold=args.threshold)
+    files_to_process: list[Path] = []
+    for entry in args.files:
+        path = Path(entry)
+        if path.is_file():
+            if path.resolve() not in exclude_paths:
+                files_to_process.append(path)
+        elif path.is_dir():
+            for ext in args.extensions:
+                for fp in path.rglob(f"*{ext}"):
+                    if (
+                        fp.is_file()
+                        and fp.resolve() not in exclude_paths
+                        and not any(part.startswith(".") for part in fp.parts)
+                    ):
+                        files_to_process.append(fp)
 
-    import inspect
-
-    is_chinese_text = threshold_is_chinese_text
-    files_to_process = collect_files(args.files, args.extensions, args.exclude)
     if not files_to_process:
-        print("No files to process.")
+        logger.info("No files to process.")
         return
-    print(f"Found {len(files_to_process)} files to process")
-    if args.dry_run:
-        print("DRY RUN MODE - No files will be modified")
-    print(f"Using {args.workers} workers")
-    print(f"Chinese detection threshold: {args.threshold:.0%}")
-    print()
-    worker_args = [(file_path, args.dry_run) for file_path in files_to_process]
+
+    logger.info(
+        "Found %d files. Using %d workers (Threshold: %.0f%%)",
+        len(files_to_process),
+        args.workers,
+        args.threshold * 100,
+    )
+
+    tasks = [(fp, args.dry_run, args.threshold) for fp in files_to_process]
+
     if args.workers == 1:
-        all_stats = [worker(w_args) for w_args in worker_args]
+        all_stats = [worker(t) for t in tasks]
     else:
         with mp.Pool(processes=args.workers) as pool:
-            all_stats = pool.map(worker, worker_args)
+            all_stats = pool.map(worker, tasks)
+
+    # Summary
     print("\n" + "=" * 60)
     print("SUMMARY")
     print("=" * 60)
-    total_files = len(all_stats)
-    total_lines = sum((s["total_lines"] for s in all_stats))
-    total_chinese_lines = sum((s["chinese_lines"] for s in all_stats))
-    total_translated = sum((s["translated_lines"] for s in all_stats))
-    total_errors = sum((s["errors"] for s in all_stats))
-    print(f"Files processed: {total_files}")
-    print(f"Total lines scanned: {total_lines:,}")
-    print(f"Chinese lines found: {total_chinese_lines:,}")
+    print(f"Files processed:   {len(all_stats)}")
+    print(f"Chinese lines:     {sum(s['chinese_lines'] for s in all_stats):,}")
     if not args.dry_run:
-        print(f"Lines translated: {total_translated:,}")
-    print(f"Errors encountered: {total_errors}")
-    if total_chinese_lines > 0 and args.dry_run:
-        print(f"\nℹ Run without --dry-run to translate {total_chinese_lines} Chinese lines")
-    elif total_translated > 0:
-        print(f"\n✓ Successfully translated {total_translated} Chinese lines to English")
-    chinese_files = [s for s in all_stats if s["chinese_lines"] > 0]
-    if chinese_files:
-        print(f"\nFiles containing Chinese text:")
-        for stats in chinese_files:
-            print(f"  - {stats['file']}: {stats['chinese_lines']} Chinese lines")
+        print(f"Translated lines:  {sum(s['translated_lines'] for s in all_stats):,}")
+    print(f"Errors:            {sum(s['errors'] for s in all_stats)}")
+    print("=" * 60)
 
 
 if __name__ == "__main__":

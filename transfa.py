@@ -1,44 +1,78 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/usr/bin/env python3
+"""
+Translates Persian (Farsi) text in a file to English.
+"""
 
+import logging
 import sys
-from multiprocessing import Pool, cpu_count
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+from typing import Final
 
 from deep_translator import GoogleTranslator
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+# Constants
+MAX_WORKERS: Final[int] = 4
+
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+logger = logging.getLogger(__name__)
 
 
 def translate_line(line: str) -> tuple[str, str] | None:
-    if not line.strip():
+    """Translates a single line from Persian to English."""
+    if not (stripped := line.strip()):
         return None
-    text = line.strip()
     try:
+        # Check if line contains Persian characters (heuristic)
+        if not any("\u0600" <= char <= "\u06ff" for char in stripped):
+            return None
+
         translator = GoogleTranslator(source="fa", target="en")
-        result = translator.translate(text)
-        return (text, result)
-    except Exception:
+        result = translator.translate(stripped)
+        logger.info(f"{stripped} == {result}")
+        return (stripped, result) if result else None
+    except Exception as e:
+        logger.debug("Translation error for '%s': %s", stripped[:20], e)
         return None
 
 
-def translate_file(fname: str) -> None:
-    path = Path(fname)
+def translate_file(file_input: str) -> None:
+    """Reads a file and writes translated output to a new file."""
+    path = Path(file_input)
+    if not path.exists():
+        logger.error("File not found: %s", file_input)
+        return
 
-    with path.open("r", encoding="utf-8") as infile:
-        linez = infile.readlines()
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except Exception as e:
+        logger.error("Error reading file: %s", e)
+        return
 
-    outf = f"{path.stem}_eng{path.suffix}"
-    outpath = path.parent / outf
+    out_path = path.parent / f"{path.stem}_en{path.suffix}"
 
-    with Pool(cpu_count()) as pool:
-        results = pool.imap_unordered(translate_line, linez)
-        with outpath.open("w", encoding="utf-8") as f:
-            for result in results:
-                if result:
-                    text, translated = result
-                    print(f"{text} -> {translated}")
-                    f.write(f"{text} = {translated}\n")
+    logger.info("Translating %d lines from %s...", len(lines), path.name)
+
+    results: list[tuple[str, str]] = []
+    with ProcessPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        future_to_line = {executor.submit(translate_line, line): line for line in lines}
+        for future in as_completed(future_to_line):
+            if res := future.result():
+                text, translated = res
+                logger.info("%s -> %s", text, translated)
+                results.append(res)
+
+    try:
+        with out_path.open("w", encoding="utf-8") as f:
+            for text, translated in results:
+                f.write(f"{text} = {translated}\n")
+        logger.info("✓ Translated output saved to %s", out_path)
+    except Exception as e:
+        logger.error("Error writing output file: %s", e)
 
 
 if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: python transfa.py <file_path>")
+        sys.exit(1)
     translate_file(sys.argv[1])

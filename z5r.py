@@ -1,15 +1,7 @@
-#!/data/data/com.termux/files/usr/bin/env python
-
-
+#!/usr/bin/env python3
 """
 Compress or decompress folders using zstandard compression.
-- Uses tar to archive folders first (no shutil for compression)
-- Uses pathlib for path operations
-- Uses multiprocessing for parallel operations
-- Shows progress bar
-- Removes original folders after successful compression
-- Stores compressed files in current directory (not subdir)
-- Skips specified directories
+Optimized for Python 3.12 with streaming and parallel processing.
 """
 
 import argparse
@@ -17,13 +9,17 @@ import multiprocessing as mp
 import shutil
 import sys
 import tarfile
+import time
+from collections.abc import Generator
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Final, Optional
 
 import zstandard as zstd
-from tqdm import tqdm
 
-SKIP_DIRS = {
+# Configuration and Constants
+DEFAULT_SKIP_DIRS: Final[set[str]] = {
     "zstandard",
     "0",
     "compressed",
@@ -43,261 +39,211 @@ SKIP_DIRS = {
     "venv",
 }
 
+try:
+    from rich.console import Console
+    from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 
-def get_folder_size(folder_path: Path) -> int:
-    total_size = 0
-    for file_path in folder_path.rglob("*"):
-        if file_path.is_file():
-            total_size += file_path.stat().st_size
-    return total_size
-
-
-def should_skip_folder(folder_path: Path) -> bool:
-    if folder_path.name in SKIP_DIRS:
-        return True
-    for part in folder_path.parts:
-        if part in SKIP_DIRS:
-            return True
-    return False
+    RICH_AVAILABLE: Final[bool] = True
+except ImportError:
+    RICH_AVAILABLE: Final[bool] = False
 
 
-def compress_folder(folder_path: Path, output_dir: Path, compression_level: int = 3, threads: int = 2) -> tuple:
+@dataclass(slots=True)
+class FolderResult:
+    """Stores the outcome of a folder compression/decompression."""
+
+    name: str
+    original_size: int = 0
+    compressed_size: int = 0
+    success: bool = False
+    error: Optional[str] = None
+    duration: float = 0.0
+
+    @property
+    def saved_bytes(self) -> int:
+        return max(0, self.original_size - self.compressed_size)
+
+
+def format_size(size_bytes: int) -> str:
+    """Human-readable size formatting."""
+    val = float(size_bytes)
+    for unit in ["B", "KB", "MB", "GB", "TB"]:
+        if val < 1024.0:
+            return f"{val:.2f} {unit}"
+        val /= 1024.0
+    return f"{val:.2f} PB"
+
+
+def get_folder_size(path: Path) -> int:
+    """Calculate total size of all files in a folder."""
+    return sum(f.stat().st_size for f in path.rglob("*") if f.is_file())
+
+
+def compress_folder_task(folder_path: Path, output_dir: Path, level: int = 3, threads: int = 0) -> FolderResult:
+    """Worker task: Tar and compress a folder using streaming."""
+    start_time = time.perf_counter()
+    folder_name = folder_path.name
+    zst_path = output_dir / f"{folder_name}.tar.zst"
+    temp_tar = output_dir / f".tmp_{folder_name}.tar"
+
     try:
-        folder_name = folder_path.name
-        zst_path = output_dir / f"{folder_name}.tar.zst"
-        temp_tar_path = output_dir / f"temp_{folder_name}.tar"
-        original_size = get_folder_size(folder_path)
-        with tarfile.open(temp_tar_path, "w", dereference=True) as tar:
-            for file_path in folder_path.rglob("*"):
-                if file_path.is_file():
-                    arcname = str(file_path.relative_to(folder_path.parent))
-                    tar.add(str(file_path), arcname=arcname)
-        cctx = zstd.ZstdCompressor(level=compression_level, threads=threads)
-        with open(temp_tar_path, "rb") as f_in:
-            compressed_data = cctx.compress(f_in.read())
-        with open(zst_path, "wb") as f_out:
-            f_out.write(compressed_data)
-        compressed_size = zst_path.stat().st_size
-        temp_tar_path.unlink()
+        orig_size = get_folder_size(folder_path)
+
+        # 1. Create Tar
+        with tarfile.open(temp_tar, "w") as tar:
+            tar.add(folder_path, arcname=folder_name)
+
+        # 2. Compress Tar using streaming
+        cctx = zstd.ZstdCompressor(level=level, threads=threads)
+        with temp_tar.open("rb") as f_in, zst_path.open("wb") as f_out:
+            with cctx.stream_writer(f_out) as compressor:
+                shutil.copyfileobj(f_in, compressor)
+
+        comp_size = zst_path.stat().st_size
+        temp_tar.unlink()
+
+        # 3. Cleanup original
         shutil.rmtree(folder_path)
-        return True, folder_name, compressed_size, original_size, None
-    except Exception as e:
-        return False, folder_path.name, 0, 0, str(e)
 
-
-def decompress_file(zst_path: Path, output_dir: Path, threads: int = 2) -> tuple:
-    try:
-        with open(zst_path, "rb") as f:
-            compressed_data = f.read()
-        dctx = zstd.ZstdDecompressor()
-        decompressed_data = dctx.decompress(compressed_data)
-        base_name = zst_path.stem.replace(".tar", "")
-        tar_path = output_dir / f"temp_{base_name}.tar"
-        with open(tar_path, "wb") as f:
-            f.write(decompressed_data)
-        extract_dir = output_dir / base_name
-        extract_dir.mkdir(exist_ok=True)
-        with tarfile.open(tar_path, "r") as tar:
-            tar.extractall(path=extract_dir)
-        extracted_size = get_folder_size(extract_dir)
-        tar_path.unlink()
-        zst_path.unlink()
-        return True, base_name, extracted_size, None
-    except Exception as e:
-        return False, zst_path.name, 0, str(e)
-
-
-def process_folders_compress(
-    root_dir: Path, min_size_mb: int = 5, compression_level: int = 3, threads: int = 2, max_workers: int = None
-):
-    if max_workers is None:
-        max_workers = mp.cpu_count()
-    folders_to_compress = []
-    total_folders = 0
-    skipped_folders = 0
-    skipped_by_name = 0
-    print(f"Scanning folders in {root_dir}...")
-    print(f"Skipping directories: {', '.join(sorted(SKIP_DIRS))}")
-    for item in root_dir.iterdir():
-        if item.is_dir():
-            total_folders += 1
-            if should_skip_folder(item):
-                skipped_by_name += 1
-                print(f"  ⏭ Skipping: {item.name} (in skip list)")
-                continue
-            size_bytes = get_folder_size(item)
-            size_mb = size_bytes / (1024 * 1024)
-            if size_mb > min_size_mb:
-                folders_to_compress.append((item, size_mb))
-                print(f"  Found: {item.name} ({size_mb:.2f} MB)")
-            else:
-                skipped_folders += 1
-    if not folders_to_compress:
-        print(
-            f"""
-No folders > {min_size_mb}MB found. Scanned {total_folders} folders, skipped {skipped_folders} smaller folders, {skipped_by_name} by name."""
+        return FolderResult(
+            name=folder_name,
+            original_size=orig_size,
+            compressed_size=comp_size,
+            success=True,
+            duration=time.perf_counter() - start_time,
         )
-        return
-    print(
-        f"""
-Found {len(folders_to_compress)} folders to compress (skipped {skipped_folders} folders <= {min_size_mb}MB, {skipped_by_name} by name)"""
-    )
-    print(f"Using compression level {compression_level}, {threads} threads per worker")
-    print(f"Using {max_workers} parallel workers")
-    print(f"Compressed files will be saved to: {root_dir}\n")
-    successful = 0
-    failed = 0
-    total_saved = 0
-    with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        future_to_folder = {
-            executor.submit(compress_folder, folder_path, root_dir, compression_level, threads): (folder_path, size_mb)
-            for folder_path, size_mb in folders_to_compress
-        }
-        with tqdm(total=len(folders_to_compress), desc="Compressing", unit="folder") as pbar:
-            for future in as_completed(future_to_folder):
-                folder_path, size_mb = future_to_folder[future]
-                try:
-                    success, name, comp_size, orig_size, error = future.result()
-                    if success:
-                        successful += 1
-                        saved = orig_size - comp_size
-                        total_saved += saved
-                        compression_ratio = comp_size / orig_size * 100 if orig_size > 0 else 0
-                        tqdm.write(
-                            f"✓ {name}: {orig_size / (1024 * 1024):.2f}MB → {comp_size / (1024 * 1024):.2f}MB ({compression_ratio:.1f}%, saved {saved / (1024 * 1024):.2f}MB)"
-                        )
-                    else:
-                        failed += 1
-                        tqdm.write(f"✗ Failed to compress {name}: {error}")
-                except Exception as e:
-                    failed += 1
-                    tqdm.write(f"✗ Error compressing {folder_path.name}: {e}")
-                pbar.update(1)
-    total_compressed = successful + failed
-    print("\n" + "=" * 60)
-    print(f"COMPRESSION SUMMARY")
-    print(f"  Total folders processed: {total_compressed}")
-    print(f"  ✓ Successful: {successful}")
-    print(f"  ✗ Failed: {failed}")
-    if successful > 0:
-        print(f"  Total space saved: {total_saved / (1024 * 1024):.2f} MB")
-        print(f"  Average compression: {total_saved / (successful * 1024 * 1024):.2f} MB/folder")
-    print(f"  Compressed files saved to: {root_dir}")
-    print("=" * 60)
+    except Exception as e:
+        if temp_tar.exists():
+            temp_tar.unlink()
+        if zst_path.exists():
+            zst_path.unlink()
+        return FolderResult(name=folder_name, success=False, error=str(e))
 
 
-def process_files_decompress(root_dir: Path, threads: int = 2, max_workers: int = None):
-    if max_workers is None:
-        max_workers = mp.cpu_count()
-    zst_files = list(root_dir.glob("*.tar.zst"))
-    zst_files = [f for f in zst_files if not f.name.startswith("temp_")]
-    if not zst_files:
-        print(f"No .tar.zst files found in {root_dir}")
-        return
-    print(f"\nFound {len(zst_files)} compressed files to decompress")
-    print(f"Using {threads} threads per worker, {max_workers} parallel workers\n")
-    successful = 0
-    failed = 0
-    total_size = 0
-    with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        future_to_file = {
-            executor.submit(decompress_file, zst_path, root_dir, threads): zst_path for zst_path in zst_files
-        }
-        with tqdm(total=len(zst_files), desc="Decompressing", unit="file") as pbar:
-            for future in as_completed(future_to_file):
-                zst_path = future_to_file[future]
-                try:
-                    success, name, size, error = future.result()
-                    if success:
-                        successful += 1
-                        total_size += size
-                        tqdm.write(f"✓ {name}: extracted {size / (1024 * 1024):.2f}MB")
-                    else:
-                        failed += 1
-                        tqdm.write(f"✗ Failed to decompress {name}: {error}")
-                except Exception as e:
-                    failed += 1
-                    tqdm.write(f"✗ Error decompressing {zst_path.name}: {e}")
-                pbar.update(1)
-    total_processed = successful + failed
-    print("\n" + "=" * 60)
-    print(f"DECOMPRESSION SUMMARY")
-    print(f"  Total files processed: {total_processed}")
-    print(f"  ✓ Successful: {successful}")
-    print(f"  ✗ Failed: {failed}")
-    if successful > 0:
-        print(f"  Total extracted data: {total_size / (1024 * 1024):.2f} MB")
-        print(f"  Average extracted: {total_size / (successful * 1024 * 1024):.2f} MB/file")
-    print(f"  Extracted to: {root_dir}")
-    print("=" * 60)
+def decompress_folder_task(zst_path: Path, output_dir: Path) -> FolderResult:
+    """Worker task: Decompress and untar a folder using streaming."""
+    start_time = time.perf_counter()
+    folder_name = zst_path.name.removesuffix(".tar.zst")
+    temp_tar = output_dir / f".tmp_{folder_name}.tar"
+
+    try:
+        comp_size = zst_path.stat().st_size
+
+        # 1. Decompress to Tar
+        dctx = zstd.ZstdDecompressor()
+        with zst_path.open("rb") as f_in, temp_tar.open("wb") as f_out:
+            with dctx.stream_reader(f_in) as decompressor:
+                shutil.copyfileobj(decompressor, f_out)
+
+        # 2. Extract Tar
+        with tarfile.open(temp_tar, "r") as tar:
+            tar.extractall(output_dir, filter="data")
+
+        temp_tar.unlink()
+        zst_path.unlink()
+
+        extracted_size = get_folder_size(output_dir / folder_name)
+
+        return FolderResult(
+            name=folder_name,
+            original_size=extracted_size,
+            compressed_size=comp_size,
+            success=True,
+            duration=time.perf_counter() - start_time,
+        )
+    except Exception as e:
+        if temp_tar.exists():
+            temp_tar.unlink()
+        return FolderResult(name=folder_name, success=False, error=str(e))
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Compress or decompress folders using zstandard",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  # Compress folders >5MB in current directory
-  python script.py -c
-  
-  # Compress with custom settings
-  python script.py -c -m 10 -l 5 -t 4
-  
-  # Compress with custom skip directories
-  python script.py -c --skip-dirs .git,dist,node_modules
-  
-  # Decompress all .tar.zst files
-  python script.py -d
-  
-  # Decompress with custom threads
-  python script.py -d -t 4
-        """,
-    )
-    parser.add_argument("-c", "--compress", action="store_true", default=True, help="Compress folders (default)")
-    parser.add_argument("-d", "--decompress", action="store_true", help="Decompress .tar.zst files")
-    parser.add_argument(
-        "-m", "--min-size", type=float, default=5, help="Minimum folder size in MB to compress (default: 5)"
-    )
-    parser.add_argument("-l", "--level", type=int, default=3, help="Zstandard compression level 1-22 (default: 3)")
-    parser.add_argument("-t", "--threads", type=int, default=2, help="Threads per worker (default: 2)")
-    parser.add_argument("-w", "--workers", type=int, default=None, help="Max parallel workers (default: CPU count)")
-    parser.add_argument(
-        "-p", "--path", type=str, default=".", help="Target directory path (default: current directory)"
-    )
-    parser.add_argument(
-        "--skip-dirs",
-        type=str,
-        default=None,
-        help="Comma-separated list of directories to skip (default: .git,dist,build,node_modules,__pycache__,.venv,venv)",
-    )
+    parser = argparse.ArgumentParser(description="Optimized Folder Zstd Archiver")
+    parser.add_argument("-c", "--compress", action="store_true", help="Compress folders")
+    parser.add_argument("-d", "--decompress", action="store_true", help="Decompress archives")
+    parser.add_argument("-p", "--path", type=Path, default=Path("."), help="Root directory")
+    parser.add_argument("-l", "--level", type=int, default=3, help="Compression level (1-22)")
+    parser.add_argument("-m", "--min-size", type=float, default=5.0, help="Min folder size in MB")
+    parser.add_argument("-w", "--workers", type=int, default=mp.cpu_count(), help="Parallel workers")
+
     args = parser.parse_args()
-    if args.skip_dirs:
-        global SKIP_DIRS
-        SKIP_DIRS = set(args.skip_dirs.split(","))
-    if args.decompress and args.compress:
-        args.compress = False
-    target_dir = Path(args.path).resolve()
-    if not target_dir.exists():
-        print(f"Error: Directory not found: {target_dir}")
-        sys.exit(1)
-    print(f"Working directory: {target_dir}")
-    print(f"Mode: {'DECOMPRESS' if args.decompress else 'COMPRESS'}")
-    if not args.decompress:
-        print(f"Skip directories: {', '.join(sorted(SKIP_DIRS))}")
-        print(f"Minimum size: {args.min_size}MB")
-    print("-" * 60)
-    try:
+    root = args.path.resolve()
+
+    if args.decompress:
+        targets = list(root.glob("*.tar.zst"))
+        mode_name = "Decompressing"
+    else:
+        # Default to compress
+        targets = [d for d in root.iterdir() if d.is_dir() and d.name not in DEFAULT_SKIP_DIRS]
+        # Filter by size
+        valid_targets = []
+        for d in targets:
+            size_mb = get_folder_size(d) / (1024 * 1024)
+            if size_mb >= args.min_size:
+                valid_targets.append(d)
+        targets = valid_targets
+        mode_name = "Compressing"
+
+    if not targets:
+        print("No targets found to process.")
+        return
+
+    print(f"🚀 {mode_name} {len(targets)} items in {root}...")
+
+    results: list[FolderResult] = []
+
+    if RICH_AVAILABLE:
+        console = Console()
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            TimeElapsedColumn(),
+            console=console,
+        ) as progress:
+            task = progress.add_task(f"{mode_name}...", total=len(targets))
+            with ProcessPoolExecutor(max_workers=args.workers) as executor:
+                if args.decompress:
+                    futures = [executor.submit(decompress_folder_task, t, root) for t in targets]
+                else:
+                    futures = [executor.submit(compress_folder_task, t, root, args.level) for t in targets]
+
+                for f in as_completed(futures):
+                    res = f.result()
+                    results.append(res)
+                    progress.advance(task)
+                    if not res.success:
+                        console.print(f"[red]Error on {res.name}: {res.error}[/red]")
+    else:
+        with ProcessPoolExecutor(max_workers=args.workers) as executor:
+            if args.decompress:
+                futures = [executor.submit(decompress_folder_task, t, root) for t in targets]
+            else:
+                futures = [executor.submit(compress_folder_task, t, root, args.level) for t in targets]
+
+            for i, f in enumerate(as_completed(futures), 1):
+                res = f.result()
+                results.append(res)
+                print(f"[{i}/{len(targets)}] {res.name} - {'OK' if res.success else 'FAIL'}")
+
+    # Summary
+    successes = [r for r in results if r.success]
+    print(f"\n{'=' * 40}")
+    print(f"SUMMARY ({mode_name})")
+    print(f"{'=' * 40}")
+    print(f"Total: {len(results)}")
+    print(f"Success: {len(successes)}")
+    print(f"Failed: {len(results) - len(successes)}")
+    if successes:
+        total_orig = sum(r.original_size for r in successes)
+        total_comp = sum(r.compressed_size for r in successes)
         if args.decompress:
-            process_files_decompress(target_dir, args.threads, args.workers)
+            print(f"Extracted size: {format_size(total_orig)}")
         else:
-            process_folders_compress(target_dir, args.min_size, args.level, args.threads, args.workers)
-    except KeyboardInterrupt:
-        print("\n\nProcess interrupted by user.")
-        sys.exit(1)
-    except Exception as e:
-        print(f"\nError: {e}")
-        sys.exit(1)
+            print(
+                f"Space saved: {format_size(total_orig - total_proc if 'total_proc' in locals() else total_orig - total_comp)}"
+            )
+    print(f"{'=' * 40}")
 
 
 if __name__ == "__main__":

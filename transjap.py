@@ -1,177 +1,168 @@
-#!/data/data/com.termux/files/usr/bin/env python
-
-
+#!/usr/bin/env python3
 """
-Translate Japanese comments and docstrings in Python files to English.
-Recursively processes all .py files, updates in-place with AST validation.
+Optimized version of transjap.py for Python 3.12.
+Translates Japanese comments and docstrings in Python files to English.
 """
 
 import ast
-import multiprocessing as mp
+import logging
 import re
+import sys
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Final, Any
 
 from deep_translator import GoogleTranslator
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+# Constants
+SKIP_DIRS: Final[frozenset[str]] = frozenset({
+    "lazy",
+    ".git",
+    "__pycache__",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".pytest_cache",
+})
+# Japanese character range (Hiragana, Katakana, Kanji)
+JAPANESE_PATTERN: Final[re.Pattern] = re.compile(r"[\u3040-\u30ff\u4e00-\u9fff]")
 
-
-translator = None
-
-
-def get_translator():
-    global translator
-    if translator is None:
-        translator = GoogleTranslator(source="ja", target="en")
-    return translator
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+logger = logging.getLogger(__name__)
 
 
 def translate_text(text: str) -> str:
-    if not text or not text.strip():
-        return text
-    if not re.search(r"[\u3040-\u30ff\u4e00-\u9fff]", text):
+    """Translates Japanese text to English."""
+    if not text or not text.strip() or not JAPANESE_PATTERN.search(text):
         return text
     try:
-        translated = get_translator().translate(text)
+        # Re-creating translator inside worker for thread/process safety
+        translator = GoogleTranslator(source="ja", target="en")
+        translated = translator.translate(text)
         return translated if translated else text
     except Exception as e:
-        print(f"Translation error: {e} for text: {text[:50]}")
+        logger.error("Translation error: %s for text snippet: %s", e, text[:50])
         return text
 
 
-class CommentDocstringTranslator(ast.NodeTransformer):
-    def __init__(self, file_content: str):
-        self.file_content = file_content
+class CommentDocstringTransformer(ast.NodeTransformer):
+    """AST Transformer to find and translate Japanese docstrings."""
+
+    def __init__(self):
         self.modified = False
 
-    def translate_docstring(self, node) -> Optional[str]:
+    def _process_docstring(self, node: Any) -> None:
         docstring = ast.get_docstring(node)
-        if docstring and re.search(r"[\u3040-\u30ff\u4e00-\u9fff]", docstring):
+        if docstring and JAPANESE_PATTERN.search(docstring):
             translated = translate_text(docstring)
             if translated != docstring:
                 self.modified = True
-                return translated
-        return None
+                # Update the docstring in the node body
+                if (
+                    node.body
+                    and isinstance(node.body[0], ast.Expr)
+                    and isinstance(node.body[0].value, ast.Constant)
+                    and isinstance(node.body[0].value.value, str)
+                ):
+                    node.body[0].value.value = translated
 
-    def visit_FunctionDef(self, node):
-        new_doc = self.translate_docstring(node)
-        if new_doc:
-            node.body = [ast.Expr(value=ast.Constant(value=new_doc))] + node.body[1:]
-        self.generic_visit(node)
-        return node
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> ast.FunctionDef:
+        self._process_docstring(node)
+        return self.generic_visit(node)
 
-    def visit_ClassDef(self, node):
-        new_doc = self.translate_docstring(node)
-        if new_doc:
-            node.body = [ast.Expr(value=ast.Constant(value=new_doc))] + node.body[1:]
-        self.generic_visit(node)
-        return node
+    def visit_ClassDef(self, node: ast.ClassDef) -> ast.ClassDef:
+        self._process_docstring(node)
+        return self.generic_visit(node)
 
-    def visit_Module(self, node):
-        new_doc = self.translate_docstring(node)
-        if new_doc:
-            node.body = [ast.Expr(value=ast.Constant(value=new_doc))] + node.body[1:]
-        self.generic_visit(node)
-        return node
+    def visit_Module(self, node: ast.Module) -> ast.Module:
+        self._process_docstring(node)
+        return self.generic_visit(node)
 
 
-def translate_comments_in_line(line: str) -> Tuple[str, bool]:
-    comment_match = re.search(r"#(.*)$", line)
-    if not comment_match:
-        return line, False
-    comment = comment_match.group(1)
-    if not re.search(r"[\u3040-\u30ff\u4e00-\u9fff]", comment):
-        return line, False
-    translated_comment = translate_text(comment)
-    if translated_comment != comment:
-        new_line = line[: comment_match.start(1)] + translated_comment
-        return new_line, True
-    return line, False
+def translate_comments_in_content(content: str) -> tuple[str, bool]:
+    """Translates Japanese comments in a file content string."""
+    lines = content.splitlines(keepends=True)
+    modified = False
+    new_lines = []
+
+    for line in lines:
+        if "#" in line:
+            parts = line.split("#", 1)
+            comment = parts[1]
+            if JAPANESE_PATTERN.search(comment):
+                translated_comment = translate_text(comment)
+                if translated_comment != comment:
+                    new_lines.append(f"{parts[0]}#{translated_comment}")
+                    modified = True
+                    continue
+        new_lines.append(line)
+
+    return "".join(new_lines), modified
 
 
 def translate_file(file_path: Path) -> bool:
+    """Translates docstrings and comments in a single Python file."""
     try:
-        original_content = file_path.read_text(encoding="utf-8")
-        lines = original_content.splitlines(keepends=True)
-        modified_lines = []
-        comments_modified = False
-        for line in lines:
-            new_line, modified = translate_comments_in_line(line)
-            modified_lines.append(new_line)
-            if modified:
-                comments_modified = True
-        content_with_translated_comments = "".join(modified_lines)
+        content = file_path.read_text(encoding="utf-8")
+
+        # 1. Translate comments
+        content_after_comments, comments_modified = translate_comments_in_content(content)
+
+        # 2. Translate docstrings via AST
         try:
-            tree = ast.parse(content_with_translated_comments)
-            transformer = CommentDocstringTranslator(content_with_translated_comments)
+            tree = ast.parse(content_after_comments)
+            transformer = CommentDocstringTransformer()
             new_tree = transformer.visit(tree)
-            ast.fix_missing_locations(new_tree)
-            new_content = ast.unparse(new_tree)
+
             docstrings_modified = transformer.modified
             if comments_modified or docstrings_modified:
-                if re.search(r"[\u3040-\u30ff\u4e00-\u9fff]", new_content):
-                    print(f"Warning: Some Japanese characters remain in {file_path}")
+                new_content = ast.unparse(new_tree)
 
-                    def aggressive_translate(match):
-                        return translate_text(match.group(0))
+                # Double-check for any missed Japanese characters (aggressive fallback)
+                if JAPANESE_PATTERN.search(new_content):
+                    new_content = JAPANESE_PATTERN.sub(lambda m: translate_text(m.group(0)), new_content)
 
-                    new_content = re.sub(
-                        r"[^\w\s\.\,\!\?\;\:\'\"\(\)\[\]\{\}\@\#\$\%\^\&\*\-\+\=\\\/\|\<\>]*(?:[\u3040-\u30ff\u4e00-\u9fff]+[^\w\s\.\,\!\?\;\:\'\"\(\)\[\]\{\}\@\#\$\%\^\&\*\-\+\=\\\/\|\<\>]*)+",
-                        aggressive_translate,
-                        new_content,
-                    )
                 file_path.write_text(new_content, encoding="utf-8")
-                print(f"✓ Updated: {file_path}")
                 return True
-            else:
-                return False
         except SyntaxError as e:
-            print(f"✗ Syntax error in {file_path}: {e}. File not modified.")
+            logger.error("Syntax error in %s: %s. Skipping AST translation.", file_path, e)
+            if comments_modified:
+                file_path.write_text(content_after_comments, encoding="utf-8")
+                return True
             return False
+
     except Exception as e:
-        print(f"✗ Error processing {file_path}: {e}")
+        logger.error("Error processing %s: %s", file_path, e)
         return False
+    return False
 
 
-def process_file_wrapper(file_path_str: str) -> Tuple[str, bool]:
-    return file_path_str, translate_file(Path(file_path_str))
-
-
-def main():
-    import sys
-    from pathlib import Path
-
+def main() -> None:
     start_dir = sys.argv[1] if len(sys.argv) > 1 else "."
     start_path = Path(start_dir).resolve()
+
     if not start_path.exists():
-        print(f"Error: Path '{start_path}' does not exist")
+        logger.error("Error: Path '%s' does not exist", start_path)
         sys.exit(1)
-    print(f"Scanning for Python files in: {start_path}")
-    py_files = list(start_path.rglob("*.py"))
-    print(f"Found {len(py_files)} Python files")
+
+    logger.info("Scanning for Python files in: %s", start_path)
+    py_files = [f for f in start_path.rglob("*.py") if not any(part in SKIP_DIRS for part in f.parts)]
+
     if not py_files:
-        print("No Python files found")
+        logger.info("No Python files found.")
         return
-    with mp.Pool(processes=mp.cpu_count()) as pool:
-        results = pool.map(process_file_wrapper, [str(f) for f in py_files])
-    modified_count = sum(1 for _, modified in results if modified)
-    print(f"\n{'=' * 50}")
-    print(f"Completed! Modified {modified_count} out of {len(py_files)} files")
-    print("\nDouble-checking for any remaining Japanese characters...")
-    remaining = []
-    for file_path in py_files:
-        content = file_path.read_text(encoding="utf-8")
-        if re.search(r"[\u3040-\u30ff\u4e00-\u9fff]", content):
-            remaining.append(file_path)
-    if remaining:
-        print(f"⚠ Warning: Japanese characters found in {len(remaining)} files:")
-        for f in remaining[:10]:
-            print(f"  - {f}")
-        if len(remaining) > 10:
-            print(f"  ... and {len(remaining) - 10} more")
-    else:
-        print("✓ No Japanese characters found in any file!")
+
+    logger.info("Found %d Python files. Starting translation...", len(py_files))
+
+    modified_count = 0
+    with ProcessPoolExecutor() as executor:
+        future_to_file = {executor.submit(translate_file, f): f for f in py_files}
+        for future in as_completed(future_to_file):
+            if future.result():
+                modified_count += 1
+                logger.info("✓ Updated: %s", future_to_file[future])
+
+    logger.info("\n" + "=" * 50)
+    logger.info("Completed! Modified %d out of %d files", modified_count, len(py_files))
 
 
 if __name__ == "__main__":

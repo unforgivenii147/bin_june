@@ -1,150 +1,188 @@
-#!/data/data/com.termux/files/usr/bin/env python
-
-
+#!/usr/bin/env python3
 """
-Translate non-English lines in files to English in-place using parallel processing.
-Requires: googletrans==4.0.0rc1 or deep-translator
+Translate non-English lines (focused on Chinese) to English in-place.
+Optimized for Python 3.12.
 """
 
 import argparse
+import logging
 import multiprocessing as mp
 import re
 import sys
 from pathlib import Path
-from typing import List, Tuple
+from typing import Final
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+# Setup logging
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+logger = logging.getLogger(__name__)
 
+# Try to import translators
 try:
     from googletrans import Translator
 
+    HAS_GOOGLETRANS = True
 except ImportError:
-    print("Please install googletrans: pip install googletrans==4.0.0rc1")
+    HAS_GOOGLETRANS = False
+
+try:
+    from deep_translator import GoogleTranslator
+
+    HAS_DEEP_TRANSLATOR = True
+except ImportError:
+    HAS_DEEP_TRANSLATOR = False
+
+if not (HAS_GOOGLETRANS or HAS_DEEP_TRANSLATOR):
+    logger.error("Please install either googletrans (4.0.0rc1) or deep-translator.")
     sys.exit(1)
 
+# Configuration
+SKIP_DIRS: Final[frozenset[str]] = frozenset({
+    "lazy",
+    ".git",
+    "__pycache__",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".pytest_cache",
+})
 
-def contains_chinese(text: str) -> bool:
-    chinese_pattern = re.compile(r"[一-鿿㐀-䶿\u20000-⩭F⩰0-⭳F\u2b740-⮁F⮂0-⳪F豈-\ufaff⾀0-⾡F]")
-    return bool(chinese_pattern.search(text))
+# Comprehensive Chinese character regex
+CHINESE_PATTERN: Final[re.Pattern] = re.compile(
+    r"[\u4e00-\u9fff\u3400-\u4dbf\u20000-\u2a6df\u2a700-\u2b73f\u2b740-\u2b81f\u2b820-\u2ceaf\uf900-\ufaff]"
+)
 
 
 def is_chinese_text(text: str, threshold: float = 0.3) -> bool:
-    text = text.strip()
-    if not text:
+    """Checks if text contains a significant portion of Chinese characters."""
+    clean_text = "".join(text.split())
+    if not clean_text:
         return False
-    total_chars = len([c for c in text if not c.isspace()])
-    if total_chars == 0:
+
+    chinese_chars = len(CHINESE_PATTERN.findall(clean_text))
+    return (chinese_chars / len(clean_text)) >= threshold
+
+
+def is_non_english(text: str) -> bool:
+    """Heuristic to determine if a line needs translation."""
+    if not text.strip():
         return False
-    chinese_chars = len(re.findall(r"[一-鿿㐀-䶿\u20000-⩭F⩰0-⭳F\u2b740-⮁F⮂0-⳪F豈-\ufaff⾀0-⾡F]", text))
-    return chinese_chars / total_chars >= threshold
+    return is_chinese_text(text)
 
 
-def is_english(text: str) -> bool:
-    return not is_chinese_text(text)
+class UniversalTranslator:
+    """Wrapper for available translation libraries."""
 
-
-def translate_line(line: str, translator: Translator) -> str:
-    if not line.strip() or is_english(line):
-        return line
-    try:
-        leading_ws = line[: len(line) - len(line.lstrip())]
-        trailing_ws = line[len(line.rstrip()) :]
-        stripped_line = line.strip()
-        translated = translator.translate(stripped_line, dest="en").text
-        return leading_ws + translated + trailing_ws
-    except Exception as e:
-        print(f"Translation error: {e}", file=sys.stderr)
-        return line
-
-
-def process_lines_batch(lines_with_indices: List[Tuple[int, str]], translator: Translator) -> List[Tuple[int, str]]:
-    results = []
-    for idx, line in lines_with_indices:
-        if line.strip() and (not is_english(line)):
-            translated_line = translate_line(line, translator)
-            results.append((idx, translated_line))
+    def __init__(self):
+        if HAS_DEEP_TRANSLATOR:
+            self.translator = GoogleTranslator(source="auto", target="en")
+            self.mode = "deep"
         else:
-            results.append((idx, line))
-    return results
+            self.translator = Translator()
+            self.mode = "google"
+
+    def translate(self, text: str) -> str:
+        if not text.strip():
+            return text
+        try:
+            if self.mode == "deep":
+                return self.translator.translate(text)
+            else:
+                return self.translator.translate(text, dest="en").text
+        except Exception as e:
+            logger.warning("Translation error: %s", e)
+            return text
 
 
-def process_file(file_path: Path, translator: Translator, batch_size: int = 10) -> None:
-    print(f"Processing: {file_path}")
+def process_file(file_path: Path, batch_size: int = 10) -> None:
+    """Translates non-English lines in a file in-place."""
+    logger.info("Processing: %s", file_path)
     try:
-        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
-            lines = f.readlines()
-        needs_translation = False
-        for line in lines:
-            if line.strip() and (not is_english(line)):
-                needs_translation = True
-                break
-        if not needs_translation:
-            print(f"  No non-English lines found, skipping.")
+        source = file_path.read_text(encoding="utf-8", errors="ignore")
+        lines = source.splitlines(keepends=True)
+
+        target_indices = [i for i, line in enumerate(lines) if is_non_english(line)]
+
+        if not target_indices:
+            logger.info("  No non-English (Chinese) lines found, skipping.")
             return
-        translated_lines = lines.copy()
-        non_english_indices = [(i, line) for i, line in enumerate(lines) if line.strip() and (not is_english(line))]
-        for i, (idx, line) in enumerate(non_english_indices):
-            translated_line = translate_line(line, translator)
-            translated_lines[idx] = translated_line
-            if (i + 1) % 10 == 0:
-                print(f"  Progress: {i + 1}/{len(non_english_indices)} lines translated")
-        with open(file_path, "w", encoding="utf-8", errors="ignore") as f:
-            f.writelines(translated_lines)
-        print(f"  ✓ Completed: {len(non_english_indices)} lines translated")
+
+        translator = UniversalTranslator()
+        translated_count = 0
+
+        for i, idx in enumerate(target_indices):
+            line = lines[idx]
+            leading_ws = line[: len(line) - len(line.lstrip())]
+            trailing_ws = line[len(line.rstrip()) :]
+            stripped_line = line.strip()
+
+            translated = translator.translate(stripped_line)
+            lines[idx] = f"{leading_ws}{translated}{trailing_ws}"
+            translated_count += 1
+
+            if (i + 1) % batch_size == 0:
+                logger.info("  Progress: %d/%d lines translated", i + 1, len(target_indices))
+
+        file_path.write_text("".join(lines), encoding="utf-8", errors="ignore")
+        logger.info("  \u2713 Completed: %d lines translated", translated_count)
+
     except Exception as e:
-        print(f"  ✗ Error processing {file_path}: {e}", file=sys.stderr)
+        logger.error("  \u2717 Error processing %s: %s", file_path, e)
 
 
-def worker(args: Tuple[Path, int]) -> None:
-    file_path, batch_size = args
-    translator = Translator()
-    process_file(file_path, translator, batch_size)
+def worker(args: tuple[Path, int]) -> None:
+    """Worker function for pool mapping."""
+    process_file(*args)
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Translate non-English lines in files to English in-place")
-    parser.add_argument("files", nargs="+", type=str, help="Files or directories to process")
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Translate non-English (Chinese) lines in-place.")
+    parser.add_argument("files", nargs="+", help="Files or directories to process")
     parser.add_argument(
         "--extensions",
         nargs="+",
         default=[".txt", ".md", ".py", ".js", ".html", ".css", ".json", ".xml", ".csv"],
-        help="File extensions to process (default: .txt .md .py .js .html .css .json .xml .csv)",
+        help="File extensions to process",
     )
     parser.add_argument(
         "--workers", type=int, default=mp.cpu_count(), help=f"Number of parallel workers (default: {mp.cpu_count()})"
     )
-    parser.add_argument("--batch-size", type=int, default=10, help="Batch size for translation (default: 10)")
-    parser.add_argument("--exclude", nargs="+", default=[], help="Files or directories to exclude")
+    parser.add_argument("--batch-size", type=int, default=10, help="Batch size for progress logging")
+    parser.add_argument("--exclude", nargs="+", default=[], help="Paths to exclude")
+
     args = parser.parse_args()
-    files_to_process = []
-    exclude_paths = [Path(p).resolve() for p in args.exclude]
-    for file_pattern in args.files:
-        path = Path(file_pattern)
+    exclude_paths = {Path(p).resolve() for p in args.exclude}
+
+    files_to_process: list[Path] = []
+    for entry in args.files:
+        path = Path(entry)
         if path.is_file():
             if path.resolve() not in exclude_paths:
-                if path.suffix in args.extensions or not args.extensions:
-                    files_to_process.append(path)
+                files_to_process.append(path)
         elif path.is_dir():
             for ext in args.extensions:
                 for file_path in path.rglob(f"*{ext}"):
-                    if file_path.is_file() and file_path.resolve() not in exclude_paths:
-                        if not any((part.startswith(".") for part in file_path.parts)):
-                            files_to_process.append(file_path)
-        else:
-            print(f"Warning: {path} does not exist", file=sys.stderr)
+                    if (
+                        file_path.is_file()
+                        and file_path.resolve() not in exclude_paths
+                        and not any(part.startswith(".") for part in file_path.parts)
+                    ):
+                        files_to_process.append(file_path)
+
     if not files_to_process:
-        print("No files to process.")
+        logger.info("No files to process.")
         return
-    print(f"Found {len(files_to_process)} files to process")
-    print(f"Using {args.workers} workers\n")
-    worker_args = [(file_path, args.batch_size) for file_path in files_to_process]
+
+    logger.info("Found %d files. Using %d workers...", len(files_to_process), args.workers)
+
+    tasks = [(fp, args.batch_size) for fp in files_to_process]
+
     if args.workers == 1:
-        for w_args in worker_args:
-            worker(w_args)
+        for t in tasks:
+            worker(t)
     else:
         with mp.Pool(processes=args.workers) as pool:
-            pool.map(worker, worker_args)
-    print("\n✓ All translations completed!")
+            pool.map(worker, tasks)
+
+    logger.info("\n\u2713 All translations completed!")
 
 
 if __name__ == "__main__":

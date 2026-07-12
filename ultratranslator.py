@@ -1,70 +1,70 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/usr/bin/env python3
+"""
+Optimized version of ultratranslator.py for Python 3.12.
+Translates Python files and other text files while preserving structure.
+"""
+
 import ast
 import io
+import logging
 import re
 import shutil
 import sys
 import tempfile
 import tokenize
 from collections.abc import Callable, Iterable
-from multiprocessing import get_context
-from os import scandir as os_scandir
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from os import scandir
 from pathlib import Path
-from typing import Any, ParamSpec, TypeVar
+from typing import Any, Final
 
 from deep_translator import GoogleTranslator
 from binaryornot import is_binary
 
-CHUNK_SIZE = 4990
-SKIP_DIRS = [".git", "__pycache__"]
-MAX_WORKERS = 6
+# Constants
+CHUNK_SIZE: Final[int] = 4990
+SKIP_DIRS: Final[frozenset[str]] = frozenset({".git", "__pycache__", ".venv"})
+MAX_WORKERS: Final[int] = 6
+DOC_TH1: Final[str] = '"""'
+DOC_TH2: Final[str] = "'''"
 
-DOC_TH1 = '"""'
-DOC_TH2 = "'''"
-DOCTH = ('"""', "'''")
+# Regex for non-English detection
+NON_ENGLISH_PATTERN: Final[re.Pattern] = re.compile(r"[^\x00-\x7F]")
 
-cwd = Path.cwd()
-non_english_pattern = re.compile(r"[^\x00-\x7F]")
-
-
-def mpf_async(func: Callable[[Any], Any], items: Iterable[Any]):
-    with get_context("spawn").Pool(MAX_WORKERS) as p:
-        async_results = [p.apply_async(func, (item,)) for item in items]
-        results = []
-        for i, async_result in enumerate(async_results):
-            try:
-                results.append(async_result.get(timeout=30))
-            except Exception as e:
-                print(f"Item {i} failed: {e}")
-                results.append(None)
-        return results
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
-def get_nobinary(path: str | Path) -> list[Path]:
-    return [f for f in get_files(path) if not is_binary(f)]
+def is_english(text: str) -> bool:
+    """Checks if the text is primarily English (ASCII)."""
+    return not NON_ENGLISH_PATTERN.search(text)
 
 
-def get_files(path: str | Path, include_hidden: bool = True, ext: list[str] | None = None) -> list[Path]:
-    path = Path(path)
+def get_nobinary(path: Path) -> list[Path]:
+    """Returns a list of non-binary files in the directory."""
+    return [f for f in get_files(path) if not is_binary(str(f))]
+
+
+def get_files(path: Path, include_hidden: bool = False, ext: tuple[str, ...] | None = None) -> list[Path]:
+    """Recursively gets files from a directory, skipping specific folders."""
     if not path.exists():
         raise FileNotFoundError(f"Path does not exist: {path}")
     if not path.is_dir():
         raise NotADirectoryError(f"Path is not a directory: {path}")
 
-    ext = tuple(ext) if ext else None
     files = []
     stack = [path]
 
     while stack:
         current = stack.pop()
         try:
-            with os_scandir(current) as entries:
+            with scandir(current) as entries:
                 for entry in entries:
                     if entry.is_symlink():
                         continue
                     if entry.is_dir(follow_symlinks=False):
                         if entry.name not in SKIP_DIRS:
-                            stack.append(entry)
+                            stack.append(Path(entry.path))
                     elif entry.is_file(follow_symlinks=False):
                         if not include_hidden and entry.name.startswith("."):
                             continue
@@ -76,27 +76,44 @@ def get_files(path: str | Path, include_hidden: bool = True, ext: list[str] | No
     return sorted(files)
 
 
-def translate_text(path) -> str:
-    path = Path(path)
-    return GoogleTranslator(source="auto", target="en").translate_file(path)
+def translate_text(text: str) -> str:
+    """Translates text using Google Translate."""
+    try:
+        translated = GoogleTranslator(source="auto", target="en").translate(text)
+        return translated if translated else text
+    except Exception as e:
+        logger.error(f"Translation error: {e}")
+        return text
+
+
+def translate_file_content(path: Path) -> str:
+    """Translates the entire content of a file."""
+    try:
+        return GoogleTranslator(source="auto", target="en").translate_file(str(path))
+    except Exception as e:
+        logger.error(f"Error translating file {path}: {e}")
+        return path.read_text(encoding="utf-8", errors="ignore")
 
 
 def safe_overwrite(filepath: Path, content: str) -> None:
+    """Atomically overwrites a file with new content."""
     with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False, dir=filepath.parent) as tmp:
         tmp.write(content)
         tmp_path = Path(tmp.name)
     shutil.move(tmp_path, filepath)
 
 
-def translate_python_file(path) -> str:
-    print("  Analyzing Python structure...")
-    path = Path(path)
+def translate_python_file(path: Path) -> str:
+    """Parses a Python file and translates comments and strings while preserving code structure."""
+    logger.info(f"  Analyzing Python structure for {path.name}...")
     source = path.read_text(encoding="utf-8")
+
     try:
-        tree = ast.parse(source)
+        # Check if it's a valid python file
+        ast.parse(source)
     except SyntaxError as e:
-        print(f"  Syntax error: {e}")
-        return source
+        logger.warning(f"  Syntax error in {path.name}: {e}. Translating as plain text.")
+        return translate_file_content(path)
 
     result = []
     translated_count = 0
@@ -104,7 +121,7 @@ def translate_python_file(path) -> str:
     try:
         tokens = list(tokenize.generate_tokens(io.StringIO(source).readline))
     except tokenize.TokenError:
-        return translate_text(source)
+        return translate_file_content(path)
 
     source_lines = source.splitlines(keepends=True)
     prev_end = (1, 0)
@@ -112,6 +129,7 @@ def translate_python_file(path) -> str:
     for token in tokens:
         tok_type, tok_str, start, end, line = token
 
+        # Fill in skipped text (whitespace, etc.)
         if start[0] > prev_end[0]:
             result.extend(source_lines[prev_end[0] : start[0]])
             result.append(line[: start[1]])
@@ -120,28 +138,16 @@ def translate_python_file(path) -> str:
 
         if tok_type == tokenize.COMMENT and not is_english(tok_str):
             comment_text = tok_str[1:].strip()
-            print(f"  Translating comment: {comment_text[:50]}...")
             translated = translate_text(comment_text)
             result.append(f"# {translated}")
             translated_count += 1
-
         elif tok_type == tokenize.STRING:
             stripped = tok_str.strip("'\"")
-            if stripped and not is_english(stripped) and len(stripped) > 10:
-                try:
-                    print(f"  Translating string: {stripped[:50]}...")
-                    translated = translate_text(stripped)
-
-                    if tok_str.startswith((DOC_TH1, DOC_TH2)):
-                        quote_char = tok_str[:3]
-                    else:
-                        quote_char = tok_str[0]
-
-                    result.append(f"{quote_char}{translated}{quote_char}")
-                    translated_count += 1
-                except Exception as e:
-                    print(f"  Error translating string: {e}")
-                    result.append(tok_str)
+            if stripped and not is_english(stripped) and len(stripped) > 5:
+                translated = translate_text(stripped)
+                quote_char = tok_str[:3] if tok_str.startswith((DOC_TH1, DOC_TH2)) else tok_str[0]
+                result.append(f"{quote_char}{translated}{quote_char}")
+                translated_count += 1
             else:
                 result.append(tok_str)
         else:
@@ -149,30 +155,50 @@ def translate_python_file(path) -> str:
 
         prev_end = end
 
-    print(f"  Translated {translated_count} items")
+    logger.info(f"  Translated {translated_count} items in {path.name}")
     return "".join(result)
 
 
-def process_file(path: str | Path) -> None:
-    path = Path(path)
-    print(f"  Processing {path.name}...")
+def process_file(path: Path) -> None:
+    """Processes a single file based on its type."""
+    logger.info(f"  Processing {path.name}...")
     try:
+        original = path.read_text(encoding="utf-8", errors="ignore")
+        if is_english(original):
+            return
+
         if path.suffix == ".py":
             translated = translate_python_file(path)
         else:
-            translated = translate_text(path)
+            translated = translate_file_content(path)
 
         if translated.strip() != original.strip():
             safe_overwrite(path, translated)
-            print(f"  ✓ Updated {path.name}")
+            logger.info(f"  ✓ Updated {path.name}")
     except Exception as e:
-        print(f"  Failed to process {path}: {e}")
+        logger.error(f"  Failed to process {path}: {e}")
+
+
+def main() -> None:
+    """Main entry point using ProcessPoolExecutor for parallel processing."""
+    args = sys.argv[1:]
+    files = [Path(p) for p in args] if args else get_nobinary(Path.cwd())
+
+    if not files:
+        logger.info("No files found to process.")
+        return
+
+    logger.info(f"Found {len(files)} files to process.")
+
+    with ProcessPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        futures = {executor.submit(process_file, f): f for f in files}
+        for future in as_completed(futures):
+            f = futures[future]
+            try:
+                future.result()
+            except Exception as e:
+                logger.error(f"File {f} generated an exception: {e}")
 
 
 if __name__ == "__main__":
-    args = sys.argv[1:]
-    files = [Path(p) for p in args] if args else get_nobinary(cwd)
-    if len(files) == 1:
-        process_file(files[0])
-        sys.exit(0)
-    mpf_async(process_file, files)
+    main()

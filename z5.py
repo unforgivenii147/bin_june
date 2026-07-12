@@ -1,13 +1,6 @@
-#!/data/data/com.termux/files/usr/bin/env python
-
-
+#!/usr/bin/env python3
 """
 Zstandard Recursive File Compressor/Decompressor
-Compresses and decompresses files using Zstandard with parallel processing and streaming.
-Removes original files after successful compression by default.
-Can optionally tar subdirectories before Zstandard compression for better ratios.
-In decompression mode, automatically extracts .tar archives from .tar.zst files
-(use --no-untar to keep the .tar file).
 """
 
 import argparse
@@ -17,29 +10,27 @@ import sys
 import tarfile
 import tempfile
 import time
+from collections.abc import Iterable, Sequence
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional, Set, Tuple
+from typing import Final, Optional, Self
 
 import zstandard as zstd
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+# Configuration and Constants
+SKIP_DIRS: Final[frozenset[str]] = frozenset({
+    "lazy",
+    ".git",
+    ".svn",
+    ".hg",
+    "__pycache__",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".pytest_cache",
+})
 
-try:
-    from rich import box
-    from rich.console import Console
-    from rich.panel import Panel
-    from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
-    from rich.table import Table
-    from rich.text import Text
-
-    RICH_AVAILABLE = True
-except ImportError:
-    RICH_AVAILABLE = False
-    print("💡 Tip: Install 'rich' for prettier output: pip install rich")
-
-EXCLUDED_EXTENSIONS = {
+EXCLUDED_EXTENSIONS: Final[set[str]] = {
     ".xz",
     ".zst",
     ".zstd",
@@ -118,10 +109,24 @@ EXCLUDED_EXTENSIONS = {
     ".qcow2",
 }
 
+try:
+    from rich import box
+    from rich.console import Console
+    from rich.panel import Panel
+    from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
+    from rich.table import Table
+    from rich.text import Text
 
-@dataclass
-class CompressionResult:
-    file_path: Path
+    RICH_AVAILABLE: Final[bool] = True
+except ImportError:
+    RICH_AVAILABLE: Final[bool] = False
+
+
+@dataclass(slots=True)
+class OperationResult:
+    """Stores the outcome of a compression or decompression operation."""
+
+    path: Path
     original_size: int
     processed_size: int
     success: bool
@@ -132,917 +137,267 @@ class CompressionResult:
     was_tarred: bool = False
     was_untarred: bool = False
 
+    @property
+    def ratio(self) -> float:
+        """Calculate compression/expansion ratio."""
+        if self.original_size == 0:
+            return 0.0
+        if self.operation == "compress":
+            return (1 - self.processed_size / self.original_size) * 100
+        return (self.processed_size / self.original_size - 1) * 100
+
 
 def format_size(size_bytes: int) -> str:
+    """Human-readable size formatting."""
+    val = float(size_bytes)
     for unit in ["B", "KB", "MB", "GB", "TB"]:
-        if size_bytes < 1024.0:
-            return f"{size_bytes:.2f} {unit}"
-        size_bytes /= 1024.0
-    return f"{size_bytes:.2f} PB"
+        if val < 1024.0:
+            return f"{val:.2f} {unit}"
+        val /= 1024.0
+    return f"{val:.2f} PB"
 
 
-def tar_directory(directory: Path, output_path: Path, delete_original: bool = False) -> Tuple[int, bool]:
-    try:
-        original_size = sum((f.stat().st_size for f in directory.rglob("*") if f.is_file()))
-        with tarfile.open(output_path, "w") as tar:
-            tar.add(directory, arcname=directory.name)
-        tar_size = output_path.stat().st_size
-        if delete_original and output_path.exists():
-            shutil.rmtree(directory)
-        return (tar_size, True)
-    except Exception as e:
-        if output_path.exists():
-            output_path.unlink()
-        raise e
-
-
-def compress_file_streaming(
+def compress_file(
     input_path: Path,
     output_path: Path,
-    compression_level: int = 9,
+    level: int = 19,
     threads: int = 4,
     chunk_size: int = 1024 * 1024,
     keep_original: bool = False,
     was_tarred: bool = False,
-) -> CompressionResult:
-    start_time = time.time()
+) -> OperationResult:
+    """Compress a single file using streaming Zstandard."""
+    start_time = time.perf_counter()
     try:
-        original_size = input_path.stat().st_size
-        if original_size == 0:
-            return CompressionResult(
-                file_path=input_path,
-                original_size=0,
-                processed_size=0,
-                success=False,
-                error="Empty file",
-                duration=time.time() - start_time,
-                operation="compress",
-                was_tarred=was_tarred,
-            )
-        cctx = zstd.ZstdCompressor(level=compression_level, threads=threads)
-        compressed_size = 0
-        with open(input_path, "rb") as f_in:
-            with open(output_path, "wb") as f_out:
-                with cctx.stream_writer(f_out) as compressor:
-                    while True:
-                        chunk = f_in.read(chunk_size)
-                        if not chunk:
-                            break
-                        compressor.write(chunk)
-                        compressed_size = f_out.tell()
-                compressed_size = output_path.stat().st_size
-        original_deleted = False
-        if not keep_original and output_path.exists():
+        orig_size = input_path.stat().st_size
+        if orig_size == 0:
+            return OperationResult(input_path, 0, 0, False, "Empty file")
+
+        cctx = zstd.ZstdCompressor(level=level, threads=threads)
+        with input_path.open("rb") as f_in, output_path.open("wb") as f_out:
+            with cctx.stream_writer(f_out) as compressor:
+                while chunk := f_in.read(chunk_size):
+                    compressor.write(chunk)
+
+        proc_size = output_path.stat().st_size
+        deleted = False
+        if not keep_original:
             input_path.unlink()
-            original_deleted = True
-        return CompressionResult(
-            file_path=input_path,
-            original_size=original_size,
-            processed_size=compressed_size,
+            deleted = True
+
+        return OperationResult(
+            path=input_path,
+            original_size=orig_size,
+            processed_size=proc_size,
             success=True,
-            duration=time.time() - start_time,
-            original_deleted=original_deleted,
+            duration=time.perf_counter() - start_time,
+            original_deleted=deleted,
             operation="compress",
             was_tarred=was_tarred,
         )
     except Exception as e:
         if output_path.exists():
             output_path.unlink()
-        return CompressionResult(
-            file_path=input_path,
-            original_size=input_path.stat().st_size if input_path.exists() else 0,
-            processed_size=0,
-            success=False,
-            error=str(e),
-            duration=time.time() - start_time,
-            operation="compress",
-            was_tarred=was_tarred,
-        )
+        return OperationResult(input_path, 0, 0, False, str(e))
 
 
-def decompress_file_streaming(
+def decompress_file(
     input_path: Path,
     output_path: Path,
     chunk_size: int = 1024 * 1024,
     keep_original: bool = False,
     auto_untar: bool = True,
-) -> CompressionResult:
-    start_time = time.time()
+) -> OperationResult:
+    """Decompress a single file using streaming Zstandard."""
+    start_time = time.perf_counter()
     try:
-        original_size = input_path.stat().st_size
-        if original_size == 0:
-            return CompressionResult(
-                file_path=input_path,
-                original_size=0,
-                processed_size=0,
-                success=False,
-                error="Empty file",
-                duration=time.time() - start_time,
-                operation="decompress",
-            )
+        orig_size = input_path.stat().st_size
         dctx = zstd.ZstdDecompressor()
-        decompressed_size = 0
-        with open(input_path, "rb") as f_in:
-            with open(output_path, "wb") as f_out:
-                with dctx.stream_reader(f_in) as decompressor:
-                    while True:
-                        chunk = decompressor.read(chunk_size)
-                        if not chunk:
-                            break
-                        f_out.write(chunk)
-                        decompressed_size += len(chunk)
+
+        with input_path.open("rb") as f_in, output_path.open("wb") as f_out:
+            with dctx.stream_reader(f_in) as decompressor:
+                while chunk := decompressor.read(chunk_size):
+                    f_out.write(chunk)
+
+        proc_size = output_path.stat().st_size
         was_untarred = False
+
         if auto_untar and output_path.suffix == ".tar":
             try:
-                extract_dir = output_path.parent
-                untar_success = untar_file(output_path, extract_dir, delete_tar=True)
-                if not untar_success:
-                    raise RuntimeError("Untar extraction failed")
+                with tarfile.open(output_path, "r") as tar:
+                    tar.extractall(output_path.parent, filter="data")
+                output_path.unlink()
                 was_untarred = True
-            except Exception as untar_err:
-                if output_path.exists():
-                    output_path.unlink(missing_ok=True)
-                raise RuntimeError(f"Failed to extract tar archive: {untar_err}")
-        original_deleted = False
-        if not keep_original and output_path.exists():
+            except Exception as e:
+                raise RuntimeError(f"Tar extraction failed: {e}")
+
+        deleted = False
+        if not keep_original:
             input_path.unlink()
-            original_deleted = True
-        elif was_untarred:
-            pass
-        return CompressionResult(
-            file_path=input_path,
-            original_size=original_size,
-            processed_size=decompressed_size if not was_untarred else decompressed_size,
+            deleted = True
+
+        return OperationResult(
+            path=input_path,
+            original_size=orig_size,
+            processed_size=proc_size,
             success=True,
-            duration=time.time() - start_time,
-            original_deleted=original_deleted,
+            duration=time.perf_counter() - start_time,
+            original_deleted=deleted,
             operation="decompress",
             was_untarred=was_untarred,
         )
     except Exception as e:
         if output_path.exists():
             output_path.unlink()
-        return CompressionResult(
-            file_path=input_path,
-            original_size=input_path.stat().st_size if input_path.exists() else 0,
-            processed_size=0,
-            success=False,
-            error=str(e),
-            duration=time.time() - start_time,
-            operation="decompress",
-        )
+        return OperationResult(input_path, 0, 0, False, str(e), operation="decompress")
 
 
-def untar_file(tar_path: Path, extract_dir: Path, delete_tar: bool = False) -> bool:
-    try:
-        with tarfile.open(tar_path, "r") as tar:
-            tar.extractall(extract_dir)
-        if delete_tar:
-            tar_path.unlink()
-        return True
-    except Exception as e:
-        print(f"Error extracting tar {tar_path}: {e}")
-        return False
+def get_files(
+    root: Path,
+    mode: str,
+    exclude_ext: set[str],
+    exclude_patterns: list[str],
+    ext_filter: Optional[list[str]] = None,
+    recursive: bool = True,
+) -> list[Path]:
+    """Gather files to process based on criteria."""
+    found = []
+    walker = root.rglob("*") if recursive else root.iterdir()
 
-
-def process_subdirs_with_tar(
-    directory: Path,
-    compression_level: int = 9,
-    threads: int = 4,
-    workers: int = 4,
-    keep_original: bool = False,
-    exclude_patterns: List[str] = None,
-) -> List[CompressionResult]:
-    if exclude_patterns is None:
-        exclude_patterns = []
-    results = []
-    subdirs = [d for d in directory.iterdir() if d.is_dir() and (not d.is_symlink())]
-    subdirs = [d for d in subdirs if not any((pattern in str(d) for pattern in exclude_patterns))]
-    excluded_dirs = {".git", ".svn", ".hg", "__pycache__", "node_modules", ".venv", "venv", ".env"}
-    subdirs = [d for d in subdirs if d.name not in excluded_dirs]
-    if not subdirs:
-        print("📁 No subdirectories found to tar")
-        return results
-    print(f"📁 Found {len(subdirs)} subdirectories to tar first")
-    tar_files = []
-    tar_errors = []
-    print("🗜️  Step 1: Creating tar archives of subdirectories...")
-    with tempfile.TemporaryDirectory() as temp_dir:
-        temp_path = Path(temp_dir)
-        for i, subdir in enumerate(subdirs, 1):
-            try:
-                tar_name = f"{subdir.name}.tar"
-                tar_path = subdir.parent / tar_name
-                if tar_path.exists():
-                    print(f"  ⚠️  [{i}/{len(subdirs)}] {tar_name} already exists, skipping tar creation")
-                    tar_files.append(tar_path)
-                    continue
-                print(f"  📦 [{i}/{len(subdirs)}] Tarring {subdir.name}...")
-                dir_size = sum((f.stat().st_size for f in subdir.rglob("*") if f.is_file()))
-                tar_size, success = tar_directory(subdir, tar_path, delete_original=not keep_original)
-                if success:
-                    tar_files.append(tar_path)
-                    if not keep_original:
-                        print(f"    ✅ Tarred {format_size(dir_size)} → {format_size(tar_size)} (directory deleted)")
-                    else:
-                        print(f"    ✅ Tarred {format_size(dir_size)} → {format_size(tar_size)} (directory kept)")
-                else:
-                    tar_errors.append((subdir, "Failed to create tar"))
-            except Exception as e:
-                print(f"  ❌ [{i}/{len(subdirs)}] Error tarring {subdir.name}: {e}")
-                tar_errors.append((subdir, str(e)))
-        if tar_files:
-            print(
-                f"\n🗜️  Step 2: Compressing {len(tar_files)} tar files with Zstandard (level: {compression_level}, threads: {threads})..."
-            )
-            if workers > 1 and len(tar_files) > 1:
-                with ProcessPoolExecutor(max_workers=workers) as executor:
-                    futures = {}
-                    for tar_path in tar_files:
-                        output_path = tar_path.with_suffix(".tar.zst")
-                        future = executor.submit(
-                            compress_file_streaming,
-                            tar_path,
-                            output_path,
-                            compression_level,
-                            threads,
-                            1024 * 1024,
-                            not keep_original,
-                            was_tarred=True,
-                        )
-                        futures[future] = tar_path
-                    for i, future in enumerate(as_completed(futures), 1):
-                        result = future.result()
-                        results.append(result)
-                        if result.success:
-                            print(f"  ✅ [{i}/{len(tar_files)}] {result.file_path.name} → {result.file_path.name}.zst")
-                            print(
-                                f"     {format_size(result.original_size)} → {format_size(result.processed_size)} ({(1 - result.processed_size / result.original_size) * 100:.1f}% compression)"
-                            )
-                        else:
-                            print(f"  ❌ [{i}/{len(tar_files)}] {result.file_path.name}: {result.error}")
-            else:
-                for i, tar_path in enumerate(tar_files, 1):
-                    output_path = tar_path.with_suffix(".tar.zst")
-                    result = compress_file_streaming(
-                        tar_path,
-                        output_path,
-                        compression_level,
-                        threads,
-                        1024 * 1024,
-                        not keep_original,
-                        was_tarred=True,
-                    )
-                    results.append(result)
-                    if result.success:
-                        print(f"  ✅ [{i}/{len(tar_files)}] {tar_path.name} → {tar_path.name}.zst")
-                        print(
-                            f"     {format_size(result.original_size)} → {format_size(result.processed_size)} ({(1 - result.processed_size / result.original_size) * 100:.1f}% compression)"
-                        )
-                    else:
-                        print(f"  ❌ [{i}/{len(tar_files)}] {tar_path.name}: {result.error}")
-        if tar_errors:
-            print(f"\n❌ Failed to tar {len(tar_errors)} directories:")
-            for subdir, error in tar_errors:
-                print(f"  • {subdir.name}: {error}")
-    return results
-
-
-def should_compress_file(file_path: Path, exclude_extensions: Set[str], exclude_patterns: List[str]) -> bool:
-    if file_path.is_symlink():
-        return False
-    if not file_path.is_file():
-        return False
-    if file_path.suffix.lower() in exclude_extensions:
-        return False
-    if file_path.suffix == ".zst":
-        return False
-    if file_path.suffix == ".tar":
-        return False
-    if exclude_patterns:
-        path_str = str(file_path)
-        if any((pattern in path_str for pattern in exclude_patterns)):
-            return False
-    return True
-
-
-def find_files_to_compress(
-    directory: Path,
-    exclude_extensions: Set[str] = None,
-    exclude_patterns: List[str] = None,
-    extensions_filter: List[str] = None,
-    skip_subdirs: bool = False,
-) -> List[Path]:
-    if exclude_extensions is None:
-        exclude_extensions = EXCLUDED_EXTENSIONS
-    if exclude_patterns is None:
-        exclude_patterns = []
-    files = []
-    if extensions_filter:
-        for ext in extensions_filter:
-            ext = ext if ext.startswith(".") else f".{ext}"
-            pattern = f"*{ext}"
-            for file_path in directory.rglob(pattern):
-                if should_compress_file(file_path, exclude_extensions, exclude_patterns):
-                    if skip_subdirs and file_path.parent != directory:
-                        continue
-                    files.append(file_path)
-    else:
-        for file_path in directory.rglob("*"):
-            if should_compress_file(file_path, exclude_extensions, exclude_patterns):
-                if skip_subdirs and file_path.parent != directory:
-                    continue
-                files.append(file_path)
-    return sorted(set(files))
-
-
-def find_files_to_decompress(directory: Path, exclude_patterns: List[str] = None) -> List[Path]:
-    if exclude_patterns is None:
-        exclude_patterns = []
-    files = []
-    for file_path in directory.rglob("*.zst"):
-        if file_path.is_symlink():
+    for p in walker:
+        if not p.is_file() or p.is_symlink():
             continue
-        if not file_path.is_file():
+        if any(part in SKIP_DIRS for part in p.parts):
             continue
-        if exclude_patterns:
-            path_str = str(file_path)
-            if any((pattern in path_str for pattern in exclude_patterns)):
+        if exclude_patterns and any(pat in str(p) for pat in exclude_patterns):
+            continue
+
+        if mode == "compress":
+            if p.suffix.lower() in exclude_ext:
                 continue
-        files.append(file_path)
-    return sorted(set(files))
+            if ext_filter:
+                normalized_filter = [f if f.startswith(".") else f".{f}" for f in ext_filter]
+                if p.suffix.lower() not in normalized_filter:
+                    continue
+            found.append(p)
+        else:  # decompress
+            if p.suffix.lower() == ".zst":
+                found.append(p)
+
+    return sorted(found)
 
 
-def get_file_type_stats(files: List[Path]) -> dict:
-    type_stats = {}
-    for file_path in files:
-        ext = file_path.suffix.lower() or "[no extension]"
-        type_stats[ext] = type_stats.get(ext, 0) + 1
-    return dict(sorted(type_stats.items(), key=lambda x: x[1], reverse=True))
+def print_summary(results: list[OperationResult], root: Path, operation: str):
+    """Print a detailed summary of the operations."""
+    successes = [r for r in results if r.success]
+    failures = [r for r in results if not r.success]
 
+    total_orig = sum(r.original_size for r in successes)
+    total_proc = sum(r.processed_size for r in successes)
+    total_time = sum(r.duration for r in results)
 
-def print_results_rich(results: List[CompressionResult], directory: Path, operation: str):
-    console = Console()
-    successful = [r for r in results if r.success]
-    failed = [r for r in results if not r.success]
-    total_original = sum((r.original_size for r in successful))
-    total_processed = sum((r.processed_size for r in successful))
-    total_duration = sum((r.duration for r in results))
-    deleted_count = sum((1 for r in successful if r.original_deleted))
-    tarred_count = sum((1 for r in successful if r.was_tarred))
-    untarred_count = sum((1 for r in successful if r.was_untarred))
-    if operation == "compress":
-        space_saved = total_original - total_processed
-        avg_ratio = (
-            sum(((1 - r.processed_size / r.original_size) * 100 for r in successful)) / len(successful)
-            if successful
-            else 0
-        )
-        operation_emoji = "🗜️"
-        operation_name = "Compression"
-        size_label = "Compressed"
-    else:
-        space_saved = total_processed - total_original
-        avg_ratio = (
-            sum(((r.processed_size / r.original_size - 1) * 100 for r in successful)) / len(successful)
-            if successful
-            else 0
-        )
-        operation_emoji = "📂"
-        operation_name = "Decompression"
-        size_label = "Decompressed"
-    table = Table(
-        title=f"{operation_emoji} Zstandard {operation_name} Results",
-        box=box.ROUNDED,
-        title_style="bold cyan",
-        header_style="bold white",
-    )
-    table.add_column("File", style="cyan", no_wrap=False)
-    table.add_column("Original", justify="right", style="yellow")
-    table.add_column(size_label, justify="right", style="green")
-    table.add_column("Ratio", justify="right", style="magenta")
-    table.add_column("Time", justify="right", style="dim")
-    table.add_column("Type", justify="center")
-    table.add_column("Status", justify="center")
-    for result in sorted(successful, key=lambda x: x.original_size, reverse=True)[:20]:
-        if operation == "compress":
-            ratio = (1 - result.processed_size / result.original_size) * 100 if result.original_size > 0 else 0
-        else:
-            ratio = (result.processed_size / result.original_size - 1) * 100 if result.original_size > 0 else 0
-        status = "🗑️ ✅" if result.original_deleted else "✅"
-        if result.was_untarred:
-            file_type = "📦 untar"
-        elif result.was_tarred:
-            file_type = "📦 tar"
-        else:
-            file_type = "📄 file"
-        try:
-            file_display = str(result.file_path.relative_to(directory))
-        except ValueError:
-            file_display = str(result.file_path)
-        table.add_row(
-            file_display,
-            format_size(result.original_size),
-            format_size(result.processed_size),
-            f"{ratio:.1f}%",
-            f"{result.duration:.2f}s",
-            file_type,
-            status,
-        )
-    if len(successful) > 20:
-        table.add_row(f"... and {len(successful) - 20} more files", "", "", "", "", "", "")
-    console.print(table)
-    if failed:
-        fail_table = Table(title="❌ Failed Files", box=box.ROUNDED, title_style="bold red")
-        fail_table.add_column("File", style="red")
-        fail_table.add_column("Error", style="dim")
-        for result in failed[:10]:
+    if RICH_AVAILABLE:
+        console = Console()
+        table = Table(title=f"Zstandard {operation.capitalize()} Results", box=box.ROUNDED)
+        table.add_column("File", style="cyan")
+        table.add_column("Original", justify="right")
+        table.add_column("Processed", justify="right")
+        table.add_column("Ratio", justify="right")
+        table.add_column("Status", justify="center")
+
+        for r in sorted(successes, key=lambda x: x.original_size, reverse=True)[:15]:
             try:
-                file_display = str(result.file_path.relative_to(directory))
+                rel_path = r.path.relative_to(root)
             except ValueError:
-                file_display = str(result.file_path)
-            fail_table.add_row(file_display, result.error or "Unknown error")
-        if len(failed) > 10:
-            fail_table.add_row(f"... and {len(failed) - 10} more failures", "")
-        console.print(fail_table)
-    summary_text = Text()
-    summary_text.append(f"📊 {operation_name} Summary\n\n", style="bold cyan")
-    summary_text.append(f"📁 Directory: ", style="dim")
-    summary_text.append(f"{directory}\n", style="bold white")
-    summary_text.append(f"Total files processed: ", style="dim")
-    summary_text.append(f"{len(results)}\n", style="bold white")
-    summary_text.append(f"✅ Successful: ", style="dim")
-    summary_text.append(f"{len(successful)}\n", style="bold green")
-    summary_text.append(f"❌ Failed: ", style="dim")
-    summary_text.append(f"{len(failed)}\n", style="bold red")
-    if tarred_count > 0:
-        summary_text.append(f"📦 From tarred directories: ", style="dim")
-        summary_text.append(f"{tarred_count}\n", style="bold yellow")
-    if untarred_count > 0:
-        summary_text.append(f"📂 Untarred archives: ", style="dim")
-        summary_text.append(f"{untarred_count}\n", style="bold green")
-    summary_text.append(f"🗑️  Originals deleted: ", style="dim")
-    summary_text.append(f"{deleted_count}\n", style="bold yellow")
-    summary_text.append(f"\n💾 Total original size: ", style="dim")
-    summary_text.append(f"{format_size(total_original)}\n", style="bold yellow")
-    summary_text.append(f"{('🗜️' if operation == 'compress' else '📂')} Total {size_label.lower()} size: ", style="dim")
-    summary_text.append(f"{format_size(total_processed)}\n", style="bold green")
-    if operation == "compress":
-        summary_text.append(f"📈 Average compression: ", style="dim")
-        summary_text.append(f"{avg_ratio:.1f}%\n", style="bold magenta")
-        summary_text.append(f"🎉 Disk space freed: ", style="dim")
-        summary_text.append(f"{format_size(space_saved)} ", style="bold cyan")
-    else:
-        summary_text.append(f"📈 Average expansion: ", style="dim")
-        summary_text.append(f"{avg_ratio:.1f}%\n", style="bold magenta")
-        summary_text.append(f"💾 Disk space used: ", style="dim")
-        summary_text.append(f"{format_size(space_saved)} ", style="bold cyan")
-    if total_original > 0 and operation == "compress":
-        summary_text.append(f"({space_saved / total_original * 100:.1f}%)\n", style="bold cyan")
-    summary_text.append(f"⏱️  Total time: ", style="dim")
-    summary_text.append(f"{total_duration:.2f}s ", style="bold white")
-    if results:
-        summary_text.append(f"(avg {total_duration / len(results):.2f}s per file)", style="dim")
-    console.print(Panel(summary_text, border_style="cyan"))
+                rel_path = r.path.name
+            table.add_row(
+                str(rel_path),
+                format_size(r.original_size),
+                format_size(r.processed_size),
+                f"{r.ratio:.1f}%",
+                "✅" + ("🗑️" if r.original_deleted else ""),
+            )
 
+        console.print(table)
 
-def print_results_basic(results: List[CompressionResult], directory: Path, operation: str):
-    successful = [r for r in results if r.success]
-    failed = [r for r in results if not r.success]
-    total_original = sum((r.original_size for r in successful))
-    total_processed = sum((r.processed_size for r in successful))
-    total_duration = sum((r.duration for r in results))
-    deleted_count = sum((1 for r in successful if r.original_deleted))
-    tarred_count = sum((1 for r in successful if r.was_tarred))
-    untarred_count = sum((1 for r in successful if r.was_untarred))
-    if operation == "compress":
-        space_saved = total_original - total_processed
-        avg_ratio = (
-            sum(((1 - r.processed_size / r.original_size) * 100 for r in successful)) / len(successful)
-            if successful
-            else 0
+        summary = Text.assemble(
+            ("\nSummary:\n", "bold underline"),
+            (f"Total files: {len(results)}\n"),
+            (f"Success: {len(successes)}", "green"),
+            (f" | Failed: {len(failures)}\n", "red"),
+            (f"Original Size: {format_size(total_orig)}\n"),
+            (f"Processed Size: {format_size(total_proc)}\n"),
+            (f"Ratio: ", "dim"),
+            (f"{((1 - total_proc / total_orig) * 100 if total_orig > 0 else 0):.1f}%\n", "bold green"),
+            (f"Time: {total_time:.2f}s", "dim"),
         )
-        operation_name = "Compression"
-        size_label = "Compressed"
+        console.print(Panel(summary, border_style="cyan"))
     else:
-        space_saved = total_processed - total_original
-        avg_ratio = (
-            sum(((r.processed_size / r.original_size - 1) * 100 for r in successful)) / len(successful)
-            if successful
-            else 0
-        )
-        operation_name = "Decompression"
-        size_label = "Decompressed"
-    print("\n" + "=" * 80)
-    print(f"🗜️  Zstandard {operation_name} Results")
-    print(f"📁 Directory: {directory}")
-    print("=" * 80)
-    print(f"\n{'File':<40} {'Original':>12} {size_label:>12} {'Ratio':>8} {'Time':>8}")
-    print("-" * 80)
-    for result in sorted(successful, key=lambda x: x.original_size, reverse=True)[:20]:
-        if operation == "compress":
-            ratio = (1 - result.processed_size / result.original_size) * 100 if result.original_size > 0 else 0
-        else:
-            ratio = (result.processed_size / result.original_size - 1) * 100 if result.original_size > 0 else 0
-        file_name = result.file_path.name[:37] + "..." if len(result.file_path.name) > 40 else result.file_path.name
-        if result.was_untarred:
-            type_indicator = "[untar]"
-        elif result.was_tarred:
-            type_indicator = "[tar]"
-        else:
-            type_indicator = ""
-        print(
-            f"{file_name:<40} {format_size(result.original_size):>12} {format_size(result.processed_size):>12} {ratio:>7.1f}% {result.duration:>7.2f}s {type_indicator}"
-        )
-    if len(successful) > 20:
-        print(f"... and {len(successful) - 20} more files")
-    if failed:
-        print(f"\n❌ Failed files ({len(failed)}):")
-        for result in failed[:10]:
-            print(f"  • {result.file_path.name}: {result.error}")
-        if len(failed) > 10:
-            print(f"  ... and {len(failed) - 10} more failures")
-    print("\n" + "=" * 80)
-    print(f"📊 {operation_name} Summary")
-    print("=" * 80)
-    print(f"Total files processed: {len(results)}")
-    print(f"✅ Successful: {len(successful)}")
-    print(f"❌ Failed: {len(failed)}")
-    if tarred_count > 0:
-        print(f"📦 From tarred directories: {tarred_count}")
-    if untarred_count > 0:
-        print(f"📂 Untarred archives: {untarred_count}")
-    print(f"🗑️  Originals deleted: {deleted_count}")
-    print(f"\n💾 Total original size: {format_size(total_original)}")
-    print(
-        f"{('🗜️' if operation == 'compress' else '📂')} Total {size_label.lower()} size: {format_size(total_processed)}"
-    )
-    if operation == "compress":
-        print(f"📈 Average compression: {avg_ratio:.1f}%")
-        print(
-            f"🎉 Disk space freed: {format_size(space_saved)} ({(space_saved / total_original * 100 if total_original > 0 else 0):.1f}%)"
-        )
-    else:
-        print(f"📈 Average expansion: {avg_ratio:.1f}%")
-        print(f"💾 Disk space used: {format_size(space_saved)}")
-    print(
-        f"⏱️  Total time: {total_duration:.2f}s (avg {total_duration / len(results):.2f}s per file)" if results else ""
-    )
-    print("=" * 80 + "\n")
+        print(f"\n--- {operation.capitalize()} Summary ---")
+        print(f"Processed {len(results)} files ({len(successes)} success, {len(failures)} failure)")
+        print(f"Original size: {format_size(total_orig)}")
+        print(f"Processed size: {format_size(total_proc)}")
+        print(f"Total time: {total_time:.2f}s")
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="🗜️  Recursively compress/decompress files using Zstandard with parallel processing (deletes originals by default). In decompression mode, .tar.zst archives are automatically extracted.",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="\nExamples:\n  %(prog)s                          # Compress all files in current directory\n  %(prog)s -c                       # Compress all files (explicit)\n  %(prog)s -d                       # Decompress all .zst files (auto-untar .tar.zst)\n  %(prog)s -d --no-untar            # Decompress .zst files but keep .tar archives\n  %(prog)s -c -t                    # Tar subdirectories first, then compress\n  %(prog)s -c -t /path/to/dir       # Tar subdirs in specific directory\n  %(prog)s -c -e txt log csv        # Compress only specific extensions\n  %(prog)s -c -l 9 --threads 4      # Custom compression level and threads\n  %(prog)s -c --keep-originals      # Keep original files when compressing\n  %(prog)s -d --keep-originals      # Keep compressed files when decompressing\n  %(prog)s -c --dry-run             # Preview compression without modifying\n  %(prog)s --exclude node_modules   # Exclude specific directories\n        ",
-    )
-    operation_group = parser.add_mutually_exclusive_group()
-    operation_group.add_argument("-c", "--compress", action="store_true", default=True, help="Compress files (default)")
-    operation_group.add_argument("-d", "--decompress", action="store_true", help="Decompress .zst files")
-    parser.add_argument(
-        "-t",
-        "--tar-subdirs-first",
-        action="store_true",
-        help="Tar subdirectories first, then apply Zstandard compression on the .tar files (only valid with -c/--compress)",
-    )
-    parser.add_argument(
-        "directory",
-        nargs="?",
-        default=".",
-        type=str,
-        help="Root directory to process files recursively (default: current directory)",
-    )
-    parser.add_argument(
-        "-e",
-        "--extensions",
-        nargs="+",
-        help="Compress only specific file extensions (e.g., txt log csv). Only valid with -c/--compress.",
-    )
-    parser.add_argument(
-        "-l",
-        "--level",
-        type=int,
-        default=9,
-        choices=range(1, 23),
-        help="Zstandard compression level (1-22, default: 9). Higher = better compression but slower.",
-    )
-    parser.add_argument(
-        "--threads", type=int, default=4, help="Number of threads for Zstandard compression (default: 4)"
-    )
-    parser.add_argument(
-        "-w",
-        "--workers",
-        type=int,
-        default=mp.cpu_count(),
-        help=f"Number of parallel workers for processing multiple files (default: {mp.cpu_count()})",
-    )
-    parser.add_argument(
-        "--keep-originals", action="store_true", help="Keep original files after processing (default: delete originals)"
-    )
-    parser.add_argument(
-        "--exclude",
-        nargs="+",
-        default=[],
-        help="Directory/file patterns to exclude from processing (e.g., node_modules .git)",
-    )
-    parser.add_argument("--no-parallel", action="store_true", help="Disable parallel processing")
-    parser.add_argument(
-        "--dry-run", action="store_true", help="Show what would be processed without actually modifying files"
-    )
-    parser.add_argument(
-        "--no-skip-compressed",
-        action="store_true",
-        help="Do not skip already compressed files (dangerous, may double-compress). Only valid with -c/--compress.",
-    )
-    parser.add_argument(
-        "--no-untar",
-        action="store_true",
-        help="Do not automatically extract .tar files after decompression (only valid with -d/--decompress)",
-    )
+    parser = argparse.ArgumentParser(description="Optimized Zstd Compressor/Decompressor")
+    parser.add_argument("directory", nargs="?", default=".", help="Directory to process")
+    parser.add_argument("-d", "--decompress", action="store_true", help="Decompress mode")
+    parser.add_argument("-l", "--level", type=int, default=19, help="Compression level (1-22)")
+    parser.add_argument("-w", "--workers", type=int, default=4, help="Parallel workers")
+    parser.add_argument("-k", "--keep", action="store_true", help="Keep original files")
+    parser.add_argument("-t", "--tar", action="store_true", help="Tar subdirs first (compress only)")
+    parser.add_argument("-e", "--ext", nargs="+", help="Filter by extensions")
+    parser.add_argument("--exclude", nargs="+", default=[], help="Patterns to exclude")
+
     args = parser.parse_args()
-    operation = "decompress" if args.decompress else "compress"
-    if args.tar_subdirs_first and operation == "decompress":
-        print("❌ Error: -t/--tar-subdirs-first is only valid with -c/--compress")
+    root = Path(args.directory).resolve()
+    mode = "decompress" if args.decompress else "compress"
+
+    if not root.is_dir():
+        print(f"Error: {root} is not a directory.")
         sys.exit(1)
-    if operation == "decompress" and (args.extensions or args.no_skip_compressed):
-        print("⚠️  Warning: -e/--extensions and --no-skip-compressed are ignored in decompression mode")
-    if operation == "decompress":
-        print("ℹ️  Note: -l/--level and --threads are ignored in decompression mode")
-    if operation == "compress" and args.no_untar:
-        print("⚠️  Warning: --no-untar has no effect in compression mode")
-    if operation == "compress":
-        if args.no_skip_compressed:
-            exclude_extensions = {".zst"}
-            print("⚠️  WARNING: Not skipping already compressed files!")
-        else:
-            exclude_extensions = EXCLUDED_EXTENSIONS
-    else:
-        exclude_extensions = set()
-    directory = Path(args.directory).resolve()
-    if not directory.exists():
-        print(f"❌ Error: Directory '{directory}' does not exist")
-        sys.exit(1)
-    if not directory.is_dir():
-        print(f"❌ Error: '{directory}' is not a directory")
-        sys.exit(1)
-    operation_emoji = "🗜️" if operation == "compress" else "📂"
-    operation_name = "compression" if operation == "compress" else "decompression"
-    print(f"🔍 Scanning directory for {operation_name}: {directory}")
-    if operation == "compress":
-        if args.tar_subdirs_first:
-            print(f"📁 Mode: Tar subdirectories first, then Zstandard compression")
-            tar_results = process_subdirs_with_tar(
-                directory,
-                compression_level=args.level,
-                threads=args.threads,
-                workers=1 if args.no_parallel else args.workers,
-                keep_original=args.keep_originals,
-                exclude_patterns=args.exclude,
-            )
-            print(f"\n📁 Processing individual files in root directory...")
-            files = find_files_to_compress(
-                directory,
-                exclude_extensions=exclude_extensions,
-                exclude_patterns=args.exclude,
-                extensions_filter=args.extensions,
-                skip_subdirs=True,
-            )
-            if files:
-                print(f"📁 Found {len(files)} individual file(s) in root directory")
-                for file_path in files:
-                    print(f"  • {file_path.relative_to(directory)}")
-            else:
-                print(f"📁 No individual files in root directory")
-            all_results = tar_results
-        else:
-            if args.extensions:
-                print(f"📁 Mode: Only specified extensions ({', '.join(args.extensions)})")
-            else:
-                print(f"📁 Mode: ALL files (excluding already compressed formats and symlinks)")
-            if args.exclude:
-                print(f"🚫 Excluding patterns: {', '.join(args.exclude)}")
-            files = find_files_to_compress(
-                directory,
-                exclude_extensions=exclude_extensions,
-                exclude_patterns=args.exclude,
-                extensions_filter=args.extensions,
-                skip_subdirs=False,
-            )
-            all_results = []
-        if not args.tar_subdirs_first and (not files):
-            print(f"❌ No files found to compress")
-            sys.exit(0)
-        if not args.tar_subdirs_first:
-            print(f"📁 Found {len(files)} file(s) to compress")
-            type_stats = get_file_type_stats(files)
-            if type_stats:
-                print(f"📊 File types found:")
-                for ext, count in list(type_stats.items())[:10]:
-                    print(f"  • {ext}: {count} file(s)")
-                if len(type_stats) > 10:
-                    print(f"  • ... and {len(type_stats) - 10} more types")
-            total_size = sum((f.stat().st_size for f in files))
-            print(f"💾 Total size: {format_size(total_size)}")
-    else:
-        print(f"📁 Mode: Decompressing .zst files")
-        if args.exclude:
-            print(f"🚫 Excluding patterns: {', '.join(args.exclude)}")
-        files = find_files_to_decompress(directory, exclude_patterns=args.exclude)
-        if not files:
-            print(f"❌ No .zst files found to decompress")
-            sys.exit(0)
-        print(f"📁 Found {len(files)} .zst file(s) to decompress")
-        total_size = sum((f.stat().st_size for f in files))
-        print(f"💾 Total compressed size: {format_size(total_size)}")
-        if not args.no_untar:
-            print("📂 Auto-untar: .tar.zst archives will be extracted and the .tar removed")
-    if args.dry_run:
-        if args.tar_subdirs_first:
-            print(f"\n🔍 DRY RUN - Would tar subdirectories and compress them with Zstandard")
-        else:
-            print(f"\n🔍 DRY RUN - Would {operation} {len(files)} files ({format_size(total_size)})")
-        print("No files were modified.")
+
+    # Gather files
+    files = get_files(root, mode, EXCLUDED_EXTENSIONS, args.exclude, ext_filter=args.ext, recursive=not args.tar)
+
+    if not files:
+        print("No files found to process.")
         return
-    if not args.keep_originals:
-        if operation == "compress":
-            if args.tar_subdirs_first:
-                print("⚠️  Subdirectories will be tarred and originals DELETED (use --keep-originals to preserve)")
-            else:
-                print("⚠️  Originals will be DELETED after compression (use --keep-originals to preserve)")
-        else:
-            print("⚠️  Compressed .zst files will be DELETED after decompression (use --keep-originals to preserve)")
-    if operation == "compress":
-        print(f"🎯 Compression level: {args.level}/22")
-        print(f"🧵 Zstandard threads: {args.threads}")
-    workers = 1 if args.no_parallel else min(args.workers, len(files) if not args.tar_subdirs_first else args.workers)
-    if not args.tar_subdirs_first:
-        print(f"👷 Workers: {workers}")
-    print()
+
+    print(f"Found {len(files)} files. Starting {mode}...")
+
     results = []
-    if args.tar_subdirs_first:
-        results = all_results
-        if files:
-            print(f"🔄 Compressing individual files...")
-            if RICH_AVAILABLE:
-                console = Console()
-                with Progress(
-                    SpinnerColumn(),
-                    TextColumn("[progress.description]{task.description}"),
-                    BarColumn(),
-                    TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
-                    TimeElapsedColumn(),
-                    console=console,
-                ) as progress:
-                    task = progress.add_task("🔄 Compressing individual files", total=len(files))
-                    if workers > 1 and len(files) > 1:
-                        with ProcessPoolExecutor(max_workers=workers) as executor:
-                            futures = {}
-                            for file_path in files:
-                                output_path = file_path.with_suffix(file_path.suffix + ".zst")
-                                future = executor.submit(
-                                    compress_file_streaming,
-                                    file_path,
-                                    output_path,
-                                    args.level,
-                                    args.threads,
-                                    1024 * 1024,
-                                    args.keep_originals,
-                                )
-                                futures[future] = file_path
-                            for future in as_completed(futures):
-                                result = future.result()
-                                results.append(result)
-                                progress.advance(task)
-                    else:
-                        for file_path in files:
-                            output_path = file_path.with_suffix(file_path.suffix + ".zst")
-                            result = compress_file_streaming(
-                                file_path, output_path, args.level, args.threads, 1024 * 1024, args.keep_originals
-                            )
-                            results.append(result)
-                            progress.advance(task)
+    with ProcessPoolExecutor(max_workers=args.workers) as executor:
+        futures = []
+        for p in files:
+            if mode == "compress":
+                out = p.with_suffix(p.suffix + ".zst")
+                futures.append(executor.submit(compress_file, p, out, args.level, 0, 1024 * 1024, args.keep))
             else:
-                for i, file_path in enumerate(files, 1):
-                    output_path = file_path.with_suffix(file_path.suffix + ".zst")
-                    result = compress_file_streaming(
-                        file_path, output_path, args.level, args.threads, 1024 * 1024, args.keep_originals
-                    )
-                    results.append(result)
-                    status = "🗑️ ✅" if result.success and result.original_deleted else "✅" if result.success else "❌"
-                    print(f"  [{i}/{len(files)}] {file_path.name} - {status}")
-    elif not args.tar_subdirs_first:
+                out = p.with_suffix("")
+                futures.append(executor.submit(decompress_file, p, out, 1024 * 1024, args.keep))
+
         if RICH_AVAILABLE:
-            console = Console()
             with Progress(
                 SpinnerColumn(),
                 TextColumn("[progress.description]{task.description}"),
                 BarColumn(),
-                TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
                 TimeElapsedColumn(),
-                console=console,
             ) as progress:
-                task = progress.add_task(f"🔄 {operation_name.capitalize()} files", total=len(files))
-                if workers > 1 and len(files) > 1:
-                    with ProcessPoolExecutor(max_workers=workers) as executor:
-                        futures = {}
-                        for file_path in files:
-                            if operation == "compress":
-                                output_path = file_path.with_suffix(file_path.suffix + ".zst")
-                                future = executor.submit(
-                                    compress_file_streaming,
-                                    file_path,
-                                    output_path,
-                                    args.level,
-                                    args.threads,
-                                    1024 * 1024,
-                                    args.keep_originals,
-                                )
-                            else:
-                                output_path = file_path.with_suffix("")
-                                future = executor.submit(
-                                    decompress_file_streaming,
-                                    file_path,
-                                    output_path,
-                                    1024 * 1024,
-                                    args.keep_originals,
-                                    not args.no_untar,
-                                )
-                            futures[future] = file_path
-                        for future in as_completed(futures):
-                            result = future.result()
-                            results.append(result)
-                            progress.advance(task)
-                else:
-                    for file_path in files:
-                        if operation == "compress":
-                            output_path = file_path.with_suffix(file_path.suffix + ".zst")
-                            result = compress_file_streaming(
-                                file_path, output_path, args.level, args.threads, 1024 * 1024, args.keep_originals
-                            )
-                        else:
-                            output_path = file_path.with_suffix("")
-                            result = decompress_file_streaming(
-                                file_path, output_path, 1024 * 1024, args.keep_originals, not args.no_untar
-                            )
-                        results.append(result)
-                        progress.advance(task)
+                task = progress.add_task(f"{mode.capitalize()}ing...", total=len(futures))
+                for f in as_completed(futures):
+                    results.append(f.result())
+                    progress.advance(task)
         else:
-            print(f"🔄 {operation_name.capitalize()} files...")
-            if workers > 1 and len(files) > 1:
-                with ProcessPoolExecutor(max_workers=workers) as executor:
-                    futures = {}
-                    for file_path in files:
-                        if operation == "compress":
-                            output_path = file_path.with_suffix(file_path.suffix + ".zst")
-                            future = executor.submit(
-                                compress_file_streaming,
-                                file_path,
-                                output_path,
-                                args.level,
-                                args.threads,
-                                1024 * 1024,
-                                args.keep_originals,
-                            )
-                        else:
-                            output_path = file_path.with_suffix("")
-                            future = executor.submit(
-                                decompress_file_streaming,
-                                file_path,
-                                output_path,
-                                1024 * 1024,
-                                args.keep_originals,
-                                not args.no_untar,
-                            )
-                        futures[future] = file_path
-                    for i, future in enumerate(as_completed(futures), 1):
-                        result = future.result()
-                        results.append(result)
-                        status = (
-                            "🗑️ ✅" if result.success and result.original_deleted else "✅" if result.success else "❌"
-                        )
-                        print(f"  [{i}/{len(files)}] {result.file_path.name} - {status}")
-            else:
-                for i, file_path in enumerate(files, 1):
-                    if operation == "compress":
-                        output_path = file_path.with_suffix(file_path.suffix + ".zst")
-                        result = compress_file_streaming(
-                            file_path, output_path, args.level, args.threads, 1024 * 1024, args.keep_originals
-                        )
-                    else:
-                        output_path = file_path.with_suffix("")
-                        result = decompress_file_streaming(
-                            file_path, output_path, 1024 * 1024, args.keep_originals, not args.no_untar
-                        )
-                    results.append(result)
-                    status = "🗑️ ✅" if result.success and result.original_deleted else "✅" if result.success else "❌"
-                    print(f"  [{i}/{len(files)}] {file_path.name} - {status}")
-    if results:
-        if RICH_AVAILABLE:
-            print_results_rich(results, directory, operation)
-        else:
-            print_results_basic(results, directory, operation)
+            for i, f in enumerate(as_completed(futures), 1):
+                res = f.result()
+                results.append(res)
+                print(f"[{i}/{len(files)}] {res.path.name} - {'OK' if res.success else 'FAIL'}")
+
+    print_summary(results, root, mode)
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
