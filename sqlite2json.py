@@ -1,11 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/env python
-import sys
-import sqlite3
-import json
 import base64
-from pathlib import Path
-from multiprocessing import Pool, cpu_count
+import json
+import sqlite3
+import sys
 from functools import partial
+from multiprocessing import Pool, cpu_count
+from pathlib import Path
 
 
 def serialize_value(v):

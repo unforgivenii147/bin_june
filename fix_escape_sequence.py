@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import difflib
 import re
 from pathlib import Path

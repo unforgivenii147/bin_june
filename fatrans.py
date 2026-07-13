@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/env python
 """
 Offline Persian \u2194 English translator.
 Optimized for Python 3.12.

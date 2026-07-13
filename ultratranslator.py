@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/env python
 """
 Optimized version of ultratranslator.py for Python 3.12.
 Translates Python files and other text files while preserving structure.
@@ -12,18 +12,39 @@ import shutil
 import sys
 import tempfile
 import tokenize
+from collections import deque
 from collections.abc import Callable, Iterable
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from os import scandir
 from pathlib import Path
 from typing import Any, Final
 
-from deep_translator import GoogleTranslator
 from binaryornot import is_binary
+from deep_translator import GoogleTranslator
 
-# Constants
-CHUNK_SIZE: Final[int] = 4990
-SKIP_DIRS: Final[frozenset[str]] = frozenset({".git", "__pycache__", ".venv"})
+
+def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
+    path = Path(path)
+    skip_dirs = {".git", "__pycache__"}
+    queue = deque([path])
+    files = []
+    while queue:
+        current = queue.popleft()
+        try:
+            entries = current.iterdir()
+        except (PermissionError, OSError):
+            continue
+        for item in entries:
+            if item.is_symlink():
+                continue
+            if item.is_dir() and item.name not in skip_dirs:
+                queue.append(item)
+            elif item.is_file():
+                if ext is None or item.suffix in ext:
+                    files.append(item)
+    return files
+
+
 MAX_WORKERS: Final[int] = 6
 DOC_TH1: Final[str] = '"""'
 DOC_TH2: Final[str] = "'''"

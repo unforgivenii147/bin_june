@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/env python
 """
 Translate non-English lines in files to English in-place using parallel processing.
 Optimized for Python 3.12.

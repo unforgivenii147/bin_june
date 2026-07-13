@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 PATH Deduplicator and Formatter Script
 Extracts unique PATH values, assigns them to variables (P1, P2, etc.),

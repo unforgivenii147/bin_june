@@ -1,13 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import json
 from pathlib import Path
 
 from deep_translator import GoogleTranslator
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 INPUT_FILE = "words.txt"
 OUTPUT_FILE = "dic.json"

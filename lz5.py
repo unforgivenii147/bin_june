@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Folder compressor/decompressor using LZ4 with multiprocessing
 Usage:

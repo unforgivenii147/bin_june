@@ -1,18 +1,37 @@
 #!/data/data/com.termux/files/usr/bin/env python
-
-
 import os
 import sys
+from collections import deque
 from collections.abc import Callable, Iterable
 from os import scandir as os_scandir
 from pathlib import Path
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
+    path = Path(path)
+    skip_dirs = {".git", "__pycache__"}
+    queue = deque([path])
+    files = []
+    while queue:
+        current = queue.popleft()
+        try:
+            entries = current.iterdir()
+        except (PermissionError, OSError):
+            continue
+        for item in entries:
+            if item.is_symlink():
+                continue
+            if item.is_dir() and item.name not in skip_dirs:
+                queue.append(item)
+            elif item.is_file():
+                if ext is None or item.suffix in ext:
+                    files.append(item)
+    return files
 
 
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
-    units = "B", "KB", "MB", "GB", "TB"
+    units = ("B", "KB", "MB", "GB", "TB")
     if sz == 0:
         return "0 B"
     i = min((int(sz).bit_length() - 1) // 10, len(units) - 1)
@@ -25,12 +44,9 @@ def fsz(sz: float) -> str:
 def rrs(path, before, after) -> None:
     delta = before - after
     msg = (
-        "\033[5;92mNO CHANGE\033[0m"
+        "\x1b[5;92mNO CHANGE\x1b[0m"
         if delta == 0
-        else (
-            f"\033[5;92m{'-' if delta > 0 else '+'} \033[5;94m{fsz(abs(delta))}\033[0m | "
-            f"\033[5;96m{after / before * 100:.1f}\033[5;95m%\033[0m"
-        )
+        else f"\x1b[5;92m{('-' if delta > 0 else '+')} \x1b[5;94m{fsz(abs(delta))}\x1b[0m | \x1b[5;96m{after / before * 100:.1f}\x1b[5;95m%\x1b[0m"
     )
     print(f"\n{path.name} | {msg}")
 
@@ -60,40 +76,8 @@ def unique_path(path: Path | str) -> Path:
 def _clean_fname(path: Path) -> Path:
     from re import sub as re_sub
 
-    clean_name = re_sub(r"(_\d+)+", "", path.name)
+    clean_name = re_sub("(_\\d+)+", "", path.name)
     return path.with_name(clean_name)
-
-
-def get_files(path: str | Path, include_hidden: bool = True, ext: list[str] | None = None) -> list[Path]:
-    path = Path(path)
-    if not path.exists():
-        raise FileNotFoundError(f"Path does not exist: {path}")
-    if not path.is_dir():
-        raise NotADirectoryError(f"Path is not a directory: {path}")
-
-    ext = tuple(ext) if ext else None
-    files = []
-    stack = [path]
-
-    while stack:
-        current = stack.pop()
-        try:
-            with os_scandir(current) as entries:
-                for entry in entries:
-                    if entry.is_symlink():
-                        continue
-                    if entry.is_dir(follow_symlinks=False):
-                        if entry.name not in SKIP_DIRS:
-                            stack.append(entry)
-                    elif entry.is_file(follow_symlinks=False):
-                        if not include_hidden and entry.name.startswith("."):
-                            continue
-                        if ext is None or entry.name.endswith(ext):
-                            files.append(Path(entry.path))
-        except (PermissionError, OSError):
-            continue
-
-    return sorted(files)
 
 
 def gsz(path: str | Path) -> int:
@@ -111,11 +95,10 @@ def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
-    return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
+    return Parallel(n_jobs=-1)((delayed(process_function)(file_str, **kwargs) for file_str in file_strings))
 
 
 ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
-
 HIGHLIGHTS = {
     "on_black": 40,
     "on_grey": 40,
@@ -135,7 +118,6 @@ HIGHLIGHTS = {
     "on_light_cyan": 106,
     "on_white": 107,
 }
-
 COLORS = {
     "black": 30,
     "grey": 30,
@@ -155,7 +137,6 @@ COLORS = {
     "light_cyan": 96,
     "white": 97,
 }
-
 RESET = "\x1b[0m"
 
 

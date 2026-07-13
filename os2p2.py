@@ -1,6 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
+from typing import Callable, Dict, List, Set, Tuple
+from enum import Enum
+from dataclasses import dataclass
+import re
 import os
 import sys
 from os import scandir as os_scandir
@@ -183,13 +186,6 @@ def get_pyfiles(path: str | Path) -> list[Path]:
 Refactor Python files from os.path to pathlib using regex transformations.
 Warning: This approach is simpler but less safe than AST-based refactoring.
 """
-
-import re
-import sys
-from dataclasses import dataclass
-from enum import Enum
-from pathlib import Path
-from typing import Callable, Dict, List, Set, Tuple
 
 
 class TransformationType(Enum):

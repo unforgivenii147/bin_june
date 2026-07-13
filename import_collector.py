@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import ast
 import importlib.metadata
 import importlib.util

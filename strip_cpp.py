@@ -5,7 +5,6 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 # Match single-line comments (//...), multi-line comments (/*...*/),
 # and character/string literals ("..." or '...') to avoid false positives.
 COMMENT_RE = re.compile(

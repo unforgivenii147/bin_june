@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import sys
 from collections import deque
 from collections.abc import Callable, Iterable
@@ -10,6 +9,17 @@ from pathlib import Path
 from typing import Any, ParamSpec, TypeVar
 
 MAX_WORKERS = 4
+
+
+def gsz(path: str | Path) -> int:
+    path = Path(path)
+    total = 0
+    if path.is_file():
+        return path.stat().st_size
+    for file in path.rglob("*"):
+        if file.is_file():
+            total += file.stat().st_size
+    return total
 
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
@@ -132,12 +142,17 @@ def process_file(path: Path) -> None:
 
 def main() -> None:
     cwd = Path.cwd()
+    before = gsz(cwd)
     args = sys.argv[1:]
     files = [Path(p) for p in args] if args else get_files(cwd, ext=[".pdf"])
     if len(files) == 1:
         process_file(files[0])
         sys.exit(0)
     mpf_async(process_file, files)
+    after = gsz(cwd)
+    dsz = before - after
+    if dsz:
+        print(f"space freed: {fsz(dsz)}")
 
 
 if __name__ == "__main__":

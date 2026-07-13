@@ -1,56 +1,41 @@
 #!/data/data/com.termux/files/usr/bin/env python
-
-
+from collections import defaultdict
+from packaging import version as pkg_version
+from typing import Dict, List, Optional, Tuple
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from collections import defaultdict, deque
+import re
+import argparse
 from os import scandir as os_scandir
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+"\nScript to detect and keep only the latest version of wheel, deb, or tar.gz files in current directory recursively.\n"
 
 
-def get_files(path: str | Path, include_hidden: bool = True, ext: list[str] | None = None) -> list[Path]:
+def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
-    if not path.exists():
-        raise FileNotFoundError(f"Path does not exist: {path}")
-    if not path.is_dir():
-        raise NotADirectoryError(f"Path is not a directory: {path}")
-
-    ext = tuple(ext) if ext else None
+    skip_dirs = {".git", "__pycache__"}
+    queue = deque([path])
     files = []
-    stack = [path]
-
-    while stack:
-        current = stack.pop()
+    while queue:
+        current = queue.popleft()
         try:
-            with os_scandir(current) as entries:
-                for entry in entries:
-                    if entry.is_symlink():
-                        continue
-                    if entry.is_dir(follow_symlinks=False):
-                        if entry.name not in SKIP_DIRS:
-                            stack.append(entry)
-                    elif entry.is_file(follow_symlinks=False):
-                        if not include_hidden and entry.name.startswith("."):
-                            continue
-                        if ext is None or entry.name.endswith(ext):
-                            files.append(Path(entry.path))
+            entries = current.iterdir()
         except (PermissionError, OSError):
             continue
+        for item in entries:
+            if item.is_symlink():
+                continue
+            if item.is_dir() and item.name not in skip_dirs:
+                queue.append(item)
+            elif item.is_file():
+                if ext is None or item.suffix in ext:
+                    files.append(item)
+    return files
 
-    return sorted(files)
 
-
-"""
-Script to detect and keep only the latest version of wheel, deb, or tar.gz files in current directory recursively.
-"""
-
-import argparse
-import re
-from collections import defaultdict
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple
-
-from packaging import version as pkg_version
+"\nScript to detect and keep only the latest version of wheel, deb, or tar.gz files in current directory recursively.\n"
 
 
 def parse_wheel_version(filename: str) -> Optional[Tuple[str, str]]:
@@ -78,7 +63,7 @@ def parse_wheel_version(filename: str) -> Optional[Tuple[str, str]]:
     if pkg_name_parts and version_parts:
         pkg_name = "-".join(pkg_name_parts)
         version = "-".join(version_parts)
-        return pkg_name, version
+        return (pkg_name, version)
     return None
 
 
@@ -97,7 +82,7 @@ def parse_targz_version(filename: str) -> Optional[Tuple[str, str]]:
             version = "-".join(parts[i:])
             version = re.sub(r"\.(tar|tgz)$", "", version)
             if pkg_name and version:
-                return pkg_name, version
+                return (pkg_name, version)
     return None
 
 
@@ -106,7 +91,7 @@ def parse_deb_version(filename: str) -> Optional[Tuple[str, str]]:
     if len(parts) >= 2:
         pkg_name = parts[0]
         version = parts[1]
-        return pkg_name, version
+        return (pkg_name, version)
     return None
 
 
@@ -136,17 +121,17 @@ def process_file(file_path: Path, file_type: str) -> Optional[Tuple[str, str, Pa
             parsed = parse_wheel_version(filename)
             if parsed:
                 pkg_name, version = parsed
-                return pkg_name, version, file_path
+                return (pkg_name, version, file_path)
         elif file_type == "targz" and (filename.endswith(".tar.gz") or filename.endswith(".tgz")):
             parsed = parse_targz_version(filename)
             if parsed:
                 pkg_name, version = parsed
-                return pkg_name, version, file_path
+                return (pkg_name, version, file_path)
         elif file_type == "deb" and filename.endswith(".deb"):
             parsed = parse_deb_version(filename)
             if parsed:
                 pkg_name, version = parsed
-                return pkg_name, version, file_path
+                return (pkg_name, version, file_path)
     except Exception as e:
         print(f"Error processing {file_path}: {e}")
     return None
@@ -154,15 +139,15 @@ def process_file(file_path: Path, file_type: str) -> Optional[Tuple[str, str, Pa
 
 def scan_directory(directory: Path, file_type: str, check_all: bool = False) -> Dict[str, List[Tuple[str, Path]]]:
     packages = defaultdict(list)
-    extensions = ".whl", ".deb", ".tar.gz", ".tgz", ".metadata"
+    extensions = (".whl", ".deb", ".tar.gz", ".tgz", ".metadata")
     if check_all:
-        extensions = ".whl", ".deb", ".tar.gz", ".tgz", ".metadata"
+        extensions = (".whl", ".deb", ".tar.gz", ".tgz", ".metadata")
     elif file_type == "wheel":
-        extensions = ".whl", ".metadata"
+        extensions = (".whl", ".metadata")
     elif file_type == "deb":
         extensions = ".deb"
     elif file_type == "targz":
-        extensions = ".tar.gz", ".tgz"
+        extensions = (".tar.gz", ".tgz")
     files_to_process = get_files(directory, ext=extensions)
     print(f"Found {len(files_to_process)} files to process...")
     with ThreadPoolExecutor(max_workers=4) as executor:
@@ -193,7 +178,7 @@ def get_latest_version(versions: List[Tuple[str, Path]]) -> Tuple[str, Path]:
     latest = versions[0]
     for version, path in versions[1:]:
         if compare_versions(version, latest[0]) > 0:
-            latest = version, path
+            latest = (version, path)
     return latest
 
 
@@ -221,21 +206,14 @@ def keep_latest_versions(packages: Dict[str, List[Tuple[str, Path]]], dry_run: b
                 except Exception as e:
                     print(f"  Error deleting {file_path.name}: {e}")
         total_files_kept += 1
-    return total_deleted, total_files_kept
+    return (total_deleted, total_files_kept)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Detect and keep only the latest version of package files.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  %(prog)s -w                # Clean wheel files only
-  %(prog)s -d                # Clean deb files only
-  %(prog)s -t                # Clean tar.gz files only
-  %(prog)s -a                # Clean all package types
-  %(prog)s -t --dry-run      # Preview what would be deleted
-        """,
+        epilog="\nExamples:\n  %(prog)s -w                # Clean wheel files only\n  %(prog)s -d                # Clean deb files only\n  %(prog)s -t                # Clean tar.gz files only\n  %(prog)s -a                # Clean all package types\n  %(prog)s -t --dry-run      # Preview what would be deleted\n        ",
     )
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-d", "--deb", action="store_true", help="Check .deb files")
@@ -271,7 +249,7 @@ Examples:
     if not packages:
         print("No matching package files found.")
         return 0
-    total_versions = sum(len(versions) for versions in packages.values())
+    total_versions = sum((len(versions) for versions in packages.values()))
     print(f"\nFound {len(packages)} package(s) with {total_versions} total version(s):")
     if args.verbose:
         for pkg_name, versions in packages.items():

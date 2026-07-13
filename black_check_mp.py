@@ -1,13 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import ast
 import shutil
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 ERROR_DIR = Path("error")
 OK_DIR = Path("ok")

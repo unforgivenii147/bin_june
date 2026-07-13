@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Script to find Python packages in system site directories that don't have entry_points.txt
 Separates pure Python packages from non-pure (binary/extension) packages based on RECORD file.

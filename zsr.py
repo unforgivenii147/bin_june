@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/env python
 """
 zsr_optimized_by_gemini.py — Multi-threaded Zstandard compression/decompression tool.
 Optimized for Python 3.12 with modern syntax, type hints, and performance improvements.

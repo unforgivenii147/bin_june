@@ -1,13 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import argparse
 import urllib.error
 import urllib.request
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 MAX_DOWNLOAD_SIZE = 1 * 1024 * 1024
 

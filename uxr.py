@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Parallel Archive Extractor
 Extracts archives recursively in current directory using joblib parallelism.

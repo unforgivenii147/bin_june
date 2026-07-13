@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import re
 import shutil
 import sys
@@ -11,7 +10,6 @@ from packaging.utils import canonicalize_name
 from packaging.version import Version
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 MOVE_MODE = "-m" in sys.argv
 WHEEL_PATTERN = re.compile(

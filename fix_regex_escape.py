@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import ast
 from ast import Call
 from os import scandir as os_scandir

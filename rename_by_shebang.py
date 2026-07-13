@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Rename files in current directory based on their shebang line.
 Optimized for Termux environment.
@@ -12,7 +11,6 @@ import shutil
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 SHEBANG_MAPPING = {
     "#!/data/data/com.termux/files/usr/bin/python3?": ".py",

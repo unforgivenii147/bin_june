@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import re
 import sys
 from pathlib import Path
@@ -9,7 +8,6 @@ from binaryornot import is_binary
 from nltk.tokenize import sent_tokenize
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 DEFAULT_MAX = 5000
 BINARY_SAMPLE = 4096

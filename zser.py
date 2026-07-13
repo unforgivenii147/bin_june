@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/env python
 """
 zser_optimized_by_gemini.py – Parallel Zstandard compressor/decompressor.
 Optimized for Python 3.12 with modern syntax, type hints, and performance improvements.

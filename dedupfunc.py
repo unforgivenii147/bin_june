@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Duplicate Function Detector and Remover
 Detects functions with identical bodies (ignoring whitespace and comments)

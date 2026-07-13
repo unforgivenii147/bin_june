@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Delete commits older than n days from a Git repository.
 WARNING: This is a destructive operation. Use with caution!

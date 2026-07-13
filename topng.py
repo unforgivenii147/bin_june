@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import sys
 from pathlib import Path
 
@@ -8,7 +7,6 @@ import cv2
 import numpy as np
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 SUPPORTED_FORMATS = {".png", ".bmp", ".tiff", ".webp", ".ico", ".jpg", ".jpeg"}
 

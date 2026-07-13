@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 cwd = os.getcwd()
 subdir_sizes = {}
 total_size = 0

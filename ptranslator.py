@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/env python
 """
 Recursively translate text files using Google Translate.
 Optimized for Python 3.12 with modern syntax and performance improvements.

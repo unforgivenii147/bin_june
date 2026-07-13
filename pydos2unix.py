@@ -14,11 +14,12 @@ Features:
 """
 
 import argparse
-import sys
-from pathlib import Path
-from multiprocessing import Pool, cpu_count
-from typing import List, Tuple, Optional
 import logging
+import sys
+from multiprocessing import Pool, cpu_count
+from pathlib import Path
+from typing import List, Optional, Tuple
+
 from dh import BIN_EXT, TXT_EXT
 
 # Configure logging

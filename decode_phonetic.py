@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import sys
 from html import unescape
 from pathlib import Path

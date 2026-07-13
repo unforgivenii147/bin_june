@@ -11,7 +11,6 @@ from tqdm import tqdm
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 MAX_WORKERS = 4
 MAX_RETRIES = 3
 TIMEOUT = 60

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 lzma_compress.py — Recursive LZMA multithreaded compression/decompression.
 

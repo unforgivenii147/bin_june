@@ -4,12 +4,33 @@ import re
 import sys
 import tarfile
 import zipfile
-from collections import Counter
+from collections import Counter, deque
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
+    path = Path(path)
+    skip_dirs = {".git", "__pycache__"}
+    queue = deque([path])
+    files = []
+    while queue:
+        current = queue.popleft()
+        try:
+            entries = current.iterdir()
+        except (PermissionError, OSError):
+            continue
+        for item in entries:
+            if item.is_symlink():
+                continue
+            if item.is_dir() and item.name not in skip_dirs:
+                queue.append(item)
+            elif item.is_file():
+                if ext is None or item.suffix in ext:
+                    files.append(item)
+    return files
+
 
 try:
     import tree_sitter_python as tsp
@@ -26,8 +47,9 @@ try:
 except ImportError:
     HAS_ZSTD = False
 
-
 # Helper functions (replacing dh import)
+
+
 def get_files(directory: Path) -> List[Path]:
     """Recursively get all files in a directory."""
     files = []

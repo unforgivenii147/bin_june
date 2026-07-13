@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Strip EXIF data from image files using pathlib only.
 Supports parallel processing, size reporting, and file/directory input.

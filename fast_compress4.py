@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Recursive file compressor using zstandard streaming compression.
 Compresses files in place with .zst extension and removes originals.

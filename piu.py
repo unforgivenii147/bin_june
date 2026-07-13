@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import sys
 from pathlib import Path
 
@@ -123,7 +122,6 @@ if __name__ == "__main__":
     args = sys.argv[1:]
     for k in args:
         installwhl(k)
-
 
 """
     candidates = [p.strip() for p in args if p.strip() != "-w"] if args else None

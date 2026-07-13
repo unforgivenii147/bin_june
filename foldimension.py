@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 folderize_images.py
 Recursively find all image files in the current directory,

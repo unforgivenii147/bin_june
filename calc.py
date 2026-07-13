@@ -39,7 +39,7 @@ class Calculator(Static):
         border: solid $accent;
         background: $panel;
     }
-    
+
     #button-grid {
         width: 1fr;
         height: auto;
@@ -47,20 +47,20 @@ class Calculator(Static):
         grid-gutter: 1 1;
         padding: 1;
     }
-    
+
     Button {
         width: 1fr;
         height: 3;
     }
-    
+
     Button.operator {
         background: $accent 80%;
     }
-    
+
     Button.equals {
         background: $success 80%;
     }
-    
+
     Button.clear {
         background: $error 80%;
     }

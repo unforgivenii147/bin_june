@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Script to detect and keep only the latest version of wheel or deb files in current directory recursively.
 """

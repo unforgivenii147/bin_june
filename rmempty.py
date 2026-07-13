@@ -1,11 +1,31 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import os
 import sys
+from collections import deque
 from pathlib import Path
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
+    path = Path(path)
+    skip_dirs = {".git", "__pycache__"}
+    queue = deque([path])
+    files = []
+    while queue:
+        current = queue.popleft()
+        try:
+            entries = current.iterdir()
+        except (PermissionError, OSError):
+            continue
+        for item in entries:
+            if item.is_symlink():
+                continue
+            if item.is_dir() and item.name not in skip_dirs:
+                queue.append(item)
+            elif item.is_file():
+                if ext is None or item.suffix in ext:
+                    files.append(item)
+    return files
 
 
 ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}

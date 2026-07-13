@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Folderize files recursively by first letter.
 Files starting with 'a' go into folder 'a/', 'b' into 'b/', etc.

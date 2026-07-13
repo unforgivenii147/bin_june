@@ -1,8 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from pathlib import Path
-from pypdf import PdfReader, PdfWriter
-from concurrent.futures import ThreadPoolExecutor
 import sys
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
+from pypdf import PdfReader, PdfWriter
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

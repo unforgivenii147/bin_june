@@ -6,7 +6,6 @@ from dh import FONT_EXT
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 FONT_EXTENSIONS = tuple(FONT_EXT)
 OUTPUT_HTML = "fonts_preview.html"
 FONT_SIZES = [14, 22]

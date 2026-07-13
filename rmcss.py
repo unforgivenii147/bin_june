@@ -12,7 +12,6 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 # Compile regex for HTML comments
 # This handles multi-line comments and non-greedy matching
 COMMENT_PATTERN = re.compile(r"<!--.*?-->", re.DOTALL)

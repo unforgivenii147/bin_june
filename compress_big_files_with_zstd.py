@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Compress files larger than a threshold in current directory recursively.
 Usage: python compress_large_files.py <threshold_in_bytes>
@@ -16,7 +15,6 @@ from pathlib import Path
 import zstandard as zstd
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 GREEN = "\x1b[92m"
 YELLOW = "\x1b[93m"

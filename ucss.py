@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import base64
 import hashlib
 import mimetypes
@@ -11,7 +10,6 @@ from pathlib import Path
 from dh import MIME2EXT
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 DATA_URL_RE = re.compile(
     r"url\(\s*(['\"]?)data:(?P<mime>[^;]+)(?:;charset=[^;]+)?;base64,(?P<data>[A-Za-z0-9+/=\s]+)\1\s*\)",

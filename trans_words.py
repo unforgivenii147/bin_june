@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/env python
 """
 Optimized version of trans_words.py for Python 3.12.
 Chunks text files, detects language, and translates to English, saving in JSON.
@@ -10,7 +10,7 @@ import sys
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Final, Any
+from typing import Any, Final
 
 import langdetect
 from deep_translator import GoogleTranslator

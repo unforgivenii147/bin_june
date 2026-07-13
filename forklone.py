@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Automate forking and cloning a GitHub repository
 Usage: python script.py user/repo

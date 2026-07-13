@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Convert .mo files to .po files in-place using GNU gettext utilities.
 Original .mo files are removed only if conversion succeeds.

@@ -1,11 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 from pathlib import Path
 from random import choice as random_choice
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 extensions = [
     ".3dml",

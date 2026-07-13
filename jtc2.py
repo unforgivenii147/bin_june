@@ -1,15 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import ast
 from pathlib import Path
 from sys import argv
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 # WARNING: Source code for 'run_command' not found.
-
 
 if __name__ == "__main__":
     path = Path(argv[1])

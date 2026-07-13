@@ -1,9 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/env python
 import ast
 import sys
-from pathlib import Path
 from collections import deque
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
 
 NEW_GET_FILES = """from collections import deque
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
@@ -28,6 +28,18 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     return files"""
 
 
+def has_get_files(file_path: Path) -> bool:
+    try:
+        content = file_path.read_text(encoding="utf-8")
+        tree = ast.parse(content)
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef) and node.name == "get_files":
+                return True
+        return False
+    except Exception:
+        return False
+
+
 def process_file(file_path: Path) -> tuple[Path, bool, str]:
     try:
         content = file_path.read_text(encoding="utf-8")
@@ -45,6 +57,9 @@ def process_file(file_path: Path) -> tuple[Path, bool, str]:
             get_files_end = node.end_lineno
             break
 
+    if get_files_start is None:
+        return file_path, False, "get_files function not found"
+
     lines = content.split("\n")
     import_end = 0
 
@@ -56,9 +71,6 @@ def process_file(file_path: Path) -> tuple[Path, bool, str]:
         if "SKIP_DIRS" in line and "=" in line:
             skip_dirs_line = i
             break
-
-    if get_files_start is None:
-        return file_path, False, "get_files function not found"
 
     new_lines = lines[:import_end]
     new_lines.append("")
@@ -120,10 +132,18 @@ def main():
         print("No Python files found")
         return
 
-    print(f"Processing {len(py_files)} files...")
+    print(f"Scanning {len(py_files)} files for get_files function...")
+
+    candidate_files = [f for f in py_files if has_get_files(f)]
+
+    if not candidate_files:
+        print("No files with get_files function found")
+        return
+
+    print(f"Processing {len(candidate_files)} files...")
 
     with ProcessPoolExecutor() as executor:
-        futures = {executor.submit(process_file, f): f for f in py_files}
+        futures = {executor.submit(process_file, f): f for f in candidate_files}
         updated = 0
         failed = 0
 

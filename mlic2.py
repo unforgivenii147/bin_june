@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import argparse
 import multiprocessing as mp
 import sys
@@ -10,7 +9,6 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 TEXT_EXTENSIONS = {
     ".py",

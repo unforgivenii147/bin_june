@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/env python
 """
 Compress or decompress folders using zstandard compression.
 Optimized for Python 3.12 with streaming and parallel processing.

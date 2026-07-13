@@ -8,7 +8,6 @@ from os import get_terminal_size
 from pathlib import Path
 from typing import Self
 
-
 from tqdm import tqdm
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})

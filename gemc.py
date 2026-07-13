@@ -10,7 +10,6 @@ from tree_sitter import Language, Parser, Query, QueryCursor
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 PY_LANGUAGE = Language(tspython.language())
 parser = Parser(PY_LANGUAGE)
 QUERY_STRING = """

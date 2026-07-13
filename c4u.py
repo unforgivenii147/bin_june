@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 PyPI Package Update Checker with Multiprocessing & Resume Capability
 - Checks installed packages against PyPI for updates

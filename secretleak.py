@@ -6,7 +6,6 @@ from typing import List, Tuple
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 SECRET_PATTERNS = {
     "AWS Key": "AKIA[0-9A-Z]{16}",
     "Private Key": "-----BEGIN (?:RSA|DSA|EC|OPENSSH) PRIVATE KEY-----",

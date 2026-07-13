@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Convert CodePen-style HTML (body only) to a complete HTML document.
 Adds proper <head> section with links to style.css and script.js

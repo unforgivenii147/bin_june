@@ -5,7 +5,6 @@ from PIL import Image
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 for png_path in Path(".").rglob("*.png"):
     if png_path.is_file():
         jpg_path = png_path.with_suffix(".jpg")

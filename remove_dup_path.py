@@ -1,10 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 if __name__ == "__main__":
     path = "/data/data/com.termux/files/home/.pyenv/shims:/data/data/com.termux/files/home/.pyenv/bin:/data/data/com.termux/files/home/bin:/data/data/com.termux/files/home/bashbin:/data/data/com.termux/files/home/.cargo/bin:/data/data/com.termux/files/home/.npm-global/bin:/data/data/com.termux/files/usr/lib/node_modules/.bin:/data/data/com.termux/files/usr/bin:/data/data/com.termux/files/home/.local/bin:/data/data/com.termux/files/home/sbin:/data/data/com.termux/files/home/.pyenv/bin:/data/data/com.termux/files/home/.local/share/nvim/mason/bin:/data/data/com.termux/files/usr/local/bin"

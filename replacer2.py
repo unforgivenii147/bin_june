@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Text replacer for Python files in current directory.
 Replaces exact text matches in all .py files.

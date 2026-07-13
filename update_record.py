@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Rewrite of the RECORD updater with multiprocessing support.
 Recalculates file hashes and sizes for installed packages,
@@ -17,7 +16,6 @@ from pathlib import Path
 from typing import Tuple
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s", stream=sys.stderr)
 logger = logging.getLogger(__name__)

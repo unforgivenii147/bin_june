@@ -1,12 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import sys
 
 from moviepy import AudioFileClip
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 if __name__ == "__main__":
     file = sys.argv[1]

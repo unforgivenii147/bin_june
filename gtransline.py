@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/env python
 """
 Translate non-English lines (focused on Chinese) to English in-place.
 Optimized for Python 3.12.

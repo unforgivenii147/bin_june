@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import argparse
 import json
 from collections import defaultdict
@@ -10,7 +9,6 @@ from pathlib import Path
 import xxhash
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 BACKUP_FILE = ".symlink_backup.json"
 MIN_FILE_SIZE = 8

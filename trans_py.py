@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/env python
 """
 Optimized version of trans_py.py for Python 3.12.
 Translates docstrings and comments in Python files using AST and parallel threads.
@@ -11,7 +11,7 @@ import shutil
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Final, Any
+from typing import Any, Final
 
 from deep_translator import GoogleTranslator
 

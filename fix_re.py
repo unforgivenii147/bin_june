@@ -521,13 +521,13 @@ def main():
 Examples:
   # Fix all Python files in current directory
   python fix_regex.py
-  
+
   # Fix specific files or directories
   python fix_regex.py src/ tests/test_regex.py
-  
+
   # Use 4 parallel workers, disable backups
   python fix_regex.py --workers 4 --no-backup
-  
+
   # Preview changes without modifying files
   python fix_regex.py --dry-run --verbose
         """,

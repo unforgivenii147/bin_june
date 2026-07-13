@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
+import sys
+import argparse
 from os import scandir as os_scandir
 from pathlib import Path
 
@@ -87,10 +88,6 @@ def get_pyfiles(path: str | Path) -> list[Path]:
 """
 Skip blank lines option with dry run and auto-fix modes.
 """
-
-import argparse
-import sys
-from pathlib import Path
 
 
 def is_blank_line(line: str):

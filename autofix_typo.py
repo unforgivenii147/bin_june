@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Auto typo fixer with pattern learning.
 Learns from common substitution errors (b→n, 8→i, etc.) and user corrections.

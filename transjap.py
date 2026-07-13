@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/env python
 """
 Optimized version of transjap.py for Python 3.12.
 Translates Japanese comments and docstrings in Python files to English.
@@ -10,7 +10,7 @@ import re
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Final, Any
+from typing import Any, Final
 
 from deep_translator import GoogleTranslator
 

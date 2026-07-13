@@ -1,12 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import builtins
 import re
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 env_vars = set()
 env_var_pattern = re.compile(r"^([A-Z_0-9]+)=")

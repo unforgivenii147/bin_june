@@ -2,13 +2,11 @@
 import argparse
 import os
 import sys
+from collections import deque
 from collections.abc import Callable, Iterable
 from os import scandir as os_scandir
 from pathlib import Path
 from time import perf_counter as pff
-
-from pathlib import Path
-from collections import deque
 
 
 def is_python_file(path: str | Path) -> bool:

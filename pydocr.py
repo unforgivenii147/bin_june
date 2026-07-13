@@ -9,7 +9,27 @@ from os import scandir as os_scandir
 from pathlib import Path
 from textwrap import dedent
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
+    path = Path(path)
+    skip_dirs = {".git", "__pycache__"}
+    queue = deque([path])
+    files = []
+    while queue:
+        current = queue.popleft()
+        try:
+            entries = current.iterdir()
+        except (PermissionError, OSError):
+            continue
+        for item in entries:
+            if item.is_symlink():
+                continue
+            if item.is_dir() and item.name not in skip_dirs:
+                queue.append(item)
+            elif item.is_file():
+                if ext is None or item.suffix in ext:
+                    files.append(item)
+    return files
 
 
 def unique_path(path: Path | str) -> Path:
@@ -37,40 +57,8 @@ def unique_path(path: Path | str) -> Path:
 def _clean_fname(path: Path) -> Path:
     from re import sub as re_sub
 
-    clean_name = re_sub(r"(_\d+)+", "", path.name)
+    clean_name = re_sub("(_\\d+)+", "", path.name)
     return path.with_name(clean_name)
-
-
-def get_files(path: str | Path, include_hidden: bool = True, ext: list[str] | None = None) -> list[Path]:
-    path = Path(path)
-    if not path.exists():
-        raise FileNotFoundError(f"Path does not exist: {path}")
-    if not path.is_dir():
-        raise NotADirectoryError(f"Path is not a directory: {path}")
-
-    ext = tuple(ext) if ext else None
-    files = []
-    stack = [path]
-
-    while stack:
-        current = stack.pop()
-        try:
-            with os_scandir(current) as entries:
-                for entry in entries:
-                    if entry.is_symlink():
-                        continue
-                    if entry.is_dir(follow_symlinks=False):
-                        if entry.name not in SKIP_DIRS:
-                            stack.append(entry)
-                    elif entry.is_file(follow_symlinks=False):
-                        if not include_hidden and entry.name.startswith("."):
-                            continue
-                        if ext is None or entry.name.endswith(ext):
-                            files.append(Path(entry.path))
-        except (PermissionError, OSError):
-            continue
-
-    return sorted(files)
 
 
 cwd = Path.cwd()
@@ -97,7 +85,7 @@ def extract_ast_docs(src: str) -> tuple[str, list, list]:
     try:
         tree = ast.parse(src)
     except Exception:
-        return "", [], []
+        return ("", [], [])
     module_doc = dedent(ast.get_docstring(tree) or "").strip()
     functions = []
     classes = []
@@ -112,7 +100,7 @@ def extract_ast_docs(src: str) -> tuple[str, list, list]:
             doc = dedent(doc).strip()
             if doc:
                 classes.append((node.name, doc))
-    return module_doc, functions, classes
+    return (module_doc, functions, classes)
 
 
 def extract_from_file(py_path: str) -> tuple[str, str, str, list, list]:
@@ -121,9 +109,9 @@ def extract_from_file(py_path: str) -> tuple[str, str, str, list, list]:
     except Exception:
         return None
     module_doc, functions, classes = extract_ast_docs(src)
-    if not module_doc and not functions and not classes:
+    if not module_doc and (not functions) and (not classes):
         return None
-    return module_doc, functions, classes
+    return (module_doc, functions, classes)
 
 
 def extract_from_importable(name: str):
@@ -138,14 +126,14 @@ def extract_from_importable(name: str):
         doc = dedent(inspect.getdoc(module) or "").strip()
         if not doc:
             return None
-        return doc, [], []
+        return (doc, [], [])
 
 
 def module_to_md_paths(name: str) -> tuple[str, str]:
     parts = name.split(".")
     folder = BASE_DIR.joinpath(*parts[:-1])
     filename = f"{parts[-1]}.md"
-    return str(folder), str(folder / filename)
+    return (str(folder), str(folder / filename))
 
 
 def file_to_md_paths(py_file: str, root: str) -> tuple[str, str]:
@@ -153,7 +141,7 @@ def file_to_md_paths(py_file: str, root: str) -> tuple[str, str]:
     parts = list(rel.parts)
     parts[-1] = parts[-1].replace(".py", ".md")
     outfile = BASE_DIR.joinpath(*parts)
-    return str(outfile.parent), str(outfile)
+    return (str(outfile.parent), str(outfile))
 
 
 def save_markdown(folder: str, path: str, content: str) -> None:
@@ -209,16 +197,6 @@ def main() -> None:
             pending.popleft().get()
 
 
-"""
-    print(f"processing {len(importable)} importable")
-    with get_context('spawn').Pool(8) as pool:
-        pending=deque()
-        for x in importables:
-            pending.append(pool.apply_async(process_importable_task, (x,)))
-            if len(pending)>16:
-                pending.popleft().get()
-        while pending:
-            pending.popleft().get()
-"""
+"\n    print(f\"processing {len(importable)} importable\")\n    with get_context('spawn').Pool(8) as pool:\n        pending=deque()\n        for x in importables:\n            pending.append(pool.apply_async(process_importable_task, (x,)))\n            if len(pending)>16:\n                pending.popleft().get()\n        while pending:\n            pending.popleft().get()\n"
 if __name__ == "__main__":
     main()

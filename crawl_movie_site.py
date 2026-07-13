@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import re
 from urllib.parse import urljoin
 
@@ -8,7 +7,6 @@ import requests
 from bs4 import BeautifulSoup
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 BASE_URL = "https://sr.moviesho.com/Series/"
 OUTPUT_FILE = "movies.txt"

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 LZMA Recursive File Compressor/Decompressor
 Compresses and decompresses files using LZMA with parallel processing and streaming.

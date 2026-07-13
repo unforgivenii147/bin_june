@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Detect and optionally remove repeated multi-line blocks in all text-based files
 under the current directory.

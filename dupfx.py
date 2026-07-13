@@ -9,7 +9,6 @@ from xxhash import xxh64
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 DEFAULT_BLOCK = 32768
 QUICK_READ = 4096
 CHUNK_SIZE = 65536  # Was missing - critical fix

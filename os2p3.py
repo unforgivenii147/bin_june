@@ -1,11 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import re
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 OS_PATH_TO_PATHLIB = {
     "os\\.path\\.join\\(": "Path(",

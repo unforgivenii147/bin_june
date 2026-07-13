@@ -15,7 +15,6 @@ from typing import Dict, List, Optional, Set, Tuple
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 # Configuration
 DH_SOURCE_PATH = Path.home() / "isaac" / "pkgs" / "dh" / "src" / "dh"
 DH_MODULE_NAME = "dh"
@@ -303,22 +302,22 @@ def parse_args() -> argparse.Namespace:
 Examples:
   # Process current directory recursively
   %(prog)s
-  
+
   # Process specific files
   %(prog)s script1.py script2.py
-  
+
   # Process specific directories
   %(prog)s src/ tests/
-  
+
   # Mix files and directories
   %(prog)s main.py src/ tests/utils.py
-  
+
   # Dry run to preview changes
   %(prog)s --dry-run
-  
+
   # Custom dh module path
   %(prog)s --dh-path /path/to/dh/src/dh src/
-  
+
   # Parallel processing with specific workers
   %(prog)s --workers 4 src/ tests/
         """,

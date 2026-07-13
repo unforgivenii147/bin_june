@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/env python
 """
 Translate mixed-language files containing Tamil, Chinese, and English text.
 Handles auto-detection of language and provides resilient translation with retry logic.

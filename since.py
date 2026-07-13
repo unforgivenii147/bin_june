@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Persian to Gregorian Date Converter with Days Since Calculator
 Converts Persian (Solar Hijri) dates to Gregorian dates and calculates days since

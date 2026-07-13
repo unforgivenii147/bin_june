@@ -7,15 +7,15 @@ Uses memory-efficient os.walk traversal with progress reporting
 and optimized filesystem walking strategies.
 """
 
-import os
-import sys
-import stat
-from pathlib import Path
-from multiprocessing import Pool, cpu_count
-from typing import Tuple, Iterator, Set, Optional
 import logging
 import mimetypes
+import os
+import stat
+import sys
 from functools import lru_cache
+from multiprocessing import Pool, cpu_count
+from pathlib import Path
+from typing import Iterator, Optional, Set, Tuple
 
 from dh import BIN_EXT
 

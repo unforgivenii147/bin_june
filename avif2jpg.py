@@ -5,7 +5,6 @@ from PIL import Image
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 input_dir = Path("avif_images")
 output_dir = Path("jpg_images")
 output_dir.mkdir(exist_ok=True, parents=True)

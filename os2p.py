@@ -1,6 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/env python
-
-
+from termcolor import cprint
+from typing import Any, List, Optional, Set, Tuple
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from collections import deque
+import traceback
+import sys
+import ast
 from os import scandir as os_scandir
 from pathlib import Path
 
@@ -9,7 +14,7 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
-    units = "B", "KB", "MB", "GB", "TB"
+    units = ("B", "KB", "MB", "GB", "TB")
     if sz == 0:
         return "0 B"
     i = min((int(sz).bit_length() - 1) // 10, len(units) - 1)
@@ -30,51 +35,32 @@ def gsz(path: str | Path) -> int:
     return total
 
 
-def get_files(path: str | Path, include_hidden: bool = True, ext: list[str] | None = None) -> list[Path]:
+"\nEnhanced AST-based refactoring from os/path to pathlib.\nComprehensive coverage of os and os.path operations.\n"
+
+
+def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
-    if not path.exists():
-        raise FileNotFoundError(f"Path does not exist: {path}")
-    if not path.is_dir():
-        raise NotADirectoryError(f"Path is not a directory: {path}")
-
-    ext = tuple(ext) if ext else None
+    skip_dirs = {".git", "__pycache__"}
+    queue = deque([path])
     files = []
-    stack = [path]
-
-    while stack:
-        current = stack.pop()
+    while queue:
+        current = queue.popleft()
         try:
-            with os_scandir(current) as entries:
-                for entry in entries:
-                    if entry.is_symlink():
-                        continue
-                    if entry.is_dir(follow_symlinks=False):
-                        if entry.name not in SKIP_DIRS:
-                            stack.append(entry)
-                    elif entry.is_file(follow_symlinks=False):
-                        if not include_hidden and entry.name.startswith("."):
-                            continue
-                        if ext is None or entry.name.endswith(ext):
-                            files.append(Path(entry.path))
+            entries = current.iterdir()
         except (PermissionError, OSError):
             continue
+        for item in entries:
+            if item.is_symlink():
+                continue
+            if item.is_dir() and item.name not in skip_dirs:
+                queue.append(item)
+            elif item.is_file():
+                if ext is None or item.suffix in ext:
+                    files.append(item)
+    return files
 
-    return sorted(files)
 
-
-"""
-Enhanced AST-based refactoring from os/path to pathlib.
-Comprehensive coverage of os and os.path operations.
-"""
-
-import ast
-import sys
-import traceback
-from concurrent.futures import ProcessPoolExecutor, as_completed
-from pathlib import Path
-from typing import Any, List, Optional, Set, Tuple
-
-from termcolor import cprint
+"\nEnhanced AST-based refactoring from os/path to pathlib.\nComprehensive coverage of os and os.path operations.\n"
 
 
 class PathlibTransformer(ast.NodeTransformer):
@@ -182,16 +168,16 @@ class PathlibTransformer(ast.NodeTransformer):
         return (
             isinstance(node, ast.Attribute)
             and isinstance(node.value, ast.Name)
-            and node.value.id == self.os_var_name
-            and node.attr == "path"
+            and (node.value.id == self.os_var_name)
+            and (node.attr == "path")
         )
 
     def _is_os_call(self, node: ast.Call, func_name: str) -> bool:
         return (
             isinstance(node.func, ast.Attribute)
             and isinstance(node.func.value, ast.Name)
-            and node.func.value.id == self.os_var_name
-            and node.func.attr == func_name
+            and (node.func.value.id == self.os_var_name)
+            and (node.func.attr == func_name)
         )
 
     def _is_os_path_call(self, node: ast.Call, func_name: str) -> bool:
@@ -199,16 +185,16 @@ class PathlibTransformer(ast.NodeTransformer):
             isinstance(node.func, ast.Attribute)
             and isinstance(node.func.value, ast.Attribute)
             and isinstance(node.func.value.value, ast.Name)
-            and node.func.value.value.id == self.os_var_name
-            and node.func.value.attr == "path"
-            and node.func.attr == func_name
+            and (node.func.value.value.id == self.os_var_name)
+            and (node.func.value.attr == "path")
+            and (node.func.attr == func_name)
         ):
             return True
         if (
             isinstance(node.func, ast.Attribute)
             and isinstance(node.func.value, ast.Name)
-            and node.func.value.id == self.os_path_var_name
-            and node.func.attr == func_name
+            and (node.func.value.id == self.os_path_var_name)
+            and (node.func.attr == func_name)
         ):
             return True
         return False
@@ -252,7 +238,7 @@ class PathlibTransformer(ast.NodeTransformer):
             return self._transform_stat_call(node, target)
         elif target == "samefile":
             return self._transform_samefile(node)
-        elif isinstance(target, str) and not isinstance(target, tuple):
+        elif isinstance(target, str) and (not isinstance(target, tuple)):
             new_node = ast.Attribute(
                 value=self._ensure_path(node.args[0] if node.args else ast.Constant(value=".")),
                 attr=target,
@@ -343,7 +329,7 @@ class PathlibTransformer(ast.NodeTransformer):
             if (
                 isinstance(node.func, ast.Attribute)
                 and isinstance(node.func.value, ast.Name)
-                and node.func.value.id in self.pathlib_imports
+                and (node.func.value.id in self.pathlib_imports)
             ):
                 return node
         return ast.Call(func=ast.Name(id="Path", ctx=ast.Load()), args=[node], keywords=[])
@@ -511,11 +497,7 @@ class PathlibTransformer(ast.NodeTransformer):
         if not node.args:
             return node
         path_arg = node.args[0]
-        walk_code = f"""(
-            (str(root), [d.name for d in root.iterdir() if d.is_dir()], 
-             [f.name for f in root.iterdir() if f.is_file()])
-            for root in Path({ast.unparse(path_arg)}).rglob('*') if root.is_dir()
-        )"""
+        walk_code = f"(\n            (str(root), [d.name for d in root.iterdir() if d.is_dir()], \n             [f.name for f in root.iterdir() if f.is_file()])\n            for root in Path({ast.unparse(path_arg)}).rglob('*') if root.is_dir()\n        )"
         self.warnings.append(f"os.walk converted to simplified generator - verify correctness")
         try:
             walk_ast = ast.parse(walk_code, mode="eval")
@@ -588,18 +570,18 @@ def process_file(
         for warning in transformer.warnings:
             cprint(f"  ⚠️ {warning}", "yellow")
         if transformer.infos or transformer.warnings:
-            cprint(f"{'📝' if dry_run else '✓'} Refactored: {file_path.name}", "green" if not dry_run else "yellow")
-        return new_content, True, transformer.warnings, transformer.infos
+            cprint(f"{('📝' if dry_run else '✓')} Refactored: {file_path.name}", "green" if not dry_run else "yellow")
+        return (new_content, True, transformer.warnings, transformer.infos)
     except SyntaxError as e:
         cprint(f"✗ Syntax error in {file_path.name}: {e}", "red")
         if verbose:
             traceback.print_exc()
-        return None, False, [], []
+        return (None, False, [], [])
     except Exception as e:
         cprint(f"✗ Error processing {file_path.name}: {e}", "red")
         if verbose:
             traceback.print_exc()
-        return None, False, [], []
+        return (None, False, [], [])
 
 
 def main() -> int:
@@ -607,14 +589,7 @@ def main() -> int:
 
     parser = argparse.ArgumentParser(
         description="Refactor Python files from os/path to pathlib",
-        epilog="""
-Examples:
-  %(prog)s                    # Process all Python files in current directory
-  %(prog)s script.py          # Process a single file
-  %(prog)s src/               # Process all Python files in src directory
-  %(prog)s --dry-run .        # Preview changes without modifying
-  %(prog)s --verbose file.py  # Show detailed output
-        """,
+        epilog="\nExamples:\n  %(prog)s                    # Process all Python files in current directory\n  %(prog)s script.py          # Process a single file\n  %(prog)s src/               # Process all Python files in src directory\n  %(prog)s --dry-run .        # Preview changes without modifying\n  %(prog)s --verbose file.py  # Show detailed output\n        ",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("paths", nargs="*", help="Files or directories to process")
@@ -652,14 +627,14 @@ Examples:
             file_path = future_to_file[future]
             try:
                 new_content, success, warnings, infos = future.result()
-                results[file_path] = new_content, success, warnings, infos
+                results[file_path] = (new_content, success, warnings, infos)
                 total_warnings += len(warnings)
                 total_changes += len(infos)
             except Exception as e:
                 cprint(f"✗ Failed to process {file_path.name}: {e}", "red")
                 if args.verbose:
                     traceback.print_exc()
-                results[file_path] = None, False, [], []
+                results[file_path] = (None, False, [], [])
     modified_count = 0
     for file_path, (new_content, success, warnings, infos) in results.items():
         if success and new_content and (infos or warnings):

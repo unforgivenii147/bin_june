@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """Create .deb files from installed Termux packages."""
 
 import logging
@@ -11,7 +10,6 @@ from pathlib import Path
 from typing import List
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 DEB_DIR = Path.home() / "debs"
 EXCLUDED_PKGS = {

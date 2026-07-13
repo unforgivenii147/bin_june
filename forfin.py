@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 run_script.py - Run a CLI app over all files with a specific extension in current directory
 Usage: python run_script.py <extension> <cli_app> [args...]

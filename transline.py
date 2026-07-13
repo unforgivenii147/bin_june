@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/env python
 """
 Optimized version of transline.py for Python 3.12.
 In-place translation of Chinese characters in text files with progress persistence.
@@ -12,7 +12,7 @@ import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
-from typing import Final, Any
+from typing import Any, Final
 
 from deep_translator import GoogleTranslator
 from tenacity import before_sleep_log, retry, retry_if_exception_type, stop_after_attempt, wait_exponential_jitter

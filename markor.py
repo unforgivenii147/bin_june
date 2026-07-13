@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import operator
 import sys
 from abc import ABC, abstractmethod

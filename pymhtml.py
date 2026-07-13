@@ -2,63 +2,52 @@
 import base64
 import re
 import sys
+from collections import deque
 from email import policy
 from email.message import EmailMessage
 from email.parser import BytesParser
 from os import scandir as os_scandir
 from pathlib import Path
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
-def get_files(path: str | Path, include_hidden: bool = True, ext: list[str] | None = None) -> list[Path]:
+def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
-    if not path.exists():
-        raise FileNotFoundError(f"Path does not exist: {path}")
-    if not path.is_dir():
-        raise NotADirectoryError(f"Path is not a directory: {path}")
-
-    ext = tuple(ext) if ext else None
+    skip_dirs = {".git", "__pycache__"}
+    queue = deque([path])
     files = []
-    stack = [path]
-
-    while stack:
-        current = stack.pop()
+    while queue:
+        current = queue.popleft()
         try:
-            with os_scandir(current) as entries:
-                for entry in entries:
-                    if entry.is_symlink():
-                        continue
-                    if entry.is_dir(follow_symlinks=False):
-                        if entry.name not in SKIP_DIRS:
-                            stack.append(entry)
-                    elif entry.is_file(follow_symlinks=False):
-                        if not include_hidden and entry.name.startswith("."):
-                            continue
-                        if ext is None or entry.name.endswith(ext):
-                            files.append(Path(entry.path))
+            entries = current.iterdir()
         except (PermissionError, OSError):
             continue
-
-    return sorted(files)
+        for item in entries:
+            if item.is_symlink():
+                continue
+            if item.is_dir() and item.name not in skip_dirs:
+                queue.append(item)
+            elif item.is_file():
+                if ext is None or item.suffix in ext:
+                    files.append(item)
+    return files
 
 
 def sanitize_filename(name: str) -> str:
     name = name.strip().strip('"').strip("'")
-    return re.sub(r"[^A-Za-z0-9._-]+", "_", name) or "resource"
+    return re.sub("[^A-Za-z0-9._-]+", "_", name) or "resource"
 
 
 def split_data_url(src: str):
     if not src or not src.startswith("data:"):
         return None
-    m = re.match(r"data:([^;]+);base64,(.*)$", src, flags=re.IGNORECASE | re.DOTALL)
+    m = re.match("data:([^;]+);base64,(.*)$", src, flags=re.IGNORECASE | re.DOTALL)
     if not m:
         return None
     mime = m.group(1)
     b64 = m.group(2)
     try:
         raw = base64.b64decode(b64)
-        return mime, raw
+        return (mime, raw)
     except Exception:
         return None
 
@@ -118,7 +107,7 @@ def process_file(path) -> None:
         if filename:
             return sanitize_filename(filename)
         cd = part.get("Content-Disposition") or ""
-        m = re.search(r"filename\*?=(?:UTF-8'')?[\\\"']?([^\\\"';]+)", cd, flags=re.IGNORECASE)
+        m = re.search("filename\\*?=(?:UTF-8'')?[\\\\\\\"']?([^\\\\\\\"';]+)", cd, flags=re.IGNORECASE)
         if m:
             return sanitize_filename(m.group(1))
         return None
@@ -130,7 +119,7 @@ def process_file(path) -> None:
         if ctype == "text/html":
             continue
         ext = None
-        m = re.match(r"^[^/]+/([^;\\s]+)", ctype)
+        m = re.match("^[^/]+/([^;\\\\s]+)", ctype)
         if m:
             ext = m.group(1)
         if ext == "svg+xml":
@@ -140,7 +129,7 @@ def process_file(path) -> None:
         out_path = out_dir / fname
         if out_path.exists():
             p_fname = Path(fname)
-            stem, suffix = p_fname.stem, p_fname.suffix
+            stem, suffix = (p_fname.stem, p_fname.suffix)
             i = 1
             while True:
                 cand = out_dir / f"{stem}_{i}{suffix}"
@@ -159,7 +148,7 @@ def process_file(path) -> None:
         return match.group(0)
 
     html_text = re.sub(
-        r"(src|href)=[\\\"']cid:([^\\\"']+)[\\\"']",
+        "(src|href)=[\\\\\\\"']cid:([^\\\\\\\"']+)[\\\\\\\"']",
         lambda m: (
             f'{m.group(1)}="{out_dir.name}/{cid_to_file.get(m.group(2), m.group(2))}"'
             if m.group(2) in cid_to_file
@@ -177,7 +166,7 @@ def process_file(path) -> None:
             return match.group(0)
         mime, raw = parsed
         ext = None
-        m = re.match(r"^[^/]+/([^;\\s]+)", mime)
+        m = re.match("^[^/]+/([^;\\\\s]+)", mime)
         if m:
             ext = m.group(1)
         if ext == "svg+xml":
@@ -189,7 +178,9 @@ def process_file(path) -> None:
             f.write(raw)
         return f'{attr}="{out_dir.name}/{fname}"'
 
-    html_text = re.sub(r"(src|href)=[\\\"'](data:[^\\\"']+)[\\\"']", data_uri_replacer, html_text, flags=re.IGNORECASE)
+    html_text = re.sub(
+        "(src|href)=[\\\\\\\"'](data:[^\\\\\\\"']+)[\\\\\\\"']", data_uri_replacer, html_text, flags=re.IGNORECASE
+    )
     with out_html.open("w", encoding="utf-8") as f:
         f.write(html_text)
     print("Done.")

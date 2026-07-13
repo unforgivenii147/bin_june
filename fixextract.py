@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Fix mis-extracted .zst files where a directory contains a file with the same name.
 Example: __init__.py/__init__.py -> __init__.py (file)

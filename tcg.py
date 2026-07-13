@@ -10,9 +10,6 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 TERMUX_SHEBANGS = {
     "python": "#!/data/data/com.termux/files/usr/bin/env python",
     "bash": "#!/data/data/com.termux/files/usr/bin/env bash",
@@ -61,6 +58,9 @@ def replace_shebang(content: str, lang: str) -> str:
 
 def archive_existing_file(file_path: Path) -> None:
     if not file_path.exists():
+        return
+    parent_name = file_path.parent.name
+    if parent_name not in {"bin", "bashbin", ".bin"}:
         return
     ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -129,12 +129,12 @@ def main() -> None:
         # Determine language from file extension
         lang = get_language_from_extension(filename)
         content = replace_shebang(content, lang)
-        print(f"✓ Added {lang} shebang")
+    #        print(f"✓ Added {lang} shebang")
 
     # Write the file
     try:
         output_path.write_text(content)
-        print(f"✓ Created: {output_path}")
+    #        print(f"✓ Created: {output_path}")
     except OSError as e:
         print(f"Error writing file: {e}", file=sys.stderr)
         sys.exit(1)
@@ -142,7 +142,7 @@ def main() -> None:
     # Make executable if in a bin directory
     if is_script_dir:
         output_path.chmod(0o755)  # rwxr-xr-x
-        print(f"✓ Made executable: {output_path}")
+        #        print(f"✓ Made executable: {output_path}")
         create_symlink(output_path)
 
 

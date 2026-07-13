@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Network State Script
 Displays your public IP, local IP, primary/secondary DNS, and approximate internet speed.
@@ -165,7 +164,6 @@ def main() -> None:
 
     print("
 " + "=" * 50)
-
 
 """
 if __name__ == "__main__":

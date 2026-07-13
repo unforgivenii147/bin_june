@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/env python
 """
 ziprepo_optimized_by_gemini.py — Download a GitHub repository as ZIP.
 Optimized for Python 3.12 with modern syntax, type hints, and performance improvements.

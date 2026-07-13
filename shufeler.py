@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import argparse
 import mmap
 import random
@@ -9,7 +8,6 @@ import sys
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 MMAP_THRESHOLD_BYTES = 1 * 1024 * 1024
 

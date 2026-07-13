@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Convert pyproject.toml → setup.py, preserving setup.cfg & MANIFEST.in.
 Handles C-extensions: setuptools, scikit-build-core, meson-python.

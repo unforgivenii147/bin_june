@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Convert OTF files to TTF recursively using multiprocessing.
 Removes original OTF files after successful conversion.

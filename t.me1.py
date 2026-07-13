@@ -1,12 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import re
 
 from telethon import TelegramClient
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 API_ID = "your_api_id"
 API_HASH = "your_api_hash"

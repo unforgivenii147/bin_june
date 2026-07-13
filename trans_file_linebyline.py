@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/env python
 """
 Optimized version of trans_file_linebyline.py for Python 3.12.
 Translates non-English lines in a file line by line in-place.

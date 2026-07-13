@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/env python
 """
 Optimized version of transchin.py for Python 3.12.
 Translates non-English characters in files in-place using parallel processing.

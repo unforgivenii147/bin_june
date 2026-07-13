@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 merge_to_single.py
 
@@ -30,7 +29,6 @@ from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 MAX_DEFAULT = 10
 

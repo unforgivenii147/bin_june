@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Find files with uppercase extensions in current directory recursively.
 Optionally convert them to lowercase using -a or --autofix flag.

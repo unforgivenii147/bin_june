@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/env python
 """
 zstder_optimized_by_gemini.py — Recursive Zstandard compression/decompression tool.
 Optimized for Python 3.12 with modern syntax, type hints, and performance improvements.

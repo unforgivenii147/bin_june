@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Strip docstrings from Python files in the current directory (non-recursive),
 preserving the module docstring (topmost docstring in the module).

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 zser – pathlib + joblib parallel compressor/decompressor
 No size threshold (only skip zero-byte files).

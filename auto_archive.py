@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 auto_compress.py
 Benchmark multiple compression algorithms on a file or directory,

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/env python
 """
 Optimized version of transwords.py for Python 3.12.
 Translates chunks of words.txt from Persian to English in parallel.

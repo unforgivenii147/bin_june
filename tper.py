@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import json
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -11,7 +10,6 @@ from deep_translator import GoogleTranslator
 from tqdm import tqdm
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 INPUT_FILE = "words.txt"
 OUTPUT_FILE = "dic.json"

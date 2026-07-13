@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Convert OTF to TTF recursively using FontForge Python bindings.
 Usage: fontforge -script otf2ttf_fontforge.py [directory]

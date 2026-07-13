@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Apply all available 2to3 fixes to Python files using multiprocessing.
 Uses lib2to3 module directly without subprocess.
@@ -16,7 +15,6 @@ from pathlib import Path
 from typing import List, Tuple
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 logging.getLogger("lib2to3").setLevel(logging.WARNING)
 

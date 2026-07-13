@@ -1,15 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import re
 import sys
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 # WARNING: Source code for 'atomic_write' not found.
-
 
 LOCAL_FONT_BASE = Path("/sdcard/_static/fonts")
 FONT_EXTS = {".woff", ".woff2", ".ttf", ".otf", ".eot"}

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Extract entities (classes, functions, constants) from Python files recursively.
 

@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 MAX_DIRS = 25
 MIN_SIZE_KB = 100
 OUTPUT_FILENAME = "dirinfo.png"

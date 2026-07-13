@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/env python
 """
 Optimized version of vitrans.py for Python 3.12.
 Translates Vietnamese text files to English using Google Translate via deep_translator.
@@ -14,13 +14,7 @@ from pathlib import Path
 from typing import Final, NoReturn
 
 from deep_translator import GoogleTranslator
-from tenacity import (
-    before_sleep_log,
-    retry,
-    retry_if_exception_type,
-    stop_after_attempt,
-    wait_exponential_jitter,
-)
+from tenacity import before_sleep_log, retry, retry_if_exception_type, stop_after_attempt, wait_exponential_jitter
 
 # Constants
 MAX_CHUNK_CHARS: Final[int] = 4800

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Brotli Recursive File Compressor/Decompressor
 Compresses and decompresses files using Brotli with parallel processing and streaming.

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import random
 import string
 import sys
@@ -8,7 +7,6 @@ import traceback
 from importlib.machinery import SourceFileLoader
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 if __name__ == "__main__":
     files = sys.argv[1:]

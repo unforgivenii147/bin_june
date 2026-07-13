@@ -1,13 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import argparse
 import re
 import sys
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 TIMESTAMP_RE = re.compile(r"(\d{2}:\d{2}:\d{2},\d{3})\s-->\s(\d{2}:\d{2}:\d{2},\d{3})")
 ONE_SEC_MS = 1000

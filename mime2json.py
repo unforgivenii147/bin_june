@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 from __future__ import annotations
 
 import json
@@ -8,7 +7,6 @@ from collections import defaultdict
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 OUTPUT_FILE = Path("mime_to_ext.json")
 

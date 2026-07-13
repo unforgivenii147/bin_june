@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/env python
 """
 Optimized version of transformimports.py for Python 3.12.
 Transforms direct imports (import module) to from-imports (from module import name).

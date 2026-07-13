@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import json
 from collections import defaultdict
 from os import scandir as os_scandir

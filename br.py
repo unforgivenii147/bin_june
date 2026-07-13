@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 brotli_compress.py — Recursive brotli compression/decompression tool.
 

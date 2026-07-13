@@ -10,7 +10,6 @@ from dh import PKG_MAPPING, STDLIB
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 STD_LIB = STDLIB
 MAPPING = PKG_MAPPING
 try:

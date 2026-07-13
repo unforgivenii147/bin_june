@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """Check for Python packages with missing console scripts in system bin directory."""
 
 import multiprocessing as mp

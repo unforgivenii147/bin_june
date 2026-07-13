@@ -7,7 +7,6 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 THRESHOLD = 5 * 1024 * 1024
 RE_REPEAT = re.compile(r"^(.)\1+$", re.IGNORECASE)
 

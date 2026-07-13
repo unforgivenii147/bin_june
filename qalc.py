@@ -12,8 +12,8 @@ import argparse
 import math
 import re
 import sys
-from typing import Union, Dict, Callable, Any
 from decimal import Decimal, getcontext
+from typing import Any, Callable, Dict, Union
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

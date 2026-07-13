@@ -9,7 +9,6 @@ from telethon import TelegramClient
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 env_path = Path.home() / ".env"
 load_dotenv(env_path)
 api_id = os.environ.get("API_ID")

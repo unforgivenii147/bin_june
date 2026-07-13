@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/env python
 """
 Persian to English word translator using parallel processing.
 Optimized for Python 3.12.

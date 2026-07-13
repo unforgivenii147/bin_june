@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/env python
 """
 Automatically scan directory and translate non-English text files.
 Optimized for Python 3.12.

@@ -43,7 +43,6 @@ try:
 except ImportError:
     lz4 = None
 
-
 EXTENSION_MAP = {
     ".txt": {"algo": "brotli", "level": 11},
     ".log": {"algo": "brotli", "level": 11},

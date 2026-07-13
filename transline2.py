@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/env python
 """
 Optimized version of transline2.py for Python 3.12.
 Parallel translation of text files in a directory or specified paths.

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import sys
 import zipfile
 from pathlib import Path
@@ -9,7 +8,6 @@ from wheel.archive import wheel_load
 from wheel.wheelfile import WheelFile
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 UNPACKED_WHEELS_SOURCE_DIR = Path.cwd()
 WHEELS_OUTPUT_DIR = None

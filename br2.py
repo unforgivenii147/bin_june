@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import argparse
 import sys
 import tarfile
@@ -10,7 +9,6 @@ from pathlib import Path
 from brotlicffi import Compressor, Decompressor
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 CHUNK_SIZE = 32768
 LARGE_FILE_THRESHOLD = 2 * 1024 * 1024

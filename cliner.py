@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import mmap
 import re
 from collections.abc import Callable, Iterable

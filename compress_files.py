@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import argparse
 import sys
 import textwrap
@@ -11,7 +10,6 @@ from typing import List, Tuple
 import lzma_mt
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 ARCHIVE_EXTENSIONS = {
     ".zip",
@@ -214,7 +212,7 @@ def main():
               python compress_files.py -d /path/to/files
               python compress_files.py -c /path/to/files --num-workers 8
               python compress_files.py --keep-orig
-            
+
             Excluded by default:
               - Directories: .git, __pycache__, .venv, venv, node_modules
               - Archives: .zip, .br, .xz, .gz, .bz2, .bz3, .zst, .7z, .lz4, etc.

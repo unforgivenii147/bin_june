@@ -1,13 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import re
 from pathlib import Path
 
 from bs4 import BeautifulSoup
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 meta_tag_pattern = re.compile(r"<meta[^>]*>", re.IGNORECASE)
 

@@ -6,12 +6,12 @@ verifies they are actually text-based files, and reports mismatches.
 Uses memory-efficient os.walk traversal with progress reporting.
 """
 
-import os
-from pathlib import Path
-from multiprocessing import Pool, cpu_count
-from typing import Tuple, Iterator, Set
 import logging
 import mimetypes
+import os
+from multiprocessing import Pool, cpu_count
+from pathlib import Path
+from typing import Iterator, Set, Tuple
 
 from dh import TXT_EXT
 

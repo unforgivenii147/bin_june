@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Subtitle Downloader - Download English subtitles for movies/TV shows by name
 Usage: python get_sub.py "movie_or_series_name"

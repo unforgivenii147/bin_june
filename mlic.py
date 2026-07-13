@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Find repeated multiline strings in text files recursively.
 Supports parallel processing, removal, and saving of found strings.
@@ -15,7 +14,6 @@ from pathlib import Path
 from typing import Dict, List, Set, Tuple
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 MIN_LINES = 3
 MIN_CHARS = 100

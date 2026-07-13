@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import argparse
 import sys
 from pathlib import Path
@@ -9,7 +8,6 @@ from deep_translator import GoogleTranslator, single_detection
 from deep_translator.google import GoogleTranslator
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 CHUNK_SIZE = 2000
 ALLOWED_EXT = {".txt", ".md", ".csv", ".json", ".py"}

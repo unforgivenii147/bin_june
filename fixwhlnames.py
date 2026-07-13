@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Fix batch-renamed .whl files by reading METADATA from inside each wheel.
 This is the most accurate method as it extracts the real distribution name and version.

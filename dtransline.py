@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/env python
 """
 Alternative version using deep-translator for in-place translation.
 Requires: deep-translator

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/env python
 """
 zreport_optimized_by_gemini.py — Report uncompressed sizes of compressed files.
 Optimized for Python 3.12 with modern syntax, type hints, and performance improvements.
@@ -13,7 +13,7 @@ import sys
 import tarfile
 import zipfile
 from pathlib import Path
-from typing import Final, Callable, Optional
+from typing import Callable, Final, Optional
 
 # Constants
 SKIP_DIRS: Final[frozenset[str]] = frozenset({
@@ -25,8 +25,9 @@ SKIP_DIRS: Final[frozenset[str]] = frozenset({
     ".pytest_cache",
 })
 
-
 # Optional dependency imports
+
+
 def _try_import(module_name: str):
     try:
         import importlib
@@ -75,6 +76,8 @@ def _tar_size(fileobj, mode="r:*") -> Optional[int]:
 
 
 # Size calculation handlers
+
+
 def get_zst_size(path: Path) -> tuple[Optional[int], Optional[str]]:
     if not zstd:
         return None, "zstandard not installed"

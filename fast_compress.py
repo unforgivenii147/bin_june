@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Recursive file compression/decompression tool using Zstandard.
 Compresses files in current directory recursively, skipping certain extensions and .git folders.

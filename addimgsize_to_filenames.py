@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import sys
 from multiprocessing import Pool, cpu_count
 from pathlib import Path

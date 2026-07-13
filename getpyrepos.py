@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 GitHub Python Repositories Fetcher
 Usage: python script.py [username]

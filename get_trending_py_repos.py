@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import csv
 import json
 from dataclasses import asdict, dataclass
@@ -10,7 +9,6 @@ import requests
 from bs4 import BeautifulSoup
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 BASE_URL = "https://github.com/trending/python"
 TIMEFRAMES = ["daily", "weekly", "monthly"]

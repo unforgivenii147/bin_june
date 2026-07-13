@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/env python
 """
 Optimized version of transasis.py for Python 3.12.
 Translates text files to English recursively or individually.

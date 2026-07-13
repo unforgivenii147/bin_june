@@ -21,7 +21,6 @@ from typing import Dict, List, Tuple
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 EXCLUDED_PREFIXES = ["#!", "# type", "# fmt", "# pylint", "# ruff", "# mypy"]
 
 

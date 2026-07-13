@@ -1,14 +1,33 @@
 #!/data/data/com.termux/files/usr/bin/env python
-
-
 import sys
 import tarfile
 import zipfile
+from collections import deque
 from collections.abc import Callable, Iterable
 from os import scandir as os_scandir
 from pathlib import Path
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
+    path = Path(path)
+    skip_dirs = {".git", "__pycache__"}
+    queue = deque([path])
+    files = []
+    while queue:
+        current = queue.popleft()
+        try:
+            entries = current.iterdir()
+        except (PermissionError, OSError):
+            continue
+        for item in entries:
+            if item.is_symlink():
+                continue
+            if item.is_dir() and item.name not in skip_dirs:
+                queue.append(item)
+            elif item.is_file():
+                if ext is None or item.suffix in ext:
+                    files.append(item)
+    return files
 
 
 def unique_path(path: Path | str) -> Path:
@@ -36,7 +55,7 @@ def unique_path(path: Path | str) -> Path:
 def _clean_fname(path: Path) -> Path:
     from re import sub as re_sub
 
-    clean_name = re_sub(r"(_\d+)+", "", path.name)
+    clean_name = re_sub("(_\\d+)+", "", path.name)
     return path.with_name(clean_name)
 
 
@@ -44,39 +63,7 @@ def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
-    return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
-
-
-def get_files(path: str | Path, include_hidden: bool = True, ext: list[str] | None = None) -> list[Path]:
-    path = Path(path)
-    if not path.exists():
-        raise FileNotFoundError(f"Path does not exist: {path}")
-    if not path.is_dir():
-        raise NotADirectoryError(f"Path is not a directory: {path}")
-
-    ext = tuple(ext) if ext else None
-    files = []
-    stack = [path]
-
-    while stack:
-        current = stack.pop()
-        try:
-            with os_scandir(current) as entries:
-                for entry in entries:
-                    if entry.is_symlink():
-                        continue
-                    if entry.is_dir(follow_symlinks=False):
-                        if entry.name not in SKIP_DIRS:
-                            stack.append(entry)
-                    elif entry.is_file(follow_symlinks=False):
-                        if not include_hidden and entry.name.startswith("."):
-                            continue
-                        if ext is None or entry.name.endswith(ext):
-                            files.append(Path(entry.path))
-        except (PermissionError, OSError):
-            continue
-
-    return sorted(files)
+    return Parallel(n_jobs=-1)((delayed(process_function)(file_str, **kwargs) for file_str in file_strings))
 
 
 def process_file(path: str | Path) -> None:

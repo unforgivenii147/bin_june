@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import base64
 import mimetypes
 import re
@@ -11,7 +10,6 @@ from bs4 import BeautifulSoup
 from bs4.element import AttributeValueList
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 cwd = Path.cwd()
 INPUT_DIR = cwd

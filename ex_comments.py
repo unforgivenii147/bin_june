@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 from collections import defaultdict
 from pathlib import Path
 
@@ -8,7 +7,6 @@ import tree_sitter_python as tsp
 from tree_sitter import Language, Parser, Tree
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 parser = Parser()
 parser.language = Language(tsp.language())

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """Commit all files in current directory to a local git repository.
 Initializes a new repository if not already inside one.
 Automatically pushes to remote if configured.

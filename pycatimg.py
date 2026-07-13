@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 catimg - Display images in terminal with true color support (including SVG)
 """
@@ -15,7 +14,6 @@ from PIL import Image
 from PIL.ImageFile import ImageFile
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 SVG_SUPPORT = True
 

@@ -1,20 +1,38 @@
 #!/data/data/com.termux/files/usr/bin/env python
-
-
 import ctypes
 import os
 import subprocess
 import sys
+from collections import deque
 from os import scandir as os_scandir
 from pathlib import Path
 from typing import List, Optional, Tuple
-
 from loguru import logger
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
+    path = Path(path)
+    skip_dirs = {".git", "__pycache__"}
+    queue = deque([path])
+    files = []
+    while queue:
+        current = queue.popleft()
+        try:
+            entries = current.iterdir()
+        except (PermissionError, OSError):
+            continue
+        for item in entries:
+            if item.is_symlink():
+                continue
+            if item.is_dir() and item.name not in skip_dirs:
+                queue.append(item)
+            elif item.is_file():
+                if ext is None or item.suffix in ext:
+                    files.append(item)
+    return files
+
 
 ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
-
 HIGHLIGHTS = {
     "on_black": 40,
     "on_grey": 40,
@@ -34,7 +52,6 @@ HIGHLIGHTS = {
     "on_light_cyan": 106,
     "on_white": 107,
 }
-
 COLORS = {
     "black": 30,
     "grey": 30,
@@ -54,7 +71,6 @@ COLORS = {
     "light_cyan": 96,
     "white": 97,
 }
-
 RESET = "\x1b[0m"
 
 
@@ -107,38 +123,6 @@ def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
 
 
-def get_files(path: str | Path, include_hidden: bool = True, ext: list[str] | None = None) -> list[Path]:
-    path = Path(path)
-    if not path.exists():
-        raise FileNotFoundError(f"Path does not exist: {path}")
-    if not path.is_dir():
-        raise NotADirectoryError(f"Path is not a directory: {path}")
-
-    ext = tuple(ext) if ext else None
-    files = []
-    stack = [path]
-
-    while stack:
-        current = stack.pop()
-        try:
-            with os_scandir(current) as entries:
-                for entry in entries:
-                    if entry.is_symlink():
-                        continue
-                    if entry.is_dir(follow_symlinks=False):
-                        if entry.name not in SKIP_DIRS:
-                            stack.append(entry)
-                    elif entry.is_file(follow_symlinks=False):
-                        if not include_hidden and entry.name.startswith("."):
-                            continue
-                        if ext is None or entry.name.endswith(ext):
-                            files.append(Path(entry.path))
-        except (PermissionError, OSError):
-            continue
-
-    return sorted(files)
-
-
 logger.remove()
 logger.add(
     "/sdcard/soverify.log", level="ERROR", format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}", rotation="10 MB"
@@ -156,29 +140,29 @@ class CtypesVerifier:
 
     def verify_so_file(self, file_path: Path) -> Tuple[bool, str]:
         if not file_path.exists():
-            return False, "File does not exist"
+            return (False, "File does not exist")
         if not file_path.is_file():
-            return False, "Not a regular file"
+            return (False, "Not a regular file")
         try:
             lib = ctypes.CDLL(str(file_path), use_errno=True)
             err = ctypes.get_errno()
             if err:
                 self.log(f"Warning: errno set to {err} for {file_path.name}")
-            return True, "ok"
+            return (True, "ok")
         except OSError as e:
             error_msg = f"OSError: {e}"
             self.log(f"Failed to load {file_path.name}: {error_msg}", "ERROR")
-            return False, error_msg
+            return (False, error_msg)
         except Exception as e:
             error_msg = f"{type(e).__name__}: {e}"
             self.log(f"Failed to load {file_path.name}: {error_msg}", "ERROR")
-            return False, error_msg
+            return (False, error_msg)
 
     def verify_with_symbols(self, file_path: Path) -> Tuple[bool, dict]:
         can_load, msg = self.verify_so_file(file_path)
         symbol_info = {"can_load": can_load, "message": msg, "has_symbols": False, "symbol_count": 0}
         if not can_load:
-            return False, symbol_info
+            return (False, symbol_info)
         try:
             result = subprocess.run(["nm", str(file_path)], capture_output=True, timeout=10, text=True)
             if result.returncode == 0:
@@ -192,7 +176,7 @@ class CtypesVerifier:
             self.log(f"Symbol extraction timed out for {file_path.name}", "WARNING")
         except Exception as e:
             self.log(f"Could not extract symbols from {file_path.name}: {e}", "ERROR")
-        return can_load, symbol_info
+        return (can_load, symbol_info)
 
 
 def verify_single_file(file_path: Path) -> Optional[bool]:

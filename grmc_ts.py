@@ -10,7 +10,6 @@ from tree_sitter import Language, Parser
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 # Initialize Tree-Sitter Language and Parser
 PY_LANGUAGE = Language(tspython.language())
 

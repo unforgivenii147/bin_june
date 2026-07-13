@@ -4,15 +4,14 @@ Text file chunker with parallel processing.
 Splits text files into chunks (< 5000 chars) while respecting word and sentence boundaries.
 """
 
-import sys
-import re
-from pathlib import Path
-from typing import List, Tuple, Optional
-from multiprocessing import Pool, cpu_count
 import argparse
+import re
+import sys
+from multiprocessing import Pool, cpu_count
+from pathlib import Path
+from typing import List, Optional, Tuple
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 TARGET_CHUNK_SIZE = 4900  # Reduced to ensure final chunks stay under 5000
 BUFFER_SIZE = 500  # Buffer to find word boundaries

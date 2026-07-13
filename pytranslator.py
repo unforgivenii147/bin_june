@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/env python
 """
 Translate non-English comments, docstrings, and print() strings in Python files.
 Recursively processes Python files from the current directory.

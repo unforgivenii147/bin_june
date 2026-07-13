@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import argparse
 import base64
 import csv
@@ -312,22 +311,22 @@ Examples:
   # Run from inside site-packages directory:
   cd /path/to/venv/lib/python3.x/site-packages
   python /path/to/script.py
-  
+
   # Force rebuild all packages with parallel processing (default)
   python /path/to/script.py -a
-  
+
   # Build with serial processing (no parallel)
   python /path/to/script.py --no-parallel
-  
+
   # Build specific package
   python /path/to/script.py -p requests
-  
+
   # Force rebuild specific package
   python /path/to/script.py -a -p requests
-  
+
   # Specify number of workers
   python /path/to/script.py -a -w 4
-  
+
   # Specify output directory
   python /path/to/script.py -o /path/to/wheels
         """,

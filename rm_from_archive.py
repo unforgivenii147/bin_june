@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Delete a file from a tar.zst archive
 Usage: python script.py <archive.tar.zst> <file-to-delete>

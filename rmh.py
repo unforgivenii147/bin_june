@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Safely remove single-line and multi-line comments from C/C++ source files.
 

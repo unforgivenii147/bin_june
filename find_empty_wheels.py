@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Check recursively for empty wheels in the current directory.
 An empty wheel is a .whl file (ZIP archive) that contains no .py files.

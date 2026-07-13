@@ -1,6 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
+from binaryornot import is_binary
+from typing import List, Optional, Tuple
+import subprocess
+import concurrent.futures
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
@@ -38,13 +41,6 @@ Binary File Analyzer - Finds executables in current directory that fail to run
 Uses concurrent.futures for parallel processing
 Outputs results to ~/tmp/err
 """
-
-import concurrent.futures
-import subprocess
-from pathlib import Path
-from typing import List, Optional, Tuple
-
-from binaryornot import is_binary
 
 
 def is_executable(filepath: Path) -> bool:

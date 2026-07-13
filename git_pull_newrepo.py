@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Script to run git pull on all git repositories recursively.
 If a repo has no remote, create a new public repo on GitHub and set it as origin.
@@ -15,7 +14,6 @@ from dotenv import load_dotenv
 from git import GitCommandError, Repo
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 load_dotenv()
 

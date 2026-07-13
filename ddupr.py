@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 refactor_utils.py — AST-based duplicate extractor.
 
@@ -34,7 +33,6 @@ import zstandard as zstd
 from loguru import logger
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 HAS_ZST = True
 HAS_BR = True

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Generate requirements.txt by inspecting Python files recursively.
 Supports:

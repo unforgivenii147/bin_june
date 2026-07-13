@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Convert GIF files in the current directory (recursively) to JPG.
 Skips near-duplicate frames where only minor motion (e.g. mouse pointer) occurred.
@@ -20,7 +19,6 @@ from joblib import Parallel, delayed
 from PIL import Image, UnidentifiedImageError
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 SEARCH_ROOT = Path(".")
 JPEG_QUALITY = 90

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Simple package duplicate checker for Termux (Python 3.12+)
 """

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 """
 Live WiFi/Cellular Signal Strength Monitor for Termux
 Displays real-time signal meters and connection info
@@ -17,7 +16,6 @@ from rich.console import Console
 from rich.panel import Panel
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 console = Console()
 

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
