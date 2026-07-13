@@ -22,7 +22,7 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 LARGE_FILE_THRESHOLD = 5 * 1024 * 1024
 LEVEL_DEFAULT = 11
-LEVEL_LARGE = 3
+LEVEL_LARGE = 6
 BROTLI_EXT = ".br"
 BROTLI_WINDOW_BITS = 24
 BROTLI_BLOCK_BITS = 0

@@ -10,6 +10,15 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from os import scandir as os_scandir
 from pathlib import Path
 
+cwd = Path.cwd()
+IGNORED_DIRS = {".git", ".hg", ".svn", "node_modules", "__pycache__", ".ruff_cache", ".pytest_cache", ".mypy_cache"}
+BINARY_CHUNK = 32768
+DEFAULT_THREADS = 4
+ANSI_BOLD = "\x1b[1m"
+ANSI_RESET = "\x1b[0m"
+ANSI_RED = "\x1b[31m"
+ANSI_BLUE = "\x1b[94m"
+
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -47,16 +56,6 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > ZERO_DOT_THREE
     except Exception:
         return True
-
-
-cwd = Path.cwd()
-IGNORED_DIRS = {".git", ".hg", ".svn", "node_modules", "__pycache__", ".ruff_cache", ".pytest_cache", ".mypy_cache"}
-BINARY_CHUNK = 32768
-DEFAULT_THREADS = 4
-ANSI_BOLD = "\x1b[1m"
-ANSI_RESET = "\x1b[0m"
-ANSI_RED = "\x1b[31m"
-ANSI_BLUE = "\x1b[94m"
 
 
 def colorize(text: str, start: int, end: int, enable: bool = True) -> str:
@@ -159,7 +158,7 @@ def main(argv: list[str] | None = None) -> int:
             return 2
     include_globs = args.glob or []
     exclude_globs = args.exclude or []
-    candidates = get_files(cwd, include_hidden=True)
+    candidates = get_files(cwd)
     if not candidates:
         return 0
     color = not args.no_color and sys.stdout.isatty()
