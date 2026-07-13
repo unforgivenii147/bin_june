@@ -4,117 +4,153 @@ import fnmatch
 import operator
 import re
 import sys
-from collections import deque
-from collections.abc import Iterable
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from os import scandir as os_scandir
 from pathlib import Path
+from typing import Iterable
 
-cwd = Path.cwd()
+# Configuration Constants
 IGNORED_DIRS = {".git", ".hg", ".svn", "node_modules", "__pycache__", ".ruff_cache", ".pytest_cache", ".mypy_cache"}
 BINARY_CHUNK = 32768
 DEFAULT_THREADS = 4
+
+# ANSI Styles
 ANSI_BOLD = "\x1b[1m"
 ANSI_RESET = "\x1b[0m"
-ANSI_RED = "\x1b[31m"
 ANSI_BLUE = "\x1b[94m"
+ANSI_CYAN = "\x1b[5;96m"
+
+# Pre-compiled byte array containing standard printable ASCII text characters + common whitespaces
+TEXT_CHARS = bytes(range(32, 127)) + b"\n\r\t\x08"
 
 
-def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
-    path = Path(path)
-    skip_dirs = {".git", "__pycache__"}
-    queue = deque([path])
-    files = []
-    while queue:
-        current = queue.popleft()
-        try:
-            entries = current.iterdir()
-        except (PermissionError, OSError):
-            continue
-        for item in entries:
-            if item.is_symlink():
+def get_files(
+    paths: list[str],
+    include_globs: list[str],
+    exclude_globs: list[str],
+    search_hidden: bool,
+    follow_symlinks: bool,
+    max_size: int,
+) -> list[Path]:
+    """Finds all target files matching configuration criteria using Python 3.12 Path.walk."""
+    candidates = []
+    
+    for p_str in paths:
+        path = Path(p_str)
+        if path.is_file():
+            if not search_hidden and path.name.startswith("."):
                 continue
-            if item.is_dir() and item.name not in skip_dirs:
-                queue.append(item)
-            elif item.is_file():
-                if ext is None or item.suffix in ext:
-                    files.append(item)
-    return files
+            if max_size and path.stat().st_size > max_size:
+                continue
+            if include_globs and not matches_any_glob(path, include_globs):
+                continue
+            if exclude_globs and matches_any_glob(path, exclude_globs):
+                continue
+            candidates.append(path)
+            continue
+
+        if not path.is_dir():
+            continue
+
+        # Path.walk efficiently handles recursive directory hierarchies natively in Py3.12
+        for root, dirs, walk_files in path.walk(top_down=True, follow_symlinks=follow_symlinks):
+            # Prune directories in place to prevent walking down unwanted paths
+            if not search_hidden:
+                dirs[:] = [d for d in dirs if not d.startswith(".")]
+            dirs[:] = [d for d in dirs if d not in IGNORED_DIRS]
+
+            for f in walk_files:
+                if not search_hidden and f.startswith("."):
+                    continue
+                file_path = root / f
+
+                try:
+                    if max_size and file_path.stat().st_size > max_size:
+                        continue
+                except OSError:
+                    continue
+
+                if include_globs and not matches_any_glob(file_path, include_globs):
+                    continue
+                if exclude_globs and matches_any_glob(file_path, exclude_globs):
+                    continue
+
+                candidates.append(file_path)
+                
+    return candidates
 
 
-def is_binary(path: Path | str) -> bool:
-    path = Path(path)
+def is_binary(path: Path) -> bool:
+    """Fast binary check shifting loops down to optimized C-level builtins."""
     try:
         with path.open("rb") as f:
-            chunk = f.read(CHUNK_SIZE)
+            chunk = f.read(BINARY_CHUNK)
         if not chunk:
             return False
         if b"\x00" in chunk:
             return True
-        text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
-        nontext = sum((1 for b in chunk if b not in text_chars))
-        return nontext / len(chunk) > ZERO_DOT_THREE
+        
+        # translate() strips matching characters instantly via C optimization
+        non_text_len = len(chunk.translate(None, TEXT_CHARS))
+        return (non_text_len / len(chunk)) > 0.3
     except Exception:
         return True
 
 
-def colorize(text: str, start: int, end: int, enable: bool = True) -> str:
-    if not enable:
-        return text
-    ss = start - 50
-    if ss < 0:
-        ss = 0
-    ee = end + 50
-    if ee > len(text):
-        ee = len(text)
-    removed_from_left = text[0:ss]
-    rmchar = len(removed_from_left)
-    new_start = start - rmchar
-    new_end = end - rmchar
-    text = text[ss:ee]
-    return text[:new_start] + ANSI_BLUE + ANSI_BOLD + text[new_start:new_end] + ANSI_RESET + text[new_end:]
+def colorize_line(line: str, spans: list[tuple[int, int]]) -> str:
+    """Accurately inserts color tags from right to left to protect character indices."""
+    chars = list(line)
+    # Reverse sorting by starting index keeps historical indices intact during insertion
+    for s, e in sorted(spans, key=operator.itemgetter(0), reverse=True):
+        chars.insert(e, ANSI_RESET)
+        chars.insert(s, ANSI_BLUE + ANSI_BOLD)
+    return "".join(chars)
 
 
 def matches_any_glob(path: Path, patterns: Iterable[str]) -> bool:
     basename = path.name
-    return any((fnmatch.fnmatch(str(path), p) or fnmatch.fnmatch(basename, p) for p in patterns))
+    path_str = str(path)
+    return any(fnmatch.fnmatch(path_str, p) or fnmatch.fnmatch(basename, p) for p in patterns)
 
 
 def search_file_text_mode(
-    path: str | Path,
+    path: Path,
+    cwd: Path,
     regex: re.Pattern | None,
     fixed: str,
     ignore_case: bool,
-    show_line_numbers: bool,
-    color: bool,
     max_matches: int | None = None,
 ) -> tuple[str, list[tuple[int, str, list[tuple[int, int]]]]]:
+    """Scans individual files line by line extracting matching locations."""
     matches = []
-    path = Path(path)
     try:
         with path.open(encoding="utf-8", errors="replace") as fh:
             for lineno, raw_line in enumerate(fh, start=1):
-                line = raw_line.rstrip("\n")
-                spans: list[tuple[int, int]] = []
+                line = raw_line.rstrip("\n\r")
+                spans = []
+                
                 if regex:
-                    spans.extend(((m.start(), m.end()) for m in regex.finditer(line)))
+                    spans = [(m.start(), m.end()) for m in regex.finditer(line)]
                 else:
                     hay = line.lower() if ignore_case else line
                     needle = fixed.lower() if ignore_case else fixed
                     start = 0
-                    while True:
-                        idx = hay.find(needle, start)
-                        if idx == -1:
-                            break
+                    while (idx := hay.find(needle, start)) != -1:
                         spans.append((idx, idx + len(needle)))
                         start = idx + max(1, len(needle))
+                
                 if spans:
                     matches.append((lineno, line, spans))
                     if max_matches and len(matches) >= max_matches:
                         break
     except Exception:
-        return (str(path.relative_to(cwd)), [])
-    return (str(path.relative_to(cwd)), matches)
+        pass
+    
+    try:
+        rel_path = str(path.relative_to(cwd))
+    except ValueError:
+        rel_path = str(path)
+        
+    return rel_path, matches
 
 
 def build_argparser() -> argparse.ArgumentParser:
@@ -122,17 +158,17 @@ def build_argparser() -> argparse.ArgumentParser:
     p.add_argument("pattern", nargs="?", help="Regex pattern (positional) or use -e")
     p.add_argument("-e", "--regexp", dest="pattern_e", help="Pattern (alternative to positional)")
     p.add_argument("-i", "--ignore-case", action="store_true", help="Case-insensitive search")
-    p.add_argument("--fixed-strings", action="store_true", default=True, help="Fixed string search (no regex)")
-    p.add_argument("-n", "--line-number", default=True, action="store_true", help="Show line numbers")
+    p.add_argument("-F", "--fixed-strings", action="store_true", help="Fixed string search (no regex)")
+    p.add_argument("-n", "--line-number", action="store_true", default=True, help="Show line numbers")
     p.add_argument("-l", "--files-with-matches", action="store_true", help="Only print filenames that match")
     p.add_argument("-c", "--count", action="store_true", help="Print count of matches per file")
     p.add_argument("-t", "--threads", type=int, default=DEFAULT_THREADS, help="Number of worker threads")
-    p.add_argument("-H", "--hidden", action="store_true", default=True, help="Search hidden files and directories")
-    p.add_argument("-g", "--glob", action="append", help="Include glob (fnmatch); can be repeated")
-    p.add_argument("-x", "--exclude", action="append", help="Exclude glob (fnmatch); can be repeated")
-    p.add_argument("-C", "--no-color", default=False, action="store_true", help="Disable colorized output")
-    p.add_argument("-m", "--max-filesize", type=int, default=10000000, help="Skip files larger than size (bytes)")
-    p.add_argument("-F", "--follow", default=False, action="store_true", help="Follow symlinks")
+    p.add_argument("--hidden", action="store_true", help="Search hidden files and directories")
+    p.add_argument("-g", "--glob", action="append", help="Include glob; can be repeated")
+    p.add_argument("-x", "--exclude", action="append", help="Exclude glob; can be repeated")
+    p.add_argument("-C", "--no-color", action="store_true", help="Disable colorized output")
+    p.add_argument("-m", "--max-filesize", type=int, default=10_000_000, help="Skip files larger than size (bytes)")
+    p.add_argument("-F-sym", "--follow", action="store_true", help="Follow symlinks")
     p.add_argument("paths", nargs="*", default=["."], help="Files or directories to search (default: .)")
     return p
 
@@ -141,68 +177,75 @@ def main(argv: list[str] | None = None) -> int:
     cwd = Path.cwd()
     args = build_argparser().parse_args(argv)
     pattern = args.pattern_e or args.pattern
+    
     if not pattern:
         print("No pattern provided. Use positional PATTERN or -e PATTERN.", file=sys.stderr)
         return 2
-    ignore_case = args.ignore_case
-    fixed = args.fixed_strings
+
     compiled = None
-    if not fixed:
+    if not args.fixed_strings:
         flags = re.MULTILINE
-        if ignore_case:
+        if args.ignore_case:
             flags |= re.IGNORECASE
         try:
             compiled = re.compile(pattern, flags)
         except re.error as ex:
             print(f"Invalid regex: {ex}", file=sys.stderr)
             return 2
-    include_globs = args.glob or []
-    exclude_globs = args.exclude or []
-    candidates = get_files(cwd)
+
+    candidates = get_files(
+        paths=args.paths,
+        include_globs=args.glob or [],
+        exclude_globs=args.exclude or [],
+        search_hidden=args.hidden,
+        follow_symlinks=args.follow,
+        max_size=args.max_filesize,
+    )
+    
     if not candidates:
-        return 0
+        return 1
+
     color = not args.no_color and sys.stdout.isatty()
     any_match = False
-    results_per_file = {}
 
-    def worker(path: str):
+    def worker(path: Path):
         if is_binary(path):
-            return (path, [])
+            return str(path), []
         return search_file_text_mode(
-            path,
+            path=path,
+            cwd=cwd,
             regex=compiled,
             fixed=pattern,
-            ignore_case=ignore_case,
-            show_line_numbers=args.line_number,
-            color=color,
+            ignore_case=args.ignore_case,
         )
 
-    with ThreadPoolExecutor(max_workers=args.threads) as ex:
-        futures = {ex.submit(worker, str(p)): p for p in candidates}
+    with ThreadPoolExecutor(max_workers=args.threads) as executor:
+        futures = {executor.submit(worker, p): p for p in candidates}
         try:
             for fut in as_completed(futures):
-                path, matches = fut.result()
+                path_str, matches = fut.result()
                 if not matches:
                     continue
+                
                 any_match = True
-                results_per_file[path] = matches
                 if args.files_with_matches:
-                    print(path)
+                    print(path_str)
+                    continue
                 elif args.count:
-                    print(f"{path}:{len(matches)}")
-                else:
-                    for lineno, line, spans in matches:
-                        out_line = line
-                        if color and spans:
-                            for s, e in sorted(spans, key=operator.itemgetter(0), reverse=True):
-                                out_line = colorize(out_line, s, e, enable=True)
-                        if args.line_number:
-                            print(f"\x1b[5;96m{path}\x1b[0m:{lineno}:{out_line}")
-                        else:
-                            print(f"\x1b[5;96m{path}\x1b[0m:{out_line}")
+                    print(f"{path_str}:{len(matches)}")
+                    continue
+
+                for lineno, line, spans in matches:
+                    out_line = colorize_line(line, spans) if color else line
+                    if args.line_number:
+                        print(f"{ANSI_CYAN}{path_str}{ANSI_RESET}:{lineno}:{out_line}")
+                    else:
+                        print(f"{ANSI_CYAN}{path_str}{ANSI_RESET}:{out_line}")
+                        
         except KeyboardInterrupt:
             print("\nSearch cancelled.", file=sys.stderr)
             return 130
+
     return 0 if any_match else 1
 
 
