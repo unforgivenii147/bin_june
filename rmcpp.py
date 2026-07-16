@@ -4,6 +4,7 @@ from collections import deque
 from multiprocessing import get_context
 from os import scandir as os_scandir
 from pathlib import Path
+
 import tree_sitter_cpp as tscpp
 from tree_sitter import Language, Parser, Query, QueryCursor
 

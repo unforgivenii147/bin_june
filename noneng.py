@@ -3,6 +3,7 @@ from collections import deque
 from collections.abc import Callable, Iterable
 from os import scandir as os_scandir
 from pathlib import Path
+
 from langdetect import DetectorFactory, detect
 from langdetect.lang_detect_exception import LangDetectException
 

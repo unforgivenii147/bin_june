@@ -85,7 +85,11 @@ def extract_items(path: Path, parser: Parser) -> list[Item]:
 
 
 def write_utils_file(dups: dict[str, Item], output: Path) -> None:
-    lines = ["# Auto-generated file", "# Contains duplicate top-level constants, functions, and classes.", ""]
+    lines = [
+        "# Auto-generated file",
+        "# Contains duplicate top-level constants, functions, and classes.",
+        "",
+    ]
     seen = set()
     for h, item in dups.items():
         if h in seen:

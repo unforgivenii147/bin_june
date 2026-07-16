@@ -404,7 +404,10 @@ def main():
     parser = argparse.ArgumentParser(description="Generate requirements.txt by inspecting Python files recursively")
     parser.add_argument("-d", "--directory", default=".", help="Root directory to scan (default: current directory)")
     parser.add_argument(
-        "-o", "--output", default="requirements.txt", help="Output file path (default: requirements.txt)"
+        "-o",
+        "--output",
+        default="requirements.txt",
+        help="Output file path (default: requirements.txt)",
     )
     parser.add_argument(
         "-p",
@@ -420,7 +423,11 @@ def main():
         help="Directories to exclude from scan",
     )
     parser.add_argument(
-        "-j", "--jobs", type=int, default=cpu_count(), help=f"Number of parallel jobs (default: {cpu_count()})"
+        "-j",
+        "--jobs",
+        type=int,
+        default=cpu_count(),
+        help=f"Number of parallel jobs (default: {cpu_count()})",
     )
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
     args = parser.parse_args()

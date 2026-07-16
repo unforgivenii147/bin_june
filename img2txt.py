@@ -1,70 +1,50 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
 import sys
-from collections import deque
-from multiprocessing import get_context
-from os import scandir as os_scandir
+import os
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import pytesseract
 from PIL import Image
-from pytesseract import image_to_string
 
+os.environ['TESSDATA_PREFIX'] = str(Path.home() / '.local/share/tessdata_best')
 
-def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
-    path = Path(path)
-    skip_dirs = {".git", "__pycache__"}
-    queue = deque([path])
-    files = []
-    while queue:
-        current = queue.popleft()
-        try:
-            entries = current.iterdir()
-        except (PermissionError, OSError):
-            continue
-        for item in entries:
-            if item.is_symlink():
-                continue
-            if item.is_dir() and item.name not in skip_dirs:
-                queue.append(item)
-            elif item.is_file():
-                if ext is None or item.suffix in ext:
-                    files.append(item)
-    return files
+def extract_text(image_path):
+    try:
+        text = pytesseract.image_to_string(image_path, lang='eng')
+        output_path = image_path.with_suffix('.txt')
+        output_path.write_text(text, encoding='utf-8')
+        return f"✓ {image_path.name}"
+    except Exception as e:
+        return f"✗ {image_path.name}: {e}"
 
-
-def extract_text(image_path: Path) -> bytes | dict[str, bytes | str] | str:
-    img = Image.open(image_path)
-    result = image_to_string(img, lang="eng", config="--oem 1 --psm 6")
-    print("*" * 35)
-    print(result)
-    return result
-
-
-def process_file(path: Path) -> None:
-    path = Path(path)
-    txtfile = path.with_suffix(".txt")
-    if txtfile.exists():
-        return
-    print(f"Processing {path.name}")
-    text = extract_text(path)
-    if text and len(text) > 1:
-        txtfile.write_text(text, encoding="utf-8")
-        print(f"{txtfile} created.")
+def process_images(paths=None):
+    if not paths:
+        paths = [Path.cwd()]
     else:
-        print("No text found.")
+        paths = [Path(p) for p in paths]
+    
+    image_extensions = {'.png', '.jpg', '.jpeg', '.bmp', '.tiff', '.tif', '.webp'}
+    image_files = []
+    
+    for path in paths:
+        if path.is_file() and path.suffix.lower() in image_extensions:
+            image_files.append(path)
+        elif path.is_dir():
+            image_files.extend(path.rglob('*'))
+    
+    image_files = [f for f in image_files if f.is_file() and f.suffix.lower() in image_extensions]
+    
+    if not image_files:
+        print("No image files found.")
+        return
+    
+    print(f"Processing {len(image_files)} image(s)...\n")
+    
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        futures = {executor.submit(extract_text, img): img for img in image_files}
+        for future in as_completed(futures):
+            print(future.result())
 
-
-def main() -> None:
-    cwd = Path.cwd()
-    args = sys.argv[1:]
-    files = [Path(p) for p in args] if args else get_files(cwd, ext=[".jpg", ".png"])
-    if len(files) == 1:
-        process_file(files[0])
-        sys.exit(0)
-    p = get_context("spawn").Pool(8)
-    for _ in p.imap_unordered(process_file, files):
-        pass
-    p.close()
-    p.join()
-
-
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    process_images(sys.argv[1:] if len(sys.argv) > 1 else None)

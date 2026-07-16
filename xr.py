@@ -1,16 +1,16 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-from collections import deque
-import lzma
-import gzip
-import bz2
 import argparse
 import asyncio
+import bz2
+import gzip
+import lzma
 import mmap
 import shutil
 import sys
 import tarfile
 import tempfile
+from collections import deque
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 

@@ -163,7 +163,10 @@ def process_file_tree_sitter(file_path: Path) -> ProcessingResult:
         )
     except Exception as e:
         return ProcessingResult(
-            file_path=file_path, success=False, error=str(e), processing_time=time.perf_counter() - start_time
+            file_path=file_path,
+            success=False,
+            error=str(e),
+            processing_time=time.perf_counter() - start_time,
         )
 
 
@@ -191,7 +194,10 @@ def process_file_ast(file_path: Path) -> ProcessingResult:
         )
     except Exception as e:
         return ProcessingResult(
-            file_path=file_path, success=False, error=str(e), processing_time=time.perf_counter() - start_time
+            file_path=file_path,
+            success=False,
+            error=str(e),
+            processing_time=time.perf_counter() - start_time,
         )
 
 
@@ -257,7 +263,12 @@ Examples:
   %(prog)s /path/to/dir --workers 8 # Custom directory and workers
         """,
     )
-    parser.add_argument("directory", nargs="?", default=".", help="Directory to process (default: current directory)")
+    parser.add_argument(
+        "directory",
+        nargs="?",
+        default=".",
+        help="Directory to process (default: current directory)",
+    )
     parser.add_argument(
         "--method",
         choices=["tree-sitter", "ast"],

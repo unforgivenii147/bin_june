@@ -95,32 +95,38 @@ def get_files_in_cwd():
                 if file_data["is_binary"]:
                     compressed = compress_data(file_data["content"])
                     if compressed:
-                        files.append({
-                            "filename": item_path.name,
-                            "contents": compressed,
-                            "compressed": 1,
-                            "original_size": file_data["original_size"],
-                            "compressed_size": len(compressed),
-                        })
+                        files.append(
+                            {
+                                "filename": item_path.name,
+                                "contents": compressed,
+                                "compressed": 1,
+                                "original_size": file_data["original_size"],
+                                "compressed_size": len(compressed),
+                            }
+                        )
                         print(
                             f"    ✓ Compressed {file_data['original_size'] / 1024:.1f}KB to {len(compressed) / 1024:.1f}KB"
                         )
                     else:
-                        files.append({
+                        files.append(
+                            {
+                                "filename": item_path.name,
+                                "contents": "[Binary file - compression failed]",
+                                "compressed": 0,
+                                "original_size": file_data["original_size"],
+                                "compressed_size": 0,
+                            }
+                        )
+                else:
+                    files.append(
+                        {
                             "filename": item_path.name,
-                            "contents": "[Binary file - compression failed]",
+                            "contents": file_data["content"],
                             "compressed": 0,
                             "original_size": file_data["original_size"],
                             "compressed_size": 0,
-                        })
-                else:
-                    files.append({
-                        "filename": item_path.name,
-                        "contents": file_data["content"],
-                        "compressed": 0,
-                        "original_size": file_data["original_size"],
-                        "compressed_size": 0,
-                    })
+                        }
+                    )
                     print(f"    ✓ Stored as text ({file_data['original_size'] / 1024:.1f}KB)")
     except PermissionError:
         print("Warning: Permission denied accessing some files")

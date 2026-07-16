@@ -11,6 +11,7 @@ from gzip import compress as gzip_compress
 from os import scandir as os_scandir
 from pathlib import Path
 from typing import Tuple
+
 from lzma_mt import decompress
 
 
@@ -59,7 +60,11 @@ def process_file(path: Path) -> Tuple[str, bool, str]:
             original_size = path.stat().st_size if path.exists() else 0
             new_size = gz_path.stat().st_size
             ratio = new_size / original_size * 100 if original_size > 0 else 0
-            return (str(path), True, f"Converted to {gz_path.name} ({original_size} -> {new_size} bytes, {ratio:.1f}%)")
+            return (
+                str(path),
+                True,
+                f"Converted to {gz_path.name} ({original_size} -> {new_size} bytes, {ratio:.1f}%)",
+            )
         return (str(path), False, "Output file is empty or missing")
     except Exception as e:
         if gz_path.exists():

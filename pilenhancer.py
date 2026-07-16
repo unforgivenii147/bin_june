@@ -4,6 +4,7 @@ from collections import deque
 from collections.abc import Callable, Iterable
 from os import scandir as os_scandir
 from pathlib import Path
+
 from PIL import Image, ImageEnhance
 
 

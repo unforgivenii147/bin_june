@@ -118,13 +118,22 @@ If no argument, recursively search current directory.""",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
-        "target", nargs="?", default=None, help="File to extract or directory to search (default: current directory)"
+        "target",
+        nargs="?",
+        default=None,
+        help="File to extract or directory to search (default: current directory)",
     )
     parser.add_argument(
-        "--dry-run", "-n", action="store_true", help="Show what would be done without actually extracting"
+        "--dry-run",
+        "-n",
+        action="store_true",
+        help="Show what would be done without actually extracting",
     )
     parser.add_argument(
-        "--keep-original", "-k", action="store_true", help="Keep original archive files after extraction"
+        "--keep-original",
+        "-k",
+        action="store_true",
+        help="Keep original archive files after extraction",
     )
     parser.add_argument("--quiet", "-q", action="store_true", help="Suppress progress output")
     args = parser.parse_args()

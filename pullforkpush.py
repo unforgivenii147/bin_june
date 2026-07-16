@@ -1,7 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+
 import os
 from pathlib import Path
-
 import git
 from dotenv import load_dotenv
 from github import Github, GithubException
@@ -10,32 +11,25 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 
 def setup_github_client():
-    """Loads the token from ~/.env and initializes the GitHub client."""
     env_path = Path.home() / ".env"
     if not env_path.exists():
         raise FileNotFoundError(f"Could not find .env file at {env_path}")
-
     load_dotenv(dotenv_path=env_path)
     token = os.getenv("GITHUB_TOKEN")
-
     if not token:
         raise ValueError("GITHUB_TOKEN not found in ~/.env")
-
-    return Github(token), token
+    return (Github(token), token)
 
 
 def get_repo_info(repo: git.Repo):
-    """Parses the remote URL to extract the owner and repository name."""
     try:
-        # Supports both HTTPS and SSH formats
         remote_url = repo.remotes.origin.url
         if remote_url.endswith(".git"):
             remote_url = remote_url[:-4]
-
         if "github.com" in remote_url:
             parts = remote_url.split("github.com")[-1].strip("/:").split("/")
             if len(parts) >= 2:
-                return parts[0], parts[1]
+                return (parts[0], parts[1])
     except (AttributeError, IndexError):
         pass
     raise ValueError("Could not parse a valid GitHub remote URL from 'origin'.")
@@ -43,59 +37,39 @@ def get_repo_info(repo: git.Repo):
 
 def main():
     try:
-        # 1. Initialize local repository and GitHub client
         local_dir = os.getcwd()
         local_repo = git.Repo(local_dir, search_parent_directories=True)
-
         g, token = setup_github_client()
         current_user = g.get_user()
         my_username = current_user.login
-
-        # 2. Extract upstream repository details
         repo_owner, repo_name = get_repo_info(local_repo)
         print(f"[*] Local repo detected: {repo_owner}/{repo_name}")
         print(f"[*] Authenticated as GitHub user: {my_username}")
-
-        # 3. Fetch latest from origin
         print("[*] Fetching updates from remote...")
         origin = local_repo.remotes.origin
         origin.fetch()
-
-        # Check if local branch tracks a remote branch
         active_branch = local_repo.active_branch
         if not active_branch.tracking_branch():
             print(
                 f"[!] Active branch '{active_branch.name}' has no upstream tracking branch. Setting to origin/{active_branch.name}"
             )
             active_branch.set_tracking_branch(origin.refs[active_branch.name])
-
-        # 4. Pull/Merge updates
         print(f"[*] Pulling latest changes into '{active_branch.name}'...")
-        # GitPython's pull combines fetch and merge
         origin.pull()
-
-        # 5. Determine Ownership & Handle Pushing/Forking
         if repo_owner.lower() == my_username.lower():
             print("[+] You are the owner of this repository. Preparing to push local changes...")
-
             if local_repo.is_dirty(untracked_files=True):
                 print("[-] Found uncommitted local changes. Please commit them before pushing.")
                 return
-
-            # Push local branch updates to GitHub
             print(f"[*] Pushing '{active_branch.name}' to origin...")
             info = origin.push()
-            # Check push flags for errors
             if info[0].flags & git.remote.PushInfo.ERROR:
                 print(f"[-] Push failed: {info[0].summary}")
             else:
                 print("[+] Successfully synced and pushed updates to your repository!")
-
         else:
             print("[*] You are not the owner. Checking for fork status...")
             target_repo = g.get_repo(f"{repo_owner}/{repo_name}")
-
-            # Check if fork already exists, create if missing
             try:
                 my_fork = current_user.get_repo(repo_name)
                 print(f"[+] Existing fork found: {my_fork.full_name}")
@@ -106,27 +80,19 @@ def main():
                     print(f"[+] Fork created successfully: {my_fork.full_name}")
                 else:
                     raise e
-
-            # Update local remotes to include the fork
             fork_url = f"https://{my_username}:{token}@github.com/{my_username}/{repo_name}.git"
-
             if "fork" in local_repo.remotes:
                 fork_remote = local_repo.remotes.fork
-                # Update URL if it changed
                 fork_remote.set_url(fork_url)
             else:
                 print("[*] Adding 'fork' remote to local configuration...")
                 fork_remote = local_repo.create_remote("fork", fork_url)
-
-            # Push the local branch to your fork
             print(f"[*] Pushing '{active_branch.name}' to your fork...")
             fork_info = fork_remote.push(refspec=f"{active_branch.name}:{active_branch.name}")
-
             if fork_info[0].flags & git.remote.PushInfo.ERROR:
                 print(f"[-] Push to fork failed: {fork_info[0].summary}")
             else:
                 print(f"[+] Successfully pulled upstream updates and pushed your work to your fork!")
-
     except git.InvalidGitRepositoryError:
         print("[-] Error: Current directory is not inside a valid Git repository.")
     except Exception as e:
@@ -135,28 +101,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-"""
-
-# Instead of creating a separate 'fork' remote:
-if "upstream" not in local_repo.remotes:
-    print("[*] Renaming original remote to 'upstream'...")
-    # Rename current origin to upstream
-    local_repo.remotes.origin.rename("upstream")
-
-# Define your fork as the new origin
-fork_url = f"https://{my_username}:{token}@github.com/{my_username}/{repo_name}.git"
-if "origin" in local_repo.remotes:
-    local_repo.remotes.origin.set_url(fork_url)
-else:
-    print("[*] Setting your fork as 'origin'...")
-    origin = local_repo.create_remote("origin", fork_url)
-
-# Explicitly set your local branch to track your fork's branch
-print(f"[*] Setting upstream tracking for '{active_branch.name}' to your fork...")
-active_branch.set_tracking_branch(origin.refs[active_branch.name])
-
-# Now push
-origin.push(refspec=f"{active_branch.name}:{active_branch.name}", set_upstream=True)
-
-"""
+'\n\n# Instead of creating a separate \'fork\' remote:\nif "upstream" not in local_repo.remotes:\n    print("[*] Renaming original remote to \'upstream\'...")\n    # Rename current origin to upstream\n    local_repo.remotes.origin.rename("upstream")\n\n# Define your fork as the new origin\nfork_url = f"https://{my_username}:{token}@github.com/{my_username}/{repo_name}.git"\nif "origin" in local_repo.remotes:\n    local_repo.remotes.origin.set_url(fork_url)\nelse:\n    print("[*] Setting your fork as \'origin\'...")\n    origin = local_repo.create_remote("origin", fork_url)\n\n# Explicitly set your local branch to track your fork\'s branch\nprint(f"[*] Setting upstream tracking for \'{active_branch.name}\' to your fork...")\nactive_branch.set_tracking_branch(origin.refs[active_branch.name])\n\n# Now push\norigin.push(refspec=f"{active_branch.name}:{active_branch.name}", set_upstream=True)\n\n'

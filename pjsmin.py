@@ -7,6 +7,7 @@ from multiprocessing import get_context
 from os import scandir as os_scandir
 from pathlib import Path
 from typing import Any, ParamSpec, TypeVar
+
 from rjsmin import jsmin
 
 
@@ -71,7 +72,16 @@ def gsz(path: str | Path) -> int:
     return total
 
 
-ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
+ATTRIBUTES = {
+    "bold": 1,
+    "dark": 2,
+    "italic": 3,
+    "underline": 4,
+    "blink": 5,
+    "reverse": 7,
+    "concealed": 8,
+    "strike": 9,
+}
 HIGHLIGHTS = {
     "on_black": 40,
     "on_grey": 40,

@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+
 """
 Optimized version of trans_py.py for Python 3.12.
 Translates docstrings and comments in Python files using AST and parallel threads.
@@ -12,28 +14,19 @@ import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Final
-
 from deep_translator import GoogleTranslator
 
-# Constants
-SKIP_DIRS: Final[frozenset[str]] = frozenset({
-    "lazy",
-    ".git",
-    "__pycache__",
-    ".mypy_cache",
-    ".ruff_cache",
-    ".pytest_cache",
-})
+SKIP_DIRS: Final[frozenset[str]] = frozenset(
+    {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
+)
 CHUNK_SIZE: Final[int] = 5000
-NON_ASCII_PATTERN: Final[re.Pattern] = re.compile(r"[^\x00-\x7F]")
+NON_ASCII_PATTERN: Final[re.Pattern] = re.compile("[^\\x00-\\x7F]")
 MAX_WORKERS: Final[int] = 8
-
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
 
 def is_binary(path: Path) -> bool:
-    """Checks if a file is binary."""
     try:
         with path.open("rb") as f:
             chunk = f.read(1024)
@@ -43,18 +36,16 @@ def is_binary(path: Path) -> bool:
 
 
 def get_pyfiles(directory: Path) -> list[Path]:
-    """Recursively retrieves Python files."""
     pyfiles: list[Path] = []
     for p in directory.rglob("*.py"):
-        if any(part.startswith(".") or part in SKIP_DIRS for part in p.parts):
+        if any((part.startswith(".") or part in SKIP_DIRS for part in p.parts)):
             continue
-        if p.is_file() and not is_binary(p):
+        if p.is_file() and (not is_binary(p)):
             pyfiles.append(p)
     return sorted(pyfiles)
 
 
 def translate_text(text: str) -> str:
-    """Translates a text snippet to English."""
     if not text.strip() or not NON_ASCII_PATTERN.search(text):
         return text
     try:
@@ -67,8 +58,6 @@ def translate_text(text: str) -> str:
 
 
 class DocstringCommentTransformer(ast.NodeTransformer):
-    """AST Transformer to translate docstrings."""
-
     def __init__(self):
         self.modified = False
 
@@ -78,7 +67,6 @@ class DocstringCommentTransformer(ast.NodeTransformer):
             translated = translate_text(docstring)
             if translated != docstring:
                 self.modified = True
-                # Modern AST access for docstring
                 if (
                     node.body
                     and isinstance(node.body[0], ast.Expr)
@@ -101,7 +89,6 @@ class DocstringCommentTransformer(ast.NodeTransformer):
 
 
 def translate_comments(content: str) -> tuple[str, bool]:
-    """Translates comments in code content."""
     lines = content.splitlines(keepends=True)
     new_lines = []
     modified = False
@@ -116,27 +103,19 @@ def translate_comments(content: str) -> tuple[str, bool]:
                     modified = True
                     continue
         new_lines.append(line)
-    return "".join(new_lines), modified
+    return ("".join(new_lines), modified)
 
 
 def process_file(filepath: Path) -> bool:
-    """Translates docstrings and comments in a Python file."""
     try:
-        # Backup original
         backup_path = filepath.with_suffix(filepath.suffix + ".bak")
         shutil.copyfile(filepath, backup_path)
-
         content = filepath.read_text(encoding="utf-8")
-
-        # 1. Translate comments
         content_after_comments, comments_modified = translate_comments(content)
-
-        # 2. Translate docstrings
         try:
             tree = ast.parse(content_after_comments)
             transformer = DocstringCommentTransformer()
             new_tree = transformer.visit(tree)
-
             if transformer.modified or comments_modified:
                 new_content = ast.unparse(new_tree)
                 filepath.write_text(new_content, encoding="utf-8")
@@ -145,7 +124,6 @@ def process_file(filepath: Path) -> bool:
             if comments_modified:
                 filepath.write_text(content_after_comments, encoding="utf-8")
                 return True
-
     except Exception as e:
         logger.error("Failed to process %s: %s", filepath, e)
     return False
@@ -157,7 +135,6 @@ def main() -> None:
     if not py_files:
         logger.info("No Python files found.")
         return
-
     logger.info("Processing %d files...", len(py_files))
     modified_count = 0
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
@@ -166,7 +143,6 @@ def main() -> None:
             if future.result():
                 modified_count += 1
                 logger.info("✓ Updated: %s", future_to_file[future].name)
-
     logger.info("Done. Modified %d files.", modified_count)
 
 

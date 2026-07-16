@@ -137,7 +137,10 @@ def process_file_removal(filepath: Path, removals: List[Tuple[int, List[str]]], 
                 rel_path = filepath.relative_to(root)
             except ValueError:
                 rel_path = filepath
-            print(f"Warning: Removing blocks from {rel_path} would create invalid Python: {e}", file=sys.stderr)
+            print(
+                f"Warning: Removing blocks from {rel_path} would create invalid Python: {e}",
+                file=sys.stderr,
+            )
             return filepath, 0, False
     try:
         with open(filepath, "w", encoding="utf-8") as f:
@@ -180,10 +183,16 @@ def remove_repeated_blocks(repeated: Dict[str, List[Tuple[Path, int, List[str]]]
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "-r", "--remove", action="store_true", help="Remove found repeated multi-line blocks from files"
+        "-r",
+        "--remove",
+        action="store_true",
+        help="Remove found repeated multi-line blocks from files",
     )
     parser.add_argument(
-        "--min-lines", type=int, default=2, help="Minimum consecutive lines to consider a block (default: 2)"
+        "--min-lines",
+        type=int,
+        default=2,
+        help="Minimum consecutive lines to consider a block (default: 2)",
     )
     parser.add_argument("-j", "--jobs", type=int, default=8, help="Number of parallel jobs (default: 8)")
     args = parser.parse_args()

@@ -75,7 +75,10 @@ class WheelBuilder:
                 if not row or not row[0]:
                     continue
                 path = row[0]
-                records[path] = {"hash": row[1] if len(row) > 1 else "", "size": row[2] if len(row) > 2 else ""}
+                records[path] = {
+                    "hash": row[1] if len(row) > 1 else "",
+                    "size": row[2] if len(row) > 2 else "",
+                }
         return records
 
     def _find_scripts_for_package(self, records: Dict) -> List[Path]:
@@ -332,16 +335,27 @@ Examples:
         """,
     )
     parser.add_argument(
-        "--output", "-o", type=Path, default=Path("./wheels"), help="Output directory for wheels (default: ./wheels)"
+        "--output",
+        "-o",
+        type=Path,
+        default=Path("./wheels"),
+        help="Output directory for wheels (default: ./wheels)",
     )
     parser.add_argument("--package", "-p", help="Build only this package (by name)")
     parser.add_argument("--all", "-a", action="store_true", help="Repack all packages (overwrite existing wheels)")
     parser.add_argument("--no-parallel", action="store_true", help="Disable parallel processing (use serial mode)")
     parser.add_argument(
-        "--workers", "-w", type=int, default=None, help="Number of worker processes (default: CPU count, max 8)"
+        "--workers",
+        "-w",
+        type=int,
+        default=None,
+        help="Number of worker processes (default: CPU count, max 8)",
     )
     parser.add_argument(
-        "--site-packages", "-s", type=Path, help="Path to site-packages directory (default: current directory)"
+        "--site-packages",
+        "-s",
+        type=Path,
+        help="Path to site-packages directory (default: current directory)",
     )
     args = parser.parse_args()
     if args.site_packages:

@@ -183,7 +183,16 @@ def reattach_inline_comments(new_source: str, preserved_comments: Dict[int, List
 
 def should_skip_path(p: Path) -> bool:
     parts = {part.lower() for part in p.parts}
-    skip_indicators = {".git", "__pycache__", ".venv", "venv", "node_modules", ".tox", "build", "dist"}
+    skip_indicators = {
+        ".git",
+        "__pycache__",
+        ".venv",
+        "venv",
+        "node_modules",
+        ".tox",
+        "build",
+        "dist",
+    }
     return bool(parts & skip_indicators)
 
 
@@ -204,7 +213,10 @@ def collect_py_files(paths: List[Path]) -> List[Path]:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Strip docstrings and comments from Python files", prog="strip-py")
     parser.add_argument(
-        "paths", nargs="*", type=Path, help="Files or directories to process (default: current directory)"
+        "paths",
+        nargs="*",
+        type=Path,
+        help="Files or directories to process (default: current directory)",
     )
     args = parser.parse_args()
     if not args.paths:

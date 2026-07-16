@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+
 """
 Recursively translate text files using Google Translate.
 Optimized for Python 3.12 with modern syntax and performance improvements.
@@ -13,44 +15,31 @@ import time
 from collections.abc import Generator
 from pathlib import Path
 from typing import Final
-
 from deep_translator import GoogleTranslator
 
-# Configuration
-SKIP_DIRS: Final[frozenset[str]] = frozenset({
-    "lazy",
-    ".git",
-    "__pycache__",
-    ".mypy_cache",
-    ".ruff_cache",
-    ".pytest_cache",
-})
+SKIP_DIRS: Final[frozenset[str]] = frozenset(
+    {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
+)
 MAX_CHUNK_LEN: Final[int] = 5000
-
-# Setup logging
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
 
 def is_text_file(path: Path) -> bool:
-    """Checks if a file is likely a text file by reading the beginning."""
     try:
         with path.open("rb") as f:
             chunk = f.read(512)
             if not chunk:
                 return False
-            # Check for null bytes which indicate binary
             return b"\x00" not in chunk
     except (OSError, IOError):
         return False
 
 
 def get_chunks(text: str, max_len: int = MAX_CHUNK_LEN) -> Generator[str, None, None]:
-    """Splits text into chunks, respecting line boundaries where possible."""
     lines = text.splitlines(keepends=True)
     current_chunk: list[str] = []
     current_len = 0
-
     for line in lines:
         line_len = len(line)
         if current_len + line_len > max_len and current_chunk:
@@ -60,30 +49,24 @@ def get_chunks(text: str, max_len: int = MAX_CHUNK_LEN) -> Generator[str, None, 
         else:
             current_chunk.append(line)
             current_len += line_len
-
     if current_chunk:
         yield "".join(current_chunk)
 
 
 def translate_file_task(task: tuple[Path, str, float, Path | None]) -> None:
-    """Processes a single file: reads, translates in chunks, and writes output."""
     file_path, target_lang, delay, output_dir = task
     logger.info("[%d] Processing: %s", os.getpid(), file_path)
-
     try:
         content = file_path.read_text(encoding="utf-8", errors="ignore")
     except Exception as e:
         logger.error("  ✗ Cannot read: %s (%s)", file_path, e)
         return
-
     if not content.strip():
         logger.info("  ⊘ Empty file, skipping: %s", file_path)
         return
-
     translator = GoogleTranslator(source="auto", target=target_lang)
     translated_chunks: list[str] = []
     chunks = list(get_chunks(content))
-
     for i, chunk in enumerate(chunks, 1):
         try:
             translated = translator.translate(chunk)
@@ -96,13 +79,9 @@ def translate_file_task(task: tuple[Path, str, float, Path | None]) -> None:
         except Exception as e:
             logger.error("  ✗ Translation error in chunk %d/%d: %s", i, len(chunks), e)
             return
-
         if i < len(chunks):
             time.sleep(delay)
-
     translated_text = "".join(translated_chunks)
-
-    # Python syntax validation for .py files
     if file_path.suffix.lower() == ".py":
         try:
             ast.parse(translated_text)
@@ -110,8 +89,6 @@ def translate_file_task(task: tuple[Path, str, float, Path | None]) -> None:
         except SyntaxError as e:
             logger.error("  ✗ Syntax error in translated Python, NOT writing: %s", e)
             return
-
-    # Determine output path
     if output_dir:
         try:
             rel_path = file_path.relative_to(Path.cwd())
@@ -120,7 +97,6 @@ def translate_file_task(task: tuple[Path, str, float, Path | None]) -> None:
         out_path = (output_dir / rel_path).with_suffix(f"{file_path.suffix}.{target_lang}")
     else:
         out_path = file_path.with_suffix(f"{file_path.suffix}.{target_lang}")
-
     try:
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(translated_text, encoding="utf-8")
@@ -130,7 +106,6 @@ def translate_file_task(task: tuple[Path, str, float, Path | None]) -> None:
 
 
 def collect_files(paths: list[str]) -> list[Path]:
-    """Gathers all text files from the specified paths."""
     files: set[Path] = set()
     for p in paths:
         path = Path(p).resolve()
@@ -139,7 +114,7 @@ def collect_files(paths: list[str]) -> list[Path]:
                 files.add(path)
         elif path.is_dir():
             for entry in path.rglob("*"):
-                if entry.is_file() and not any(part in SKIP_DIRS for part in entry.parts) and is_text_file(entry):
+                if entry.is_file() and (not any((part in SKIP_DIRS for part in entry.parts))) and is_text_file(entry):
                     files.add(entry)
     return sorted(files)
 
@@ -151,21 +126,16 @@ def main() -> None:
     parser.add_argument("--delay", type=float, default=0.5, help="Delay between chunks (default: 0.5)")
     parser.add_argument("--workers", type=int, help="Parallel workers (default: CPU count)")
     parser.add_argument("--output-dir", type=Path, help="Target directory for translations")
-
     args = parser.parse_args()
     workers = args.workers or multiprocessing.cpu_count()
-
     files = collect_files(args.paths)
     if not files:
         logger.info("No text files found to process.")
         return
-
     logger.info("Found %d text files. Starting %d workers...\n", len(files), workers)
     tasks = [(f, args.target_lang, args.delay, args.output_dir) for f in files]
-
     with multiprocessing.Pool(processes=workers) as pool:
         pool.map(translate_file_task, tasks)
-
     logger.info("\n✓ All files processed.")
 
 

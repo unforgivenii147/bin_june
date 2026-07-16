@@ -183,7 +183,12 @@ def build_decl_for_assign(node, lines):
     for name in names:
         decls.append(
             Decl(
-                kind="assign", name=name, lineno=node.lineno, end_lineno=node.end_lineno, source=source, content_hash=h
+                kind="assign",
+                name=name,
+                lineno=node.lineno,
+                end_lineno=node.end_lineno,
+                source=source,
+                content_hash=h,
             )
         )
     return decls

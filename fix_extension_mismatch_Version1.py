@@ -59,7 +59,11 @@ SIGNATURES = [
     (lambda b: b.startswith(b"7z\xbc\xaf'\x1c"), ".7z", "7-Zip archive"),
     (lambda b: b.startswith(b"Rar!\x1a\x07\x00"), ".rar", "RAR archive"),
     (lambda b: len(b) > 262 and b[257:262] == b"ustar", ".tar", "TAR archive"),
-    (lambda b: b.startswith(b"ID3") or len(b) >= 2 and (b[0] == 255 and b[1] & 224 == 224), ".mp3", "MP3 audio"),
+    (
+        lambda b: b.startswith(b"ID3") or len(b) >= 2 and (b[0] == 255 and b[1] & 224 == 224),
+        ".mp3",
+        "MP3 audio",
+    ),
     (lambda b: len(b) > 8 and b[4:8] == b"ftyp", ".mp4", "MP4/ISO-BMFF"),
     (lambda b: b.startswith(b"\x1aE\xdf\xa3"), ".mkv", "Matroska (MKV/WebM)"),
     (lambda b: b.startswith(b"RIFF") and len(b) > 8 and b[8:12] == b"WAVE", ".wav", "WAV audio"),
@@ -73,7 +77,11 @@ SIGNATURES = [
         ".html",
         "HTML document",
     ),
-    (lambda b: b.lstrip().startswith(b"{") or b.lstrip().startswith(b"["), ".json", "JSON-ish text (heuristic)"),
+    (
+        lambda b: b.lstrip().startswith(b"{") or b.lstrip().startswith(b"["),
+        ".json",
+        "JSON-ish text (heuristic)",
+    ),
     (lambda b: b.startswith(b"\x7fELF"), ".elf", "ELF binary"),
     (lambda b: b.startswith(b"MZ"), ".exe", "PE/EXE binary"),
 ]
@@ -163,7 +171,13 @@ def safe_rename(src: Path, dst: Path) -> Tuple[bool, Optional[str]]:
 def process_file(args) -> Dict:
     path_str, commit, verbose = args
     path = Path(path_str)
-    result = {"path": str(path), "action": "skipped", "reason": None, "detected": None, "target": None}
+    result = {
+        "path": str(path),
+        "action": "skipped",
+        "reason": None,
+        "detected": None,
+        "target": None,
+    }
     if not path.is_file():
         result["reason"] = "not a file"
         return result
@@ -251,7 +265,8 @@ def print_summary(results: List[Dict], verbose: bool = False) -> None:
 
 def main():
     ap = argparse.ArgumentParser(
-        prog="fix_extension_mismatch.py", description="Fix extension mismatches using file signatures"
+        prog="fix_extension_mismatch.py",
+        description="Fix extension mismatches using file signatures",
     )
     ap.add_argument("path", nargs="?", default=".", help="Root path to scan (default: .)")
     ap.add_argument(
@@ -262,12 +277,16 @@ def main():
         help="Number of worker processes (default: cpu_count()-1)",
     )
     ap.add_argument(
-        "--commit", action="store_true", help="Perform renames. Without this flag the script runs in dry-run mode."
+        "--commit",
+        action="store_true",
+        help="Perform renames. Without this flag the script runs in dry-run mode.",
     )
     ap.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     ap.add_argument("--follow-symlinks", action="store_true", help="Follow symlinks when scanning")
     ap.add_argument(
-        "--no-skip-hidden", action="store_true", help="Do not skip hidden files/directories (default: skip)"
+        "--no-skip-hidden",
+        action="store_true",
+        help="Do not skip hidden files/directories (default: skip)",
     )
     args = ap.parse_args()
     root = Path(args.path).resolve()

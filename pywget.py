@@ -56,7 +56,11 @@ def filename_fix_existing(filepath: Path) -> Path:
 
 
 def download(
-    url: str, output: str | None = None, timeout: float = 30.0, resume: bool = False, quiet: bool = False
+    url: str,
+    output: str | None = None,
+    timeout: float = 30.0,
+    resume: bool = False,
+    quiet: bool = False,
 ) -> str:
     output_path = Path(output) if output else None
     if output_path and output_path.is_dir():

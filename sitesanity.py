@@ -10,7 +10,9 @@ from pathlib import Path
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 logging.basicConfig(
-    level=logging.INFO, format="[%(levelname)s] %(message)s", handlers=[logging.StreamHandler(sys.stdout)]
+    level=logging.INFO,
+    format="[%(levelname)s] %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)],
 )
 
 

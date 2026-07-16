@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+
 """
 Alternative version using deep-translator for in-place translation.
 Requires: deep-translator
@@ -12,43 +14,29 @@ import sys
 import time
 from pathlib import Path
 from typing import Final
-
 from deep_translator import GoogleTranslator
 
-# Setup logging
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
-
-# Configuration
-SKIP_DIRS: Final[frozenset[str]] = frozenset({
-    "lazy",
-    ".git",
-    "__pycache__",
-    ".mypy_cache",
-    ".ruff_cache",
-    ".pytest_cache",
-})
+SKIP_DIRS: Final[frozenset[str]] = frozenset(
+    {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
+)
 
 
 def is_english(text: str, threshold: float = 0.6) -> bool:
-    """Heuristic to check if text is likely English/ASCII based."""
     stripped = text.strip()
     if not stripped:
         return True
-
     alpha_chars = [c for c in stripped if c.isalpha()]
     if not alpha_chars:
         return True
-
-    ascii_alpha_count = sum(1 for c in alpha_chars if ord(c) < 128)
-    return (ascii_alpha_count / len(alpha_chars)) > threshold
+    ascii_alpha_count = sum((1 for c in alpha_chars if ord(c) < 128))
+    return ascii_alpha_count / len(alpha_chars) > threshold
 
 
 def translate_text(text: str, translator: GoogleTranslator, max_retries: int = 3) -> str:
-    """Translates a single line of text with retry logic."""
     if not text.strip() or is_english(text):
         return text
-
     for attempt in range(max_retries):
         try:
             result = translator.translate(text)
@@ -63,42 +51,34 @@ def translate_text(text: str, translator: GoogleTranslator, max_retries: int = 3
 
 
 def process_file(file_path: Path) -> None:
-    """Translates non-English lines in a file in-place."""
     logger.info("Processing: %s", file_path)
     try:
         content = file_path.read_text(encoding="utf-8", errors="ignore")
         lines = content.splitlines(keepends=True)
-
         translator = GoogleTranslator(source="auto", target="en")
         translated_count = 0
         new_lines: list[str] = []
-
         for line in lines:
-            if line.strip() and not is_english(line):
+            if line.strip() and (not is_english(line)):
                 leading_ws = line[: len(line) - len(line.lstrip())]
                 trailing_ws = line[len(line.rstrip()) :]
                 translated = translate_text(line.strip(), translator)
                 new_lines.append(f"{leading_ws}{translated}{trailing_ws}")
                 translated_count += 1
-
                 if translated_count % 10 == 0:
                     logger.info("  Progress: %d lines translated", translated_count)
             else:
                 new_lines.append(line)
-
         if translated_count == 0:
             logger.info("  No non-English lines found, skipping.")
             return
-
         file_path.write_text("".join(new_lines), encoding="utf-8", errors="ignore")
-        logger.info("  \u2713 Completed: %d lines translated", translated_count)
-
+        logger.info("  ✓ Completed: %d lines translated", translated_count)
     except Exception as e:
-        logger.error("  \u2717 Error processing %s: %s", file_path, e)
+        logger.error("  ✗ Error processing %s: %s", file_path, e)
 
 
 def worker(file_path: Path) -> None:
-    """Worker function for pool mapping."""
     process_file(file_path)
 
 
@@ -115,10 +95,8 @@ def main() -> None:
         "--workers", type=int, default=mp.cpu_count(), help=f"Number of workers (default: {mp.cpu_count()})"
     )
     parser.add_argument("--exclude", nargs="+", default=[], help="Paths to exclude")
-
     args = parser.parse_args()
     exclude_paths = {Path(p).resolve() for p in args.exclude}
-
     files_to_process: list[Path] = []
     for entry in args.files:
         path = Path(entry)
@@ -131,24 +109,20 @@ def main() -> None:
                     if (
                         fp.is_file()
                         and fp.resolve() not in exclude_paths
-                        and not any(part.startswith(".") for part in fp.parts)
+                        and (not any((part.startswith(".") for part in fp.parts)))
                     ):
                         files_to_process.append(fp)
-
     if not files_to_process:
         logger.info("No files to process.")
         return
-
     logger.info("Found %d files. Using %d workers...", len(files_to_process), args.workers)
-
     if args.workers == 1:
         for fp in files_to_process:
             worker(fp)
     else:
         with mp.Pool(processes=args.workers) as pool:
             pool.map(worker, files_to_process)
-
-    logger.info("\n\u2713 All translations completed!")
+    logger.info("\n✓ All translations completed!")
 
 
 if __name__ == "__main__":

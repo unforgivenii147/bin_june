@@ -58,4 +58,9 @@ def md2pdf(pdf_file_path, md_file_path, css_file_path=None, base_url=None) -> No
 if __name__ == "__main__":
     md_file = sys.argv[1]
     pdf_file = md_file.replace(".md", ".pdf")
-    md2pdf(pdf_file_path=pdf_file, md_file_path=md_file, css_file_path="/sdcard/_static/css/book.css", base_url=".")
+    md2pdf(
+        pdf_file_path=pdf_file,
+        md_file_path=md_file,
+        css_file_path="/sdcard/_static/css/book.css",
+        base_url=".",
+    )

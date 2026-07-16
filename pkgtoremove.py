@@ -11,7 +11,10 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 def get_installed_packages():
     installed_packages = []
     result = subprocess.run(
-        ["dpkg-query", "-W", "-f=${binary:Package} ${Installed-Size}\n"], check=True, capture_output=True, text=True
+        ["dpkg-query", "-W", "-f=${binary:Package} ${Installed-Size}\n"],
+        check=True,
+        capture_output=True,
+        text=True,
     )
     for line in result.stdout.splitlines():
         pkg, size = line.split()

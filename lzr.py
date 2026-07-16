@@ -405,7 +405,12 @@ LZ4 Settings:
         """,
     )
     group = parser.add_mutually_exclusive_group()
-    group.add_argument("-c", "--compress", action="store_true", help="Compress files and folders with LZ4 (default)")
+    group.add_argument(
+        "-c",
+        "--compress",
+        action="store_true",
+        help="Compress files and folders with LZ4 (default)",
+    )
     group.add_argument("-d", "--decompress", action="store_true", help="Decompress .lz4 and .tar.lz4 files")
     args = parser.parse_args()
     if args.decompress:

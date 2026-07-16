@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-import sys
 import argparse
+import sys
 from os import scandir as os_scandir
 from pathlib import Path
 

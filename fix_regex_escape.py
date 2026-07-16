@@ -85,7 +85,17 @@ def get_pyfiles(path: str | Path) -> list[Path]:
     return sorted(pyfiles)
 
 
-TARGET_FUNCS = {"compile", "search", "match", "fullmatch", "findall", "finditer", "split", "sub", "subn"}
+TARGET_FUNCS = {
+    "compile",
+    "search",
+    "match",
+    "fullmatch",
+    "findall",
+    "finditer",
+    "split",
+    "sub",
+    "subn",
+}
 
 
 class RegexFixer(ast.NodeTransformer):

@@ -72,13 +72,15 @@ def filter_latest_for_armv7(urls_file=None):
             print(f"   Arch: {arch}")
             print(f"   Version: {version_str}")
             print(f"   URL: {url}")
-            results.append({
-                "package": package,
-                "python_version": py_version,
-                "arch": arch,
-                "version": version_str,
-                "url": url,
-            })
+            results.append(
+                {
+                    "package": package,
+                    "python_version": py_version,
+                    "arch": arch,
+                    "version": version_str,
+                    "url": url,
+                }
+            )
     print("\n" + "=" * 80)
     print(f"SUMMARY: Found {len(results)} ARMv7 wheel(s)")
     print("=" * 80)
@@ -91,7 +93,8 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Find latest ARMv7 wheels from URL list", epilog="Example: python3 filter_armv7.py urls.txt"
+        description="Find latest ARMv7 wheels from URL list",
+        epilog="Example: python3 filter_armv7.py urls.txt",
     )
     parser.add_argument("input", nargs="?", default=None, help="Input file with URLs (one per line)")
     parser.add_argument("--output", "-o", help="Output file to save URLs (one per line)")

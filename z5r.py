@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+
 """
 Compress or decompress folders using zstandard compression.
 Optimized for Python 3.12 with streaming and parallel processing.
@@ -15,10 +17,8 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Final, Optional
-
 import zstandard as zstd
 
-# Configuration and Constants
 DEFAULT_SKIP_DIRS: Final[set[str]] = {
     "zstandard",
     "0",
@@ -38,7 +38,6 @@ DEFAULT_SKIP_DIRS: Final[set[str]] = {
     ".venv",
     "venv",
 }
-
 try:
     from rich.console import Console
     from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
@@ -50,8 +49,6 @@ except ImportError:
 
 @dataclass(slots=True)
 class FolderResult:
-    """Stores the outcome of a folder compression/decompression."""
-
     name: str
     original_size: int = 0
     compressed_size: int = 0
@@ -65,7 +62,6 @@ class FolderResult:
 
 
 def format_size(size_bytes: int) -> str:
-    """Human-readable size formatting."""
     val = float(size_bytes)
     for unit in ["B", "KB", "MB", "GB", "TB"]:
         if val < 1024.0:
@@ -75,36 +71,25 @@ def format_size(size_bytes: int) -> str:
 
 
 def get_folder_size(path: Path) -> int:
-    """Calculate total size of all files in a folder."""
-    return sum(f.stat().st_size for f in path.rglob("*") if f.is_file())
+    return sum((f.stat().st_size for f in path.rglob("*") if f.is_file()))
 
 
 def compress_folder_task(folder_path: Path, output_dir: Path, level: int = 3, threads: int = 0) -> FolderResult:
-    """Worker task: Tar and compress a folder using streaming."""
     start_time = time.perf_counter()
     folder_name = folder_path.name
     zst_path = output_dir / f"{folder_name}.tar.zst"
     temp_tar = output_dir / f".tmp_{folder_name}.tar"
-
     try:
         orig_size = get_folder_size(folder_path)
-
-        # 1. Create Tar
         with tarfile.open(temp_tar, "w") as tar:
             tar.add(folder_path, arcname=folder_name)
-
-        # 2. Compress Tar using streaming
         cctx = zstd.ZstdCompressor(level=level, threads=threads)
         with temp_tar.open("rb") as f_in, zst_path.open("wb") as f_out:
             with cctx.stream_writer(f_out) as compressor:
                 shutil.copyfileobj(f_in, compressor)
-
         comp_size = zst_path.stat().st_size
         temp_tar.unlink()
-
-        # 3. Cleanup original
         shutil.rmtree(folder_path)
-
         return FolderResult(
             name=folder_name,
             original_size=orig_size,
@@ -121,29 +106,20 @@ def compress_folder_task(folder_path: Path, output_dir: Path, level: int = 3, th
 
 
 def decompress_folder_task(zst_path: Path, output_dir: Path) -> FolderResult:
-    """Worker task: Decompress and untar a folder using streaming."""
     start_time = time.perf_counter()
     folder_name = zst_path.name.removesuffix(".tar.zst")
     temp_tar = output_dir / f".tmp_{folder_name}.tar"
-
     try:
         comp_size = zst_path.stat().st_size
-
-        # 1. Decompress to Tar
         dctx = zstd.ZstdDecompressor()
         with zst_path.open("rb") as f_in, temp_tar.open("wb") as f_out:
             with dctx.stream_reader(f_in) as decompressor:
                 shutil.copyfileobj(decompressor, f_out)
-
-        # 2. Extract Tar
         with tarfile.open(temp_tar, "r") as tar:
             tar.extractall(output_dir, filter="data")
-
         temp_tar.unlink()
         zst_path.unlink()
-
         extracted_size = get_folder_size(output_dir / folder_name)
-
         return FolderResult(
             name=folder_name,
             original_size=extracted_size,
@@ -165,17 +141,13 @@ def main():
     parser.add_argument("-l", "--level", type=int, default=3, help="Compression level (1-22)")
     parser.add_argument("-m", "--min-size", type=float, default=5.0, help="Min folder size in MB")
     parser.add_argument("-w", "--workers", type=int, default=mp.cpu_count(), help="Parallel workers")
-
     args = parser.parse_args()
     root = args.path.resolve()
-
     if args.decompress:
         targets = list(root.glob("*.tar.zst"))
         mode_name = "Decompressing"
     else:
-        # Default to compress
         targets = [d for d in root.iterdir() if d.is_dir() and d.name not in DEFAULT_SKIP_DIRS]
-        # Filter by size
         valid_targets = []
         for d in targets:
             size_mb = get_folder_size(d) / (1024 * 1024)
@@ -183,15 +155,11 @@ def main():
                 valid_targets.append(d)
         targets = valid_targets
         mode_name = "Compressing"
-
     if not targets:
         print("No targets found to process.")
         return
-
     print(f"🚀 {mode_name} {len(targets)} items in {root}...")
-
     results: list[FolderResult] = []
-
     if RICH_AVAILABLE:
         console = Console()
         with Progress(
@@ -207,7 +175,6 @@ def main():
                     futures = [executor.submit(decompress_folder_task, t, root) for t in targets]
                 else:
                     futures = [executor.submit(compress_folder_task, t, root, args.level) for t in targets]
-
                 for f in as_completed(futures):
                     res = f.result()
                     results.append(res)
@@ -220,13 +187,10 @@ def main():
                 futures = [executor.submit(decompress_folder_task, t, root) for t in targets]
             else:
                 futures = [executor.submit(compress_folder_task, t, root, args.level) for t in targets]
-
             for i, f in enumerate(as_completed(futures), 1):
                 res = f.result()
                 results.append(res)
-                print(f"[{i}/{len(targets)}] {res.name} - {'OK' if res.success else 'FAIL'}")
-
-    # Summary
+                print(f"[{i}/{len(targets)}] {res.name} - {('OK' if res.success else 'FAIL')}")
     successes = [r for r in results if r.success]
     print(f"\n{'=' * 40}")
     print(f"SUMMARY ({mode_name})")
@@ -235,8 +199,8 @@ def main():
     print(f"Success: {len(successes)}")
     print(f"Failed: {len(results) - len(successes)}")
     if successes:
-        total_orig = sum(r.original_size for r in successes)
-        total_comp = sum(r.compressed_size for r in successes)
+        total_orig = sum((r.original_size for r in successes))
+        total_comp = sum((r.compressed_size for r in successes))
         if args.decompress:
             print(f"Extracted size: {format_size(total_orig)}")
         else:

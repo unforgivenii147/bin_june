@@ -5,6 +5,7 @@ from collections import deque
 from collections.abc import Callable, Iterable
 from os import scandir as os_scandir
 from pathlib import Path
+
 from fontTools.ttLib import TTFont
 
 
@@ -66,7 +67,16 @@ def mpf3(process_function: Callable, files: list[Path], **kwargs):
     return Parallel(n_jobs=-1)((delayed(process_function)(file_str, **kwargs) for file_str in file_strings))
 
 
-ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
+ATTRIBUTES = {
+    "bold": 1,
+    "dark": 2,
+    "italic": 3,
+    "underline": 4,
+    "blink": 5,
+    "reverse": 7,
+    "concealed": 8,
+    "strike": 9,
+}
 HIGHLIGHTS = {
     "on_black": 40,
     "on_grey": 40,

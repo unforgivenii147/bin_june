@@ -65,7 +65,10 @@ class GoogleDriveSync:
         print("\n" + "=" * 60)
         print("GOOGLE DRIVE AUTHENTICATION (Device Flow)")
         print("=" * 60)
-        device_data = {"client_id": self.client_id, "scope": "https://www.googleapis.com/auth/drive.readonly"}
+        device_data = {
+            "client_id": self.client_id,
+            "scope": "https://www.googleapis.com/auth/drive.readonly",
+        }
         try:
             response = requests.post("https://oauth2.googleapis.com/device/code", data=device_data, timeout=10)
             if response.status_code != 200:
@@ -92,7 +95,13 @@ class GoogleDriveSync:
                         self.access_token = token_data.get("access_token")
                         self.refresh_token = token_data.get("refresh_token")
                         with open(self.token_file, "wb") as f:
-                            pickle.dump({"access_token": self.access_token, "refresh_token": self.refresh_token}, f)
+                            pickle.dump(
+                                {
+                                    "access_token": self.access_token,
+                                    "refresh_token": self.refresh_token,
+                                },
+                                f,
+                            )
                         print("\n✓ Authentication successful!\n")
                         return
                     error_data = token_response.json()

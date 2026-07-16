@@ -41,7 +41,16 @@ try:
 
 except Exception:
     HAS_BROTLI = False
-RECOGNIZED_ARCHIVE_EXTS = {".zip", ".tar", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz"}
+RECOGNIZED_ARCHIVE_EXTS = {
+    ".zip",
+    ".tar",
+    ".tar.gz",
+    ".tgz",
+    ".tar.bz2",
+    ".tbz2",
+    ".tar.xz",
+    ".txz",
+}
 SINGLE_COMPRESSED = {".gz", ".bz2", ".xz", ".zst", ".br"}
 PY_EXT = ".py"
 UTILS_DIR = Path("utils")
@@ -225,7 +234,15 @@ def extract_defs_from_source(srcfile: Tuple[str, str, str, str]) -> Tuple[str, L
             elif isinstance(node, ast.ClassDef):
                 code = node_to_code(node)
                 h = sha256_text(code)
-                results.append({"kind": "class", "name": node.name, "hash": h, "code": code, "imports": imports})
+                results.append(
+                    {
+                        "kind": "class",
+                        "name": node.name,
+                        "hash": h,
+                        "code": code,
+                        "imports": imports,
+                    }
+                )
             elif isinstance(node, ast.Assign) and is_constant_assign(node):
                 names = []
                 for t in node.targets:
@@ -345,7 +362,10 @@ def main() -> None:
     group.add_argument("-m", "--move", action="store_true", help="move duplicated objects (default off)")
     group.add_argument("-c", "--copy", action="store_true", help="copy duplicated objects (default off)")
     parser.add_argument(
-        "--min-occurs", type=int, default=2, help="minimum occurrences to consider duplicate (default 2)"
+        "--min-occurs",
+        type=int,
+        default=2,
+        help="minimum occurrences to consider duplicate (default 2)",
     )
     parser.add_argument("--jobs", type=int, default=max(1, cpu_count() - 1), help="multiprocessing workers")
     parser.add_argument("--verbose", action="store_true")

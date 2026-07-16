@@ -77,7 +77,9 @@ def write_summary(filename: Path | None = None) -> None:
 def create_bar_chart(chart_type: str, output_filename: str = "/sdcard/dirinfo.png") -> None:
     _, _, _, _, size_by_ext = scan_directory()
     sorted_items = sorted(
-        [(ext, size) for ext, size in size_by_ext.items() if size > 0], key=operator.itemgetter(1), reverse=True
+        [(ext, size) for ext, size in size_by_ext.items() if size > 0],
+        key=operator.itemgetter(1),
+        reverse=True,
     )
     if not sorted_items:
         print("No data to plot.", file=sys.stderr)
@@ -102,7 +104,10 @@ def create_bar_chart(chart_type: str, output_filename: str = "/sdcard/dirinfo.pn
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Analyze directory information.")
     parser.add_argument(
-        "-s", "--save", action="store_true", help="Save the report to a file named .dirinfo in the current directory."
+        "-s",
+        "--save",
+        action="store_true",
+        help="Save the report to a file named .dirinfo in the current directory.",
     )
     parser.add_argument(
         "-i",

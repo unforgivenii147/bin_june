@@ -308,7 +308,11 @@ def main():
     parser.add_argument("--workers", type=int, default=4, help="Number of parallel workers (default: 4)")
     parser.add_argument("--dry-run", action="store_true", help="Show what would be done without making changes")
     parser.add_argument("--no-validate", action="store_true", help="Skip AST validation (faster but less safe)")
-    parser.add_argument("--wheels", action="store_true", help="Process .whl files in addition to regular Python files")
+    parser.add_argument(
+        "--wheels",
+        action="store_true",
+        help="Process .whl files in addition to regular Python files",
+    )
     parser.add_argument(
         "--recursive-wheels",
         action="store_true",

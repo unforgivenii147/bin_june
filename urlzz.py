@@ -12,6 +12,7 @@ from itertools import chain
 from os import scandir as os_scandir
 from pathlib import Path
 from typing import Any, Callable, Dict
+
 import py7zr
 
 
@@ -58,7 +59,16 @@ url_regex = re.compile(
     re.UNICODE | re.IGNORECASE,
 )
 URL_RE = re.compile(url_regex)
-ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
+ATTRIBUTES = {
+    "bold": 1,
+    "dark": 2,
+    "italic": 3,
+    "underline": 4,
+    "blink": 5,
+    "reverse": 7,
+    "concealed": 8,
+    "strike": 9,
+}
 HIGHLIGHTS = {
     "on_black": 40,
     "on_grey": 40,
@@ -260,7 +270,12 @@ def extract_urls(filepath):
     path = Path(filepath)
     if path.suffix in {".zip", ".whl"}:
         return extract_urls_from_zip(filepath)
-    if path.suffix.startswith(".tar") or path.suffix in {".tar.gz", ".tar.xz", ".tar.zst", ".tar.7z"}:
+    if path.suffix.startswith(".tar") or path.suffix in {
+        ".tar.gz",
+        ".tar.xz",
+        ".tar.zst",
+        ".tar.7z",
+    }:
         return extract_urls_from_tar(filepath)
     if path.suffix == ".7z":
         return extract_urls_from_7z(filepath)

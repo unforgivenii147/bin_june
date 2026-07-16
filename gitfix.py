@@ -32,7 +32,13 @@ def sync_branch_with_upstream(repo_path: str = ".") -> bool:
         current_branch = repo.active_branch
         original_head = repo.head.commit
         try:
-            repo.git.rebase("--onto", upstream_commit, original_head, current_branch, allow_unrelated_histories=True)
+            repo.git.rebase(
+                "--onto",
+                upstream_commit,
+                original_head,
+                current_branch,
+                allow_unrelated_histories=True,
+            )
             print("Rebase successful")
         except Exception as e:
             print(f"Rebase failed: {e}")

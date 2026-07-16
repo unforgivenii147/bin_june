@@ -86,7 +86,11 @@ class MmapReader(LineProcessor):
             raise OSError(msg)
 
     def read_lines(
-        self, file_path: Path, encoding: str = "utf-8", skip_empty: bool = False, use_mmap: bool = True
+        self,
+        file_path: Path,
+        encoding: str = "utf-8",
+        skip_empty: bool = False,
+        use_mmap: bool = True,
     ) -> Generator[str, None, None]:
         if use_mmap:
             yield from self.read_lines_mmap(file_path, encoding, skip_empty)

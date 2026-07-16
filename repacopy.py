@@ -10,7 +10,11 @@ from loguru import logger
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 logger = logging.getLogger(__name__)
 
 
@@ -187,7 +191,13 @@ class PackageRepacker:
                 logger.warning("No files found for package %s", package_name)
                 return False
             package_structure_path = self.create_wheel_structure(
-                package_name, metadata, files_to_include, site_packages_path, output_dir, dist_info_dir, is_pure_python
+                package_name,
+                metadata,
+                files_to_include,
+                site_packages_path,
+                output_dir,
+                dist_info_dir,
+                is_pure_python,
             )
             if package_structure_path:
                 print("Copied package files to: %s", package_structure_path)
@@ -229,7 +239,9 @@ def main() -> int:
     parser.add_argument("--output", "-o", default="~/tmp/repack", help="Output directory (default: ~/tmp/repack)")
     parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose output")
     parser.add_argument(
-        "--skip-scan", action="store_true", help="Skip local scan and use current active environment only"
+        "--skip-scan",
+        action="store_true",
+        help="Skip local scan and use current active environment only",
     )
     args = parser.parse_args()
     if args.verbose:

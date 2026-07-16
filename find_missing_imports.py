@@ -491,7 +491,11 @@ def main():
     )
     parser.add_argument("-a", "--autofix", action="store_true", help="Automatically add missing imports")
     parser.add_argument(
-        "-w", "--workers", type=int, default=None, help="Number of worker processes (default: CPU count)"
+        "-w",
+        "--workers",
+        type=int,
+        default=None,
+        help="Number of worker processes (default: CPU count)",
     )
     parser.add_argument("directory", nargs="?", default=".", help="Directory to scan (default: current directory)")
     args = parser.parse_args()

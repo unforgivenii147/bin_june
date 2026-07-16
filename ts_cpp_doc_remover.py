@@ -32,7 +32,16 @@ def remove_blank_lines(text: str | Path) -> str:
     return "".join(result_lines)
 
 
-ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
+ATTRIBUTES = {
+    "bold": 1,
+    "dark": 2,
+    "italic": 3,
+    "underline": 4,
+    "blink": 5,
+    "reverse": 7,
+    "concealed": 8,
+    "strike": 9,
+}
 
 HIGHLIGHTS = {
     "on_black": 40,

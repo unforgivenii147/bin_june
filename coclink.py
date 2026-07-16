@@ -22,7 +22,12 @@ def get_videos(youtube: Resource, channel_id: str):
     past_date = (datetime.now(UTC) - timedelta(days=30)).isoformat()
     videos = []
     request = youtube.search().list(
-        part="snippet", channelId=channel_id, publishedAfter=past_date, maxResults=50, order="date", type="video"
+        part="snippet",
+        channelId=channel_id,
+        publishedAfter=past_date,
+        maxResults=50,
+        order="date",
+        type="video",
     )
     while request:
         response = request.execute()
@@ -30,11 +35,13 @@ def get_videos(youtube: Resource, channel_id: str):
             video_id = item["id"]["videoId"]
             video_details = youtube.videos().list(part="snippet", id=video_id).execute()
             snippet = video_details["items"][0]["snippet"]
-            videos.append({
-                "title": snippet["title"],
-                "description": snippet["description"],
-                "url": f"https://www.youtube.com/watch?v={video_id}",
-            })
+            videos.append(
+                {
+                    "title": snippet["title"],
+                    "description": snippet["description"],
+                    "url": f"https://www.youtube.com/watch?v={video_id}",
+                }
+            )
         request = youtube.search().list_next(request, response)
         if len(videos) > 100:
             break

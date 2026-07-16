@@ -69,7 +69,8 @@ class GitHubRepoManager:
             print(f"✓ Repository {self.repo_name} already exists on GitHub")
             return True
         returncode, stdout, stderr = self._run_command(
-            ["gh", "repo", "create", self.repo_name, "--source=.", "--remote=origin", "--public"], capture_output=True
+            ["gh", "repo", "create", self.repo_name, "--source=.", "--remote=origin", "--public"],
+            capture_output=True,
         )
         if returncode != 0:
             print("Error creating repository on GitHub")
@@ -242,7 +243,10 @@ def main() -> None:
     )
     parser.add_argument("-n", "--name", help="Repository name (default: current directory name)", type=str)
     parser.add_argument(
-        "-m", "--message", help="Custom commit message (default: auto-generated with timestamp)", type=str
+        "-m",
+        "--message",
+        help="Custom commit message (default: auto-generated with timestamp)",
+        type=str,
     )
     args = parser.parse_args()
     try:

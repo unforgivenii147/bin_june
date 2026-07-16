@@ -9,7 +9,10 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 def save_installed_packages(output_file: str = "installed.txt") -> None:
     try:
         result = subprocess.run(
-            ["dpkg-query", "-f", "${binary:Package}\n", "-W"], capture_output=True, text=True, check=True
+            ["dpkg-query", "-f", "${binary:Package}\n", "-W"],
+            capture_output=True,
+            text=True,
+            check=True,
         )
         installed_packages = result.stdout.splitlines()
         Path(output_file).write_text("\n".join(installed_packages), encoding="utf-8")

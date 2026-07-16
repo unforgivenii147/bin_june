@@ -40,7 +40,10 @@ def extract_package_info(wheel_path: Path) -> tuple[str, str] | tuple[None, None
 def get_installed_packages():
     try:
         result = subprocess.run(
-            [sys.executable, "-m", "pip", "list", "--format=freeze"], capture_output=True, text=True, check=True
+            [sys.executable, "-m", "pip", "list", "--format=freeze"],
+            capture_output=True,
+            text=True,
+            check=True,
         )
         installed = {}
         for line in result.stdout.strip().split("\n"):
@@ -71,7 +74,9 @@ def check_pip_show(package_name):
 def check_package_location(package_name: str) -> tuple[str | None, bool] | tuple[None, bool]:
     try:
         result = subprocess.run(
-            [sys.executable, "-m", "pip", "show", "-f", package_name], capture_output=True, text=True
+            [sys.executable, "-m", "pip", "show", "-f", package_name],
+            capture_output=True,
+            text=True,
         )
         if result.returncode == 0:
             lines = result.stdout.strip().split("\n")
@@ -117,11 +122,13 @@ def analyze_wheels(source_dir, dest_dir_name: str = "empty_wheels", check_instal
                         print(f"  📍 Installed at: {location}")
                         if not has_files:
                             print(f"  ⚠ Installation appears incomplete!")
-                    installed_empty_wheels.append({
-                        "wheel": wheel_file,
-                        "package": pkg_name,
-                        "version": installed_version,
-                    })
+                    installed_empty_wheels.append(
+                        {
+                            "wheel": wheel_file,
+                            "package": pkg_name,
+                            "version": installed_version,
+                        }
+                    )
                 else:
                     print(f"  ℹ Package '{pkg_name}' not found in installed packages")
             empty_wheels.append(wheel_file)
@@ -197,14 +204,22 @@ def main() -> None:
         description="Identify and move empty .whl files, with detection of potentially installed ones"
     )
     parser.add_argument(
-        "directory", nargs="?", default=".", help="Directory containing .whl files (default: current directory)"
+        "directory",
+        nargs="?",
+        default=".",
+        help="Directory containing .whl files (default: current directory)",
     )
     parser.add_argument(
-        "-d", "--dest", default="empty_wheels", help="Destination subdirectory name (default: 'empty_wheels')"
+        "-d",
+        "--dest",
+        default="empty_wheels",
+        help="Destination subdirectory name (default: 'empty_wheels')",
     )
     parser.add_argument("--no-install-check", action="store_true", help="Skip checking installed packages")
     parser.add_argument(
-        "--auto-move-all", action="store_true", help="Automatically move all empty wheels without prompting"
+        "--auto-move-all",
+        action="store_true",
+        help="Automatically move all empty wheels without prompting",
     )
     args = parser.parse_args()
     directory_path = Path(args.directory)

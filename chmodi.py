@@ -284,9 +284,15 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Normalize file and directory permissions.", epilog="Example: python3 normalize_perms.py . -v"
+        description="Normalize file and directory permissions.",
+        epilog="Example: python3 normalize_perms.py . -v",
     )
-    parser.add_argument("path", nargs="?", default=".", help="Path to start normalization (default: current directory)")
+    parser.add_argument(
+        "path",
+        nargs="?",
+        default=".",
+        help="Path to start normalization (default: current directory)",
+    )
     parser.add_argument("-v", "--verbose", action="store_true", help="Print detailed changes")
     parser.add_argument("-q", "--quiet", action="store_true", help="Suppress progress output")
     args = parser.parse_args()

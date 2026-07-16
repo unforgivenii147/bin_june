@@ -157,7 +157,9 @@ def remove_empty_rules(css: str) -> str:
 
 def condense_zero_units(css: str) -> str:
     return re.sub(
-        r"([\s:])(0)(px|em|%|in|q|ch|cm|mm|pc|pt|ex|rem|s|ms|deg|grad|rad|turn|vw|vh|vmin|vmax|fr)", "\\1\\2", css
+        r"([\s:])(0)(px|em|%|in|q|ch|cm|mm|pc|pt|ex|rem|s|ms|deg|grad|rad|turn|vw|vh|vmin|vmax|fr)",
+        "\\1\\2",
+        css,
     )
 
 

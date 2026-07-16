@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+
 """
 Zstandard Recursive File Compressor/Decompressor
 """
@@ -15,21 +17,11 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Final, Optional, Self
-
 import zstandard as zstd
 
-# Configuration and Constants
-SKIP_DIRS: Final[frozenset[str]] = frozenset({
-    "lazy",
-    ".git",
-    ".svn",
-    ".hg",
-    "__pycache__",
-    ".mypy_cache",
-    ".ruff_cache",
-    ".pytest_cache",
-})
-
+SKIP_DIRS: Final[frozenset[str]] = frozenset(
+    {"lazy", ".git", ".svn", ".hg", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
+)
 EXCLUDED_EXTENSIONS: Final[set[str]] = {
     ".xz",
     ".zst",
@@ -108,7 +100,6 @@ EXCLUDED_EXTENSIONS: Final[set[str]] = {
     ".vmdk",
     ".qcow2",
 }
-
 try:
     from rich import box
     from rich.console import Console
@@ -124,8 +115,6 @@ except ImportError:
 
 @dataclass(slots=True)
 class OperationResult:
-    """Stores the outcome of a compression or decompression operation."""
-
     path: Path
     original_size: int
     processed_size: int
@@ -139,7 +128,6 @@ class OperationResult:
 
     @property
     def ratio(self) -> float:
-        """Calculate compression/expansion ratio."""
         if self.original_size == 0:
             return 0.0
         if self.operation == "compress":
@@ -148,7 +136,6 @@ class OperationResult:
 
 
 def format_size(size_bytes: int) -> str:
-    """Human-readable size formatting."""
     val = float(size_bytes)
     for unit in ["B", "KB", "MB", "GB", "TB"]:
         if val < 1024.0:
@@ -166,25 +153,21 @@ def compress_file(
     keep_original: bool = False,
     was_tarred: bool = False,
 ) -> OperationResult:
-    """Compress a single file using streaming Zstandard."""
     start_time = time.perf_counter()
     try:
         orig_size = input_path.stat().st_size
         if orig_size == 0:
             return OperationResult(input_path, 0, 0, False, "Empty file")
-
         cctx = zstd.ZstdCompressor(level=level, threads=threads)
         with input_path.open("rb") as f_in, output_path.open("wb") as f_out:
             with cctx.stream_writer(f_out) as compressor:
                 while chunk := f_in.read(chunk_size):
                     compressor.write(chunk)
-
         proc_size = output_path.stat().st_size
         deleted = False
         if not keep_original:
             input_path.unlink()
             deleted = True
-
         return OperationResult(
             path=input_path,
             original_size=orig_size,
@@ -208,20 +191,16 @@ def decompress_file(
     keep_original: bool = False,
     auto_untar: bool = True,
 ) -> OperationResult:
-    """Decompress a single file using streaming Zstandard."""
     start_time = time.perf_counter()
     try:
         orig_size = input_path.stat().st_size
         dctx = zstd.ZstdDecompressor()
-
         with input_path.open("rb") as f_in, output_path.open("wb") as f_out:
             with dctx.stream_reader(f_in) as decompressor:
                 while chunk := decompressor.read(chunk_size):
                     f_out.write(chunk)
-
         proc_size = output_path.stat().st_size
         was_untarred = False
-
         if auto_untar and output_path.suffix == ".tar":
             try:
                 with tarfile.open(output_path, "r") as tar:
@@ -230,12 +209,10 @@ def decompress_file(
                 was_untarred = True
             except Exception as e:
                 raise RuntimeError(f"Tar extraction failed: {e}")
-
         deleted = False
         if not keep_original:
             input_path.unlink()
             deleted = True
-
         return OperationResult(
             path=input_path,
             original_size=orig_size,
@@ -260,18 +237,15 @@ def get_files(
     ext_filter: Optional[list[str]] = None,
     recursive: bool = True,
 ) -> list[Path]:
-    """Gather files to process based on criteria."""
     found = []
     walker = root.rglob("*") if recursive else root.iterdir()
-
     for p in walker:
         if not p.is_file() or p.is_symlink():
             continue
-        if any(part in SKIP_DIRS for part in p.parts):
+        if any((part in SKIP_DIRS for part in p.parts)):
             continue
-        if exclude_patterns and any(pat in str(p) for pat in exclude_patterns):
+        if exclude_patterns and any((pat in str(p) for pat in exclude_patterns)):
             continue
-
         if mode == "compress":
             if p.suffix.lower() in exclude_ext:
                 continue
@@ -280,22 +254,17 @@ def get_files(
                 if p.suffix.lower() not in normalized_filter:
                     continue
             found.append(p)
-        else:  # decompress
-            if p.suffix.lower() == ".zst":
-                found.append(p)
-
+        elif p.suffix.lower() == ".zst":
+            found.append(p)
     return sorted(found)
 
 
 def print_summary(results: list[OperationResult], root: Path, operation: str):
-    """Print a detailed summary of the operations."""
     successes = [r for r in results if r.success]
     failures = [r for r in results if not r.success]
-
-    total_orig = sum(r.original_size for r in successes)
-    total_proc = sum(r.processed_size for r in successes)
-    total_time = sum(r.duration for r in results)
-
+    total_orig = sum((r.original_size for r in successes))
+    total_proc = sum((r.processed_size for r in successes))
+    total_time = sum((r.duration for r in results))
     if RICH_AVAILABLE:
         console = Console()
         table = Table(title=f"Zstandard {operation.capitalize()} Results", box=box.ROUNDED)
@@ -304,7 +273,6 @@ def print_summary(results: list[OperationResult], root: Path, operation: str):
         table.add_column("Processed", justify="right")
         table.add_column("Ratio", justify="right")
         table.add_column("Status", justify="center")
-
         for r in sorted(successes, key=lambda x: x.original_size, reverse=True)[:15]:
             try:
                 rel_path = r.path.relative_to(root)
@@ -317,16 +285,14 @@ def print_summary(results: list[OperationResult], root: Path, operation: str):
                 f"{r.ratio:.1f}%",
                 "✅" + ("🗑️" if r.original_deleted else ""),
             )
-
         console.print(table)
-
         summary = Text.assemble(
             ("\nSummary:\n", "bold underline"),
-            (f"Total files: {len(results)}\n"),
+            f"Total files: {len(results)}\n",
             (f"Success: {len(successes)}", "green"),
             (f" | Failed: {len(failures)}\n", "red"),
-            (f"Original Size: {format_size(total_orig)}\n"),
-            (f"Processed Size: {format_size(total_proc)}\n"),
+            f"Original Size: {format_size(total_orig)}\n",
+            f"Processed Size: {format_size(total_proc)}\n",
             (f"Ratio: ", "dim"),
             (f"{((1 - total_proc / total_orig) * 100 if total_orig > 0 else 0):.1f}%\n", "bold green"),
             (f"Time: {total_time:.2f}s", "dim"),
@@ -350,24 +316,17 @@ def main():
     parser.add_argument("-t", "--tar", action="store_true", help="Tar subdirs first (compress only)")
     parser.add_argument("-e", "--ext", nargs="+", help="Filter by extensions")
     parser.add_argument("--exclude", nargs="+", default=[], help="Patterns to exclude")
-
     args = parser.parse_args()
     root = Path(args.directory).resolve()
     mode = "decompress" if args.decompress else "compress"
-
     if not root.is_dir():
         print(f"Error: {root} is not a directory.")
         sys.exit(1)
-
-    # Gather files
     files = get_files(root, mode, EXCLUDED_EXTENSIONS, args.exclude, ext_filter=args.ext, recursive=not args.tar)
-
     if not files:
         print("No files found to process.")
         return
-
     print(f"Found {len(files)} files. Starting {mode}...")
-
     results = []
     with ProcessPoolExecutor(max_workers=args.workers) as executor:
         futures = []
@@ -378,7 +337,6 @@ def main():
             else:
                 out = p.with_suffix("")
                 futures.append(executor.submit(decompress_file, p, out, 1024 * 1024, args.keep))
-
         if RICH_AVAILABLE:
             with Progress(
                 SpinnerColumn(),
@@ -394,8 +352,7 @@ def main():
             for i, f in enumerate(as_completed(futures), 1):
                 res = f.result()
                 results.append(res)
-                print(f"[{i}/{len(files)}] {res.path.name} - {'OK' if res.success else 'FAIL'}")
-
+                print(f"[{i}/{len(files)}] {res.path.name} - {('OK' if res.success else 'FAIL')}")
     print_summary(results, root, mode)
 
 

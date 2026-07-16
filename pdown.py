@@ -105,7 +105,10 @@ def main():
     parser.add_argument("--python", default="3.12", help="Python version (default: 3.12)")
     parser.add_argument("--workers", type=int, default=4, help="Number of download workers (default: 4)")
     parser.add_argument(
-        "--output", type=pathlib.Path, default=pathlib.Path("wheels"), help="Output directory (default: wheels)"
+        "--output",
+        type=pathlib.Path,
+        default=pathlib.Path("wheels"),
+        help="Output directory (default: wheels)",
     )
     args = parser.parse_args()
     wheels_dir = args.output.resolve()

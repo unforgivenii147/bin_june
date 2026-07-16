@@ -99,7 +99,13 @@ def main():
     args = [(path,) for path in otf_files]
     with Pool(processes=num_workers) as pool:
         results = pool.map(process_file, args)
-    summary = {"total": len(results), "success": 0, "skipped_exists": 0, "skipped_already_ttf": 0, "failed": 0}
+    summary = {
+        "total": len(results),
+        "success": 0,
+        "skipped_exists": 0,
+        "skipped_already_ttf": 0,
+        "failed": 0,
+    }
     for result in results:
         if result["status"] == "success":
             summary["success"] += 1

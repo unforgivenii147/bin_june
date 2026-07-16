@@ -58,14 +58,30 @@ def extract_items_from_file(path: Path, parser: Parser) -> list[Item]:
                 continue
             name = node_text(src_bytes, name_node)
             code = node_text(src_bytes, child)
-            items.append(Item(kind="function", name=name, source=code, file_path=str(path), hash=sha256_text(code)))
+            items.append(
+                Item(
+                    kind="function",
+                    name=name,
+                    source=code,
+                    file_path=str(path),
+                    hash=sha256_text(code),
+                )
+            )
         elif child.type == "class_definition":
             name_node = child.child_by_field_name("name")
             if name_node is None:
                 continue
             name = node_text(src_bytes, name_node)
             code = node_text(src_bytes, child)
-            items.append(Item(kind="class", name=name, source=code, file_path=str(path), hash=sha256_text(code)))
+            items.append(
+                Item(
+                    kind="class",
+                    name=name,
+                    source=code,
+                    file_path=str(path),
+                    hash=sha256_text(code),
+                )
+            )
         elif child.type == "expression_statement":
             expr = child.children[0] if child.children else None
             if expr is None:
@@ -81,7 +97,15 @@ def extract_items_from_file(path: Path, parser: Parser) -> list[Item]:
                 if not is_const_name(name):
                     continue
                 code = node_text(src_bytes, child)
-                items.append(Item(kind="const", name=name, source=code, file_path=str(path), hash=sha256_text(code)))
+                items.append(
+                    Item(
+                        kind="const",
+                        name=name,
+                        source=code,
+                        file_path=str(path),
+                        hash=sha256_text(code),
+                    )
+                )
             elif expr.type == "assignment_expression":
                 pass
         elif child.type == "assignment":
@@ -94,7 +118,15 @@ def extract_items_from_file(path: Path, parser: Parser) -> list[Item]:
             if not is_const_name(name):
                 continue
             code = node_text(src_bytes, child)
-            items.append(Item(kind="const", name=name, source=code, file_path=str(path), hash=sha256_text(code)))
+            items.append(
+                Item(
+                    kind="const",
+                    name=name,
+                    source=code,
+                    file_path=str(path),
+                    hash=sha256_text(code),
+                )
+            )
     return items
 
 

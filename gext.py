@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+
 import ast
 import re
 import sys
@@ -39,7 +41,6 @@ try:
     HAS_TREE_SITTER = True
 except ImportError:
     HAS_TREE_SITTER = False
-
 try:
     import zstd
 
@@ -47,11 +48,8 @@ try:
 except ImportError:
     HAS_ZSTD = False
 
-# Helper functions (replacing dh import)
-
 
 def get_files(directory: Path) -> List[Path]:
-    """Recursively get all files in a directory."""
     files = []
     try:
         for path in directory.rglob("*"):
@@ -63,7 +61,6 @@ def get_files(directory: Path) -> List[Path]:
 
 
 def unique_path(path: Path) -> Path:
-    """Get a unique path by adding a number if it exists."""
     if not path.exists():
         return path
     stem = path.stem
@@ -81,10 +78,8 @@ if not HERE:
     OUTPUT_DIR = Path.cwd() / "output"
 else:
     OUTPUT_DIR = Path.home() / "tmp" / "output"
-
 ARCHIVE_EXTENSIONS = (".whl", ".zip", ".tar.gz", ".tgz", ".tar.zst", ".tar.xz", ".tar", ".zst")
 ALLOWED_PYTHON_EXTENSIONS = ".py"
-
 COMMON_IMPORTS = {
     "typing": ["List", "Dict", "Optional", "Union", "Tuple", "Any", "Callable", "TypeVar"],
     "dataclasses": ["dataclass", "field"],
@@ -97,7 +92,6 @@ COMMON_IMPORTS = {
     "functools": ["lru_cache", "wraps", "partial", "reduce"],
     "typing_extensions": ["Literal", "TypedDict", "Protocol"],
 }
-
 IMPORT_PATTERNS = {
     "\\bList\\b|\\bDict\\b|\\bOptional\\b|\\bUnion\\b|\\bTuple\\b|\\bAny\\b|\\bCallable\\b": "from typing import List, Dict, Optional, Union, Tuple, Any, Callable",
     "\\bTypeVar\\b": "from typing import TypeVar",
@@ -148,18 +142,20 @@ class EntityExtractor(ast.NodeVisitor):
         entity_code = self._get_source_slice(node)
         scope_prefix = "_".join(self.scope_stack)
         full_name = f"{scope_prefix}_{name}" if scope_prefix else name
-        self.entities.append({
-            "name": name,
-            "full_name": full_name,
-            "type": entity_type,
-            "code": entity_code,
-            "path": str(self.original_path),
-            "is_constant": entity_type == "const",
-            "is_class": entity_type == "class",
-            "is_function": entity_type in ("function", "method"),
-            "imports": list(self.imports),
-            "imports_from": self.imports_from.copy(),
-        })
+        self.entities.append(
+            {
+                "name": name,
+                "full_name": full_name,
+                "type": entity_type,
+                "code": entity_code,
+                "path": str(self.original_path),
+                "is_constant": entity_type == "const",
+                "is_class": entity_type == "class",
+                "is_function": entity_type in ("function", "method"),
+                "imports": list(self.imports),
+                "imports_from": self.imports_from.copy(),
+            }
+        )
 
     def _add_import(self, import_stmt: str) -> None:
         self.imports.add(import_stmt)
@@ -206,7 +202,7 @@ class EntityExtractor(ast.NodeVisitor):
     def visit_Assign(self, node: ast.Assign) -> None:
         if not self.scope_stack and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
             target_name = node.targets[0].id
-            if re.match(r"^[A-Z_][A-Z0-9_]*$", target_name):
+            if re.match("^[A-Z_][A-Z0-9_]*$", target_name):
                 self._extract_and_save(node, "const", target_name)
 
 
@@ -243,7 +239,7 @@ class ImportCollector:
                     for alias in node.names:
                         imports.append(f"import {alias.name}")
                 elif isinstance(node, ast.ImportFrom):
-                    if node.module and not node.module.startswith("."):
+                    if node.module and (not node.module.startswith(".")):
                         names = ", ".join([alias.name for alias in node.names])
                         imports.append(f"from {node.module} import {names}")
         except:
@@ -269,13 +265,13 @@ def analyze_dependencies(code: str) -> Set[str]:
     for pattern, imp in IMPORT_PATTERNS.items():
         if re.search(pattern, code, re.MULTILINE):
             imports.add(imp)
-    typing_types = re.findall(r"\b(List|Dict|Optional|Union|Tuple|Any|Callable|TypeVar)\b", code)
+    typing_types = re.findall("\\b(List|Dict|Optional|Union|Tuple|Any|Callable|TypeVar)\\b", code)
     if typing_types:
         unique_types = sorted(set(typing_types))
         imports.add(f"from typing import {', '.join(unique_types)}")
-    if re.search(r"field\(", code):
+    if re.search("field\\(", code):
         imports.add("from dataclasses import field")
-    if re.search(r"auto\(\)", code):
+    if re.search("auto\\(\\)", code):
         imports.add("from enum import auto")
     return imports
 
@@ -311,7 +307,7 @@ def merge_imports(existing_imports: List[str], needed_imports: Set[str]) -> List
             "random",
         }
         is_stdlib = module in stdlib_modules
-        return 0 if is_stdlib else 1, imp
+        return (0 if is_stdlib else 1, imp)
 
     return sorted(all_imports, key=import_key)
 
@@ -367,9 +363,9 @@ def is_python_file_no_extension(path: Path) -> bool:
     try:
         with path.open(encoding="utf-8", errors="ignore") as f:
             first_lines = "".join(f.readlines(1024))
-            if re.match(r"#!\s*/.*python", first_lines):
+            if re.match("#!\\s*/.*python", first_lines):
                 return True
-            if any(keyword in first_lines for keyword in ["def ", "class ", "import ", "from "]):
+            if any((keyword in first_lines for keyword in ["def ", "class ", "import ", "from "])):
                 return True
     except:
         pass
@@ -384,16 +380,15 @@ def process_single_file(path: Path) -> Tuple[List[Dict[str, Any]], List[str]]:
             content = path.read_text(encoding="utf-8", errors="ignore")
             entities = extract_entities_from_content(content, path)
             imports = ImportCollector.collect_from_file(path)
-        return entities, imports
+        return (entities, imports)
     except Exception as e:
         print(f"Error reading file {path}: {e}")
-        return [], []
+        return ([], [])
 
 
 def process_archive(path: Path) -> Tuple[List[Dict[str, Any]], List[str]]:
     entities = []
     all_imports = []
-
     if path.suffix == ".zst":
         if HAS_ZSTD:
             try:
@@ -401,13 +396,12 @@ def process_archive(path: Path) -> Tuple[List[Dict[str, Any]], List[str]]:
                 content = dctx.decompress(path.read_bytes()).decode("utf-8", errors="ignore")
                 entities = extract_entities_from_content(content, path)
                 imports = ImportCollector.parse_imports_with_ast(content)
-                return entities, imports
+                return (entities, imports)
             except Exception as e:
                 print(f"Error decompressing ZST file {path}: {e}")
         else:
             print(f"Warning: zstd module not available, skipping {path}")
-        return [], []
-
+        return ([], [])
     if path.suffix in {".zip", ".whl"}:
         try:
             with zipfile.ZipFile(path, "r") as zf:
@@ -421,8 +415,7 @@ def process_archive(path: Path) -> Tuple[List[Dict[str, Any]], List[str]]:
                             all_imports.extend(ImportCollector.parse_imports_with_ast(content))
         except Exception as e:
             print(f"Error processing ZIP/WHL archive {path}: {e}")
-
-    elif any(path.name.endswith(ext) for ext in [".tar", ".tar.gz", ".tgz", ".tar.zst", ".tar.xz"]):
+    elif any((path.name.endswith(ext) for ext in [".tar", ".tar.gz", ".tgz", ".tar.zst", ".tar.xz"])):
         mode_map = {".tar.gz": "r:gz", ".tgz": "r:gz", ".tar.zst": "r:zst", ".tar.xz": "r:xz", ".tar": "r"}
         mode = next((mode_map[ext] for ext in mode_map if path.name.endswith(ext)), "r")
         try:
@@ -440,8 +433,7 @@ def process_archive(path: Path) -> Tuple[List[Dict[str, Any]], List[str]]:
             pass
         except Exception as e:
             print(f"Error processing TAR archive {path}: {e}")
-
-    return entities, all_imports
+    return (entities, all_imports)
 
 
 def worker_process(path_str: str) -> Tuple[List[Dict[str, Any]], List[str]]:
@@ -469,11 +461,9 @@ def process_files_parallel(
     all_entities = []
     all_imports = []
     if max_workers is None:
-        # Use pathlib and cpu_count from os (still need os for this one function)
         import os
 
         max_workers = min(os.cpu_count() or 4, 8)
-
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         future_to_path = {executor.submit(worker_process, path): path for path in file_paths}
         for future in as_completed(future_to_path):
@@ -485,22 +475,19 @@ def process_files_parallel(
                 print(f"✓ Processed: {path} ({len(entities)} entities, {len(imports)} imports)")
             except Exception as e:
                 print(f"✗ Failed: {path} - {e}")
-    return all_entities, all_imports
+    return (all_entities, all_imports)
 
 
 def print_statistics(entities: List[Dict[str, Any]], imports: List[str], saved_entities: int) -> None:
     print("\n" + "=" * 35)
     print("PROCESSING STATISTICS")
     print("=" * 35)
-
     entity_types = {}
     for entity in entities:
         etype = entity["type"]
         entity_types[etype] = entity_types.get(etype, 0) + 1
-
     for etype, count in sorted(entity_types.items()):
         print(f"  • {etype.capitalize()}s: {count}")
-
     import_modules = Counter()
     for imp in imports:
         if imp.startswith("import "):
@@ -509,12 +496,10 @@ def print_statistics(entities: List[Dict[str, Any]], imports: List[str], saved_e
         elif imp.startswith("from "):
             module = imp.split()[1].split(".")[0]
             import_modules[module] += 1
-
     if import_modules:
         print("\n📖 Most Common Imports:")
         for module, count in import_modules.most_common(10):
             print(f"  • {module}: {count} times")
-
     print(f"\n💾 Saved Entities: {saved_entities}")
 
 
@@ -522,39 +507,32 @@ def main() -> int:
     cwd = Path.cwd()
     files = get_files(cwd)
     files_to_process = []
-
     print("\n🔎 Finding Python files and archives...")
     for path in files:
         if path.is_relative_to(OUTPUT_DIR):
             continue
-        is_archive = any(path.name.endswith(ext) for ext in ARCHIVE_EXTENSIONS)
+        is_archive = any((path.name.endswith(ext) for ext in ARCHIVE_EXTENSIONS))
         is_py = path.suffix in ALLOWED_PYTHON_EXTENSIONS or is_python_file_no_extension(path)
         if is_archive or is_py:
             files_to_process.append(str(path))
-
     if not files_to_process:
         print("❌ No Python files or archives found to process.")
         return 1
-
     print(f"Found {len(files_to_process)} files to process.")
     all_entities, all_imports = process_files_parallel(files_to_process)
-
-    if not all_entities and not all_imports:
+    if not all_entities and (not all_imports):
         print("❌ No entities or imports extracted.")
         return 1
-
     saved_count = 0
     for idx, entity in enumerate(all_entities, 1):
         if save_entity(entity):
             saved_count += 1
         if idx % 100 == 0:
             print(f"  Progress: {idx}/{len(all_entities)} entities processed")
-
     if all_imports:
         imports_file = save_global_imports(all_imports, cwd)
         if imports_file:
             print(f"✓ Imports saved to: {imports_file}")
-
     print_statistics(all_entities, all_imports, saved_count)
     return 0
 

@@ -25,7 +25,11 @@ def find_bin_dir() -> Optional[Path]:
     bin_dir = prefix / "bin"
     if bin_dir.exists():
         return bin_dir
-    for possible_bin in [Path("/data/data/com.termux/files/usr/bin"), Path("/usr/bin"), Path("/usr/local/bin")]:
+    for possible_bin in [
+        Path("/data/data/com.termux/files/usr/bin"),
+        Path("/usr/bin"),
+        Path("/usr/local/bin"),
+    ]:
         if possible_bin.exists():
             return possible_bin
     return None
@@ -65,11 +69,13 @@ def check_package(args: Tuple[Path, Path]) -> Dict:
         result["defined_scripts"].append(script_name)
         script_path = bin_dir / script_name
         if not script_path.exists():
-            result["missing_scripts"].append({
-                "name": script_name,
-                "entry": module_entry,
-                "expected_path": str(script_path),
-            })
+            result["missing_scripts"].append(
+                {
+                    "name": script_name,
+                    "entry": module_entry,
+                    "expected_path": str(script_path),
+                }
+            )
     return result
 
 

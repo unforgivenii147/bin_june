@@ -234,7 +234,11 @@ def main() -> int:
     parser.add_argument("paths", nargs="+", help="Files or directories to process")
     parser.add_argument("-d", "--dry-run", action="store_true", help="Preview changes without applying them")
     parser.add_argument(
-        "-e", "--extensions", nargs="+", default=[".py"], help="File extensions to process (default: .py)"
+        "-e",
+        "--extensions",
+        nargs="+",
+        default=[".py"],
+        help="File extensions to process (default: .py)",
     )
     args = parser.parse_args()
     python_files = find_python_files(args.paths, args.extensions)

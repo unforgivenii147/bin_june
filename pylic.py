@@ -134,7 +134,8 @@ def remove_repeated_blocks(repeated: Dict[str, List[Tuple[Path, int, List[str]]]
             print(f"Removed {file_removed} line(s) from {filepath.name}")
         except SyntaxError as e:
             print(
-                f"Warning: Removing blocks from {filepath} would create invalid Python, skipping: {e}", file=sys.stderr
+                f"Warning: Removing blocks from {filepath} would create invalid Python, skipping: {e}",
+                file=sys.stderr,
             )
         except Exception as e:
             print(f"Error: cannot write {filepath}: {e}", file=sys.stderr)
@@ -144,7 +145,10 @@ def remove_repeated_blocks(repeated: Dict[str, List[Tuple[Path, int, List[str]]]
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "-r", "--remove", action="store_true", help="Remove found repeated multi-line comment blocks from files"
+        "-r",
+        "--remove",
+        action="store_true",
+        help="Remove found repeated multi-line comment blocks from files",
     )
     parser.add_argument(
         "--min-lines",

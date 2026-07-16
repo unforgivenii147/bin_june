@@ -110,14 +110,23 @@ def add_outline(html_root, reader: pypdf.PdfReader, writer: pypdf.PdfWriter, nod
 def main() -> None:
     parser = argparse.ArgumentParser(prog="mdbook_pdf_summary", description="Add outline to the PDF file.")
     parser.add_argument(
-        "--html_path", type=str, help="path of the `print.html` generated `mdbook-pdf`", default="print.html"
+        "--html_path",
+        type=str,
+        help="path of the `print.html` generated `mdbook-pdf`",
+        default="print.html",
     )
     parser.add_argument(
-        "--pdf_path", type=str, help="path of the `output.pdf` generated `mdbook-pdf`", default="output.pdf"
+        "--pdf_path",
+        type=str,
+        help="path of the `output.pdf` generated `mdbook-pdf`",
+        default="output.pdf",
     )
     parser.add_argument("--summary_path", type=str, help="path of the `SUMMARY.md`", default="src/SUMMARY.md")
     parser.add_argument(
-        "--output_path", type=str, help="path of the output PDF file", default="output_with_outline.pdf"
+        "--output_path",
+        type=str,
+        help="path of the output PDF file",
+        default="output_with_outline.pdf",
     )
     args = parser.parse_args()
     print("============ args =============")

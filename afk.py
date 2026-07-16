@@ -173,7 +173,10 @@ def analyse_source(source: str, display_path: str) -> FileReport:
             raw_line = lines[node.lineno - 1] if node.lineno <= len(lines) else ""
             report.unused.append(
                 UnusedImport(
-                    lineno=node.lineno, col_offset=node.col_offset, statement=raw_line.strip(), names=unused_names
+                    lineno=node.lineno,
+                    col_offset=node.col_offset,
+                    statement=raw_line.strip(),
+                    names=unused_names,
                 )
             )
     return report
@@ -356,7 +359,13 @@ def print_report(reports: list[FileReport], verbose: bool, use_colour: bool) -> 
             print(f"{label}  -->  {lineno_str}  {stmt_str}{names_note}")
             first = False
     print()
-    print(_coloured(f"Found {total} unused import(s) across {len(files_with_issues)} file(s).", BOLD, use_colour))
+    print(
+        _coloured(
+            f"Found {total} unused import(s) across {len(files_with_issues)} file(s).",
+            BOLD,
+            use_colour,
+        )
+    )
     return total
 
 
@@ -400,7 +409,12 @@ def collect_tasks(
 
 
 def run(
-    paths: list[Path], workers: int, autofix: bool, dry_run: bool, verbose: bool, exclude: Optional[list[str]] = None
+    paths: list[Path],
+    workers: int,
+    autofix: bool,
+    dry_run: bool,
+    verbose: bool,
+    exclude: Optional[list[str]] = None,
 ) -> int:
     use_colour = sys.stdout.isatty()
     if verbose:
@@ -491,15 +505,25 @@ Examples:
 """,
     )
     parser.add_argument(
-        "paths", nargs="*", default=["."], help="Files and/or directories to scan (default: current directory)"
+        "paths",
+        nargs="*",
+        default=["."],
+        help="Files and/or directories to scan (default: current directory)",
     )
     parser.add_argument(
-        "-a", "--autofix", action="store_true", help="Remove unused imports in-place; creates .bak backups"
+        "-a",
+        "--autofix",
+        action="store_true",
+        help="Remove unused imports in-place; creates .bak backups",
     )
     parser.add_argument("--dry-run", action="store_true", help="Show what would be changed without writing files")
     parser.add_argument("-v", "--verbose", action="store_true", help="Print extra progress and per-name details")
     parser.add_argument(
-        "--workers", type=int, default=8, metavar="N", help="Number of parallel worker processes (default: 8)"
+        "--workers",
+        type=int,
+        default=8,
+        metavar="N",
+        help="Number of parallel worker processes (default: 8)",
     )
     parser.add_argument(
         "--exclude",
@@ -507,7 +531,11 @@ Examples:
         metavar="PATTERN",
         help="Exclude files/directories matching regex pattern (can be used multiple times)",
     )
-    parser.add_argument("--ignore-init", action="store_true", help="Ignore __init__.py files (treat imports as used)")
+    parser.add_argument(
+        "--ignore-init",
+        action="store_true",
+        help="Ignore __init__.py files (treat imports as used)",
+    )
     parser.add_argument("--no-color", action="store_true", help="Disable colored output")
     return parser
 

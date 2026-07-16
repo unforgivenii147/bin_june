@@ -1,17 +1,15 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+
 import re
 import sys
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-# WARNING: Source code for 'atomic_write' not found.
-
 LOCAL_FONT_BASE = Path("/sdcard/_static/fonts")
 FONT_EXTS = {".woff", ".woff2", ".ttf", ".otf", ".eot"}
 IMG_EXTS = {".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp"}
-IMPORT_RE = re.compile(r"@import\s+url\([^)]+fonts\.googleapis[^)]+\);?", re.IGNORECASE)
+IMPORT_RE = re.compile("@import\\s+url\\([^)]+fonts\\.googleapis[^)]+\\);?", re.IGNORECASE)
 FAMILY_RULES = {
     "roboto": "roboto",
     "lato": "lato",
@@ -20,7 +18,7 @@ FAMILY_RULES = {
     "fontawesome": "fa",
     "fa-": "fa",
 }
-URL_RE = re.compile(r"url\(([\"\']?)(https?://[^)]+?\.(?:woff2?|ttf|otf|eot))\1\)", re.IGNORECASE)
+URL_RE = re.compile("url\\(([\\\"\\']?)(https?://[^)]+?\\.(?:woff2?|ttf|otf|eot))\\1\\)", re.IGNORECASE)
 
 
 def find_css(paths: str):
@@ -68,7 +66,7 @@ def read_css(files):
                 continue
             cleaned.append(line)
         chunks.append((file, "\n".join(cleaned).strip()))
-    return charset_line, chunks
+    return (charset_line, chunks)
 
 
 def join_css(files, output: str) -> None:

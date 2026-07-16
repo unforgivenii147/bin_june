@@ -52,7 +52,16 @@ def fsz(sz: float) -> str:
     return f"{value:.1f} {units[i]}"
 
 
-ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
+ATTRIBUTES = {
+    "bold": 1,
+    "dark": 2,
+    "italic": 3,
+    "underline": 4,
+    "blink": 5,
+    "reverse": 7,
+    "concealed": 8,
+    "strike": 9,
+}
 HIGHLIGHTS = {
     "on_black": 40,
     "on_grey": 40,

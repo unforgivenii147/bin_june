@@ -275,21 +275,41 @@ Personal Dictionary Management:
     parser.add_argument("inputs", nargs="*", help="File(s) or folder(s) to check (default: current directory)")
     parser.add_argument("-a", "--autofix", action="store_true", help="Automatically fix misspelled words")
     parser.add_argument(
-        "-j", "--jobs", type=int, default=cpu_count(), help=f"Number of worker processes (default: {cpu_count()})"
+        "-j",
+        "--jobs",
+        type=int,
+        default=cpu_count(),
+        help=f"Number of worker processes (default: {cpu_count()})",
     )
     parser.add_argument(
-        "-d", "--dict-file", type=str, help="Path to personal dictionary file (default: ~/.spell_checker_dict.json)"
+        "-d",
+        "--dict-file",
+        type=str,
+        help="Path to personal dictionary file (default: ~/.spell_checker_dict.json)",
     )
-    parser.add_argument("--add-words", nargs="+", metavar="WORD", help="Add one or more words to personal dictionary")
     parser.add_argument(
-        "--add-from-file", type=str, metavar="FILE", help="Add words from file (one word per line) to dictionary"
+        "--add-words",
+        nargs="+",
+        metavar="WORD",
+        help="Add one or more words to personal dictionary",
     )
     parser.add_argument(
-        "--remove-words", nargs="+", metavar="WORD", help="Remove one or more words from personal dictionary"
+        "--add-from-file",
+        type=str,
+        metavar="FILE",
+        help="Add words from file (one word per line) to dictionary",
+    )
+    parser.add_argument(
+        "--remove-words",
+        nargs="+",
+        metavar="WORD",
+        help="Remove one or more words from personal dictionary",
     )
     parser.add_argument("--list-dict", action="store_true", help="List all words in personal dictionary")
     parser.add_argument(
-        "--clear-dict", action="store_true", help="Clear entire personal dictionary (with confirmation)"
+        "--clear-dict",
+        action="store_true",
+        help="Clear entire personal dictionary (with confirmation)",
     )
     args = parser.parse_args()
     personal_dict = PersonalDictionary(Path(args.dict_file) if args.dict_file else None)

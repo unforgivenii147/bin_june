@@ -1,21 +1,20 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+
 import argparse
 import os
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
 from xxhash import xxh64
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 DEFAULT_BLOCK = 32768
 QUICK_READ = 4096
-CHUNK_SIZE = 65536  # Was missing - critical fix
+CHUNK_SIZE = 65536
 
 
 def file_stat_key(p: Path) -> tuple[int, int] | None:
-    """Get unique file identity (inode, device) with error handling."""
     try:
         st = p.stat()
         return (st.st_ino, st.st_dev)
@@ -24,22 +23,17 @@ def file_stat_key(p: Path) -> tuple[int, int] | None:
 
 
 def quick_hash(path: Path, n: int = QUICK_READ) -> str:
-    """Generate partial hash for quick comparison."""
     h = xxh64()
     try:
         size = path.stat().st_size
         with path.open("rb") as f:
-            # Read head
             head = f.read(n)
             h.update(head)
-
             if size > n * 2:
-                # Read tail
                 f.seek(max(size - n, 0))
                 tail = f.read(n)
                 h.update(tail)
             elif size > n:
-                # Read remaining bytes for small files
                 rest = f.read()
                 h.update(rest)
     except (OSError, IOError) as e:
@@ -48,13 +42,11 @@ def quick_hash(path: Path, n: int = QUICK_READ) -> str:
 
 
 def full_hash(path: Path) -> tuple[str, Path]:
-    """Generate complete file hash. Returns (hash, path) tuple."""
     try:
         if not path.stat().st_size:
             return ("", path)
     except OSError:
         return ("", path)
-
     h = xxh64()
     try:
         with path.open("rb") as f:
@@ -69,12 +61,10 @@ def full_hash(path: Path) -> tuple[str, Path]:
 
 
 def iter_files(root: Path, recursive: bool, follow_symlinks: bool, min_size: int):
-    """Memory-efficient file iterator with early filtering."""
     if recursive:
         iterator = root.rglob("*")
     else:
         iterator = root.iterdir()
-
     for p in iterator:
         if not p.is_file():
             continue
@@ -88,10 +78,8 @@ def iter_files(root: Path, recursive: bool, follow_symlinks: bool, min_size: int
 
 
 def choose_keep(files: list, policy: str = "oldest") -> Path:
-    """Choose which file to keep based on policy."""
     if not files:
         raise ValueError("Empty file list")
-
     if policy == "first":
         return min(files, key=str)
     elif policy == "oldest":
@@ -125,12 +113,9 @@ def main() -> None:
     p.add_argument("--workers", type=int, default=8, help="Number of worker threads (default: 8).")
     args = p.parse_args()
     root = Path.cwd()
-
-    # Phase 1: Group by size (memory efficient)
     print("Phase 1: Scanning files and grouping by size...")
     size_groups = defaultdict(list)
     total_files = 0
-
     for f in iter_files(root, args.recursive, args.follow_symlinks, args.min_size):
         total_files += 1
         try:
@@ -138,26 +123,19 @@ def main() -> None:
             size_groups[size].append(f)
         except OSError:
             continue
-
-    # Filter to groups with duplicates only
     candidates = {s: lst for s, lst in size_groups.items() if len(lst) > 1}
     if not candidates:
         print(f"Scanned {total_files} files. No potential duplicates found.")
         return
-
-    candidate_count = sum(len(v) for v in candidates.values())
+    candidate_count = sum((len(v) for v in candidates.values()))
     print(f"Phase 1 complete: {candidate_count} files in {len(candidates)} size-groups to examine.")
-
-    # Phase 2: Quick hash comparison
     print("Phase 2: Quick hash comparison...")
     quick_groups = defaultdict(list)
-
     with ThreadPoolExecutor(max_workers=args.workers) as ex:
         futures = {}
         for files in candidates.values():
             for fpath in files:
                 futures[ex.submit(quick_hash, fpath)] = fpath
-
         for fut in as_completed(futures):
             fpath = futures[fut]
             try:
@@ -166,83 +144,60 @@ def main() -> None:
                 quick_groups[key].append(fpath)
             except Exception as e:
                 print(f"Warning: Skipping {fpath}: {e}")
-
-    # Filter to groups needing full hash
     need_full = [group for group in quick_groups.values() if len(group) > 1]
     if not need_full:
         print("No duplicates found after quick hash comparison.")
         return
-
-    full_candidates = sum(len(g) for g in need_full)
+    full_candidates = sum((len(g) for g in need_full))
     print(f"Phase 2 complete: {full_candidates} files in {len(need_full)} groups need full hash.")
-
-    # Phase 3: Full hash for remaining candidates
     print("Phase 3: Full hash comparison...")
     full_groups = defaultdict(list)
-
     with ThreadPoolExecutor(max_workers=args.workers) as ex:
         futures = {}
         for group in need_full:
             for fpath in group:
                 st_key = file_stat_key(fpath)
                 futures[ex.submit(full_hash, fpath)] = (fpath, st_key)
-
         for fut in as_completed(futures):
             fpath, st_key = futures[fut]
             try:
-                h, _ = fut.result()  # Unpack the tuple
-                if h:  # Only add if hash is non-empty
+                h, _ = fut.result()
+                if h:
                     full_groups[h].append((fpath, st_key))
             except Exception as e:
                 print(f"Warning: Skipping {fpath}: {e}")
-
-    # Phase 4: Process results and handle hard links
     print("Phase 4: Processing results...")
     to_delete = []
-
     for h, entries in full_groups.items():
         if len(entries) < 2:
             continue
-
-        # Group by inode to handle hard links
         inode_map = defaultdict(list)
         for p, stk in entries:
             inode_map[stk].append(p)
-
-        # Get one representative per inode
         group_reps = [min(ps, key=str) for ps in inode_map.values()]
-
         if len(group_reps) < 2:
             continue
-
         keep_file = choose_keep(group_reps, policy=args.keep)
         for rep in group_reps:
             if rep != keep_file:
                 to_delete.append(rep)
-
     if not to_delete:
         print("No duplicate files found.")
         return
-
-    # Phase 5: Confirmation and deletion
     print(f"\nFound {len(to_delete)} duplicate files to delete.")
     if not args.dry_run:
         print("Files to be deleted:")
     else:
         print("DRY RUN - Files that would be deleted:")
-
     for p in to_delete:
         try:
             rel_path = p.relative_to(cwd)
         except ValueError:
             rel_path = p
         print(f"  {rel_path}")
-
     if args.dry_run:
         print(f"\nDry-run complete. {len(to_delete)} files would be deleted.")
         return
-
-    # Confirmation prompt
     try:
         response = input(f"\nDelete {len(to_delete)} files? [y/N]: ").strip().lower()
         if response not in ("y", "yes"):
@@ -251,12 +206,9 @@ def main() -> None:
     except (KeyboardInterrupt, EOFError):
         print("\nDeletion cancelled.")
         return
-
-    # Delete files
     removed = 0
     failed = 0
     freed_space = 0
-
     for p in to_delete:
         try:
             size = p.stat().st_size
@@ -273,8 +225,6 @@ def main() -> None:
                 print(f"Failed: {p.relative_to(cwd)} - {e}")
             except ValueError:
                 print(f"Failed: {p} - {e}")
-
-    # Summary
     print(f"\nSummary:")
     print(f"  Files scanned: {total_files}")
     print(f"  Duplicates found: {len(to_delete)}")

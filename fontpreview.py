@@ -33,12 +33,14 @@ def generate_html(font_files) -> str:
     ]
     for font_path in font_files:
         font_name = Path(font_path).name
-        html.extend((
-            "<div class='font-preview'>",
-            "<style>",
-            f"@font-face {{ font-family: '{font_name}'; src: url('{font_path}'); }}",
-            "</style>",
-        ))
+        html.extend(
+            (
+                "<div class='font-preview'>",
+                "<style>",
+                f"@font-face {{ font-family: '{font_name}'; src: url('{font_path}'); }}",
+                "</style>",
+            )
+        )
         html.append(
             f"<div style='font-family: \"{font_name}\"; font-size: 16px;'>LIFE IS A DREAM, we are dreaming.</div>"
         )

@@ -106,7 +106,11 @@ def process_file(args: Tuple[Path, int, int]) -> Tuple[Path, Dict[str, List[Tupl
 
 
 def find_repeated_strings(
-    directory: Path, min_lines: int = 2, min_chars: int = 10, max_workers: int = None, half: bool = False
+    directory: Path,
+    min_lines: int = 2,
+    min_chars: int = 10,
+    max_workers: int = None,
+    half: bool = False,
 ) -> Dict[str, List[Tuple[Path, List[Tuple[int, int]]]]]:
     files = find_files(directory)
     if not files:
@@ -171,7 +175,10 @@ def remove_strings_from_files(
             if file_path.suffix.lower() == ".py" and validate:
                 is_valid, error_msg = validate_python_syntax(new_content)
                 if not is_valid:
-                    print(f"SKIPPED: {file_path} - Syntax validation failed: {error_msg}", file=sys.stderr)
+                    print(
+                        f"SKIPPED: {file_path} - Syntax validation failed: {error_msg}",
+                        file=sys.stderr,
+                    )
                     skipped_files.append((file_path, error_msg))
                     continue
             with open(file_path, "w", encoding="utf-8") as f:
@@ -213,9 +220,16 @@ def main():
         help="Remove found repeated strings. Optionally specify string numbers (e.g., -r 2 4 to remove strings #2 and #4)",
     )
     parser.add_argument(
-        "-H", "--half", action="store_true", help="Only show strings found in at least 50 percent of files"
+        "-H",
+        "--half",
+        action="store_true",
+        help="Only show strings found in at least 50 percent of files",
     )
-    parser.add_argument("--no-validate", action="store_true", help="Skip Python syntax validation (use with caution)")
+    parser.add_argument(
+        "--no-validate",
+        action="store_true",
+        help="Skip Python syntax validation (use with caution)",
+    )
     parser.add_argument(
         "--min-lines",
         type=int,
@@ -250,7 +264,11 @@ def main():
         print("Filtering: Only strings appearing in at least 50% of files will be shown")
 
     repeated = find_repeated_strings(
-        directory, min_lines=args.min_lines, min_chars=args.min_chars, max_workers=args.workers, half=args.half
+        directory,
+        min_lines=args.min_lines,
+        min_chars=args.min_chars,
+        max_workers=args.workers,
+        half=args.half,
     )
 
     output_file = Path.cwd() / "lic.txt"
@@ -275,7 +293,10 @@ def main():
             max_num = len(repeated)
             invalid_nums = [n for n in string_numbers if n < 1 or n > max_num]
             if invalid_nums:
-                print(f"\nError: Invalid string numbers: {invalid_nums}. Valid range: 1-{max_num}", file=sys.stderr)
+                print(
+                    f"\nError: Invalid string numbers: {invalid_nums}. Valid range: 1-{max_num}",
+                    file=sys.stderr,
+                )
                 sys.exit(1)
             print(f"\nRemoving strings: {string_numbers}...")
         else:

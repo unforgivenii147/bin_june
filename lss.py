@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+
 import sys
 from pathlib import Path
 
@@ -10,8 +12,6 @@ def main() -> None:
     if not prefix:
         print("Usage: python script.py <prefix>", file=sys.stderr)
         sys.exit(1)
-
-    # Using iterdir with manual filtering (fastest for simple prefix checks)
     for entry in Path.cwd().iterdir():
         if entry.name.startswith(prefix):
             print(entry.name)

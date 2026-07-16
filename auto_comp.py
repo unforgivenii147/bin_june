@@ -41,11 +41,15 @@ COMPRESSORS: Final[dict[str, tuple[CompressorFunc, str]]] = {
     "gzip": (lambda d: gzip.compress(d, compresslevel=COMPRESSION_LEVEL_MAX), ".gz"),
     "lz4": (
         lambda d: lz4.frame.compress(
-            d, compression_context=lz4.frame.create_compression_context(lz4.frame.COMPRESSIONLEVEL_MAX)
+            d,
+            compression_context=lz4.frame.create_compression_context(lz4.frame.COMPRESSIONLEVEL_MAX),
         ),
         ".lz4",
     ),
-    "blosc2": (lambda d: blosc2.compress(d, codec=blosc2.Codec.zstd, clevel=COMPRESSION_LEVEL_MAX), ".blosc2"),
+    "blosc2": (
+        lambda d: blosc2.compress(d, codec=blosc2.Codec.zstd, clevel=COMPRESSION_LEVEL_MAX),
+        ".blosc2",
+    ),
 }
 
 
@@ -116,7 +120,12 @@ class CompressionManager:
             comp_size = len(compressed)
             ratio = comp_size / len(data)
             return CompressionResult(
-                name=name, size=comp_size, ratio=ratio, time=elapsed, path=output_path, original_size=len(data)
+                name=name,
+                size=comp_size,
+                ratio=ratio,
+                time=elapsed,
+                path=output_path,
+                original_size=len(data),
             )
         except Exception as e:
             print(f"✗ {name:10} | Error: {e}")
@@ -138,7 +147,12 @@ class CompressionManager:
             comp_size = output_path.stat().st_size
             ratio = comp_size / len(data)
             return CompressionResult(
-                name="7z", size=comp_size, ratio=ratio, time=elapsed, path=output_path, original_size=len(data)
+                name="7z",
+                size=comp_size,
+                ratio=ratio,
+                time=elapsed,
+                path=output_path,
+                original_size=len(data),
             )
         except Exception as e:
             print(f"✗ {'7z':10} | Error: {e}")

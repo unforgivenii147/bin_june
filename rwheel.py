@@ -32,7 +32,14 @@ def get_wheel_tags() -> str:
 
 
 def get_package_info(pkg_path):
-    info = {"name": pkg_path.name, "version": "0.0.0", "files": [], "data_files": [], "scripts": [], "has_so": False}
+    info = {
+        "name": pkg_path.name,
+        "version": "0.0.0",
+        "files": [],
+        "data_files": [],
+        "scripts": [],
+        "has_so": False,
+    }
     for dist_dir in pkg_path.parent.glob(f"{pkg_path.name}*.dist-info"):
         metadata_path = dist_dir / "METADATA"
         if metadata_path.exists():

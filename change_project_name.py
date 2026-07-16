@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+
 import shutil
 import sys
 from pathlib import Path
@@ -39,13 +41,9 @@ def main() -> None:
     old = sys.argv[1]
     new = sys.argv[2]
     root = Path(".")
-
-    # Process files first
     for path in list(root.rglob("*")):
         if path.is_file():
             replace_in_file(path, old, new)
-
-    # Rename files and directories (bottom-up)
     paths = sorted(root.rglob("*"), key=lambda p: len(p.parts), reverse=True)
     for path in paths:
         rename_path(path, old, new)

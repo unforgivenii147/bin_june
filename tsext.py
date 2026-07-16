@@ -114,7 +114,10 @@ def extract_python_code_elements(filepath: Path):
                 class_name_node = child.child_by_field_name("name")
                 if class_name_node:
                     classes.append(class_name_node.text.decode("utf-8"))
-            elif child.type == "assignment" and node.type not in {"import_statement", "import_from_statement"}:
+            elif child.type == "assignment" and node.type not in {
+                "import_statement",
+                "import_from_statement",
+            }:
                 target = child.child_by_field_name("name")
                 if target and target.text.decode("utf-8").isupper() and len(target.text.decode("utf-8")) > 1:
                     if child.named_child_count == 2:

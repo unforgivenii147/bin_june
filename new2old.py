@@ -96,7 +96,10 @@ def has_c_extension(tool: Dict[str, Any]) -> Tuple[bool, str]:
 
 
 def generate_setup_py(
-    metadata: Dict[str, Any], setup_cfg_text: Optional[str], manifest_text: Optional[str], force: bool = False
+    metadata: Dict[str, Any],
+    setup_cfg_text: Optional[str],
+    manifest_text: Optional[str],
+    force: bool = False,
 ) -> str:
     cfg = parse_setup_cfg(setup_cfg_text)
     has_cext, cext_method = has_c_extension(metadata["tool"])
@@ -198,7 +201,7 @@ def generate_setup_py(
             cext_extension = "from setuptools import Extension\n\n" + "\n".join(ext_list) if ext_list else ""
             cext_imports = "from setuptools import Extension\n"
             cext_build = (
-                f"""    ext_modules=[{", ".join([f'''Extension("{e.get('name', '')}", sources={e.get('sources', [])})''' for e in ext_modules])}],\n"""
+                f"""    ext_modules=[{", ".join([f'''Extension("{e.get("name", "")}", sources={e.get("sources", [])})''' for e in ext_modules])}],\n"""
                 if ext_modules
                 else ""
             )
@@ -222,7 +225,10 @@ def main() -> None:
     )
     parser.add_argument("--force", action="store_true", help="Overwrite existing setup.py")
     parser.add_argument(
-        "toml_path", nargs="?", default="pyproject.toml", help="Path to pyproject.toml (default: ./pyproject.toml)"
+        "toml_path",
+        nargs="?",
+        default="pyproject.toml",
+        help="Path to pyproject.toml (default: ./pyproject.toml)",
     )
     args = parser.parse_args()
     toml_path = Path(args.toml_path).resolve()

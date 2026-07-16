@@ -7,6 +7,7 @@ from collections import deque
 from os import scandir as os_scandir
 from pathlib import Path
 from typing import List, Optional, Tuple
+
 from loguru import logger
 
 
@@ -32,7 +33,16 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     return files
 
 
-ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
+ATTRIBUTES = {
+    "bold": 1,
+    "dark": 2,
+    "italic": 3,
+    "underline": 4,
+    "blink": 5,
+    "reverse": 7,
+    "concealed": 8,
+    "strike": 9,
+}
 HIGHLIGHTS = {
     "on_black": 40,
     "on_grey": 40,
@@ -125,7 +135,10 @@ def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_
 
 logger.remove()
 logger.add(
-    "/sdcard/soverify.log", level="ERROR", format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}", rotation="10 MB"
+    "/sdcard/soverify.log",
+    level="ERROR",
+    format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}",
+    rotation="10 MB",
 )
 
 
@@ -160,7 +173,12 @@ class CtypesVerifier:
 
     def verify_with_symbols(self, file_path: Path) -> Tuple[bool, dict]:
         can_load, msg = self.verify_so_file(file_path)
-        symbol_info = {"can_load": can_load, "message": msg, "has_symbols": False, "symbol_count": 0}
+        symbol_info = {
+            "can_load": can_load,
+            "message": msg,
+            "has_symbols": False,
+            "symbol_count": 0,
+        }
         if not can_load:
             return (False, symbol_info)
         try:

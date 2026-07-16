@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+
 """
 Optimized version of transformimports.py for Python 3.12.
 Transforms direct imports (import module) to from-imports (from module import name).
@@ -11,8 +13,6 @@ from typing import Any
 
 
 class ImportTransformer(ast.NodeTransformer):
-    """AST Transformer to change 'import module' to 'from module import ...'."""
-
     def __init__(self, tree: ast.Module):
         self.tree = tree
         self.module_to_names: dict[str, set[str]] = {}
@@ -20,26 +20,20 @@ class ImportTransformer(ast.NodeTransformer):
         self._analyze_usage()
 
     def _analyze_usage(self) -> None:
-        """Finds all usages of imported modules (e.g., module.attr)."""
-        # First, find direct imports
         direct_imports = set()
         for node in ast.walk(self.tree):
             if isinstance(node, ast.Import):
                 for alias in node.names:
                     if not alias.asname:
                         direct_imports.add(alias.name)
-
         if not direct_imports:
             return
-
-        # Then find their attribute usages
         for node in ast.walk(self.tree):
             if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name):
                 if node.value.id in direct_imports:
                     self.module_to_names.setdefault(node.value.id, set()).add(node.attr)
 
     def visit_Import(self, node: ast.Import) -> Any:
-        """Replaces Import nodes with ImportFrom nodes if applicable."""
         new_nodes = []
         for alias in node.names:
             if not alias.asname and alias.name in self.module_to_names:
@@ -50,10 +44,9 @@ class ImportTransformer(ast.NodeTransformer):
                 )
             else:
                 new_nodes.append(ast.Import(names=[alias]))
-        return new_nodes if len(new_nodes) > 1 else (new_nodes[0] if new_nodes else None)
+        return new_nodes if len(new_nodes) > 1 else new_nodes[0] if new_nodes else None
 
     def visit_Attribute(self, node: ast.Attribute) -> Any:
-        """Replaces 'module.attr' with 'attr' if 'module' was transformed."""
         if isinstance(node.value, ast.Name) and node.value.id in self.module_to_names:
             self.modified = True
             return ast.Name(id=node.attr, ctx=node.ctx)
@@ -64,19 +57,15 @@ def main() -> None:
     if len(sys.argv) != 2:
         print("Usage: python transformimports_optimized.py <python_file>", file=sys.stderr)
         sys.exit(1)
-
     filepath = Path(sys.argv[1])
     if not filepath.exists() or filepath.suffix != ".py":
         print(f"Error: Invalid Python file '{filepath}'", file=sys.stderr)
         sys.exit(1)
-
     try:
         content = filepath.read_text(encoding="utf-8")
         tree = ast.parse(content)
-
         transformer = ImportTransformer(tree)
         new_tree = transformer.visit(tree)
-
         if transformer.modified:
             ast.fix_missing_locations(new_tree)
             new_content = ast.unparse(new_tree)
@@ -84,7 +73,6 @@ def main() -> None:
             print(f"✓ Successfully transformed imports in '{filepath}'.")
         else:
             print(f"No transformations needed for '{filepath}'.")
-
     except SyntaxError as e:
         print(f"Error: File has syntax errors: {e}", file=sys.stderr)
         sys.exit(1)

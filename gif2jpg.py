@@ -26,7 +26,10 @@ SIMILARITY_THRESHOLD = 8.0
 MIN_CHANGED_PIXEL_FRACTION = 0.005
 N_JOBS = -1
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s  %(levelname)-8s  %(message)s", datefmt="%H:%M:%S", stream=sys.stdout
+    level=logging.INFO,
+    format="%(asctime)s  %(levelname)-8s  %(message)s",
+    datefmt="%H:%M:%S",
+    stream=sys.stdout,
 )
 log = logging.getLogger(__name__)
 
@@ -47,7 +50,8 @@ def extract_unique_frames(gif_path: Path) -> list[np.ndarray]:
             if not hasattr(img, "n_frames"):
                 canvas = Image.new("RGB", img.size, (255, 255, 255))
                 canvas.paste(
-                    img.convert("RGBA"), mask=img.convert("RGBA").split()[3] if img.mode in ("RGBA", "P") else None
+                    img.convert("RGBA"),
+                    mask=img.convert("RGBA").split()[3] if img.mode in ("RGBA", "P") else None,
                 )
                 frames.append(np.asarray(canvas))
                 return frames
@@ -129,7 +133,12 @@ def main() -> None:
     total_gifs = len(results)
     total_frames = sum(r[1] for r in results)
     total_saved = sum(r[2] for r in results)
-    log.info("Done. %d GIF(s) processed — %d/%d frames saved as JPG.", total_gifs, total_saved, total_frames)
+    log.info(
+        "Done. %d GIF(s) processed — %d/%d frames saved as JPG.",
+        total_gifs,
+        total_saved,
+        total_frames,
+    )
 
 
 if __name__ == "__main__":

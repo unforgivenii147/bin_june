@@ -21,7 +21,11 @@ import pkg_resources
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 logger = logging.getLogger(__name__)
 
 
@@ -84,7 +88,9 @@ def get_package_path(package_name: str, site_paths: List[Path]) -> Optional[Path
     return None
 
 
-def repack_package(args_tuple: Tuple[str, str, Path, List[Path]]) -> Tuple[str, bool, Optional[str]]:
+def repack_package(
+    args_tuple: Tuple[str, str, Path, List[Path]],
+) -> Tuple[str, bool, Optional[str]]:
     package_name, version, output_dir, site_paths = args_tuple
     try:
         pkg_path = get_package_path(package_name, site_paths)
@@ -178,10 +184,16 @@ Root-Is-Purelib: false
 def main():
     parser = argparse.ArgumentParser(description="Repack installed Python packages into wheel files")
     parser.add_argument(
-        "-o", "--output", default="~/tmp/.whl", help="Output directory for wheel files (default: ~/tmp/.whl)"
+        "-o",
+        "--output",
+        default="~/tmp/.whl",
+        help="Output directory for wheel files (default: ~/tmp/.whl)",
     )
     parser.add_argument(
-        "-p", "--packages", nargs="+", help="Specific packages to repack (default: all non-pure packages)"
+        "-p",
+        "--packages",
+        nargs="+",
+        help="Specific packages to repack (default: all non-pure packages)",
     )
     parser.add_argument("-j", "--jobs", type=int, default=4, help="Number of parallel jobs (default: 4)")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")

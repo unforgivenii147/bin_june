@@ -282,7 +282,11 @@ def main():
     )
     parser.add_argument("-j", "--json", action="store_true", help="Output in JSON format")
     parser.add_argument(
-        "-p", "--processes", type=int, default=None, help=f"Number of processes to use (default: {cpu_count()})"
+        "-p",
+        "--processes",
+        type=int,
+        default=None,
+        help=f"Number of processes to use (default: {cpu_count()})",
     )
     parser.add_argument("-v", "--verbose", action="store_true", help="Print verbose output")
     args = parser.parse_args()

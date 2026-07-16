@@ -91,7 +91,16 @@ def mpf3(process_function: Callable, files: list[Path], **kwargs):
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
 
 
-ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
+ATTRIBUTES = {
+    "bold": 1,
+    "dark": 2,
+    "italic": 3,
+    "underline": 4,
+    "blink": 5,
+    "reverse": 7,
+    "concealed": 8,
+    "strike": 9,
+}
 
 HIGHLIGHTS = {
     "on_black": 40,
@@ -264,7 +273,10 @@ def process_file(path: str | Path, mode: str = MODE) -> bool:
                 from black import TargetVersion as _tv
                 from black import format_str
 
-                code = format_str(original_code, mode=_Mode(target_versions={_tv.PY310, _tv.PY313}, line_length=120))
+                code = format_str(
+                    original_code,
+                    mode=_Mode(target_versions={_tv.PY310, _tv.PY313}, line_length=120),
+                )
             case "autopep":
                 from autopep8 import fix_code as fix_with_autopep
 
@@ -278,7 +290,10 @@ def process_file(path: str | Path, mode: str = MODE) -> bool:
                 from black import TargetVersion as _tv
                 from black import format_str
 
-                code = format_str(original_code, mode=_Mode(target_versions={_tv.PY310, _tv.PY313}, line_length=120))
+                code = format_str(
+                    original_code,
+                    mode=_Mode(target_versions={_tv.PY310, _tv.PY313}, line_length=120),
+                )
         after = len(code)
         dsz = abs(before - after)
         etime = pff()

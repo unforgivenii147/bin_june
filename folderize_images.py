@@ -107,7 +107,11 @@ def main() -> None:
     args = parser.parse_args()
     cwd = Path.cwd()
     folderize_by_similarity(
-        root=cwd, out_dir_name=args.out, hash_func=args.hash_func, hash_size=args.hash_size, threshold=args.threshold
+        root=cwd,
+        out_dir_name=args.out,
+        hash_func=args.hash_func,
+        hash_size=args.hash_size,
+        threshold=args.threshold,
     )
 
 

@@ -29,7 +29,10 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
 
 
 def runcmd(
-    cmd: list[str], run_silently: bool = False, show_output: bool = True, timeout: float | None = None
+    cmd: list[str],
+    run_silently: bool = False,
+    show_output: bool = True,
+    timeout: float | None = None,
 ) -> tuple[int, str, str]:
     from subprocess import DEVNULL as _DEVNULL
     from subprocess import TimeoutExpired as subprocess_TimeoutExpired

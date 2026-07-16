@@ -29,7 +29,10 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
 
 
 def runcmd(
-    cmd: list[str], run_silently: bool = False, show_output: bool = True, timeout: float | None = None
+    cmd: list[str],
+    run_silently: bool = False,
+    show_output: bool = True,
+    timeout: float | None = None,
 ) -> tuple[int, str, str]:
     from subprocess import DEVNULL as _DEVNULL
     from subprocess import TimeoutExpired as subprocess_TimeoutExpired
@@ -100,7 +103,20 @@ def main() -> None:
         [Path(f) for f in args]
         if args
         else get_files(
-            cwd, e=[".html", ".htm", ".js", ".jsx", ".ts", ".tsx", ".md", ".jsm", ".scss", ".tsm", ".coffee"]
+            cwd,
+            e=[
+                ".html",
+                ".htm",
+                ".js",
+                ".jsx",
+                ".ts",
+                ".tsx",
+                ".md",
+                ".jsm",
+                ".scss",
+                ".tsm",
+                ".coffee",
+            ],
         )
     )
     if len(files) == 1:

@@ -22,7 +22,12 @@ OS_PATH_TO_PATHLIB = {
     "os\\.path\\.split\\(": ".parts",
     "os\\.path\\.splitext\\(": ".suffix",
 }
-OS_PATH_IMPORT_PATTERNS = ["import os\\.path", "from os\\.path import", "from os import path", "import os"]
+OS_PATH_IMPORT_PATTERNS = [
+    "import os\\.path",
+    "from os\\.path import",
+    "from os import path",
+    "import os",
+]
 
 
 def refactor_file(file_path):
@@ -32,7 +37,11 @@ def refactor_file(file_path):
         content = re.sub(pattern, "from pathlib import Path", content)
     for os_path_func, pathlib_replacement in OS_PATH_TO_PATHLIB.items():
         content = re.sub(os_path_func, pathlib_replacement, content)
-    content = re.sub(r"Path\(([^)]+)\)", lambda m: f"Path({m.group(1).replace(' ', '').replace(',', ', ')})", content)
+    content = re.sub(
+        r"Path\(([^)]+)\)",
+        lambda m: f"Path({m.group(1).replace(' ', '').replace(',', ', ')})",
+        content,
+    )
     content = re.sub(r"Path\(([^)]+)\)", lambda m: f"Path({m.group(1)})", content)
     content = re.sub(r"(\w+)\s*\.parent", "Path(\\1).parent", content)
     content = re.sub(r"(\w+)\s*\.name", "Path(\\1).name", content)

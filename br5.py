@@ -373,7 +373,12 @@ def process_subdirs_with_tar(
                 for i, tar_path in enumerate(tar_files, 1):
                     output_path = tar_path.with_suffix(".tar.br")
                     result = compress_file_streaming(
-                        tar_path, output_path, quality, 1024 * 1024, not keep_original, was_tarred=True
+                        tar_path,
+                        output_path,
+                        quality,
+                        1024 * 1024,
+                        not keep_original,
+                        was_tarred=True,
                     )
                     results.append(result)
                     if result.success:
@@ -558,7 +563,10 @@ def print_results_rich(results: List[CompressionResult], directory: Path, operat
     summary_text.append(f"{deleted_count}\n", style="bold yellow")
     summary_text.append(f"\n💾 Total original size: ", style="dim")
     summary_text.append(f"{format_size(total_original)}\n", style="bold yellow")
-    summary_text.append(f"{('📦' if operation == 'compress' else '📂')} Total {size_label.lower()} size: ", style="dim")
+    summary_text.append(
+        f"{('📦' if operation == 'compress' else '📂')} Total {size_label.lower()} size: ",
+        style="dim",
+    )
     summary_text.append(f"{format_size(total_processed)}\n", style="bold green")
     if operation == "compress":
         summary_text.append(f"📈 Average compression: ", style="dim")
@@ -700,7 +708,9 @@ def main():
         help=f"Number of parallel workers (default: {mp.cpu_count()})",
     )
     parser.add_argument(
-        "--keep-originals", action="store_true", help="Keep original files after processing (default: delete originals)"
+        "--keep-originals",
+        action="store_true",
+        help="Keep original files after processing (default: delete originals)",
     )
     parser.add_argument(
         "--exclude",
@@ -710,7 +720,9 @@ def main():
     )
     parser.add_argument("--no-parallel", action="store_true", help="Disable parallel processing")
     parser.add_argument(
-        "--dry-run", action="store_true", help="Show what would be processed without actually modifying files"
+        "--dry-run",
+        action="store_true",
+        help="Show what would be processed without actually modifying files",
     )
     parser.add_argument(
         "--no-skip-compressed",
@@ -868,7 +880,11 @@ def main():
                         for file_path in files:
                             output_path = file_path.with_suffix(file_path.suffix + ".br")
                             result = compress_file_streaming(
-                                file_path, output_path, args.quality, 1024 * 1024, args.keep_originals
+                                file_path,
+                                output_path,
+                                args.quality,
+                                1024 * 1024,
+                                args.keep_originals,
                             )
                             results.append(result)
                             progress.advance(task)
@@ -910,7 +926,11 @@ def main():
                             else:
                                 output_path = file_path.with_suffix("")
                                 future = executor.submit(
-                                    decompress_file_streaming, file_path, output_path, 1024 * 1024, args.keep_originals
+                                    decompress_file_streaming,
+                                    file_path,
+                                    output_path,
+                                    1024 * 1024,
+                                    args.keep_originals,
                                 )
                             futures[future] = file_path
                         for future in as_completed(futures):
@@ -922,7 +942,11 @@ def main():
                         if operation == "compress":
                             output_path = file_path.with_suffix(file_path.suffix + ".br")
                             result = compress_file_streaming(
-                                file_path, output_path, args.quality, 1024 * 1024, args.keep_originals
+                                file_path,
+                                output_path,
+                                args.quality,
+                                1024 * 1024,
+                                args.keep_originals,
                             )
                         else:
                             output_path = file_path.with_suffix("")
@@ -948,7 +972,11 @@ def main():
                         else:
                             output_path = file_path.with_suffix("")
                             future = executor.submit(
-                                decompress_file_streaming, file_path, output_path, 1024 * 1024, args.keep_originals
+                                decompress_file_streaming,
+                                file_path,
+                                output_path,
+                                1024 * 1024,
+                                args.keep_originals,
                             )
                         futures[future] = file_path
                     for i, future in enumerate(as_completed(futures), 1):

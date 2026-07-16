@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+
 """
 Optimized version of transchin.py for Python 3.12.
 Translates non-English characters in files in-place using parallel processing.
@@ -10,33 +12,23 @@ import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Final
-
 from deep_translator import GoogleTranslator
 
-# Constants
 CHUNK_SIZE: Final[int] = 2000
 MAX_WORKERS: Final[int] = 16
-SKIP_DIRS: Final[frozenset[str]] = frozenset({
-    "lazy",
-    ".git",
-    "__pycache__",
-    ".mypy_cache",
-    ".ruff_cache",
-    ".pytest_cache",
-})
-NON_ASCII_PATTERN: Final[re.Pattern] = re.compile(r"[^\x00-\x7F]")
-
+SKIP_DIRS: Final[frozenset[str]] = frozenset(
+    {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
+)
+NON_ASCII_PATTERN: Final[re.Pattern] = re.compile("[^\\x00-\\x7F]")
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
 
 def split_into_chunks(text: str, size: int = CHUNK_SIZE) -> list[str]:
-    """Splits text into chunks of specified size."""
     return [text[i : i + size] for i in range(0, len(text), size)]
 
 
 def translate_chunk(chunk: str) -> str:
-    """Translates a single chunk to English."""
     if not NON_ASCII_PATTERN.search(chunk):
         return chunk
     try:
@@ -52,25 +44,18 @@ def translate_chunk(chunk: str) -> str:
 
 
 def translate_file(path: Path) -> None:
-    """Translates a file's content in-place."""
     try:
         content = path.read_text(encoding="utf-8")
     except Exception as e:
         logger.warning("Skipping unreadable file %s: %s", path, e)
         return
-
     if not NON_ASCII_PATTERN.search(content):
         return
-
     logger.info("Translating: %s", path.name)
     chunks = split_into_chunks(content)
-
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        # Use as_completed or map; map preserves order which is essential here
         translated_chunks = list(executor.map(translate_chunk, chunks))
-
     translated_text = "".join(translated_chunks)
-
     try:
         path.write_text(translated_text, encoding="utf-8")
         logger.info("✓ Updated: %s", path.name)
@@ -79,10 +64,9 @@ def translate_file(path: Path) -> None:
 
 
 def get_files(path: Path) -> list[Path]:
-    """Recursively retrieves text files from a directory."""
     files: list[Path] = []
     for p in path.rglob("*"):
-        if any(part.startswith(".") or part in SKIP_DIRS for part in p.parts):
+        if any((part.startswith(".") or part in SKIP_DIRS for part in p.parts)):
             continue
         if p.is_file() and p.suffix.lower() in {".txt", ".md", ".py", ".json", ".csv"}:
             files.append(p)
@@ -92,16 +76,13 @@ def get_files(path: Path) -> list[Path]:
 def main() -> None:
     directory = sys.argv[1] if len(sys.argv) > 1 else "."
     start_path = Path(directory)
-
     if not start_path.exists():
         logger.error("Path does not exist: %s", directory)
         sys.exit(1)
-
     files = get_files(start_path)
     if not files:
         logger.info("No files found to process.")
         return
-
     logger.info("Processing %d files...", len(files))
     for f in files:
         translate_file(f)

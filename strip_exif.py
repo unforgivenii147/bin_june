@@ -143,13 +143,23 @@ Examples:
         """,
     )
     parser.add_argument(
-        "paths", nargs="*", default=["."], help="Files or directories to process (default: current directory)"
+        "paths",
+        nargs="*",
+        default=["."],
+        help="Files or directories to process (default: current directory)",
     )
     parser.add_argument(
-        "-b", "--backup", action="store_true", help="Create backup files (.backup) before stripping EXIF"
+        "-b",
+        "--backup",
+        action="store_true",
+        help="Create backup files (.backup) before stripping EXIF",
     )
     parser.add_argument(
-        "-j", "--jobs", type=int, default=None, help=f"Number of parallel workers (default: CPU count = {cpu_count()})"
+        "-j",
+        "--jobs",
+        type=int,
+        default=None,
+        help=f"Number of parallel workers (default: CPU count = {cpu_count()})",
     )
     parser.add_argument("--no-recursive", action="store_true", help="Do not process subdirectories recursively")
     parser.add_argument(
@@ -202,14 +212,16 @@ Examples:
                     print(f"  {progress} {'✅' if result['success'] else '❌'} {img.name}")
             except Exception as e:
                 print(f"❌ {img.name}: Unexpected error: {str(e)}")
-                results.append({
-                    "path": img,
-                    "success": False,
-                    "original_size": 0,
-                    "new_size": 0,
-                    "message": f"Unexpected error: {str(e)}",
-                    "backup_created": False,
-                })
+                results.append(
+                    {
+                        "path": img,
+                        "success": False,
+                        "original_size": 0,
+                        "new_size": 0,
+                        "message": f"Unexpected error: {str(e)}",
+                        "backup_created": False,
+                    }
+                )
     print("-" * 60)
     successful = sum(1 for r in results if r["success"])
     failed = len(results) - successful

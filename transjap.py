@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+
 """
 Optimized version of transjap.py for Python 3.12.
 Translates Japanese comments and docstrings in Python files to English.
@@ -11,31 +13,20 @@ import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Final
-
 from deep_translator import GoogleTranslator
 
-# Constants
-SKIP_DIRS: Final[frozenset[str]] = frozenset({
-    "lazy",
-    ".git",
-    "__pycache__",
-    ".mypy_cache",
-    ".ruff_cache",
-    ".pytest_cache",
-})
-# Japanese character range (Hiragana, Katakana, Kanji)
-JAPANESE_PATTERN: Final[re.Pattern] = re.compile(r"[\u3040-\u30ff\u4e00-\u9fff]")
-
+SKIP_DIRS: Final[frozenset[str]] = frozenset(
+    {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
+)
+JAPANESE_PATTERN: Final[re.Pattern] = re.compile("[\\u3040-\\u30ff\\u4e00-\\u9fff]")
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
 
 def translate_text(text: str) -> str:
-    """Translates Japanese text to English."""
-    if not text or not text.strip() or not JAPANESE_PATTERN.search(text):
+    if not text or not text.strip() or (not JAPANESE_PATTERN.search(text)):
         return text
     try:
-        # Re-creating translator inside worker for thread/process safety
         translator = GoogleTranslator(source="ja", target="en")
         translated = translator.translate(text)
         return translated if translated else text
@@ -45,8 +36,6 @@ def translate_text(text: str) -> str:
 
 
 class CommentDocstringTransformer(ast.NodeTransformer):
-    """AST Transformer to find and translate Japanese docstrings."""
-
     def __init__(self):
         self.modified = False
 
@@ -56,7 +45,6 @@ class CommentDocstringTransformer(ast.NodeTransformer):
             translated = translate_text(docstring)
             if translated != docstring:
                 self.modified = True
-                # Update the docstring in the node body
                 if (
                     node.body
                     and isinstance(node.body[0], ast.Expr)
@@ -79,11 +67,9 @@ class CommentDocstringTransformer(ast.NodeTransformer):
 
 
 def translate_comments_in_content(content: str) -> tuple[str, bool]:
-    """Translates Japanese comments in a file content string."""
     lines = content.splitlines(keepends=True)
     modified = False
     new_lines = []
-
     for line in lines:
         if "#" in line:
             parts = line.split("#", 1)
@@ -95,32 +81,22 @@ def translate_comments_in_content(content: str) -> tuple[str, bool]:
                     modified = True
                     continue
         new_lines.append(line)
-
-    return "".join(new_lines), modified
+    return ("".join(new_lines), modified)
 
 
 def translate_file(file_path: Path) -> bool:
-    """Translates docstrings and comments in a single Python file."""
     try:
         content = file_path.read_text(encoding="utf-8")
-
-        # 1. Translate comments
         content_after_comments, comments_modified = translate_comments_in_content(content)
-
-        # 2. Translate docstrings via AST
         try:
             tree = ast.parse(content_after_comments)
             transformer = CommentDocstringTransformer()
             new_tree = transformer.visit(tree)
-
             docstrings_modified = transformer.modified
             if comments_modified or docstrings_modified:
                 new_content = ast.unparse(new_tree)
-
-                # Double-check for any missed Japanese characters (aggressive fallback)
                 if JAPANESE_PATTERN.search(new_content):
                     new_content = JAPANESE_PATTERN.sub(lambda m: translate_text(m.group(0)), new_content)
-
                 file_path.write_text(new_content, encoding="utf-8")
                 return True
         except SyntaxError as e:
@@ -129,7 +105,6 @@ def translate_file(file_path: Path) -> bool:
                 file_path.write_text(content_after_comments, encoding="utf-8")
                 return True
             return False
-
     except Exception as e:
         logger.error("Error processing %s: %s", file_path, e)
         return False
@@ -139,20 +114,15 @@ def translate_file(file_path: Path) -> bool:
 def main() -> None:
     start_dir = sys.argv[1] if len(sys.argv) > 1 else "."
     start_path = Path(start_dir).resolve()
-
     if not start_path.exists():
         logger.error("Error: Path '%s' does not exist", start_path)
         sys.exit(1)
-
     logger.info("Scanning for Python files in: %s", start_path)
-    py_files = [f for f in start_path.rglob("*.py") if not any(part in SKIP_DIRS for part in f.parts)]
-
+    py_files = [f for f in start_path.rglob("*.py") if not any((part in SKIP_DIRS for part in f.parts))]
     if not py_files:
         logger.info("No Python files found.")
         return
-
     logger.info("Found %d Python files. Starting translation...", len(py_files))
-
     modified_count = 0
     with ProcessPoolExecutor() as executor:
         future_to_file = {executor.submit(translate_file, f): f for f in py_files}
@@ -160,7 +130,6 @@ def main() -> None:
             if future.result():
                 modified_count += 1
                 logger.info("✓ Updated: %s", future_to_file[future])
-
     logger.info("\n" + "=" * 50)
     logger.info("Completed! Modified %d out of %d files", modified_count, len(py_files))
 

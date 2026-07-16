@@ -175,11 +175,16 @@ def main() -> None:
         epilog="This is the most accurate method as it extracts the real package name and version.",
     )
     parser.add_argument(
-        "directory", nargs="?", default=".", help="Directory containing .whl files (default: current directory)"
+        "directory",
+        nargs="?",
+        default=".",
+        help="Directory containing .whl files (default: current directory)",
     )
     parser.add_argument("--execute", "-e", action="store_true", help="Actually rename files (dry run by default)")
     parser.add_argument(
-        "--no-backup", action="store_true", help="Skip creating backups (backups are created by default)"
+        "--no-backup",
+        action="store_true",
+        help="Skip creating backups (backups are created by default)",
     )
     parser.add_argument(
         "--parallel",

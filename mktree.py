@@ -141,11 +141,18 @@ Also install tesseract: https://github.com/UB-Mannheim/tesseract/wiki""")
 def main():
     parser = argparse.ArgumentParser(description="Build directory structure from tree.txt or photo")
     parser.add_argument(
-        "source", nargs="?", default="tree.txt", help="Path to tree.txt file or photo (default: tree.txt)"
+        "source",
+        nargs="?",
+        default="tree.txt",
+        help="Path to tree.txt file or photo (default: tree.txt)",
     )
     parser.add_argument("-o", "--output", default=".", help="Output directory (default: current directory)")
     parser.add_argument(
-        "-j", "--workers", type=int, default=None, help="Number of worker processes (default: cpu_count - 1)"
+        "-j",
+        "--workers",
+        type=int,
+        default=None,
+        help="Number of worker processes (default: cpu_count - 1)",
     )
     parser.add_argument("--no-multiprocessing", action="store_true", help="Disable multiprocessing")
     parser.add_argument("--preview", action="store_true", help="Preview structure without creating")

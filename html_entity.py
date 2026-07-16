@@ -1,8 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from collections import deque
-import sys
-import re
 import multiprocessing as mp
+import re
+import sys
+from collections import deque
 from os import scandir as os_scandir
 from pathlib import Path
 

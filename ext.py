@@ -1,11 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+
 import ast
 import multiprocessing as mp
 from ast import AST
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 OUTPUT_DIR = Path("output")
 EXCLUDE_DIRS = {"test", "tests", "examples", "output"}
 
@@ -25,8 +26,7 @@ def discover_python_files() -> list[Path]:
     files = []
     base_path = Path(".")
     for path in base_path.rglob("*"):
-        # Check if any part of the path is in EXCLUDE_DIRS
-        if any(part in EXCLUDE_DIRS for part in path.parts):
+        if any((part in EXCLUDE_DIRS for part in path.parts)):
             continue
         if path.is_file() and is_python_script(path):
             files.append(path)
@@ -50,10 +50,10 @@ def extract_from_file(
         source = path.read_text(encoding="utf-8", errors="ignore")
         tree = ast.parse(source)
     except Exception:
-        return path, {}, {}, {}, {}, {}
+        return (path, {}, {}, {}, {}, {})
     mark_parents(tree)
-    tl_classes, tl_funcs = {}, {}
-    nested_classes, nested_funcs = {}, {}
+    tl_classes, tl_funcs = ({}, {})
+    nested_classes, nested_funcs = ({}, {})
     consts = {}
     for node in ast.walk(tree):
         if isinstance(node, (ast.ClassDef, ast.FunctionDef)):
@@ -87,12 +87,12 @@ def extract_from_file(
             src = ast.get_source_segment(source, node)
             if src:
                 consts[name] = src
-    return path, tl_classes, tl_funcs, nested_classes, nested_funcs, consts
+    return (path, tl_classes, tl_funcs, nested_classes, nested_funcs, consts)
 
 
 def write_output(path: Path, data: dict[str, str]) -> None:
     with path.open("w", encoding="utf-8") as f:
-        f.writelines(src.rstrip() + "\n\n" for _name, src in sorted(data.items()))
+        f.writelines((src.rstrip() + "\n\n" for _name, src in sorted(data.items())))
 
 
 def main() -> None:
@@ -103,8 +103,8 @@ def main() -> None:
         return
     with mp.Pool(mp.cpu_count()) as pool:
         results = pool.map(extract_from_file, files)
-    tl_classes, tl_funcs = {}, {}
-    nested_classes, nested_funcs = {}, {}
+    tl_classes, tl_funcs = ({}, {})
+    nested_classes, nested_funcs = ({}, {})
     const_map = {}
     for _, c, f, nc, nf, consts in results:
         tl_classes.update(c)

@@ -19,12 +19,14 @@ def extract_code_snippets_with_details(markdown_content: str):
     for i, line in enumerate(lines):
         if line.strip().startswith("```"):
             if in_code_block:
-                snippets_data.append({
-                    "language": language,
-                    "start_line": start_line_num,
-                    "end_line": i,
-                    "content": "\n".join(current_block_lines),
-                })
+                snippets_data.append(
+                    {
+                        "language": language,
+                        "start_line": start_line_num,
+                        "end_line": i,
+                        "content": "\n".join(current_block_lines),
+                    }
+                )
                 in_code_block = False
                 current_block_lines = []
                 language = ""
@@ -37,12 +39,14 @@ def extract_code_snippets_with_details(markdown_content: str):
         elif in_code_block:
             current_block_lines.append(line)
     if in_code_block:
-        snippets_data.append({
-            "language": language,
-            "start_line": start_line_num,
-            "end_line": len(lines),
-            "content": "\n".join(current_block_lines),
-        })
+        snippets_data.append(
+            {
+                "language": language,
+                "start_line": start_line_num,
+                "end_line": len(lines),
+                "content": "\n".join(current_block_lines),
+            }
+        )
     return snippets_data
 
 
@@ -72,7 +76,11 @@ def get_extension_from_language(language) -> str:
 def process_markdown_files(directory: str = ".") -> None:
     directory_path = Path(directory)
     for path in directory_path.rglob("*"):
-        if path.suffix.lower() in {".md", ".markdown", ".metadata"} or path.name in {"METADATA", "PKGINFO", "PKG-INFO"}:
+        if path.suffix.lower() in {".md", ".markdown", ".metadata"} or path.name in {
+            "METADATA",
+            "PKGINFO",
+            "PKG-INFO",
+        }:
             try:
                 content = path.read_text(encoding="utf-8")
             except Exception as e:

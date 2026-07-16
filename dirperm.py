@@ -229,10 +229,14 @@ def main():
     )
     parser.add_argument("path", nargs="?", default=".", help="Root path to start from (default: current directory)")
     parser.add_argument(
-        "--dry-run", action="store_true", help="Show what would be done without actually changing permissions"
+        "--dry-run",
+        action="store_true",
+        help="Show what would be done without actually changing permissions",
     )
     parser.add_argument(
-        "--show-examples", action="store_true", help="Show example files/directories that would be changed"
+        "--show-examples",
+        action="store_true",
+        help="Show example files/directories that would be changed",
     )
     parser.add_argument("--dirs-only", action="store_true", help="Only process directories, skip files")
     parser.add_argument("--files-only", action="store_true", help="Only process files, skip directories")

@@ -30,7 +30,14 @@ except ImportError:
 
     logger = logging.getLogger(__name__)
     logging.basicConfig(level=logging.INFO)
-_COMPRESSED_EXT: Dict[str, object] = {".gz": gzip, ".bz2": gzip, ".xz": lzma, ".lzma": lzma, ".zst": None, ".br": None}
+_COMPRESSED_EXT: Dict[str, object] = {
+    ".gz": gzip,
+    ".bz2": gzip,
+    ".xz": lzma,
+    ".lzma": lzma,
+    ".zst": None,
+    ".br": None,
+}
 
 
 def _decompress_file(path: Path) -> Optional[str]:
@@ -225,7 +232,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Copy/move repeated Python definitions to utils/")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("-c", "--copy", action="store_true", help="Copy duplicates to utils/")
-    group.add_argument("-m", "--move", action="store_true", help="Move duplicates to utils/ and remove from originals")
+    group.add_argument(
+        "-m",
+        "--move",
+        action="store_true",
+        help="Move duplicates to utils/ and remove from originals",
+    )
     args = parser.parse_args()
     action = "copy" if args.copy else "move"
     logger.info("Action: {}", action)

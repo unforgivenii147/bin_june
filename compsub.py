@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+
 """
 Compress/decompress subdirectories using tar + zstandard with parallel processing.
 Usage: script.py -c    # Compress subdirs to .tar.zst
@@ -12,14 +14,12 @@ import sys
 import tarfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-
 import zstandard as zstd
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def get_dir_size(path):
-    """Calculate total size of a directory."""
     total = 0
     for entry in path.rglob("*"):
         if entry.is_file():
@@ -28,33 +28,20 @@ def get_dir_size(path):
 
 
 def compress_directory(subdir):
-    """Compress a single subdirectory using tar + zstd streaming."""
     subdir = Path(subdir)
     tar_zst_path = subdir.parent / f"{subdir.name}.tar.zst"
-
     try:
-        # Calculate original size
         original_size = get_dir_size(subdir)
-
-        # Create tar stream and compress with zstd
         cctx = zstd.ZstdCompressor(level=9)
-
         with open(tar_zst_path, "wb") as f_out:
             with cctx.stream_writer(f_out) as compressor:
                 with tarfile.open(fileobj=compressor, mode="w|") as tar:
                     tar.add(subdir, arcname=subdir.name)
-
-        # Verify archive was created
         if not tar_zst_path.exists() or tar_zst_path.stat().st_size == 0:
             raise Exception("Archive creation failed or empty")
-
-        # Remove original directory
         shutil.rmtree(subdir)
-
-        # Calculate compressed size
         compressed_size = tar_zst_path.stat().st_size
         space_freed = original_size - compressed_size
-
         return {
             "success": True,
             "name": subdir.name,
@@ -62,36 +49,24 @@ def compress_directory(subdir):
             "compressed_size": compressed_size,
             "space_freed": space_freed,
         }
-
     except Exception as e:
         return {"success": False, "name": subdir.name, "error": str(e)}
 
 
 def decompress_archive(archive_path):
-    """Decompress a .tar.zst file back to directory."""
     archive_path = Path(archive_path)
-
     try:
-        # Calculate archive size
         archive_size = archive_path.stat().st_size
-
-        # Decompress and extract
         dctx = zstd.ZstdDecompressor()
-
         with open(archive_path, "rb") as f_in:
             with dctx.stream_reader(f_in) as decompressor:
                 with tarfile.open(fileobj=decompressor, mode="r|") as tar:
                     tar.extractall(path=archive_path.parent)
-
-        # Remove the archive file
         archive_path.unlink()
-
-        # Calculate extracted size
-        dir_name = archive_path.stem  # removes .tar.zst, gives just the name
+        dir_name = archive_path.stem
         extracted_dir = archive_path.parent / dir_name
         extracted_size = get_dir_size(extracted_dir)
         space_used = extracted_size - archive_size
-
         return {
             "success": True,
             "name": archive_path.name,
@@ -99,13 +74,11 @@ def decompress_archive(archive_path):
             "extracted_size": extracted_size,
             "space_used": space_used,
         }
-
     except Exception as e:
         return {"success": False, "name": archive_path.name, "error": str(e)}
 
 
 def format_size(size_bytes):
-    """Format bytes to human readable string."""
     for unit in ["B", "KB", "MB", "GB", "TB"]:
         if size_bytes < 1024.0:
             return f"{size_bytes:.2f} {unit}"
@@ -118,48 +91,33 @@ def main():
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("-c", "--compress", action="store_true", help="Compress subdirectories to .tar.zst")
     group.add_argument("-d", "--decompress", action="store_true", help="Decompress .tar.zst files back to directories")
-
     args = parser.parse_args()
-
     current_dir = Path(".")
-
     if args.compress:
-        # Find all subdirectories in current directory
         subdirs = [d for d in current_dir.iterdir() if d.is_dir()]
-
         if not subdirs:
             print("No subdirectories found to compress.")
             return
-
         print(f"Found {len(subdirs)} subdirectories to compress.")
         print("Starting compression with zstd level 9...")
-
-        # Process directories in parallel
         total_original = 0
         total_compressed = 0
         successful = 0
         failed = 0
-
         with ProcessPoolExecutor(max_workers=os.cpu_count()) as executor:
             future_to_dir = {executor.submit(compress_directory, subdir): subdir for subdir in subdirs}
-
             for future in as_completed(future_to_dir):
                 result = future.result()
-
                 if result["success"]:
                     successful += 1
                     total_original += result["original_size"]
                     total_compressed += result["compressed_size"]
                     print(
-                        f"✓ {result['name']}: "
-                        f"{format_size(result['original_size'])} -> "
-                        f"{format_size(result['compressed_size'])} "
-                        f"(freed {format_size(result['space_freed'])})"
+                        f"✓ {result['name']}: {format_size(result['original_size'])} -> {format_size(result['compressed_size'])} (freed {format_size(result['space_freed'])})"
                     )
                 else:
                     failed += 1
                     print(f"✗ {result['name']}: Failed - {result['error']}")
-
         print(f"\n{'=' * 60}")
         print(f"Compression complete: {successful} successful, {failed} failed")
         if successful > 0:
@@ -169,29 +127,21 @@ def main():
             print(f"Total compressed size: {format_size(total_compressed)}")
             print(f"Total space freed:     {format_size(total_freed)}")
             print(f"Compression ratio:     {compression_ratio:.1f}%")
-
     elif args.decompress:
-        # Find all .tar.zst files in current directory
         archives = list(current_dir.glob("*.tar.zst"))
-
         if not archives:
             print("No .tar.zst files found to decompress.")
             return
-
         print(f"Found {len(archives)} archives to decompress.")
         print("Starting decompression...")
-
         total_archive = 0
         total_extracted = 0
         successful = 0
         failed = 0
-
         with ProcessPoolExecutor(max_workers=os.cpu_count()) as executor:
             future_to_archive = {executor.submit(decompress_archive, archive): archive for archive in archives}
-
             for future in as_completed(future_to_archive):
                 result = future.result()
-
                 if result["success"]:
                     successful += 1
                     total_archive += result["archive_size"]
@@ -202,14 +152,11 @@ def main():
                     else:
                         change_str = f"(space freed: {format_size(-space_change)})"
                     print(
-                        f"✓ {result['name']}: "
-                        f"{format_size(result['archive_size'])} -> "
-                        f"{format_size(result['extracted_size'])} {change_str}"
+                        f"✓ {result['name']}: {format_size(result['archive_size'])} -> {format_size(result['extracted_size'])} {change_str}"
                     )
                 else:
                     failed += 1
                     print(f"✗ {result['name']}: Failed - {result['error']}")
-
         print(f"\n{'=' * 60}")
         print(f"Decompression complete: {successful} successful, {failed} failed")
         if successful > 0:
@@ -220,12 +167,9 @@ def main():
 
 
 if __name__ == "__main__":
-    # Check for required package
     try:
         import zstandard
-
     except ImportError:
         print("Error: zstandard package is required. Install it with: pip install zstandard")
         sys.exit(1)
-
     main()

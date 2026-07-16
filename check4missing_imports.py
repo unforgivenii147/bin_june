@@ -103,10 +103,18 @@ def main():
     parser = argparse.ArgumentParser(description="Check Python files for missing imports recursively.")
     parser.add_argument("-a", "--auto-fix", action="store_true", help="Automatically add missing imports to files")
     parser.add_argument(
-        "-d", "--directory", type=Path, default=Path.cwd(), help="Root directory to scan (default: current directory)"
+        "-d",
+        "--directory",
+        type=Path,
+        default=Path.cwd(),
+        help="Root directory to scan (default: current directory)",
     )
     parser.add_argument(
-        "-j", "--jobs", type=int, default=cpu_count(), help=f"Number of parallel jobs (default: {cpu_count()})"
+        "-j",
+        "--jobs",
+        type=int,
+        default=cpu_count(),
+        help=f"Number of parallel jobs (default: {cpu_count()})",
     )
     args = parser.parse_args()
     root_dir = args.directory

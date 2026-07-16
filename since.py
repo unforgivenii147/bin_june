@@ -135,7 +135,15 @@ def main():
         print(f"\n🇮🇷 Persian date:  {persian_date_str}")
         gregorian_date_str = f"{gregorian_year}/{gregorian_month:02d}/{gregorian_day:02d}"
         print(f"🌍 Gregorian date: {gregorian_date_str}")
-        weekday_names = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        weekday_names = [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+        ]
         weekday = weekday_names[input_date.weekday()]
         print(f"📆 Weekday:       {weekday}")
         print("\n" + "-" * 60)

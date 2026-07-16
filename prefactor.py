@@ -220,13 +220,25 @@ def main():
         help="Directory to write merged file to. Defaults to ./out.",
     )
     parser.add_argument("--out-name", type=str, default=None, help="Output filename (defaults to <pkg>_single.py).")
-    parser.add_argument("--max-files", type=int, default=MAX_DEFAULT, help="Max number of files allowed (default: 10).")
     parser.add_argument(
-        "--package-name", type=str, default=None, help="Force package name (defaults to input folder name if package)."
+        "--max-files",
+        type=int,
+        default=MAX_DEFAULT,
+        help="Max number of files allowed (default: 10).",
+    )
+    parser.add_argument(
+        "--package-name",
+        type=str,
+        default=None,
+        help="Force package name (defaults to input folder name if package).",
     )
     parser.add_argument("--force", action="store_true", help="Force merge even if file count > max-files.")
     parser.add_argument(
-        "-j", "--jobs", type=int, default=0, help="Number of worker processes to use (default: auto cpu count)."
+        "-j",
+        "--jobs",
+        type=int,
+        default=0,
+        help="Number of worker processes to use (default: auto cpu count).",
     )
     args = parser.parse_args()
     root: Path = args.input.resolve()
@@ -242,7 +254,10 @@ def main():
     package_mode = (root / "__init__.py").exists()
     package_name = args.package_name if args.package_name else root.name if package_mode else None
     if len(files) > args.max_files and not args.force:
-        print(f"Found {len(files)} files which is > {args.max_files}. Use --force to override.", file=sys.stderr)
+        print(
+            f"Found {len(files)} files which is > {args.max_files}. Use --force to override.",
+            file=sys.stderr,
+        )
         sys.exit(2)
     full_map_candidates: Dict[str, Path] = {}
     for p in files:

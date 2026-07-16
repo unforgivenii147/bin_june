@@ -37,7 +37,10 @@ def _clean_fname(path: Path) -> Path:
 
 
 def remove_string_from_names(
-    string_to_remove: str, dry_run: bool = False, recursive: bool = False, current_path: Path = Path.cwd()
+    string_to_remove: str,
+    dry_run: bool = False,
+    recursive: bool = False,
+    current_path: Path = Path.cwd(),
 ) -> int:
     renamed_count = 0
     try:
@@ -84,7 +87,11 @@ def remove_string_from_names(
 
 
 def replace_string_in_names(
-    str1: str, str2: str, dry_run: bool = False, recursive: bool = False, current_path: Path = Path()
+    str1: str,
+    str2: str,
+    dry_run: bool = False,
+    recursive: bool = False,
+    current_path: Path = Path(),
 ) -> int:
     renamed_count = 0
     try:
@@ -186,14 +193,31 @@ def main() -> None:
         """,
     )
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("-r", "--remove", metavar="STRING", help="Remove specified string from file and directory names")
     group.add_argument(
-        "-s", "--replace", nargs=2, metavar=("STR1", "STR2"), help="Replace STR1 with STR2 in file and directory names"
+        "-r",
+        "--remove",
+        metavar="STRING",
+        help="Remove specified string from file and directory names",
     )
     group.add_argument(
-        "-t", "--template", metavar="NAME", default="", help="Rename files using template with sequential numbering"
+        "-s",
+        "--replace",
+        nargs=2,
+        metavar=("STR1", "STR2"),
+        help="Replace STR1 with STR2 in file and directory names",
     )
-    parser.add_argument("--dry-run", action="store_true", help="Show what would be renamed without actually doing it")
+    group.add_argument(
+        "-t",
+        "--template",
+        metavar="NAME",
+        default="",
+        help="Rename files using template with sequential numbering",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be renamed without actually doing it",
+    )
     parser.add_argument("--recursive", action="store_true", help="Process directories recursively")
     args = parser.parse_args()
     cwd = Path.cwd()

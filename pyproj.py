@@ -58,17 +58,19 @@ if __name__ == "__main__":
         cfg_content.append(f"author_email = {email}")
     if url:
         cfg_content.append(f"url = {url}")
-    cfg_content.extend([
-        "",
-        "[options]",
-        "package_dir =",
-        "    = src",
-        "packages = find:",
-        "python_requires = >=3.11",
-        "",
-        "[options.packages.find]",
-        "where = src",
-    ])
+    cfg_content.extend(
+        [
+            "",
+            "[options]",
+            "package_dir =",
+            "    = src",
+            "packages = find:",
+            "python_requires = >=3.11",
+            "",
+            "[options.packages.find]",
+            "where = src",
+        ]
+    )
     setup_cfg.write_text("\n".join(cfg_content))
     pyproject_path = cwd / "pyproject.toml"
     pyproject_path.write_text("""[build-system]

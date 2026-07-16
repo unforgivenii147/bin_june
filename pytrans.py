@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+
 """
 Translate non-English comments, docstrings, and print() strings in Python files.
 Uses pycld2 for fast language detection.
@@ -13,82 +15,65 @@ import time
 import tokenize
 from pathlib import Path
 from typing import Final
-
 import pycld2
 from deep_translator import GoogleTranslator
 from dh import DOC_TH1, DOC_TH2
 
-# Configuration
-SKIP_DIRS: Final[frozenset[str]] = frozenset({
-    "lazy",
-    ".git",
-    "__pycache__",
-    ".mypy_cache",
-    ".ruff_cache",
-    ".pytest_cache",
-})
+SKIP_DIRS: Final[frozenset[str]] = frozenset(
+    {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
+)
 TARGET_LANG: Final[str] = "en"
 DELAY_SECONDS: Final[float] = 0.5
 MAX_WORKERS: Final[int] = multiprocessing.cpu_count()
 SHEBANG_PREFIX: Final[str] = "#!/"
-
-KNOWN_ENGLISH_TOKENS: Final[frozenset[str]] = frozenset({
-    "TODO",
-    "FIXME",
-    "HACK",
-    "XXX",
-    "NOTE",
-    "BUG",
-    "pylint",
-    "noqa",
-    "type: ignore",
-    "pragma",
-    "coding:",
-    "encoding:",
-    "charset:",
-})
-
-# Setup logging
+KNOWN_ENGLISH_TOKENS: Final[frozenset[str]] = frozenset(
+    {
+        "TODO",
+        "FIXME",
+        "HACK",
+        "XXX",
+        "NOTE",
+        "BUG",
+        "pylint",
+        "noqa",
+        "type: ignore",
+        "pragma",
+        "coding:",
+        "encoding:",
+        "charset:",
+    }
+)
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
 
 def should_skip(text: str) -> bool:
-    """Determines if a string should be skipped for translation."""
     clean = text.strip()
     if not clean or clean.startswith(SHEBANG_PREFIX):
         return True
-
     if clean.isascii():
-        if any(token in clean.upper() for token in KNOWN_ENGLISH_TOKENS):
+        if any((token in clean.upper() for token in KNOWN_ENGLISH_TOKENS)):
             return True
-        # Simple heuristic: small ASCII strings are likely code/names
         if len(clean.split()) <= 2 and len(clean) < 30:
             return True
-
-    if not any(c.isalpha() for c in clean):
+    if not any((c.isalpha() for c in clean)):
         return True
     return False
 
 
 def is_non_english(text: str) -> bool:
-    """Detects if a string is non-English using pycld2."""
     clean = text.strip()
     if len(clean) < 4 or should_skip(clean):
         return False
-
     try:
-        # isReliable, textBytesFound, details
         _, _, details = pycld2.detect(clean)
         lang_code = details[0][1]
-        # 'un' means unknown
         return lang_code not in ("en", "un")
     except Exception:
         return False
 
 
 def translate_text(text: str) -> str:
-    """Translates text to the target language with a rate-limit delay."""
     if not text.strip():
         return text
     try:
@@ -101,16 +86,13 @@ def translate_text(text: str) -> str:
 
 
 def get_node_positions(tree: ast.AST) -> tuple[set[tuple[int, int]], set[tuple[int, int]]]:
-    """Extracts positions of print arguments and docstrings from an AST."""
     print_positions = set()
     docstring_positions = set()
-
     for node in ast.walk(tree):
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "print":
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and (node.func.id == "print"):
             for arg in node.args:
                 if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
                     print_positions.add((arg.lineno, arg.col_offset))
-
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Module)):
             if (
                 node.body
@@ -120,48 +102,40 @@ def get_node_positions(tree: ast.AST) -> tuple[set[tuple[int, int]], set[tuple[i
             ):
                 ds = node.body[0].value
                 docstring_positions.add((ds.lineno, ds.col_offset))
-
-    return print_positions, docstring_positions
+    return (print_positions, docstring_positions)
 
 
 def process_file(path: Path) -> bool:
-    """Processes a single Python file, translating eligible strings in-place."""
     try:
         source = path.read_text(encoding="utf-8")
     except Exception as e:
         logger.error("[error] Could not read %s: %s", path, e)
         return False
-
     try:
         tokens = list(tokenize.generate_tokens(io.StringIO(source).readline))
         tree = ast.parse(source)
     except (tokenize.TokenError, SyntaxError) as e:
         logger.warning("[skip] %s: Parse error - %s", path, e)
         return False
-
     lines = source.splitlines(keepends=True)
 
     def get_offset(lineno: int, col: int) -> int:
-        return sum(len(lines[i]) for i in range(lineno - 1)) + col
+        return sum((len(lines[i]) for i in range(lineno - 1))) + col
 
     print_pos, doc_pos = get_node_positions(tree)
     replacements: list[tuple[int, int, str]] = []
-
     for tok in tokens:
         start_offset = get_offset(tok.start[0], tok.start[1])
         end_offset = get_offset(tok.end[0], tok.end[1])
-
         if tok.type == tokenize.COMMENT:
             inner = tok.string.lstrip("#").strip()
             if is_non_english(inner):
                 translated = translate_text(inner)
                 logger.info("  [comment] %s -> %s", inner, translated)
                 replacements.append((start_offset, end_offset, f"# {translated}"))
-
         elif tok.type == tokenize.STRING:
             is_print = (tok.start[0], tok.start[1]) in print_pos
             is_doc = (tok.start[0], tok.start[1]) in doc_pos
-
             if is_print or is_doc:
                 raw = tok.string
                 if raw.startswith((DOC_TH1, DOC_TH2)):
@@ -170,27 +144,22 @@ def process_file(path: Path) -> bool:
                     quote = '"'
                 else:
                     quote = "'"
-
                 try:
                     inner = ast.literal_eval(raw)
                 except Exception:
                     continue
-
                 if isinstance(inner, str) and is_non_english(inner):
                     translated = translate_text(inner)
                     label = "docstring" if is_doc else "print-str"
                     logger.info("  [%s] %s -> %s", label, inner, translated)
                     escaped = translated.replace("\\", "\\\\").replace(quote, f"\\{quote}")
                     replacements.append((start_offset, end_offset, f"{quote}{escaped}{quote}"))
-
     if not replacements:
         return False
-
     replacements.sort(key=lambda x: x[0], reverse=True)
     src_list = list(source)
     for start, end, new_text in replacements:
         src_list[start:end] = list(new_text)
-
     new_source = "".join(src_list)
     try:
         ast.parse(new_source)
@@ -202,7 +171,6 @@ def process_file(path: Path) -> bool:
 
 
 def worker(path_str: str) -> None:
-    """Worker function for multiprocessing."""
     path = Path(path_str)
     try:
         if process_file(path):
@@ -212,13 +180,10 @@ def worker(path_str: str) -> None:
 
 
 def main() -> None:
-    """Finds all Python files and processes them in parallel."""
-    files = [str(p) for p in Path(".").rglob("*.py") if not any(part in SKIP_DIRS for part in p.parts)]
-
+    files = [str(p) for p in Path(".").rglob("*.py") if not any((part in SKIP_DIRS for part in p.parts))]
     if not files:
         logger.info("No Python files found.")
         return
-
     logger.info("Found %d files. Processing with %d workers...", len(files), MAX_WORKERS)
     with multiprocessing.Pool(processes=MAX_WORKERS) as pool:
         pool.map(worker, files)

@@ -55,7 +55,12 @@ class SignalMonitor:
                     self.cellular_strength = None
             if state_match:
                 state_num = int(state_match.group(1))
-                states = {(0): "Disconnected", (1): "Connecting", (2): "Connected", (3): "Suspended"}
+                states = {
+                    (0): "Disconnected",
+                    (1): "Connecting",
+                    (2): "Connected",
+                    (3): "Suspended",
+                }
                 self.cellular_status = states.get(state_num, "Unknown")
             return self.cellular_strength
         except Exception as e:
@@ -74,7 +79,10 @@ class SignalMonitor:
     def get_airplane_mode(self) -> bool:
         try:
             result = subprocess.run(
-                ["settings", "get", "global", "airplane_mode_on"], capture_output=True, text=True, timeout=1
+                ["settings", "get", "global", "airplane_mode_on"],
+                capture_output=True,
+                text=True,
+                timeout=1,
             )
             self.is_airplane_mode = result.stdout.strip() == "1"
             return self.is_airplane_mode

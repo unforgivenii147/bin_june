@@ -37,7 +37,9 @@ try:
 except ImportError:
     py7zr = None
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler()]
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[logging.StreamHandler()],
 )
 log = logging.getLogger(__name__)
 
@@ -206,7 +208,19 @@ def _worker(args) -> Path | None:
         return None
 
 
-SKIP_EXTENSIONS = {".zst", ".br", ".gz", ".bz2", ".xz", ".lz4", ".7z", ".zip", ".rar", ".zstd", ".lzma"}
+SKIP_EXTENSIONS = {
+    ".zst",
+    ".br",
+    ".gz",
+    ".bz2",
+    ".xz",
+    ".lz4",
+    ".7z",
+    ".zip",
+    ".rar",
+    ".zstd",
+    ".lzma",
+}
 
 
 def collect_files(root: Path) -> list[Path]:

@@ -200,12 +200,23 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Extract burned-in subtitles from video using OCR")
     parser.add_argument("video", help="Path to the video file")
     parser.add_argument(
-        "output", nargs="?", default="extracted_subs.srt", help="Output SRT file (default: extracted_subs.srt)"
+        "output",
+        nargs="?",
+        default="extracted_subs.srt",
+        help="Output SRT file (default: extracted_subs.srt)",
     )
-    parser.add_argument("-s", "--start", dest="start_time", help="Start time for extraction (HH:MM:SS), e.g. 00:05:00")
+    parser.add_argument(
+        "-s",
+        "--start",
+        dest="start_time",
+        help="Start time for extraction (HH:MM:SS), e.g. 00:05:00",
+    )
     parser.add_argument("-e", "--end", dest="end_time", help="End time for extraction (HH:MM:SS), e.g. 00:10:00")
     parser.add_argument(
-        "-r", "--resume", action="store_true", help="Resume from a previous run (appends to existing SRT if present)"
+        "-r",
+        "--resume",
+        action="store_true",
+        help="Resume from a previous run (appends to existing SRT if present)",
     )
     parser.add_argument("--sample_fps", type=float, default=2.0, help="Frames per second to sample (default: 2.0)")
     parser.add_argument("--workers", type=int, default=4, help="Number of OCR worker processes (default: 4)")

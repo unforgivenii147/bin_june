@@ -120,7 +120,8 @@ async def compress_file_async(path: Path) -> bool:
 async def get_files_async(directory: Path) -> list[Path]:
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(
-        None, lambda: [p for p in directory.glob("*") if p.is_file() and not p.is_symlink() and should_compress(p)]
+        None,
+        lambda: [p for p in directory.glob("*") if p.is_file() and not p.is_symlink() and should_compress(p)],
     )
 
 

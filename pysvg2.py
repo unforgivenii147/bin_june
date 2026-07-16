@@ -59,7 +59,10 @@ def mpf3(process_function: Callable, files: list[Path], **kwargs):
 
 
 def runcmd(
-    cmd: list[str], run_silently: bool = False, show_output: bool = True, timeout: float | None = None
+    cmd: list[str],
+    run_silently: bool = False,
+    show_output: bool = True,
+    timeout: float | None = None,
 ) -> tuple[int, str, str]:
     from subprocess import DEVNULL as _DEVNULL
     from subprocess import TimeoutExpired as subprocess_TimeoutExpired

@@ -1,13 +1,13 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from collections import defaultdict
-from packaging import version as pkg_version
-from typing import Dict, List, Optional, Tuple
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from collections import defaultdict, deque
-import re
 import argparse
+import re
+from collections import defaultdict, deque
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from os import scandir as os_scandir
 from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+
+from packaging import version as pkg_version
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 "\nScript to detect and keep only the latest version of wheel, deb, or tar.gz files in current directory recursively.\n"
@@ -219,7 +219,12 @@ def main() -> int:
     group.add_argument("-d", "--deb", action="store_true", help="Check .deb files")
     group.add_argument("-w", "--wheel", action="store_true", help="Check .whl files")
     group.add_argument("-t", "--targz", action="store_true", help="Check .tar.gz and .tgz files")
-    group.add_argument("-a", "--all", action="store_true", help="Check all package types (.whl, .deb, .tar.gz, .tgz)")
+    group.add_argument(
+        "-a",
+        "--all",
+        action="store_true",
+        help="Check all package types (.whl, .deb, .tar.gz, .tgz)",
+    )
     parser.add_argument("--dry-run", action="store_true", help="Simulate deletion without actually removing files")
     parser.add_argument("--dir", type=str, default=".", help="Directory to scan (default: current directory)")
     parser.add_argument("--verbose", action="store_true", help="Show detailed information about each file")

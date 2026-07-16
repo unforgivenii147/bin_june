@@ -76,7 +76,11 @@ class EntityExtractor(ast.NodeVisitor):
                 if isinstance(target, ast.Name):
                     if target.id.isupper():
                         self.constants.append(
-                            Entity(name=target.id, file_path=str(self.file_path), line_number=node.lineno)
+                            Entity(
+                                name=target.id,
+                                file_path=str(self.file_path),
+                                line_number=node.lineno,
+                            )
                         )
         self.generic_visit(node)
 
@@ -115,7 +119,10 @@ def find_python_files(root_dir: Path) -> List[Path]:
 
 
 def save_entities(
-    output_dir: Path, entity_type: str, entities_by_file: Dict[str, List[Entity]], unique_entities: Set[str]
+    output_dir: Path,
+    entity_type: str,
+    entities_by_file: Dict[str, List[Entity]],
+    unique_entities: Set[str],
 ) -> None:
     entity_dir = output_dir / entity_type
     entity_dir.mkdir(parents=True, exist_ok=True)

@@ -161,7 +161,12 @@ def get_user_choices(groups: Dict[str, List[FunctionInfo]]) -> Dict[str, int]:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Find and optionally remove duplicate functions in Python files")
     parser.add_argument("file", help="Python file to analyze")
-    parser.add_argument("-r", "--remove", action="store_true", help="Remove duplicate functions with user confirmation")
+    parser.add_argument(
+        "-r",
+        "--remove",
+        action="store_true",
+        help="Remove duplicate functions with user confirmation",
+    )
     parser.add_argument("--backup", action="store_true", help="Create a backup before removing (implies -r)")
     args = parser.parse_args()
     filepath = args.file

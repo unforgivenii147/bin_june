@@ -78,7 +78,9 @@ ARGS_PARSER = ArgumentParser(
     prog=MYNAME,
 )
 ARGS_PARSER.add_argument(
-    "domainName", type=str, help="The domain to be queried. Domains with national characters can be Unicode or IDN."
+    "domainName",
+    type=str,
+    help="The domain to be queried. Domains with national characters can be Unicode or IDN.",
 )
 ARGS_PARSER.add_argument(
     "--version",

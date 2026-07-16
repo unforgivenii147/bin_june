@@ -41,7 +41,14 @@ def fetch_trending(timeframe: str) -> list[Repo]:
         stars_tag = article.select_one("a[href$='stargazers']")
         stars = stars_tag.text.strip() if stars_tag else "0"
         repos.append(
-            Repo(name=name, url=repo_url, description=description, stars=stars, language=language, timeframe=timeframe)
+            Repo(
+                name=name,
+                url=repo_url,
+                description=description,
+                stars=stars,
+                language=language,
+                timeframe=timeframe,
+            )
         )
     return repos
 

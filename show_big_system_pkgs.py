@@ -27,7 +27,13 @@ def parse_size(size_str: str) -> int:
         return 0
     value = float(match.group(1))
     unit = match.group(2).upper()
-    multipliers = {"": 1, "K": 1024, "M": 1024 * 1024, "G": 1024 * 1024 * 1024, "T": 1024 * 1024 * 1024 * 1024}
+    multipliers = {
+        "": 1,
+        "K": 1024,
+        "M": 1024 * 1024,
+        "G": 1024 * 1024 * 1024,
+        "T": 1024 * 1024 * 1024 * 1024,
+    }
     return int(value * multipliers.get(unit, 1))
 
 

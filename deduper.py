@@ -202,24 +202,28 @@ def extract_with_ast(code: str):
             snippet = source_segment(code, node)
             if not snippet:
                 continue
-            objects.append({
-                "name": node.name,
-                "kind": "function",
-                "snippet": snippet,
-                "lineno": node.lineno,
-                "end_lineno": node.end_lineno,
-            })
+            objects.append(
+                {
+                    "name": node.name,
+                    "kind": "function",
+                    "snippet": snippet,
+                    "lineno": node.lineno,
+                    "end_lineno": node.end_lineno,
+                }
+            )
         elif isinstance(node, ast.ClassDef):
             snippet = source_segment(code, node)
             if not snippet:
                 continue
-            objects.append({
-                "name": node.name,
-                "kind": "class",
-                "snippet": snippet,
-                "lineno": node.lineno,
-                "end_lineno": node.end_lineno,
-            })
+            objects.append(
+                {
+                    "name": node.name,
+                    "kind": "class",
+                    "snippet": snippet,
+                    "lineno": node.lineno,
+                    "end_lineno": node.end_lineno,
+                }
+            )
         elif isinstance(node, ast.Assign) and is_simple_constant_assign(node):
             name = node.targets[0].id
             if name in {"__all__", "__version__", "__doc__"}:
@@ -227,13 +231,15 @@ def extract_with_ast(code: str):
             snippet = source_segment(code, node)
             if not snippet:
                 continue
-            objects.append({
-                "name": name,
-                "kind": "constant",
-                "snippet": snippet,
-                "lineno": node.lineno,
-                "end_lineno": node.end_lineno,
-            })
+            objects.append(
+                {
+                    "name": name,
+                    "kind": "constant",
+                    "snippet": snippet,
+                    "lineno": node.lineno,
+                    "end_lineno": node.end_lineno,
+                }
+            )
     return objects
 
 
@@ -271,15 +277,17 @@ def process_file(path_str: str):
         stripped = obj["snippet"].strip()
         if not stripped:
             continue
-        out.append({
-            "file": str(path),
-            "name": obj["name"],
-            "kind": obj["kind"],
-            "snippet": obj["snippet"],
-            "hash": sha256(stripped),
-            "lineno": obj["lineno"],
-            "end_lineno": obj["end_lineno"],
-        })
+        out.append(
+            {
+                "file": str(path),
+                "name": obj["name"],
+                "kind": obj["kind"],
+                "snippet": obj["snippet"],
+                "hash": sha256(stripped),
+                "lineno": obj["lineno"],
+                "end_lineno": obj["end_lineno"],
+            }
+        )
     return out
 
 
@@ -418,9 +426,17 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Find repeated top-level Python objects and optionally move/copy them to utils.py"
     )
-    parser.add_argument("-m", "--move", action="store_true", help="Move duplicate objects to utils.py and add imports")
     parser.add_argument(
-        "-c", "--copy", action="store_true", help="Copy duplicate objects to utils.py without modifying source files"
+        "-m",
+        "--move",
+        action="store_true",
+        help="Move duplicate objects to utils.py and add imports",
+    )
+    parser.add_argument(
+        "-c",
+        "--copy",
+        action="store_true",
+        help="Copy duplicate objects to utils.py without modifying source files",
     )
     parser.add_argument("-j", "--jobs", type=int, default=max(1, mp.cpu_count() - 1), help="Worker process count")
     parser.add_argument("--log-level", default="INFO", help="DEBUG, INFO, WARNING, ERROR")

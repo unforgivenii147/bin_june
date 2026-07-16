@@ -32,7 +32,12 @@ def find_git_repos(root_path: Path) -> list[Path]:
 def create_github_repo(repo_name: str, github_token: str) -> str | None:
     url = "https://api.github.com/user/repos"
     headers = {"Authorization": f"token {github_token}", "Accept": "application/vnd.github.v3+json"}
-    data = {"name": repo_name, "description": f"Repository for {repo_name}", "private": False, "auto_init": False}
+    data = {
+        "name": repo_name,
+        "description": f"Repository for {repo_name}",
+        "private": False,
+        "auto_init": False,
+    }
     try:
         response = requests.post(url, headers=headers, json=data)
         response.raise_for_status()

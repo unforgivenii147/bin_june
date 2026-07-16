@@ -1,10 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-from binaryornot import is_binary
-from typing import List, Optional, Tuple
-import subprocess
+
 import concurrent.futures
+import subprocess
 from pathlib import Path
+from typing import List, Optional, Tuple
+from binaryornot import is_binary
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -36,15 +37,11 @@ def should_skip(path: str | Path) -> bool:
     return bool(path.is_symlink() or not SKIP_DIRS.isdisjoint(path.parts))
 
 
-"""
-Binary File Analyzer - Finds executables in current directory that fail to run
-Uses concurrent.futures for parallel processing
-Outputs results to ~/tmp/err
-"""
+"\nBinary File Analyzer - Finds executables in current directory that fail to run\nUses concurrent.futures for parallel processing\nOutputs results to ~/tmp/err\n"
 
 
 def is_executable(filepath: Path) -> bool:
-    return filepath.is_file() and filepath.stat().st_mode & 0o111 != 0
+    return filepath.is_file() and filepath.stat().st_mode & 73 != 0
 
 
 def is_elf(filepath: Path) -> bool:
@@ -62,7 +59,6 @@ def is_elf(filepath: Path) -> bool:
 
 
 def get_binary_files(directory: Path) -> List[Path]:
-    """Get all executable binary files in a directory"""
     binaries = []
     try:
         for path in get_filez(directory):
@@ -83,46 +79,50 @@ def test_executable(filepath: Path) -> Tuple[Path, Optional[str]]:
             if result.stderr:
                 error_lower = result.stderr.lower()
                 if any(
-                    pattern in error_lower
-                    for pattern in [
-                        "error while loading shared libraries",
-                        "cannot open shared object file",
-                        "no such file",
-                        "not found",
-                        "failed to load",
-                    ]
+                    (
+                        pattern in error_lower
+                        for pattern in [
+                            "error while loading shared libraries",
+                            "cannot open shared object file",
+                            "no such file",
+                            "not found",
+                            "failed to load",
+                        ]
+                    )
                 ):
-                    return filepath, result.stderr.strip()[:200]
+                    return (filepath, result.stderr.strip()[:200])
             if result.returncode == 0:
-                return filepath, None
+                return (filepath, None)
         except subprocess.TimeoutExpired:
-            return filepath, None
+            return (filepath, None)
         except FileNotFoundError:
-            return filepath, "File not found"
+            return (filepath, "File not found")
         except PermissionError:
-            return filepath, "Permission denied"
+            return (filepath, "Permission denied")
         except OSError as e:
             if "exec format error" in str(e):
-                return filepath, "Exec format error (wrong architecture)"
-            return filepath, str(e)
+                return (filepath, "Exec format error (wrong architecture)")
+            return (filepath, str(e))
     try:
         result = subprocess.run([str(filepath)], capture_output=True, text=True, timeout=1)
         if result.stderr:
             error_lower = result.stderr.lower()
             if any(
-                pattern in error_lower
-                for pattern in [
-                    "error while loading shared libraries",
-                    "cannot open shared object file",
-                    "no such file",
-                ]
+                (
+                    pattern in error_lower
+                    for pattern in [
+                        "error while loading shared libraries",
+                        "cannot open shared object file",
+                        "no such file",
+                    ]
+                )
             ):
-                return filepath, result.stderr.strip()[:200]
-        return filepath, None
+                return (filepath, result.stderr.strip()[:200])
+        return (filepath, None)
     except subprocess.TimeoutExpired:
-        return filepath, None
+        return (filepath, None)
     except Exception as e:
-        return filepath, str(e)[:200]
+        return (filepath, str(e)[:200])
 
 
 def main() -> None:
@@ -158,13 +158,11 @@ def main() -> None:
         new_path = out_dir / filepath.name
         filepath.rename(new_path)
     output_file.write_text(
-        f"Binary Analysis Results\n"
-        f"Directory: {cwd}\n"
-        f"Total binaries tested: {len(binaries)}\n"
-        f"Failed binaries: {len(failed_binaries)}\n"
-        f"{'=' * 70}\n\n"
+        f"Binary Analysis Results\nDirectory: {cwd}\nTotal binaries tested: {len(binaries)}\nFailed binaries: {len(failed_binaries)}\n{'=' * 70}\n\n"
         + (
-            "\n".join(f"Binary: {filepath}\nError:  {error_msg}\n{'-' * 70}" for filepath, error_msg in failed_binaries)
+            "\n".join(
+                (f"Binary: {filepath}\nError:  {error_msg}\n{'-' * 70}" for filepath, error_msg in failed_binaries)
+            )
             if failed_binaries
             else "✓ All binaries tested successfully!\n"
         )

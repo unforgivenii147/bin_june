@@ -312,7 +312,11 @@ def compress_file(
 
 
 def decompress_file(
-    input_path: Path, output_path: Path, threads: int = 4, remove_original: bool = False, stats: SpaceStats = None
+    input_path: Path,
+    output_path: Path,
+    threads: int = 4,
+    remove_original: bool = False,
+    stats: SpaceStats = None,
 ):
     try:
         compressed_size = input_path.stat().st_size
@@ -415,15 +419,27 @@ def process_files(files, compress: bool, level: int = 19, threads: int = 4, remo
 def main():
     parser = argparse.ArgumentParser(description="Recursively compress or decompress files using Zstandard")
     group = parser.add_mutually_exclusive_group(required=False)
-    group.add_argument("-c", "--compress", action="store_true", help="Compress files (default if no action specified)")
+    group.add_argument(
+        "-c",
+        "--compress",
+        action="store_true",
+        help="Compress files (default if no action specified)",
+    )
     group.add_argument("-d", "--decompress", action="store_true", help="Decompress files")
     parser.add_argument(
-        "--level", type=int, default=3, choices=range(1, 23), help="Compression level (1-22, default: 3)"
+        "--level",
+        type=int,
+        default=3,
+        choices=range(1, 23),
+        help="Compression level (1-22, default: 3)",
     )
     parser.add_argument("--threads", type=int, default=4, help="Number of threads to use (default: 8)")
     parser.add_argument("--dir", type=str, default=".", help="Directory to process (default: current directory)")
     parser.add_argument(
-        "--keep", default=False, action="store_true", help="Keep original files (default: remove on success)"
+        "--keep",
+        default=False,
+        action="store_true",
+        help="Keep original files (default: remove on success)",
     )
     args = parser.parse_args()
     if not args.compress and not args.decompress:

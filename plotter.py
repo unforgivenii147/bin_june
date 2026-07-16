@@ -1,9 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-import numpy as np
-import matplotlib.pyplot as plt
 import sys
+
 import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
 
 matplotlib.use("Agg")
 

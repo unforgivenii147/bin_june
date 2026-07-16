@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+
 """
 Clone repositories from repos.txt that are smaller than 0.5MB
 Format in repos.txt: user/repo (one per line)
@@ -11,29 +13,21 @@ import subprocess
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
-
 import requests
 from dotenv import load_dotenv
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-# Load environment variables from ~/.env
 env_path = Path.home() / ".env"
 if env_path.exists():
     load_dotenv(env_path)
     print(f"✅ Loaded environment from {env_path}")
 else:
     print(f"⚠️  ~/.env not found, using system environment variables")
-
-# Constants
 SIZE_CACHE_FILE = "repo_sizes.json"
-CACHE_EXPIRY_DAYS = 7  # Re-fetch sizes after 7 days
+CACHE_EXPIRY_DAYS = 7
 
 
 def get_github_token():
-    """
-    Get GitHub token from environment variables
-    """
     token = os.getenv("GITHUB_TOKEN")
     if token:
         print("✅ GitHub token found")
@@ -45,16 +39,11 @@ def get_github_token():
 
 
 def load_size_cache():
-    """
-    Load repository sizes from JSON cache file
-    Returns dict with repo names as keys
-    """
     cache_file = Path(SIZE_CACHE_FILE)
     if cache_file.exists():
         try:
             with open(cache_file, "r") as f:
                 cache_data = json.load(f)
-                # Check if cache is expired
                 cache_date = datetime.fromisoformat(cache_data.get("_cache_date", "2000-01-01"))
                 if datetime.now() - cache_date < timedelta(days=CACHE_EXPIRY_DAYS):
                     print(f"📂 Loaded cache from {SIZE_CACHE_FILE} ({len(cache_data) - 1} repos)")
@@ -69,12 +58,8 @@ def load_size_cache():
 
 
 def save_size_cache(cache_data):
-    """
-    Save repository sizes to JSON cache file
-    """
     cache_data["_cache_date"] = datetime.now().isoformat()
     cache_data["_cache_version"] = "1.0"
-
     try:
         with open(SIZE_CACHE_FILE, "w") as f:
             json.dump(cache_data, f, indent=2)
@@ -84,35 +69,22 @@ def save_size_cache(cache_data):
 
 
 def get_repo_size(repo, token=None, cache_data=None):
-    """
-    Get repository size in MB using GitHub API or cache
-    Returns size in MB or None if error
-    """
-    # Check cache first
     if cache_data and repo in cache_data:
         cached_size = cache_data[repo].get("size_mb")
         cached_date = cache_data[repo].get("fetched_at", "")
         if cached_size is not None:
             print(f"  📦 Using cached size: {cached_size:.2f} MB (fetched: {cached_date})")
             return cached_size
-
-    # If not in cache, fetch from GitHub API
     api_url = f"https://api.github.com/repos/{repo}"
     headers = {}
-
     if token:
         headers["Authorization"] = f"token {token}"
-
     try:
         response = requests.get(api_url, headers=headers, timeout=10)
-
         if response.status_code == 200:
             data = response.json()
-            # Size is returned in KB
             size_kb = data.get("size", 0)
             size_mb = size_kb / 1024
-
-            # Update cache data with fetched size
             if cache_data is not None:
                 cache_data[repo] = {
                     "size_mb": size_mb,
@@ -123,7 +95,6 @@ def get_repo_size(repo, token=None, cache_data=None):
                     "description": data.get("description", ""),
                     "private": data.get("private", False),
                 }
-
             return size_mb
         elif response.status_code == 403 and "rate limit" in response.text.lower():
             print(f"  ⚠️  Rate limit exceeded! Please check your GITHUB_TOKEN")
@@ -137,24 +108,16 @@ def get_repo_size(repo, token=None, cache_data=None):
 
 
 def clone_repo(repo):
-    """
-    Clone a repository using git
-    Returns True if successful, False otherwise
-    """
     clone_url = f"https://github.com/{repo}.git"
     repo_name = repo.split("/")[-1]
-
-    # Check if directory already exists
     if os.path.exists(repo_name):
         print(f"  ⏭️  {repo_name} already exists, skipping...")
         return True
-
     try:
         print(f"  🔄 Cloning {repo}...")
         result = subprocess.run(
             ["git", "clone", "--depth", "1", clone_url], capture_output=True, text=True, timeout=120
         )
-
         if result.returncode == 0:
             print(f"  ✅ Successfully cloned {repo_name}")
             return True
@@ -170,23 +133,16 @@ def clone_repo(repo):
 
 
 def display_cached_stats(cache_data):
-    """
-    Display statistics from the cached data
-    """
     if not cache_data or len(cache_data) <= 1:
         return
-
     repos = {k: v for k, v in cache_data.items() if k not in ["_cache_date", "_cache_version"]}
-
     if not repos:
         return
-
     sizes = [v["size_mb"] for v in repos.values() if "size_mb" in v]
     total_size = sum(sizes)
     avg_size = total_size / len(sizes) if sizes else 0
     largest = max(sizes) if sizes else 0
     smallest = min(sizes) if sizes else 0
-
     print("\n📊 Cache Statistics:")
     print(f"  📦 Total repos in cache: {len(repos)}")
     print(f"  📊 Total size: {total_size:.2f} MB")
@@ -197,72 +153,48 @@ def display_cached_stats(cache_data):
 
 
 def main():
-    # Check if repos.txt exists
     repos_file = Path("repos.txt")
     if not repos_file.exists():
         print("❌ repos.txt not found in current directory")
         sys.exit(1)
-
-    # Get GitHub token
     token = get_github_token()
-
-    # Load cache
     cache_data = load_size_cache()
-
-    # Read repositories
     with open(repos_file, "r") as f:
         repos = [line.strip() for line in f if line.strip()]
-
     if not repos:
         print("❌ No repositories found in repos.txt")
         sys.exit(1)
-
     print(f"\n📚 Found {len(repos)} repositories")
     print(f"🔍 Checking and cloning in one pass...")
     print("=" * 60)
-
     size_limit_mb = 0.5
     cloned_count = 0
     skipped_count = 0
     failed_count = 0
     total_size = 0
     no_size_count = 0
-
     for idx, repo in enumerate(repos, 1):
         print(f"\n[{idx}/{len(repos)}] 📦 Processing {repo}")
         print("-" * 40)
-
-        # Get repository size
         size_mb = get_repo_size(repo, token, cache_data)
-
         if size_mb is None:
             print(f"  ⚠️  Could not determine size, skipping...")
             no_size_count += 1
             continue
-
         print(f"  📊 Size: {size_mb:.2f} MB")
-
-        # Check size limit
         if size_mb > size_limit_mb:
             print(f"  ❌ Exceeds limit ({size_limit_mb} MB), skipping...")
             skipped_count += 1
             continue
-
         print(f"  ✅ Within limit ({size_limit_mb} MB)")
         total_size += size_mb
-
-        # Clone immediately
         if clone_repo(repo):
             cloned_count += 1
         else:
             failed_count += 1
-
-    # Save cache
     if cache_data:
         save_size_cache(cache_data)
         display_cached_stats(cache_data)
-
-    # Final Summary
     print("\n" + "=" * 60)
     print("📊 FINAL SUMMARY")
     print("=" * 60)
@@ -272,14 +204,11 @@ def main():
     print(f"⚠️  Skipped (no size info): {no_size_count}")
     print(f"📊 Total size of cloned repos: {total_size:.2f} MB")
     print(f"📚 Total repos processed: {len(repos)}")
-
-    # Rate limit info
     if token:
         print(f"\n💡 Using authenticated requests (rate limit: 5000/hr)")
     else:
         print(f"\n💡 Using unauthenticated requests (rate limit: 60/hr)")
         print("   Consider adding GITHUB_TOKEN to ~/.env for higher limits")
-
     print(f"\n💾 Repository size data saved to: {SIZE_CACHE_FILE}")
 
 

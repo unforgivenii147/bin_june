@@ -12,7 +12,11 @@ from dh import STDLIB
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-SHEBANG_PATTERNS = ["#!/data/data/com.termux/files/usr/bin/python", "#!/usr/bin/env python", "#! */python"]
+SHEBANG_PATTERNS = [
+    "#!/data/data/com.termux/files/usr/bin/python",
+    "#!/usr/bin/env python",
+    "#! */python",
+]
 COMPRESSED_EXTS = {".tar.gz", ".tgz", ".tar.xz", ".tar.bz2", ".tar.zst", ".zip", ".whl", ".7z"}
 PIP_LIST_PATH = Path("/sdcard/pip.txt")
 KNOWN_PACKAGES = set()
@@ -65,7 +69,11 @@ def extract_imports_from_ast(code: str):
 
 def extract_imports_regex(content: str):
     imports = set()
-    patterns = ["^\\s*import\\s+(\\w+)", "^\\s*from\\s+(\\w+)\\s+import", "^\\s*import\\s+\\w+\\s+as\\s+\\w+"]
+    patterns = [
+        "^\\s*import\\s+(\\w+)",
+        "^\\s*from\\s+(\\w+)\\s+import",
+        "^\\s*import\\s+\\w+\\s+as\\s+\\w+",
+    ]
     for line in content.splitlines():
         for pattern in patterns:
             match = re.search(pattern, line, re.IGNORECASE)

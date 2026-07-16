@@ -381,7 +381,12 @@ Brotli Settings:
         """,
     )
     group = parser.add_mutually_exclusive_group()
-    group.add_argument("-c", "--compress", action="store_true", help="Compress files and folders with Brotli (default)")
+    group.add_argument(
+        "-c",
+        "--compress",
+        action="store_true",
+        help="Compress files and folders with Brotli (default)",
+    )
     group.add_argument("-d", "--decompress", action="store_true", help="Decompress .br and .tar.br files")
     args = parser.parse_args()
     if args.decompress:

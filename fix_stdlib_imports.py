@@ -253,7 +253,18 @@ def get_stdlib_names() -> Dict[str, Set[str]]:
             "sep",
             "linesep",
         },
-        "sys": {"argv", "path", "stdin", "stdout", "stderr", "exit", "version", "platform", "executable", "modules"},
+        "sys": {
+            "argv",
+            "path",
+            "stdin",
+            "stdout",
+            "stderr",
+            "exit",
+            "version",
+            "platform",
+            "executable",
+            "modules",
+        },
         "math": {
             "sqrt",
             "ceil",
@@ -270,7 +281,16 @@ def get_stdlib_names() -> Dict[str, Set[str]]:
             "fabs",
             "factorial",
         },
-        "random": {"random", "randint", "choice", "shuffle", "sample", "uniform", "seed", "randrange"},
+        "random": {
+            "random",
+            "randint",
+            "choice",
+            "shuffle",
+            "sample",
+            "uniform",
+            "seed",
+            "randrange",
+        },
         "datetime": {"datetime", "date", "time", "timedelta", "timezone"},
         "json": {"dumps", "loads", "dump", "load"},
         "collections": {"defaultdict", "OrderedDict", "Counter", "deque", "namedtuple"},
@@ -291,7 +311,17 @@ def get_stdlib_names() -> Dict[str, Set[str]]:
         "argparse": {"ArgumentParser", "Namespace"},
         "logging": {"debug", "info", "warning", "error", "critical", "getLogger", "basicConfig"},
         "statistics": {"mean", "median", "mode", "stdev", "variance"},
-        "typing": {"List", "Dict", "Set", "Tuple", "Optional", "Union", "Any", "Callable", "Iterator"},
+        "typing": {
+            "List",
+            "Dict",
+            "Set",
+            "Tuple",
+            "Optional",
+            "Union",
+            "Any",
+            "Callable",
+            "Iterator",
+        },
         "decimal": {"Decimal"},
         "fractions": {"Fraction"},
         "hashlib": {"md5", "sha1", "sha256", "sha512"},
@@ -449,13 +479,33 @@ Examples:
   %(prog)s . --show-all             # Show all files including those without issues
         """,
     )
-    parser.add_argument("directory", nargs="?", default=".", help="Root directory to scan (default: current directory)")
+    parser.add_argument(
+        "directory",
+        nargs="?",
+        default=".",
+        help="Root directory to scan (default: current directory)",
+    )
     parser.add_argument("--exclude", "-e", default="", help="Comma-separated list of directories to exclude")
     parser.add_argument(
-        "--show-all", "-a", action="store_true", help="Show all files even if no missing imports detected"
+        "--show-all",
+        "-a",
+        action="store_true",
+        help="Show all files even if no missing imports detected",
     )
     args = parser.parse_args()
-    exclude_dirs = {".git", "__pycache__", ".venv", "venv", "env", ".env", "build", "dist", "egg-info", ".tox", ".eggs"}
+    exclude_dirs = {
+        ".git",
+        "__pycache__",
+        ".venv",
+        "venv",
+        "env",
+        ".env",
+        "build",
+        "dist",
+        "egg-info",
+        ".tox",
+        ".eggs",
+    }
     if args.exclude:
         exclude_dirs.update(d.strip() for d in args.exclude.split(","))
     print(f"🔍 Checking for missing stdlib imports in: {args.directory}")

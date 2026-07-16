@@ -213,11 +213,24 @@ def main():
     parser.add_argument("-c", "--compress", action="store_true", help="Compress files (default if no -d specified)")
     parser.add_argument("-d", "--decompress", action="store_true", help="Decompress .xz files")
     parser.add_argument(
-        "--preset", type=int, default=9, choices=range(0, 10), help="Compression preset 0-9 (default: 9)"
+        "--preset",
+        type=int,
+        default=9,
+        choices=range(0, 10),
+        help="Compression preset 0-9 (default: 9)",
     )
     parser.add_argument("--threads", type=int, default=4, help="Threads per compression job (default: 4)")
-    parser.add_argument("--keep-orig", action="store_true", help="Keep original files after compression/decompression")
-    parser.add_argument("directory", nargs="?", default=".", help="Directory to process (default: current directory)")
+    parser.add_argument(
+        "--keep-orig",
+        action="store_true",
+        help="Keep original files after compression/decompression",
+    )
+    parser.add_argument(
+        "directory",
+        nargs="?",
+        default=".",
+        help="Directory to process (default: current directory)",
+    )
     args = parser.parse_args()
     if args.compress and args.decompress:
         print("Error: Cannot specify both -c and -d")
@@ -228,7 +241,11 @@ def main():
         print(f"Error: {root_dir} is not a directory")
         sys.exit(1)
     process_files(
-        root_dir, compress=compress_mode, preset=args.preset, threads=args.threads, remove_orig=not args.keep_orig
+        root_dir,
+        compress=compress_mode,
+        preset=args.preset,
+        threads=args.threads,
+        remove_orig=not args.keep_orig,
     )
 
 

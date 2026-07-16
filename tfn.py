@@ -1,7 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-from fontTools.ttLib import TTFont
 from pathlib import Path
+
+from fontTools.ttLib import TTFont
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

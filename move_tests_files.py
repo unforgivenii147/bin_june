@@ -111,7 +111,9 @@ def main():
         description="Move Python test files to ~/tmp/tests with directory structure preservation."
     )
     parser.add_argument(
-        "--reverse", action="store_true", help="Reverse the move operation (return files to original locations)."
+        "--reverse",
+        action="store_true",
+        help="Reverse the move operation (return files to original locations).",
     )
     parser.add_argument(
         "--dir",
@@ -120,7 +122,10 @@ def main():
         help="Base directory to search for test files (default: current directory).",
     )
     parser.add_argument(
-        "--log", type=Path, default=MOVED_FILES_LOG, help=f"Path to log file (default: {MOVED_FILES_LOG})."
+        "--log",
+        type=Path,
+        default=MOVED_FILES_LOG,
+        help=f"Path to log file (default: {MOVED_FILES_LOG}).",
     )
     parser.add_argument("--workers", type=int, default=4, help="Number of parallel workers (default: 4).")
     args = parser.parse_args()

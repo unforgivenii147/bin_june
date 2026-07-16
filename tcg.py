@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 """
 Termux script creator - Creates executable scripts from clipboard content.
-Archives existing files to ~/isaac/may/scripts/ instead of overwriting.
+Archives existing files to ~/isaac/may/scripts/ if -a flag provided.
 """
 
 import shutil
@@ -41,10 +41,7 @@ def get_clipboard_content() -> str:
 
 
 def get_language_from_extension(filename: str) -> str:
-    """Determine language based on file extension."""
-    path = Path(filename)
-    ext = path.suffix.lower()
-    return EXTENSION_MAP.get(ext, "bash")  # Default to bash if unknown extension
+    return EXTENSION_MAP.get(Path(filename).suffix.lower(), "bash")
 
 
 def replace_shebang(content: str, lang: str) -> str:
@@ -59,90 +56,73 @@ def replace_shebang(content: str, lang: str) -> str:
 def archive_existing_file(file_path: Path) -> None:
     if not file_path.exists():
         return
-    parent_name = file_path.parent.name
-    if parent_name not in {"bin", "bashbin", ".bin"}:
-        return
+
     ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     archive_name = f"{file_path.stem}_{timestamp}{file_path.suffix}"
     archive_path = ARCHIVE_DIR / archive_name
+
     counter = 1
     while archive_path.exists():
         archive_name = f"{file_path.stem}_{timestamp}_{counter}{file_path.suffix}"
         archive_path = ARCHIVE_DIR / archive_name
         counter += 1
+
     try:
         shutil.move(str(file_path), str(archive_path))
-        print(f"📦 Archived existing file to: {archive_path}")
+        print(f"📦 Archived to: {archive_path}")
     except OSError as e:
-        print(f"❌ Failed to archive file: {e}", file=sys.stderr)
+        print(f"❌ Failed to archive: {e}", file=sys.stderr)
         sys.exit(1)
 
 
 def create_symlink(script_path: Path) -> None:
-    # Don't create symlinks for .rs files
     if script_path.suffix.lower() == ".rs":
         return
 
     symlink_path = script_path.parent / script_path.stem
     if symlink_path.exists() and symlink_path.is_symlink():
-        try:
-            symlink_path.unlink()
-        except OSError as e:
-            print(f"  ⚠️  Failed to remove old symlink: {e}", file=sys.stderr)
+        symlink_path.unlink()
+
     if not symlink_path.exists():
         try:
             symlink_path.symlink_to(script_path)
-            print(f"  → Created symlink: {symlink_path.name}")
+            print(f"  → Symlink: {symlink_path.name}")
         except OSError as e:
-            print(f"  ⚠️  Failed to create symlink: {e}", file=sys.stderr)
+            print(f"  ⚠️  Symlink failed: {e}", file=sys.stderr)
 
 
 def main() -> None:
-    if len(sys.argv) != 2:
-        print(f"Usage: {sys.argv[0]} <filename>", file=sys.stderr)
+    archive = "-a" in sys.argv
+    args = [arg for arg in sys.argv[1:] if arg != "-a"]
+
+    if len(args) != 1:
+        print(f"Usage: {sys.argv[0]} [-a] <filename>", file=sys.stderr)
         sys.exit(1)
 
-    filename = sys.argv[1]
+    filename = args[0]
     output_path = Path(filename)
-    cwd = Path.cwd()
+    is_script_dir = Path.cwd() in SCRIPT_DIRS or Path.cwd().name == "bin"
 
-    # Check if we're in a bin directory
-    is_script_dir = cwd in SCRIPT_DIRS or cwd.name == "bin"
-
-    # Archive existing file if it exists
-    if output_path.exists():
+    if archive and output_path.exists():
         archive_existing_file(output_path)
 
-    # Get clipboard content
     content = get_clipboard_content()
 
     if not content.strip():
-        # Empty clipboard
-        print("⚠️  Clipboard is empty, creating empty file")
-        if is_script_dir:
-            lang = get_language_from_extension(filename)
-            content = TERMUX_SHEBANGS[lang] + "\n\n"
-        else:
-            content = "\n"
+        content = (TERMUX_SHEBANGS[get_language_from_extension(filename)] + "\n\n") if is_script_dir else "\n"
     elif is_script_dir:
-        # Determine language from file extension
         lang = get_language_from_extension(filename)
         content = replace_shebang(content, lang)
-    #        print(f"✓ Added {lang} shebang")
 
-    # Write the file
     try:
         output_path.write_text(content)
-    #        print(f"✓ Created: {output_path}")
     except OSError as e:
         print(f"Error writing file: {e}", file=sys.stderr)
         sys.exit(1)
 
-    # Make executable if in a bin directory
     if is_script_dir:
-        output_path.chmod(0o755)  # rwxr-xr-x
-        #        print(f"✓ Made executable: {output_path}")
+        output_path.chmod(0o755)
         create_symlink(output_path)
 
 

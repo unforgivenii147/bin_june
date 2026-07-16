@@ -4,6 +4,7 @@ from collections.abc import Callable, Iterable
 from io import BytesIO
 from os import scandir as os_scandir
 from pathlib import Path
+
 import cairosvg
 from PIL import Image
 

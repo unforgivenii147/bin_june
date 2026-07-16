@@ -42,7 +42,10 @@ def convert_with_openai(js_code: str, api_key: str | None = None) -> tuple[bool,
         return (False, "OpenAI library not installed. Install with: pip install openai")
     api_key = api_key or os.getenv("OPENAI_API_KEY")
     if not api_key:
-        return (False, "OpenAI API key not found. Set OPENAI_API_KEY environment variable or pass --api-key")
+        return (
+            False,
+            "OpenAI API key not found. Set OPENAI_API_KEY environment variable or pass --api-key",
+        )
     try:
         client = openai.OpenAI(api_key=api_key)
         prompt = f"""Convert the following JavaScript code to Python.
@@ -104,7 +107,10 @@ def simple_js_to_python(js_code: str) -> str:
 
 
 def convert_file(
-    input_file: Path, output_file: Path | None = None, method: str = "js2py", api_key: str | None = None
+    input_file: Path,
+    output_file: Path | None = None,
+    method: str = "js2py",
+    api_key: str | None = None,
 ) -> bool:
     try:
         js_code = Path(input_file).read_text(encoding="utf-8")

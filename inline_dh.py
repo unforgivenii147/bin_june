@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+
 import argparse
 import ast
 import sys
@@ -102,7 +103,7 @@ def get_all_dependencies(path: Path, target_symbol: str) -> tuple[set[str], list
                     to_resolve.append(ref)
     needed_imports = set()
     all_code_text = "\n".join(
-        "\n".join(lines[nodes_by_name[sym].lineno - 1 : nodes_by_name[sym].end_lineno]) for sym in needed_symbols
+        ("\n".join(lines[nodes_by_name[sym].lineno - 1 : nodes_by_name[sym].end_lineno]) for sym in needed_symbols)
     )
     for imp in global_imports:
         imp_text = ast.unparse(imp)
@@ -134,10 +135,8 @@ def process_file(path: Path, mapping: dict):
             return
         tree = ast.parse(content)
         lines = content.splitlines(keepends=True)
-
         dh_import_ranges = []
         used_dh_symbols = set()
-
         for node in tree.body:
             if isinstance(node, ast.ImportFrom) and node.module == "dh":
                 dh_import_ranges.append((node.lineno - 1, node.end_lineno))
@@ -147,13 +146,10 @@ def process_file(path: Path, mapping: dict):
                 for alias in node.names:
                     if alias.name == "dh":
                         dh_import_ranges.append((node.lineno - 1, node.end_lineno))
-
         if not used_dh_symbols:
             return
-
         for start, end in sorted(dh_import_ranges, reverse=True):
             del lines[start:end]
-
         file_imports = set()
         file_source_blocks = []
         for symbol in used_dh_symbols:
@@ -165,28 +161,19 @@ def process_file(path: Path, mapping: dict):
                         file_source_blocks.append(block)
             else:
                 file_source_blocks.append(f"# WARNING: Source code for '{symbol}' not found.")
-
         if file_source_blocks:
             injection_parts = []
             if file_imports:
                 injection_parts.append("\n".join(file_imports))
             injection_parts.extend(file_source_blocks)
             inlined_code = "\n\n" + "\n\n".join(injection_parts) + "\n\n"
-
-            # Find the insertion point: after shebang and all imports
             insert_idx = 0
-
-            # Skip shebang line if present
             if lines and lines[0].startswith("#!"):
                 insert_idx = 1
-
-            # Parse the file to find the last import statement
             tree = ast.parse(content)
             last_import_end = 0
-
             for node in tree.body:
                 if isinstance(node, (ast.Import, ast.ImportFrom)):
-                    # Skip dh imports as they'll be removed
                     if isinstance(node, ast.ImportFrom) and node.module == "dh":
                         continue
                     if isinstance(node, ast.Import):
@@ -199,17 +186,11 @@ def process_file(path: Path, mapping: dict):
                             continue
                     last_import_end = max(last_import_end, node.end_lineno)
                 else:
-                    # Stop at the first non-import statement
                     break
-
-            # If we found imports, insert after them; otherwise insert after shebang
             if last_import_end > 0:
                 insert_idx = last_import_end
-
-            # Ensure we have a blank line between imports and inlined code
             if insert_idx > 0 and lines[insert_idx - 1].strip():
                 inlined_code = "\n" + inlined_code
-
             new_content = "".join(lines[:insert_idx]) + inlined_code + "".join(lines[insert_idx:])
             path.write_text(new_content, encoding="utf-8")
             print(f"Refactored: {path} -> Inlined: {', '.join(used_dh_symbols)}")
@@ -225,9 +206,7 @@ def main():
         sys.exit(1)
     cwd = Path.cwd()
     args = sys.argv[1:]
-
     py_files = [Path(p) for p in args] if args else get_files(cwd, ext=[".py"])
-
     with ThreadPoolExecutor() as executor:
         executor.map(lambda p: process_file(p, mapping), py_files)
 

@@ -43,7 +43,9 @@ def is_likely_binary(file_path: Path, chunk_size=1024) -> bool:
         return True
 
 
-def read_file_with_encodings(file_path: Path) -> tuple[str, str] | tuple[str, None] | tuple[None, None]:
+def read_file_with_encodings(
+    file_path: Path,
+) -> tuple[str, str] | tuple[str, None] | tuple[None, None]:
     encodings_to_try = ["utf-8", "latin-1", "iso-8859-1", "cp1252"]
     for encoding in encodings_to_try:
         try:
@@ -123,7 +125,8 @@ def process_file(file_path_str: str):
                                         member_content_str = member_content_bytes.decode(enc, errors="ignore")
                                         if member_content_str:
                                             urls, gh_urls = extract_links_from_text(
-                                                member_content_str, f"{file_path}/{file_info.filename}"
+                                                member_content_str,
+                                                f"{file_path}/{file_info.filename}",
                                             )
                                             local_urls.extend(urls)
                                             github_urls.extend(gh_urls)

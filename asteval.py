@@ -203,7 +203,10 @@ def main() -> int:
     )
     parser.add_argument("paths", nargs="*", help="Files or directories to process (default: current directory)")
     parser.add_argument(
-        "--dry-run", "-n", action="store_true", help="Show what would be done without actually moving files"
+        "--dry-run",
+        "-n",
+        action="store_true",
+        help="Show what would be done without actually moving files",
     )
     parser.add_argument(
         "--parallel",

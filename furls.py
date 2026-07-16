@@ -440,7 +440,10 @@ def main() -> None:
         help="Comma-separated list of file extensions to scan (e.g. .py,.md). If empty, all files are scanned. Applies to archive members too.",
     )
     parser.add_argument(
-        "--max-recursion", type=int, default=999, help="Max nested-archive recursion depth (default 999)."
+        "--max-recursion",
+        type=int,
+        default=999,
+        help="Max nested-archive recursion depth (default 999).",
     )
     args = parser.parse_args()
 

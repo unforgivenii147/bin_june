@@ -7,7 +7,19 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 def keep_one_image_per_folder(base_dir):
     base_path = Path(base_dir)
-    image_extensions = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webp", ".svg", ".heic", ".heif", ".raw"}
+    image_extensions = {
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".gif",
+        ".bmp",
+        ".tiff",
+        ".webp",
+        ".svg",
+        ".heic",
+        ".heif",
+        ".raw",
+    }
     group_folders = []
     for folder in base_path.iterdir():
         if folder.is_dir() and folder.name.startswith("similar_"):

@@ -4,6 +4,7 @@ from collections import deque
 from multiprocessing import get_context
 from os import scandir as os_scandir
 from pathlib import Path
+
 import cv2
 from PIL import Image
 from PIL.Image import Image

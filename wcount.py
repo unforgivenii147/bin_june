@@ -5,6 +5,7 @@ from collections import deque
 from multiprocessing import get_context
 from os import scandir as os_scandir
 from pathlib import Path
+
 from toolz import compose, frequencies
 from toolz.curried import map as _map
 

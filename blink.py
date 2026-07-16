@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+
 import sys
 from collections import deque
 from pathlib import Path
@@ -41,7 +43,6 @@ if __name__ == "__main__":
     cwd = Path.cwd()
     bcount = 0
     broken_links = []
-
     for path in get_files(cwd):
         if not path.exists():
             print(path.name)
@@ -53,19 +54,15 @@ if __name__ == "__main__":
                     print(f"Removed: {path.relative_to(cwd)}")
                 except Exception as e:
                     print(f"Error deleting {path}: {e}")
-
-    # Save broken links to blink.txt
     if broken_links:
         blink_file = cwd / "blink.txt"
         with open(blink_file, "w") as f:
             for link in broken_links:
                 f.write(f"{link}\n")
         print(f"\nBroken links saved to: {blink_file}")
-
     if not bcount:
         print("no broken link found.")
         sys.exit(0)
-
     if RM:
         print(f"{bcount} broken link removed.")
     else:

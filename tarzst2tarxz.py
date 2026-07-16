@@ -1,11 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from __future__ import annotations
 
+
+from __future__ import annotations
 import lzma
 import os
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-
 import zstandard as zstd
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
@@ -32,25 +32,18 @@ def dir_files_total_bytes(p: Path) -> int:
 
 def convert_one(src: str) -> tuple[str, int, bool, str]:
     src_path = Path(src)
-    dst_xz = src_path.with_suffix("")  # *.tar.zst -> *.tar
+    dst_xz = src_path.with_suffix("")
     dst_xz = Path(str(dst_xz) + ".xz")
-
     if dst_xz.exists():
         return (src, 0, True, f"skipped (exists): {dst_xz.name}")
-
     try:
-        # Stream: zstd --decompress -> tar bytes -> lzma --compress -> tar.xz
         dctx = zstd.ZstdDecompressor()
         with src_path.open("rb") as f_in:
             with dctx.stream_reader(f_in) as zreader:
-                comp = lzma.LZMACompressor(
-                    format=lzma.FORMAT_XZ,
-                    check=-1,
-                    preset=9,
-                )
+                comp = lzma.LZMACompressor(format=lzma.FORMAT_XZ, check=-1, preset=9)
                 with dst_xz.open("wb") as f_out:
                     while True:
-                        chunk = zreader.read(1024 * 1024)  # 1 MiB
+                        chunk = zreader.read(1024 * 1024)
                         if not chunk:
                             break
                         out = comp.compress(chunk)
@@ -59,16 +52,11 @@ def convert_one(src: str) -> tuple[str, int, bool, str]:
                     tail = comp.flush()
                     if tail:
                         f_out.write(tail)
-
         src_size_before = src_path.stat().st_size
         dst_size_after = dst_xz.stat().st_size
-
-        # Remove original after conversion
         src_path.unlink()
-
         return (src, dst_size_after - src_size_before, True, f"converted -> {dst_xz.name}, removed original")
     except Exception as e:
-        # If we created a partial output, try to remove it to avoid confusing later runs.
         try:
             if dst_xz.exists():
                 dst_xz.unlink()
@@ -83,28 +71,21 @@ def main() -> None:
     if not tar_zst_files:
         print("No .tar.zst files found in current directory.")
         return
-
     initial_bytes = dir_files_total_bytes(cwd)
-
     max_workers = max(1, min(os.cpu_count() or 1, len(tar_zst_files)))
     results: list[tuple[str, int, bool, str]] = []
-
     with ProcessPoolExecutor(max_workers=max_workers) as ex:
         futures = [ex.submit(convert_one, str(p)) for p in tar_zst_files]
         for f in as_completed(futures):
             results.append(f.result())
-
     final_bytes = dir_files_total_bytes(cwd)
     delta = final_bytes - initial_bytes
-
-    ok_count = sum(1 for _, _, ok, _ in results if ok)
+    ok_count = sum((1 for _, _, ok, _ in results if ok))
     fail_count = len(results) - ok_count
-
     print(f"Found: {len(tar_zst_files)}; Converted OK: {ok_count}; Failed/Skipped: {fail_count}")
     for src, _, ok, msg in sorted(results, key=lambda x: x[0]):
         status = "OK" if ok else "FAIL"
         print(f"[{status}] {Path(src).name}: {msg}")
-
     print(f"Disk usage (files in cwd) initial: {human_bytes(initial_bytes)}")
     print(f"Disk usage (files in cwd) final:   {human_bytes(final_bytes)}")
     if delta < 0:

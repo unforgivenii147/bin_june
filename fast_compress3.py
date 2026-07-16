@@ -271,7 +271,12 @@ def walk_files(directory: Path, compress: bool):
 
 
 def compress_file(
-    input_path: Path, output_path: Path, level: int, threads: int, remove_original: bool, stats: SpaceStats
+    input_path: Path,
+    output_path: Path,
+    level: int,
+    threads: int,
+    remove_original: bool,
+    stats: SpaceStats,
 ):
     try:
         original_size = input_path.stat().st_size
@@ -400,7 +405,11 @@ def main():
     action_group.add_argument("-c", "--compress", action="store_true", help="Compress files (default)")
     action_group.add_argument("-d", "--decompress", action="store_true", help="Decompress files")
     parser.add_argument(
-        "--level", type=int, default=3, choices=range(1, 23), help="Compression level (1-22, default: 3)"
+        "--level",
+        type=int,
+        default=3,
+        choices=range(1, 23),
+        help="Compression level (1-22, default: 3)",
     )
     parser.add_argument("--threads", type=int, default=4, help="Number of threads (default: 4)")
     parser.add_argument("--dir", type=str, default=".", help="Directory to process (default: current)")

@@ -1,18 +1,15 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
 from deep_translator import GoogleTranslator
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-# WARNING: Source code for 'walker' not found.
-
 DIRECTORY = "."
 CHUNK_SIZE = 2000
-non_english_pattern = re.compile(r"[^\x00-\x7F]")
+non_english_pattern = re.compile("[^\\x00-\\x7F]")
 
 
 def is_text_file(path: Path) -> bool:

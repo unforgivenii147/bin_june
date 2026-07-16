@@ -184,7 +184,12 @@ def process_zip_file(path: Path) -> dict[str, list[str]]:
                         pass
     except Exception:
         pass
-    return {"imports": sorted(imports), "star_modules": sorted(stars), "dynamic": sorted(dyn), "relative": sorted(rel)}
+    return {
+        "imports": sorted(imports),
+        "star_modules": sorted(stars),
+        "dynamic": sorted(dyn),
+        "relative": sorted(rel),
+    }
 
 
 def process_tar_file(path: Path) -> dict[str, list[str]]:
@@ -211,7 +216,12 @@ def process_tar_file(path: Path) -> dict[str, list[str]]:
                         pass
     except Exception:
         pass
-    return {"imports": sorted(imports), "star_modules": sorted(stars), "dynamic": sorted(dyn), "relative": sorted(rel)}
+    return {
+        "imports": sorted(imports),
+        "star_modules": sorted(stars),
+        "dynamic": sorted(dyn),
+        "relative": sorted(rel),
+    }
 
 
 def process_raw(path: str) -> dict[str, list[str]]:
@@ -293,7 +303,11 @@ def trace_star_module(module: str, project_map: dict[str, list[str]]) -> set[str
 
 
 def resolve_packages(
-    imports: set[str], stdlib: set[str], mapping: dict[str, str], pip_available: set[str], project_toplevels: set[str]
+    imports: set[str],
+    stdlib: set[str],
+    mapping: dict[str, str],
+    pip_available: set[str],
+    project_toplevels: set[str],
 ) -> set[str]:
     out = set()
     for imp in imports:
@@ -341,7 +355,10 @@ def scan_sources(ignore_dirs: set[str]) -> list[str]:
 def main() -> None:
     p = argparse.ArgumentParser(description="Offline requirements.txt generator (static + heuristics).")
     p.add_argument(
-        "--ignore", nargs="*", default=[".venv", ".git", ".ipynb_checkpoints"], help="Directories to ignore during scan"
+        "--ignore",
+        nargs="*",
+        default=[".venv", ".git", ".ipynb_checkpoints"],
+        help="Directories to ignore during scan",
     )
     p.add_argument("--no-cache", action="store_true", default=True, help="Disable cache usage")
     p.add_argument("--clear-cache", action="store_true", help="Clear cache and exit")

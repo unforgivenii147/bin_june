@@ -250,16 +250,32 @@ def main() -> None:
         epilog="Example: python script.py -m 4 -o output.txt",
     )
     parser.add_argument(
-        "-m", "--min-lines", type=int, default=3, help="Minimum lines for a block to be considered (default: 3)"
+        "-m",
+        "--min-lines",
+        type=int,
+        default=3,
+        help="Minimum lines for a block to be considered (default: 3)",
     )
     parser.add_argument(
-        "-o", "--output", type=str, default="output.txt", help="Output file for findings (default: output.txt)"
+        "-o",
+        "--output",
+        type=str,
+        default="output.txt",
+        help="Output file for findings (default: output.txt)",
     )
     parser.add_argument(
-        "-w", "--workers", type=int, default=None, help="Number of worker processes (default: CPU count)"
+        "-w",
+        "--workers",
+        type=int,
+        default=None,
+        help="Number of worker processes (default: CPU count)",
     )
     parser.add_argument(
-        "-d", "--directory", type=str, default=".", help="Directory to scan (default: current directory)"
+        "-d",
+        "--directory",
+        type=str,
+        default=".",
+        help="Directory to scan (default: current directory)",
     )
     args = parser.parse_args()
     root = Path(args.directory)

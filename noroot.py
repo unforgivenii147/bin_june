@@ -80,7 +80,18 @@ def main() -> None:
                 is_likely_bash = False
                 if content.startswith(("#!/bin/bash", "#!/usr/bin/env bash")) or oct(item_path.stat().st_mode)[
                     -3:
-                ] not in ("000", "001", "010", "011", "002", "012", "100", "110", "111", "101"):
+                ] not in (
+                    "000",
+                    "001",
+                    "010",
+                    "011",
+                    "002",
+                    "012",
+                    "100",
+                    "110",
+                    "111",
+                    "101",
+                ):
                     is_likely_bash = True
                 if is_likely_bash:
                     remove_conditional_exit_blocks(item_path)

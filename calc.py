@@ -1,8 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+
 import re
 import sys
-
 from textual.app import App, ComposeResult
 from textual.containers import Grid
 from textual.widgets import Button, Static
@@ -11,16 +11,7 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 
 class Display(Static):
-    DEFAULT_CSS = """
-    Display {
-        width: 1fr;
-        height: 3;
-        content-align: right middle;
-        background: $surface;
-        border: solid $primary;
-        text-style: bold;
-    }
-    """
+    DEFAULT_CSS = "\n    Display {\n        width: 1fr;\n        height: 3;\n        content-align: right middle;\n        background: $surface;\n        border: solid $primary;\n        text-style: bold;\n    }\n    "
 
     def __init__(self) -> None:
         super().__init__("0")
@@ -32,39 +23,7 @@ class Display(Static):
 
 
 class Calculator(Static):
-    DEFAULT_CSS = """
-    Calculator {
-        width: 50;
-        height: auto;
-        border: solid $accent;
-        background: $panel;
-    }
-
-    #button-grid {
-        width: 1fr;
-        height: auto;
-        grid-size: 4 5;
-        grid-gutter: 1 1;
-        padding: 1;
-    }
-
-    Button {
-        width: 1fr;
-        height: 3;
-    }
-
-    Button.operator {
-        background: $accent 80%;
-    }
-
-    Button.equals {
-        background: $success 80%;
-    }
-
-    Button.clear {
-        background: $error 80%;
-    }
-    """
+    DEFAULT_CSS = "\n    Calculator {\n        width: 50;\n        height: auto;\n        border: solid $accent;\n        background: $panel;\n    }\n\n    #button-grid {\n        width: 1fr;\n        height: auto;\n        grid-size: 4 5;\n        grid-gutter: 1 1;\n        padding: 1;\n    }\n\n    Button {\n        width: 1fr;\n        height: 3;\n    }\n\n    Button.operator {\n        background: $accent 80%;\n    }\n\n    Button.equals {\n        background: $success 80%;\n    }\n\n    Button.clear {\n        background: $error 80%;\n    }\n    "
 
     def __init__(self) -> None:
         super().__init__()
@@ -115,7 +74,7 @@ class Calculator(Static):
             return
         if button_id in ("plus", "minus", "multiply", "divide"):
             current_value = float(self.display_widget.value)
-            if self.left_operand is not None and self.operator is not None and not self.new_input:
+            if self.left_operand is not None and self.operator is not None and (not self.new_input):
                 result = self._calculate(self.left_operand, self.operator, current_value)
                 self.display_widget.update_display(result)
                 self.left_operand = float(result)
@@ -164,30 +123,17 @@ class Calculator(Static):
 
 
 def parse_expression(expr):
-    """Parse an expression like '1024*1024' or '10 / 3' into parts."""
-    # Remove all spaces
     expr = expr.replace(" ", "")
-
-    # Try to split by operators
-    # Match: number, operator, number
-    # Supported operators: +, -, *, /, ×, ÷
-    pattern = r"^([\d.]+)\s*([+\-*/×÷])\s*([\d.]+)$"
+    pattern = "^([\\d.]+)\\s*([+\\-*/×÷])\\s*([\\d.]+)$"
     match = re.match(pattern, expr)
-
     if match:
-        return match.group(1), match.group(2), match.group(3)
-    return None, None, None
+        return (match.group(1), match.group(2), match.group(3))
+    return (None, None, None)
 
 
 def evaluate_cli(args):
-    """Evaluate a mathematical expression from command-line arguments."""
-    # Join all arguments into one string (handles both spaced and unspaced)
     expr = " ".join(args)
-
-    # Try to parse the expression
     num1_str, operator, num2_str = parse_expression(expr)
-
-    # If parse failed, try the old way (space-separated)
     if num1_str is None:
         if len(args) < 3:
             print("Usage: python calc.py <expression>")
@@ -199,8 +145,6 @@ def evaluate_cli(args):
             print("  python calc.py 5.5 + 2.5")
             print("  python calc.py 5.5+2.5")
             return False
-
-        # Try space-separated format
         try:
             num1 = float(args[0])
             operator = args[1]
@@ -212,51 +156,36 @@ def evaluate_cli(args):
             print("Examples: 1024*1024 or 1024 * 1024")
             return False
     else:
-        # Parse the numbers from the expression
         try:
             num1 = float(num1_str)
             num2 = float(num2_str)
         except ValueError:
             print("Error: Invalid numbers in expression")
             return False
-
-    # Map operators
     operator_map = {"+": "+", "-": "−", "*": "×", "/": "÷", "×": "×", "÷": "÷"}
-
     if operator not in operator_map:
         print(f"Error: Unsupported operator '{operator}'")
         print("Supported operators: +, -, *, /, ×, ÷")
         return False
-
     mapped_operator = operator_map[operator]
-
-    # Create a temporary calculator instance for the calculation logic
     calc = Calculator()
     result = calc._calculate(num1, mapped_operator, num2)
-
     if result == "Error":
         print("Error: Invalid calculation (division by zero?)")
         return False
-
-    # Print in a clean format
     operator_display = {"+": "+", "−": "-", "×": "*", "÷": "/"}
-
-    # Format numbers nicely
     num1_str = str(int(num1)) if num1 == int(num1) else str(num1)
     num2_str = str(int(num2)) if num2 == int(num2) else str(num2)
-
     print(f"{num1_str} {operator_display.get(mapped_operator, operator)} {num2_str} = {result}")
     return True
 
 
 if __name__ == "__main__":
-    # Check if we're running in CLI mode with arguments
     if len(sys.argv) > 1:
-        # We have arguments - run in CLI mode
         success = evaluate_cli(sys.argv[1:])
         sys.exit(0 if success else 1)
     else:
-        # No arguments - launch the GUI
+
         class CalcApp(App):
             BINDINGS = [("q", "quit", "Quit")]
 

@@ -52,7 +52,10 @@ def rrs(path, before, after) -> None:
 
 
 def runcmd(
-    cmd: list[str], run_silently: bool = False, show_output: bool = True, timeout: float | None = None
+    cmd: list[str],
+    run_silently: bool = False,
+    show_output: bool = True,
+    timeout: float | None = None,
 ) -> tuple[int, str, str]:
     from subprocess import DEVNULL as _DEVNULL
     from subprocess import TimeoutExpired as subprocess_TimeoutExpired
@@ -117,7 +120,16 @@ def mpf3(process_function: Callable, files: list[Path], **kwargs):
     return Parallel(n_jobs=-1)((delayed(process_function)(file_str, **kwargs) for file_str in file_strings))
 
 
-ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
+ATTRIBUTES = {
+    "bold": 1,
+    "dark": 2,
+    "italic": 3,
+    "underline": 4,
+    "blink": 5,
+    "reverse": 7,
+    "concealed": 8,
+    "strike": 9,
+}
 HIGHLIGHTS = {
     "on_black": 40,
     "on_grey": 40,

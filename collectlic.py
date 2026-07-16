@@ -1,8 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 EXCLUDE_DIRS = {".git"}
 OUTPUT_FILE = Path("/sdcard/all2.txt")
 
@@ -34,10 +35,7 @@ def build_all_txt(root_path: str) -> None:
     root = Path(root_path)
     files = list(collect_files(root))
     print(f"Found {len(files)} files")
-
-    # Ensure parent directory exists for OUTPUT_FILE
     OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
-
     with OUTPUT_FILE.open("w", encoding="utf-8") as out:
         for i, path in enumerate(files, 1):
             content = read_file(path)

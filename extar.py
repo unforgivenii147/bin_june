@@ -109,13 +109,22 @@ Original archives are automatically removed after successful extraction.""",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
-        "target", nargs="?", default=None, help="File to extract or directory to search (default: current directory)"
+        "target",
+        nargs="?",
+        default=None,
+        help="File to extract or directory to search (default: current directory)",
     )
     parser.add_argument(
-        "--dry-run", "-n", action="store_true", help="Show what would be done without actually extracting"
+        "--dry-run",
+        "-n",
+        action="store_true",
+        help="Show what would be done without actually extracting",
     )
     parser.add_argument(
-        "--quiet", "-q", action="store_true", help="Suppress all output except errors and final summary"
+        "--quiet",
+        "-q",
+        action="store_true",
+        help="Suppress all output except errors and final summary",
     )
     args = parser.parse_args()
     if args.target:

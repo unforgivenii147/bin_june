@@ -112,7 +112,12 @@ def process_dist_info(dist_info_dir: Path) -> bool:
     record_relative = str(record_path.relative_to(dist_info_dir.parent))
     new_lines.append(f"{record_relative},,")
     if missing_files:
-        logger.warning("%d missing files in %s: %s", len(missing_files), dist_info_dir.name, ", ".join(missing_files))
+        logger.warning(
+            "%d missing files in %s: %s",
+            len(missing_files),
+            dist_info_dir.name,
+            ", ".join(missing_files),
+        )
     try:
         record_path.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
         logger.info("Updated %s", record_path)

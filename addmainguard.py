@@ -96,14 +96,30 @@ def main():
     parser.add_argument("directory", nargs="?", default=".", help="Directory to scan (default: current directory)")
     parser.add_argument("-a", "--add", action="store_true", help="Add the main guard to missing files")
     parser.add_argument(
-        "--dry-run", action="store_true", help="Show what would be changed without actually modifying files"
+        "--dry-run",
+        action="store_true",
+        help="Show what would be changed without actually modifying files",
     )
     parser.add_argument(
-        "-j", "--jobs", type=int, default=None, help="Number of parallel processes (default: CPU count)"
+        "-j",
+        "--jobs",
+        type=int,
+        default=None,
+        help="Number of parallel processes (default: CPU count)",
     )
     parser.add_argument("--exclude", nargs="+", default=[], help="Additional directories to exclude")
     args = parser.parse_args()
-    exclude_patterns = [".git", "__pycache__", "venv", ".venv", "env", "dist", "build", ".pytest_cache", ".mypy_cache"]
+    exclude_patterns = [
+        ".git",
+        "__pycache__",
+        "venv",
+        ".venv",
+        "env",
+        "dist",
+        "build",
+        ".pytest_cache",
+        ".mypy_cache",
+    ]
     exclude_patterns.extend(args.exclude)
     max_workers = args.jobs or multiprocessing.cpu_count()
     print(f"📂 Scanning: {args.directory}")
@@ -115,7 +131,14 @@ def main():
         print("\n⚠️  No Python files found!")
         return
     print(f"\n📄 Found {total} Python files")
-    results = {"has_guard": [], "missing": [], "added": [], "would_add": [], "skipped": [], "errors": []}
+    results = {
+        "has_guard": [],
+        "missing": [],
+        "added": [],
+        "would_add": [],
+        "skipped": [],
+        "errors": [],
+    }
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         futures = {executor.submit(process_file, f, args.add, args.dry_run): f for f in py_files}
         completed = 0

@@ -20,7 +20,11 @@ from typing import List, Optional, Tuple
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 logger = logging.getLogger(__name__)
 
 
@@ -112,7 +116,11 @@ def convert_whl_to_tarxz(path: Path, remove_original: bool = False) -> Tuple[boo
                     logger.info(f"Removed original: {path.name}")
                 except Exception as e:
                     logger.error(f"Failed to remove original file {path.name}: {e}")
-                    return (False, f"Conversion succeeded but failed to remove original: {e}", output_path)
+                    return (
+                        False,
+                        f"Conversion succeeded but failed to remove original: {e}",
+                        output_path,
+                    )
             return (True, f"Converted {converted_count} files to tar.xz", output_path)
         else:
             return False, "Output file is empty or missing", None
@@ -165,7 +173,11 @@ def convert_tarxz_to_whl(path: Path, remove_original: bool = False) -> Tuple[boo
                     logger.info(f"Removed original: {path.name}")
                 except Exception as e:
                     logger.error(f"Failed to remove original file {path.name}: {e}")
-                    return (False, f"Conversion succeeded but failed to remove original: {e}", output_path)
+                    return (
+                        False,
+                        f"Conversion succeeded but failed to remove original: {e}",
+                        output_path,
+                    )
             return (True, f"Converted {converted_count} files to wheel", output_path)
         else:
             return False, "Output file is empty or missing", None
@@ -222,11 +234,16 @@ Examples:
         """,
     )
     parser.add_argument(
-        "paths", nargs="*", default=["."], help="Files or directories to process (default: current directory)"
+        "paths",
+        nargs="*",
+        default=["."],
+        help="Files or directories to process (default: current directory)",
     )
     parser.add_argument("-r", "--recursive", action="store_true", help="Search directories recursively")
     parser.add_argument(
-        "--remove-original", action="store_true", help="Remove original files after successful conversion"
+        "--remove-original",
+        action="store_true",
+        help="Remove original files after successful conversion",
     )
     parser.add_argument("-j", "--jobs", type=int, default=None, help="Number of parallel jobs (default: CPU count)")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose logging")

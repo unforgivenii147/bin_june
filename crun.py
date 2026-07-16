@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+
 import sys
 from collections.abc import Callable, Iterable
 from pathlib import Path
@@ -36,7 +37,7 @@ def should_skip(path: str | Path) -> bool:
 
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
-    units = "B", "KB", "MB", "GB", "TB"
+    units = ("B", "KB", "MB", "GB", "TB")
     if sz == 0:
         return "0 B"
     i = min((int(sz).bit_length() - 1) // 10, len(units) - 1)
@@ -44,9 +45,6 @@ def fsz(sz: float) -> str:
     if i == 0:
         return f"{int(value)} {units[i]}"
     return f"{value:.1f} {units[i]}"
-
-
-# WARNING: Source code for 'run_command' not found.
 
 
 def gsz(path: str | Path) -> int:
@@ -64,7 +62,7 @@ def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
-    return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
+    return Parallel(n_jobs=-1)((delayed(process_function)(file_str, **kwargs) for file_str in file_strings))
 
 
 def process_file(path):

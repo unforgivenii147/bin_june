@@ -47,7 +47,16 @@ def fsz(sz: float) -> str:
     return f"{value:.1f} {units[i]}"
 
 
-ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
+ATTRIBUTES = {
+    "bold": 1,
+    "dark": 2,
+    "italic": 3,
+    "underline": 4,
+    "blink": 5,
+    "reverse": 7,
+    "concealed": 8,
+    "strike": 9,
+}
 
 HIGHLIGHTS = {
     "on_black": 40,
@@ -212,7 +221,14 @@ def has_compressed_suffix(path: Path) -> bool:
 
 
 def output_name_for_file(path: Path, mode: str) -> Path:
-    ext_map = {"xz": ".xz", "gz": ".gz", "brotli": ".br", "zstd": ".zst", "7z": ".7z", "zip": ".zip"}
+    ext_map = {
+        "xz": ".xz",
+        "gz": ".gz",
+        "brotli": ".br",
+        "zstd": ".zst",
+        "7z": ".7z",
+        "zip": ".zip",
+    }
     if mode not in ext_map:
         raise ValueError(f"Unsupported mode: {mode}")
     return path.with_name(path.name + ext_map[mode])
@@ -419,7 +435,10 @@ def decompress_one(path_str: str) -> Result:
                     result.dst = str(dst_path)
                     break
         elif name.endswith((".7z", ".zip")):
-            ext_map = {".7z": (py7zr.SevenZipFile(src, "r"), src.stem), ".zip": (zipfile.ZipFile(src, "r"), src.stem)}
+            ext_map = {
+                ".7z": (py7zr.SevenZipFile(src, "r"), src.stem),
+                ".zip": (zipfile.ZipFile(src, "r"), src.stem),
+            }
             for ext, (archive, extract_name) in ext_map.items():
                 if name.endswith(ext):
                     with archive as zf:

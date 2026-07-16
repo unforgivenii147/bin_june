@@ -59,7 +59,10 @@ def compress_file(src: Path, dry_run: bool, verbose: bool, level: int | None = N
         return result
     try:
         ctx = brotli.Compressor(
-            quality=effective_level, lgwin=BROTLI_WINDOW_BITS, lgblock=BROTLI_BLOCK_BITS, mode=BROTLI_MODE
+            quality=effective_level,
+            lgwin=BROTLI_WINDOW_BITS,
+            lgblock=BROTLI_BLOCK_BITS,
+            mode=BROTLI_MODE,
         )
         with open(src, "rb") as f_in, open(dst, "wb") as f_out:
             while chunk := f_in.read(CHUNK_SIZE):
@@ -167,7 +170,10 @@ def do_compress(root: Path, tar_subdirs: bool, dry_run: bool, verbose: bool) -> 
             if verbose:
                 print(f"Compressing {len(tar_files)} .tar archive(s) with level {LEVEL_LARGE} …")
             ok, err = run_parallel(
-                tar_files, compress_file, {"dry_run": dry_run, "verbose": verbose, "level": LEVEL_LARGE}, verbose
+                tar_files,
+                compress_file,
+                {"dry_run": dry_run, "verbose": verbose, "level": LEVEL_LARGE},
+                verbose,
             )
             compressed_tars = {tp for tp in tar_files if tp.with_suffix(tp.suffix + BROTLI_EXT).exists() or dry_run}
             for sd, tp in tar_paths:
@@ -215,7 +221,10 @@ Default (no flags): compress files in CWD individually at level 11.""",
     )
     mode = p.add_mutually_exclusive_group()
     mode.add_argument(
-        "-c", "--compress", action="store_true", help="Compress files recursively (default when no mode flag given)."
+        "-c",
+        "--compress",
+        action="store_true",
+        help="Compress files recursively (default when no mode flag given).",
     )
     mode.add_argument("-d", "--decompress", action="store_true", help="Decompress .br files recursively.")
     p.add_argument(
@@ -226,7 +235,12 @@ Default (no flags): compress files in CWD individually at level 11.""",
     )
     p.add_argument("--verbose", action="store_true", help="Print per-file progress.")
     p.add_argument("--dry-run", action="store_true", help="Show what would happen without touching any files.")
-    p.add_argument("directory", nargs="?", default=".", help="Root directory to process (default: current directory).")
+    p.add_argument(
+        "directory",
+        nargs="?",
+        default=".",
+        help="Root directory to process (default: current directory).",
+    )
     return p
 
 

@@ -74,7 +74,16 @@ def get_installed_packages() -> dict[str, str]:
     return dict(sorted(packages.items(), key=itemgetter(0)))
 
 
-ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
+ATTRIBUTES = {
+    "bold": 1,
+    "dark": 2,
+    "italic": 3,
+    "underline": 4,
+    "blink": 5,
+    "reverse": 7,
+    "concealed": 8,
+    "strike": 9,
+}
 
 HIGHLIGHTS = {
     "on_black": 40,
@@ -266,7 +275,10 @@ if __name__ == "__main__":
                     "yellow",
                 )
         else:
-            cprint(f"[{i + 1}/{len(packages_to_check)}] {pkg_name}: Could not get latest version from PyPI.", "yellow")
+            cprint(
+                f"[{i + 1}/{len(packages_to_check)}] {pkg_name}: Could not get latest version from PyPI.",
+                "yellow",
+            )
         if (i + 1) % 10 == 0 or i + 1 == len(packages_to_check):
             save_results(current_results)
             cprint("Results saved periodically.", "blue")

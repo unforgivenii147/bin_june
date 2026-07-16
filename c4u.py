@@ -107,7 +107,9 @@ def query_pypi(package_name: str, installed_version: str, retries: int = 2) -> P
 
     url = f"https://pypi.org/pypi/{package_name}/json"
     pkg_info = PackageInfo(
-        pkgname=package_name, installed_version=installed_version, checked_at=time.strftime("%Y-%m-%d %H:%M:%S")
+        pkgname=package_name,
+        installed_version=installed_version,
+        checked_at=time.strftime("%Y-%m-%d %H:%M:%S"),
     )
     for attempt in range(retries):
         try:

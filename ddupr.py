@@ -400,7 +400,9 @@ def collect_all_paths(root: Path) -> list[Path]:
     return [p for p in paths if not str(p).startswith(str(utils_dir))]
 
 
-def find_duplicates(all_objects: list[PyObject]) -> tuple[dict[str, list[PyObject]], dict[str, list[PyObject]]]:
+def find_duplicates(
+    all_objects: list[PyObject],
+) -> tuple[dict[str, list[PyObject]], dict[str, list[PyObject]]]:
     by_hash: dict[str, list[PyObject]] = defaultdict(list)
     for obj in all_objects:
         by_hash[obj.content_hash].append(obj)
@@ -436,7 +438,12 @@ def run(cwd: Path, mode: Optional[str], workers: int) -> None:
     if mode is None:
         for kind, objs in grouped.items():
             for obj in objs:
-                logger.info("[{}] '{}' duplicated in {} file(s)", kind, obj.name, len(duplicates[obj.content_hash]))
+                logger.info(
+                    "[{}] '{}' duplicated in {} file(s)",
+                    kind,
+                    obj.name,
+                    len(duplicates[obj.content_hash]),
+                )
         return
     dry_run = mode not in {"copy", "move"}
     write_utils(grouped, utils_dir, dry_run=dry_run)
@@ -455,13 +462,22 @@ def _parse_args() -> argparse.Namespace:
     )
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
-        "-c", "--copy", action="store_true", help="Copy duplicate definitions to utils/ (originals untouched)"
+        "-c",
+        "--copy",
+        action="store_true",
+        help="Copy duplicate definitions to utils/ (originals untouched)",
     )
     group.add_argument(
-        "-m", "--move", action="store_true", help="Move duplicate definitions to utils/ and patch original files"
+        "-m",
+        "--move",
+        action="store_true",
+        help="Move duplicate definitions to utils/ and patch original files",
     )
     parser.add_argument(
-        "--dir", type=Path, default=Path("."), help="Root directory to scan (default: current directory)"
+        "--dir",
+        type=Path,
+        default=Path("."),
+        help="Root directory to scan (default: current directory)",
     )
     parser.add_argument(
         "--workers",

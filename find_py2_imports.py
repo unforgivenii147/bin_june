@@ -1,17 +1,15 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+
 import os
 import sys
 from pathlib import Path
-
 import tree_sitter_python as tsp
 from rapidfuzz import fuzz
 from tree_sitter import Language, Parser
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
-
 HIGHLIGHTS = {
     "on_black": 40,
     "on_grey": 40,
@@ -31,7 +29,6 @@ HIGHLIGHTS = {
     "on_light_cyan": 106,
     "on_white": 107,
 }
-
 COLORS = {
     "black": 30,
     "grey": 30,
@@ -51,7 +48,6 @@ COLORS = {
     "light_cyan": 96,
     "white": 97,
 }
-
 RESET = "\x1b[0m"
 
 
@@ -131,9 +127,6 @@ def should_skip(path: str | Path) -> bool:
     return bool(path.is_symlink() or not SKIP_DIRS.isdisjoint(path.parts))
 
 
-# WARNING: Source code for 'STDLIB2' not found.
-
-
 cwd = Path.cwd()
 parser = Parser()
 parser.language = Language(tsp.language())
@@ -157,7 +150,7 @@ def process_file(path: Path) -> None:
                 if "." in k:
                     indx = k.index(".")
                     k = k[:indx]
-                if k not in impoz and not k.startswith("_"):
+                if k not in impoz and (not k.startswith("_")):
                     impoz.append(k + "\n")
             elif k.startswith("from "):
                 k = k.replace("from ", "")
@@ -172,7 +165,7 @@ def process_file(path: Path) -> None:
                 if " import" in k:
                     indx = k.index(" import")
                     k = k[:indx]
-                if k not in impoz and not k.startswith("_"):
+                if k not in impoz and (not k.startswith("_")):
                     impoz.append(k + "\n")
     impoz = sorted(set(impoz))
     stdlib2 = list(STDLIB2)
@@ -187,22 +180,24 @@ def process_file(path: Path) -> None:
             if (
                 ratio > 85
                 and len(x) > 3
-                and len(v) > 3
-                and x
-                not in {
-                    "io",
-                    "os",
-                    "pathlib",
-                    "urllib",
-                    "tkinter",
-                    "pickle",
-                    "string",
-                    "queue",
-                    "urllib3",
-                    "configparser",
-                    "copyreg",
-                    "httplib2",
-                }
+                and (len(v) > 3)
+                and (
+                    x
+                    not in {
+                        "io",
+                        "os",
+                        "pathlib",
+                        "urllib",
+                        "tkinter",
+                        "pickle",
+                        "string",
+                        "queue",
+                        "urllib3",
+                        "configparser",
+                        "copyreg",
+                        "httplib2",
+                    }
+                )
             ):
                 cprint(f"{path.relative_to(cwd)}", "yellow")
                 cprint(f"{x} / {v} / {ratio}", "green")

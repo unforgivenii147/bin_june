@@ -6,7 +6,16 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
+ATTRIBUTES = {
+    "bold": 1,
+    "dark": 2,
+    "italic": 3,
+    "underline": 4,
+    "blink": 5,
+    "reverse": 7,
+    "concealed": 8,
+    "strike": 9,
+}
 
 HIGHLIGHTS = {
     "on_black": 40,
@@ -158,7 +167,7 @@ def process_lic(path: Path) -> None:
 
 def main() -> None:
     cwd = Path.cwd()
-    for path in cwd.glob("*"):
+    for path in cwd.rglob("*"):
         if path.is_dir() and "dist-info" in path.name:
             process_lic(path)
             if len(list(path.iterdir())) < 2:

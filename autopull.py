@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+
 import subprocess
 from pathlib import Path
 
@@ -20,8 +22,7 @@ def git_pull(repo_path: Path) -> None:
 def walk_and_pull(path: Path) -> None:
     if is_git_repo(path):
         git_pull(path)
-        return  # Don't recurse into .git or sub-repos if already pulled at root
-
+        return
     try:
         for item in path.iterdir():
             if item.is_dir() and item.name != ".git":

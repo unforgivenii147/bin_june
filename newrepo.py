@@ -54,7 +54,10 @@ def get_or_create_github_repo(gh: Github, repo_name: str):
 def make_signature() -> pygit2.Signature:
     now = datetime.now(tz=timezone.utc)
     return pygit2.Signature(
-        name=GITHUB_USERNAME, email=f"{GITHUB_USERNAME}@users.noreply.github.com", time=int(now.timestamp()), offset=0
+        name=GITHUB_USERNAME,
+        email=f"{GITHUB_USERNAME}@users.noreply.github.com",
+        time=int(now.timestamp()),
+        offset=0,
     )
 
 

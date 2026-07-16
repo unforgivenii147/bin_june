@@ -169,7 +169,9 @@ def main():
     )
     parser.add_argument("path", nargs="?", default=".", help="Root path to start from (default: current directory)")
     parser.add_argument(
-        "--dry-run", action="store_true", help="Show what would be done without actually changing permissions"
+        "--dry-run",
+        action="store_true",
+        help="Show what would be done without actually changing permissions",
     )
     parser.add_argument("--show-examples", action="store_true", help="Show example files that would be changed")
     args = parser.parse_args()

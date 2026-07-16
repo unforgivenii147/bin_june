@@ -155,7 +155,12 @@ def format_bytes(bytes_val: int) -> str:
 
 
 def process_files(
-    root_dir: Path, compress: bool, preset: int, threads: int, num_workers: int, remove_orig: bool = True
+    root_dir: Path,
+    compress: bool,
+    preset: int,
+    threads: int,
+    num_workers: int,
+    remove_orig: bool = True,
 ):
     files = get_files_to_process(root_dir, compress)
     if not files:
@@ -222,12 +227,30 @@ def main():
     parser.add_argument("-c", "--compress", action="store_true", help="Compress files (default if no -d specified)")
     parser.add_argument("-d", "--decompress", action="store_true", help="Decompress .xz files")
     parser.add_argument(
-        "--preset", type=int, default=9, choices=range(0, 10), help="Compression preset 0-9 (default: 9)"
+        "--preset",
+        type=int,
+        default=9,
+        choices=range(0, 10),
+        help="Compression preset 0-9 (default: 9)",
     )
     parser.add_argument("--threads", type=int, default=4, help="Threads per compression job (default: 4)")
-    parser.add_argument("--num-workers", type=int, default=4, help="Number of parallel worker processes (default: 4)")
-    parser.add_argument("--keep-orig", action="store_true", help="Keep original files after compression/decompression")
-    parser.add_argument("directory", nargs="?", default=".", help="Directory to process (default: current directory)")
+    parser.add_argument(
+        "--num-workers",
+        type=int,
+        default=4,
+        help="Number of parallel worker processes (default: 4)",
+    )
+    parser.add_argument(
+        "--keep-orig",
+        action="store_true",
+        help="Keep original files after compression/decompression",
+    )
+    parser.add_argument(
+        "directory",
+        nargs="?",
+        default=".",
+        help="Directory to process (default: current directory)",
+    )
     args = parser.parse_args()
     if args.compress and args.decompress:
         print("Error: Cannot specify both -c and -d")

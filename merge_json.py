@@ -57,7 +57,10 @@ def main():
         help="Пути к файлам или директориям для обработки. Если не указаны, обрабатывается текущая директория.",
     )
     parser.add_argument(
-        "--output", "-o", default="mergedf.json", help="Имя выходного файла. По умолчанию 'mergedf.json'."
+        "--output",
+        "-o",
+        default="mergedf.json",
+        help="Имя выходного файла. По умолчанию 'mergedf.json'.",
     )
     args = parser.parse_args()
     if not args.input_paths:

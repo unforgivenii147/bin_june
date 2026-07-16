@@ -1,17 +1,26 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-from typing import Callable, Dict, List, Set, Tuple
-from enum import Enum
-from dataclasses import dataclass
-import re
 import os
+import re
 import sys
+from dataclasses import dataclass
+from enum import Enum
 from os import scandir as os_scandir
 from pathlib import Path
+from typing import Callable, Dict, List, Set, Tuple
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
+ATTRIBUTES = {
+    "bold": 1,
+    "dark": 2,
+    "italic": 3,
+    "underline": 4,
+    "blink": 5,
+    "reverse": 7,
+    "concealed": 8,
+    "strike": 9,
+}
 
 HIGHLIGHTS = {
     "on_black": 40,

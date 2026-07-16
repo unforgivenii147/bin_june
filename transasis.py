@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+
 """
 Optimized version of transasis.py for Python 3.12.
 Translates text files to English recursively or individually.
@@ -9,35 +11,25 @@ import re
 import sys
 from pathlib import Path
 from typing import Final, Iterator
-
 from deep_translator import GoogleTranslator
 
-# Constants
 CHUNK_SIZE: Final[int] = 2000
 TARGET_LANGUAGE: Final[str] = "en"
-SKIP_DIRS: Final[frozenset[str]] = frozenset({
-    "lazy",
-    ".git",
-    "__pycache__",
-    ".mypy_cache",
-    ".ruff_cache",
-    ".pytest_cache",
-})
-NON_ENGLISH_PATTERN: Final[re.Pattern] = re.compile(r"[^\x00-\x7F]")
-
+SKIP_DIRS: Final[frozenset[str]] = frozenset(
+    {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
+)
+NON_ENGLISH_PATTERN: Final[re.Pattern] = re.compile("[^\\x00-\\x7F]")
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
 
 def chunk_text(text: str, chunk_size: int = CHUNK_SIZE) -> Iterator[str]:
-    """Yields chunks of text based on word count."""
     words = text.split()
     for i in range(0, len(words), chunk_size):
         yield " ".join(words[i : i + chunk_size])
 
 
 def translate_text(text: str) -> str:
-    """Translates a text chunk to English."""
     try:
         translator = GoogleTranslator(source="auto", target=TARGET_LANGUAGE)
         return translator.translate(text)
@@ -47,23 +39,18 @@ def translate_text(text: str) -> str:
 
 
 def translate_file(filepath: Path) -> None:
-    """Translates a single file and saves it with a 'translated_' prefix."""
     try:
         content = filepath.read_text(encoding="utf-8")
     except Exception as e:
         logger.warning("Skipping unreadable file %s: %s", filepath, e)
         return
-
     if not NON_ENGLISH_PATTERN.search(content):
         logger.info("No non-English content found in %s, skipping.", filepath.name)
         return
-
     logger.info("Translating: %s", filepath.name)
     translated_chunks = [translate_text(chunk) for chunk in chunk_text(content)]
-
     translated_content = "\n\n".join(translated_chunks)
     new_filepath = filepath.parent / f"translated_{filepath.name}"
-
     try:
         new_filepath.write_text(translated_content, encoding="utf-8")
         logger.info("✓ Saved as: %s", new_filepath.name)
@@ -72,9 +59,8 @@ def translate_file(filepath: Path) -> None:
 
 
 def translate_folder(directory: Path) -> None:
-    """Recursively translates all files in a directory."""
     for p in directory.rglob("*"):
-        if any(part.startswith(".") or part in SKIP_DIRS for part in p.parts):
+        if any((part.startswith(".") or part in SKIP_DIRS for part in p.parts)):
             continue
         if p.is_file():
             translate_file(p)

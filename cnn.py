@@ -1,10 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+
 import shutil
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 FILE_EXTENSIONS = [".pyc", ".log", ".bak"]
 DIR_NAMES = ["__pycache__", ".ruff_cache", ".mypy_cache", "dist", "build", "target"]
 
@@ -16,7 +17,6 @@ def remove_path(path: Path) -> None:
             print(f"Removed file: {path.name}")
         elif path.is_dir():
             shutil.rmtree(path)
-            # relative_to Path.cwd() for display
             try:
                 rel = path.relative_to(Path.cwd())
             except ValueError:
@@ -30,7 +30,7 @@ def scan_and_remove(base_path: Path):
     try:
         for item in base_path.iterdir():
             if item.is_file():
-                if any(item.name.endswith(ext) for ext in FILE_EXTENSIONS):
+                if any((item.name.endswith(ext) for ext in FILE_EXTENSIONS)):
                     yield item
             elif item.is_dir():
                 if item.name in DIR_NAMES:

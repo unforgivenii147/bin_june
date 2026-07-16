@@ -1,11 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+
 import time
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-# WARNING: Source code for 'SoFileStripper' not found.
 
 
 class BatchStripper:
@@ -46,7 +45,7 @@ class BatchStripper:
             exclude_patterns = ["test", "debug", "profile"]
         print(f"\nStripping .so files (excluding: {exclude_patterns})...")
         so_files = [
-            f for f in Path(directory).rglob("*.so*") if not any(pattern in f.name for pattern in exclude_patterns)
+            f for f in Path(directory).rglob("*.so*") if not any((pattern in f.name for pattern in exclude_patterns))
         ]
         stripper = SoFileStripper(verbose=verbose, verify_ctypes=verify)
         for so_file in so_files:

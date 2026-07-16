@@ -84,7 +84,9 @@ def process_file(path):
                     f.write(fixed_content)
                 print(f"  ✅ Manual conversion applied")
                 result = subprocess.run(
-                    ["ruff", "check", "--fix", "--select", "UP010", path], capture_output=True, text=True
+                    ["ruff", "check", "--fix", "--select", "UP010", path],
+                    capture_output=True,
+                    text=True,
                 )
                 if result.returncode == 0:
                     print(f"  ✅ Ruff applied additional fixes")

@@ -145,7 +145,10 @@ def main() -> int:
         help="Allow non-ASCII characters in output (default: escape them)",
     )
     encoding_group.add_argument(
-        "-u", "--allow-unicode", action="store_true", help="Keep unicode characters as-is (alias for --no-ensure-ascii)"
+        "-u",
+        "--allow-unicode",
+        action="store_true",
+        help="Keep unicode characters as-is (alias for --no-ensure-ascii)",
     )
     parsing_group = parser.add_argument_group("Parsing")
     parsing_group.add_argument(

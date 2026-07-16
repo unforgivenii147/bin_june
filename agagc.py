@@ -23,7 +23,10 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 def parse_arguments() -> Namespace:
     parser = argparse.ArgumentParser(description="Commit and push all files to git repository")
     parser.add_argument(
-        "-c", "--create", action="store_true", help="Create remote repository on GitHub if it doesn't exist"
+        "-c",
+        "--create",
+        action="store_true",
+        help="Create remote repository on GitHub if it doesn't exist",
     )
     parser.add_argument("-r", "--remote-name", default="origin", help="Remote name to use (default: origin)")
     return parser.parse_args()

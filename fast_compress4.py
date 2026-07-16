@@ -67,7 +67,10 @@ def compress_file(
 
 
 def decompress_file(
-    input_path: Path, output_path: Optional[Path] = None, chunk_size: int = 1024 * 1024, remove_original: bool = True
+    input_path: Path,
+    output_path: Optional[Path] = None,
+    chunk_size: int = 1024 * 1024,
+    remove_original: bool = True,
 ) -> bool:
     if not input_path.suffix == ".zst":
         print(f"Skipping {input_path} - not a .zst file", file=sys.stderr)
@@ -103,13 +106,27 @@ def decompress_file(
 def main():
     parser = argparse.ArgumentParser(description="Recursively compress/decompress files using zstandard")
     parser.add_argument("directory", type=str, help="Root directory to process")
-    parser.add_argument("--decompress", "-d", action="store_true", help="Decompress .zst files instead of compressing")
+    parser.add_argument(
+        "--decompress",
+        "-d",
+        action="store_true",
+        help="Decompress .zst files instead of compressing",
+    )
     parser.add_argument("--level", "-l", type=int, default=3, help="Compression level (1-22, default: 3)")
     parser.add_argument("--threads", "-t", type=int, default=4, help="Number of threads (default: 4)")
     parser.add_argument("--pattern", "-p", type=str, default="*", help="File pattern to match (default: *)")
-    parser.add_argument("--chunk-size", "-c", type=int, default=1024 * 1024, help="Chunk size in bytes (default: 1MB)")
     parser.add_argument(
-        "--dry-run", "-n", action="store_true", help="Show what would be done without actually doing it"
+        "--chunk-size",
+        "-c",
+        type=int,
+        default=1024 * 1024,
+        help="Chunk size in bytes (default: 1MB)",
+    )
+    parser.add_argument(
+        "--dry-run",
+        "-n",
+        action="store_true",
+        help="Show what would be done without actually doing it",
     )
     parser.add_argument("--keep-original", "-k", action="store_true", help="Keep original files (don't remove them)")
     args = parser.parse_args()

@@ -1,8 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+
 import concurrent.futures
 import subprocess
 from pathlib import Path
-
 from tqdm import tqdm
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
@@ -13,7 +14,7 @@ def format_file(file_path: str) -> str | None:
         subprocess.run(["npx", "prettier", "--write", str(file_path)], capture_output=True, text=True, check=True)
         return None
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
-        return f"{file_path}: {e.stderr if hasattr(e, 'stderr') else str(e)}"
+        return f"{file_path}: {(e.stderr if hasattr(e, 'stderr') else str(e))}"
 
 
 def main() -> None:
@@ -22,24 +23,17 @@ def main() -> None:
     exclude_extensions = (".min.js", ".min.css")
     files_to_format = []
     print("Scanning directory for files...")
-
     base_path = Path(".")
     for file_path in base_path.rglob("*"):
         if not file_path.is_file():
             continue
-
-        # Check if any part of the path is in exclude_dirs
-        if any(part in exclude_dirs for part in file_path.parts):
+        if any((part in exclude_dirs for part in file_path.parts)):
             continue
-
-        if file_path.suffix in target_extensions or any(file_path.name.endswith(ext) for ext in target_extensions):
-            # target_extensions includes things like .html which is a suffix, but also .htm
-            # Let's be more precise
-            if any(file_path.name.endswith(ext) for ext in target_extensions) and not any(
-                file_path.name.endswith(ext) for ext in exclude_extensions
+        if file_path.suffix in target_extensions or any((file_path.name.endswith(ext) for ext in target_extensions)):
+            if any((file_path.name.endswith(ext) for ext in target_extensions)) and (
+                not any((file_path.name.endswith(ext) for ext in exclude_extensions))
             ):
                 files_to_format.append(str(file_path))
-
     if not files_to_format:
         print("No matching files found.")
         return

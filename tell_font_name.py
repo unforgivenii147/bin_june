@@ -7,6 +7,7 @@ from multiprocessing import get_context
 from os import scandir as os_scandir
 from pathlib import Path
 from typing import Any, ParamSpec, TypeVar
+
 from fontTools.ttLib import TTFont
 from fontTools.ttLib.ttFont import TTFont
 from termcolor import cprint

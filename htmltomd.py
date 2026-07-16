@@ -82,18 +82,36 @@ Examples:
         """,
     )
     parser.add_argument(
-        "path", nargs="?", default=".", help="HTML file or directory to process (default: current directory)"
+        "path",
+        nargs="?",
+        default=".",
+        help="HTML file or directory to process (default: current directory)",
     )
     parser.add_argument(
-        "-r", "--recursive", action="store_true", default=True, help="Process directories recursively (default: True)"
+        "-r",
+        "--recursive",
+        action="store_true",
+        default=True,
+        help="Process directories recursively (default: True)",
     )
-    parser.add_argument("--no-recursive", action="store_false", dest="recursive", help="Disable recursive processing")
     parser.add_argument(
-        "--workers", type=int, default=cpu_count(), help=f"Number of worker processes (default: {cpu_count()})"
+        "--no-recursive",
+        action="store_false",
+        dest="recursive",
+        help="Disable recursive processing",
+    )
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=cpu_count(),
+        help=f"Number of worker processes (default: {cpu_count()})",
     )
     parser.add_argument("--keep-forms", action="store_true", help="Keep form elements (default: remove them)")
     parser.add_argument(
-        "--github-flavored", action="store_true", default=True, help="Use GitHub-flavored Markdown (default: True)"
+        "--github-flavored",
+        action="store_true",
+        default=True,
+        help="Use GitHub-flavored Markdown (default: True)",
     )
     args = parser.parse_args()
     options = Options(

@@ -1,25 +1,24 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+
 import re
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-# Assuming is_binary is available from a local module 'dh' as in pytokei.py
 try:
     from dh import is_binary
-
 except ImportError:
-    # Fallback or placeholder if dh is not available, though it should be if following pytokei.py
+
     def is_binary(path):
         return False
 
 
 def count_lines_of_code(file_path: Path, lang) -> tuple[int, int, int]:
     if ".git" in str(file_path):
-        return 0, 0, 0
+        return (0, 0, 0)
     if is_binary(str(file_path)):
         print(f"{file_path} is binary")
-        return 0, 0, 0
+        return (0, 0, 0)
     with file_path.open(encoding="utf-8") as file:
         code_lines = 0
         comment_lines = 0
@@ -31,7 +30,7 @@ def count_lines_of_code(file_path: Path, lang) -> tuple[int, int, int]:
                 comment_lines += 1
             else:
                 code_lines += 1
-    return code_lines, comment_lines, blank_lines
+    return (code_lines, comment_lines, blank_lines)
 
 
 def scan_directory(directory: str = "."):
@@ -43,7 +42,6 @@ def scan_directory(directory: str = "."):
     for file_path in base_path.rglob("*"):
         if not file_path.is_file():
             continue
-
         file_extension = file_path.suffix.lower()
         if not file_extension:
             lang = get_language_from_shebang(str(file_path))

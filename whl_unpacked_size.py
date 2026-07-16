@@ -52,16 +52,28 @@ def find_wheel_files(directory: Path, recursive: bool = False) -> list[Path]:
 def main():
     parser = argparse.ArgumentParser(description="Report the overall unpacked size of .whl files")
     parser.add_argument(
-        "-d", "--directory", type=Path, default=Path.cwd(), help="Directory to scan (default: current directory)"
+        "-d",
+        "--directory",
+        type=Path,
+        default=Path.cwd(),
+        help="Directory to scan (default: current directory)",
     )
     parser.add_argument("-r", "--recursive", action="store_true", help="Scan subdirectories recursively")
     parser.add_argument(
-        "-j", "--jobs", type=int, default=cpu_count(), help=f"Number of parallel jobs (default: {cpu_count()})"
+        "-j",
+        "--jobs",
+        type=int,
+        default=cpu_count(),
+        help=f"Number of parallel jobs (default: {cpu_count()})",
     )
     parser.add_argument("-v", "--verbose", action="store_true", help="Show detailed information for each wheel")
     parser.add_argument("--json", action="store_true", help="Output results in JSON format")
     parser.add_argument(
-        "-s", "--sort", choices=["name", "size"], default="name", help="Sort output by name or size (default: name)"
+        "-s",
+        "--sort",
+        choices=["name", "size"],
+        default="name",
+        help="Sort output by name or size (default: name)",
     )
     args = parser.parse_args()
     if not args.directory.exists():
@@ -106,12 +118,14 @@ def main():
             "wheels": [],
         }
         for wheel_path, size in results:
-            output["wheels"].append({
-                "name": wheel_path.name,
-                "path": str(wheel_path),
-                "size_bytes": size,
-                "size_formatted": format_size(size),
-            })
+            output["wheels"].append(
+                {
+                    "name": wheel_path.name,
+                    "path": str(wheel_path),
+                    "size_bytes": size,
+                    "size_formatted": format_size(size),
+                }
+            )
         if errors:
             output["errors"] = []
             for wheel_path, error in errors:

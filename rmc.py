@@ -201,7 +201,10 @@ def process_python_file(path: Path, preserve_module_docstring: bool = True) -> F
                 temp_file = Path(tmp.name)
             shutil.move(str(temp_file), str(path))
         return FileResult(
-            path=path, comments_removed=comments_removed, docstrings_removed=docstrings_removed, changed=changed
+            path=path,
+            comments_removed=comments_removed,
+            docstrings_removed=docstrings_removed,
+            changed=changed,
         )
     except Exception as e:
         if temp_file and temp_file.exists():
@@ -285,7 +288,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Remove comments and docstrings from Python files (preserves formatting)"
     )
-    parser.add_argument("target", nargs="?", default=".", help="Target file or directory (default: current directory)")
+    parser.add_argument(
+        "target",
+        nargs="?",
+        default=".",
+        help="Target file or directory (default: current directory)",
+    )
     parser.add_argument("--workers", type=int, default=4, help="Number of worker processes (default: 4)")
     parser.add_argument(
         "--remove-module-docstring",
@@ -293,7 +301,9 @@ def main() -> None:
         help="Also remove module-level docstrings (preserved by default)",
     )
     parser.add_argument(
-        "--dry-run", action="store_true", help="Show what would be changed without actually modifying files"
+        "--dry-run",
+        action="store_true",
+        help="Show what would be changed without actually modifying files",
     )
     args = parser.parse_args()
     target_path = Path(args.target).resolve()

@@ -180,7 +180,10 @@ def process_files_parallel(paths: List[Path], num_workers: int = None) -> List[P
     with Pool(num_workers) as pool:
         results = list(
             tqdm(
-                pool.imap_unordered(remover.process_file, paths), total=len(paths), desc="Processing files", unit="file"
+                pool.imap_unordered(remover.process_file, paths),
+                total=len(paths),
+                desc="Processing files",
+                unit="file",
             )
         )
     return results
@@ -239,7 +242,10 @@ def print_summary(results: List[ProcessResult], targets: List[Path]) -> None:
 
 
 def main(
-    targets: Optional[List[str]] = None, num_workers: int = None, keep_backups: bool = True, dry_run: bool = False
+    targets: Optional[List[str]] = None,
+    num_workers: int = None,
+    keep_backups: bool = True,
+    dry_run: bool = False,
 ) -> int:
     if not targets:
         targets = ["."]
@@ -310,5 +316,10 @@ if __name__ == "__main__":
     parser.add_argument("--dry-run", action="store_true", help="Preview changes without modifying files")
     args = parser.parse_args()
     targets = args.targets if args.targets else None
-    exit_code = main(targets=targets, num_workers=args.workers, keep_backups=not args.no_backup, dry_run=args.dry_run)
+    exit_code = main(
+        targets=targets,
+        num_workers=args.workers,
+        keep_backups=not args.no_backup,
+        dry_run=args.dry_run,
+    )
     sys.exit(exit_code)
