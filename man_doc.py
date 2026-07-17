@@ -5,7 +5,7 @@ import gzip
 import os
 import sys
 from collections import deque
-from collections.abc import Callable, Iterable
+from collections.abc import Callable
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 

@@ -1,7 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
-import os
 import shutil
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path

@@ -41,7 +41,7 @@ def translate_file(path: Path) -> None:
         return
     if not non_english_pattern.search(content):
         return
-    chunks = split_into_chunks(content, CHUNK_SIZE)
+    chunks = split_into_chunks(content, 32768)
     with ThreadPoolExecutor(max_workers=8) as executor:
         translated_chunks = list(executor.map(translate_chunk, chunks))
     translated_text = "".join(translated_chunks)

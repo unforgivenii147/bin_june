@@ -30,7 +30,7 @@ class TranslationResult(TypedDict):
     translated: str
 
 
-def chunk_file(file_path: Path, chunk_size: int = CHUNK_SIZE) -> list[tuple[int, int, str]]:
+def chunk_file(file_path: Path, chunk_size: int = 32768) -> list[tuple[int, int, str]]:
     chunks = []
     current_chunk = []
     current_size = 0

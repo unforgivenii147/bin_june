@@ -9,7 +9,7 @@ Translates non-English characters in files in-place using parallel processing.
 import logging
 import re
 import sys
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Final
 from deep_translator import GoogleTranslator
@@ -24,7 +24,7 @@ logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
 
-def split_into_chunks(text: str, size: int = CHUNK_SIZE) -> list[str]:
+def split_into_chunks(text: str, size: int = 32768) -> list[str]:
     return [text[i : i + size] for i in range(0, len(text), size)]
 
 

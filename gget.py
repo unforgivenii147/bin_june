@@ -100,7 +100,7 @@ class Downloader:
         if not Path(self.filename).exists():
             with Path(self.filename).open("wb") as f:
                 f.truncate(self.file_size)
-        chunks = [(i, min(i + CHUNK_SIZE - 1, self.file_size - 1)) for i in range(0, self.file_size, CHUNK_SIZE)]
+        chunks = [(i, min(i + 32768 - 1, self.file_size - 1)) for i in range(0, self.file_size, 32768)]
         self.progress_data["total_chunks"] = len(chunks)
         pending_chunks = [
             (idx, s, e) for idx, (s, e) in enumerate(chunks) if idx not in self.progress_data["downloaded_chunks"]
@@ -122,7 +122,7 @@ class Downloader:
                 "download",
                 filename=self.filename,
                 total=self.file_size,
-                completed=len(self.progress_data["downloaded_chunks"]) * CHUNK_SIZE,
+                completed=len(self.progress_data["downloaded_chunks"]) * 32768,
             )
             signal.signal(signal.SIGINT, lambda s, f: self.stop_event.set())
             with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:

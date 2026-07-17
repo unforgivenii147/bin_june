@@ -4,14 +4,8 @@ import argparse
 import asyncio
 import bz2
 import gzip
-import lzma
-import mmap
-import shutil
 import sys
-import tarfile
-import tempfile
 from collections import deque
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})

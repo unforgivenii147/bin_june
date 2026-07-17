@@ -47,7 +47,7 @@ def is_binary(path: Path | str) -> bool:
             return True
         text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
         nontext = sum(1 for b in chunk if b not in text_chars)
-        return nontext / len(chunk) > ZERO_DOT_THREE
+        return nontext / len(chunk) > 0.3
     except Exception:
         return True
 
@@ -99,7 +99,7 @@ logging.basicConfig(filename=LOG_FILE, level=logging.ERROR, format="%(asctime)s 
 def get_file_hash(filepath: Path) -> str:
     hasher = xxh64()
     with Path(filepath).open("rb") as f:
-        while chunk := f.read(32768):
+        while chunk := f.read(CHUNK_SIZE):
             hasher.update(chunk)
     return hasher.hexdigest()
 

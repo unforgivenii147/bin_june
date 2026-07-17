@@ -10,7 +10,6 @@ import argparse
 import logging
 import multiprocessing as mp
 import re
-import sys
 import time
 from pathlib import Path
 from typing import Final

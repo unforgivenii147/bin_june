@@ -8,11 +8,9 @@ Runs all .py files in a directory tree, continuing even if some fail.
 
 import argparse
 import multiprocessing
-import queue
 import subprocess
 import sys
 import time
-import traceback
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple

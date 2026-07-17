@@ -8,7 +8,6 @@ Translates lines containing foreign characters using parallel process pool.
 
 import logging
 import re
-import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Final

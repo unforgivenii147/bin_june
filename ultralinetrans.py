@@ -13,7 +13,6 @@ import shutil
 import sys
 import tempfile
 import tokenize
-from collections.abc import Callable, Iterable
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from os import scandir
 from pathlib import Path
@@ -22,9 +21,9 @@ from deep_translator import GoogleTranslator
 
 CHUNK_SIZE: Final[int] = 4990
 MAX_WORKERS: Final[int] = 6
-ZERO_DOT_THREE: Final[float] = 0.3
 DOC_TH1: Final[str] = '"""'
 DOC_TH2: Final[str] = "'''"
+
 SKIP_DIRS: Final[frozenset[str]] = frozenset(
     {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache", ".venv"}
 )
@@ -43,7 +42,7 @@ def is_binary(path: Path) -> bool:
             return True
         text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
         nontext = sum((1 for b in chunk if b not in text_chars))
-        return nontext / len(chunk) > ZERO_DOT_THREE
+        return nontext / len(chunk) > 0.3
     except Exception:
         return True
 

@@ -1,158 +1,102 @@
 #!/data/data/com.termux/files/usr/bin/env python
-
 """
-Create a GitHub repo from the current directory and push,
-or commit+push changes if a repo already exists.
-
-Requirements:
-    pip install pygit2 PyGithub python-dotenv
-
-~/.env must contain:
-    GITHUB_TOKEN=your_token_here
+Create and push a git repository to GitHub from the current directory.
+If the repo already exists on GitHub, it will just commit and push changes.
 """
 
 import os
+import subprocess
 import sys
-from datetime import datetime, timezone
-from pathlib import Path
-
-import pygit2
-from dotenv import load_dotenv
-from github import Github, GithubException
-
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-GITHUB_USERNAME = "unforgivenii147"
-ENV_FILE = Path.home() / ".env"
-REPO_DIR = Path.cwd()
 
 
-def load_token() -> str:
-    if not ENV_FILE.is_file():
-        sys.exit(f"[error] ~/.env not found at {ENV_FILE}")
-    load_dotenv(dotenv_path=ENV_FILE)
-    token = os.getenv("GITHUB_TOKEN")
-    if not token:
-        sys.exit("[error] GITHUB_TOKEN not set in ~/.env")
-    return token
+def run_command(cmd, check=True):
+    """Run a shell command and return the output."""
+    print(f"Running: {' '.join(cmd)}")
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if check and result.returncode != 0:
+        print(f"Error: {result.stderr}")
+        sys.exit(1)
+    return result
 
 
-def get_or_create_github_repo(gh: Github, repo_name: str):
-    user = gh.get_user()
-    try:
-        remote_repo = user.get_repo(repo_name)
-        print(f"[info] Found existing GitHub repo: {remote_repo.full_name}")
-    except GithubException as exc:
-        if exc.status != 404:
-            sys.exit(f"[error] GitHub API error: {exc}")
-        print(f"[info] Creating new GitHub repo: {GITHUB_USERNAME}/{repo_name}")
-        remote_repo = user.create_repo(repo_name, private=False, auto_init=False)
-        print(f"[ok] Created: {remote_repo.html_url}")
-    return remote_repo
+def is_git_repo():
+    """Check if current directory is already a git repository."""
+    result = subprocess.run(["git", "rev-parse", "--git-dir"], capture_output=True, text=True)
+    return result.returncode == 0
 
 
-def make_signature() -> pygit2.Signature:
-    now = datetime.now(tz=timezone.utc)
-    return pygit2.Signature(
-        name=GITHUB_USERNAME,
-        email=f"{GITHUB_USERNAME}@users.noreply.github.com",
-        time=int(now.timestamp()),
-        offset=0,
+def get_dir_name():
+    """Get the name of the current directory."""
+    return os.path.basename(os.getcwd())
+
+
+def main():
+    # Get the directory name for the repo
+    repo_name = get_dir_name()
+    print(f"Repository name: {repo_name}")
+
+    # Initialize git if not already a repo
+    if not is_git_repo():
+        print("Initializing git repository...")
+        run_command(["git", "init"])
+    else:
+        print("Git repository already initialized.")
+
+    # Check if remote 'origin' exists
+    result = subprocess.run(["git", "remote", "get-url", "origin"], capture_output=True, text=True)
+
+    if result.returncode != 0:
+        # No remote exists, create the GitHub repo
+        print(f"Creating GitHub repository '{repo_name}'...")
+        run_command(["gh", "repo", "create", repo_name, "--public", "--source=."])
+    else:
+        print("Remote 'origin' already exists. Checking if repo exists on GitHub...")
+        # Try to fetch to see if the remote exists and is accessible
+        fetch_result = subprocess.run(["git", "fetch", "origin"], capture_output=True, text=True)
+        if fetch_result.returncode == 0:
+            print("GitHub repository exists. Will push changes.")
+        else:
+            print("Remote exists but seems inaccessible. You might need to authenticate.")
+            print(f"Remote URL: {result.stdout.strip()}")
+
+    # Add all files
+    print("Adding all files...")
+    run_command(["git", "add", "-A"])
+
+    # Check if there are changes to commit
+    status = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True)
+
+    if status.stdout.strip():
+        # There are changes to commit
+        print("Committing changes...")
+        run_command(["git", "commit", "-m", "initial"])
+    else:
+        print("No changes to commit.")
+
+    # Push to GitHub
+    print("Pushing to GitHub...")
+
+    # Check if we need to set upstream
+    branch_result = subprocess.run(["git", "branch", "--show-current"], capture_output=True, text=True)
+    current_branch = branch_result.stdout.strip() if branch_result.returncode == 0 else "main"
+
+    # Try to push with upstream tracking
+    push_result = subprocess.run(
+        ["git", "push", "--set-upstream", "origin", current_branch], capture_output=True, text=True
     )
 
-
-def stage_all(repo: pygit2.Repository) -> bool:
-    index = repo.index
-    index.read()
-    status = repo.status()
-    if not status:
-        print("[info] Nothing to stage — working tree is clean.")
-        return False
-    for filepath, flags in status.items():
-        deleted = flags & (pygit2.GIT_STATUS_WT_DELETED | pygit2.GIT_STATUS_INDEX_DELETED)
-        if deleted:
-            try:
-                index.remove(filepath)
-            except KeyError:
-                pass
+    if push_result.returncode != 0:
+        if "remote contains work that you do not have" in push_result.stderr:
+            print("Remote has changes. Pulling first...")
+            run_command(["git", "pull", "origin", current_branch, "--rebase"])
+            print("Pushing again...")
+            run_command(["git", "push", "--set-upstream", "origin", current_branch])
         else:
-            index.add(filepath)
-    index.write()
-    return True
+            print(f"Push failed: {push_result.stderr}")
+            sys.exit(1)
 
-
-def commit_all(repo: pygit2.Repository, message: str) -> pygit2.Oid:
-    sig = make_signature()
-    tree_oid = repo.index.write_tree()
-    parents = []
-    try:
-        head_commit = repo.head.target
-        parents = [head_commit]
-    except pygit2.GitError:
-        pass
-    commit_oid = repo.create_commit("refs/heads/main", sig, sig, message, tree_oid, parents)
-    print(f"[ok] Committed: {message} ({str(commit_oid)[:7]})")
-    return commit_oid
-
-
-def ensure_remote(repo: pygit2.Repository, remote_url: str) -> pygit2.Remote:
-    try:
-        remote = repo.remotes["origin"]
-        if remote.url != remote_url:
-            repo.remotes.set_url("origin", remote_url)
-            print(f"[info] Updated remote URL to {remote_url}")
-        else:
-            print(f"[info] Remote 'origin' already set: {remote_url}")
-    except KeyError:
-        remote = repo.remotes.create("origin", remote_url)
-        print(f"[ok] Added remote 'origin': {remote_url}")
-    return remote
-
-
-def push_to_remote(repo: pygit2.Repository, token: str) -> None:
-    remote = repo.remotes["origin"]
-    callbacks = pygit2.RemoteCallbacks(credentials=pygit2.UserpassCredentials(token, "x-oauth-basic"))
-    refspec = "refs/heads/main:refs/heads/main"
-    remote.push([refspec], callbacks=callbacks)
-    print("[ok] Pushed to origin/main.")
-
-
-def main() -> None:
-    token = load_token()
-    gh = Github(token)
-    repo_name = REPO_DIR.name
-    print(f"[info] Working directory : {REPO_DIR}")
-    print(f"[info] Repo name         : {repo_name}")
-    git_dir = REPO_DIR / ".git"
-    is_new_local_repo = not git_dir.exists()
-    if is_new_local_repo:
-        print("[info] No .git found — initialising new local repo.")
-        repo = pygit2.init_repository(str(REPO_DIR), initial_head="main")
-    else:
-        print("[info] Existing local git repo detected.")
-        repo = pygit2.Repository(str(REPO_DIR))
-    has_changes = stage_all(repo)
-    if has_changes:
-        if is_new_local_repo:
-            msg = "Initial commit"
-        else:
-            msg = f"Update {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-        commit_all(repo, msg)
-    else:
-        try:
-            repo.head
-        except pygit2.GitError:
-            print("[warn] Repo has no commits and nothing to stage. Exiting.")
-            return
-    remote_repo = get_or_create_github_repo(gh, repo_name)
-    remote_url = remote_repo.clone_url
-    has_origin = "origin" in [r.name for r in repo.remotes]
-    if not has_origin:
-        ensure_remote(repo, remote_url)
-    else:
-        ensure_remote(repo, remote_url)
-    push_to_remote(repo, token)
-    print(f"\n[done] {remote_repo.html_url}")
+    print(f"\n✅ Success! Repository '{repo_name}' is now on GitHub.")
+    print(f"View it at: https://github.com/{repo_name}")
 
 
 if __name__ == "__main__":

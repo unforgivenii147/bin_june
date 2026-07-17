@@ -11,7 +11,6 @@ import shutil
 import sys
 import tempfile
 from pathlib import Path
-from typing import Final
 from deep_translator import GoogleTranslator
 from langdetect import DetectorFactory, detect
 

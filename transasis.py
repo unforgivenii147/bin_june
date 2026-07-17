@@ -23,7 +23,7 @@ logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
 
-def chunk_text(text: str, chunk_size: int = CHUNK_SIZE) -> Iterator[str]:
+def chunk_text(text: str, chunk_size: int = 32768) -> Iterator[str]:
     words = text.split()
     for i in range(0, len(words), chunk_size):
         yield " ".join(words[i : i + chunk_size])

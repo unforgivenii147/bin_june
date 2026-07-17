@@ -9,9 +9,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import wraps
 from inspect import getfullargspec
 from itertools import chain
-from os import scandir as os_scandir
 from pathlib import Path
-from typing import Any, Callable, Dict
+from typing import Any, Callable
 
 import py7zr
 
@@ -170,7 +169,7 @@ def is_binary(path: Path | str) -> bool:
             return True
         text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
         nontext = sum((1 for b in chunk if b not in text_chars))
-        return nontext / len(chunk) > ZERO_DOT_THREE
+        return nontext / len(chunk) > 0.3
     except Exception:
         return True
 

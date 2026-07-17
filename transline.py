@@ -23,9 +23,8 @@ SKIP_DIRS: Final[frozenset[str]] = frozenset(
     {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
 )
 CHINESE_PATTERN: Final[re.Pattern] = re.compile("[\\u4e00-\\u9fff\\u3400-\\u4dbf\\uf900-\\ufaff]+")
-ZERO_DOT_THREE: Final[float] = 0.3
 MAX_WORKERS: Final[int] = 10
-MAX_RETRIES: Final[int] = 3
+MAX_RETRIES: Final[int] = 1
 PROGRESS_SAVE_EVERY: Final[int] = 20
 logging.basicConfig(level=logging.WARNING)
 log = logging.getLogger(__name__)
@@ -51,7 +50,7 @@ def is_binary(path: Path) -> bool:
             return True
         text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
         nontext = sum((1 for b in chunk if b not in text_chars))
-        return nontext / len(chunk) > ZERO_DOT_THREE
+        return nontext / len(chunk) > 0.3
     except Exception:
         return True
 

@@ -19,7 +19,7 @@ def read_text_file(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
-def chunk_text(text: str, size: int = CHUNK_SIZE) -> list[str]:
+def chunk_text(text: str, size: int = 32768) -> list[str]:
     return [text[i : i + size] for i in range(0, len(text), size)]
 
 

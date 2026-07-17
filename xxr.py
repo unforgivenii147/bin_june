@@ -11,7 +11,7 @@ import sys
 import tarfile
 import tempfile
 import zipfile
-from collections.abc import Callable, Iterable
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Tuple
@@ -248,7 +248,7 @@ def output_name_for_dir(dir_path: Path, mode: str) -> Path:
     return dir_path.parent / f"{dir_path.name}{ext_map[mode]}"
 
 
-def copy_chunks(src_fd, dst_fd, chunk_size: int = CHUNK_SIZE) -> None:
+def copy_chunks(src_fd, dst_fd, chunk_size: int = 32768) -> None:
     while chunk := src_fd.read(chunk_size):
         dst_fd.write(chunk)
 

@@ -8,14 +8,12 @@ Processes Python files with optimized single-threaded or parallel processing.
 """
 
 import ast
-import os
 import shutil
 import sys
-from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import List, Optional, Set, Tuple
+from typing import List, Optional, Tuple
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 RE_FUNCTIONS = {"compile", "search", "match", "fullmatch", "split", "findall", "finditer", "sub", "subn"}

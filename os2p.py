@@ -4,7 +4,6 @@ import sys
 import traceback
 from collections import deque
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from os import scandir as os_scandir
 from pathlib import Path
 from typing import Any, List, Optional, Set, Tuple
 

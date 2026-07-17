@@ -121,12 +121,12 @@ def compress_chunked(in_path: Path, out_path: Path, file_size: int) -> bool:
     temp_dir = TEMP_DIR / f"compress_{in_path.stem}"
     temp_dir.mkdir(parents=True, exist_ok=True)
     try:
-        chunk_count = (file_size + CHUNK_SIZE - 1) // CHUNK_SIZE
+        chunk_count = (file_size + 32768 - 1) // 32768
         with (
             in_path.open("rb") as fin,
             mmap.mmap(fin.fileno(), length=0, access=mmap.ACCESS_READ) as mm,
         ):
-            chunks = [mm[i * CHUNK_SIZE : min((i + 1) * CHUNK_SIZE, file_size)] for i in range(chunk_count)]
+            chunks = [mm[i * 32768 : min((i + 1) * 32768, file_size)] for i in range(chunk_count)]
             compressed_paths = [None] * chunk_count
             with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
                 futures = {executor.submit(compress_chunk, chunk, i, temp_dir): i for i, chunk in enumerate(chunks)}

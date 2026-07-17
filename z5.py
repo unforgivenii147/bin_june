@@ -6,17 +6,13 @@ Zstandard Recursive File Compressor/Decompressor
 """
 
 import argparse
-import multiprocessing as mp
-import shutil
 import sys
 import tarfile
-import tempfile
 import time
-from collections.abc import Iterable, Sequence
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Final, Optional, Self
+from typing import Final, Optional
 import zstandard as zstd
 
 SKIP_DIRS: Final[frozenset[str]] = frozenset(

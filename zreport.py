@@ -9,7 +9,6 @@ Optimized for Python 3.12 with modern syntax, type hints, and performance improv
 import argparse
 import bz2
 import gzip
-import io
 import lzma
 import sys
 import tarfile

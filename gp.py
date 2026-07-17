@@ -1,22 +1,14 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
-import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
 
-
-def run_git_cmd(cmd: list[str], capture: bool = False) -> str:
-    try:
-        result = subprocess.run(cmd, capture_output=capture, text=True, check=True)
-        return result.stdout.strip() if capture else ""
-    except subprocess.CalledProcessError as e:
-        print(f"Error running {' '.join(cmd)}: {e.stderr or e}", file=sys.stderr)
-        sys.exit(e.returncode or 1)
-    except FileNotFoundError:
-        print("Git executable not found. Ensure git is installed.", file=sys.stderr)
-        sys.exit(127)
+try:
+    from git import Repo, GitCommandError, InvalidGitRepositoryError
+except ImportError:
+    print("GitPython not found. Install it with: pip install gitpython", file=sys.stderr)
+    sys.exit(1)
 
 
 def symlink_global_gitignore() -> None:
@@ -35,18 +27,45 @@ def symlink_global_gitignore() -> None:
 
 
 def main() -> None:
-    run_git_cmd(["git", "rev-parse", "--is-inside-work-tree"], capture=True)
-    symlink_global_gitignore()
-    run_git_cmd(["git", "add", "-A"])
-    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    commit_msg = f"Auto-commit at {now}"
-    run_git_cmd(["git", "commit", "-m", commit_msg])
-    branch = run_git_cmd(["git", "branch", "--show-current"], capture=True)
-    if not branch:
-        print("Error: Could not detect current branch (detached HEAD?).", file=sys.stderr)
+    try:
+        repo = Repo(".", search_parent_directories=True)
+    except InvalidGitRepositoryError:
+        print("Error: Not a git repository.", file=sys.stderr)
         sys.exit(1)
-    run_git_cmd(["git", "push", "origin", branch])
-    print(f"Pushed to origin/{branch} with message: {commit_msg}")
+    except Exception as e:
+        print(f"Error accessing repository: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    symlink_global_gitignore()
+
+    try:
+        # Stage all changes
+        repo.git.add(A=True)
+
+        # Create commit
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        commit_msg = f"Auto-commit at {now}"
+        repo.index.commit(commit_msg)
+
+        # Get current branch
+        if repo.head.is_detached:
+            print("Error: Could not detect current branch (detached HEAD?).", file=sys.stderr)
+            sys.exit(1)
+
+        branch = repo.active_branch.name
+
+        # Push to origin
+        origin = repo.remote("origin")
+        origin.push(branch)
+
+        print(f"Pushed to origin/{branch} with message: {commit_msg}")
+
+    except GitCommandError as e:
+        print(f"Git command error: {e}", file=sys.stderr)
+        sys.exit(e.status or 1)
+    except Exception as e:
+        print(f"Unexpected error: {e}", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

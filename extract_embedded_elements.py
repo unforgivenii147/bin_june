@@ -5,7 +5,6 @@ import re
 import sys
 from collections import deque
 from collections.abc import Iterable
-from os import scandir as os_scandir
 from pathlib import Path
 
 
@@ -42,7 +41,7 @@ def is_binary(path: Path | str) -> bool:
             return True
         text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
         nontext = sum((1 for b in chunk if b not in text_chars))
-        return nontext / len(chunk) > ZERO_DOT_THREE
+        return nontext / len(chunk) > 0.3
     except Exception:
         return True
 

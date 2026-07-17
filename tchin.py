@@ -18,7 +18,7 @@ def translator() -> GoogleTranslator:
 
 
 def translate_text_chunked(text: str) -> str:
-    chunks = [text[i : i + CHUNK_SIZE] for i in range(0, len(text), CHUNK_SIZE)]
+    chunks = [text[i : i + 32768] for i in range(0, len(text), 32768)]
     t = translator()
     out = [t.translate(c) for c in chunks]
     return "".join(out)

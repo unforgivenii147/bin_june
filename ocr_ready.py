@@ -3,7 +3,6 @@
 
 import multiprocessing
 import sys
-import traceback
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 import numpy as np
@@ -18,8 +17,7 @@ try:
     HAS_CV2 = True
 except ImportError:
     HAS_CV2 = False
-    import io
-    from PIL import Image, ImageEnhance, ImageFilter, ImageOps
+    from PIL import Image, ImageEnhance, ImageFilter
 
 
 def deskew(image):

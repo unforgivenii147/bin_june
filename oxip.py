@@ -2,7 +2,6 @@
 import subprocess
 from collections import deque
 from multiprocessing import Pool, cpu_count
-from os import scandir as os_scandir
 from pathlib import Path
 
 from rich.progress import Progress

@@ -11,7 +11,6 @@ Save a comprehensive report to ~/dh_usage.txt
 """
 
 import ast
-import importlib
 import pkgutil
 import sys
 from collections import Counter, defaultdict

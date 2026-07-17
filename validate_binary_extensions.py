@@ -12,7 +12,6 @@ and optimized filesystem walking strategies.
 import logging
 import mimetypes
 import os
-import stat
 import sys
 from functools import lru_cache
 from multiprocessing import Pool, cpu_count

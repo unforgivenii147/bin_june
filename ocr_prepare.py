@@ -20,7 +20,6 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 try:
     import cv2
-    import numpy as np
 
     USE_CV2 = True
     logger.info("Using OpenCV for image processing")

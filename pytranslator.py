@@ -13,7 +13,6 @@ import logging
 import multiprocessing
 import time
 import tokenize
-from collections.abc import Generator, Iterable
 from pathlib import Path
 from typing import Final
 from deep_translator import GoogleTranslator

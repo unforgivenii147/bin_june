@@ -13,7 +13,6 @@ import multiprocessing
 import shutil
 import sys
 import tarfile
-import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from io import BytesIO
 from pathlib import Path

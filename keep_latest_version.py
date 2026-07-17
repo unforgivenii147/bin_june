@@ -3,7 +3,6 @@ import argparse
 import re
 from collections import defaultdict, deque
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from os import scandir as os_scandir
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 

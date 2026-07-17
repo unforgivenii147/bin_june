@@ -14,7 +14,7 @@ import textwrap
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional
 
 SKIP_DIRS = {
     ".git",

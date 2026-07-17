@@ -96,13 +96,13 @@ def compress_chunk(data: bytes) -> bytes:
 
 def compress_chunked(in_path: Path, out_path: Path, file_size: int) -> bool:
     try:
-        chunk_count = (file_size + CHUNK_SIZE - 1) // CHUNK_SIZE
+        chunk_count = (file_size + 32768 - 1) // 32768
         with (
             out_path.open("wb", buffering=1024 * 1024) as fout,
             in_path.open("rb") as fin,
             mmap.mmap(fin.fileno(), length=0, access=mmap.ACCESS_READ) as mm,
         ):
-            chunks = (mm[i * CHUNK_SIZE : min((i + 1) * CHUNK_SIZE, file_size)] for i in range(chunk_count))
+            chunks = (mm[i * 32768 : min((i + 1) * 32768, file_size)] for i in range(chunk_count))
             with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
                 futures = {executor.submit(compress_chunk, chunk): i for i, chunk in enumerate(chunks)}
                 results = [None] * chunk_count

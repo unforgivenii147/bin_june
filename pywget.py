@@ -4,9 +4,8 @@ import re
 import sys
 import urllib.parse
 import urllib.request
-from os import get_terminal_size
+from shutil import get_terminal_size
 from pathlib import Path
-from typing import Self
 
 from tqdm import tqdm
 
@@ -120,14 +119,14 @@ def download(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Modern wget clone in Python 3.13+",
+        description="Modern wget",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python wget_modern.py https://example.com/file.zip
-  python wget_modern.py https://example.com/file.zip -o mydir/
-  python wget_modern.py https://example.com/file.zip --resume
-  python wget_modern.py https://example.com/file.zip -q
+  python pywget.py https://example.com/file.zip
+  python pywget.py https://example.com/file.zip -o mydir/
+  python pywget.py https://example.com/file.zip --resume
+  python pywget.py https://example.com/file.zip -q
         """,
     )
     parser.add_argument("url", help="URL to download")

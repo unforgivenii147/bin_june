@@ -1,0 +1,162 @@
+#!/data/data/com.termux/files/usr/bin/env python
+"""
+Clone GitHub repositories from a repos.txt file using GitPython.
+Format: user/repo (one per line)
+Uses --depth 1 for shallow clones.
+"""
+
+import sys
+from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import List, Tuple
+import argparse
+from git import Repo, GitCommandError
+from git.exc import InvalidGitRepositoryError
+
+
+def read_repos(file_path: Path) -> List[str]:
+    """Read repository names from file, stripping whitespace and empty lines."""
+    if not file_path.exists():
+        print(f"Error: {file_path} does not exist")
+        sys.exit(1)
+
+    with open(file_path, "r") as f:
+        repos = [line.strip() for line in f if line.strip()]
+
+    if not repos:
+        print(f"Error: No repositories found in {file_path}")
+        sys.exit(1)
+
+    return repos
+
+
+def validate_repo_format(repo: str) -> bool:
+    """Validate that repo is in user/repo format."""
+    parts = repo.split("/")
+    return len(parts) == 2 and all(parts)
+
+
+def clone_repo(repo: str, base_dir: Path) -> Tuple[str, bool, str]:
+    """
+    Clone a single repository with --depth 1 using GitPython.
+    Returns (repo_name, success, message).
+    """
+    if not validate_repo_format(repo):
+        return repo, False, f"Invalid format: {repo} (expected user/repo)"
+
+    user, repo_name = repo.split("/")
+    target_dir = base_dir / user / repo_name
+
+    # Skip if already cloned
+    if target_dir.exists():
+        try:
+            # Verify it's actually a git repo
+            Repo(target_dir)
+            return repo, True, f"Already exists: {target_dir}"
+        except InvalidGitRepositoryError:
+            return repo, False, f"Directory exists but is not a git repo: {target_dir}"
+
+    # Create parent directory
+    target_dir.parent.mkdir(parents=True, exist_ok=True)
+
+    # Clone the repository
+    clone_url = f"https://github.com/{repo}.git"
+
+    try:
+        Repo.clone_from(clone_url, target_dir, depth=1, single_branch=True)
+        return repo, True, f"Successfully cloned to {target_dir}"
+
+    except GitCommandError as e:
+        error_msg = str(e).strip()
+        # Clean up failed clone directory if it exists
+        if target_dir.exists():
+            import shutil
+
+            shutil.rmtree(target_dir, ignore_errors=True)
+        return repo, False, f"Clone failed: {error_msg}"
+    except Exception as e:
+        # Clean up failed clone directory if it exists
+        if target_dir.exists():
+            import shutil
+
+            shutil.rmtree(target_dir, ignore_errors=True)
+        return repo, False, f"Error: {str(e)}"
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Clone GitHub repositories in parallel from a text file")
+    parser.add_argument(
+        "file", nargs="?", default="repos.txt", help="Path to file containing repositories (default: repos.txt)"
+    )
+    parser.add_argument(
+        "-o", "--output", default="repos", help="Output directory for cloned repositories (default: repos)"
+    )
+    parser.add_argument("-w", "--workers", type=int, default=4, help="Number of parallel workers (default: 4)")
+    parser.add_argument("--dry-run", action="store_true", help="Show what would be cloned without actually cloning")
+
+    args = parser.parse_args()
+
+    # Setup paths
+    repos_file = Path(args.file)
+    output_dir = Path(args.output)
+
+    # Read repositories
+    repos = read_repos(repos_file)
+    print(f"Found {len(repos)} repositories to clone")
+
+    if args.dry_run:
+        print("\nDry run - would clone:")
+        for repo in repos:
+            if validate_repo_format(repo):
+                user, repo_name = repo.split("/")
+                target = output_dir / user / repo_name
+                status = "EXISTS" if target.exists() else "NEW"
+                print(f"  [{status}] {repo} -> {target}")
+            else:
+                print(f"  [INVALID] {repo}")
+        return
+
+    # Clone repositories in parallel
+    successful = 0
+    failed = 0
+    skipped = 0
+
+    print(f"\nCloning with {args.workers} parallel workers to {output_dir.absolute()}")
+    print("-" * 60)
+
+    with ThreadPoolExecutor(max_workers=args.workers) as executor:
+        # Submit all clone tasks
+        future_to_repo = {executor.submit(clone_repo, repo, output_dir): repo for repo in repos}
+
+        # Process completed tasks
+        for future in as_completed(future_to_repo):
+            repo = future_to_repo[future]
+            try:
+                repo_name, success, message = future.result()
+
+                if success:
+                    if "Already exists" in message:
+                        skipped += 1
+                        print(f"⏭️  {repo}: {message}")
+                    else:
+                        successful += 1
+                        print(f"✅ {repo}: {message}")
+                else:
+                    failed += 1
+                    print(f"❌ {repo}: {message}")
+
+            except Exception as e:
+                failed += 1
+                print(f"❌ {repo}: Unexpected error: {str(e)}")
+
+    # Summary
+    print("-" * 60)
+    print(f"\nSummary:")
+    print(f"  ✅ Successfully cloned: {successful}")
+    print(f"  ⏭️  Already existed: {skipped}")
+    print(f"  ❌ Failed: {failed}")
+    print(f"  📊 Total: {len(repos)}")
+
+
+if __name__ == "__main__":
+    main()

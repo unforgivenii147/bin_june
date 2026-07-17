@@ -5,7 +5,6 @@ import base64
 import json
 import sqlite3
 import sys
-from functools import partial
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 

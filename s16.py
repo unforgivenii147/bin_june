@@ -1,8 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 import sys
 from collections import deque
-from collections.abc import Callable, Iterable
-from os import scandir as os_scandir
+from collections.abc import Callable
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})

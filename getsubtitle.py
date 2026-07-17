@@ -6,13 +6,10 @@ Advanced script to download English subtitles with multiple providers.
 """
 
 import logging
-import os
 import sys
 from pathlib import Path
 import babelfish
 from subliminal import download_best_subtitles, save_subtitles
-from subliminal.core import ProviderPool
-from subliminal.providers.opensubtitles import OpenSubtitlesProvider
 from subliminal.video import scan_video
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")

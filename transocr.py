@@ -52,7 +52,7 @@ def read_image_ocr(path: Path) -> str:
         raise RuntimeError(f"OCR failed for {path}: {e}") from e
 
 
-def chunk_text(text: str, size: int = CHUNK_SIZE) -> list[str]:
+def chunk_text(text: str, size: int = 32768) -> list[str]:
     return [text[i : i + size] for i in range(0, len(text), size)]
 
 

@@ -4,7 +4,6 @@ import os
 import subprocess
 import sys
 from collections import deque
-from os import scandir as os_scandir
 from pathlib import Path
 from typing import List, Optional, Tuple
 

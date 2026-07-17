@@ -6,9 +6,8 @@ Skips symlinks and processes files recursively in the current directory.
 
 import sys
 from collections import deque
-from collections.abc import Callable, Iterable
+from collections.abc import Callable
 from gzip import compress as gzip_compress
-from os import scandir as os_scandir
 from pathlib import Path
 from typing import Tuple
 

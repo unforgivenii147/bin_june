@@ -1,50 +1,113 @@
 #!/data/data/com.termux/files/usr/bin/env python
-
 import sys
-import os
+from collections import deque
 from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import pytesseract
+
 from PIL import Image
+from pytesseract import image_to_string
 
-os.environ['TESSDATA_PREFIX'] = str(Path.home() / '.local/share/tessdata_best')
 
-def extract_text(image_path):
+from collections.abc import Callable
+from pathlib import Path
+
+
+def mpf3(process_function: Callable, files: list[Path], **kwargs):
+    from joblib import Parallel, delayed
+
+    file_strings = [str(f) for f in files]
+    return Parallel(n_jobs=2)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
+
+
+def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
+    """Memory-efficient directory walker."""
+    path = Path(path)
+    skip_dirs = {".git", "__pycache__", "node_modules"}
+    queue = deque([path])
+    files = []
+
+    while queue:
+        current = queue.popleft()
+        try:
+            for item in current.iterdir():
+                if item.is_symlink():
+                    continue
+                if item.is_dir() and item.name not in skip_dirs:
+                    queue.append(item)
+                elif item.is_file() and (ext is None or item.suffix.lower() in ext):
+                    files.append(item)
+        except (PermissionError, OSError, FileNotFoundError):
+            continue
+    return files
+
+
+def extract_text(image_path: Path) -> str:
+    """Extract text with explicit resource cleanup."""
     try:
-        text = pytesseract.image_to_string(image_path, lang='eng')
-        output_path = image_path.with_suffix('.txt')
-        output_path.write_text(text, encoding='utf-8')
-        return f"✓ {image_path.name}"
-    except Exception as e:
-        return f"✗ {image_path.name}: {e}"
+        with Image.open(image_path) as img:
+            # Optional: convert to grayscale to save some memory
+            if img.mode not in ("L", "RGB"):
+                img = img.convert("RGB")
 
-def process_images(paths=None):
-    if not paths:
-        paths = [Path.cwd()]
+            result = image_to_string(img, lang="eng", config="--oem 1 --psm 6")
+
+        print("*" * 40)
+        print(result.strip() or "[No text detected]")
+        return result.strip()
+
+    except Exception as e:
+        print(f"Error processing {image_path.name}: {e}")
+        return ""
+
+
+def process_file(path: Path) -> None:
+    """Process single file with minimal memory footprint."""
+    path = Path(path)
+    txtfile = path.with_suffix(".txt")
+
+    if txtfile.exists():
+        print(f"✓ {path.name} already processed")
+        return
+
+    print(f"→ Processing {path.name}")
+    text = extract_text(path)
+
+    if text and len(text) > 5:  # reasonable threshold
+        try:
+            txtfile.write_text(text, encoding="utf-8")
+            print(f"✓ Saved {txtfile.name}")
+        except Exception as e:
+            print(f"✗ Failed to write {txtfile.name}: {e}")
     else:
-        paths = [Path(p) for p in paths]
-    
-    image_extensions = {'.png', '.jpg', '.jpeg', '.bmp', '.tiff', '.tif', '.webp'}
-    image_files = []
-    
-    for path in paths:
-        if path.is_file() and path.suffix.lower() in image_extensions:
-            image_files.append(path)
-        elif path.is_dir():
-            image_files.extend(path.rglob('*'))
-    
-    image_files = [f for f in image_files if f.is_file() and f.suffix.lower() in image_extensions]
-    
-    if not image_files:
+        print(f"⚠ No significant text in {path.name}")
+
+
+def main() -> None:
+    cwd = Path.cwd()
+    args = sys.argv[1:]
+
+    # Get files
+    if args:
+        files = [Path(p) for p in args if Path(p).is_file()]
+    else:
+        print("Scanning directory for images...")
+        files = get_files(cwd, ext=[".jpg", ".jpeg", ".png", ".tiff", ".bmp", ".webp"])
+
+    if not files:
         print("No image files found.")
         return
-    
-    print(f"Processing {len(image_files)} image(s)...\n")
-    
-    with ThreadPoolExecutor(max_workers=4) as executor:
-        futures = {executor.submit(extract_text, img): img for img in image_files}
-        for future in as_completed(futures):
-            print(future.result())
 
-if __name__ == '__main__':
-    process_images(sys.argv[1:] if len(sys.argv) > 1 else None)
+    print(f"Found {len(files)} image(s). Starting OCR...\n")
+
+    # === Critical for Termux: Low concurrency ===
+    # Most Android devices struggle with >2-3 heavy OCR processes
+    max_workers = 2
+
+    if len(files) == 1:
+        process_file(files[0])
+    else:
+        print(f"Using {max_workers} worker(s) for memory safety...")
+        mpf3(process_file, files)
+
+
+if __name__ == "__main__":
+    main()

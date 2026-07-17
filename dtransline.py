@@ -10,7 +10,6 @@ Optimized for Python 3.12.
 import argparse
 import logging
 import multiprocessing as mp
-import sys
 import time
 from pathlib import Path
 from typing import Final

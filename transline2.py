@@ -11,7 +11,6 @@ import re
 import shutil
 import sys
 import tempfile
-from collections.abc import Iterable
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Final

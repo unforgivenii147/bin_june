@@ -2,7 +2,6 @@
 import os
 import sys
 from collections import defaultdict, deque
-from os import scandir as os_scandir
 from pathlib import Path
 
 from ppdeep import hash_from_file

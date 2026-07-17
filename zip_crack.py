@@ -6,7 +6,7 @@ import multiprocessing
 import sys
 import time
 import zipfile
-from collections.abc import Generator, Iterable
+from collections.abc import Generator
 from dataclasses import dataclass, field
 from itertools import islice
 from pathlib import Path

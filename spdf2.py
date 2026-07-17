@@ -4,9 +4,8 @@ import sys
 from collections import deque
 from collections.abc import Callable, Iterable
 from multiprocessing import get_context
-from os import scandir as os_scandir
 from pathlib import Path
-from typing import Any, ParamSpec, TypeVar
+from typing import Any
 
 MAX_WORKERS = 4
 

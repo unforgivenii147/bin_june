@@ -3,9 +3,8 @@ import mmap
 import re
 import tokenize
 from collections import deque
-from collections.abc import Callable, Iterable
+from collections.abc import Callable
 from mmap import mmap
-from os import scandir as os_scandir
 from pathlib import Path
 
 

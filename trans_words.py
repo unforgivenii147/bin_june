@@ -25,7 +25,7 @@ logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
 
-def chunk_file(file_path: Path, size: int = CHUNK_SIZE) -> list[tuple[int, int, str]]:
+def chunk_file(file_path: Path, size: int = 32768) -> list[tuple[int, int, str]]:
     chunks: list[tuple[int, int, str]] = []
     current_chunk: list[str] = []
     current_size = 0

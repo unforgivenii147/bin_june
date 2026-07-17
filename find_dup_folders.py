@@ -59,7 +59,7 @@ def hash_folder(folder_path: Path) -> str:
         hasher.update(str(rel).encode("utf-8"))
         try:
             with file.open("rb") as f:
-                while chunk := f.read(32768):
+                while chunk := f.read(CHUNK_SIZE):
                     hasher.update(chunk)
         except OSError:
             continue

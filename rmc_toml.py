@@ -6,12 +6,11 @@ TOML Comment Remover - Removes comments from TOML files using parallel processin
 Supports processing multiple files/directories recursively.
 """
 
-import re
 import sys
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

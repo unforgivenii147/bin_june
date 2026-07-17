@@ -1,12 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-import argparse
-import os
 import sys
 from collections import deque
-from collections.abc import Callable, Iterable
-from concurrent.futures import ProcessPoolExecutor
-from os import scandir as os_scandir
 from pathlib import Path
 
 from loguru import logger

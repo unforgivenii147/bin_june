@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 import ast
-import sys
 from collections import deque
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path

@@ -8,7 +8,6 @@ Handles edge cases like try-except blocks and validates output.
 """
 
 import ast
-import re
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Optional, Tuple

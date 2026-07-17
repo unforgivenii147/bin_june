@@ -3,7 +3,7 @@
 """
 Recursive file compression/decompression tool using Zstandard.
 Compresses files in current directory recursively, skipping certain extensions and .git folders.
-Uses Path.walk() for memory-efficient traversal (Python 3.13+).
+Uses Path.walk() for memory-efficient traversal.
 """
 
 import argparse

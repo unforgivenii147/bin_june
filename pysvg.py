@@ -1,8 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 from collections import deque
-from collections.abc import Callable, Iterable
-from os import scandir as os_scandir
+from collections.abc import Callable
 from pathlib import Path
 
 

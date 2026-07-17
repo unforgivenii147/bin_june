@@ -13,9 +13,8 @@ A simple, fast command-line calculator with support for:
 import argparse
 import math
 import re
-import sys
 from decimal import Decimal, getcontext
-from typing import Any, Callable, Dict, Union
+from typing import Union
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 getcontext().prec = 28

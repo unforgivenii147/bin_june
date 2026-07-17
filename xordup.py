@@ -2,7 +2,7 @@
 
 import os
 import sys
-from collections.abc import Callable, Iterable
+from collections.abc import Callable
 from pathlib import Path
 
 from xorhash import get_xorhash

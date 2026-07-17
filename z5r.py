@@ -9,12 +9,10 @@ Optimized for Python 3.12 with streaming and parallel processing.
 import argparse
 import multiprocessing as mp
 import shutil
-import sys
 import tarfile
 import time
-from collections.abc import Generator
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Final, Optional
 import zstandard as zstd

@@ -23,7 +23,7 @@ def compress_file(src_path: Path, compression_level=lz4.frame.COMPRESSIONLEVEL_M
             compressor = lz4.frame.LZ4FrameCompressor(compression_level=compression_level)
             if file_size > CHUNK_THRESHOLD:
                 while True:
-                    chunk = f_in.read(32768)
+                    chunk = f_in.read(CHUNK_SIZE)
                     if not chunk:
                         break
                     f_out.write(compressor.compress_chunk(chunk))

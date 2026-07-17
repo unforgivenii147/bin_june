@@ -19,7 +19,7 @@ BUFFER_SIZE = 500
 MAX_CHUNK_SIZE = 4999
 
 
-def find_chunk_boundary(text: str, start_pos: int, target_size: int = TARGET_CHUNK_SIZE) -> int:
+def find_chunk_boundary(text: str, start_pos: int, target_size: int = TARGET_32768) -> int:
     end_pos = min(start_pos + target_size, len(text))
     if end_pos >= len(text):
         return len(text)
@@ -46,7 +46,7 @@ def split_text_into_chunks(text: str) -> List[str]:
         chunk = text[pos:chunk_end].strip()
         if chunk:
             if len(chunk) > MAX_CHUNK_SIZE:
-                chunk = chunk[:MAX_CHUNK_SIZE].rsplit(" ", 1)[0]
+                chunk = chunk[:MAX_32768].rsplit(" ", 1)[0]
             chunks.append(chunk)
         pos = chunk_end
     return chunks

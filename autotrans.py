@@ -17,7 +17,6 @@ DIRECTORY: Final[str] = "."
 CHUNK_SIZE: Final[int] = 2000
 MAX_WORKERS_FILE: Final[int] = 6
 MAX_WORKERS_CHUNK: Final[int] = 8
-ZERO_DOT_THREE: Final[float] = 0.3
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s", datefmt="%H:%M:%S")
 logger = logging.getLogger(__name__)
 try:
@@ -39,7 +38,7 @@ def is_binary(path: Path) -> bool:
             return True
         text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
         non_text_count = sum((1 for b in chunk if b not in text_chars))
-        return non_text_count / len(chunk) > ZERO_DOT_THREE
+        return non_text_count / len(chunk) > 0.3
     except Exception:
         return True
 
@@ -73,7 +72,7 @@ def translate_file(path: Path) -> None:
         logger.info("File is already English: %s", path.name)
         return
     logger.info("Non-English content detected in: %s", path.name)
-    chunks = split_into_chunks(content, CHUNK_SIZE)
+    chunks = split_into_chunks(content, 32768)
     logger.info("Total chunks: %d. Translating in parallel...", len(chunks))
     with ThreadPoolExecutor(max_workers=MAX_WORKERS_CHUNK) as executor:
         translated_chunks = list(executor.map(translate_chunk, chunks))

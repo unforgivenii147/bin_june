@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-
 import argparse
 import fnmatch
 import operator
@@ -8,10 +7,10 @@ import re
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Iterable
+from typing import Generator
 
 IGNORED_DIRS = {".git", ".hg", ".svn", "node_modules", "__pycache__", ".ruff_cache", ".pytest_cache", ".mypy_cache"}
-BINARY_CHUNK = 32768
+BINARY_CHUNK = 8192
 DEFAULT_THREADS = 4
 ANSI_BOLD = "\x1b[1m"
 ANSI_RESET = "\x1b[0m"
@@ -25,26 +24,24 @@ def get_files(
     include_globs: list[str],
     exclude_globs: list[str],
     search_hidden: bool,
-    follow_symlinks: bool,
     max_size: int,
-) -> list[Path]:
-    candidates = []
+) -> Generator[Path, None, None]:
     for p_str in paths:
         path = Path(p_str)
-        if path.is_file():
+        if path.is_file() and not path.is_symlink():
             if not search_hidden and path.name.startswith("."):
                 continue
             if max_size and path.stat().st_size > max_size:
                 continue
-            if include_globs and (not matches_any_glob(path, include_globs)):
+            if include_globs and not matches_any_glob(path, include_globs):
                 continue
             if exclude_globs and matches_any_glob(path, exclude_globs):
                 continue
-            candidates.append(path)
+            yield path
             continue
-        if not path.is_dir():
+        if not path.is_dir() or path.is_symlink():
             continue
-        for root, dirs, walk_files in path.walk(top_down=True, follow_symlinks=follow_symlinks):
+        for root, dirs, walk_files in path.walk(top_down=True, follow_symlinks=False):
             if not search_hidden:
                 dirs[:] = [d for d in dirs if not d.startswith(".")]
             dirs[:] = [d for d in dirs if d not in IGNORED_DIRS]
@@ -52,17 +49,18 @@ def get_files(
                 if not search_hidden and f.startswith("."):
                     continue
                 file_path = root / f
+                if file_path.is_symlink():
+                    continue
                 try:
                     if max_size and file_path.stat().st_size > max_size:
                         continue
                 except OSError:
                     continue
-                if include_globs and (not matches_any_glob(file_path, include_globs)):
+                if include_globs and not matches_any_glob(file_path, include_globs):
                     continue
                 if exclude_globs and matches_any_glob(file_path, exclude_globs):
                     continue
-                candidates.append(file_path)
-    return candidates
+                yield file_path
 
 
 def is_binary(path: Path) -> bool:
@@ -87,14 +85,14 @@ def colorize_line(line: str, spans: list[tuple[int, int]]) -> str:
     return "".join(chars)
 
 
-def matches_any_glob(path: Path, patterns: Iterable[str]) -> bool:
+def matches_any_glob(path: Path, patterns: list[str]) -> bool:
     basename = path.name
     path_str = str(path)
-    return any((fnmatch.fnmatch(path_str, p) or fnmatch.fnmatch(basename, p) for p in patterns))
+    return any(fnmatch.fnmatch(path_str, p) or fnmatch.fnmatch(basename, p) for p in patterns)
 
 
 def search_file_text_mode(
-    path: Path, cwd: Path, regex: re.Pattern | None, fixed: str, ignore_case: bool, max_matches: int | None = None
+    path: Path, cwd: Path, regex: re.Pattern | None, fixed: str, ignore_case: bool
 ) -> tuple[str, list[tuple[int, str, list[tuple[int, int]]]]]:
     matches = []
     try:
@@ -113,8 +111,6 @@ def search_file_text_mode(
                         start = idx + max(1, len(needle))
                 if spans:
                     matches.append((lineno, line, spans))
-                    if max_matches and len(matches) >= max_matches:
-                        break
     except Exception:
         pass
     try:
@@ -139,7 +135,6 @@ def build_argparser() -> argparse.ArgumentParser:
     p.add_argument("-x", "--exclude", action="append", help="Exclude glob; can be repeated")
     p.add_argument("-C", "--no-color", action="store_true", help="Disable colorized output")
     p.add_argument("-m", "--max-filesize", type=int, default=10000000, help="Skip files larger than size (bytes)")
-    p.add_argument("-F-sym", "--follow", action="store_true", help="Follow symlinks")
     p.add_argument("paths", nargs="*", default=["."], help="Files or directories to search (default: .)")
     return p
 
@@ -166,11 +161,8 @@ def main(argv: list[str] | None = None) -> int:
         include_globs=args.glob or [],
         exclude_globs=args.exclude or [],
         search_hidden=args.hidden,
-        follow_symlinks=args.follow,
         max_size=args.max_filesize,
     )
-    if not candidates:
-        return 1
     color = not args.no_color and sys.stdout.isatty()
     any_match = False
 
@@ -189,16 +181,15 @@ def main(argv: list[str] | None = None) -> int:
                 any_match = True
                 if args.files_with_matches:
                     print(path_str)
-                    continue
                 elif args.count:
                     print(f"{path_str}:{len(matches)}")
-                    continue
-                for lineno, line, spans in matches:
-                    out_line = colorize_line(line, spans) if color else line
-                    if args.line_number:
-                        print(f"{ANSI_CYAN}{path_str}{ANSI_RESET}:{lineno}:{out_line}")
-                    else:
-                        print(f"{ANSI_CYAN}{path_str}{ANSI_RESET}:{out_line}")
+                else:
+                    for lineno, line, spans in matches:
+                        out_line = colorize_line(line, spans) if color else line
+                        if args.line_number:
+                            print(f"{ANSI_CYAN}{path_str}{ANSI_RESET}:{lineno}:{out_line}")
+                        else:
+                            print(f"{ANSI_CYAN}{path_str}{ANSI_RESET}:{out_line}")
         except KeyboardInterrupt:
             print("\nSearch cancelled.", file=sys.stderr)
             return 130

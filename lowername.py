@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 import sys
-from collections.abc import Callable, Iterable
+from collections.abc import Callable
 from functools import partial
 from pathlib import Path
 
