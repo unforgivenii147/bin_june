@@ -157,7 +157,7 @@ def main() -> None:
             continue
         label, handler = handler_info
         comp_size = item.stat().st_size
-        uncomp_size, err = handler(item)
+        uncomp_size, _err = handler(item)
         total_files += 1
         grand_comp += comp_size
         if uncomp_size is not None:

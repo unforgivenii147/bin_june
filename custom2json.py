@@ -47,7 +47,7 @@ def parse_magic_file(filepath: str, encoding="latin-1"):
             if current_mimetype not in result:
                 result[current_mimetype] = []
             continue
-        if line.startswith("#") or line.startswith("!"):
+        if line.startswith(("#", "!")):
             continue
         if current_mimetype is None:
             print(f"Warning: rule outside section: {line!r}", file=sys.stderr)

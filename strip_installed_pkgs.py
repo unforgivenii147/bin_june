@@ -573,7 +573,7 @@ def strip_installed_from_requirements(fname: str) -> None:
     lines = read_requirements(fname)
     new_lines = [line for line in lines if line not in installed]
     new_lines = [line for line in new_lines if line not in STDLIB]
-    new_lines = sorted(list(set(new_lines)))
+    new_lines = sorted(set(new_lines))
     Path(fname).write_text("\n".join(new_lines) + "\n", encoding="utf-8")
     removed = len(lines) - len(new_lines)
     print(f"Removed {removed} packages")

@@ -93,10 +93,9 @@ class GoogleDriveSync:
         headers["Authorization"] = f"Bearer {self.access_token}"
         kwargs["headers"] = headers
         response = requests.request(method, url, **kwargs)
-        if response.status_code == 401:
-            if self.refresh_access_token():
-                headers["Authorization"] = f"Bearer {self.access_token}"
-                response = requests.request(method, url, **kwargs)
+        if response.status_code == 401 and self.refresh_access_token():
+            headers["Authorization"] = f"Bearer {self.access_token}"
+            response = requests.request(method, url, **kwargs)
         return response
 
     def list_files(self, folder_id="root", page_token=None):
@@ -178,11 +177,10 @@ class GoogleDriveSync:
                         if local_mtime >= remote_time:
                             should_download = False
                             print(f"{indent}  ⏭ Up to date: {item_name}")
-                if should_download:
-                    if self.download_file(item_id, item_name, local_path):
-                        if remote_modified:
-                            mod_time = datetime.fromisoformat(remote_modified.replace("Z", "+00:00")).timestamp()
-                            os.utime(local_path, (mod_time, mod_time))
+                if should_download and self.download_file(item_id, item_name, local_path):
+                    if remote_modified:
+                        mod_time = datetime.fromisoformat(remote_modified.replace("Z", "+00:00")).timestamp()
+                        os.utime(local_path, (mod_time, mod_time))
 
     def sanitize_filename(self, filename):
         invalid_chars = '<>:"/\\|?*'

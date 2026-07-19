@@ -80,7 +80,7 @@ def process_path(path: Path) -> tuple[str, int]:
     return (str(path), 0)
 
 
-def find_and_remove_files(root_dir: Path = None) -> dict:
+def find_and_remove_files(root_dir: Path | None = None) -> dict:
     if root_dir is None:
         root_dir = Path.cwd()
     else:

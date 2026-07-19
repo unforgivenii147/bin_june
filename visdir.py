@@ -11,7 +11,7 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 cwd = os.getcwd()
 subdir_sizes = {}
 total_size = 0
-for dirpath, dirnames, filenames in os.walk(cwd):
+for dirpath, _dirnames, filenames in os.walk(cwd):
     dir_size = 0
     for f in filenames:
         path = os.path.join(dirpath, f)

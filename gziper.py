@@ -73,7 +73,7 @@ def compress_file(file_path: Path) -> Tuple[Path, bool, int, int, str]:
         return (file_path, False, 0, 0, str(e))
 
 
-def find_files_to_compress(directories: List[Path], skip_extensions: set = None) -> List[Path]:
+def find_files_to_compress(directories: List[Path], skip_extensions: set | None = None) -> List[Path]:
     """
     Find all files recursively in given directories that should be compressed.
 

@@ -78,7 +78,7 @@ def phash_cv2(img: np.ndarray, hash_size: int = HASH_SIZE) -> str:
 def hamming_distance(hash1: str, hash2: str) -> int:
     if hash1 is None or hash2 is None:
         return float("inf")
-    return sum(c1 != c2 for c1, c2 in zip(hash1, hash2))
+    return sum(c1 != c2 for c1, c2 in zip(hash1, hash2, strict=False))
 
 
 def compute_hash(file_path: Path) -> Tuple[str, str | None]:

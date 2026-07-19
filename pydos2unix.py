@@ -54,9 +54,7 @@ def is_text_file(file_path: Path) -> bool:
             if b"\x00" in chunk:
                 return False
             text_characters = bytearray({7, 8, 9, 10, 12, 13, 27} | set(range(32, 256)))
-            if not all(byte in text_characters for byte in chunk):
-                return False
-            return True
+            return all(byte in text_characters for byte in chunk)
     except OSError:
         return False
 

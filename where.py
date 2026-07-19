@@ -96,15 +96,11 @@ class ChangeHandler(FileSystemEventHandler):
         if src_path.exists() and src_path.is_file():
             if self.allowed_exts is not None and not file_matches_extensions(src_path, self.allowed_exts):
                 return False
-            if self.excluded_exts is not None and file_matches_exclude(src_path, self.excluded_exts):
-                return False
-            return True
+            return not (self.excluded_exts is not None and file_matches_exclude(src_path, self.excluded_exts))
         elif not src_path.exists():
             if self.allowed_exts is not None and not file_matches_extensions(src_path, self.allowed_exts):
                 return False
-            if self.excluded_exts is not None and file_matches_exclude(src_path, self.excluded_exts):
-                return False
-            return True
+            return not (self.excluded_exts is not None and file_matches_exclude(src_path, self.excluded_exts))
         return False
 
     def _queue(self, src_path: Path, reason: str) -> None:

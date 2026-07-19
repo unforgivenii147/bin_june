@@ -80,9 +80,8 @@ def extract_prefix_comments_and_shebang(source: str) -> Tuple[str, str]:
                 "coding" in low
                 or "encoding" in low
                 or "type:" in low
-                or low.startswith("# type")
+                or low.startswith(("# type", "# fmt"))
                 or "fmt:" in low
-                or low.startswith("# fmt")
             ):
                 prefix_lines.append(line)
                 continue
@@ -140,9 +139,7 @@ def process_file(path: Path) -> Tuple[Path, str | None]:
 def should_skip_path(p: Path) -> bool:
     parts = {p_part.lower() for p_part in p.parts}
     skip_indicators = {".git", "__pycache__", "venv", ".venv", "env", ".env", "node_modules"}
-    if parts & skip_indicators:
-        return True
-    return False
+    return bool(parts & skip_indicators)
 
 
 def collect_py_files(root: Path) -> List[Path]:

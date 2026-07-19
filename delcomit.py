@@ -36,9 +36,8 @@ def delete_commits_older_than_week(repo_path: str = ".", branch: str = "master")
         commits_to_delete = []
         for commit in repo.iter_commits(f"{branch}"):
             commit_date = datetime.fromtimestamp(commit.committed_date)
-            if commit_date < one_week_ago:
-                if commit not in repo.iter_commits(upstream):
-                    commits_to_delete.append(commit)
+            if commit_date < one_week_ago and commit not in repo.iter_commits(upstream):
+                commits_to_delete.append(commit)
         if not commits_to_delete:
             print("No old commits found to delete")
             return True
@@ -130,10 +129,9 @@ def delete_commits_with_rebase(repo_path: str = ".", branch: str = "master", day
         repo = Repo(repo_path)
         origin = repo.remotes.origin
         upstream = f"origin/{branch}"
-        if upstream not in repo.refs:
-            if branch == "master" and "origin/main" in repo.refs:
-                upstream = "origin/main"
-                branch = "main"
+        if upstream not in repo.refs and branch == "master" and "origin/main" in repo.refs:
+            upstream = "origin/main"
+            branch = "main"
         if branch not in repo.branches:
             repo.create_head(branch, repo.refs[upstream])
         repo.head.reference = repo.branches[branch]

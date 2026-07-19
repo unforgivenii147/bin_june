@@ -109,7 +109,7 @@ Also install tesseract: https://github.com/UB-Mannheim/tesseract/wiki""")
         except Exception as e:
             return path, is_file, f"error: {e}"
 
-    def create_structure(self, base_dir: str = ".", num_workers: int = None) -> None:
+    def create_structure(self, base_dir: str = ".", num_workers: int | None = None) -> None:
         if not self.items_to_create:
             print("No items to create. Parse tree first.")
             return

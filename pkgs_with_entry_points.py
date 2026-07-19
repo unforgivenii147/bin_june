@@ -127,14 +127,14 @@ def parse_entry_points(entry_points_file: Path) -> Dict[str, List[str]]:
         try:
             config.read_string(content)
             if config.has_section("console_scripts"):
-                for key, value in config.items("console_scripts"):
+                for key, _value in config.items("console_scripts"):
                     scripts["console_scripts"].append(key)
             if config.has_section("gui_scripts"):
-                for key, value in config.items("gui_scripts"):
+                for key, _value in config.items("gui_scripts"):
                     scripts["gui_scripts"].append(key)
             for section in config.sections():
                 if section not in ["console_scripts", "gui_scripts"]:
-                    for key, value in config.items(section):
+                    for key, _value in config.items(section):
                         scripts["other"].append(f"{section}:{key}")
         except:
             lines = content.split("\n")

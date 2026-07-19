@@ -54,7 +54,7 @@ def find_repeated_definitions(file_paths):
 def process_file(file_path, repeated_definitions, move) -> None:
     path = Path(path)
     tree = parse_python_file(file_path)
-    functions, classes, constants = extract_definitions(tree)
+    _functions, _classes, _constants = extract_definitions(tree)
     utils_dir = "utils"
     os.makedirs(utils_dir, exist_ok=True)
 

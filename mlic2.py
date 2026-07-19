@@ -172,7 +172,7 @@ def find_multiline_blocks(text: str, min_lines: int = 3) -> Dict[str, List[Tuple
 def scan_file(filepath: Path, min_lines: int = 3) -> Dict[str, List[Tuple[Path, int, str]]]:
     if not is_text_file(filepath):
         return {}
-    filepath, lines, text = read_file_content(filepath)
+    filepath, _lines, text = read_file_content(filepath)
     if not text:
         return {}
     blocks = find_multiline_blocks(text, min_lines)
@@ -183,7 +183,7 @@ def scan_file(filepath: Path, min_lines: int = 3) -> Dict[str, List[Tuple[Path, 
 
 
 def collect_multiline_repeats(
-    root: Path, min_lines: int = 3, num_workers: int = None
+    root: Path, min_lines: int = 3, num_workers: int | None = None
 ) -> Dict[str, List[Tuple[Path, int, str]]]:
     if num_workers is None:
         num_workers = mp.cpu_count()

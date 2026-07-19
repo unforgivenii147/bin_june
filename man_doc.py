@@ -28,26 +28,25 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 continue
             if item.is_dir() and item.name not in skip_dirs:
                 queue.append(item)
-            elif item.is_file():
-                if (
-                    ext is None
-                    or item.suffix in ext
-                    or (
-                        item.suffixes[-2:] == [".1", ".gz"]
-                        or item.suffixes[-2:] == [".3", ".gz"]
-                        or item.suffixes[-2:] == [".4", ".gz"]
-                        or (item.suffixes[-2:] == [".5", ".gz"])
-                        or (item.suffixes[-2:] == [".7", ".gz"])
-                        or (item.suffixes[-2:] == [".8", ".gz"])
-                        or (item.suffixes[-2:] == [".3am", ".gz"])
-                        or (item.suffixes[-2:] == [".3form", ".gz"])
-                        or (item.suffixes[-2:] == [".3menu", ".gz"])
-                        or (item.suffixes[-2:] == [".3ncurses", ".gz"])
-                        or (item.suffixes[-2:] == [".3readline", ".gz"])
-                        or (item.suffixes[-2:] == [".3t", ".gz"])
-                    )
-                ):
-                    files.append(item)
+            elif item.is_file() and (
+                ext is None
+                or item.suffix in ext
+                or (
+                    item.suffixes[-2:] == [".1", ".gz"]
+                    or item.suffixes[-2:] == [".3", ".gz"]
+                    or item.suffixes[-2:] == [".4", ".gz"]
+                    or (item.suffixes[-2:] == [".5", ".gz"])
+                    or (item.suffixes[-2:] == [".7", ".gz"])
+                    or (item.suffixes[-2:] == [".8", ".gz"])
+                    or (item.suffixes[-2:] == [".3am", ".gz"])
+                    or (item.suffixes[-2:] == [".3form", ".gz"])
+                    or (item.suffixes[-2:] == [".3menu", ".gz"])
+                    or (item.suffixes[-2:] == [".3ncurses", ".gz"])
+                    or (item.suffixes[-2:] == [".3readline", ".gz"])
+                    or (item.suffixes[-2:] == [".3t", ".gz"])
+                )
+            ):
+                files.append(item)
     return files
 
 

@@ -334,9 +334,8 @@ def get_stdlib_names() -> Dict[str, Set[str]]:
         "time": {"time", "sleep", "ctime", "localtime", "gmtime", "strftime", "strptime"},
     }
     for module in STDLIB_MODULES:
-        if "." not in module:
-            if module not in stdlib_names:
-                stdlib_names[module] = set()
+        if "." not in module and module not in stdlib_names:
+            stdlib_names[module] = set()
     return stdlib_names
 
 
@@ -416,7 +415,7 @@ def find_missing_imports(filepath: str, stdlib_names: Dict[str, Set[str]]) -> Li
     return missing
 
 
-def scan_directory(root_dir: str, exclude_dirs: Set[str] = None) -> Dict[str, List[Tuple[str, str]]]:
+def scan_directory(root_dir: str, exclude_dirs: Set[str] | None = None) -> Dict[str, List[Tuple[str, str]]]:
     if exclude_dirs is None:
         exclude_dirs = {
             ".git",

@@ -186,10 +186,7 @@ def is_already_compressed(data, sample_size=4096) -> bool:
         b"Rar!": "rar",
         b"7z\xbc\xaf'\x1c": "7z",
     }
-    for magic, name in magic_bytes.items():
-        if data.startswith(magic):
-            return True
-    return False
+    return any(data.startswith(magic) for magic, name in magic_bytes.items())
 
 
 def choose_algorithm(file_path: Path, data: bytes | None = None, file_size: int | None = None) -> dict[str, int | str]:
@@ -233,7 +230,7 @@ def compress_single_file(file_path, output_path=None, remove_original: bool = Fa
         compressed_data = compress_data(data, algo, level, is_large)
         if output_path is None:
             output_path = str(file_path) + f".{algo}"
-        elif output_path.endswith("/") or output_path.endswith("\\"):
+        elif output_path.endswith(("/", "\\")):
             output_path = Path(output_path) / (Path(file_path).name + f".{algo}")
         else:
             output_path = Path(output_path)

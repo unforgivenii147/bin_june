@@ -162,7 +162,7 @@ def _extract_header(lines: list[str]) -> tuple[list[str], list[str]]:
         if i == 0 and stripped.startswith("#!"):
             header.append(line)
             idx = i + 1
-        elif stripped.startswith("# -*-") or stripped.startswith("# coding"):
+        elif stripped.startswith(("# -*-", "# coding")):
             header.append(line)
             idx = i + 1
         else:

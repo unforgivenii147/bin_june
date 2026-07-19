@@ -111,7 +111,7 @@ def apply_2to3_fixes(file_path: str) -> Tuple[str, bool, str]:
                 original_lines = original_content.splitlines()
                 refactored_lines = refactored.splitlines()
                 changes = 0
-                for i, (orig, new) in enumerate(zip(original_lines, refactored_lines)):
+                for i, (orig, new) in enumerate(zip(original_lines, refactored_lines, strict=False)):
                     if orig != new:
                         changes += 1
                         diff_lines.append(f"  Line {i + 1}: {orig[:50]} -> {new[:50]}")
@@ -135,7 +135,7 @@ def apply_2to3_fixes(file_path: str) -> Tuple[str, bool, str]:
         return file_path, False, f"Unexpected error: {e!s}"
 
 
-def find_python_files(paths: List[str], extensions: List[str] = None) -> List[str]:
+def find_python_files(paths: List[str], extensions: List[str] | None = None) -> List[str]:
     if extensions is None:
         extensions = [".py"]
     python_files = []
@@ -192,7 +192,7 @@ def dry_run_file(file_path: str) -> Tuple[str, str, bool]:
                 original_lines = original_content.splitlines()
                 refactored_lines = refactored.splitlines()
                 diff = []
-                for i, (orig, new) in enumerate(zip(original_lines, refactored_lines)):
+                for _i, (orig, new) in enumerate(zip(original_lines, refactored_lines, strict=False)):
                     if orig != new:
                         diff.append(f"  - {orig[:80]}")
                         diff.append(f"  + {new[:80]}")

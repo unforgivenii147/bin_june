@@ -37,10 +37,7 @@ EXCLUDE_DIRS = {".git", "__pycache__", ".venv", "venv", ".env", "node_modules"}
 
 
 def should_exclude(path: Path) -> bool:
-    for part in path.parts:
-        if part in EXCLUDE_DIRS:
-            return True
-    return False
+    return any(part in EXCLUDE_DIRS for part in path.parts)
 
 
 def get_files_to_process(root_dir: Path, compress: bool) -> List[Path]:
@@ -52,9 +49,8 @@ def get_files_to_process(root_dir: Path, compress: bool) -> List[Path]:
                     files.append(file)
     else:
         for file in root_dir.rglob("*"):
-            if file.is_file() and not should_exclude(file):
-                if file.suffix.lower() == ".xz":
-                    files.append(file)
+            if file.is_file() and not should_exclude(file) and file.suffix.lower() == ".xz":
+                files.append(file)
     return sorted(files)
 
 

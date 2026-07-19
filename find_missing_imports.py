@@ -147,7 +147,7 @@ class ImportAnalyzer(ast.NodeVisitor):
         for target in node.targets:
             if isinstance(target, ast.Name):
                 self.assigned_names.add(target.id)
-            elif isinstance(target, ast.Tuple) or isinstance(target, ast.List):
+            elif isinstance(target, (ast.Tuple, ast.List)):
                 for elt in ast.walk(target):
                     if isinstance(elt, ast.Name):
                         self.assigned_names.add(elt.id)
@@ -457,7 +457,7 @@ def autofix_imports(filepath: Path, missing_imports: List[Tuple[str, int]]) -> b
     try:
         with open(filepath, encoding="utf-8") as f:
             lines = f.readlines()
-        unique_imports = sorted(set(imp[0] for imp in missing_imports))
+        unique_imports = sorted({imp[0] for imp in missing_imports})
         insert_idx = 0
         in_imports = True
         for i, line in enumerate(lines):

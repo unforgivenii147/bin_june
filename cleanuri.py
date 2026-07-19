@@ -26,7 +26,7 @@ DATA_URI_PATTERN = re.compile(
 
 def get_extension(mime: str) -> str:
     if mime:
-        if mime in MIME2EXT.keys():
+        if mime in MIME2EXT:
             return MIME2EXT.get(mime)[0]
         ext = mimetypes.guess_extension(mime)
         if ext:

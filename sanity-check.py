@@ -57,7 +57,7 @@ def runcmd(
 
 def get_installed_packages() -> list[str]:
     try:
-        ret, txt, _err = runcmd(["dpkg-query", "-W", "-f='${Package}\t${Status}\t${Version}\n'"], show_output=True)
+        _ret, txt, _err = runcmd(["dpkg-query", "-W", "-f='${Package}\t${Status}\t${Version}\n'"], show_output=True)
         return txt.splitlines()
     except:
         print(f"Error listing installed packages")
@@ -66,7 +66,7 @@ def get_installed_packages() -> list[str]:
 
 def check_package_health(package_name: str):
     try:
-        ret, txt, _err = runcmd(["dpkg", "-l", package_name], show_output=True)
+        _ret, txt, _err = runcmd(["dpkg", "-l", package_name], show_output=True)
         lines = txt.splitlines()
         for line in lines:
             if package_name in line:
@@ -80,7 +80,7 @@ def check_package_health(package_name: str):
 
 def check_for_updates() -> str:
     try:
-        res, txt, _err = runcmd(["apt-get", "-s", "upgrade"], show_output=True)
+        _res, txt, _err = runcmd(["apt-get", "-s", "upgrade"], show_output=True)
         return txt
     except:
         return f"Error checking for updates"

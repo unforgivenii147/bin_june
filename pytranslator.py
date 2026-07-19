@@ -91,9 +91,7 @@ def should_skip(text: str) -> bool:
         return True
     if any(token in clean.upper() for token in KNOWN_ENGLISH_TOKENS):
         return True
-    if not any(c.isalpha() for c in clean):
-        return True
-    return False
+    return bool(not any(c.isalpha() for c in clean))
 
 
 def is_non_english(text: str) -> bool:
@@ -128,15 +126,14 @@ def get_node_positions(tree: ast.AST) -> tuple[set[tuple[int, int]], set[tuple[i
             for arg in node.args:
                 if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
                     print_positions.add((arg.lineno, arg.col_offset))
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Module)):
-            if (
-                node.body
-                and isinstance(node.body[0], ast.Expr)
-                and isinstance(node.body[0].value, ast.Constant)
-                and isinstance(node.body[0].value.value, str)
-            ):
-                ds = node.body[0].value
-                docstring_positions.add((ds.lineno, ds.col_offset))
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Module)) and (
+            node.body
+            and isinstance(node.body[0], ast.Expr)
+            and isinstance(node.body[0].value, ast.Constant)
+            and isinstance(node.body[0].value.value, str)
+        ):
+            ds = node.body[0].value
+            docstring_positions.add((ds.lineno, ds.col_offset))
     return (print_positions, docstring_positions)
 
 

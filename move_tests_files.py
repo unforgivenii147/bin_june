@@ -64,7 +64,7 @@ def move_files_parallel(
             futures[future] = source_file, dest_file
         for future in as_completed(futures):
             source_file, dest_file = futures[future]
-            source_str, success, message = future.result()
+            _source_str, success, message = future.result()
             if success:
                 file_mapping[str(source_file)] = str(dest_file)
                 results.append((str(source_file), message))
@@ -90,8 +90,8 @@ def reverse_move(moved_files_log: Path) -> Tuple[dict, List[Tuple[str, str]]]:
                 future = executor.submit(move_file, moved_file, original_file)
                 futures[future] = moved_file, original_file
         for future in as_completed(futures):
-            source_file, dest_file = futures[future]
-            source_str, success, message = future.result()
+            source_file, _dest_file = futures[future]
+            _source_str, success, message = future.result()
             if success:
                 results.append((str(source_file), message))
                 print(f"✓ {message}")

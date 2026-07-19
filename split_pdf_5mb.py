@@ -54,7 +54,7 @@ def split_pdf_by_size(pdf_path: Path, output_dir: Path, max_size_mb: int = 5) ->
             f.write(current_buffer.getvalue())
 
 
-def process_pdfs(input_paths=None, output_dir: Path = None) -> None:
+def process_pdfs(input_paths=None, output_dir: Path | None = None) -> None:
     if output_dir is None:
         output_dir = Path.cwd() / "output"
 

@@ -4,13 +4,15 @@ Split text files into parts with character count between 4900-4990,
 respecting word and sentence boundaries.
 """
 
+from __future__ import annotations
+
 import argparse
-import re
-from pathlib import Path
-from concurrent.futures import ProcessPoolExecutor, as_completed
-import os
-from typing import List, Tuple
 import logging
+import os
+import re
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
+from typing import List, Tuple
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -182,11 +184,11 @@ def process_file(input_file: Path, output_dir: Path, min_chars: int, max_chars: 
     try:
         # Read file content
         try:
-            with open(input_file, "r", encoding="utf-8") as f:
+            with open(input_file, encoding="utf-8") as f:
                 content = f.read()
         except UnicodeDecodeError:
             # Try with different encoding if UTF-8 fails
-            with open(input_file, "r", encoding="latin-1") as f:
+            with open(input_file, encoding="latin-1") as f:
                 content = f.read()
 
         # Skip empty files
@@ -311,7 +313,7 @@ Examples:
         for future in as_completed(future_to_file):
             file_path = future_to_file[future]
             try:
-                result_file, num_parts = future.result()
+                _result_file, num_parts = future.result()
                 total_parts += num_parts
                 processed_files += 1
             except Exception as e:

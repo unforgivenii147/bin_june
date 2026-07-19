@@ -20,21 +20,20 @@ def get_removal_zones(source: str):
     replacements = []
 
     for node in ast.walk(tree):
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
-            if (
-                node.body
-                and isinstance(node.body[0], ast.Expr)
-                and isinstance(node.body[0].value, ast.Constant)
-                and isinstance(node.body[0].value.value, str)
-            ):
-                ds_node = node.body[0]
-                start_line, start_col = ds_node.lineno - 1, ds_node.col_offset
-                end_line, end_col = ds_node.end_lineno - 1, ds_node.end_col_offset
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and (
+            node.body
+            and isinstance(node.body[0], ast.Expr)
+            and isinstance(node.body[0].value, ast.Constant)
+            and isinstance(node.body[0].value.value, str)
+        ):
+            ds_node = node.body[0]
+            start_line, start_col = ds_node.lineno - 1, ds_node.col_offset
+            end_line, end_col = ds_node.end_lineno - 1, ds_node.end_col_offset
 
-                if len(node.body) == 1:
-                    replacements.append(((start_line, start_col), "pass"))
-                else:
-                    zones.append((start_line, start_col, end_line, end_col))
+            if len(node.body) == 1:
+                replacements.append(((start_line, start_col), "pass"))
+            else:
+                zones.append((start_line, start_col, end_line, end_col))
 
     tokens = tokenize.generate_tokens(io.StringIO(source).readline)
     for tok in tokens:

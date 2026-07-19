@@ -50,7 +50,7 @@ def main() -> None:
     print(f"Found {len(subtitle_streams)} subtitle streams.")
     try:
         extracted_files = []
-        for i, stream_info in enumerate(subtitle_streams):
+        for _i, stream_info in enumerate(subtitle_streams):
             index = stream_info["index"]
             lang = stream_info["language"]
             title = stream_info["title"]

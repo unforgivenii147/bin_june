@@ -406,7 +406,7 @@ def decompress_one(path_str: str) -> Result:
                 ".tar.br": (7, copy_via_brotli),
                 ".tar.zst": (8, copy_via_zstd),
             }
-            for ext, (len_offset, decompress_func) in ext_map.items():
+            for ext, (_len_offset, decompress_func) in ext_map.items():
                 if name.endswith(ext):
                     extracted = decompress_stream_tar(src, decompress_func, dst_dir, ext)
                     result.dst = str(extracted)

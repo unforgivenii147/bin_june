@@ -38,10 +38,9 @@ def verify_and_get_files(dist_info_dir):
             abs_path = (site_packages_root / rel_path).resolve()
             if rel_path.name == "RECORD" or rel_path.suffix == ".pyc":
                 continue
-            if not abs_path.exists():
-                if not abs_path.is_dir():
-                    logging.warning(f"Aborting {dist_info_dir.name}: Missing file -> {rel_path}")
-                    return None
+            if not abs_path.exists() and not abs_path.is_dir():
+                logging.warning(f"Aborting {dist_info_dir.name}: Missing file -> {rel_path}")
+                return None
             files_to_pack.append((abs_path, rel_path))
     return files_to_pack
 

@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 from __future__ import annotations
 
+import contextlib
 import os
 import re
 import sys
@@ -37,10 +38,8 @@ def main() -> None:
         tmp_path.replace(fpath)
     except Exception:
         if tmp_path.exists():
-            try:
+            with contextlib.suppress(OSError):
                 tmp_path.unlink()
-            except OSError:
-                pass
         raise
 
 

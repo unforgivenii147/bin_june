@@ -12,7 +12,7 @@ import numpy as np
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
-def enhance_image(image_path: Path, verbose: bool = False, progress: tuple = None) -> bool:
+def enhance_image(image_path: Path, verbose: bool = False, progress: tuple | None = None) -> bool:
     try:
         if progress:
             current, total = progress
@@ -88,7 +88,7 @@ def process_parallel(tasks, num_cores):
     total = len(tasks)
     print(f"[SYSTEM] Utilizing {num_cores} parallel CPU threads.")
     parallel_tasks = []
-    for i, (img, verbose) in enumerate(tasks, 1):
+    for i, (img, _verbose) in enumerate(tasks, 1):
         print(f"[{i}/{total}] {img.name}")
         parallel_tasks.append((img, False))
     with mp.Pool(processes=num_cores) as pool:

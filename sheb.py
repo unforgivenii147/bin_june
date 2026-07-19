@@ -51,7 +51,7 @@ def process_file(filepath) -> None:
         f.truncate()
         print(f"{os.path.relpath(filepath)} updated.")
     if "bin" in filepath.split(os.sep):
-        Path(filepath).chmod(493)
+        Path(filepath).chmod(0o755)
 
 
 def traverse_directory(directory: Path) -> None:

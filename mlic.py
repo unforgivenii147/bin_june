@@ -62,7 +62,7 @@ def validate_python_syntax(code: str) -> Tuple[bool, str]:
         return (False, f"Syntax error at line {e.lineno}, column {e.offset}: {e.msg}")
 
 
-def find_files(directory: Path, extensions: Set[str] = None) -> List[Path]:
+def find_files(directory: Path, extensions: Set[str] | None = None) -> List[Path]:
     if extensions is None:
         extensions = {
             ".txt",
@@ -111,7 +111,7 @@ def find_repeated_strings(
     directory: Path,
     min_lines: int = 2,
     min_chars: int = 10,
-    max_workers: int = None,
+    max_workers: int | None = None,
     half: bool = False,
 ) -> Dict[str, List[Tuple[Path, List[Tuple[int, int]]]]]:
     files = find_files(directory)
@@ -148,7 +148,7 @@ def find_repeated_strings(
 
 def remove_strings_from_files(
     repeated_strings: Dict[str, List[Tuple[Path, List[Tuple[int, int]]]]],
-    string_numbers: List[int] = None,
+    string_numbers: List[int] | None = None,
     validate: bool = True,
 ):
     files_to_modify = defaultdict(set)

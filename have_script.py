@@ -11,7 +11,7 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 def find_whl_files(directory):
     whl_files = []
-    for root, dirs, files in os.walk(directory):
+    for root, _dirs, files in os.walk(directory):
         for file in files:
             if file.endswith(".whl"):
                 whl_files.append(os.path.join(root, file))

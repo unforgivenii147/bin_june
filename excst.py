@@ -166,7 +166,7 @@ def write_imports_file(all_imports: Set[str]) -> None:
     imports_file = OUTPUT_DIR / "imports.py"
 
     # Simple sort to group imports
-    sorted_imports = sorted(list(all_imports))
+    sorted_imports = sorted(all_imports)
 
     content = "#!/usr/bin/env python3\n# -*- coding: utf-8 -*-\n"
     content += "# Combined imports from all processed files\n\n"

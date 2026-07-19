@@ -43,7 +43,10 @@ class ValidationFailure(Exception):
 
 
 def _func_args_as_dict(func: Callable[..., Any], *args: Any, **kwargs: Any):
-    return dict(list(zip(dict.fromkeys(chain(getfullargspec(func)[0], kwargs.keys())), args)) + list(kwargs.items()))
+    return dict(
+        list(zip(dict.fromkeys(chain(getfullargspec(func)[0], kwargs.keys())), args, strict=False))
+        + list(kwargs.items())
+    )
 
 
 def validator(func: Callable[..., Any]):

@@ -15,7 +15,7 @@ def is_empty_wheel(wheel_path: Path) -> bool:
             all_files = zip_ref.namelist()
             has_py_files = any(file.endswith(".py") for file in all_files)
             has_code_dirs = any(
-                not (file.startswith("dist-info/") or file.startswith("__pycache__/"))
+                not (file.startswith(("dist-info/", "__pycache__/")))
                 and not file.endswith("/")
                 and not file.endswith(".dist-info/")
                 for file in all_files

@@ -19,10 +19,10 @@ def serialize_value(v):
 
 def row_to_dict(row):
     try:
-        return {k: serialize_value(row[k]) for k in row.keys()}
+        return {k: serialize_value(row[k]) for k in row}
     except UnicodeDecodeError as e:
         result = {}
-        for k in row.keys():
+        for k in row:
             try:
                 result[k] = serialize_value(row[k])
             except UnicodeDecodeError:
@@ -72,7 +72,7 @@ def fetch_table_data(args):
                     rows = []
                     for row in cur.fetchall():
                         row_dict = {}
-                        for k in row.keys():
+                        for k in row:
                             val = row[k]
                             if isinstance(val, bytes):
                                 row_dict[k] = {"__blob_base64": base64.b64encode(val).decode("ascii")}

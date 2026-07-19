@@ -249,7 +249,7 @@ def main() -> None:
     setup_py_content = generate_setup_py(metadata, setup_cfg_text, manifest_text, args.force)
     setup_py_path.write_text(setup_py_content, encoding="utf-8")
     print(f"✅ Generated {setup_py_path}")
-    has_cext, cext_method = has_c_extension(metadata["tool"])
+    _has_cext, cext_method = has_c_extension(metadata["tool"])
     print("\n--- Conversion Summary ---")
     print(f"Project: {metadata['name']} v{metadata['version']}")
     print(f"Dependencies: {len(metadata['dependencies'])}")

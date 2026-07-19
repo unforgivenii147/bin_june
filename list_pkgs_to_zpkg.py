@@ -28,7 +28,7 @@ def get_top_level_modules(dist) -> set[str]:
     """Extract top-level modules/packages from distribution."""
     try:
         if dist.read_text("top_level.txt"):
-            return set(line.strip() for line in dist.read_text("top_level.txt").splitlines() if line.strip())
+            return {line.strip() for line in dist.read_text("top_level.txt").splitlines() if line.strip()}
     except (FileNotFoundError, TypeError):
         pass
 

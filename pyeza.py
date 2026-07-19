@@ -170,7 +170,7 @@ def output_columns(entries: list[Entry], icons=False, colors=True, width=None) -
 def print_tree(base: str | Path, prefix: str = "", icons=False, colors=True) -> None:
     base_path = Path(base)
     try:
-        entries = sorted(list(base_path.iterdir()), key=lambda e: e.name)
+        entries = sorted(base_path.iterdir(), key=lambda e: e.name)
     except PermissionError:
         print(prefix + " [permission denied]")
         return

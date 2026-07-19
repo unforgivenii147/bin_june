@@ -9,6 +9,7 @@ Uses pure generator for memory-efficient streaming traversal.
 from __future__ import annotations
 
 import argparse
+import contextlib
 import fnmatch
 import sys
 import threading
@@ -135,10 +136,7 @@ class SpaceStats:
 def should_skip_directory(dir_name: str) -> bool:
     if dir_name in SKIP_DIRS:
         return True
-    for pattern in SKIP_DIR_PATTERNS:
-        if fnmatch.fnmatch(dir_name, pattern):
-            return True
-    return False
+    return any(fnmatch.fnmatch(dir_name, pattern) for pattern in SKIP_DIR_PATTERNS)
 
 
 def is_editable_package_dir(root_path: Path) -> bool:
@@ -294,10 +292,8 @@ def compress_file(
         return True, input_path, output_path, original_size, compressed_size
     except Exception as e:
         if output_path.exists():
-            try:
+            with contextlib.suppress(BaseException):
                 output_path.unlink()
-            except:
-                pass
         return False, input_path, str(e), 0, 0
 
 
@@ -316,10 +312,8 @@ def decompress_file(input_path: Path, output_path: Path, threads: int, remove_or
         return (True, input_path, output_path, decompressed_size, compressed_size)
     except Exception as e:
         if output_path.exists():
-            try:
+            with contextlib.suppress(BaseException):
                 output_path.unlink()
-            except:
-                pass
         return False, input_path, str(e), 0, 0
 
 

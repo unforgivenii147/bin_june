@@ -58,9 +58,8 @@ class TreeSitterCommentRemover:
         for node, capture_name in captures:
             if capture_name == "comment":
                 ranges_to_remove.append((node.start_byte, node.end_byte))
-            elif capture_name == "string":
-                if self._is_docstring(node):
-                    ranges_to_remove.append((node.start_byte, node.end_byte))
+            elif capture_name == "string" and self._is_docstring(node):
+                ranges_to_remove.append((node.start_byte, node.end_byte))
         ranges_to_remove.sort(reverse=True)
         result = self._remove_ranges(source_bytes, ranges_to_remove)
         return result.decode("utf-8", errors="replace")

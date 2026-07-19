@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import shutil
 from pathlib import Path
 
@@ -43,16 +44,12 @@ def folderize_by_extension(cwd: Path):
             while target_path.exists():
                 target_path = target_dir / f"{file_path.stem}_{counter}{file_path.suffix}"
                 counter += 1
-            try:
+            with contextlib.suppress(BaseException):
                 shutil.move(str(file_path), str(target_path))
-            except:
-                pass
     for dir_path in sorted(root_path.glob("**/*"), key=lambda p: len(p.parts), reverse=True):
         if dir_path.is_dir() and dir_path != root_path:
-            try:
+            with contextlib.suppress(OSError):
                 dir_path.rmdir()
-            except OSError:
-                pass
     total_files = 0
     total_size = 0
     for ext in sorted(extension_stats.keys()):

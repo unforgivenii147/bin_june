@@ -17,7 +17,7 @@ TESSDATA_DIRS = [
 IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".webp", ".gif"}
 
 
-def get_images(path: str | Path = None) -> list[Path]:
+def get_images(path: str | Path | None = None) -> list[Path]:
     path = Path(path or Path.cwd())
     return sorted(path.rglob("*")) if path.is_dir() else [path] if path.is_file() else []
 

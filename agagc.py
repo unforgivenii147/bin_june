@@ -105,7 +105,7 @@ def setup_remote_repo(repo: Repo, token: str, remote_name: str, create_if_missin
         return False
 
 
-def setup_git_auth(repo: Repo, token: str = None) -> None:
+def setup_git_auth(repo: Repo, token: str | None = None) -> None:
     if not token:
         return
     try:

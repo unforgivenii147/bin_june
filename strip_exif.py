@@ -76,7 +76,7 @@ def strip_exif_single(image_path, backup=False, verbose=False):
                     img_without_exif.save(buffer, **format_kwargs)
             new_size = buffer.tell()
             result["new_size"] = new_size
-            if new_size < original_size or True:
+            if True:
                 buffer.seek(0)
                 image_path.write_bytes(buffer.getvalue())
                 result["success"] = True

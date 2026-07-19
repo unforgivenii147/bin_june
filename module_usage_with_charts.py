@@ -117,9 +117,7 @@ def is_third_party(module_name: str, stdlib_set: set[str]) -> bool:
         return False
     if top_level in stdlib_set:
         return False
-    if top_level.startswith("__"):
-        return False
-    return True
+    return not top_level.startswith("__")
 
 
 def extract_imports(filepath: Path) -> dict[str, list[str]]:
@@ -141,12 +139,11 @@ def extract_imports(filepath: Path) -> dict[str, list[str]]:
                 if asname:
                     imports[mod].append(asname)
 
-        if isinstance(node, ast.ImportFrom):
-            if node.module:
-                mod = node.module
-                for alias in node.names:
-                    name = alias.name if alias.asname is None else alias.asname
-                    imports[mod].append(name)
+        if isinstance(node, ast.ImportFrom) and node.module:
+            mod = node.module
+            for alias in node.names:
+                name = alias.name if alias.asname is None else alias.asname
+                imports[mod].append(name)
 
     dh_names: set[str] = set()
     for node in ast.walk(tree):
@@ -191,12 +188,11 @@ def count_calls(filepath: Path, imports: dict[str, list[str]]) -> dict[str, dict
             if isinstance(func, ast.Name) and func.id in local_to_import:
                 mod, name = local_to_import[func.id]
                 call_counts[mod][name] += 1
-            if isinstance(func, ast.Attribute):
-                if isinstance(func.value, ast.Name):
-                    obj_name = func.value.id
-                    for mod, names in imports.items():
-                        if mod == obj_name or mod.endswith("." + obj_name):
-                            call_counts[mod][func.attr] += 1
+            if isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name):
+                obj_name = func.value.id
+                for mod, names in imports.items():
+                    if mod == obj_name or mod.endswith("." + obj_name):
+                        call_counts[mod][func.attr] += 1
 
     return dict(call_counts)
 
@@ -377,7 +373,7 @@ def save_charts(
     category_counts = {k: v for k, v in category_counts.items() if v > 0}
     if category_counts:
         colors = ["#3498db", "#e74c3c", "#2ecc71"]
-        wedges, texts, autotexts = ax.pie(
+        _wedges, _texts, autotexts = ax.pie(
             category_counts.values(),
             labels=category_counts.keys(),
             autopct="%1.1f%%",
@@ -405,6 +401,6 @@ def save_charts(
         plt.close()
         print(f"   ✅ Saved: 03_thirdparty_top10.png")
 
-    fig, ax = plt.subplots(figsize=(12, 6))
+    _fig, ax = plt.subplots(figsize=(12, 6))
     if dh_counts:
         ax.bar(list(dh_counts.keys()), list(dh_counts.values()), color="#2ecc71")

@@ -26,7 +26,7 @@ def split_pdf_by_page(pdf_path: Path, output_dir: Path) -> None:
             writer.write(f)
 
 
-def process_pdfs(input_paths=None, output_dir: Path = None) -> None:
+def process_pdfs(input_paths=None, output_dir: Path | None = None) -> None:
     if output_dir is None:
         output_dir = Path.cwd() / "output"
 

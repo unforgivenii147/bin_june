@@ -132,9 +132,7 @@ class RegexFixer:
                             return True
                 i += 1
             i += 1
-        if any(indicator in content for indicator in REGEX_INDICATORS):
-            return True
-        return False
+        return bool(any(indicator in content for indicator in REGEX_INDICATORS))
 
     def parse_string_literal(self, token_str: str) -> Tuple[str, str, str, bool]:
         prefix_end = 0

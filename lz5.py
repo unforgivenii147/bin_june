@@ -25,7 +25,7 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 def get_folder_size(folder_path):
     total = 0
-    for dirpath, dirnames, filenames in os.walk(folder_path):
+    for dirpath, _dirnames, filenames in os.walk(folder_path):
         for f in filenames:
             fp = os.path.join(dirpath, f)
             if os.path.exists(fp):

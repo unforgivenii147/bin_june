@@ -14,7 +14,7 @@ extensions = {".so", ".pyd", ".dylib", ".dll"}
 for pkg in user_site.iterdir():
     if pkg.is_dir() and not pkg.name.endswith((".dist-info", ".egg-info")):
         has_compiled = False
-        for root, dirs, files in os.walk(pkg):
+        for _root, _dirs, files in os.walk(pkg):
             for f in files:
                 if os.path.splitext(f)[1].lower() in extensions:
                     has_compiled = True

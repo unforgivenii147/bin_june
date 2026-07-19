@@ -141,7 +141,7 @@ def _extract_definitions(path: str, source: str) -> List[_Def]:
 
 def _new_utils_entries(groups: Dict[str, List[_Def]], existing: Dict[str, Dict[str, _Def]]) -> Dict[str, List[_Def]]:
     new: Dict[str, List[_Def]] = {"func": [], "class": [], "const": []}
-    for hash_key, defs in groups.items():
+    for _hash_key, defs in groups.items():
         rep = defs[0]
         typ, name = rep.type, rep.name
         if typ not in existing:
@@ -228,9 +228,6 @@ def _move_definitions(groups: Dict[str, List[_Def]]) -> None:
 
 
 def main() -> None:
-    if sys.version_info < (3, 9):
-        logger.error("Python 3.9+ is required (ast.unparse).")
-        sys.exit(1)
     parser = argparse.ArgumentParser(description="Copy/move repeated Python definitions to utils/")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("-c", "--copy", action="store_true", help="Copy duplicates to utils/")

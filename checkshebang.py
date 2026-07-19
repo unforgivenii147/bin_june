@@ -17,9 +17,7 @@ def fix_file(path: Path) -> bool:
     for line in lines:
         if line.startswith("#!"):
             i += 1
-    if i > 1:
-        return True
-    return False
+    return i > 1
 
 
 def main() -> None:

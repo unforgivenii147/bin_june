@@ -125,7 +125,7 @@ def check_file(file_path: Path) -> Tuple[Path, str, bool, str]:
         return (file_path, file_path.suffix.lower(), None, "error")
 
 
-def validate_extensions(root_dir: str = "/", num_workers: int = None, verbose: bool = True) -> dict:
+def validate_extensions(root_dir: str = "/", num_workers: int | None = None, verbose: bool = True) -> dict:
     if num_workers is None:
         num_workers = max(1, cpu_count() - 1)
     root_path = Path(root_dir)

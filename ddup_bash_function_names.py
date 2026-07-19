@@ -52,7 +52,7 @@ def find_duplicates(functions):
 def display_results(functions, duplicates, filepath: Path) -> bool:
     if not duplicates:
         print("✓ No duplicate function names found!")
-        print(f"✓ Total unique functions: {len(set(name for name, _, _ in functions))}")
+        print(f"✓ Total unique functions: {len({name for name, _, _ in functions})}")
         return True
     print(f"✗ Found {len(duplicates)} function name(s) defined multiple times:")
     print("=" * 60)
@@ -68,7 +68,7 @@ def display_results(functions, duplicates, filepath: Path) -> bool:
 
 def show_statistics(functions, duplicates) -> None:
     total_definitions = len(functions)
-    unique_functions = len(set(name for name, _, _ in functions))
+    unique_functions = len({name for name, _, _ in functions})
     duplicate_count = len(duplicates)
     duplicate_definitions = sum(duplicates.values()) - len(duplicates)
     print("\n📊 Statistics:")

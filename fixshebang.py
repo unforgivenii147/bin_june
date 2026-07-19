@@ -63,10 +63,7 @@ def is_likely_python_file(path: Path) -> bool:
                 "^if\\s+__name__\\s*==\\s*['\\\"]__main__['\\\"]",
                 "^#!.*python",
             ]
-            for pattern in python_patterns:
-                if re.search(pattern, text_sample, re.MULTILINE):
-                    return True
-            return False
+            return any(re.search(pattern, text_sample, re.MULTILINE) for pattern in python_patterns)
     except (OSError, UnicodeDecodeError, PermissionError):
         return False
 
@@ -74,9 +71,8 @@ def is_likely_python_file(path: Path) -> bool:
 def find_python_files(directory: Path) -> list[Path]:
     python_files = []
     for path in directory.rglob("*"):
-        if any(part.startswith(".") and part != "." for part in path.parts):
-            if ".git" in path.parts:
-                continue
+        if any(part.startswith(".") and part != "." for part in path.parts) and ".git" in path.parts:
+            continue
         if is_symlink(path):
             continue
         if not path.is_file():
@@ -100,9 +96,8 @@ def find_python_files(directory: Path) -> list[Path]:
             if is_likely_python_file(path):
                 python_files.append(path)
             continue
-        if "." not in path.name:
-            if is_likely_python_file(path):
-                python_files.append(path)
+        if "." not in path.name and is_likely_python_file(path):
+            python_files.append(path)
     return python_files
 
 

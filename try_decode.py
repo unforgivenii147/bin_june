@@ -81,7 +81,7 @@ def get_first_chunk(text: str, chunk_size: int = 500) -> str:
     return text[:chunk_size] + "...\n[truncated...]"
 
 
-def decode_file(file_path: str, output_path: str = None, show_chunk: int = 500):
+def decode_file(file_path: str, output_path: str | None = None, show_chunk: int = 500):
     file_path = Path(file_path)
     if not file_path.exists():
         print(f"Error: File '{file_path}' not found.")

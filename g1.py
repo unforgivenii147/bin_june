@@ -27,7 +27,7 @@ def parse_repo_url(txt: str) -> tuple[str, str]:
         txt = txt[:-4]
     if txt.startswith("git@github.com:"):
         txt = txt.replace("git@github.com:", "")
-    if txt.startswith("http://") or txt.startswith("https://"):
+    if txt.startswith(("http://", "https://")):
         txt = txt.split("github.com/", 1)[-1]
     parts = txt.split("/")
     if len(parts) >= 2:

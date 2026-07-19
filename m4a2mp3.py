@@ -41,7 +41,7 @@ def convert_m4a_to_mp3(input_file, bitrate="64k"):
 
     try:
         # Run the conversion
-        ret, txt, err = runcmd(cmd, show_output=True)
+        ret, _txt, _err = runcmd(cmd, show_output=True)
         if not ret:
             print(f"Successfully converted to: {output_file}")
 

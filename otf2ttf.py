@@ -63,7 +63,7 @@ def convert_otf_to_ttf(otf_path: Path) -> dict:
     return result
 
 
-def find_otf_files(root_dir: Path = None, pattern: str = "**/*.otf") -> list[Path]:
+def find_otf_files(root_dir: Path | None = None, pattern: str = "**/*.otf") -> list[Path]:
     if root_dir is None:
         root_dir = Path.cwd()
     else:

@@ -101,7 +101,7 @@ def is_constant_assign(node: ast.Assign) -> bool:
         if isinstance(n, (ast.Tuple, ast.List, ast.Set)):
             return all(lit_ok(e) for e in n.elts)
         if isinstance(n, ast.Dict):
-            return all(lit_ok(k) and lit_ok(v) for k, v in zip(n.keys, n.values))
+            return all(lit_ok(k) and lit_ok(v) for k, v in zip(n.keys, n.values, strict=False))
         return False
 
     return lit_ok(node.value)
@@ -199,7 +199,7 @@ def iter_python_sources(root: Path) -> Iterable[SourceFile]:
                         data = p.read_bytes()
                         dec = try_decompress_single(data, ext.lstrip("."))
                         if dec:
-                            bytes_decomp, suggested = dec
+                            bytes_decomp, _suggested = dec
                             try:
                                 txt = bytes_decomp.decode("utf-8")
                             except UnicodeDecodeError:
@@ -215,7 +215,7 @@ def iter_python_sources(root: Path) -> Iterable[SourceFile]:
 
 
 def extract_defs_from_source(srcfile: Tuple[str, str, str, str]) -> Tuple[str, List[Dict]]:
-    path_str, relpath_str, text, origin = srcfile
+    path_str, _relpath_str, text, origin = srcfile
     results = []
     try:
         tree = ast.parse(text)
@@ -406,7 +406,7 @@ def main() -> None:
         name = it["name"]
         code = it["code"]
         imports = it["imports"]
-        for sf, info in instances:
+        for sf, _info in instances:
             if args.copy:
                 pass
             else:

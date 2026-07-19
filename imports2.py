@@ -288,10 +288,9 @@ class PythonImportExtractor:
                     for alias in node.names:
                         module_name = alias.name.split(".")[0]
                         imports.add(module_name)
-                elif isinstance(node, ast.ImportFrom):
-                    if node.module:
-                        module_name = node.module.split(".")[0]
-                        imports.add(module_name)
+                elif isinstance(node, ast.ImportFrom) and node.module:
+                    module_name = node.module.split(".")[0]
+                    imports.add(module_name)
         except SyntaxError as e:
             logger.debug(f"Syntax error in {filename}: {e}")
         except Exception as e:

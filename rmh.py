@@ -173,10 +173,10 @@ def collect_source_files(targets: List[str]) -> List[Path]:
             continue
         found_files = find_source_files(path)
         all_files.update(found_files)
-    return sorted(list(all_files))
+    return sorted(all_files)
 
 
-def process_files_parallel(paths: List[Path], num_workers: int = None) -> List[ProcessResult]:
+def process_files_parallel(paths: List[Path], num_workers: int | None = None) -> List[ProcessResult]:
     num_workers = num_workers or cpu_count()
     remover = CommentRemover()
     with Pool(num_workers) as pool:
@@ -245,7 +245,7 @@ def print_summary(results: List[ProcessResult], targets: List[Path]) -> None:
 
 def main(
     targets: List[str] | None = None,
-    num_workers: int = None,
+    num_workers: int | None = None,
     keep_backups: bool = True,
     dry_run: bool = False,
 ) -> int:

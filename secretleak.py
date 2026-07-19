@@ -50,9 +50,7 @@ def should_skip_file(file_path: Path) -> bool:
     for pattern in SKIP_PATTERNS:
         if pattern in file_path.parts:
             return True
-    if file_path.is_symlink():
-        return True
-    return False
+    return bool(file_path.is_symlink())
 
 
 def scan_file(file_path: Path) -> Tuple[str, List[dict]]:
@@ -90,7 +88,7 @@ def get_all_files(root_dir: Path = Path(".")) -> List[Path]:
     return files
 
 
-def check_secrets(root_dir: Path = Path("."), max_workers: int = None) -> Tuple[int, int]:
+def check_secrets(root_dir: Path = Path("."), max_workers: int | None = None) -> Tuple[int, int]:
     files = get_all_files(root_dir)
     if not files:
         print("No files found to scan.")

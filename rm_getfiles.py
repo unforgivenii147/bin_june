@@ -68,7 +68,7 @@ def functions_match(target_ast: ast.FunctionDef, candidate_ast: ast.FunctionDef)
     return target_str == candidate_str
 
 
-def find_python_files(path: Path, include_hidden: bool = False, script_path: Path = None) -> list[Path]:
+def find_python_files(path: Path, include_hidden: bool = False, script_path: Path | None = None) -> list[Path]:
     if not path.exists():
         raise FileNotFoundError(f"Path does not exist: {path}")
     if not path.is_dir():

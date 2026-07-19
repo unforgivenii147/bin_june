@@ -17,7 +17,7 @@ def strip_comments_from_text(text: str) -> str:
 
     def replacer(match):
         group = match.group(0)
-        if group.startswith("/") or group.startswith("/*"):
+        if group.startswith(("/", "/*")):
             return ""
         return group
 

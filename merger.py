@@ -33,9 +33,8 @@ def get_files(path: Path, ext: list[str] | None = None) -> list[Path]:
             if item.is_dir():
                 if item.name not in SKIP_DIRS:
                     queue.append(item)
-            elif item.is_file():
-                if ext is None or item.suffix in ext:
-                    files.append(item)
+            elif item.is_file() and (ext is None or item.suffix in ext):
+                files.append(item)
     return files
 
 
@@ -76,9 +75,7 @@ def read_file(path: Path) -> str | None:
 def should_skip_file(file_path: Path, cwd: Path) -> bool:
     if any(part.startswith(".") for part in file_path.relative_to(cwd).parts):
         return True
-    if file_path.name.startswith("."):
-        return True
-    return False
+    return bool(file_path.name.startswith("."))
 
 
 def merge_files() -> Path | None:

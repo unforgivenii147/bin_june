@@ -52,17 +52,17 @@ except ImportError:
 SIGNATURES = [
     (lambda b: b.startswith(b"\x89PNG\r\n\x1a\n"), ".png", "PNG image"),
     (lambda b: b.startswith(b"\xff\xd8\xff"), ".jpg", "JPEG image"),
-    (lambda b: b.startswith(b"GIF87a") or b.startswith(b"GIF89a"), ".gif", "GIF image"),
+    (lambda b: b.startswith((b"GIF87a", b"GIF89a")), ".gif", "GIF image"),
     (lambda b: b.startswith(b"BM"), ".bmp", "BMP image"),
     (
-        lambda b: b.startswith(b"II*\x00") or b.startswith(b"I\x00*\x00") or b.startswith(b"MM\x00*"),
+        lambda b: b.startswith((b"II*\x00", b"I\x00*\x00", b"MM\x00*")),
         ".tif",
         "TIFF image",
     ),
     (lambda b: b.startswith(b"WEBP"), ".webp", "WebP image"),
     (lambda b: b.startswith(b"%PDF-"), ".pdf", "PDF document"),
     (
-        lambda b: b.startswith(b"PK\x03\x04") or b.startswith(b"PK\x05\x06") or b.startswith(b"PK\x07\x08"),
+        lambda b: b.startswith((b"PK\x03\x04", b"PK\x05\x06", b"PK\x07\x08")),
         ".zip",
         "ZIP archive",
     ),
@@ -292,7 +292,7 @@ def safe_rename(src: Path, dst: Path) -> Tuple[bool, str | None]:
 
 
 def process_file(args) -> Dict:
-    path_str, commit, verbose = args
+    path_str, commit, _verbose = args
     path = Path(path_str)
     result = {
         "path": str(path),

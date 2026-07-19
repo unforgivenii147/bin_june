@@ -23,10 +23,7 @@ IGNORE_DIRS = frozenset(
 
 
 def check_skip_dirs_usage(tree: ast.AST) -> bool:
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Name) and node.id == "SKIP_DIRS":
-            return True
-    return False
+    return any(isinstance(node, ast.Name) and node.id == "SKIP_DIRS" for node in ast.walk(tree))
 
 
 def check_skip_dirs_defined(tree: ast.AST) -> bool:

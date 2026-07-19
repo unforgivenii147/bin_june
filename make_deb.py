@@ -45,9 +45,7 @@ def should_exclude(pkg_name: str) -> bool:
         return True
     if any(exclude in pkg_lower for exclude in ["llvm", "clang"]):
         return True
-    if any(exclude in pkg_lower for exclude in ["rust", "cargo"]):
-        return True
-    return False
+    return bool(any(exclude in pkg_lower for exclude in ["rust", "cargo"]))
 
 
 def get_installed_packages() -> List[str]:

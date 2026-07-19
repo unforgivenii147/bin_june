@@ -24,12 +24,10 @@ def get_parser() -> Parser:
 def should_preserve_comment(comment_bytes: bytes) -> bool:
     text = comment_bytes.decode("utf-8", errors="ignore").strip()
     return (
-        text.startswith("#!")
-        or text.startswith("# type:")
-        or text.startswith("# fmt:")
-        or (text == "# fmt: skip")
-        or (text == "# fmt: on")
-        or (text == "# fmt: off")
+        text.startswith(("#!", "# type:", "# fmt:"))
+        or text == "# fmt: skip"
+        or text == "# fmt: on"
+        or text == "# fmt: off"
     )
 
 

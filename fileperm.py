@@ -116,7 +116,7 @@ def apply_changes(stats, dry_run=False):
     print(f"\nApplying changes to {len(changes)} files...")
     success = 0
     failed = 0
-    for filepath, current, target in tqdm(changes, desc="Changing permissions", unit="files"):
+    for filepath, _current, target in tqdm(changes, desc="Changing permissions", unit="files"):
         if process_file(filepath, target, dry_run):
             success += 1
         else:

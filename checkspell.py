@@ -27,7 +27,7 @@ except ImportError:
 
 
 class PersonalDictionary:
-    def __init__(self, dict_path: Path = None):
+    def __init__(self, dict_path: Path | None = None):
         self.dict_path = dict_path or Path.home() / ".spell_checker_dict.json"
         self.words: Set[str] = set()
         self.load()
@@ -37,7 +37,7 @@ class PersonalDictionary:
             try:
                 with open(self.dict_path, encoding="utf-8") as f:
                     data = json.load(f)
-                    self.words = set(word.lower() for word in data.get("words", []))
+                    self.words = {word.lower() for word in data.get("words", [])}
             except (OSError, json.JSONDecodeError) as e:
                 print(f"Warning: Could not load personal dictionary: {e}", file=sys.stderr)
                 self.words = set()

@@ -78,9 +78,7 @@ def preprocess_image(img_path: Path):
 
 
 def should_skip(path: Path) -> bool:
-    if path.suffix.lower() not in SUPPORTED_EXT:
-        return True
-    return False
+    return path.suffix.lower() not in SUPPORTED_EXT
 
 
 def save_processed_image(img, img_path: Path):

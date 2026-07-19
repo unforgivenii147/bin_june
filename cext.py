@@ -378,10 +378,7 @@ def _looks_like_python(data: bytes) -> bool:
     head = data[:512]
     if b"#!/usr/bin/env python" in head or b"#!/usr/bin/python" in head:
         return True
-    for kw in (b"import ", b"def ", b"class ", b"if __name__"):
-        if kw in head:
-            return True
-    return False
+    return any(kw in head for kw in (b"import ", b"def ", b"class ", b"if __name__"))
 
 
 def read_py_file(path: Path) -> str | None:
@@ -451,7 +448,7 @@ def _open_tar(archive_path: Path) -> tarfile.TarFile | None:
     """Open a tar archive, supporting gz/bz2/xz and optionally zstd."""
     suffix = "".join(archive_path.suffixes).lower()
     try:
-        if suffix.endswith(".zst") or suffix.endswith(".tar.zst"):
+        if suffix.endswith((".zst", ".tar.zst")):
             if not HAS_ZSTD:
                 print(f"  [warn] zstd not available, skipping {archive_path}", file=sys.stderr)
                 return None
@@ -499,7 +496,7 @@ def process_tar_archive(
 def process_archive(archive_path: Path) -> list[tuple[list[Entity], list[str]]]:
     """Dispatch to zip or tar processor based on file extension."""
     name = archive_path.name.lower()
-    if name.endswith(".whl") or name.endswith(".zip"):
+    if name.endswith((".whl", ".zip")):
         return process_zip_archive(archive_path)
     return process_tar_archive(archive_path)
 
@@ -602,9 +599,7 @@ def write_entity(entity: Entity, output_dir: Path) -> Path | None:
     # Build file content
     header = f"# Source: {entity.source_path}\n\n"
     # Deduplicate and sort imports (stdlib first heuristic: no '.' in module)
-    all_imports = sorted(
-        set(entity.imports), key=lambda s: 0 if s.startswith("import ") or s.startswith("from ") else 1
-    )
+    all_imports = sorted(set(entity.imports), key=lambda s: 0 if s.startswith(("import ", "from ")) else 1)
     import_block = "\n".join(all_imports)
     if import_block:
         import_block += "\n\n"

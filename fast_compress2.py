@@ -9,6 +9,7 @@ Uses Path.walk() for memory-efficient traversal.
 from __future__ import annotations
 
 import argparse
+import contextlib
 import fnmatch
 import heapq
 import json
@@ -137,10 +138,7 @@ class SpaceStats:
 def should_skip_directory(dir_name: str) -> bool:
     if dir_name in SKIP_DIRS:
         return True
-    for pattern in SKIP_DIR_PATTERNS:
-        if fnmatch.fnmatch(dir_name, pattern):
-            return True
-    return False
+    return any(fnmatch.fnmatch(dir_name, pattern) for pattern in SKIP_DIR_PATTERNS)
 
 
 def is_editable_package_dir(root_path: Path) -> bool:
@@ -280,7 +278,7 @@ def get_files_generator(directory: Path, compress: bool):
         print(f"ℹ️  Skipped {skipped_dirs} excluded directories")
     print(f"Sorting {total_files} files by size (largest first)...")
     while file_heap:
-        neg_size, file_path = heapq.heappop(file_heap)
+        _neg_size, file_path = heapq.heappop(file_heap)
         yield file_path
     print(f"Scanned {total_dirs} directories, found {total_files} files to process")
 
@@ -311,10 +309,8 @@ def compress_file(
         return True, input_path, output_path, original_size, compressed_size
     except Exception as e:
         if output_path.exists():
-            try:
+            with contextlib.suppress(BaseException):
                 output_path.unlink()
-            except:
-                pass
         return False, input_path, str(e), 0, 0
 
 
@@ -341,10 +337,8 @@ def decompress_file(
         return (True, input_path, output_path, decompressed_size, compressed_size)
     except Exception as e:
         if output_path.exists():
-            try:
+            with contextlib.suppress(BaseException):
                 output_path.unlink()
-            except:
-                pass
         return False, input_path, str(e), 0, 0
 
 
@@ -395,9 +389,9 @@ def process_files(file_generator, compress: bool, level: int = 3, threads: int =
         for future in as_completed(futures):
             result = future.result()
             if compress:
-                success, path, output_path, original_size, compressed_size = result
+                success, path, output_path, _original_size, compressed_size = result
             else:
-                success, path, output_path, decompressed_size, compressed_size = result
+                success, path, output_path, _decompressed_size, _compressed_size = result
             completed += 1
             progress = int(completed / total_files * 50)
             bar = "█" * progress + "░" * (50 - progress)

@@ -76,7 +76,7 @@ def get_wordlist_batches(path: Path, batch_size: int) -> Generator[list[str], No
 def count_lines(path: Path) -> int:
     count = 0
     with path.open("rb") as f:
-        for line in f:
+        for _line in f:
             count += 1
     return count
 

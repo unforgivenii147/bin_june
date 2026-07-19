@@ -56,9 +56,8 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 continue
             if item.is_dir() and item.name not in skip_dirs:
                 queue.append(item)
-            elif item.is_file():
-                if ext is None or item.suffix in ext:
-                    files.append(item)
+            elif item.is_file() and (ext is None or item.suffix in ext):
+                files.append(item)
     return files
 
 
@@ -158,12 +157,11 @@ class PathlibTransformer(ast.NodeTransformer):
         return self.generic_visit(node)
 
     def visit_Assign(self, node: ast.Assign) -> ast.AST:
-        if isinstance(node.value, ast.Attribute):
-            if self._is_os_path(node.value):
-                for target in node.targets:
-                    if isinstance(target, ast.Name):
-                        self.os_path_var_name = target.id
-                        self.infos.append(f"Found alias: {target.id} = os.path")
+        if isinstance(node.value, ast.Attribute) and self._is_os_path(node.value):
+            for target in node.targets:
+                if isinstance(target, ast.Name):
+                    self.os_path_var_name = target.id
+                    self.infos.append(f"Found alias: {target.id} = os.path")
         return self.generic_visit(node)
 
     def _is_os_path(self, node: ast.AST) -> bool:
@@ -192,14 +190,12 @@ class PathlibTransformer(ast.NodeTransformer):
             and (node.func.attr == func_name)
         ):
             return True
-        if (
+        return bool(
             isinstance(node.func, ast.Attribute)
             and isinstance(node.func.value, ast.Name)
-            and (node.func.value.id == self.os_path_var_name)
-            and (node.func.attr == func_name)
-        ):
-            return True
-        return False
+            and node.func.value.id == self.os_path_var_name
+            and node.func.attr == func_name
+        )
 
     def visit_Call(self, node: ast.Call) -> ast.AST:
         for func_name, (target, return_type) in self.PATHLIB_MAPPINGS.items():
@@ -520,10 +516,9 @@ def add_required_imports(tree: ast.AST, needs_pathlib: bool, needs_shutil: bool)
                     if alias.name == "pathlib":
                         has_pathlib = True
                         break
-            elif isinstance(node, ast.ImportFrom):
-                if node.module == "pathlib":
-                    has_pathlib = True
-                    break
+            elif isinstance(node, ast.ImportFrom) and node.module == "pathlib":
+                has_pathlib = True
+                break
         if not has_pathlib:
             imports_to_add.append(ast.ImportFrom(module="pathlib", names=[ast.alias(name="Path")], level=0))
     if needs_shutil:
@@ -534,10 +529,9 @@ def add_required_imports(tree: ast.AST, needs_pathlib: bool, needs_shutil: bool)
                     if alias.name == "shutil":
                         has_shutil = True
                         break
-            elif isinstance(node, ast.ImportFrom):
-                if node.module == "shutil":
-                    has_shutil = True
-                    break
+            elif isinstance(node, ast.ImportFrom) and node.module == "shutil":
+                has_shutil = True
+                break
         if not has_shutil:
             imports_to_add.append(ast.Import(name=ast.alias(name="shutil")))
     if imports_to_add:

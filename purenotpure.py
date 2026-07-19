@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import sys
 import sysconfig
 from importlib import metadata
@@ -23,10 +24,8 @@ def is_in_system_site_packages(dist: metadata.Distribution) -> bool:
                 site_paths.add(Path(p).resolve())
         for p in sys.path:
             if p and "site-packages" in p:
-                try:
+                with contextlib.suppress(Exception):
                     site_paths.add(Path(p).resolve())
-                except Exception:
-                    pass
         return any(str(loc).startswith(str(sp)) for sp in site_paths)
     except Exception:
         return False

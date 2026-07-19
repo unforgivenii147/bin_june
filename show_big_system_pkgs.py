@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import json
 import re
 import subprocess
@@ -138,10 +139,8 @@ def main() -> None:
     threshold_bytes = int(threshold_mb * 1024 * 1024)
     num_processes = 12
     if len(sys.argv) > 2:
-        try:
+        with contextlib.suppress(ValueError):
             num_processes = int(sys.argv[2])
-        except ValueError:
-            pass
     print(f"🔍 Scanning ALL available packages larger than {threshold_mb}MB...")
     print("=" * 35)
     packages = get_all_packages()
@@ -160,7 +159,7 @@ def main() -> None:
         print(f"{'PACKAGE NAME':<40} {'DOWNLOAD SIZE':>15}")
         print("-" * 35)
         display_count = min(len(sorted_packages), 50)
-        for i, (pkg, size) in enumerate(sorted_packages[:display_count]):
+        for _i, (pkg, size) in enumerate(sorted_packages[:display_count]):
             print(f"{pkg:<40} {format_size(size):>15}")
             total_size += size
         if len(sorted_packages) > 50:

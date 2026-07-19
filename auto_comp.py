@@ -10,6 +10,7 @@ only the best result based on compression ratio.
 from __future__ import annotations
 
 import bz2
+import contextlib
 import gzip
 import lzma
 import shutil
@@ -82,10 +83,8 @@ class CompressionManager:
         self.temp_dir = tempfile.mkdtemp(prefix="compress_")
 
     def __del__(self) -> None:
-        try:
+        with contextlib.suppress(Exception):
             shutil.rmtree(self.temp_dir, ignore_errors=True)
-        except Exception:
-            pass
 
     @staticmethod
     def prepare_input(target_path: str | Path) -> tuple[bytes, str]:
@@ -104,10 +103,8 @@ class CompressionManager:
                 data = tar_path.read_bytes()
                 return data, tar_name
             finally:
-                try:
+                with contextlib.suppress(Exception):
                     tar_path.unlink(missing_ok=True)
-                except Exception:
-                    pass
         raise ValueError(f"Target is neither file nor directory: {target_path}")
 
     def compress_single(
@@ -131,10 +128,8 @@ class CompressionManager:
             )
         except Exception as e:
             print(f"✗ {name:10} | Error: {e}")
-            try:
+            with contextlib.suppress(Exception):
                 output_path.unlink(missing_ok=True)
-            except Exception:
-                pass
             return None
 
     def compress_7z(self, data: bytes, base_name: str) -> CompressionResult | None:
@@ -158,16 +153,12 @@ class CompressionManager:
             )
         except Exception as e:
             print(f"✗ {'7z':10} | Error: {e}")
-            try:
+            with contextlib.suppress(Exception):
                 output_path.unlink(missing_ok=True)
-            except Exception:
-                pass
             return None
         finally:
-            try:
+            with contextlib.suppress(Exception):
                 temp_file.unlink(missing_ok=True)
-            except Exception:
-                pass
 
     def compress_all(self, data: bytes, base_name: str) -> list[CompressionResult]:
         results: list[CompressionResult] = []

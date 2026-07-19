@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import bz2
+import contextlib
 import gzip
 import lzma
 import os
@@ -228,10 +229,8 @@ def convert_one(src_str: str, dst_codec: str) -> tuple[str, bool, str]:
                             p.unlink()
                     except Exception:
                         pass
-                try:
+                with contextlib.suppress(Exception):
                     tmpdir.rmdir()
-                except Exception:
-                    pass
         else:
             write_tar_bytes_with_decoder_to_file(src, tmp_tar, src_codec)
         if dst_codec == "7z":

@@ -131,7 +131,7 @@ def translate_python_file(source: str) -> str:
     if not to_translate:
         return source
     translated_texts = batch_translate(to_translate)
-    for target_info, translated_str in zip(translation_targets, translated_texts):
+    for target_info, translated_str in zip(translation_targets, translated_texts, strict=False):
         idx = target_info[0]
         tok_type = target_info[1]
         if tok_type == "COMMENT":

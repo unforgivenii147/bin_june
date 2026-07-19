@@ -136,7 +136,7 @@ class PatternLearner:
         self.learned_corrections[wrong] = correct
         self.error_frequency[wrong] += 1
         if len(wrong) == len(correct):
-            for w_char, c_char in zip(wrong, correct):
+            for w_char, c_char in zip(wrong, correct, strict=False):
                 if w_char != c_char:
                     pattern = f"{w_char}→{c_char}"
                     self.error_frequency[pattern] += 1

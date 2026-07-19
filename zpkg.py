@@ -87,7 +87,7 @@ def process_package(pkg_name, site_packages):
     zip_path = site_packages / zip_filename
 
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
-        for root, dirs, files in os.walk(pkg_dir):
+        for root, _dirs, files in os.walk(pkg_dir):
             for file in files:
                 file_path = Path(root) / file
                 # Calculate the archive name relative to the package directory

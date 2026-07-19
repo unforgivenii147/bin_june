@@ -12,8 +12,7 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 def ylines(path: Path):
     with path.open(encoding="utf-8") as f:
-        for line in f:
-            yield line
+        yield from f
 
 
 if __name__ == "__main__":

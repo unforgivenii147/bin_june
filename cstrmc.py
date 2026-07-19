@@ -36,7 +36,7 @@ class StripTransformer(cst.CSTTransformer):
     def _is_preserved_comment(value: str) -> bool:
         stripped = value.lstrip()
 
-        return stripped.startswith("#!") or stripped.startswith("# fmt") or stripped.startswith("# type")
+        return stripped.startswith(("#!", "# fmt", "# type"))
 
     def leave_Comment(
         self,

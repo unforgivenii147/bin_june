@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import datetime
 import json
 import sys
@@ -44,22 +45,22 @@ def valid_date(s):
 
 def dictstr(structure, ntabs: int) -> None:
     global raw_str
-    for field in structure.keys():
+    for field in structure:
         tabs = ""
         for _ in range(ntabs):
             tabs += "\t"
         if isinstance(structure[field], list):
-            raw_str += "%s%s: " % (tabs, field)
+            raw_str += f"{tabs}{field}: "
             comma = ""
             for item in structure[field]:
-                raw_str += "%s%s" % (comma, item)
+                raw_str += f"{comma}{item}"
                 comma = ", "
             raw_str += "\n"
         elif isinstance(structure[field], dict):
-            raw_str += "%s%s: \n" % (tabs, field)
+            raw_str += f"{tabs}{field}: \n"
             dictstr(structure[field], ntabs + 1)
         else:
-            raw_str += "%s%s: %s\n" % (tabs, field, structure[field])
+            raw_str += f"{tabs}{field}: {structure[field]}\n"
 
 
 def is_empty_field(field):
@@ -67,7 +68,7 @@ def is_empty_field(field):
 
 
 def purge_empty_fields(structure):
-    for field in structure.copy().keys():
+    for field in structure.copy():
         if isinstance(structure[field], dict):
             structure[field] = purge_empty_fields(structure[field])
         if is_empty_field(structure[field]):
@@ -206,24 +207,24 @@ else:
 URL = API + "&domainName=" + domain_name
 if ARGS.history:
     if ARGS.since_date is not None:
-        URL += "&sinceDate=%s" % ARGS.since_date
+        URL += f"&sinceDate={ARGS.since_date}"
     if ARGS.created_date_from is not None:
-        URL += "&createdDateFrom=%s" % ARGS.created_date_from
+        URL += f"&createdDateFrom={ARGS.created_date_from}"
     if ARGS.created_date_to is not None:
-        URL += "&createdDateTo=%s" % ARGS.created_date_to
+        URL += f"&createdDateTo={ARGS.created_date_to}"
     if ARGS.updated_date_from is not None:
-        URL += "&updatedDateFrom=%s" % ARGS.updated_date_from
+        URL += f"&updatedDateFrom={ARGS.updated_date_from}"
     if ARGS.updated_date_to is not None:
-        URL += "&updatedDateTo=%s" % ARGS.updated_date_to
+        URL += f"&updatedDateTo={ARGS.updated_date_to}"
     if ARGS.expired_date_from is not None:
-        URL += "&expiredDateFrom=%s" % ARGS.expired_date_from
+        URL += f"&expiredDateFrom={ARGS.expired_date_from}"
     if ARGS.expired_date_to is not None:
-        URL += "&expiredDateTo=%s" % ARGS.expired_date_to
+        URL += f"&expiredDateTo={ARGS.expired_date_to}"
 try:
     result = requests.get(URL).json()
 except Exception as e:
     sys.stderr.write("Error invoking API. The API key or the domain name is probably invalid.\n")
-    sys.stderr.write("Error text: %s\n" % str(e))
+    sys.stderr.write(f"Error text: {e!s}\n")
     exit(1)
 if ARGS.history:
     try:
@@ -249,28 +250,20 @@ for whoisRecord in result["records"]:
         whoisRecord = purge_empty_fields(whoisRecord)
     if ARGS.strippedrawtext:
         for textfield in ["rawText", "strippedText", "cleanText", "header", "footer"]:
-            try:
+            with contextlib.suppress(BaseException):
                 whoisRecord[textfield] = whoisRecord[textfield][0:64] + "..."
-            except:
-                pass
-        for subfield in whoisRecord.keys():
+        for subfield in whoisRecord:
             for textfield in ["rawText", "strippedText", "cleanText", "header", "footer"]:
-                try:
+                with contextlib.suppress(BaseException):
                     whoisRecord[subfield][textfield] = whoisRecord[subfield][textfield][0:64] + "..."
-                except:
-                    pass
     elif not ARGS.fullrawtext:
         for textfield in ["rawText", "strippedText", "cleanText", "header", "footer"]:
-            try:
+            with contextlib.suppress(BaseException):
                 whoisRecord.pop(textfield)
-            except:
-                pass
-        for subfield in whoisRecord.keys():
+        for subfield in whoisRecord:
             for textfield in ["rawText", "strippedText", "cleanText", "header", "footer"]:
-                try:
+                with contextlib.suppress(BaseException):
                     whoisRecord[subfield].pop(textfield)
-                except:
-                    pass
     json_str = json.dumps(whoisRecord, indent=1, sort_keys=False)
     if ARGS.history:
         print("Historic record no. %d of %d for %s:\n------------\n" % (recordno, recordCount, ARGS.domainName))

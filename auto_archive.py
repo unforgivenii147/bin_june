@@ -175,7 +175,7 @@ def process_file(src: Path, out_dir: Path | None = None) -> Path | None:
     for name, ext, fn, min_l, max_l in ALGORITHMS:
         result = best_for_algo(data, name, ext, fn, min_l, max_l, src_name=src.name)
         if result:
-            r_name, r_ext, r_level, r_bytes = result
+            r_name, _r_ext, r_level, r_bytes = result
             log.info(
                 "  %-8s best level=%2d  %s → %s  (%.1f%%)",
                 r_name,

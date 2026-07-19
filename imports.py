@@ -651,12 +651,12 @@ def find_imports_for_directory(dir_path: Path, start_path: Path, std_libs: set, 
     all_imports = set()
     if HAS_JOBLIB:
         results = Parallel(n_jobs=-1)(delayed(_process_file)(f) for f in files)
-        for file_path, imports, success, error in results:
+        for _file_path, imports, success, _error in results:
             if success:
                 all_imports.update(imports)
     else:
         for f in files:
-            file_path, imports, success, error = _process_file(f)
+            _file_path, imports, success, error = _process_file(f)
             if success:
                 all_imports.update(imports)
     local_modules = {p.stem for p in dir_path.glob("*.py") if not any(part in SKIP_DIRS for part in p.parts)}
@@ -844,12 +844,12 @@ def main() -> None:
                 start_time = time.time()
             if HAS_JOBLIB:
                 results = Parallel(n_jobs=-1)(delayed(_process_file)(f) for f in dir_files)
-                for file_path, imports, success, error in results:
+                for _file_path, imports, success, _error in results:
                     if success:
                         all_imports.update(imports)
             else:
                 for f in dir_files:
-                    file_path, imports, success, error = _process_file(f)
+                    _file_path, imports, success, error = _process_file(f)
                     if success:
                         all_imports.update(imports)
             if show_progress:
@@ -860,16 +860,11 @@ def main() -> None:
         local_modules = {p.stem for p in cwd.glob("*.py") if not any(part in SKIP_DIRS for part in p.parts)}
         local_names = local_modules | all_local_packages
         modules = sorted(
-            set(
-                [
-                    imp
-                    for imp in all_imports
-                    if imp not in std_libs
-                    and imp not in local_names
-                    and not imp.startswith(".")
-                    and imp != "__future__"
-                ]
-            )
+            {
+                imp
+                for imp in all_imports
+                if imp not in std_libs and imp not in local_names and not imp.startswith(".") and imp != "__future__"
+            }
         )
         if modules:
             print(f"\n{'Module':<20} | {'Version':<15}")

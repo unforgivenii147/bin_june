@@ -81,10 +81,7 @@ EXCLUDE_DIRS = {".git", "__pycache__", ".venv", "venv", ".env", "node_modules"}
 
 
 def should_exclude(path: Path) -> bool:
-    for part in path.parts:
-        if part in EXCLUDE_DIRS:
-            return True
-    return False
+    return any(part in EXCLUDE_DIRS for part in path.parts)
 
 
 def is_media_file(path: Path) -> bool:
@@ -99,9 +96,8 @@ def get_files_to_process(root_dir: Path, compress: bool) -> Generator[Path, None
                     yield file
     else:
         for file in root_dir.rglob("*"):
-            if file.is_file() and not should_exclude(file):
-                if file.suffix.lower() == ".xz":
-                    yield file
+            if file.is_file() and not should_exclude(file) and file.suffix.lower() == ".xz":
+                yield file
 
 
 def compress_file(

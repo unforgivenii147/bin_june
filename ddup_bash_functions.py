@@ -62,7 +62,7 @@ def remove_aliases(aliases_to_remove, aliases_file: Path) -> int:
         new_lines = []
         removed_count = 0
         skip_next = False
-        for i, line in enumerate(lines):
+        for _i, line in enumerate(lines):
             if skip_next:
                 skip_next = False
                 continue

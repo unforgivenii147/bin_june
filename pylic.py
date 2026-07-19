@@ -101,7 +101,7 @@ def report(repeated: Dict[str, List[Tuple[Path, int, List[str]]]]) -> None:
 
 def remove_repeated_blocks(repeated: Dict[str, List[Tuple[Path, int, List[str]]]]) -> None:
     file_removals: Dict[Path, List[Tuple[int, List[str]]]] = defaultdict(list)
-    for block_text, occurrences in repeated.items():
+    for _block_text, occurrences in repeated.items():
         for filepath, start_lineno, original_lines in occurrences:
             file_removals[filepath].append((start_lineno, original_lines))
     removed_total = 0

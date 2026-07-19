@@ -150,9 +150,8 @@ def analyse_source(source: str, display_path: str) -> FileReport:
             continue
         if _is_under_type_checking(node, tree):
             continue
-        if isinstance(node, ast.ImportFrom) and node.module:
-            if _is_module_used_in_docstring(tree, node.module):
-                continue
+        if isinstance(node, ast.ImportFrom) and node.module and _is_module_used_in_docstring(tree, node.module):
+            continue
         unused_names: list[str] = []
         if isinstance(node, ast.Import):
             for alias in node.names:
@@ -165,7 +164,7 @@ def analyse_source(source: str, display_path: str) -> FileReport:
             for alias in node.names:
                 if alias.name == "*":
                     break
-                bound, full = _dotted(alias.name, alias.asname)
+                bound, _full = _dotted(alias.name, alias.asname)
                 if bound not in used_names and (not is_init or bound not in re_exports):
                     unused_names.append(alias.asname or alias.name)
         if unused_names:

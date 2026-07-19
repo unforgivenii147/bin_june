@@ -161,7 +161,7 @@ class ProjectCleaner:
                 for py_file in path.rglob("*.py"):
                     if not any(part.startswith(".") for part in py_file.parts):
                         py_files.add(py_file)
-        return sorted(list(py_files))
+        return sorted(py_files)
 
     def process_parallel(self, py_files: List[Path], dry_run: bool = False) -> Dict[str, int]:
         if not py_files:

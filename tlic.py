@@ -80,7 +80,7 @@ def collect_blocks_parallel(
         results = Parallel(n_jobs=n_jobs, prefer="threads", verbose=0)(
             delayed(extract_blocks_from_file)(path, min_lines) for path in batch_files
         )
-        for filepath, blocks in zip(batch_files, results):
+        for filepath, blocks in zip(batch_files, results, strict=False):
             for block_text, start_lineno, original_lines in blocks:
                 blocks_dict[block_text].append((filepath, start_lineno, original_lines))
     return blocks_dict
@@ -155,7 +155,7 @@ def process_file_removal(filepath: Path, removals: List[Tuple[int, List[str]]], 
 
 def remove_repeated_blocks(repeated: Dict[str, List[Tuple[Path, int, List[str]]]], root: Path, n_jobs: int = 8) -> None:
     file_removals: Dict[Path, List[Tuple[int, List[str]]]] = defaultdict(list)
-    for block_text, occurrences in repeated.items():
+    for _block_text, occurrences in repeated.items():
         for filepath, start_lineno, original_lines in occurrences:
             file_removals[filepath].append((start_lineno, original_lines))
     if not file_removals:

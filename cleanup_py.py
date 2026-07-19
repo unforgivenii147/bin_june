@@ -59,11 +59,9 @@ class CleanTransformer(cst.CSTTransformer):
 
         # Preserve shebang, fmt, type comments
         if (
-            comment_text.startswith("#!")
+            comment_text.startswith(("#!", "# fmt:", "# type:"))
             or "# fmt:" in comment_text
             or "# type:" in comment_text
-            or comment_text.startswith("# fmt:")
-            or comment_text.startswith("# type:")
         ):
             return updated_node
 

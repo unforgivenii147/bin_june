@@ -302,7 +302,7 @@ def process_subdirs_with_tar(
     quality: int = 11,
     workers: int = 4,
     keep_original: bool = False,
-    exclude_patterns: List[str] = None,
+    exclude_patterns: List[str] | None = None,
 ) -> List[CompressionResult]:
     if exclude_patterns is None:
         exclude_patterns = []
@@ -415,9 +415,9 @@ def should_compress_file(file_path: Path, exclude_extensions: Set[str], exclude_
 
 def find_files_to_compress(
     directory: Path,
-    exclude_extensions: Set[str] = None,
-    exclude_patterns: List[str] = None,
-    extensions_filter: List[str] = None,
+    exclude_extensions: Set[str] | None = None,
+    exclude_patterns: List[str] | None = None,
+    extensions_filter: List[str] | None = None,
     skip_subdirs: bool = False,
 ) -> List[Path]:
     if exclude_extensions is None:
@@ -443,7 +443,7 @@ def find_files_to_compress(
     return sorted(set(files))
 
 
-def find_files_to_decompress(directory: Path, exclude_patterns: List[str] = None) -> List[Path]:
+def find_files_to_decompress(directory: Path, exclude_patterns: List[str] | None = None) -> List[Path]:
     if exclude_patterns is None:
         exclude_patterns = []
     files = []

@@ -149,9 +149,7 @@ def is_binary_file(file_path: Path) -> bool | None:
             try:
                 decoded = chunk.decode("latin-1")
                 control_chars = sum(1 for c in decoded if ord(c) < 32 and c not in "\t\n\r")
-                if control_chars > len(decoded) * 0.3:
-                    return True
-                return False
+                return control_chars > len(decoded) * 0.3
             except Exception:
                 return True
     except (OSError, PermissionError):
@@ -171,7 +169,7 @@ def check_file(file_path: Path) -> Tuple[Path, str, bool | None, str]:
 
 
 def validate_extensions(
-    root_dir: str = "/", num_workers: int = None, verbose: bool = True, skip_mount_points: bool = True
+    root_dir: str = "/", num_workers: int | None = None, verbose: bool = True, skip_mount_points: bool = True
 ) -> dict:
     if num_workers is None:
         num_workers = max(1, cpu_count() - 1)

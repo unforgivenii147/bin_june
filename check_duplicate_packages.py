@@ -64,10 +64,9 @@ def scan_directory_for_packages(directory: pathlib.Path) -> Dict[str, pathlib.Pa
                 if item.suffix == ".py":
                     packages[item.stem] = item
                 # Check for .dist-info and .egg-info files
-                elif item.suffix == ".dist-info" or item.suffix == ".egg-info":
-                    if item.is_dir():
-                        pkg_name = item.name.split("-")[0]
-                        packages[pkg_name] = item
+                elif (item.suffix == ".dist-info" or item.suffix == ".egg-info") and item.is_dir():
+                    pkg_name = item.name.split("-")[0]
+                    packages[pkg_name] = item
 
     except PermissionError:
         print(f"Warning: Permission denied accessing {directory}", file=sys.stderr)

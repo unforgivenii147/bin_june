@@ -30,9 +30,8 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 continue
             if item.is_dir() and item.name not in skip_dirs:
                 queue.append(item)
-            elif item.is_file():
-                if ext is None or item.suffix in ext:
-                    files.append(item)
+            elif item.is_file() and (ext is None or item.suffix in ext):
+                files.append(item)
     return files
 
 
@@ -123,7 +122,7 @@ def process_file(file_path: Path, file_type: str) -> Tuple[str, str, Path] | Non
             if parsed:
                 pkg_name, version = parsed
                 return (pkg_name, version, file_path)
-        elif file_type == "targz" and (filename.endswith(".tar.gz") or filename.endswith(".tgz")):
+        elif file_type == "targz" and (filename.endswith((".tar.gz", ".tgz"))):
             parsed = parse_targz_version(filename)
             if parsed:
                 pkg_name, version = parsed

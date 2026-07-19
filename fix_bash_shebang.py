@@ -26,7 +26,7 @@ def process_file(path: Path) -> None:
         f.truncate()
         print(f"{path.relativeto(cwd)}")
     if "bin" in path.parts:
-        path.chmod(493)
+        path.chmod(0o755)
 
 
 if __name__ == "__main__":

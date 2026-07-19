@@ -67,9 +67,7 @@ class CommentRemover:
             return True
         if comment_text.startswith("type:"):
             return True
-        if comment_text.startswith("fmt:"):
-            return True
-        return False
+        return bool(comment_text.startswith("fmt:"))
 
     @staticmethod
     def remove_comments(source_code: str) -> Tuple[str, int]:
@@ -78,7 +76,7 @@ class CommentRemover:
         comment_count = 0
         in_multiline_string = False
         string_delimiter = None
-        for line_index, line in enumerate(lines):
+        for _line_index, line in enumerate(lines):
             for delimiter in ('"""', "'''"):
                 if delimiter in line:
                     temp_line = line

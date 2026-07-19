@@ -112,7 +112,7 @@ def mo_to_po_python_only(mo_path, remove_orig: bool = True, verbose: bool = Fals
             po_file.write('"MIME-Version: 1.0\\n"\n')
             po_file.write('"Content-Type: text/plain; charset=UTF-8\\n"\n')
             po_file.write('"Content-Transfer-Encoding: 8bit\\n"\n\n')
-            for orig, trans in zip(orig_strings, trans_strings):
+            for orig, trans in zip(orig_strings, trans_strings, strict=False):
                 po_file.write(f'msgid "{orig}"\n')
                 po_file.write(f'msgstr "{trans}"\n\n')
         if verbose:

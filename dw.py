@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 import shutil
 import sys
 import time
@@ -26,10 +27,8 @@ def get_all_files(folder):
         base = Path(folder)
         for p in base.rglob("*"):
             if p.is_file():
-                try:
+                with contextlib.suppress(OSError):
                     files[str(p)] = p.stat().st_mtime
-                except OSError:
-                    pass
     except OSError as e:
         print(f"Error scanning folder: {e}", file=sys.stderr)
     return files

@@ -8,7 +8,7 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 
 def html_to_png(html_content, output_path, dpi=150):
-    if html_content.startswith("<") or html_content.startswith("<!DOCTYPE"):
+    if html_content.startswith(("<", "<!DOCTYPE")):
         html = HTML(string=html_content)
     else:
         html = HTML(filename=html_content)

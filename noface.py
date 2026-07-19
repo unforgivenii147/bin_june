@@ -121,7 +121,7 @@ def collect_images(directory: Path, exclude_dir: Path) -> list:
     return images
 
 
-def process_images(num_workers: int = None):
+def process_images(num_workers: int | None = None):
     current_dir = Path.cwd()
     noface_dir = Path("/sdcard/DCIM/noface")
     try:

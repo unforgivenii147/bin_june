@@ -31,7 +31,7 @@ def format_size(size_bytes) -> str:
 def get_dir_size(start_path: str) -> int:
     total_size = 0
     try:
-        for dirpath, dirnames, filenames in os.walk(start_path):
+        for dirpath, _dirnames, filenames in os.walk(start_path):
             for f in filenames:
                 path = os.path.join(dirpath, f)
                 if not os.path.islink(path):
@@ -70,7 +70,7 @@ def create_chart(target_dir: str = ".") -> None:
     if remaining_size > 0:
         labels.append("Other")
     sizes = list(percentages.values())
-    fig, ax = plt.subplots(figsize=(10, 6))
+    _fig, ax = plt.subplots(figsize=(10, 6))
     if CHART_TYPE == "bar":
         ax.bar(labels, sizes, color="skyblue")
         ax.set_ylabel("Percentage %")

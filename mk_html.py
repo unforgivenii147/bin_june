@@ -86,7 +86,7 @@ def convert_md_to_rst(content: str) -> str:
     return content
 
 
-def convert_file_to_html(file_path: Path, stylesheet_url: str = None) -> Path:
+def convert_file_to_html(file_path: Path, stylesheet_url: str | None = None) -> Path:
     """Convert a single file to HTML using appropriate converter."""
     try:
         html_path = file_path.with_suffix(".html")
@@ -163,13 +163,13 @@ def generate_stylesheet_hash(stylesheet_path: Path) -> str:
     return f"style_{checksum}.css"
 
 
-def process_file(file_path: Path, stylesheet_url: str = None) -> tuple:
+def process_file(file_path: Path, stylesheet_url: str | None = None) -> tuple:
     """Process a single file and return (original_path, html_path)."""
     html_path = convert_file_to_html(file_path, stylesheet_url)
     return (file_path, html_path)
 
 
-def find_all_source_files(root_dir: Path = None) -> list:
+def find_all_source_files(root_dir: Path | None = None) -> list:
     """Find all source files recursively in the directory."""
     if root_dir is None:
         root_dir = Path.cwd()
@@ -181,7 +181,7 @@ def find_all_source_files(root_dir: Path = None) -> list:
     return source_files
 
 
-def publish_parallel(root_dir: Path = None, max_workers: int = None):
+def publish_parallel(root_dir: Path | None = None, max_workers: int | None = None):
     """Convert all source files to HTML in parallel."""
     if root_dir is None:
         root_dir = Path.cwd()

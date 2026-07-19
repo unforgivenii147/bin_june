@@ -82,7 +82,7 @@ def folderize_by_similarity(root: Path, out_dir_name: str, hash_func: str, hash_
         group_idx += 1
         group_folder = out_dir / f"group_{group_idx:06d}"
         group_folder.mkdir(parents=True, exist_ok=True)
-        for mi, member in enumerate(members):
+        for _mi, member in enumerate(members):
             dest = group_folder / member.path.name
             if dest.exists():
                 stem = dest.stem

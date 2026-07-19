@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 from __future__ import annotations
 
+import contextlib
 import os
 import shutil
 import tarfile
@@ -132,10 +133,8 @@ def copy_pkg_files(files: list[str], dest: Path) -> None:
             try:
                 content = path.read_bytes()
                 target.write_bytes(content)
-                try:
+                with contextlib.suppress(BaseException):
                     os.chmod(target, path.stat().st_mode)
-                except:
-                    pass
             except:
                 pass
 

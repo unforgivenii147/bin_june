@@ -166,7 +166,7 @@ def main() -> None:
         print(f"Error writing file: {e}", file=sys.stderr)
         sys.exit(1)
     if is_script_dir:
-        output_path.chmod(493)
+        output_path.chmod(0o755)
         print(f"✓ Made executable (755)")
         create_symlink(output_path)
     if content.strip():

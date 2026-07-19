@@ -21,7 +21,7 @@ def add_path_statement(file_path: str) -> bool:
             continue
         if in_function and not added:
             stripped = line.strip()
-            if stripped and (stripped.startswith('"""') or stripped.startswith("'''")):
+            if stripped and (stripped.startswith(('"""', "'''"))):
                 modified_lines.append(line)
                 if stripped.count('"""') == 1 or stripped.count("'''") == 1:
                     docstring_started = True

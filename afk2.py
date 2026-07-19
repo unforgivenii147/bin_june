@@ -543,7 +543,7 @@ def _task_analyze_source_str(args: tuple[str, str]) -> FileReport:
     virtual_path, source = args
     if source.startswith("__ERROR__:"):
         return FileReport(path=virtual_path, error=source[len("__ERROR__:") :])
-    is_init = virtual_path.endswith("/__init__.py") or virtual_path.endswith("\\__init__.py")
+    is_init = virtual_path.endswith(("/__init__.py", "\\__init__.py"))
     return analyze_source(
         source,
         virtual_path,
@@ -660,7 +660,7 @@ def print_report(
         lineno_str = cyan(f"line {ui.lineno:>4}")
         stmt_display = yellow(ui.original_stmt.splitlines()[0])
         print(f"  {bold(display)}  -->  {lineno_str}  {stmt_display}")
-        if verbose or True:  # always show unused names
+        if True:  # always show unused names
             names_str = red(", ".join(ui.unused_names))
             print(f"{'':>50}  [unused: {names_str}]")
 

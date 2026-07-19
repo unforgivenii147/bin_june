@@ -333,7 +333,7 @@ def extract_from_zip(zip_path: str) -> Set[str]:
     return imports
 
 
-def extract_from_tar(tar_path: str, compression: str = None) -> Set[str]:
+def extract_from_tar(tar_path: str, compression: str | None = None) -> Set[str]:
     imports = set()
     try:
         mode = f"r:{compression}" if compression else "r:*"
@@ -373,7 +373,7 @@ def process_file(file_path: str) -> Set[str]:
     return imports
 
 
-def collect_files(root_dir: str, exclude_dirs: List[str] = None) -> List[str]:
+def collect_files(root_dir: str, exclude_dirs: List[str] | None = None) -> List[str]:
     if exclude_dirs is None:
         exclude_dirs = {".venv", "venv", ".env", "__pycache__", ".git", "node_modules", ".egg-info"}
     files = []

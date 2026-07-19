@@ -138,10 +138,7 @@ class SpaceStats:
 def should_skip_directory(dir_name: str) -> bool:
     if dir_name in SKIP_DIRS:
         return True
-    for pattern in SKIP_DIR_PATTERNS:
-        if fnmatch.fnmatch(dir_name, pattern):
-            return True
-    return False
+    return any(fnmatch.fnmatch(dir_name, pattern) for pattern in SKIP_DIR_PATTERNS)
 
 
 def is_editable_package_dir(root_path: Path) -> bool:

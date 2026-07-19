@@ -48,7 +48,7 @@ def write_sorted_aliases(aliases, filepath: Path, create_backup=True) -> None:
             print(f"Warning: Could not create backup: {e}")
     try:
         with open(filepath, "w", encoding="utf-8") as f:
-            for name, value, raw_line in sorted_aliases:
+            for _name, _value, raw_line in sorted_aliases:
                 f.write(raw_line + "\n")
         print(f"\n✓ Sorted {len(sorted_aliases)} aliases by value")
         print(f"Output written to: {filepath}")

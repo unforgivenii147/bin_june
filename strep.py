@@ -24,9 +24,8 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 continue
             if item.is_dir() and item.name not in skip_dirs:
                 queue.append(item)
-            elif item.is_file():
-                if ext is None or item.suffix in ext:
-                    files.append(item)
+            elif item.is_file() and (ext is None or item.suffix in ext):
+                files.append(item)
     return files
 
 
@@ -221,7 +220,7 @@ def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_
 def process_file(path) -> None:
     path = Path(path)
     before = path.stat().st_size
-    ret, _, _ = runcmd(["strip", str(path)], show_output=True)
+    _ret, _, _ = runcmd(["strip", str(path)], show_output=True)
     after = path.stat().st_size
     if not after:
         return

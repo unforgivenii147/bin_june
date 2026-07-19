@@ -74,7 +74,7 @@ def extract_shebang_and_encoding(source_code: str) -> Tuple[str, str, str]:
         if i == 0 and line.startswith("#!"):
             shebang = line
             continue
-        elif i < 2 and (line.startswith("# -*- coding:") or line.startswith("# coding:")):
+        elif i < 2 and (line.startswith(("# -*- coding:", "# coding:"))):
             encoding = line
             continue
         remaining_lines.append(line)

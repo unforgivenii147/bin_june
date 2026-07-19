@@ -17,7 +17,7 @@ def is_empty_wheel(wheel_path: Path) -> bool:
             all_files = zip_ref.namelist()
             has_py_files = any(file.endswith(".py") for file in all_files)
             has_code_dirs = any(
-                not (file.startswith("dist-info/") or file.startswith("__pycache__/"))
+                not (file.startswith(("dist-info/", "__pycache__/")))
                 and not file.endswith("/")
                 and not file.endswith(".dist-info/")
                 for file in all_files
@@ -114,7 +114,7 @@ def analyze_wheels(source_dir, dest_dir_name: str = "empty_wheels", check_instal
         print(f"Checking {wheel_file.name}...")
         if is_empty_wheel(wheel_file):
             print(f"  ✓ EMPTY wheel")
-            pkg_name, pkg_version = extract_package_info(wheel_file)
+            pkg_name, _pkg_version = extract_package_info(wheel_file)
             if check_installed and pkg_name:
                 installed_version = installed_packages.get(pkg_name.lower())
                 if installed_version:

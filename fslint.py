@@ -26,6 +26,7 @@ Usage examples:
 from __future__ import annotations
 
 import argparse
+import contextlib
 import grp
 import hashlib
 import os
@@ -97,7 +98,7 @@ def walk(
     """
     for root in roots:
         root = root.resolve() if follow_symlinks else root
-        for dirpath, dirnames, filenames in os.walk(root, followlinks=follow_symlinks, onerror=_walk_err):
+        for dirpath, _dirnames, filenames in os.walk(root, followlinks=follow_symlinks, onerror=_walk_err):
             dp = Path(dirpath)
             if yield_dirs:
                 yield dp
@@ -140,10 +141,8 @@ def findup(roots: list[Path]) -> int:
     for p in walk(roots, yield_dirs=False):
         if p.is_symlink():
             continue
-        try:
+        with contextlib.suppress(OSError):
             size_map[p.stat().st_size].append(p)
-        except OSError:
-            pass
 
     groups: dict[str, list[Path]] = defaultdict(list)
     for size, paths in size_map.items():

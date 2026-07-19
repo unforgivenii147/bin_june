@@ -27,7 +27,7 @@ def is_pure_python_wheel(wheel_path: Path) -> bool:
         with zipfile.ZipFile(wheel_path, "r") as zf:
             # Look for WHEEL metadata file
             for name in zf.namelist():
-                if name.endswith(".dist-info/WHEEL") or name.endswith(".dist-info/METADATA"):
+                if name.endswith((".dist-info/WHEEL", ".dist-info/METADATA")):
                     with zf.open(name) as f:
                         content = f.read().decode("utf-8")
                         # Check if Root-Is-Purelib is true

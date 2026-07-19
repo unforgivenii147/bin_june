@@ -75,15 +75,14 @@ class EntityExtractor(ast.NodeVisitor):
     def visit_Assign(self, node: ast.Assign) -> None:
         if not self._in_class:
             for target in node.targets:
-                if isinstance(target, ast.Name):
-                    if target.id.isupper():
-                        self.constants.append(
-                            Entity(
-                                name=target.id,
-                                file_path=str(self.file_path),
-                                line_number=node.lineno,
-                            )
+                if isinstance(target, ast.Name) and target.id.isupper():
+                    self.constants.append(
+                        Entity(
+                            name=target.id,
+                            file_path=str(self.file_path),
+                            line_number=node.lineno,
                         )
+                    )
         self.generic_visit(node)
 
     def visit_Import(self, node: ast.Import) -> None:
@@ -155,7 +154,7 @@ def save_imports(output_dir: Path, imports_by_dir: Dict[str, Set[str]]) -> None:
     logger.info(f"Saved imports for {len(imports_by_dir)} directories")
 
 
-def main(root_dir: str = ".", output_dir: str = "output", num_workers: int = None) -> None:
+def main(root_dir: str = ".", output_dir: str = "output", num_workers: int | None = None) -> None:
     root_path = Path(root_dir)
     output_path = Path(output_dir)
     if not root_path.exists():

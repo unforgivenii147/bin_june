@@ -24,9 +24,8 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 continue
             if item.is_dir() and item.name not in skip_dirs:
                 queue.append(item)
-            elif item.is_file():
-                if ext is None or item.suffix in ext:
-                    files.append(item)
+            elif item.is_file() and (ext is None or item.suffix in ext):
+                files.append(item)
     return files
 
 
@@ -205,7 +204,7 @@ def process_file(path: str | Path) -> None:
     before = gsz(path)
     try:
         cmd = ["optipng", f"-o7", str(path)]
-        ret, txt, err = runcmd(cmd, show_output=True)
+        _ret, txt, _err = runcmd(cmd, show_output=True)
         if "skipping" in txt.lower():
             print(f" Skipped: {path.name}")
             return

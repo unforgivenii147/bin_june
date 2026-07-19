@@ -161,7 +161,7 @@ def analyze_file(filepath: Path, detailed: bool = False) -> Dict | None:
         return {"file": str(filepath), "error": str(e), "non_english_lines": []}
 
 
-def scan_files(root_dir: Path, detailed: bool = False, max_workers: int = None) -> List[Dict]:
+def scan_files(root_dir: Path, detailed: bool = False, max_workers: int | None = None) -> List[Dict]:
     if max_workers is None:
         max_workers = min(cpu_count(), 8)
     files = []

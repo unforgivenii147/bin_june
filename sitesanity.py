@@ -34,10 +34,7 @@ def should_ignore_file(file_path: Path, ignore_patterns: list[str]) -> bool:
     if file_path.suffix == ".pyc":
         return True
     name = file_path.name
-    for pattern in ignore_patterns:
-        if fnmatch(name, pattern):
-            return True
-    return False
+    return any(fnmatch(name, pattern) for pattern in ignore_patterns)
 
 
 def check_package_files(dist, ignore_patterns: list[str]) -> list[str]:

@@ -123,7 +123,7 @@ def process_file(path: Path) -> Tuple[str, bool, str | None, RemovalStats]:
         return (str(path), False, f"read-error: {exc}", RemovalStats(0, 0))
     if not original.strip():
         return (str(path), False, None, RemovalStats(0, 0))
-    prefix, code_part = extract_prefix_comments_and_shebang(original)
+    prefix, _code_part = extract_prefix_comments_and_shebang(original)
     preserved_inline_comments, comments_removed = collect_and_strip_comments(original)
     try:
         tree = ast.parse(original)

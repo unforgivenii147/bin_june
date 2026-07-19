@@ -158,7 +158,7 @@ def apply_changes(stats, dry_run=False):
     print(f"\nApplying changes to {len(all_changes)} items...")
     success = 0
     failed = 0
-    for path, current, target in tqdm(all_changes, desc="Changing permissions", unit="items"):
+    for path, _current, target in tqdm(all_changes, desc="Changing permissions", unit="items"):
         if process_item(path, target, dry_run):
             success += 1
         else:

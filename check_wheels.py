@@ -28,9 +28,8 @@ def inspect_and_move_wheels(root_dir="."):
                 for name in namelist:
                     if name.endswith("/"):
                         continue
-                    if "/" not in name:
-                        if name.endswith((".py", ".pyc", ".pyd", ".so", ".dll")):
-                            loose_root_files.append(name)
+                    if "/" not in name and name.endswith((".py", ".pyc", ".pyd", ".so", ".dll")):
+                        loose_root_files.append(name)
                 if loose_root_files:
                     bad_wheels_count += 1
                     relative_path = whl_path.relative_to(root_path)

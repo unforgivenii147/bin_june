@@ -15,5 +15,5 @@ def show_random_color() -> None:
 
 
 if __name__ == "__main__":
-    for i in range(1, randbelow(1000)):
+    for _i in range(1, randbelow(1000)):
         show_random_color()

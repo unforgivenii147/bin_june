@@ -64,7 +64,7 @@ def normalize_file_contents(path) -> None:
 
 def normalize_filenames_batch(directory: Path) -> None:
     processed_count = 0
-    for root, dirs, files in os.walk(directory):
+    for root, _dirs, files in os.walk(directory):
         for file in files:
             if (".js" in file or ".css" in file) and not file.endswith((".js", ".css")):
                 path = Path(root) / file
