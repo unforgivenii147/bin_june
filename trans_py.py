@@ -6,6 +6,8 @@ Optimized version of trans_py.py for Python 3.12.
 Translates docstrings and comments in Python files using AST and parallel threads.
 """
 
+from __future__ import annotations
+
 import ast
 import logging
 import re
@@ -38,7 +40,7 @@ def is_binary(path: Path) -> bool:
 def get_pyfiles(directory: Path) -> list[Path]:
     pyfiles: list[Path] = []
     for p in directory.rglob("*.py"):
-        if any((part.startswith(".") or part in SKIP_DIRS for part in p.parts)):
+        if any(part.startswith(".") or part in SKIP_DIRS for part in p.parts):
             continue
         if p.is_file() and (not is_binary(p)):
             pyfiles.append(p)

@@ -6,6 +6,8 @@ Optimized version of trans_words.py for Python 3.12.
 Chunks text files, detects language, and translates to English, saving in JSON.
 """
 
+from __future__ import annotations
+
 import json
 import logging
 import sys
@@ -115,7 +117,7 @@ def get_input_files(paths: list[str]) -> list[Path]:
             files.append(path)
         elif path.is_dir():
             files.extend(path.rglob("*.txt"))
-    return [f for f in files if not any((part in SKIP_DIRS for part in f.parts))]
+    return [f for f in files if not any(part in SKIP_DIRS for part in f.parts)]
 
 
 def main() -> None:

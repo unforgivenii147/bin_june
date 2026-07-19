@@ -7,6 +7,8 @@ Optimized for Linux/Termux - only checks for .so files.
 Uses multiprocessing for parallel scanning and pathlib for path operations.
 """
 
+from __future__ import annotations
+
 import argparse
 import json
 import re

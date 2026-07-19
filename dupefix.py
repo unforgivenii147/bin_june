@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import pathlib
 import shutil
 from collections import defaultdict
@@ -22,7 +24,7 @@ def get_file_hash(filepath):
                     break
                 xxh.update(chunk)
         return filepath, xxh.hexdigest()
-    except (OSError, PermissionError, IOError):
+    except (OSError, PermissionError):
         return filepath, None
 
 

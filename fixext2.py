@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import cmd
 import os
 from pathlib import Path
@@ -31,7 +33,7 @@ def detect_text_based_extension(text: str):
         return "sh"
     if text.startswith(("# ", "## ")) or "---" in text:
         return "md"
-    if text.startswith("---") or ": " in text and "\n" in text:
+    if text.startswith("---") or (": " in text and "\n" in text):
         return "yaml"
     if "=" in text and "[" in text and "]" in text:
         return "toml"

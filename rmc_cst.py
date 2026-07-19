@@ -25,7 +25,7 @@ import libcst as cst
 import libcst.matchers as m
 
 
-def find_module_docstring(source: str) -> Optional[tuple[int, int]]:
+def find_module_docstring(source: str) -> tuple[int, int] | None:
     try:
         module = ast.parse(source)
     except SyntaxError:
@@ -60,7 +60,7 @@ class StripCommentsAndDocstrings(cst.CSTTransformer):
     and tracks how many were removed.
     """
 
-    def __init__(self, module_doc_range: Optional[tuple[int, int]]):
+    def __init__(self, module_doc_range: tuple[int, int] | None):
         super().__init__()
         self.module_doc_range = module_doc_range
         self.comments_removed = 0
@@ -107,7 +107,7 @@ class StripCommentsAndDocstrings(cst.CSTTransformer):
 
     def leave_SimpleStatementLine(
         self, original_node: cst.SimpleStatementLine, updated_node: cst.SimpleStatementLine
-    ) -> Optional[cst.CSTNode]:
+    ) -> cst.CSTNode | None:
         if not self._is_docstring_expr(updated_node):
             return updated_node
 
@@ -118,7 +118,7 @@ class StripCommentsAndDocstrings(cst.CSTTransformer):
         return cst.RemovalSentinel
 
 
-def process_file(path: Path) -> Tuple[Path, int, int, bool, Optional[str]]:
+def process_file(path: Path) -> Tuple[Path, int, int, bool, str | None]:
     """
     Process a single file:
 

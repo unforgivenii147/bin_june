@@ -6,6 +6,8 @@ Optimized version of transasis.py for Python 3.12.
 Translates text files to English recursively or individually.
 """
 
+from __future__ import annotations
+
 import logging
 import re
 import sys
@@ -61,7 +63,7 @@ def translate_file(filepath: Path) -> None:
 
 def translate_folder(directory: Path) -> None:
     for p in directory.rglob("*"):
-        if any((part.startswith(".") or part in SKIP_DIRS for part in p.parts)):
+        if any(part.startswith(".") or part in SKIP_DIRS for part in p.parts):
             continue
         if p.is_file():
             translate_file(p)

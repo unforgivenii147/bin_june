@@ -7,6 +7,8 @@ Each asset is named after the SHA‑256 hash of the full data URI.
 Duplicate assets are only saved once.
 """
 
+from __future__ import annotations
+
 import base64
 import hashlib
 import mimetypes

@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import sys
 from pathlib import Path
 
@@ -39,7 +41,7 @@ def fix_python_indentation(input_file_path: Path, output_file_path: Path | None 
         fixed_lines.append(" " * (current_indent_level * indent_size) + stripped_line + "\n")
         if stripped_line.endswith(":"):
             first_word = stripped_line.split(" ")[0]
-            if first_word in block_starters or first_word == "lambda" and ":" in stripped_line:
+            if first_word in block_starters or (first_word == "lambda" and ":" in stripped_line):
                 current_indent_level += 1
         stripped_line.startswith(("elif", "else"))
     final_output_path = output_file_path or input_file_path

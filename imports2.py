@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import ast
 import logging
 import subprocess
@@ -240,7 +242,6 @@ class PythonImportExtractor:
                 "zlib",
                 "__future__",
                 "__main__",
-                "dataclasses",
                 "graphlib",
                 "tomllib",
                 "zoneinfo",
@@ -368,7 +369,7 @@ class PythonImportExtractor:
             return self.extract_from_zip(filepath)
         elif filepath.suffixes[-2:] == [".tar", ".gz"] or filepath.name.endswith((".tar.xz", ".tar.zst")):
             return self.extract_from_tar(filepath)
-        elif filepath.suffix in {".py", ".pyw"} or filepath.is_file() and filepath.suffix == "":
+        elif filepath.suffix in {".py", ".pyw"} or (filepath.is_file() and filepath.suffix == ""):
             return self.extract_from_file(filepath)
         return set()
 

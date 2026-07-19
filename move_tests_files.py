@@ -5,6 +5,8 @@ Move test files to ~/tmp/tests while preserving directory structure.
 Supports parallel processing and reversible operations.
 """
 
+from __future__ import annotations
+
 import argparse
 import json
 import shutil
@@ -37,7 +39,7 @@ def move_file(source: Path, dest: Path) -> Tuple[str, bool, str]:
         shutil.move(str(source), str(dest))
         return str(source), True, f"Moved to {dest}"
     except Exception as e:
-        return str(source), False, f"Error: {str(e)}"
+        return str(source), False, f"Error: {e!s}"
 
 
 def find_test_files(base_dir: Path) -> List[Path]:
@@ -76,7 +78,7 @@ def move_files_parallel(
 def reverse_move(moved_files_log: Path) -> Tuple[dict, List[Tuple[str, str]]]:
     if not moved_files_log.exists():
         raise FileNotFoundError(f"Log file not found: {moved_files_log}")
-    with open(moved_files_log, "r") as f:
+    with open(moved_files_log) as f:
         file_mapping = json.load(f)
     results = []
     with ProcessPoolExecutor(max_workers=4) as executor:

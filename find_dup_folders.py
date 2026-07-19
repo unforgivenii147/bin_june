@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import json
 from collections import defaultdict
 from os import scandir as os_scandir

@@ -148,13 +148,12 @@ def write_compressed_tar_bytes_from_tar(src_tar: Path, dst: Path, codec: str) ->
                 f_out.write(tail)
     elif codec == "zst":
         cctx = zstd.ZstdCompressor(level=22)
-        with src_tar.open("rb") as f_in, dst.open("wb") as f_out:
-            with cctx.stream_writer(f_out) as zw:
-                while True:
-                    chunk = f_in.read(CHUNK)
-                    if not chunk:
-                        break
-                    zw.write(chunk)
+        with src_tar.open("rb") as f_in, dst.open("wb") as f_out, cctx.stream_writer(f_out) as zw:
+            while True:
+                chunk = f_in.read(CHUNK)
+                if not chunk:
+                    break
+                zw.write(chunk)
     elif codec == "br":
         compressor = brotli.Compressor(quality=11)
         with src_tar.open("rb") as f_in, dst.open("wb") as f_out:

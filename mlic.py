@@ -5,6 +5,8 @@ Find repeated multiline strings in text files recursively.
 Supports parallel processing, removal, and saving of found strings.
 """
 
+from __future__ import annotations
+
 import argparse
 import ast
 import concurrent.futures
@@ -23,7 +25,7 @@ def find_multiline_strings(
     file_path: Path, min_lines: int = 2, min_chars: int = 10
 ) -> Dict[str, List[Tuple[int, int]]]:
     try:
-        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+        with open(file_path, encoding="utf-8", errors="ignore") as f:
             lines = f.readlines()
     except Exception as e:
         print(f"Error reading {file_path}: {e}", file=sys.stderr)
@@ -164,7 +166,7 @@ def remove_strings_from_files(
     modified_files = []
     for file_path, positions in files_to_modify.items():
         try:
-            with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            with open(file_path, encoding="utf-8", errors="ignore") as f:
                 original_content = f.read()
                 lines = f.seek(0) or original_content.splitlines(True)
             lines = original_content.splitlines(True)

@@ -6,6 +6,8 @@ Compresses files in current directory recursively, skipping certain extensions a
 Uses Path.walk() for memory-efficient traversal.
 """
 
+from __future__ import annotations
+
 import argparse
 import fnmatch
 import heapq
@@ -151,7 +153,7 @@ def is_editable_package_dir(root_path: Path) -> bool:
                 direct_url = item / "direct_url.json"
                 if direct_url.exists():
                     try:
-                        with open(direct_url, "r") as f:
+                        with open(direct_url) as f:
                             data = json.load(f)
                             if data.get("dir_info", {}).get("editable", False):
                                 return True
@@ -294,14 +296,13 @@ def compress_file(
     try:
         original_size = input_path.stat().st_size
         compressor = zstd.ZstdCompressor(level=level, threads=threads)
-        with open(input_path, "rb") as infile:
-            with open(output_path, "wb") as outfile:
-                reader = compressor.stream_reader(infile)
-                while True:
-                    chunk = reader.read(8192)
-                    if not chunk:
-                        break
-                    outfile.write(chunk)
+        with open(input_path, "rb") as infile, open(output_path, "wb") as outfile:
+            reader = compressor.stream_reader(infile)
+            while True:
+                chunk = reader.read(8192)
+                if not chunk:
+                    break
+                outfile.write(chunk)
         compressed_size = output_path.stat().st_size
         if stats:
             stats.add(original_size, compressed_size)
@@ -327,14 +328,13 @@ def decompress_file(
     try:
         compressed_size = input_path.stat().st_size
         decompressor = zstd.ZstdDecompressor()
-        with open(input_path, "rb") as infile:
-            with open(output_path, "wb") as outfile:
-                reader = decompressor.stream_reader(infile)
-                while True:
-                    chunk = reader.read(8192)
-                    if not chunk:
-                        break
-                    outfile.write(chunk)
+        with open(input_path, "rb") as infile, open(output_path, "wb") as outfile:
+            reader = decompressor.stream_reader(infile)
+            while True:
+                chunk = reader.read(8192)
+                if not chunk:
+                    break
+                outfile.write(chunk)
         decompressed_size = output_path.stat().st_size
         if remove_original:
             input_path.unlink()

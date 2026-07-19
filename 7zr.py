@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import argparse
 import asyncio
 import mmap
@@ -52,12 +54,11 @@ def decompress_file(path: Path) -> bool:
         return False
     out_path = path.with_suffix("")
     try:
-        with py7zr.SevenZipFile(path, mode="r") as sevenz:
-            with tempfile.TemporaryDirectory() as tmpdir:
-                sevenz.extractall(path=tmpdir)
-                extracted = Path(tmpdir) / out_path.name
-                if extracted.exists():
-                    shutil.move(str(extracted), str(out_path))
+        with py7zr.SevenZipFile(path, mode="r") as sevenz, tempfile.TemporaryDirectory() as tmpdir:
+            sevenz.extractall(path=tmpdir)
+            extracted = Path(tmpdir) / out_path.name
+            if extracted.exists():
+                shutil.move(str(extracted), str(out_path))
         original_size = path.stat().st_size
         decompressed_size = out_path.stat().st_size
         print(f"  ✓ Decompressed {path.name}: {fsz(original_size)} → {fsz(decompressed_size)}")

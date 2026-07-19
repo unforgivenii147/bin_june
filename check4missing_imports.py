@@ -5,6 +5,8 @@ Check Python files recursively for missing imports.
 Supports parallel processing and optional auto-fix with -a flag.
 """
 
+from __future__ import annotations
+
 import argparse
 import ast
 import sys
@@ -22,7 +24,7 @@ def get_python_files(root_dir: Path) -> List[Path]:
 
 def extract_imports(file_path: Path) -> Set[str]:
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             tree = ast.parse(f.read(), filename=str(file_path))
     except (SyntaxError, UnicodeDecodeError):
         return set()
@@ -39,7 +41,7 @@ def extract_imports(file_path: Path) -> Set[str]:
 
 def extract_used_names(file_path: Path) -> Set[str]:
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             tree = ast.parse(f.read(), filename=str(file_path))
     except (SyntaxError, UnicodeDecodeError):
         return set()
@@ -74,7 +76,7 @@ def check_file(file_path: Path) -> Tuple[Path, List[str]]:
 def fix_file(file_path: Path, missing_imports: List[str]) -> None:
     if not missing_imports:
         return
-    with open(file_path, "r", encoding="utf-8") as f:
+    with open(file_path, encoding="utf-8") as f:
         content = f.read()
     try:
         tree = ast.parse(content)

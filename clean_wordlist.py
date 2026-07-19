@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import mmap
 import sys
 from collections import defaultdict
@@ -11,10 +13,9 @@ def get_lines(file_path: Path) -> list[str]:
     file_size = file_path.stat().st_size
     if file_size > 5 * 1024 * 1024:
         print(f"[Info] Large file detected ({file_size / (1024 * 1024):.2f} MB). Using mmap...")
-        with file_path.open("r+b") as f:
-            with mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm:
-                content = mm.read().decode("utf-8", errors="ignore")
-                return [line.strip() for line in content.splitlines() if line.strip()]
+        with file_path.open("r+b") as f, mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm:
+            content = mm.read().decode("utf-8", errors="ignore")
+            return [line.strip() for line in content.splitlines() if line.strip()]
     else:
         print("[Info] Small file detected. Using standard read...")
         with file_path.open("r", encoding="utf-8") as f:

@@ -72,7 +72,7 @@ SIGNATURES = [
     (lambda b: b.startswith(b"Rar!\x1a\x07\x00"), ".rar", "RAR archive"),
     (lambda b: len(b) > 262 and b[257:262] == b"ustar", ".tar", "TAR archive"),
     (
-        lambda b: b.startswith(b"ID3") or len(b) >= 2 and (b[0] == 255 and b[1] & 224 == 224),
+        lambda b: b.startswith(b"ID3") or (len(b) >= 2 and (b[0] == 255 and b[1] & 224 == 224)),
         ".mp3",
         "MP3 audio",
     ),
@@ -186,7 +186,7 @@ SKIP_EXTS = {
 }
 
 
-def detect_with_magic(path: Path) -> Optional[Tuple[str, str]]:
+def detect_with_magic(path: Path) -> Tuple[str, str] | None:
     if not MAGIC_AVAILABLE:
         return None
     try:
@@ -201,7 +201,7 @@ def detect_with_magic(path: Path) -> Optional[Tuple[str, str]]:
         return None
 
 
-def detect_by_signature(path: Path, nbytes: int = READ_BYTES) -> Optional[Tuple[str, str]]:
+def detect_by_signature(path: Path, nbytes: int = READ_BYTES) -> Tuple[str, str] | None:
     try:
         with path.open("rb") as f:
             head = f.read(nbytes)
@@ -252,7 +252,7 @@ def detect_by_signature(path: Path, nbytes: int = READ_BYTES) -> Optional[Tuple[
     return None
 
 
-def detect_file_type(path: Path) -> Optional[Tuple[str, str]]:
+def detect_file_type(path: Path) -> Tuple[str, str] | None:
     if MAGIC_AVAILABLE:
         result = detect_with_magic(path)
         if result:
@@ -260,7 +260,7 @@ def detect_file_type(path: Path) -> Optional[Tuple[str, str]]:
     return detect_by_signature(path)
 
 
-def safe_rename(src: Path, dst: Path) -> Tuple[bool, Optional[str]]:
+def safe_rename(src: Path, dst: Path) -> Tuple[bool, str | None]:
     if src.samefile(dst) if dst.exists() and src.exists() else False:
         return False, "source and destination are identical"
     if not dst.exists():

@@ -7,6 +7,8 @@ Bidirectional converter between wheel files (.whl) and tar.xz archives.
 - Auto-detects file type and performs appropriate conversion
 """
 
+from __future__ import annotations
+
 import argparse
 import logging
 import sys
@@ -79,7 +81,7 @@ def preserve_tar_metadata(tarinfo: tarfile.TarInfo, zipinfo: zipfile.ZipInfo) ->
     return zipinfo
 
 
-def convert_whl_to_tarxz(path: Path, remove_original: bool = False) -> Tuple[bool, str, Optional[Path]]:
+def convert_whl_to_tarxz(path: Path, remove_original: bool = False) -> Tuple[bool, str, Path | None]:
     try:
         if not path.exists() or not path.is_file():
             return False, f"Invalid file: {path}", None
@@ -128,7 +130,7 @@ def convert_whl_to_tarxz(path: Path, remove_original: bool = False) -> Tuple[boo
         return False, f"Conversion error: {e}", None
 
 
-def convert_tarxz_to_whl(path: Path, remove_original: bool = False) -> Tuple[bool, str, Optional[Path]]:
+def convert_tarxz_to_whl(path: Path, remove_original: bool = False) -> Tuple[bool, str, Path | None]:
     try:
         if not path.exists() or not path.is_file():
             return False, f"Invalid file: {path}", None
@@ -187,7 +189,7 @@ def convert_tarxz_to_whl(path: Path, remove_original: bool = False) -> Tuple[boo
         return False, f"Conversion error: {e}", None
 
 
-def process_file(path: Path, remove_original: bool = False) -> Tuple[bool, str, Optional[Path]]:
+def process_file(path: Path, remove_original: bool = False) -> Tuple[bool, str, Path | None]:
     path = Path(path)
     if not path.exists():
         return False, f"File not found: {path}", None
@@ -260,7 +262,7 @@ Examples:
             logger.error(f"Path does not exist: {path}")
             continue
         if path.is_file():
-            if path.suffix.lower() == ".whl" or path.suffix == ".xz" and ".tar" in str(path):
+            if path.suffix.lower() == ".whl" or (path.suffix == ".xz" and ".tar" in str(path)):
                 convertible_files.append(path)
             else:
                 logger.warning(f"Skipping unsupported file: {path}")

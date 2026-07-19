@@ -10,6 +10,8 @@ A simple, fast command-line calculator with support for:
 - Constants (pi, e, etc.)
 """
 
+from __future__ import annotations
+
 import argparse
 import math
 import re
@@ -207,13 +209,13 @@ class Calculator:
         except ZeroDivisionError:
             return "Error: Division by zero"
         except ValueError as e:
-            return f"Error: {str(e)}"
+            return f"Error: {e!s}"
         except NameError as e:
-            return f"Error: Unknown variable or function: {str(e)}"
+            return f"Error: Unknown variable or function: {e!s}"
         except SyntaxError:
             return f"Error: Invalid expression syntax"
         except Exception as e:
-            return f"Error: {str(e)}"
+            return f"Error: {e!s}"
 
     def format_result(self, result: Union[float, str]) -> str:
         if isinstance(result, str):

@@ -6,6 +6,8 @@ Uses lib2to3 module directly without subprocess.
 Requires Python 3.12+
 """
 
+from __future__ import annotations
+
 import argparse
 import logging
 import sys
@@ -96,7 +98,7 @@ def get_all_fixers() -> List[str]:
 
 def apply_2to3_fixes(file_path: str) -> Tuple[str, bool, str]:
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             original_content = f.read()
         all_fixers = get_all_fixers()
         tool = CustomRefactoringTool(fixers=all_fixers, explicit=all_fixers)
@@ -124,13 +126,13 @@ def apply_2to3_fixes(file_path: str) -> Tuple[str, bool, str]:
         except SyntaxError as e:
             return file_path, False, f"Syntax error in file: {e}"
         except Exception as e:
-            return file_path, False, f"Refactoring error: {str(e)}"
+            return file_path, False, f"Refactoring error: {e!s}"
     except FileNotFoundError:
         return file_path, False, "File not found"
     except PermissionError:
         return file_path, False, "Permission denied"
     except Exception as e:
-        return file_path, False, f"Unexpected error: {str(e)}"
+        return file_path, False, f"Unexpected error: {e!s}"
 
 
 def find_python_files(paths: List[str], extensions: List[str] = None) -> List[str]:
@@ -174,13 +176,13 @@ def process_files_parallel(file_paths: List[str]) -> Tuple[List[str], List[str]]
             except Exception as e:
                 failed.append(file_path)
                 print(f"[{i}/{len(file_paths)}] ✗ {Path(file_path).name}")
-                print(f"    Unexpected error: {str(e)}")
+                print(f"    Unexpected error: {e!s}")
     return successful, failed
 
 
 def dry_run_file(file_path: str) -> Tuple[str, str, bool]:
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             original_content = f.read()
         all_fixers = get_all_fixers()
         tool = CustomRefactoringTool(fixers=all_fixers, explicit=all_fixers)
@@ -202,9 +204,9 @@ def dry_run_file(file_path: str) -> Tuple[str, str, bool]:
         except SyntaxError as e:
             return file_path, f"Syntax error: {e}", False
         except Exception as e:
-            return file_path, f"Error: {str(e)}", False
+            return file_path, f"Error: {e!s}", False
     except Exception as e:
-        return file_path, f"Error reading file: {str(e)}", False
+        return file_path, f"Error reading file: {e!s}", False
 
 
 def perform_dry_run(file_paths: List[str]) -> None:

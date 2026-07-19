@@ -1,6 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
+from __future__ import annotations
+
 import concurrent.futures
 import subprocess
 from pathlib import Path
@@ -54,7 +56,7 @@ def is_elf(filepath: Path) -> bool:
             return True
         if header[:2] == b"#!":
             return False
-    except (IOError, OSError):
+    except OSError:
         pass
     return False
 
@@ -72,7 +74,7 @@ def get_binary_files(directory: Path) -> List[Path]:
     return binaries
 
 
-def test_executable(filepath: Path) -> Tuple[Path, Optional[str]]:
+def test_executable(filepath: Path) -> Tuple[Path, str | None]:
     test_args = ["--help", "-h", "--version", "-v", "--info"]
     for test_arg in test_args:
         try:
@@ -80,16 +82,14 @@ def test_executable(filepath: Path) -> Tuple[Path, Optional[str]]:
             if result.stderr:
                 error_lower = result.stderr.lower()
                 if any(
-                    (
-                        pattern in error_lower
-                        for pattern in [
-                            "error while loading shared libraries",
-                            "cannot open shared object file",
-                            "no such file",
-                            "not found",
-                            "failed to load",
-                        ]
-                    )
+                    pattern in error_lower
+                    for pattern in [
+                        "error while loading shared libraries",
+                        "cannot open shared object file",
+                        "no such file",
+                        "not found",
+                        "failed to load",
+                    ]
                 ):
                     return (filepath, result.stderr.strip()[:200])
             if result.returncode == 0:
@@ -109,14 +109,12 @@ def test_executable(filepath: Path) -> Tuple[Path, Optional[str]]:
         if result.stderr:
             error_lower = result.stderr.lower()
             if any(
-                (
-                    pattern in error_lower
-                    for pattern in [
-                        "error while loading shared libraries",
-                        "cannot open shared object file",
-                        "no such file",
-                    ]
-                )
+                pattern in error_lower
+                for pattern in [
+                    "error while loading shared libraries",
+                    "cannot open shared object file",
+                    "no such file",
+                ]
             ):
                 return (filepath, result.stderr.strip()[:200])
         return (filepath, None)

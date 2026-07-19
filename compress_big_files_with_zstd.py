@@ -6,6 +6,8 @@ Usage: python compress_large_files.py <threshold_in_bytes>
 Example: python compress_large_files.py 1048576  # Compress files > 1MB
 """
 
+from __future__ import annotations
+
 import sys
 import threading
 import time

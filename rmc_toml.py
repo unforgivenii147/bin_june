@@ -6,6 +6,8 @@ TOML Comment Remover - Removes comments from TOML files using parallel processin
 Supports processing multiple files/directories recursively.
 """
 
+from __future__ import annotations
+
 import sys
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -81,7 +83,7 @@ def remove_line_comment(line: str) -> str:
 def process_file(file_path: Path) -> Tuple[str, float, int, int]:
     start_time = time.perf_counter()
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             content = f.read()
         before_size = len(content.encode("utf-8"))
         cleaned_content = remove_toml_comments(content)
@@ -143,10 +145,10 @@ def main():
                 f"{display_name:<50} {time_taken:>8.2f}  {format_size(before_size):<12} {format_size(after_size):<12} {ratio:>6.1f}%"
             )
     print("-" * 80)
-    total_before = sum((r[2] for r in results))
-    total_after = sum((r[3] for r in results))
+    total_before = sum(r[2] for r in results)
+    total_after = sum(r[3] for r in results)
     total_ratio = total_after / total_before * 100 if total_before > 0 else 0
-    total_time = sum((r[1] for r in results))
+    total_time = sum(r[1] for r in results)
     print(f"Total: {len(results)} file(s) processed in {total_time:.2f} ms")
     print(f"Size reduction: {format_size(total_before)} -> {format_size(total_after)} ({total_ratio:.1f}% of original)")
 

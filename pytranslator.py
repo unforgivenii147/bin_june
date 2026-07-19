@@ -7,6 +7,8 @@ Recursively processes Python files from the current directory.
 Optimized for Python 3.12.
 """
 
+from __future__ import annotations
+
 import ast
 import io
 import logging
@@ -78,7 +80,7 @@ def is_english_alphabet(text: str) -> bool:
 
 
 def has_non_latin_alphabet(text: str) -> bool:
-    return any((char.isalpha() and (not is_latin_char(char)) for char in text))
+    return any(char.isalpha() and (not is_latin_char(char)) for char in text)
 
 
 def should_skip(text: str) -> bool:
@@ -87,9 +89,9 @@ def should_skip(text: str) -> bool:
         return True
     if is_english_alphabet(clean):
         return True
-    if any((token in clean.upper() for token in KNOWN_ENGLISH_TOKENS)):
+    if any(token in clean.upper() for token in KNOWN_ENGLISH_TOKENS):
         return True
-    if not any((c.isalpha() for c in clean)):
+    if not any(c.isalpha() for c in clean):
         return True
     return False
 
@@ -153,7 +155,7 @@ def process_file(path: Path) -> bool:
     lines = source.splitlines(keepends=True)
 
     def get_offset(lineno: int, col: int) -> int:
-        return sum((len(lines[i]) for i in range(lineno - 1))) + col
+        return sum(len(lines[i]) for i in range(lineno - 1)) + col
 
     print_pos, doc_pos = get_node_positions(tree)
     replacements: list[tuple[int, int, str]] = []
@@ -213,7 +215,7 @@ def worker(path_str: str) -> None:
 
 
 def main() -> None:
-    files = [str(p) for p in Path(".").rglob("*.py") if not any((part in SKIP_DIRS for part in p.parts))]
+    files = [str(p) for p in Path(".").rglob("*.py") if not any(part in SKIP_DIRS for part in p.parts)]
     if not files:
         logger.info("No Python files found.")
         return

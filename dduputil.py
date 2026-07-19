@@ -115,7 +115,7 @@ def read_file_bytes(path: Path) -> bytes:
     return path.read_bytes()
 
 
-def try_decompress_single(data: bytes, ext: str) -> Optional[Tuple[bytes, str]]:
+def try_decompress_single(data: bytes, ext: str) -> Tuple[bytes, str] | None:
     try:
         if ext == ".gz":
             return gzip.decompress(data), ""

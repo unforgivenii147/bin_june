@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import argparse
 import ast
 import shutil
@@ -20,7 +22,7 @@ class FileResult:
     comments_removed: int
     docstrings_removed: int
     changed: bool
-    error: Optional[str] = None
+    error: str | None = None
 
 
 class DocstringProcessor(ast.NodeTransformer):
@@ -149,7 +151,7 @@ def remove_comments_preserve_format(source_code: str) -> Tuple[str, int]:
     return ("".join(result_lines), comments_removed)
 
 
-def validate_python_code(code: str) -> Tuple[bool, Optional[str]]:
+def validate_python_code(code: str) -> Tuple[bool, str | None]:
     try:
         ast.parse(code)
         return (True, None)

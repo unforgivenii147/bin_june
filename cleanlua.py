@@ -4,6 +4,8 @@ Strip comments from Lua files recursively using parallel processing.
 Supports multiple input directories and provides prettier-style output.
 """
 
+from __future__ import annotations
+
 import re
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -149,7 +151,7 @@ def strip_lua_comments(content: str) -> Tuple[str, int, int]:
     return stripped_content, lines_removed, comments_removed
 
 
-def process_lua_file(file_path: Path) -> Optional[FileStats]:
+def process_lua_file(file_path: Path) -> FileStats | None:
     """
     Process a single Lua file to remove comments.
     Returns FileStats if successful, None otherwise.

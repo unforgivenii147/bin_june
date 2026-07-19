@@ -6,6 +6,8 @@ Compress or decompress folders using zstandard compression.
 Optimized for Python 3.12 with streaming and parallel processing.
 """
 
+from __future__ import annotations
+
 import argparse
 import multiprocessing as mp
 import shutil
@@ -52,7 +54,7 @@ class FolderResult:
     original_size: int = 0
     compressed_size: int = 0
     success: bool = False
-    error: Optional[str] = None
+    error: str | None = None
     duration: float = 0.0
 
     @property
@@ -70,7 +72,7 @@ def format_size(size_bytes: int) -> str:
 
 
 def get_folder_size(path: Path) -> int:
-    return sum((f.stat().st_size for f in path.rglob("*") if f.is_file()))
+    return sum(f.stat().st_size for f in path.rglob("*") if f.is_file())
 
 
 def compress_folder_task(folder_path: Path, output_dir: Path, level: int = 3, threads: int = 0) -> FolderResult:
@@ -83,9 +85,8 @@ def compress_folder_task(folder_path: Path, output_dir: Path, level: int = 3, th
         with tarfile.open(temp_tar, "w") as tar:
             tar.add(folder_path, arcname=folder_name)
         cctx = zstd.ZstdCompressor(level=level, threads=threads)
-        with temp_tar.open("rb") as f_in, zst_path.open("wb") as f_out:
-            with cctx.stream_writer(f_out) as compressor:
-                shutil.copyfileobj(f_in, compressor)
+        with temp_tar.open("rb") as f_in, zst_path.open("wb") as f_out, cctx.stream_writer(f_out) as compressor:
+            shutil.copyfileobj(f_in, compressor)
         comp_size = zst_path.stat().st_size
         temp_tar.unlink()
         shutil.rmtree(folder_path)
@@ -198,8 +199,8 @@ def main():
     print(f"Success: {len(successes)}")
     print(f"Failed: {len(results) - len(successes)}")
     if successes:
-        total_orig = sum((r.original_size for r in successes))
-        total_comp = sum((r.compressed_size for r in successes))
+        total_orig = sum(r.original_size for r in successes)
+        total_comp = sum(r.compressed_size for r in successes)
         if args.decompress:
             print(f"Extracted size: {format_size(total_orig)}")
         else:

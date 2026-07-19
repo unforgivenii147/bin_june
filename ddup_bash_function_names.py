@@ -4,6 +4,8 @@
 Check for duplicate function names in bash functions file.
 """
 
+from __future__ import annotations
+
 import re
 import sys
 from collections import Counter
@@ -20,7 +22,7 @@ def extract_function_names(filepath: Path):
         re.compile(r"^\s*function\s+([a-zA-Z_][a-zA-Z0-9_-]*)\s*\(\s*\)\s*\{"),
     ]
     try:
-        with open(filepath, "r", encoding="utf-8") as f:
+        with open(filepath, encoding="utf-8") as f:
             lines = f.readlines()
         for line_num, line in enumerate(lines, 1):
             line_stripped = line.strip()

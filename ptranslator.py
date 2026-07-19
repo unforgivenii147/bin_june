@@ -6,6 +6,8 @@ Recursively translate text files using Google Translate.
 Optimized for Python 3.12 with modern syntax and performance improvements.
 """
 
+from __future__ import annotations
+
 import argparse
 import ast
 import logging
@@ -33,7 +35,7 @@ def is_text_file(path: Path) -> bool:
             if not chunk:
                 return False
             return b"\x00" not in chunk
-    except (OSError, IOError):
+    except OSError:
         return False
 
 
@@ -115,7 +117,7 @@ def collect_files(paths: list[str]) -> list[Path]:
                 files.add(path)
         elif path.is_dir():
             for entry in path.rglob("*"):
-                if entry.is_file() and (not any((part in SKIP_DIRS for part in entry.parts))) and is_text_file(entry):
+                if entry.is_file() and (not any(part in SKIP_DIRS for part in entry.parts)) and is_text_file(entry):
                     files.add(entry)
     return sorted(files)
 

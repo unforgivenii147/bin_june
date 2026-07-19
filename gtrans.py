@@ -7,6 +7,8 @@ Handles auto-detection of language and provides resilient translation with retry
 Optimized for Python 3.12.
 """
 
+from __future__ import annotations
+
 import argparse
 import logging
 import re

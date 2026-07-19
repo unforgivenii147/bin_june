@@ -1,6 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
 """Merge non-binary files from current directory into a single text file."""
 
+from __future__ import annotations
+
 from collections import deque
 from pathlib import Path
 from random import choice

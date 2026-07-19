@@ -3,6 +3,8 @@
 Check for bash functions that also exist as aliases and remove the aliases.
 """
 
+from __future__ import annotations
+
 import re
 import sys
 from pathlib import Path
@@ -14,7 +16,7 @@ def extract_function_names(filepath: Path):
     functions = set()
     function_pattern = re.compile(r"^\s*([a-zA-Z_][a-zA-Z0-9_-]*)\s*\(\s*\)\s*\{", re.MULTILINE)
     try:
-        with open(filepath, "r", encoding="utf-8") as f:
+        with open(filepath, encoding="utf-8") as f:
             content = f.read()
             matches = function_pattern.findall(content)
             functions.update(matches)
@@ -31,7 +33,7 @@ def extract_alias_names(filepath: Path):
     aliases = {}
     alias_pattern = re.compile(r"^\s*alias\s+([a-zA-Z_][a-zA-Z0-9_-]*)=", re.MULTILINE)
     try:
-        with open(filepath, "r", encoding="utf-8") as f:
+        with open(filepath, encoding="utf-8") as f:
             lines = f.readlines()
         current_line = ""
         for line in lines:
@@ -55,7 +57,7 @@ def remove_aliases(aliases_to_remove, aliases_file: Path) -> int:
     if not aliases_to_remove:
         return 0
     try:
-        with open(aliases_file, "r", encoding="utf-8") as f:
+        with open(aliases_file, encoding="utf-8") as f:
             lines = f.readlines()
         new_lines = []
         removed_count = 0

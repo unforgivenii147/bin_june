@@ -6,6 +6,8 @@ Convert all images in a directory (and subdirectories) to negative/inverted colo
 Processes images in parallel using multiprocessing.
 """
 
+from __future__ import annotations
+
 import argparse
 import logging
 import sys

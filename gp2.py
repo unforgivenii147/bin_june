@@ -1,12 +1,13 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import os
 import sys
 from datetime import datetime
 from pathlib import Path
 
 from dotenv import load_dotenv
-from git import Repo
-from git import exc as GitExc
+from git import Repo, exc as GitExc
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

@@ -6,6 +6,8 @@ Usage: script.py -c [paths...]
        script.py -d [paths...]
 """
 
+from __future__ import annotations
+
 import argparse
 import os
 import shutil
@@ -92,10 +94,9 @@ def compress_directory(subdir, level):
         original_size = dir_size_bytes(subdir)
 
         cctx = zstd.ZstdCompressor(level=19, threads=4)
-        with open(tar_zst_path, "wb") as f_out:
-            with cctx.stream_writer(f_out) as compressor:
-                with tarfile.open(fileobj=compressor, mode="w|") as tar:
-                    tar.add(str(subdir), arcname=subdir.name, recursive=True)
+        with open(tar_zst_path, "wb") as f_out, cctx.stream_writer(f_out) as compressor:
+            with tarfile.open(fileobj=compressor, mode="w|") as tar:
+                tar.add(str(subdir), arcname=subdir.name, recursive=True)
         if not tar_zst_path.exists() or tar_zst_path.stat().st_size == 0:
             raise RuntimeError("Archive creation failed or empty")
 
@@ -145,28 +146,26 @@ def decompress_archive(archive_path):
         extracted_size = 0
         extracted_root = None
 
-        with open(archive_path, "rb") as f_in:
-            with dctx.stream_reader(f_in) as decompressor:
-                with tarfile.open(fileobj=decompressor, mode="r|") as tar:
-                    first_member = None
-                    for member in tar:
-                        if member is None:
-                            continue
-                        extracted_size += int(getattr(member, "size", 0) or 0)
-                        if first_member is None and member.name:
-                            first_member = member.name.split("/", 1)[0]
-                        break
+        with open(archive_path, "rb") as f_in, dctx.stream_reader(f_in) as decompressor:
+            with tarfile.open(fileobj=decompressor, mode="r|") as tar:
+                first_member = None
+                for member in tar:
+                    if member is None:
+                        continue
+                    extracted_size += int(getattr(member, "size", 0) or 0)
+                    if first_member is None and member.name:
+                        first_member = member.name.split("/", 1)[0]
+                    break
 
-                    fobj_tell = None
-                    _ = fobj_tell
+                fobj_tell = None
+                _ = fobj_tell
 
         dir_name = archive_path.stem
         target_dir = archive_path.parent / dir_name
 
-        with open(archive_path, "rb") as f_in:
-            with dctx.stream_reader(f_in) as decompressor:
-                with tarfile.open(fileobj=decompressor, mode="r|") as tar:
-                    safe_extract_stream(tar, target_dir, extracted_size)
+        with open(archive_path, "rb") as f_in, dctx.stream_reader(f_in) as decompressor:
+            with tarfile.open(fileobj=decompressor, mode="r|") as tar:
+                safe_extract_stream(tar, target_dir, extracted_size)
 
         archive_path.unlink()
 

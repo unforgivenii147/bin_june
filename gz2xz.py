@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import gzip
 import sys
 from collections import deque
@@ -15,7 +17,7 @@ def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
-    return Parallel(n_jobs=-1)((delayed(process_function)(file_str, **kwargs) for file_str in file_strings))
+    return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
 
 
 "\nConvert man pages from .gz to .xz format with maximum compression.\nSkips symlinks and processes files recursively in the current directory.\n"
@@ -69,7 +71,7 @@ def process_file(path: Path) -> Tuple[str, bool, str]:
     except Exception as e:
         if xz_path.exists():
             xz_path.unlink()
-        return (str(path), False, f"Error: {str(e)}")
+        return (str(path), False, f"Error: {e!s}")
 
 
 def main() -> None:

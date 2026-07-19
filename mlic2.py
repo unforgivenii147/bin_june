@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import argparse
 import multiprocessing as mp
 import sys
@@ -107,19 +109,19 @@ def is_text_file(filepath: Path) -> bool:
                     return True
                 text_chars = sum(1 for b in sample if 32 <= b <= 126 or b in (9, 10, 13))
                 return text_chars / len(sample) > 0.8
-        except (OSError, IOError):
+        except OSError:
             return False
     return False
 
 
 def read_file_content(filepath: Path) -> Tuple[Path, List[str], str]:
     try:
-        with open(filepath, "r", encoding="utf-8") as f:
+        with open(filepath, encoding="utf-8") as f:
             lines = f.readlines()
         return filepath, lines, "".join(lines)
     except UnicodeDecodeError:
         try:
-            with open(filepath, "r", encoding="latin-1") as f:
+            with open(filepath, encoding="latin-1") as f:
                 lines = f.readlines()
             return filepath, lines, "".join(lines)
         except (OSError, UnicodeDecodeError) as e:
@@ -187,7 +189,7 @@ def collect_multiline_repeats(
         num_workers = mp.cpu_count()
     text_files = []
     for filepath in root.rglob("*"):
-        if filepath.is_file() and is_text_file(filepath) and not filepath.is_symlink() and not ".git" in filepath.parts:
+        if filepath.is_file() and is_text_file(filepath) and not filepath.is_symlink() and ".git" not in filepath.parts:
             text_files.append(filepath)
     if not text_files:
         return {}

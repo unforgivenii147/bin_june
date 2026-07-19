@@ -4,6 +4,8 @@
 catimg - Display images in terminal with true color support (including SVG)
 """
 
+from __future__ import annotations
+
 import argparse
 import io
 import os

@@ -1,5 +1,7 @@
 """Strip comments and docstrings from Python source files."""
 
+from __future__ import annotations
+
 import argparse
 import ast
 import shutil
@@ -87,10 +89,8 @@ def _strip_comments(source: str) -> tuple[str, int]:
                 rest = line[i:]
                 stripped_rest = rest.strip()
                 if any(
-                    (
-                        stripped_rest.startswith(p.lstrip("#").strip()) or rest.lstrip().startswith(p)
-                        for p in _PRESERVE_PREFIXES
-                    )
+                    stripped_rest.startswith(p.lstrip("#").strip()) or rest.lstrip().startswith(p)
+                    for p in _PRESERVE_PREFIXES
                 ):
                     new_line_chars.append(rest)
                     i = length

@@ -6,6 +6,8 @@ Removes original OTF files after successful conversion.
 Requires: pip install fonttools brotli
 """
 
+from __future__ import annotations
+
 import sys
 from multiprocessing import Pool
 from pathlib import Path

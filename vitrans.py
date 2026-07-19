@@ -6,6 +6,8 @@ Optimized version of vitrans.py for Python 3.12.
 Translates Vietnamese text files to English using Google Translate via deep_translator.
 """
 
+from __future__ import annotations
+
 import json
 import logging
 import signal
@@ -94,10 +96,10 @@ def _translate_chunk(text: str) -> str:
         return result
     except Exception as e:
         msg = str(e).lower()
-        if any((k in msg for k in ("429", "rate limit", "too many", "quota"))):
+        if any(k in msg for k in ("429", "rate limit", "too many", "quota")):
             print("   ⏳ Rate limited — backing off…")
             raise RateLimitError(str(e)) from e
-        if any((k in msg for k in ("timeout", "timed out", "connection", "reset"))):
+        if any(k in msg for k in ("timeout", "timed out", "connection", "reset")):
             raise TranslationError(str(e)) from e
         raise TranslationError(str(e)) from e
 
@@ -186,7 +188,7 @@ def process_file(path: Path) -> bool:
             save_progress(path, done, total)
         if i < total - 1 and (not _interrupted):
             time.sleep(DELAY_BETWEEN_CHUNKS)
-    translated_text = "\n".join((done[i] for i in range(total)))
+    translated_text = "\n".join(done[i] for i in range(total))
     try:
         out.write_text(translated_text, encoding="utf-8")
         drop_progress(path)

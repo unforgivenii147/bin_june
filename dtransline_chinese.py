@@ -6,6 +6,8 @@ Translate Chinese lines in files to English in-place using parallel processing.
 Optimized for Python 3.12.
 """
 
+from __future__ import annotations
+
 import argparse
 import logging
 import multiprocessing as mp
@@ -127,7 +129,7 @@ def main() -> None:
                     if (
                         fp.is_file()
                         and fp.resolve() not in exclude_paths
-                        and (not any((part.startswith(".") for part in fp.parts)))
+                        and (not any(part.startswith(".") for part in fp.parts))
                     ):
                         files_to_process.append(fp)
     if not files_to_process:
@@ -149,10 +151,10 @@ def main() -> None:
     print("SUMMARY")
     print("=" * 60)
     print(f"Files processed:   {len(all_stats)}")
-    print(f"Chinese lines:     {sum((s['chinese_lines'] for s in all_stats)):,}")
+    print(f"Chinese lines:     {sum(s['chinese_lines'] for s in all_stats):,}")
     if not args.dry_run:
-        print(f"Translated lines:  {sum((s['translated_lines'] for s in all_stats)):,}")
-    print(f"Errors:            {sum((s['errors'] for s in all_stats))}")
+        print(f"Translated lines:  {sum(s['translated_lines'] for s in all_stats):,}")
+    print(f"Errors:            {sum(s['errors'] for s in all_stats)}")
     print("=" * 60)
 
 

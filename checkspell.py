@@ -5,6 +5,8 @@ Spell checker script that reports and optionally fixes spelling errors in files.
 Supports multiple files, directories, multiprocessing, and personal dictionaries.
 """
 
+from __future__ import annotations
+
 import argparse
 import json
 import re
@@ -33,10 +35,10 @@ class PersonalDictionary:
     def load(self) -> None:
         if self.dict_path.exists():
             try:
-                with open(self.dict_path, "r", encoding="utf-8") as f:
+                with open(self.dict_path, encoding="utf-8") as f:
                     data = json.load(f)
                     self.words = set(word.lower() for word in data.get("words", []))
-            except (json.JSONDecodeError, IOError) as e:
+            except (OSError, json.JSONDecodeError) as e:
                 print(f"Warning: Could not load personal dictionary: {e}", file=sys.stderr)
                 self.words = set()
         else:
@@ -47,7 +49,7 @@ class PersonalDictionary:
             with open(self.dict_path, "w", encoding="utf-8") as f:
                 json.dump({"words": sorted(self.words)}, f, indent=2, ensure_ascii=False)
             print(f"✓ Dictionary saved to {self.dict_path}")
-        except IOError as e:
+        except OSError as e:
             print(f"Error: Could not save dictionary: {e}", file=sys.stderr)
 
     def add_word(self, word: str) -> bool:
@@ -87,9 +89,9 @@ class SpellCheckProcessor:
     def check_file(self, file_path: Path) -> Dict:
         result = {"file": str(file_path), "errors": [], "total_errors": 0, "fixed": False}
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read()
-        except (UnicodeDecodeError, IOError) as e:
+        except (OSError, UnicodeDecodeError) as e:
             result["error"] = f"Could not read file: {e}"
             return result
         lines = content.split("\n")
@@ -126,7 +128,7 @@ class SpellCheckProcessor:
             with open(file_path, "w", encoding="utf-8") as f:
                 f.write(fixed_content)
             return True
-        except IOError as e:
+        except OSError as e:
             print(f"Error writing to {file_path}: {e}", file=sys.stderr)
             return False
 
@@ -201,12 +203,12 @@ def handle_dictionary_operations(args) -> None:
         personal_dict.save()
     if args.add_from_file:
         try:
-            with open(args.add_from_file, "r", encoding="utf-8") as f:
+            with open(args.add_from_file, encoding="utf-8") as f:
                 words = [line.strip() for line in f if line.strip()]
             count = personal_dict.add_words(words)
             print(f"✓ Added {count} word(s) from {args.add_from_file}")
             personal_dict.save()
-        except IOError as e:
+        except OSError as e:
             print(f"Error: Could not read file {args.add_from_file}: {e}", file=sys.stderr)
             sys.exit(1)
     if args.remove_words:

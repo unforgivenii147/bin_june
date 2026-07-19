@@ -1,6 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
+from __future__ import annotations
+
 import sys
 from collections.abc import Callable
 from pathlib import Path
@@ -62,7 +64,7 @@ def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
-    return Parallel(n_jobs=-1)((delayed(process_function)(file_str, **kwargs) for file_str in file_strings))
+    return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
 
 
 def process_file(path):

@@ -6,6 +6,8 @@ Script to remove dependencies on the 'dh' custom module by inlining function cod
 Supports multiple files/folders as input with parallel processing.
 """
 
+from __future__ import annotations
+
 import argparse
 import ast
 import sys
@@ -24,8 +26,8 @@ DH_MODULE_NAME = "dh"
 class ProcessResult:
     file_path: Path
     modified: bool
-    new_content: Optional[str]
-    error: Optional[str]
+    new_content: str | None
+    error: str | None
 
 
 class DHModuleAnalyzer:
@@ -45,7 +47,7 @@ class DHModuleAnalyzer:
             module_name = py_file.stem
             self.module_mapping[module_name] = set()
             try:
-                with open(py_file, "r", encoding="utf-8") as f:
+                with open(py_file, encoding="utf-8") as f:
                     content = f.read()
                 tree = ast.parse(content)
                 lines = content.split("\n")
@@ -60,7 +62,7 @@ class DHModuleAnalyzer:
             except Exception as e:
                 print(f"⚠ Warning: Could not parse {py_file}: {e}", file=sys.stderr)
 
-    def get_definition(self, func_name: str) -> Optional[str]:
+    def get_definition(self, func_name: str) -> str | None:
         return self.definitions.get(func_name)
 
     def get_all_definitions(self) -> Dict[str, str]:
@@ -74,7 +76,7 @@ class ImportRemover(ast.NodeTransformer):
         self.inlined_code: List[str] = []
         self.has_dh_imports = False
 
-    def visit_ImportFrom(self, node: ast.ImportFrom) -> Optional[ast.stmt]:
+    def visit_ImportFrom(self, node: ast.ImportFrom) -> ast.stmt | None:
         if node.module and (node.module == DH_MODULE_NAME or node.module.startswith(f"{DH_MODULE_NAME}.")):
             for alias in node.names:
                 name = alias.name
@@ -85,8 +87,8 @@ class ImportRemover(ast.NodeTransformer):
             return None
         return node
 
-    def visit_Import(self, node: ast.Import) -> Optional[ast.stmt]:
-        if any((alias.name == DH_MODULE_NAME or alias.name.startswith(f"{DH_MODULE_NAME}.") for alias in node.names)):
+    def visit_Import(self, node: ast.Import) -> ast.stmt | None:
+        if any(alias.name == DH_MODULE_NAME or alias.name.startswith(f"{DH_MODULE_NAME}.") for alias in node.names):
             self.has_dh_imports = True
             return None
         return node
@@ -98,7 +100,7 @@ class PythonFileProcessor:
 
     def process(self, file_path: Path) -> ProcessResult:
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 original_content = f.read()
             tree = ast.parse(original_content)
             transformer = ImportRemover(self.definitions)
@@ -136,7 +138,7 @@ class PythonFileProcessor:
 
 
 class ProjectCleaner:
-    def __init__(self, dh_path: Path = DH_SOURCE_PATH, max_workers: Optional[int] = None):
+    def __init__(self, dh_path: Path = DH_SOURCE_PATH, max_workers: int | None = None):
         self.dh_path = dh_path.resolve()
         self.max_workers = max_workers
         self.analyzer = DHModuleAnalyzer(self.dh_path)
@@ -157,7 +159,7 @@ class ProjectCleaner:
                     print(f"⚠ Warning: Not a Python file: {path}", file=sys.stderr)
             elif path.is_dir():
                 for py_file in path.rglob("*.py"):
-                    if not any((part.startswith(".") for part in py_file.parts)):
+                    if not any(part.startswith(".") for part in py_file.parts):
                         py_files.add(py_file)
         return sorted(list(py_files))
 

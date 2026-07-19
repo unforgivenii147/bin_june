@@ -1,6 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
+from __future__ import annotations
+
 import base64
 import json
 import sqlite3
@@ -91,9 +93,9 @@ def fetch_table_data(args):
                     return (table_name, rows, f"Table '{table_name}' had encoding issues; binary data base64-encoded")
                 except Exception as e3:
                     conn.close()
-                    return (table_name, [], f"Error processing table '{table_name}': {str(e3)}")
+                    return (table_name, [], f"Error processing table '{table_name}': {e3!s}")
     except Exception as e:
-        return (table_name, [], f"Error processing table '{table_name}': {str(e)}")
+        return (table_name, [], f"Error processing table '{table_name}': {e!s}")
 
 
 def main():

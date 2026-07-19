@@ -7,6 +7,8 @@ Processes images in-place to optimize them for Tesseract OCR.
 Supports multiple files/folders with parallel processing.
 """
 
+from __future__ import annotations
+
 import argparse
 import logging
 import sys
@@ -103,7 +105,7 @@ def find_images(paths: List[Path], recursive: bool = False) -> List[Path]:
     return unique_files
 
 
-def process_images_parallel(image_files: List[Path], max_workers: Optional[int] = None) -> dict:
+def process_images_parallel(image_files: List[Path], max_workers: int | None = None) -> dict:
     if not image_files:
         logger.warning("No image files found to process")
         return {"success": 0, "failed": 0}

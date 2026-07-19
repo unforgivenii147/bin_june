@@ -4,6 +4,8 @@
 Script to detect and keep only the latest version of wheel or deb files in current directory recursively.
 """
 
+from __future__ import annotations
+
 import argparse
 import re
 from collections import defaultdict
@@ -16,7 +18,7 @@ from packaging import version as pkg_version
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
-def parse_wheel_version(filename: str) -> Optional[Tuple[str, str]]:
+def parse_wheel_version(filename: str) -> Tuple[str, str] | None:
     name = filename[:-4]
     parts = name.split("-")
     if len(parts) < 5:
@@ -42,7 +44,7 @@ def parse_wheel_version(filename: str) -> Optional[Tuple[str, str]]:
     return None
 
 
-def parse_deb_version(filename: str) -> Optional[Tuple[str, str]]:
+def parse_deb_version(filename: str) -> Tuple[str, str] | None:
     name = filename[:-4]
     parts = name.split("_")
     if len(parts) >= 2:
@@ -71,7 +73,7 @@ def compare_versions(ver1: str, ver2: str) -> int:
             return 0
 
 
-def process_file(file_path: Path, file_type: str) -> Optional[Tuple[str, str, Path]]:
+def process_file(file_path: Path, file_type: str) -> Tuple[str, str, Path] | None:
     try:
         filename = file_path.name
         if file_type == "wheel" and filename.endswith(".whl"):

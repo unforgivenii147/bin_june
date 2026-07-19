@@ -6,6 +6,8 @@ Optimized version of transwords.py for Python 3.12.
 Translates chunks of words.txt from Persian to English in parallel.
 """
 
+from __future__ import annotations
+
 import json
 import logging
 import time

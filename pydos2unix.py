@@ -15,6 +15,8 @@ Features:
 - Automatically skips binary files and common directories
 """
 
+from __future__ import annotations
+
 import argparse
 import logging
 import sys
@@ -52,10 +54,10 @@ def is_text_file(file_path: Path) -> bool:
             if b"\x00" in chunk:
                 return False
             text_characters = bytearray({7, 8, 9, 10, 12, 13, 27} | set(range(32, 256)))
-            if not all((byte in text_characters for byte in chunk)):
+            if not all(byte in text_characters for byte in chunk):
                 return False
             return True
-    except (IOError, OSError):
+    except OSError:
         return False
 
 
@@ -87,7 +89,7 @@ def convert_file(file_path: Path) -> Tuple[str, bool, str]:
                 return (str(file_path), True, "Converted")
             else:
                 return (str(file_path), True, "Already Unix format")
-        except (IOError, OSError) as e:
+        except OSError as e:
             return (str(file_path), False, f"Read/Write error: {e}")
     except Exception as e:
         return (str(file_path), False, f"Error: {e}")
@@ -101,14 +103,14 @@ def find_text_files(paths: List[Path]) -> List[Path]:
                 files.append(path)
         elif path.is_dir():
             for text_file in path.rglob("*"):
-                if any((should_skip_dir(parent) for parent in text_file.parents)):
+                if any(should_skip_dir(parent) for parent in text_file.parents):
                     continue
                 if text_file.is_file() and is_text_file(text_file):
                     files.append(text_file)
     return files
 
 
-def get_input_paths(input_args: Optional[List[str]]) -> List[Path]:
+def get_input_paths(input_args: List[str] | None) -> List[Path]:
     if not input_args:
         return [Path.cwd()]
     paths = []

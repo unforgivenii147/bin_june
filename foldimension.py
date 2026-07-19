@@ -10,6 +10,8 @@ is moved into an "other" folder instead.
 Uses pathlib for all filesystem operations.
 """
 
+from __future__ import annotations
+
 import shutil
 from collections import defaultdict
 from pathlib import Path

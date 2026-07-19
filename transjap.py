@@ -6,6 +6,8 @@ Optimized version of transjap.py for Python 3.12.
 Translates Japanese comments and docstrings in Python files to English.
 """
 
+from __future__ import annotations
+
 import ast
 import logging
 import re
@@ -119,7 +121,7 @@ def main() -> None:
         logger.error("Error: Path '%s' does not exist", start_path)
         sys.exit(1)
     logger.info("Scanning for Python files in: %s", start_path)
-    py_files = [f for f in start_path.rglob("*.py") if not any((part in SKIP_DIRS for part in f.parts))]
+    py_files = [f for f in start_path.rglob("*.py") if not any(part in SKIP_DIRS for part in f.parts)]
     if not py_files:
         logger.info("No Python files found.")
         return

@@ -6,6 +6,8 @@ Optimized version of transocr.py for Python 3.12.
 Translates text or images to English using OCR and Google Translator.
 """
 
+from __future__ import annotations
+
 import argparse
 import sys
 from pathlib import Path
@@ -59,7 +61,7 @@ def chunk_text(text: str, size: int = 32768) -> list[str]:
 
 def translate_chunks(chunks: list[str], src_lang: str) -> str:
     translator = GoogleTranslator(source=src_lang, target="en")
-    return "".join((translator.translate(chunk) for chunk in chunks))
+    return "".join(translator.translate(chunk) for chunk in chunks)
 
 
 def build_output_paths(input_path: Path) -> tuple[Path, Path | None]:

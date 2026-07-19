@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import os
 import time
 
@@ -13,7 +15,7 @@ def watch_tor_log(log_path: str = "~/.tor/tor.log") -> None:
     last_position = 0
     try:
         if os.path.exists(log_path):
-            with open(log_path, "r") as f:
+            with open(log_path) as f:
                 lines = f.readlines()
                 print("=== Last 5 lines of Tor log ===")
                 for line in lines[-5:]:
@@ -28,7 +30,7 @@ def watch_tor_log(log_path: str = "~/.tor/tor.log") -> None:
             if not os.path.exists(log_path):
                 time.sleep(0.5)
                 continue
-            with open(log_path, "r") as f:
+            with open(log_path) as f:
                 f.seek(last_position)
                 new_lines = f.readlines()
                 last_position = f.tell()

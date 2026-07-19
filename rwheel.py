@@ -5,6 +5,8 @@ Repack site-packages packages into wheel files.
 Works in Termux with Python 3.12.
 """
 
+from __future__ import annotations
+
 import argparse
 import email.parser
 import platform

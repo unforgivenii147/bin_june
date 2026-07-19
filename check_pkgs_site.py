@@ -4,6 +4,8 @@
 Simple package duplicate checker for Termux (Python 3.12+)
 """
 
+from __future__ import annotations
+
 import site
 import sys
 from importlib.metadata import distributions

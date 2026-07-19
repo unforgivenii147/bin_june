@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import argparse
 import sys
 from os import scandir as os_scandir
@@ -96,7 +98,7 @@ def is_blank_line(line: str):
 
 def find_duplicates(file_path: Path, skip_blanks: bool = True):
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             lines = f.readlines()
         duplicates = []
         i = 0
@@ -150,7 +152,7 @@ def process_file(file_path, duplicates, dry_run: bool = False, auto_yes=False, s
     else:
         should_fix = True
     if should_fix:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             lines = f.readlines()
         new_lines = remove_duplicates(lines, duplicates)
         backup = file_path.with_suffix(file_path.suffix + ".bak")

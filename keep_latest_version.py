@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import argparse
 import re
 from collections import defaultdict, deque
@@ -37,7 +39,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
 "\nScript to detect and keep only the latest version of wheel, deb, or tar.gz files in current directory recursively.\n"
 
 
-def parse_wheel_version(filename: str) -> Optional[Tuple[str, str]]:
+def parse_wheel_version(filename: str) -> Tuple[str, str] | None:
     if filename.endswith(".whl"):
         name = filename[:-4]
     if filename.endswith(".metadata"):
@@ -66,7 +68,7 @@ def parse_wheel_version(filename: str) -> Optional[Tuple[str, str]]:
     return None
 
 
-def parse_targz_version(filename: str) -> Optional[Tuple[str, str]]:
+def parse_targz_version(filename: str) -> Tuple[str, str] | None:
     name = filename
     if filename.endswith(".tar.gz"):
         name = filename[:-7]
@@ -85,7 +87,7 @@ def parse_targz_version(filename: str) -> Optional[Tuple[str, str]]:
     return None
 
 
-def parse_deb_version(filename: str) -> Optional[Tuple[str, str]]:
+def parse_deb_version(filename: str) -> Tuple[str, str] | None:
     parts = filename.split("_")
     if len(parts) >= 2:
         pkg_name = parts[0]
@@ -113,7 +115,7 @@ def compare_versions(ver1: str, ver2: str) -> int:
             return 0
 
 
-def process_file(file_path: Path, file_type: str) -> Optional[Tuple[str, str, Path]]:
+def process_file(file_path: Path, file_type: str) -> Tuple[str, str, Path] | None:
     try:
         filename = file_path.name
         if file_type == "wheel" and filename.endswith((".whl", ".metadata")):
@@ -253,7 +255,7 @@ def main() -> int:
     if not packages:
         print("No matching package files found.")
         return 0
-    total_versions = sum((len(versions) for versions in packages.values()))
+    total_versions = sum(len(versions) for versions in packages.values())
     print(f"\nFound {len(packages)} package(s) with {total_versions} total version(s):")
     if args.verbose:
         for pkg_name, versions in packages.items():

@@ -2,6 +2,8 @@
 
 """Create .deb files from installed Termux packages."""
 
+from __future__ import annotations
+
 import logging
 import subprocess
 import sys

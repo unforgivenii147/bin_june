@@ -6,6 +6,8 @@ Optimized version of ultralinetrans.py for Python 3.12.
 Translates files using batch translation for improved performance.
 """
 
+from __future__ import annotations
+
 import io
 import logging
 import re
@@ -42,7 +44,7 @@ def is_binary(path: Path) -> bool:
         if b"\x00" in chunk:
             return True
         text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
-        nontext = sum((1 for b in chunk if b not in text_chars))
+        nontext = sum(1 for b in chunk if b not in text_chars)
         return nontext / len(chunk) > 0.3
     except Exception:
         return True

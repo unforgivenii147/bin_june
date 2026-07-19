@@ -10,6 +10,8 @@ Excluded lines:
   - Shebang lines (e.g., #!)
 """
 
+from __future__ import annotations
+
 import argparse
 import ast
 import sys

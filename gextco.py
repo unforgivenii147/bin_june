@@ -11,6 +11,8 @@ Features:
 - Extracts and saves imports
 """
 
+from __future__ import annotations
+
 import ast
 import logging
 import sys

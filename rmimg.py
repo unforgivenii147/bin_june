@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import os
 import sys
 from collections import deque
@@ -163,7 +165,7 @@ def process_file(file_path: Path) -> None:
             img.decompose()
         for tag in soup.find_all(style=True):
             style = tag["style"]
-            new_style = "; ".join((s for s in style.split(";") if "background-image" not in s)).strip()
+            new_style = "; ".join(s for s in style.split(";") if "background-image" not in s).strip()
             if new_style:
                 tag["style"] = new_style
             else:

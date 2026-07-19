@@ -3,6 +3,8 @@
 
 """Repack installed Python packages as wheels."""
 
+from __future__ import annotations
+
 import argparse
 import csv
 import shutil
@@ -111,7 +113,7 @@ def repack_package(dist_dir: Path, site_packages: Path, output_dir: Path, not_re
     existing_files, missing_files = read_record_file(dist_dir, site_packages)
     if not existing_files:
         return False
-    has_missing_critical = any((f.suffix in {".py", ""} or f.is_dir() for f in missing_files))
+    has_missing_critical = any(f.suffix in {".py", ""} or f.is_dir() for f in missing_files)
     if has_missing_critical:
         pkg_not_repacked = not_repacked_dir / pkg_name
         pkg_not_repacked.mkdir(parents=True, exist_ok=True)

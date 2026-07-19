@@ -6,6 +6,8 @@ Text file chunker with parallel processing.
 Splits text files into chunks (< 5000 chars) while respecting word and sentence boundaries.
 """
 
+from __future__ import annotations
+
 import argparse
 import re
 import sys
@@ -52,9 +54,9 @@ def split_text_into_chunks(text: str) -> List[str]:
     return chunks
 
 
-def process_file(file_path: Path, output_dir: Path) -> Tuple[str, int, Optional[str]]:
+def process_file(file_path: Path, output_dir: Path) -> Tuple[str, int, str | None]:
     try:
-        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+        with open(file_path, encoding="utf-8", errors="ignore") as f:
             text = f.read()
         if not text.strip():
             return (file_path.name, 0, None)

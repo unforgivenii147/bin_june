@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import ast
 import multiprocessing as mp
 import os
@@ -20,9 +22,8 @@ except FileNotFoundError:
 
 
 def is_python_file(file_path):
-    return (
-        file_path.suffix == ".py"
-        or not file_path.suffix
+    return file_path.suffix == ".py" or (
+        not file_path.suffix
         and any(
             line.startswith(("import ", "from ", "#!/usr/bin/env python"))
             for line in Path(file_path).open(encoding="utf-8", errors="ignore")

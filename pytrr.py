@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import shutil
 import sys
 import tarfile
@@ -39,23 +41,22 @@ def create_archive_streaming_optimized():
             sys.exit(1)
         print(f"Found {len(files_to_archive)} items to archive")
         print("Compressing...")
-        with open(archive_path, "wb") as f_out:
-            with compressor.stream_writer(f_out) as zstd_writer:
-                with tarfile.open(fileobj=zstd_writer, mode="w|") as tar:
-                    for item in files_to_archive:
-                        try:
-                            arcname = item.relative_to(parent_dir)
-                            if item.is_symlink():
-                                tar.add(item, arcname=arcname, recursive=False)
-                            elif item.is_file():
-                                tar.add(item, arcname=arcname, recursive=False)
-                            elif item.is_dir():
-                                tar.add(item, arcname=arcname, recursive=False)
-                            else:
-                                tar.add(item, arcname=arcname, recursive=False)
-                        except (OSError, PermissionError) as e:
-                            print(f"Warning: Could not add {item}: {e}", file=sys.stderr)
-                            continue
+        with open(archive_path, "wb") as f_out, compressor.stream_writer(f_out) as zstd_writer:
+            with tarfile.open(fileobj=zstd_writer, mode="w|") as tar:
+                for item in files_to_archive:
+                    try:
+                        arcname = item.relative_to(parent_dir)
+                        if item.is_symlink():
+                            tar.add(item, arcname=arcname, recursive=False)
+                        elif item.is_file():
+                            tar.add(item, arcname=arcname, recursive=False)
+                        elif item.is_dir():
+                            tar.add(item, arcname=arcname, recursive=False)
+                        else:
+                            tar.add(item, arcname=arcname, recursive=False)
+                    except (OSError, PermissionError) as e:
+                        print(f"Warning: Could not add {item}: {e}", file=sys.stderr)
+                        continue
         if archive_path.exists() and archive_path.stat().st_size > 0:
             archive_size = archive_path.stat().st_size
             print(f"Archive created successfully: {archive_size:,} bytes")

@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import argparse
 import shutil
 import subprocess
@@ -86,7 +88,7 @@ def check_package_location(package_name: str) -> tuple[str | None, bool] | tuple
                 if line.startswith("Location:"):
                     location = line.split(":", 1)[1].strip()
                 elif line.startswith("Files:"):
-                    if any(file_line.strip() and not ".dist-info" in file_line for file_line in lines[i + 1 : i + 10]):
+                    if any(file_line.strip() and ".dist-info" not in file_line for file_line in lines[i + 1 : i + 10]):
                         has_files = True
             return location, has_files
     except Exception:

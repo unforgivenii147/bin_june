@@ -5,6 +5,8 @@ Format: user/repo (one per line)
 Uses --depth 1 for shallow clones.
 """
 
+from __future__ import annotations
+
 import argparse
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -21,7 +23,7 @@ def read_repos(file_path: Path) -> List[str]:
         print(f"Error: {file_path} does not exist")
         sys.exit(1)
 
-    with open(file_path, "r") as f:
+    with open(file_path) as f:
         repos = [line.strip() for line in f if line.strip()]
 
     if not repos:
@@ -81,7 +83,7 @@ def clone_repo(repo: str, base_dir: Path) -> Tuple[str, bool, str]:
             import shutil
 
             shutil.rmtree(target_dir, ignore_errors=True)
-        return repo, False, f"Error: {str(e)}"
+        return repo, False, f"Error: {e!s}"
 
 
 def main():
@@ -148,7 +150,7 @@ def main():
 
             except Exception as e:
                 failed += 1
-                print(f"❌ {repo}: Unexpected error: {str(e)}")
+                print(f"❌ {repo}: Unexpected error: {e!s}")
 
     # Summary
     print("-" * 60)

@@ -5,6 +5,8 @@ Script to run git pull on all git repositories in current directory and subdirec
 Requires gitpython library: pip install gitpython
 """
 
+from __future__ import annotations
+
 from pathlib import Path
 
 from git import GitCommandError, Repo
@@ -67,7 +69,7 @@ def git_pull_all() -> None:
             failed_repos.append((repo_path, str(e)))
             print(f"   ❌ Git error: {e}")
         except Exception as e:
-            failed_repos.append((repo_path, f"Unexpected error: {str(e)}"))
+            failed_repos.append((repo_path, f"Unexpected error: {e!s}"))
             print(f"   ❌ Error: {e}")
     print("\n" + "=" * 60)
     print("SUMMARY")

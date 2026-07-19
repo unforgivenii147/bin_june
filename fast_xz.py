@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import argparse
 import sys
 import textwrap
@@ -70,7 +72,7 @@ def compress_file(
             filepath.unlink()
         return filepath, True, f"Compressed to {output_path.name}"
     except Exception as e:
-        return filepath, False, f"Error: {str(e)}"
+        return filepath, False, f"Error: {e!s}"
 
 
 def decompress_file(filepath: Path, remove_orig: bool = True) -> Tuple[Path, bool, str]:
@@ -87,7 +89,7 @@ def decompress_file(filepath: Path, remove_orig: bool = True) -> Tuple[Path, boo
             filepath.unlink()
         return filepath, True, f"Decompressed to {output_path.name}"
     except Exception as e:
-        return filepath, False, f"Error: {str(e)}"
+        return filepath, False, f"Error: {e!s}"
 
 
 def process_files(
@@ -151,7 +153,7 @@ def main():
         "--preset",
         type=int,
         default=9,
-        choices=range(0, 10),
+        choices=range(10),
         help="Compression preset 0-9 (default: 9)",
     )
     parser.add_argument("--threads", type=int, default=4, help="Threads per compression job (default: 4)")

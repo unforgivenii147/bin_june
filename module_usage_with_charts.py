@@ -9,6 +9,8 @@ Scan ~/bin for Python scripts and count imports from:
 Save a comprehensive report to ~/dh_usage.txt and generate PNG charts.
 """
 
+from __future__ import annotations
+
 import ast
 import pkgutil
 import sys

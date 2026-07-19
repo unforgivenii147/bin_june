@@ -8,6 +8,8 @@ verifies they are actually text-based files, and reports mismatches.
 Uses memory-efficient os.walk traversal with progress reporting.
 """
 
+from __future__ import annotations
+
 import logging
 import mimetypes
 import os
@@ -107,7 +109,7 @@ def is_text_file(file_path: Path) -> bool:
                 except (UnicodeDecodeError, LookupError):
                     continue
             return False
-    except (OSError, IOError, PermissionError):
+    except (OSError, PermissionError):
         return None
 
 

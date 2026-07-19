@@ -1,6 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
+from __future__ import annotations
+
 import shutil
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
@@ -25,7 +27,7 @@ def process_symlink(symlink_path: Path):
             shutil.copy2(target_path, symlink_path)
         return {"status": "replaced", "msg": f"Replaced: {symlink_path} -> {target_path}"}
     except Exception as e:
-        return {"status": "error", "msg": f"Failed to process {symlink_path}: {str(e)}"}
+        return {"status": "error", "msg": f"Failed to process {symlink_path}: {e!s}"}
 
 
 def main():

@@ -5,6 +5,8 @@ Network State Script
 Displays your public IP, local IP, primary/secondary DNS, and approximate internet speed.
 """
 
+from __future__ import annotations
+
 import json
 import platform
 import random
@@ -53,7 +55,7 @@ def get_dns_servers():
     system = platform.system()
     try:
         if system:
-            with open("/data/data/com.termux/files/usr/etc/resolv.conf", "r") as f:
+            with open("/data/data/com.termux/files/usr/etc/resolv.conf") as f:
                 for line in f:
                     if line.startswith("nameserver"):
                         parts = line.split()

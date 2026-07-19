@@ -6,6 +6,8 @@ Extracts unique PATH values, assigns them to variables (P1, P2, etc.),
 and saves the configuration to ~/.bashrc
 """
 
+from __future__ import annotations
+
 import os
 from collections import OrderedDict
 from pathlib import Path
@@ -46,7 +48,7 @@ def generate_bash_config(paths):
 
 def read_bashrc(bashrc_path):
     if bashrc_path.exists():
-        with open(bashrc_path, "r", encoding="utf-8") as f:
+        with open(bashrc_path, encoding="utf-8") as f:
             return f.read()
     return ""
 

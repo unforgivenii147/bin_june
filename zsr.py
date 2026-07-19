@@ -6,6 +6,8 @@ zsr_optimized_by_gemini.py — Multi-threaded Zstandard compression/decompressio
 Optimized for Python 3.12 with modern syntax, type hints, and performance improvements.
 """
 
+from __future__ import annotations
+
 import argparse
 import asyncio
 import logging
@@ -184,7 +186,7 @@ async def process_compress() -> None:
     files = [
         p
         for p in cwd.iterdir()
-        if p.is_file() and (not p.suffix in (".zst", ".tar", ".gz", ".zip")) and (p.stat().st_size >= 1024)
+        if p.is_file() and (p.suffix not in (".zst", ".tar", ".gz", ".zip")) and (p.stat().st_size >= 1024)
     ]
     if files:
         logger.info(f"\n📄 Compressing {len(files)} files...")

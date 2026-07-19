@@ -93,7 +93,7 @@ def extract_prefix_comments_and_shebang(source: str) -> Tuple[str, str]:
     return prefix, remainder
 
 
-def process_file(path: Path) -> Tuple[Path, Optional[str]]:
+def process_file(path: Path) -> Tuple[Path, str | None]:
     try:
         with tokenize.open(path) as f:
             original = f.read()
@@ -200,7 +200,7 @@ def main() -> int:
     return 0
 
 
-def process_file_check_changed(path: Path) -> Tuple[Optional[Path], Optional[str]]:
+def process_file_check_changed(path: Path) -> Tuple[Path | None, str | None]:
     try:
         with tokenize.open(path) as f:
             original = f.read()

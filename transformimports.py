@@ -6,6 +6,8 @@ Optimized version of transformimports.py for Python 3.12.
 Transforms direct imports (import module) to from-imports (from module import name).
 """
 
+from __future__ import annotations
+
 import ast
 import sys
 from pathlib import Path

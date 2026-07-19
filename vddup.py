@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import argparse
 import ast
 import bz2
@@ -43,17 +45,14 @@ def extract_archive(file_path, extract_to) -> None:
             with tarfile.open(file_path, "r") as t:
                 t.extractall(extract_to)
         elif file_path.suffix == ".gz":
-            with gzip.open(file_path, "rb") as g:
-                with open(extract_to / file_path.stem, "wb") as f:
-                    copy_chunks(g, f)
+            with gzip.open(file_path, "rb") as g, open(extract_to / file_path.stem, "wb") as f:
+                copy_chunks(g, f)
         elif file_path.suffix == ".bz2":
-            with bz2.open(file_path, "rb") as b:
-                with open(extract_to / file_path.stem, "wb") as f:
-                    copy_chunks(b, f)
+            with bz2.open(file_path, "rb") as b, open(extract_to / file_path.stem, "wb") as f:
+                copy_chunks(b, f)
         elif file_path.suffix == ".xz":
-            with lzma.open(file_path, "rb") as x:
-                with open(extract_to / file_path.stem, "wb") as f:
-                    copy_chunks(x, f)
+            with lzma.open(file_path, "rb") as x, open(extract_to / file_path.stem, "wb") as f:
+                copy_chunks(x, f)
         elif file_path.suffix == ".zst":
             with open(file_path, "rb") as z:
                 dctx = zstd.ZstdDecompressor()
@@ -70,7 +69,7 @@ def extract_archive(file_path, extract_to) -> None:
 
 def parse_python_file(file_path) -> Module | None:
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             return ast.parse(f.read(), filename=str(file_path))
     except Exception as e:
         logger.error(f"Error parsing {file_path}: {e}")

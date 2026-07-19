@@ -6,6 +6,8 @@ Usage: script.py -c [paths...]
        script.py -d [paths...]
 """
 
+from __future__ import annotations
+
 import argparse
 import lzma
 import os
@@ -138,21 +140,19 @@ def decompress_archive(archive_path):
     try:
         archive_size = archive_path.stat().st_size
 
-        with lzma.open(archive_path, "rb") as lzma_in:
-            with tarfile.open(fileobj=lzma_in, mode="r|") as tar:
-                extracted_size = 0
-                for member in tar:
-                    if member is None:
-                        continue
-                    extracted_size += int(getattr(member, "size", 0) or 0)
-                    break
+        with lzma.open(archive_path, "rb") as lzma_in, tarfile.open(fileobj=lzma_in, mode="r|") as tar:
+            extracted_size = 0
+            for member in tar:
+                if member is None:
+                    continue
+                extracted_size += int(getattr(member, "size", 0) or 0)
+                break
 
         extracted_root_name = archive_path.stem
         target_dir = archive_path.parent / extracted_root_name
 
-        with lzma.open(archive_path, "rb") as lzma_in:
-            with tarfile.open(fileobj=lzma_in, mode="r|") as tar:
-                safe_extract_stream(tar, target_dir)
+        with lzma.open(archive_path, "rb") as lzma_in, tarfile.open(fileobj=lzma_in, mode="r|") as tar:
+            safe_extract_stream(tar, target_dir)
 
         archive_path.unlink()
         extracted_size = 0

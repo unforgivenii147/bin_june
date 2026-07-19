@@ -6,6 +6,8 @@ Compresses files in current directory recursively, skipping certain extensions a
 Uses pure generator for memory-efficient streaming traversal.
 """
 
+from __future__ import annotations
+
 import argparse
 import fnmatch
 import sys
@@ -281,11 +283,10 @@ def compress_file(
     try:
         original_size = input_path.stat().st_size
         compressor = zstd.ZstdCompressor(level=level, threads=threads)
-        with open(input_path, "rb") as infile:
-            with open(output_path, "wb") as outfile:
-                reader = compressor.stream_reader(infile)
-                for chunk in iter(lambda: reader.read(8192), b""):
-                    outfile.write(chunk)
+        with open(input_path, "rb") as infile, open(output_path, "wb") as outfile:
+            reader = compressor.stream_reader(infile)
+            for chunk in iter(lambda: reader.read(8192), b""):
+                outfile.write(chunk)
         compressed_size = output_path.stat().st_size
         stats.add(original_size, compressed_size)
         if remove_original:
@@ -304,11 +305,10 @@ def decompress_file(input_path: Path, output_path: Path, threads: int, remove_or
     try:
         compressed_size = input_path.stat().st_size
         decompressor = zstd.ZstdDecompressor()
-        with open(input_path, "rb") as infile:
-            with open(output_path, "wb") as outfile:
-                reader = decompressor.stream_reader(infile)
-                for chunk in iter(lambda: reader.read(8192), b""):
-                    outfile.write(chunk)
+        with open(input_path, "rb") as infile, open(output_path, "wb") as outfile:
+            reader = decompressor.stream_reader(infile)
+            for chunk in iter(lambda: reader.read(8192), b""):
+                outfile.write(chunk)
         decompressed_size = output_path.stat().st_size
         stats.add(decompressed_size, compressed_size)
         if remove_original:

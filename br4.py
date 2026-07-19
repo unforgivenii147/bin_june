@@ -12,6 +12,8 @@ Usage:
     python brotli_tool.py -d <path>          # Decompress file or directory
 """
 
+from __future__ import annotations
+
 import argparse
 import shutil
 import sys
@@ -267,7 +269,7 @@ Examples:
         "--quality",
         type=int,
         default=6,
-        choices=range(0, 12),
+        choices=range(12),
         help="Compression quality (0-11, default: 6). Higher = better compression but slower",
     )
     parser.add_argument(

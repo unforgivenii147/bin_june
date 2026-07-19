@@ -8,6 +8,8 @@ Usage:
     python script.py -d         # Decompress all .tar.lz4 files
 """
 
+from __future__ import annotations
+
 import argparse
 import io
 import os

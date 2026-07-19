@@ -137,7 +137,7 @@ class CommentRemover:
 
     def process_file(self, file_path: Path) -> Tuple[Path, int, bool, str]:
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 original_code = f.read()
             cleaned_code, comment_count = self.remove_comments(original_code)
             if self.validate:
@@ -148,7 +148,7 @@ class CommentRemover:
                 f.write(cleaned_code)
             return (file_path, comment_count, True, "OK")
         except Exception as e:
-            return (file_path, 0, False, f"Error: {str(e)}")
+            return (file_path, 0, False, f"Error: {e!s}")
 
     def find_python_files(self, paths: list[Path]) -> Generator[Path, None, None]:
         for path in paths:
@@ -199,7 +199,7 @@ class CommentRemover:
         except zipfile.BadZipFile:
             return (0, [], False)
         except Exception as e:
-            print(f"⚠ Error processing wheel {whl_path.name}: {str(e)}")
+            print(f"⚠ Error processing wheel {whl_path.name}: {e!s}")
             return (0, [], False)
 
     def process_files(
@@ -333,7 +333,7 @@ def main():
         print("\n\n⚠ Processing interrupted by user")
         sys.exit(130)
     except Exception as e:
-        print(f"\n❌ Fatal error: {str(e)}", file=sys.stderr)
+        print(f"\n❌ Fatal error: {e!s}", file=sys.stderr)
         sys.exit(1)
 
 

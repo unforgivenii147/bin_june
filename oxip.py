@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import subprocess
 from collections import deque
 from multiprocessing import Pool, cpu_count
@@ -57,7 +59,7 @@ def main() -> None:
         with Pool(8) as pool:
             for _ in pool.imap_unordered(optimize_png, png_files):
                 progress.update(task, advance=1)
-    total_space_freed = sum((optimize_png(path) for path in png_files)) / (1024 * 1024)
+    total_space_freed = sum(optimize_png(path) for path in png_files) / (1024 * 1024)
     print(f"\n[bold green]Total space freed: {total_space_freed:.2f} MB[/bold green]")
 
 

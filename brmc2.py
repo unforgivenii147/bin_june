@@ -10,6 +10,8 @@ It uses parallel processing for performance and validates output with ast.parse.
 Optimized for Python 3.12+ on Linux.
 """
 
+from __future__ import annotations
+
 import ast
 import logging
 import sys
@@ -88,7 +90,7 @@ class DocstringRemover(ast.NodeTransformer):
         return new_body
 
 
-def remove_docstrings_from_code(source_code: str) -> Optional[str]:
+def remove_docstrings_from_code(source_code: str) -> str | None:
     try:
         tree = ast.parse(source_code)
         transformer = DocstringRemover()
@@ -114,7 +116,7 @@ def validate_python_code(code: str) -> bool:
         return False
 
 
-def process_file(file_path: Path) -> tuple[Path, bool, Optional[str]]:
+def process_file(file_path: Path) -> tuple[Path, bool, str | None]:
     try:
         original_code = file_path.read_text(encoding="utf-8")
         if not validate_python_code(original_code):

@@ -4,6 +4,8 @@ Report Python packages installed in both user and system site directories.
 Uses pathlib for path handling and concurrent.futures for parallel processing.
 """
 
+from __future__ import annotations
+
 import concurrent.futures
 import pathlib
 import site
@@ -177,7 +179,7 @@ def analyze_package_versions(
                 for metadata_file in metadata_files:
                     metadata_path = location / metadata_file
                     if metadata_path.exists():
-                        with open(metadata_path, "r") as f:
+                        with open(metadata_path) as f:
                             for line in f:
                                 if line.startswith("Version:"):
                                     version_key = f"{location_type}_version"
@@ -196,7 +198,7 @@ def analyze_package_versions(
                         metadata_path = dist_dir / "PKG-INFO"
 
                     if metadata_path.exists():
-                        with open(metadata_path, "r") as f:
+                        with open(metadata_path) as f:
                             for line in f:
                                 if line.startswith("Version:"):
                                     version_key = f"{location_type}_version"

@@ -5,6 +5,8 @@
 Zstandard Recursive File Compressor/Decompressor
 """
 
+from __future__ import annotations
+
 import argparse
 import sys
 import tarfile
@@ -116,7 +118,7 @@ class OperationResult:
     original_size: int
     processed_size: int
     success: bool
-    error: Optional[str] = None
+    error: str | None = None
     duration: float = 0.0
     original_deleted: bool = False
     operation: str = "compress"
@@ -231,7 +233,7 @@ def get_files(
     mode: str,
     exclude_ext: set[str],
     exclude_patterns: list[str],
-    ext_filter: Optional[list[str]] = None,
+    ext_filter: list[str] | None = None,
     recursive: bool = True,
 ) -> list[Path]:
     found = []
@@ -239,9 +241,9 @@ def get_files(
     for p in walker:
         if not p.is_file() or p.is_symlink():
             continue
-        if any((part in SKIP_DIRS for part in p.parts)):
+        if any(part in SKIP_DIRS for part in p.parts):
             continue
-        if exclude_patterns and any((pat in str(p) for pat in exclude_patterns)):
+        if exclude_patterns and any(pat in str(p) for pat in exclude_patterns):
             continue
         if mode == "compress":
             if p.suffix.lower() in exclude_ext:
@@ -259,9 +261,9 @@ def get_files(
 def print_summary(results: list[OperationResult], root: Path, operation: str):
     successes = [r for r in results if r.success]
     failures = [r for r in results if not r.success]
-    total_orig = sum((r.original_size for r in successes))
-    total_proc = sum((r.processed_size for r in successes))
-    total_time = sum((r.duration for r in results))
+    total_orig = sum(r.original_size for r in successes)
+    total_proc = sum(r.processed_size for r in successes)
+    total_time = sum(r.duration for r in results)
     if RICH_AVAILABLE:
         console = Console()
         table = Table(title=f"Zstandard {operation.capitalize()} Results", box=box.ROUNDED)

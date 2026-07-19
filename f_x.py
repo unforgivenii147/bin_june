@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import sys
 import time
 from datetime import datetime
@@ -36,7 +38,7 @@ def main():
         print("Error: minutes must be a non-negative number")
         sys.exit(1)
     cwd = Path.cwd()
-    all_files = [p for p in cwd.rglob("*") if p.is_file() and not p.is_symlink() and not ".git" in p.parts]
+    all_files = [p for p in cwd.rglob("*") if p.is_file() and not p.is_symlink() and ".git" not in p.parts]
     if not all_files:
         print("No files found in current directory")
         return

@@ -414,7 +414,7 @@ def find_duplicates(
     return duplicates, grouped
 
 
-def run(cwd: Path, mode: Optional[str], workers: int) -> None:
+def run(cwd: Path, mode: str | None, workers: int) -> None:
     utils_dir = cwd / "utils"
     paths = collect_all_paths(cwd)
     logger.info("Found {} file(s) to scan", len(paths))

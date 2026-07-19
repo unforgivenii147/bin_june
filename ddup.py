@@ -10,6 +10,8 @@ Multiprocessing is used for fast AST analysis. Logging is handled by loguru.
 Requires Python 3.9+ (for ast.unparse).
 """
 
+from __future__ import annotations
+
 import argparse
 import ast
 import concurrent.futures
@@ -40,7 +42,7 @@ _COMPRESSED_EXT: Dict[str, object] = {
 }
 
 
-def _decompress_file(path: Path) -> Optional[str]:
+def _decompress_file(path: Path) -> str | None:
     suffix = path.suffix.lower()
     if suffix not in _COMPRESSED_EXT:
         return None
@@ -75,8 +77,8 @@ def _decompress_file(path: Path) -> Optional[str]:
         return None
 
 
-def _find_files(root: str = ".") -> List[Tuple[str, Optional[str]]]:
-    results: List[Tuple[str, Optional[str]]] = []
+def _find_files(root: str = ".") -> List[Tuple[str, str | None]]:
+    results: List[Tuple[str, str | None]] = []
     root_path = Path(root).resolve()
     utils_path = root_path / "utils"
     for dirpath, _, filenames in Path(root).walk():

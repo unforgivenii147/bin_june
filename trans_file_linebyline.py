@@ -6,6 +6,8 @@ Optimized version of trans_file_linebyline.py for Python 3.12.
 Translates non-English lines in a file line by line in-place.
 """
 
+from __future__ import annotations
+
 import logging
 import shutil
 import sys

@@ -10,6 +10,8 @@ Scan ~/bin for Python scripts and count imports from:
 Save a comprehensive report to ~/dh_usage.txt
 """
 
+from __future__ import annotations
+
 import ast
 import pkgutil
 import sys
@@ -257,8 +259,8 @@ def generate_report(per_file_data: list[tuple[str, dict[str, dict[str, int]]]], 
     lines.append(f"\n{'─' * 80}")
     lines.append("  SECTION 4: PER-FILE BREAKDOWN")
     lines.append(f"{'─' * 80}")
-    for fname, module_calls in sorted(per_file_data, key=lambda x: -sum((sum(c.values()) for c in x[1].values()))):
-        total_calls = sum((sum(c.values()) for c in module_calls.values()))
+    for fname, module_calls in sorted(per_file_data, key=lambda x: -sum(sum(c.values()) for c in x[1].values())):
+        total_calls = sum(sum(c.values()) for c in module_calls.values())
         lines.append(f"\n  📄 {fname}  ({total_calls} total calls)")
         stdlib_in_file = {}
         thirdparty_in_file = {}

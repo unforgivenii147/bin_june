@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import ast
 import sys
 
@@ -8,7 +10,7 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 def get_function_names(filename, skip_main=True):
     try:
-        with open(filename, "r") as file:
+        with open(filename) as file:
             tree = ast.parse(file.read())
         function_names = []
         for node in ast.walk(tree):

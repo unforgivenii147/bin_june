@@ -6,6 +6,8 @@ Separates git links into a separate file and shows progress.
 Uses pathlib and parallel processing for efficiency.
 """
 
+from __future__ import annotations
+
 import re
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
@@ -39,7 +41,7 @@ def extract_urls_from_file(file_path: Path) -> Tuple[Set[str], Set[str]]:
         if file_path.stat().st_size > 10 * 1024 * 1024:
             return regular_urls, git_urls
         try:
-            with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            with open(file_path, encoding="utf-8", errors="ignore") as f:
                 content = f.read()
         except Exception:
             return regular_urls, git_urls

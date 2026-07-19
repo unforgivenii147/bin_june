@@ -4,6 +4,8 @@
 Sort bash aliases by their value (the part after =).
 """
 
+from __future__ import annotations
+
 import re
 import sys
 from pathlib import Path
@@ -14,14 +16,14 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 def parse_aliases(filepath: Path):
     aliases = []
     try:
-        with open(filepath, "r", encoding="utf-8") as f:
+        with open(filepath, encoding="utf-8") as f:
             content = f.read()
         content = re.sub(r"\\\n", "", content)
         pattern = re.compile(r"^\s*alias\s+([a-zA-Z_][a-zA-Z0-9_-]*)\s*=\s*(.+?)\s*$", re.MULTILINE)
         for match in pattern.finditer(content):
             name = match.group(1)
             value = match.group(2).strip()
-            if value.startswith('"') and value.endswith('"') or value.startswith("'") and value.endswith("'"):
+            if (value.startswith('"') and value.endswith('"')) or (value.startswith("'") and value.endswith("'")):
                 value = value[1:-1]
             aliases.append((name, value, match.group(0)))
     except FileNotFoundError:

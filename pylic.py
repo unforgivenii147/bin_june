@@ -12,6 +12,8 @@ Excluded lines:
   - Lines starting with '# type', '# fmt', '# pylint', '# ruff', '# mypy'
 """
 
+from __future__ import annotations
+
 import argparse
 import ast
 import sys

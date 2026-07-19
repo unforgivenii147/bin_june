@@ -5,6 +5,8 @@ If a file has no shebang, add one at the beginning.
 Usage: python change_shebang.py
 """
 
+from __future__ import annotations
+
 import re
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -65,14 +67,14 @@ def is_likely_python_file(path: Path) -> bool:
                 if re.search(pattern, text_sample, re.MULTILINE):
                     return True
             return False
-    except (UnicodeDecodeError, IOError, PermissionError):
+    except (OSError, UnicodeDecodeError, PermissionError):
         return False
 
 
 def find_python_files(directory: Path) -> list[Path]:
     python_files = []
     for path in directory.rglob("*"):
-        if any((part.startswith(".") and part != "." for part in path.parts)):
+        if any(part.startswith(".") and part != "." for part in path.parts):
             if ".git" in path.parts:
                 continue
         if is_symlink(path):
@@ -92,7 +94,7 @@ def find_python_files(directory: Path) -> list[Path]:
             "\\.(so|dll|dylib|exe|o|a|lib)$",
             "\\.(pyc|pyo|pyd)$",
         ]
-        if any((re.search(pattern, str(path), re.IGNORECASE) for pattern in skip_patterns)):
+        if any(re.search(pattern, str(path), re.IGNORECASE) for pattern in skip_patterns):
             continue
         if path.stem in COMMON_PYTHON_NAMES:
             if is_likely_python_file(path):
@@ -104,7 +106,7 @@ def find_python_files(directory: Path) -> list[Path]:
     return python_files
 
 
-def process_file(path: Path, root_dir: Path) -> Tuple[Path, bool, Optional[str], str, str]:
+def process_file(path: Path, root_dir: Path) -> Tuple[Path, bool, str | None, str, str]:
     rel_path = str(path.relative_to(root_dir))
     if is_symlink(path):
         return (path, False, "Symlink skipped", rel_path, "skipped")

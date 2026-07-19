@@ -5,6 +5,8 @@ Fix batch-renamed .whl files by reading METADATA from inside each wheel.
 This is the most accurate method as it extracts the real distribution name and version.
 """
 
+from __future__ import annotations
+
 import re
 import shutil
 import zipfile
@@ -15,7 +17,7 @@ from typing import Dict, Optional, Tuple
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
-def extract_metadata_from_wheel(wheel_path: Path) -> Optional[Dict[str, str]]:
+def extract_metadata_from_wheel(wheel_path: Path) -> Dict[str, str] | None:
     try:
         with zipfile.ZipFile(wheel_path, "r") as zf:
             metadata_files = [f for f in zf.namelist() if f.endswith(".dist-info/METADATA")]
@@ -41,7 +43,7 @@ def extract_metadata_from_wheel(wheel_path: Path) -> Optional[Dict[str, str]]:
         return None
 
 
-def extract_wheel_tags(filename: str) -> Optional[Tuple[str, str, str]]:
+def extract_wheel_tags(filename: str) -> Tuple[str, str, str] | None:
     patterns = [
         ".*?-.*?-.*?-(py3|py2\\.py3|py2|cp[0-9]+)-(none|abi[0-9]+|cp[0-9]+m?)-(manylinux[0-9_]+|linux|win_amd64|win32|macosx[0-9_]+)\\.whl$",
         ".*?-.*?-.*?-([a-z0-9]+(?:[\\.\\-][a-z0-9]+)?)-([a-z0-9]+(?:[\\.\\-][a-z0-9]+)?)-([a-z0-9_]+(?:[\\.\\-][a-z0-9_]+)?)\\.whl$",
@@ -57,7 +59,7 @@ def extract_wheel_tags(filename: str) -> Optional[Tuple[str, str, str]]:
     return None
 
 
-def reconstruct_wheel_name(wheel_path: Path, metadata: Dict[str, str], original_filename: str) -> Optional[str]:
+def reconstruct_wheel_name(wheel_path: Path, metadata: Dict[str, str], original_filename: str) -> str | None:
     name = metadata["name"]
     version = metadata["version"]
     tags = extract_wheel_tags(wheel_path.name)

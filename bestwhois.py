@@ -4,6 +4,8 @@
 (c) WhoisXML API Inc. 2019.
 """
 
+from __future__ import annotations
+
 import datetime
 import json
 import sys
@@ -36,7 +38,7 @@ def valid_date(s):
         _ = datetime.datetime.strptime(s, "%Y-%m-%d")
         return s
     except ValueError:
-        msg = "Not a valid date: '{0}'.".format(s)
+        msg = f"Not a valid date: '{s}'."
         raise argparse.ArgumentTypeError(msg)
 
 

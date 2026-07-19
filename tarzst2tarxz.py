@@ -40,20 +40,19 @@ def convert_one(src: str) -> tuple[str, int, bool, str]:
         return (src, 0, True, f"skipped (exists): {dst_xz.name}")
     try:
         dctx = zstd.ZstdDecompressor()
-        with src_path.open("rb") as f_in:
-            with dctx.stream_reader(f_in) as zreader:
-                comp = lzma.LZMACompressor(format=lzma.FORMAT_XZ, check=-1, preset=9)
-                with dst_xz.open("wb") as f_out:
-                    while True:
-                        chunk = zreader.read(1024 * 1024)
-                        if not chunk:
-                            break
-                        out = comp.compress(chunk)
-                        if out:
-                            f_out.write(out)
-                    tail = comp.flush()
-                    if tail:
-                        f_out.write(tail)
+        with src_path.open("rb") as f_in, dctx.stream_reader(f_in) as zreader:
+            comp = lzma.LZMACompressor(format=lzma.FORMAT_XZ, check=-1, preset=9)
+            with dst_xz.open("wb") as f_out:
+                while True:
+                    chunk = zreader.read(1024 * 1024)
+                    if not chunk:
+                        break
+                    out = comp.compress(chunk)
+                    if out:
+                        f_out.write(out)
+                tail = comp.flush()
+                if tail:
+                    f_out.write(tail)
         src_size_before = src_path.stat().st_size
         dst_size_after = dst_xz.stat().st_size
         src_path.unlink()

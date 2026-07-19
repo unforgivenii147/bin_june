@@ -8,6 +8,8 @@ Requirements:
   pip install tree-sitter==0.25.2 tree-sitter-python==0.25.0
 """
 
+from __future__ import annotations
+
 import ast
 import sys
 import time
@@ -30,7 +32,7 @@ except ImportError:
 class ProcessingResult:
     file_path: Path
     success: bool
-    error: Optional[str] = None
+    error: str | None = None
     original_size: int = 0
     new_size: int = 0
     processing_time: float = 0.0

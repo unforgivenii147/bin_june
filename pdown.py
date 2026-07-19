@@ -12,7 +12,7 @@ from typing import Dict, Optional, Tuple
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
-def get_pypi_json(package: str, timeout: int = 10) -> Optional[Dict]:
+def get_pypi_json(package: str, timeout: int = 10) -> Dict | None:
     url = f"https://pypi.org/pypi/{package}/json"
     try:
         with urllib.request.urlopen(url, timeout=timeout) as response:
@@ -22,7 +22,7 @@ def get_pypi_json(package: str, timeout: int = 10) -> Optional[Dict]:
         return None
 
 
-def find_wheel_url(package_data: Dict, python_version: str = "3.12") -> Optional[Tuple[str, int]]:
+def find_wheel_url(package_data: Dict, python_version: str = "3.12") -> Tuple[str, int] | None:
     releases = package_data.get("releases", {})
     if not releases:
         return None
@@ -76,7 +76,7 @@ def download_file(url: str, destination: pathlib.Path, expected_size: int, chunk
             print(f"    ✅ Downloaded {destination.name} ({downloaded / 1024 / 1024:.2f} MB)")
             return True, ""
     except Exception as e:
-        return False, f"Failed: {str(e)}"
+        return False, f"Failed: {e!s}"
 
 
 def download_package(package: str, wheels_dir: pathlib.Path, python_version: str = "3.12") -> Tuple[str, bool, str]:

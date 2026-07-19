@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import json
 import re
 import subprocess
@@ -101,7 +103,7 @@ def process_packages_parallel(packages, threshold_bytes: int, num_processes: int
         return large_packages, all_packages, no_size, total
 
 
-def save_json_results(data, filename: str, threshold_mb: float | int, include_all=False) -> bool:
+def save_json_results(data, filename: str, threshold_mb: float, include_all=False) -> bool:
     output = {
         "metadata": {
             "threshold_mb": threshold_mb,

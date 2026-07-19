@@ -6,6 +6,8 @@ Translate non-English lines (focused on Chinese) to English in-place.
 Optimized for Python 3.12.
 """
 
+from __future__ import annotations
+
 import argparse
 import logging
 import multiprocessing as mp
@@ -134,7 +136,7 @@ def main() -> None:
                     if (
                         file_path.is_file()
                         and file_path.resolve() not in exclude_paths
-                        and (not any((part.startswith(".") for part in file_path.parts)))
+                        and (not any(part.startswith(".") for part in file_path.parts))
                     ):
                         files_to_process.append(file_path)
     if not files_to_process:

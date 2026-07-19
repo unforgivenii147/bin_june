@@ -7,6 +7,8 @@ Matches the exact function structure using AST comparison.
 Excludes the script itself and fileutils.py files.
 """
 
+from __future__ import annotations
+
 import argparse
 import ast
 import sys
@@ -76,9 +78,9 @@ def find_python_files(path: Path, include_hidden: bool = False, script_path: Pat
         for entry in path.rglob("*.py"):
             if entry.is_symlink():
                 continue
-            if not include_hidden and any((part.startswith(".") for part in entry.parts)):
+            if not include_hidden and any(part.startswith(".") for part in entry.parts):
                 continue
-            if any((skip_dir in entry.parts for skip_dir in SKIP_DIRS)):
+            if any(skip_dir in entry.parts for skip_dir in SKIP_DIRS):
                 continue
             if script_path and entry.resolve() == script_path.resolve():
                 continue
@@ -93,7 +95,7 @@ def find_python_files(path: Path, include_hidden: bool = False, script_path: Pat
 def remove_matching_function(file_path: Path) -> tuple[bool, int, int]:
     try:
         original_size = file_path.stat().st_size
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             source = f.read()
         try:
             tree = ast.parse(source)
@@ -125,7 +127,7 @@ def remove_matching_function(file_path: Path) -> tuple[bool, int, int]:
         return (False, 0, 0)
 
 
-def process_file(file_path: Path) -> tuple[Path, float, Optional[tuple[int, int, float]]]:
+def process_file(file_path: Path) -> tuple[Path, float, tuple[int, int, float] | None]:
     start_time = time.time()
     removed, original_size, new_size = remove_matching_function(file_path)
     elapsed_time = (time.time() - start_time) * 1000

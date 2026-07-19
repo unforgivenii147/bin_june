@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import argparse
 import ast
 import importlib
@@ -93,9 +95,6 @@ class ImportAnalyzer(ast.NodeVisitor):
             "setattr",
             "delattr",
             "hasattr",
-            "staticmethod",
-            "classmethod",
-            "property",
             "Exception",
             "BaseException",
             "ValueError",
@@ -426,7 +425,7 @@ def get_stdlib_modules() -> Set[str]:
 
 def analyze_file(filepath: Path) -> Tuple[Path, List[Tuple[str, int]]]:
     try:
-        with open(filepath, "r", encoding="utf-8") as f:
+        with open(filepath, encoding="utf-8") as f:
             content = f.read()
         tree = ast.parse(content, str(filepath))
         analyzer = ImportAnalyzer()
@@ -456,7 +455,7 @@ def autofix_imports(filepath: Path, missing_imports: List[Tuple[str, int]]) -> b
     if not missing_imports:
         return False
     try:
-        with open(filepath, "r", encoding="utf-8") as f:
+        with open(filepath, encoding="utf-8") as f:
             lines = f.readlines()
         unique_imports = sorted(set(imp[0] for imp in missing_imports))
         insert_idx = 0

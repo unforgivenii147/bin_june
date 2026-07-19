@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import ast
 import os
 import re
@@ -230,7 +232,7 @@ def find_docstring_ranges(node: Module) -> list[tuple[int, int]]:
 
 def remove_blank_lines(content: str) -> str:
     content = re.sub(r"\n\n+", "\n", content)
-    return "\n".join((line.rstrip() for line in content.split("\n")))
+    return "\n".join(line.rstrip() for line in content.split("\n"))
 
 
 def process_file(file_path: Path) -> None:

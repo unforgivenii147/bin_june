@@ -6,6 +6,8 @@ Images without human faces are moved to 'noface' folder.
 Images with faces stay in their original location.
 """
 
+from __future__ import annotations
+
 import logging
 import shutil
 import sys

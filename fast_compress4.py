@@ -5,6 +5,8 @@ Recursive file compressor using zstandard streaming compression.
 Compresses files in place with .zst extension and removes originals.
 """
 
+from __future__ import annotations
+
 import argparse
 import sys
 from pathlib import Path
@@ -38,14 +40,13 @@ def compress_file(
 ) -> bool:
     try:
         compressor = zstd.ZstdCompressor(level=level, threads=threads)
-        with open(input_path, "rb") as infile:
-            with open(output_path, "wb") as outfile:
-                with compressor.stream_writer(outfile) as stream_writer:
-                    while True:
-                        chunk = infile.read(chunk_size)
-                        if not chunk:
-                            break
-                        stream_writer.write(chunk)
+        with open(input_path, "rb") as infile, open(output_path, "wb") as outfile:
+            with compressor.stream_writer(outfile) as stream_writer:
+                while True:
+                    chunk = infile.read(chunk_size)
+                    if not chunk:
+                        break
+                    stream_writer.write(chunk)
         if output_path.exists() and output_path.stat().st_size > 0:
             original_size = input_path.stat().st_size
             compressed_size = output_path.stat().st_size
@@ -68,7 +69,7 @@ def compress_file(
 
 def decompress_file(
     input_path: Path,
-    output_path: Optional[Path] = None,
+    output_path: Path | None = None,
     chunk_size: int = 1024 * 1024,
     remove_original: bool = True,
 ) -> bool:
@@ -82,14 +83,13 @@ def decompress_file(
         return False
     try:
         decompressor = zstd.ZstdDecompressor()
-        with open(input_path, "rb") as infile:
-            with open(output_path, "wb") as outfile:
-                with decompressor.stream_reader(infile) as stream_reader:
-                    while True:
-                        chunk = stream_reader.read(chunk_size)
-                        if not chunk:
-                            break
-                        outfile.write(chunk)
+        with open(input_path, "rb") as infile, open(output_path, "wb") as outfile:
+            with decompressor.stream_reader(infile) as stream_reader:
+                while True:
+                    chunk = stream_reader.read(chunk_size)
+                    if not chunk:
+                        break
+                    outfile.write(chunk)
         if remove_original:
             input_path.unlink()
             print(f"✓ Decompressed & removed: {input_path} -> {output_path}")

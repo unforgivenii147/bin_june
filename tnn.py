@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import os
 import sys
 from collections import deque
@@ -32,7 +34,7 @@ def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
-    return Parallel(n_jobs=-1)((delayed(process_function)(file_str, **kwargs) for file_str in file_strings))
+    return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
 
 
 ATTRIBUTES = {
@@ -145,7 +147,7 @@ def is_binary(path: Path | str) -> bool:
         if b"\x00" in chunk:
             return True
         text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
-        nontext = sum((1 for b in chunk if b not in text_chars))
+        nontext = sum(1 for b in chunk if b not in text_chars)
         return nontext / len(chunk) > 0.3
     except Exception:
         return True

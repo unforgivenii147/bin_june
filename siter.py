@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import argparse
 import base64
 import csv
@@ -22,7 +24,7 @@ class WheelBuilder:
         output_dir: Path,
         force_all: bool = False,
         parallel: bool = True,
-        max_workers: Optional[int] = None,
+        max_workers: int | None = None,
     ) -> None:
         self.site_packages = site_packages.resolve()
         self.output_dir = output_dir.resolve()
@@ -35,7 +37,7 @@ class WheelBuilder:
         self.share_dir = self.venv_root / "share" if self.venv_root else None
         self.processed_packages: Set[str] = set()
 
-    def _find_venv_root(self) -> Optional[Path]:
+    def _find_venv_root(self) -> Path | None:
         current = self.site_packages
         for _ in range(5):
             if (current / "pyvenv.cfg").exists():
@@ -47,7 +49,7 @@ class WheelBuilder:
             current = current.parent
         return None
 
-    def _find_bin_dir(self) -> Optional[Path]:
+    def _find_bin_dir(self) -> Path | None:
         if not self.venv_root:
             return None
         for name in ["bin", "Scripts"]:
@@ -147,7 +149,7 @@ class WheelBuilder:
     def _detect_purity(self, records: Dict) -> bool:
         return all(not path.endswith((".so", ".pyd", ".dll")) for path in records)
 
-    def build_wheel(self, dist_info_dir: Path) -> Optional[Path]:
+    def build_wheel(self, dist_info_dir: Path) -> Path | None:
         if not dist_info_dir.is_dir():
             return None
         parts = dist_info_dir.stem.split("-")
@@ -257,7 +259,7 @@ class WheelBuilder:
             print(f"  ❌ Failed to build {pkg_name}: {e}")
             return None
 
-    def _build_wheel_worker(self, dist_info: Path) -> Tuple[str, Optional[Path]]:
+    def _build_wheel_worker(self, dist_info: Path) -> Tuple[str, Path | None]:
         try:
             result = self.build_wheel(dist_info)
             return dist_info.name, result

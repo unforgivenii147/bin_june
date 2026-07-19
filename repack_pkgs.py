@@ -1,6 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
+from __future__ import annotations
+
 import base64
 import hashlib
 import json
@@ -48,11 +50,7 @@ class PackageDetector:
             self.log(f"Found C extensions: {len(so_files)} .so, {len(pyd_files)} .pyd, {len(dll_files)} .dll")
         binary_extensions = {".exe", ".bin", ".dylib", ".so", ".pyd", ".dll"}
         has_binary = any(
-            (
-                file_path.suffix.lower() in binary_extensions
-                for file_path in package_dir.rglob("*")
-                if file_path.is_file()
-            )
+            file_path.suffix.lower() in binary_extensions for file_path in package_dir.rglob("*") if file_path.is_file()
         )
         return (is_pure_python, has_c_extension, has_binary)
 
@@ -252,7 +250,7 @@ class VenvRepacker:
             for item in self.site_packages.iterdir()
             if item.is_dir()
             and (not item.name.startswith("."))
-            and (not any((item.name.endswith(p) for p in exclude_patterns)))
+            and (not any(item.name.endswith(p) for p in exclude_patterns))
         }
         self.log(f"Found {len(packages)} packages")
         return sorted(packages)

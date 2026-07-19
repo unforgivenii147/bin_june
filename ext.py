@@ -1,6 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
+from __future__ import annotations
+
 import ast
 import multiprocessing as mp
 from ast import AST
@@ -26,7 +28,7 @@ def discover_python_files() -> list[Path]:
     files = []
     base_path = Path(".")
     for path in base_path.rglob("*"):
-        if any((part in EXCLUDE_DIRS for part in path.parts)):
+        if any(part in EXCLUDE_DIRS for part in path.parts):
             continue
         if path.is_file() and is_python_script(path):
             files.append(path)

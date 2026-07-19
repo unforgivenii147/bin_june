@@ -4,6 +4,8 @@ Clone GitHub repositories using pure Python (dulwich).
 Skips repos >5MB and removes successfully cloned repos from repos.txt.
 """
 
+from __future__ import annotations
+
 import argparse
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -25,7 +27,7 @@ def read_repos(file_path: Path) -> List[str]:
         print(f"Error: {file_path} does not exist")
         sys.exit(1)
 
-    with open(file_path, "r") as f:
+    with open(file_path) as f:
         repos = [line.strip() for line in f if line.strip()]
 
     if not repos:
@@ -110,7 +112,7 @@ def clone_repo(repo: str, base_dir: Path) -> Tuple[str, bool, str]:
             import shutil
 
             shutil.rmtree(target_dir, ignore_errors=True)
-        return repo, False, f"Clone failed: {str(e)}"
+        return repo, False, f"Clone failed: {e!s}"
 
 
 def remove_from_repos_file(file_path: Path, repos_to_remove: Set[str]):
@@ -208,7 +210,7 @@ def main():
 
             except Exception as e:
                 failed += 1
-                print(f"❌ {repo}: Unexpected error: {str(e)}")
+                print(f"❌ {repo}: Unexpected error: {e!s}")
 
     # Remove successfully cloned repos from repos.txt
     if not args.no_cleanup and successfully_cloned:

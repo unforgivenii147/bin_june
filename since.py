@@ -5,6 +5,8 @@ Persian to Gregorian Date Converter with Days Since Calculator
 Converts Persian (Solar Hijri) dates to Gregorian dates and calculates days since
 """
 
+from __future__ import annotations
+
 import datetime
 import sys
 

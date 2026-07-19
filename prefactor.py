@@ -41,7 +41,7 @@ class ModuleInfo:
     deps: Set[str]
 
 
-def find_py_files(root: Path, exclude: Optional[Path] = None) -> List[Path]:
+def find_py_files(root: Path, exclude: Path | None = None) -> List[Path]:
     files = []
     for p in sorted(root.rglob("*.py")):
         if "__pycache__" in p.parts:
@@ -57,7 +57,7 @@ def find_py_files(root: Path, exclude: Optional[Path] = None) -> List[Path]:
     return files
 
 
-def module_fullname_for_path(root: Path, file_path: Path, package_mode: bool, package_name: Optional[str]) -> str:
+def module_fullname_for_path(root: Path, file_path: Path, package_mode: bool, package_name: str | None) -> str:
     rel = file_path.relative_to(root)
     parts = list(rel.with_suffix("").parts)
     if parts and parts[-1] == "__init__":
@@ -73,7 +73,7 @@ def module_fullname_for_path(root: Path, file_path: Path, package_mode: bool, pa
         return ".".join(parts)
 
 
-def resolve_relative_import(curr_fullname: str, module: Optional[str], level: int) -> Optional[str]:
+def resolve_relative_import(curr_fullname: str, module: str | None, level: int) -> str | None:
     if level == 0:
         return module
     cur_parts = curr_fullname.split(".")

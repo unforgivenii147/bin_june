@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import sys
 from pathlib import Path
 
@@ -8,7 +10,7 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 def clean_file(path: Path, target: str) -> None:
     lines = path.read_text(encoding="utf-8", errors="ignore").splitlines(keepends=True)
-    cleaned = [p for p in lines if not target in p]
+    cleaned = [p for p in lines if target not in p]
     result = "".join(cleaned)
     path.write_text(result, encoding="utf-8")
 

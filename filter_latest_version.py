@@ -5,6 +5,8 @@ Filter the latest version for ARMv7 architecture (armeabi_v7a, armv7l, linux_arm
 from a list of wheel URLs.
 """
 
+from __future__ import annotations
+
 import re
 import sys
 from collections import defaultdict
@@ -14,7 +16,7 @@ from typing import Dict, Optional, Tuple
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
-def parse_wheel_url(url: str) -> Optional[Tuple[str, str, Tuple[int, ...], str]]:
+def parse_wheel_url(url: str) -> Tuple[str, str, Tuple[int, ...], str] | None:
     android_pattern = "/([^/]+)-(\\d+\\.\\d+\\.\\d+)-py3-none-android_24_([^/]+)\\.whl"
     linux_pattern = "/([^/]+)-(\\d+\\.\\d+\\.\\d+(?:\\.\\d+)?)-cp\\d+-cp\\d+-linux_([^/]+)\\.whl"
     match = re.search(android_pattern, url)
@@ -42,11 +44,11 @@ def is_armv7_arch(arch: str) -> bool:
 def filter_latest_for_armv7(urls_file=None):
     urls = []
     if urls_file and Path(urls_file).exists():
-        with open(urls_file, "r") as f:
+        with open(urls_file) as f:
             urls = [line.strip() for line in f if line.strip()]
     elif len(sys.argv) > 1:
         if Path(sys.argv[1]).exists():
-            with open(sys.argv[1], "r") as f:
+            with open(sys.argv[1]) as f:
                 urls = [line.strip() for line in f if line.strip()]
         else:
             urls = sys.argv[1:]

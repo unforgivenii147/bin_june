@@ -1,6 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
+from __future__ import annotations
+
 import bz2
 import lzma
 import shutil
@@ -290,7 +292,7 @@ def main() -> None:
     if removed_lines_accumulator:
         try:
             with LOG_FILE.open("a", encoding="utf-8") as f:
-                f.writelines((line + "\n" for line in removed_lines_accumulator))
+                f.writelines(line + "\n" for line in removed_lines_accumulator)
             print(f"--- Saved {len(removed_lines_accumulator)} lines to {LOG_FILE} ---")
         except PermissionError:
             pass

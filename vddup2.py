@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import argparse
 import ast
 import os
@@ -10,7 +12,7 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 
 def parse_python_file(file_path) -> Module:
-    with open(file_path, "r", encoding="utf-8") as file:
+    with open(file_path, encoding="utf-8") as file:
         return ast.parse(file.read(), filename=file_path)
 
 
@@ -60,7 +62,7 @@ def process_file(file_path, repeated_definitions, move) -> None:
         with open(os.path.join(utils_dir, filename), "a", encoding="utf-8") as f:
             f.write(content + "\n")
 
-    with open(file_path, "r", encoding="utf-8") as file:
+    with open(file_path, encoding="utf-8") as file:
         lines = file.readlines()
     new_lines = []
     for node in ast.walk(tree):

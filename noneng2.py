@@ -9,6 +9,8 @@ Usage:
   python find_noneng.py -l -o out.json  # Save to custom JSON file
 """
 
+from __future__ import annotations
+
 import argparse
 import json
 import sys
@@ -83,7 +85,7 @@ def is_english(text: str) -> Tuple[bool, float]:
         return (True, 0.0)
 
 
-def analyze_file(filepath: Path, detailed: bool = False) -> Optional[Dict]:
+def analyze_file(filepath: Path, detailed: bool = False) -> Dict | None:
     try:
         content = None
         for encoding in ["utf-8", "latin-1", "cp1252"]:
@@ -165,7 +167,7 @@ def scan_files(root_dir: Path, detailed: bool = False, max_workers: int = None) 
     files = []
     for ext in TEXT_EXTENSIONS:
         files.extend(root_dir.rglob(f"*{ext}"))
-    files = [f for f in files if not any((part in SKIP_DIRS for part in f.parts))]
+    files = [f for f in files if not any(part in SKIP_DIRS for part in f.parts)]
     print(f"Found {len(files)} text files. Analyzing with {max_workers} workers...")
     results = []
     with ProcessPoolExecutor(max_workers=max_workers) as executor:

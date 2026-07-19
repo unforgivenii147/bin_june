@@ -6,6 +6,8 @@ Recursive Python file runner with parallel processing and timeout handling.
 Runs all .py files in a directory tree, continuing even if some fail.
 """
 
+from __future__ import annotations
+
 import argparse
 import multiprocessing
 import subprocess
@@ -18,7 +20,7 @@ from typing import Dict, List, Optional, Tuple
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
-def run_python_file(file_path: Path, timeout: int = 10) -> Tuple[Path, bool, Optional[str], Optional[str]]:
+def run_python_file(file_path: Path, timeout: int = 10) -> Tuple[Path, bool, str | None, str | None]:
     try:
         result = subprocess.run(
             [sys.executable, str(file_path)], capture_output=True, text=True, timeout=timeout, cwd=file_path.parent
@@ -51,7 +53,7 @@ def run_python_file(file_path: Path, timeout: int = 10) -> Tuple[Path, bool, Opt
     except subprocess.SubprocessError as e:
         return (file_path, False, "SubprocessError", str(e))
     except Exception as e:
-        return (file_path, False, "UnexpectedError", f"{type(e).__name__}: {str(e)}")
+        return (file_path, False, "UnexpectedError", f"{type(e).__name__}: {e!s}")
 
 
 def find_python_files(root_dir: Path, recursive: bool = True) -> List[Path]:
@@ -62,7 +64,7 @@ def find_python_files(root_dir: Path, recursive: bool = True) -> List[Path]:
 
 
 def run_files_parallel(
-    files: List[Path], max_workers: Optional[int] = None, timeout: int = 10, verbose: bool = False
+    files: List[Path], max_workers: int | None = None, timeout: int = 10, verbose: bool = False
 ) -> Dict[str, List[Tuple[Path, str]]]:
     if max_workers is None:
         max_workers = min(multiprocessing.cpu_count(), len(files))

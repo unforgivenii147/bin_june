@@ -4,6 +4,8 @@ Smart Archiver - Automatically chooses best compression algorithm based on file 
 and supports parallel compression for multiple files.
 """
 
+from __future__ import annotations
+
 import argparse
 import json
 import multiprocessing

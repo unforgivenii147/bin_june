@@ -6,6 +6,8 @@ Optimized version of transchin.py for Python 3.12.
 Translates non-English characters in files in-place using parallel processing.
 """
 
+from __future__ import annotations
+
 import logging
 import re
 import sys
@@ -67,7 +69,7 @@ def translate_file(path: Path) -> None:
 def get_files(path: Path) -> list[Path]:
     files: list[Path] = []
     for p in path.rglob("*"):
-        if any((part.startswith(".") or part in SKIP_DIRS for part in p.parts)):
+        if any(part.startswith(".") or part in SKIP_DIRS for part in p.parts):
             continue
         if p.is_file() and p.suffix.lower() in {".txt", ".md", ".py", ".json", ".csv"}:
             files.append(p)

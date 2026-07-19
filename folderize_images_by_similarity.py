@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import shutil
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
@@ -43,7 +45,7 @@ class ImageSimilarityOrganizer:
             hash_array = (img_resized > avg).flatten().astype(int)
             return image_path, hash_array
         except Exception as e:
-            print(f"[ERROR] Failed to hash {image_path}: {str(e)}")
+            print(f"[ERROR] Failed to hash {image_path}: {e!s}")
             return image_path, None
 
     def compute_hashes(self, image_paths: List[Path]) -> Dict[Path, np.ndarray]:
@@ -114,7 +116,7 @@ class ImageSimilarityOrganizer:
                         counter += 1
                     shutil.move(str(img_path), str(dest_path))
                 except Exception as e:
-                    print(f"[ERROR] Failed to move {img_path}: {str(e)}")
+                    print(f"[ERROR] Failed to move {img_path}: {e!s}")
         print(f"[ORGANIZE] Done! Check {self.root_dir} for organized groups")
 
     def run(self) -> None:

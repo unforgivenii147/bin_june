@@ -7,6 +7,8 @@ Requires: deep-translator
 Optimized for Python 3.12.
 """
 
+from __future__ import annotations
+
 import argparse
 import logging
 import multiprocessing as mp
@@ -30,7 +32,7 @@ def is_english(text: str, threshold: float = 0.6) -> bool:
     alpha_chars = [c for c in stripped if c.isalpha()]
     if not alpha_chars:
         return True
-    ascii_alpha_count = sum((1 for c in alpha_chars if ord(c) < 128))
+    ascii_alpha_count = sum(1 for c in alpha_chars if ord(c) < 128)
     return ascii_alpha_count / len(alpha_chars) > threshold
 
 
@@ -109,7 +111,7 @@ def main() -> None:
                     if (
                         fp.is_file()
                         and fp.resolve() not in exclude_paths
-                        and (not any((part.startswith(".") for part in fp.parts)))
+                        and (not any(part.startswith(".") for part in fp.parts))
                     ):
                         files_to_process.append(fp)
     if not files_to_process:

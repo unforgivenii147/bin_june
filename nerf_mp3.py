@@ -3,6 +3,8 @@
 Convert MP3 files to half their original bitrate using ffmpeg with parallel processing.
 """
 
+from __future__ import annotations
+
 import argparse
 import json
 import os
@@ -74,7 +76,7 @@ def format_duration(seconds: float) -> str:
         return f"{minutes}m {secs:.0f}s"
 
 
-def get_audio_info(mp3_file: Path) -> Tuple[Optional[int], Optional[int]]:
+def get_audio_info(mp3_file: Path) -> Tuple[int | None, int | None]:
     """
     Get audio bitrate and file size using ffprobe.
     Returns (bitrate_kbps, file_size_bytes) or (None, None) on failure.

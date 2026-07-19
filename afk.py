@@ -12,6 +12,8 @@ Supports:
   • --dry-run and --verbose modes
 """
 
+from __future__ import annotations
+
 import argparse
 import ast
 import multiprocessing
@@ -40,10 +42,10 @@ class UnusedImport:
 class FileReport:
     path: str
     unused: list[UnusedImport] = field(default_factory=list)
-    error: Optional[str] = None
+    error: str | None = None
 
 
-def _dotted(name: str, asname: Optional[str]) -> tuple[str, str]:
+def _dotted(name: str, asname: str | None) -> tuple[str, str]:
     bound = asname if asname else name.split(".")[0]
     full = asname if asname else name
     return bound, full
@@ -97,11 +99,8 @@ def _is_under_type_checking(node: ast.AST, tree: ast.AST) -> bool:
     while current is not None:
         if isinstance(current, ast.If):
             test = current.test
-            if (
-                isinstance(test, ast.Name)
-                and test.id == "TYPE_CHECKING"
-                or isinstance(test, ast.Attribute)
-                and test.attr == "TYPE_CHECKING"
+            if (isinstance(test, ast.Name) and test.id == "TYPE_CHECKING") or (
+                isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING"
             ):
                 return True
         current = parent.get(id(current))
@@ -182,7 +181,7 @@ def analyse_source(source: str, display_path: str) -> FileReport:
     return report
 
 
-def _remove_names_from_import(line: str, names_to_remove: set[str]) -> Optional[str]:
+def _remove_names_from_import(line: str, names_to_remove: set[str]) -> str | None:
     stripped = line.strip()
     if stripped.startswith("import ") and not stripped.startswith("from "):
         parts = stripped[len("import ") :].split(",")
@@ -237,7 +236,7 @@ def _remove_names_from_import(line: str, names_to_remove: set[str]) -> Optional[
     return line
 
 
-def fix_source(source: str, report: FileReport) -> Optional[str]:
+def fix_source(source: str, report: FileReport) -> str | None:
     if not report.unused:
         return None
     lines = source.splitlines(keepends=True)
@@ -370,7 +369,7 @@ def print_report(reports: list[FileReport], verbose: bool, use_colour: bool) -> 
 
 
 def collect_tasks(
-    paths: list[Path], exclude_patterns: Optional[list[str]] = None
+    paths: list[Path], exclude_patterns: list[str] | None = None
 ) -> tuple[list[tuple[str, str]], list[tuple[str, str]]]:
     file_tasks: list[tuple[str, str]] = []
     source_tasks: list[tuple[str, str]] = []
@@ -414,7 +413,7 @@ def run(
     autofix: bool,
     dry_run: bool,
     verbose: bool,
-    exclude: Optional[list[str]] = None,
+    exclude: list[str] | None = None,
 ) -> int:
     use_colour = sys.stdout.isatty()
     if verbose:

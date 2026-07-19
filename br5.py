@@ -7,6 +7,8 @@ Removes original files after successful compression by default.
 Can optionally tar subdirectories before Brotli compression for better ratios.
 """
 
+from __future__ import annotations
+
 import argparse
 import multiprocessing as mp
 import shutil
@@ -122,7 +124,7 @@ class CompressionResult:
     original_size: int
     processed_size: int
     success: bool
-    error: Optional[str] = None
+    error: str | None = None
     duration: float = 0.0
     original_deleted: bool = False
     operation: str = "compress"
@@ -139,7 +141,7 @@ def format_size(size_bytes: int) -> str:
 
 def tar_directory(directory: Path, output_path: Path, delete_original: bool = False) -> Tuple[int, bool]:
     try:
-        original_size = sum((f.stat().st_size for f in directory.rglob("*") if f.is_file()))
+        original_size = sum(f.stat().st_size for f in directory.rglob("*") if f.is_file())
         with tarfile.open(output_path, "w") as tar:
             tar.add(directory, arcname=directory.name)
         tar_size = output_path.stat().st_size
@@ -176,19 +178,18 @@ def compress_file_streaming(
             )
         compressor = brotlicffi.Compressor(quality=quality)
         compressed_size = 0
-        with open(input_path, "rb") as f_in:
-            with open(output_path, "wb") as f_out:
-                while True:
-                    chunk = f_in.read(chunk_size)
-                    if not chunk:
-                        break
-                    compressed_chunk = compressor.compress(chunk)
-                    f_out.write(compressed_chunk)
-                    compressed_size += len(compressed_chunk)
-                remaining = compressor.flush()
-                if remaining:
-                    f_out.write(remaining)
-                    compressed_size += len(remaining)
+        with open(input_path, "rb") as f_in, open(output_path, "wb") as f_out:
+            while True:
+                chunk = f_in.read(chunk_size)
+                if not chunk:
+                    break
+                compressed_chunk = compressor.compress(chunk)
+                f_out.write(compressed_chunk)
+                compressed_size += len(compressed_chunk)
+            remaining = compressor.flush()
+            if remaining:
+                f_out.write(remaining)
+                compressed_size += len(remaining)
         original_deleted = False
         if not keep_original and output_path.exists():
             input_path.unlink()
@@ -236,28 +237,27 @@ def decompress_file_streaming(
             )
         decompressor = brotlicffi.Decompressor()
         decompressed_size = 0
-        with open(input_path, "rb") as f_in:
-            with open(output_path, "wb") as f_out:
-                while True:
-                    chunk = f_in.read(chunk_size)
-                    if not chunk:
+        with open(input_path, "rb") as f_in, open(output_path, "wb") as f_out:
+            while True:
+                chunk = f_in.read(chunk_size)
+                if not chunk:
+                    break
+                try:
+                    decompressed_chunk = decompressor.decompress(chunk)
+                    f_out.write(decompressed_chunk)
+                    decompressed_size += len(decompressed_chunk)
+                except Exception as e:
+                    if decompressed_size > 0:
+                        try:
+                            remaining = decompressor.flush()
+                            if remaining:
+                                f_out.write(remaining)
+                                decompressed_size += len(remaining)
+                        except:
+                            pass
                         break
-                    try:
-                        decompressed_chunk = decompressor.decompress(chunk)
-                        f_out.write(decompressed_chunk)
-                        decompressed_size += len(decompressed_chunk)
-                    except Exception as e:
-                        if decompressed_size > 0:
-                            try:
-                                remaining = decompressor.flush()
-                                if remaining:
-                                    f_out.write(remaining)
-                                    decompressed_size += len(remaining)
-                            except:
-                                pass
-                            break
-                        else:
-                            raise
+                    else:
+                        raise
         original_deleted = False
         if not keep_original and output_path.exists():
             input_path.unlink()
@@ -308,7 +308,7 @@ def process_subdirs_with_tar(
         exclude_patterns = []
     results = []
     subdirs = [d for d in directory.iterdir() if d.is_dir() and (not d.is_symlink())]
-    subdirs = [d for d in subdirs if not any((pattern in str(d) for pattern in exclude_patterns))]
+    subdirs = [d for d in subdirs if not any(pattern in str(d) for pattern in exclude_patterns)]
     excluded_dirs = {".git", ".svn", ".hg", "__pycache__", "node_modules", ".venv", "venv", ".env"}
     subdirs = [d for d in subdirs if d.name not in excluded_dirs]
     if not subdirs:
@@ -329,7 +329,7 @@ def process_subdirs_with_tar(
                     tar_files.append(tar_path)
                     continue
                 print(f"  📦 [{i}/{len(subdirs)}] Tarring {subdir.name}...")
-                dir_size = sum((f.stat().st_size for f in subdir.rglob("*") if f.is_file()))
+                dir_size = sum(f.stat().st_size for f in subdir.rglob("*") if f.is_file())
                 tar_size, success = tar_directory(subdir, tar_path, delete_original=not keep_original)
                 if success:
                     tar_files.append(tar_path)
@@ -408,7 +408,7 @@ def should_compress_file(file_path: Path, exclude_extensions: Set[str], exclude_
         return False
     if exclude_patterns:
         path_str = str(file_path)
-        if any((pattern in path_str for pattern in exclude_patterns)):
+        if any(pattern in path_str for pattern in exclude_patterns):
             return False
     return True
 
@@ -454,7 +454,7 @@ def find_files_to_decompress(directory: Path, exclude_patterns: List[str] = None
             continue
         if exclude_patterns:
             path_str = str(file_path)
-            if any((pattern in path_str for pattern in exclude_patterns)):
+            if any(pattern in path_str for pattern in exclude_patterns):
                 continue
         files.append(file_path)
     return sorted(set(files))
@@ -472,15 +472,15 @@ def print_results_rich(results: List[CompressionResult], directory: Path, operat
     console = Console()
     successful = [r for r in results if r.success]
     failed = [r for r in results if not r.success]
-    total_original = sum((r.original_size for r in successful))
-    total_processed = sum((r.processed_size for r in successful))
-    total_duration = sum((r.duration for r in results))
-    deleted_count = sum((1 for r in successful if r.original_deleted))
-    tarred_count = sum((1 for r in successful if r.was_tarred))
+    total_original = sum(r.original_size for r in successful)
+    total_processed = sum(r.processed_size for r in successful)
+    total_duration = sum(r.duration for r in results)
+    deleted_count = sum(1 for r in successful if r.original_deleted)
+    tarred_count = sum(1 for r in successful if r.was_tarred)
     if operation == "compress":
         space_saved = total_original - total_processed
         avg_ratio = (
-            sum(((1 - r.processed_size / r.original_size) * 100 for r in successful)) / len(successful)
+            sum((1 - r.processed_size / r.original_size) * 100 for r in successful) / len(successful)
             if successful
             else 0
         )
@@ -490,7 +490,7 @@ def print_results_rich(results: List[CompressionResult], directory: Path, operat
     else:
         space_saved = total_processed - total_original
         avg_ratio = (
-            sum(((r.processed_size / r.original_size - 1) * 100 for r in successful)) / len(successful)
+            sum((r.processed_size / r.original_size - 1) * 100 for r in successful) / len(successful)
             if successful
             else 0
         )
@@ -590,15 +590,15 @@ def print_results_rich(results: List[CompressionResult], directory: Path, operat
 def print_results_basic(results: List[CompressionResult], directory: Path, operation: str):
     successful = [r for r in results if r.success]
     failed = [r for r in results if not r.success]
-    total_original = sum((r.original_size for r in successful))
-    total_processed = sum((r.processed_size for r in successful))
-    total_duration = sum((r.duration for r in results))
-    deleted_count = sum((1 for r in successful if r.original_deleted))
-    tarred_count = sum((1 for r in successful if r.was_tarred))
+    total_original = sum(r.original_size for r in successful)
+    total_processed = sum(r.processed_size for r in successful)
+    total_duration = sum(r.duration for r in results)
+    deleted_count = sum(1 for r in successful if r.original_deleted)
+    tarred_count = sum(1 for r in successful if r.was_tarred)
     if operation == "compress":
         space_saved = total_original - total_processed
         avg_ratio = (
-            sum(((1 - r.processed_size / r.original_size) * 100 for r in successful)) / len(successful)
+            sum((1 - r.processed_size / r.original_size) * 100 for r in successful) / len(successful)
             if successful
             else 0
         )
@@ -607,7 +607,7 @@ def print_results_basic(results: List[CompressionResult], directory: Path, opera
     else:
         space_saved = total_processed - total_original
         avg_ratio = (
-            sum(((r.processed_size / r.original_size - 1) * 100 for r in successful)) / len(successful)
+            sum((r.processed_size / r.original_size - 1) * 100 for r in successful) / len(successful)
             if successful
             else 0
         )
@@ -697,7 +697,7 @@ def main():
         "--quality",
         type=int,
         default=11,
-        choices=range(0, 12),
+        choices=range(12),
         help="Brotli compression quality (0-11, default: 11). Only valid with -c/--compress.",
     )
     parser.add_argument(
@@ -808,7 +808,7 @@ def main():
                     print(f"  • {ext}: {count} file(s)")
                 if len(type_stats) > 10:
                     print(f"  • ... and {len(type_stats) - 10} more types")
-            total_size = sum((f.stat().st_size for f in files))
+            total_size = sum(f.stat().st_size for f in files)
             print(f"💾 Total size: {format_size(total_size)}")
     else:
         print(f"📁 Mode: Decompressing .br files")
@@ -819,7 +819,7 @@ def main():
             print(f"❌ No .br files found to decompress")
             sys.exit(0)
         print(f"📁 Found {len(files)} .br file(s) to decompress")
-        total_size = sum((f.stat().st_size for f in files))
+        total_size = sum(f.stat().st_size for f in files)
         print(f"💾 Total compressed size: {format_size(total_size)}")
     if args.dry_run:
         if args.tar_subdirs_first:

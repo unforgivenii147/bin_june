@@ -1,6 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
+from __future__ import annotations
+
 import shutil
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
@@ -30,7 +32,7 @@ def scan_and_remove(base_path: Path):
     try:
         for item in base_path.iterdir():
             if item.is_file():
-                if any((item.name.endswith(ext) for ext in FILE_EXTENSIONS)):
+                if any(item.name.endswith(ext) for ext in FILE_EXTENSIONS):
                     yield item
             elif item.is_dir():
                 if item.name in DIR_NAMES:

@@ -4,6 +4,8 @@ Clone GitHub repositories by downloading ZIP archives.
 No git binary needed. Uses requests for HTTP.
 """
 
+from __future__ import annotations
+
 import argparse
 import io
 import sys
@@ -21,7 +23,7 @@ def read_repos(file_path: Path) -> List[str]:
         print(f"Error: {file_path} does not exist")
         sys.exit(1)
 
-    with open(file_path, "r") as f:
+    with open(file_path) as f:
         repos = [line.strip() for line in f if line.strip()]
 
     if not repos:
@@ -90,7 +92,7 @@ def download_repo_zip(repo: str, base_dir: Path) -> Tuple[str, bool, str]:
         return repo, True, f"Successfully downloaded to {target_dir}"
 
     except requests.RequestException as e:
-        return repo, False, f"Download failed: {str(e)}"
+        return repo, False, f"Download failed: {e!s}"
     except zipfile.BadZipFile:
         return repo, False, "Invalid ZIP file received"
     except Exception as e:
@@ -99,7 +101,7 @@ def download_repo_zip(repo: str, base_dir: Path) -> Tuple[str, bool, str]:
             import shutil
 
             shutil.rmtree(target_dir, ignore_errors=True)
-        return repo, False, f"Error: {str(e)}"
+        return repo, False, f"Error: {e!s}"
 
 
 def main():
@@ -159,7 +161,7 @@ def main():
 
             except Exception as e:
                 failed += 1
-                print(f"❌ {repo}: Unexpected error: {str(e)}")
+                print(f"❌ {repo}: Unexpected error: {e!s}")
 
     print("-" * 60)
     print(f"\nSummary:")

@@ -1,6 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
+from __future__ import annotations
+
 import concurrent.futures
 import subprocess
 from pathlib import Path
@@ -28,11 +30,11 @@ def main() -> None:
     for file_path in base_path.rglob("*"):
         if not file_path.is_file():
             continue
-        if any((part in exclude_dirs for part in file_path.parts)):
+        if any(part in exclude_dirs for part in file_path.parts):
             continue
-        if file_path.suffix in target_extensions or any((file_path.name.endswith(ext) for ext in target_extensions)):
-            if any((file_path.name.endswith(ext) for ext in target_extensions)) and (
-                not any((file_path.name.endswith(ext) for ext in exclude_extensions))
+        if file_path.suffix in target_extensions or any(file_path.name.endswith(ext) for ext in target_extensions):
+            if any(file_path.name.endswith(ext) for ext in target_extensions) and (
+                not any(file_path.name.endswith(ext) for ext in exclude_extensions)
             ):
                 files_to_format.append(str(file_path))
     if not files_to_format:

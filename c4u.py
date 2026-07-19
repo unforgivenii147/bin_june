@@ -8,6 +8,8 @@ PyPI Package Update Checker with Multiprocessing & Resume Capability
 - Uses multiprocessing for concurrent API queries (Linux/Termux)
 """
 
+from __future__ import annotations
+
 import json
 import logging
 import sys
@@ -43,16 +45,16 @@ logger = setup_logging(verbose=True)
 class PackageInfo:
     pkgname: str
     installed_version: str
-    latest_version: Optional[str] = None
+    latest_version: str | None = None
     upgradable: bool = False
     checked_at: str = ""
-    error: Optional[str] = None
+    error: str | None = None
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "PackageInfo":
+    def from_dict(cls, data: Dict[str, Any]) -> PackageInfo:
         return cls(**data)
 
 
@@ -65,7 +67,7 @@ class PackageStateManager:
     def _load_state(self) -> None:
         if self.state_file.exists():
             try:
-                with open(self.state_file, "r") as f:
+                with open(self.state_file) as f:
                     raw_state = json.load(f)
                 self.state = {name: PackageInfo.from_dict(data) for name, data in raw_state.items()}
                 logger.info(f"✓ Resumed state: {len(self.state)} packages loaded from {self.state_file}")

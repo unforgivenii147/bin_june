@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import io
 import os
 import re
@@ -211,7 +213,7 @@ def remove_comments_and_docstrings(source_code: str) -> str:
         _end_lineno, end_col = tok[3]
         if start_lineno > last_lineno:
             last_col = 0
-        if toktype == tokenize.COMMENT or toktype == tokenize.STRING and prev_toktype == tokenize.INDENT:
+        if toktype == tokenize.COMMENT or (toktype == tokenize.STRING and prev_toktype == tokenize.INDENT):
             pass
         else:
             if start_col > last_col:

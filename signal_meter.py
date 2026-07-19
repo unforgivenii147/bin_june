@@ -5,6 +5,8 @@ Live WiFi/Cellular Signal Strength Monitor for Termux
 Displays real-time signal meters and connection info
 """
 
+from __future__ import annotations
+
 import os
 import re
 import subprocess

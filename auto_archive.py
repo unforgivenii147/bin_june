@@ -6,6 +6,8 @@ Benchmark multiple compression algorithms on a file or directory,
 keep only the smallest result. Uses multiprocessing in folder mode.
 """
 
+from __future__ import annotations
+
 import bz2
 import gzip
 import logging

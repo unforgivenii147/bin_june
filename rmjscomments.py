@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import os
 import re
 import sys
@@ -168,7 +170,7 @@ def process_file(path) -> None:
     processed_lines = [re.sub(single_line_comment_re, "", line) for line in lines]
     final_code = "\n".join(processed_lines)
     final_code = re.sub(r"\n\s*\n", "\\n\\n", final_code)
-    final_code = "\n".join((line.rstrip() for line in final_code.splitlines()))
+    final_code = "\n".join(line.rstrip() for line in final_code.splitlines())
     path.write_text(final_code, encoding="utf-8")
 
 
@@ -205,7 +207,7 @@ def main() -> None:
                 ".mm",
             ],
         )
-    Parallel(n_jobs=N_JOBS, backend="loky")((delayed(process_file)(f) for f in files))
+    Parallel(n_jobs=N_JOBS, backend="loky")(delayed(process_file)(f) for f in files)
     diffsize = before - gsz(cwd)
     cprint(f"space change : {fsz(diffsize)}", "cyan")
 

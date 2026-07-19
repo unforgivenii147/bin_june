@@ -5,6 +5,8 @@ Text replacer for Python files in current directory.
 Replaces exact text matches in all .py files.
 """
 
+from __future__ import annotations
+
 import sys
 from pathlib import Path
 
@@ -13,7 +15,7 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 def replace_in_file(filepath: Path, old_text: str, new_text: str) -> bool:
     try:
-        with open(filepath, "r", encoding="utf-8") as f:
+        with open(filepath, encoding="utf-8") as f:
             content = f.read()
         if old_text not in content:
             return False
@@ -42,8 +44,8 @@ def main() -> None:
         print("No Python files found in current directory.")
         sys.exit(0)
     print(f"Found {len(py_files)} Python file(s)")
-    print(f"Replacing: {repr(old_text)}")
-    print(f"With:      {repr(new_text)}")
+    print(f"Replacing: {old_text!r}")
+    print(f"With:      {new_text!r}")
     print("-" * 50)
     modified_count = 0
     for py_file in py_files:

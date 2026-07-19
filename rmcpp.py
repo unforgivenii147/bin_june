@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import sys
 from collections import deque
 from multiprocessing import get_context
@@ -127,9 +129,9 @@ if __name__ == "__main__":
     with get_context("spawn").Pool(processes=8, initializer=ts_remover_initializer) as pool:
         results = pool.map(process_file, files)
     diffsize = before - gsz(cwd)
-    changed = sum((1 for r in results if r[0] == "changed"))
+    changed = sum(1 for r in results if r[0] == "changed")
     errors = [r for r in results if r[0] == "error"]
-    nochg = sum((1 for r in results if r[0] == "nochange"))
+    nochg = sum(1 for r in results if r[0] == "nochange")
     print(f"Files: {len(files)} | Changed: {changed} | Unchanged: {nochg} | Errors: {len(errors)}")
     if errors:
         print("\nErrors in:")

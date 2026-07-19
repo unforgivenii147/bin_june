@@ -6,6 +6,8 @@ Offline Persian ↔ English translator.
 Optimized for Python 3.12.
 """
 
+from __future__ import annotations
+
 import argparse
 import json
 import logging
@@ -89,7 +91,7 @@ def main() -> None:
     fa_en, en_fa = load_dictionary(Path(DICT_FILE))
     all_words = set(fa_en) | set(en_fa)
     if args.prefix:
-        matches = sorted((w for w in all_words if w.startswith(args.prefix)))
+        matches = sorted(w for w in all_words if w.startswith(args.prefix))
         if matches:
             print("\n".join(matches))
             sys.exit(0)

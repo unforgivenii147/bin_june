@@ -6,6 +6,8 @@ Optimized version of ultratranslator.py for Python 3.12.
 Translates Python files and other text files while preserving structure.
 """
 
+from __future__ import annotations
+
 import ast
 import io
 import logging

@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import sys
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
@@ -65,7 +67,7 @@ class ImageDownscaler:
             message = f"{original_size} → {new_size}"
             return image_path, True, message
         except Exception as e:
-            return image_path, False, f"Error: {str(e)}"
+            return image_path, False, f"Error: {e!s}"
 
     def process_images(self, image_paths: list) -> None:
         if not image_paths:

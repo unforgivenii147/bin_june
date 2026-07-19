@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import sys
 from collections import deque
 from collections.abc import Callable
@@ -11,7 +13,7 @@ def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
-    return Parallel(n_jobs=-1)((delayed(process_function)(file_str, **kwargs) for file_str in file_strings))
+    return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
 
 
 CHUNKSIZE = 15850
@@ -20,7 +22,7 @@ CHUNKSIZE = 15850
 def process_file(path):
     path = Path(path)
     try:
-        with open(path, "r", encoding="utf-8") as infile:
+        with open(path, encoding="utf-8") as infile:
             part_num = 0
             while True:
                 chunk = infile.read(CHUNKSIZE)
@@ -61,7 +63,7 @@ CHUNKSIZE = 15850
 def process_file(path):
     path = Path(path)
     try:
-        with open(path, "r", encoding="utf-8") as infile:
+        with open(path, encoding="utf-8") as infile:
             part_num = 0
             while True:
                 chunk = infile.read(CHUNKSIZE)

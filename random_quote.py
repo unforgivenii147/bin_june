@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import json
 import random
 
@@ -8,7 +10,7 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 def show_random_quote():
     try:
-        with open("/sdcard/data/quotes.json", "r", encoding="utf-8") as f:
+        with open("/sdcard/data/quotes.json", encoding="utf-8") as f:
             quotes = json.load(f)
         if not quotes:
             print("No quotes found in the file.")

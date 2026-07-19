@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import argparse
 import re
 from multiprocessing import Pool, cpu_count
@@ -28,7 +30,7 @@ class DirectoryBuilder:
         if not tree_file.exists():
             raise FileNotFoundError(f"File not found: {filepath}")
         lines = []
-        with open(tree_file, "r", encoding="utf-8") as f:
+        with open(tree_file, encoding="utf-8") as f:
             for line in f:
                 line = line.split("#")[0].rstrip()
                 if line.strip():

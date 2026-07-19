@@ -7,6 +7,8 @@ Supports multiple input directories, optional space-only line removal,
 and automatic binary file detection.
 """
 
+from __future__ import annotations
+
 import argparse
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
@@ -136,18 +138,18 @@ def is_binary_file(file_path: Path) -> bool:
                 return True
         text_chars = bytearray({7, 8, 9, 10, 12, 13, 27} | set(range(32, 127)) | set(range(128, 256)))
         if chunk:
-            non_text = sum((1 for byte in chunk if byte not in text_chars))
+            non_text = sum(1 for byte in chunk if byte not in text_chars)
             non_text_ratio = non_text / len(chunk)
             if non_text_ratio > 0.3:
                 return True
         return False
-    except (IOError, OSError):
+    except OSError:
         return True
 
 
 def remove_blank_lines(file_path: Path, remove_spaces: bool = False) -> Tuple[str, int, int, str]:
     try:
-        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+        with open(file_path, encoding="utf-8", errors="ignore") as f:
             lines = f.readlines()
         total_lines = len(lines)
         if remove_spaces:
@@ -162,7 +164,7 @@ def remove_blank_lines(file_path: Path, remove_spaces: bool = False) -> Tuple[st
     except UnicodeDecodeError:
         return (str(file_path), 0, 0, "binary")
     except Exception as e:
-        return (str(file_path), 0, 0, f"error: {str(e)}")
+        return (str(file_path), 0, 0, f"error: {e!s}")
 
 
 def process_file(args: Tuple[Path, Path, bool]) -> Tuple[str, int, int, str]:
@@ -255,7 +257,7 @@ def print_results(results: List[Tuple], total_removed: int, total_files: int):
     print(f"  Total files found:     {BOLD}{total_files:,}{RESET}")
     print(f"  Text files processed:  {BOLD}{len(processed):,}{RESET}")
     print(f"  Binary files skipped:  {BOLD}{YELLOW}{len(skipped_binary):,}{RESET}")
-    print(f"  Files modified:        {BOLD}{sum((1 for r in processed if r[2] > 0)):,}{RESET}")
+    print(f"  Files modified:        {BOLD}{sum(1 for r in processed if r[2] > 0):,}{RESET}")
     print(f"  Lines removed:         {BOLD}{GREEN}{total_removed:,}{RESET}")
     if errors:
         print(f"  Errors:                {BOLD}{RED}{len(errors):,}{RESET}")

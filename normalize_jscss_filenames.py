@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import os
 import re
 from pathlib import Path
@@ -52,7 +54,7 @@ def normalize_filenames_in_text(text: str) -> str:
 
 
 def normalize_file_contents(path) -> None:
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         content = f.read()
     normalized_content = normalize_filenames_in_text(content)
     with open(path, "w", encoding="utf-8") as f:

@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import os
 from pathlib import Path
 
@@ -15,8 +17,8 @@ def html_to_png(html_content, output_path, dpi=150):
 
     images = convert_from_bytes(pdf_bytes, dpi=dpi)
     if len(images) > 1:
-        total_height = sum((img.height for img in images))
-        max_width = max((img.width for img in images))
+        total_height = sum(img.height for img in images)
+        max_width = max(img.width for img in images)
         combined = Image.new("RGB", (max_width, total_height), (255, 255, 255))
         y_offset = 0
         for img in images:

@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import subprocess
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
@@ -25,7 +27,7 @@ def extract_subtitles(video_path) -> None:
     ]
     subs_output = subprocess.run(ffprobe_cmd, capture_output=True, text=True, check=True)
     subs = subs_output.stdout.strip().split("\n")
-    if not subs or len(subs) == 1 and subs[0] == "":
+    if not subs or (len(subs) == 1 and subs[0] == ""):
         print("No subtitle streams found.")
         return
     count = 0

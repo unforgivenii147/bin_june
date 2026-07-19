@@ -5,6 +5,8 @@ Pure Python wheels -> user site-packages
 Platform-specific wheels -> system site-packages
 """
 
+from __future__ import annotations
+
 import platform
 import subprocess
 import sys
@@ -66,7 +68,7 @@ def install_wheel(wheel_path: Path, user_install: bool) -> Tuple[Path, bool, str
         error_msg = e.stderr.strip() if e.stderr else str(e)
         return wheel_path, False, f"✗ {wheel_path.name}: {error_msg}"
     except Exception as e:
-        return wheel_path, False, f"✗ {wheel_path.name}: {str(e)}"
+        return wheel_path, False, f"✗ {wheel_path.name}: {e!s}"
 
 
 def get_wheel_type(wheel_path: Path) -> str:

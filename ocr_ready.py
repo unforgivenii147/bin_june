@@ -1,6 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
+from __future__ import annotations
+
 import multiprocessing
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed

@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import json
 import os
 import sys
@@ -44,7 +46,7 @@ class BidirectionalDictionary:
         except Exception as e:
             print(f"❌ Error saving dictionary: {e}")
 
-    def search(self, query: str) -> Optional[str]:
+    def search(self, query: str) -> str | None:
         query = query.strip()
         if not query:
             return None

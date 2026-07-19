@@ -4,6 +4,8 @@ Script to remove author/email/time info block from Python files recursively.
 Handles both .py files and Python files without extension (detected via shebang).
 """
 
+from __future__ import annotations
+
 import os
 import re
 import sys
@@ -33,7 +35,7 @@ def is_python_file(file_path):
     # Check for shebang in files without extension
     if not file_path.suffix:
         try:
-            with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            with open(file_path, encoding="utf-8", errors="ignore") as f:
                 first_line = f.readline()
                 for pattern in PYTHON_SHEBANG_PATTERNS:
                     if pattern.match(first_line):
@@ -47,7 +49,7 @@ def is_python_file(file_path):
 def remove_info_block(file_path):
     """Remove the info block from a Python file."""
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             content = f.read()
 
         # Skip if file doesn't contain the info block

@@ -5,6 +5,8 @@ Scans files in current directory and renames them with .py or .sh extensions
 if they contain appropriate shebangs but have wrong or missing extensions.
 """
 
+from __future__ import annotations
+
 import os
 import shutil
 import sys
@@ -29,7 +31,7 @@ TARGET_EXTENSIONS = {".py", ".sh"}
 def detect_shebang(filepath):
     """Read the first line of a file and detect if it contains a shebang."""
     try:
-        with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
+        with open(filepath, encoding="utf-8", errors="ignore") as f:
             first_line = f.readline().strip()
             if first_line.startswith("#!"):
                 # Extract the interpreter from shebang
@@ -45,7 +47,7 @@ def detect_shebang(filepath):
                 for key, ext in SHEBANG_MAP.items():
                     if key in interpreter.lower():
                         return ext
-    except (IOError, OSError) as e:
+    except OSError as e:
         print(f"Error reading {filepath}: {e}")
     return None
 

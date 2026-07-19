@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import argparse
 import shutil
 import sys
@@ -10,10 +12,10 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 def tail_file(fname, n=10):
     try:
-        with open(fname, "r") as f:
+        with open(fname) as f:
             lines = f.readlines()
             return lines[-n:] if lines else []
-    except (IOError, OSError) as e:
+    except OSError as e:
         print(f"Error reading file: {e}", file=sys.stderr)
         return []
 
@@ -26,9 +28,9 @@ def get_all_files(folder):
             if p.is_file():
                 try:
                     files[str(p)] = p.stat().st_mtime
-                except (IOError, OSError):
+                except OSError:
                     pass
-    except (IOError, OSError) as e:
+    except OSError as e:
         print(f"Error scanning folder: {e}", file=sys.stderr)
     return files
 
@@ -39,7 +41,7 @@ def copy_file(src, dst_folder: Path | None) -> bool:
             dst_folder.mkdir(parents=True, exist_ok=True)
             shutil.copy2(src, dst_folder)
         return True
-    except (IOError, OSError) as e:
+    except OSError as e:
         print(f"Error copying file: {e}", file=sys.stderr)
         return False
 

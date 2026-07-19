@@ -4,6 +4,8 @@ Create and push a git repository to GitHub from the current directory.
 If the repo already exists on GitHub, it will just commit and push changes.
 """
 
+from __future__ import annotations
+
 import os
 import subprocess
 import sys

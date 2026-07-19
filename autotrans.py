@@ -6,6 +6,8 @@ Automatically scan directory and translate non-English text files.
 Optimized for Python 3.12.
 """
 
+from __future__ import annotations
+
 import logging
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -38,7 +40,7 @@ def is_binary(path: Path) -> bool:
         if b"\x00" in chunk:
             return True
         text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
-        non_text_count = sum((1 for b in chunk if b not in text_chars))
+        non_text_count = sum(1 for b in chunk if b not in text_chars)
         return non_text_count / len(chunk) > 0.3
     except Exception:
         return True
@@ -97,7 +99,7 @@ def process_directory(directory: str) -> None:
                 files.append(p)
     else:
         for p in dir_path.rglob("*"):
-            if p.is_file() and (not any((part.startswith(".") for part in p.parts))) and (not is_binary(p)):
+            if p.is_file() and (not any(part.startswith(".") for part in p.parts)) and (not is_binary(p)):
                 files.append(p)
     logger.info("Total text files found: %d", len(files))
     if not files:

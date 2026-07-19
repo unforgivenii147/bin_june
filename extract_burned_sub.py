@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import multiprocessing
 import sys
 from functools import partial
@@ -36,7 +38,7 @@ def extract_frames(
 ) -> list[tuple[float, np.ndarray]]:
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
-        raise IOError(f"Cannot open video: {video_path}")
+        raise OSError(f"Cannot open video: {video_path}")
     native_fps = cap.get(cv2.CAP_PROP_FPS) or 25.0
     frame_interval = max(1, int(native_fps / sample_fps))
     frames: list[tuple[float, np.ndarray]] = []

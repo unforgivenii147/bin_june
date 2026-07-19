@@ -1,17 +1,19 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
+from __future__ import annotations
+
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-EXT = {".py", ".h", ".c", ".cpp", ".cc", ".cxx", ".hh", ".hpp", ".h", ".hxx"}
+EXT = {".py", ".h", ".c", ".cpp", ".cc", ".cxx", ".hh", ".hpp", ".hxx"}
 
 
 def get_first_13(path: Path) -> str:
     try:
         lines = path.read_text(encoding="utf-8", errors="ignore").splitlines(keepends=True)
         return "".join(lines[:23])
-    except (IOError, OSError):
+    except OSError:
         return ""
 
 

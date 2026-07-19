@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import json
 import sys
 from pathlib import Path
@@ -10,7 +12,7 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 def file_to_json(filepath: Path, delimiter: str):
     result = {}
     try:
-        with open(filepath, "r", encoding="utf-8") as f:
+        with open(filepath, encoding="utf-8") as f:
             for line_num, line in enumerate(f, start=1):
                 line = line.strip()
                 if not line or line.startswith("#"):

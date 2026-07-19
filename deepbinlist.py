@@ -4,6 +4,8 @@
 Find non-pure Python packages in system site-packages and save list to file.
 """
 
+from __future__ import annotations
+
 import argparse
 import logging
 import site
@@ -46,7 +48,7 @@ def get_installed_packages() -> List[Tuple[str, str]]:
     return packages
 
 
-def find_package_path(package_name: str, site_paths: List[Path]) -> Optional[Path]:
+def find_package_path(package_name: str, site_paths: List[Path]) -> Path | None:
     for site_path in site_paths:
         pkg_path = site_path / package_name
         if pkg_path.exists() and pkg_path.is_dir():

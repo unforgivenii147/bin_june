@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import ast
 import importlib.util
 import sys
@@ -11,7 +13,7 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 def extract_imports(file_path: Path):
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             tree = ast.parse(f.read(), filename=str(file_path))
     except Exception as e:
         print(f"  ✗ Error parsing {file_path}: {e}")

@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import os
 import sys
 from collections import defaultdict
@@ -19,7 +21,7 @@ def get_sha256(path: str | Path) -> str:
             while chunk := f.read(CHUNK_SIZE):
                 h.update(chunk)
         return h.hexdigest()
-    except (OSError, IOError):
+    except OSError:
         return ""
 
 

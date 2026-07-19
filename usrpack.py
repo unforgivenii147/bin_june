@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import logging
 import multiprocessing
 import site
@@ -26,7 +28,7 @@ def verify_and_get_files(dist_info_dir):
         return None
     site_packages_root = dist_info_dir.parent
     files_to_pack = []
-    with open(record_path, "r", encoding="utf-8") as f:
+    with open(record_path, encoding="utf-8") as f:
         for line in f:
             if not line.strip():
                 continue

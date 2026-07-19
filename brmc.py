@@ -71,7 +71,7 @@ def _remove_docstrings_from_source(source: str) -> str:
     return new_source
 
 
-def process_file(path: Path, cwd: Path) -> Optional[str]:
+def process_file(path: Path, cwd: Path) -> str | None:
     rel = str(path.relative_to(cwd))
     try:
         source = path.read_text(encoding="utf-8")
@@ -86,7 +86,7 @@ def process_file(path: Path, cwd: Path) -> Optional[str]:
 
 def main() -> None:
     cwd = Path(".").resolve()
-    py_files = sorted((p for p in cwd.iterdir() if p.is_file() and p.suffix == ".py" and (not p.name.startswith("."))))
+    py_files = sorted(p for p in cwd.iterdir() if p.is_file() and p.suffix == ".py" and (not p.name.startswith(".")))
     if not py_files:
         return
     changed = []

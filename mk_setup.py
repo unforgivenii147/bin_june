@@ -4,6 +4,8 @@ Script to generate a setup.py for a Python project.
 Automatically detects __main__.py or cli.py and adds console_scripts entry points.
 """
 
+from __future__ import annotations
+
 import os
 import re
 import sys
@@ -52,7 +54,7 @@ def detect_entry_point(project_dir, package_name):
 def detect_main_function(file_path):
     """Detect if the file has a main function or click command."""
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             content = f.read()
 
         # Check for common patterns
@@ -81,7 +83,7 @@ def find_requirements(project_dir):
         req_path = project_path / req_file
         if req_path.exists():
             try:
-                with open(req_path, "r", encoding="utf-8") as f:
+                with open(req_path, encoding="utf-8") as f:
                     for line in f:
                         line = line.strip()
                         if line and not line.startswith("#") and not line.startswith("-"):

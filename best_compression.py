@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import bz2
 import gzip
 import hashlib
@@ -154,7 +156,7 @@ class Result:
     out_size: int
     elapsed_s: float
     ok: bool
-    error: Optional[str] = None
+    error: str | None = None
 
 
 def human(n: int) -> str:
@@ -208,9 +210,8 @@ def compress_bz2(in_path: Path, out_path: Path) -> None:
 
 
 def compress_lzma(in_path: Path, out_path: Path) -> None:
-    with lzma.open(out_path, "wb", preset=9 | lzma.PRESET_EXTREME) as fout:
-        with in_path.open("rb") as fin:
-            copy_chunks(fin, fout)
+    with lzma.open(out_path, "wb", preset=9 | lzma.PRESET_EXTREME) as fout, in_path.open("rb") as fin:
+        copy_chunks(fin, fout)
 
 
 def compress_zip(in_path: Path, out_path: Path) -> None:
@@ -351,7 +352,7 @@ def _worker(arg):
     return _chunk_compressor(algo)(chunk)
 
 
-def mp_compress_chunks(algo: str, in_path: Path, tmpdir: Path, chunk_size: int, processes: Optional[int]) -> Result:
+def mp_compress_chunks(algo: str, in_path: Path, tmpdir: Path, chunk_size: int, processes: int | None) -> Result:
     if algo not in WORKER_ALGOS:
         return Result(
             algo=f"mp_{algo}",
@@ -400,7 +401,7 @@ def mp_compress_chunks(algo: str, in_path: Path, tmpdir: Path, chunk_size: int, 
         )
 
 
-def choose_best(results: List[Result]) -> Optional[Result]:
+def choose_best(results: List[Result]) -> Result | None:
     ok = [r for r in results if r.ok and r.out_path]
     if not ok:
         return None

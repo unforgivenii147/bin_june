@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import io
 import sys
 from concurrent.futures import ThreadPoolExecutor

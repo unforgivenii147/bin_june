@@ -5,6 +5,8 @@ Auto typo fixer with pattern learning.
 Learns from common substitution errors (b→n, 8→i, etc.) and user corrections.
 """
 
+from __future__ import annotations
+
 import argparse
 import json
 import re
@@ -87,7 +89,7 @@ class PatternLearner:
     def _load_learning_db(self) -> None:
         if Path(self.learning_db_path).exists():
             try:
-                with open(self.learning_db_path, "r") as f:
+                with open(self.learning_db_path) as f:
                     data = json.load(f)
                     self.learned_corrections = data.get("corrections", {})
                     self.error_frequency.update(data.get("frequencies", {}))
@@ -232,7 +234,7 @@ class TypoFixerWithLearning:
             return True
         return word.lower() in self.valid_words
 
-    def suggest_correction(self, word: str, context: str = "") -> Optional[str]:
+    def suggest_correction(self, word: str, context: str = "") -> str | None:
         if self.is_valid_word(word):
             return None
         pattern_corrected = self.learner.apply_substitutions(word)
@@ -287,7 +289,7 @@ class TypoFixerWithLearning:
 
     def fix_file(self, filepath: Path) -> bool:
         try:
-            with open(filepath, "r", encoding="utf-8") as f:
+            with open(filepath, encoding="utf-8") as f:
                 lines = f.readlines()
         except Exception as e:
             print(f"  Error reading {filepath}: {e}", file=sys.stderr)

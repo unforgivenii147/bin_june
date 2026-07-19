@@ -11,6 +11,8 @@ Uses multiprocessing for parallel scanning and pathlib for path operations.
 Optimized for Linux/Termux - only checks for .so files.
 """
 
+from __future__ import annotations
+
 import argparse
 import configparser
 import json

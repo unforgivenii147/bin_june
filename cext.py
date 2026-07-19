@@ -4,6 +4,8 @@ Python Code Entity Extractor
 Extracts classes, functions, methods, and constants from Python files and archives.
 """
 
+from __future__ import annotations
+
 import argparse
 import ast
 import io

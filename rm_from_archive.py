@@ -5,6 +5,8 @@ Delete a file from a tar.zst archive
 Usage: python script.py <archive.tar.zst> <file-to-delete>
 """
 
+from __future__ import annotations
+
 import os
 import shutil
 import sys

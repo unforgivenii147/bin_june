@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import sys
 from concurrent.futures import ProcessPoolExecutor
 from multiprocessing import cpu_count

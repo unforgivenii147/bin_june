@@ -7,6 +7,8 @@ Example: python run_script.py .svg svgo
          python run_script.py .svg svgo -c config.json -o output/
 """
 
+from __future__ import annotations
+
 import subprocess
 import sys
 from functools import partial
@@ -25,7 +27,7 @@ def process_file(cli_app, cli_args, file_path):
         else:
             return f"❌ Failed: {file_path.name} - {result.stderr.strip()}"
     except Exception as e:
-        return f"❌ Error processing {file_path.name}: {str(e)}"
+        return f"❌ Error processing {file_path.name}: {e!s}"
 
 
 def main():

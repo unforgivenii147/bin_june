@@ -4,6 +4,8 @@ Convert man pages from .gz to .xz format with maximum compression.
 Skips symlinks and processes files recursively in the current directory.
 """
 
+from __future__ import annotations
+
 import sys
 from collections import deque
 from collections.abc import Callable
@@ -40,7 +42,7 @@ def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
-    return Parallel(n_jobs=-1)((delayed(process_function)(file_str, **kwargs) for file_str in file_strings))
+    return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
 
 
 def process_file(path: Path) -> Tuple[str, bool, str]:
@@ -68,7 +70,7 @@ def process_file(path: Path) -> Tuple[str, bool, str]:
     except Exception as e:
         if gz_path.exists():
             gz_path.unlink()
-        return (str(path), False, f"Error: {str(e)}")
+        return (str(path), False, f"Error: {e!s}")
 
 
 def main() -> None:

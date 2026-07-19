@@ -8,6 +8,8 @@ Brotli is CPU-bound per file; parallelising across files via ProcessPoolExecutor
 saturates cores with no chunking overhead or custom framing required.
 """
 
+from __future__ import annotations
+
 import argparse
 import multiprocessing
 import sys

@@ -9,6 +9,8 @@ Uses memory-efficient os.walk traversal with progress reporting
 and optimized filesystem walking strategies.
 """
 
+from __future__ import annotations
+
 import logging
 import mimetypes
 import os
@@ -124,7 +126,7 @@ class SpinnerProgressReporter:
             print(msg, end="", flush=True)
 
 
-def is_binary_file(file_path: Path) -> Optional[bool]:
+def is_binary_file(file_path: Path) -> bool | None:
     try:
         if file_path.stat().st_size == 0:
             return None
@@ -146,17 +148,17 @@ def is_binary_file(file_path: Path) -> Optional[bool]:
         except UnicodeDecodeError:
             try:
                 decoded = chunk.decode("latin-1")
-                control_chars = sum((1 for c in decoded if ord(c) < 32 and c not in "\t\n\r"))
+                control_chars = sum(1 for c in decoded if ord(c) < 32 and c not in "\t\n\r")
                 if control_chars > len(decoded) * 0.3:
                     return True
                 return False
             except Exception:
                 return True
-    except (OSError, IOError, PermissionError):
+    except (OSError, PermissionError):
         return None
 
 
-def check_file(file_path: Path) -> Tuple[Path, str, Optional[bool], str]:
+def check_file(file_path: Path) -> Tuple[Path, str, bool | None, str]:
     try:
         extension = file_path.suffix.lower()
         is_binary = is_binary_file(file_path)

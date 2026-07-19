@@ -7,6 +7,8 @@ Usage:
     python convert_pyproject_to_setup.py [--force] [pyproject.toml path]
 """
 
+from __future__ import annotations
+
 import configparser
 import sys
 import tomllib
@@ -21,7 +23,7 @@ def load_toml(path: Path) -> dict:
         return tomllib.load(f)
 
 
-def safe_read_file(path: Path) -> Optional[str]:
+def safe_read_file(path: Path) -> str | None:
     return path.read_text(encoding="utf-8") if path.exists() else None
 
 
@@ -88,7 +90,7 @@ def has_c_extension(tool: Dict[str, Any]) -> Tuple[bool, str]:
         return (True, "scikit-build")
     if "meson-python" in tool or "build-system" in tool.get("requires", []):
         build_requires = tool.get("build-system", {}).get("requires", [])
-        if any(("meson-python" in r for r in build_requires)):
+        if any("meson-python" in r for r in build_requires):
             return (True, "meson")
     if "cmake" in str(tool).lower():
         return (True, "cmake")
@@ -97,8 +99,8 @@ def has_c_extension(tool: Dict[str, Any]) -> Tuple[bool, str]:
 
 def generate_setup_py(
     metadata: Dict[str, Any],
-    setup_cfg_text: Optional[str],
-    manifest_text: Optional[str],
+    setup_cfg_text: str | None,
+    manifest_text: str | None,
     force: bool = False,
 ) -> str:
     cfg = parse_setup_cfg(setup_cfg_text)
@@ -120,11 +122,11 @@ def generate_setup_py(
     optional_deps = metadata["optional_dependencies"]
     include_package_data = str(metadata["include_package_data"]).lower()
     build_backend = metadata["build_backend"]
-    install_requires = ",\n        ".join((f'"{d}"' for d in dependencies)) if dependencies else ""
+    install_requires = ",\n        ".join(f'"{d}"' for d in dependencies) if dependencies else ""
     install_requires_str = f"[\n        {install_requires}\n    ]" if install_requires else "[]"
     extras_parts = []
     for extra, deps in optional_deps.items():
-        deps_str = ", ".join((f'"{d}"' for d in deps))
+        deps_str = ", ".join(f'"{d}"' for d in deps)
         extras_parts.append(f'    "{extra}": [{deps_str}],')
     extras_str = "{\n" + "\n".join(extras_parts) + "\n    }" if extras_parts else "{}"
     entry_parts = []
@@ -136,12 +138,12 @@ def generate_setup_py(
     for k, v in (scripts or {}).items():
         script_items.append(f'        "{k} = {v}"')
     scripts_str = "[\n" + "\n".join(script_items) + "\n    ]" if script_items else "[]"
-    class_str = ",\n        ".join((f'"{c}"' for c in classifiers)) if classifiers else ""
+    class_str = ",\n        ".join(f'"{c}"' for c in classifiers) if classifiers else ""
     classifiers_str = f"[\n        {class_str}\n    ]" if class_str else "[]"
-    keywords_str = ", ".join((f'"{k}"' for k in keywords)) if keywords else "[]"
+    keywords_str = ", ".join(f'"{k}"' for k in keywords) if keywords else "[]"
 
     def format_authors(auths) -> str:
-        return ", ".join((f"'{a.get('name', '')} <{a.get('email', '')}>'" for a in auths if a.get("name")))
+        return ", ".join(f"'{a.get('name', '')} <{a.get('email', '')}>'" for a in auths if a.get("name"))
 
     author_str = format_authors(authors)
     maintainer_str = format_authors(maintainers)
@@ -196,7 +198,7 @@ def generate_setup_py(
                 name = ext.get("name", "")
                 sources = ext.get("sources", [])
                 if name:
-                    sources_str = ", ".join((f'"{s}"' for s in sources))
+                    sources_str = ", ".join(f'"{s}"' for s in sources)
                     ext_list.append(f'    Extension("{name}", sources=[{sources_str}]),')
             cext_extension = "from setuptools import Extension\n\n" + "\n".join(ext_list) if ext_list else ""
             cext_imports = "from setuptools import Extension\n"

@@ -7,6 +7,8 @@ Count how many times each function from 'dh' is imported and used,
 then save a report to ~/dh_usage.txt.
 """
 
+from __future__ import annotations
+
 import ast
 import sys
 from collections import Counter
@@ -58,7 +60,7 @@ def count_calls(filepath: Path, func_names: list[str]) -> dict[str, int]:
     except (SyntaxError, UnicodeDecodeError):
         return {}
     name_set = set(func_names)
-    counter: dict[str, int] = {name: 0 for name in func_names}
+    counter: dict[str, int] = dict.fromkeys(func_names, 0)
     for node in ast.walk(tree):
         if isinstance(node, ast.Call):
             func = node.func

@@ -5,6 +5,8 @@ Strip EXIF data from image files using pathlib only.
 Supports parallel processing, size reporting, and file/directory input.
 """
 
+from __future__ import annotations
+
 import argparse
 import io
 import sys
@@ -88,9 +90,9 @@ def strip_exif_single(image_path, backup=False, verbose=False):
                 result["message"] = "No size reduction, skipped"
     except Exception as e:
         result["success"] = False
-        result["message"] = f"Error: {str(e)}"
+        result["message"] = f"Error: {e!s}"
         if verbose:
-            print(f"  ❌ {image_path.name}: {str(e)}")
+            print(f"  ❌ {image_path.name}: {e!s}")
     return result
 
 
@@ -211,14 +213,14 @@ Examples:
                     size_change = result["new_size"] - result["original_size"]
                     print(f"  {progress} {'✅' if result['success'] else '❌'} {img.name}")
             except Exception as e:
-                print(f"❌ {img.name}: Unexpected error: {str(e)}")
+                print(f"❌ {img.name}: Unexpected error: {e!s}")
                 results.append(
                     {
                         "path": img,
                         "success": False,
                         "original_size": 0,
                         "new_size": 0,
-                        "message": f"Unexpected error: {str(e)}",
+                        "message": f"Unexpected error: {e!s}",
                         "backup_created": False,
                     }
                 )

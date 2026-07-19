@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import re
 import sys
 from collections import deque
@@ -80,7 +82,7 @@ mpf = mpf_async
 
 
 def is_ascii_printable(s: str) -> bool:
-    return all((32 <= ord(c) <= 126 for c in s))
+    return all(32 <= ord(c) <= 126 for c in s)
 
 
 def clean_filename(s: str) -> str:

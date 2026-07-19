@@ -6,6 +6,8 @@ Optimized version of transline2.py for Python 3.12.
 Parallel translation of text files in a directory or specified paths.
 """
 
+from __future__ import annotations
+
 import logging
 import re
 import shutil

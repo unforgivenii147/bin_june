@@ -4,6 +4,8 @@
 Convert .rst files to .md in-place using pandoc.
 """
 
+from __future__ import annotations
+
 import argparse
 import subprocess
 import sys

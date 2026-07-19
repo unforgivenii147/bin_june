@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import mmap
 import sys
 from multiprocessing import Pool, cpu_count
@@ -28,7 +30,7 @@ def read_lines(path: Path) -> list[str]:
     sz = path.stat().st_size
     try:
         if sz > THRESHOLD:
-            with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            with open(path, encoding="utf-8", errors="ignore") as f:
                 with mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm:
                     data = mm.read().decode("utf-8", "ignore")
                     return data.splitlines()

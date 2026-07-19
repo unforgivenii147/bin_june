@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import argparse
 import json
 import logging
@@ -110,7 +112,7 @@ def main() -> None:
         elif shutil.which("fzf"):
             sys.exit(0)
     if args.prefix:
-        matches = sorted((w for w in all_words if w.startswith(args.prefix)))
+        matches = sorted(w for w in all_words if w.startswith(args.prefix))
         if matches:
             print("\n".join(matches))
             sys.exit(0)

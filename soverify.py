@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import ctypes
 import os
 import subprocess
@@ -196,7 +198,7 @@ class CtypesVerifier:
         return (can_load, symbol_info)
 
 
-def verify_single_file(file_path: Path) -> Optional[bool]:
+def verify_single_file(file_path: Path) -> bool | None:
     try:
         verifier = CtypesVerifier()
         success, message = verifier.verify_so_file(file_path)

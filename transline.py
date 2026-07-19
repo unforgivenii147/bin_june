@@ -6,6 +6,8 @@ Optimized version of transline.py for Python 3.12.
 In-place translation of Chinese characters in text files with progress persistence.
 """
 
+from __future__ import annotations
+
 import json
 import logging
 import re
@@ -50,7 +52,7 @@ def is_binary(path: Path) -> bool:
         if b"\x00" in chunk:
             return True
         text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
-        nontext = sum((1 for b in chunk if b not in text_chars))
+        nontext = sum(1 for b in chunk if b not in text_chars)
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
@@ -128,7 +130,7 @@ def _translate(text: str) -> str:
         return result
     except Exception as e:
         msg = str(e).lower()
-        if any((k in msg for k in ("429", "rate limit", "too many", "quota"))):
+        if any(k in msg for k in ("429", "rate limit", "too many", "quota")):
             raise RateLimitError(str(e))
         raise TranslationError(str(e))
 
@@ -196,7 +198,7 @@ def process_file(path: Path) -> bool:
         print("   ✅ No Chinese characters found — skipping")
         drop_progress(path)
         return True
-    total_segments = sum((len(segs) for segs in line_segments.values()))
+    total_segments = sum(len(segs) for segs in line_segments.values())
     done = load_progress(path)
     tasks: list[tuple[int, int, int, str]] = []
     for line_idx, segments in line_segments.items():
@@ -227,7 +229,7 @@ def process_file(path: Path) -> bool:
         return False
     out_content = []
     for i, line in enumerate(lines):
-        if i in done and done[i]:
+        if done.get(i):
             stripped = line.rstrip("\r\n")
             eol = line[len(stripped) :]
             out_content.append(reassemble_line(stripped, done[i]) + eol)

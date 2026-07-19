@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import sys
 from multiprocessing import get_context
 from pathlib import Path
@@ -59,6 +61,6 @@ if __name__ == "__main__":
     files = (
         list(cwd.glob("*"))
         if not args
-        else list([p for p in cwd.rglob("*") if not ".git" in p.parts and not p.is_symlink()])
+        else list([p for p in cwd.rglob("*") if ".git" not in p.parts and not p.is_symlink()])
     )
     mpf3(process_file, files)

@@ -7,6 +7,8 @@ Handles all re module functions (compile, sub, findall, match, search, etc.).
 Processes Python files with optimized single-threaded or parallel processing.
 """
 
+from __future__ import annotations
+
 import ast
 import shutil
 import sys
@@ -69,7 +71,7 @@ class StringInfo:
 def needs_raw_string(string_content: str) -> bool:
     if not string_content:
         return False
-    has_regex_pattern = any((indicator in string_content for indicator in REGEX_INDICATORS))
+    has_regex_pattern = any(indicator in string_content for indicator in REGEX_INDICATORS)
     escape_count = 0
     i = 0
     while i < len(string_content) - 1:
@@ -83,7 +85,7 @@ def needs_raw_string(string_content: str) -> bool:
     return False
 
 
-def extract_and_convert_strings(content: str) -> Optional[str]:
+def extract_and_convert_strings(content: str) -> str | None:
     try:
         tree = ast.parse(content)
     except SyntaxError:
@@ -192,7 +194,7 @@ def collect_python_files(inputs: List[Path]) -> List[Path]:
         elif input_path.is_dir():
             skip_dirs = {".venv", "venv", "env", "__pycache__", ".git", "node_modules"}
             for py_file in input_path.rglob("*.py"):
-                if any((part in skip_dirs for part in py_file.parts)):
+                if any(part in skip_dirs for part in py_file.parts):
                     continue
                 python_files.add(py_file)
     return sorted(python_files)

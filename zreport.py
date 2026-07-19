@@ -6,6 +6,8 @@ zreport_optimized_by_gemini.py — Report uncompressed sizes of compressed files
 Optimized for Python 3.12 with modern syntax, type hints, and performance improvements.
 """
 
+from __future__ import annotations
+
 import argparse
 import bz2
 import gzip
@@ -57,15 +59,15 @@ def _stream_size(readable, chunk=1 << 20) -> int:
     return total
 
 
-def _tar_size(fileobj, mode="r:*") -> Optional[int]:
+def _tar_size(fileobj, mode="r:*") -> int | None:
     try:
         with tarfile.open(fileobj=fileobj, mode=mode) as tf:
-            return sum((m.size for m in tf.getmembers() if m.isfile()))
+            return sum(m.size for m in tf.getmembers() if m.isfile())
     except Exception:
         return None
 
 
-def get_zst_size(path: Path) -> tuple[Optional[int], Optional[str]]:
+def get_zst_size(path: Path) -> tuple[int | None, str | None]:
     if not zstd:
         return (None, "zstandard not installed")
     try:
@@ -80,7 +82,7 @@ def get_zst_size(path: Path) -> tuple[Optional[int], Optional[str]]:
         return (None, str(e))
 
 
-def get_xz_size(path: Path) -> tuple[Optional[int], Optional[str]]:
+def get_xz_size(path: Path) -> tuple[int | None, str | None]:
     try:
         with lzma.open(path, "rb") as f:
             return (_stream_size(f), None)
@@ -88,7 +90,7 @@ def get_xz_size(path: Path) -> tuple[Optional[int], Optional[str]]:
         return (None, str(e))
 
 
-def get_gz_size(path: Path) -> tuple[Optional[int], Optional[str]]:
+def get_gz_size(path: Path) -> tuple[int | None, str | None]:
     try:
         with gzip.open(path, "rb") as f:
             return (_stream_size(f), None)
@@ -96,7 +98,7 @@ def get_gz_size(path: Path) -> tuple[Optional[int], Optional[str]]:
         return (None, str(e))
 
 
-def get_bz2_size(path: Path) -> tuple[Optional[int], Optional[str]]:
+def get_bz2_size(path: Path) -> tuple[int | None, str | None]:
     try:
         with bz2.open(path, "rb") as f:
             return (_stream_size(f), None)
@@ -104,20 +106,20 @@ def get_bz2_size(path: Path) -> tuple[Optional[int], Optional[str]]:
         return (None, str(e))
 
 
-def get_7z_size(path: Path) -> tuple[Optional[int], Optional[str]]:
+def get_7z_size(path: Path) -> tuple[int | None, str | None]:
     if not py7zr:
         return (None, "py7zr not installed")
     try:
         with py7zr.SevenZipFile(path, mode="r") as z:
-            return (sum((f.uncompressed for f in z.list() if f.uncompressed is not None)), None)
+            return (sum(f.uncompressed for f in z.list() if f.uncompressed is not None), None)
     except Exception as e:
         return (None, str(e))
 
 
-def get_zip_size(path: Path) -> tuple[Optional[int], Optional[str]]:
+def get_zip_size(path: Path) -> tuple[int | None, str | None]:
     try:
         with zipfile.ZipFile(path, "r") as z:
-            return (sum((i.file_size for i in z.infolist())), None)
+            return (sum(i.file_size for i in z.infolist()), None)
     except Exception as e:
         return (None, str(e))
 
@@ -148,7 +150,7 @@ def main() -> None:
     print(col_fmt.format("File", "Format", "Compressed", "Uncompressed", "Ratio"))
     print("-" * 85)
     for item in sorted(root.rglob("*")):
-        if not item.is_file() or any((part in SKIP_DIRS for part in item.parts)):
+        if not item.is_file() or any(part in SKIP_DIRS for part in item.parts):
             continue
         handler_info = next((v for k, v in HANDLERS.items() if item.name.endswith(k)), None)
         if not handler_info:

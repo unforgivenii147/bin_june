@@ -1,6 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
+from __future__ import annotations
+
 import argparse
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -36,7 +38,7 @@ def quick_hash(path: Path, n: int = QUICK_READ) -> str:
             elif size > n:
                 rest = f.read()
                 h.update(rest)
-    except (OSError, IOError) as e:
+    except OSError as e:
         raise OSError(f"quick_hash error {path}: {e}")
     return h.hexdigest()
 
@@ -56,7 +58,7 @@ def full_hash(path: Path) -> tuple[str, Path]:
                     break
                 h.update(chunk)
         return (h.hexdigest(), path)
-    except (OSError, IOError):
+    except OSError:
         return ("", path)
 
 
@@ -127,7 +129,7 @@ def main() -> None:
     if not candidates:
         print(f"Scanned {total_files} files. No potential duplicates found.")
         return
-    candidate_count = sum((len(v) for v in candidates.values()))
+    candidate_count = sum(len(v) for v in candidates.values())
     print(f"Phase 1 complete: {candidate_count} files in {len(candidates)} size-groups to examine.")
     print("Phase 2: Quick hash comparison...")
     quick_groups = defaultdict(list)
@@ -148,7 +150,7 @@ def main() -> None:
     if not need_full:
         print("No duplicates found after quick hash comparison.")
         return
-    full_candidates = sum((len(g) for g in need_full))
+    full_candidates = sum(len(g) for g in need_full)
     print(f"Phase 2 complete: {full_candidates} files in {len(need_full)} groups need full hash.")
     print("Phase 3: Full hash comparison...")
     full_groups = defaultdict(list)

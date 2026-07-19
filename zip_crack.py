@@ -1,6 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
+from __future__ import annotations
+
 import argparse
 import multiprocessing
 import sys
@@ -19,10 +21,10 @@ DEFAULT_UPDATE_INTERVAL: Final[float] = 5.0
 @dataclass
 class CrackResult:
     success: bool = False
-    password: Optional[str] = None
+    password: str | None = None
     tested_count: int = 0
     start_time: float = field(default_factory=time.time)
-    end_time: Optional[float] = None
+    end_time: float | None = None
 
     @property
     def elapsed(self) -> float:
@@ -44,7 +46,7 @@ def format_duration(seconds: float) -> str:
     return f"{secs}s"
 
 
-def check_password_batch(zip_path: Path, passwords: list[str]) -> tuple[Optional[str], int]:
+def check_password_batch(zip_path: Path, passwords: list[str]) -> tuple[str | None, int]:
     tested = 0
     try:
         with zipfile.ZipFile(zip_path) as zf:
@@ -82,7 +84,7 @@ def count_lines(path: Path) -> int:
 def brute_force_zip(
     zip_path: Path,
     wordlist_path: Path,
-    num_processes: Optional[int] = None,
+    num_processes: int | None = None,
     batch_size: int = DEFAULT_BATCH_SIZE,
     update_interval: float = DEFAULT_UPDATE_INTERVAL,
 ) -> CrackResult:
@@ -94,7 +96,7 @@ def brute_force_zip(
         return CrackResult()
     try:
         with zipfile.ZipFile(zip_path) as zf:
-            if not any((info.flag_bits & 1 for info in zf.infolist())):
+            if not any(info.flag_bits & 1 for info in zf.infolist()):
                 print("⚠️  Warning: Zip file does not appear to be password protected.")
     except zipfile.BadZipFile:
         print("❌ Error: Invalid zip file.")

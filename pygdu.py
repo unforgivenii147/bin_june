@@ -1,6 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
+from __future__ import annotations
+
 import sys
 import termios
 import tty
@@ -18,8 +20,8 @@ class FSItem:
     name: str
     is_dir: bool
     size: int = 0
-    children: List["FSItem"] = field(default_factory=list)
-    parent: "FSItem" = None
+    children: List[FSItem] = field(default_factory=list)
+    parent: FSItem = None
     flag: str = " "
 
 

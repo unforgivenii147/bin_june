@@ -7,6 +7,8 @@ Uses pycld2 for fast language detection.
 Optimized for Python 3.12.
 """
 
+from __future__ import annotations
+
 import ast
 import io
 import logging
@@ -53,11 +55,11 @@ def should_skip(text: str) -> bool:
     if not clean or clean.startswith(SHEBANG_PREFIX):
         return True
     if clean.isascii():
-        if any((token in clean.upper() for token in KNOWN_ENGLISH_TOKENS)):
+        if any(token in clean.upper() for token in KNOWN_ENGLISH_TOKENS):
             return True
         if len(clean.split()) <= 2 and len(clean) < 30:
             return True
-    if not any((c.isalpha() for c in clean)):
+    if not any(c.isalpha() for c in clean):
         return True
     return False
 
@@ -121,7 +123,7 @@ def process_file(path: Path) -> bool:
     lines = source.splitlines(keepends=True)
 
     def get_offset(lineno: int, col: int) -> int:
-        return sum((len(lines[i]) for i in range(lineno - 1))) + col
+        return sum(len(lines[i]) for i in range(lineno - 1)) + col
 
     print_pos, doc_pos = get_node_positions(tree)
     replacements: list[tuple[int, int, str]] = []
@@ -181,7 +183,7 @@ def worker(path_str: str) -> None:
 
 
 def main() -> None:
-    files = [str(p) for p in Path(".").rglob("*.py") if not any((part in SKIP_DIRS for part in p.parts))]
+    files = [str(p) for p in Path(".").rglob("*.py") if not any(part in SKIP_DIRS for part in p.parts)]
     if not files:
         logger.info("No Python files found.")
         return

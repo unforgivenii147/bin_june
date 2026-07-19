@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import bz2
 import gzip
 import lzma
@@ -34,17 +36,14 @@ def extract_file(file_path):
     try:
         if file_path.suffix in SUPPORTED_EXTENSIONS:
             if file_path.suffix == ".gz":
-                with gzip.open(file_path, "rb") as f_in:
-                    with open(file_path.with_suffix(""), "wb") as f_out:
-                        f_out.write(f_in.read())
+                with gzip.open(file_path, "rb") as f_in, open(file_path.with_suffix(""), "wb") as f_out:
+                    f_out.write(f_in.read())
             elif file_path.suffix == ".xz":
-                with lzma.open(file_path, "rb") as f_in:
-                    with open(file_path.with_suffix(""), "wb") as f_out:
-                        f_out.write(f_in.read())
+                with lzma.open(file_path, "rb") as f_in, open(file_path.with_suffix(""), "wb") as f_out:
+                    f_out.write(f_in.read())
             elif file_path.suffix == ".bz2":
-                with bz2.open(file_path, "rb") as f_in:
-                    with open(file_path.with_suffix(""), "wb") as f_out:
-                        f_out.write(f_in.read())
+                with bz2.open(file_path, "rb") as f_in, open(file_path.with_suffix(""), "wb") as f_out:
+                    f_out.write(f_in.read())
             elif file_path.suffix == ".7z":
                 with py7zr.SevenZipFile(file_path, mode="r") as archive:
                     archive.extractall(path=file_path.parent)

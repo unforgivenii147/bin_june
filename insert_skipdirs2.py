@@ -7,6 +7,8 @@ Uses parallel processing for better performance.
 Handles edge cases like try-except blocks and validates output.
 """
 
+from __future__ import annotations
+
 import ast
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
@@ -47,14 +49,14 @@ def get_module_level_imports(tree: ast.AST) -> int:
     return last_import_line
 
 
-def find_insert_position(content: str) -> Optional[int]:
+def find_insert_position(content: str) -> int | None:
     try:
         tree = ast.parse(content)
         last_import_line = get_module_level_imports(tree)
         if last_import_line > 0:
             lines = content.splitlines(True)
             if last_import_line <= len(lines):
-                pos = sum((len(line) for line in lines[:last_import_line]))
+                pos = sum(len(line) for line in lines[:last_import_line])
                 return pos
     except SyntaxError:
         pass
@@ -119,7 +121,7 @@ def process_file(file_path: Path) -> Tuple[Path, bool, str]:
         file_path.write_text(modified_content, encoding="utf-8")
         return (file_path, True, "success")
     except Exception as e:
-        return (file_path, False, f"exception: {str(e)}")
+        return (file_path, False, f"exception: {e!s}")
 
 
 def find_python_files(root_dir: Path = Path(".")) -> list[Path]:

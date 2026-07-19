@@ -15,6 +15,8 @@ Features:
 - Reports disk space freed at the end
 """
 
+from __future__ import annotations
+
 import re
 import sys
 from dataclasses import dataclass
@@ -38,7 +40,7 @@ class ProcessResult:
     original_size: int
     final_size: int
     backup_size: int
-    error: Optional[str] = None
+    error: str | None = None
 
     @property
     def space_freed(self) -> int:
@@ -209,11 +211,11 @@ def _format_bytes(bytes_val: int) -> str:
 def print_summary(results: List[ProcessResult], targets: List[Path]) -> None:
     successful = [r for r in results if r.success]
     failed = [r for r in results if not r.success]
-    total_comments = sum((r.comments_removed for r in successful))
-    total_lines_removed = sum((r.original_lines - r.final_lines for r in successful))
-    total_space_freed = sum((r.space_freed for r in successful))
-    total_final_size = sum((r.final_size for r in successful))
-    total_backup_size = sum((r.backup_size for r in successful))
+    total_comments = sum(r.comments_removed for r in successful)
+    total_lines_removed = sum(r.original_lines - r.final_lines for r in successful)
+    total_space_freed = sum(r.space_freed for r in successful)
+    total_final_size = sum(r.final_size for r in successful)
+    total_backup_size = sum(r.backup_size for r in successful)
     total_space_used = total_final_size + total_backup_size
     logger.info("=" * 70)
     logger.info("Processing Summary:")
@@ -242,7 +244,7 @@ def print_summary(results: List[ProcessResult], targets: List[Path]) -> None:
 
 
 def main(
-    targets: Optional[List[str]] = None,
+    targets: List[str] | None = None,
     num_workers: int = None,
     keep_backups: bool = True,
     dry_run: bool = False,
@@ -257,7 +259,7 @@ def main(
             return 1
         target_paths.append(path)
     logger.info(f"Scanning for C/C++ files...")
-    logger.info(f"Targets: {', '.join((str(p) for p in target_paths))}")
+    logger.info(f"Targets: {', '.join(str(p) for p in target_paths)}")
     source_files = collect_source_files(targets)
     if not source_files:
         logger.warning("No C/C++ source files found.")

@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 from datetime import datetime
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
@@ -65,19 +67,19 @@ class JalaliDate:
         return jdate, now
 
     @staticmethod
-    def today() -> "JalaliDate":
+    def today() -> JalaliDate:
         gregorian_date = datetime.now()
         return JalaliDate.from_gregorian(gregorian_date.year, gregorian_date.month, gregorian_date.day)
 
     @staticmethod
-    def from_gregorian(g_year: int, g_month: int, g_day: int) -> "JalaliDate":
+    def from_gregorian(g_year: int, g_month: int, g_day: int) -> JalaliDate:
         gy = g_year - 1600
         gm = g_month - 1
         gd = g_day - 1
         g_day_of_year = (
             sum([31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][:gm])
             + gd
-            + (1 if gm > 1 and (g_year % 4 == 0 and g_year % 100 != 0 or g_year % 400 == 0) else 0)
+            + (1 if gm > 1 and ((g_year % 4 == 0 and g_year % 100 != 0) or g_year % 400 == 0) else 0)
         )
         g_day_no = gy * 365 + (gy + 3) // 4 - (gy + 99) // 100 + (gy + 399) // 400 + g_day_of_year
         j_day_no = g_day_no - 79
@@ -188,7 +190,7 @@ class JalaliDate:
         leap += (n + 4) // 33 * 8 + ((n + 4) % 33 + 1) // 4
         if jump % 33 % 4 == 0 and jm - jp == 128:
             leap += 1
-        return gy % 400 == 0 or gy % 100 != 0 and gy % 4 == 0
+        return gy % 400 == 0 or (gy % 100 != 0 and gy % 4 == 0)
 
     def days_in_month(self) -> int:
         if self.month <= 6:

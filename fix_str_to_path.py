@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import os
 import re
 
@@ -6,7 +8,7 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 
 def add_path_statement(file_path: str) -> bool:
-    with open(file_path, "r", encoding="utf-8") as file:
+    with open(file_path, encoding="utf-8") as file:
         lines = file.readlines()
     modified_lines = []
     in_function = False
@@ -50,7 +52,7 @@ def add_path_statement(file_path: str) -> bool:
 
 
 def add_path_statement_simple(file_path: str) -> bool:
-    with open(file_path, "r", encoding="utf-8") as file:
+    with open(file_path, encoding="utf-8") as file:
         content = file.read()
     if "path=Path(path)" in content or "path = Path(path)" in content:
         print(f"Skipping {file_path}: path=Path(path) already exists")

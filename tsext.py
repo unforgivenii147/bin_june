@@ -1,9 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/env python
-import imp
+from __future__ import annotations
+
 import os
 from os import scandir as os_scandir
 from pathlib import Path
 
+import imp
 import tree_sitter_python as tsp
 from tree_sitter import Language, Parser
 

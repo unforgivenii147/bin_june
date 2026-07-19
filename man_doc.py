@@ -1,6 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
+from __future__ import annotations
+
 import gzip
 import os
 import sys
@@ -52,11 +54,8 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
 def runcmd(
     cmd: list[str], run_silently: bool = False, show_output: bool = True, timeout: float | None = None
 ) -> tuple[int, str, str]:
-    from subprocess import DEVNULL as _DEVNULL
-    from subprocess import TimeoutExpired as subprocess_TimeoutExpired
-    from subprocess import run as subprocess_run
-    from sys import stderr as sys_stderr
-    from sys import stdout as sys_stdout
+    from subprocess import DEVNULL as _DEVNULL, TimeoutExpired as subprocess_TimeoutExpired, run as subprocess_run
+    from sys import stderr as sys_stderr, stdout as sys_stdout
 
     if not cmd:
         msg = "cmd must be a non-empty list (e.g., ['ls', '-l'])"
@@ -101,7 +100,7 @@ def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
-    return Parallel(n_jobs=-1)((delayed(process_function)(file_str, **kwargs) for file_str in file_strings))
+    return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
 
 
 ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}

@@ -5,6 +5,8 @@ Repack installed Python packages from system site-packages into wheel files.
 Skips pure Python packages and .pyc files, uses parallel processing.
 """
 
+from __future__ import annotations
+
 import argparse
 import importlib.metadata
 import logging
@@ -73,7 +75,7 @@ def is_pure_python(package_name: str, site_path: Path) -> bool:
     return True
 
 
-def get_package_path(package_name: str, site_paths: List[Path]) -> Optional[Path]:
+def get_package_path(package_name: str, site_paths: List[Path]) -> Path | None:
     for site_path in site_paths:
         pkg_path = site_path / package_name
         if pkg_path.exists() and pkg_path.is_dir():
@@ -90,7 +92,7 @@ def get_package_path(package_name: str, site_paths: List[Path]) -> Optional[Path
 
 def repack_package(
     args_tuple: Tuple[str, str, Path, List[Path]],
-) -> Tuple[str, bool, Optional[str]]:
+) -> Tuple[str, bool, str | None]:
     package_name, version, output_dir, site_paths = args_tuple
     try:
         pkg_path = get_package_path(package_name, site_paths)
@@ -176,9 +178,9 @@ Root-Is-Purelib: false
                 else:
                     return (package_name, False, f"Wheel command failed: {result.stderr[:100]}")
             except Exception as e:
-                return package_name, False, f"Error running wheel: {str(e)}"
+                return package_name, False, f"Error running wheel: {e!s}"
     except Exception as e:
-        return package_name, False, f"Error: {str(e)}"
+        return package_name, False, f"Error: {e!s}"
 
 
 def main():

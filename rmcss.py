@@ -6,6 +6,8 @@ Remove HTML comments (<!-- ... -->) from HTML and CSS files recursively.
 Processes files in parallel and updates them in-place.
 """
 
+from __future__ import annotations
+
 import os
 import re
 import sys
@@ -18,7 +20,7 @@ COMMENT_PATTERN = re.compile("<!--.*?-->", re.DOTALL)
 
 def remove_comments_from_file(file_path):
     try:
-        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+        with open(file_path, encoding="utf-8", errors="ignore") as f:
             content = f.read()
         new_content = COMMENT_PATTERN.sub("", content)
         if new_content != content:

@@ -5,6 +5,8 @@ Check recursively for empty wheels in the current directory.
 An empty wheel is a .whl file (ZIP archive) that contains no .py files.
 """
 
+from __future__ import annotations
+
 import zipfile
 from pathlib import Path
 

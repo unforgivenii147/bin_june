@@ -5,6 +5,8 @@ Initializes a new repository if not already inside one.
 Automatically pushes to remote if configured.
 """
 
+from __future__ import annotations
+
 import argparse
 import os
 import re

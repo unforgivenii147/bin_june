@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import ast
 import sys
 import traceback
@@ -556,7 +558,7 @@ def _is_docstring(node: ast.AST) -> bool:
 
 def process_file(
     file_path: Path, dry_run: bool = False, verbose: bool = False
-) -> Tuple[Optional[str], bool, List[str], List[str]]:
+) -> Tuple[str | None, bool, List[str], List[str]]:
     path = Path(path)
     try:
         original_content = file_path.read_text(encoding="utf-8")

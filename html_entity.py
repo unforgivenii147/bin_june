@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import multiprocessing as mp
 import re
 import sys
@@ -18,7 +20,7 @@ def is_binary(path: Path | str) -> bool:
         if b"\x00" in chunk:
             return True
         text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
-        nontext = sum((1 for b in chunk if b not in text_chars))
+        nontext = sum(1 for b in chunk if b not in text_chars)
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
@@ -80,7 +82,7 @@ HTML_ENTITIES = {
     "&ldquo;": '"',
     "&rdquo;": '"',
 }
-ENTITY_PATTERN = re.compile(r"|".join((re.escape(k) for k in HTML_ENTITIES.keys())))
+ENTITY_PATTERN = re.compile(r"|".join(re.escape(k) for k in HTML_ENTITIES))
 
 
 def replace_entities(text: str) -> str:
@@ -93,7 +95,7 @@ def replace_entities(text: str) -> str:
 
 def process_file(filepath: Path) -> tuple[Path, bool, str]:
     try:
-        with open(filepath, "r", encoding="utf-8") as f:
+        with open(filepath, encoding="utf-8") as f:
             content = f.read()
         new_content = replace_entities(content)
         changed = content != new_content

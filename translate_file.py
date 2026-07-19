@@ -6,6 +6,8 @@ Optimized version of translate_file.py for Python 3.12.
 Translates lines containing foreign characters using parallel process pool.
 """
 
+from __future__ import annotations
+
 import logging
 import re
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -67,7 +69,7 @@ def main() -> None:
     cwd = Path(".")
     for ext in extensions:
         for path in cwd.rglob(ext):
-            if any((part.startswith(".") or part in SKIP_DIRS for part in path.parts)):
+            if any(part.startswith(".") or part in SKIP_DIRS for part in path.parts):
                 continue
             if path.is_file():
                 files_to_process.append(path)

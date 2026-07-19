@@ -5,6 +5,8 @@
 Script to download English subtitles for an MKV movie using Subliminal.
 """
 
+from __future__ import annotations
+
 import logging
 import sys
 from pathlib import Path

@@ -5,6 +5,8 @@ Compresses files recursively using maximum compression with gzip module.
 Uses pathlib and parallel processing for efficiency.
 """
 
+from __future__ import annotations
+
 import argparse
 import gzip
 import shutil
@@ -53,9 +55,8 @@ def compress_file(file_path: Path) -> Tuple[Path, bool, int, int, str]:
         original_size = file_path.stat().st_size
 
         # Compress with maximum compression (level 9)
-        with open(file_path, "rb") as f_in:
-            with gzip.open(gz_path, "wb", compresslevel=9) as f_out:
-                shutil.copyfileobj(f_in, f_out)
+        with open(file_path, "rb") as f_in, gzip.open(gz_path, "wb", compresslevel=9) as f_out:
+            shutil.copyfileobj(f_in, f_out)
 
         # Get compressed file size
         compressed_size = gz_path.stat().st_size

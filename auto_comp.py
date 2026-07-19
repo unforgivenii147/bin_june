@@ -7,6 +7,8 @@ Compresses files/directories using multiple algorithms and retains
 only the best result based on compression ratio.
 """
 
+from __future__ import annotations
+
 import bz2
 import gzip
 import lzma

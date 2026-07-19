@@ -5,6 +5,8 @@ Fix mis-extracted .zst files where a directory contains a file with the same nam
 Example: __init__.py/__init__.py -> __init__.py (file)
 """
 
+from __future__ import annotations
+
 import shutil
 import sys
 from pathlib import Path

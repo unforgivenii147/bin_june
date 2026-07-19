@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import os
 import sys
 from collections import defaultdict
@@ -158,7 +160,7 @@ def get_hash_file(path):
             while chunk := f.read(CHUNKSIZE):
                 h.update(chunk)
         return h.hexdigest(), path
-    except (OSError, IOError):
+    except OSError:
         return "", path
 
 

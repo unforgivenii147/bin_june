@@ -1,6 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
+from __future__ import annotations
+
 import compileall
 import csv
 import os
@@ -19,7 +21,7 @@ def check_dist_info_safely(dist_info_path):
     top_level_path = dist_info_path / "top_level.txt"
     if top_level_path.exists():
         try:
-            with open(top_level_path, "r", encoding="utf-8") as tlf:
+            with open(top_level_path, encoding="utf-8") as tlf:
                 top_levels = [line.strip() for line in tlf if line.strip()]
                 if len(top_levels) > 1:
                     return (True, f"Multi-folder package detected ({', '.join(top_levels)})")
@@ -28,7 +30,7 @@ def check_dist_info_safely(dist_info_path):
     record_path = dist_info_path / "RECORD"
     if record_path.exists():
         try:
-            with open(record_path, mode="r", encoding="utf-8", newline="") as f:
+            with open(record_path, encoding="utf-8", newline="") as f:
                 reader = csv.reader(f)
                 for row in reader:
                     if row:

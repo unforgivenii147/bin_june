@@ -4,6 +4,8 @@
 Termux script creator - Creates executable scripts from clipboard content.
 """
 
+from __future__ import annotations
+
 import subprocess
 import sys
 from pathlib import Path
@@ -85,7 +87,7 @@ def detect_script_type(content: str) -> str:
         return "bash"
 
 
-def get_shebang_from_filename(filename: str) -> Optional[str]:
+def get_shebang_from_filename(filename: str) -> str | None:
     path = Path(filename)
     suffix = path.suffix.lower()
     if suffix in [".py", ".pyw"]:

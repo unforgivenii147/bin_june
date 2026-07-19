@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import ast
 import operator
 import re
@@ -162,7 +164,7 @@ def handle_compressed_file(archive_path: Path):
 
                 result = subprocess.run(["7z", "l", str(path)], check=False, capture_output=True, text=True)
                 for line in result.stdout.splitlines():
-                    ".py" in line or "python" in line.lower() and "bin" not in line.lower()
+                    ".py" in line or ("python" in line.lower() and "bin" not in line.lower())
             except:
                 pass
     except Exception:

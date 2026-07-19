@@ -303,9 +303,8 @@ def compress_file_zstd(src: Path, dst: Path) -> None:
     if zstd is None:
         raise RuntimeError("zstandard is not installed")
     cctx = zstd.ZstdCompressor(level=22)
-    with src.open("rb") as fin, dst.open("wb") as fout:
-        with cctx.stream_writer(fout) as compressor:
-            copy_chunks(fin, compressor)
+    with src.open("rb") as fin, dst.open("wb") as fout, cctx.stream_writer(fout) as compressor:
+        copy_chunks(fin, compressor)
 
 
 def compress_file_zip(src: Path, dst: Path) -> None:

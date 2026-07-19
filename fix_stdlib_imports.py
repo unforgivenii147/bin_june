@@ -5,6 +5,8 @@ Script to detect potentially missing standard library imports in Python files.
 Recursively scans directories and reports stdlib names that are used but not imported.
 """
 
+from __future__ import annotations
+
 import ast
 import importlib
 import keyword
@@ -381,7 +383,7 @@ class ImportChecker(ast.NodeVisitor):
 
 def find_missing_imports(filepath: str, stdlib_names: Dict[str, Set[str]]) -> List[Tuple[str, str]]:
     try:
-        with open(filepath, "r", encoding="utf-8") as f:
+        with open(filepath, encoding="utf-8") as f:
             source = f.read()
     except Exception as e:
         print(f"Error reading {filepath}: {e}", file=sys.stderr)

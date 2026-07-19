@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import ast
 import hashlib
 import sys
@@ -23,7 +25,7 @@ def get_function_content_hash(function_node):
         source = astunparse.unparse(func_copy)
     except ImportError:
         try:
-            source = ast.get_source_segment(open(function_node.lineno, "r").read(), function_node)
+            source = ast.get_source_segment(open(function_node.lineno).read(), function_node)
         except:
             source = str(ast.dump(func_copy))
     return hashlib.md5(source.encode("utf-8")).hexdigest()
@@ -31,7 +33,7 @@ def get_function_content_hash(function_node):
 
 def get_function_content_hash_manual(filename, function_node):
     try:
-        with open(filename, "r") as f:
+        with open(filename) as f:
             lines = f.readlines()
         start_line = function_node.lineno - 1
         end_line = function_node.end_lineno
@@ -60,7 +62,7 @@ def get_function_content_hash_manual(filename, function_node):
 
 def extract_functions_with_hash(filename):
     try:
-        with open(filename, "r") as file:
+        with open(filename) as file:
             tree = ast.parse(file.read())
         functions = {}
         for node in ast.walk(tree):
@@ -102,7 +104,7 @@ def remove_functions_from_file(file1, file2):
         return True
     functions_to_remove.sort(key=lambda x: x["lineno"], reverse=True)
     try:
-        with open(file2, "r") as f:
+        with open(file2) as f:
             lines = f.readlines()
         for func_info in functions_to_remove:
             start = func_info["lineno"] - 1

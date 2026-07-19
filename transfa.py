@@ -5,6 +5,8 @@
 Translates Persian (Farsi) text in a file to English.
 """
 
+from __future__ import annotations
+
 import logging
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -22,7 +24,7 @@ def translate_line(line: str) -> tuple[str, str] | None:
     if not (stripped := line.strip()):
         return None
     try:
-        if not any(("\u0600" <= char <= "ۿ" for char in stripped)):
+        if not any("\u0600" <= char <= "ۿ" for char in stripped):
             return None
         translator = GoogleTranslator(source="fa", target="en")
         result = translator.translate(stripped)

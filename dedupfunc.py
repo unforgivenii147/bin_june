@@ -6,6 +6,8 @@ Detects functions with identical bodies (ignoring whitespace and comments)
 and optionally removes duplicates with user confirmation.
 """
 
+from __future__ import annotations
+
 import argparse
 import ast
 import re
@@ -51,7 +53,7 @@ class DuplicateFunctionFinder(ast.NodeVisitor):
         self.generic_visit(node)
 
     def analyze_file(self, filepath: str) -> Dict[str, List[FunctionInfo]]:
-        with open(filepath, "r", encoding="utf-8") as f:
+        with open(filepath, encoding="utf-8") as f:
             content = f.read()
             self.source_lines = content.splitlines()
         try:
@@ -86,7 +88,7 @@ class DuplicateFunctionRemover:
         return "\n".join(self.lines[start_line - 1 : end_line])
 
     def remove_duplicates(self, groups: Dict[str, List[FunctionInfo]], keep_choice: Dict[str, int]) -> bool:
-        with open(self.filepath, "r", encoding="utf-8") as f:
+        with open(self.filepath, encoding="utf-8") as f:
             self.content = f.read()
             self.lines = self.content.splitlines()
         lines_to_remove = set()
@@ -113,9 +115,8 @@ class DuplicateFunctionRemover:
 
     def backup_file(self) -> str:
         backup_path = self.filepath.with_suffix(self.filepath.suffix + ".backup")
-        with open(self.filepath, "r", encoding="utf-8") as src:
-            with open(backup_path, "w", encoding="utf-8") as dst:
-                dst.write(src.read())
+        with open(self.filepath, encoding="utf-8") as src, open(backup_path, "w", encoding="utf-8") as dst:
+            dst.write(src.read())
         return str(backup_path)
 
 

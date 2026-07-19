@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import re
 from collections import defaultdict
 from pathlib import Path
@@ -133,7 +135,7 @@ def main():
         print(f"Current directory: {Path.cwd()}")
         return False
     try:
-        with open(input_file, "r", encoding="utf-8") as f:
+        with open(input_file, encoding="utf-8") as f:
             text = f.read()
         print(f"✅ Read {len(text)} characters from {input_file}")
     except Exception as e:

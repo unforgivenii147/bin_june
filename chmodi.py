@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import logging
 import os
 import stat
@@ -29,7 +31,7 @@ def is_binary(file_path: Path) -> bool:
         with file_path.open("rb") as f:
             chunk = f.read(1024)
         return b"\x00" in chunk
-    except (OSError, IOError):
+    except OSError:
         return False
 
 
@@ -38,7 +40,7 @@ def has_shebang(file_path: Path) -> bool:
         with file_path.open("rb") as f:
             first_line = f.readline()
         return first_line.startswith(b"#!")
-    except (OSError, IOError):
+    except OSError:
         return False
 
 

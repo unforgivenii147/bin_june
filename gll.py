@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import sys
 from pathlib import Path
 
@@ -21,7 +23,7 @@ Usage: {sys.argv[0]} <filename> <start_line> [end_line]""",
     except ValueError:
         print("Error: start_line and end_line must be integers.", file=sys.stderr)
         return 1
-    if start < 1 or end != -1 and end < start:
+    if start < 1 or (end != -1 and end < start):
         print("Invalid range: start must be >=1 and end >= start.", file=sys.stderr)
         return 1
     path = Path(filename)

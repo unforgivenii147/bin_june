@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import shutil
 import subprocess
 from collections import deque
@@ -64,7 +66,7 @@ EXCLUDE_PATTERNS = {}
 def should_format(path: Path) -> bool:
     if path.suffix not in EXTENSIONS:
         return False
-    return all((not path.name.endswith(p) for p in EXCLUDE_PATTERNS))
+    return all(not path.name.endswith(p) for p in EXCLUDE_PATTERNS)
 
 
 def get_files_to_format(cwd: str = ".") -> list[Path]:

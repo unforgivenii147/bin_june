@@ -79,7 +79,7 @@ def extract_prefix_comments_and_shebang(source: str) -> Tuple[str, str]:
             continue
         if stripped.startswith("#"):
             low = stripped.lower()
-            if any((x in low for x in ("coding", "encoding", "type:", "fmt:"))):
+            if any(x in low for x in ("coding", "encoding", "type:", "fmt:")):
                 prefix_lines.append(line)
                 continue
             break
@@ -102,7 +102,7 @@ def collect_and_strip_comments(source: str) -> Tuple[str, Dict[int, List[str]], 
                 low = tok_string.lower()
                 row = tok.start[0]
                 col = tok.start[1]
-                if any((x in low for x in ("type:", "fmt:", "noqa"))):
+                if any(x in low for x in ("type:", "fmt:", "noqa")):
                     preserved_comments.setdefault(row, []).append(tok_string)
                 else:
                     line_before_comment = lines[row - 1][:col].rstrip()
@@ -114,7 +114,7 @@ def collect_and_strip_comments(source: str) -> Tuple[str, Dict[int, List[str]], 
     return (preserved_comments, comments_removed)
 
 
-def process_file(path: Path) -> Tuple[str, bool, Optional[str], RemovalStats]:
+def process_file(path: Path) -> Tuple[str, bool, str | None, RemovalStats]:
     try:
         with tokenize.open(path) as f:
             original = f.read()

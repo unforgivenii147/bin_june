@@ -14,6 +14,8 @@ Usage:
   python fix_regex.py [paths] [--workers N] [--no-backup] [--dry-run] [--verbose]
 """
 
+from __future__ import annotations
+
 import ast
 import io
 import re
@@ -106,7 +108,7 @@ class RegexFixer:
         create_backup: bool = True,
         dry_run: bool = False,
         verbose: bool = False,
-        max_workers: Optional[int] = None,
+        max_workers: int | None = None,
     ):
         self.create_backup = create_backup
         self.dry_run = dry_run
@@ -130,7 +132,7 @@ class RegexFixer:
                             return True
                 i += 1
             i += 1
-        if any((indicator in content for indicator in REGEX_INDICATORS)):
+        if any(indicator in content for indicator in REGEX_INDICATORS):
             return True
         return False
 
@@ -158,7 +160,7 @@ class RegexFixer:
         content = token_str[content_start:content_end]
         return (prefix, opening, content, is_raw)
 
-    def convert_string(self, token_str: str) -> Optional[str]:
+    def convert_string(self, token_str: str) -> str | None:
         prefix, opening, content, is_raw = self.parse_string_literal(token_str)
         if is_raw:
             return None
@@ -301,7 +303,7 @@ class RegexFixer:
                     python_files.add(path)
             elif path.is_dir():
                 for py_file in path.rglob("*.py"):
-                    if any((part in exclude_dirs for part in py_file.parts)):
+                    if any(part in exclude_dirs for part in py_file.parts):
                         continue
                     python_files.add(py_file)
         return sorted(python_files)

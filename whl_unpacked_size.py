@@ -5,6 +5,8 @@ Report the overall unpacked size of .whl files in the current directory.
 Uses pathlib for path handling and multiprocessing for parallel processing.
 """
 
+from __future__ import annotations
+
 import argparse
 import json
 import sys
@@ -24,7 +26,7 @@ def format_size(size_bytes: int) -> str:
     return f"{size_bytes:.2f} PB"
 
 
-def get_wheel_unpacked_size(wheel_path: Path) -> Tuple[Path, int, Optional[str]]:
+def get_wheel_unpacked_size(wheel_path: Path) -> Tuple[Path, int, str | None]:
     try:
         if not wheel_path.exists():
             return wheel_path, 0, f"File not found: {wheel_path}"
@@ -36,10 +38,10 @@ def get_wheel_unpacked_size(wheel_path: Path) -> Tuple[Path, int, Optional[str]]
                 for info in whl.filelist:
                     total_size += info.file_size
         except Exception as e:
-            return wheel_path, 0, f"Failed to read wheel: {str(e)}"
+            return wheel_path, 0, f"Failed to read wheel: {e!s}"
         return wheel_path, total_size, None
     except Exception as e:
-        return wheel_path, 0, f"Unexpected error: {str(e)}"
+        return wheel_path, 0, f"Unexpected error: {e!s}"
 
 
 def find_wheel_files(directory: Path, recursive: bool = False) -> list[Path]:

@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import argparse
 import os
 import stat
@@ -51,7 +53,7 @@ def has_shebang(filepath):
         with open(filepath, "rb") as f:
             first_line = f.readline()
             return first_line.startswith(b"#!")
-    except (OSError, IOError):
+    except OSError:
         return False
 
 

@@ -6,6 +6,8 @@ zstder_optimized_by_gemini.py — Recursive Zstandard compression/decompression 
 Optimized for Python 3.12 with modern syntax, type hints, and performance improvements.
 """
 
+from __future__ import annotations
+
 import argparse
 import logging
 import multiprocessing
@@ -210,7 +212,7 @@ def do_compress(root: Path, tar_subdirs: bool, dry_run: bool, verbose: bool, thr
         files = [
             p
             for p in root.rglob("*")
-            if p.is_file() and p.suffix != ZSTD_EXT and (not any((part in SKIP_DIRS for part in p.parts)))
+            if p.is_file() and p.suffix != ZSTD_EXT and (not any(part in SKIP_DIRS for part in p.parts))
         ]
         if not files:
             logger.info("No files to compress.")

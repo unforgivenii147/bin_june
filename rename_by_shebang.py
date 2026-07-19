@@ -5,6 +5,8 @@ Rename files in current directory based on their shebang line.
 Optimized for Termux environment.
 """
 
+from __future__ import annotations
+
 import os
 import re
 import shutil
@@ -59,11 +61,11 @@ SHEBANG_MAPPING = {
 
 def get_shebang(file_path: Path) -> str | None:
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             first_line = f.readline().strip()
             if first_line.startswith("#!"):
                 return first_line
-    except (UnicodeDecodeError, IOError):
+    except (OSError, UnicodeDecodeError):
         pass
     return None
 

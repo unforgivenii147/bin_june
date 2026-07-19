@@ -4,6 +4,8 @@ Script to show various extensions in current directory with total size for each 
 Uses pathlib and parallel processing for speedup.
 """
 
+from __future__ import annotations
+
 import sys
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -92,7 +94,7 @@ def main():
     print(f"{'Extension':<20} {'Total Size':<15} {'Files':<10} {'Percentage'}")
     print("-" * 60)
     for ext, size in sorted_extensions:
-        ext_files = sum(1 for f in files if f.suffix.lower() == ext or ext == "NO_EXTENSION" and f.suffix == "")
+        ext_files = sum(1 for f in files if f.suffix.lower() == ext or (ext == "NO_EXTENSION" and f.suffix == ""))
         percentage = size / total_size * 100 if total_size > 0 else 0
         display_ext = ext if ext != "NO_EXTENSION" else "(no extension)"
         print(f"{display_ext:<20} {format_size(size):<15} {ext_files:<10} {percentage:.1f}%")

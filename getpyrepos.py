@@ -6,6 +6,8 @@ Usage: python script.py [username]
 If no username provided, fetches top trending GitHub users' Python repos
 """
 
+from __future__ import annotations
+
 import json
 import sys
 from datetime import datetime, timedelta

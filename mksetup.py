@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import shutil
 import sys
 import tempfile
@@ -72,7 +74,7 @@ def find_extensions(root: Path) -> list[str]:
 def generate_setup_py(meta: dict, extensions: list[str], entry_points: dict[str, list[str]]) -> str:
     ext_block = (
         "from setuptools import Extension\n\next_modules = [\n"
-        + "\n".join((f"""    Extension("{m}", sources=["{m.replace(".", "/")}.*"]),""" for m in extensions))
+        + "\n".join(f"""    Extension("{m}", sources=["{m.replace(".", "/")}.*"]),""" for m in extensions)
         + "\n]\n"
         if extensions
         else "ext_modules = []\n"

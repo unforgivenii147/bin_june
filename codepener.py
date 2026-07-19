@@ -5,6 +5,8 @@ Convert CodePen-style HTML (body only) to a complete HTML document.
 Adds proper <head> section with links to style.css and script.js
 """
 
+from __future__ import annotations
+
 import sys
 from pathlib import Path
 
@@ -18,7 +20,7 @@ def convert_codepen_html(html_content, title="Document", charset="UTF-8"):
 
 def process_file(input_file, output_file=None, title=None):
     try:
-        with open(input_file, "r", encoding="utf-8") as f:
+        with open(input_file, encoding="utf-8") as f:
             html_content = f.read()
     except FileNotFoundError:
         print(f"Error: File '{input_file}' not found.")

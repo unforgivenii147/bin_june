@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import multiprocessing as mp
 import shutil
 import sys
@@ -107,15 +109,14 @@ def create_archive_streaming_fixed():
             sys.exit(0)
     try:
         compressor = zstd.ZstdCompressor(level=3, threads=mp.cpu_count())
-        with open(archive_path, "wb") as f_out:
-            with compressor.stream_writer(f_out) as zstd_writer:
-                with tarfile.open(fileobj=zstd_writer, mode="w:") as tar:
-                    files = get_file_list(current_dir)
-                    if not files:
-                        print("No files to archive")
-                        sys.exit(1)
-                    for file_path in files:
-                        tar.add(file_path, arcname=file_path.relative_to(parent_dir))
+        with open(archive_path, "wb") as f_out, compressor.stream_writer(f_out) as zstd_writer:
+            with tarfile.open(fileobj=zstd_writer, mode="w:") as tar:
+                files = get_file_list(current_dir)
+                if not files:
+                    print("No files to archive")
+                    sys.exit(1)
+                for file_path in files:
+                    tar.add(file_path, arcname=file_path.relative_to(parent_dir))
         if archive_path.exists() and archive_path.stat().st_size > 0:
             test_dir = parent_dir / f"{dir_name}_test"
             try:

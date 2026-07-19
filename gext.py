@@ -1,6 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
+from __future__ import annotations
+
 import ast
 import re
 import sys
@@ -330,7 +332,7 @@ def enhance_entity_code(entity: Dict[str, Any]) -> str:
     return header + code
 
 
-def save_entity(entity: Dict[str, Any]) -> Optional[Path]:
+def save_entity(entity: Dict[str, Any]) -> Path | None:
     filename_base = f"{entity['full_name']}.py"
     output_path_base = OUTPUT_DIR / entity["type"] / filename_base.lower()
     output_path_base.parent.mkdir(parents=True, exist_ok=True)
@@ -365,7 +367,7 @@ def is_python_file_no_extension(path: Path) -> bool:
             first_lines = "".join(f.readlines(1024))
             if re.match("#!\\s*/.*python", first_lines):
                 return True
-            if any((keyword in first_lines for keyword in ["def ", "class ", "import ", "from "])):
+            if any(keyword in first_lines for keyword in ["def ", "class ", "import ", "from "]):
                 return True
     except:
         pass
@@ -415,7 +417,7 @@ def process_archive(path: Path) -> Tuple[List[Dict[str, Any]], List[str]]:
                             all_imports.extend(ImportCollector.parse_imports_with_ast(content))
         except Exception as e:
             print(f"Error processing ZIP/WHL archive {path}: {e}")
-    elif any((path.name.endswith(ext) for ext in [".tar", ".tar.gz", ".tgz", ".tar.zst", ".tar.xz"])):
+    elif any(path.name.endswith(ext) for ext in [".tar", ".tar.gz", ".tgz", ".tar.zst", ".tar.xz"]):
         mode_map = {".tar.gz": "r:gz", ".tgz": "r:gz", ".tar.zst": "r:zst", ".tar.xz": "r:xz", ".tar": "r"}
         mode = next((mode_map[ext] for ext in mode_map if path.name.endswith(ext)), "r")
         try:
@@ -443,7 +445,7 @@ def worker_process(path_str: str) -> Tuple[List[Dict[str, Any]], List[str]]:
     return process_single_file(path)
 
 
-def save_global_imports(all_imports: List[str], source_dir: Path) -> Optional[Path]:
+def save_global_imports(all_imports: List[str], source_dir: Path) -> Path | None:
     if not all_imports:
         return None
     unique_imports = sorted(set(all_imports))
@@ -456,7 +458,7 @@ def save_global_imports(all_imports: List[str], source_dir: Path) -> Optional[Pa
 
 
 def process_files_parallel(
-    file_paths: List[str], max_workers: Optional[int] = 8
+    file_paths: List[str], max_workers: int | None = 8
 ) -> Tuple[List[Dict[str, Any]], List[str]]:
     all_entities = []
     all_imports = []
@@ -511,7 +513,7 @@ def main() -> int:
     for path in files:
         if path.is_relative_to(OUTPUT_DIR):
             continue
-        is_archive = any((path.name.endswith(ext) for ext in ARCHIVE_EXTENSIONS))
+        is_archive = any(path.name.endswith(ext) for ext in ARCHIVE_EXTENSIONS)
         is_py = path.suffix in ALLOWED_PYTHON_EXTENSIONS or is_python_file_no_extension(path)
         if is_archive or is_py:
             files_to_process.append(str(path))

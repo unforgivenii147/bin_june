@@ -1,10 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import re
 import sys
 
 
 def clean_terminal_transcript(filepath):
-    with open(filepath, "r", encoding="utf-8", errors="replace") as f:
+    with open(filepath, encoding="utf-8", errors="replace") as f:
         content = f.read()
 
     # Remove ANSI escape codes (colors, cursor movement, etc.)

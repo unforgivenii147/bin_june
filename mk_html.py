@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from __future__ import absolute_import
+
+from __future__ import annotations
 
 import argparse
 import hashlib

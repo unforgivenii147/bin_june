@@ -4,13 +4,16 @@ Search the current directory for Windows and macOS related files on a Linux syst
 Optionally remove them with the -a (--auto-remove) CLI argument.
 """
 
+from __future__ import annotations
+
+import argparse
 import os
 import sys
-import argparse
 
 # File extensions / names to search for
-WINDOWS_FILES = {'.exe', '.dll', '.bat', '.com', '.msi', '.vbs', '.ps1'}
-MACOS_FILES = {'.dmg', '.app', '.DS_Store', '.plist', '.pkg'}
+WINDOWS_FILES = {".exe", ".dll", ".bat", ".com", ".msi", ".vbs", ".ps1"}
+MACOS_FILES = {".dmg", ".app", ".DS_Store", ".plist", ".pkg"}
+
 
 def find_target_files(root_dir):
     target_files = []
@@ -21,18 +24,17 @@ def find_target_files(root_dir):
                 target_files.append(os.path.join(dirpath, filename))
             elif any(filename.lower().endswith(ext) for ext in MACOS_FILES):
                 target_files.append(os.path.join(dirpath, filename))
-            elif filename == '.DS_Store':
+            elif filename == ".DS_Store":
                 target_files.append(os.path.join(dirpath, filename))
     return target_files
+
 
 def main():
     parser = argparse.ArgumentParser(
         description="Search for Windows/macOS files in the current directory and optionally remove them."
     )
     parser.add_argument(
-        '-a', '--auto-remove',
-        action='store_true',
-        help="Automatically remove found files after confirmation."
+        "-a", "--auto-remove", action="store_true", help="Automatically remove found files after confirmation."
     )
     args = parser.parse_args()
 
@@ -60,6 +62,7 @@ def main():
             except Exception as e:
                 print(f"Error deleting {file_path}: {e}")
         print(f"\nDeleted {deleted_count} of {len(found_files)} files.")
+
 
 if __name__ == "__main__":
     main()

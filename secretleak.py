@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import re
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
@@ -56,9 +58,9 @@ def should_skip_file(file_path: Path) -> bool:
 def scan_file(file_path: Path) -> Tuple[str, List[dict]]:
     leaks = []
     try:
-        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+        with open(file_path, encoding="utf-8", errors="ignore") as f:
             content = f.read()
-    except (OSError, IOError):
+    except OSError:
         return str(file_path), leaks
     for secret_name, pattern in SECRET_PATTERNS.items():
         matches = re.finditer(pattern, content, re.IGNORECASE)

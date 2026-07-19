@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import argparse
 import json
 from pathlib import Path
@@ -25,13 +27,14 @@ def py_to_ipynb(input_file, output_file=None) -> bool:
             i > 0
             and (
                 line.startswith(("def ", "class "))
-                or line.startswith(("import ", "from "))
-                and not current_cell[-1].startswith(("import ", "from "))
-                or line.strip() == ""
-                and current_cell
-                and i + 1 < len(lines)
-                and lines[i + 1].strip()
-                and not lines[i + 1].startswith((" ", "\t"))
+                or (line.startswith(("import ", "from ")) and not current_cell[-1].startswith(("import ", "from ")))
+                or (
+                    line.strip() == ""
+                    and current_cell
+                    and i + 1 < len(lines)
+                    and lines[i + 1].strip()
+                    and not lines[i + 1].startswith((" ", "\t"))
+                )
             )
             and current_cell
         ):

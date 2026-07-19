@@ -11,6 +11,8 @@ Supports:
 - Works offline using pip package list
 """
 
+from __future__ import annotations
+
 import argparse
 import importlib.util
 import os
@@ -38,7 +40,7 @@ class PIPPackageCache:
             print("   Script will still work but may include stdlib packages.")
             return
         try:
-            with open(pip_list_path, "r", encoding="utf-8", errors="ignore") as f:
+            with open(pip_list_path, encoding="utf-8", errors="ignore") as f:
                 for line in f:
                     line = line.strip()
                     if line and not line.startswith("#"):
@@ -295,7 +297,7 @@ def extract_imports_from_code(code: str, file_path: str = "") -> Set[str]:
 
 def read_python_file(file_path: str) -> str:
     try:
-        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+        with open(file_path, encoding="utf-8", errors="ignore") as f:
             return f.read()
     except Exception as e:
         print(f"⚠️  Error reading {file_path}: {e}")

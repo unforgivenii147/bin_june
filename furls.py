@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import argparse
 import contextlib
 import io
@@ -115,7 +117,7 @@ def is_valid_url(value, public=False):
     result = URL_RE.match(value)
     if not public:
         return result
-    return result and not any((result.groupdict().get(key) for key in ("private_ip", "private_host")))
+    return result and not any(result.groupdict().get(key) for key in ("private_ip", "private_host"))
 
 
 def append_text(path: str | Path, content: str, encoding: str = "utf-8") -> bool:

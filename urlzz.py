@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import os
 import re
 import sys
@@ -168,7 +170,7 @@ def is_binary(path: Path | str) -> bool:
         if b"\x00" in chunk:
             return True
         text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
-        nontext = sum((1 for b in chunk if b not in text_chars))
+        nontext = sum(1 for b in chunk if b not in text_chars)
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
@@ -195,7 +197,7 @@ def is_valid_url(value, public=False):
     result = URL_RE.match(value)
     if not public:
         return result
-    return result and (not any((result.groupdict().get(key) for key in ("private_ip", "private_host"))))
+    return result and (not any(result.groupdict().get(key) for key in ("private_ip", "private_host")))
 
 
 url_pattern = re.compile("https?://[^\\s\\\"\\']+")
@@ -294,5 +296,5 @@ if __name__ == "__main__":
             all_urls.update(future.result())
     with Path("/sdcard/data/urlzz.txt").open("a", encoding="utf-8") as f:
         f.write("\n")
-        f.writelines((url + "\n" for url in sorted(all_urls)))
+        f.writelines(url + "\n" for url in sorted(all_urls))
     print(f"Extracted {len(all_urls)} unique URLs to urls.txt")

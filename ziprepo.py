@@ -6,6 +6,8 @@ ziprepo_optimized_by_gemini.py — Download a GitHub repository as ZIP.
 Optimized for Python 3.12 with modern syntax, type hints, and performance improvements.
 """
 
+from __future__ import annotations
+
 import argparse
 import logging
 import os
@@ -23,9 +25,7 @@ if env_path.exists():
     load_dotenv(env_path)
 
 
-def download_repo_zip(
-    username: str, repo: str, branch: str = "main", output_name: Optional[str] = None
-) -> Optional[Path]:
+def download_repo_zip(username: str, repo: str, branch: str = "main", output_name: str | None = None) -> Path | None:
     token = os.getenv("GITHUB_TOKEN")
     if not token:
         logger.error("❌ Error: GITHUB_TOKEN environment variable not set.")

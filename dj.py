@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import shutil
 import sys
 from pathlib import Path
@@ -29,7 +31,7 @@ def remove_it(path: Path) -> None:
 
 
 def should_skip(path: Path) -> bool:
-    return any((skip_dir in path.parts for skip_dir in SKIP_DIRS))
+    return any(skip_dir in path.parts for skip_dir in SKIP_DIRS)
 
 
 def has_multiple_suffixes(path: Path) -> bool:
@@ -201,27 +203,9 @@ def main() -> None:
             "toplevel.txt",
             "unlicense",
             "zip-safe",
-            "licence",
             ".pyformat_cache.json",
             "simz.json",
-            "changelog.md",
-            "changelog.txt",
-            "license.rst",
-            "license.md",
-            "license.txt",
-            "license.mit",
-            "authors.md",
-            "changelog",
-            "license",
-            "author",
-            "authors",
-            "copying",
             ".gitkeep",
-            ".dirinfo",
-            "copyright",
-            "contributing",
-            ".travis.yml",
-            "third_party_notices",
         }:
             if REMOVE_MODE:
                 remove_it(path)

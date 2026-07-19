@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import hashlib
 import shutil
 from pathlib import Path
@@ -13,7 +15,7 @@ def calculate_hash(filepath: Path, chunk_size=8192):
             for chunk in iter(lambda: f.read(chunk_size), b""):
                 sha256.update(chunk)
         return sha256.hexdigest()
-    except (IOError, OSError, PermissionError):
+    except (OSError, PermissionError):
         return None
 
 

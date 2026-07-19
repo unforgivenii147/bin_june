@@ -6,6 +6,8 @@ Extracts archives recursively in current directory using joblib parallelism.
 Supported: .gz, .xz, .zip, .whl, .br, .zst, .7z, and tarballs (.tar.gz, .tar.xz, etc.)
 """
 
+from __future__ import annotations
+
 import sys
 from pathlib import Path
 from typing import Optional, Tuple
@@ -77,7 +79,7 @@ class ArchiveExtractor:
             msg += f" {details}"
         print(f"{color}{msg}{colors['RESET']}")
 
-    def _detect_format(self, archive: Path) -> Optional[str]:
+    def _detect_format(self, archive: Path) -> str | None:
         for ext in [".tar.gz", ".tar.xz", ".tar.bz2", ".tgz", ".txz"]:
             if str(archive).endswith(ext):
                 return self.SUPPORTED_EXTENSIONS.get(ext)
@@ -104,9 +106,8 @@ class ArchiveExtractor:
             import gzip
 
             output_file = output_dir / archive.stem
-            with gzip.open(archive, "rb") as f_in:
-                with open(output_file, "wb") as f_out:
-                    copy_chunks(f_in, f_out)
+            with gzip.open(archive, "rb") as f_in, open(output_file, "wb") as f_out:
+                copy_chunks(f_in, f_out)
             return True
         except Exception as e:
             if self.verbose:
@@ -118,9 +119,8 @@ class ArchiveExtractor:
             import lzma
 
             output_file = output_dir / archive.stem
-            with lzma.open(archive, "rb") as f_in:
-                with open(output_file, "wb") as f_out:
-                    copy_chunks(f_in, f_out)
+            with lzma.open(archive, "rb") as f_in, open(output_file, "wb") as f_out:
+                copy_chunks(f_in, f_out)
             return True
         except Exception as e:
             if self.verbose:
@@ -190,9 +190,8 @@ class ArchiveExtractor:
                 output_file = output_dir / output_name
                 with open(archive, "rb") as f_in:
                     dctx = zstd.ZstdDecompressor()
-                    with dctx.stream_reader(f_in) as reader:
-                        with open(output_file, "wb") as f_out:
-                            copy_chunks(reader, f_out)
+                    with dctx.stream_reader(f_in) as reader, open(output_file, "wb") as f_out:
+                        copy_chunks(reader, f_out)
                 return True
         except Exception as e:
             if self.verbose:
@@ -209,7 +208,7 @@ class ArchiveExtractor:
                 self._print_status(archive, "FAILED", f"7z error: {e}")
             return False
 
-    def extract_single(self, archive_path: Path) -> Tuple[Path, bool, Optional[str]]:
+    def extract_single(self, archive_path: Path) -> Tuple[Path, bool, str | None]:
         archive = Path(archive_path)
         if not archive.exists() or not archive.is_file():
             return archive, False, "File not found"

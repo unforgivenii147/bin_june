@@ -1,6 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 
+from __future__ import annotations
+
 import argparse
 import pathlib
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -12,15 +14,15 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 def check_directory(dir_path, max_size_kb=None):
     try:
         contents = list(dir_path.iterdir())
-        has_subdirs = any((item.is_dir() for item in contents))
+        has_subdirs = any(item.is_dir() for item in contents)
         if has_subdirs:
             return None
         py_files = [item for item in contents if item.is_file() and item.suffix == ".py"]
         if not py_files:
             return None
         if max_size_kb is not None:
-            total_size = sum((f.stat().st_size for f in contents if f.is_file())) + sum(
-                (f.stat().st_size for f in py_files if f.is_file())
+            total_size = sum(f.stat().st_size for f in contents if f.is_file()) + sum(
+                f.stat().st_size for f in py_files if f.is_file()
             )
             total_size_kb = total_size / 1024
             if total_size_kb > max_size_kb:

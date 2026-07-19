@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import json
 import sys
 
@@ -11,7 +13,7 @@ def main():
         print("Usage: python script.py <json_file>")
         sys.exit(1)
     fn = sys.argv[1]
-    with open(fn, "r", encoding="utf-8") as f:
+    with open(fn, encoding="utf-8") as f:
         data = json.load(f)
     transformed = []
     for item in data:

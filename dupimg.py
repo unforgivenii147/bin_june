@@ -19,6 +19,8 @@ Optional:
     DRY_RUN (default: 0, set to 1 to preview without moving files)
 """
 
+from __future__ import annotations
+
 import os
 import shutil
 import sys
@@ -49,7 +51,7 @@ def is_image(path: Path) -> bool:
     return path.suffix.lower() in IMAGE_EXTS
 
 
-def load_image_cv2(path: str) -> Optional[np.ndarray]:
+def load_image_cv2(path: str) -> np.ndarray | None:
     try:
         img = cv2.imread(path)
         if img is None:
@@ -79,7 +81,7 @@ def hamming_distance(hash1: str, hash2: str) -> int:
     return sum(c1 != c2 for c1, c2 in zip(hash1, hash2))
 
 
-def compute_hash(file_path: Path) -> Tuple[str, Optional[str]]:
+def compute_hash(file_path: Path) -> Tuple[str, str | None]:
     img = load_image_cv2(str(file_path))
     if img is None:
         return file_path.name, None

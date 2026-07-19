@@ -5,8 +5,10 @@ Delete commits older than n days from a Git repository.
 WARNING: This is a destructive operation. Use with caution!
 """
 
+from __future__ import annotations
+
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta, timezone
 
 import git
 from git import GitCommandError, Repo
@@ -22,7 +24,7 @@ def delete_old_commits(days: int) -> None:
             sys.exit(1)
         current_branch = repo.active_branch.name
         print(f"Current branch: {current_branch}")
-        cutoff_date = datetime.now(timezone.utc) - timedelta(days=days)
+        cutoff_date = datetime.now(UTC) - timedelta(days=days)
         print(f"Cutoff date: {cutoff_date.strftime('%Y-%m-%d %H:%M:%S UTC')}")
         if repo.is_dirty(untracked_files=True):
             print("Error: Working directory is not clean. Please commit or stash changes.")
@@ -34,7 +36,7 @@ def delete_old_commits(days: int) -> None:
         commits_to_keep = []
         commits_to_delete = []
         for commit in commits:
-            commit_date = commit.committed_datetime.replace(tzinfo=timezone.utc)
+            commit_date = commit.committed_datetime.replace(tzinfo=UTC)
             if commit_date > cutoff_date:
                 commits_to_keep.append(commit)
             else:
@@ -50,7 +52,7 @@ def delete_old_commits(days: int) -> None:
         preview_count = min(5, len(commits_to_delete))
         print(f"\nPreview of commits to delete (oldest first):")
         for commit in commits_to_delete[-preview_count:]:
-            commit_date = commit.committed_datetime.replace(tzinfo=timezone.utc)
+            commit_date = commit.committed_datetime.replace(tzinfo=UTC)
             print(f"  {commit.hexsha[:8]} - {commit_date.strftime('%Y-%m-%d %H:%M')} - {commit.summary}")
         if len(commits_to_delete) > preview_count:
             print(f"  ... and {len(commits_to_delete) - preview_count} more")
@@ -100,7 +102,7 @@ def main() -> None:
     print(f"Git Commit Cleanup Tool")
     print(f"=======================")
     print(f"Will delete commits older than {days} days")
-    print(f"Current time (UTC): {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"Current time (UTC): {datetime.now(UTC).strftime('%Y-%m-%d %H:%M:%S')}")
     delete_old_commits(days)
 
 

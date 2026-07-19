@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import sys
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
@@ -7,7 +9,7 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 def move_lines(src_file: str, start_line: int, end_line: int, dest_file: str) -> None:
     try:
-        with open(src_file, "r", encoding="utf-8") as f:
+        with open(src_file, encoding="utf-8") as f:
             lines = f.readlines()
         start_idx = max(0, start_line - 1)
         end_idx = min(len(lines), end_line)

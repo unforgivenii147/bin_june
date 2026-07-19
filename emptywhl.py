@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import csv
 import zipfile
 from pathlib import Path
@@ -14,7 +16,7 @@ def is_empty_wheel(wheel_path: str) -> bool:
             dist_info_dirs = [
                 name.rstrip("/")
                 for name in z.namelist()
-                if name.endswith(".dist-info/") or name == name.rstrip("/") + "/" and name.endswith(".dist-info")
+                if name.endswith(".dist-info/") or (name == name.rstrip("/") + "/" and name.endswith(".dist-info"))
             ]
             dist_info = next((name.rstrip("/") for name in z.namelist() if ".dist-info" in name), None)
             if not dist_info:

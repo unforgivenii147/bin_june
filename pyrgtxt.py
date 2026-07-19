@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+from __future__ import annotations
+
 import sys
 from pathlib import Path
 
@@ -13,7 +15,7 @@ def is_text_file(file_path):
         with open(file_path, "rb") as f:
             chunk = f.read(1024)
             return b"\x00" not in chunk
-    except (IOError, PermissionError):
+    except (OSError, PermissionError):
         return False
 
 
@@ -21,11 +23,11 @@ def search_in_file(file_path, search_string):
     try:
         if not is_text_file(file_path):
             return []
-        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+        with open(file_path, encoding="utf-8", errors="ignore") as f:
             content = f.read()
             if search_string in content:
                 return [str(file_path.relative_to(Path.cwd()))]
-    except (IOError, PermissionError, UnicodeDecodeError):
+    except (OSError, PermissionError, UnicodeDecodeError):
         pass
     return []
 

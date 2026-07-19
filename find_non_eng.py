@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from __future__ import annotations
+
 import argparse
 import os
 import sys
@@ -84,7 +86,7 @@ class LanguageDetector:
                     continue
                 self.stats["languages"][lang_name] += 1
                 if lang_code != "en" or not only_report_non_english:
-                    if lang_code == "en" and not is_reliable and only_report_non_english or lang_code != "en":
+                    if (lang_code == "en" and not is_reliable and only_report_non_english) or lang_code != "en":
                         self.stats["non_english"].append(
                             {
                                 "file": filepath,

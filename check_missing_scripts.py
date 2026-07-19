@@ -2,6 +2,8 @@
 
 """Check for Python packages with missing console scripts in system bin directory."""
 
+from __future__ import annotations
+
 import multiprocessing as mp
 import sys
 from configparser import ConfigParser
@@ -12,7 +14,7 @@ from typing import Dict, List, Optional, Tuple
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
-def find_site_packages() -> Optional[Path]:
+def find_site_packages() -> Path | None:
     for path in sys.path:
         p = Path(path)
         if p.name == "site-packages" and p.exists():
@@ -20,7 +22,7 @@ def find_site_packages() -> Optional[Path]:
     return None
 
 
-def find_bin_dir() -> Optional[Path]:
+def find_bin_dir() -> Path | None:
     prefix = Path(sys.prefix)
     bin_dir = prefix / "bin"
     if bin_dir.exists():

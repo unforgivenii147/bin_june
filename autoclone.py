@@ -7,6 +7,8 @@ Format in repos.txt: user/repo (one per line)
 Saves repository sizes to repo_sizes.json for caching
 """
 
+from __future__ import annotations
+
 import json
 import os
 import subprocess
@@ -43,7 +45,7 @@ def load_size_cache():
     cache_file = Path(SIZE_CACHE_FILE)
     if cache_file.exists():
         try:
-            with open(cache_file, "r") as f:
+            with open(cache_file) as f:
                 cache_data = json.load(f)
                 cache_date = datetime.fromisoformat(cache_data.get("_cache_date", "2000-01-01"))
                 if datetime.now() - cache_date < timedelta(days=CACHE_EXPIRY_DAYS):
@@ -160,7 +162,7 @@ def main():
         sys.exit(1)
     token = get_github_token()
     cache_data = load_size_cache()
-    with open(repos_file, "r") as f:
+    with open(repos_file) as f:
         repos = [line.strip() for line in f if line.strip()]
     if not repos:
         print("❌ No repositories found in repos.txt")

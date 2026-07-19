@@ -6,6 +6,8 @@ If a repo has no remote, create a new public repo on GitHub and set it as origin
 Requires: pip install gitpython requests python-dotenv
 """
 
+from __future__ import annotations
+
 import os
 from pathlib import Path
 
@@ -120,7 +122,7 @@ def process_repository(repo_path: Path, github_token: str) -> tuple[bool, str]:
             else:
                 return False, "Failed to push to GitHub"
     except Exception as e:
-        return False, f"Error: {str(e)}"
+        return False, f"Error: {e!s}"
 
 
 def main() -> None:

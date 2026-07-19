@@ -6,6 +6,8 @@ Persian to English word translator using parallel processing.
 Optimized for Python 3.12.
 """
 
+from __future__ import annotations
+
 import json
 import logging
 import time

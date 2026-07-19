@@ -5,6 +5,8 @@ Convert .mo files to .po files in-place using GNU gettext utilities.
 Original .mo files are removed only if conversion succeeds.
 """
 
+from __future__ import annotations
+
 import argparse
 import subprocess
 import sys
