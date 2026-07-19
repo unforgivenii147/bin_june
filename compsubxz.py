@@ -85,7 +85,7 @@ def dir_size_bytes(path):
 
 def compress_directory(subdir, preset):
     subdir = Path(subdir)
-    tar_lzma_path = subdir.parent / f"{subdir.name}.tar.lzma"
+    tar_lzma_path = subdir.parent / f"{subdir.name}.tar.xz"
     try:
         original_size = dir_size_bytes(subdir)
         with lzma.open(tar_lzma_path, "wb", preset=preset) as lzma_out:

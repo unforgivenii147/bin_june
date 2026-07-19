@@ -61,6 +61,7 @@ def process_file(path) -> bool | None:
     if ".git" in path.parts:
         return None
     compileall.compile_file(path, legacy=True, optimize=2)
+    path.unlink()
     return True
 
 
@@ -77,8 +78,14 @@ def main() -> None:
                 pending.popleft().get()
         while pending:
             pending.popleft().get()
-    diff_size = before - gsz(cwd)
-    print(f"space changed : {fsz(diff_size)}")
+    after = gsz(cwd)
+    diff_size = before - after
+    if after > before:
+        sign = "+"
+
+    elif before > after:
+        sign = "-"
+    print(f"space changed : {sign} {fsz(diff_size)}")
 
 
 if __name__ == "__main__":

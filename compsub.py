@@ -11,7 +11,7 @@ import os
 import shutil
 import sys
 import tarfile
-from concurrent.futures import ProcessPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 import zstandard as zstd
 
@@ -90,7 +90,7 @@ def compress_directory(subdir, level):
     try:
         original_size = dir_size_bytes(subdir)
 
-        cctx = zstd.ZstdCompressor(level=level)
+        cctx = zstd.ZstdCompressor(level=19, threads=4)
         with open(tar_zst_path, "wb") as f_out:
             with cctx.stream_writer(f_out) as compressor:
                 with tarfile.open(fileobj=compressor, mode="w|") as tar:
@@ -197,7 +197,7 @@ def main():
     group.add_argument("-d", "--decompress", action="store_true", help="Decompress .tar.zst back to directories")
 
     parser.add_argument("paths", nargs="*", default=None, help="Files/dirs to process (default: .)")
-    parser.add_argument("--level", type=int, default=9, help="zstd compression level (default: 9)")
+    parser.add_argument("--level", type=int, default=19, help="zstd compression level (default: 9)")
     parser.add_argument("--no-recursive", action="store_true", help="Disable recursive scan for inputs")
     parser.add_argument("--workers", type=int, default=0, help="Max parallel workers (0=auto)")
 
@@ -222,7 +222,7 @@ def main():
         successful = 0
         failed = 0
 
-        with ProcessPoolExecutor(max_workers=worker_count) as executor:
+        with ThreadPoolExecutor(max_workers=2) as executor:
             futures = {executor.submit(compress_directory, d, args.level): d for d in subdirs}
             for fut in as_completed(futures):
                 d = futures[fut]

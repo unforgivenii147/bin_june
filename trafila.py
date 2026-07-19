@@ -65,8 +65,8 @@ def process_file(path: str | Path) -> tuple[Path, bool]:
         if markdown and markdown.strip():
             md_file.write_text(markdown, encoding="utf-8")
             print(f"✓ Converted: {path.name} -> {md_file.name}")
-            if remove_orig:
-                path.unlink()
+            #            if remove_orig:
+            #                path.unlink()
             return md_file, True
 
         print(f"✗ No content extracted from {path.name}")

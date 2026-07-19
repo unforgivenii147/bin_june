@@ -6,6 +6,7 @@ from collections import defaultdict
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+prefix = "/data/data/com.termux/files"
 
 
 def get_path_dirs() -> list[str]:
@@ -101,9 +102,9 @@ def display_results(alias_conflicts, func_conflicts, path_duplicates, path_dirs:
     if path_duplicates:
         print(f"\n⚠️  WARNING: Commands found in multiple PATH locations ({len(path_duplicates)}):")
         for cmd, paths in sorted(path_duplicates.items())[:10]:
-            print(f"   • '{cmd}' found in:")
+            print(f"   • '\033[5;96m{cmd}\033[0m' found in:")
             for path in paths:
-                print(f"     - {path}")
+                print(f"     - {str(path).replace(prefix, '')}")
         if len(path_duplicates) > 10:
             print(f"   ... and {len(path_duplicates) - 10} more")
     else:
@@ -116,7 +117,7 @@ def display_results(alias_conflicts, func_conflicts, path_duplicates, path_dirs:
     if alias_conflicts:
         print(f"   ❌ Conflicts with PATH commands ({alias_total}):")
         for alias, (full_path, dir_path) in sorted(alias_conflicts.items()):
-            print(f"      • '{alias}' -> conflicts with: {full_path}")
+            print(f"      • '\033[5;96m{alias}\033[0m' -> conflicts with: {str(full_path).replace(prefix, '')}")
         print("\n   💡 Suggestion: Rename these aliases or remove the conflicting binaries")
     else:
         print("   ✓ No conflicts with PATH commands")

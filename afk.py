@@ -469,12 +469,12 @@ def run(
                 print(f"  {_coloured('[dry-run]', CYAN, use_colour)} would fix {p}")
                 fixed_count += 1
                 continue
-            bak = p.with_suffix(p.suffix + ".bak")
-            counter = 1
-            while bak.exists():
-                bak = p.with_suffix(f"{p.suffix}.bak.{counter}")
-                counter += 1
-            shutil.copy2(p, bak)
+            #            bak = p.with_suffix(p.suffix + ".bak")
+            #            counter = 1
+            #            while bak.exists():
+            #                bak = p.with_suffix(f"{p.suffix}.bak.{counter}")
+            #                counter += 1
+            #            shutil.copy2(p, bak)
             p.write_text(new_source, encoding="utf-8")
             fixed_count += 1
             if verbose:

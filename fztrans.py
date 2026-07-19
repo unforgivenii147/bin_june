@@ -1,11 +1,3 @@
-#!/data/data/com.termux/files/usr/bin/env python
-
-
-"""
-Offline Persian ↔ English translator with fzf integration.
-Optimized for Python 3.12.
-"""
-
 import argparse
 import json
 import logging
@@ -19,7 +11,7 @@ from typing import Final
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
-DICT_FILE: Final[str] = "/sdcard/isaac/dic.json"
+DICT_FILE: Final[str] = Path("~/dic.json").expanduser()
 
 
 def load_dictionary(path: Path) -> tuple[dict[str, str], dict[str, str]]:

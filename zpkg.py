@@ -77,10 +77,21 @@ def process_package(pkg_name, site_packages):
         print(f"  Warning: No .dist-info found for {pkg_name}. Proceeding cautiously...")
     print(f"  Processing: {pkg_name}...")
     compileall.compile_dir(pkg_dir, quiet=1, legacy=True)
+
+    # Fix: Create zip without the root directory
+    import zipfile
+
     zip_filename = f"{pkg_name}.zip"
-    shutil.make_archive(
-        base_name=str(site_packages / pkg_name), format="zip", root_dir=site_packages, base_dir=pkg_name
-    )
+    zip_path = site_packages / zip_filename
+
+    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
+        for root, dirs, files in os.walk(pkg_dir):
+            for file in files:
+                file_path = Path(root) / file
+                # Calculate the archive name relative to the package directory
+                arcname = str(file_path.relative_to(pkg_dir))
+                zipf.write(file_path, arcname)
+
     create_loader_stub(pkg_name, site_packages)
     try:
         shutil.rmtree(pkg_dir)

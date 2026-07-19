@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-
 import argparse
 import ast
 import shutil
@@ -9,9 +8,10 @@ import zipfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Iterator, Optional, Tuple
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache", ".venv", "venv"})
+CHUNK_SIZE = 1024
 
 
 @dataclass
@@ -30,8 +30,7 @@ class DocstringProcessor(ast.NodeTransformer):
         super().__init__()
 
     def _remove_docstring(self, node) -> bool:
-        docstring = ast.get_docstring(node)
-        if docstring:
+        if docstring := ast.get_docstring(node):
             is_module = isinstance(node, ast.Module)
             if is_module and self.preserve_module_docstring:
                 return False
@@ -73,10 +72,7 @@ def extract_shebang_and_encoding(source_code: str) -> Tuple[str, str, str]:
         if i == 0 and line.startswith("#!"):
             shebang = line
             continue
-        elif i < 2 and line.startswith("# -*- coding:"):
-            encoding = line
-            continue
-        elif i < 2 and line.startswith("# coding:"):
+        elif i < 2 and (line.startswith("# -*- coding:") or line.startswith("# coding:")):
             encoding = line
             continue
         remaining_lines.append(line)
@@ -103,6 +99,7 @@ def remove_comments_preserve_format(source_code: str) -> Tuple[str, int]:
     string_char = None
     in_triple_quotes = False
     triple_quote_char = None
+
     for line in lines:
         new_line = []
         i = 0
@@ -110,8 +107,8 @@ def remove_comments_preserve_format(source_code: str) -> Tuple[str, int]:
         comment_start = -1
         while i < len(line):
             char = line[i]
-            if char in ('"', "'") and (not in_triple_quotes):
-                if i + 2 < len(line) and line[i + 1] == char and (line[i + 2] == char):
+            if char in ('"', "'") and not in_triple_quotes:
+                if i + 2 < len(line) and line[i + 1] == char and line[i + 2] == char:
                     if not in_string:
                         in_triple_quotes = True
                         triple_quote_char = char
@@ -124,16 +121,16 @@ def remove_comments_preserve_format(source_code: str) -> Tuple[str, int]:
                         new_line.append(char * 3)
                         i += 3
                         continue
-                if not in_string and (not in_triple_quotes):
+                if not in_string and not in_triple_quotes:
                     in_string = True
                     string_char = char
-                elif in_string and string_char == char and (not in_triple_quotes):
+                elif in_string and string_char == char and not in_triple_quotes:
                     in_string = False
                     string_char = None
                 new_line.append(char)
                 i += 1
                 continue
-            if char == "#" and (not in_string) and (not in_triple_quotes):
+            if char == "#" and not in_string and not in_triple_quotes:
                 remaining = line[i:]
                 if remaining.startswith("# type:"):
                     new_line.append(remaining)
@@ -152,7 +149,7 @@ def remove_comments_preserve_format(source_code: str) -> Tuple[str, int]:
     return ("".join(result_lines), comments_removed)
 
 
-def validate_python_code(code: str, path: Path) -> Tuple[bool, Optional[str]]:
+def validate_python_code(code: str) -> Tuple[bool, Optional[str]]:
     try:
         ast.parse(code)
         return (True, None)
@@ -171,7 +168,6 @@ def process_docstrings_ast(source_code: str, preserve_module_docstring: bool = T
         modified_code = ast.unparse(modified_tree)
         return (modified_code, processor.docstrings_removed)
     except SyntaxError as e:
-        print(f"Warning: AST parsing error - {e}")
         return (source_code, 0)
 
 
@@ -185,7 +181,7 @@ def process_python_file(path: Path, preserve_module_docstring: bool = True) -> F
         final_code = restore_shebang_and_encoding(code_no_docstrings, shebang, encoding)
         changed = comments_removed > 0 or docstrings_removed > 0
         if changed:
-            is_valid, error_msg = validate_python_code(final_code, path)
+            is_valid, error_msg = validate_python_code(final_code)
             if not is_valid:
                 return FileResult(
                     path=path,
@@ -212,9 +208,14 @@ def process_python_file(path: Path, preserve_module_docstring: bool = True) -> F
         return FileResult(path=path, comments_removed=0, docstrings_removed=0, changed=False, error=str(e))
 
 
+def process_dry_run_placeholder(path: Path, preserve_module_docstring: bool) -> FileResult:
+    """Top-level picklable function for dry-runs instead of an unpicklable lambda."""
+    return FileResult(path, 0, 0, False, "dry run")
+
+
 def process_wheel_file(
     whl_path: Path, preserve_module_docstring: bool = True, dry_run: bool = False
-) -> List[FileResult]:
+) -> list[FileResult]:
     results = []
     temp_dir = None
     try:
@@ -232,7 +233,7 @@ def process_wheel_file(
             relative_path = py_file.relative_to(extract_dir)
             result.path = Path(f"{whl_path.name}::{relative_path}")
             results.append(result)
-        if not dry_run and any((r.changed for r in results)):
+        if not dry_run and any(r.changed for r in results):
             new_whl_path = whl_path.with_suffix(".tmp.whl")
             with zipfile.ZipFile(new_whl_path, "w", zipfile.ZIP_DEFLATED) as new_whl:
                 for file_path in extract_dir.rglob("*"):
@@ -258,105 +259,133 @@ def process_wheel_file(
     return results
 
 
-def find_python_files(path: Path) -> list[Path]:
+def find_python_files(path: Path) -> Iterator[Path]:
+    """Memory efficient file discoverer using Python 3.12 walk with in-place pruning."""
     if path.is_file():
         if path.suffix in (".py", ".whl"):
-            return [path]
-        return []
-    return list(path.rglob("*.py")) + list(path.rglob("*.whl"))
+            yield path
+        return
+
+    for root, dirs, filenames in path.walk(top_down=True):
+        # Prune matching cache and system folders in-place to optimize memory/speed
+        dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
+        for name in filenames:
+            p = root / name
+            if p.suffix in (".py", ".whl"):
+                yield p
 
 
-def is_wheel_file(path: Path) -> bool:
-    return path.suffix.lower() == ".whl"
+def format_result(result: FileResult, cwd: Path) -> str:
+    # Try rendering the path relative to CWD if possible
+    try:
+        display_path = result.path.relative_to(cwd)
+    except ValueError:
+        display_path = result.path
 
-
-def format_result(result: FileResult) -> str:
     if result.error:
-        return f"{result.path} (error: {result.error})"
+        return f"{display_path} (error: {result.error})"
     if not result.changed:
-        return f"{result.path} (no change)"
+        return f"{display_path} (no change)"
     parts = []
     if result.comments_removed > 0:
         parts.append(f"{result.comments_removed} comment{('s' if result.comments_removed != 1 else '')}")
     if result.docstrings_removed > 0:
         parts.append(f"{result.docstrings_removed} docstring{('s' if result.docstrings_removed != 1 else '')}")
-    removal_text = ", ".join(parts)
-    return f"{result.path} ({removal_text} removed)"
+    return f"{display_path} ({', '.join(parts)} removed)"
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Remove comments and docstrings from Python files (preserves formatting)"
     )
-    parser.add_argument(
-        "target",
-        nargs="?",
-        default=".",
-        help="Target file or directory (default: current directory)",
-    )
+    parser.add_argument("target", nargs="?", default=".", help="Target file or directory (default: current directory)")
     parser.add_argument("--workers", type=int, default=4, help="Number of worker processes (default: 4)")
-    parser.add_argument(
-        "--remove-module-docstring",
-        action="store_true",
-        help="Also remove module-level docstrings (preserved by default)",
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Show what would be changed without actually modifying files",
-    )
+    parser.add_argument("--remove-module-docstring", action="store_true", help="Also remove module-level docstrings")
+    parser.add_argument("--dry-run", action="store_true", help="Show changes without modifying files")
     args = parser.parse_args()
+
+    cwd = Path.cwd()
     target_path = Path(args.target).resolve()
     if not target_path.exists():
         print(f"Error: {target_path} does not exist")
         sys.exit(1)
-    python_files = find_python_files(target_path)
-    if not python_files:
+
+    wheel_files = []
+    regular_files = []
+
+    # Stream items incrementally to split groups instead of holding heavy lists
+    for p in find_python_files(target_path):
+        if p.suffix.lower() == ".whl":
+            wheel_files.append(p)
+        else:
+            regular_files.append(p)
+
+    if not wheel_files and not regular_files:
         print("No Python files or wheel files found")
         return
-    wheel_files = [f for f in python_files if is_wheel_file(f)]
-    regular_files = [f for f in python_files if not is_wheel_file(f)]
+
     print(
         f"Found: {len(regular_files)} Python file{('s' if len(regular_files) != 1 else '')}, {len(wheel_files)} wheel file{('s' if len(wheel_files) != 1 else '')}"
     )
     if args.dry_run:
         print("DRY RUN - No files will be modified")
-    results = []
+
+    # Metrics tracked out-of-list to maximize memory efficiency
+    total_files = 0
+    changed_files = 0
+    total_comments = 0
+    total_docstrings = 0
+    errors = 0
     preserve_module_docstring = not args.remove_module_docstring
+
     if regular_files:
+        func = process_dry_run_placeholder if args.dry_run else process_python_file
         with ProcessPoolExecutor(max_workers=args.workers) as executor:
-            future_to_file = {
-                executor.submit(
-                    process_python_file if not args.dry_run else lambda p: FileResult(p, 0, 0, False, "dry run"),
-                    path,
-                    preserve_module_docstring,
-                ): path
-                for path in regular_files
-            }
+            future_to_file = {executor.submit(func, path, preserve_module_docstring): path for path in regular_files}
             for future in as_completed(future_to_file):
                 result = future.result()
-                results.append(result)
+                total_files += 1
+                if result.changed:
+                    changed_files += 1
+                total_comments += result.comments_removed
+                docstrings_removed = result.docstrings_removed if result.docstrings_removed is not None else 0
+                total_docstrings += docstrings_removed
+                if result.error and result.error != "dry run":
+                    errors += 1
+
                 if not args.dry_run:
-                    print(format_result(result))
+                    print(format_result(result, cwd))
                 else:
-                    print(f"{result.path.name} (would process)")
+                    try:
+                        r_path = result.path.relative_to(cwd)
+                    except ValueError:
+                        r_path = result.path
+                    print(f"{r_path} (would process)")
+
     for wheel_path in wheel_files:
-        print(f"\nProcessing wheel file: {wheel_path.name}")
+        try:
+            w_path_display = wheel_path.relative_to(cwd)
+        except ValueError:
+            w_path_display = wheel_path
+
+        print(f"\nProcessing wheel file: {w_path_display}")
         wheel_results = process_wheel_file(wheel_path, preserve_module_docstring, args.dry_run)
-        results.extend(wheel_results)
+
         if args.dry_run:
-            print(f"  Would process {len(wheel_results)} files inside {wheel_path.name}")
+            print(f"  Would process {len(wheel_results)} files inside {w_path_display}")
         else:
             for result in wheel_results:
-                print(f"  {format_result(result)}")
-    if not args.dry_run and results:
-        total_files = len(results)
-        changed_files = sum((1 for r in results if r.changed))
-        total_comments = sum((r.comments_removed for r in results))
-        total_docstrings = sum((r.docstrings_removed for r in results))
-        errors = sum((1 for r in results if r.error))
-        print(f"\n{'=' * 50}")
-        print(f"Summary:")
+                total_files += 1
+                if result.changed:
+                    changed_files += 1
+                total_comments += result.comments_removed
+                total_docstrings += result.docstrings_removed
+                if result.error:
+                    errors += 1
+                print(f"  {format_result(result, cwd)}")
+
+    if not args.dry_run and total_files > 0:
+        print(f"\n{'=' * 50}\nSummary:")
         print(f"  Total files processed: {total_files}")
         print(f"  Files changed: {changed_files}")
         print(f"  Total comments removed: {total_comments}")
