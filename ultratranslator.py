@@ -15,15 +15,24 @@ import re
 import shutil
 import sys
 import tempfile
+import time
 import tokenize
 from collections import deque
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from os import scandir
 from pathlib import Path
-from typing import Final
+from typing import Final, Optional
 
 from binaryornot import is_binary
 from deep_translator import GoogleTranslator
+from dh import DOC_TH1, DOC_TH2
+
+MAX_WORKERS: Final[int] = 6
+MAX_RETRIES: Final[int] = 3
+RETRY_DELAY: Final[float] = 2.0  # seconds between retries
+NON_ENGLISH_PATTERN: Final[re.Pattern] = re.compile(r"[^\x00-\x7F]")
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
@@ -48,14 +57,6 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     return files
 
 
-MAX_WORKERS: Final[int] = 6
-DOC_TH1: Final[str] = '"""'
-DOC_TH2: Final[str] = "'''"
-NON_ENGLISH_PATTERN: Final[re.Pattern] = re.compile("[^\\x00-\\x7F]")
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-
 def is_english(text: str) -> bool:
     return not NON_ENGLISH_PATTERN.search(text)
 
@@ -64,48 +65,33 @@ def get_nobinary(path: Path) -> list[Path]:
     return [f for f in get_files(path) if not is_binary(str(f))]
 
 
-def get_files(path: Path, include_hidden: bool = False, ext: tuple[str, ...] | None = None) -> list[Path]:
-    if not path.exists():
-        raise FileNotFoundError(f"Path does not exist: {path}")
-    if not path.is_dir():
-        raise NotADirectoryError(f"Path is not a directory: {path}")
-    files = []
-    stack = [path]
-    while stack:
-        current = stack.pop()
+def translate_text(text: str, retries: int = MAX_RETRIES) -> str:
+    for attempt in range(retries):
         try:
-            with scandir(current) as entries:
-                for entry in entries:
-                    if entry.is_symlink():
-                        continue
-                    if entry.is_dir(follow_symlinks=False):
-                        if entry.name not in SKIP_DIRS:
-                            stack.append(Path(entry.path))
-                    elif entry.is_file(follow_symlinks=False):
-                        if not include_hidden and entry.name.startswith("."):
-                            continue
-                        if ext is None or entry.name.endswith(ext):
-                            files.append(Path(entry.path))
-        except (PermissionError, OSError):
-            continue
-    return sorted(files)
+            translated = GoogleTranslator(source="auto", target="en").translate(text)
+            return translated if translated else text
+        except Exception as e:
+            if attempt < retries - 1:
+                logger.warning(f"Translation attempt {attempt + 1} failed: {e}. Retrying in {RETRY_DELAY}s...")
+                time.sleep(RETRY_DELAY)
+            else:
+                logger.error(f"Translation failed after {retries} attempts: {e}")
+                return text
 
 
-def translate_text(text: str) -> str:
-    try:
-        translated = GoogleTranslator(source="auto", target="en").translate(text)
-        return translated if translated else text
-    except Exception as e:
-        logger.error(f"Translation error: {e}")
-        return text
-
-
-def translate_file_content(path: Path) -> str:
-    try:
-        return GoogleTranslator(source="auto", target="en").translate_file(str(path))
-    except Exception as e:
-        logger.error(f"Error translating file {path}: {e}")
-        return path.read_text(encoding="utf-8", errors="ignore")
+def translate_file_content(path: Path, retries: int = MAX_RETRIES) -> str:
+    for attempt in range(retries):
+        try:
+            return GoogleTranslator(source="auto", target="en").translate_file(str(path))
+        except Exception as e:
+            if attempt < retries - 1:
+                logger.warning(
+                    f"File translation attempt {attempt + 1} failed for {path}: {e}. Retrying in {RETRY_DELAY}s..."
+                )
+                time.sleep(RETRY_DELAY)
+            else:
+                logger.error(f"File translation failed after {retries} attempts for {path}: {e}")
+                return path.read_text(encoding="utf-8", errors="ignore")
 
 
 def safe_overwrite(filepath: Path, content: str) -> None:
@@ -159,12 +145,12 @@ def translate_python_file(path: Path) -> str:
     return "".join(result)
 
 
-def process_file(path: Path) -> None:
+def process_file(path: Path) -> Optional[Path]:
     logger.info(f"  Processing {path.name}...")
     try:
         original = path.read_text(encoding="utf-8", errors="ignore")
         if is_english(original):
-            return
+            return None
         if path.suffix == ".py":
             translated = translate_python_file(path)
         else:
@@ -172,8 +158,49 @@ def process_file(path: Path) -> None:
         if translated.strip() != original.strip():
             safe_overwrite(path, translated)
             logger.info(f"  ✓ Updated {path.name}")
+        return None  # Success, no retry needed
     except Exception as e:
         logger.error(f"  Failed to process {path}: {e}")
+        return path  # Return path for retry
+
+
+def process_files_with_retry(files: list[Path]) -> None:
+    """Process files with retry logic for failed files."""
+    files_to_process = files.copy()
+    retry_count = 0
+
+    while files_to_process and retry_count < MAX_RETRIES:
+        if retry_count > 0:
+            logger.info(f"\n{'=' * 50}")
+            logger.info(f"Retry attempt {retry_count}/{MAX_RETRIES}")
+            logger.info(f"Retrying {len(files_to_process)} failed files...")
+            logger.info(f"{'=' * 50}\n")
+            time.sleep(RETRY_DELAY)  # Wait before retrying
+
+        failed_files = []
+
+        with ProcessPoolExecutor(max_workers=MAX_WORKERS) as executor:
+            futures = {executor.submit(process_file, f): f for f in files_to_process}
+            for future in as_completed(futures):
+                f = futures[future]
+                try:
+                    failed = future.result()
+                    if failed:
+                        failed_files.append(failed)
+                except Exception as e:
+                    logger.error(f"File {f} generated an exception: {e}")
+                    failed_files.append(f)
+
+        files_to_process = failed_files
+        retry_count += 1
+
+        if failed_files:
+            logger.warning(f"{len(failed_files)} files failed and will be retried.")
+
+    if files_to_process:
+        logger.error(f"\nFailed to process {len(files_to_process)} files after {MAX_RETRIES} retries:")
+        for f in files_to_process:
+            logger.error(f"  - {f}")
 
 
 def main() -> None:
@@ -183,14 +210,7 @@ def main() -> None:
         logger.info("No files found to process.")
         return
     logger.info(f"Found {len(files)} files to process.")
-    with ProcessPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        futures = {executor.submit(process_file, f): f for f in files}
-        for future in as_completed(futures):
-            f = futures[future]
-            try:
-                future.result()
-            except Exception as e:
-                logger.error(f"File {f} generated an exception: {e}")
+    process_files_with_retry(files)
 
 
 if __name__ == "__main__":
