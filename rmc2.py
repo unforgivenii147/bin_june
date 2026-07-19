@@ -1,14 +1,14 @@
 """Strip comments and docstrings from Python source files."""
 
+import argparse
 import ast
 import shutil
+import sys
 import tempfile
 import zipfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
-import argparse
-import sys
 
 
 @dataclass

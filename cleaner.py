@@ -1,121 +1,48 @@
 #!/data/data/com.termux/files/usr/bin/env python
-
 import re
 import sys
-from collections import deque
-from pathlib import Path
 
 
-def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
-    """Recursively get files with optional extension filter."""
-    path = Path(path)
-    skip_dirs = {".git", "__pycache__", ".svn", ".hg"}
-    queue = deque([path])
-    files = []
+def clean_terminal_transcript(filepath):
+    with open(filepath, "r", encoding="utf-8", errors="replace") as f:
+        content = f.read()
 
-    while queue:
-        current = queue.popleft()
-        try:
-            entries = list(current.iterdir())
-        except (PermissionError, OSError):
-            continue
+    # Remove ANSI escape codes (colors, cursor movement, etc.)
+    ansi_escape = re.compile(r"\x1b(\[[0-9;]*[mABCDEFGHJKSTfhilmnprsu]|\][^\x07]*\x07|[()][AB012])")
+    content = ansi_escape.sub("", content)
 
-        for item in entries:
-            if item.is_symlink() or not item.exists():
-                continue
-            if item.is_dir():
-                if item.name not in skip_dirs:
-                    queue.append(item)
-            elif item.is_file():
-                if ext is None or item.suffix in ext:
-                    files.append(item)
-    return files
+    # Remove carriage returns (^M) used in terminal output
+    content = content.replace("\r\n", "\n")
+    content = content.replace("\r", "\n")
 
+    # Remove backspace sequences (char + backspace)
+    while "\x08" in content:
+        content = re.sub(r".\x08", "", content)
 
-def clean_transcript(content: bytes) -> str:
-    """Clean terminal transcript content in a single pass."""
-    # Comprehensive ANSI escape sequence removal
-    # Covers: CSI sequences, OSC sequences, DCS, SOS, PM, APC, and other escapes
-    ansi_pattern = re.compile(
-        b"\x1b"  # ESC character
-        b"(?:"
-        b"\[[\d;:]*[A-Za-z]"  # CSI sequences (colors, cursor movement)
-        b"|\][^\x07\x1b]*(?:\x07|\x1b\\)"  # OSC sequences (window titles)
-        b"|[PX^_][^\x1b]*\x1b\\"  # DCS, SOS, PM, APC
-        b"|[@-_]"  # 7-bit C1 control characters
-        b"|[()][\dA-Za-z]"  # Character set selection
-        b")"
-    )
-    content = ansi_pattern.sub(b"", content)
+    # Remove null bytes
+    content = content.replace("\x00", "")
 
-    # Remove remaining control characters (keep newlines \n and tabs \t)
-    content = re.sub(b"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", b"", content)
+    # Remove other common control characters except newline and tab
+    content = re.sub(r"[\x01-\x08\x0b\x0c\x0e-\x1f\x7f]", "", content)
 
-    # Normalize line endings
-    content = re.sub(b"\r\n?|\n\r?", b"\n", content)
+    # Collapse 3+ consecutive blank lines into 2
+    content = re.sub(r"\n{3,}", "\n\n", content)
 
-    # Decode with error handling
-    text = content.decode("utf-8", errors="replace")
+    # Strip trailing whitespace from each line
+    content = "\n".join(line.rstrip() for line in content.splitlines())
 
-    # Remove trailing whitespace from each line
-    lines = text.split("\n")
-    cleaned_lines = [line.rstrip() for line in lines]
-    text = "\n".join(cleaned_lines)
+    # Ensure file ends with a single newline
+    content = content.rstrip("\n") + "\n"
 
-    # Collapse multiple blank lines (3+ becomes 2)
-    text = re.sub(r"\n\s*\n\s*\n", "\n\n", text)
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write(content)
 
-    return text.strip()
-
-
-def process_file(filepath: Path) -> None:
-    """Process a single transcript file."""
-    try:
-        content = filepath.read_bytes()
-        cleaned = clean_transcript(content)
-        filepath.write_text(cleaned, encoding="utf-8")
-        print(f"✓  {filepath.name}")
-    except Exception as e:
-        print(f"✗ Error processing {filepath.name}: {e}", file=sys.stderr)
-
-
-def main() -> None:
-    cwd = Path.cwd()
-    args = sys.argv[1:]
-
-    # Get files to process
-    if args:
-        files = []
-        for arg in args:
-            p = Path(arg)
-            if p.is_dir():
-                files.extend(get_files(p, ext=[".log", ".txt", ".md"]))
-            elif p.is_file():
-                files.append(p)
-    else:
-        files = get_files(cwd, ext=[".log", ".txt", ".md"])
-
-    if not files:
-        print("No files found to process.")
-        sys.exit(0)
-
-    print(f"Processing {len(files)} file(s)...")
-
-    if len(files) == 1:
-        process_file(files[0])
-    else:
-        # Use joblib for parallel processing
-        try:
-            from joblib import Parallel, delayed
-
-            Parallel(n_jobs=-1, verbose=0)(delayed(process_file)(f) for f in files)
-        except ImportError:
-            # Fallback to sequential processing
-            for f in files:
-                process_file(f)
-
-    print("Done!")
+    print(f"Cleaned: {filepath}")
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) != 2:
+        print(f"Usage: {sys.argv[0]} <transcript_file>")
+        sys.exit(1)
+
+    clean_terminal_transcript(sys.argv[1])

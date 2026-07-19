@@ -13,6 +13,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Final, Optional
+
 import zstandard as zstd
 
 SKIP_DIRS: Final[frozenset[str]] = frozenset(

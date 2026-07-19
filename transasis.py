@@ -11,6 +11,7 @@ import re
 import sys
 from pathlib import Path
 from typing import Final, Iterator
+
 from deep_translator import GoogleTranslator
 
 CHUNK_SIZE: Final[int] = 2000

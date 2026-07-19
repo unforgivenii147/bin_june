@@ -4,13 +4,13 @@ Strip comments from Lua files recursively using parallel processing.
 Supports multiple input directories and provides prettier-style output.
 """
 
-import sys
 import re
-from pathlib import Path
+import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from typing import Tuple, Optional
 from dataclasses import dataclass
 from itertools import chain
+from pathlib import Path
+from typing import Optional, Tuple
 
 
 @dataclass

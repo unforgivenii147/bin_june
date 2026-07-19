@@ -1,9 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 import sys
-from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor
 from multiprocessing import cpu_count
+from pathlib import Path
+
 import pytesseract
 from PIL import Image
 

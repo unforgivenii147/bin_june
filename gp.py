@@ -5,7 +5,7 @@ from datetime import datetime
 from pathlib import Path
 
 try:
-    from git import Repo, GitCommandError, InvalidGitRepositoryError
+    from git import GitCommandError, InvalidGitRepositoryError, Repo
 except ImportError:
     print("GitPython not found. Install it with: pip install gitpython", file=sys.stderr)
     sys.exit(1)

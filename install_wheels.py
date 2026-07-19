@@ -5,12 +5,12 @@ Pure Python wheels -> user site-packages
 Platform-specific wheels -> system site-packages
 """
 
+import platform
 import subprocess
 import sys
-import platform
 import zipfile
-from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
 from typing import Tuple
 
 

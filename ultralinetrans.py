@@ -17,6 +17,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from os import scandir
 from pathlib import Path
 from typing import Final
+
 from deep_translator import GoogleTranslator
 
 CHUNK_SIZE: Final[int] = 4990

@@ -15,6 +15,7 @@ import time
 from collections.abc import Generator
 from pathlib import Path
 from typing import Final
+
 from deep_translator import GoogleTranslator
 
 SKIP_DIRS: Final[frozenset[str]] = frozenset(

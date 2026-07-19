@@ -17,6 +17,7 @@ import tarfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Final
+
 import zstandard as zstd
 
 SKIP_DIRS: Final[frozenset[str]] = frozenset(

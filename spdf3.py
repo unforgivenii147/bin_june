@@ -1,8 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
 import os
-import sys
-import subprocess
 import shutil
+import subprocess
+import sys
 
 
 def shrink_pdf_mobile(file_path):

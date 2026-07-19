@@ -7,6 +7,7 @@ Usage: python qr_reader.py <image_path>
 """
 
 import sys
+
 from PIL import Image
 from pyzbar.pyzbar import decode
 

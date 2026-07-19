@@ -6,6 +6,7 @@ import ast
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+
 import tree_sitter_python as tspython
 from tree_sitter import Language, Parser
 

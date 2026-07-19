@@ -21,6 +21,7 @@ import sys
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 from typing import List, Optional, Tuple
+
 from dh import BIN_EXT, TXT_EXT
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")

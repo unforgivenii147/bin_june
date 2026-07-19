@@ -12,6 +12,7 @@ import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Final, TypedDict
+
 from deep_translator import GoogleTranslator
 
 CHUNK_SIZE: Final[int] = 4500

@@ -8,32 +8,17 @@ import sys
 from collections import deque
 from pathlib import Path
 
+import brotlicffi as brotli
+import lz4.frame
+import py7zr
+import zstandard as zstd
+
+HAS_ZSTD = True
+HAS_BROTLI = True
+HAS_PY7ZR = True
+HAS_LZ4 = True
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-try:
-    import zstandard as zstd
-
-    HAS_ZSTD = True
-except ImportError:
-    HAS_ZSTD = False
-try:
-    import brotli
-
-    HAS_BROTLI = True
-except ImportError:
-    HAS_BROTLI = False
-try:
-    import py7zr
-
-    HAS_PY7ZR = True
-except ImportError:
-    HAS_PY7ZR = False
-try:
-    import lz4.frame
-
-    HAS_LZ4 = True
-except ImportError:
-    HAS_LZ4 = False
 
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:

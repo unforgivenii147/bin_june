@@ -2,6 +2,7 @@
 
 
 from pathlib import Path
+
 from rcssmin import cssmin
 from rjsmin import jsmin
 

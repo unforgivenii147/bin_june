@@ -5,6 +5,7 @@ import concurrent.futures
 import subprocess
 from pathlib import Path
 from typing import List, Optional, Tuple
+
 from binaryornot import is_binary
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})

@@ -2,9 +2,9 @@
 """List pure Python packages with specific naming and structure constraints."""
 
 import sys
-from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor
 from importlib.metadata import distributions
+from pathlib import Path
 
 
 def is_pure_python(dist) -> bool:

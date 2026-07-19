@@ -5,12 +5,13 @@ Format: user/repo (one per line)
 Uses --depth 1 for shallow clones.
 """
 
-import sys
-from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import List, Tuple
 import argparse
-from git import Repo, GitCommandError
+import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
+from typing import List, Tuple
+
+from git import GitCommandError, Repo
 from git.exc import InvalidGitRepositoryError
 
 

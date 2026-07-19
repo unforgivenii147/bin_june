@@ -4,8 +4,8 @@ import re
 import sys
 import urllib.parse
 import urllib.request
-from shutil import get_terminal_size
 from pathlib import Path
+from shutil import get_terminal_size
 
 from tqdm import tqdm
 

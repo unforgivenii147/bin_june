@@ -6,8 +6,8 @@ if they contain appropriate shebangs but have wrong or missing extensions.
 """
 
 import os
-import sys
 import shutil
+import sys
 from pathlib import Path
 
 # Shebang to extension mapping

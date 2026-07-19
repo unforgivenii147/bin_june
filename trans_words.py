@@ -13,6 +13,7 @@ import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Final
+
 import langdetect
 from deep_translator import GoogleTranslator
 

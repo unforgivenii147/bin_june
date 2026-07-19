@@ -7,6 +7,7 @@ Optimized for Python 3.12 with modern syntax, type hints, and performance improv
 """
 
 from __future__ import annotations
+
 import argparse
 import logging
 import multiprocessing
@@ -17,6 +18,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from io import BytesIO
 from pathlib import Path
 from typing import Final
+
 import zstandard as zstd
 
 ZST_EXT: Final[str] = ".zst"

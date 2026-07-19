@@ -16,6 +16,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import cpu_count
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+
 import cld3
 
 TEXT_EXTENSIONS = {

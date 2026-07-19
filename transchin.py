@@ -12,6 +12,7 @@ import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Final
+
 from deep_translator import GoogleTranslator
 
 CHUNK_SIZE: Final[int] = 2000

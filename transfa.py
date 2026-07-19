@@ -10,6 +10,7 @@ import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Final
+
 from deep_translator import GoogleTranslator
 
 MAX_WORKERS: Final[int] = 4

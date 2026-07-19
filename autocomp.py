@@ -1,21 +1,21 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-import sys
+import bz2
+import gzip
+import lzma
 import os
-import time
+import sys
 import tarfile
 import tempfile
-import bz2
-import lzma
-import gzip
-from pathlib import Path
+import time
 from collections import namedtuple
+from pathlib import Path
 
-import brotli
-import zstandard as zstd
-import lz4.frame
 import blosc
+import brotli
+import lz4.frame
 import py7zr
+import zstandard as zstd
 
 CompressionResult = namedtuple("CompressionResult", ["name", "ext", "size", "ratio", "elapsed", "output_path"])
 

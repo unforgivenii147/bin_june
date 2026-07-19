@@ -4,13 +4,14 @@ Clone GitHub repositories by downloading ZIP archives.
 No git binary needed. Uses requests for HTTP.
 """
 
+import argparse
+import io
 import sys
 import zipfile
-import io
-from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
 from typing import List, Tuple
-import argparse
+
 import requests
 
 

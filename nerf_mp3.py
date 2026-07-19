@@ -3,16 +3,16 @@
 Convert MP3 files to half their original bitrate using ffmpeg with parallel processing.
 """
 
+import argparse
+import json
 import os
 import subprocess
 import sys
-import json
 import time
-from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
-from typing import Optional, List, Tuple
-import argparse
+from pathlib import Path
+from typing import List, Optional, Tuple
 
 
 # Terminal colors for prettier output

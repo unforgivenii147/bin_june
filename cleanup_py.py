@@ -5,10 +5,11 @@ Preserves shebangs, # fmt, # type, and module docstrings.
 """
 
 import argparse
-import libcst as cst
-from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
 from typing import Tuple
+
+import libcst as cst
 
 
 class CleanTransformer(cst.CSTTransformer):

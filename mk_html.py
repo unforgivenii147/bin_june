@@ -1,14 +1,15 @@
 #!/data/data/com.termux/files/usr/bin/env python
 from __future__ import absolute_import
+
+import argparse
+import hashlib
+import os
 import re
-from pathlib import Path
+import shutil
 import subprocess
 import sys
-import os
-import hashlib
-import shutil
 from concurrent.futures import ProcessPoolExecutor, as_completed
-import argparse
+from pathlib import Path
 
 # Configuration
 RST2HTML_OPTIONS = " ".join(["--no-toc-backlinks", "--strip-comments", "--language en", "--date"])

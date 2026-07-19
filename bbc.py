@@ -3,7 +3,6 @@
 import shutil
 from pathlib import Path
 
-
 L1 = "[egg_info]"
 L2 = "tag_build = "
 L3 = "tag_date = 0"

@@ -4,19 +4,19 @@ Python Code Entity Extractor
 Extracts classes, functions, methods, and constants from Python files and archives.
 """
 
+import argparse
 import ast
-import sys
+import io
 import os
 import re
-import io
-import tarfile
-import zipfile
 import shutil
-import argparse
+import sys
+import tarfile
 import textwrap
-from pathlib import Path
-from concurrent.futures import ProcessPoolExecutor, as_completed
+import zipfile
 from collections import defaultdict
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
 from typing import NamedTuple
 
 # Optional dependencies

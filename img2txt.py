@@ -1,14 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/env python
 import sys
 from collections import deque
+from collections.abc import Callable
 from pathlib import Path
 
 from PIL import Image
 from pytesseract import image_to_string
-
-
-from collections.abc import Callable
-from pathlib import Path
 
 
 def mpf3(process_function: Callable, files: list[Path], **kwargs):

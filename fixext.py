@@ -1,8 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
-import os
-import sys
-import subprocess
 import argparse
+import os
+import subprocess
+import sys
 from pathlib import Path
 
 MIME_TO_EXT: dict[str, list[str]] = {

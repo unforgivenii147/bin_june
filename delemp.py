@@ -8,8 +8,8 @@ and automatic binary file detection.
 """
 
 import argparse
-from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
 from typing import List, Tuple
 
 BOLD = "\x1b[1m"

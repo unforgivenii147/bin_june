@@ -14,6 +14,7 @@ import os
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 from typing import Iterator, Set, Tuple
+
 from dh import TXT_EXT
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

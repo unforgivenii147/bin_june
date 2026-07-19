@@ -4,10 +4,10 @@ Report Python packages installed in both user and system site directories.
 Uses pathlib for path handling and concurrent.futures for parallel processing.
 """
 
-import sys
-import site
-import pathlib
 import concurrent.futures
+import pathlib
+import site
+import sys
 from typing import Dict, List, Tuple
 
 

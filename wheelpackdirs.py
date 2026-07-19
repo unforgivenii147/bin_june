@@ -1,9 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/env python
+import argparse
 import subprocess
-from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from multiprocessing import cpu_count
-import argparse
+from pathlib import Path
 
 
 def pack_wheel(directory):

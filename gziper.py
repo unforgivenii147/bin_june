@@ -5,14 +5,14 @@ Compresses files recursively using maximum compression with gzip module.
 Uses pathlib and parallel processing for efficiency.
 """
 
+import argparse
 import gzip
 import shutil
-import argparse
-from pathlib import Path
-from concurrent.futures import ProcessPoolExecutor, as_completed
-from typing import List, Tuple
 import time
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import timedelta
+from pathlib import Path
+from typing import List, Tuple
 
 
 class CompressionStats:

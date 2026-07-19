@@ -17,8 +17,8 @@ from __future__ import annotations
 import argparse
 import ast
 import io
-from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
 from typing import Iterable, Optional, Tuple
 
 import libcst as cst

@@ -13,6 +13,7 @@ import re
 import time
 from pathlib import Path
 from typing import Final
+
 from deep_translator import GoogleTranslator
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")

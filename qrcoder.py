@@ -8,6 +8,7 @@ Install: pip install pyzbar pillow
 
 import os
 import sys
+
 import pyzbar.pyzbar as pyzbar
 from PIL import Image
 

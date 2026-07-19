@@ -19,6 +19,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from os import scandir
 from pathlib import Path
 from typing import Final
+
 from binaryornot import is_binary
 from deep_translator import GoogleTranslator
 

@@ -15,6 +15,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Final, Optional
+
 import zstandard as zstd
 
 DEFAULT_SKIP_DIRS: Final[set[str]] = {
