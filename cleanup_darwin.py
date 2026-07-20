@@ -105,7 +105,7 @@ def find_and_remove_files(root_dir: Path | None = None) -> dict:
     total_freed = sum((size for _, size in results))
     successful = sum((1 for _, size in results if size > 0))
 
-    def format_bytes(bytes_val: int) -> str:
+    def format_bytes(bytes_val: float) -> str:
         for unit in ["B", "KB", "MB", "GB", "TB"]:
             if bytes_val < 1024:
                 return f"{bytes_val:.2f} {unit}"

@@ -3,7 +3,7 @@
 
 """
 Optimized version of transchin.py for Python 3.12.
-Translates non-English characters in files in-place using parallel processing.
+Translates Persian text in files in-place using parallel processing.
 """
 
 from __future__ import annotations
@@ -11,6 +11,7 @@ from __future__ import annotations
 import logging
 import re
 import sys
+import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Final
@@ -19,26 +20,55 @@ from deep_translator import GoogleTranslator
 
 CHUNK_SIZE: Final[int] = 4500
 MAX_WORKERS: Final[int] = 16
+CHUNK_DELAY: Final[float] = 1.5
+FILE_DELAY: Final[float] = 2.0
 SKIP_DIRS: Final[frozenset[str]] = frozenset(
     {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
 )
-NON_ASCII_PATTERN: Final[re.Pattern] = re.compile("[^\\x00-\\x7F]")
+PERSIAN_PATTERN: Final[re.Pattern] = re.compile("[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff]")
+BOUNDARY_PATTERN: Final[re.Pattern] = re.compile(r"[\s\n\.\!\?\;]+")
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
 
 def split_into_chunks(text: str, size: int = 4900) -> list[str]:
-    return [text[i : i + size] for i in range(0, len(text), size)]
+    if len(text) <= size:
+        return [text]
+
+    chunks = []
+    pos = 0
+
+    while pos < len(text):
+        end = min(pos + size, len(text))
+
+        if end == len(text):
+            chunks.append(text[pos:])
+            break
+
+        boundary_match = None
+        for match in BOUNDARY_PATTERN.finditer(text, pos, end):
+            boundary_match = match
+
+        if boundary_match and boundary_match.end() > pos:
+            split_pos = boundary_match.end()
+        else:
+            split_pos = end
+
+        chunks.append(text[pos:split_pos])
+        pos = split_pos
+
+    return chunks
 
 
 def translate_chunk(chunk: str) -> str:
-    if not NON_ASCII_PATTERN.search(chunk):
+    if not PERSIAN_PATTERN.search(chunk):
         return chunk
     try:
-        translator = GoogleTranslator(source="auto", target="en")
+        translator = GoogleTranslator(source="fa", target="en")
         result = translator.translate(chunk)
         if result:
             logger.info("Chunk translated: %s...", result[:30].replace("\n", " "))
+            time.sleep(CHUNK_DELAY)
             return result
         return chunk
     except Exception as e:
@@ -52,7 +82,7 @@ def translate_file(path: Path) -> None:
     except Exception as e:
         logger.warning("Skipping unreadable file %s: %s", path, e)
         return
-    if not NON_ASCII_PATTERN.search(content):
+    if not PERSIAN_PATTERN.search(content):
         return
     logger.info("Translating: %s", path.name)
     chunks = split_into_chunks(content)
@@ -64,6 +94,7 @@ def translate_file(path: Path) -> None:
         logger.info("✓ Updated: %s", path.name)
     except Exception as e:
         logger.error("Error writing to %s: %s", path, e)
+    time.sleep(FILE_DELAY)
 
 
 def get_files(path: Path) -> list[Path]:

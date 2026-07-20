@@ -173,6 +173,24 @@ def process_docstrings_ast(source_code: str, preserve_module_docstring: bool = T
         return (source_code, 0)
 
 
+def is_python_file(path: Path) -> bool:
+    """Check if a file is a Python file, with or without extension."""
+    # Check by extension first
+    if path.suffix.lower() in (".py", ".pyw", ".pyi"):
+        return True
+
+    # Check if file has no extension but starts with shebang
+    if not path.suffix:
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                first_line = f.readline()
+                return first_line.startswith("#!") and "python" in first_line.lower()
+        except (IOError, UnicodeDecodeError):
+            return False
+
+    return False
+
+
 def process_python_file(path: Path, preserve_module_docstring: bool = True) -> FileResult:
     temp_file = None
     try:
@@ -211,7 +229,6 @@ def process_python_file(path: Path, preserve_module_docstring: bool = True) -> F
 
 
 def process_dry_run_placeholder(path: Path, preserve_module_docstring: bool) -> FileResult:
-    """Top-level picklable function for dry-runs instead of an unpicklable lambda."""
     return FileResult(path, 0, 0, False, "dry run")
 
 
@@ -226,7 +243,7 @@ def process_wheel_file(
         extract_dir.mkdir()
         with zipfile.ZipFile(whl_path, "r") as whl:
             whl.extractall(extract_dir)
-        python_files = list(extract_dir.rglob("*.py"))
+        python_files = [f for f in extract_dir.rglob("*") if f.is_file() and is_python_file(f)]
         for py_file in python_files:
             if not dry_run:
                 result = process_python_file(py_file, preserve_module_docstring)
@@ -262,23 +279,20 @@ def process_wheel_file(
 
 
 def find_python_files(path: Path) -> Iterator[Path]:
-    """Memory efficient file discoverer using Python 3.12 walk with in-place pruning."""
     if path.is_file():
-        if path.suffix in (".py", ".whl"):
+        if is_python_file(path) or path.suffix.lower() == ".whl":
             yield path
         return
 
     for root, dirs, filenames in path.walk(top_down=True):
-        # Prune matching cache and system folders in-place to optimize memory/speed
         dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
         for name in filenames:
             p = root / name
-            if p.suffix in (".py", ".whl"):
+            if is_python_file(p) or p.suffix.lower() == ".whl":
                 yield p
 
 
 def format_result(result: FileResult, cwd: Path) -> str:
-    # Try rendering the path relative to CWD if possible
     try:
         display_path = result.path.relative_to(cwd)
     except ValueError:

@@ -55,8 +55,8 @@ def main() -> None:
     sys.argv[1:]
     successful = 0
     errors = 0
-    start_dir = Path.cwd()
-    files = get_files(start_dir, ext=[".xz", ".tar.xz"])
+    cwd = Path.cwd()
+    files = get_files(cwd, ext=[".xz", ".tar.xz"])
     if not files:
         print("No files to decompress")
         return

@@ -68,9 +68,11 @@ def iter_files(root: Path, recursive: bool, follow_symlinks: bool, min_size: int
     else:
         iterator = root.iterdir()
     for p in iterator:
+        if ".git" in p.parts:
+            continue
         if not p.is_file():
             continue
-        if not follow_symlinks and p.is_symlink():
+        if p.is_symlink():
             continue
         try:
             if p.stat().st_size >= min_size:

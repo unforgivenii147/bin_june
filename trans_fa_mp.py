@@ -17,8 +17,6 @@ from typing import Final
 
 from deep_translator import GoogleTranslator
 
-INPUT_FILE: Final[str] = "words.txt"
-OUTPUT_FILE: Final[str] = "dic_mp.json"
 MAX_WORKERS: Final[int] = 16
 RETRY_ATTEMPTS: Final[int] = 3
 RETRY_DELAY: Final[float] = 0.5
@@ -27,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 def translate_word(word: str) -> str | None:
-    translator = GoogleTranslator(source="auto", target="en")
+    translator = GoogleTranslator(source="fa", target="en")
     for attempt in range(RETRY_ATTEMPTS):
         try:
             result = translator.translate(word)
@@ -41,9 +39,13 @@ def translate_word(word: str) -> str | None:
 
 
 def main() -> None:
-    input_path = Path(INPUT_FILE)
+
+    import sys
+
+    input_path = Path(sys.argv[1].strip())
+    output_path = input_path.with_suffix(".json")
     if not input_path.exists():
-        logger.error("Input file not found: %s", INPUT_FILE)
+        logger.error("Input file not found: %s", input_path.name)
         return
     try:
         with input_path.open(encoding="utf-8") as f:
@@ -52,7 +54,7 @@ def main() -> None:
         logger.error("Error reading input file: %s", e)
         return
     if not words:
-        logger.info("No words found in %s", INPUT_FILE)
+        logger.info("No words found in %s", input_path.name)
         return
     logger.info("Loaded %d Persian words. Starting translation with %d workers...", len(words), MAX_WORKERS)
     results: dict[str, str] = {}
@@ -69,11 +71,10 @@ def main() -> None:
                     logger.error("Could not translate: %s", persian_word)
             except Exception as e:
                 logger.error("Unexpected error for '%s': %s", persian_word, e)
-    output_path = Path(OUTPUT_FILE)
     try:
         with output_path.open("w", encoding="utf-8") as f:
             json.dump(results, f, ensure_ascii=False, indent=2)
-        logger.info("Translation dictionary saved to %s (%d entries)", OUTPUT_FILE, len(results))
+        logger.info("Translation dictionary saved to %s (%d entries)", output_path.name, len(results))
     except Exception as e:
         logger.error("Error saving results: %s", e)
 

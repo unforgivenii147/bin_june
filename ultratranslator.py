@@ -27,9 +27,9 @@ from binaryornot import is_binary
 from deep_translator import GoogleTranslator
 from dh import DOC_TH1, DOC_TH2
 
-MAX_WORKERS: Final[int] = 6
-MAX_RETRIES: Final[int] = 3
-RETRY_DELAY: Final[float] = 2.0  # seconds between retries
+MAX_WORKERS: Final[int] = 4
+MAX_RETRIES: Final[int] = 2
+RETRY_DELAY: Final[float] = 3.0  # seconds between retries
 NON_ENGLISH_PATTERN: Final[re.Pattern] = re.compile(r"[^\x00-\x7F]")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -64,20 +64,6 @@ def get_nobinary(path: Path) -> list[Path]:
     return [f for f in get_files(path) if not is_binary(str(f))]
 
 
-def translate_text(text: str, retries: int = MAX_RETRIES) -> str:
-    for attempt in range(retries):
-        try:
-            translated = GoogleTranslator(source="auto", target="en").translate(text)
-            return translated if translated else text
-        except Exception as e:
-            if attempt < retries - 1:
-                logger.warning(f"Translation attempt {attempt + 1} failed: {e}. Retrying in {RETRY_DELAY}s...")
-                time.sleep(RETRY_DELAY)
-            else:
-                logger.error(f"Translation failed after {retries} attempts: {e}")
-                return text
-
-
 def translate_file_content(path: Path, retries: int = MAX_RETRIES) -> str:
     for attempt in range(retries):
         try:
@@ -100,60 +86,14 @@ def safe_overwrite(filepath: Path, content: str) -> None:
     shutil.move(tmp_path, filepath)
 
 
-def translate_python_file(path: Path) -> str:
-    logger.info(f"  Analyzing Python structure for {path.name}...")
-    source = path.read_text(encoding="utf-8")
-    try:
-        ast.parse(source)
-    except SyntaxError as e:
-        logger.warning(f"  Syntax error in {path.name}: {e}. Translating as plain text.")
-        return translate_file_content(path)
-    result = []
-    translated_count = 0
-    try:
-        tokens = list(tokenize.generate_tokens(io.StringIO(source).readline))
-    except tokenize.TokenError:
-        return translate_file_content(path)
-    source_lines = source.splitlines(keepends=True)
-    prev_end = (1, 0)
-    for token in tokens:
-        tok_type, tok_str, start, end, line = token
-        if start[0] > prev_end[0]:
-            result.extend(source_lines[prev_end[0] : start[0]])
-            result.append(line[: start[1]])
-        elif start[1] > prev_end[1]:
-            result.append(line[prev_end[1] : start[1]])
-        if tok_type == tokenize.COMMENT and (not is_english(tok_str)):
-            comment_text = tok_str[1:].strip()
-            translated = translate_text(comment_text)
-            result.append(f"# {translated}")
-            translated_count += 1
-        elif tok_type == tokenize.STRING:
-            stripped = tok_str.strip("'\"")
-            if stripped and (not is_english(stripped)) and (len(stripped) > 5):
-                translated = translate_text(stripped)
-                quote_char = tok_str[:3] if tok_str.startswith((DOC_TH1, DOC_TH2)) else tok_str[0]
-                result.append(f"{quote_char}{translated}{quote_char}")
-                translated_count += 1
-            else:
-                result.append(tok_str)
-        else:
-            result.append(tok_str)
-        prev_end = end
-    logger.info(f"  Translated {translated_count} items in {path.name}")
-    return "".join(result)
-
-
 def process_file(path: Path) -> Path | None:
     logger.info(f"  Processing {path.name}...")
     try:
         original = path.read_text(encoding="utf-8", errors="ignore")
         if is_english(original):
             return None
-        if path.suffix == ".py":
-            translated = translate_python_file(path)
-        else:
-            translated = translate_file_content(path)
+        translated = translate_file_content(path)
+        print(translated)
         if translated.strip() != original.strip():
             safe_overwrite(path, translated)
             logger.info(f"  ✓ Updated {path.name}")
