@@ -12,8 +12,6 @@ from github.GithubException import GithubException, UnknownObjectException
 from github.Repository import Repository
 from tqdm import tqdm
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def get_github_client(token: str | None = None) -> Github:
     if token:
@@ -81,9 +79,6 @@ def clone_repo(clone_url: str, branch: str) -> None:
         "clone",
         "--depth",
         "1",
-        "--single-branch",
-        "--branch",
-        branch,
         clone_url,
         "--progress",
     ]
