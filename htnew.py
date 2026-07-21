@@ -1,26 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+
 from __future__ import annotations
-
 from pathlib import Path
-
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def create_html_template(filename: str = "index.html") -> None:
-    html_template = """<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <h1>Hello, World!</h1>
-    <!-- Your content here -->
-</body>
-</html>
-"""
+    html_template = '<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Document</title>\n</head>\n<body>\n    <h1>Hello, World!</h1>\n    <!-- Your content here -->\n</body>\n</html>\n'
     try:
         Path(filename).write_text(html_template, encoding="utf-8")
         print(f"Successfully created {filename} in {Path.cwd()}")

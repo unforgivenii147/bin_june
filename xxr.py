@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from __future__ import annotations
 
+
+from __future__ import annotations
 import argparse
 import bz2
 import gzip
@@ -15,13 +16,10 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Tuple
-
 import brotlicffi as brotli
 import py7zr
 import zstandard as zstd
 from loguru import logger
-
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def gsz(path: str | Path) -> int:
@@ -37,7 +35,7 @@ def gsz(path: str | Path) -> int:
 
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
-    units = "B", "KB", "MB", "GB", "TB"
+    units = ("B", "KB", "MB", "GB", "TB")
     if sz == 0:
         return "0 B"
     i = min((int(sz).bit_length() - 1) // 10, len(units) - 1)
@@ -47,17 +45,7 @@ def fsz(sz: float) -> str:
     return f"{value:.1f} {units[i]}"
 
 
-ATTRIBUTES = {
-    "bold": 1,
-    "dark": 2,
-    "italic": 3,
-    "underline": 4,
-    "blink": 5,
-    "reverse": 7,
-    "concealed": 8,
-    "strike": 9,
-}
-
+ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
 HIGHLIGHTS = {
     "on_black": 40,
     "on_grey": 40,
@@ -77,7 +65,6 @@ HIGHLIGHTS = {
     "on_light_cyan": 106,
     "on_white": 107,
 }
-
 COLORS = {
     "black": 30,
     "grey": 30,
@@ -97,7 +84,6 @@ COLORS = {
     "light_cyan": 96,
     "white": 97,
 }
-
 RESET = "\x1b[0m"
 
 
@@ -154,7 +140,7 @@ def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
-    return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
+    return Parallel(n_jobs=-1)((delayed(process_function)(file_str, **kwargs) for file_str in file_strings))
 
 
 SUPPORTED_EXTS = {
@@ -217,18 +203,11 @@ def format_size(size_bytes: int) -> str:
 
 def has_compressed_suffix(path: Path) -> bool:
     name = path.name.lower()
-    return any(name.endswith(ext) for ext in SUPPORTED_EXTS)
+    return any((name.endswith(ext) for ext in SUPPORTED_EXTS))
 
 
 def output_name_for_file(path: Path, mode: str) -> Path:
-    ext_map = {
-        "xz": ".xz",
-        "gz": ".gz",
-        "brotli": ".br",
-        "zstd": ".zst",
-        "7z": ".7z",
-        "zip": ".zip",
-    }
+    ext_map = {"xz": ".xz", "gz": ".gz", "brotli": ".br", "zstd": ".zst", "7z": ".7z", "zip": ".zip"}
     if mode not in ext_map:
         raise ValueError(f"Unsupported mode: {mode}")
     return path.with_name(path.name + ext_map[mode])
@@ -434,10 +413,7 @@ def decompress_one(path_str: str) -> Result:
                     result.dst = str(dst_path)
                     break
         elif name.endswith((".7z", ".zip")):
-            ext_map = {
-                ".7z": (py7zr.SevenZipFile(src, "r"), src.stem),
-                ".zip": (zipfile.ZipFile(src, "r"), src.stem),
-            }
+            ext_map = {".7z": (py7zr.SevenZipFile(src, "r"), src.stem), ".zip": (zipfile.ZipFile(src, "r"), src.stem)}
             for ext, (archive, extract_name) in ext_map.items():
                 if name.endswith(ext):
                     with archive as zf:
@@ -481,9 +457,9 @@ def collect_top_level_items(base: Path) -> list[tuple[Path, bool]]:
     for p in base.iterdir():
         if p.is_symlink():
             continue
-        if p.is_file() and not has_compressed_suffix(p):
+        if p.is_file() and (not has_compressed_suffix(p)):
             items.append((p, False))
-        elif p.is_dir() and ".git" not in p.parts and not has_compressed_suffix(p):
+        elif p.is_dir() and ".git" not in p.parts and (not has_compressed_suffix(p)):
             items.append((p, True))
     return items
 
@@ -510,7 +486,7 @@ def main() -> None:
     parser.add_argument("--zip", action="store_true", help="Use zipfile")
     parser.add_argument("--bz2", action="store_true", help="Use bz2")
     args = parser.parse_args()
-    if not args.compress and not args.decompress:
+    if not args.compress and (not args.decompress):
         args.compress = True
         args.zstd = True
     if args.decompress:

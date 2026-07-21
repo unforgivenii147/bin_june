@@ -14,9 +14,8 @@ import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from lib2to3.refactor import RefactoringTool, get_fixers_from_package
 from pathlib import Path
-from typing import List, Tuple
+from typing import list, tuple
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 logging.getLogger("lib2to3").setLevel(logging.WARNING)
 
@@ -36,7 +35,7 @@ class CustomRefactoringTool(RefactoringTool):
         self.output_lines.append(msg)
 
 
-def get_all_fixers() -> List[str]:
+def get_all_fixers() -> list[str]:
     try:
         fixers = get_fixers_from_package("lib2to3.fixes")
         return fixers
@@ -96,7 +95,7 @@ def get_all_fixers() -> List[str]:
         ]
 
 
-def apply_2to3_fixes(file_path: str) -> Tuple[str, bool, str]:
+def apply_2to3_fixes(file_path: str) -> tuple[str, bool, str]:
     try:
         with open(file_path, encoding="utf-8") as f:
             original_content = f.read()
@@ -135,7 +134,7 @@ def apply_2to3_fixes(file_path: str) -> Tuple[str, bool, str]:
         return file_path, False, f"Unexpected error: {e!s}"
 
 
-def find_python_files(paths: List[str], extensions: List[str] | None = None) -> List[str]:
+def find_python_files(paths: list[str], extensions: list[str] | None = None) -> list[str]:
     if extensions is None:
         extensions = [".py"]
     python_files = []
@@ -153,7 +152,7 @@ def find_python_files(paths: List[str], extensions: List[str] | None = None) -> 
     return python_files
 
 
-def process_files_parallel(file_paths: List[str]) -> Tuple[List[str], List[str]]:
+def process_files_parallel(file_paths: list[str]) -> tuple[list[str], list[str]]:
     successful = []
     failed = []
     print(f"Processing {len(file_paths)} files using {4} workers...")
@@ -180,7 +179,7 @@ def process_files_parallel(file_paths: List[str]) -> Tuple[List[str], List[str]]
     return successful, failed
 
 
-def dry_run_file(file_path: str) -> Tuple[str, str, bool]:
+def dry_run_file(file_path: str) -> tuple[str, str, bool]:
     try:
         with open(file_path, encoding="utf-8") as f:
             original_content = f.read()
@@ -209,7 +208,7 @@ def dry_run_file(file_path: str) -> Tuple[str, str, bool]:
         return file_path, f"Error reading file: {e!s}", False
 
 
-def perform_dry_run(file_paths: List[str]) -> None:
+def perform_dry_run(file_paths: list[str]) -> None:
     print(f"\nDRY RUN - Preview of changes using {4} workers:")
     print("=" * 60)
     files_with_changes = 0

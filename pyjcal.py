@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from datetime import datetime
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 class JalaliDate:
     JALALI_MONTHS_EN = [
@@ -199,9 +197,6 @@ class JalaliDate:
             return 30
         return 30 if self.is_leap_year() else 29
 
-    def days_in_year(self) -> int:
-        return 366 if self.is_leap_year() else 365
-
     def __str__(self) -> str:
         return f"{self.year:04d}/{self.month:02d}/{self.day:02d}"
 
@@ -260,31 +255,6 @@ class JalaliCalendar:
             output.append(" ".join(week_str))
         return "\n".join(output)
 
-    def print_year(self, language: str = "en") -> str:
-        output = []
-        if language == "fa":
-            output.append(f"سال {self.year}".center(80))
-        else:
-            output.append(f"Year {self.year}".center(80))
-        output.append("\n")
-        for row in range(0, 12, 3):
-            month_calendars = []
-            for m in range(row, min(row + 3, 12)):
-                cal = JalaliCalendar(self.year, m + 1)
-                lines = cal.print_month(language, show_header=True).split("\n")
-                month_calendars.append(lines)
-            max_lines = max(len(mc) for mc in month_calendars)
-            for i in range(max_lines):
-                combined = ""
-                for mc in month_calendars:
-                    if i < len(mc):
-                        combined += f"{mc[i]:<30}"
-                    else:
-                        combined += " " * 30
-                output.append(combined)
-            output.append("\n")
-        return "\n".join(output)
-
 
 class JalaliDateFormatter:
     @staticmethod
@@ -304,7 +274,7 @@ class JalaliDateFormatter:
         return output.replace("%S", f"{time.second:02d}")
 
     @staticmethod
-    def format_fa(date: JalaliDate, fmt: str = "%Y/%m/%d %H:%M:%S", include_time: bool = True) -> str:
+    def format_fa(date: JalaliDate, fmt: str = "%Y/%m/%d %H:%M:%S") -> str:
         output = fmt
         now = datetime.now()
         output = output.replace("%Y", f"{date.year:04d}")

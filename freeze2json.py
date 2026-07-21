@@ -5,8 +5,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def freeze_to_json(input_file: str = "pip.freeze", output_file: str = "packages.json") -> None:
     packages = {}

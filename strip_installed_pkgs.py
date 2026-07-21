@@ -42,8 +42,8 @@ STDLIB: frozenset = frozenset(
         "Tkconstants",
         "Tkdnd",
         "Tkinter",
-        "UserDict",
-        "UserList",
+        "Userdict",
+        "Userlist",
         "UserString",
         "W",
         "_LWPCookieJar",
@@ -497,8 +497,6 @@ STDLIB: frozenset = frozenset(
         "zoneinfo",
     }
 )
-
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def get_file_age(path: str | Path, str_mode: bool = False) -> float | str:

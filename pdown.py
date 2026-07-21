@@ -1,129 +1,88 @@
 #!/data/data/com.termux/files/usr/bin/env python
-
 from __future__ import annotations
 
-import concurrent.futures
-import json
-import pathlib
-import urllib.error
-import urllib.request
-from typing import Dict, Optional, Tuple
+import argparse
+import sys
+from pathlib import Path
+
+import requests
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
-def get_pypi_json(package: str, timeout: int = 10) -> Dict | None:
-    url = f"https://pypi.org/pypi/{package}/json"
+def get_package_url(package_name, version=None):
+    url = f"https://pypi.org/pypi/{package_name}/json"
     try:
-        with urllib.request.urlopen(url, timeout=timeout) as response:
-            return json.loads(response.read())
-    except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError) as e:
-        print(f"  ❌ Error fetching {package}: {e}")
-        return None
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+        releases = data.get("releases", {})
+        if not releases:
+            raise ValueError(f"No releases found for {package_name}")
+        if version:
+            if version not in releases:
+                raise ValueError(f"Version {version} not found for {package_name}")
+            version_data = releases[version]
+        else:
+            latest_version = data.get("info", {}).get("version")
+            version_data = releases.get(latest_version, [])
+        if not version_data:
+            raise ValueError(f"No downloadable files found")
+        for file_info in version_data:
+            if file_info.get("packagetype") == "bdist_wheel":
+                return file_info["url"], file_info["filename"]
+        for file_info in version_data:
+            if file_info.get("packagetype") == "sdist":
+                return file_info["url"], file_info["filename"]
+        if version_data:
+            return version_data[0]["url"], version_data[0]["filename"]
+        raise ValueError("No downloadable files found")
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching package information: {e}")
+        sys.exit(1)
 
 
-def find_wheel_url(package_data: Dict, python_version: str = "3.12") -> Tuple[str, int] | None:
-    releases = package_data.get("releases", {})
-    if not releases:
-        return None
-    latest_version = max(releases.keys())
-    files = releases[latest_version]
-    wheels = []
-    for file in files:
-        if not file.get("packagetype") == "bdist_wheel":
-            continue
-        filename = file["filename"].lower()
-        pv = file.get("python_version", "").lower()
-        score = 0
-        if f"cp{python_version.replace('.', '')}" in filename:
-            score += 100
-        if pv == f"=={python_version}":
-            score += 100
-        if pv.startswith(f">={python_version}"):
-            score += 90
-        if "py3" in filename and "none" in filename:
-            score += 80
-        if "abi3" in filename:
-            score += 70
-        if pv.startswith(">=3."):
-            score += 60
-        if score > 0:
-            wheels.append((score, file))
-    if not wheels:
-        return None
-    _, best_wheel = max(wheels, key=lambda x: x[0])
-    return best_wheel["url"], best_wheel["size"]
-
-
-def download_file(url: str, destination: pathlib.Path, expected_size: int, chunk_size: int = 8192) -> Tuple[bool, str]:
-    print(f"  📥 Downloading {destination.name} ({expected_size / 1024 / 1024:.2f} MB)...")
+def download_package(url, filename, output_dir="."):
     try:
-        with urllib.request.urlopen(url) as response:
-            total_size = int(response.headers.get("content-length", expected_size))
-            downloaded = 0
-            with open(destination, "wb") as f:
-                while True:
-                    chunk = response.read(chunk_size)
-                    if not chunk:
-                        break
+        output_path = Path(output_dir) / filename
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        print(f"Downloading {filename}...")
+        response = requests.get(url, stream=True)
+        response.raise_for_status()
+        total_size = int(response.headers.get("content-length", 0))
+        downloaded = 0
+        with output_path.open("wb") as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                if chunk:
                     f.write(chunk)
                     downloaded += len(chunk)
-                    percent = downloaded / total_size * 100
-                    print(
-                        f"    ⬇ {downloaded / 1024 / 1024:.2f} MB / {total_size / 1024 / 1024:.2f} MB ({percent:.1f}%)",
-                        end="\r",
-                    )
-            print(f"    ✅ Downloaded {destination.name} ({downloaded / 1024 / 1024:.2f} MB)")
-            return True, ""
-    except Exception as e:
-        return False, f"Failed: {e!s}"
-
-
-def download_package(package: str, wheels_dir: pathlib.Path, python_version: str = "3.12") -> Tuple[str, bool, str]:
-    print(f"🔍 Fetching info for: {package}")
-    package_data = get_pypi_json(package)
-    if not package_data:
-        return package, False, "Failed to fetch package info from PyPI"
-    wheel_info = find_wheel_url(package_data, python_version)
-    if not wheel_info:
-        return (package, False, "No compatible wheel found for Python " + python_version)
-    url, size = wheel_info
-    filename = url.split("/")[-1]
-    destination = wheels_dir / filename
-    print(f"  📊 Package: {package}")
-    print(f"  🔗 URL: {url}")
-    print(f"  💾 Size: {size / 1024 / 1024:.2f} MB")
-    success, message = download_file(url, destination, size)
-    return package, success, message
+                    if total_size > 0:
+                        percent = downloaded / total_size * 100
+                        print(f"\rProgress: {percent:.1f}% ({downloaded}/{total_size} bytes)", end="")
+        print(f"\n✓ Downloaded to: {output_path}")
+        return output_path
+    except requests.exceptions.RequestException as e:
+        print(f"Error downloading package: {e}")
+        sys.exit(1)
 
 
 def main():
-    import argparse
-
-    parser = argparse.ArgumentParser(description="Download Python packages from PyPI as wheels")
-    parser.add_argument("packages", nargs="+", help="Package name(s) to download")
-    parser.add_argument("--python", default="3.12", help="Python version (default: 3.12)")
-    parser.add_argument("--workers", type=int, default=4, help="Number of download workers (default: 4)")
-    parser.add_argument(
-        "--output",
-        type=pathlib.Path,
-        default=pathlib.Path("wheels"),
-        help="Output directory (default: wheels)",
+    parser = argparse.ArgumentParser(
+        description="Download a Python package from PyPI.org (skips Python version compatibility check)"
     )
+    parser.add_argument("package", help="Package name to download")
+    parser.add_argument("-v", "--version", help="Specific version to download (default: latest)")
+    parser.add_argument("-o", "--output", default=".", help="Output directory (default: current directory)")
     args = parser.parse_args()
-    wheels_dir = args.output.resolve()
-    wheels_dir.mkdir(parents=True, exist_ok=True)
-    print(f"📁 Saving wheels to: {wheels_dir}\n")
-    with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) as executor:
-        futures = {executor.submit(download_package, pkg, wheels_dir, args.python): pkg for pkg in args.packages}
-        success_count = 0
-        for future in concurrent.futures.as_completed(futures):
-            package, success, message = future.result()
-            if success:
-                success_count += 1
-            else:
-                print(f"  ⚠️  {package}: {message}")
-    print(f"\n✅ Downloaded {success_count}/{len(args.packages)} packages successfully.")
+    try:
+        print(f"Fetching {args.package} (version: {args.version or 'latest'})...")
+        download_url, filename = get_package_url(args.package, args.version)
+        print(f"Found: {filename}")
+        print(f"URL: {download_url}")
+        download_package(download_url, filename, args.output)
+    except Exception as e:
+        print(f"Error: {e}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":

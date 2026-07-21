@@ -10,9 +10,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
-from bs4.element import AttributeValueList
-
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+from bs4.element import AttributeValuelist
 
 
 class HTMLStandaloneMaker:
@@ -35,15 +33,9 @@ class HTMLStandaloneMaker:
         ".xml": "application/xml",
         ".txt": "text/plain",
     }
-    RESOURCE_TYPES = {
-        "img": {"tag": "img", "attr": "src", "mime_prefix": "image"},
-        "link": {"tag": "link", "attr": "href", "condition": lambda t: t.get("rel") == ["stylesheet"]},
-        "script": {"tag": "script", "attr": "src"},
-    }
 
     def __init__(self, verbose: bool = False):
         self.verbose = verbose
-        self.search_paths = []
         self.embedded_count = 0
         self.warning_count = 0
 
@@ -66,7 +58,7 @@ class HTMLStandaloneMaker:
             self.log(f"Error encoding file {file_path}: {e}", "ERROR")
             return None
 
-    def find_local_resource(self, resource_name: str | AttributeValueList, base_dir: Path) -> Path | None:
+    def find_local_resource(self, resource_name: str | AttributeValuelist, base_dir: Path) -> Path | None:
         resource_str = str(resource_name)
         parsed = urlparse(resource_str)
         path_part = parsed.path.lstrip("/")

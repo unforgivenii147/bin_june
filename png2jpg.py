@@ -3,23 +3,25 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-
+from dh import get_files, mpf3
 from PIL import Image
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-if len(sys.argv) != 2:
-    print("Usage: python convert_png_to_jpg.py <filename.png>")
-    sys.exit(1)
-fname = Path(sys.argv[1])
-if not fname.is_file():
-    print(f"File {fname} does not exist.")
-    sys.exit(1)
-if fname.suffix.lower() != ".png":
-    print("File must be a PNG.")
-    sys.exit(1)
-img = Image.open(fname).convert("RGB")
-jpg_fname = fname.with_suffix(".jpg")
-img.save(jpg_fname, "JPEG")
-fname.unlink()
-print(f"Converted {fname} to {jpg_fname} and deleted the original PNG.")
+def process_file(path):
+    path = Path(path)
+
+    img = Image.open(path).convert("RGB")
+    jpg_path = path.with_suffix(".jpg")
+    img.save(jpg_path, "JPEG")
+    path.unlink()
+    print(f"Converted {path} to {jpg_path} and deleted the original PNG.")
+
+
+if __name__ == "__main__":
+    cwd = Path.cwd()
+    args = sys.argv[1:]
+    files = [Path(p) for p in args] if args else get_files(cwd, ext=[".png", ".PNG"])
+    if len(files) == 1:
+        process_file(files[0])
+        sys.exit(0)
+    mpf3(process_file, files)

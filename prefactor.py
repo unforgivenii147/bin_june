@@ -26,9 +26,7 @@ from collections import deque
 from dataclasses import dataclass
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 MAX_DEFAULT = 10
 
@@ -38,10 +36,10 @@ class ModuleInfo:
     path: Path
     fullname: str
     source: str
-    deps: Set[str]
+    deps: set[str]
 
 
-def find_py_files(root: Path, exclude: Path | None = None) -> List[Path]:
+def find_py_files(root: Path, exclude: Path | None = None) -> list[Path]:
     files = []
     for p in sorted(root.rglob("*.py")):
         if "__pycache__" in p.parts:
@@ -96,7 +94,7 @@ def analyze_file(args) -> ModuleInfo:
     except SyntaxError:
         return ModuleInfo(path=file_path, fullname="", source=src, deps=set())
     fullname = module_fullname_for_path(root, file_path, package_mode, package_name)
-    deps: Set[str] = set()
+    deps: set[str] = set()
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
@@ -119,7 +117,7 @@ def analyze_file(args) -> ModuleInfo:
                 prefix = package_name if package_name else root.name
                 if mod == prefix or mod.startswith(prefix + "."):
                     deps.add(mod)
-    normalized: Set[str] = set()
+    normalized: set[str] = set()
     for d in deps:
         if d in full_map:
             normalized.add(d)
@@ -130,13 +128,13 @@ def analyze_file(args) -> ModuleInfo:
     return ModuleInfo(path=file_path, fullname=fullname, source=src, deps=normalized)
 
 
-def topological_sort(modules: Dict[str, ModuleInfo]) -> Tuple[List[str], List[Set[str]]]:
+def topological_sort(modules: dict[str, ModuleInfo]) -> tuple[list[str], list[set[str]]]:
     edges = {name: set(info.deps) for name, info in modules.items()}
     for name in edges:
         edges[name] = {d for d in edges[name] if d in modules}
     in_deg = {n: len(ds) for n, ds in edges.items()}
     q = deque([n for n, deg in in_deg.items() if deg == 0])
-    ordered: List[str] = []
+    ordered: list[str] = []
     while q:
         n = q.popleft()
         ordered.append(n)
@@ -154,8 +152,8 @@ def topological_sort(modules: Dict[str, ModuleInfo]) -> Tuple[List[str], List[Se
     return ordered, cycles
 
 
-def build_merged_source(modules: Dict[str, ModuleInfo], ordered: List[str], out_module_name: str) -> str:
-    lines: List[str] = []
+def build_merged_source(modules: dict[str, ModuleInfo], ordered: list[str], out_module_name: str) -> str:
+    lines: list[str] = []
     lines.append("# Auto-generated single-file package by merge_to_single.py")
     lines.append(f"# Reconstructed modules: {', '.join(ordered)}")
     lines.append("import sys, types")
@@ -259,7 +257,7 @@ def main():
             file=sys.stderr,
         )
         sys.exit(2)
-    full_map_candidates: Dict[str, Path] = {}
+    full_map_candidates: dict[str, Path] = {}
     for p in files:
         name = module_fullname_for_path(root, p, package_mode, package_name)
         full_map_candidates[name] = p
@@ -273,7 +271,7 @@ def main():
     else:
         with Pool(processes=workers) as pool:
             results = pool.map(analyze_file, pool_args)
-    modules: Dict[str, ModuleInfo] = {}
+    modules: dict[str, ModuleInfo] = {}
     for mi in results:
         if not mi.fullname:
             mi.fullname = module_fullname_for_path(root, mi.path, package_mode, package_name)

@@ -8,15 +8,11 @@ Recursively scans directories and reports stdlib names that are used but not imp
 from __future__ import annotations
 
 import ast
-import importlib
 import keyword
 import os
 import sys
-from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 STDLIB_MODULES = {
     "abc",
@@ -222,7 +218,7 @@ STDLIB_MODULES = {
     "zlib",
     "collections.abc",
     "collections.defaultdict",
-    "collections.OrderedDict",
+    "collections.Ordereddict",
     "os.path",
     "datetime.datetime",
     "datetime.date",
@@ -238,7 +234,7 @@ STDLIB_MODULES = {
 }
 
 
-def get_stdlib_names() -> Dict[str, Set[str]]:
+def get_stdlib_names() -> dict[str, set[str]]:
     stdlib_names = {
         "os": {
             "path",
@@ -295,7 +291,7 @@ def get_stdlib_names() -> Dict[str, Set[str]]:
         },
         "datetime": {"datetime", "date", "time", "timedelta", "timezone"},
         "json": {"dumps", "loads", "dump", "load"},
-        "collections": {"defaultdict", "OrderedDict", "Counter", "deque", "namedtuple"},
+        "collections": {"defaultdict", "Ordereddict", "Counter", "deque", "namedtuple"},
         "itertools": {
             "chain",
             "cycle",
@@ -314,10 +310,10 @@ def get_stdlib_names() -> Dict[str, Set[str]]:
         "logging": {"debug", "info", "warning", "error", "critical", "getLogger", "basicConfig"},
         "statistics": {"mean", "median", "mode", "stdev", "variance"},
         "typing": {
-            "List",
-            "Dict",
-            "Set",
-            "Tuple",
+            "list",
+            "dict",
+            "set",
+            "tuple",
             "Optional",
             "Union",
             "Any",
@@ -340,47 +336,14 @@ def get_stdlib_names() -> Dict[str, Set[str]]:
 
 
 class ImportChecker(ast.NodeVisitor):
-    def __init__(self, stdlib_names: Dict[str, Set[str]]):
+    def __init__(self, stdlib_names: dict[str, set[str]]):
         self.stdlib_names = stdlib_names
         self.imports = {}
         self.used_names = set()
         self.import_nodes = []
 
-    def visit_Import(self, node):
-        for alias in node.names:
-            module_name = alias.name
-            local_name = alias.asname if alias.asname else module_name.split(".")[0]
-            self.imports[local_name] = module_name
-        self.import_nodes.append(node)
 
-    def visit_ImportFrom(self, node):
-        module = node.module or ""
-        for alias in node.names:
-            name = alias.name
-            local_name = alias.asname if alias.asname else name
-            full_name = f"{module}.{name}" if module else name
-            self.imports[local_name] = full_name
-        self.import_nodes.append(node)
-
-    def visit_Name(self, node):
-        if isinstance(node.ctx, (ast.Load, ast.Del)):
-            self.used_names.add(node.id)
-        self.generic_visit(node)
-
-    def visit_Attribute(self, node):
-        parts = []
-        current = node
-        while isinstance(current, ast.Attribute):
-            parts.append(current.attr)
-            current = current.value
-        if isinstance(current, ast.Name):
-            parts.append(current.id)
-            full_attr = ".".join(reversed(parts))
-            self.used_names.add(full_attr)
-        self.generic_visit(node)
-
-
-def find_missing_imports(filepath: str, stdlib_names: Dict[str, Set[str]]) -> List[Tuple[str, str]]:
+def find_missing_imports(filepath: str, stdlib_names: dict[str, set[str]]) -> list[tuple[str, str]]:
     try:
         with open(filepath, encoding="utf-8") as f:
             source = f.read()
@@ -415,7 +378,7 @@ def find_missing_imports(filepath: str, stdlib_names: Dict[str, Set[str]]) -> Li
     return missing
 
 
-def scan_directory(root_dir: str, exclude_dirs: Set[str] | None = None) -> Dict[str, List[Tuple[str, str]]]:
+def scan_directory(root_dir: str, exclude_dirs: set[str] | None = None) -> dict[str, list[tuple[str, str]]]:
     if exclude_dirs is None:
         exclude_dirs = {
             ".git",
@@ -446,7 +409,7 @@ def scan_directory(root_dir: str, exclude_dirs: Set[str] | None = None) -> Dict[
     return results
 
 
-def print_results(results: Dict[str, List[Tuple[str, str]]], show_all: bool = False):
+def print_results(results: dict[str, list[tuple[str, str]]], show_all: bool = False):
     if not results:
         print("\n✅ No missing stdlib imports detected!")
         return

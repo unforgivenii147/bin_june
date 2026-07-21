@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from __future__ import annotations
 
+
+from __future__ import annotations
 import ast
 import sys
 import traceback
@@ -8,10 +9,7 @@ from collections import deque
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, List, Optional, Set, Tuple
-
 from termcolor import cprint
-
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def fsz(sz: float) -> str:
@@ -193,8 +191,8 @@ class PathlibTransformer(ast.NodeTransformer):
         return bool(
             isinstance(node.func, ast.Attribute)
             and isinstance(node.func.value, ast.Name)
-            and node.func.value.id == self.os_path_var_name
-            and node.func.attr == func_name
+            and (node.func.value.id == self.os_path_var_name)
+            and (node.func.attr == func_name)
         )
 
     def visit_Call(self, node: ast.Call) -> ast.AST:
@@ -487,9 +485,7 @@ class PathlibTransformer(ast.NodeTransformer):
         path_arg = node.args[0] if node.args else ast.Constant(value=".")
         self.warnings.append("os.scandir -> Path.iterdir() returns DirEntry-like objects, check attribute access")
         return ast.Call(
-            func=ast.Attribute(value=self._ensure_path(path_arg), attr="iterdir", ctx=ast.Load()),
-            args=[],
-            keywords=[],
+            func=ast.Attribute(value=self._ensure_path(path_arg), attr="iterdir", ctx=ast.Load()), args=[], keywords=[]
         )
 
     def _transform_walk(self, node: ast.Call) -> ast.AST:
@@ -568,10 +564,7 @@ def process_file(
         for warning in transformer.warnings:
             cprint(f"  ⚠️ {warning}", "yellow")
         if transformer.infos or transformer.warnings:
-            cprint(
-                f"{('📝' if dry_run else '✓')} Refactored: {file_path.name}",
-                "green" if not dry_run else "yellow",
-            )
+            cprint(f"{('📝' if dry_run else '✓')} Refactored: {file_path.name}", "green" if not dry_run else "yellow")
         return (new_content, True, transformer.warnings, transformer.infos)
     except SyntaxError as e:
         cprint(f"✗ Syntax error in {file_path.name}: {e}", "red")

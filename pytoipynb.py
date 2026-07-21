@@ -8,7 +8,7 @@ from pathlib import Path
 
 import nbformat as nbf
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def simple_convert(py_file: str, ipynb_file: str | None = None) -> None:

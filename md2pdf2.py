@@ -11,7 +11,7 @@ from pygments.formatters import HtmlFormatter
 from pygments.lexers import TextLexer, get_lexer_by_name
 from weasyprint import CSS, HTML
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 class ValidationError(Exception):

@@ -202,14 +202,6 @@ def main() -> None:
     if args.dry_run:
         print(f"\nDry-run complete. {len(to_delete)} files would be deleted.")
         return
-    try:
-        response = input(f"\nDelete {len(to_delete)} files? [y/N]: ").strip().lower()
-        if response not in ("y", "yes"):
-            print("Deletion cancelled.")
-            return
-    except (KeyboardInterrupt, EOFError):
-        print("\nDeletion cancelled.")
-        return
     removed = 0
     failed = 0
     freed_space = 0

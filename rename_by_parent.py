@@ -5,7 +5,7 @@ import os
 from os.path import dirname as dirn, isfile as isf, join as jn
 from pathlib import Path
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 class DirectoryWalker:

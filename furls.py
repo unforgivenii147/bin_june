@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from __future__ import annotations
 
+
+from __future__ import annotations
 import argparse
 import contextlib
 import io
@@ -18,10 +19,7 @@ from tarfile import TarFile
 from typing import Any, Callable, Dict
 from urllib.parse import urlparse
 from zipfile import ZipFile
-
 import zstd
-
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 class ValidationFailure(Exception):
@@ -32,7 +30,7 @@ class ValidationFailure(Exception):
     def __repr__(self):
         return (
             f"ValidationFailure(func={self.func.__name__}, "
-            + f"args={ ({k: v for (k, v) in self.__dict__.items() if k != 'func'}) })"
+            + f"args={ {k: v for k, v in self.__dict__.items() if k != 'func'} })"
         )
 
     def __str__(self):
@@ -50,6 +48,7 @@ def _func_args_as_dict(func: Callable[..., Any], *args: Any, **kwargs: Any):
 
 
 def validator(func: Callable[..., Any]):
+
     @wraps(func)
     def wrapper(*args: Any, **kwargs: Any):
         return True if func(*args, **kwargs) else ValidationFailure(func, _func_args_as_dict(func, *args, **kwargs))
@@ -57,62 +56,26 @@ def validator(func: Callable[..., Any]):
     return wrapper
 
 
-ip_middle_octet = r"(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5]))"
-
-ip_last_octet = r"(?:\.(?:0|[1-9]\d?|1\d\d|2[0-4]\d|25[0-5]))"
-
+ip_middle_octet = "(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5]))"
+ip_last_octet = "(?:\\.(?:0|[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-5]))"
 url_regex = re.compile(
-    r"^"
-    r"(?:(?:https?|ftp)://)"
-    r"(?:[-a-z\u00a1-\uffff0-9._~%!$&'()*+,;=:]+"
-    r"(?::[-a-z0-9._~%!$&'()*+,;=:]*)?@)?"
-    r"(?:"
-    r"(?P<private_ip>"
-    r"(?:(?:10|127)" + ip_middle_octet + r"{2}" + ip_last_octet + r")|"
-    r"(?:(?:169\.254|192\.168)" + ip_middle_octet + ip_last_octet + r")|"
-    r"(?:172\.(?:1[6-9]|2\d|3[0-1])" + ip_middle_octet + ip_last_octet + r"))"
-    r"|"
-    r"(?P<private_host>"
-    r"(?:localhost))"
-    r"|"
-    r"(?P<public_ip>"
-    r"(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])"
-    r"" + ip_middle_octet + r"{2}"
-    r"" + ip_last_octet + r")"
-    r"|"
-    r"\[("
-    r"([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|"
-    r"([0-9a-fA-F]{1,4}:){1,7}:|"
-    r"([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|"
-    r"([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|"
-    r"([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|"
-    r"([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|"
-    r"([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|"
-    r"[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|"
-    r":((:[0-9a-fA-F]{1,4}){1,7}|:)|"
-    r"fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|"
-    r"::(ffff(:0{1,4}){0,1}:){0,1}"
-    r"((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}"
-    r"(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|"
-    r"([0-9a-fA-F]{1,4}:){1,4}:"
-    r"((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}"
-    r"(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])"
-    r")\]|"
-    r"(?:(?:(?:xn--[-]{0,2})|[a-z\u00a1-\uffff\U00010000-\U0010ffff0-9]-?)*"
-    r"[a-z\u00a1-\uffff\U00010000-\U0010ffff0-9]+)"
-    r"(?:\.(?:(?:xn--[-]{0,2})|[a-z\u00a1-\uffff\U00010000-\U0010ffff0-9]-?)*"
-    r"[a-z\u00a1-\uffff\U00010000-\U0010ffff0-9]+)*"
-    r"(?:\.(?:(?:xn--[-]{0,2}[a-z\u00a1-\uffff\U00010000-\U0010ffff0-9]{2,})|"
-    r"[a-z\u00a1-\uffff\U00010000-\U0010ffff]{2,}))"
-    r")"
-    r"(?::\d{2,5})?"
-    r"(?:/[-a-z\u00a1-\uffff\U00010000-\U0010ffff0-9._~%!$&'()*+,;=:@/]*)?"
-    r"(?:\?\S*)?"
-    r"(?:#\S*)?"
-    r"$",
+    "^(?:(?:https?|ftp)://)(?:[-a-z\\u00a1-\\uffff0-9._~%!$&'()*+,;=:]+(?::[-a-z0-9._~%!$&'()*+,;=:]*)?@)?(?:(?P<private_ip>(?:(?:10|127)"
+    + ip_middle_octet
+    + "{2}"
+    + ip_last_octet
+    + ")|(?:(?:169\\.254|192\\.168)"
+    + ip_middle_octet
+    + ip_last_octet
+    + ")|(?:172\\.(?:1[6-9]|2\\d|3[0-1])"
+    + ip_middle_octet
+    + ip_last_octet
+    + "))|(?P<private_host>(?:localhost))|(?P<public_ip>(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])"
+    + ip_middle_octet
+    + "{2}"
+    + ip_last_octet
+    + ")|\\[(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))\\]|(?:(?:(?:xn--[-]{0,2})|[a-z\\u00a1-\\uffff\\U00010000-\\U0010ffff0-9]-?)*[a-z\\u00a1-\\uffff\\U00010000-\\U0010ffff0-9]+)(?:\\.(?:(?:xn--[-]{0,2})|[a-z\\u00a1-\\uffff\\U00010000-\\U0010ffff0-9]-?)*[a-z\\u00a1-\\uffff\\U00010000-\\U0010ffff0-9]+)*(?:\\.(?:(?:xn--[-]{0,2}[a-z\\u00a1-\\uffff\\U00010000-\\U0010ffff0-9]{2,})|[a-z\\u00a1-\\uffff\\U00010000-\\U0010ffff]{2,})))(?::\\d{2,5})?(?:/[-a-z\\u00a1-\\uffff\\U00010000-\\U0010ffff0-9._~%!$&'()*+,;=:@/]*)?(?:\\?\\S*)?(?:#\\S*)?$",
     re.UNICODE | re.IGNORECASE,
 )
-
 URL_RE = re.compile(url_regex)
 
 
@@ -120,7 +83,7 @@ def is_valid_url(value, public=False):
     result = URL_RE.match(value)
     if not public:
         return result
-    return result and not any(result.groupdict().get(key) for key in ("private_ip", "private_host"))
+    return result and (not any((result.groupdict().get(key) for key in ("private_ip", "private_host"))))
 
 
 def append_text(path: str | Path, content: str, encoding: str = "utf-8") -> bool:
@@ -138,11 +101,9 @@ def append_text(path: str | Path, content: str, encoding: str = "utf-8") -> bool
 
 DEFAULT_MAX_MB = 15
 EXCLUDE_DIRS = {".git", "__pycache__"}
-URL_RE = re.compile(r"(https?://[^\s\'\"<>\\)\\(]+)", flags=re.IGNORECASE)
-
+URL_RE = re.compile("(https?://[^\\s\\'\\\"<>\\\\)\\\\(]+)", flags=re.IGNORECASE)
 GIT_FILE = Path("gitlinks.txt")
 REPO_FILE = Path("repos.txt")
-
 ARCHIVE_SUFFIXES = (
     ".tar.gz",
     ".tgz",
@@ -169,7 +130,7 @@ ARCHIVE_SUFFIXES = (
 
 
 def should_skip_dir(dirname: str) -> bool:
-    return any(part in EXCLUDE_DIRS for part in dirname.split(os.sep))
+    return any((part in EXCLUDE_DIRS for part in dirname.split(os.sep)))
 
 
 def find_urls_in_text(text):
@@ -203,7 +164,7 @@ def scan_bytes_for_urls(b: bytes, max_bytes, exts, name_hint=None):
 
 def is_archive_name(name) -> bool:
     nl = name.lower()
-    return any(nl.endswith(suf) for suf in ARCHIVE_SUFFIXES)
+    return any((nl.endswith(suf) for suf in ARCHIVE_SUFFIXES))
 
 
 def open_tar_from_zst_path(path):
@@ -223,11 +184,11 @@ def open_tar_from_zst_path(path):
     temp.seek(0)
     try:
         tf = tarfile.open(fileobj=temp, mode="r:*")
-        return tf, temp
+        return (tf, temp)
     except Exception:
         with contextlib.suppress(Exception):
             temp.close()
-        return None, None
+        return (None, None)
 
 
 def process_zipfile_zipped(zipf: ZipFile, max_bytes, exts, found, recursion_depth, max_recursion) -> None:
@@ -279,8 +240,7 @@ def process_bytes_as_archive(b, name, max_bytes, exts, found, recursion_depth: i
             except zipfile.BadZipFile:
                 found.update(scan_bytes_for_urls(b, max_bytes, exts, name_hint=name))
             return
-
-        if any(lname.endswith(suf) for suf in (".tar", ".tar.gz", ".tgz", ".tar.xz", ".txz", ".tar.bz2", ".tbz2")):
+        if any((lname.endswith(suf) for suf in (".tar", ".tar.gz", ".tgz", ".tar.xz", ".txz", ".tar.bz2", ".tbz2"))):
             try:
                 bio.seek(0)
                 with tarfile.open(fileobj=bio, mode="r:*") as tf:
@@ -288,7 +248,6 @@ def process_bytes_as_archive(b, name, max_bytes, exts, found, recursion_depth: i
             except tarfile.ReadError:
                 found.update(scan_bytes_for_urls(b, max_bytes, exts, name_hint=name))
             return
-
         if lname.endswith(".tar.zst"):
             if zstd is None:
                 found.update(scan_bytes_for_urls(b, max_bytes, exts, name_hint=name))
@@ -311,7 +270,6 @@ def process_bytes_as_archive(b, name, max_bytes, exts, found, recursion_depth: i
             except Exception:
                 found.update(scan_bytes_for_urls(b, max_bytes, exts, name_hint=name))
                 return
-
         found.update(scan_bytes_for_urls(b, max_bytes, exts, name_hint=name))
     except Exception:
         found.update(scan_bytes_for_urls(b, max_bytes, exts, name_hint=name))
@@ -323,27 +281,24 @@ def process_path(path: str, max_bytes: int, exts, found, recursion_limit=999) ->
         size = p.stat().st_size
     except Exception:
         return
-    if size > max_bytes and not is_archive_name(path):
+    if size > max_bytes and (not is_archive_name(path)):
         return
-
     lname = path.lower()
     try:
-        if any(lname.endswith(suf) for suf in (".zip", ".whl")):
+        if any((lname.endswith(suf) for suf in (".zip", ".whl"))):
             try:
                 with ZipFile(p) as zf:
                     process_zipfile_zipped(zf, max_bytes, exts, found, 0, recursion_limit)
                 return
             except zipfile.BadZipFile:
                 pass
-
-        if any(lname.endswith(suf) for suf in (".tar", ".tar.gz", ".tgz", ".tar.xz", ".txz", ".tar.bz2", ".tbz2")):
+        if any((lname.endswith(suf) for suf in (".tar", ".tar.gz", ".tgz", ".tar.xz", ".txz", ".tar.bz2", ".tbz2"))):
             try:
                 with tarfile.open(p, mode="r:*") as tf:
                     process_tarfile_obj(tf, max_bytes, exts, found, 0, recursion_limit)
                 return
             except (tarfile.ReadError, EOFError):
                 pass
-
         if lname.endswith(".tar.zst"):
             if zstd is None:
                 try:
@@ -352,7 +307,6 @@ def process_path(path: str, max_bytes: int, exts, found, recursion_limit=999) ->
                 except Exception:
                     pass
                 return
-
             tf, tmpf = open_tar_from_zst_path(path)
             if tf is None:
                 return
@@ -364,7 +318,6 @@ def process_path(path: str, max_bytes: int, exts, found, recursion_limit=999) ->
                 with contextlib.suppress(Exception):
                     tmpf.close()
             return
-
         b = p.read_bytes()[: max_bytes + 1]
         found.update(scan_bytes_for_urls(b, max_bytes, exts, found=found, name_hint=path))
     except TypeError:
@@ -387,7 +340,7 @@ def is_github_url(url):
 
 def extract_git_repos(urls):
     repo_urls = []
-    github_regex = re.compile(r"https?://github\.com/([^/]+)/([^/]+?)(?:/|$|\.git|\?|#)")
+    github_regex = re.compile("https?://github\\.com/([^/]+)/([^/]+?)(?:/|$|\\.git|\\?|#)")
     for url in urls:
         matchz = github_regex.search(url)
         if matchz:
@@ -423,7 +376,7 @@ def iter_files(root: Path):
             continue
         cd = Path(current_dir)
         for fname in filenames:
-            yield cd / fname
+            yield (cd / fname)
 
 
 def main() -> None:
@@ -445,28 +398,20 @@ def main() -> None:
         help="Comma-separated list of file extensions to scan (e.g. .py,.md). If empty, all files are scanned. Applies to archive members too.",
     )
     parser.add_argument(
-        "--max-recursion",
-        type=int,
-        default=999,
-        help="Max nested-archive recursion depth (default 999).",
+        "--max-recursion", type=int, default=999, help="Max nested-archive recursion depth (default 999)."
     )
     args = parser.parse_args()
-
     max_bytes = int(args.max_mb * 1024 * 1024)
     exts = {e.strip().lower() for e in args.extensions.split(",") if e.strip()} if args.extensions else None
     found = set()
-
     for p in iter_files(Path(".")):
         print(f"processing {p.name}")
         process_path(str(p), max_bytes, exts, found, recursion_limit=args.max_recursion)
-
     if not found:
         print("no url found")
         sys.exit(0)
-
     sorted_urls = sorted(found)
     extract_and_save_gitlinks(sorted_urls)
-
     out_path = Path(args.output)
     try:
         if out_path.exists():
@@ -481,9 +426,8 @@ def main() -> None:
                 for u in sorted_urls:
                     if is_valid_url(u):
                         out.write(u + "\n")
-
         print(f"Wrote {len(sorted_urls)} unique URLs to {args.output}")
-        any(p.endswith(".tar.zst") for p in sorted_urls)
+        any((p.endswith(".tar.zst") for p in sorted_urls))
     except OSError as e:
         print(f"Error writing output file: {e}", file=sys.stderr)
 

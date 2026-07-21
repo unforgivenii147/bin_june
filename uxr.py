@@ -10,14 +10,11 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import Optional, Tuple
 
-import joblib
 import py7zr
 from joblib import Parallel, delayed
 from tqdm import tqdm
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 try:
     import zstandard as zstd
@@ -208,7 +205,7 @@ class ArchiveExtractor:
                 self._print_status(archive, "FAILED", f"7z error: {e}")
             return False
 
-    def extract_single(self, archive_path: Path) -> Tuple[Path, bool, str | None]:
+    def extract_single(self, archive_path: Path) -> tuple[Path, bool, str | None]:
         archive = Path(archive_path)
         if not archive.exists() or not archive.is_file():
             return archive, False, "File not found"

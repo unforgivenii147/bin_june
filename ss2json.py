@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pandas as pd
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 fn = Path(sys.argv[1])
 df = pd.read_csv(str(fn))

@@ -1,18 +1,16 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-from __future__ import annotations
 
+from __future__ import annotations
 import sys
 from pathlib import Path
-
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def split_file_by_delimiter(fname: str, delimiter: str) -> None:
     content = Path(fname).read_text(encoding="utf-8")
     parts = content.split(delimiter)
     with Path(fname).open("w", encoding="utf-8") as f:
-        f.writelines(part.strip() + f"{delimiter}\n" for part in parts)
+        f.writelines((part.strip() + f"{delimiter}\n" for part in parts))
 
 
 def main() -> None:

@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from __future__ import annotations
 
+
+from __future__ import annotations
 import argparse
 import ast
 import bz2
@@ -14,10 +15,7 @@ import tempfile
 import zipfile
 from collections import defaultdict
 from pathlib import Path
-
 from loguru import logger
-
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 try:
     import tree_sitter_python
@@ -32,7 +30,6 @@ except ImportError:
     zstd = None
 try:
     import brotli
-
 except ImportError:
     brotli = None
 SUPPORTED_ARCHIVES = (
@@ -107,7 +104,7 @@ def extract_with_tree_sitter(code: str):
                     parsed = ast.parse(text)
                     if len(parsed.body) == 1 and isinstance(parsed.body[0], ast.Assign):
                         assign = parsed.body[0]
-                        if all(isinstance(t, ast.Name) for t in assign.targets):
+                        if all((isinstance(t, ast.Name) for t in assign.targets)):
                             name = assign.targets[0].id
                             objects.append(
                                 {
@@ -162,7 +159,7 @@ def extract_with_ast(code: str):
                     }
                 )
             elif isinstance(node, ast.Assign):
-                if all(isinstance(t, ast.Name) for t in node.targets):
+                if all((isinstance(t, ast.Name) for t in node.targets)):
                     snippet = ast.get_source_segment(code, node)
                     if snippet is None:
                         continue
@@ -190,7 +187,7 @@ def extract_objects(code: str):
 
 def is_supported_archive(path: Path) -> bool:
     s = str(path).lower()
-    return any(s.endswith(ext) for ext in SUPPORTED_ARCHIVES)
+    return any((s.endswith(ext) for ext in SUPPORTED_ARCHIVES))
 
 
 def extract_archive(path: Path) -> str:
@@ -203,15 +200,15 @@ def extract_archive(path: Path) -> str:
         elif lower.endswith((".tar", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz")):
             with tarfile.open(path) as tf:
                 tf.extractall(temp_dir)
-        elif lower.endswith(".gz") and not lower.endswith(".tar.gz"):
+        elif lower.endswith(".gz") and (not lower.endswith(".tar.gz")):
             out_path = Path(temp_dir) / path.stem
             with gzip.open(path, "rb") as f_in, open(out_path, "wb") as f_out:
                 f_out.write(f_in.read())
-        elif lower.endswith(".bz2") and not lower.endswith(".tar.bz2"):
+        elif lower.endswith(".bz2") and (not lower.endswith(".tar.bz2")):
             out_path = Path(temp_dir) / path.stem
             with bz2.open(path, "rb") as f_in, open(out_path, "wb") as f_out:
                 f_out.write(f_in.read())
-        elif lower.endswith(".xz") and not lower.endswith(".tar.xz"):
+        elif lower.endswith(".xz") and (not lower.endswith(".tar.xz")):
             out_path = Path(temp_dir) / path.stem
             with lzma.open(path, "rb") as f_in, open(out_path, "wb") as f_out:
                 f_out.write(f_in.read())
@@ -328,7 +325,7 @@ def build_import_line(utils_module_name: str, names) -> str:
 
 
 def write_utils_file(path: Path, objects) -> bool:
-    content = "\n\n".join(obj["snippet"].rstrip() for obj in objects).rstrip() + "\n"
+    content = "\n\n".join((obj["snippet"].rstrip() for obj in objects)).rstrip() + "\n"
     try:
         ast.parse(content)
     except SyntaxError as e:
@@ -354,7 +351,7 @@ def insert_import_after_shebang(code: str, import_line: str) -> str:
 def remove_snippets_from_code(code: str, objects) -> str:
     if not objects:
         return code
-    if all(o.get("start_byte") is not None and o.get("end_byte") is not None for o in objects):
+    if all((o.get("start_byte") is not None and o.get("end_byte") is not None for o in objects)):
         encoded = code.encode("utf-8")
         spans = sorted([(o["start_byte"], o["end_byte"]) for o in objects], key=lambda x: x[0], reverse=True)
         for start, end in spans:
@@ -396,17 +393,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Find repeated top-level Python objects and optionally move/copy them to utils.py"
     )
+    parser.add_argument("-m", "--move", action="store_true", help="Move duplicate objects to utils.py and add imports")
     parser.add_argument(
-        "-m",
-        "--move",
-        action="store_true",
-        help="Move duplicate objects to utils.py and add imports",
-    )
-    parser.add_argument(
-        "-c",
-        "--copy",
-        action="store_true",
-        help="Copy duplicate objects to utils.py without changing source files",
+        "-c", "--copy", action="store_true", help="Copy duplicate objects to utils.py without changing source files"
     )
     parser.add_argument("-j", "--jobs", type=int, default=mp.cpu_count(), help="Number of worker processes")
     args = parser.parse_args()

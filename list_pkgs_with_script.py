@@ -1,16 +1,14 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-from __future__ import annotations
 
+from __future__ import annotations
 import site
 from pathlib import Path
-
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 u = Path(site.getusersitepackages())
 nl = []
 for p in u.iterdir():
-    if p.is_dir() and not p.name.endswith((".dist-info", ".egg-info")):
+    if p.is_dir() and (not p.name.endswith((".dist-info", ".egg-info"))):
         for d in u.glob(f"{p.name}*.dist-info"):
             if (d / "entry_points.txt").exists():
                 print(p.name)

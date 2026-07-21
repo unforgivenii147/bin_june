@@ -32,7 +32,7 @@ import lzma_mt
 import zstandard as zstd
 from loguru import logger
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 HAS_ZST = True
 HAS_BR = True

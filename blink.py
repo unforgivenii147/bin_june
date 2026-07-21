@@ -56,11 +56,8 @@ if __name__ == "__main__":
                 except Exception as e:
                     print(f"Error deleting {path}: {e}")
     if broken_links:
-        blink_file = cwd / "blink.txt"
-        with open(blink_file, "w") as f:
-            for link in broken_links:
-                f.write(f"{link}\n")
-        print(f"\nBroken links saved to: {blink_file}")
+        for link in broken_links:
+            print(f"{link}\n")
     if not bcount:
         print("no broken link found.")
         sys.exit(0)

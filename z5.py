@@ -14,13 +14,9 @@ import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Final, Optional
 
 import zstandard as zstd
 
-SKIP_DIRS: Final[frozenset[str]] = frozenset(
-    {"lazy", ".git", ".svn", ".hg", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
-)
 EXCLUDED_EXTENSIONS: Final[set[str]] = {
     ".xz",
     ".zst",
@@ -118,7 +114,6 @@ class OperationResult:
     original_size: int
     processed_size: int
     success: bool
-    error: str | None = None
     duration: float = 0.0
     original_deleted: bool = False
     operation: str = "compress"

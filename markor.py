@@ -1,17 +1,14 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-from __future__ import annotations
 
+from __future__ import annotations
 import operator
 import sys
 from abc import ABC, abstractmethod
 from datetime import datetime
 from pathlib import Path
 from typing import Any
-
 import markdown
-
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 class GUIFramework:
@@ -358,8 +355,7 @@ class TextEditor:
         if not name:
             return
         format_choice = self.gui.show_menu(
-            "Select Format",
-            ["Markdown (.md)", "Todo List (.txt)", "Plain Text (.txt)", "JSON (.json)"],
+            "Select Format", ["Markdown (.md)", "Todo List (.txt)", "Plain Text (.txt)", "JSON (.json)"]
         )
         formats = ["markdown", "todo", "text", "json"]
         format_type = formats[format_choice] if 0 <= format_choice < len(formats) else "markdown"
@@ -396,9 +392,7 @@ class TextEditor:
             return
         search_content = (
             self.gui.show_dialog(
-                "Search Scope",
-                "Search in filenames only or file content?",
-                ["Filenames Only", "Content Too"],
+                "Search Scope", "Search in filenames only or file content?", ["Filenames Only", "Content Too"]
             )
             == 1
         )
@@ -493,12 +487,8 @@ class TextEditor:
                 "Italic": "*italic text*",
                 "Code": "`code`",
                 "Link": "[Link](url)",
-                "List": """- Item 1
-- Item 2
-- Item 3""",
-                "Table": """| Col1 | Col2 |
-|------|------|
-| A    | B    |""",
+                "List": "- Item 1\n- Item 2\n- Item 3",
+                "Table": "| Col1 | Col2 |\n|------|------|\n| A    | B    |",
             },
             "todo": {
                 "Task": "() New task",
@@ -537,12 +527,7 @@ class TextEditor:
         if count == 0:
             self.gui.show_dialog("Not Found", f"'{find_text}' not found")
             return
-        replace_choice = self.gui.show_dialog(
-            "Replace",
-            f"""Found {count} occurrence(s).
-Replace all?""",
-            ["Yes", "No"],
-        )
+        replace_choice = self.gui.show_dialog("Replace", f"Found {count} occurrence(s).\nReplace all?", ["Yes", "No"])
         if replace_choice == 0:
             replace_text = self.gui.show_text_input("Replace With", "")
             if replace_text is not None:
@@ -552,18 +537,7 @@ Replace all?""",
 
     def show_document_info(self) -> None:
         info = self.current_document.get_info()
-        info_text = f"""
-Document Information
-{"=" * 40}
-Name: {info["name"]}
-Path: {info["path"]}
-Format: {info["format"]}
-Size: {info["size_bytes"]} bytes
-Words: {info["words"]}
-Characters: {info["characters"]}
-Lines: {info["lines"]}
-Last Modified: {info["last_modified"]}
-"""
+        info_text = f"\nDocument Information\n{'=' * 40}\nName: {info['name']}\nPath: {info['path']}\nFormat: {info['format']}\nSize: {info['size_bytes']} bytes\nWords: {info['words']}\nCharacters: {info['characters']}\nLines: {info['lines']}\nLast Modified: {info['last_modified']}\n"
         self.gui.show_dialog("Document Info", info_text)
 
     def save_document(self) -> None:
@@ -585,14 +559,7 @@ Last Modified: {info["last_modified"]}
         self.current_document = None
 
     def show_settings(self) -> None:
-        settings_menu = [
-            "Theme (Dark/Light)",
-            "Auto-save",
-            "Font Size",
-            "Word Wrap",
-            "Show Line Numbers",
-            "Back",
-        ]
+        settings_menu = ["Theme (Dark/Light)", "Auto-save", "Font Size", "Word Wrap", "Show Line Numbers", "Back"]
         choice = self.gui.show_menu("Settings", settings_menu)
         if choice >= 0 and choice < 5:
             self.gui.show_toast(f"Setting {choice}: Not yet implemented")

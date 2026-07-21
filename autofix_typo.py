@@ -15,9 +15,9 @@ import sys
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+# from typing import Optional
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 COMMON_SUBSTITUTIONS = {
     "b": "n",
@@ -130,7 +130,7 @@ class PatternLearner:
             return candidates[0][0]
         return word
 
-    def learn_from_correction(self, wrong: str, correct: str, context: str = "") -> None:
+    def learn_from_correction(self, wrong: str, correct: str) -> None:
         if wrong == correct:
             return
         self.learned_corrections[wrong] = correct
@@ -234,7 +234,7 @@ class TypoFixerWithLearning:
             return True
         return word.lower() in self.valid_words
 
-    def suggest_correction(self, word: str, context: str = "") -> str | None:
+    def suggest_correction(self, word: str) -> str | None:
         if self.is_valid_word(word):
             return None
         pattern_corrected = self.learner.apply_substitutions(word)

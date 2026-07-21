@@ -8,24 +8,84 @@ import bz2
 import gzip
 import sys
 from collections import deque
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from typing import Callable
 
 import brotlicffi as brotli
 import lz4.frame
 import py7zr
 import zstandard as zstd
 
-HAS_ZSTD = True
-HAS_BROTLI = True
-HAS_PY7ZR = True
-HAS_LZ4 = True
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+# Constants
+MAX_WORKERS = 4
+CHUNK_SIZE = 10 * 1024 * 1024  # 10MB chunks
+COMPRESSORS = {}
+
+
+def fsz(size: int) -> str:
+    """Format size in bytes to human-readable format."""
+    for unit in ("B", "KB", "MB", "GB", "TB"):
+        if size < 1024:
+            return f"{size:.1f}{unit}"
+        size /= 1024
+    return f"{size:.1f}PB"
+
+
+def setup_compressors() -> None:
+    """Initialize compressor configurations."""
+    global COMPRESSORS
+    COMPRESSORS = {
+        "zstd": {
+            "ext": ".zst",
+            "tar_ext": "*.tar.zst",
+            "settings": {"level": 22},
+            "available": True,
+        },
+        "xz": {
+            "ext": ".xz",
+            "tar_ext": "*.tar.xz",
+            "settings": {"preset": 9},
+            "available": True,
+        },
+        "py7zr": {
+            "ext": ".7z",
+            "tar_ext": "*.7z",
+            "settings": {"compression_level": 7},
+            "available": True,
+        },
+        "gzip": {
+            "ext": ".gz",
+            "tar_ext": "*.tar.gz",
+            "settings": {"compresslevel": 9},
+            "available": True,
+        },
+        "bz2": {
+            "ext": ".bz2",
+            "tar_ext": "*.tar.bz2",
+            "settings": {"compresslevel": 9},
+            "available": True,
+        },
+        "brotli": {
+            "ext": ".br",
+            "tar_ext": "*.tar.br",
+            "settings": {"quality": 11, "lgwin": 22},
+            "available": True,
+        },
+        "lz4": {
+            "ext": ".lz4",
+            "tar_ext": "*.tar.lz4",
+            "settings": {"compression_level": 12},
+            "available": True,
+        },
+    }
 
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
+    """Recursively get all files in a directory, optionally filtered by extension."""
     path = Path(path)
-    skip_dirs = {".git", "__pycache__"}
+    skip_dirs = {".git", "__pycache__", "node_modules", ".venv", "venv"}
     queue = deque([path])
     files = []
     while queue:
@@ -45,14 +105,26 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
 
 
 def get_dirs(directory: Path) -> list[Path]:
+    """Get immediate subdirectories (non-symlink)."""
     return [p for p in directory.glob("*") if not p.is_symlink() and p.is_dir()]
 
 
 def should_compress(path: Path, compressor: str) -> bool:
+    """Determine if a file should be compressed based on size and type."""
     try:
         if not path.is_file() or path.is_symlink():
             return False
-        compressed_extensions = (".xz", ".gz", ".bz2", ".br", ".zst", ".7z", ".zip", ".rar", ".lz4")
+        compressed_extensions = (
+            ".xz",
+            ".gz",
+            ".bz2",
+            ".br",
+            ".zst",
+            ".7z",
+            ".zip",
+            ".rar",
+            ".lz4",
+        )
         if path.suffix in compressed_extensions:
             return False
         size = path.stat().st_size
@@ -61,13 +133,251 @@ def should_compress(path: Path, compressor: str) -> bool:
         return False
 
 
+def compress_in_memory(path: Path, out_path: Path, compressor: str) -> bool:
+    """Compress a file that fits in memory."""
+    try:
+        with open(path, "rb") as f:
+            data = f.read()
+
+        with open(out_path, "wb") as f:
+            if compressor == "zstd":
+                cctx = zstd.ZstdCompressor(level=COMPRESSORS["zstd"]["settings"]["level"])
+                f.write(cctx.compress(data))
+            elif compressor == "gzip":
+                f.write(
+                    gzip.compress(
+                        data,
+                        compresslevel=COMPRESSORS["gzip"]["settings"]["compresslevel"],
+                    )
+                )
+            elif compressor == "bz2":
+                f.write(
+                    bz2.compress(
+                        data,
+                        compresslevel=COMPRESSORS["bz2"]["settings"]["compresslevel"],
+                    )
+                )
+            elif compressor == "brotli":
+                f.write(
+                    brotli.compress(
+                        data,
+                        quality=COMPRESSORS["brotli"]["settings"]["quality"],
+                        lgwin=COMPRESSORS["brotli"]["settings"]["lgwin"],
+                    )
+                )
+            elif compressor == "lz4":
+                f.write(
+                    lz4.frame.compress(
+                        data,
+                        compression_level=COMPRESSORS["lz4"]["settings"]["compression_level"],
+                    )
+                )
+            elif compressor == "xz":
+                import lzma
+
+                cctx = lzma.LZMACompressor(preset=COMPRESSORS["xz"]["settings"]["preset"])
+                f.write(cctx.compress(data))
+                f.write(cctx.flush())
+            elif compressor == "py7zr":
+                with py7zr.SevenZipFile(out_path, "w") as archive:
+                    archive.write(path, arcname=path.name)
+                return True
+        return True
+    except Exception as e:
+        print(f"    Error compressing: {e}")
+        return False
+
+
+def compress_chunked(path: Path, out_path: Path, original_size: int, compressor: str) -> bool:
+    """Compress a large file in chunks."""
+    try:
+        if compressor == "zstd":
+            cctx = zstd.ZstdCompressor(level=COMPRESSORS["zstd"]["settings"]["level"])
+            with open(path, "rb") as inf, open(out_path, "wb") as outf:
+                with cctx.stream_writer(outf) as writer:
+                    while True:
+                        chunk = inf.read(CHUNK_SIZE)
+                        if not chunk:
+                            break
+                        writer.write(chunk)
+        elif compressor == "gzip":
+            with (
+                open(path, "rb") as inf,
+                gzip.open(
+                    out_path,
+                    "wb",
+                    compresslevel=COMPRESSORS["gzip"]["settings"]["compresslevel"],
+                ) as outf,
+            ):
+                while True:
+                    chunk = inf.read(CHUNK_SIZE)
+                    if not chunk:
+                        break
+                    outf.write(chunk)
+        elif compressor == "bz2":
+            with (
+                open(path, "rb") as inf,
+                bz2.open(
+                    out_path,
+                    "wb",
+                    compresslevel=COMPRESSORS["bz2"]["settings"]["compresslevel"],
+                ) as outf,
+            ):
+                while True:
+                    chunk = inf.read(CHUNK_SIZE)
+                    if not chunk:
+                        break
+                    outf.write(chunk)
+        elif compressor == "brotli":
+            with open(path, "rb") as inf, open(out_path, "wb") as outf:
+                compressor_obj = brotli.Compressor(
+                    quality=COMPRESSORS["brotli"]["settings"]["quality"],
+                    lgwin=COMPRESSORS["brotli"]["settings"]["lgwin"],
+                )
+                while True:
+                    chunk = inf.read(CHUNK_SIZE)
+                    if not chunk:
+                        break
+                    outf.write(compressor_obj.process(chunk))
+                outf.write(compressor_obj.finish())
+        elif compressor == "lz4":
+            context = lz4.frame.create_compression_context()
+            with open(path, "rb") as inf, open(out_path, "wb") as outf:
+                while True:
+                    chunk = inf.read(CHUNK_SIZE)
+                    if not chunk:
+                        break
+                    compressed = lz4.frame.compress_chunk(
+                        context,
+                        chunk,
+                        compression_level=COMPRESSORS["lz4"]["settings"]["compression_level"],
+                    )
+                    outf.write(compressed)
+        elif compressor == "xz":
+            import lzma
+
+            with (
+                open(path, "rb") as inf,
+                lzma.open(out_path, "wb", preset=COMPRESSORS["xz"]["settings"]["preset"]) as outf,
+            ):
+                while True:
+                    chunk = inf.read(CHUNK_SIZE)
+                    if not chunk:
+                        break
+                    outf.write(chunk)
+        elif compressor == "py7zr":
+            with py7zr.SevenZipFile(out_path, "w") as archive:
+                archive.write(path, arcname=path.name)
+        return True
+    except Exception as e:
+        print(f"    Error compressing: {e}")
+        return False
+
+
+def decompress_file(path: Path, compressor: str) -> bool:
+    """Decompress a single file."""
+    try:
+        out_path = path.with_suffix("")
+
+        if compressor == "zstd":
+            dctx = zstd.ZstdDecompressor()
+            with open(path, "rb") as inf, open(out_path, "wb") as outf:
+                with dctx.stream_reader(inf) as reader:
+                    while True:
+                        chunk = reader.read(CHUNK_SIZE)
+                        if not chunk:
+                            break
+                        outf.write(chunk)
+        elif compressor == "gzip":
+            with gzip.open(path, "rb") as inf, open(out_path, "wb") as outf:
+                while True:
+                    chunk = inf.read(CHUNK_SIZE)
+                    if not chunk:
+                        break
+                    outf.write(chunk)
+        elif compressor == "bz2":
+            with bz2.open(path, "rb") as inf, open(out_path, "wb") as outf:
+                while True:
+                    chunk = inf.read(CHUNK_SIZE)
+                    if not chunk:
+                        break
+                    outf.write(chunk)
+        elif compressor == "brotli":
+            decompressor = brotli.Decompressor()
+            with open(path, "rb") as inf, open(out_path, "wb") as outf:
+                while True:
+                    chunk = inf.read(CHUNK_SIZE)
+                    if not chunk:
+                        break
+                    outf.write(decompressor.process(chunk))
+                outf.write(decompressor.finish())
+        elif compressor == "lz4":
+            with open(path, "rb") as inf, open(out_path, "wb") as outf:
+                decompressed = lz4.frame.decompress(inf.read())
+                outf.write(decompressed)
+        elif compressor == "xz":
+            import lzma
+
+            with lzma.open(path, "rb") as inf, open(out_path, "wb") as outf:
+                while True:
+                    chunk = inf.read(CHUNK_SIZE)
+                    if not chunk:
+                        break
+                    outf.write(chunk)
+        elif compressor == "py7zr":
+            with py7zr.SevenZipFile(path, "r") as archive:
+                archive.extractall(path=path.parent)
+        path.unlink()
+        print(f"  ✓ Decompressed {path.name} to {out_path.name}")
+        return True
+    except Exception as e:
+        print(f"  ✗ Error decompressing {path.name}: {e}")
+        return False
+
+
+def decompress_archive(archive_path: Path, compressor: str) -> bool:
+    """Decompress an archive file."""
+    try:
+        if compressor == "py7zr":
+            with py7zr.SevenZipFile(archive_path, "r") as archive:
+                archive.extractall(path=archive_path.parent)
+        else:
+            # For tar-based archives, would need tarfile + compression
+            print(f"  ⚠️  Archive decompression not fully implemented for {compressor}")
+            return False
+        archive_path.unlink()
+        print(f"  ✓ Decompressed archive {archive_path.name}")
+        return True
+    except Exception as e:
+        print(f"  ✗ Error decompressing archive: {e}")
+        return False
+
+
+async def compress_folder_async(dir_path: Path, archive_path: str, compressor: str) -> bool:
+    """Compress an entire folder into an archive."""
+    try:
+        if compressor == "py7zr":
+            with py7zr.SevenZipFile(f"{archive_path}{COMPRESSORS[compressor]['ext']}", "w") as archive:
+                archive.writeall(dir_path, arcname=dir_path.name)
+        else:
+            # For other formats, would need additional tar handling
+            print(f"  ⚠️  Folder compression not fully implemented for {compressor}")
+            return False
+        return True
+    except Exception as e:
+        print(f"  ✗ Error compressing folder: {e}")
+        return False
+
+
 async def process_compress(compressor: str) -> None:
+    """Main compression process."""
     cwd = Path.cwd()
-    print(f"\n🔧 {compressor.upper()} Compression Settings:")
+    print(f"\n🔧 {compressor.upper()} Compression settings:")
     for key, value in COMPRESSORS[compressor]["settings"].items():
         print(f"   {key}: {value}")
     print(f"   Parallel workers: {MAX_WORKERS}")
     print(f"   Chunk size: {fsz(CHUNK_SIZE)}")
+
     dirs_to_compress = get_dirs(cwd)
     if dirs_to_compress:
         print(f"\n📁 Compressing {len(dirs_to_compress)} directories...")
@@ -79,26 +389,32 @@ async def process_compress(compressor: str) -> None:
                 print(f"  ✓ Successfully compressed {relative_path}")
             else:
                 print(f"  ✗ Failed to compress {relative_path}")
-    files_to_compress = get_files(cwd, compressor, mode="compress")
+
+    files_to_compress = [p for p in get_files(cwd) if should_compress(p, compressor)]
     if not files_to_compress:
         print("\n📄 No files to compress")
         return
+
     print(f"\n📄 Compressing {len(files_to_compress)} files with {compressor.upper()}...")
     total_original = 0
     total_compressed = 0
     successful = 0
+
     for i, path in enumerate(sorted(files_to_compress), 1):
         print(f"\n[{i}/{len(files_to_compress)}] {path.name}")
         original_size = path.stat().st_size
         total_original += original_size
         out_path = path.with_suffix(path.suffix + COMPRESSORS[compressor]["ext"])
+
         if out_path.exists():
             print(f"Skipping {path.name} - output already exists")
             continue
+
         if original_size < CHUNK_SIZE:
             success = compress_in_memory(path, out_path, compressor)
         else:
             success = compress_chunked(path, out_path, original_size, compressor)
+
         if success and out_path.exists():
             compressed_size = out_path.stat().st_size
             if compressed_size > 0 and compressed_size < original_size:
@@ -112,6 +428,7 @@ async def process_compress(compressor: str) -> None:
                 out_path.unlink()
         else:
             print(f"  ✗ Failed to compress {path.name}")
+
     if successful > 0:
         savings = total_original - total_compressed
         savings_percent = savings / total_original * 100
@@ -126,25 +443,31 @@ async def process_compress(compressor: str) -> None:
 
 
 async def process_decompress(compressor: str) -> None:
+    """Main decompression process."""
     cwd = Path.cwd()
     archive_ext = COMPRESSORS[compressor]["tar_ext"]
     archives = [p for p in cwd.glob(f"*{archive_ext}") if p.is_file()]
+
     if archives:
         print(f"\n📦 Decompressing {len(archives)} archives...")
         for archive in sorted(archives):
             print(f"\n  Decompressing {archive.name}...")
             decompress_archive(archive, compressor)
-    files_to_decompress = get_files(cwd, compressor, mode="decompress")
+
+    files_to_decompress = [p for p in get_files(cwd) if p.suffix == COMPRESSORS[compressor]["ext"]]
     if not files_to_decompress:
         print("\n📄 No files to decompress")
         return
+
     files_to_decompress = [p for p in files_to_decompress if not p.name.endswith(COMPRESSORS[compressor]["tar_ext"])]
     if not files_to_decompress:
         return
+
     print(f"\n📄 Decompressing {len(files_to_decompress)} {compressor.upper()} files...")
     total_original = 0
     total_decompressed = 0
     successful = 0
+
     for i, path in enumerate(sorted(files_to_decompress), 1):
         print(f"\n[{i}/{len(files_to_decompress)}] {path.name}")
         original_size = path.stat().st_size
@@ -154,6 +477,7 @@ async def process_decompress(compressor: str) -> None:
             out_path = path.with_suffix("")
             if out_path.exists():
                 total_decompressed += out_path.stat().st_size
+
     if successful > 0:
         print(f"\n{'=' * 50}")
         print(f"✅ Decompressed {successful}/{len(files_to_decompress)} files")
@@ -165,6 +489,7 @@ async def process_decompress(compressor: str) -> None:
 
 
 async def main_async(compressor: str, mode: str = "compress") -> None:
+    """Main async entry point."""
     if mode == "compress":
         await process_compress(compressor)
     elif mode == "decompress":
@@ -174,6 +499,7 @@ async def main_async(compressor: str, mode: str = "compress") -> None:
 
 
 def check_compressor_availability(compressor: str) -> bool:
+    """Check if required libraries are available."""
     if not COMPRESSORS[compressor]["available"]:
         print(f"\n❌ Error: {compressor.upper()} compression is not available.")
         print(f"Please install the required library:")
@@ -194,6 +520,7 @@ def check_compressor_availability(compressor: str) -> bool:
 
 
 def main() -> None:
+    """Main entry point."""
     setup_compressors()
     parser = argparse.ArgumentParser(
         description="Multi-format compression/decompression tool",
@@ -205,6 +532,7 @@ Compression Methods:
   -7, --7z       7-Zip compression (LZMA2 max)
   -g, --gzip     Gzip compression (level 9)
   -b, --bz2      Bzip2 compression (level 9)
+  -r, --brotli   Brotli compression (quality 11)
   -l, --lz4      LZ4 compression (HC mode max)
 
 Examples:
@@ -213,6 +541,7 @@ Examples:
   %(prog)s -7              # Compress with 7-Zip
   %(prog)s -g              # Compress with Gzip
   %(prog)s -b -d           # Decompress Bzip2 files
+  %(prog)s -r              # Compress with Brotli
   %(prog)s -l              # Compress with LZ4
         """,
     )
@@ -222,24 +551,30 @@ Examples:
     method_group.add_argument("-7", "--7z", action="store_true", help="Use 7-Zip compression")
     method_group.add_argument("-g", "--gzip", action="store_true", help="Use Gzip compression")
     method_group.add_argument("-b", "--bz2", action="store_true", help="Use Bzip2 compression")
+    method_group.add_argument("-r", "--brotli", action="store_true", help="Use Brotli compression")
     method_group.add_argument("-l", "--lz4", action="store_true", help="Use LZ4 compression")
     parser.add_argument("-d", "--decompress", action="store_true", help="Decompress files")
     args = parser.parse_args()
-    compressor = "zstd"
+
+    compressor = "zstd"  # Default
     if args.xz:
         compressor = "xz"
-    elif args.gz or args.gzip:
+    elif args.gzip:
         compressor = "gzip"
     elif args.bz2:
         compressor = "bz2"
+    elif args.brotli:
+        compressor = "brotli"
     elif args.zstd:
         compressor = "zstd"
     elif args.lz4:
         compressor = "lz4"
-    elif args.seven or args["7z"]:
+    elif args.__dict__.get("7z"):
         compressor = "py7zr"
+
     if not check_compressor_availability(compressor):
         sys.exit(1)
+
     mode = "decompress" if args.decompress else "compress"
     try:
         asyncio.run(main_async(compressor, mode))

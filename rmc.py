@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from __future__ import annotations
 
+
+from __future__ import annotations
 import argparse
 import ast
 import shutil
@@ -74,7 +75,7 @@ def extract_shebang_and_encoding(source_code: str) -> Tuple[str, str, str]:
         if i == 0 and line.startswith("#!"):
             shebang = line
             continue
-        elif i < 2 and (line.startswith(("# -*- coding:", "# coding:"))):
+        elif i < 2 and line.startswith(("# -*- coding:", "# coding:")):
             encoding = line
             continue
         remaining_lines.append(line)
@@ -101,7 +102,6 @@ def remove_comments_preserve_format(source_code: str) -> Tuple[str, int]:
     string_char = None
     in_triple_quotes = False
     triple_quote_char = None
-
     for line in lines:
         new_line = []
         i = 0
@@ -109,8 +109,8 @@ def remove_comments_preserve_format(source_code: str) -> Tuple[str, int]:
         comment_start = -1
         while i < len(line):
             char = line[i]
-            if char in ('"', "'") and not in_triple_quotes:
-                if i + 2 < len(line) and line[i + 1] == char and line[i + 2] == char:
+            if char in ('"', "'") and (not in_triple_quotes):
+                if i + 2 < len(line) and line[i + 1] == char and (line[i + 2] == char):
                     if not in_string:
                         in_triple_quotes = True
                         triple_quote_char = char
@@ -123,16 +123,16 @@ def remove_comments_preserve_format(source_code: str) -> Tuple[str, int]:
                         new_line.append(char * 3)
                         i += 3
                         continue
-                if not in_string and not in_triple_quotes:
+                if not in_string and (not in_triple_quotes):
                     in_string = True
                     string_char = char
-                elif in_string and string_char == char and not in_triple_quotes:
+                elif in_string and string_char == char and (not in_triple_quotes):
                     in_string = False
                     string_char = None
                 new_line.append(char)
                 i += 1
                 continue
-            if char == "#" and not in_string and not in_triple_quotes:
+            if char == "#" and (not in_string) and (not in_triple_quotes):
                 remaining = line[i:]
                 if remaining.startswith("# type:"):
                     new_line.append(remaining)
@@ -174,12 +174,8 @@ def process_docstrings_ast(source_code: str, preserve_module_docstring: bool = T
 
 
 def is_python_file(path: Path) -> bool:
-    """Check if a file is a Python file, with or without extension."""
-    # Check by extension first
     if path.suffix.lower() in (".py", ".pyw", ".pyi"):
         return True
-
-    # Check if file has no extension but starts with shebang
     if not path.suffix:
         try:
             with open(path, "r", encoding="utf-8") as f:
@@ -187,7 +183,6 @@ def is_python_file(path: Path) -> bool:
                 return first_line.startswith("#!") and "python" in first_line.lower()
         except (IOError, UnicodeDecodeError):
             return False
-
     return False
 
 
@@ -217,10 +212,7 @@ def process_python_file(path: Path, preserve_module_docstring: bool = True) -> F
                 temp_file = Path(tmp.name)
             shutil.move(str(temp_file), str(path))
         return FileResult(
-            path=path,
-            comments_removed=comments_removed,
-            docstrings_removed=docstrings_removed,
-            changed=changed,
+            path=path, comments_removed=comments_removed, docstrings_removed=docstrings_removed, changed=changed
         )
     except Exception as e:
         if temp_file and temp_file.exists():
@@ -252,7 +244,7 @@ def process_wheel_file(
             relative_path = py_file.relative_to(extract_dir)
             result.path = Path(f"{whl_path.name}::{relative_path}")
             results.append(result)
-        if not dry_run and any(r.changed for r in results):
+        if not dry_run and any((r.changed for r in results)):
             new_whl_path = whl_path.with_suffix(".tmp.whl")
             with zipfile.ZipFile(new_whl_path, "w", zipfile.ZIP_DEFLATED) as new_whl:
                 for file_path in extract_dir.rglob("*"):
@@ -283,7 +275,6 @@ def find_python_files(path: Path) -> Iterator[Path]:
         if is_python_file(path) or path.suffix.lower() == ".whl":
             yield path
         return
-
     for root, dirs, filenames in path.walk(top_down=True):
         dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
         for name in filenames:
@@ -297,7 +288,6 @@ def format_result(result: FileResult, cwd: Path) -> str:
         display_path = result.path.relative_to(cwd)
     except ValueError:
         display_path = result.path
-
     if result.error:
         return f"{display_path} (error: {result.error})"
     if not result.changed:
@@ -319,41 +309,32 @@ def main() -> None:
     parser.add_argument("--remove-module-docstring", action="store_true", help="Also remove module-level docstrings")
     parser.add_argument("--dry-run", action="store_true", help="Show changes without modifying files")
     args = parser.parse_args()
-
     cwd = Path.cwd()
     target_path = Path(args.target).resolve()
     if not target_path.exists():
         print(f"Error: {target_path} does not exist")
         sys.exit(1)
-
     wheel_files = []
     regular_files = []
-
-    # Stream items incrementally to split groups instead of holding heavy lists
     for p in find_python_files(target_path):
         if p.suffix.lower() == ".whl":
             wheel_files.append(p)
         else:
             regular_files.append(p)
-
-    if not wheel_files and not regular_files:
+    if not wheel_files and (not regular_files):
         print("No Python files or wheel files found")
         return
-
     print(
         f"Found: {len(regular_files)} Python file{('s' if len(regular_files) != 1 else '')}, {len(wheel_files)} wheel file{('s' if len(wheel_files) != 1 else '')}"
     )
     if args.dry_run:
         print("DRY RUN - No files will be modified")
-
-    # Metrics tracked out-of-list to maximize memory efficiency
     total_files = 0
     changed_files = 0
     total_comments = 0
     total_docstrings = 0
     errors = 0
     preserve_module_docstring = not args.remove_module_docstring
-
     if regular_files:
         func = process_dry_run_placeholder if args.dry_run else process_python_file
         with ProcessPoolExecutor(max_workers=args.workers) as executor:
@@ -368,7 +349,6 @@ def main() -> None:
                 total_docstrings += docstrings_removed
                 if result.error and result.error != "dry run":
                     errors += 1
-
                 if not args.dry_run:
                     print(format_result(result, cwd))
                 else:
@@ -377,16 +357,13 @@ def main() -> None:
                     except ValueError:
                         r_path = result.path
                     print(f"{r_path} (would process)")
-
     for wheel_path in wheel_files:
         try:
             w_path_display = wheel_path.relative_to(cwd)
         except ValueError:
             w_path_display = wheel_path
-
         print(f"\nProcessing wheel file: {w_path_display}")
         wheel_results = process_wheel_file(wheel_path, preserve_module_docstring, args.dry_run)
-
         if args.dry_run:
             print(f"  Would process {len(wheel_results)} files inside {w_path_display}")
         else:
@@ -399,7 +376,6 @@ def main() -> None:
                 if result.error:
                     errors += 1
                 print(f"  {format_result(result, cwd)}")
-
     if not args.dry_run and total_files > 0:
         print(f"\n{'=' * 50}\nSummary:")
         print(f"  Total files processed: {total_files}")

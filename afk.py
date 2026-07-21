@@ -27,7 +27,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional, Set
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 @dataclass

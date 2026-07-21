@@ -10,7 +10,7 @@ from pathlib import Path
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 TEMPDIR = Path("/data/data/com.termux/files/usr/tmp")
 DEST_DIR = Path("~/tmp/tgz").expanduser()

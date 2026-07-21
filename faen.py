@@ -5,16 +5,13 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional
-
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
-class BidirectionalDictionary:
+class Bidirectionaldictionary:
     def __init__(self, json_file: str = "/sdcard/dic/dic.json"):
         self.json_file = Path(json_file)
-        self.persian_to_english: Dict[str, str] = {}
-        self.english_to_persian: Dict[str, str] = {}
+        self.persian_to_english: dict[str, str] = {}
+        self.english_to_persian: dict[str, str] = {}
         self.load_dictionary()
 
     def load_dictionary(self) -> None:
@@ -42,7 +39,7 @@ class BidirectionalDictionary:
         try:
             with open(self.json_file, "w", encoding="utf-8") as file:
                 json.dump(self.persian_to_english, file, ensure_ascii=False, indent=2)
-            print(f"💾 Dictionary saved to {self.json_file}")
+            print(f"💾 dictionary saved to {self.json_file}")
         except Exception as e:
             print(f"❌ Error saving dictionary: {e}")
 
@@ -68,7 +65,7 @@ class BidirectionalDictionary:
             return result.strip()
         return None
 
-    def get_suggestions(self, query: str) -> List[str]:
+    def get_suggestions(self, query: str) -> list[str]:
         query_lower = query.lower()
         suggestions = []
         for persian in self.persian_to_english:
@@ -111,7 +108,7 @@ class BidirectionalDictionary:
 
     def list_all(self, page: int = 1, per_page: int = 10) -> None:
         if not self.persian_to_english:
-            print("📭 Dictionary is empty")
+            print("📭 dictionary is empty")
             return
         sorted_items = sorted(self.persian_to_english.items())
         total = len(sorted_items)
@@ -121,7 +118,7 @@ class BidirectionalDictionary:
             return
         start = (page - 1) * per_page
         end = min(start + per_page, total)
-        print(f"\n📚 Dictionary (Page {page}/{total_pages}):")
+        print(f"\n📚 dictionary (Page {page}/{total_pages}):")
         print("-" * 50)
         for i, (persian, english) in enumerate(sorted_items[start:end], start + 1):
             print(f"{i:3}. {persian:15} → {english}")
@@ -130,16 +127,16 @@ class BidirectionalDictionary:
 
     def list_all_full(self) -> None:
         if not self.persian_to_english:
-            print("📭 Dictionary is empty")
+            print("📭 dictionary is empty")
             return
         sorted_items = sorted(self.persian_to_english.items())
-        print(f"\n📚 Dictionary ({len(sorted_items)} entries):")
+        print(f"\n📚 dictionary ({len(sorted_items)} entries):")
         print("-" * 50)
         for i, (persian, english) in enumerate(sorted_items, 1):
             print(f"{i:3}. {persian:15} → {english}")
         print("-" * 50)
 
-    def stats(self) -> Dict[str, int]:
+    def stats(self) -> dict[str, int]:
         return {
             "total": len(self.persian_to_english),
             "persian": len(self.persian_to_english),
@@ -160,7 +157,7 @@ class BidirectionalDictionary:
         import random
 
         if not self.persian_to_english:
-            print("📭 Dictionary is empty")
+            print("📭 dictionary is empty")
             return
         persian = random.choice(list(self.persian_to_english.keys()))
         english = self.persian_to_english[persian]
@@ -168,7 +165,7 @@ class BidirectionalDictionary:
 
 
 def main():
-    dict_app = BidirectionalDictionary("dic.json")
+    dict_app = Bidirectionaldictionary("dic.json")
     search_history = []
     print("\n" + "=" * 60)
     print("📖 PERSIAN-ENGLISH BIDIRECTIONAL DICTIONARY")
@@ -176,8 +173,8 @@ def main():
     print("Commands:")
     print("  :add <fa> <en>    - Add a new word")
     print("  :del <word>       - Delete a word")
-    print("  :list [page]      - List words (page number optional)")
-    print("  :list all         - List all words")
+    print("  :list [page]      - list words (page number optional)")
+    print("  :list all         - list all words")
     print("  :stats            - Show dictionary statistics")
     print("  :export           - Export to CSV")
     print("  :random           - Show random word")
@@ -202,8 +199,8 @@ def main():
                     print("\nCommands:")
                     print("  :add <fa> <en>    - Add a new Persian-English word pair")
                     print("  :del <word>       - Delete a word from dictionary")
-                    print("  :list [page]      - List words (page number optional)")
-                    print("  :list all         - List all words")
+                    print("  :list [page]      - list words (page number optional)")
+                    print("  :list all         - list all words")
                     print("  :stats            - Show dictionary statistics")
                     print("  :export           - Export dictionary to CSV file")
                     print("  :random           - Show a random word")
@@ -238,7 +235,7 @@ def main():
                     continue
                 elif command == "stats":
                     stats = dict_app.stats()
-                    print("\n📊 Dictionary Statistics:")
+                    print("\n📊 dictionary Statistics:")
                     print("-" * 40)
                     print(f"  Total entries:   {stats['total']}")
                     print(f"  Persian words:   {stats['persian']}")

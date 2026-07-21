@@ -15,10 +15,8 @@ from __future__ import annotations
 import argparse
 import math
 import re
-from decimal import Decimal, getcontext
-from typing import Union
+from decimal import getcontext
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 getcontext().prec = 28
 
 
@@ -287,7 +285,7 @@ def main():
     args = parser.parse_args()
     calculator = Calculator()
     if args.precision:
-        getcontext().prec = args.precision
+        args.precision = 28
     if args.interactive:
         print("qalc - Quick Calculator (type 'quit' to exit)")
         print("Supports: +, -, *, /, %, **, sin, cos, tan, sqrt, log, etc.")

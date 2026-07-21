@@ -14,13 +14,10 @@ import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional, Tuple
 
 
-# Terminal colors for prettier output
 class Colors:
     HEADER = "\033[95m"
-    BLUE = "\033[94m"
     CYAN = "\033[96m"
     GREEN = "\033[92m"
     YELLOW = "\033[93m"
@@ -76,7 +73,7 @@ def format_duration(seconds: float) -> str:
         return f"{minutes}m {secs:.0f}s"
 
 
-def get_audio_info(mp3_file: Path) -> Tuple[int | None, int | None]:
+def get_audio_info(mp3_file: Path) -> tuple[int | None, int | None]:
     """
     Get audio bitrate and file size using ffprobe.
     Returns (bitrate_kbps, file_size_bytes) or (None, None) on failure.
@@ -233,7 +230,7 @@ def print_file_result(stat: ConversionStats, index: int, total: int):
         print(f"  {Colors.RED}Error: {stat.error_message}{Colors.END}")
 
 
-def print_final_summary(stats: List[ConversionStats], total_duration: float):
+def print_final_summary(stats: list[ConversionStats], total_duration: float):
     """Print final summary of all conversions."""
     successful = [s for s in stats if s.success]
     failed = [s for s in stats if not s.success]
@@ -262,7 +259,7 @@ def print_final_summary(stats: List[ConversionStats], total_duration: float):
     print(f"{'─' * 60}")
 
 
-def find_mp3_files(directories: List[Path]) -> List[Path]:
+def find_mp3_files(directories: list[Path]) -> list[Path]:
     """Find all MP3 files in given directories recursively."""
     mp3_files = []
 

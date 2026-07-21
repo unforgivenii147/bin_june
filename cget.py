@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pycurl
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def download_urls_from_file(filepath: str = "urls.txt", output_dir_str: str = "downloads") -> None:

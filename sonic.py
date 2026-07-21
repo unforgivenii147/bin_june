@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from __future__ import annotations
 
+
+from __future__ import annotations
 import argparse
 import mmap
 import os
@@ -13,8 +14,6 @@ from collections import Counter
 from collections.abc import Generator
 from datetime import UTC, datetime
 from pathlib import Path
-
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 class LineProcessor:
@@ -88,11 +87,7 @@ class MmapReader(LineProcessor):
             raise OSError(msg)
 
     def read_lines(
-        self,
-        file_path: Path,
-        encoding: str = "utf-8",
-        skip_empty: bool = False,
-        use_mmap: bool = True,
+        self, file_path: Path, encoding: str = "utf-8", skip_empty: bool = False, use_mmap: bool = True
     ) -> Generator[str, None, None]:
         if use_mmap:
             yield from self.read_lines_mmap(file_path, encoding, skip_empty)
@@ -209,12 +204,12 @@ class FileSorter(LineProcessor):
         print("╚════════════════════════════════════════════════════════════╝\n")
         print(f"Input file: {input_path}")
         print(f"Output file: {output_path}")
-        print(f"Mode: {'DRY RUN' if self.dry_run else 'NORMAL'}")
+        print(f"Mode: {('DRY RUN' if self.dry_run else 'NORMAL')}")
         print("-" * 60)
         start_time = time.time()
         try:
             original_size = self.get_file_size(input_path)
-            original_lines = sum(1 for _ in self.reader.read_lines(input_path, encoding, skip_empty))
+            original_lines = sum((1 for _ in self.reader.read_lines(input_path, encoding, skip_empty)))
             self.log(f"Original file: {original_lines} lines, {self.fsz(original_size)}")
             lines = list(self.reader.read_lines(input_path, encoding, skip_empty))
             if sort:
@@ -232,14 +227,14 @@ class FileSorter(LineProcessor):
                     self.log(f"Backup created: {backup_path}")
                 output_path.parent.mkdir(parents=True, exist_ok=True)
                 with Path(output_path).open("w", encoding=encoding) as f:
-                    f.writelines(line + "\n" for line in lines)
+                    f.writelines((line + "\n" for line in lines))
                 self.log(f"Output written: {output_path}")
             else:
                 self.log("DRY RUN: File not written")
             if not self.dry_run:
                 after = self.get_file_size(output_path)
             else:
-                after = sum(len(line.encode(encoding)) + 1 for line in lines)
+                after = sum((len(line.encode(encoding)) + 1 for line in lines))
             elapsed_time = time.time() - start_time
             return {
                 "input_file": str(input_path),
@@ -281,7 +276,6 @@ class FileSorter(LineProcessor):
     def save_report(self, stats: dict, report_file: str | None = None) -> None:
         if report_file is None:
             import json
-
         report = {"timestamp": datetime.now(tz=UTC).isoformat(), "statistics": stats}
         try:
             with Path(report_file).open("w", encoding="utf-8") as f:
@@ -300,9 +294,9 @@ class FileAnalyzer(LineProcessor):
         get_size = self.get_file_size(file_path)
         lines = list(self.reader.read_lines(file_path, encoding))
         line_counts = Counter(lines)
-        duplicate_count = sum(count - 1 for count in line_counts.values())
+        duplicate_count = sum((count - 1 for count in line_counts.values()))
         max_length = max((len(line) for line in lines), default=0)
-        avg_length = sum(len(line) for line in lines) / len(lines) if lines else 0
+        avg_length = sum((len(line) for line in lines)) / len(lines) if lines else 0
         most_common = line_counts.most_common(10)
         return {
             "file": str(file_path),
@@ -342,20 +336,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Sort lines in a file and remove duplicates (uses mmap for large files)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  python sort_unique_lines.py input.txt
-  python sort_unique_lines.py input.txt --no-unique
-  python sort_unique_lines.py input.txt --no-sort
-  python sort_unique_lines.py input.txt --output sorted_output.txt
-  python sort_unique_lines.py input.txt --reverse
-  python sort_unique_lines.py input.txt --case-insensitive
-  python sort_unique_lines.py input.txt --skip-empty
-  python sort_unique_lines.py input.txt --dry-run -v
-  python sort_unique_lines.py input.txt --analyze
-  python sort_unique_lines.py input.txt --report stats.json
-  python sort_unique_lines.py input.txt -v
-        """,
+        epilog="\nExamples:\n  python sort_unique_lines.py input.txt\n  python sort_unique_lines.py input.txt --no-unique\n  python sort_unique_lines.py input.txt --no-sort\n  python sort_unique_lines.py input.txt --output sorted_output.txt\n  python sort_unique_lines.py input.txt --reverse\n  python sort_unique_lines.py input.txt --case-insensitive\n  python sort_unique_lines.py input.txt --skip-empty\n  python sort_unique_lines.py input.txt --dry-run -v\n  python sort_unique_lines.py input.txt --analyze\n  python sort_unique_lines.py input.txt --report stats.json\n  python sort_unique_lines.py input.txt -v\n        ",
     )
     parser.add_argument("filename", help="Input filename")
     parser.add_argument("--output", "-o", help="Output filename (default: overwrite input)")

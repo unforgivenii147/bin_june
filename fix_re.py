@@ -29,7 +29,7 @@ from multiprocessing import cpu_count
 from pathlib import Path
 from typing import List, Optional, Tuple
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 RE_FUNCTIONS = {"compile", "search", "match", "fullmatch", "split", "findall", "finditer", "sub", "subn"}
 SKIP_TOKEN_TYPES = {
     tokenize.NL,

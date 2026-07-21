@@ -5,7 +5,7 @@ import argparse
 import subprocess
 from pathlib import Path
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def check_or_fix_imports(file_path, autofix=False):

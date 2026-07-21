@@ -52,7 +52,7 @@ def gsz(path: str | Path) -> int:
     return total
 
 
-MAX_QUEUE = 16
+MAX_QUEUE = 4
 
 
 def process_file(path) -> bool | None:
@@ -61,8 +61,7 @@ def process_file(path) -> bool | None:
         return False
     if ".git" in path.parts:
         return None
-    compileall.compile_file(path, legacy=True, optimize=2)
-    path.unlink()
+    compileall.compile_file(path, legacy=False, optimize=0)
     return True
 
 

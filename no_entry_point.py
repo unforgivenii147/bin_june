@@ -16,12 +16,10 @@ import sys
 from datetime import datetime
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import Dict, List, Tuple
-
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+from typing import dict, list, tuple
 
 
-def get_site_packages_dirs() -> List[Path]:
+def get_site_packages_dirs() -> list[Path]:
     site_dirs = []
     import site
 
@@ -112,7 +110,7 @@ def is_pure_python_package(pkg_name: str, site_dir: Path) -> bool:
         return True
 
 
-def scan_package(package_path: Path, site_dir: Path) -> Dict[str, any]:
+def scan_package(package_path: Path, site_dir: Path) -> dict[str, any]:
     pkg_name = get_package_name_from_path(package_path)
     result = {"name": pkg_name, "has_entry_points": False, "is_pure_python": True, "error": None}
     try:
@@ -160,7 +158,7 @@ def scan_package(package_path: Path, site_dir: Path) -> Dict[str, any]:
     return result
 
 
-def find_packages_without_entry_points(site_dir: Path) -> Tuple[List[str], List[str]]:
+def find_packages_without_entry_points(site_dir: Path) -> tuple[list[str], list[str]]:
     pure_packages = []
     non_pure_packages = []
     processed_packages = set()

@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def main() -> None:
     with Path("/sdcard/colors").open(encoding="utf-8") as file:

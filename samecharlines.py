@@ -1,18 +1,16 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-from __future__ import annotations
 
+from __future__ import annotations
 import sys
 from pathlib import Path
-
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def is_repeated_char_line(line: str) -> bool:
     stripped = line.rstrip("\n")
     if len(stripped) <= 1:
         return False
-    return all(ch == stripped[0] for ch in stripped)
+    return all((ch == stripped[0] for ch in stripped))
 
 
 def main() -> None:

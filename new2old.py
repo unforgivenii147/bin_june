@@ -13,9 +13,7 @@ import configparser
 import sys
 import tomllib
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
-
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+from typing import Any
 
 
 def load_toml(path: Path) -> dict:
@@ -27,7 +25,7 @@ def safe_read_file(path: Path) -> str | None:
     return path.read_text(encoding="utf-8") if path.exists() else None
 
 
-def extract_metadata(toml_data: dict) -> Dict[str, Any]:
+def extract_metadata(toml_data: dict) -> dict[str, Any]:
     project = toml_data.get("project", {})
     build_system = toml_data.get("build-system", {})
     tool = toml_data.get("tool", {})
@@ -56,7 +54,7 @@ def extract_metadata(toml_data: dict) -> Dict[str, Any]:
     return metadata
 
 
-def parse_setup_cfg(setup_cfg_text: str) -> Dict[str, List[str]]:
+def parse_setup_cfg(setup_cfg_text: str) -> dict[str, list[str]]:
     if not setup_cfg_text:
         return {}
     cp = configparser.ConfigParser()
@@ -82,7 +80,7 @@ def parse_setup_cfg(setup_cfg_text: str) -> Dict[str, List[str]]:
     return result
 
 
-def has_c_extension(tool: Dict[str, Any]) -> Tuple[bool, str]:
+def has_c_extension(tool: dict[str, Any]) -> tuple[bool, str]:
     setuptools_tool = tool.get("setuptools", {})
     if setuptools_tool.get("ext-modules"):
         return (True, "setuptools")
@@ -98,7 +96,7 @@ def has_c_extension(tool: Dict[str, Any]) -> Tuple[bool, str]:
 
 
 def generate_setup_py(
-    metadata: Dict[str, Any],
+    metadata: dict[str, Any],
     setup_cfg_text: str | None,
     manifest_text: str | None,
     force: bool = False,
@@ -121,7 +119,6 @@ def generate_setup_py(
     dependencies = metadata["dependencies"]
     optional_deps = metadata["optional_dependencies"]
     include_package_data = str(metadata["include_package_data"]).lower()
-    build_backend = metadata["build_backend"]
     install_requires = ",\n        ".join(f'"{d}"' for d in dependencies) if dependencies else ""
     install_requires_str = f"[\n        {install_requires}\n    ]" if install_requires else "[]"
     extras_parts = []
@@ -188,7 +185,6 @@ def generate_setup_py(
             df_lines.append(f'        ("{target}", {files_list})')
         data_files_str = "    data_files=[\n" + ",\n".join(df_lines) + "\n    ],\n"
     cext_imports = ""
-    cext_extension = ""
     cext_build = ""
     if has_cext:
         if cext_method == "setuptools":
@@ -200,7 +196,6 @@ def generate_setup_py(
                 if name:
                     sources_str = ", ".join(f'"{s}"' for s in sources)
                     ext_list.append(f'    Extension("{name}", sources=[{sources_str}]),')
-            cext_extension = "from setuptools import Extension\n\n" + "\n".join(ext_list) if ext_list else ""
             cext_imports = "from setuptools import Extension\n"
             cext_build = (
                 f"""    ext_modules=[{", ".join([f'''Extension("{e.get("name", "")}", sources={e.get("sources", [])})''' for e in ext_modules])}],\n"""

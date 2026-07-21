@@ -6,7 +6,7 @@ from pathlib import Path
 
 from fastwalk import walk_files
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 shebang = "#!/data/data/com.termux/files/usr/bin/python\n"
 

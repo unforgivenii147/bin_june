@@ -1,4 +1,4 @@
-"""Strip comments and docstrings from Python source files."""
+#!/data/data/com.termux/files/usr/bin/env python
 
 from __future__ import annotations
 
@@ -154,7 +154,7 @@ def _remove_docstrings(source: str, remove_module: bool) -> tuple[str, int]:
     return (ast.unparse(new_tree), remover.count)
 
 
-def _extract_header(lines: list[str]) -> tuple[list[str], list[str]]:
+def _extract_header(lines: list[str]):
     header: list[str] = []
     idx = 0
     for i, line in enumerate(lines[:2]):

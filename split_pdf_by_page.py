@@ -7,7 +7,7 @@ from pathlib import Path
 
 from pypdf import PdfReader, PdfWriter
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def split_pdf_by_page(pdf_path: Path, output_dir: Path) -> None:

@@ -1,7 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
 from __future__ import annotations
 
-import logging
 import os
 import stat
 import sys
@@ -9,7 +8,6 @@ import time
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 DIR_PERM = 0o755
 FILE_PERM = 0o664
@@ -17,9 +15,6 @@ EXEC_PERM = 0o755
 
 SKIP_NAMES = {".git", "__pycache__", ".idea", "node_modules", ".venv", "venv"}
 EXECUTABLE_DIRS = {"bin", "sbin", ".bin", "libexec", "scripts", "tools"}
-
-logging.basicConfig(level=logging.INFO, format="%(message)s")
-logger = logging.getLogger(__name__)
 
 
 def is_executable(mode: int) -> bool:

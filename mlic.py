@@ -13,9 +13,8 @@ import concurrent.futures
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
+from typing import dict, list, set, tuple
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 MIN_LINES = 3
 MIN_CHARS = 100
@@ -23,7 +22,7 @@ MIN_CHARS = 100
 
 def find_multiline_strings(
     file_path: Path, min_lines: int = 2, min_chars: int = 10
-) -> Dict[str, List[Tuple[int, int]]]:
+) -> dict[str, list[tuple[int, int]]]:
     try:
         with open(file_path, encoding="utf-8", errors="ignore") as f:
             lines = f.readlines()
@@ -54,7 +53,7 @@ def normalize_string(text: str) -> str:
     return "\n".join(line.rstrip() for line in text.splitlines())
 
 
-def validate_python_syntax(code: str) -> Tuple[bool, str]:
+def validate_python_syntax(code: str) -> tuple[bool, str]:
     try:
         ast.parse(code)
         return True, ""
@@ -62,7 +61,7 @@ def validate_python_syntax(code: str) -> Tuple[bool, str]:
         return (False, f"Syntax error at line {e.lineno}, column {e.offset}: {e.msg}")
 
 
-def find_files(directory: Path, extensions: Set[str] | None = None) -> List[Path]:
+def find_files(directory: Path, extensions: set[str] | None = None) -> list[Path]:
     if extensions is None:
         extensions = {
             ".txt",
@@ -101,7 +100,7 @@ def find_files(directory: Path, extensions: Set[str] | None = None) -> List[Path
     return files
 
 
-def process_file(args: Tuple[Path, int, int]) -> Tuple[Path, Dict[str, List[Tuple[int, int]]]]:
+def process_file(args: tuple[Path, int, int]) -> tuple[Path, dict[str, list[tuple[int, int]]]]:
     file_path, min_lines, min_chars = args
     strings = find_multiline_strings(file_path, min_lines, min_chars)
     return file_path, strings
@@ -113,7 +112,7 @@ def find_repeated_strings(
     min_chars: int = 10,
     max_workers: int | None = None,
     half: bool = False,
-) -> Dict[str, List[Tuple[Path, List[Tuple[int, int]]]]]:
+) -> dict[str, list[tuple[Path, list[tuple[int, int]]]]]:
     files = find_files(directory)
     if not files:
         print("No text files found in directory", file=sys.stderr)
@@ -147,8 +146,8 @@ def find_repeated_strings(
 
 
 def remove_strings_from_files(
-    repeated_strings: Dict[str, List[Tuple[Path, List[Tuple[int, int]]]]],
-    string_numbers: List[int] | None = None,
+    repeated_strings: dict[str, list[tuple[Path, list[tuple[int, int]]]]],
+    string_numbers: list[int] | None = None,
     validate: bool = True,
 ):
     files_to_modify = defaultdict(set)
@@ -196,7 +195,7 @@ def remove_strings_from_files(
     return modified_files, skipped_files
 
 
-def save_strings_to_file(repeated_strings: Dict[str, List[Tuple[Path, List[Tuple[int, int]]]]], output_file: Path):
+def save_strings_to_file(repeated_strings: dict[str, list[tuple[Path, list[tuple[int, int]]]]], output_file: Path):
     try:
         with open(output_file, "w", encoding="utf-8") as f:
             f.write("Repeated Multiline Strings Report\n")

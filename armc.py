@@ -28,7 +28,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Generator, List, Tuple
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 class CommentRemover:

@@ -16,8 +16,6 @@ from functools import partial
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def get_wheel_tags() -> str:
     python_version = f"{sys.version_info.major}{sys.version_info.minor}"

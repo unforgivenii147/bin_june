@@ -10,7 +10,6 @@ import requests
 from dotenv import load_dotenv
 from requests.models import Response
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 env_path = Path.home() / ".env"
 if env_path.exists():
@@ -199,20 +198,6 @@ class GoogleDriveSync:
         print("\n" + "=" * 60)
         print("✅ SYNC COMPLETED!")
         print("=" * 60)
-
-    def sync_folder_by_name(self, folder_name, local_base_path) -> None:
-        print(f"\nSearching for folder: {folder_name}")
-        items = self.get_all_files_recursive("root")
-        target_folder = None
-        for item in items:
-            if item["name"] == folder_name and item["mimeType"] == "application/vnd.google-apps.folder":
-                target_folder = item
-                break
-        if target_folder:
-            local_path = os.path.join(local_base_path, folder_name)
-            self.sync_folder(target_folder["id"], local_path, folder_name)
-        else:
-            print(f"❌ Folder '{folder_name}' not found in root directory")
 
 
 def main() -> None:

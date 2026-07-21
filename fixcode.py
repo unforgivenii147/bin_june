@@ -6,7 +6,7 @@ import ast
 import re
 from pathlib import Path
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 INDENT = " " * 4
 DEF_CLASS = re.compile(r"^\s*(def|class)\s+")

@@ -6,7 +6,7 @@ import glob
 
 from PIL import Image
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def reduce_image_size(image_path, scale_factor=0.75) -> None:

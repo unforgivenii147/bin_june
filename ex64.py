@@ -6,7 +6,7 @@ import hashlib
 import re
 from pathlib import Path
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 BASE64_IMG_REGEX = re.compile(r"data:image/(?P<ext>[a-zA-Z0-9+]+);base64,(?P<data>[A-Za-z0-9+/=\n\r]+)")
 

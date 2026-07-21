@@ -124,7 +124,7 @@ def is_within_directory(directory, target):
     return directory == target or directory in target.parents
 
 
-def safe_extract_stream(tar, dest_dir, members_size_sum):
+def safe_extract_stream(tar, dest_dir):
     dest_dir = Path(dest_dir)
     dest_dir.mkdir(parents=True, exist_ok=True)
 
@@ -144,7 +144,6 @@ def decompress_archive(archive_path):
         archive_size = archive_path.stat().st_size
         dctx = zstd.ZstdDecompressor()
         extracted_size = 0
-        extracted_root = None
 
         with open(archive_path, "rb") as f_in, dctx.stream_reader(f_in) as decompressor:
             with tarfile.open(fileobj=decompressor, mode="r|") as tar:

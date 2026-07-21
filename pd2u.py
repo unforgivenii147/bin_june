@@ -1,11 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-from __future__ import annotations
 
+from __future__ import annotations
 import sys
 from pathlib import Path
-
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 CHUNK_SIZE = 65536
 BINARY_BYTES = bytes(range(9)) + bytes([11, 12]) + bytes(range(14, 32))
@@ -19,7 +17,7 @@ def is_binary(path: Path) -> bool:
             return False
         if b"\x00" in chunk:
             return True
-        return any(b in BINARY_BYTES for b in chunk)
+        return any((b in BINARY_BYTES for b in chunk))
     except Exception:
         return True
 

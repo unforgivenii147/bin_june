@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-from __future__ import annotations
 
+from __future__ import annotations
 import bz2
 import gzip
 import hashlib
@@ -14,18 +14,13 @@ import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
-
 import brotli
 import py7zr
 import zstandard as zstd
 from loguru import logger
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 _HASH_TABLE_SIZE = 1 << 14
-
 _MAX_OFFSET_1 = 2047
-
 _MAX_OFFSET_2 = 65535
 
 
@@ -71,7 +66,7 @@ def _emit_literal(output: bytearray, data: bytes, start: int, length: int) -> No
 
 def _emit_copy(output: bytearray, offset: int, length: int) -> None:
     while length > 0:
-        if length >= 4 and length <= 11 and offset <= _MAX_OFFSET_1:
+        if length >= 4 and length <= 11 and (offset <= _MAX_OFFSET_1):
             tag = 1 | length - 4 << 2 | offset >> 8 << 5
             output.append(tag)
             output.append(offset & 255)
@@ -113,7 +108,7 @@ def compress(data: bytes) -> bytes:
         if (
             (candidate > 0 or (candidate == 0 and pos > 0))
             and pos - candidate <= _MAX_OFFSET_2
-            and data[candidate : candidate + 4] == data[pos : pos + 4]
+            and (data[candidate : candidate + 4] == data[pos : pos + 4])
         ):
             if pos > literal_start:
                 _emit_literal(output, data, literal_start, pos - literal_start)
@@ -268,23 +263,12 @@ def run_single(algo: str, in_path: Path, tmpdir: Path) -> Result:
         elapsed = time.perf_counter() - t0
         out_size = out_path.stat().st_size
         return Result(
-            algo=algo,
-            input_path=str(in_path),
-            out_path=str(out_path),
-            out_size=out_size,
-            elapsed_s=elapsed,
-            ok=True,
+            algo=algo, input_path=str(in_path), out_path=str(out_path), out_size=out_size, elapsed_s=elapsed, ok=True
         )
     except Exception as e:
         logger.exception(f"[{algo}] failed: {e}")
         return Result(
-            algo=algo,
-            input_path=str(in_path),
-            out_path="",
-            out_size=0,
-            elapsed_s=0.0,
-            ok=False,
-            error=str(e),
+            algo=algo, input_path=str(in_path), out_path="", out_size=0, elapsed_s=0.0, ok=False, error=str(e)
         )
 
 
@@ -391,13 +375,7 @@ def mp_compress_chunks(algo: str, in_path: Path, tmpdir: Path, chunk_size: int, 
     except Exception as e:
         logger.exception(f"[mp_{algo}] failed: {e}")
         return Result(
-            algo=f"mp_{algo}",
-            input_path=str(in_path),
-            out_path="",
-            out_size=0,
-            elapsed_s=0.0,
-            ok=False,
-            error=str(e),
+            algo=f"mp_{algo}", input_path=str(in_path), out_path="", out_size=0, elapsed_s=0.0, ok=False, error=str(e)
         )
 
 
@@ -466,8 +444,9 @@ def main() -> None:
         print("-" * 40)
         for r in ok_single:
             print(f"{r.algo:<10} {human(r.out_size):>15} {r.elapsed_s:>12.4f}")
-        print(f"""
-Best overall: {best_overall.algo} size={human(best_overall.out_size)} time={best_overall.elapsed_s:.4f}s""")
+        print(
+            f"\nBest overall: {best_overall.algo} size={human(best_overall.out_size)} time={best_overall.elapsed_s:.4f}s"
+        )
         if best_overall.algo.startswith("mp_"):
             base_algo = best_overall.algo[len("mp_") :]
         else:

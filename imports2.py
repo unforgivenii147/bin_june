@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-from __future__ import annotations
 
+from __future__ import annotations
 import ast
 import logging
 import subprocess
@@ -12,8 +12,6 @@ from collections import defaultdict
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 from typing import List, Set, Tuple
-
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -386,15 +384,7 @@ class PythonImportExtractor:
 
 
 def find_python_files(directory: str = ".") -> List[Path]:
-    exclude_dirs = {
-        ".git",
-        "__pycache__",
-        ".pytest_cache",
-        "dist",
-        "build",
-        ".mypy_cache",
-        ".ruff_cache",
-    }
+    exclude_dirs = {".git", "__pycache__", ".pytest_cache", "dist", "build", ".mypy_cache", ".ruff_cache"}
     python_files = []
     dir_path = Path(directory)
     for item in dir_path.rglob("*"):
@@ -422,7 +412,7 @@ def process_single_file(args: Tuple[Path, PythonImportExtractor]) -> Tuple[Path,
     filepath, extractor = args
     imports = extractor.process_file(filepath)
     filtered = extractor.filter_packages(imports)
-    return filepath, filtered
+    return (filepath, filtered)
 
 
 def main():
@@ -431,10 +421,7 @@ def main():
     parser = argparse.ArgumentParser(description="Create requirements.txt by inspecting Python files")
     parser.add_argument("-d", "--directory", default=".", help="Directory to scan (default: current directory)")
     parser.add_argument(
-        "-o",
-        "--output",
-        default="requirements.txt",
-        help="Output file name (default: requirements.txt)",
+        "-o", "--output", default="requirements.txt", help="Output file name (default: requirements.txt)"
     )
     parser.add_argument(
         "-p",
@@ -443,10 +430,7 @@ def main():
         help="Path to pip packages file (default: /sdcard/data/pip.txt)",
     )
     parser.add_argument(
-        "--workers",
-        type=int,
-        default=cpu_count(),
-        help=f"Number of worker processes (default: {cpu_count()})",
+        "--workers", type=int, default=cpu_count(), help=f"Number of worker processes (default: {cpu_count()})"
     )
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
     args = parser.parse_args()

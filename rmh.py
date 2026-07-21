@@ -22,12 +22,9 @@ import sys
 from dataclasses import dataclass
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import List, Optional, Tuple
 
 from loguru import logger
 from tqdm import tqdm
-
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 @dataclass
@@ -61,7 +58,7 @@ class CommentRemover:
         self.single_comment_regex = re.compile(self.SINGLE_COMMENT_PATTERN)
         self.multi_comment_regex = re.compile(self.MULTI_COMMENT_PATTERN, re.DOTALL)
 
-    def _protect_strings(self, text: str) -> Tuple[str, dict]:
+    def _protect_strings(self, text: str) -> tuple[str, dict]:
         protected_strings = {}
         placeholder_counter = [0]
 
@@ -79,7 +76,7 @@ class CommentRemover:
             text = text.replace(placeholder, original)
         return text
 
-    def remove_comments(self, text: str) -> Tuple[str, int]:
+    def remove_comments(self, text: str) -> tuple[str, int]:
         protected_text, protected_strings = self._protect_strings(text)
         single_count = len(self.single_comment_regex.findall(protected_text))
         multi_count = len(self.multi_comment_regex.findall(protected_text))
@@ -152,7 +149,7 @@ class CommentRemover:
             )
 
 
-def find_source_files(root_dir: Path) -> List[Path]:
+def find_source_files(root_dir: Path) -> list[Path]:
     extensions = {".h", ".hpp", ".c", ".cpp", ".cc", ".cxx", ".hxx"}
     files = []
     if root_dir.is_file():
@@ -164,7 +161,7 @@ def find_source_files(root_dir: Path) -> List[Path]:
     return sorted(files)
 
 
-def collect_source_files(targets: List[str]) -> List[Path]:
+def collect_source_files(targets: list[str]) -> list[Path]:
     all_files = set()
     for target in targets:
         path = Path(target).resolve()
@@ -176,7 +173,7 @@ def collect_source_files(targets: List[str]) -> List[Path]:
     return sorted(all_files)
 
 
-def process_files_parallel(paths: List[Path], num_workers: int | None = None) -> List[ProcessResult]:
+def process_files_parallel(paths: list[Path], num_workers: int | None = None) -> list[ProcessResult]:
     num_workers = num_workers or cpu_count()
     remover = CommentRemover()
     with Pool(num_workers) as pool:
@@ -191,15 +188,6 @@ def process_files_parallel(paths: List[Path], num_workers: int | None = None) ->
     return results
 
 
-def _safe_relative_path(path: Path, root_dir: Path) -> str:
-    try:
-        abs_file = path.resolve()
-        abs_root = root_dir.resolve()
-        return str(abs_file.relative_to(abs_root))
-    except ValueError:
-        return str(path)
-
-
 def _format_bytes(bytes_val: int) -> str:
     for unit in ["B", "KB", "MB", "GB"]:
         if bytes_val < 1024:
@@ -208,7 +196,7 @@ def _format_bytes(bytes_val: int) -> str:
     return f"{bytes_val:.2f} TB"
 
 
-def print_summary(results: List[ProcessResult], targets: List[Path]) -> None:
+def print_summary(results: list[ProcessResult], targets: list[Path]) -> None:
     successful = [r for r in results if r.success]
     failed = [r for r in results if not r.success]
     total_comments = sum(r.comments_removed for r in successful)
@@ -244,7 +232,7 @@ def print_summary(results: List[ProcessResult], targets: List[Path]) -> None:
 
 
 def main(
-    targets: List[str] | None = None,
+    targets: list[str] | None = None,
     num_workers: int | None = None,
     keep_backups: bool = True,
     dry_run: bool = False,

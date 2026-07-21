@@ -1,12 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-from __future__ import annotations
 
+from __future__ import annotations
 import json
 import operator
 from pathlib import Path
-
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def sort_by_size(root_folder: Path):
@@ -15,7 +13,7 @@ def sort_by_size(root_folder: Path):
         if path.is_symlink():
             continue
         if path.is_dir():
-            size = sum(p.stat().st_size for p in path.rglob("*") if p.is_file() and not p.is_symlink())
+            size = sum((p.stat().st_size for p in path.rglob("*") if p.is_file() and (not p.is_symlink())))
         if path.is_file():
             size = path.stat().st_size
         items.append({"name": path.name, "size": size})

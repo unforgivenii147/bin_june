@@ -1,14 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from __future__ import annotations
 
+
+from __future__ import annotations
 import os
 import sys
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def sort_and_dedup(file_name: str) -> None:
-    file_size = os.path.getsize(file_name)
     with open(file_name) as f:
         lines = f.readlines()
     unique_lines = sorted(set(lines))

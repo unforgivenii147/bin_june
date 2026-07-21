@@ -18,12 +18,9 @@ import concurrent.futures
 import gzip
 import hashlib
 import lzma
-import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 try:
     from loguru import logger
@@ -32,7 +29,7 @@ except ImportError:
 
     logger = logging.getLogger(__name__)
     logging.basicConfig(level=logging.INFO)
-_COMPRESSED_EXT: Dict[str, object] = {
+_COMPRESSED_EXT: dict[str, object] = {
     ".gz": gzip,
     ".bz2": gzip,
     ".xz": lzma,
@@ -77,8 +74,8 @@ def _decompress_file(path: Path) -> str | None:
         return None
 
 
-def _find_files(root: str = ".") -> List[Tuple[str, str | None]]:
-    results: List[Tuple[str, str | None]] = []
+def _find_files(root: str = ".") -> list[tuple[str, str | None]]:
+    results: list[tuple[str, str | None]] = []
     root_path = Path(root).resolve()
     utils_path = root_path / "utils"
     for dirpath, _, filenames in Path(root).walk():
@@ -108,13 +105,13 @@ class _Def:
     filepath: str
 
 
-def _extract_definitions(path: str, source: str) -> List[_Def]:
+def _extract_definitions(path: str, source: str) -> list[_Def]:
     try:
         tree = ast.parse(source, filename=path)
     except SyntaxError as exc:
         logger.error("Syntax error in {}: {}", path, exc)
         return []
-    defs: List[_Def] = []
+    defs: list[_Def] = []
     for node in tree.body:
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             typ, name = "func", node.name
@@ -139,8 +136,8 @@ def _extract_definitions(path: str, source: str) -> List[_Def]:
     return defs
 
 
-def _new_utils_entries(groups: Dict[str, List[_Def]], existing: Dict[str, Dict[str, _Def]]) -> Dict[str, List[_Def]]:
-    new: Dict[str, List[_Def]] = {"func": [], "class": [], "const": []}
+def _new_utils_entries(groups: dict[str, list[_Def]], existing: dict[str, dict[str, _Def]]) -> dict[str, list[_Def]]:
+    new: dict[str, list[_Def]] = {"func": [], "class": [], "const": []}
     for _hash_key, defs in groups.items():
         rep = defs[0]
         typ, name = rep.type, rep.name
@@ -158,8 +155,8 @@ def _new_utils_entries(groups: Dict[str, List[_Def]], existing: Dict[str, Dict[s
     return new
 
 
-def _read_existing_utils(utils_dir: Path) -> Dict[str, Dict[str, _Def]]:
-    existing: Dict[str, Dict[str, _Def]] = {"func": {}, "class": {}, "const": {}}
+def _read_existing_utils(utils_dir: Path) -> dict[str, dict[str, _Def]]:
+    existing: dict[str, dict[str, _Def]] = {"func": {}, "class": {}, "const": {}}
     for typ, fname in [("func", "func.py"), ("class", "class.py"), ("const", "const.py")]:
         path = utils_dir / fname
         if path.is_file():
@@ -172,7 +169,7 @@ def _read_existing_utils(utils_dir: Path) -> Dict[str, Dict[str, _Def]]:
     return existing
 
 
-def _write_utils_files(utils_dir: Path, new: Dict[str, List[_Def]]) -> None:
+def _write_utils_files(utils_dir: Path, new: dict[str, list[_Def]]) -> None:
     utils_dir.mkdir(exist_ok=True)
     for typ, fname in [("func", "func.py"), ("class", "class.py"), ("const", "const.py")]:
         if not new[typ]:
@@ -187,8 +184,8 @@ def _write_utils_files(utils_dir: Path, new: Dict[str, List[_Def]]) -> None:
         logger.info("Added {} definition(s) to {}", len(new[typ]), fname)
 
 
-def _move_definitions(groups: Dict[str, List[_Def]]) -> None:
-    to_remove: Dict[str, Set[str]] = {}
+def _move_definitions(groups: dict[str, list[_Def]]) -> None:
+    to_remove: dict[str, set[str]] = {}
     for hash_key, defs in groups.items():
         for d in defs:
             if not d.filepath.endswith(".py") or any(d.filepath.endswith(ext) for ext in _COMPRESSED_EXT):
@@ -242,7 +239,7 @@ def main() -> None:
     logger.info("Action: {}", action)
     logger.info("Scanning for Python files …")
     files = _find_files(".")
-    file_jobs: List[Tuple[str, str]] = []
+    file_jobs: list[tuple[str, str]] = []
     for path, source in files:
         if source is None:
             try:
@@ -252,7 +249,7 @@ def main() -> None:
                 continue
         file_jobs.append((path, source))
     logger.info("Found {} file(s) to process", len(file_jobs))
-    all_defs: List[_Def] = []
+    all_defs: list[_Def] = []
     with concurrent.futures.ProcessPoolExecutor() as executor:
         futures = {executor.submit(_extract_definitions, p, src): p for p, src in file_jobs}
         for future in concurrent.futures.as_completed(futures):
@@ -262,7 +259,7 @@ def main() -> None:
                     all_defs.extend(result)
             except Exception as exc:
                 logger.error("Worker failed: {}", exc)
-    groups: Dict[str, List[_Def]] = {}
+    groups: dict[str, list[_Def]] = {}
     for d in all_defs:
         groups.setdefault(d.content_hash, []).append(d)
     duplicate_groups = {h: defs for h, defs in groups.items() if len(defs) > 1}

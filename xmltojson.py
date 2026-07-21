@@ -9,7 +9,7 @@ from xml.etree.ElementTree import Element
 
 from defusedxml.ElementTree import parse as _parse
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def etree_to_dict(element: Element | None):

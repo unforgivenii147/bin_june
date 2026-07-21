@@ -14,7 +14,7 @@ import sys
 import pyzbar.pyzbar as pyzbar
 from PIL import Image
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def extract_qr_data_zbar(image_path):

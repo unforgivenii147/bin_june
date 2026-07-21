@@ -1,23 +1,16 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-from __future__ import annotations
 
+from __future__ import annotations
 import sys
 from pathlib import Path
-
 from weasyprint import CSS, HTML
-
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def html2pdf(
-    pdf_file_path,
-    html_file_path=None,
-    css_file_path: str = "/sdcard/_static/css/markdown.css",
-    base_url=None,
+    pdf_file_path, html_file_path=None, css_file_path: str = "/sdcard/_static/css/markdown.css", base_url=None
 ) -> None:
     raw_html = ""
-    extras = ["cuddled-lists", "tables"]
     if html_file_path:
         raw_html = html_file_path.read_text(encoding="utf8")
     html = HTML(string=raw_html, base_url=base_url)

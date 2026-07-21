@@ -12,7 +12,7 @@ from __future__ import annotations
 import argparse
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import List, Tuple
+from typing import list, tuple
 
 BOLD = "\x1b[1m"
 GREEN = "\x1b[32m"
@@ -147,7 +147,7 @@ def is_binary_file(file_path: Path) -> bool:
         return True
 
 
-def remove_blank_lines(file_path: Path, remove_spaces: bool = False) -> Tuple[str, int, int, str]:
+def remove_blank_lines(file_path: Path, remove_spaces: bool = False) -> tuple[str, int, int, str]:
     try:
         with open(file_path, encoding="utf-8", errors="ignore") as f:
             lines = f.readlines()
@@ -167,7 +167,7 @@ def remove_blank_lines(file_path: Path, remove_spaces: bool = False) -> Tuple[st
         return (str(file_path), 0, 0, f"error: {e!s}")
 
 
-def process_file(args: Tuple[Path, Path, bool]) -> Tuple[str, int, int, str]:
+def process_file(args: tuple[Path, Path, bool]) -> tuple[str, int, int, str]:
     base_dir, file_path, remove_spaces = args
     if is_binary_file(file_path):
         try:
@@ -186,7 +186,7 @@ def process_file(args: Tuple[Path, Path, bool]) -> Tuple[str, int, int, str]:
     return result
 
 
-def collect_files(directories: List[Path]) -> List[Tuple[Path, Path]]:
+def collect_files(directories: list[Path]) -> list[tuple[Path, Path]]:
     files = []
     for directory in directories:
         if not directory.exists():
@@ -201,7 +201,7 @@ def collect_files(directories: List[Path]) -> List[Tuple[Path, Path]]:
     return files
 
 
-def print_header(directories: List[Path], remove_spaces: bool):
+def print_header(directories: list[Path], remove_spaces: bool):
     print(f"\n{BOLD}{CYAN}╔══════════════════════════════════════════════╗{RESET}")
     print(f"{BOLD}{CYAN}║{RESET}         {BOLD}Blank Line Remover{RESET}                    {BOLD}{CYAN}║{RESET}")
     print(f"{BOLD}{CYAN}╚══════════════════════════════════════════════╝{RESET}\n")
@@ -216,7 +216,7 @@ def print_header(directories: List[Path], remove_spaces: bool):
     print()
 
 
-def print_results(results: List[Tuple], total_removed: int, total_files: int):
+def print_results(results: list[tuple], total_removed: int, total_files: int):
     print(f"\n{BOLD}{CYAN}{'─' * 70}{RESET}\n")
     results.sort(key=lambda x: x[0])
     processed = []

@@ -5,7 +5,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+THRESHOLD = 1024 * 1024
 
 
 def read_lines(path: str | Path, ke: bool = True) -> list[str]:

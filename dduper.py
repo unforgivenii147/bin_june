@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from __future__ import annotations
 
+
+from __future__ import annotations
 import argparse
 import ast
 import bz2
@@ -14,14 +15,11 @@ import tempfile
 import zipfile
 from collections import defaultdict
 from pathlib import Path
-
 import brotli
 import tree_sitter_python
 import zstandard as zstd
 from loguru import logger
 from tree_sitter import Language, Parser
-
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 TREE_SITTER_AVAILABLE = True
 SUPPORTED_ARCHIVES = (
@@ -96,7 +94,7 @@ def extract_with_tree_sitter(code: str):
                     parsed = ast.parse(text)
                     if len(parsed.body) == 1 and isinstance(parsed.body[0], ast.Assign):
                         assign = parsed.body[0]
-                        if all(isinstance(t, ast.Name) for t in assign.targets):
+                        if all((isinstance(t, ast.Name) for t in assign.targets)):
                             name = assign.targets[0].id
                             objects.append(
                                 {
@@ -151,7 +149,7 @@ def extract_with_ast(code: str):
                     }
                 )
             elif isinstance(node, ast.Assign):
-                if all(isinstance(t, ast.Name) for t in node.targets):
+                if all((isinstance(t, ast.Name) for t in node.targets)):
                     snippet = ast.get_source_segment(code, node)
                     if snippet is None:
                         continue
@@ -179,7 +177,7 @@ def extract_objects(code: str):
 
 def is_supported_archive(path: Path) -> bool:
     s = str(path).lower()
-    return any(s.endswith(ext) for ext in SUPPORTED_ARCHIVES)
+    return any((s.endswith(ext) for ext in SUPPORTED_ARCHIVES))
 
 
 def extract_archive(path: Path) -> str:
@@ -192,15 +190,15 @@ def extract_archive(path: Path) -> str:
         elif lower.endswith((".tar", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.xz", ".txz")):
             with tarfile.open(path) as tf:
                 tf.extractall(temp_dir, filter="data")
-        elif lower.endswith(".gz") and not lower.endswith(".tar.gz"):
+        elif lower.endswith(".gz") and (not lower.endswith(".tar.gz")):
             out_path = Path(temp_dir) / path.stem
             with gzip.open(path, "rb") as f_in, open(out_path, "wb") as f_out:
                 f_out.write(f_in.read())
-        elif lower.endswith(".bz2") and not lower.endswith(".tar.bz2"):
+        elif lower.endswith(".bz2") and (not lower.endswith(".tar.bz2")):
             out_path = Path(temp_dir) / path.stem
             with bz2.open(path, "rb") as f_in, open(out_path, "wb") as f_out:
                 f_out.write(f_in.read())
-        elif lower.endswith(".xz") and not lower.endswith(".tar.xz"):
+        elif lower.endswith(".xz") and (not lower.endswith(".tar.xz")):
             out_path = Path(temp_dir) / path.stem
             with lzma.open(path, "rb") as f_in, open(out_path, "wb") as f_out:
                 f_out.write(f_in.read())
@@ -317,7 +315,7 @@ def build_import_line(utils_module_name: str, names) -> str:
 
 
 def write_utils_file(path: Path, objects) -> bool:
-    content = "\n\n".join(obj["snippet"].rstrip() for obj in objects).rstrip() + "\n"
+    content = "\n\n".join((obj["snippet"].rstrip() for obj in objects)).rstrip() + "\n"
     return safe_write_text(path, content)
 
 
@@ -376,17 +374,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Find repeated top-level Python objects and optionally move/copy them to utils.py"
     )
+    parser.add_argument("-m", "--move", action="store_true", help="Move duplicate objects to utils.py and add imports")
     parser.add_argument(
-        "-m",
-        "--move",
-        action="store_true",
-        help="Move duplicate objects to utils.py and add imports",
-    )
-    parser.add_argument(
-        "-c",
-        "--copy",
-        action="store_true",
-        help="Copy duplicate objects to utils.py without changing source files",
+        "-c", "--copy", action="store_true", help="Copy duplicate objects to utils.py without changing source files"
     )
     parser.add_argument("-j", "--jobs", type=int, default=mp.cpu_count(), help="Number of worker processes")
     args = parser.parse_args()

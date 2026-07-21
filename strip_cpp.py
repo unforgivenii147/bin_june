@@ -7,7 +7,7 @@ import concurrent.futures
 import re
 from pathlib import Path
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 COMMENT_RE = re.compile(
     "(?://[^\\n]*|/\\*.*?\\*/)|(?:\"(?:\\\\[\\s\\S]|[^\"\\\\])*\"|\\'(?:\\\\[\\s\\S]|[^\\'\\\\])*\\')", re.DOTALL
 )

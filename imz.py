@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from __future__ import annotations
 
+
+from __future__ import annotations
 import argparse
 import ast
 import contextlib
@@ -11,12 +12,9 @@ import sys
 import tarfile
 import zipfile
 from pathlib import Path
-
 import xxhash
 from dh import PKG_MAPPING, STDLIB
 from tqdm import tqdm
-
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 CACHE_FILE = ".reqcache.json"
 
@@ -81,7 +79,7 @@ def extract_from_ast(code: str, path_hint: str | None = None) -> dict[str, set[s
     try:
         tree = ast.parse(code)
     except Exception:
-        for m in re.finditer(r"(?:import_module|__import__)\(\s*['\"]([\w\.]+)['\"]\s*\)", code):
+        for m in re.finditer("(?:import_module|__import__)\\(\\s*['\\\"]([\\w\\.]+)['\\\"]\\s*\\)", code):
             result["dynamic"].add(m.group(1).split(".", 1)[0])
         return result
     for node in ast.walk(tree):
@@ -98,7 +96,7 @@ def extract_from_ast(code: str, path_hint: str | None = None) -> dict[str, set[s
                 continue
             if node.module:
                 base = node.module.split(".", 1)[0]
-                if any(name.name == "*" for name in node.names):
+                if any((name.name == "*" for name in node.names)):
                     result["star_modules"].add(node.module)
                 else:
                     result["imports"].add(base)
@@ -109,7 +107,7 @@ def extract_from_ast(code: str, path_hint: str | None = None) -> dict[str, set[s
             elif isinstance(node.func, ast.Attribute):
                 val = node.func
                 if (
-                    isinstance(val.value, ast.Name) and val.value.id == "importlib" and val.attr == "import_module"
+                    isinstance(val.value, ast.Name) and val.value.id == "importlib" and (val.attr == "import_module")
                 ) and (node.args and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str)):
                     result["dynamic"].add(node.args[0].value.split(".", 1)[0])
     return result
@@ -186,12 +184,7 @@ def process_zip_file(path: Path) -> dict[str, list[str]]:
                         pass
     except Exception:
         pass
-    return {
-        "imports": sorted(imports),
-        "star_modules": sorted(stars),
-        "dynamic": sorted(dyn),
-        "relative": sorted(rel),
-    }
+    return {"imports": sorted(imports), "star_modules": sorted(stars), "dynamic": sorted(dyn), "relative": sorted(rel)}
 
 
 def process_tar_file(path: Path) -> dict[str, list[str]]:
@@ -218,12 +211,7 @@ def process_tar_file(path: Path) -> dict[str, list[str]]:
                         pass
     except Exception:
         pass
-    return {
-        "imports": sorted(imports),
-        "star_modules": sorted(stars),
-        "dynamic": sorted(dyn),
-        "relative": sorted(rel),
-    }
+    return {"imports": sorted(imports), "star_modules": sorted(stars), "dynamic": sorted(dyn), "relative": sorted(rel)}
 
 
 def process_raw(path: str) -> dict[str, list[str]]:
@@ -250,7 +238,6 @@ def build_project_module_map(sources: list[str]) -> dict[str, list[str]]:
             continue
         if p.suffix != ".py":
             continue
-        # Normalize path using pathlib
         rel = p.resolve().relative_to(Path.cwd().resolve())
         parts = rel.parts
         if parts[-1] == "__init__.py":
@@ -292,9 +279,11 @@ def trace_star_module(module: str, project_map: dict[str, list[str]]) -> set[str
                             names = []
                             if isinstance(val, (ast.List, ast.Tuple)):
                                 names.extend(
-                                    elt.value
-                                    for elt in val.elts
-                                    if isinstance(elt, ast.Constant) and isinstance(elt.value, str)
+                                    (
+                                        elt.value
+                                        for elt in val.elts
+                                        if isinstance(elt, ast.Constant) and isinstance(elt.value, str)
+                                    )
                                 )
                             for nm in names:
                                 if "." in nm:
@@ -305,11 +294,7 @@ def trace_star_module(module: str, project_map: dict[str, list[str]]) -> set[str
 
 
 def resolve_packages(
-    imports: set[str],
-    stdlib: set[str],
-    mapping: dict[str, str],
-    pip_available: set[str],
-    project_toplevels: set[str],
+    imports: set[str], stdlib: set[str], mapping: dict[str, str], pip_available: set[str], project_toplevels: set[str]
 ) -> set[str]:
     out = set()
     for imp in imports:
@@ -344,8 +329,7 @@ def scan_sources(ignore_dirs: set[str]) -> list[str]:
     out = []
     cwd = Path.cwd()
     for path in cwd.rglob("*"):
-        # Check if any parent directory should be ignored
-        if any(part in ignore_dirs for part in path.relative_to(cwd).parts):
+        if any((part in ignore_dirs for part in path.relative_to(cwd).parts)):
             continue
         if path.is_file():
             lower = path.name.lower()
@@ -357,10 +341,7 @@ def scan_sources(ignore_dirs: set[str]) -> list[str]:
 def main() -> None:
     p = argparse.ArgumentParser(description="Offline requirements.txt generator (static + heuristics).")
     p.add_argument(
-        "--ignore",
-        nargs="*",
-        default=[".venv", ".git", ".ipynb_checkpoints"],
-        help="Directories to ignore during scan",
+        "--ignore", nargs="*", default=[".venv", ".git", ".ipynb_checkpoints"], help="Directories to ignore during scan"
     )
     p.add_argument("--no-cache", action="store_true", default=True, help="Disable cache usage")
     p.add_argument("--clear-cache", action="store_true", help="Clear cache and exit")

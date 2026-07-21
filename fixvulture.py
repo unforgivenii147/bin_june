@@ -6,23 +6,19 @@ Reads Vulture findings from stdin or a file and fixes the issues in-place.
 
 from __future__ import annotations
 
-import ast
 import os
 import re
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
+from typing import dict, list, set, tuple
 
-# Parse Vulture output
 VULTURE_LINE_PATTERN = re.compile(
     r"^(.+?):(\d+):\s+(unused\s+(function|variable|class|attribute|method|import)\s+'([^']+)'|unreachable code after '(\w+)'|redundant if-condition|unreachable 'else' block|unused import '([^']+)'\s+\(\d+% confidence\))$"
 )
 
 
-def parse_vulture_output(lines: List[str]) -> Dict[str, List[Tuple[int, str, str]]]:
-    """Parse Vulture output and return structured data."""
-    # Structure: {filepath: [(line_number, type, name), ...]}
+def parse_vulture_output(lines: list[str]) -> dict[str, list[tuple[int, str, str]]]:
     results = defaultdict(list)
 
     for line in lines:
@@ -66,7 +62,7 @@ def parse_vulture_output(lines: List[str]) -> Dict[str, List[Tuple[int, str, str
     return dict(results)
 
 
-def fix_file(filepath: str, issues: List[Tuple[int, str, str]]) -> bool:
+def fix_file(filepath: str, issues: list[tuple[int, str, str]]) -> bool:
     """Fix issues in a single file."""
     if not os.path.exists(filepath):
         print(f"Warning: File not found: {filepath}")
@@ -86,7 +82,7 @@ def fix_file(filepath: str, issues: List[Tuple[int, str, str]]) -> bool:
     issues_sorted = sorted(issues, key=lambda x: x[0], reverse=True)
 
     # Track lines to remove (for multi-line removals)
-    lines_to_remove: Set[int] = set()
+    lines_to_remove: set[int] = set()
 
     for line_num, issue_type, name in issues_sorted:
         idx = line_num - 1  # Convert to 0-based index
@@ -195,7 +191,7 @@ def _get_indent(line: str) -> str:
     return line[: len(line) - len(line.lstrip())]
 
 
-def _get_function_lines(lines: List[str], start_idx: int) -> Tuple[int, int]:
+def _get_function_lines(lines: list[str], start_idx: int) -> tuple[int, int]:
     """Get the start and end line indices of a function/method definition."""
     # Check for decorators above
     func_start = start_idx
@@ -222,7 +218,7 @@ def _get_function_lines(lines: List[str], start_idx: int) -> Tuple[int, int]:
     return func_start, end_idx - 1
 
 
-def _get_class_lines(lines: List[str], start_idx: int) -> Tuple[int, int]:
+def _get_class_lines(lines: list[str], start_idx: int) -> tuple[int, int]:
     """Get the start and end line indices of a class definition."""
     # Similar to function but for classes
     class_start = start_idx
@@ -248,7 +244,7 @@ def _get_class_lines(lines: List[str], start_idx: int) -> Tuple[int, int]:
     return class_start, end_idx - 1
 
 
-def _find_block_end(lines: List[str], start_idx: int) -> int:
+def _find_block_end(lines: list[str], start_idx: int) -> int:
     """Find the end of a code block."""
     indent = _get_indent(lines[start_idx])
     end_idx = start_idx
@@ -262,7 +258,7 @@ def _find_block_end(lines: List[str], start_idx: int) -> int:
     return end_idx
 
 
-def _cleanup_blank_lines(lines: List[str]) -> List[str]:
+def _cleanup_blank_lines(lines: list[str]) -> list[str]:
     """Remove excessive blank lines (keep max 2 consecutive)."""
     cleaned = []
     blank_count = 0

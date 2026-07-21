@@ -22,7 +22,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional, Set, Tuple
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 try:
     from rich import box

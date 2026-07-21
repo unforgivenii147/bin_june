@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+
 """
 fslint.py — FSLint reimplemented as a Python CLI tool.
 
@@ -24,7 +26,6 @@ Usage examples:
 """
 
 from __future__ import annotations
-
 import argparse
 import contextlib
 import grp
@@ -40,21 +41,16 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Generator, Iterator
 
-# ---------------------------------------------------------------------------
-# ANSI helpers
-# ---------------------------------------------------------------------------
-
-RESET = "\033[0m"
-BOLD = "\033[1m"
-RED = "\033[31m"
-YELLOW = "\033[33m"
-CYAN = "\033[36m"
-GREEN = "\033[32m"
-GREY = "\033[90m"
+RESET = "\x1b[0m"
+BOLD = "\x1b[1m"
+RED = "\x1b[31m"
+YELLOW = "\x1b[33m"
+CYAN = "\x1b[36m"
+GREEN = "\x1b[32m"
+GREY = "\x1b[90m"
 
 
 def _c(color: str, text: str) -> str:
-    """Wrap *text* in ANSI color if stdout is a tty."""
     if sys.stdout.isatty():
         return f"{color}{text}{RESET}"
     return text
@@ -80,22 +76,9 @@ def warn(msg: str) -> None:
     print(_c(RED, f"  ✘  {msg}"), file=sys.stderr)
 
 
-# ---------------------------------------------------------------------------
-# Generic filesystem walker
-# ---------------------------------------------------------------------------
-
-
 def walk(
-    roots: list[Path],
-    *,
-    follow_symlinks: bool = False,
-    yield_dirs: bool = True,
-    yield_files: bool = True,
+    roots: list[Path], *, follow_symlinks: bool = False, yield_dirs: bool = True, yield_files: bool = True
 ) -> Generator[Path, None, None]:
-    """
-    Yield every file/directory under each root.
-    Never crosses symlinks unless follow_symlinks=True.
-    """
     for root in roots:
         root = root.resolve() if follow_symlinks else root
         for dirpath, _dirnames, filenames in os.walk(root, followlinks=follow_symlinks, onerror=_walk_err):
@@ -104,24 +87,17 @@ def walk(
                 yield dp
             if yield_files:
                 for fn in filenames:
-                    yield dp / fn
-            # also yield symlinks that os.walk puts in filenames
-            # (they are files from walk's perspective)
+                    yield (dp / fn)
 
 
 def _walk_err(exc: OSError) -> None:
     warn(f"walk error: {exc}")
 
 
-# ---------------------------------------------------------------------------
-# 1. findup — duplicate files
-# ---------------------------------------------------------------------------
-
-CHUNK = 65_536  # 64 KiB read chunks
+CHUNK = 65536
 
 
 def _file_hash(path: Path) -> str | None:
-    """SHA-256 of file contents; None on read error."""
     h = hashlib.sha256()
     try:
         with path.open("rb") as fh:
@@ -133,26 +109,21 @@ def _file_hash(path: Path) -> str | None:
 
 
 def findup(roots: list[Path]) -> int:
-    """Find duplicate files by content hash."""
     header("findup — Duplicate Files")
-
-    # Group by (size, hash)
     size_map: dict[int, list[Path]] = defaultdict(list)
     for p in walk(roots, yield_dirs=False):
         if p.is_symlink():
             continue
         with contextlib.suppress(OSError):
             size_map[p.stat().st_size].append(p)
-
     groups: dict[str, list[Path]] = defaultdict(list)
     for size, paths in size_map.items():
         if size == 0 or len(paths) < 2:
-            continue  # unique by size already
+            continue
         for p in paths:
             h = _file_hash(p)
             if h:
                 groups[h].append(p)
-
     total = 0
     for digest, paths in sorted(groups.items()):
         if len(paths) < 2:
@@ -161,8 +132,7 @@ def findup(roots: list[Path]) -> int:
         print(f"\n  {_c(BOLD, 'Hash:')} {digest[:16]}…  {_c(GREY, f'({size:,} bytes × {len(paths)})')}")
         for p in paths:
             found(p)
-        total += len(paths) - 1  # originals don't count as waste
-
+        total += len(paths) - 1
     if total == 0:
         ok("No duplicate files found.")
     else:
@@ -170,25 +140,19 @@ def findup(roots: list[Path]) -> int:
     return total
 
 
-# ---------------------------------------------------------------------------
-# 2. findnl — name lint
-# ---------------------------------------------------------------------------
-
-# Characters that are legal but commonly problematic
 _NL_RULES: list[tuple[str, re.Pattern[str]]] = [
-    ("leading whitespace", re.compile(r"^\s")),
-    ("trailing whitespace", re.compile(r"\s$")),
-    ("consecutive spaces", re.compile(r"  ")),
-    ("control character", re.compile(r"[\x00-\x1f\x7f]")),
-    ("shell-special character", re.compile(r"[;`$!&|<>\\]")),
-    ("mixed case (CamelCase)", re.compile(r"(?<=[a-z])(?=[A-Z])")),
-    ("starts with hyphen", re.compile(r"^-")),
-    ("trailing dot", re.compile(r"\.$")),
+    ("leading whitespace", re.compile("^\\s")),
+    ("trailing whitespace", re.compile("\\s$")),
+    ("consecutive spaces", re.compile("  ")),
+    ("control character", re.compile("[\\x00-\\x1f\\x7f]")),
+    ("shell-special character", re.compile("[;`$!&|<>\\\\]")),
+    ("mixed case (CamelCase)", re.compile("(?<=[a-z])(?=[A-Z])")),
+    ("starts with hyphen", re.compile("^-")),
+    ("trailing dot", re.compile("\\.$")),
 ]
 
 
 def findnl(roots: list[Path]) -> int:
-    """Lint filenames for problematic characters and patterns."""
     header("findnl — Name Lint")
     total = 0
     for p in walk(roots):
@@ -204,20 +168,13 @@ def findnl(roots: list[Path]) -> int:
     return total
 
 
-# ---------------------------------------------------------------------------
-# 3. findu8 — non-UTF-8 filenames
-# ---------------------------------------------------------------------------
-
-
 def findu8(roots: list[Path]) -> int:
-    """Find filenames that are not valid UTF-8."""
     header("findu8 — Non-UTF-8 Filenames")
     total = 0
     for root in roots:
         for dirpath, dirnames, filenames in os.walk(root, onerror=_walk_err):
             all_names = dirnames + filenames
             for raw in all_names:
-                # os.walk returns str via surrogateescape on Linux
                 try:
                     raw.encode("utf-8")
                 except (UnicodeEncodeError, UnicodeDecodeError):
@@ -228,13 +185,7 @@ def findu8(roots: list[Path]) -> int:
     return total
 
 
-# ---------------------------------------------------------------------------
-# 4. findbl — bad symlinks
-# ---------------------------------------------------------------------------
-
-
 def _symlink_is_cyclic(path: Path, visited: set[Path] | None = None) -> bool:
-    """Detect self-referential or cyclic symlink chains."""
     if visited is None:
         visited = set()
     try:
@@ -250,7 +201,6 @@ def _symlink_is_cyclic(path: Path, visited: set[Path] | None = None) -> bool:
 
 
 def findbl(roots: list[Path]) -> int:
-    """Find bad (dangling, cyclic) symlinks."""
     header("findbl — Bad Symlinks")
     total = 0
     for p in walk(roots, yield_files=True, yield_dirs=True):
@@ -259,35 +209,24 @@ def findbl(roots: list[Path]) -> int:
         target = Path(os.readlink(p))
         if not target.is_absolute():
             target = p.parent / target
-
         if _symlink_is_cyclic(p):
             found(p, f"cyclic → {os.readlink(p)}")
             total += 1
         elif not target.exists():
             found(p, f"dangling → {os.readlink(p)}")
             total += 1
-
     if total == 0:
         ok("No bad symlinks found.")
     return total
 
 
-# ---------------------------------------------------------------------------
-# 5. findem — empty directories
-# ---------------------------------------------------------------------------
-
-
 def findem(roots: list[Path]) -> int:
-    """Find empty directories (recursively, innermost first)."""
     header("findem — Empty Directories")
     total = 0
-    # Collect all dirs, sort deepest first so nested empties surface correctly
     all_dirs: list[Path] = []
     for p in walk(roots, yield_files=False, yield_dirs=True):
         all_dirs.append(p)
-
     all_dirs.sort(key=lambda p: len(p.parts), reverse=True)
-
     reported: set[Path] = set()
     for d in all_dirs:
         if d in reported:
@@ -300,15 +239,9 @@ def findem(roots: list[Path]) -> int:
             found(d)
             reported.add(d)
             total += 1
-
     if total == 0:
         ok("No empty directories found.")
     return total
-
-
-# ---------------------------------------------------------------------------
-# 6. findid — bad uid/gid
-# ---------------------------------------------------------------------------
 
 
 def _valid_uids() -> set[int]:
@@ -320,7 +253,6 @@ def _valid_gids() -> set[int]:
 
 
 def findid(roots: list[Path]) -> int:
-    """Find files owned by non-existent UIDs or GIDs."""
     header("findid — Bad UID/GID Ownership")
     valid_uids = _valid_uids()
     valid_gids = _valid_gids()
@@ -343,10 +275,6 @@ def findid(roots: list[Path]) -> int:
     return total
 
 
-# ---------------------------------------------------------------------------
-# 7. findns — non-stripped binaries
-# ---------------------------------------------------------------------------
-
 ELF_MAGIC = b"\x7fELF"
 
 
@@ -359,12 +287,6 @@ def _is_elf(path: Path) -> bool:
 
 
 def _has_debug_symbols(path: Path) -> bool:
-    """
-    Return True if the ELF binary still has a symbol table.
-    We check for the presence of a .symtab or .debug_info section
-    using 'readelf' if available, otherwise fall back to a raw header check.
-    """
-    # Try readelf first (most reliable)
     try:
         result = subprocess.run(
             ["readelf", "--sections", "--wide", str(path)], capture_output=True, text=True, timeout=10
@@ -373,8 +295,6 @@ def _has_debug_symbols(path: Path) -> bool:
         return ".symtab" in output or ".debug_info" in output
     except (FileNotFoundError, subprocess.TimeoutExpired):
         pass
-
-    # Fallback: scan raw bytes for section name strings
     try:
         data = path.read_bytes()
         return b".symtab" in data or b".debug_info" in data
@@ -383,7 +303,6 @@ def _has_debug_symbols(path: Path) -> bool:
 
 
 def findns(roots: list[Path]) -> int:
-    """Find non-stripped ELF binaries that still contain debug symbols."""
     header("findns — Non-Stripped Binaries")
     total = 0
     for p in walk(roots, yield_dirs=False):
@@ -403,20 +322,10 @@ def findns(roots: list[Path]) -> int:
     return total
 
 
-# ---------------------------------------------------------------------------
-# 8. findsn — same-name files in PATH (shadowed executables)
-# ---------------------------------------------------------------------------
-
-
 def findsn(_roots: list[Path] | None = None) -> int:
-    """
-    Find executables that appear in multiple PATH directories.
-    The first entry shadows the rest — flag all shadows.
-    """
     header("findsn — Shadowed PATH Executables")
     path_env = os.environ.get("PATH", "")
     path_dirs = [Path(d) for d in path_env.split(os.pathsep) if d]
-
     seen: dict[str, list[Path]] = defaultdict(list)
     for d in path_dirs:
         if not d.is_dir():
@@ -427,7 +336,6 @@ def findsn(_roots: list[Path] | None = None) -> int:
                     seen[entry.name].append(entry)
         except PermissionError:
             pass
-
     total = 0
     for name, paths in sorted(seen.items()):
         if len(paths) < 2:
@@ -438,45 +346,39 @@ def findsn(_roots: list[Path] | None = None) -> int:
             color = GREEN if i == 0 else RED
             print(f"    {_c(color, label):<20} {p}")
         total += len(paths) - 1
-
     if total == 0:
         ok("No shadowed PATH executables found.")
     return total
 
 
-# ---------------------------------------------------------------------------
-# 9. findtf — temporary / junk files
-# ---------------------------------------------------------------------------
-
 _TF_PATTERNS: list[re.Pattern[str]] = [
-    re.compile(r"~$"),  # editor backups
-    re.compile(r"^#.*#$"),  # Emacs auto-save
-    re.compile(r"\.bak$", re.I),
-    re.compile(r"\.tmp$", re.I),
-    re.compile(r"\.temp$", re.I),
-    re.compile(r"\.swp$", re.I),  # Vim swap
-    re.compile(r"\.swo$", re.I),
-    re.compile(r"^\.DS_Store$"),  # macOS metadata
-    re.compile(r"^Thumbs\.db$", re.I),  # Windows thumbnails
-    re.compile(r"^desktop\.ini$", re.I),
-    re.compile(r"\.orig$", re.I),
-    re.compile(r"\.rej$", re.I),  # patch reject files
-    re.compile(r"core\.\d+$"),  # core dumps
-    re.compile(r"^core$"),
-    re.compile(r"\.log$", re.I),
-    re.compile(r"\.pid$", re.I),
-    re.compile(r"__pycache__"),
-    re.compile(r"\.pyc$"),
-    re.compile(r"\.pyo$"),
-    re.compile(r"node_modules"),
-    re.compile(r"\.class$"),  # Java bytecode
-    re.compile(r"\.o$"),  # object files
-    re.compile(r"\.a$"),  # static libs (often junk in src)
+    re.compile("~$"),
+    re.compile("^#.*#$"),
+    re.compile("\\.bak$", re.I),
+    re.compile("\\.tmp$", re.I),
+    re.compile("\\.temp$", re.I),
+    re.compile("\\.swp$", re.I),
+    re.compile("\\.swo$", re.I),
+    re.compile("^\\.DS_Store$"),
+    re.compile("^Thumbs\\.db$", re.I),
+    re.compile("^desktop\\.ini$", re.I),
+    re.compile("\\.orig$", re.I),
+    re.compile("\\.rej$", re.I),
+    re.compile("core\\.\\d+$"),
+    re.compile("^core$"),
+    re.compile("\\.log$", re.I),
+    re.compile("\\.pid$", re.I),
+    re.compile("__pycache__"),
+    re.compile("\\.pyc$"),
+    re.compile("\\.pyo$"),
+    re.compile("node_modules"),
+    re.compile("\\.class$"),
+    re.compile("\\.o$"),
+    re.compile("\\.a$"),
 ]
 
 
 def findtf(roots: list[Path]) -> int:
-    """Find temporary and junk files."""
     header("findtf — Temporary / Junk Files")
     total = 0
     for p in walk(roots):
@@ -485,19 +387,13 @@ def findtf(roots: list[Path]) -> int:
             if rx.search(name):
                 found(p, f"matches pattern: {rx.pattern!r}")
                 total += 1
-                break  # one match per path is enough
+                break
     if total == 0:
         ok("No temporary files found.")
     return total
 
 
-# ---------------------------------------------------------------------------
-# 10. findwd — world-writable files/directories
-# ---------------------------------------------------------------------------
-
-
 def findwd(roots: list[Path]) -> int:
-    """Find world-writable files and directories (potential security risk)."""
     header("findwd — World-Writable Items")
     total = 0
     for p in walk(roots):
@@ -515,15 +411,10 @@ def findwd(roots: list[Path]) -> int:
     return total
 
 
-# ---------------------------------------------------------------------------
-# 11. findrs — redundant whitespace in filenames
-# ---------------------------------------------------------------------------
-
-_RS_RE = re.compile(r"  |^\s|\s$|\t")  # double space, leading/trailing, tabs
+_RS_RE = re.compile("  |^\\s|\\s$|\\t")
 
 
 def findrs(roots: list[Path]) -> int:
-    """Find filenames with redundant whitespace."""
     header("findrs — Redundant Whitespace in Filenames")
     total = 0
     for p in walk(roots):
@@ -535,10 +426,6 @@ def findrs(roots: list[Path]) -> int:
         ok("No redundant whitespace in filenames found.")
     return total
 
-
-# ---------------------------------------------------------------------------
-# Check registry
-# ---------------------------------------------------------------------------
 
 ALL_CHECKS: dict[str, tuple[str, callable]] = {
     "findup": ("Duplicate files", findup),
@@ -555,18 +442,10 @@ ALL_CHECKS: dict[str, tuple[str, callable]] = {
 }
 
 
-# ---------------------------------------------------------------------------
-# CLI
-# ---------------------------------------------------------------------------
-
-
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        prog="fslint",
-        description=__doc__,
-        formatter_class=argparse.RawDescriptionHelpFormatter,
+        prog="fslint", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
-
     p.add_argument(
         "paths",
         nargs="*",
@@ -576,33 +455,16 @@ def build_parser() -> argparse.ArgumentParser:
         help="Directory/directories to scan (default: current directory)",
     )
     p.add_argument(
-        "--all",
-        "-a",
-        action="store_true",
-        dest="run_all",
-        help="Run all checks (default when no check flag is given)",
+        "--all", "-a", action="store_true", dest="run_all", help="Run all checks (default when no check flag is given)"
     )
-    p.add_argument(
-        "--summary",
-        "-s",
-        action="store_true",
-        help="Print a one-line summary table at the end",
-    )
-
+    p.add_argument("--summary", "-s", action="store_true", help="Print a one-line summary table at the end")
     group = p.add_argument_group("checks")
     for flag, (desc, _fn) in ALL_CHECKS.items():
-        group.add_argument(
-            f"--{flag}",
-            action="store_true",
-            default=False,
-            help=desc,
-        )
-
+        group.add_argument(f"--{flag}", action="store_true", default=False, help=desc)
     return p
 
 
 def print_summary(results: dict[str, int]) -> None:
-    """Print a compact summary table of all check results."""
     width = 42
     print("\n" + _c(BOLD, "┌" + "─" * width + "┐"))
     print(_c(BOLD, f"│{'SUMMARY':^{width}}│"))
@@ -618,8 +480,6 @@ def print_summary(results: dict[str, int]) -> None:
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
-
-    # Validate paths
     roots: list[Path] = []
     for p in args.paths:
         if not p.exists():
@@ -629,30 +489,22 @@ def main(argv: list[str] | None = None) -> int:
             warn(f"Not a directory: {p}")
             continue
         roots.append(p.resolve())
-
     if not roots:
-        # findsn doesn't need a path; allow it to run anyway
         if not args.findsn:
             warn("No valid paths to scan.")
             return 1
         roots = [Path.cwd()]
-
-    # Determine which checks to run
     requested = [flag for flag in ALL_CHECKS if getattr(args, flag, False)]
     if args.run_all or not requested:
         requested = list(ALL_CHECKS.keys())
-
     print(_c(BOLD + CYAN, "\nFSLint — Filesystem Lint Tool"))
-    print(_c(GREY, f"Scanning: {', '.join(str(r) for r in roots)}"))
+    print(_c(GREY, f"Scanning: {', '.join((str(r) for r in roots))}"))
     print(_c(GREY, f"Checks:   {', '.join(requested)}"))
-
     results: dict[str, int] = {}
     exit_code = 0
-
     for flag in requested:
         _desc, fn = ALL_CHECKS[flag]
         try:
-            # findsn ignores roots (uses $PATH instead)
             count = fn(roots) if flag != "findsn" else fn()
         except KeyboardInterrupt:
             print("\nInterrupted.", file=sys.stderr)
@@ -663,10 +515,8 @@ def main(argv: list[str] | None = None) -> int:
         results[flag] = count
         if count > 0:
             exit_code = 1
-
     if args.summary or len(requested) > 1:
         print_summary(results)
-
     return exit_code
 
 

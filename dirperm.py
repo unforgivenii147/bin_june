@@ -71,7 +71,7 @@ def get_current_mode(path):
         return None
 
 
-def determine_dir_target_mode(dirpath):
+def determine_dir_target_mode():
     return 509
 
 
@@ -109,45 +109,6 @@ def process_item(path, target_mode, dry_run=False):
     except Exception as e:
         print(f"Error: {path}: {e}")
         return False
-
-
-def scan_and_report(root_path="."):
-    stats = {
-        "total_dirs": 0,
-        "total_files": 0,
-        "dirs_to_change": [],
-        "dirs_correct": [],
-        "files_skip_executable": [],
-        "files_skip_correct": [],
-        "files_make_executable": [],
-        "files_set_standard": [],
-        "errors": [],
-    }
-    print("Scanning directories and files...")
-    all_items = walk_all(root_path)
-    for item_type, path in tqdm(all_items, desc="Analyzing", unit="items"):
-        if item_type == "dir":
-            stats["total_dirs"] += 1
-        else:
-            stats["total_files"] += 1
-        status, path, current, target = analyze_item(item_type, path)
-        if status == "skip_executable":
-            stats["files_skip_executable"].append(path)
-        elif status == "skip_correct":
-            if item_type == "dir":
-                stats["dirs_correct"].append(path)
-            else:
-                stats["files_skip_correct"].append(path)
-        elif status == "change":
-            if item_type == "dir":
-                stats["dirs_to_change"].append((path, current, target))
-            elif target == 493:
-                stats["files_make_executable"].append((path, current, target))
-            else:
-                stats["files_set_standard"].append((path, current, target))
-        elif status == "error":
-            stats["errors"].append(path)
-    return stats
 
 
 def apply_changes(stats, dry_run=False):

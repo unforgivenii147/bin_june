@@ -16,12 +16,6 @@ from pathlib import Path
 
 from PIL import Image
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
-def get_file_size(file_path):
-    return file_path.stat().st_size
-
 
 def get_folder_size(folder_path):
     total = 0
@@ -86,8 +80,6 @@ def strip_exif_single(image_path, backup=False, verbose=False):
                     print(f"  ✅ {image_path.name}")
                     print(f"     {format_size(original_size)} → {format_size(new_size)} ({percent_change:+.1f}%)")
                 result["message"] = f"Stripped EXIF: {size_change:+.0f}B ({percent_change:+.1f}%)"
-            else:
-                result["message"] = "No size reduction, skipped"
     except Exception as e:
         result["success"] = False
         result["message"] = f"Error: {e!s}"

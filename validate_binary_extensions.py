@@ -18,7 +18,7 @@ import sys
 from functools import lru_cache
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import Iterator, Optional, Set, Tuple
+from typing import Iterator
 
 from dh import BIN_EXT
 
@@ -41,7 +41,7 @@ class OptimizedWalker:
     def _get_extensions_lower(extensions: tuple) -> set:
         return {ext.lower() for ext in extensions}
 
-    def walk(self, root_dir: str, extensions: Set[str], progress_callback=None) -> Iterator[Path]:
+    def walk(self, root_dir: str, extensions: set[str], progress_callback=None) -> Iterator[Path]:
         extensions_lower = self._get_extensions_lower(tuple(extensions))
         file_count = 0
         if self.skip_mount_points:
@@ -56,7 +56,7 @@ class OptimizedWalker:
             raise
 
     def _walk_recursive(
-        self, current_dir: str, extensions_lower: Set[str], progress_callback, file_count: int
+        self, current_dir: str, extensions_lower: set[str], progress_callback, file_count: int
     ) -> Iterator[Path]:
         if self.skip_symlinks:
             try:
@@ -156,7 +156,7 @@ def is_binary_file(file_path: Path) -> bool | None:
         return None
 
 
-def check_file(file_path: Path) -> Tuple[Path, str, bool | None, str]:
+def check_file(file_path: Path) -> tuple[Path, str, bool | None, str]:
     try:
         extension = file_path.suffix.lower()
         is_binary = is_binary_file(file_path)

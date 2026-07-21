@@ -15,11 +15,8 @@ import traceback
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Set
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 DH_SOURCE_PATH = Path.home() / "isaac" / "pkgs" / "dh" / "src" / "dh"
-DH_MODULE_NAME = "dh"
 
 
 @dataclass
@@ -33,8 +30,8 @@ class ProcessResult:
 class DHModuleAnalyzer:
     def __init__(self, dh_path: Path):
         self.dh_path = dh_path
-        self.definitions: Dict[str, str] = {}
-        self.module_mapping: Dict[str, Set[str]] = {}
+        self.definitions: dict[str, str] = {}
+        self.module_mapping: dict[str, set[str]] = {}
         self._load_dh_definitions()
 
     def _load_dh_definitions(self):
@@ -62,40 +59,19 @@ class DHModuleAnalyzer:
             except Exception as e:
                 print(f"⚠ Warning: Could not parse {py_file}: {e}", file=sys.stderr)
 
-    def get_definition(self, func_name: str) -> str | None:
-        return self.definitions.get(func_name)
-
-    def get_all_definitions(self) -> Dict[str, str]:
+    def get_all_definitions(self) -> dict[str, str]:
         return self.definitions.copy()
 
 
 class ImportRemover(ast.NodeTransformer):
-    def __init__(self, definitions: Dict[str, str]):
+    def __init__(self, definitions: dict[str, str]):
         self.definitions = definitions
-        self.imported_names: Dict[str, str] = {}
-        self.inlined_code: List[str] = []
+        self.inlined_code: list[str] = []
         self.has_dh_imports = False
-
-    def visit_ImportFrom(self, node: ast.ImportFrom) -> ast.stmt | None:
-        if node.module and (node.module == DH_MODULE_NAME or node.module.startswith(f"{DH_MODULE_NAME}.")):
-            for alias in node.names:
-                name = alias.name
-                if name in self.definitions:
-                    self.imported_names[alias.asname or name] = name
-                    self.inlined_code.append(self.definitions[name])
-            self.has_dh_imports = True
-            return None
-        return node
-
-    def visit_Import(self, node: ast.Import) -> ast.stmt | None:
-        if any(alias.name == DH_MODULE_NAME or alias.name.startswith(f"{DH_MODULE_NAME}.") for alias in node.names):
-            self.has_dh_imports = True
-            return None
-        return node
 
 
 class PythonFileProcessor:
-    def __init__(self, definitions: Dict[str, str]):
+    def __init__(self, definitions: dict[str, str]):
         self.definitions = definitions
 
     def process(self, file_path: Path) -> ProcessResult:
@@ -116,7 +92,7 @@ class PythonFileProcessor:
                 file_path=file_path, modified=False, new_content=None, error=f"{type(e).__name__}: {e}"
             )
 
-    def _build_new_content(self, original_content: str, inlined_code: List[str]) -> str:
+    def _build_new_content(self, original_content: str, inlined_code: list[str]) -> str:
         lines = original_content.split("\n")
         import_end_idx = 0
         for i, line in enumerate(lines):
@@ -143,9 +119,9 @@ class ProjectCleaner:
         self.max_workers = max_workers
         self.analyzer = DHModuleAnalyzer(self.dh_path)
         self.processor = PythonFileProcessor(self.analyzer.get_all_definitions())
-        self.results: List[ProcessResult] = []
+        self.results: list[ProcessResult] = []
 
-    def find_python_files(self, paths: List[Path]) -> List[Path]:
+    def find_python_files(self, paths: list[Path]) -> list[Path]:
         py_files = set()
         for path in paths:
             path = path.resolve()
@@ -163,7 +139,7 @@ class ProjectCleaner:
                         py_files.add(py_file)
         return sorted(py_files)
 
-    def process_parallel(self, py_files: List[Path], dry_run: bool = False) -> Dict[str, int]:
+    def process_parallel(self, py_files: list[Path], dry_run: bool = False) -> dict[str, int]:
         if not py_files:
             print("No Python files to process.")
             return {"total": 0, "modified": 0, "errors": 0}
@@ -198,7 +174,7 @@ class ProjectCleaner:
         stats = {"total": len(py_files), "modified": modified_count, "errors": error_count}
         return stats
 
-    def print_summary(self, stats: Dict[str, int], dry_run: bool = False):
+    def print_summary(self, stats: dict[str, int], dry_run: bool = False):
         print(f"\n{'=' * 70}")
         print(f"Processing Complete!")
         print(f"{'=' * 70}")

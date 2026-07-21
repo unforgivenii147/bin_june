@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-from __future__ import annotations
 
+from __future__ import annotations
 import argparse
 import ast
 import importlib
@@ -12,14 +12,12 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 STDLIB_MODULES = set(sys.builtin_module_names)
 for module_name in list(sys.modules.keys()):
     if hasattr(importlib.util, "find_spec"):
         try:
             spec = importlib.util.find_spec(module_name)
-            if spec and spec.origin and "site-packages" not in spec.origin:
+            if spec and spec.origin and ("site-packages" not in spec.origin):
                 STDLIB_MODULES.add(module_name.split(".")[0])
         except (ImportError, ModuleNotFoundError, ValueError):
             pass
@@ -436,9 +434,9 @@ def analyze_file(filepath: Path) -> Tuple[Path, List[Tuple[str, int]]]:
             if (
                 name not in analyzer.imported_names
                 and name not in analyzer.assigned_names
-                and name not in analyzer.builtin_names
-                and name in stdlib
-                and not name.startswith("_")
+                and (name not in analyzer.builtin_names)
+                and (name in stdlib)
+                and (not name.startswith("_"))
             ):
                 line_num = 0
                 for node in ast.walk(tree):
@@ -446,9 +444,9 @@ def analyze_file(filepath: Path) -> Tuple[Path, List[Tuple[str, int]]]:
                         line_num = node.lineno
                         break
                 missing_imports.append((name, line_num or 1))
-        return filepath, missing_imports
+        return (filepath, missing_imports)
     except (SyntaxError, UnicodeDecodeError):
-        return filepath, []
+        return (filepath, [])
 
 
 def autofix_imports(filepath: Path, missing_imports: List[Tuple[str, int]]) -> bool:
@@ -466,7 +464,7 @@ def autofix_imports(filepath: Path, missing_imports: List[Tuple[str, int]]) -> b
                 continue
             if stripped.startswith(("import ", "from ")):
                 insert_idx = i + 1
-            elif in_imports and not stripped.startswith(("import ", "from ")):
+            elif in_imports and (not stripped.startswith(("import ", "from "))):
                 in_imports = False
         new_imports = [f"import {imp}\n" for imp in unique_imports]
         lines[insert_idx:insert_idx] = new_imports
@@ -481,20 +479,13 @@ def main():
     parser = argparse.ArgumentParser(
         description="Find and fix missing stdlib imports in Python files",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=textwrap.dedent("""
-            Examples:
-              python find_missing_imports.py
-              python find_missing_imports.py --autofix
-              python find_missing_imports.py --workers 8
-        """),
+        epilog=textwrap.dedent(
+            "\n            Examples:\n              python find_missing_imports.py\n              python find_missing_imports.py --autofix\n              python find_missing_imports.py --workers 8\n        "
+        ),
     )
     parser.add_argument("-a", "--autofix", action="store_true", help="Automatically add missing imports")
     parser.add_argument(
-        "-w",
-        "--workers",
-        type=int,
-        default=None,
-        help="Number of worker processes (default: CPU count)",
+        "-w", "--workers", type=int, default=None, help="Number of worker processes (default: CPU count)"
     )
     parser.add_argument("directory", nargs="?", default=".", help="Directory to scan (default: current directory)")
     args = parser.parse_args()

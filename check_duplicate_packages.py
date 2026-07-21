@@ -10,15 +10,14 @@ import concurrent.futures
 import pathlib
 import site
 import sys
-from typing import Dict, List, Tuple
 
 
-def get_site_directories() -> Tuple[List[pathlib.Path], List[pathlib.Path]]:
+def get_site_directories() -> tuple[list[pathlib.Path], list[pathlib.Path]]:
     """
     Get system and user site-packages directories.
 
     Returns:
-        Tuple of (system_site_dirs, user_site_dirs)
+        tuple of (system_site_dirs, user_site_dirs)
     """
     # Get all site-packages directories
     site_dirs = [pathlib.Path(p) for p in site.getsitepackages()]
@@ -33,7 +32,7 @@ def get_site_directories() -> Tuple[List[pathlib.Path], List[pathlib.Path]]:
     return system_site_dirs, user_site_dirs
 
 
-def scan_directory_for_packages(directory: pathlib.Path) -> Dict[str, pathlib.Path]:
+def scan_directory_for_packages(directory: pathlib.Path) -> dict[str, pathlib.Path]:
     """
     Scan a directory for installed packages.
 
@@ -41,7 +40,7 @@ def scan_directory_for_packages(directory: pathlib.Path) -> Dict[str, pathlib.Pa
         directory: Path to scan for packages
 
     Returns:
-        Dictionary mapping package names to their locations
+        dictionary mapping package names to their locations
     """
     packages = {}
 
@@ -77,8 +76,8 @@ def scan_directory_for_packages(directory: pathlib.Path) -> Dict[str, pathlib.Pa
 
 
 def find_duplicate_packages(
-    system_packages: Dict[str, pathlib.Path], user_packages: Dict[str, pathlib.Path]
-) -> Dict[str, Tuple[pathlib.Path, pathlib.Path]]:
+    system_packages: dict[str, pathlib.Path], user_packages: dict[str, pathlib.Path]
+) -> dict[str, tuple[pathlib.Path, pathlib.Path]]:
     """
     Find packages that exist in both system and user directories.
 
@@ -87,7 +86,7 @@ def find_duplicate_packages(
         user_packages: Packages from user directories
 
     Returns:
-        Dictionary mapping package names to (system_location, user_location) tuples
+        dictionary mapping package names to (system_location, user_location) tuples
     """
     duplicates = {}
     common_packages = set(system_packages.keys()) & set(user_packages.keys())
@@ -98,12 +97,12 @@ def find_duplicate_packages(
     return duplicates
 
 
-def process_system_directories(system_dirs: List[pathlib.Path]) -> Dict[str, pathlib.Path]:
+def process_system_directories(system_dirs: list[pathlib.Path]) -> dict[str, pathlib.Path]:
     """
     Process system directories in parallel.
 
     Args:
-        system_dirs: List of system site-package directories
+        system_dirs: list of system site-package directories
 
     Returns:
         Combined dictionary of all system packages
@@ -126,12 +125,12 @@ def process_system_directories(system_dirs: List[pathlib.Path]) -> Dict[str, pat
     return system_packages
 
 
-def process_user_directories(user_dirs: List[pathlib.Path]) -> Dict[str, pathlib.Path]:
+def process_user_directories(user_dirs: list[pathlib.Path]) -> dict[str, pathlib.Path]:
     """
     Process user directories in parallel.
 
     Args:
-        user_dirs: List of user site-package directories
+        user_dirs: list of user site-package directories
 
     Returns:
         Combined dictionary of all user packages
@@ -154,7 +153,7 @@ def process_user_directories(user_dirs: List[pathlib.Path]) -> Dict[str, pathlib
 
 def analyze_package_versions(
     package_name: str, system_location: pathlib.Path, user_location: pathlib.Path
-) -> Dict[str, str]:
+) -> dict[str, str]:
     """
     Try to determine the versions of a package in both locations.
 
@@ -164,7 +163,7 @@ def analyze_package_versions(
         user_location: User installation location
 
     Returns:
-        Dictionary with version information
+        dictionary with version information
     """
     versions = {"system_version": "unknown", "user_version": "unknown"}
 
