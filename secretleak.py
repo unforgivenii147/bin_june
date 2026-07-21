@@ -1,10 +1,13 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
+
+"""Module for secretleak.py."""
 from __future__ import annotations
 
 import re
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import List, Tuple
+from typing import List
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -119,7 +122,7 @@ def main():
     try:
         total_files, total_leaks, files_affected = check_secrets()
         print("=" * 70)
-        print(f"Scan Complete!")
+        print("Scan Complete!")
         print(f"Files scanned: {total_files}")
         print(f"Leaks found: {total_leaks}")
         print(f"Files with leaks: {files_affected}")

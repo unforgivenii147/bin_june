@@ -12,7 +12,7 @@ from __future__ import annotations
 import ast
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Tuple
 
 SKIP_DIRS_DEF = (
     'SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})\n'
@@ -86,7 +86,7 @@ def validate_modified_code(original: str, modified: str) -> bool:
     try:
         ast.parse(modified)
         return True
-    except SyntaxError as e:
+    except SyntaxError:
         return False
 
 
@@ -95,8 +95,8 @@ def process_file(file_path: Path) -> Tuple[Path, bool, str]:
         content = file_path.read_text(encoding="utf-8")
         try:
             tree = ast.parse(content)
-        except SyntaxError as e:
-            return (file_path, False, f"syntax_error_original")
+        except SyntaxError:
+            return (file_path, False, "syntax_error_original")
         if not check_skip_dirs_usage(tree):
             return (file_path, False, "no_skip_dirs_usage")
         if check_skip_dirs_defined(tree):
@@ -174,7 +174,7 @@ def main():
                 stats["other_errors"] += 1
                 print(f"✗ Exception processing {file_path}: {e}")
     print(f"\n{'=' * 60}")
-    print(f"Summary:")
+    print("Summary:")
     print(f"  Total files found:           {len(python_files)}")
     print(f"  Modified (uses but not defined): {stats['modified']}")
     print(f"  Already defined:             {stats['already_defined']}")
@@ -186,7 +186,7 @@ def main():
     if stats["modified"] > 0:
         print(f"\n✓ Successfully added SKIP_DIRS definition to {stats['modified']} file(s)")
     else:
-        print(f"\nℹ No files needed SKIP_DIRS definition")
+        print("\nℹ No files needed SKIP_DIRS definition")
 
 
 if __name__ == "__main__":

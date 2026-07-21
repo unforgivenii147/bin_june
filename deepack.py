@@ -18,7 +18,6 @@ import sys
 import tempfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Optional
 
 
 logging.basicConfig(
@@ -144,7 +143,7 @@ def repack_package(
     try:
         pkg_path = get_package_path(package_name, site_paths)
         if not pkg_path:
-            return package_name, False, f"Package directory not found"
+            return package_name, False, "Package directory not found"
 
         if is_pure_python(package_name, pkg_path.parent):
             return package_name, False, "Pure Python package - skipped"

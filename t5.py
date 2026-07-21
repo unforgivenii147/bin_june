@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for t5.py."""
+
 from __future__ import annotations
 
 import ast
@@ -12,6 +14,8 @@ from typing import Any
 
 import tree_sitter_python as tspython
 from tree_sitter import Language, Parser, Query, QueryCursor
+
+CHUNK_SIZE = 1024 * 1024
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -211,3 +215,8 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+def gsz(path):
+    try:
+        return Path(path).stat().st_size
+    except Exception:
+        return 0

@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
 """
 Parallel GZIP Compression Script
 Compresses files recursively using maximum compression with gzip module.
@@ -14,7 +15,7 @@ import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import timedelta
 from pathlib import Path
-from typing import List, Tuple
+from typing import List
 
 
 class CompressionStats:
@@ -153,7 +154,7 @@ Examples:
     print("\n" + "=" * 70)
     print("🔍 GZIP Compression Tool (Maximum Compression - Level 9)".center(70))
     print("=" * 70)
-    print(f"\n📂 Processing directories:")
+    print("\n📂 Processing directories:")
     for d in directories:
         print(f"   • {d}")
 

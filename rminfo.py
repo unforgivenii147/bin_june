@@ -6,7 +6,6 @@ Handles both .py files and Python files without extension (detected via shebang)
 
 from __future__ import annotations
 
-import os
 import re
 import sys
 from pathlib import Path
@@ -99,7 +98,7 @@ def main():
             print(f"✓ Removed info block from: {file_path}")
             removed_count += 1
 
-    print(f"\nSummary:")
+    print("\nSummary:")
     print(f"  Python files checked: {files_checked}")
     print(f"  Info blocks removed: {removed_count}")
 

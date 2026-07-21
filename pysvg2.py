@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for pysvg2.py."""
 from __future__ import annotations
 
 import sys
@@ -124,7 +126,7 @@ def process_file(path) -> None:
             rrs(path, before, after)
             return
         return
-    except Exception as e:
+    except Exception:
         return
     finally:
         if tmp_out_path and Path(tmp_out_path).exists():

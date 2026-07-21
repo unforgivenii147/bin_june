@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for 20most.py."""
 from __future__ import annotations
 
 import re
@@ -6,6 +8,8 @@ import sys
 from collections import Counter, deque
 from multiprocessing import Pool
 from pathlib import Path
+
+CHUNK_SIZE = 1024 * 1024
 
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:

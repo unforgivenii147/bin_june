@@ -1,15 +1,17 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Dict
+
+"""Module for gext.py."""
 
 import os
 import ast
 import re
 import tarfile
 import zipfile
-import io
 import shutil
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import List, Any
 
 OUTPUT_DIR = Path("output")
 ARCHIVE_EXTENSIONS = (".whl", ".zip", ".tar.gz", ".tgz", ".tar.zst", ".tar.xz", ".tar", ".zst")

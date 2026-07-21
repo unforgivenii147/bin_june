@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for 7zr.py."""
+
 from __future__ import annotations
 
 import argparse
@@ -191,7 +193,7 @@ async def compress_folder_async(folder_path: Path, output_path: Path) -> bool:
                 print(f"  ✓ Compressed archive: {reduction:.1f}% saved ({fsz(original_size)} → {fsz(compressed_size)})")
                 return True
             else:
-                print(f"  ✗ Archive compression didn't save space")
+                print("  ✗ Archive compression didn't save space")
                 output_path.unlink()
                 return False
         return False
@@ -264,13 +266,13 @@ def should_compress(path: Path) -> bool:
 async def process_compress() -> None:
     cwd = Path.cwd()
     TEMP_DIR.mkdir(parents=True, exist_ok=True)
-    print(f"\n🔧 7-Zip Compression Settings:")
-    print(f"   Format: 7z")
-    print(f"   Filter: LZMA2 (preset 9 - maximum)")
-    print(f"   Dictionary size: 256 MB")
-    print(f"   Solid compression: Yes")
-    print(f"   Header compression: Yes")
-    print(f"   Block size: 4 MB")
+    print("\n🔧 7-Zip Compression Settings:")
+    print("   Format: 7z")
+    print("   Filter: LZMA2 (preset 9 - maximum)")
+    print("   Dictionary size: 256 MB")
+    print("   Solid compression: Yes")
+    print("   Header compression: Yes")
+    print("   Block size: 4 MB")
     print(f"   Parallel workers: {MAX_WORKERS}")
     print(f"   Chunk size: {fsz(CHUNK_SIZE)}")
     dirs_to_compress = get_dirs(cwd)
@@ -334,7 +336,7 @@ async def process_decompress() -> None:
                 original_size = path.stat().st_size
                 total_original += original_size
                 if out_path.exists():
-                    print(f"  Output already exists, skipping...")
+                    print("  Output already exists, skipping...")
                     continue
                 sevenz.extractall(path=out_path)
                 if out_path.is_file():

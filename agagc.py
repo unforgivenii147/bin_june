@@ -118,7 +118,7 @@ def setup_git_auth(repo: Repo, token: str | None = None) -> None:
                     elif url.startswith("https://"):
                         new_url = url.replace("https://", f"https://oauth2:{token}@")
                         remote.set_url(new_url)
-                        print(f"✅ Updated remote URL with token authentication")
+                        print("✅ Updated remote URL with token authentication")
                         return
                     elif url.startswith("git@github.com:"):
                         print("Using SSH authentication (no token needed)")
@@ -145,7 +145,7 @@ def push_to_remote(repo: Repo, remote_name: str, token: str = load_git_token()) 
             push_result = remote.push(refspec=f"{current_branch}:{current_branch}", set_upstream=True)
         except Exception as e:
             if "no upstream branch" in str(e):
-                print(f"Setting upstream and pushing...")
+                print("Setting upstream and pushing...")
                 repo.git.push("--set-upstream", remote_name, current_branch)
                 push_result = []
             else:
@@ -165,7 +165,7 @@ def push_to_remote(repo: Repo, remote_name: str, token: str = load_git_token()) 
                     print(f"✅ Successfully pushed to {remote_name}/{current_branch}")
                     success = True
                 else:
-                    print(f"✅ Push successful")
+                    print("✅ Push successful")
                     success = True
         else:
             success = True
@@ -200,7 +200,7 @@ def main() -> None:
                 current_branch = repo.active_branch
                 remote_name = args.remote_name
                 if remote_name in [r.name for r in repo.remotes]:
-                    remote = repo.remote(remote_name)
+                    repo.remote(remote_name)
                     try:
                         remote_ref = f"refs/remotes/{remote_name}/{current_branch.name}"
                         if remote_ref in repo.refs:

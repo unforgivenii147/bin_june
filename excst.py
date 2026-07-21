@@ -1,12 +1,14 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import List
+
+"""Module for excst.py."""
 from __future__ import annotations
 
 import ast
 import os
-import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, Set
 
 import libcst as cst
 

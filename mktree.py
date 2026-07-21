@@ -1,11 +1,14 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
+
+"""Module for mktree.py."""
 from __future__ import annotations
 
 import argparse
 import re
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import List, Tuple
+from typing import List
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

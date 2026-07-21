@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for html_entity.py."""
 from __future__ import annotations
 
 import multiprocessing as mp
@@ -6,6 +8,8 @@ import re
 import sys
 from collections import deque
 from pathlib import Path
+
+CHUNK_SIZE = 1024 * 1024
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

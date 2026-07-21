@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for ocr_ready.py."""
+
 
 from __future__ import annotations
 
@@ -66,7 +68,7 @@ def preprocess_image_pillow(img_path: Path):
         img = img.point(lambda p: 255 if p > 128 else 0)
         img = img.filter(ImageFilter.SHARPEN)
         return img
-    except Exception as e:
+    except Exception:
         return None
 
 
@@ -158,7 +160,7 @@ def process() -> None:
                 error_count += 1
                 print(f"❌ [{processed_count + error_count}/{total_images}] {path.name}: {e}")
     print("\n" + "=" * 60)
-    print(f"📊 Processing Summary:")
+    print("📊 Processing Summary:")
     print(f"   ✅ Successfully processed: {processed_count} images")
     print(f"   ❌ Errors: {error_count} images")
     print(f"   📁 Total images: {total_images}")

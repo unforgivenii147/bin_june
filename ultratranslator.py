@@ -8,24 +8,19 @@ Translates Python files and other text files while preserving structure.
 
 from __future__ import annotations
 
-import ast
-import io
 import logging
 import re
 import shutil
 import sys
 import tempfile
 import time
-import tokenize
 from collections import deque
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from os import scandir
 from pathlib import Path
-from typing import Final, Optional
+from typing import Final
 
 from binaryornot import is_binary
 from deep_translator import GoogleTranslator
-from dh import DOC_TH1, DOC_TH2
 
 MAX_WORKERS: Final[int] = 4
 MAX_RETRIES: Final[int] = 2

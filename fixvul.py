@@ -109,7 +109,7 @@ def main():
             print(f"✗ Error in {filename}: {e}")
 
     print(f"\n{'=' * 50}")
-    print(f"Summary:")
+    print("Summary:")
     print(f"  Fixed: {fixed}")
     print(f"  Skipped: {skipped}")
     print(f"  Not found: {not_found}")

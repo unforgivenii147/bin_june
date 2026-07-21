@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for html_tag_balancer.py."""
+
 from __future__ import annotations
 
 import argparse
@@ -99,7 +101,6 @@ def fix_html_file(path: Path) -> bool:
     except Exception as e:
         print(f"❌ Parsing error in '{path}': {e}", file=sys.stderr)
         return False
-    remove_ranges = []
     for _, tag, pos in parser.errors:
         line, col = pos
 

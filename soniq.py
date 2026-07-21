@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for soniq.py."""
+
 from __future__ import annotations
 
 import mmap
@@ -98,7 +100,7 @@ if __name__ == "__main__":
                 if len(sorted_dupes) > 50:
                     print(f"... ({len(sorted_dupes) - 50} more duplicate lines not shown)")
             elif quiet:
-                print(f"  (Use without --quiet to see the actual duplicate lines)")
+                print("  (Use without --quiet to see the actual duplicate lines)")
         else:
             print("✓ File sorted (all lines were unique)")
     except Exception as e:

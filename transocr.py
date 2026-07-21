@@ -18,6 +18,8 @@ from deep_translator import GoogleTranslator
 from langdetect import DetectorFactory, detect
 from PIL import Image, ImageEnhance, ImageFilter
 
+CHUNK_SIZE = 1024 * 1024
+
 DetectorFactory.seed = 0
 TEXT_EXT: Final[set[str]] = {".txt", ".md", ".csv", ".json", ".py"}
 IMAGE_EXT: Final[set[str]] = {".jpg", ".jpeg", ".png"}

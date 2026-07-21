@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for gitfix.py."""
+
 from __future__ import annotations
 
 import sys
@@ -78,7 +80,6 @@ def sync_with_plumbing(repo_path: str = ".") -> bool:
                 repo.head.reset(upstream_commit, index=True, working_tree=True)
                 repo.git.cherry_pick(f"{current_commit.hexsha}..{upstream_commit.hexsha}")
                 repo.git.cherry_pick("--continue")
-                original_branch = repo.active_branch
                 repo.head.reference = repo.head.commit
             except Exception as e:
                 print(f"Rebase failed: {e}")
@@ -87,7 +88,7 @@ def sync_with_plumbing(repo_path: str = ".") -> bool:
             finally:
                 if temp_branch in repo.branches:
                     repo.delete_head(temp_branch)
-        origin.push(refspec=f"master:master", force_with_lease=True)
+        origin.push(refspec="master:master", force_with_lease=True)
         return True
     except Exception as e:
         print(f"Error: {e}")

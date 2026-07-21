@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
+from typing import List
 
 """
 Detect and optionally remove repeated multi-line comment blocks (starting with '#')
@@ -19,7 +21,7 @@ import ast
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -94,7 +96,7 @@ def report(repeated: Dict[str, List[Tuple[Path, int, List[str]]]]) -> None:
 --- Block {i} ({len(occurrences)} occurrences, {block_text.count(chr(10)) + 1} lines) ---""")
         for line in block_text.split("\n"):
             print(f"  {line}")
-        print(f"  Found in:")
+        print("  Found in:")
         for filepath, lineno, _ in occurrences:
             print(f"    {Path(filepath).name}:{lineno}")
 

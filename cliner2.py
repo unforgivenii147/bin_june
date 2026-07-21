@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for cliner2.py."""
+
 from __future__ import annotations
 
 import re

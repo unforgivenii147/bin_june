@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for exnames.py."""
+
 from __future__ import annotations
 
 import re
@@ -63,7 +65,7 @@ def find_names_in_files(names_db_path: str = "names.txt") -> None:
                     content = f.read()
                     for original_name, pattern in names_to_find:
                         for match in pattern.finditer(content):
-                            matched_span = match.span()
+                            match.span()
                             matched_text = match.group(0)
                             match_parts = matched_text.strip().split()
                             if len(match_parts) >= 2 and (

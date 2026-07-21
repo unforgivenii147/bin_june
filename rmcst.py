@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for rmcst.py."""
+
 
 from __future__ import annotations
 
@@ -91,7 +93,7 @@ def process_wheel(wheel_path: Path, base_dir: Path) -> List[str]:
         with zipfile.ZipFile(wheel_path, "r") as zin:
             zin.extractall(temp_dir)
         internal_changes = []
-        with ProcessPoolExecutor() as executor:
+        with ProcessPoolExecutor():
             files_to_process = []
             for p in temp_dir.rglob("*"):
                 if p.suffix == ".py" or (p.is_file() and (not p.suffix)):

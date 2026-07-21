@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for getsrt.py."""
+
 from __future__ import annotations
 
 import subprocess
@@ -13,11 +15,11 @@ def extract_subtitles(path) -> None:
     if not path.exists():
         return
     output_path = path.with_suffix(".srt")
-    cmd = ["ffmpeg", "-i", str(path), "-map", f"0:s:0", "-y", str(output_path)]
+    cmd = ["ffmpeg", "-i", str(path), "-map", "0:s:0", "-y", str(output_path)]
     try:
         subprocess.run(cmd, check=True)
     except:
-        print(f"Error")
+        print("Error")
 
 
 if __name__ == "__main__":

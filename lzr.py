@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for lzr.py."""
+
 from __future__ import annotations
 
 import argparse
@@ -165,7 +167,7 @@ def compress_tar_to_lz4(tar_path: Path, lz4_path: Path) -> bool:
                 print(f"  ✓ Compressed archive: {reduction:.1f}% saved ({fsz(tar_size)} → {fsz(lz4_size)})")
                 return True
             else:
-                print(f"  ✗ Archive compression didn't save space, keeping .tar")
+                print("  ✗ Archive compression didn't save space, keeping .tar")
                 lz4_path.unlink()
                 return False
         return False
@@ -179,12 +181,12 @@ async def compress_folder_async(folder_path: Path, output_base_name: str) -> boo
     tar_path = Path(output_base_name + ".tar")
     lz4_path = Path(output_base_name + ".tar.lz4")
     try:
-        print(f"  Creating tar archive...")
+        print("  Creating tar archive...")
         success = await loop.run_in_executor(None, create_tar_archive, folder_path, tar_path)
         if not success or not tar_path.exists():
-            print(f"  Failed to create tar archive")
+            print("  Failed to create tar archive")
             return False
-        print(f"  Compressing tar archive with LZ4 (max compression)...")
+        print("  Compressing tar archive with LZ4 (max compression)...")
         if compress_tar_to_lz4(tar_path, lz4_path):
             await loop.run_in_executor(None, shutil.rmtree, folder_path)
             return True
@@ -270,13 +272,13 @@ def extract_tar_archive(tar_path: Path, extract_dir: Path) -> bool:
 
 async def process_compress() -> None:
     cwd = Path.cwd()
-    print(f"\n🔧 LZ4 Compression Settings:")
+    print("\n🔧 LZ4 Compression Settings:")
     print(f"   Level: {LZ4_COMPRESS_LEVEL}/9 (maximum)")
-    print(f"   Mode: High Compression (HC)")
+    print("   Mode: High Compression (HC)")
     print(f"   Acceleration: {LZ4_ACCELERATION} (slowest/max compression)")
-    print(f"   Block size: Max (4MB)")
-    print(f"   Block linking: Enabled")
-    print(f"   Content checksum: Enabled")
+    print("   Block size: Max (4MB)")
+    print("   Block linking: Enabled")
+    print("   Content checksum: Enabled")
     print(f"   Parallel workers: {MAX_WORKERS}")
     print(f"   Chunk size: {fsz(CHUNK_SIZE)}")
     dirs_to_compress = get_dirs(cwd)
@@ -328,7 +330,7 @@ async def process_decompress() -> None:
             tar_path = None
             try:
                 tar_path = archive.with_suffix("")
-                print(f"    Decompressing LZ4...")
+                print("    Decompressing LZ4...")
                 compressed_data = archive.read_bytes()
                 tar_data = lz4.frame.decompress(compressed_data)
                 tar_path.write_bytes(tar_data)

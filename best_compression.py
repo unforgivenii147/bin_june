@@ -1,4 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
+from typing import Dict
+from typing import List
+
+"""Module for best_compression.py."""
 
 
 from __future__ import annotations
@@ -13,7 +18,7 @@ import time
 import zipfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 import brotli
 import py7zr
 import zstandard as zstd

@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for fasort.py."""
 import sys
-import re
 
 
 def persian_sort_key(word):

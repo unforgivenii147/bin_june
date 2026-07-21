@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for sheb.py."""
 from __future__ import annotations
 
 import os
@@ -32,7 +34,7 @@ def is_python_file(filepath) -> bool:
 
 
 def process_file(filepath) -> None:
-    path = Path(path)
+    Path(path)
     with Path(filepath).open("r+", encoding="utf-8") as f:
         lines = f.readlines()
         if not lines:

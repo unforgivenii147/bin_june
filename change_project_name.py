@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for change_project_name.py."""
+
 
 from __future__ import annotations
 

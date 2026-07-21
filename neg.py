@@ -102,7 +102,7 @@ def main():
     successful = sum((1 for _, success in results if success))
     failed = len(results) - successful
     logger.info(f"\n{'=' * 50}")
-    logger.info(f"Processing complete!")
+    logger.info("Processing complete!")
     logger.info(f"✓ Successful: {successful}")
     if failed > 0:
         logger.warning(f"✗ Failed: {failed}")

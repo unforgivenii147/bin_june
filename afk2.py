@@ -569,7 +569,6 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
-    import textwrap
 
     parser = build_parser()
     args = parser.parse_args(argv)

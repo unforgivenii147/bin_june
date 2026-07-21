@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for eximports3.py."""
 from __future__ import annotations
 
 import ast
@@ -65,7 +67,7 @@ def mpf3(process_function: Callable, files: list[Path], **kwargs):
 
 
 def process_file(file_path):
-    path = Path(path)
+    Path(path)
     imports = set()
     try:
         with Path(file_path).open(encoding="utf-8") as f:

@@ -1,4 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
+
+"""Module for soverify.py."""
 from __future__ import annotations
 
 import ctypes
@@ -7,7 +10,7 @@ import subprocess
 import sys
 from collections import deque
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List
 
 from loguru import logger
 
@@ -157,7 +160,7 @@ class CtypesVerifier:
         if not file_path.is_file():
             return (False, "Not a regular file")
         try:
-            lib = ctypes.CDLL(str(file_path), use_errno=True)
+            ctypes.CDLL(str(file_path), use_errno=True)
             err = ctypes.get_errno()
             if err:
                 self.log(f"Warning: errno set to {err} for {file_path.name}")
@@ -246,7 +249,7 @@ def main() -> None:
             error_count += 1
             error_files.append(file_path)
     print(f"\n{'=' * 50}")
-    print(f"VERIFICATION SUMMARY")
+    print("VERIFICATION SUMMARY")
     print(f"{'=' * 50}")
     print(f"Total files checked: {len(files)}")
     print(f"✓ Valid files:       {valid_count}")

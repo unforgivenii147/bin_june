@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for noneng.py."""
 from __future__ import annotations
 
 from collections import deque
@@ -7,6 +9,8 @@ from pathlib import Path
 
 from langdetect import DetectorFactory, detect
 from langdetect.lang_detect_exception import LangDetectException
+
+CHUNK_SIZE = 1024 * 1024
 
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:

@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for rename_json.py."""
 from __future__ import annotations
 
 import json

@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for wcount.py."""
 from __future__ import annotations
 
 import json
@@ -9,6 +11,8 @@ from pathlib import Path
 
 from toolz import compose, frequencies
 from toolz.curried import map as _map
+
+CHUNK_SIZE = 1024 * 1024
 
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:

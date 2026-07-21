@@ -1,9 +1,13 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for extract_lines_contains_base64.py."""
 from __future__ import annotations
 
 import sys
 from collections import deque
 from pathlib import Path
+
+CHUNK_SIZE = 1024 * 1024
 
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:

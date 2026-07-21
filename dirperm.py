@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for dirperm.py."""
 from __future__ import annotations
 
 import argparse
@@ -133,14 +135,14 @@ def print_report(stats, success=None, failed=None):
         len(stats["dirs_to_change"]) + len(stats["files_make_executable"]) + len(stats["files_set_standard"])
     )
     print(f"\n{'=' * 60}")
-    print(f"Scan Summary:")
+    print("Scan Summary:")
     print(f"  Total items scanned: {total_items}")
     print(f"    Directories: {stats['total_dirs']}")
     print(f"    Files: {stats['total_files']}")
-    print(f"\nDirectory Permissions:")
+    print("\nDirectory Permissions:")
     print(f"  → Will set to 0775: {len(stats['dirs_to_change'])}")
     print(f"  ✓ Already correct (0775): {len(stats['dirs_correct'])}")
-    print(f"\nFile Permissions:")
+    print("\nFile Permissions:")
     print(f"  ⊘ Already executable (skipped): {len(stats['files_skip_executable'])}")
     print(f"  → Will make executable (+x): {len(stats['files_make_executable'])}")
     print(f"  → Will set to standard (0644): {len(stats['files_set_standard'])}")
@@ -150,7 +152,7 @@ def print_report(stats, success=None, failed=None):
         print(f"  ✗ Errors during analysis: {len(stats['errors'])}")
     if success is not None:
         print(f"\n{'=' * 60}")
-        print(f"Results:")
+        print("Results:")
         print(f"  ✓ Changes successful: {success}")
         if failed:
             print(f"  ✗ Changes failed: {failed}")
@@ -159,25 +161,25 @@ def print_report(stats, success=None, failed=None):
 
 def show_examples(stats, num=5):
     if stats["dirs_to_change"]:
-        print(f"\nExamples of directories to change to 0775:")
+        print("\nExamples of directories to change to 0775:")
         for path, current, target in stats["dirs_to_change"][:num]:
             print(f"  {oct(current)} -> {oct(target)}  {path}")
         if len(stats["dirs_to_change"]) > num:
             print(f"  ... and {len(stats['dirs_to_change']) - num} more")
     if stats["files_make_executable"]:
-        print(f"\nExamples of files to make executable (+x):")
+        print("\nExamples of files to make executable (+x):")
         for path, current, target in stats["files_make_executable"][:num]:
             print(f"  {oct(current)} -> {oct(target)}  {path}")
         if len(stats["files_make_executable"]) > num:
             print(f"  ... and {len(stats['files_make_executable']) - num} more")
     if stats["files_set_standard"]:
-        print(f"\nExamples of files to set to 0644:")
+        print("\nExamples of files to set to 0644:")
         for path, current, target in stats["files_set_standard"][:num]:
             print(f"  {oct(current)} -> {oct(target)}  {path}")
         if len(stats["files_set_standard"]) > num:
             print(f"  ... and {len(stats['files_set_standard']) - num} more")
     if stats["files_skip_executable"]:
-        print(f"\nExamples of skipped files (already executable):")
+        print("\nExamples of skipped files (already executable):")
         for path in stats["files_skip_executable"][:num]:
             print(f"  {path}")
         if len(stats["files_skip_executable"]) > num:
@@ -262,7 +264,7 @@ def main():
         success, failed = apply_changes(stats, dry_run=False)
         if success is not None:
             print(f"\n{'=' * 60}")
-            print(f"Final Results:")
+            print("Final Results:")
             print(f"  ✓ Changes applied successfully: {success}")
             if failed:
                 print(f"  ✗ Failed changes: {failed}")

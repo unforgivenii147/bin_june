@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for fileperm.py."""
 from __future__ import annotations
 
 import argparse
@@ -126,7 +128,7 @@ def apply_changes(stats, dry_run=False):
 
 def print_report(stats, success=None, failed=None):
     print(f"\n{'=' * 60}")
-    print(f"Scan Results:")
+    print("Scan Results:")
     print(f"  Total files scanned: {stats['total']}")
     print(f"  ⊘ Already executable (skipped): {len(stats['skip_executable'])}")
     print(f"  ✓ Already correct: {len(stats['skip_correct'])}")
@@ -135,7 +137,7 @@ def print_report(stats, success=None, failed=None):
     if stats["errors"]:
         print(f"  ✗ Errors during analysis: {len(stats['errors'])}")
     if success is not None:
-        print(f"\nResults:")
+        print("\nResults:")
         print(f"  ✓ Changes successful: {success}")
         if failed:
             print(f"  ✗ Changes failed: {failed}")
@@ -144,19 +146,19 @@ def print_report(stats, success=None, failed=None):
 
 def show_examples(stats, num=5):
     if stats["make_executable"]:
-        print(f"\nExamples of files to make executable (+x):")
+        print("\nExamples of files to make executable (+x):")
         for path, current, target in stats["make_executable"][:num]:
             print(f"  {oct(current)} -> {oct(target)}  {path}")
         if len(stats["make_executable"]) > num:
             print(f"  ... and {len(stats['make_executable']) - num} more")
     if stats["set_standard"]:
-        print(f"\nExamples of files to set to 0644:")
+        print("\nExamples of files to set to 0644:")
         for path, current, target in stats["set_standard"][:num]:
             print(f"  {oct(current)} -> {oct(target)}  {path}")
         if len(stats["set_standard"]) > num:
             print(f"  ... and {len(stats['set_standard']) - num} more")
     if stats["skip_executable"]:
-        print(f"\nExamples of skipped files (already executable):")
+        print("\nExamples of skipped files (already executable):")
         for path in stats["skip_executable"][:num]:
             print(f"  {path}")
         if len(stats["skip_executable"]) > num:
@@ -188,7 +190,7 @@ def main():
         success, failed = apply_changes(stats, dry_run=False)
         if success is not None:
             print(f"\n{'=' * 60}")
-            print(f"Final Results:")
+            print("Final Results:")
             print(f"  ✓ Changes applied successfully: {success}")
             if failed:
                 print(f"  ✗ Failed changes: {failed}")

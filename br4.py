@@ -129,7 +129,7 @@ def compress_path(input_path: Path, quality: int = 6, max_workers: int = 4) -> b
         result = compress_file(input_path, compressed_path, quality)
         if result["success"]:
             input_path.unlink()
-            print(f"✓ Compression successful!")
+            print("✓ Compression successful!")
             print(f"  Original: {result['original_size']:,} bytes")
             print(f"  Compressed: {result['compressed_size']:,} bytes")
             print(f"  Ratio: {result['ratio']:.1f}%")
@@ -140,16 +140,16 @@ def compress_path(input_path: Path, quality: int = 6, max_workers: int = 4) -> b
             return False
     elif input_path.is_dir():
         if input_path.suffix == ".br":
-            print(f"Error: Cannot compress a .br directory")
+            print("Error: Cannot compress a .br directory")
             return False
         print(f"Compressing directory: {input_path}")
         compressed_path = compress_directory_to_tar(input_path, quality)
         if compressed_path:
-            print(f"✓ Directory compression successful!")
+            print("✓ Directory compression successful!")
             print(f"  Output: {compressed_path}")
             return True
         else:
-            print(f"✗ Directory compression failed")
+            print("✗ Directory compression failed")
             return False
 
 
@@ -162,11 +162,11 @@ def decompress_path(input_path: Path, max_workers: int = 4) -> bool:
             print(f"Decompressing tar archive: {input_path}")
             output_dir = decompress_tar_br(input_path)
             if output_dir:
-                print(f"✓ Decompression successful!")
+                print("✓ Decompression successful!")
                 print(f"  Extracted to: {output_dir}")
                 return True
             else:
-                print(f"✗ Decompression failed")
+                print("✗ Decompression failed")
                 return False
         elif input_path.suffix == ".br":
             output_path = input_path.with_suffix("")
@@ -174,7 +174,7 @@ def decompress_path(input_path: Path, max_workers: int = 4) -> bool:
             result = decompress_file(input_path, output_path)
             if result["success"]:
                 input_path.unlink()
-                print(f"✓ Decompression successful!")
+                print("✓ Decompression successful!")
                 print(f"  Original: {result['original_size']:,} bytes")
                 print(f"  Decompressed: {result['decompressed_size']:,} bytes")
                 print(f"  Output: {result['output']}")
@@ -215,7 +215,7 @@ def decompress_path(input_path: Path, max_workers: int = 4) -> bool:
                     else:
                         print(f"  ✗ Failed: {br_file} - {result['error']}")
         print(f"\n{'=' * 60}")
-        print(f"Decompression Complete!")
+        print("Decompression Complete!")
         print(f"  Files decompressed: {success_count}/{len(br_files)}")
         print(f"{'=' * 60}")
         return success_count > 0

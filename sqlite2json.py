@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for sqlite2json.py."""
+
 
 from __future__ import annotations
 
@@ -20,7 +22,7 @@ def serialize_value(v):
 def row_to_dict(row):
     try:
         return {k: serialize_value(row[k]) for k in row}
-    except UnicodeDecodeError as e:
+    except UnicodeDecodeError:
         result = {}
         for k in row:
             try:
@@ -51,7 +53,7 @@ def fetch_table_data(args):
             rows = [row_to_dict(row) for row in cur.fetchall()]
             conn.close()
             return (table_name, rows, None)
-        except UnicodeDecodeError as decode_err:
+        except UnicodeDecodeError:
             conn.close()
             conn = sqlite3.connect(db_path)
             conn.text_factory = lambda x: x.decode("utf-8", errors="replace") if isinstance(x, bytes) else x
@@ -62,7 +64,7 @@ def fetch_table_data(args):
                 rows = [row_to_dict(row) for row in cur.fetchall()]
                 conn.close()
                 return (table_name, rows, f"UTF-8 decoding errors replaced in '{table_name}'")
-            except Exception as e2:
+            except Exception:
                 conn.close()
                 conn = sqlite3.connect(db_path)
                 conn.row_factory = sqlite3.Row

@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for egg2whl.py."""
+
 from __future__ import annotations
 
 import shutil
@@ -25,7 +27,7 @@ def parse_pkg_info(egg_info_dir):
 
 def create_setup_py(egg_root: Path, temp_dir: Path):
     egg_info_dir = egg_root / "EGG-INFO"
-    setupmeta_dir = egg_root / "setupmeta"
+    egg_root / "setupmeta"
     metadata = parse_pkg_info(egg_info_dir)
     setup_py_content = """from setuptools import setup, find_packages
 setup(

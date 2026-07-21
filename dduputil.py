@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
+from typing import List
 """dedup_utils.py
 Usage:
   python dedup_utils.py --copy
@@ -16,7 +18,7 @@ from ast import Name, Tuple, expr
 from dataclasses import dataclass
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Tuple
+from typing import Dict, Iterable, Tuple
 
 from loguru import logger
 
@@ -142,7 +144,7 @@ def iter_python_sources(root: Path) -> Iterable[SourceFile]:
     for p in root.rglob("*"):
         if p.is_dir():
             continue
-        suffix = "".join(p.suffixes) or p.suffix
+        "".join(p.suffixes) or p.suffix
         lower = str(p.name).lower()
         try:
             if lower.endswith(".py"):
@@ -410,10 +412,10 @@ def main() -> None:
             if args.copy:
                 pass
             else:
-                relpath = sf.relpath if sf else Path("<unknown>")
+                sf.relpath if sf else Path("<unknown>")
                 disk_path = sf.path if sf else None
                 if disk_path and disk_path.exists() and disk_path.suffixes:
-                    target_path = sf.path if sf.path.exists() else None
+                    sf.path if sf.path.exists() else None
                 d = modifications.setdefault(
                     sf.path, {"remove_snippets": [], "add_imports": set(), "preserve_imports": []}
                 )

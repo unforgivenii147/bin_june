@@ -8,9 +8,7 @@ if they contain appropriate shebangs but have wrong or missing extensions.
 from __future__ import annotations
 
 import os
-import shutil
 import sys
-from pathlib import Path
 
 # Shebang to extension mapping
 SHEBANG_MAP = {
@@ -78,7 +76,6 @@ def rename_file(filepath, target_ext):
 
     # Handle name conflicts
     counter = 1
-    original_new_path = new_path
     while os.path.exists(new_path) and new_path != filepath:
         new_name = f"{basename}_{counter}{target_ext}"
         new_path = os.path.join(directory, new_name)
@@ -150,7 +147,7 @@ def main():
                 skipped_count += 1
 
     # Summary
-    print(f"\nSummary:")
+    print("\nSummary:")
     if dry_run:
         print(f"  Would rename: {renamed_count} files")
     else:

@@ -1,4 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
+
+"""Module for pdown2.py."""
 
 from __future__ import annotations
 
@@ -7,7 +10,7 @@ import json
 import pathlib
 import urllib.error
 import urllib.request
-from typing import Dict, Optional, Tuple
+from typing import Dict
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

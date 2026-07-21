@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for whisper2txt.py."""
+
 
 from __future__ import annotations
 
@@ -13,7 +15,7 @@ def m4a_to_text_whisper(input_file, output_file="out.txt"):
     if not os.path.exists(input_file):
         print(f"Error: Input file '{input_file}' not found.")
         sys.exit(1)
-    print(f"Loading Whisper model...")
+    print("Loading Whisper model...")
     model = whisper.load_model("base")
     print(f"Processing: {input_file}")
     result = model.transcribe(input_file)

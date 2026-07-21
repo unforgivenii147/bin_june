@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
+from typing import List
 
 """Check for Python packages with missing console scripts in system bin directory."""
 
@@ -9,7 +11,7 @@ import sys
 from configparser import ConfigParser
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

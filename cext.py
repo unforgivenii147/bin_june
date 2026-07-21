@@ -12,10 +12,8 @@ import ast
 import io
 import os
 import re
-import shutil
 import sys
 import tarfile
-import textwrap
 import zipfile
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -278,7 +276,7 @@ def extract_imports_tree_sitter(source: str) -> list[str]:
         parser = tree_sitter.Parser(PY_LANGUAGE)
         tree = parser.parse(source.encode())
         imports: list[str] = []
-        cursor = tree.walk()
+        tree.walk()
 
         def _walk(node: tree_sitter.Node) -> None:
             if node.type in ("import_statement", "import_from_statement"):

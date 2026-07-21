@@ -39,7 +39,7 @@ def mo_to_po(mo_path, remove_orig: bool = True, verbose: bool = False) -> bool:
     po_path = mo_path.with_suffix(".po")
     try:
         with open(po_path, "w", encoding="utf-8") as po_file:
-            result = subprocess.run(
+            subprocess.run(
                 ["msgunfmt", str(mo_path)],
                 stdout=po_file,
                 stderr=subprocess.PIPE,
@@ -81,7 +81,7 @@ def mo_to_po_python_only(mo_path, remove_orig: bool = True, verbose: bool = Fals
                 endian = "<"
             else:
                 raise ValueError("Invalid .mo file magic number")
-            revision = struct.unpack(endian + "I", mo_file.read(4))[0]
+            struct.unpack(endian + "I", mo_file.read(4))[0]
             num_strings = struct.unpack(endian + "I", mo_file.read(4))[0]
             orig_table_offset = struct.unpack(endian + "I", mo_file.read(4))[0]
             trans_table_offset = struct.unpack(endian + "I", mo_file.read(4))[0]

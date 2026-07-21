@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for wf.py."""
 from __future__ import annotations
 
 import os
@@ -39,7 +41,7 @@ def main():
                     print(line.rstrip("\n"))
                 tail_text = "".join(lines)
                 if "boostraped 100%" in tail_text:
-                    print(f"\n✓ Bootstrap complete detected! Exiting...\n")
+                    print("\n✓ Bootstrap complete detected! Exiting...\n")
                     sys.exit(0)
             time.sleep(1)
     except KeyboardInterrupt:

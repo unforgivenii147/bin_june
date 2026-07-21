@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Dict
+from typing import Optional
 """
 PyPI RSS Feed Parser
 Fetches and extracts newly added packages from the PyPI RSS feed.
@@ -8,7 +10,7 @@ import requests
 import xml.etree.ElementTree as ET
 from datetime import datetime
 import sys
-from typing import List, Dict, Optional
+from typing import List
 
 # PyPI RSS feed URL for latest packages
 PYPI_RSS_URL = "https://pypi.org/rss/packages.xml"

@@ -1,4 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
+from typing import List
+
+"""Module for rmco.py."""
 
 from __future__ import annotations
 
@@ -10,7 +14,7 @@ import multiprocessing
 import sys
 import tokenize
 from pathlib import Path
-from typing import Dict, List, NamedTuple, Optional, Tuple
+from typing import Dict, NamedTuple
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

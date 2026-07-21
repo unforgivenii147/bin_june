@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
 
 """
 Brotli Recursive File Compressor/Decompressor
@@ -19,7 +20,7 @@ import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional, Set, Tuple
+from typing import List, Set
 
 import brotlicffi
 
@@ -141,7 +142,7 @@ def format_size(size_bytes: int) -> str:
 
 def tar_directory(directory: Path, output_path: Path, delete_original: bool = False) -> Tuple[int, bool]:
     try:
-        original_size = sum(f.stat().st_size for f in directory.rglob("*") if f.is_file())
+        sum(f.stat().st_size for f in directory.rglob("*") if f.is_file())
         with tarfile.open(output_path, "w") as tar:
             tar.add(directory, arcname=directory.name)
         tar_size = output_path.stat().st_size
@@ -246,7 +247,7 @@ def decompress_file_streaming(
                     decompressed_chunk = decompressor.decompress(chunk)
                     f_out.write(decompressed_chunk)
                     decompressed_size += len(decompressed_chunk)
-                except Exception as e:
+                except Exception:
                     if decompressed_size > 0:
                         try:
                             remaining = decompressor.flush()
@@ -319,7 +320,7 @@ def process_subdirs_with_tar(
     tar_errors = []
     print("🗜️  Step 1: Creating tar archives of subdirectories...")
     with tempfile.TemporaryDirectory() as temp_dir:
-        temp_path = Path(temp_dir)
+        Path(temp_dir)
         for i, subdir in enumerate(subdirs, 1):
             try:
                 tar_name = f"{subdir.name}.tar"
@@ -548,20 +549,20 @@ def print_results_rich(results: List[CompressionResult], directory: Path, operat
         console.print(fail_table)
     summary_text = Text()
     summary_text.append(f"📊 {operation_name} Summary\n\n", style="bold cyan")
-    summary_text.append(f"📁 Directory: ", style="dim")
+    summary_text.append("📁 Directory: ", style="dim")
     summary_text.append(f"{directory}\n", style="bold white")
-    summary_text.append(f"Total files processed: ", style="dim")
+    summary_text.append("Total files processed: ", style="dim")
     summary_text.append(f"{len(results)}\n", style="bold white")
-    summary_text.append(f"✅ Successful: ", style="dim")
+    summary_text.append("✅ Successful: ", style="dim")
     summary_text.append(f"{len(successful)}\n", style="bold green")
-    summary_text.append(f"❌ Failed: ", style="dim")
+    summary_text.append("❌ Failed: ", style="dim")
     summary_text.append(f"{len(failed)}\n", style="bold red")
     if tarred_count > 0:
-        summary_text.append(f"📦 From tarred directories: ", style="dim")
+        summary_text.append("📦 From tarred directories: ", style="dim")
         summary_text.append(f"{tarred_count}\n", style="bold yellow")
-    summary_text.append(f"🗑️  Originals deleted: ", style="dim")
+    summary_text.append("🗑️  Originals deleted: ", style="dim")
     summary_text.append(f"{deleted_count}\n", style="bold yellow")
-    summary_text.append(f"\n💾 Total original size: ", style="dim")
+    summary_text.append("\n💾 Total original size: ", style="dim")
     summary_text.append(f"{format_size(total_original)}\n", style="bold yellow")
     summary_text.append(
         f"{('📦' if operation == 'compress' else '📂')} Total {size_label.lower()} size: ",
@@ -569,18 +570,18 @@ def print_results_rich(results: List[CompressionResult], directory: Path, operat
     )
     summary_text.append(f"{format_size(total_processed)}\n", style="bold green")
     if operation == "compress":
-        summary_text.append(f"📈 Average compression: ", style="dim")
+        summary_text.append("📈 Average compression: ", style="dim")
         summary_text.append(f"{avg_ratio:.1f}%\n", style="bold magenta")
-        summary_text.append(f"🎉 Disk space freed: ", style="dim")
+        summary_text.append("🎉 Disk space freed: ", style="dim")
         summary_text.append(f"{format_size(space_saved)} ", style="bold cyan")
     else:
-        summary_text.append(f"📈 Average expansion: ", style="dim")
+        summary_text.append("📈 Average expansion: ", style="dim")
         summary_text.append(f"{avg_ratio:.1f}%\n", style="bold magenta")
-        summary_text.append(f"💾 Disk space used: ", style="dim")
+        summary_text.append("💾 Disk space used: ", style="dim")
         summary_text.append(f"{format_size(space_saved)} ", style="bold cyan")
     if total_original > 0 and operation == "compress":
         summary_text.append(f"({space_saved / total_original * 100:.1f}%)\n", style="bold cyan")
-    summary_text.append(f"⏱️  Total time: ", style="dim")
+    summary_text.append("⏱️  Total time: ", style="dim")
     summary_text.append(f"{total_duration:.2f}s ", style="bold white")
     if results:
         summary_text.append(f"(avg {total_duration / len(results):.2f}s per file)", style="dim")
@@ -753,12 +754,11 @@ def main():
     if not directory.is_dir():
         print(f"❌ Error: '{directory}' is not a directory")
         sys.exit(1)
-    operation_emoji = "📦" if operation == "compress" else "📂"
     operation_name = "compression" if operation == "compress" else "decompression"
     print(f"🔍 Scanning directory for {operation_name}: {directory}")
     if operation == "compress":
         if args.tar_subdirs_first:
-            print(f"📁 Mode: Tar subdirectories first, then Brotli compression")
+            print("📁 Mode: Tar subdirectories first, then Brotli compression")
             tar_results = process_subdirs_with_tar(
                 directory,
                 quality=args.quality,
@@ -766,7 +766,7 @@ def main():
                 keep_original=args.keep_originals,
                 exclude_patterns=args.exclude,
             )
-            print(f"\n📁 Processing individual files in root directory...")
+            print("\n📁 Processing individual files in root directory...")
             files = find_files_to_compress(
                 directory,
                 exclude_extensions=exclude_extensions,
@@ -779,13 +779,13 @@ def main():
                 for file_path in files:
                     print(f"  • {file_path.relative_to(directory)}")
             else:
-                print(f"📁 No individual files in root directory")
+                print("📁 No individual files in root directory")
             all_results = tar_results
         else:
             if args.extensions:
                 print(f"📁 Mode: Only specified extensions ({', '.join(args.extensions)})")
             else:
-                print(f"📁 Mode: ALL files (excluding already compressed formats and symlinks)")
+                print("📁 Mode: ALL files (excluding already compressed formats and symlinks)")
             if args.exclude:
                 print(f"🚫 Excluding patterns: {', '.join(args.exclude)}")
             files = find_files_to_compress(
@@ -797,13 +797,13 @@ def main():
             )
             all_results = []
         if not args.tar_subdirs_first and (not files):
-            print(f"❌ No files found to compress")
+            print("❌ No files found to compress")
             sys.exit(0)
         if not args.tar_subdirs_first:
             print(f"📁 Found {len(files)} file(s) to compress")
             type_stats = get_file_type_stats(files)
             if type_stats:
-                print(f"📊 File types found:")
+                print("📊 File types found:")
                 for ext, count in list(type_stats.items())[:10]:
                     print(f"  • {ext}: {count} file(s)")
                 if len(type_stats) > 10:
@@ -811,19 +811,19 @@ def main():
             total_size = sum(f.stat().st_size for f in files)
             print(f"💾 Total size: {format_size(total_size)}")
     else:
-        print(f"📁 Mode: Decompressing .br files")
+        print("📁 Mode: Decompressing .br files")
         if args.exclude:
             print(f"🚫 Excluding patterns: {', '.join(args.exclude)}")
         files = find_files_to_decompress(directory, exclude_patterns=args.exclude)
         if not files:
-            print(f"❌ No .br files found to decompress")
+            print("❌ No .br files found to decompress")
             sys.exit(0)
         print(f"📁 Found {len(files)} .br file(s) to decompress")
         total_size = sum(f.stat().st_size for f in files)
         print(f"💾 Total compressed size: {format_size(total_size)}")
     if args.dry_run:
         if args.tar_subdirs_first:
-            print(f"\n🔍 DRY RUN - Would tar subdirectories and compress them with Brotli")
+            print("\n🔍 DRY RUN - Would tar subdirectories and compress them with Brotli")
         else:
             print(f"\n🔍 DRY RUN - Would {operation} {len(files)} files ({format_size(total_size)})")
         print("No files were modified.")
@@ -846,7 +846,7 @@ def main():
     if args.tar_subdirs_first:
         results = all_results
         if files:
-            print(f"🔄 Compressing individual files...")
+            print("🔄 Compressing individual files...")
             if RICH_AVAILABLE:
                 console = Console()
                 with Progress(

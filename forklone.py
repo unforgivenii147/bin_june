@@ -34,7 +34,7 @@ def load_env_token():
         else:
             print(f"⚠️  {env_path} exists but GITHUB_TOKEN not found")
     else:
-        print(f"⚠️  ~/.env file not found")
+        print("⚠️  ~/.env file not found")
     return None
 
 
@@ -100,7 +100,7 @@ def clone_and_setup(forked_repo, original_full_name):
 def create_env_template():
     env_path = Path.home() / ".env"
     if not env_path.exists():
-        print(f"\n📝 Creating ~/.env template...")
+        print("\n📝 Creating ~/.env template...")
         with open(env_path, "w") as f:
             f.write("# GitHub Personal Access Token\n")
             f.write("# Get one at: https://github.com/settings/tokens\n")
@@ -139,7 +139,7 @@ def main():
     print(f"\nTo pull from original repo: git pull upstream {default_branch}")
     print(f"To push to your fork: git push origin {default_branch}")
     print(f"\nRepo location: ./{forked_repo.name}")
-    print(f"\nRepository info:")
+    print("\nRepository info:")
     print(f"  Original: {repo_full}")
     print(f"  Your fork: {forked_repo.full_name}")
     print(f"  Default branch: {default_branch}")

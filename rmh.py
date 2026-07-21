@@ -246,14 +246,14 @@ def main(
             logger.error(f"Path not found: {target}")
             return 1
         target_paths.append(path)
-    logger.info(f"Scanning for C/C++ files...")
+    logger.info("Scanning for C/C++ files...")
     logger.info(f"Targets: {', '.join(str(p) for p in target_paths)}")
     source_files = collect_source_files(targets)
     if not source_files:
         logger.warning("No C/C++ source files found.")
         return 0
     logger.info(f"Found {len(source_files)} source files")
-    logger.info(f"File types: .h, .hpp, .c, .cpp, .cc, .cxx, .hxx")
+    logger.info("File types: .h, .hpp, .c, .cpp, .cc, .cxx, .hxx")
     if dry_run:
         logger.info("DRY RUN MODE: No files will be modified")
         remover = CommentRemover()

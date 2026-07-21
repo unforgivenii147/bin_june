@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
+from typing import List
 
 """
 Script to detect and keep only the latest version of wheel or deb files in current directory recursively.
@@ -11,7 +13,7 @@ import re
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict
 
 from packaging import version as pkg_version
 

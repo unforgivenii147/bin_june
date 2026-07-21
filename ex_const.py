@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for ex_const.py."""
+
 from __future__ import annotations
 
 import ast
@@ -10,6 +12,8 @@ from pathlib import Path
 
 from joblib import Parallel, delayed
 from xxhash import xxh64
+
+CHUNK_SIZE = 1024 * 1024
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -139,7 +143,7 @@ def extract_constants(filepath: Path) -> list[tuple[str, str, str]]:
 
 def process_file(filepath: Path) -> tuple[str, list[tuple[str, str, str]] | None]:
     file_hash = get_file_hash(filepath)
-    path = Path(path)
+    Path(path)
     constants = extract_constants(filepath)
     return file_hash, constants
 
@@ -152,7 +156,6 @@ def main() -> None:
         return
     print(f"Found {len(python_files)} Python files. Processing...")
     results = Parallel(n_jobs=-1)(delayed(process_file)(f) for f in python_files)
-    unique_constants = {}
     processed_hashes = set()
     all_constants_by_hash = {}
     for file_hash, constants in results:
@@ -163,7 +166,6 @@ def main() -> None:
             for name, value, ctype in constants:
                 if file_hash not in all_constants_by_hash:
                     all_constants_by_hash[file_hash] = []
-                constant_repr = f"{name} = {value}"
                 found = False
                 for idx, (existing_name, existing_value, _existing_type) in enumerate(all_constants_by_hash[file_hash]):
                     if existing_name == name and existing_value == value:

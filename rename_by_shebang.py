@@ -96,11 +96,11 @@ def check_termux() -> bool:
     termux_prefix = "/data/data/com.termux/files/usr"
     is_termux = os.path.exists(termux_prefix)
     if is_termux:
-        print(f"📱 Termux environment detected")
+        print("📱 Termux environment detected")
         print(f"   Prefix: {termux_prefix}")
         print(f"   Python: {os.path.realpath('/data/data/com.termux/files/usr/bin/python3')}")
     else:
-        print(f"💻 Standard Linux/Unix environment detected")
+        print("💻 Standard Linux/Unix environment detected")
     return is_termux
 
 
@@ -109,7 +109,7 @@ def main() -> None:
     renamed_count = 0
     skipped_count = 0
     unknown_count = 0
-    is_termux = check_termux()
+    check_termux()
     print(f"📂 Scanning directory: {cwd}\n")
     files = [f for f in cwd.iterdir() if f.is_file()]
     if not files:
@@ -140,7 +140,7 @@ def main() -> None:
         if rename_file(file_path, new_path):
             renamed_count += 1
     print(f"\n{'=' * 50}")
-    print(f"📊 Summary:")
+    print("📊 Summary:")
     print(f"   ✅ Renamed: {renamed_count} file(s)")
     print(f"   ⏭️  Skipped (already correct): {skipped_count} file(s)")
     if unknown_count:
@@ -165,7 +165,7 @@ def dry_run() -> None:
         if extension and not file_path.suffix == extension:
             new_name = f"{file_path.stem}{extension}"
             print(f"  Would rename: {file_path.name} -> {new_name}")
-    print(f"\nRun without '--dry-run' to apply changes.")
+    print("\nRun without '--dry-run' to apply changes.")
 
 
 if __name__ == "__main__":

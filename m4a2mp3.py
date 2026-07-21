@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for m4a2mp3.py."""
 from __future__ import annotations
 
 import os
@@ -15,7 +17,7 @@ def convert_m4a_to_mp3(input_file, bitrate="64k"):
 
     # Check if it's an M4A file
     if not input_file.lower().endswith(".m4a"):
-        print(f"Warning: Input file doesn't have .m4a extension. Proceeding anyway...")
+        print("Warning: Input file doesn't have .m4a extension. Proceeding anyway...")
 
     # Generate output filename
     input_path = Path(input_file)
@@ -53,7 +55,7 @@ def convert_m4a_to_mp3(input_file, bitrate="64k"):
         print(f"Size ratio: {output_size / input_size:.1%}")
 
     except subprocess.CalledProcessError as e:
-        print(f"Error during conversion:")
+        print("Error during conversion:")
         print(e.stderr)
         sys.exit(1)
     except FileNotFoundError:

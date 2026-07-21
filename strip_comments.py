@@ -24,7 +24,7 @@ import tokenize
 import io
 from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Callable
 
 

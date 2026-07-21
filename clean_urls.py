@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for clean_urls.py."""
+
 from __future__ import annotations
 
 from urllib.parse import urlparse

@@ -16,6 +16,8 @@ from typing import Final, Iterator
 
 from deep_translator import GoogleTranslator
 
+CHUNK_SIZE = 1024 * 1024
+
 CHUNK_SIZE: Final[int] = 2000
 TARGET_LANGUAGE: Final[str] = "en"
 SKIP_DIRS: Final[frozenset[str]] = frozenset(

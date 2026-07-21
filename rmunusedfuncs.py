@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for rmunusedfuncs.py."""
+
 from __future__ import annotations
 
 import argparse
@@ -47,7 +49,7 @@ def remove_functions_from_source(source: str, unused_functions) -> str:
 
 
 def process_file(filepath, dry_run: bool = False):
-    path = Path(path)
+    Path(path)
     errors = []
     filepath = Path(filepath)
     try:

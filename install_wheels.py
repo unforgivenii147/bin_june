@@ -53,13 +53,12 @@ def is_pure_python_wheel(wheel_path: Path) -> bool:
 def install_wheel(wheel_path: Path, user_install: bool) -> Tuple[Path, bool, str]:
     """Install a single wheel and return status."""
     try:
-        install_flag = "--user" if user_install else ""
         cmd = [sys.executable, "-m", "pip", "install", str(wheel_path)]
 
         if user_install:
             cmd.insert(3, "--user")
 
-        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        subprocess.run(cmd, capture_output=True, text=True, check=True)
 
         install_type = "user site-packages" if user_install else "system site-packages"
         return wheel_path, True, f"✓ {wheel_path.name} -> {install_type}"

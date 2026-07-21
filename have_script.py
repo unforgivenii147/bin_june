@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for have_script.py."""
 from __future__ import annotations
 
 import argparse
@@ -96,7 +98,7 @@ def main():
             for whl_path, name, version in no_entry_points:
                 print(f"   {name} ({version}): {whl_path}")
         else:
-            print(f"   (Use -v to see full list)")
+            print("   (Use -v to see full list)")
     if errors:
         print("\n" + "=" * 80)
         print(f"⚠️  {len(errors)} wheel(s) could not be read:")

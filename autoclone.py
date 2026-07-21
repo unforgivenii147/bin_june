@@ -25,7 +25,7 @@ if env_path.exists():
     load_dotenv(env_path)
     print(f"✅ Loaded environment from {env_path}")
 else:
-    print(f"⚠️  ~/.env not found, using system environment variables")
+    print("⚠️  ~/.env not found, using system environment variables")
 SIZE_CACHE_FILE = "repo_sizes.json"
 CACHE_EXPIRY_DAYS = 7
 
@@ -100,7 +100,7 @@ def get_repo_size(repo, token=None, cache_data=None):
                 }
             return size_mb
         elif response.status_code == 403 and "rate limit" in response.text.lower():
-            print(f"  ⚠️  Rate limit exceeded! Please check your GITHUB_TOKEN")
+            print("  ⚠️  Rate limit exceeded! Please check your GITHUB_TOKEN")
             return None
         else:
             print(f"  ⚠️  Error fetching {repo}: HTTP {response.status_code}")
@@ -168,7 +168,7 @@ def main():
         print("❌ No repositories found in repos.txt")
         sys.exit(1)
     print(f"\n📚 Found {len(repos)} repositories")
-    print(f"🔍 Checking and cloning in one pass...")
+    print("🔍 Checking and cloning in one pass...")
     print("=" * 60)
     size_limit_mb = 0.5
     cloned_count = 0
@@ -181,7 +181,7 @@ def main():
         print("-" * 40)
         size_mb = get_repo_size(repo, token, cache_data)
         if size_mb is None:
-            print(f"  ⚠️  Could not determine size, skipping...")
+            print("  ⚠️  Could not determine size, skipping...")
             no_size_count += 1
             continue
         print(f"  📊 Size: {size_mb:.2f} MB")
@@ -208,9 +208,9 @@ def main():
     print(f"📊 Total size of cloned repos: {total_size:.2f} MB")
     print(f"📚 Total repos processed: {len(repos)}")
     if token:
-        print(f"\n💡 Using authenticated requests (rate limit: 5000/hr)")
+        print("\n💡 Using authenticated requests (rate limit: 5000/hr)")
     else:
-        print(f"\n💡 Using unauthenticated requests (rate limit: 60/hr)")
+        print("\n💡 Using unauthenticated requests (rate limit: 60/hr)")
         print("   Consider adding GITHUB_TOKEN to ~/.env for higher limits")
     print(f"\n💾 Repository size data saved to: {SIZE_CACHE_FILE}")
 

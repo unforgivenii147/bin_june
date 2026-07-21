@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
 
 """
 Find non-pure Python packages in system site-packages and save list to file.
@@ -12,7 +13,7 @@ import site
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List
 
 import pkg_resources
 

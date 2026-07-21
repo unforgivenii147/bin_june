@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Union
 
 
 """
@@ -211,7 +212,7 @@ class Calculator:
         except NameError as e:
             return f"Error: Unknown variable or function: {e!s}"
         except SyntaxError:
-            return f"Error: Invalid expression syntax"
+            return "Error: Invalid expression syntax"
         except Exception as e:
             return f"Error: {e!s}"
 

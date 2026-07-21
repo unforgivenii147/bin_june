@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for dupefix.py."""
+
 from __future__ import annotations
 
 import pathlib
@@ -76,7 +78,7 @@ def remove_duplicates(root_dir, dry_run=True):
                         print(f"Deleted: {p}")
                 except OSError as e:
                     print(f"Error deleting {p}: {e}")
-    print(f"\nCleanup complete.")
+    print("\nCleanup complete.")
     print(f"Duplicate files found: {duplicates_found}")
     if not dry_run:
         print(f"Total disk space freed: {total_freed / (1024 * 1024):.2f} MB")

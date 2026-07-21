@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for rprompt.py."""
 from __future__ import annotations
 
 import io
@@ -9,6 +11,8 @@ import tokenize
 from collections.abc import Callable
 from os import scandir as os_scandir
 from pathlib import Path
+
+CHUNK_SIZE = 1024 * 1024
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -238,7 +242,7 @@ def process_file(path) -> None:
     content_no_comments = remove_comments_and_docstrings(content)
     lines = content_no_comments.splitlines()
     non_empty_lines = [line.strip() for line in lines if line.strip()]
-    content_cleaned = "\n".join(non_empty_lines)
+    "\n".join(non_empty_lines)
     import keyword
 
     keywords = set(keyword.kwlist)

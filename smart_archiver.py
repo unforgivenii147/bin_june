@@ -488,7 +488,7 @@ Examples:
             total_original = sum(r.get("original_size", 0) for r in results if r["success"])
             total_compressed = sum(r.get("compressed_size", 0) for r in results if r["success"])
             print(f"\n{'=' * 60}")
-            print(f"COMPRESSION SUMMARY")
+            print("COMPRESSION SUMMARY")
             print(f"  Successful: {successful}/{len(results)} files")
             if failed:
                 print(f"  Failed: {failed} files")

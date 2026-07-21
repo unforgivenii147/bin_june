@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for standalone_css.py."""
 from __future__ import annotations
 
 import base64
@@ -20,7 +22,6 @@ def get_file_extension(url):
 
 
 def is_font_url(url) -> bool:
-    e = [".woff", ".woff2", ".ttf", ".eot", ".svg"]
     return any(url.lower().endswith(ext) for ext in extensions)
 
 

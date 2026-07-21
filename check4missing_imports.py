@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
 
 """
 Check Python files recursively for missing imports.
@@ -13,7 +14,7 @@ import sys
 from importlib.util import find_spec
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import List, Set, Tuple
+from typing import List, Set
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -139,7 +140,7 @@ def main():
                 print(f"  - Missing: {imp}")
             if args.auto_fix:
                 fix_file(file_path, missing)
-                print(f"  ✓ Fixed")
+                print("  ✓ Fixed")
     print(f"\n{'=' * 60}")
     if files_with_issues:
         print(f"Files with missing imports: {len(files_with_issues)}")

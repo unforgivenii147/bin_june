@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for find_non_eng.py."""
 from __future__ import annotations
 
 import argparse
@@ -8,6 +10,8 @@ from collections import Counter
 from pathlib import Path
 
 import pycld2
+
+CHUNK_SIZE = 1024 * 1024
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

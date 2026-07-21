@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
+from typing import List
 
 """
 Detect and optionally remove repeated multi-line blocks in all text-based files
@@ -18,7 +20,7 @@ import sys
 import time
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
+from typing import Dict, Set
 
 from joblib import Parallel, delayed
 

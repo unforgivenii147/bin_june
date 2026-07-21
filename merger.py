@@ -8,6 +8,8 @@ from pathlib import Path
 from random import choice
 from string import ascii_lowercase
 
+CHUNK_SIZE = 1024 * 1024
+
 # Constants
 CHUNK_SIZE: int = 8192
 BINARY_THRESHOLD: float = 0.3

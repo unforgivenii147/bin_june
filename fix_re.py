@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
 
 
 """
@@ -18,7 +19,6 @@ from __future__ import annotations
 
 import ast
 import io
-import re
 import shutil
 import sys
 import time
@@ -27,7 +27,7 @@ from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass, field
 from multiprocessing import cpu_count
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List
 
 # SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 RE_FUNCTIONS = {"compile", "search", "match", "fullmatch", "split", "findall", "finditer", "sub", "subn"}
@@ -144,8 +144,8 @@ class RegexFixer:
             return (token_str, "", "", False)
         prefix = token_str[:prefix_end]
         is_raw = "r" in prefix.lower()
-        is_fstring = "f" in prefix.lower()
-        is_bytes = "b" in prefix.lower()
+        "f" in prefix.lower()
+        "b" in prefix.lower()
         quote_char = token_str[prefix_end]
         quote_len = 1
         if len(token_str) >= prefix_end + 3 and token_str[prefix_end : prefix_end + 3] == quote_char * 3:
@@ -374,7 +374,7 @@ class RegexFixer:
                 rel_path = self._get_relative_path(filepath)
                 print(f"  ✗ {rel_path}: {message}")
         print("\n" + "=" * 80)
-        print(f"\n📊 Summary:")
+        print("\n📊 Summary:")
         print(f"  Total files:     {self.stats.total_files}")
         print(f"  Processed:       {self.stats.processed}")
         print(f"  Modified:        {self.stats.modified}")
@@ -401,7 +401,7 @@ def main():
         epilog="\nExamples:\n  # Fix all Python files in current directory\n  python fix_regex.py\n\n  # Fix specific files or directories\n  python fix_regex.py src/ tests/test_regex.py\n\n  # Use 4 parallel workers, disable backups\n  python fix_regex.py --workers 4 --no-backup\n\n  # Preview changes without modifying files\n  python fix_regex.py --dry-run --verbose\n        ",
     )
     parser.add_argument("paths", nargs="*", help="Files or directories to process (default: current directory)")
-    parser.add_argument("--workers", "-w", type=int, help=f"Number of parallel workers (default: min(CPU cores, 8))")
+    parser.add_argument("--workers", "-w", type=int, help="Number of parallel workers (default: min(CPU cores, 8))")
     parser.add_argument("--no-backup", action="store_true", help="Disable backup creation")
     parser.add_argument("--dry-run", "-n", action="store_true", help="Preview changes without modifying files")
     parser.add_argument("--verbose", "-v", action="store_true", help="Show detailed output")

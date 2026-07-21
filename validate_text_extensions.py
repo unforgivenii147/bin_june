@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
 
 
 """
@@ -15,7 +16,7 @@ import mimetypes
 import os
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import Iterator, Set, Tuple
+from typing import Iterator, Set
 
 from dh import TXT_EXT
 
@@ -190,7 +191,7 @@ def print_report(results: dict):
     print("\n" + "=" * 80)
     print("TEXT EXTENSION VALIDATION REPORT")
     print("=" * 80)
-    print(f"\nSummary:")
+    print("\nSummary:")
     print(f"  Total files found:    {results['total_files']}")
     print(f"  Actual text files:    {results['text_files']}")
     print(f"  Binary files:         {results['binary_files']}")
@@ -204,8 +205,8 @@ def print_report(results: dict):
         if len(results["mismatches"]) > 20:
             print(f"  ... and {len(results['mismatches']) - 20} more")
     else:
-        print(f"\n✓ No mismatches found! All files match their extensions.")
-    print(f"\nBreakdown by extension:")
+        print("\n✓ No mismatches found! All files match their extensions.")
+    print("\nBreakdown by extension:")
     print("-" * 80)
     for ext, stats in sorted(results["by_extension"].items()):
         print(f"  {ext:12} - Text: {stats['text']:6}  Binary: {stats['binary']:6}  Errors: {stats['error']:6}")

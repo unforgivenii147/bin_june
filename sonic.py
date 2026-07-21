@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for sonic.py."""
+
 
 from __future__ import annotations
 import argparse
@@ -70,7 +72,7 @@ class MmapReader(LineProcessor):
                         decoded_line = line.rstrip("\r\n")
                         if not skip_empty or decoded_line.strip():
                             yield decoded_line
-        except Exception as e:
+        except Exception:
             raise OSError(msg)
 
     def read_lines_regular(
@@ -83,7 +85,7 @@ class MmapReader(LineProcessor):
                     decoded_line = line.rstrip("\r\n")
                     if not skip_empty or decoded_line.strip():
                         yield decoded_line
-        except Exception as e:
+        except Exception:
             raise OSError(msg)
 
     def read_lines(
@@ -251,7 +253,7 @@ class FileSorter(LineProcessor):
                 "processing_time": elapsed_time,
                 "lines_per_second": original_lines / elapsed_time if elapsed_time > 0 else 0,
             }
-        except Exception as e:
+        except Exception:
             raise RuntimeError(msg)
 
     def print_stats(self, stats: dict) -> None:

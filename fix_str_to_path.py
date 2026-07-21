@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for fix_str_to_path.py."""
 from __future__ import annotations
 
 import os
@@ -24,7 +26,6 @@ def add_path_statement(file_path: str) -> bool:
             if stripped and (stripped.startswith(('"""', "'''"))):
                 modified_lines.append(line)
                 if stripped.count('"""') == 1 or stripped.count("'''") == 1:
-                    docstring_started = True
                     modified_lines.append(line)
                     continue
                 else:

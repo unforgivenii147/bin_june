@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for opng.py."""
 from __future__ import annotations
 
 import os
@@ -203,7 +205,7 @@ def process_file(path: str | Path) -> None:
     path = Path(path)
     before = gsz(path)
     try:
-        cmd = ["optipng", f"-o7", str(path)]
+        cmd = ["optipng", "-o7", str(path)]
         _ret, txt, _err = runcmd(cmd, show_output=True)
         if "skipping" in txt.lower():
             print(f" Skipped: {path.name}")

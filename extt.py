@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for extt.py."""
+
 from __future__ import annotations
 
 from collections import defaultdict

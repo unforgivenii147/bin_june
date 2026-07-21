@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for gclone1.py."""
 from __future__ import annotations
 
 import os
@@ -122,7 +124,7 @@ def clone_repo_shallow(user, repo) -> bool:
     print(f"\n🚀 Cloning {repo_name} (shallow clone)...")
     command = ["git", "clone", repo_url, clone_path]
     try:
-        process = runcmd(command, show_output=True)
+        runcmd(command, show_output=True)
         print("✅ Successfully cloned repository.")
         print(f"   Cloned into: {clone_path}")
         return True

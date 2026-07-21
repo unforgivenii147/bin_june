@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for diduper.py."""
 from __future__ import annotations
 
 import hashlib
@@ -90,7 +92,7 @@ def extract_items_from_file(path: Path, parser: Parser) -> list[Item]:
                 if len(expr.children) < 3:
                     continue
                 lhs = expr.children[0]
-                rhs = expr.children[-1]
+                expr.children[-1]
                 if lhs.type != "identifier":
                     continue
                 name = node_text(src_bytes, lhs)

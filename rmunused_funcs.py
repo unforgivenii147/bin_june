@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for rmunused_funcs.py."""
+
 from __future__ import annotations
 
 import ast
@@ -34,7 +36,7 @@ def get_defined_and_called(file_path):
 
 
 def process_file(file_path, dry_run: bool = True) -> str | None:
-    path = Path(path)
+    Path(path)
     defined, called, err = get_defined_and_called(file_path)
     if err:
         return f"Error parsing {file_path}: {err}"

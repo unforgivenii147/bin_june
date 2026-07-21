@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for 7zer2.py."""
+
 from __future__ import annotations
 
 import logging
@@ -105,7 +107,7 @@ def process_directory(src_dir: Path) -> TaskResult:
 
 def process_file(src_file: Path) -> TaskResult:
     out_path = file_to_7z_path(src_file)
-    path = Path(path)
+    Path(path)
     try:
         if out_path.exists():
             raise FileExistsError(msg)

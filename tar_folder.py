@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for tar_folder.py."""
+
 from __future__ import annotations
 
 import shutil
@@ -13,7 +15,7 @@ def compress_folder(folder_path: Path, output_path: Path) -> bool:
     try:
         shutil.make_archive(str(folder_path), str(output_path), format="tar")
         return True
-    except Exception as e:
+    except Exception:
         return False
 
 

@@ -142,10 +142,10 @@ def main():
     functions = extract_function_names(functions_file)
     if not functions:
         print("\n⚠ No function definitions found in file.")
-        print(f"""   Make sure the file contains functions like:
-   function_name() {{
+        print("""   Make sure the file contains functions like:
+   function_name() {
        commands
-   }}""")
+   }""")
         sys.exit(0)
     duplicates = find_duplicates(functions)
     is_clean = display_results(functions, duplicates, functions_file)

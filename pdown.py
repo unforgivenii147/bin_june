@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for pdown.py."""
 from __future__ import annotations
 
 import argparse
@@ -27,7 +29,7 @@ def get_package_url(package_name, version=None):
             latest_version = data.get("info", {}).get("version")
             version_data = releases.get(latest_version, [])
         if not version_data:
-            raise ValueError(f"No downloadable files found")
+            raise ValueError("No downloadable files found")
         for file_info in version_data:
             if file_info.get("packagetype") == "bdist_wheel":
                 return file_info["url"], file_info["filename"]

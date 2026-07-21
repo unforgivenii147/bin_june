@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for pyjcal.py."""
+
 from __future__ import annotations
 
 from datetime import datetime

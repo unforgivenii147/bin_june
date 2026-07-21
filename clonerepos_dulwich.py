@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
 """
 Clone GitHub repositories using pure Python (dulwich).
 Skips repos >5MB and removes successfully cloned repos from repos.txt.
@@ -10,7 +11,7 @@ import argparse
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import List, Set, Tuple
+from typing import List, Set
 
 import requests
 from dulwich import porcelain
@@ -218,7 +219,7 @@ def main():
 
     # Summary
     print("-" * 60)
-    print(f"\nSummary:")
+    print("\nSummary:")
     print(f"  ✅ Successfully cloned: {successful}")
     print(f"  ⏭️  Already existed: {skipped}")
     print(f"  ❌ Failed: {failed}")

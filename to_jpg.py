@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for to_jpg.py."""
 from __future__ import annotations
 
 import os
@@ -253,7 +255,7 @@ def process_file(path):
             rrs(path, before, after)
             return
         return
-    except Exception as e:
+    except Exception:
         return
 
 

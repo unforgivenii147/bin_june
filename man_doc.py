@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for man_doc.py."""
+
 
 from __future__ import annotations
 
@@ -229,7 +231,7 @@ def process_file(path) -> bool:
     print(f"{path.name}", end=" ")
     res = safe_run(path)
     if res:
-        cprint(f"[✓] ", "cyan")
+        cprint("[✓] ", "cyan")
         return True
     cprint("[ERROR]", "red")
     return False

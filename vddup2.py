@@ -1,4 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from pathlib import Path
+
+"""Module for vddup2.py."""
 from __future__ import annotations
 
 import argparse
@@ -52,7 +55,7 @@ def find_repeated_definitions(file_paths):
 
 
 def process_file(file_path, repeated_definitions, move) -> None:
-    path = Path(path)
+    Path(path)
     tree = parse_python_file(file_path)
     _functions, _classes, _constants = extract_definitions(tree)
     utils_dir = "utils"

@@ -17,6 +17,8 @@ from typing import Final, TypedDict
 
 from deep_translator import GoogleTranslator
 
+CHUNK_SIZE = 1024 * 1024
+
 CHUNK_SIZE: Final[int] = 4500
 MAX_WORKERS: Final[int] = 1
 INPUT_FILE: Final[Path] = Path("words.txt")

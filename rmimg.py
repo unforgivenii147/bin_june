@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for rmimg.py."""
 from __future__ import annotations
 
 import os
@@ -156,7 +158,7 @@ def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_
 
 def process_file(file_path: Path) -> None:
     before = gsz(file_path)
-    path = Path(path)
+    Path(path)
     try:
         html = file_path.read_text(encoding="utf-8")
         soup = BeautifulSoup(html, "html.parser")

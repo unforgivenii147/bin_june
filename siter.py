@@ -1,4 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
+from typing import List
+
+"""Module for siter.py."""
 
 
 from __future__ import annotations
@@ -12,7 +16,7 @@ import tempfile
 import zipfile
 from multiprocessing import cpu_count
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, Set
 
 
 class WheelBuilder:

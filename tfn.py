@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for tfn.py."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -71,7 +73,7 @@ STYLE_MAPPING = {
 
 
 def get_font_name_and_style(font_path):
-    ext = font_path.suffix.lower()
+    font_path.suffix.lower()
     try:
         font = TTFont(font_path)
         name_table = font.get("name")

@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for rmmc.py."""
 from __future__ import annotations
 
 import ast
@@ -7,6 +9,8 @@ import sys
 from collections import deque
 from multiprocessing import get_context
 from pathlib import Path
+
+CHUNK_SIZE = 1024 * 1024
 
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
@@ -74,7 +78,7 @@ def get_nobinary(path: str | Path) -> list[Path]:
 
 
 def process_file(file_path: Path) -> None:
-    path = Path(path)
+    Path(path)
     if is_binary(file_path):
         return
     before = gsz(file_path)

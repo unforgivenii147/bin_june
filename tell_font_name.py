@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for tell_font_name.py."""
 from __future__ import annotations
 
 import re
@@ -119,7 +121,7 @@ def get_font_names(path) -> tuple[str, str] | tuple[None, None]:
 
 
 def process_file(fn: Path) -> int:
-    path = Path(path)
+    Path(path)
     try:
         family, style = get_font_names(fn)
     except Exception as e:

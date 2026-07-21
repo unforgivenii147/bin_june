@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for xr.py."""
+
 from __future__ import annotations
 
 import argparse
@@ -8,9 +10,7 @@ import bz2
 import gzip
 import sys
 from collections import deque
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from typing import Callable
 
 import brotlicffi as brotli
 import lz4.frame
@@ -502,7 +502,7 @@ def check_compressor_availability(compressor: str) -> bool:
     """Check if required libraries are available."""
     if not COMPRESSORS[compressor]["available"]:
         print(f"\n❌ Error: {compressor.upper()} compression is not available.")
-        print(f"Please install the required library:")
+        print("Please install the required library:")
         if compressor == "zstd":
             print("  pip install zstandard")
             print("  or for Termux: pkg install python-zstandard")

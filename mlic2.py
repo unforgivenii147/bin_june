@@ -1,4 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
+from typing import List
+
+"""Module for mlic2.py."""
 
 from __future__ import annotations
 
@@ -8,7 +12,7 @@ import sys
 from collections import defaultdict
 from functools import partial
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -230,13 +234,13 @@ def save_to_file(repeated: Dict[str, List[Tuple[Path, int, str]]], output_file: 
         return
     try:
         with open(output_file, "w", encoding="utf-8") as f:
-            f.write(f"REPEATED MULTILINE BLOCKS FOUND\n")
+            f.write("REPEATED MULTILINE BLOCKS FOUND\n")
             f.write(f"{'=' * 50}\n\n")
             for block_num, (block, occurrences) in enumerate(repeated.items(), 1):
                 f.write(f"BLOCK #{block_num}\n")
                 f.write(f"{'-' * 40}\n")
                 f.write(block)
-                f.write(f"\n\nLOCATIONS:\n")
+                f.write("\n\nLOCATIONS:\n")
                 for filepath, lineno, context in occurrences:
                     f.write(f"  {filepath}:{lineno}\n")
                     f.write(f"    -> {context}\n")

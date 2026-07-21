@@ -43,7 +43,7 @@ def get_english_subtitles(mkv_path, output_dir=None):
         logger.error(f"Error scanning video: {e}")
         return False
     language = babelfish.Language("eng")
-    logger.info(f"Searching for English subtitles...")
+    logger.info("Searching for English subtitles...")
     try:
         subtitles = download_best_subtitles(
             [video], {language}, providers=["opensubtitles", "podnapisi", "addic7ed", "tvsubtitles"]

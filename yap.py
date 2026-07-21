@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for yap.py."""
 from __future__ import annotations
 
 import argparse
@@ -8,6 +10,8 @@ from collections import deque
 from collections.abc import Callable
 from pathlib import Path
 from time import perf_counter as pff
+
+CHUNK_SIZE = 1024 * 1024
 
 
 def is_python_file(path: str | Path) -> bool:

@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for ptrr.py."""
 from __future__ import annotations
 
 import multiprocessing as mp
@@ -78,7 +80,7 @@ def create_archive_optimized():
                 shutil.rmtree(current_dir)
                 print(f"✓ Archive created: {archive_path}")
                 print(f"✓ Original directory removed: {current_dir}")
-            except Exception as e:
+            except Exception:
                 if test_dir.exists():
                     shutil.rmtree(test_dir)
                 raise
@@ -126,7 +128,7 @@ def create_archive_streaming_fixed():
                 shutil.rmtree(current_dir)
                 print(f"✓ Archive created: {archive_path}")
                 print(f"✓ Original directory removed: {current_dir}")
-            except Exception as e:
+            except Exception:
                 if test_dir.exists():
                     shutil.rmtree(test_dir)
                 raise

@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for buildr.py."""
 from __future__ import annotations
 
 from collections import deque

@@ -19,6 +19,8 @@ from typing import Any, Final
 import langdetect
 from deep_translator import GoogleTranslator
 
+CHUNK_SIZE = 1024 * 1024
+
 SKIP_DIRS: Final[frozenset[str]] = frozenset(
     {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
 )

@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for aremci.py."""
+
 from __future__ import annotations
 
 import ast
@@ -8,6 +10,8 @@ import shutil
 from concurrent.futures import ProcessPoolExecutor
 from os import scandir as os_scandir
 from pathlib import Path
+
+CHUNK_SIZE = 1024 * 1024
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -106,7 +110,7 @@ def strip_comments_and_docstrings(file_path_str) -> bool:
     except Exception as e:
         print(f"Error reading file {file_path}: {e}")
         return False
-    cleaned_content = DOCSTRING_START_REGEX.sub("\x01", original_content, count=3)
+    DOCSTRING_START_REGEX.sub("\x01", original_content, count=3)
 
     def replace_comments(match):
         _indent1, comment1, quote1, _indent2, _quote2, fn_type, indent3, quote3, quote4 = match.groups()
@@ -120,7 +124,7 @@ def strip_comments_and_docstrings(file_path_str) -> bool:
 
     no_single_line_comments = re.sub(r"^\s*#.*$", "", original_content, flags=re.MULTILINE)
     try:
-        tree = ast.parse(no_single_line_comments)
+        ast.parse(no_single_line_comments)
         cleaned_content_heuristic = DOCSTRING_START_REGEX.sub("\x01", no_single_line_comments, count=3)
         try:
             ast.parse(cleaned_content_heuristic)

@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for emptywhl.py."""
+
 from __future__ import annotations
 
 import csv
@@ -13,7 +15,7 @@ def is_empty_wheel(wheel_path: str) -> bool:
     print(f"checking {wheel_path}")
     try:
         with zipfile.ZipFile(wheel_path, "r") as z:
-            dist_info_dirs = [
+            [
                 name.rstrip("/")
                 for name in z.namelist()
                 if name.endswith(".dist-info/") or (name == name.rstrip("/") + "/" and name.endswith(".dist-info"))

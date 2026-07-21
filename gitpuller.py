@@ -44,7 +44,7 @@ def git_pull_all() -> None:
             print(f"   Branch: {current_branch}")
             if not repo.remotes:
                 failed_repos.append((repo_path, "No remote configured"))
-                print(f"   ❌ No remote configured")
+                print("   ❌ No remote configured")
                 continue
             remote_name = repo.remotes[0].name
             pull_result = repo.remotes[remote_name].pull()
@@ -59,10 +59,10 @@ def git_pull_all() -> None:
                         if hasattr(info, "commit") and info.commit:
                             print(f"   ✅ Pulled successfully: {info.commit}")
                         else:
-                            print(f"   ℹ️  Already up to date")
+                            print("   ℹ️  Already up to date")
                 else:
                     success = True
-                    print(f"   ✅ Pull completed")
+                    print("   ✅ Pull completed")
             if success:
                 pulled_repos.append(repo_path)
         except GitCommandError as e:

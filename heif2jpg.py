@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for heif2jpg.py."""
+
 from __future__ import annotations
 
 import sys
@@ -40,3 +42,9 @@ def main() -> None:
 
 if __name__ == "__main__":
     sys.exit(main())
+
+def gsz(path):
+    try:
+        return Path(path).stat().st_size
+    except Exception:
+        return 0

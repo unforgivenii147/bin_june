@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Optional
 """
 Generate a Cargo.toml file from a Cargo.lock file.
 Reads package information from Cargo.lock and creates a basic Cargo.toml
@@ -8,7 +9,7 @@ with all dependencies listed.
 import re
 import sys
 from pathlib import Path
-from typing import List, Dict, Optional
+from typing import List, Dict
 
 
 def parse_cargo_lock(filepath: str) -> Dict:

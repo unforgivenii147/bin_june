@@ -352,7 +352,7 @@ Examples:
         "--workers",
         type=int,
         default=min(4, os.cpu_count() or 1),
-        help=f"Number of parallel workers (default: min(4, CPU cores))",
+        help="Number of parallel workers (default: min(4, CPU cores))",
     )
 
     parser.add_argument("--no-color", action="store_true", help="Disable colored output")

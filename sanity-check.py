@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for sanity-check.py."""
+
 from __future__ import annotations
 
 import sys
@@ -60,7 +62,7 @@ def get_installed_packages() -> list[str]:
         _ret, txt, _err = runcmd(["dpkg-query", "-W", "-f='${Package}\t${Status}\t${Version}\n'"], show_output=True)
         return txt.splitlines()
     except:
-        print(f"Error listing installed packages")
+        print("Error listing installed packages")
         sys.exit(1)
 
 
@@ -75,7 +77,7 @@ def check_package_health(package_name: str):
                     return True, "OK"
                 return False, f"Status: {status}"
     except:
-        return False, f"Error checking package"
+        return False, "Error checking package"
 
 
 def check_for_updates() -> str:
@@ -83,7 +85,7 @@ def check_for_updates() -> str:
         _res, txt, _err = runcmd(["apt-get", "-s", "upgrade"], show_output=True)
         return txt
     except:
-        return f"Error checking for updates"
+        return "Error checking for updates"
 
 
 def main() -> None:

@@ -442,7 +442,7 @@ def process_stream(base_dir: Path, compress: bool, level: int, threads: int, rem
     print("-" * 60)
     if compress and (stats.original_size > 0 or stats.compressed_size > 0):
         saved, ratio, percent_saved = stats.get_savings()
-        print(f"\n📊 Compression Statistics:")
+        print("\n📊 Compression Statistics:")
         print(f"   Original size:  {format_size(stats.original_size)}")
         print(f"   Compressed size: {format_size(stats.compressed_size)}")
         print(f"   Space saved:    {format_size(saved)} ({percent_saved:.1f}%)")

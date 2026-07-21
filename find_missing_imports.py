@@ -1,4 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
+from typing import List
+
+"""Module for find_missing_imports.py."""
 
 
 from __future__ import annotations
@@ -10,7 +14,7 @@ import sys
 import textwrap
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
+from typing import Dict, Set
 
 STDLIB_MODULES = set(sys.builtin_module_names)
 for module_name in list(sys.modules.keys()):
@@ -516,10 +520,10 @@ def main():
                     print(f"  Line {lineno}: missing `import {module}`")
                 if args.autofix:
                     if autofix_imports(filepath, missing_imports):
-                        print(f"  ✓ Fixed")
+                        print("  ✓ Fixed")
                         fixed_files += 1
                     else:
-                        print(f"  ✗ Failed to fix")
+                        print("  ✗ Failed to fix")
     print(f"\n{'─' * 60}")
     print(f"Total missing imports found: {total_missing}")
     if args.autofix:

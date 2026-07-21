@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for fix_html_md_broken_links.py."""
 from __future__ import annotations
 
 import os

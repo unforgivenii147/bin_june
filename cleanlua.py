@@ -160,7 +160,7 @@ def main():
         directories = [Path(d).resolve() for d in sys.argv[1:]]
     else:
         directories = [Path.cwd()]
-    print(f"\n🔍 Searching for Lua files in:")
+    print("\n🔍 Searching for Lua files in:")
     for directory in directories:
         print(f"   {directory}")
     lua_files = find_lua_files(directories)
@@ -200,7 +200,7 @@ def main():
     total_comments = sum((s.comments_removed for s in stats_list))
     total_lines = sum((s.lines_removed for s in stats_list))
     modified_files = sum((1 for s in stats_list if s.original_size != s.new_size))
-    print(f"\n📊 Summary:")
+    print("\n📊 Summary:")
     print(f"   Files processed:  {processed} ({modified_files} modified, {processed - modified_files} unchanged)")
     if errors:
         print(f"   Errors:           {errors}")

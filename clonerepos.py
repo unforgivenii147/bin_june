@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
 """
 Clone GitHub repositories by downloading ZIP archives.
 No git binary needed. Uses requests for HTTP.
@@ -12,7 +13,7 @@ import sys
 import zipfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import List, Tuple
+from typing import List
 
 import requests
 
@@ -164,7 +165,7 @@ def main():
                 print(f"❌ {repo}: Unexpected error: {e!s}")
 
     print("-" * 60)
-    print(f"\nSummary:")
+    print("\nSummary:")
     print(f"  ✅ Successfully downloaded: {successful}")
     print(f"  ⏭️  Already existed: {skipped}")
     print(f"  ❌ Failed: {failed}")

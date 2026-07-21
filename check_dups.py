@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for check_dups.py."""
+
 from __future__ import annotations
 
 import ast
@@ -11,6 +13,8 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from os import scandir as os_scandir
 from pathlib import Path
+
+CHUNK_SIZE = 1024 * 1024
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -208,7 +212,7 @@ def build_decl(node: AsyncFunctionDef | ClassDef | FunctionDef, kind: str, name:
 
 
 def process_file(src_path) -> None:
-    path = Path(path)
+    Path(path)
     dup_path = src_path.parent / f"{src_path.stem}_dups.py"
     text = src_path.read_text(encoding="utf-8")
     lines = text.splitlines(keepends=True)
@@ -276,7 +280,7 @@ def process_file(src_path) -> None:
 
 def main() -> None:
     cwd = Path.cwd()
-    before = gsz(cwd)
+    gsz(cwd)
     args = sys.argv[1:]
     files = []
     if args:

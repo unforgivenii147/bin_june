@@ -22,6 +22,8 @@ from typing import Final
 
 import zstandard as zstd
 
+CHUNK_SIZE = 1024 * 1024
+
 SKIP_DIRS: Final[frozenset[str]] = frozenset(
     {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
 )
@@ -152,7 +154,7 @@ async def compress_folder_async(folder_path: Path, output_base_name: str) -> boo
         success = await loop.run_in_executor(None, create_tar_archive, folder_path, tar_path)
         if not success or not tar_path.exists():
             return False
-        logger.info(f"  Compressing tar archive with Zstandard...")
+        logger.info("  Compressing tar archive with Zstandard...")
         tar_size = tar_path.stat().st_size
         if tar_size < CHUNK_SIZE:
             success = await loop.run_in_executor(None, compress_in_memory, tar_path, zst_path)

@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import List
 
 """
 GitHub Python Repositories Fetcher
@@ -11,7 +12,7 @@ from __future__ import annotations
 import json
 import sys
 from datetime import datetime, timedelta
-from typing import Dict, List
+from typing import Dict
 
 import requests
 

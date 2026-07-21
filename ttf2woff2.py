@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for ttf2woff2.py."""
 from __future__ import annotations
 
 import os

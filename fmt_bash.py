@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for fmt_bash.py."""
 from __future__ import annotations
 
 import sys

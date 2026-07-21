@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for show_big_system_pkgs.py."""
+
 from __future__ import annotations
 
 import contextlib
@@ -171,7 +173,7 @@ def main() -> None:
         print(f"{'TOTAL PACKAGES:':<40} {len(large_packages):>15}")
     else:
         print("✅ No packages found exceeding the threshold.")
-    print(f"\n📈 Statistics:")
+    print("\n📈 Statistics:")
     print(f"   Total packages checked: {total}")
     print(f"   Packages with size info: {total - no_size}")
     print(f"   Packages below threshold: {total - len(large_packages) - no_size}")
@@ -184,10 +186,10 @@ def main() -> None:
             print(f"   Format: {{'package_name': size_in_bytes}} for packages > {threshold_mb}MB")
     save_all = input("\n💾 Save ALL packages (including smaller ones) to JSON? (y/n): ").lower()
     if save_all == "y":
-        all_json_filename = f"all_packages_sizes.json"
+        all_json_filename = "all_packages_sizes.json"
         if save_json_results(json_data, all_json_filename, threshold_mb, include_all=True):
             print(f"✅ All packages saved to: {all_json_filename}")
-            print(f"   Format: {{'package_name': size_in_bytes}} for ALL packages")
+            print("   Format: {'package_name': size_in_bytes} for ALL packages")
     save_simple = input("\n💾 Save simple JSON (just {package: size})? (y/n): ").lower()
     if save_simple == "y":
         simple_filename = f"packages_sizes_{threshold_mb}mb.json"
@@ -195,7 +197,7 @@ def main() -> None:
             with open(simple_filename, "w") as f:
                 json.dump(large_packages, f, indent=2, sort_keys=True)
             print(f"✅ Simple JSON saved to: {simple_filename}")
-            print(f'   Format: {{"package1": 12345678, "package2": 98765432}}')
+            print('   Format: {"package1": 12345678, "package2": 98765432}')
         except Exception as e:
             print(f"Error saving simple JSON: {e}")
 

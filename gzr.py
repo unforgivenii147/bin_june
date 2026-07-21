@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for gzr.py."""
+
 from __future__ import annotations
 
 import argparse
@@ -145,7 +147,7 @@ def compress_tar_to_gz(tar_path: Path, gz_path: Path) -> bool:
                 print(f"  ✓ Compressed archive: {reduction:.1f}% saved ({fsz(tar_size)} → {fsz(gz_size)})")
                 return True
             else:
-                print(f"  ✗ Archive compression didn't save space, keeping .tar")
+                print("  ✗ Archive compression didn't save space, keeping .tar")
                 gz_path.unlink()
                 return False
         return False
@@ -159,10 +161,10 @@ async def compress_folder_async(folder_path: Path, output_base_name: str) -> boo
     tar_path = Path(output_base_name + ".tar")
     gz_path = Path(output_base_name + ".tar.gz")
     try:
-        print(f"  Creating tar archive...")
+        print("  Creating tar archive...")
         success = await loop.run_in_executor(None, create_tar_archive, folder_path, tar_path)
         if not success or not tar_path.exists():
-            print(f"  Failed to create tar archive")
+            print("  Failed to create tar archive")
             return False
         print(f"  Compressing tar archive with gzip (level {GZIP_COMPRESS_LEVEL})...")
         if compress_tar_to_gz(tar_path, gz_path):
@@ -250,12 +252,12 @@ def extract_tar_archive(tar_path: Path, extract_dir: Path) -> bool:
 
 async def process_compress() -> None:
     cwd = Path.cwd()
-    print(f"\n🔧 Gzip Compression Settings:")
+    print("\n🔧 Gzip Compression Settings:")
     print(f"   Level: {GZIP_COMPRESS_LEVEL}/9 (maximum)")
-    print(f"   Algorithm: DEFLATE (LZ77 + Huffman coding)")
+    print("   Algorithm: DEFLATE (LZ77 + Huffman coding)")
     print(f"   Parallel workers: {MAX_WORKERS}")
     print(f"   Chunk size: {fsz(CHUNK_SIZE)}")
-    print(f"   Dictionary: 32KB sliding window")
+    print("   Dictionary: 32KB sliding window")
     dirs_to_compress = get_dirs(cwd)
     if dirs_to_compress:
         print(f"\n📁 Compressing {len(dirs_to_compress)} directories...")
@@ -305,7 +307,7 @@ async def process_decompress() -> None:
             tar_path = None
             try:
                 tar_path = archive.with_suffix("")
-                print(f"    Decompressing gzip...")
+                print("    Decompressing gzip...")
                 with gzip.open(archive, "rb") as f_in:
                     tar_data = f_in.read()
                 tar_path.write_bytes(tar_data)

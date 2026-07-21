@@ -12,7 +12,7 @@ from __future__ import annotations
 import ast
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Tuple
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 INSERT_TEXT = (
@@ -144,7 +144,7 @@ def main():
             except Exception as e:
                 stats["other_errors"] += 1
                 print(f"✗ Exception processing {file_path}: {e}")
-    total_processed = (
+    (
         stats["modified"]
         + stats["already_has"]
         + stats["validation_failed"]
@@ -152,7 +152,7 @@ def main():
         + stats["other_errors"]
     )
     print(f"\n{'=' * 60}")
-    print(f"Summary:")
+    print("Summary:")
     print(f"  Total files found:           {len(python_files)}")
     print(f"  Modified:                    {stats['modified']}")
     print(f"  Already has SKIP_DIRS:       {stats['already_has']}")

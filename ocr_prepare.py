@@ -15,7 +15,7 @@ import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import cpu_count
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -159,7 +159,7 @@ def main():
     logger.info(f"Found {len(image_files)} image(s) to process")
     results = process_images_parallel(image_files, args.workers)
     logger.info("=" * 50)
-    logger.info(f"Processing complete:")
+    logger.info("Processing complete:")
     logger.info(f"  ✓ Success: {results['success']}")
     logger.info(f"  ✗ Failed:  {results['failed']}")
     logger.info(f"  Total:     {len(image_files)}")

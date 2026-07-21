@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
+from typing import List
 
 """
 Script to find Python packages in system site directories and categorize them based on entry_points.txt.
@@ -21,7 +23,7 @@ import sys
 from datetime import datetime
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict
 
 # SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -153,7 +155,7 @@ def parse_entry_points(entry_points_file: Path) -> Dict[str, List[str]]:
                         scripts["gui_scripts"].append(key)
                     else:
                         scripts["other"].append(f"{current_section}:{key}")
-    except Exception as e:
+    except Exception:
         pass
     return scripts
 
@@ -307,7 +309,6 @@ def main():
     all_nonpure_noep = []
     all_pure_ep = []
     all_nonpure_ep = []
-    all_packages_with_ep_details = []
     with Pool(processes=num_processes) as pool:
         results = pool.map(find_packages_categorized, site_dirs)
         for pure_noep, nonpure_noep, pure_ep, nonpure_ep in results:
@@ -413,17 +414,17 @@ def main():
             lines.append("")
         Path(args.ep_details_output).write_text("\n".join(lines))
     print(f"\n{'=' * 50}")
-    print(f"SUMMARY - Python Package Classification")
+    print("SUMMARY - Python Package Classification")
     print(f"{'=' * 50}")
     print(f"Platform: {sys.platform}")
     print(f"Site directories: {len(site_dirs)}")
     print()
-    print(f"Without entry_points.txt:")
+    print("Without entry_points.txt:")
     print(f"  • Pure Python packages: {len(unique_pure_noep)}")
     print(f"  • Non-pure packages:    {len(unique_nonpure_noep)}")
     print(f"  • Subtotal:             {len(unique_pure_noep) + len(unique_nonpure_noep)}")
     print()
-    print(f"With entry_points.txt:")
+    print("With entry_points.txt:")
     print(f"  • Pure Python packages: {len(unique_pure_ep)}")
     print(f"  • Non-pure packages:    {len(unique_nonpure_ep)}")
     print(f"  • Subtotal:             {len(unique_pure_ep) + len(unique_nonpure_ep)}")
@@ -433,20 +434,20 @@ def main():
     )
     print(f"{'=' * 50}")
     if args.verbose:
-        print(f"\nOutput files:")
+        print("\nOutput files:")
         print(f"  Pure no-ep:      {args.pure_noep_output}")
         print(f"  Non-pure no-ep:  {args.nonpure_noep_output}")
         print(f"  Pure with ep:    {args.pure_ep_output}")
         print(f"  Non-pure with ep:{args.nonpure_ep_output}")
         print(f"  EP details:      {args.ep_details_output}")
         if unique_pure_noep:
-            print(f"\nSample - Pure packages without EP (first 5):")
+            print("\nSample - Pure packages without EP (first 5):")
             for pkg in unique_pure_noep[:5]:
                 print(f"  {pkg}")
             if len(unique_pure_noep) > 5:
                 print(f"  ... and {len(unique_pure_noep) - 5} more")
         if unique_pure_ep:
-            print(f"\nSample - Pure packages with EP (first 5):")
+            print("\nSample - Pure packages with EP (first 5):")
             for pkg in unique_pure_ep[:5]:
                 print(f"  {pkg}")
             if len(unique_pure_ep) > 5:

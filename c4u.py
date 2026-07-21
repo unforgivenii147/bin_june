@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Dict
 
 """
 PyPI Package Update Checker with Multiprocessing & Resume Capability
@@ -18,7 +19,7 @@ from dataclasses import asdict, dataclass
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 from subprocess import CalledProcessError, run
-from typing import Any, Dict, Optional
+from typing import Any
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -75,7 +76,7 @@ class PackageStateManager:
                 logger.error(f"✗ Failed to load state: {e}. Starting fresh.")
                 self.state = {}
         else:
-            logger.info(f"📁 No existing state file. Starting fresh.")
+            logger.info("📁 No existing state file. Starting fresh.")
 
     def save_state(self) -> None:
         state_dict = {name: pkg.to_dict() for name, pkg in self.state.items()}
@@ -131,7 +132,7 @@ def query_pypi(package_name: str, installed_version: str, retries: int = 2) -> P
             pkg_info.error = "Timeout"
             logger.warning(f"⏱ Timeout: {package_name}")
             return pkg_info
-        except requests.exceptions.HTTPError as e:
+        except requests.exceptions.HTTPError:
             if response.status_code == 404:
                 pkg_info.error = "Not found on PyPI"
                 logger.warning(f"❌ Not found: {package_name}")
@@ -192,7 +193,7 @@ def main() -> None:
     else:
         logger.info("✓ All packages are up-to-date!")
     logger.info("=" * 80)
-    logger.info(f"📈 SUMMARY")
+    logger.info("📈 SUMMARY")
     logger.info(f"   Total packages: {len(state_manager.state)}")
     logger.info(f"   Upgradable: {len(upgradable)}")
     logger.info(f"   Up-to-date: {len(state_manager.state) - len(upgradable)}")

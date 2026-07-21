@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
 
 """
 Recursive file compressor using zstandard streaming compression.
@@ -10,7 +11,7 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
-from typing import Iterator, Optional, Tuple
+from typing import Iterator
 
 import zstandard as zstd
 

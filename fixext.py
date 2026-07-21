@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for fixext.py."""
 from __future__ import annotations
 
 import argparse
@@ -689,7 +691,6 @@ SHEBANG_MAP: dict[str, str] = {
     "scheme48": ".scm",
     "scsh": ".scm",
     "stalin": ".scm",
-    "sisc": ".scm",
     "larceny": ".scm",
     "mosh": ".scm",
     "ypsilon": ".scm",
@@ -701,7 +702,6 @@ SHEBANG_MAP: dict[str, str] = {
     "cyclone": ".scm",
     "gerbil": ".scm",
     "gambit": ".scm",
-    "racket": ".rkt",
     "typed-racket": ".rkt",
     "lazy-racket": ".rkt",
     "frracket": ".rkt",
@@ -1085,7 +1085,7 @@ def main() -> None:
         if safe_rename(item["path"], item["new_path"]):
             cprint(f"  Renamed to {item['new_path'].name}", color="green")
         else:
-            cprint(f"  Failed to rename", color="red", attrs=["bold"])
+            cprint("  Failed to rename", color="red", attrs=["bold"])
         print()
     cprint("Done.", color="green", attrs=["bold"])
 

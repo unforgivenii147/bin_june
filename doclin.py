@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
+from typing import Optional
 """
 Remove image references (including shields.io badges) from .rst and .md files.
 Processes files in parallel and reports statistics.
@@ -8,9 +10,8 @@ import re
 import sys
 from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from typing import List, Tuple, Optional
+from typing import List
 from dataclasses import dataclass
-from datetime import datetime
 
 
 @dataclass

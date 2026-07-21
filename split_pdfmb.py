@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for split_pdfmb.py."""
 from __future__ import annotations
 
 import io
@@ -26,7 +28,7 @@ def split_pdf_by_size(pdf_path: Path, output_dir: Path, max_size_mb: int = 5) ->
         test_writer.add_page(page)
         test_buffer = io.BytesIO()
         test_writer.write(test_buffer)
-        test_size = test_buffer.tell()
+        test_buffer.tell()
 
         current_writer.add_page(page)
         current_buffer = io.BytesIO()

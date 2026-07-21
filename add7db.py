@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for add7db.py."""
 from __future__ import annotations
 
 import base64
@@ -80,7 +82,7 @@ def read_file_contents(filepath: str):
             return {"content": content, "is_binary": True, "original_size": len(content)}
     except PermissionError:
         return {"content": error_msg, "is_binary": False, "original_size": len(error_msg)}
-    except Exception as e:
+    except Exception:
         return {"content": error_msg, "is_binary": False, "original_size": len(error_msg)}
 
 

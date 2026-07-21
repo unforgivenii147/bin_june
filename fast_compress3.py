@@ -371,7 +371,7 @@ def process_files(file_generator, compress: bool, level: int, threads: int, remo
     print("\n" + "-" * 60)
     if compress and total > 0:
         saved, ratio, percent_saved = stats.get_savings()
-        print(f"\n📊 Compression Statistics:")
+        print("\n📊 Compression Statistics:")
         print(f"   Original size:   {format_size(stats.original_size)}")
         print(f"   Compressed size: {format_size(stats.compressed_size)}")
         print(f"   Space saved:     {format_size(saved)} ({percent_saved:.1f}%)")

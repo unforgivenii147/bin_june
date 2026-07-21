@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for dupfx.py."""
+
 
 from __future__ import annotations
 
@@ -221,7 +223,7 @@ def main() -> None:
                 print(f"Failed: {p.relative_to(cwd)} - {e}")
             except ValueError:
                 print(f"Failed: {p} - {e}")
-    print(f"\nSummary:")
+    print("\nSummary:")
     print(f"  Files scanned: {total_files}")
     print(f"  Duplicates found: {len(to_delete)}")
     print(f"  Successfully deleted: {removed}")

@@ -1,10 +1,11 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for pycodex.py."""
+
 from __future__ import annotations
 
 import argparse
 import json
-import keyword
 import logging
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -197,7 +198,7 @@ class FileProcessor:
         self.extractor = CodeBlockExtractor()
 
     def process_file(self, file_path: str) -> int:
-        path = Path(path)
+        Path(path)
         try:
             file_path = Path(file_path)
             if file_path.suffix.lower() != ".html":

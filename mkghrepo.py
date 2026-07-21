@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for mkghrepo.py."""
+
 from __future__ import annotations
 
 import sys
@@ -35,7 +37,7 @@ def create_github_repo(token, repo_name, description, public=True):
     response = requests.post(url, headers=headers, json=data)
     if response.status_code == 201:
         repo_info = response.json()
-        print(f"✅ Repository created successfully!")
+        print("✅ Repository created successfully!")
         print(f"📁 Name: {repo_info['name']}")
         print(f"🔗 URL: {repo_info['html_url']}")
         print(f"📝 Clone URL: {repo_info['clone_url']}")

@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for pymhtml.py."""
 from __future__ import annotations
 
 import base64
@@ -100,7 +102,6 @@ def process_file(path) -> None:
     _, html_bytes = html_candidates[0]
     html_text = html_bytes.decode(errors="replace")
     cid_to_file = {}
-    url_to_file = {}
 
     def get_name_from_headers(part) -> str:
         filename = part.get_param("name", header="Content-Type") if part.get("Content-Type") else None

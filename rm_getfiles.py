@@ -158,10 +158,10 @@ def main():
     if not args.paths:
         args.paths = ["."]
     try:
-        target_func = get_target_function_ast()
-        print(f"Target function parsed successfully")
+        get_target_function_ast()
+        print("Target function parsed successfully")
         print(f"Excluding script: {script_path.name}")
-        print(f"Excluding: fileutils.py")
+        print("Excluding: fileutils.py")
     except Exception as e:
         print(f"Error parsing target function: {e}", file=sys.stderr)
         sys.exit(1)
@@ -230,7 +230,7 @@ def main():
                 except Exception as e:
                     print(f"Error processing {file_path}: {e}", file=sys.stderr)
         print()
-        print(f"Summary:")
+        print("Summary:")
         print(f"  Files processed: {len(python_files)}")
         print(f"  Files modified: {files_modified}")
         if files_modified > 0:

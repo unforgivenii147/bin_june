@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for 7zer.py."""
+
 from __future__ import annotations
 
 import logging
@@ -151,3 +153,9 @@ if __name__ == "__main__":
     if not diff_size:
         print("no change")
     print(f"space freed : {fsz(diff_size)}")
+
+def gsz(path):
+    try:
+        return Path(path).stat().st_size
+    except Exception:
+        return 0

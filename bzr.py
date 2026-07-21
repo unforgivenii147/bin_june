@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for bzr.py."""
+
 from __future__ import annotations
 
 import argparse
@@ -147,7 +149,7 @@ def compress_tar_to_bz2(tar_path: Path, bz2_path: Path) -> bool:
                 print(f"  ✓ Compressed archive: {reduction:.1f}% saved ({fsz(tar_size)} → {fsz(bz2_size)})")
                 return True
             else:
-                print(f"  ✗ Archive compression didn't save space, keeping .tar")
+                print("  ✗ Archive compression didn't save space, keeping .tar")
                 bz2_path.unlink()
                 return False
         return False
@@ -161,10 +163,10 @@ async def compress_folder_async(folder_path: Path, output_base_name: str) -> boo
     tar_path = Path(output_base_name + ".tar")
     bz2_path = Path(output_base_name + ".tar.bz2")
     try:
-        print(f"  Creating tar archive...")
+        print("  Creating tar archive...")
         success = await loop.run_in_executor(None, create_tar_archive, folder_path, tar_path)
         if not success or not tar_path.exists():
-            print(f"  Failed to create tar archive")
+            print("  Failed to create tar archive")
             return False
         print(f"  Compressing tar archive with bzip2 (level {BZ2_COMPRESS_LEVEL})...")
         if compress_tar_to_bz2(tar_path, bz2_path):
@@ -252,12 +254,12 @@ def extract_tar_archive(tar_path: Path, extract_dir: Path) -> bool:
 
 async def process_compress() -> None:
     cwd = Path.cwd()
-    print(f"\n🔧 Bzip2 Compression Settings:")
+    print("\n🔧 Bzip2 Compression Settings:")
     print(f"   Level: {BZ2_COMPRESS_LEVEL}/9 (maximum)")
-    print(f"   Block size: 900KB (standard)")
+    print("   Block size: 900KB (standard)")
     print(f"   Parallel workers: {MAX_WORKERS}")
     print(f"   Chunk size: {fsz(CHUNK_SIZE)}")
-    print(f"   Algorithm: Burrows-Wheeler + Run-length + Huffman")
+    print("   Algorithm: Burrows-Wheeler + Run-length + Huffman")
     dirs_to_compress = get_dirs(cwd)
     if dirs_to_compress:
         print(f"\n📁 Compressing {len(dirs_to_compress)} directories...")
@@ -307,7 +309,7 @@ async def process_decompress() -> None:
             tar_path = None
             try:
                 tar_path = archive.with_suffix("")
-                print(f"    Decompressing bzip2...")
+                print("    Decompressing bzip2...")
                 compressed_data = archive.read_bytes()
                 tar_data = bz2.decompress(compressed_data)
                 tar_path.write_bytes(tar_data)

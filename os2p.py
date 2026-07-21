@@ -1,4 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
+from typing import List
+
+"""Module for os2p.py."""
 
 
 from __future__ import annotations
@@ -8,7 +12,7 @@ import traceback
 from collections import deque
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Any, List, Optional, Set, Tuple
+from typing import Any, Set
 from termcolor import cprint
 
 
@@ -494,7 +498,7 @@ class PathlibTransformer(ast.NodeTransformer):
             return node
         path_arg = node.args[0]
         walk_code = f"(\n            (str(root), [d.name for d in root.iterdir() if d.is_dir()], \n             [f.name for f in root.iterdir() if f.is_file()])\n            for root in Path({ast.unparse(path_arg)}).rglob('*') if root.is_dir()\n        )"
-        self.warnings.append(f"os.walk converted to simplified generator - verify correctness")
+        self.warnings.append("os.walk converted to simplified generator - verify correctness")
         try:
             walk_ast = ast.parse(walk_code, mode="eval")
             return walk_ast.body
@@ -549,7 +553,7 @@ def _is_docstring(node: ast.AST) -> bool:
 def process_file(
     file_path: Path, dry_run: bool = False, verbose: bool = False
 ) -> Tuple[str | None, bool, List[str], List[str]]:
-    path = Path(path)
+    Path(path)
     try:
         original_content = file_path.read_text(encoding="utf-8")
         tree = ast.parse(original_content)

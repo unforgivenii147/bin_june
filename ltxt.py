@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for ltxt.py."""
 from __future__ import annotations
 
 import os
@@ -15,7 +17,7 @@ EXCLUDED_EXTENSIONS = BIN_EXT
 
 
 def process_file(filepath):
-    path = Path(path)
+    Path(path)
     counter = Counter()
     try:
         with Path(filepath).open(encoding="utf-8", errors="ignore") as f:

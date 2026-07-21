@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
 
 """
 Extract URLs from files in current directory recursively.
@@ -11,7 +12,7 @@ from __future__ import annotations
 import re
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Set, Tuple
+from typing import Set
 
 from tqdm import tqdm
 
@@ -87,7 +88,7 @@ def main():
     with open(gitlinks_file, "w", encoding="utf-8") as f:
         for url in all_git_urls:
             f.write(url + "\n")
-    print(f"\n✓ Extraction complete!")
+    print("\n✓ Extraction complete!")
     print(f"  Regular URLs: {len(all_regular_urls)} → {urls_file.name}")
     print(f"  Git URLs: {len(all_git_urls)} → {gitlinks_file.name}")
 

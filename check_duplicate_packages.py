@@ -220,11 +220,11 @@ def main():
         print(f"Error getting site directories: {e}", file=sys.stderr)
         sys.exit(1)
 
-    print(f"\nSystem site directories:")
+    print("\nSystem site directories:")
     for d in system_dirs:
         print(f"  - {d}")
 
-    print(f"\nUser site directory:")
+    print("\nUser site directory:")
     for d in user_dirs:
         print(f"  - {d}")
 
@@ -246,7 +246,7 @@ def main():
     duplicates = find_duplicate_packages(system_packages, user_packages)
 
     # Report results
-    print(f"\nResults:")
+    print("\nResults:")
     print(f"  System packages found: {len(system_packages)}")
     print(f"  User packages found: {len(user_packages)}")
     print(f"  Duplicate packages: {len(duplicates)}")
@@ -270,7 +270,7 @@ def main():
 
             if versions["system_version"] != "unknown" and versions["user_version"] != "unknown":
                 if versions["system_version"] != versions["user_version"]:
-                    print(f"   ⚠️  Version mismatch!")
+                    print("   ⚠️  Version mismatch!")
     else:
         print("\n✅ No duplicate packages found.")
 

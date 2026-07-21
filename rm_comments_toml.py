@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for rm_comments_toml.py."""
 from __future__ import annotations
 
 import sys

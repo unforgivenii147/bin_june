@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for build_single_page.py."""
+
 from __future__ import annotations
 
 import base64
@@ -69,7 +71,6 @@ def process_html(path: Path) -> None:
     html = path.read_text(encoding="utf-8", errors="ignore")
     soup = BeautifulSoup(html, "html.parser")
     processed_html_files.append(soup)
-    file_prefix = path.stem
     for style in soup.find_all("style"):
         if not style.string:
             continue
@@ -119,7 +120,6 @@ def process_html(path: Path) -> None:
 
 def build_single_page() -> None:
     merged = BeautifulSoup("<html><head></head><body></body></html>", "html.parser")
-    head = merged.head
     body = merged.body
     for soup in processed_html_files:
         if soup.body:

@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for rmdoc_cpp.py."""
+
 from __future__ import annotations
 
 import re
@@ -29,7 +31,7 @@ class RegexCommentRemover:
 
 
 def process_file(file_path: Path, remover: RegexCommentRemover):
-    path = Path(path)
+    Path(path)
     try:
         code = Path(file_path).read_text(encoding="utf-8", errors="ignore")
     except Exception as e:

@@ -142,7 +142,7 @@ def safe_rename(src: Path, dst: Path) -> tuple[bool, str | None]:
         try:
             src.rename(dst)
             return True, str(dst)
-        except OSError as exc:
+        except OSError:
             try:
                 shutil.move(str(src), str(dst))
                 return True, str(dst)

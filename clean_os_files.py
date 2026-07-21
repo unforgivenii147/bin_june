@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import argparse
 import os
-import sys
 
 # File extensions / names to search for
 WINDOWS_FILES = {".exe", ".dll", ".bat", ".com", ".msi", ".vbs", ".ps1"}

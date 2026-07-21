@@ -121,7 +121,7 @@ class ASTCommentRemover:
 
     def _extract_docstring_ranges(self, tree: ast.AST, source: str) -> list:
         ranges = []
-        lines = source.split("\n")
+        source.split("\n")
         for node in ast.walk(tree):
             docstring = ast.get_docstring(node)
             if docstring and isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Module)):
@@ -243,7 +243,7 @@ def print_results(results: list, total_time: float, method: str):
     print(f"New size:         {total_new:,} bytes")
     print(f"Reduction:        {reduction:,} bytes ({reduction_pct:.1f}%)")
     if failed:
-        print(f"\nFailed files:")
+        print("\nFailed files:")
         for r in failed:
             print(f"  - {r.file_path}: {r.error}")
 

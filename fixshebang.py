@@ -11,7 +11,7 @@ import re
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Tuple
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -180,7 +180,7 @@ def main():
     if not updated_files and (not added_shebang_files):
         print("\n✅ No files needed updating.")
     print("\n" + "=" * 50)
-    print(f"📊 Summary:")
+    print("📊 Summary:")
     print(f"  ✏️  Updated existing shebangs: {len(updated_files)} files")
     print(f"  ➕ Added new shebangs: {len(added_shebang_files)} files")
     print(f"  ⏭️  Skipped (symlinks): {skipped_count} files")

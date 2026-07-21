@@ -176,16 +176,16 @@ class ProjectCleaner:
 
     def print_summary(self, stats: dict[str, int], dry_run: bool = False):
         print(f"\n{'=' * 70}")
-        print(f"Processing Complete!")
+        print("Processing Complete!")
         print(f"{'=' * 70}")
         print(f"Total files processed:  {stats['total']}")
         print(f"Files modified:         {stats['modified']}")
         print(f"Errors:                 {stats['errors']}")
         if dry_run:
-            print(f"\nⓘ Dry run mode - no changes saved")
+            print("\nⓘ Dry run mode - no changes saved")
         modified_files = [r.file_path for r in self.results if r.modified]
         if modified_files and stats["total"] <= 20:
-            print(f"\nModified files:")
+            print("\nModified files:")
             for f in modified_files:
                 print(f"  {f}")
 

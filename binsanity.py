@@ -1,4 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
+
+"""Module for binsanity.py."""
 
 
 from __future__ import annotations
@@ -6,7 +9,7 @@ from __future__ import annotations
 import concurrent.futures
 import subprocess
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List
 
 from binaryornot import is_binary
 
@@ -174,7 +177,7 @@ def main() -> None:
             print(f"  • {filepath.name}")
             print(f"    → {error_msg[:100]}")
     else:
-        print(f"\n✅ All binaries are working correctly!")
+        print("\n✅ All binaries are working correctly!")
         print(f"Report written to: {output_file}")
     print("=" * 70)
 

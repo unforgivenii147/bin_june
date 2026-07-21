@@ -70,10 +70,10 @@ def folderize_files(root: Path = Path.cwd()) -> None:
                 print(f"Moved: {file_path} -> {target_path}")
     print("\nCleaning up empty directories...")
     cleanup_empty_dirs(root)
-    print(f"\n✓ Organization complete!")
+    print("\n✓ Organization complete!")
     print(f"  - Files processed: {len(files_to_move)}")
     print(f"  - Files renamed: {renamed_count}")
-    print(f"  - Folders created: a, b, c, ..., 0-9")
+    print("  - Folders created: a, b, c, ..., 0-9")
 
 
 if __name__ == "__main__":

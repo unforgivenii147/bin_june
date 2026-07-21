@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for pymht.py."""
 from __future__ import annotations
 
 import base64
@@ -111,7 +113,6 @@ def main() -> None:
     _, html_bytes = html_candidates[0]
     html_text = html_bytes.decode(errors="replace")
     cid_to_file = {}
-    url_to_file = {}
 
     def get_name_from_headers(part) -> str:
         filename = part.get_param("name", header="Content-Type") if part.get("Content-Type") else None
@@ -200,7 +201,7 @@ def main() -> None:
     html_text = re.sub(r"(src|href)=[\"'](data:[^\"']+)[\"']", data_uri_replacer, html_text, flags=re.IGNORECASE)
     with open(out_html, "w", encoding="utf-8") as f:
         f.write(html_text)
-    print(f"Done.")
+    print("Done.")
     print(f"HTML: {out_html}")
     print(f"Resources: {out_dir}/ (extracted {len(cid_to_file)} CID items)")
 

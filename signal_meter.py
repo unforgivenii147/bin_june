@@ -40,7 +40,7 @@ class SignalMonitor:
             if ssid_match:
                 self.wifi_ssid = ssid_match.group(2) or "Hidden"
             return self.wifi_strength
-        except Exception as e:
+        except Exception:
             self.wifi_strength = None
             return None
 
@@ -65,7 +65,7 @@ class SignalMonitor:
                 }
                 self.cellular_status = states.get(state_num, "Unknown")
             return self.cellular_strength
-        except Exception as e:
+        except Exception:
             self.cellular_strength = None
             return None
 

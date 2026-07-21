@@ -1,8 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for sonik.py."""
+
 
 from __future__ import annotations
-import os
 import sys
 
 

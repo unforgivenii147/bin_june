@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for addimgsize_to_filenames.py."""
+
 from __future__ import annotations
 
 import sys
@@ -35,7 +37,7 @@ class ImageDimensionRenamer:
         image_files = sorted(image_files)
         print(f"[SCAN] Found {len(image_files)} image file(s)")
         if image_files:
-            print(f"[SCAN] Sample paths:")
+            print("[SCAN] Sample paths:")
             for img_path in image_files[:3]:
                 print(f"       - {img_path.relative_to(self.root_dir)}")
             if len(image_files) > 3:
@@ -55,11 +57,11 @@ class ImageDimensionRenamer:
         try:
             img = cv2.imread(str(image_path))
             if img is None:
-                return image_path, False, f"Failed to read image"
+                return image_path, False, "Failed to read image"
             height, width = img.shape[:2]
             dimensions = f"{width}x{height}"
             if self.has_dimensions_in_name(image_path.stem):
-                message = f"Already has dimensions in name"
+                message = "Already has dimensions in name"
                 return image_path, False, message
             stem = image_path.stem
             suffix = image_path.suffix

@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for ewhl.py."""
 from __future__ import annotations
 
 import argparse
@@ -61,7 +63,7 @@ def move_empty_wheels(source_dir, dest_dir_name: str = "empty_wheels") -> None:
                 counter += 1
         shutil.move(str(wheel_file), str(dest_file))
         print(f"Moved: {wheel_file.name} -> {dest_dir_name}/{dest_file.name}")
-    print(f"\nSummary:")
+    print("\nSummary:")
     print(f"  - Empty wheels moved to: {dest_dir_name}/")
     print(f"  - Valid wheels remaining: {len(valid_wheels)}")
     print(f"  - Total checked: {len(wheel_files)}")

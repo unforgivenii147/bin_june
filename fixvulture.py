@@ -10,7 +10,6 @@ import os
 import re
 import sys
 from collections import defaultdict
-from pathlib import Path
 from typing import dict, list, set, tuple
 
 VULTURE_LINE_PATTERN = re.compile(
@@ -134,7 +133,7 @@ def fix_file(filepath: str, issues: list[tuple[int, str, str]]) -> bool:
 
             elif issue_type in ("unreachable_after", "unreachable_else"):
                 # Comment out unreachable code
-                indent = _get_indent(line)
+                _get_indent(line)
                 end_idx = _find_block_end(lines, idx)
                 for i in range(idx, end_idx + 1):
                     if i not in lines_to_remove:

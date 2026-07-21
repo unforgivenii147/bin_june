@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for ensurebracket.py."""
 from __future__ import annotations
 
 import sys
@@ -32,7 +34,7 @@ MAX_QUEUE = 16
 
 
 def process_file(fn: Path) -> bool:
-    path = Path(path)
+    Path(path)
     text = ""
     text = Path(fn).read_text(encoding="utf-8")
     stack = []

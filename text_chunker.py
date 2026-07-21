@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
 
 
 """
@@ -13,7 +14,7 @@ import re
 import sys
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 TARGET_CHUNK_SIZE = 4900
@@ -111,7 +112,7 @@ def main():
         return 1
     print(f"Found {len(text_files)} text file(s)")
     print(f"Processing with {args.jobs} parallel job(s)...")
-    print(f"Target chunk size: < 5000 characters")
+    print("Target chunk size: < 5000 characters")
     with Pool(args.jobs) as pool:
         results = pool.starmap(process_file, [(f, output_dir) for f in text_files])
     total_chunks = 0

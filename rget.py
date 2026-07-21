@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for rget.py."""
 from __future__ import annotations
 
 import os
@@ -89,7 +91,7 @@ def download_one(url, session, output_dir, resume_from=None):
         with session.get(url, timeout=TIMEOUT, headers=headers, stream=True) as r:
             r.raise_for_status()
             content_length = int(r.headers.get("Content-Length", 0))
-            total_size = content_length + offset if content_length else None
+            content_length + offset if content_length else None
             mode = "ab" if offset else "wb"
             with Path(filepath).open(mode) as f:
                 for chunk in r.iter_content(chunk_size=65536):
@@ -114,7 +116,6 @@ def download_urls(urls: list[str], output_dir=OUTPUT_DIR) -> None:
     print(f"🚀 Starting download of {len(safe_urls)} URLs...\n")
     session = requests.Session()
     session.headers.update({"User-Agent": "Mozilla/5.0 (compatible; ResumableDownloader/1.0)"})
-    results = []
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         future_to_url = {executor.submit(download_one, url, session, output_dir): url for url in safe_urls}
         with tqdm(total=len(safe_urls), desc="Downloading", unit="file") as pbar:

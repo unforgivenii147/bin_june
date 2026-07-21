@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for find_big_files.py."""
+
 from __future__ import annotations
 
 import sys

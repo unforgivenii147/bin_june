@@ -1,7 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for fixext2.py."""
 from __future__ import annotations
 
-import cmd
 import os
 from pathlib import Path
 

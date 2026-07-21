@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for imzzz.py."""
 from __future__ import annotations
 
 import ast
@@ -69,7 +71,7 @@ def get_imports(file_path):
 
 
 def process_file(file_path):
-    path = Path(path)
+    Path(path)
     if file_path.is_dir():
         return set()
     if file_path.suffix in {".zip", ".whl", ".tar.gz", ".tar.xz", ".tar.zst"}:

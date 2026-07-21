@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for ewhl2.py."""
 from __future__ import annotations
 
 import argparse
@@ -113,7 +115,7 @@ def analyze_wheels(source_dir, dest_dir_name: str = "empty_wheels", check_instal
     for wheel_file in wheel_files:
         print(f"Checking {wheel_file.name}...")
         if is_empty_wheel(wheel_file):
-            print(f"  ✓ EMPTY wheel")
+            print("  ✓ EMPTY wheel")
             pkg_name, _pkg_version = extract_package_info(wheel_file)
             if check_installed and pkg_name:
                 installed_version = installed_packages.get(pkg_name.lower())
@@ -123,7 +125,7 @@ def analyze_wheels(source_dir, dest_dir_name: str = "empty_wheels", check_instal
                     if location:
                         print(f"  📍 Installed at: {location}")
                         if not has_files:
-                            print(f"  ⚠ Installation appears incomplete!")
+                            print("  ⚠ Installation appears incomplete!")
                     installed_empty_wheels.append(
                         {
                             "wheel": wheel_file,
@@ -135,7 +137,7 @@ def analyze_wheels(source_dir, dest_dir_name: str = "empty_wheels", check_instal
                     print(f"  ℹ Package '{pkg_name}' not found in installed packages")
             empty_wheels.append(wheel_file)
         else:
-            print(f"  ✓ VALID wheel (contains code)")
+            print("  ✓ VALID wheel (contains code)")
             valid_wheels.append(wheel_file)
         print()
     print("=" * 60)

@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for downimg.py."""
+
 from __future__ import annotations
 
 import sys
@@ -39,7 +41,7 @@ class ImageDownscaler:
         image_files = sorted(image_files)
         print(f"[SCAN] Found {len(image_files)} image file(s)")
         if image_files:
-            print(f"[SCAN] Sample paths:")
+            print("[SCAN] Sample paths:")
             for img_path in image_files[:3]:
                 print(f"       - {img_path.relative_to(self.root_dir)}")
             if len(image_files) > 3:
@@ -52,7 +54,7 @@ class ImageDownscaler:
         try:
             img = cv2.imread(str(image_path))
             if img is None:
-                return image_path, False, f"Failed to read image"
+                return image_path, False, "Failed to read image"
             height, width = img.shape[:2]
             original_size = width, height
             new_width = int(width * scale_factor)
@@ -63,7 +65,7 @@ class ImageDownscaler:
             downscaled = cv2.resize(img, new_size, interpolation=cv2.INTER_AREA)
             success = cv2.imwrite(str(image_path), downscaled)
             if not success:
-                return image_path, False, f"Failed to write image"
+                return image_path, False, "Failed to write image"
             message = f"{original_size} → {new_size}"
             return image_path, True, message
         except Exception as e:

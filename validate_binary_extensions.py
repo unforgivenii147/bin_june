@@ -234,7 +234,7 @@ def print_report(results: dict):
     print("\n" + "=" * 80)
     print("BINARY EXTENSION VALIDATION REPORT")
     print("=" * 80)
-    print(f"\nSummary:")
+    print("\nSummary:")
     print(f"  Total files found:    {results['total_files']}")
     print(f"  Actual binary files:  {results['binary_files']}")
     print(f"  Text files:           {results['text_files']}")
@@ -250,8 +250,8 @@ def print_report(results: dict):
         if len(results["mismatches"]) > 20:
             print(f"  ... and {len(results['mismatches']) - 20} more")
     else:
-        print(f"\n✓ No mismatches found! All files match their extensions.")
-    print(f"\nBreakdown by extension:")
+        print("\n✓ No mismatches found! All files match their extensions.")
+    print("\nBreakdown by extension:")
     print("-" * 80)
     for ext, stats in sorted(results["by_extension"].items()):
         print(f"  {ext:12} - Binary: {stats['binary']:6}  Text: {stats['text']:6}  Errors: {stats['error']:6}")

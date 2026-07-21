@@ -48,7 +48,7 @@ def process_file(path: Path) -> Tuple[str, bool, str]:
     path = Path(path)
     if path.is_symlink():
         print("symlink")
-        return (str(path), False, f"Error: symlink")
+        return (str(path), False, "Error: symlink")
     gz_path = path.with_suffix(".gz")
     try:
         data = path.read_bytes()

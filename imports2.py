@@ -1,17 +1,19 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
+
+"""Module for imports2.py."""
 
 
 from __future__ import annotations
 import ast
 import logging
-import subprocess
 import sys
 import tarfile
 import zipfile
 from collections import defaultdict
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import List, Set, Tuple
+from typing import List, Set
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)

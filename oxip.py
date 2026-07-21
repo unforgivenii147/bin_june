@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for oxip.py."""
 from __future__ import annotations
 
 import subprocess
@@ -54,7 +56,7 @@ def main() -> None:
         return
     with Progress() as progress:
         task = progress.add_task("[cyan]Optimizing PNGs...", total=len(png_files))
-        num_processes = min(cpu_count(), 8)
+        min(cpu_count(), 8)
         with Pool(8) as pool:
             for _ in pool.imap_unordered(optimize_png, png_files):
                 progress.update(task, advance=1)

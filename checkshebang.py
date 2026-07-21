@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for checkshebang.py."""
+
 
 from __future__ import annotations
 from pathlib import Path
@@ -10,7 +12,6 @@ def fix_file(path: Path) -> bool:
     lines = text.splitlines(keepends=False)
     if not lines:
         return False
-    nl = []
     i = 0
     for line in lines:
         if line.startswith("#!"):

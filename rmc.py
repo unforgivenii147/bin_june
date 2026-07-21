@@ -1,4 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
+
+"""Module for rmc.py."""
 
 
 from __future__ import annotations
@@ -11,7 +14,7 @@ import zipfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterator, Optional, Tuple
+from typing import Iterator
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache", ".venv", "venv"})
 CHUNK_SIZE = 1024
@@ -169,7 +172,7 @@ def process_docstrings_ast(source_code: str, preserve_module_docstring: bool = T
         ast.fix_missing_locations(modified_tree)
         modified_code = ast.unparse(modified_tree)
         return (modified_code, processor.docstrings_removed)
-    except SyntaxError as e:
+    except SyntaxError:
         return (source_code, 0)
 
 

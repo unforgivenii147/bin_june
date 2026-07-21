@@ -51,7 +51,7 @@ def create_github_repo(repo_name: str, github_token: str) -> str | None:
         if response.status_code == 422:
             print(f"   ⚠️  Repository '{repo_name}' already exists on GitHub")
             try:
-                get_url = f"https://api.github.com/repos/{response.json().get('errors', [{}])[0].get('resource', '')}"
+                f"https://api.github.com/repos/{response.json().get('errors', [{}])[0].get('resource', '')}"
                 username = get_github_username(github_token)
                 if username:
                     existing_url = f"https://github.com/{username}/{repo_name}.git"
@@ -83,7 +83,7 @@ def setup_remote_and_push(repo: Repo, repo_path: Path, remote_url: str) -> bool:
         else:
             repo.create_remote("origin", remote_url)
             print(f"   🔗 Added remote 'origin': {remote_url}")
-        print(f"   📤 Pushing to GitHub...")
+        print("   📤 Pushing to GitHub...")
         current_branch = repo.active_branch.name
         repo.remotes.origin.push(refspec=f"{current_branch}:{current_branch}", set_upstream=True)
         print(f"   ✅ Pushed branch '{current_branch}' to GitHub")
@@ -105,7 +105,7 @@ def process_repository(repo_path: Path, github_token: str) -> tuple[bool, str]:
             print(f"   Branch: {repo.active_branch.name}")
             try:
                 repo.remotes.origin.pull()
-                print(f"   ✅ Pull successful")
+                print("   ✅ Pull successful")
                 return True, "Pulled successfully"
             except GitCommandError as e:
                 if "merge conflict" in str(e).lower():

@@ -34,12 +34,11 @@ import os
 import pwd
 import re
 import stat
-import struct
 import subprocess
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Generator, Iterator
+from typing import Generator
 
 RESET = "\x1b[0m"
 BOLD = "\x1b[1m"

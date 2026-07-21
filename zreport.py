@@ -16,7 +16,7 @@ import sys
 import tarfile
 import zipfile
 from pathlib import Path
-from typing import Callable, Final, Optional
+from typing import Callable, Final
 
 SKIP_DIRS: Final[frozenset[str]] = frozenset(
     {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}

@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for update_get_files.py."""
 from __future__ import annotations
 
 import ast

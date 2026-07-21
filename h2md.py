@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for h2md.py."""
 from __future__ import annotations
 
 import sys
@@ -41,7 +43,7 @@ def process_file(path) -> None:
     path = Path(path)
     md_path = path.with_suffix(".md")
     content = path.read_text(encoding="utf8")
-    md = markdownify(content)
+    markdownify(content)
     md_path.write_text(md_content, encoding="utf-8")
 
 

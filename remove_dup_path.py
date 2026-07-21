@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for remove_dup_path.py."""
+
 from __future__ import annotations
 
 from pathlib import Path

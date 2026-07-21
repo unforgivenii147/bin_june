@@ -16,7 +16,6 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 def fix_mis_extracted(root_dir: Path, dry_run: bool = True, verbose: bool = True):
     fixed = 0
-    skipped = 0
     for dir_path in sorted(root_dir.rglob("*"), key=lambda p: len(p.parts), reverse=True):
         if not dir_path.is_dir():
             continue

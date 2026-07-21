@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for strip_installed_pkgs.py."""
+
 from __future__ import annotations
 
 import sys

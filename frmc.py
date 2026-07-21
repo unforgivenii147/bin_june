@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for frmc.py."""
 from __future__ import annotations
 
 import ast
@@ -7,6 +9,8 @@ import sys
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
+
+CHUNK_SIZE = 1024 * 1024
 
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:

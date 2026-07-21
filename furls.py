@@ -1,4 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Dict
+
+"""Module for furls.py."""
 
 
 from __future__ import annotations
@@ -16,7 +19,7 @@ from inspect import getfullargspec
 from itertools import chain
 from pathlib import Path
 from tarfile import TarFile
-from typing import Any, Callable, Dict
+from typing import Any, Callable
 from urllib.parse import urlparse
 from zipfile import ZipFile
 import zstd

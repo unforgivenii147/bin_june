@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for wheelpackdirs.py."""
 from __future__ import annotations
 
 import argparse
@@ -11,7 +13,7 @@ from pathlib import Path
 def pack_wheel(directory):
     """Pack a wheel directory using the wheel command."""
     try:
-        result = subprocess.run(["wheel", "pack", str(directory)], capture_output=True, text=True, check=True)
+        subprocess.run(["wheel", "pack", str(directory)], capture_output=True, text=True, check=True)
         return True, f"✓ {directory.name}"
     except subprocess.CalledProcessError as e:
         return False, f"✗ {directory.name}: {e.stderr.strip()}"

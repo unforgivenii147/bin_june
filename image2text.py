@@ -1,9 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for image2text.py."""
 from __future__ import annotations
 
 import sys
 from collections import deque
-from multiprocessing import get_context
 from pathlib import Path
 from dh import mpf3
 from PIL import Image
@@ -139,7 +140,6 @@ def process_file(image_path: Path) -> Image:
     if HAS_CV2:
         return process_image_cv2(image_path)
     else:
-        import numpy as np
 
         return process_image_skimage(image_path)
 

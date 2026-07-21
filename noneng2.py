@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
+from typing import List
 
 
 """
@@ -17,7 +19,7 @@ import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import cpu_count
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict
 
 import cld3
 

@@ -1,4 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
+
+"""Module for compress_files2.py."""
 
 from __future__ import annotations
 
@@ -6,7 +9,7 @@ import argparse
 import sys
 import textwrap
 from pathlib import Path
-from typing import Generator, Tuple
+from typing import Generator
 
 import lzma_mt
 
@@ -108,7 +111,7 @@ def compress_file(
             data = f.read()
         original_size = len(data)
         compressed = lzma_mt.compress(data, preset=preset, threads=threads)
-        compressed_size = len(compressed)
+        len(compressed)
         output_path = filepath.parent / (filepath.name + ".xz")
         with open(output_path, "wb") as f:
             f.write(compressed)

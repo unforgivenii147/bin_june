@@ -18,14 +18,13 @@ import argparse
 import ast
 import multiprocessing
 import re
-import shutil
 import sys
 import tarfile
 import tempfile
 import zipfile
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional, Set
+from typing import Set
 
 # SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -190,11 +189,10 @@ def _remove_names_from_import(line: str, names_to_remove: set[str]) -> str | Non
             if not part:
                 continue
             if " as " in part:
-                full_name = part.split(" as ")[0].strip()
+                part.split(" as ")[0].strip()
                 alias = part.split(" as ")[1].strip()
                 check_name = alias
             else:
-                full_name = part
                 check_name = part.split(".")[0]
             if check_name not in names_to_remove:
                 kept.append(part)

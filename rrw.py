@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for rrw.py."""
 from __future__ import annotations
 
 import ast
@@ -8,6 +10,8 @@ from collections import deque
 from pathlib import Path
 
 import astor
+
+CHUNK_SIZE = 1024 * 1024
 
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
@@ -80,7 +84,7 @@ def process_file(path) -> None:
 def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
-    backup = sys.argv[2] if len(sys.argv) > 2 else False
+    sys.argv[2] if len(sys.argv) > 2 else False
     files = [Path(arg) for arg in args] if args else get_files(cwd)
     for path in files:
         process_file(path)

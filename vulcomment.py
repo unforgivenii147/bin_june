@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+from typing import Tuple
+from typing import List
 
 
 """
@@ -27,7 +29,7 @@ import sys
 import os
 import difflib
 from collections import defaultdict
-from typing import Dict, Set, List, Tuple
+from typing import Dict, Set
 
 VULTURE_RE = re.compile("^(?P<path>.*?):(?P<lineno>\\d+):\\s*unused variable '(?P<var>[^']+)'", re.IGNORECASE)
 

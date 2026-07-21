@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for top501.py."""
 from __future__ import annotations
 
 import os
@@ -15,7 +17,7 @@ def is_text_file(file_path, text_extensions):
 
 
 def process_file(file_path, text_extensions):
-    path = Path(path)
+    Path(path)
     if not is_text_file(file_path, text_extensions):
         return Counter()
     try:

@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
 
 """
 Strip comments and docstrings from Python files recursively (in-place).
@@ -24,7 +25,7 @@ import multiprocessing
 import sys
 import tokenize
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -62,7 +63,6 @@ def extract_prefix_comments_and_shebang(source: str) -> Tuple[str, str]:
     lines = source.splitlines(keepends=True)
     prefix_lines: List[str] = []
     i = 0
-    seen_any_nonblank = False
     for i, line in enumerate(lines):
         stripped = line.strip()
         if i == 0 and line.startswith("#!"):
@@ -105,7 +105,7 @@ def process_file(path: Path) -> Tuple[Path, str | None]:
         tree = ast.parse(original)
     except SyntaxError as exc:
         return path, f"syntax-error-original: {exc}"
-    module_docstring = ast.get_docstring(tree, clean=False)
+    ast.get_docstring(tree, clean=False)
     stripper = DocstringStripper()
     new_tree = stripper.visit(tree)
     ast.fix_missing_locations(new_tree)
@@ -201,7 +201,6 @@ def process_file_check_changed(path: Path) -> Tuple[Path | None, str | None]:
     try:
         with tokenize.open(path) as f:
             original = f.read()
-            encoding = f.encoding
     except Exception as exc:
         return path, f"read-error: {exc}"
     if not original.strip():

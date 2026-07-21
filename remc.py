@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for remc.py."""
 from __future__ import annotations
 
 import ast
@@ -235,7 +237,7 @@ def remove_blank_lines(content: str) -> str:
 
 
 def process_file(file_path: Path) -> None:
-    path = Path(path)
+    Path(path)
     try:
         original = file_path.read_text(encoding="utf-8")
         try:

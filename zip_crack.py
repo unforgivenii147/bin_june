@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for zip_crack.py."""
+
 
 from __future__ import annotations
 
@@ -12,7 +14,7 @@ from collections.abc import Generator
 from dataclasses import dataclass, field
 from itertools import islice
 from pathlib import Path
-from typing import Final, Optional
+from typing import Final
 
 DEFAULT_BATCH_SIZE: Final[int] = 2000
 DEFAULT_UPDATE_INTERVAL: Final[float] = 5.0

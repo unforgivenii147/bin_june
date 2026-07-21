@@ -1,11 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for autocomp.py."""
+
 from __future__ import annotations
 
 import bz2
 import gzip
 import lzma
-import os
 import sys
 import tarfile
 import tempfile

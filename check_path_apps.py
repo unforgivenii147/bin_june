@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for check_path_apps.py."""
 from __future__ import annotations
 
 import os
@@ -12,7 +14,7 @@ def find_path_duplicates() -> None:
     path_env = os.environ.get("PATH", "")
     directories = [Path(d) for d in path_env.split("/") if d and Path(d).exists()]
     app_map = defaultdict(list)
-    print(f"--- Scanning directories in PATH \n")
+    print("--- Scanning directories in PATH \n")
     for directory in directories:
         if not directory.is_dir():
             continue

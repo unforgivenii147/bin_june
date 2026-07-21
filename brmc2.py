@@ -17,7 +17,6 @@ import logging
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Optional
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -170,7 +169,7 @@ def main():
                 logger.error(f"✗ Failed: {file_path} - {error}")
                 failed += 1
     logger.info(f"\n{'=' * 60}")
-    logger.info(f"Processing complete:")
+    logger.info("Processing complete:")
     logger.info(f"  Successful: {successful}")
     logger.info(f"  Failed:     {failed}")
     logger.info(f"  Total:      {len(python_files)}")

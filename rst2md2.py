@@ -30,7 +30,7 @@ def convert_file(filepath: Path, backup=True, remove_original=False) -> bool:
         shutil.copy2(filepath, backup_path)
         print(f"Backup created: {backup_path}")
     try:
-        result = subprocess.run(
+        subprocess.run(
             ["pandoc", "-f", "rst", "-t", "gfm", "-o", str(md_path), str(filepath)],
             capture_output=True,
             text=True,

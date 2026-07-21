@@ -269,7 +269,7 @@ def main():
         Path(args.nonpure_output).write_text(json.dumps(nonpure_data, indent=2))
     else:
         Path(args.nonpure_output).write_text("\n".join(unique_nonpure))
-    print(f"=== SUMMARY ===")
+    print("=== SUMMARY ===")
     print(f"Platform: {sys.platform}")
     print(f"Pure Python packages without entry_points.txt: {len(unique_pure)}")
     print(f"Non-pure packages without entry_points.txt: {len(unique_nonpure)}")

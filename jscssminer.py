@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for jscssminer.py."""
+
 
 from __future__ import annotations
 
@@ -38,7 +40,7 @@ def minify_assets_in_directory(cwd: Path | str = ".") -> None:
             print(f"Error processing {file_path.name}: {e}")
             errors_count += 1
     print(f"\n{'=' * 50}")
-    print(f"MINIFICATION SUMMARY")
+    print("MINIFICATION SUMMARY")
     print(f"{'=' * 50}")
     print(f"Files minified: {minified_count}")
     print(f"Errors: {errors_count}")
@@ -76,7 +78,7 @@ def minify_assets_with_extensions(cwd: Path | str = ".", extensions: list[str] |
             print(f"Error processing {file_path.name}: {e}")
             errors_count += 1
     print(f"\n{'=' * 50}")
-    print(f"MINIFICATION SUMMARY")
+    print("MINIFICATION SUMMARY")
     print(f"{'=' * 50}")
     print(f"Files minified: {minified_count}")
     print(f"Errors: {errors_count}")
@@ -153,7 +155,7 @@ def minify_assets_parallel(cwd: Path | str = ".", max_workers: int = 4) -> None:
                 errors_count += 1
                 print(f"✗ {file_path.name}: {error}")
     print(f"\n{'=' * 50}")
-    print(f"MINIFICATION SUMMARY")
+    print("MINIFICATION SUMMARY")
     print(f"{'=' * 50}")
     print(f"Files minified: {minified_count}")
     print(f"Errors: {errors_count}")

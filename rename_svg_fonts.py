@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for rename_svg_fonts.py."""
+
 from __future__ import annotations
 
 import re

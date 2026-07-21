@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
 """
 Clone GitHub repositories from a repos.txt file using GitPython.
 Format: user/repo (one per line)
@@ -11,7 +12,7 @@ import argparse
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import List, Tuple
+from typing import List
 
 from git import GitCommandError, Repo
 from git.exc import InvalidGitRepositoryError
@@ -154,7 +155,7 @@ def main():
 
     # Summary
     print("-" * 60)
-    print(f"\nSummary:")
+    print("\nSummary:")
     print(f"  ✅ Successfully cloned: {successful}")
     print(f"  ⏭️  Already existed: {skipped}")
     print(f"  ❌ Failed: {failed}")

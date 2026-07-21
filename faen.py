@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for faen.py."""
 from __future__ import annotations
 
 import json
@@ -54,7 +56,7 @@ class Bidirectionaldictionary:
             return f"📖 {query} → {self.english_to_persian[query_lower]}"
         suggestions = self.get_suggestions(query)
         if suggestions:
-            result = f"🔍 Did you mean:\n"
+            result = "🔍 Did you mean:\n"
             for match in suggestions[:5]:
                 if match in self.persian_to_english:
                     result += f"  • {match} → {self.persian_to_english[match]}\n"

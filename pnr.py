@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for pnr.py."""
+
 from __future__ import annotations
 
 import argparse
@@ -163,7 +165,7 @@ def rename_by_template(
     else:
         padding = 4
     for i, file_path in enumerate(sorted(files), 1):
-        name, ext = file_path.stem, file_path.suffix
+        _name, ext = file_path.stem, file_path.suffix
         number_str = str(i).zfill(padding)
         new_name = f"{template}{number_str}{ext}"
         if new_name == file_path.name:

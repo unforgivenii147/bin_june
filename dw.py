@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for dw.py."""
 from __future__ import annotations
 
 import argparse
@@ -83,7 +85,7 @@ def main():
                         lines = tail_file(path, n=10)
                         tail_text = "".join(lines)
                         if "boostraped 100%" in tail_text:
-                            print(f"\n✓ Bootstrap complete detected! Exiting...\n")
+                            print("\n✓ Bootstrap complete detected! Exiting...\n")
                             sys.exit(0)
             deleted = set(file_mtimes.keys()) - set(current_files.keys())
             for path_str in deleted:

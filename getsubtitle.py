@@ -41,7 +41,7 @@ def download_subtitles_advanced(mkv_path, output_dir=None):
         subtitles = download_best_subtitles([video], {language}, providers=providers)
         video_subtitles = subtitles.get(video, {})
         if not video_subtitles:
-            logger.warning(f"No English subtitles found")
+            logger.warning("No English subtitles found")
             return False
         subtitle_path = output_dir / f"{mkv_path.stem}.en.srt"
         save_subtitles(video, video_subtitles, single=True, path=subtitle_path)

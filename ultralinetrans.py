@@ -22,6 +22,8 @@ from typing import Final
 
 from deep_translator import GoogleTranslator
 
+CHUNK_SIZE = 1024 * 1024
+
 CHUNK_SIZE: Final[int] = 4990
 MAX_WORKERS: Final[int] = 6
 DOC_TH1: Final[str] = '"""'

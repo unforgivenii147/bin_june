@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for fregex.py."""
 from __future__ import annotations
 
 import os
@@ -23,7 +25,7 @@ def extract_regex_patterns(file_path):
 
 
 def process_file(file_path, output_dir):
-    path = Path(path)
+    Path(path)
     patterns = extract_regex_patterns(file_path)
     if patterns:
         relative_path = os.path.relpath(file_path, Path.cwd())

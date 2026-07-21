@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for xzer.py."""
+
 from __future__ import annotations
 
 import argparse
@@ -147,7 +149,7 @@ def compress_tar_to_xz(tar_path: Path, xz_path: Path) -> bool:
                 print(f"  ✓ Compressed archive: {reduction:.1f}% saved ({fsz(tar_size)} → {fsz(xz_size)})")
                 return True
             else:
-                print(f"  ✗ Archive compression didn't save space, keeping .tar")
+                print("  ✗ Archive compression didn't save space, keeping .tar")
                 xz_path.unlink()
                 return False
         return False
@@ -161,12 +163,12 @@ async def compress_folder_async(folder_path: Path, output_base_name: str) -> boo
     tar_path = Path(output_base_name + ".tar")
     xz_path = Path(output_base_name + ".tar.xz")
     try:
-        print(f"  Creating tar archive...")
+        print("  Creating tar archive...")
         success = await loop.run_in_executor(None, create_tar_archive, folder_path, tar_path)
         if not success or not tar_path.exists():
-            print(f"  Failed to create tar archive")
+            print("  Failed to create tar archive")
             return False
-        print(f"  Compressing tar archive...")
+        print("  Compressing tar archive...")
         if compress_tar_to_xz(tar_path, xz_path):
             await loop.run_in_executor(None, shutil.rmtree, folder_path)
             return True
@@ -301,7 +303,7 @@ async def process_decompress() -> None:
             tar_path = None
             try:
                 tar_path = archive.with_suffix("")
-                print(f"    Decompressing xz...")
+                print("    Decompressing xz...")
                 compressed_data = archive.read_bytes()
                 tar_data = decompress(compressed_data)
                 tar_path.write_bytes(tar_data)

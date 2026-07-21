@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Optional
 """
 HTML Minifier - Python wrapper for html-minifier-terser
 Minifies HTML files recursively with parallel processing.
@@ -12,7 +13,7 @@ import tempfile
 from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
-from typing import List, Tuple, Optional
+from typing import List
 import argparse
 from colorama import init, Fore, Style
 

@@ -12,7 +12,7 @@ import json
 import sys
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Tuple
 from zipfile import ZipFile
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
@@ -146,7 +146,7 @@ def main():
         print(f"{'TOTAL':<50} {format_size(total_unpacked_size):>20}")
         print("=" * 80)
         if args.verbose:
-            print(f"\n📊 Summary:")
+            print("\n📊 Summary:")
             print(f"   Total wheels found:      {len(wheels)}")
             print(f"   Successfully processed:  {len(results)}")
             print(f"   Errors:                  {len(errors)}")

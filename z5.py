@@ -287,7 +287,7 @@ def print_summary(results: list[OperationResult], root: Path, operation: str):
             (f" | Failed: {len(failures)}\n", "red"),
             f"Original Size: {format_size(total_orig)}\n",
             f"Processed Size: {format_size(total_proc)}\n",
-            (f"Ratio: ", "dim"),
+            ("Ratio: ", "dim"),
             (f"{((1 - total_proc / total_orig) * 100 if total_orig > 0 else 0):.1f}%\n", "bold green"),
             (f"Time: {total_time:.2f}s", "dim"),
         )

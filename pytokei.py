@@ -1,8 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for pytokei.py."""
 from __future__ import annotations
 
 import re
 from pathlib import Path
+
+CHUNK_SIZE = 1024 * 1024
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

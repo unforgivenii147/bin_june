@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for check_system_bin.py."""
 from __future__ import annotations
 
 import hashlib

@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for gdrive_syncer5.py."""
+
 
 from __future__ import annotations
 import os
@@ -126,7 +128,7 @@ class GoogleDriveSync:
         print("\n" + "=" * 60)
         print("OPTION 1 (Recommended): Localhost Redirect")
         print("=" * 60)
-        print(f"\nOpen this URL in your browser on this device:")
+        print("\nOpen this URL in your browser on this device:")
         print(f"\n{auth_url}\n")
         print("After authorization, you'll be redirected to localhost:8080")
         print("Copy the ENTIRE URL from the address bar (it will show an error page)")
@@ -134,7 +136,6 @@ class GoogleDriveSync:
         print("OPTION 2: Manual Code Entry")
         print("=" * 60)
         print("If Option 1 doesn't work, try this URL instead:")
-        alt_auth_url = f"https://accounts.google.com/o/oauth2/auth?client_id={self.client_id}&redirect_uri=urn:ietf:wg:oauth:2.0:oob&response_type=code&scope=https://www.googleapis.com/auth/drive.readonly&access_type=offline&prompt=consent"
         print(f"\n{altauth_url}\n")
         input("\nPress Enter after you have the authorization code or redirect URL...")
         auth_input = input("\nEnter the full redirect URL or auth code: ").strip()

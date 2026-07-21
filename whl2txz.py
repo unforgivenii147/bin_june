@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
 
 """
 Bidirectional converter between wheel files (.whl) and tar.xz archives.
@@ -18,7 +19,7 @@ import zipfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List
 
 # SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -325,7 +326,7 @@ Examples:
     print("=" * 70)
     print(f"Summary: {success_count} successful, {failure_count} failed")
     if args.remove_original and success_count > 0:
-        print(f"✓ Original files were removed after successful conversion")
+        print("✓ Original files were removed after successful conversion")
     return 0 if failure_count == 0 else 1
 
 

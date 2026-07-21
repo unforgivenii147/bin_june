@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import List
 
 """
 Extract entities (classes, functions, constants) from Python files recursively.
@@ -20,7 +21,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import Dict, List, Set
+from typing import Dict, Set
 
 from tqdm import tqdm
 
@@ -203,7 +204,7 @@ def main(root_dir: str = ".", output_dir: str = "output", num_workers: int | Non
     save_entities(output_path, "const", entities_by_file.get("constants", {}), unique_constants)
     save_imports(output_path, imports_by_dir)
     logger.info("=" * 50)
-    logger.info(f"Extraction Summary:")
+    logger.info("Extraction Summary:")
     logger.info(f"  Files processed: {len(py_files)}")
     logger.info(f"  Unique classes: {len(unique_classes)}")
     logger.info(f"  Unique functions: {len(unique_functions)}")

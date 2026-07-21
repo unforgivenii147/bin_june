@@ -83,20 +83,20 @@ def display_results(original_paths, deduplicated_paths, assignments, export_stat
     print("=" * 70)
     print("PATH DEDUPLICATION RESULTS")
     print("=" * 70)
-    print(f"\n📊 Summary:")
+    print("\n📊 Summary:")
     print(f"   Original PATH entries:      {len(original_paths)}")
     print(f"   Deduplicated entries:       {len(deduplicated_paths)}")
     print(f"   Duplicates removed:         {len(original_paths) - len(deduplicated_paths)}")
-    print(f"\n📝 Generated Variables:")
+    print("\n📝 Generated Variables:")
     for i, assignment in enumerate(assignments, 1):
         print(f"   {assignment}")
-    print(f"\n📤 Export Statement:")
+    print("\n📤 Export Statement:")
     print(f"   {export_statement}")
-    print(f"\n🔍 Details of Deduplicated Paths:")
+    print("\n🔍 Details of Deduplicated Paths:")
     for i, path in enumerate(deduplicated_paths, 1):
         print(f"   P{i} = {path}")
     if len(original_paths) > len(deduplicated_paths):
-        print(f"\n⚠️  Removed Duplicates:")
+        print("\n⚠️  Removed Duplicates:")
         removed = set(original_paths) - set(deduplicated_paths)
         seen = set()
         for path in original_paths:

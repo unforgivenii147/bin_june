@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for colab1.py."""
 from __future__ import annotations
 
 import shutil

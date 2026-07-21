@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import ast
 import pkgutil
-import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -362,7 +361,7 @@ def save_charts(
         plt.tight_layout()
         plt.savefig(output_dir / "01_stdlib_top10.png", dpi=100, bbox_inches="tight")
         plt.close()
-        print(f"   ✅ Saved: 01_stdlib_top10.png")
+        print("   ✅ Saved: 01_stdlib_top10.png")
 
     fig, ax = plt.subplots(figsize=(10, 8))
     category_counts = {
@@ -387,7 +386,7 @@ def save_charts(
         plt.tight_layout()
         plt.savefig(output_dir / "02_category_distribution.png", dpi=100, bbox_inches="tight")
         plt.close()
-        print(f"   ✅ Saved: 02_category_distribution.png")
+        print("   ✅ Saved: 02_category_distribution.png")
 
     fig, ax = plt.subplots(figsize=(12, 6))
     top_thirdparty = dict(sorted(thirdparty_counts.items(), key=lambda x: -x[1])[:10])
@@ -399,7 +398,7 @@ def save_charts(
         plt.tight_layout()
         plt.savefig(output_dir / "03_thirdparty_top10.png", dpi=100, bbox_inches="tight")
         plt.close()
-        print(f"   ✅ Saved: 03_thirdparty_top10.png")
+        print("   ✅ Saved: 03_thirdparty_top10.png")
 
     _fig, ax = plt.subplots(figsize=(12, 6))
     if dh_counts:

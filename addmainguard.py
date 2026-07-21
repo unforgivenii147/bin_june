@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for addmainguard.py."""
+
 from __future__ import annotations
 
 import argparse
@@ -166,7 +168,7 @@ def main():
         added = len(results["added"])
         would_add = len(results["would_add"])
         errors = len(results["errors"])
-        print(f"\n📊 Results:")
+        print("\n📊 Results:")
         print(f"  ✅ Already had guard: {has_guard}")
         if args.dry_run:
             print(f"  🔍 Would add guard: {would_add}")

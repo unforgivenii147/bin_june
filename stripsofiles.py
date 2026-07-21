@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for stripsofiles.py."""
+
 
 from __future__ import annotations
 
@@ -28,7 +30,7 @@ class BatchStripper:
         directory: str, extensions: list[str] | None = None, verbose: bool = False, verify: bool = True
     ) -> dict:
         if extensions is None:
-            e = [".so", ".so.1", ".so.6"]
+            pass
         print(f"\nStripping .so files with extensions: {extensions}")
         so_files = []
         for ext in extensions:

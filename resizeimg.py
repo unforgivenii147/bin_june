@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for resizeimg.py."""
+
 from __future__ import annotations
 
 import glob
@@ -22,7 +24,6 @@ def reduce_image_size(image_path, scale_factor=0.75) -> None:
 
 
 def main() -> None:
-    image_e = ["*.jpg", "*.jpeg", "*.png", "*.bmp", "*.tiff", "*.webp"]
     image_files = []
     for extension in image_extensions:
         image_files.extend(glob.glob(extension))

@@ -16,6 +16,8 @@ from typing import Final
 
 from deep_translator import GoogleTranslator
 
+CHUNK_SIZE = 1024 * 1024
+
 DIRECTORY: Final[str] = "."
 CHUNK_SIZE: Final[int] = 2000
 MAX_WORKERS_FILE: Final[int] = 6

@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for 2to313.py."""
+
 from __future__ import annotations
 
 import sys
@@ -7,6 +9,8 @@ from collections.abc import Callable
 from lib2to3 import refactor
 from os import scandir as os_scandir
 from pathlib import Path
+
+CHUNK_SIZE = 1024 * 1024
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

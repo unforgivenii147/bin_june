@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for brer.py."""
+
 from __future__ import annotations
 
 import argparse
@@ -149,7 +151,7 @@ def compress_tar_to_br(tar_path: Path, br_path: Path) -> bool:
                 print(f"  ✓ Compressed archive: {reduction:.1f}% saved ({fsz(tar_size)} → {fsz(br_size)})")
                 return True
             else:
-                print(f"  ✗ Archive compression didn't save space, keeping .tar")
+                print("  ✗ Archive compression didn't save space, keeping .tar")
                 br_path.unlink()
                 return False
         return False
@@ -163,12 +165,12 @@ async def compress_folder_async(folder_path: Path, output_base_name: str) -> boo
     tar_path = Path(output_base_name + ".tar")
     br_path = Path(output_base_name + ".tar.br")
     try:
-        print(f"  Creating tar archive...")
+        print("  Creating tar archive...")
         success = await loop.run_in_executor(None, create_tar_archive, folder_path, tar_path)
         if not success or not tar_path.exists():
-            print(f"  Failed to create tar archive")
+            print("  Failed to create tar archive")
             return False
-        print(f"  Compressing tar archive with Brotli (max quality)...")
+        print("  Compressing tar archive with Brotli (max quality)...")
         if compress_tar_to_br(tar_path, br_path):
             await loop.run_in_executor(None, shutil.rmtree, folder_path)
             return True
@@ -254,9 +256,9 @@ def extract_tar_archive(tar_path: Path, extract_dir: Path) -> bool:
 
 async def process_compress() -> None:
     cwd = Path.cwd()
-    print(f"\n🔧 Brotli Compression Settings:")
+    print("\n🔧 Brotli Compression Settings:")
     print(f"   Quality: {BROTLI_QUALITY}/11 (maximum)")
-    print(f"   Window size: 16MB")
+    print("   Window size: 16MB")
     print(f"   Threads: {MAX_WORKERS}")
     print(f"   Chunk size: {fsz(CHUNK_SIZE)}")
     dirs_to_compress = get_dirs(cwd)
@@ -308,7 +310,7 @@ async def process_decompress() -> None:
             tar_path = None
             try:
                 tar_path = archive.with_suffix("")
-                print(f"    Decompressing Brotli...")
+                print("    Decompressing Brotli...")
                 compressed_data = archive.read_bytes()
                 tar_data = brotli.decompress(compressed_data)
                 tar_path.write_bytes(tar_data)

@@ -1,4 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
+
+"""Module for fast_xz.py."""
 
 from __future__ import annotations
 
@@ -7,7 +10,7 @@ import sys
 import textwrap
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import List, Tuple
+from typing import List
 
 import lzma_mt
 

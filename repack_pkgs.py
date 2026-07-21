@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for repack_pkgs.py."""
+
 
 from __future__ import annotations
 import base64
@@ -90,7 +92,7 @@ class PackageDetector:
                     if ":" in line:
                         key, value = line.split(":", 1)
                         metadata[key.strip()] = value.strip()
-            except Exception as e:
+            except Exception:
                 pass
         return metadata
 

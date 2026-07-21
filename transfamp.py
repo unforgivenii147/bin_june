@@ -137,7 +137,7 @@ def main():
     elapsed_time = time.time() - start_time
 
     print("\n" + "=" * 50)
-    print(f"✨ Translation complete!")
+    print("✨ Translation complete!")
     print(f"   ✅ Successful: {successful} files")
     if failed > 0:
         print(f"   ❌ Failed: {failed} files")

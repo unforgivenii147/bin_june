@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
 
 """
 Fix batch-renamed .whl files by reading METADATA from inside each wheel.
@@ -12,7 +13,7 @@ import shutil
 import zipfile
 from email.parser import HeaderParser
 from pathlib import Path
-from typing import Dict, Optional, Tuple
+from typing import Dict
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -128,7 +129,7 @@ def fix_whl_files_by_metadata(directory: str = ".", dry_run: bool = True, backup
         else:
             print(f"  Already has correct name: {file_path.name}")
     print("\n" + "=" * 60)
-    print(f"SUMMARY:")
+    print("SUMMARY:")
     print(f"  Total files: {len(whl_files)}")
     if not dry_run:
         print(f"  Successfully renamed: {renamed_count}")

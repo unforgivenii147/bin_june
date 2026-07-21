@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
 
 
 """
@@ -22,7 +23,7 @@ import logging
 import sys
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List
 
 from dh import BIN_EXT, TXT_EXT
 

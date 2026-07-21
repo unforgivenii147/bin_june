@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for fb-fa.py."""
+
 from __future__ import annotations
 
 import ast
@@ -138,7 +140,7 @@ if __name__ == "__main__":
     if not Path(file2).exists():
         print(f"❌ Error: '{file2}' not found.")
         sys.exit(1)
-    print(f"🔍 Comparing functions between:")
+    print("🔍 Comparing functions between:")
     print(f"   File 1: {file1}")
     print(f"   File 2: {file2}")
     print("-" * 50)

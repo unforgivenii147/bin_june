@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
 
 """
 Filter the latest version for ARMv7 architecture (armeabi_v7a, armv7l, linux_arm)
@@ -11,7 +12,7 @@ import re
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, Optional, Tuple
+from typing import Dict
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

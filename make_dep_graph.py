@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for make_dep_graph.py."""
 from __future__ import annotations
 
 import json

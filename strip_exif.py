@@ -202,7 +202,7 @@ Examples:
                     print(f"❌ {img.name}: {result['message']}")
                 elif not args.verbose and result["success"]:
                     progress = f"[{processed}/{len(image_files)}]"
-                    size_change = result["new_size"] - result["original_size"]
+                    result["new_size"] - result["original_size"]
                     print(f"  {progress} {'✅' if result['success'] else '❌'} {img.name}")
             except Exception as e:
                 print(f"❌ {img.name}: Unexpected error: {e!s}")
@@ -222,7 +222,7 @@ Examples:
     total_original = sum(r["original_size"] for r in results)
     total_new = sum(r["new_size"] for r in results)
     total_change = total_new - total_original
-    print(f"\n📊 Summary:")
+    print("\n📊 Summary:")
     print(f"   Total files: {len(results)}")
     print(f"   ✅ Successful: {successful}")
     print(f"   ❌ Failed: {failed}")
@@ -232,7 +232,7 @@ Examples:
         f"   💰 Change: {format_size(total_change)} ({total_change / total_original * 100:+.1f}% if total_original > 0 else 'N/A')"
     )
     if not args.no_size_report and len(dirs) > 0:
-        print(f"\n📁 Folder size changes:")
+        print("\n📁 Folder size changes:")
         for dir_path in sorted(dirs):
             final_size = get_folder_size(dir_path)
             initial_size = initial_sizes.get(dir_path, 0)

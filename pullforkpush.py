@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for pullforkpush.py."""
+
 
 from __future__ import annotations
 
@@ -95,7 +97,7 @@ def main():
             if fork_info[0].flags & git.remote.PushInfo.ERROR:
                 print(f"[-] Push to fork failed: {fork_info[0].summary}")
             else:
-                print(f"[+] Successfully pulled upstream updates and pushed your work to your fork!")
+                print("[+] Successfully pulled upstream updates and pushed your work to your fork!")
     except git.InvalidGitRepositoryError:
         print("[-] Error: Current directory is not inside a valid Git repository.")
     except Exception as e:

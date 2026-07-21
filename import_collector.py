@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for import_collector.py."""
+
 from __future__ import annotations
 
 import ast
@@ -7,6 +9,8 @@ import importlib.metadata
 import importlib.util
 import sys
 from pathlib import Path
+
+CHUNK_SIZE = 1024 * 1024
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

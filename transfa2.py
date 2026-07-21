@@ -18,6 +18,8 @@ from typing import Final
 
 from deep_translator import GoogleTranslator
 
+CHUNK_SIZE = 1024 * 1024
+
 CHUNK_SIZE: Final[int] = 4500
 MAX_WORKERS: Final[int] = 16
 CHUNK_DELAY: Final[float] = 1.5

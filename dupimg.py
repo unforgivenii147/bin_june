@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
 """
 Find and organize duplicate images in the current directory into subfolders.
 Same image content detection works even with different resolutions.
@@ -27,7 +28,7 @@ import sys
 import time
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List
 
 import cv2
 import numpy as np
@@ -163,7 +164,7 @@ def main():
     verbose = os.environ.get("VERBOSE", "1") == "1"
     output_prefix = os.environ.get("OUTPUT_DIR_PREFIX", "duplicates")
     dry_run = os.environ.get("DRY_RUN", "0") == "1"
-    log_verbose(f"Starting duplicate image finder and organizer")
+    log_verbose("Starting duplicate image finder and organizer")
     log_verbose(f"Threshold: {threshold}, Workers: {num_workers}")
     if dry_run:
         log_verbose("DRY RUN MODE - No files will be moved", "WARN")

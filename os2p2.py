@@ -1,4 +1,8 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
+from typing import List
+
+"""Module for os2p2.py."""
 
 from __future__ import annotations
 
@@ -9,7 +13,9 @@ from dataclasses import dataclass
 from enum import Enum
 from os import scandir as os_scandir
 from pathlib import Path
-from typing import Callable, Dict, List, Set, Tuple
+from typing import Callable, Dict, Set
+
+CHUNK_SIZE = 1024 * 1024
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -454,7 +460,7 @@ def main() -> int:
             if result["backup_path"]:
                 cprint(f"     📦 Backup: {result['backup_path'].name}", "white", attrs=["dark"])
         elif args.verbose:
-            cprint(f"  ⏭️  No changes needed", "white", attrs=["dark"])
+            cprint("  ⏭️  No changes needed", "white", attrs=["dark"])
     changed = [r for r in results if r["changed"]]
     errors = [r for r in results if r["error"]]
     cprint("\n" + "=" * 50, "cyan")

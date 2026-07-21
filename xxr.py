@@ -1,4 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
+
+"""Module for xxr.py."""
 
 
 from __future__ import annotations
@@ -15,7 +18,7 @@ import zipfile
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Tuple
+from typing import Callable
 import brotlicffi as brotli
 import py7zr
 import zstandard as zstd
@@ -495,7 +498,7 @@ def main() -> None:
             print("No compressed files found to decompress.")
             return
         print(f"Found {len(targets)} compressed files. Starting decompression...")
-        results = mpf3(decompress_one, [str(t) for t in targets], max_workers=args.threads)
+        mpf3(decompress_one, [str(t) for t in targets], max_workers=args.threads)
     else:
         mode_map = {
             "use_7z": "7z",
@@ -513,7 +516,7 @@ def main() -> None:
             return
         print(f"Found {len(items_to_process)} items to compress using mode '{mode}'. Starting compression...")
         COMPRESS_MODE = mode
-        results = mpf3(worker_func, items_to_process, max_workers=args.threads)
+        mpf3(worker_func, items_to_process, max_workers=args.threads)
     after = gsz(cwd)
     space_freed = before - after
     if space_freed <= 0:

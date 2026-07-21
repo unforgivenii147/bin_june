@@ -14,12 +14,9 @@ Supports:
 from __future__ import annotations
 
 import argparse
-import importlib.util
 import os
 import re
-import sys
 import tarfile
-import tempfile
 import zipfile
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
@@ -326,9 +323,9 @@ def extract_from_zip(zip_path: str) -> Set[str]:
                     try:
                         content = zf.read(file_info.filename).decode("utf-8", errors="ignore")
                         imports.update(extract_imports_from_code(content, file_info.filename))
-                    except Exception as e:
+                    except Exception:
                         pass
-    except Exception as e:
+    except Exception:
         pass
     return imports
 
@@ -345,9 +342,9 @@ def extract_from_tar(tar_path: str, compression: str | None = None) -> Set[str]:
                         if f:
                             content = f.read().decode("utf-8", errors="ignore")
                             imports.update(extract_imports_from_code(content, member.name))
-                    except Exception as e:
+                    except Exception:
                         pass
-    except Exception as e:
+    except Exception:
         pass
     return imports
 
@@ -368,7 +365,7 @@ def process_file(file_path: str) -> Set[str]:
         elif is_python_file(file_path):
             content = read_python_file(file_path)
             imports.update(extract_imports_from_code(content, file_path))
-    except Exception as e:
+    except Exception:
         pass
     return imports
 

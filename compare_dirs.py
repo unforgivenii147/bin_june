@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for compare_dirs.py."""
+
 from __future__ import annotations
 
 import os
@@ -151,9 +153,9 @@ def main() -> None:
     first = Path(dir1).expanduser() if "~" in dir1 else Path(dir1)
     second = Path(dir2).expanduser() if "~" in dir2 else Path(dir2)
     f_files = [p.name for p in first.glob("*") if p.is_file()]
-    f_dirs = [p.name for p in first.glob("*") if p.is_dir()]
+    [p.name for p in first.glob("*") if p.is_dir()]
     s_files = [p.name for p in second.glob("*") if p.exists() and p.is_file()]
-    s_dirs = [p.name for p in second.glob("*") if p.is_dir()]
+    [p.name for p in second.glob("*") if p.is_dir()]
     common1 = [(Path(dir1).resolve() / p) for p in f_files if p in s_files]
     common2 = {str(Path(dir1).resolve() / p): str(Path(dir2).resolve() / p) for p in f_files if p in s_files}
     if common1:
@@ -163,7 +165,7 @@ def main() -> None:
         print("no common files")
         sys.exit(1)
     only_files_first = [p for p in f_files if p not in s_files]
-    only_files_second = [p for p in s_files if p not in f_files]
+    [p for p in s_files if p not in f_files]
     common_txt = cwd / "common.txt"
     common_txt.write_text("\n".join([str(p) for p in common1]))
     ans = input(f"delete from {dir1}  ? ")

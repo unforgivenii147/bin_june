@@ -8,7 +8,7 @@ WARNING: This is a destructive operation. Use with caution!
 from __future__ import annotations
 
 import sys
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import git
 from git import GitCommandError, Repo
@@ -50,7 +50,7 @@ def delete_old_commits(days: int) -> None:
         print(f"\nFound {len(commits_to_delete)} commits to delete (older than {days} days)")
         print(f"Keeping {len(commits_to_keep)} commits")
         preview_count = min(5, len(commits_to_delete))
-        print(f"\nPreview of commits to delete (oldest first):")
+        print("\nPreview of commits to delete (oldest first):")
         for commit in commits_to_delete[-preview_count:]:
             commit_date = commit.committed_datetime.replace(tzinfo=UTC)
             print(f"  {commit.hexsha[:8]} - {commit_date.strftime('%Y-%m-%d %H:%M')} - {commit.summary}")
@@ -99,8 +99,8 @@ def main() -> None:
     except ValueError:
         print("Error: Please provide a valid integer for days.")
         sys.exit(1)
-    print(f"Git Commit Cleanup Tool")
-    print(f"=======================")
+    print("Git Commit Cleanup Tool")
+    print("=======================")
     print(f"Will delete commits older than {days} days")
     print(f"Current time (UTC): {datetime.now(UTC).strftime('%Y-%m-%d %H:%M:%S')}")
     delete_old_commits(days)

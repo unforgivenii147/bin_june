@@ -9,7 +9,6 @@ from __future__ import annotations
 import subprocess
 import sys
 from pathlib import Path
-from typing import Optional
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -167,7 +166,7 @@ def main() -> None:
         sys.exit(1)
     if is_script_dir:
         output_path.chmod(0o755)
-        print(f"✓ Made executable (755)")
+        print("✓ Made executable (755)")
         create_symlink(output_path)
     if content.strip():
         first_line = content.split("\n")[0]

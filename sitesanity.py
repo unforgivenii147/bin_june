@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for sitesanity.py."""
+
 from __future__ import annotations
 
 import argparse
@@ -98,7 +100,7 @@ def main():
                     print(f"      - ... and {len(missing_files) - 5} more files missing.")
             if missing_deps:
                 broken_deps_count += 1
-                print(f"   ⚠️  Unresolved Core Dependencies:")
+                print("   ⚠️  Unresolved Core Dependencies:")
                 for dep in missing_deps:
                     print(f"      - Missing requirement: {dep}")
                 for clean_dep in file_deps:

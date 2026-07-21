@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for foldsize.py."""
+
 from __future__ import annotations
 
 import operator
@@ -50,7 +52,7 @@ def main() -> None:
     total_size = sum(f.stat().st_size for f in files)
     num_files = len(files)
     print(f"Found {num_files:,} files ({total_size:,} bytes)")
-    avg_file_size = total_size / num_files if num_files else 1
+    total_size / num_files if num_files else 1
     target_files_per_dir = max(1000, int(num_files / 10))
     target_size_per_dir = max(1000000, total_size // 10)
     n_dirs_by_count = (num_files + target_files_per_dir - 1) // target_files_per_dir

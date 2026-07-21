@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for fontpre.py."""
+
 from __future__ import annotations
 
 import html
@@ -123,7 +125,7 @@ def find_fonts(root=None):
             if path.is_file() and path.suffix.lower() in FONT_EXT:
                 found.append(path)
     except PermissionError:
-        print(f"Warning: Permission denied accessing some directories")
+        print("Warning: Permission denied accessing some directories")
     return sorted(found)
 
 

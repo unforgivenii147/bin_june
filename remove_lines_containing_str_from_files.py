@@ -1,9 +1,13 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for remove_lines_containing_str_from_files.py."""
 from __future__ import annotations
 
 import sys
 from collections import deque
 from pathlib import Path
+
+CHUNK_SIZE = 1024 * 1024
 
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
@@ -84,3 +88,8 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+def gsz(path):
+    try:
+        return Path(path).stat().st_size
+    except Exception:
+        return 0

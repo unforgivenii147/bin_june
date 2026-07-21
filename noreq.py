@@ -1,10 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for noreq.py."""
+
 
 from __future__ import annotations
 
-import bz2
-import lzma
 import shutil
 import tarfile
 import tempfile
@@ -23,7 +23,7 @@ def is_wheel_ok(path: Path) -> bool:
         return False
     except FileNotFoundError:
         return False
-    except Exception as e:
+    except Exception:
         return False
 
 

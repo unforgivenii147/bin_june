@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for lcsv.py."""
 from __future__ import annotations
 
 import csv
@@ -17,7 +19,7 @@ binf.close()
 
 
 def process_file(filepath):
-    path = Path(path)
+    Path(path)
     counter = Counter()
     try:
         with Path(filepath).open(encoding="utf-8", errors="ignore") as f:

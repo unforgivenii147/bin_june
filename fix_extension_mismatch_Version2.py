@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
+from typing import List
 
 """
 fix_extension_mismatch.py
@@ -37,7 +39,7 @@ import shutil
 import sys
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict
 
 # SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -197,7 +199,7 @@ def detect_with_magic(path: Path) -> Tuple[str, str] | None:
             canonical = PREFERRED_EXT.get(ext, ext)
             return canonical, f"{desc} (MIME: {mime})"
         return None
-    except Exception as e:
+    except Exception:
         return None
 
 
@@ -267,7 +269,7 @@ def safe_rename(src: Path, dst: Path) -> Tuple[bool, str | None]:
         try:
             src.rename(dst)
             return True, str(dst)
-        except OSError as exc:
+        except OSError:
             try:
                 shutil.move(str(src), str(dst))
                 return True, str(dst)

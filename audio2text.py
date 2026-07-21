@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for audio2text.py."""
 import sys
 import os
 import signal

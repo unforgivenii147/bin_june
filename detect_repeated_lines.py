@@ -1,11 +1,15 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for detect_repeated_lines.py."""
+
 from __future__ import annotations
 
 import argparse
 import sys
 from os import scandir as os_scandir
 from pathlib import Path
+
+CHUNK_SIZE = 1024 * 1024
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -162,7 +166,7 @@ def process_file(file_path, duplicates, dry_run: bool = False, auto_yes=False, s
             f.writelines(new_lines)
         print(f"  ✅ Fixed (backup: {backup.name})")
         return True, auto_yes
-    print(f"  ⏭️  Skipped")
+    print("  ⏭️  Skipped")
     return False, auto_yes
 
 

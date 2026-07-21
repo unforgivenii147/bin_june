@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+from typing import Tuple
+from typing import List
 
 """
 Python Comment Remover with AST Validation
@@ -26,7 +28,7 @@ import tempfile
 import zipfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Generator, List, Tuple
+from typing import Generator
 
 # SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -208,7 +210,7 @@ class CommentRemover:
         process_wheels: bool = False,
         recursive_wheels: bool = False,
     ) -> None:
-        print(f"🔍 Scanning for Python files...")
+        print("🔍 Scanning for Python files...")
         python_files = []
         wheel_files = []
         for path in paths:
@@ -265,7 +267,7 @@ class CommentRemover:
                         print(f"    └─ ... and {len(file_results) - 5} more file(s)")
                     self.processed_whl_files.append((whl_path, total_removed, len(file_results)))
                 else:
-                    print(f"  ⚠ No Python files found or no changes made")
+                    print("  ⚠ No Python files found or no changes made")
                 if not success:
                     print(f"  ⚠ Some files in {whl_path.name} had processing errors")
         if not python_files and (not wheel_files):

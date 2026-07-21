@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
+"""Module for aptin.py."""
+
 from __future__ import annotations
 
 import re
@@ -48,7 +50,7 @@ def install_packages(packages) -> bool:
     print(f"\nFound {len(packages)} package(s) to install:")
     for pkg in packages:
         print(f"  - {pkg}")
-    response = input(f"\nDo you want to install these packages? (y/N): ").lower()
+    response = input("\nDo you want to install these packages? (y/N): ").lower()
     if response != "y":
         print("Installation cancelled.")
         return False

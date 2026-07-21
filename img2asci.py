@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
+
+"""Module for img2asci.py."""
 from __future__ import annotations
 
 import os
@@ -31,7 +33,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
 
 
 def process_file(image_path: Path) -> None:
-    path = Path(path)
+    Path(path)
     art = AsciiArt.from_image(image_path)
     art.to_terminal(columns=os.get_terminal_size().columns, width_ratio=2, monochrome=False)
 

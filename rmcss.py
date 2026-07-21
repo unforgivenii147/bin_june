@@ -83,7 +83,7 @@ def main():
                     print(f"✓ UPDATED: {rel_path}")
                     updated_count += 1
         print("-" * 50)
-        print(f"Summary:")
+        print("Summary:")
         print(f"  Total files processed: {len(files)}")
         print(f"  Files updated: {updated_count}")
         print(f"  Errors: {error_count}")
