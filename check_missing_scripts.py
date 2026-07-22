@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
-from typing import List
 
 """Check for Python packages with missing console scripts in system bin directory."""
 
@@ -11,7 +9,6 @@ import sys
 from configparser import ConfigParser
 from datetime import datetime
 from pathlib import Path
-from typing import Dict
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -39,7 +36,7 @@ def find_bin_dir() -> Path | None:
     return None
 
 
-def parse_entry_points(entry_points_file: Path) -> List[Tuple[str, str]]:
+def parse_entry_points(entry_points_file: Path) -> list[tuple[str, str]]:
     scripts = []
     if not entry_points_file.exists():
         return scripts
@@ -54,7 +51,7 @@ def parse_entry_points(entry_points_file: Path) -> List[Tuple[str, str]]:
     return scripts
 
 
-def check_package(args: Tuple[Path, Path]) -> Dict:
+def check_package(args: tuple[Path, Path]) -> dict:
     dist_info_dir, bin_dir = args
     package_name = dist_info_dir.name.replace(".dist-info", "")
     entry_points_file = dist_info_dir / "entry_points.txt"
@@ -83,7 +80,7 @@ def check_package(args: Tuple[Path, Path]) -> Dict:
     return result
 
 
-def find_dist_info_dirs(site_packages: Path) -> List[Path]:
+def find_dist_info_dirs(site_packages: Path) -> list[Path]:
     return sorted(site_packages.glob("*.dist-info"))
 
 

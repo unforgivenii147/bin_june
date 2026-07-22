@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
 
 """
 Recursive file compressor using zstandard streaming compression.
@@ -11,14 +10,14 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
-from typing import Iterator
+from collections.abc import Iterator
 
 import zstandard as zstd
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
-def walk_files(directory: Path, pattern: str = "*") -> Iterator[Tuple[Path, Path]]:
+def walk_files(directory: Path, pattern: str = "*") -> Iterator[tuple[Path, Path]]:
     for file_path in directory.rglob(pattern):
         if not file_path.is_file():
             continue

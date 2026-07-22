@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
 
 """
 Extract URLs from files in current directory recursively.
@@ -12,7 +11,6 @@ from __future__ import annotations
 import re
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Set
 
 from tqdm import tqdm
 
@@ -35,7 +33,7 @@ def is_git_url(url: str) -> bool:
     return any(domain in url.lower() for domain in GIT_DOMAINS)
 
 
-def extract_urls_from_file(file_path: Path) -> Tuple[Set[str], Set[str]]:
+def extract_urls_from_file(file_path: Path) -> tuple[set[str], set[str]]:
     regular_urls = set()
     git_urls = set()
     try:

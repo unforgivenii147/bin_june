@@ -27,7 +27,6 @@ from dataclasses import dataclass
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 
-
 MAX_DEFAULT = 10
 
 

@@ -2,8 +2,8 @@
 
 """Module for deduplicate_python.py."""
 
-
 from __future__ import annotations
+
 import argparse
 import ast
 import bz2
@@ -17,6 +17,7 @@ import tempfile
 import zipfile
 from collections import defaultdict
 from pathlib import Path
+
 from loguru import logger
 
 try:

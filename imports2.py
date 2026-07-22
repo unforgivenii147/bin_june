@@ -1,10 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
 
 """Module for imports2.py."""
 
-
 from __future__ import annotations
+
 import ast
 import logging
 import sys
@@ -13,7 +12,6 @@ import zipfile
 from collections import defaultdict
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import List, Set
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -26,7 +24,7 @@ class PythonImportExtractor:
         self.local_modules = set()
 
     @staticmethod
-    def _get_stdlib_modules() -> Set[str]:
+    def _get_stdlib_modules() -> set[str]:
         stdlib = set(sys.builtin_module_names)
         stdlib.update(
             {
@@ -250,7 +248,7 @@ class PythonImportExtractor:
         return stdlib
 
     @staticmethod
-    def _load_pip_packages(pip_file: str) -> Set[str]:
+    def _load_pip_packages(pip_file: str) -> set[str]:
         try:
             pip_path = Path(pip_file)
             if not pip_path.exists():
@@ -279,7 +277,7 @@ class PythonImportExtractor:
             return set()
 
     @staticmethod
-    def _extract_imports_from_ast(code: str, filename: str = "<string>") -> Set[str]:
+    def _extract_imports_from_ast(code: str, filename: str = "<string>") -> set[str]:
         imports = set()
         try:
             tree = ast.parse(code)
@@ -321,7 +319,7 @@ class PythonImportExtractor:
                     except:
                         pass
 
-    def extract_from_file(self, filepath: Path) -> Set[str]:
+    def extract_from_file(self, filepath: Path) -> set[str]:
         try:
             code = filepath.read_text(encoding="utf-8", errors="ignore")
             return self._extract_imports_from_ast(code, str(filepath))
@@ -329,7 +327,7 @@ class PythonImportExtractor:
             logger.debug(f"Error reading {filepath}: {e}")
             return set()
 
-    def extract_from_zip(self, zippath: Path) -> Set[str]:
+    def extract_from_zip(self, zippath: Path) -> set[str]:
         imports = set()
         try:
             with zipfile.ZipFile(zippath, "r") as zf:
@@ -344,7 +342,7 @@ class PythonImportExtractor:
             logger.debug(f"Error processing zip {zippath}: {e}")
         return imports
 
-    def extract_from_tar(self, tarpath: Path) -> Set[str]:
+    def extract_from_tar(self, tarpath: Path) -> set[str]:
         imports = set()
         try:
             with tarfile.open(tarpath, "r:*") as tf:
@@ -360,10 +358,10 @@ class PythonImportExtractor:
             logger.debug(f"Error processing tar {tarpath}: {e}")
         return imports
 
-    def extract_from_whl(self, whlpath: Path) -> Set[str]:
+    def extract_from_whl(self, whlpath: Path) -> set[str]:
         return self.extract_from_zip(whlpath)
 
-    def process_file(self, filepath: Path) -> Set[str]:
+    def process_file(self, filepath: Path) -> set[str]:
         if filepath.suffix == ".zip" or filepath.suffix == ".whl":
             return self.extract_from_zip(filepath)
         elif filepath.suffixes[-2:] == [".tar", ".gz"] or filepath.name.endswith((".tar.xz", ".tar.zst")):
@@ -372,7 +370,7 @@ class PythonImportExtractor:
             return self.extract_from_file(filepath)
         return set()
 
-    def filter_packages(self, imports: Set[str]) -> Set[str]:
+    def filter_packages(self, imports: set[str]) -> set[str]:
         pip_packages = set()
         for imp in imports:
             imp_lower = imp.lower()
@@ -385,7 +383,7 @@ class PythonImportExtractor:
         return pip_packages
 
 
-def find_python_files(directory: str = ".") -> List[Path]:
+def find_python_files(directory: str = ".") -> list[Path]:
     exclude_dirs = {".git", "__pycache__", ".pytest_cache", "dist", "build", ".mypy_cache", ".ruff_cache"}
     python_files = []
     dir_path = Path(directory)
@@ -410,7 +408,7 @@ def find_python_files(directory: str = ".") -> List[Path]:
     return python_files
 
 
-def process_single_file(args: Tuple[Path, PythonImportExtractor]) -> Tuple[Path, Set[str]]:
+def process_single_file(args: tuple[Path, PythonImportExtractor]) -> tuple[Path, set[str]]:
     filepath, extractor = args
     imports = extractor.process_file(filepath)
     filtered = extractor.filter_packages(imports)

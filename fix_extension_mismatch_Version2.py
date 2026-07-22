@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
-from typing import List
 
 """
 fix_extension_mismatch.py
@@ -39,7 +37,6 @@ import shutil
 import sys
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import Dict
 
 # SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -188,7 +185,7 @@ SKIP_EXTS = {
 }
 
 
-def detect_with_magic(path: Path) -> Tuple[str, str] | None:
+def detect_with_magic(path: Path) -> tuple[str, str] | None:
     if not MAGIC_AVAILABLE:
         return None
     try:
@@ -203,7 +200,7 @@ def detect_with_magic(path: Path) -> Tuple[str, str] | None:
         return None
 
 
-def detect_by_signature(path: Path, nbytes: int = READ_BYTES) -> Tuple[str, str] | None:
+def detect_by_signature(path: Path, nbytes: int = READ_BYTES) -> tuple[str, str] | None:
     try:
         with path.open("rb") as f:
             head = f.read(nbytes)
@@ -254,7 +251,7 @@ def detect_by_signature(path: Path, nbytes: int = READ_BYTES) -> Tuple[str, str]
     return None
 
 
-def detect_file_type(path: Path) -> Tuple[str, str] | None:
+def detect_file_type(path: Path) -> tuple[str, str] | None:
     if MAGIC_AVAILABLE:
         result = detect_with_magic(path)
         if result:
@@ -262,7 +259,7 @@ def detect_file_type(path: Path) -> Tuple[str, str] | None:
     return detect_by_signature(path)
 
 
-def safe_rename(src: Path, dst: Path) -> Tuple[bool, str | None]:
+def safe_rename(src: Path, dst: Path) -> tuple[bool, str | None]:
     if src.samefile(dst) if dst.exists() and src.exists() else False:
         return False, "source and destination are identical"
     if not dst.exists():
@@ -293,7 +290,7 @@ def safe_rename(src: Path, dst: Path) -> Tuple[bool, str | None]:
     return False, "failed to find non-conflicting name"
 
 
-def process_file(args) -> Dict:
+def process_file(args) -> dict:
     path_str, commit, _verbose = args
     path = Path(path_str)
     result = {
@@ -348,8 +345,8 @@ def process_file(args) -> Dict:
     return result
 
 
-def gather_files(root: Path, follow_symlinks: bool = False, skip_hidden: bool = True) -> List[Path]:
-    files: List[Path] = []
+def gather_files(root: Path, follow_symlinks: bool = False, skip_hidden: bool = True) -> list[Path]:
+    files: list[Path] = []
     for p in root.rglob("*"):
         try:
             if p.is_file():
@@ -361,7 +358,7 @@ def gather_files(root: Path, follow_symlinks: bool = False, skip_hidden: bool = 
     return files
 
 
-def print_summary(results: List[Dict], verbose: bool = False) -> None:
+def print_summary(results: list[dict], verbose: bool = False) -> None:
     renamed = [r for r in results if r["action"] == "renamed"]
     would = [r for r in results if r["action"] == "would-rename"]
     skipped = [r for r in results if r["action"] in ("skipped", "ok")]
@@ -435,7 +432,7 @@ def main():
         return
     print(f"Scanning {len(files)} files under {root} using {args.workers} workers. Commit mode: {args.commit}")
     worker_args = [(str(p), args.commit, args.verbose) for p in files]
-    results: List[Dict] = []
+    results: list[dict] = []
     try:
         with Pool(processes=args.workers) as pool:
             for res in pool.imap_unordered(process_file, worker_args):

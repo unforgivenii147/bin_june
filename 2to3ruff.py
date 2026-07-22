@@ -1,6 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-"""Module for 2to3ruff.py."""
+
 from __future__ import annotations
 
 import re
@@ -81,17 +81,16 @@ def process_file(path):
             content = f.read()
         fixed_content = fix_print_statements_manually(content)
         if fixed_content != content:
-            if not dry_run:
-                with open(path, "w", encoding="utf-8") as f:
-                    f.write(fixed_content)
-                print("  ✅ Manual conversion applied")
-                result = subprocess.run(
-                    ["ruff", "check", "--fix", "--select", "UP010", path],
-                    capture_output=True,
-                    text=True,
-                )
-                if result.returncode == 0:
-                    print("  ✅ Ruff applied additional fixes")
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(fixed_content)
+            print("  ✅ Manual conversion applied")
+            result = subprocess.run(
+                ["ruff", "check", "--fix", "--select", "UP010", path],
+                capture_output=True,
+                text=True,
+            )
+            if not result.returncode:
+                print("  ✅ Ruff applied additional fixes")
                 return True
             else:
                 print(f"  📝 Would convert {path}")

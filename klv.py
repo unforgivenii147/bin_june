@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
-from typing import List
 
 """
 Script to detect and keep only the latest version of wheel or deb files in current directory recursively.
@@ -13,14 +11,13 @@ import re
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Dict
 
 from packaging import version as pkg_version
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
-def parse_wheel_version(filename: str) -> Tuple[str, str] | None:
+def parse_wheel_version(filename: str) -> tuple[str, str] | None:
     name = filename[:-4]
     parts = name.split("-")
     if len(parts) < 5:
@@ -46,7 +43,7 @@ def parse_wheel_version(filename: str) -> Tuple[str, str] | None:
     return None
 
 
-def parse_deb_version(filename: str) -> Tuple[str, str] | None:
+def parse_deb_version(filename: str) -> tuple[str, str] | None:
     name = filename[:-4]
     parts = name.split("_")
     if len(parts) >= 2:
@@ -75,7 +72,7 @@ def compare_versions(ver1: str, ver2: str) -> int:
             return 0
 
 
-def process_file(file_path: Path, file_type: str) -> Tuple[str, str, Path] | None:
+def process_file(file_path: Path, file_type: str) -> tuple[str, str, Path] | None:
     try:
         filename = file_path.name
         if file_type == "wheel" and filename.endswith(".whl"):
@@ -93,7 +90,7 @@ def process_file(file_path: Path, file_type: str) -> Tuple[str, str, Path] | Non
     return None
 
 
-def scan_directory(directory: Path, file_type: str, check_all: bool = False) -> Dict[str, List[Tuple[str, Path]]]:
+def scan_directory(directory: Path, file_type: str, check_all: bool = False) -> dict[str, list[tuple[str, Path]]]:
     packages = defaultdict(list)
     extensions = []
     if check_all:
@@ -124,7 +121,7 @@ def scan_directory(directory: Path, file_type: str, check_all: bool = False) -> 
     return packages
 
 
-def get_latest_version(versions: List[Tuple[str, Path]]) -> Tuple[str, Path]:
+def get_latest_version(versions: list[tuple[str, Path]]) -> tuple[str, Path]:
     if not versions:
         return None
     latest = versions[0]
@@ -134,7 +131,7 @@ def get_latest_version(versions: List[Tuple[str, Path]]) -> Tuple[str, Path]:
     return latest
 
 
-def keep_latest_versions(packages: Dict[str, List[Tuple[str, Path]]], dry_run: bool = False) -> int:
+def keep_latest_versions(packages: dict[str, list[tuple[str, Path]]], dry_run: bool = False) -> int:
     total_deleted = 0
     for pkg_name, versions in packages.items():
         if len(versions) <= 1:

@@ -2,7 +2,6 @@
 
 """Module for autopull.py."""
 
-
 from __future__ import annotations
 
 import subprocess

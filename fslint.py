@@ -26,6 +26,7 @@ Usage examples:
 """
 
 from __future__ import annotations
+
 import argparse
 import contextlib
 import grp
@@ -38,7 +39,7 @@ import subprocess
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Generator
+from collections.abc import Generator
 
 RESET = "\x1b[0m"
 BOLD = "\x1b[1m"

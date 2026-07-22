@@ -1,14 +1,13 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
 
 """Module for mktree.py."""
+
 from __future__ import annotations
 
 import argparse
 import re
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import List
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -26,9 +25,9 @@ class DirectoryBuilder:
 
     def __init__(self, use_multiprocessing: bool = True):
         self.use_multiprocessing = use_multiprocessing
-        self.items_to_create: List[Tuple[Path, bool]] = []
+        self.items_to_create: list[tuple[Path, bool]] = []
 
-    def read_tree_file(self, filepath: str) -> List[str]:
+    def read_tree_file(self, filepath: str) -> list[str]:
         tree_file = Path(filepath)
         if not tree_file.exists():
             raise FileNotFoundError(f"File not found: {filepath}")
@@ -40,7 +39,7 @@ class DirectoryBuilder:
                     lines.append(line)
         return lines
 
-    def read_from_photo(self, image_path: str) -> List[str]:
+    def read_from_photo(self, image_path: str) -> list[str]:
         if not PHOTO_SUPPORT:
             raise ImportError("""Photo support requires: pip install Pillow pytesseract
 Also install tesseract: https://github.com/UB-Mannheim/tesseract/wiki""")
@@ -51,7 +50,7 @@ Also install tesseract: https://github.com/UB-Mannheim/tesseract/wiki""")
         except Exception as e:
             raise ValueError(f"Failed to extract text from photo: {e}")
 
-    def parse_tree_lines(self, lines: List[str]) -> List[Tuple[Path, bool]]:
+    def parse_tree_lines(self, lines: list[str]) -> list[tuple[Path, bool]]:
         items = []
         stack = [Path(".")]
         for line in lines:
@@ -92,7 +91,7 @@ Also install tesseract: https://github.com/UB-Mannheim/tesseract/wiki""")
         return "." in name.split("/")[-1]
 
     @staticmethod
-    def _create_item(item_data: Tuple[Path, bool]) -> Tuple[Path, bool, str]:
+    def _create_item(item_data: tuple[Path, bool]) -> tuple[Path, bool, str]:
         path, is_file = item_data
         try:
             if is_file:

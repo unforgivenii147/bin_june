@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import List
 
 """
 GitHub Python Repositories Fetcher
@@ -12,14 +11,13 @@ from __future__ import annotations
 import json
 import sys
 from datetime import datetime, timedelta
-from typing import Dict
 
 import requests
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
-def get_user_repos(username: str) -> List[Dict]:
+def get_user_repos(username: str) -> list[dict]:
     repos = []
     page = 1
     while True:
@@ -56,7 +54,7 @@ def get_user_repos(username: str) -> List[Dict]:
     return repos
 
 
-def get_top_trending_users() -> List[Dict]:
+def get_top_trending_users() -> list[dict]:
     week_ago = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
     url = "https://api.github.com/search/users"
     params = {

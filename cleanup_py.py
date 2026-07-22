@@ -9,7 +9,6 @@ from __future__ import annotations
 import argparse
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Tuple
 
 import libcst as cst
 
@@ -69,7 +68,7 @@ class CleanTransformer(cst.CSTTransformer):
         return cst.RemoveFromParent()
 
 
-def process_file(file_path: Path) -> Tuple[Path, int, int, bool]:
+def process_file(file_path: Path) -> tuple[Path, int, int, bool]:
     """Process a single file and return (path, comments_removed, docstrings_removed, success)"""
     try:
         original_source = file_path.read_text(encoding="utf-8")

@@ -2,10 +2,11 @@
 
 """Module for ipynb2py.py."""
 
-
 from __future__ import annotations
+
 import sys
 from pathlib import Path
+
 import nbformat
 
 if __name__ == "__main__":

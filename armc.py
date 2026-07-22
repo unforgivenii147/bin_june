@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
-from typing import List
 
 """
 Python Comment Remover with AST Validation
@@ -28,7 +26,7 @@ import tempfile
 import zipfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Generator
+from collections.abc import Generator
 
 # SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -55,7 +53,7 @@ class CommentRemover:
         return False
 
     @staticmethod
-    def validate_syntax(code: str) -> Tuple[bool, str]:
+    def validate_syntax(code: str) -> tuple[bool, str]:
         try:
             ast.parse(code)
             return (True, "")
@@ -72,7 +70,7 @@ class CommentRemover:
         return bool(comment_text.startswith("fmt:"))
 
     @staticmethod
-    def remove_comments(source_code: str) -> Tuple[str, int]:
+    def remove_comments(source_code: str) -> tuple[str, int]:
         lines = source_code.split("\n")
         cleaned_lines = []
         comment_count = 0
@@ -135,7 +133,7 @@ class CommentRemover:
             result += "\n"
         return (result, comment_count)
 
-    def process_file(self, file_path: Path) -> Tuple[Path, int, bool, str]:
+    def process_file(self, file_path: Path) -> tuple[Path, int, bool, str]:
         try:
             with open(file_path, encoding="utf-8") as f:
                 original_code = f.read()
@@ -166,7 +164,7 @@ class CommentRemover:
                     if file_path.is_file() and file_path.suffix == "" and self.is_python_file(file_path):
                         yield file_path
 
-    def process_whl_file(self, whl_path: Path, dry_run: bool = False) -> Tuple[int, List[Tuple[str, int]], bool]:
+    def process_whl_file(self, whl_path: Path, dry_run: bool = False) -> tuple[int, list[tuple[str, int]], bool]:
         file_results = []
         total_removed = 0
         success = True

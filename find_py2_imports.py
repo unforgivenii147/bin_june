@@ -2,7 +2,6 @@
 
 """Module for find_py2_imports.py."""
 
-
 from __future__ import annotations
 
 import os

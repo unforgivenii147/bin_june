@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
 
 """
 Bidirectional converter between wheel files (.whl) and tar.xz archives.
@@ -19,7 +18,6 @@ import zipfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
-from typing import List
 
 # SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -31,7 +29,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def convert_zip_time_to_timestamp(date_time: Tuple[int, int, int, int, int, int]) -> float:
+def convert_zip_time_to_timestamp(date_time: tuple[int, int, int, int, int, int]) -> float:
     try:
         dt = datetime(*date_time)
         return dt.timestamp()
@@ -82,7 +80,7 @@ def preserve_tar_metadata(tarinfo: tarfile.TarInfo, zipinfo: zipfile.ZipInfo) ->
     return zipinfo
 
 
-def convert_whl_to_tarxz(path: Path, remove_original: bool = False) -> Tuple[bool, str, Path | None]:
+def convert_whl_to_tarxz(path: Path, remove_original: bool = False) -> tuple[bool, str, Path | None]:
     try:
         if not path.exists() or not path.is_file():
             return False, f"Invalid file: {path}", None
@@ -131,7 +129,7 @@ def convert_whl_to_tarxz(path: Path, remove_original: bool = False) -> Tuple[boo
         return False, f"Conversion error: {e}", None
 
 
-def convert_tarxz_to_whl(path: Path, remove_original: bool = False) -> Tuple[bool, str, Path | None]:
+def convert_tarxz_to_whl(path: Path, remove_original: bool = False) -> tuple[bool, str, Path | None]:
     try:
         if not path.exists() or not path.is_file():
             return False, f"Invalid file: {path}", None
@@ -190,7 +188,7 @@ def convert_tarxz_to_whl(path: Path, remove_original: bool = False) -> Tuple[boo
         return False, f"Conversion error: {e}", None
 
 
-def process_file(path: Path, remove_original: bool = False) -> Tuple[bool, str, Path | None]:
+def process_file(path: Path, remove_original: bool = False) -> tuple[bool, str, Path | None]:
     path = Path(path)
     if not path.exists():
         return False, f"File not found: {path}", None
@@ -204,7 +202,7 @@ def process_file(path: Path, remove_original: bool = False) -> Tuple[bool, str, 
         return (False, f"Unsupported file type: {path.suffix} (only .whl or .tar.xz)", None)
 
 
-def find_convertible_files(directory: Path, recursive: bool = False) -> List[Path]:
+def find_convertible_files(directory: Path, recursive: bool = False) -> list[Path]:
     if not directory.exists() or not directory.is_dir():
         return []
     convertible_files = []

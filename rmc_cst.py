@@ -1,5 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
+
 """
 Strip comments and docstrings from Python files.
 
@@ -20,7 +20,7 @@ import ast
 import io
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Iterable
+from collections.abc import Iterable
 
 import libcst as cst
 import libcst.matchers as m
@@ -119,7 +119,7 @@ class StripCommentsAndDocstrings(cst.CSTTransformer):
         return cst.RemovalSentinel
 
 
-def process_file(path: Path) -> Tuple[Path, int, int, bool, str | None]:
+def process_file(path: Path) -> tuple[Path, int, int, bool, str | None]:
     """
     Process a single file:
 

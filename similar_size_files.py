@@ -136,6 +136,7 @@ def main() -> None:
 if __name__ == "__main__":
     main()
 
+
 def gsz(path):
     try:
         return Path(path).stat().st_size

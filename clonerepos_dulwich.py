@@ -1,5 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
+
 """
 Clone GitHub repositories using pure Python (dulwich).
 Skips repos >5MB and removes successfully cloned repos from repos.txt.
@@ -11,7 +11,6 @@ import argparse
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import List, Set
 
 import requests
 from dulwich import porcelain
@@ -22,7 +21,7 @@ MAX_SIZE_MB = 5
 MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024
 
 
-def read_repos(file_path: Path) -> List[str]:
+def read_repos(file_path: Path) -> list[str]:
     """Read repository names from file."""
     if not file_path.exists():
         print(f"Error: {file_path} does not exist")
@@ -44,7 +43,7 @@ def validate_repo_format(repo: str) -> bool:
     return len(parts) == 2 and all(parts)
 
 
-def check_repo_size(repo: str) -> Tuple[bool, int]:
+def check_repo_size(repo: str) -> tuple[bool, int]:
     """Check repository size using GitHub API. Returns (is_small_enough, size_bytes)."""
     api_url = f"https://api.github.com/repos/{repo}"
 
@@ -73,7 +72,7 @@ def format_size(size_bytes: int) -> str:
     return f"{kb:.1f}KB"
 
 
-def clone_repo(repo: str, base_dir: Path) -> Tuple[str, bool, str]:
+def clone_repo(repo: str, base_dir: Path) -> tuple[str, bool, str]:
     """
     Clone a single repository with --depth 1 using dulwich.
     Checks size before cloning.
@@ -116,7 +115,7 @@ def clone_repo(repo: str, base_dir: Path) -> Tuple[str, bool, str]:
         return repo, False, f"Clone failed: {e!s}"
 
 
-def remove_from_repos_file(file_path: Path, repos_to_remove: Set[str]):
+def remove_from_repos_file(file_path: Path, repos_to_remove: set[str]):
     """Remove specified repos from the repos.txt file."""
     if not repos_to_remove:
         return

@@ -2,7 +2,6 @@
 
 """Module for sqlite2json.py."""
 
-
 from __future__ import annotations
 
 import base64

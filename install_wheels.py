@@ -13,7 +13,6 @@ import sys
 import zipfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Tuple
 
 
 def is_pure_python_wheel(wheel_path: Path) -> bool:
@@ -50,7 +49,7 @@ def is_pure_python_wheel(wheel_path: Path) -> bool:
         return False
 
 
-def install_wheel(wheel_path: Path, user_install: bool) -> Tuple[Path, bool, str]:
+def install_wheel(wheel_path: Path, user_install: bool) -> tuple[Path, bool, str]:
     """Install a single wheel and return status."""
     try:
         cmd = [sys.executable, "-m", "pip", "install", str(wheel_path)]

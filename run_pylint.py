@@ -19,8 +19,11 @@ def runcmd(
     show_output: bool = True,
     timeout: float | None = None,
 ) -> tuple[int, str, str]:
-    from subprocess import DEVNULL as _DEVNULL, TimeoutExpired as subprocess_TimeoutExpired, run as subprocess_run
-    from sys import stderr as sys_stderr, stdout as sys_stdout
+    from subprocess import DEVNULL as _DEVNULL
+    from subprocess import TimeoutExpired as subprocess_TimeoutExpired
+    from subprocess import run as subprocess_run
+    from sys import stderr as sys_stderr
+    from sys import stdout as sys_stdout
 
     if not cmd:
         msg = "cmd must be a non-empty list (e.g., ['ls', '-l'])"

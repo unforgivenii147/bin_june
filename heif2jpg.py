@@ -43,6 +43,7 @@ def main() -> None:
 if __name__ == "__main__":
     sys.exit(main())
 
+
 def gsz(path):
     try:
         return Path(path).stat().st_size

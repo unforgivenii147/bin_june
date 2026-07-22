@@ -1,10 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
+
+from __future__ import annotations
 
 """Module for rmc.py."""
 
 
-from __future__ import annotations
 import argparse
 import ast
 import shutil
@@ -14,7 +14,7 @@ import zipfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterator
+from collections.abc import Iterator
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache", ".venv", "venv"})
 CHUNK_SIZE = 1024
@@ -69,7 +69,7 @@ class DocstringProcessor(ast.NodeTransformer):
         return node
 
 
-def extract_shebang_and_encoding(source_code: str) -> Tuple[str, str, str]:
+def extract_shebang_and_encoding(source_code: str) -> tuple[str, str, str]:
     lines = source_code.splitlines(keepends=True)
     shebang = ""
     encoding = ""

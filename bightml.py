@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 """Module for bightml.py."""
+
 from __future__ import annotations
 
 from collections import deque

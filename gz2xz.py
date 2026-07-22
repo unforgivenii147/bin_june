@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 """Module for gz2xz.py."""
+
 from __future__ import annotations
 
 import gzip
@@ -8,7 +9,6 @@ import sys
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
-from typing import Tuple
 
 from lzma_mt import compress
 
@@ -49,7 +49,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
 "\nConvert man pages from .gz to .xz format with maximum compression.\nSkips symlinks and processes files recursively in the current directory.\n"
 
 
-def process_file(path: Path) -> Tuple[str, bool, str]:
+def process_file(path: Path) -> tuple[str, bool, str]:
     path = Path(path)
     xz_path = path.with_suffix(".xz")
     try:

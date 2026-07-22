@@ -1,13 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
 
 """Module for secretleak.py."""
+
 from __future__ import annotations
 
 import re
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import List
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -56,7 +55,7 @@ def should_skip_file(file_path: Path) -> bool:
     return bool(file_path.is_symlink())
 
 
-def scan_file(file_path: Path) -> Tuple[str, List[dict]]:
+def scan_file(file_path: Path) -> tuple[str, list[dict]]:
     leaks = []
     try:
         with open(file_path, encoding="utf-8", errors="ignore") as f:
@@ -80,7 +79,7 @@ def scan_file(file_path: Path) -> Tuple[str, List[dict]]:
     return str(file_path), leaks
 
 
-def get_all_files(root_dir: Path = Path(".")) -> List[Path]:
+def get_all_files(root_dir: Path = Path(".")) -> list[Path]:
     files = []
     try:
         for path in root_dir.rglob("*"):
@@ -91,7 +90,7 @@ def get_all_files(root_dir: Path = Path(".")) -> List[Path]:
     return files
 
 
-def check_secrets(root_dir: Path = Path("."), max_workers: int | None = None) -> Tuple[int, int]:
+def check_secrets(root_dir: Path = Path("."), max_workers: int | None = None) -> tuple[int, int]:
     files = get_all_files(root_dir)
     if not files:
         print("No files found to scan.")

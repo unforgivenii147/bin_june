@@ -2,8 +2,8 @@
 """Remove comments from JavaScript and TypeScript files."""
 
 import sys
-from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 from typing import Optional
 
 

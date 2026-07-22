@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
 
 """Module for fast_xz.py."""
 
@@ -10,7 +9,6 @@ import sys
 import textwrap
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import List
 
 import lzma_mt
 
@@ -43,7 +41,7 @@ def should_exclude(path: Path) -> bool:
     return any(part in EXCLUDE_DIRS for part in path.parts)
 
 
-def get_files_to_process(root_dir: Path, compress: bool) -> List[Path]:
+def get_files_to_process(root_dir: Path, compress: bool) -> list[Path]:
     files = []
     if compress:
         for file in root_dir.rglob("*"):
@@ -59,7 +57,7 @@ def get_files_to_process(root_dir: Path, compress: bool) -> List[Path]:
 
 def compress_file(
     filepath: Path, preset: int = 9, threads: int = 4, remove_orig: bool = True
-) -> Tuple[Path, bool, str]:
+) -> tuple[Path, bool, str]:
     try:
         with open(filepath, "rb") as f:
             data = f.read()
@@ -74,7 +72,7 @@ def compress_file(
         return filepath, False, f"Error: {e!s}"
 
 
-def decompress_file(filepath: Path, remove_orig: bool = True) -> Tuple[Path, bool, str]:
+def decompress_file(filepath: Path, remove_orig: bool = True) -> tuple[Path, bool, str]:
     try:
         if filepath.suffix.lower() != ".xz":
             return filepath, False, "Error: Not an .xz file"

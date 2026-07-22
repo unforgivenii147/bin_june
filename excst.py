@@ -1,14 +1,13 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import List
 
 """Module for excst.py."""
+
 from __future__ import annotations
 
 import ast
 import os
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Dict, Set
 
 import libcst as cst
 
@@ -37,10 +36,10 @@ class TopLevelExtractor(cst.CSTVisitor):
         super().__init__()
         self.original_path = original_path
         self.module = module
-        self.functions: Dict[str, str] = {}
-        self.classes: Dict[str, str] = {}
-        self.constants: Dict[str, str] = {}
-        self.imports: Set[str] = set()
+        self.functions: dict[str, str] = {}
+        self.classes: dict[str, str] = {}
+        self.constants: dict[str, str] = {}
+        self.imports: set[str] = set()
 
     def save_to_file(self, directory: Path, filename: str, content: str, node_name: str) -> None:
         """Save content to file with validation and automatic deduplication."""
@@ -130,7 +129,7 @@ class TopLevelExtractor(cst.CSTVisitor):
         return True
 
 
-def process_file(filepath: Path) -> Dict:
+def process_file(filepath: Path) -> dict:
     try:
         code = filepath.read_text(encoding="utf-8")
         module = cst.parse_module(code)
@@ -156,7 +155,7 @@ def process_file(filepath: Path) -> Dict:
         return {"filepath": str(filepath), "status": "error", "error": str(e)}
 
 
-def collect_python_files(root_dir: Path = Path(".")) -> List[Path]:
+def collect_python_files(root_dir: Path = Path(".")) -> list[Path]:
     return [
         p
         for p in root_dir.rglob("*.py")
@@ -164,7 +163,7 @@ def collect_python_files(root_dir: Path = Path(".")) -> List[Path]:
     ]
 
 
-def write_imports_file(all_imports: Set[str]) -> None:
+def write_imports_file(all_imports: set[str]) -> None:
     imports_file = OUTPUT_DIR / "imports.py"
 
     # Simple sort to group imports
@@ -189,7 +188,7 @@ def main() -> None:
 
     print(f"Found {len(python_files)} Python file(s) to process...")
 
-    all_imports: Set[str] = set()
+    all_imports: set[str] = set()
     processed_files = 0
     total_functions = 0
     total_classes = 0

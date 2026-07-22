@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
 
 """
 Move test files to ~/tmp/tests while preserving directory structure.
@@ -14,7 +13,6 @@ import shutil
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import List
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -34,7 +32,7 @@ def get_relative_path(file_path: Path, base_dir: Path) -> Path:
         return file_path
 
 
-def move_file(source: Path, dest: Path) -> Tuple[str, bool, str]:
+def move_file(source: Path, dest: Path) -> tuple[str, bool, str]:
     try:
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.move(str(source), str(dest))
@@ -43,7 +41,7 @@ def move_file(source: Path, dest: Path) -> Tuple[str, bool, str]:
         return str(source), False, f"Error: {e!s}"
 
 
-def find_test_files(base_dir: Path) -> List[Path]:
+def find_test_files(base_dir: Path) -> list[Path]:
     test_files = []
     for py_file in base_dir.rglob("*.py"):
         if is_test_file(py_file):
@@ -52,8 +50,8 @@ def find_test_files(base_dir: Path) -> List[Path]:
 
 
 def move_files_parallel(
-    test_files: List[Path], base_dir: Path, max_workers: int = 4
-) -> Tuple[dict, List[Tuple[str, str]]]:
+    test_files: list[Path], base_dir: Path, max_workers: int = 4
+) -> tuple[dict, list[tuple[str, str]]]:
     file_mapping = {}
     results = []
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
@@ -76,7 +74,7 @@ def move_files_parallel(
     return file_mapping, results
 
 
-def reverse_move(moved_files_log: Path) -> Tuple[dict, List[Tuple[str, str]]]:
+def reverse_move(moved_files_log: Path) -> tuple[dict, list[tuple[str, str]]]:
     if not moved_files_log.exists():
         raise FileNotFoundError(f"Log file not found: {moved_files_log}")
     with open(moved_files_log) as f:

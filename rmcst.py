@@ -2,7 +2,6 @@
 
 """Module for rmcst.py."""
 
-
 from __future__ import annotations
 
 import argparse
@@ -12,7 +11,6 @@ import tempfile
 import zipfile
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
-from typing import List
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -86,7 +84,7 @@ def process_single_file(file_path: Path, base_dir: Path) -> str:
     return ""
 
 
-def process_wheel(wheel_path: Path, base_dir: Path) -> List[str]:
+def process_wheel(wheel_path: Path, base_dir: Path) -> list[str]:
     changed_files = []
     temp_dir = Path(tempfile.mkdtemp())
     try:

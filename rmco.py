@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
-from typing import List
 
 """Module for rmco.py."""
 
@@ -14,7 +12,7 @@ import multiprocessing
 import sys
 import tokenize
 from pathlib import Path
-from typing import Dict, NamedTuple
+from typing import NamedTuple
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -68,9 +66,9 @@ class DocstringStripper(ast.NodeTransformer):
         return self._strip_docstring(node)
 
 
-def extract_prefix_comments_and_shebang(source: str) -> Tuple[str, str]:
+def extract_prefix_comments_and_shebang(source: str) -> tuple[str, str]:
     lines = source.splitlines(keepends=True)
-    prefix_lines: List[str] = []
+    prefix_lines: list[str] = []
     i = 0
     for i, line in enumerate(lines):
         stripped = line.strip()
@@ -93,10 +91,10 @@ def extract_prefix_comments_and_shebang(source: str) -> Tuple[str, str]:
     return (prefix, remainder)
 
 
-def collect_and_strip_comments(source: str) -> Tuple[str, Dict[int, List[str]], int]:
+def collect_and_strip_comments(source: str) -> tuple[str, dict[int, list[str]], int]:
     lines = source.splitlines(keepends=True)
-    preserved_comments: Dict[int, List[str]] = {}
-    comments_to_remove: Dict[int, set] = {}
+    preserved_comments: dict[int, list[str]] = {}
+    comments_to_remove: dict[int, set] = {}
     comments_removed = 0
     sio = io.StringIO(source)
     try:
@@ -118,7 +116,7 @@ def collect_and_strip_comments(source: str) -> Tuple[str, Dict[int, List[str]], 
     return (preserved_comments, comments_removed)
 
 
-def process_file(path: Path) -> Tuple[str, bool, str | None, RemovalStats]:
+def process_file(path: Path) -> tuple[str, bool, str | None, RemovalStats]:
     try:
         with tokenize.open(path) as f:
             original = f.read()
@@ -158,7 +156,7 @@ def process_file(path: Path) -> Tuple[str, bool, str | None, RemovalStats]:
     return (str(path), True, None, stats)
 
 
-def reattach_inline_comments(new_source: str, preserved_comments: Dict[int, List[str]]) -> str:
+def reattach_inline_comments(new_source: str, preserved_comments: dict[int, list[str]]) -> str:
     if not preserved_comments:
         return new_source
     new_lines = new_source.splitlines()
@@ -200,8 +198,8 @@ def should_skip_path(p: Path) -> bool:
     return bool(parts & skip_indicators)
 
 
-def collect_py_files(paths: List[Path]) -> List[Path]:
-    files: List[Path] = []
+def collect_py_files(paths: list[Path]) -> list[Path]:
+    files: list[Path] = []
     for path in paths:
         if path.is_file():
             if path.suffix == ".py" and (not path.is_symlink()):
@@ -232,8 +230,8 @@ def main() -> int:
         print("No .py files found.")
         return 0
     print(f"Processing {len(files)} file(s)...\n")
-    changed: List[Tuple[str, RemovalStats]] = []
-    errors: List[Tuple[str, str]] = []
+    changed: list[tuple[str, RemovalStats]] = []
+    errors: list[tuple[str, str]] = []
     workers = max(1, min(32, multiprocessing.cpu_count()))
     with concurrent.futures.ProcessPoolExecutor(max_workers=workers) as executor:
         futures = {executor.submit(process_file, p): p for p in files}

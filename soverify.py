@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
 
 """Module for soverify.py."""
+
 from __future__ import annotations
 
 import ctypes
@@ -10,7 +10,6 @@ import subprocess
 import sys
 from collections import deque
 from pathlib import Path
-from typing import List
 
 from loguru import logger
 
@@ -154,7 +153,7 @@ class CtypesVerifier:
         if self.verbose:
             getattr(logger, level.lower())(f"[CTYPES] {message}")
 
-    def verify_so_file(self, file_path: Path) -> Tuple[bool, str]:
+    def verify_so_file(self, file_path: Path) -> tuple[bool, str]:
         if not file_path.exists():
             return (False, "File does not exist")
         if not file_path.is_file():
@@ -174,7 +173,7 @@ class CtypesVerifier:
             self.log(f"Failed to load {file_path.name}: {error_msg}", "ERROR")
             return (False, error_msg)
 
-    def verify_with_symbols(self, file_path: Path) -> Tuple[bool, dict]:
+    def verify_with_symbols(self, file_path: Path) -> tuple[bool, dict]:
         can_load, msg = self.verify_so_file(file_path)
         symbol_info = {
             "can_load": can_load,
@@ -217,7 +216,7 @@ def verify_single_file(file_path: Path) -> bool | None:
         return False
 
 
-def collect_files(args: List[str]) -> List[Path]:
+def collect_files(args: list[str]) -> list[Path]:
     if not args:
         return get_files(Path.cwd(), ext=[".so"])
     files = []

@@ -1,11 +1,13 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/usr/bin/python
 
 """Module for image2text.py."""
+
 from __future__ import annotations
 
 import sys
 from collections import deque
 from pathlib import Path
+
 from dh import mpf3
 from PIL import Image
 from PIL.Image import Image
@@ -18,7 +20,7 @@ try:
 except ImportError:
     HAS_CV2 = False
     try:
-        from skimage import io, color, filters, util
+        from skimage import color, filters, io
         from skimage.util import img_as_ubyte
 
         HAS_SKIMAGE = True
@@ -140,7 +142,6 @@ def process_file(image_path: Path) -> Image:
     if HAS_CV2:
         return process_image_cv2(image_path)
     else:
-
         return process_image_skimage(image_path)
 
 

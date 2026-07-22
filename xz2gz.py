@@ -11,7 +11,6 @@ from collections import deque
 from collections.abc import Callable
 from gzip import compress as gzip_compress
 from pathlib import Path
-from typing import Tuple
 
 from lzma_mt import decompress
 
@@ -44,7 +43,7 @@ def mpf3(process_function: Callable, files: list[Path], **kwargs):
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
 
 
-def process_file(path: Path) -> Tuple[str, bool, str]:
+def process_file(path: Path) -> tuple[str, bool, str]:
     path = Path(path)
     if path.is_symlink():
         print("symlink")

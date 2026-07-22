@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Dict
 
 """
 PyPI Package Update Checker with Multiprocessing & Resume Capability
@@ -51,18 +50,18 @@ class PackageInfo:
     checked_at: str = ""
     error: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> PackageInfo:
+    def from_dict(cls, data: dict[str, Any]) -> PackageInfo:
         return cls(**data)
 
 
 class PackageStateManager:
     def __init__(self, state_file: Path = Path("pkgs_state.json")) -> None:
         self.state_file = state_file
-        self.state: Dict[str, PackageInfo] = {}
+        self.state: dict[str, PackageInfo] = {}
         self._load_state()
 
     def _load_state(self) -> None:

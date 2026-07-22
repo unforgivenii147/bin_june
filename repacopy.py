@@ -12,7 +12,6 @@ from pathlib import Path
 
 from loguru import logger
 
-
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",

@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 """Module for m4a2mp3.py."""
+
 from __future__ import annotations
 
 import os

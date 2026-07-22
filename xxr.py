@@ -1,10 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
 
 """Module for xxr.py."""
 
-
 from __future__ import annotations
+
 import argparse
 import bz2
 import gzip
@@ -18,7 +17,8 @@ import zipfile
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable
+from collections.abc import Callable
+
 import brotlicffi as brotli
 import py7zr
 import zstandard as zstd
@@ -467,7 +467,7 @@ def collect_top_level_items(base: Path) -> list[tuple[Path, bool]]:
     return items
 
 
-def worker_func(item_tuple: Tuple[Path, bool]) -> Result:
+def worker_func(item_tuple: tuple[Path, bool]) -> Result:
     path, is_dir = item_tuple
     return compress_one(str(path), COMPRESS_MODE, is_dir)
 

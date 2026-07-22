@@ -18,14 +18,14 @@ Usage:
 """
 
 import argparse
+import io
 import re
 import sys
 import tokenize
-import io
-from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
-from typing import Callable
+from pathlib import Path
+from collections.abc import Callable
 
 
 @dataclass

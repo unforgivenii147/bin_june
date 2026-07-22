@@ -1,5 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
+
 """
 Clone GitHub repositories from a repos.txt file using GitPython.
 Format: user/repo (one per line)
@@ -12,13 +12,12 @@ import argparse
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import List
 
 from git import GitCommandError, Repo
 from git.exc import InvalidGitRepositoryError
 
 
-def read_repos(file_path: Path) -> List[str]:
+def read_repos(file_path: Path) -> list[str]:
     """Read repository names from file, stripping whitespace and empty lines."""
     if not file_path.exists():
         print(f"Error: {file_path} does not exist")
@@ -40,7 +39,7 @@ def validate_repo_format(repo: str) -> bool:
     return len(parts) == 2 and all(parts)
 
 
-def clone_repo(repo: str, base_dir: Path) -> Tuple[str, bool, str]:
+def clone_repo(repo: str, base_dir: Path) -> tuple[str, bool, str]:
     """
     Clone a single repository with --depth 1 using GitPython.
     Returns (repo_name, success, message).

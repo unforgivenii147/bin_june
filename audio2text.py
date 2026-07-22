@@ -1,14 +1,15 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 """Module for audio2text.py."""
-import sys
+
 import os
 import signal
-import speech_recognition as sr
-from pydub import AudioSegment
+import sys
 import tempfile
 import time
 
+import speech_recognition as sr
+from pydub import AudioSegment
 
 # Global flag for graceful shutdown
 interrupted = False

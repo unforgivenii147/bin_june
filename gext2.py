@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 """Module for gext2.py."""
+
 from __future__ import annotations
 
 import ast

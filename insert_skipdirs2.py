@@ -12,7 +12,6 @@ from __future__ import annotations
 import ast
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Tuple
 
 SKIP_DIRS_DEF = (
     'SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})\n'
@@ -90,7 +89,7 @@ def validate_modified_code(original: str, modified: str) -> bool:
         return False
 
 
-def process_file(file_path: Path) -> Tuple[Path, bool, str]:
+def process_file(file_path: Path) -> tuple[Path, bool, str]:
     try:
         content = file_path.read_text(encoding="utf-8")
         try:

@@ -15,7 +15,6 @@ from multiprocessing import Pool, cpu_count
 from pathlib import Path
 from typing import dict, list, set, tuple
 
-
 try:
     from spellchecker import SpellChecker
 

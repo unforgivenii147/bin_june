@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 """Module for rmcpp.py."""
+
 from __future__ import annotations
 
 import sys
@@ -139,6 +140,7 @@ if __name__ == "__main__":
         for _, fn, *_ in errors:
             print(f"  - {fn}")
     print(f"Size reduced: {fsz(diffsize)}")
+
 
 def gsz(path):
     try:

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
-from typing import List
+
 """
 Script to show various extensions in current directory with total size for each extension.
 Uses pathlib and parallel processing for speedup.
@@ -12,12 +11,11 @@ import sys
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Dict
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
-def get_file_info(file_path: Path) -> Tuple[str, int]:
+def get_file_info(file_path: Path) -> tuple[str, int]:
     try:
         ext = file_path.suffix.lower() if file_path.suffix else "NO_EXTENSION"
         size = file_path.stat().st_size
@@ -26,7 +24,7 @@ def get_file_info(file_path: Path) -> Tuple[str, int]:
         return None, 0
 
 
-def process_files_batch(file_paths: List[Path]) -> Dict[str, int]:
+def process_files_batch(file_paths: list[Path]) -> dict[str, int]:
     ext_sizes = defaultdict(int)
     for file_path in file_paths:
         if file_path.is_file():
@@ -36,7 +34,7 @@ def process_files_batch(file_paths: List[Path]) -> Dict[str, int]:
     return dict(ext_sizes)
 
 
-def get_files_in_directory(directory: str = ".") -> List[Path]:
+def get_files_in_directory(directory: str = ".") -> list[Path]:
     path = Path(directory)
     files = []
     for file_path in path.rglob("*"):

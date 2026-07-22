@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
 
 
 """
@@ -23,7 +22,6 @@ import logging
 import sys
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import List
 
 from dh import BIN_EXT, TXT_EXT
 
@@ -64,7 +62,7 @@ def convert_dos_to_unix_chunk(chunk: bytes) -> bytes:
     return chunk.replace(b"\r\n", b"\n")
 
 
-def convert_file(file_path: Path) -> Tuple[str, bool, str]:
+def convert_file(file_path: Path) -> tuple[str, bool, str]:
     try:
         if not file_path.is_file():
             return (str(file_path), False, "Not a file")
@@ -94,7 +92,7 @@ def convert_file(file_path: Path) -> Tuple[str, bool, str]:
         return (str(file_path), False, f"Error: {e}")
 
 
-def find_text_files(paths: List[Path]) -> List[Path]:
+def find_text_files(paths: list[Path]) -> list[Path]:
     files = []
     for path in paths:
         if path.is_file():
@@ -109,7 +107,7 @@ def find_text_files(paths: List[Path]) -> List[Path]:
     return files
 
 
-def get_input_paths(input_args: List[str] | None) -> List[Path]:
+def get_input_paths(input_args: list[str] | None) -> list[Path]:
     if not input_args:
         return [Path.cwd()]
     paths = []

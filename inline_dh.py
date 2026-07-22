@@ -2,7 +2,6 @@
 
 """Module for inline_dh.py."""
 
-
 from __future__ import annotations
 
 import ast

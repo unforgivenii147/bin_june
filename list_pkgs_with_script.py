@@ -2,8 +2,8 @@
 
 """Module for list_pkgs_with_script.py."""
 
-
 from __future__ import annotations
+
 import site
 from pathlib import Path
 

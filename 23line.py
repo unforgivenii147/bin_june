@@ -2,7 +2,6 @@
 
 """Module for 23line.py."""
 
-
 from __future__ import annotations
 
 from pathlib import Path

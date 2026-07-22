@@ -1,6 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
-from typing import List
+#!/data/data/com.termux/files/usr/bin/python
 
 """Module for folderize_images_by_similarity.py."""
 
@@ -9,7 +7,6 @@ from __future__ import annotations
 import shutil
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import Dict
 
 import cv2
 import numpy as np
@@ -28,7 +25,7 @@ class ImageSimilarityOrganizer:
         print(f"[INIT] Similarity threshold: {similarity_threshold}")
         print(f"[INIT] Hash size: {hash_size}x{hash_size}")
 
-    def get_all_images(self) -> List[Path]:
+    def get_all_images(self) -> list[Path]:
         print("\n[SCAN] Scanning for image files...")
         image_files = []
         for fmt in self.supported_formats:
@@ -39,7 +36,7 @@ class ImageSimilarityOrganizer:
         return sorted(image_files)
 
     @staticmethod
-    def compute_perceptual_hash(image_path: Path, hash_size: int = 8) -> Tuple[Path, np.ndarray]:
+    def compute_perceptual_hash(image_path: Path, hash_size: int = 8) -> tuple[Path, np.ndarray]:
         try:
             img = cv2.imread(str(image_path), cv2.IMREAD_GRAYSCALE)
             if img is None:
@@ -52,7 +49,7 @@ class ImageSimilarityOrganizer:
             print(f"[ERROR] Failed to hash {image_path}: {e!s}")
             return image_path, None
 
-    def compute_hashes(self, image_paths: List[Path]) -> Dict[Path, np.ndarray]:
+    def compute_hashes(self, image_paths: list[Path]) -> dict[Path, np.ndarray]:
         print(f"\n[HASH] Computing perceptual hashes using {cpu_count()} processes...")
         hashes = {}
         with Pool(processes=cpu_count()) as pool:
@@ -77,7 +74,7 @@ class ImageSimilarityOrganizer:
     def hamming_distance(hash1: np.ndarray, hash2: np.ndarray) -> int:
         return np.sum(hash1 != hash2)
 
-    def find_similar_images(self, hashes: Dict[Path, np.ndarray]) -> Dict[int, List[Path]]:
+    def find_similar_images(self, hashes: dict[Path, np.ndarray]) -> dict[int, list[Path]]:
         print(f"\n[GROUP] Grouping similar images (threshold: {self.similarity_threshold})...")
         image_list = list(hashes.keys())
         groups = {}
@@ -102,7 +99,7 @@ class ImageSimilarityOrganizer:
         print(f"[GROUP] Created {len(groups)} group(s)")
         return groups
 
-    def organize_images(self, groups: Dict[int, List[Path]]) -> None:
+    def organize_images(self, groups: dict[int, list[Path]]) -> None:
         print("\n[ORGANIZE] Creating folders and organizing images...")
         for group_id, image_paths in tqdm(groups.items(), desc="Organizing", unit="group"):
             if len(image_paths) == 1:

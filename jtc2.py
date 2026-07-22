@@ -2,13 +2,13 @@
 
 """Module for jtc2.py."""
 
-
 from __future__ import annotations
+
 import ast
 from pathlib import Path
 from sys import argv
-from dh import runcmd
 
+from dh import runcmd
 
 if __name__ == "__main__":
     path = Path(argv[1])

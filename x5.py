@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
 
 """
 LZMA Recursive File Compressor/Decompressor
@@ -21,7 +20,6 @@ import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Set
 
 # SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -137,7 +135,7 @@ def format_size(size_bytes: int) -> str:
     return f"{size_bytes:.2f} PB"
 
 
-def tar_directory(directory: Path, output_path: Path, delete_original: bool = False) -> Tuple[int, bool]:
+def tar_directory(directory: Path, output_path: Path, delete_original: bool = False) -> tuple[int, bool]:
     try:
         sum(f.stat().st_size for f in directory.rglob("*") if f.is_file())
         with tarfile.open(output_path, "w") as tar:
@@ -289,8 +287,8 @@ def process_subdirs_with_tar(
     threads: int = 4,
     workers: int = 4,
     keep_original: bool = False,
-    exclude_patterns: List[str] | None = None,
-) -> List[CompressionResult]:
+    exclude_patterns: list[str] | None = None,
+) -> list[CompressionResult]:
     if exclude_patterns is None:
         exclude_patterns = []
     results = []
@@ -386,7 +384,7 @@ def process_subdirs_with_tar(
     return results
 
 
-def should_compress_file(file_path: Path, exclude_extensions: Set[str], exclude_patterns: List[str]) -> bool:
+def should_compress_file(file_path: Path, exclude_extensions: set[str], exclude_patterns: list[str]) -> bool:
     if file_path.is_symlink():
         return False
     if not file_path.is_file():
@@ -406,11 +404,11 @@ def should_compress_file(file_path: Path, exclude_extensions: Set[str], exclude_
 
 def find_files_to_compress(
     directory: Path,
-    exclude_extensions: Set[str] | None = None,
-    exclude_patterns: List[str] | None = None,
-    extensions_filter: List[str] | None = None,
+    exclude_extensions: set[str] | None = None,
+    exclude_patterns: list[str] | None = None,
+    extensions_filter: list[str] | None = None,
     skip_subdirs: bool = False,
-) -> List[Path]:
+) -> list[Path]:
     if exclude_extensions is None:
         exclude_extensions = EXCLUDED_EXTENSIONS
     if exclude_patterns is None:
@@ -434,7 +432,7 @@ def find_files_to_compress(
     return sorted(set(files))
 
 
-def find_files_to_decompress(directory: Path, exclude_patterns: List[str] | None = None) -> List[Path]:
+def find_files_to_decompress(directory: Path, exclude_patterns: list[str] | None = None) -> list[Path]:
     if exclude_patterns is None:
         exclude_patterns = []
     files = []
@@ -451,7 +449,7 @@ def find_files_to_decompress(directory: Path, exclude_patterns: List[str] | None
     return sorted(set(files))
 
 
-def get_file_type_stats(files: List[Path]) -> dict:
+def get_file_type_stats(files: list[Path]) -> dict:
     type_stats = {}
     for file_path in files:
         ext = file_path.suffix.lower() or "[no extension]"
@@ -459,7 +457,7 @@ def get_file_type_stats(files: List[Path]) -> dict:
     return dict(sorted(type_stats.items(), key=lambda x: x[1], reverse=True))
 
 
-def print_results_rich(results: List[CompressionResult], directory: Path, operation: str):
+def print_results_rich(results: list[CompressionResult], directory: Path, operation: str):
     console = Console()
     successful = [r for r in results if r.success]
     failed = [r for r in results if not r.success]
@@ -578,7 +576,7 @@ def print_results_rich(results: List[CompressionResult], directory: Path, operat
     console.print(Panel(summary_text, border_style="cyan"))
 
 
-def print_results_basic(results: List[CompressionResult], directory: Path, operation: str):
+def print_results_basic(results: list[CompressionResult], directory: Path, operation: str):
     successful = [r for r in results if r.success]
     failed = [r for r in results if not r.success]
     total_original = sum(r.original_size for r in successful)

@@ -1,5 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
+
 """
 Clone GitHub repositories by downloading ZIP archives.
 No git binary needed. Uses requests for HTTP.
@@ -13,12 +13,11 @@ import sys
 import zipfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import List
 
 import requests
 
 
-def read_repos(file_path: Path) -> List[str]:
+def read_repos(file_path: Path) -> list[str]:
     """Read repository names from file."""
     if not file_path.exists():
         print(f"Error: {file_path} does not exist")
@@ -40,7 +39,7 @@ def validate_repo_format(repo: str) -> bool:
     return len(parts) == 2 and all(parts)
 
 
-def download_repo_zip(repo: str, base_dir: Path) -> Tuple[str, bool, str]:
+def download_repo_zip(repo: str, base_dir: Path) -> tuple[str, bool, str]:
     """
     Download repository as ZIP from GitHub.
     This gets the default branch similar to --depth 1.

@@ -2,8 +2,8 @@
 
 """Module for sortbysize.py."""
 
-
 from __future__ import annotations
+
 import json
 import operator
 from pathlib import Path

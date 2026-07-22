@@ -28,7 +28,6 @@ import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
-
 try:
     import lzmamt
 

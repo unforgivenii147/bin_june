@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
 
 """
 Filter the latest version for ARMv7 architecture (armeabi_v7a, armv7l, linux_arm)
@@ -12,12 +11,11 @@ import re
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
-def parse_wheel_url(url: str) -> Tuple[str, str, Tuple[int, ...], str] | None:
+def parse_wheel_url(url: str) -> tuple[str, str, tuple[int, ...], str] | None:
     android_pattern = "/([^/]+)-(\\d+\\.\\d+\\.\\d+)-py3-none-android_24_([^/]+)\\.whl"
     linux_pattern = "/([^/]+)-(\\d+\\.\\d+\\.\\d+(?:\\.\\d+)?)-cp\\d+-cp\\d+-linux_([^/]+)\\.whl"
     match = re.search(android_pattern, url)
@@ -55,7 +53,7 @@ def filter_latest_for_armv7(urls_file=None):
             urls = sys.argv[1:]
     else:
         urls = [line.strip() for line in sys.stdin if line.strip()]
-    packages: Dict[Tuple[str, str], Dict] = defaultdict(dict)
+    packages: dict[tuple[str, str], dict] = defaultdict(dict)
     for url in urls:
         parsed = parse_wheel_url(url)
         if parsed:

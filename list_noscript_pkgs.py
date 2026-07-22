@@ -7,7 +7,6 @@ from __future__ import annotations
 import site
 from pathlib import Path
 
-
 u = Path(site.getusersitepackages())
 for p in u.iterdir():
     if p.is_dir() and not p.name.endswith((".dist-info", ".egg-info")):

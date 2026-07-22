@@ -20,7 +20,6 @@ import tarfile
 import zipfile
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import List, Set
 
 # SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -53,7 +52,7 @@ class PIPPackageCache:
         return package_name.lower() in self.packages
 
 
-def get_stdlib_modules() -> Set[str]:
+def get_stdlib_modules() -> set[str]:
     import sys
 
     stdlib = set(sys.builtin_module_names)
@@ -267,7 +266,7 @@ def get_stdlib_modules() -> Set[str]:
     return stdlib | stdlib_modules
 
 
-def extract_imports_from_code(code: str, file_path: str = "") -> Set[str]:
+def extract_imports_from_code(code: str, file_path: str = "") -> set[str]:
     imports = set()
     import_pattern = "^\\s*import\\s+([a-zA-Z0-9_\\.\\*\\s,]+)"
     from_pattern = "^\\s*from\\s+([a-zA-Z0-9_\\.]+)\\s+import"
@@ -314,7 +313,7 @@ def is_python_file(file_path: str) -> bool:
     return False
 
 
-def extract_from_zip(zip_path: str) -> Set[str]:
+def extract_from_zip(zip_path: str) -> set[str]:
     imports = set()
     try:
         with zipfile.ZipFile(zip_path, "r") as zf:
@@ -330,7 +329,7 @@ def extract_from_zip(zip_path: str) -> Set[str]:
     return imports
 
 
-def extract_from_tar(tar_path: str, compression: str | None = None) -> Set[str]:
+def extract_from_tar(tar_path: str, compression: str | None = None) -> set[str]:
     imports = set()
     try:
         mode = f"r:{compression}" if compression else "r:*"
@@ -349,7 +348,7 @@ def extract_from_tar(tar_path: str, compression: str | None = None) -> Set[str]:
     return imports
 
 
-def process_file(file_path: str) -> Set[str]:
+def process_file(file_path: str) -> set[str]:
     imports = set()
     try:
         if file_path.endswith((".zip", ".whl")):
@@ -370,7 +369,7 @@ def process_file(file_path: str) -> Set[str]:
     return imports
 
 
-def collect_files(root_dir: str, exclude_dirs: List[str] | None = None) -> List[str]:
+def collect_files(root_dir: str, exclude_dirs: list[str] | None = None) -> list[str]:
     if exclude_dirs is None:
         exclude_dirs = {".venv", "venv", ".env", "__pycache__", ".git", "node_modules", ".egg-info"}
     files = []
@@ -385,7 +384,7 @@ def collect_files(root_dir: str, exclude_dirs: List[str] | None = None) -> List[
     return files
 
 
-def filter_packages(imports: Set[str], stdlib: Set[str], pip_cache: PIPPackageCache, local_files: Set[str]) -> Set[str]:
+def filter_packages(imports: set[str], stdlib: set[str], pip_cache: PIPPackageCache, local_files: set[str]) -> set[str]:
     filtered = set()
     for package in imports:
         pkg_lower = package.lower()

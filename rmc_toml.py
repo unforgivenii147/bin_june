@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
-
 
 """
 TOML Comment Remover - Removes comments from TOML files using parallel processing.
@@ -13,7 +11,6 @@ import sys
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import List
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -81,7 +78,7 @@ def remove_line_comment(line: str) -> str:
     return result_line.rstrip()
 
 
-def process_file(file_path: Path) -> Tuple[str, float, int, int]:
+def process_file(file_path: Path) -> tuple[str, float, int, int]:
     start_time = time.perf_counter()
     try:
         with open(file_path, encoding="utf-8") as f:
@@ -99,7 +96,7 @@ def process_file(file_path: Path) -> Tuple[str, float, int, int]:
         return (str(file_path), time_taken, 0, 0)
 
 
-def collect_toml_files(paths: List[Path]) -> List[Path]:
+def collect_toml_files(paths: list[Path]) -> list[Path]:
     toml_files = []
     for path in paths:
         if path.is_file():

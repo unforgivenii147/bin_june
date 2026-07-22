@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 """Module for urlzz.py."""
+
 from __future__ import annotations
 
 import os
@@ -14,7 +15,8 @@ from functools import wraps
 from inspect import getfullargspec
 from itertools import chain
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
+from collections.abc import Callable
 
 import py7zr
 

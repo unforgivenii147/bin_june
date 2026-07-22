@@ -1,7 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
-from typing import List
-
 
 """
 find_noneng.py - Recursively find non-English files using pycld3
@@ -19,7 +16,6 @@ import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import cpu_count
 from pathlib import Path
-from typing import Dict
 
 import cld3
 
@@ -74,7 +70,7 @@ SKIP_DIRS = {
 BATCH_SIZE = 100
 
 
-def is_english(text: str) -> Tuple[bool, float]:
+def is_english(text: str) -> tuple[bool, float]:
     if not text or len(text.strip()) < 3:
         return (True, 1.0)
     try:
@@ -87,7 +83,7 @@ def is_english(text: str) -> Tuple[bool, float]:
         return (True, 0.0)
 
 
-def analyze_file(filepath: Path, detailed: bool = False) -> Dict | None:
+def analyze_file(filepath: Path, detailed: bool = False) -> dict | None:
     try:
         content = None
         for encoding in ["utf-8", "latin-1", "cp1252"]:
@@ -163,7 +159,7 @@ def analyze_file(filepath: Path, detailed: bool = False) -> Dict | None:
         return {"file": str(filepath), "error": str(e), "non_english_lines": []}
 
 
-def scan_files(root_dir: Path, detailed: bool = False, max_workers: int | None = None) -> List[Dict]:
+def scan_files(root_dir: Path, detailed: bool = False, max_workers: int | None = None) -> list[dict]:
     if max_workers is None:
         max_workers = min(cpu_count(), 8)
     files = []

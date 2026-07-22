@@ -1,7 +1,4 @@
-#!/usr/bin/env python3
-from typing import Tuple
-from typing import List
-
+#!/data/data/com.termux/files/usr/bin/env python
 
 """
 Comment out lines reported by vulture as containing unused variables.
@@ -23,19 +20,19 @@ Notes:
 """
 
 from __future__ import annotations
+
 import argparse
+import difflib
+import os
 import re
 import sys
-import os
-import difflib
 from collections import defaultdict
-from typing import Dict, Set
 
 VULTURE_RE = re.compile("^(?P<path>.*?):(?P<lineno>\\d+):\\s*unused variable '(?P<var>[^']+)'", re.IGNORECASE)
 
 
-def parse_vulture_output(lines: List[str]) -> Dict[str, Set[int]]:
-    mapping: Dict[str, Set[int]] = defaultdict(set)
+def parse_vulture_output(lines: list[str]) -> dict[str, set[int]]:
+    mapping: dict[str, set[int]] = defaultdict(set)
     for ln in lines:
         ln = ln.rstrip("\n")
         m = VULTURE_RE.match(ln)
@@ -47,7 +44,7 @@ def parse_vulture_output(lines: List[str]) -> Dict[str, Set[int]]:
     return mapping
 
 
-def comment_lines_in_file(path: str, line_numbers: Set[int]) -> Tuple[List[str], List[str]]:
+def comment_lines_in_file(path: str, line_numbers: set[int]) -> tuple[list[str], list[str]]:
     with open(path, "r", encoding="utf-8") as f:
         original = f.readlines()
     modified = original.copy()
@@ -71,7 +68,7 @@ def comment_lines_in_file(path: str, line_numbers: Set[int]) -> Tuple[List[str],
     return (original, modified)
 
 
-def show_diff_and_maybe_write(path: str, original: List[str], modified: List[str], apply: bool, backup: bool) -> None:
+def show_diff_and_maybe_write(path: str, original: list[str], modified: list[str], apply: bool, backup: bool) -> None:
     if original == modified:
         print(f"No changes needed for {path}")
         return
@@ -86,7 +83,7 @@ def show_diff_and_maybe_write(path: str, original: List[str], modified: List[str
             print(f"  [!] failed to write {path}: {e}")
 
 
-def main(argv: List[str]) -> int:
+def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(description="Comment out lines reported by vulture as unused variables.")
     ap.add_argument("vulture_output", nargs="?", help="Path to vulture output file. If omitted, reads stdin.")
     ap.add_argument(

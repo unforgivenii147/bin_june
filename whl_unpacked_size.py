@@ -12,7 +12,6 @@ import json
 import sys
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import Tuple
 from zipfile import ZipFile
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
@@ -26,7 +25,7 @@ def format_size(size_bytes: int) -> str:
     return f"{size_bytes:.2f} PB"
 
 
-def get_wheel_unpacked_size(wheel_path: Path) -> Tuple[Path, int, str | None]:
+def get_wheel_unpacked_size(wheel_path: Path) -> tuple[Path, int, str | None]:
     try:
         if not wheel_path.exists():
             return wheel_path, 0, f"File not found: {wheel_path}"

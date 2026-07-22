@@ -12,7 +12,8 @@ import logging
 import re
 import sys
 from pathlib import Path
-from typing import Final, Iterator
+from typing import Final
+from collections.abc import Iterator
 
 from deep_translator import GoogleTranslator
 

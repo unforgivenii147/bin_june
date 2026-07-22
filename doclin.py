@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
-from typing import Optional
 """
 Remove image references (including shields.io badges) from .rst and .md files.
 Processes files in parallel and reports statistics.
@@ -10,7 +8,7 @@ import re
 import sys
 from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from typing import List
+from typing import Optional
 from dataclasses import dataclass
 
 
@@ -48,49 +46,62 @@ RST_IMAGE_PATTERNS = [
 
 # Patterns for image references in Markdown files
 MD_IMAGE_PATTERNS = [
+    # [![alt](badge-url)](link-url) - linked badge pattern (most common for shields.io)
+    re.compile(r"^\[!\[.*?\]\(https?://[^\)]+\)\]\(https?://[^\)]+\)", re.MULTILINE),
     # ![alt](https://img.shields.io/...)
-    re.compile(r"!\[.*?\]\(https?://[^\)]+\)", re.IGNORECASE),
-    # ![alt](image.png)
-    re.compile(r"!\[.*?\]\((?!https?://)[^\)]+\)", re.IGNORECASE),
+    re.compile(r"!\[.*?\]\(https?://[^\)]+\)", re.MULTILINE),
+    # ![alt](image.png) - local images
+    re.compile(r"!\[.*?\]\((?!https?://)[^\)]+\)", re.MULTILINE),
     # <img src="...">
     re.compile(r'<img[^>]+src\s*=\s*["\'][^"\']+["\'][^>]*>', re.IGNORECASE),
-    # HTML img tags with shields.io or other image URLs
-    re.compile(r"<img[^>]*>", re.IGNORECASE),
     # Reference style images: [img]: https://img.shields.io/...
     re.compile(r"^\[.*?\]:\s+https?://[^\s]+\.(?:png|jpg|jpeg|gif|svg|ico)(?:\?[^\s]*)?", re.IGNORECASE | re.MULTILINE),
-    # Inline HTML for badges
-    re.compile(r'<a\s+href="[^"]*">\s*<img[^>]*>\s*</a>', re.IGNORECASE),
+]
+
+# Common badge/image domains to detect
+BADGE_DOMAINS = [
+    "shields.io",
+    "img.shields.io",
+    "badge.fury.io",
+    "badges.gitter.im",
+    "travis-ci.org",
+    "travis-ci.com",
+    "circleci.com",
+    "codecov.io",
+    "coveralls.io",
+    "readthedocs.org",
+    "readthedocs.io",
+    "github.com/.*/workflows/.*badge",
+    "ci.appveyor.com",
+    "dev.azure.com",
+    "scrutinizer-ci.com",
+    "packagist.org",
+    "david-dm.org",
+    "snyk.io",
+    "badges.greenkeeper.io",
+    "api.codacy.com",
+    "goreportcard.com",
+    "opencollective.com",
+    "buymeacoffee.com",
+    "patreon.com",
 ]
 
 
-def is_image_url(line: str) -> bool:
-    """Check if a line contains an image URL reference."""
-    image_extensions = (".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico", ".webp", ".bmp")
-    image_domains = (
-        "shields.io",
-        "badge.fury.io",
-        "travis-ci.org",
-        "travis-ci.com",
-        "circleci.com",
-        "codecov.io",
-        "coveralls.io",
-        "img.shields.io",
-    )
-
-    # Check for image URLs
-    for domain in image_domains:
-        if domain in line:
+def has_badge_domain(line: str) -> bool:
+    """Check if line contains any known badge domain."""
+    for domain in BADGE_DOMAINS:
+        if re.search(domain, line, re.IGNORECASE):
             return True
-
-    # Check for common image extensions in URLs
-    for ext in image_extensions:
-        if ext in line.lower():
-            return True
-
     return False
 
 
-def remove_image_lines_rst(content: str) -> Tuple[str, int]:
+def is_image_extension_url(line: str) -> bool:
+    """Check if line contains URL with image extension."""
+    image_extensions = r"\.(?:png|jpg|jpeg|gif|svg|ico|webp|bmp)(?:\?|#|$|\))"
+    return bool(re.search(image_extensions, line, re.IGNORECASE))
+
+
+def remove_image_lines_rst(content: str) -> tuple[str, int]:
     """Remove image references from RST content."""
     lines = content.split("\n")
     new_lines = []
@@ -108,8 +119,10 @@ def remove_image_lines_rst(content: str) -> Tuple[str, int]:
                 break
 
         # Check for inline image URLs
-        if not should_remove and is_image_url(line):
-            if "image::" in line or "figure::" in line or "replace::" in line:
+        if not should_remove:
+            if ("image::" in line or "figure::" in line or "replace::" in line) and (
+                has_badge_domain(line) or is_image_extension_url(line)
+            ):
                 should_remove = True
 
         if should_remove:
@@ -125,60 +138,71 @@ def remove_image_lines_rst(content: str) -> Tuple[str, int]:
     return "\n".join(new_lines), removed_count
 
 
-def remove_image_lines_md(content: str) -> Tuple[str, int]:
+def remove_image_lines_md(content: str) -> tuple[str, int]:
     """Remove image references from Markdown content."""
     lines = content.split("\n")
     new_lines = []
     removed_count = 0
-    i = 0
 
-    while i < len(lines):
-        line = lines[i]
+    for line in lines:
         original_line = line
         should_remove = False
 
+        # Check for linked badge pattern [![...](...)](...)
+        linked_badge_pattern = re.compile(r"^\[!\[.*?\]\(https?://[^\)]+\)\]\(https?://[^\)]+\)")
+        if linked_badge_pattern.match(line):
+            should_remove = True
+
         # Check for Markdown image patterns
-        for pattern in MD_IMAGE_PATTERNS:
-            if pattern.search(line):
-                # Try to remove just the image part
-                new_line = pattern.sub("", line).strip()
-                if new_line:
-                    # If there's remaining content, keep it
-                    line = new_line
-                else:
-                    # If line becomes empty after removal, mark for deletion
-                    if pattern.search(original_line):
-                        should_remove = True
+        if not should_remove:
+            for pattern in MD_IMAGE_PATTERNS:
+                if pattern.search(line):
+                    # Check if the image is the main content of the line
+                    # Try to remove just the image part
+                    cleaned = pattern.sub("", line).strip()
+                    if not cleaned or cleaned == line:
+                        # Line becomes empty or pattern didn't match
+                        if has_badge_domain(line) or is_image_extension_url(line):
+                            should_remove = True
+                        break
+                    else:
+                        # Keep the non-image part
+                        line = cleaned
                         break
 
-        # Check for inline image URLs not caught by patterns
-        if not should_remove and is_image_url(line):
-            if "![" in line and "](" in line:
-                should_remove = True
-            elif "<img" in line.lower():
-                should_remove = True
+        # Additional check for badge domains in markdown links
+        if not should_remove:
+            # Check for [text](badge-url) where the URL is a badge
+            md_link_pattern = re.compile(r"\[([^\]]*)\]\(([^\)]+)\)")
+            matches = md_link_pattern.findall(line)
+            for text, url in matches:
+                if has_badge_domain(url) or is_image_extension_url(url):
+                    # If the link contains "!" or badge/image references
+                    if "!" in line or "badge" in url.lower() or "shield" in url.lower():
+                        should_remove = True
+                        break
 
         if should_remove:
             removed_count += 1
         else:
-            if line.strip():  # Only add non-empty lines
+            if line.strip():
                 new_lines.append(line)
-            else:
-                new_lines.append(line)  # Keep empty lines for structure
+            elif new_lines and new_lines[-1].strip():
+                # Only add empty line if previous line isn't empty
+                new_lines.append(line)
+            elif not new_lines:
+                new_lines.append(line)
 
-        i += 1
+    # Remove trailing empty lines
+    while new_lines and not new_lines[-1].strip():
+        new_lines.pop()
 
-    # Clean up multiple consecutive empty lines
-    cleaned_lines = []
-    prev_empty = False
-    for line in new_lines:
-        is_empty = not line.strip()
-        if is_empty and prev_empty:
-            continue
-        cleaned_lines.append(line)
-        prev_empty = is_empty
+    # Add final newline if original had one
+    result = "\n".join(new_lines)
+    if content.endswith("\n"):
+        result += "\n"
 
-    return "\n".join(cleaned_lines), removed_count
+    return result, removed_count
 
 
 def process_file(file_path: Path) -> Optional[FileStats]:
@@ -187,6 +211,10 @@ def process_file(file_path: Path) -> Optional[FileStats]:
         # Read file
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
+
+        # Skip empty files
+        if not content.strip():
+            return None
 
         lines_before = content.count("\n") + 1
         size_before = len(content.encode("utf-8"))
@@ -223,7 +251,7 @@ def process_file(file_path: Path) -> Optional[FileStats]:
         return None
 
 
-def collect_files(directories: List[Path]) -> List[Path]:
+def collect_files(directories: list[Path]) -> list[Path]:
     """Collect all .rst and .md files from given directories."""
     files = []
     for directory in directories:
@@ -250,7 +278,7 @@ def format_size(size_bytes: int) -> str:
     return f"{size_bytes:.1f} TB"
 
 
-def print_stats(all_stats: List[FileStats], base_path: Path):
+def print_stats(all_stats: list[FileStats], base_path: Path):
     """Print formatted statistics."""
     if not all_stats:
         print("\n✨ No image references found to remove!")
@@ -278,7 +306,8 @@ def print_stats(all_stats: List[FileStats], base_path: Path):
             f"   ├─ Size: {format_size(stats.size_before)} → {format_size(stats.size_after)} "
             f"({change_symbol} {format_size(abs(size_change))})"
         )
-        print(f"   └─ Reduction: {(size_change / stats.size_before * 100):.1f}%")
+        if stats.size_before > 0:
+            print(f"   └─ Reduction: {(size_change / stats.size_before * 100):.1f}%")
 
         total_lines_before += stats.lines_before
         total_lines_after += stats.lines_after
@@ -349,6 +378,9 @@ def main():
 
     # Print statistics
     base_path = Path.cwd()
+
+    # Sort stats by path for consistent output
+    stats_list.sort(key=lambda x: str(x.path))
     print_stats(stats_list, base_path)
 
 

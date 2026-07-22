@@ -2,8 +2,8 @@
 
 """Module for collect_env_vars.py."""
 
-
 from __future__ import annotations
+
 import re
 from pathlib import Path
 

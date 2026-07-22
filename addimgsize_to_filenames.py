@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/usr/bin/python
 
 """Module for addimgsize_to_filenames.py."""
 
@@ -7,7 +7,6 @@ from __future__ import annotations
 import sys
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import Tuple
 
 import cv2
 from tqdm import tqdm
@@ -51,7 +50,7 @@ class ImageDimensionRenamer:
         pattern = "\\d+[xX]\\d+"
         return bool(re.search(pattern, filename))
 
-    def rename_image(self, args: Tuple[Path, str, str]) -> Tuple[Path, bool, str]:
+    def rename_image(self, args: tuple[Path, str, str]) -> tuple[Path, bool, str]:
         image_path, separator, root_dir_str = args
         root_dir = Path(root_dir_str)
         try:

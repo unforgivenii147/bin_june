@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 """Module for asteval.py."""
+
 from __future__ import annotations
 
 import argparse
@@ -11,7 +12,6 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from multiprocessing import Pool, cpu_count
 from os import scandir as os_scandir
 from pathlib import Path
-from typing import List
 
 CHUNK_SIZE = 1024 * 1024
 
@@ -134,7 +134,7 @@ def process_file(args: tuple) -> None:
             print(f"  ❌ Failed to move {path}: {move_error}")
 
 
-def get_files_to_process(paths: List[str]) -> List[Path]:
+def get_files_to_process(paths: list[str]) -> list[Path]:
     files = []
     if paths:
         for path_str in paths:
@@ -157,7 +157,7 @@ def get_files_to_process(paths: List[str]) -> List[Path]:
     return unique_files
 
 
-def process_files_mpf3(files: List[Path], dry_run: bool = False) -> None:
+def process_files_mpf3(files: list[Path], dry_run: bool = False) -> None:
     total = len(files)
 
     def wrapper(path):
@@ -173,7 +173,7 @@ def process_files_mpf3(files: List[Path], dry_run: bool = False) -> None:
         raise
 
 
-def process_files_threadpool(files: List[Path], dry_run: bool = False) -> None:
+def process_files_threadpool(files: list[Path], dry_run: bool = False) -> None:
     total = len(files)
 
     def worker(path, idx):
@@ -189,14 +189,14 @@ def process_files_threadpool(files: List[Path], dry_run: bool = False) -> None:
                 print(f"  ❌ Unexpected error processing {path}: {e}")
 
 
-def process_files_multiprocessing(files: List[Path], dry_run: bool = False) -> None:
+def process_files_multiprocessing(files: list[Path], dry_run: bool = False) -> None:
     total = len(files)
     args_list = [(path, idx, total, dry_run) for idx, path in enumerate(files, 1)]
     with Pool(processes=min(cpu_count(), len(files))) as pool:
         pool.map(process_file, args_list)
 
 
-def process_files_sequential(files: List[Path], dry_run: bool = False) -> None:
+def process_files_sequential(files: list[Path], dry_run: bool = False) -> None:
     total = len(files)
     for idx, path in enumerate(files, 1):
         process_file((path, idx, total, dry_run))

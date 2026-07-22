@@ -11,7 +11,7 @@ import re
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Generator
+from collections.abc import Generator
 
 IGNORED_DIRS = {".git", ".hg", ".svn", "node_modules", "__pycache__", ".ruff_cache", ".pytest_cache", ".mypy_cache"}
 BINARY_CHUNK = 8192

@@ -2,8 +2,8 @@
 
 """Module for remove_header.py."""
 
-
 from __future__ import annotations
+
 import json
 import sys
 

@@ -2,7 +2,6 @@
 
 """Module for pytokei2.py."""
 
-
 from __future__ import annotations
 
 import re

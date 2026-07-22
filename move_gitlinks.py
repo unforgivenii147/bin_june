@@ -7,7 +7,6 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-
 if __name__ == "__main__":
     fn = Path(sys.argv[1])
     lines = fn.read_text(encoding="utf-8").splitlines(keepends=False)

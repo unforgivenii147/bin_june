@@ -15,7 +15,6 @@ from collections import defaultdict
 from pathlib import Path
 from typing import dict, list, set, tuple
 
-
 MIN_LINES = 3
 MIN_CHARS = 100
 

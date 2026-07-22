@@ -1,12 +1,12 @@
-#!/usr/bin/env python3
+#!/data/data/com.termux/files/usr/bin/env python
 """
 Comment out SKIP_DIRS lines from vulture output.
 Usage: python comment_skip_dirs.py <vulture_output_file>
 """
 
-import sys
 import os
 import re
+import sys
 
 
 def parse_vulture_output(filepath):

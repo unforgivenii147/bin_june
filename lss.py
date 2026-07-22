@@ -2,7 +2,6 @@
 
 """Module for lss.py."""
 
-
 from __future__ import annotations
 
 import sys

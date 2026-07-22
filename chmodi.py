@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 """Module for chmodi.py."""
+
 from __future__ import annotations
 
 import os
@@ -9,7 +10,6 @@ import sys
 import time
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-
 
 DIR_PERM = 0o755
 FILE_PERM = 0o664

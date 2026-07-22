@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
 from typing import Optional
+
 """
 Generate a Cargo.toml file from a Cargo.lock file.
 Reads package information from Cargo.lock and creates a basic Cargo.toml
@@ -9,10 +10,10 @@ with all dependencies listed.
 import re
 import sys
 from pathlib import Path
-from typing import List, Dict
+from typing import List
 
 
-def parse_cargo_lock(filepath: str) -> Dict:
+def parse_cargo_lock(filepath: str) -> dict:
     """
     Parse a Cargo.lock file and extract package information.
 
@@ -51,7 +52,7 @@ def parse_cargo_lock(filepath: str) -> Dict:
     return {"version": lock_version, "packages": packages}
 
 
-def parse_package_block(block: str) -> Optional[Dict]:
+def parse_package_block(block: str) -> Optional[dict]:
     """
     Parse a package block from Cargo.lock v2+.
 
@@ -100,7 +101,7 @@ def parse_package_block(block: str) -> Optional[Dict]:
     return pkg
 
 
-def parse_package_block_v1(block: str) -> Optional[Dict]:
+def parse_package_block_v1(block: str) -> Optional[dict]:
     """
     Parse a package block from Cargo.lock v1.
 
@@ -135,7 +136,7 @@ def parse_package_block_v1(block: str) -> Optional[Dict]:
 
 
 def generate_cargo_toml(
-    packages: List[Dict],
+    packages: list[dict],
     root_package_name: Optional[str] = None,
     root_version: str = "0.1.0",
     include_dev_deps: bool = False,
@@ -194,7 +195,7 @@ def generate_cargo_toml(
     return "\n".join(lines)
 
 
-def find_package(packages: List[Dict], name: str) -> Optional[Dict]:
+def find_package(packages: list[dict], name: str) -> Optional[dict]:
     """
     Find a package by name in the packages list.
 

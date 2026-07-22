@@ -3,40 +3,39 @@
 
 from __future__ import annotations
 
-from collections import deque
 from pathlib import Path
 from random import choice
 from string import ascii_lowercase
-
-CHUNK_SIZE = 1024 * 1024
+from typing import Optional
 
 # Constants
 CHUNK_SIZE: int = 8192
 BINARY_THRESHOLD: float = 0.3
 DEFAULT_OUTPUT_LEN: int = 10
-SKIP_DIRS: set[str] = {".git", "__pycache__", ".venv", "node_modules", ".idea"}
-TEXT_CHARS: bytearray = bytearray(range(32, 127)) + b"\n\r\t\b"
+# Extended to include common UTF-8 continuation bytes (0x80-0xBF)
+TEXT_CHARS: bytearray = bytearray(
+    list(range(32, 127))  # ASCII printable
+    + list(range(0x80, 0x100))  # Extended ASCII/UTF-8 continuation bytes
+    + [ord(c) for c in "\n\r\t\b"]
+)
 
 
-def get_files(path: Path, ext: list[str] | None = None) -> list[Path]:
-    queue = deque([path])
+def get_files(path: Path, ext: Optional[list[str]] = None) -> list[Path]:
     files: list[Path] = []
-
-    while queue:
-        current = queue.popleft()
-        try:
-            entries = list(current.iterdir())
-        except (PermissionError, OSError):
-            continue
-
-        for item in entries:
-            if item.is_symlink():
+    for root, dirs, filenames in path.walk(top_down=False):
+        for filename in filenames:
+            file_path = Path(root) / filename
+            if file_path.is_symlink() or not file_path.is_file():
                 continue
-            if item.is_dir():
-                if item.name not in SKIP_DIRS:
-                    queue.append(item)
-            elif item.is_file() and (ext is None or item.suffix in ext):
-                files.append(item)
+            if ".git" in file_path.parts:
+                continue
+            if is_binary(file_path):
+                continue
+            if ext is not None:
+                if file_path.suffix in set(ext):
+                    files.append(file_path)
+            else:
+                files.append(file_path)
     return files
 
 
@@ -45,6 +44,7 @@ def get_random_filename(length: int = DEFAULT_OUTPUT_LEN) -> str:
 
 
 def is_binary(path: Path) -> bool:
+    """Check if a file is binary by reading a chunk and analyzing byte content."""
     try:
         with path.open("rb") as f:
             chunk = f.read(CHUNK_SIZE)
@@ -52,8 +52,15 @@ def is_binary(path: Path) -> bool:
         if not chunk:  # Empty files are not binary
             return False
 
-        if b"\x00" in chunk:  # Null byte = binary
+        if b"\x00" in chunk:  # Null byte strongly indicates binary
             return True
+
+        # Try to decode as UTF-8 first
+        try:
+            chunk.decode("utf-8")
+            return False  # Successfully decoded, not binary
+        except UnicodeDecodeError:
+            pass  # Not valid UTF-8, check further
 
         # Count non-text characters
         nontext = sum(1 for byte in chunk if byte not in TEXT_CHARS)
@@ -64,10 +71,11 @@ def is_binary(path: Path) -> bool:
 
 
 def get_nobinary(path: Path) -> list[Path]:
-    return [f for f in get_files(path) if not is_binary(f)]
+    """Get all non-binary files. Note: is_binary check is now in get_files."""
+    return get_files(path)  # is_binary check is already done in get_files
 
 
-def read_file(path: Path) -> str | None:
+def read_file(path: Path) -> Optional[str]:
     try:
         return path.read_text(encoding="utf-8", errors="ignore")
     except (OSError, UnicodeDecodeError):
@@ -75,12 +83,18 @@ def read_file(path: Path) -> str | None:
 
 
 def should_skip_file(file_path: Path, cwd: Path) -> bool:
-    if any(part.startswith(".") for part in file_path.relative_to(cwd).parts):
+    """Skip hidden files and directories."""
+    try:
+        relative_parts = file_path.relative_to(cwd).parts
+    except ValueError:
+        return True  # Skip if can't get relative path
+
+    if any(part.startswith(".") for part in relative_parts):
         return True
     return bool(file_path.name.startswith("."))
 
 
-def merge_files() -> Path | None:
+def merge_files() -> Optional[Path]:
     cwd = Path.cwd()
     output_file = cwd / f"{get_random_filename()}.txt"
 
@@ -93,6 +107,7 @@ def merge_files() -> Path | None:
 
     try:
         total_size = 0
+        file_count = 0
         with output_file.open("w", encoding="utf-8") as fo:
             for file_path in files:
                 if should_skip_file(file_path, cwd):
@@ -107,13 +122,14 @@ def merge_files() -> Path | None:
                 fo.write(content)
                 fo.write("\n")
                 total_size += len(content)
+                file_count += 1
 
         if total_size == 0:
             output_file.unlink()
             print("ℹ️  No content to merge (all files were empty or skipped).")
             return None
 
-        print(f"✅ Merged {len(files)} files ({total_size:,} bytes) into: {output_file}")
+        print(f"✅ Merged {file_count} files ({total_size:,} bytes) into: {output_file}")
         return output_file
 
     except OSError as e:

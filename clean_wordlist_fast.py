@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 """Module for clean_wordlist_fast.py."""
+
 from __future__ import annotations
 
 import contextlib

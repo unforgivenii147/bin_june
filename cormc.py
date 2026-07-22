@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
 
 """
 Strip comments and docstrings from Python files recursively (in-place).
@@ -25,7 +24,6 @@ import multiprocessing
 import sys
 import tokenize
 from pathlib import Path
-from typing import List
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -59,9 +57,9 @@ class DocstringStripper(ast.NodeTransformer):
         return self._maybe_strip_first_docstring(node)
 
 
-def extract_prefix_comments_and_shebang(source: str) -> Tuple[str, str]:
+def extract_prefix_comments_and_shebang(source: str) -> tuple[str, str]:
     lines = source.splitlines(keepends=True)
-    prefix_lines: List[str] = []
+    prefix_lines: list[str] = []
     i = 0
     for i, line in enumerate(lines):
         stripped = line.strip()
@@ -92,7 +90,7 @@ def extract_prefix_comments_and_shebang(source: str) -> Tuple[str, str]:
     return prefix, remainder
 
 
-def process_file(path: Path) -> Tuple[Path, str | None]:
+def process_file(path: Path) -> tuple[Path, str | None]:
     try:
         with tokenize.open(path) as f:
             original = f.read()
@@ -142,8 +140,8 @@ def should_skip_path(p: Path) -> bool:
     return bool(parts & skip_indicators)
 
 
-def collect_py_files(root: Path) -> List[Path]:
-    files: List[Path] = []
+def collect_py_files(root: Path) -> list[Path]:
+    files: list[Path] = []
     for p in root.rglob("*.py"):
         if should_skip_path(p):
             continue
@@ -159,8 +157,8 @@ def main() -> int:
     if not files:
         print("No .py files found.")
         return 0
-    changed: List[Path] = []
-    errors: List[Tuple[Path, str]] = []
+    changed: list[Path] = []
+    errors: list[tuple[Path, str]] = []
     workers = max(1, min(32, multiprocessing.cpu_count()))
     with concurrent.futures.ProcessPoolExecutor(max_workers=workers) as exc:
         futures = {exc.submit(process_file, p): p for p in files}
@@ -197,7 +195,7 @@ def main() -> int:
     return 0
 
 
-def process_file_check_changed(path: Path) -> Tuple[Path | None, str | None]:
+def process_file_check_changed(path: Path) -> tuple[Path | None, str | None]:
     try:
         with tokenize.open(path) as f:
             original = f.read()

@@ -1,11 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
-from typing import List
 
 """Module for siter.py."""
 
-
 from __future__ import annotations
+
 import argparse
 import base64
 import csv
@@ -16,7 +14,6 @@ import tempfile
 import zipfile
 from multiprocessing import cpu_count
 from pathlib import Path
-from typing import Dict, Set
 
 
 class WheelBuilder:
@@ -37,7 +34,7 @@ class WheelBuilder:
         self.venv_root = self._find_venv_root()
         self.bin_dir = self._find_bin_dir()
         self.share_dir = self.venv_root / "share" if self.venv_root else None
-        self.processed_packages: Set[str] = set()
+        self.processed_packages: set[str] = set()
 
     def _find_venv_root(self) -> Path | None:
         current = self.site_packages
@@ -68,7 +65,7 @@ class WheelBuilder:
         digest = h.digest()
         return f"sha256={base64.urlsafe_b64encode(digest).decode().rstrip('=')} "
 
-    def _read_record(self, dist_info: Path) -> Dict[str, Dict[str, str]]:
+    def _read_record(self, dist_info: Path) -> dict[str, dict[str, str]]:
         record_file = dist_info / "RECORD"
         if not record_file.exists():
             return {}
@@ -82,7 +79,7 @@ class WheelBuilder:
                 records[path] = {"hash": row[1] if len(row) > 1 else "", "size": row[2] if len(row) > 2 else ""}
         return records
 
-    def _find_scripts_for_package(self, records: Dict) -> List[Path]:
+    def _find_scripts_for_package(self, records: dict) -> list[Path]:
         if not self.bin_dir or not self.bin_dir.exists():
             return []
         scripts = []
@@ -112,7 +109,7 @@ class WheelBuilder:
                         break
         return scripts
 
-    def _find_data_for_package(self, package_name: str) -> List[Tuple[Path, str]]:
+    def _find_data_for_package(self, package_name: str) -> list[tuple[Path, str]]:
         if not self.share_dir or not self.share_dir.exists():
             return []
         data_files = []
@@ -128,7 +125,7 @@ class WheelBuilder:
                     pass
         return data_files
 
-    def _get_wheel_tags(self) -> Tuple[str, str, str]:
+    def _get_wheel_tags(self) -> tuple[str, str, str]:
         try:
             from packaging.tags import sys_tags
 
@@ -145,7 +142,7 @@ class WheelBuilder:
             platform_tag = f"{plat}_{machine}"
             return (python_tag, abi_tag, platform_tag)
 
-    def _detect_purity(self, records: Dict) -> bool:
+    def _detect_purity(self, records: dict) -> bool:
         return all((not path.endswith((".so", ".pyd", ".dll")) for path in records))
 
     def build_wheel(self, dist_info_dir: Path) -> Path | None:
@@ -258,7 +255,7 @@ class WheelBuilder:
             print(f"  ❌ Failed to build {pkg_name}: {e}")
             return None
 
-    def _build_wheel_worker(self, dist_info: Path) -> Tuple[str, Path | None]:
+    def _build_wheel_worker(self, dist_info: Path) -> tuple[str, Path | None]:
         try:
             result = self.build_wheel(dist_info)
             return (dist_info.name, result)
@@ -282,7 +279,7 @@ class WheelBuilder:
                 print("📝 Using serial processing")
             return self._build_serial(dist_infos)
 
-    def _build_serial(self, dist_infos: List[Path]) -> int:
+    def _build_serial(self, dist_infos: list[Path]) -> int:
         built = 0
         for dist_info in dist_infos:
             try:
@@ -293,7 +290,7 @@ class WheelBuilder:
         print(f"\n✅ Built {built}/{len(dist_infos)} wheels in {self.output_dir}")
         return built
 
-    def _build_parallel(self, dist_infos: List[Path]) -> int:
+    def _build_parallel(self, dist_infos: list[Path]) -> int:
         self.processed_packages.clear()
         from multiprocessing import get_context
 

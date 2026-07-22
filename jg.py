@@ -2,8 +2,8 @@
 
 """Module for jg.py."""
 
-
 from __future__ import annotations
+
 import shutil
 from pathlib import Path
 

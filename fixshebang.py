@@ -11,12 +11,12 @@ import re
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Tuple
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-NEW_SHEBANG = "#!/data/data/com.termux/files/usr/bin/env python"
 SHEBANG_PATTERN = re.compile(r"^#!.*python[23]?(?:\.\d+)?(?:[ \t]+.*)?$", re.MULTILINE)
+NEW_SHEBANG12 = "#!/data/data/com.termux/files/usr/bin/env python"
+NEW_SHEBANG14 = "#!/data/data/com.termux/files/usr/bin/python"
 PYTHON_EXTENSIONS = {".py", ".pyw", ".pyx", ".pxd", ".pyi"}
 COMMON_PYTHON_NAMES = {
     "setup",
@@ -43,6 +43,17 @@ COMMON_PYTHON_NAMES = {
 }
 
 
+def get_shebang(content: str) -> str:
+    """Return the appropriate shebang for a Python file."""
+    if re.search(
+        r"^\s*(?:import\s+cv2\b|from\s+cv2\b)",
+        content,
+        re.MULTILINE,
+    ):
+        return NEW_SHEBANG14
+    return NEW_SHEBANG12
+
+
 def is_symlink(path: Path) -> bool:
     return path.is_symlink()
 
@@ -56,13 +67,15 @@ def is_likely_python_file(path: Path) -> bool:
                 if b"python" in first_line.lower():
                     return True
             text_sample = content.decode("utf-8", errors="ignore")
+
             python_patterns = [
-                "^(from|import)\\s+",
-                "^def\\s+\\w+\\s*\\(",
-                "^class\\s+\\w+[:\\(]",
-                "^if\\s+__name__\\s*==\\s*['\\\"]__main__['\\\"]",
-                "^#!.*python",
+                r"^(from|import)\s+",
+                r"^def\s+\w+\s*\(",
+                r"^class\s+\w+[:\(]",
+                r"^if\s+__name__\s*==\s*['\"]__main__['\"]",
+                r"^#!.*python",
             ]
+
             return any(re.search(pattern, text_sample, re.MULTILINE) for pattern in python_patterns)
     except (OSError, UnicodeDecodeError, PermissionError):
         return False
@@ -81,15 +94,16 @@ def find_python_files(directory: Path) -> list[Path]:
             python_files.append(path)
             continue
         skip_patterns = [
-            "\\.(md|txt|rst|json|yaml|yml|toml|ini|cfg|conf|log|lock|gitignore|dockerignore)$",
-            "\\.(css|html|js|ts|jsx|tsx|vue|svelte)$",
-            "\\.(jpg|jpeg|png|gif|svg|ico|webp)$",
-            "\\.(mp4|mp3|avi|mkv|mov)$",
-            "\\.(pdf|doc|docx|xls|xlsx|ppt|pptx)$",
-            "\\.(zip|tar|gz|rar|7z)$",
-            "\\.(so|dll|dylib|exe|o|a|lib)$",
-            "\\.(pyc|pyo|pyd)$",
+            r"\.(md|txt|rst|json|yaml|yml|toml|ini|cfg|conf|log|lock|gitignore|dockerignore)$",
+            r"\.(css|html|js|ts|jsx|tsx|vue|svelte)$",
+            r"\.(jpg|jpeg|png|gif|svg|ico|webp)$",
+            r"\.(mp4|mp3|avi|mkv|mov)$",
+            r"\.(pdf|doc|docx|xls|xlsx|ppt|pptx)$",
+            r"\.(zip|tar|gz|rar|7z)$",
+            r"\.(so|dll|dylib|exe|o|a|lib)$",
+            r"\.(pyc|pyo|pyd)$",
         ]
+
         if any(re.search(pattern, str(path), re.IGNORECASE) for pattern in skip_patterns):
             continue
         if path.stem in COMMON_PYTHON_NAMES:
@@ -101,27 +115,36 @@ def find_python_files(directory: Path) -> list[Path]:
     return python_files
 
 
-def process_file(path: Path, root_dir: Path) -> Tuple[Path, bool, str | None, str, str]:
+def process_file(path: Path, root_dir: Path) -> tuple[Path, bool, str | None, str, str]:
     rel_path = str(path.relative_to(root_dir))
+
     if is_symlink(path):
         return (path, False, "Symlink skipped", rel_path, "skipped")
+
     try:
         content = path.read_text(encoding="utf-8")
+        new_shebang = get_shebang(content)
+
         has_shebang = content.startswith("#!")
+
         if not has_shebang:
-            new_content = NEW_SHEBANG + "\n" + content
-            path.write_text(new_content, encoding="utf-8")
+            path.write_text(f"{new_shebang}\n{content}", encoding="utf-8")
             return (path, True, None, rel_path, "added")
-        first_line = content.split("\n")[0] if "\n" in content else content
+
+        first_line = content.split("\n", 1)[0]
+
         if "python" not in first_line.lower():
             return (path, False, "Not a Python shebang", rel_path, "skipped")
-        if first_line.strip() == NEW_SHEBANG:
+
+        if first_line.strip() == new_shebang:
             return (path, False, "Already correct", rel_path, "unchanged")
+
         lines = content.split("\n")
-        lines[0] = NEW_SHEBANG
-        new_content = "\n".join(lines)
-        path.write_text(new_content, encoding="utf-8")
+        lines[0] = new_shebang
+        path.write_text("\n".join(lines), encoding="utf-8")
+
         return (path, True, None, rel_path, "updated")
+
     except Exception as e:
         return (path, False, str(e), rel_path, "error")
 
@@ -198,3 +221,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+# i changed NEW_SHEBANG to NEW_SHEBANG12 and added NEW_SHEBANG14 too.
+# if a python file uses opencv module its shebang will be NEW_SHEBANG14 else NEW_SHEBANG12
+# change regex to r"" style too

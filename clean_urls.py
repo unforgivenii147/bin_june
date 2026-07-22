@@ -6,7 +6,6 @@ from __future__ import annotations
 
 from urllib.parse import urlparse
 
-
 seen = set()
 gl = []
 with open("urls.txt") as f:

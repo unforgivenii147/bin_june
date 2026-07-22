@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 """Module for html_entity.py."""
+
 from __future__ import annotations
 
 import multiprocessing as mp

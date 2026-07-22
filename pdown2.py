@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
 
 """Module for pdown2.py."""
 
@@ -10,12 +9,11 @@ import json
 import pathlib
 import urllib.error
 import urllib.request
-from typing import Dict
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
-def get_pypi_json(package: str, timeout: int = 10) -> Dict | None:
+def get_pypi_json(package: str, timeout: int = 10) -> dict | None:
     url = f"https://pypi.org/pypi/{package}/json"
     try:
         with urllib.request.urlopen(url, timeout=timeout) as response:
@@ -25,7 +23,7 @@ def get_pypi_json(package: str, timeout: int = 10) -> Dict | None:
         return None
 
 
-def find_wheel_url(package_data: Dict, python_version: str = "3.12") -> Tuple[str, int] | None:
+def find_wheel_url(package_data: dict, python_version: str = "3.12") -> tuple[str, int] | None:
     releases = package_data.get("releases", {})
     if not releases:
         return None
@@ -58,7 +56,7 @@ def find_wheel_url(package_data: Dict, python_version: str = "3.12") -> Tuple[st
     return best_wheel["url"], best_wheel["size"]
 
 
-def download_file(url: str, destination: pathlib.Path, expected_size: int, chunk_size: int = 8192) -> Tuple[bool, str]:
+def download_file(url: str, destination: pathlib.Path, expected_size: int, chunk_size: int = 8192) -> tuple[bool, str]:
     print(f"  📥 Downloading {destination.name} ({expected_size / 1024 / 1024:.2f} MB)...")
     try:
         with urllib.request.urlopen(url) as response:
@@ -82,7 +80,7 @@ def download_file(url: str, destination: pathlib.Path, expected_size: int, chunk
         return False, f"Failed: {e!s}"
 
 
-def download_package(package: str, wheels_dir: pathlib.Path, python_version: str = "3.12") -> Tuple[str, bool, str]:
+def download_package(package: str, wheels_dir: pathlib.Path, python_version: str = "3.12") -> tuple[str, bool, str]:
     print(f"🔍 Fetching info for: {package}")
     package_data = get_pypi_json(package)
     if not package_data:

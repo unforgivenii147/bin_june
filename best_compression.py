@@ -1,12 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
-from typing import Dict
-from typing import List
 
 """Module for best_compression.py."""
 
-
 from __future__ import annotations
+
 import bz2
 import gzip
 import hashlib
@@ -19,6 +16,7 @@ import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+
 import brotli
 import py7zr
 import zstandard as zstd
@@ -246,7 +244,7 @@ def compress_zstd(in_path: Path, out_path: Path) -> None:
     out_path.write_bytes(cctx.compress(in_path.read_bytes()))
 
 
-ALGO_SINGLE: Dict[str, Tuple[str, Any]] = {
+ALGO_SINGLE: dict[str, tuple[str, Any]] = {
     "7z": ("7z", compress_7z),
     "gz": ("gz", compress_gz),
     "lzma": ("lzma", compress_lzma),
@@ -384,7 +382,7 @@ def mp_compress_chunks(algo: str, in_path: Path, tmpdir: Path, chunk_size: int, 
         )
 
 
-def choose_best(results: List[Result]) -> Result | None:
+def choose_best(results: list[Result]) -> Result | None:
     ok = [r for r in results if r.ok and r.out_path]
     if not ok:
         return None
@@ -413,7 +411,7 @@ def main() -> None:
     with tempfile.TemporaryDirectory(prefix="compress_bench_") as td:
         tmpdir = Path(td)
         single_algos = ["7z", "gz", "lzma", "bz2", "zip", "brotli", "huffman", "snappy", "zstd"]
-        results_single: List[Result] = []
+        results_single: list[Result] = []
         logger.info("=== Single-process benchmark ===")
         for algo in single_algos:
             logger.info(f"Compressing {algo} ...")
@@ -427,7 +425,7 @@ def main() -> None:
         chunk_size = 4 * 1024 * 1024
         processes = None
         logger.info("=== Multiprocessing chunk benchmark (reporting only) ===")
-        mp_results: List[Result] = []
+        mp_results: list[Result] = []
         for algo in mp_algos:
             logger.info(f"MP chunk compress {algo} (chunk_size={human(chunk_size)}) ...")
             r = mp_compress_chunks(algo, in_path, tmpdir, chunk_size=chunk_size, processes=processes)

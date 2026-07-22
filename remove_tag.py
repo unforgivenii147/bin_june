@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 """Module for remove_tag.py."""
+
 from __future__ import annotations
 
 import os

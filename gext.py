@@ -1,17 +1,16 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Dict
 
 """Module for gext.py."""
 
-import os
 import ast
+import os
 import re
+import shutil
 import tarfile
 import zipfile
-import shutil
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import List, Any
+from typing import Any
 
 OUTPUT_DIR = Path("output")
 ARCHIVE_EXTENSIONS = (".whl", ".zip", ".tar.gz", ".tgz", ".tar.zst", ".tar.xz", ".tar", ".zst")
@@ -100,7 +99,7 @@ def get_unique_filepath(base_path: Path) -> Path:
         i += 1
 
 
-def save_entity(entity: Dict[str, Any]):
+def save_entity(entity: dict[str, Any]):
     filename_base = f"{entity['full_name']}.py"
     output_path_base = OUTPUT_DIR / entity["type"] / filename_base
     output_path_base.parent.mkdir(parents=True, exist_ok=True)
@@ -114,7 +113,7 @@ def save_entity(entity: Dict[str, Any]):
         print(f"Error saving {final_py_path}: {e}")
 
 
-def extract_entities_from_content(content: str, path: Path) -> List[Dict[str, Any]]:
+def extract_entities_from_content(content: str, path: Path) -> list[dict[str, Any]]:
     try:
         tree = ast.parse(content)
         extractor = EntityExtractor(content, path)
@@ -142,7 +141,7 @@ def is_python_file_no_extension(path: Path) -> bool:
     return False
 
 
-def process_single_file(path: Path) -> List[Dict[str, Any]]:
+def process_single_file(path: Path) -> list[dict[str, Any]]:
     try:
         if path.suffix == ".py" or is_python_file_no_extension(path):
             content = path.read_text(encoding="utf-8", errors="ignore")
@@ -153,7 +152,7 @@ def process_single_file(path: Path) -> List[Dict[str, Any]]:
         return []
 
 
-def process_archive(path: Path) -> List[Dict[str, Any]]:
+def process_archive(path: Path) -> list[dict[str, Any]]:
     entities = []
     if path.suffix in (".zip", ".whl"):
         try:
@@ -187,7 +186,7 @@ def process_archive(path: Path) -> List[Dict[str, Any]]:
     return entities
 
 
-def worker_process(path_str: str) -> List[Dict[str, Any]]:
+def worker_process(path_str: str) -> list[dict[str, Any]]:
     path = Path(path_str)
     if path.name.endswith(ARCHIVE_EXTENSIONS):
         return process_archive(path)

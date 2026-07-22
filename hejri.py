@@ -1,8 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 """Module for hejri.py."""
-from dh import georgian_to_hijri
+
 import datetime
+
+from dh import georgian_to_hijri
 
 
 def get_current_ymd():

@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
-from typing import List
 
 """
 Detect and optionally remove repeated multi-line comment blocks (starting with '#')
@@ -21,7 +19,6 @@ import ast
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -34,7 +31,7 @@ def is_comment_line(stripped: str) -> bool:
     return not any(stripped.startswith(prefix) for prefix in EXCLUDED_PREFIXES)
 
 
-def extract_comment_blocks(lines: List[str], start_line: int) -> List[Tuple[str, int, List[str]]]:
+def extract_comment_blocks(lines: list[str], start_line: int) -> list[tuple[str, int, list[str]]]:
     blocks = []
     i = 0
     while i < len(lines):
@@ -65,8 +62,8 @@ def extract_comment_blocks(lines: List[str], start_line: int) -> List[Tuple[str,
     return blocks
 
 
-def collect_comment_blocks(root: Path) -> Dict[str, List[Tuple[Path, int, List[str]]]]:
-    blocks: Dict[str, List[Tuple[Path, int, List[str]]]] = defaultdict(list)
+def collect_comment_blocks(root: Path) -> dict[str, list[tuple[Path, int, list[str]]]]:
+    blocks: dict[str, list[tuple[Path, int, list[str]]]] = defaultdict(list)
     for py_file in root.rglob("*.py"):
         try:
             with open(py_file, encoding="utf-8") as f:
@@ -81,12 +78,12 @@ def collect_comment_blocks(root: Path) -> Dict[str, List[Tuple[Path, int, List[s
 
 
 def find_repeated_blocks(
-    blocks: Dict[str, List[Tuple[Path, int, List[str]]]],
-) -> Dict[str, List[Tuple[Path, int, List[str]]]]:
+    blocks: dict[str, list[tuple[Path, int, list[str]]]],
+) -> dict[str, list[tuple[Path, int, list[str]]]]:
     return {block: occurrences for block, occurrences in blocks.items() if len(occurrences) >= 2}
 
 
-def report(repeated: Dict[str, List[Tuple[Path, int, List[str]]]]) -> None:
+def report(repeated: dict[str, list[tuple[Path, int, list[str]]]]) -> None:
     if not repeated:
         print("No repeated multi-line comment blocks found.")
         return
@@ -101,8 +98,8 @@ def report(repeated: Dict[str, List[Tuple[Path, int, List[str]]]]) -> None:
             print(f"    {Path(filepath).name}:{lineno}")
 
 
-def remove_repeated_blocks(repeated: Dict[str, List[Tuple[Path, int, List[str]]]]) -> None:
-    file_removals: Dict[Path, List[Tuple[int, List[str]]]] = defaultdict(list)
+def remove_repeated_blocks(repeated: dict[str, list[tuple[Path, int, list[str]]]]) -> None:
+    file_removals: dict[Path, list[tuple[int, list[str]]]] = defaultdict(list)
     for _block_text, occurrences in repeated.items():
         for filepath, start_lineno, original_lines in occurrences:
             file_removals[filepath].append((start_lineno, original_lines))

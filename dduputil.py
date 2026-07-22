@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
-from typing import List
+
 """dedup_utils.py
 Usage:
   python dedup_utils.py --copy
@@ -14,11 +13,11 @@ import ast
 import hashlib
 import sys
 import tempfile
-from ast import Name, Tuple, expr
+from ast import Name, expr
 from dataclasses import dataclass
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import Dict, Iterable, Tuple
+from collections.abc import Iterable
 
 from loguru import logger
 
@@ -76,7 +75,7 @@ class Extracted:
     node: ast.AST
     src_text: str
     file: SourceFile
-    imports: List[ast.stmt]
+    imports: list[ast.stmt]
 
 
 def sha256_text(s: str) -> str:
@@ -91,7 +90,7 @@ def is_constant_assign(node: ast.Assign) -> bool:
     if not isinstance(node, ast.Assign):
         return False
 
-    def target_ok(t: Name | Tuple) -> bool:
+    def target_ok(t: Name | tuple) -> bool:
         return isinstance(t, ast.Name)
 
     if any(not target_ok(t) for t in node.targets if isinstance(t, (ast.Name, ast.Tuple))):
@@ -109,7 +108,7 @@ def is_constant_assign(node: ast.Assign) -> bool:
     return lit_ok(node.value)
 
 
-def extract_top_level_imports(tree: ast.Module) -> List[ast.stmt]:
+def extract_top_level_imports(tree: ast.Module) -> list[ast.stmt]:
     return [n for n in tree.body if isinstance(n, (ast.Import, ast.ImportFrom))]
 
 
@@ -117,7 +116,7 @@ def read_file_bytes(path: Path) -> bytes:
     return path.read_bytes()
 
 
-def try_decompress_single(data: bytes, ext: str) -> Tuple[bytes, str] | None:
+def try_decompress_single(data: bytes, ext: str) -> tuple[bytes, str] | None:
     try:
         if ext == ".gz":
             return gzip.decompress(data), ""
@@ -216,7 +215,7 @@ def iter_python_sources(root: Path) -> Iterable[SourceFile]:
             logger.exception("error iterating {}: {}", p, exc)
 
 
-def extract_defs_from_source(srcfile: Tuple[str, str, str, str]) -> Tuple[str, List[Dict]]:
+def extract_defs_from_source(srcfile: tuple[str, str, str, str]) -> tuple[str, list[dict]]:
     path_str, _relpath_str, text, origin = srcfile
     results = []
     try:
@@ -264,8 +263,8 @@ def extract_defs_from_source(srcfile: Tuple[str, str, str, str]) -> Tuple[str, L
 
 
 def partition_by_hash(
-    extracted_map: Dict[str, List[Tuple[SourceFile, Dict]]],
-) -> Dict[str, List[Tuple[SourceFile, Dict]]]:
+    extracted_map: dict[str, list[tuple[SourceFile, dict]]],
+) -> dict[str, list[tuple[SourceFile, dict]]]:
     return extracted_map
 
 
@@ -273,7 +272,7 @@ def ensure_utils_dir() -> None:
     UTILS_DIR.mkdir(exist_ok=True)
 
 
-def append_unique_to_file(target: Path, items: List[Dict], seen_hashes: set) -> None:
+def append_unique_to_file(target: Path, items: list[dict], seen_hashes: set) -> None:
     if not items:
         return
     lines = []
@@ -296,7 +295,7 @@ def safe_write_file(path: Path, content: str) -> None:
     path.write_text(content, encoding="utf-8")
 
 
-def remove_nodes_from_source(original_src: str, nodes_to_remove: List[str]) -> str:
+def remove_nodes_from_source(original_src: str, nodes_to_remove: list[str]) -> str:
     out = original_src
     for snippet in nodes_to_remove:
         idx = out.find(snippet)
@@ -327,7 +326,7 @@ def remove_nodes_from_source(original_src: str, nodes_to_remove: List[str]) -> s
     return out
 
 
-def add_imports_to_source(original_src: str, import_lines: List[str]) -> str:
+def add_imports_to_source(original_src: str, import_lines: list[str]) -> str:
     try:
         tree = ast.parse(original_src)
     except Exception:
@@ -384,7 +383,7 @@ def main() -> None:
     sources = list(iter_python_sources(root))
     logger.info("found {} candidate sources", len(sources))
     tasks = [(str(s.path), str(s.relpath), s.text, s.origin) for s in sources]
-    extracted_map: Dict[str, List[Tuple[SourceFile, Dict]]] = {}
+    extracted_map: dict[str, list[tuple[SourceFile, dict]]] = {}
     with Pool(processes=args.jobs) as pool:
         for path_str, items in pool.imap_unordered(extract_defs_from_source, tasks):
             if not items:
@@ -401,7 +400,7 @@ def main() -> None:
     funcs_to_write = []
     classes_to_write = []
     consts_to_write = []
-    modifications: Dict[Path, Dict[str, List]] = {}
+    modifications: dict[Path, dict[str, list]] = {}
     for h, instances in dups.items():
         srcfile, it = instances[0]
         kind = it["kind"]

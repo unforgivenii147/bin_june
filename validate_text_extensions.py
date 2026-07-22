@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
-
 
 """
 Sanity check script to validate text file extensions.
@@ -16,7 +14,7 @@ import mimetypes
 import os
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import Iterator, Set
+from collections.abc import Iterator
 
 from dh import TXT_EXT
 
@@ -44,7 +42,7 @@ class SpinnerProgressReporter:
 
 def memory_efficient_file_finder(
     root_dir: str,
-    extensions: Set[str],
+    extensions: set[str],
     progress_callback=None,
     skip_symlinks: bool = True,
     skip_mount_points: bool = True,
@@ -114,7 +112,7 @@ def is_text_file(file_path: Path) -> bool:
         return None
 
 
-def check_file(file_path: Path) -> Tuple[Path, str, bool, str]:
+def check_file(file_path: Path) -> tuple[Path, str, bool, str]:
     try:
         extension = file_path.suffix.lower()
         is_text = is_text_file(file_path)

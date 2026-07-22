@@ -8,8 +8,9 @@ Uses pathlib and parallel processing.
 
 import json
 import time
-from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
+
 from deep_translator import GoogleTranslator
 
 

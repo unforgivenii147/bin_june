@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 """Module for exlinks.py."""
+
 from __future__ import annotations
 
 import re
@@ -11,7 +12,6 @@ from pathlib import Path
 
 import chardet
 from loguru import logger
-
 
 TARGET_EXTENSIONS = {".tar.gz", ".pdf", ".zip", ".css", ".js", ".tar.xz", ".7z", ".whl", ".html"}
 COMPRESSED_ARCHIVES = {".tar.xz", ".tar.gz", ".tar.zst", ".7z", ".br", ".zip", ".whl"}

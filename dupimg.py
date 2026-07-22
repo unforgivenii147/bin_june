@@ -1,5 +1,5 @@
-#!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
+#!/data/data/com.termux/files/usr/bin/python
+
 """
 Find and organize duplicate images in the current directory into subfolders.
 Same image content detection works even with different resolutions.
@@ -28,7 +28,6 @@ import sys
 import time
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import List
 
 import cv2
 import numpy as np
@@ -82,7 +81,7 @@ def hamming_distance(hash1: str, hash2: str) -> int:
     return sum(c1 != c2 for c1, c2 in zip(hash1, hash2, strict=False))
 
 
-def compute_hash(file_path: Path) -> Tuple[str, str | None]:
+def compute_hash(file_path: Path) -> tuple[str, str | None]:
     img = load_image_cv2(str(file_path))
     if img is None:
         return file_path.name, None
@@ -90,7 +89,7 @@ def compute_hash(file_path: Path) -> Tuple[str, str | None]:
     return file_path.name, hash_str
 
 
-def find_duplicates(hashes: List[Tuple[str, str]], threshold: int) -> List[List[str]]:
+def find_duplicates(hashes: list[tuple[str, str]], threshold: int) -> list[list[str]]:
     groups = []
     used = set()
     for i, (file_i, hash_i) in enumerate(hashes):
@@ -125,8 +124,8 @@ def get_file_info(file_path: Path) -> str:
 
 
 def move_duplicates_to_folders(
-    groups: List[List[str]], current_dir: Path, output_prefix: str, dry_run: bool = False
-) -> Tuple[int, int]:
+    groups: list[list[str]], current_dir: Path, output_prefix: str, dry_run: bool = False
+) -> tuple[int, int]:
     folders_created = 0
     files_moved = 0
     for group_idx, group in enumerate(sorted(groups, key=len, reverse=True), 1):

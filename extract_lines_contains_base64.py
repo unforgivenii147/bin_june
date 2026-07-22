@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 """Module for extract_lines_contains_base64.py."""
+
 from __future__ import annotations
 
 import sys

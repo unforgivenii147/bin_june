@@ -2,7 +2,6 @@
 
 """Module for pretp.py."""
 
-
 from __future__ import annotations
 
 import concurrent.futures

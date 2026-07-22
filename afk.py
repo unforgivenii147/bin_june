@@ -24,7 +24,6 @@ import tempfile
 import zipfile
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Set
 
 # SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -75,7 +74,7 @@ def _collect_string_uses(tree: ast.AST) -> set[str]:
     return tokens
 
 
-def _collect_all_names(tree: ast.AST) -> Set[str]:
+def _collect_all_names(tree: ast.AST) -> set[str]:
     for node in ast.walk(tree):
         if isinstance(node, ast.Assign):
             for target in node.targets:
@@ -113,7 +112,7 @@ def _is_module_used_in_docstring(tree: ast.AST, module_name: str) -> bool:
     return False
 
 
-def _get_re_export_names(tree: ast.AST) -> Set[str]:
+def _get_re_export_names(tree: ast.AST) -> set[str]:
     re_exports = set()
     __all__names = _collect_all_names(tree)
     for node in ast.walk(tree):

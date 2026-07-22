@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
-
 
 """
 Convert escaped regex strings back to raw string format.
@@ -16,7 +14,6 @@ import sys
 from dataclasses import dataclass
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import List
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 RE_FUNCTIONS = {"compile", "search", "match", "fullmatch", "split", "findall", "finditer", "sub", "subn"}
@@ -161,7 +158,7 @@ def validate_python_file(content: str) -> bool:
         return False
 
 
-def process_file(filepath: Path, create_backup: bool = True) -> Tuple[Path, bool, str]:
+def process_file(filepath: Path, create_backup: bool = True) -> tuple[Path, bool, str]:
     try:
         original_content = filepath.read_text(encoding="utf-8")
     except Exception as e:
@@ -183,7 +180,7 @@ def process_file(filepath: Path, create_backup: bool = True) -> Tuple[Path, bool
         return (filepath, False, f"Failed to write: {e}")
 
 
-def collect_python_files(inputs: List[Path]) -> List[Path]:
+def collect_python_files(inputs: list[Path]) -> list[Path]:
     python_files = set()
     for input_path in inputs:
         if not input_path.exists():

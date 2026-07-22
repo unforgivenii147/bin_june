@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Union
-
 
 """
 Pure Python implementation of qalc (quick calculator) CLI.
@@ -194,7 +192,7 @@ class Calculator:
             i += 1
         return result
 
-    def evaluate(self, expression: str) -> Union[float, str]:
+    def evaluate(self, expression: str) -> float | str:
         try:
             tokens = self._tokenize(expression)
             if not tokens:
@@ -216,7 +214,7 @@ class Calculator:
         except Exception as e:
             return f"Error: {e!s}"
 
-    def format_result(self, result: Union[float, str]) -> str:
+    def format_result(self, result: float | str) -> str:
         if isinstance(result, str):
             return result
         if isinstance(result, bool):
@@ -256,7 +254,7 @@ def create_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def format_result_with_options(result: Union[float, str], format_type: str = "auto") -> str:
+def format_result_with_options(result: float | str, format_type: str = "auto") -> str:
     if isinstance(result, str):
         return result
     if format_type == "hex":

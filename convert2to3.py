@@ -16,7 +16,6 @@ from lib2to3.refactor import RefactoringTool, get_fixers_from_package
 from pathlib import Path
 from typing import list, tuple
 
-
 logging.getLogger("lib2to3").setLevel(logging.WARNING)
 
 

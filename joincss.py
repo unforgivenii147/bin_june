@@ -2,7 +2,6 @@
 
 """Module for joincss.py."""
 
-
 from __future__ import annotations
 
 import re

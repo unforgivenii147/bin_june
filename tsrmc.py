@@ -17,7 +17,6 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
 
-
 try:
     from tree_sitter import Node, Parser
     from tree_sitter_python import language as python_language

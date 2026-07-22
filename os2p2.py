@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
-from typing import List
 
 """Module for os2p2.py."""
 
@@ -13,7 +11,7 @@ from dataclasses import dataclass
 from enum import Enum
 from os import scandir as os_scandir
 from pathlib import Path
-from typing import Callable, Dict, Set
+from collections.abc import Callable
 
 CHUNK_SIZE = 1024 * 1024
 
@@ -223,9 +221,9 @@ class Transformation:
 
 class PathlibRefactorer:
     def __init__(self) -> None:
-        self.transformations: List[Transformation] = []
+        self.transformations: list[Transformation] = []
         self._setup_transformations()
-        self.used_transformations: Set[str] = set()
+        self.used_transformations: set[str] = set()
 
     def _setup_transformations(self) -> None:
         simple_replacements = {
@@ -354,7 +352,7 @@ class PathlibRefactorer:
         path_arg = match.group(1)
         return f"((str(p), [d.name for d in p.iterdir() if d.is_dir()], [f.name for f in p.iterdir() if f.is_file()]) for p in Path({path_arg}).rglob('*') if p.is_dir())"
 
-    def apply_transformations(self, source: str) -> Tuple[str, Set[str]]:
+    def apply_transformations(self, source: str) -> tuple[str, set[str]]:
         result = source
         applied = set()
         for trans in self.transformations:
@@ -381,7 +379,7 @@ class PathlibRefactorer:
         lines.insert(insert_idx, "from pathlib import Path\n")
         return "".join(lines)
 
-    def refactor_file(self, file_path: Path, dry_run: bool = False, create_backup: bool = True) -> Dict:
+    def refactor_file(self, file_path: Path, dry_run: bool = False, create_backup: bool = True) -> dict:
         result = {
             "path": file_path,
             "success": False,

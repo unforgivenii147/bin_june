@@ -1,21 +1,22 @@
 #!/data/data/com.termux/files/usr/bin/env python
 from typing import Optional
+
 """
 HTML Minifier - Python wrapper for html-minifier-terser
 Minifies HTML files recursively with parallel processing.
 """
 
-import subprocess
-import sys
+import argparse
 import json
 import shutil
+import subprocess
+import sys
 import tempfile
-from pathlib import Path
-from concurrent.futures import ProcessPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
-from typing import List
-import argparse
-from colorama import init, Fore, Style
+from pathlib import Path
+
+from colorama import Fore, Style, init
 
 # Initialize colorama for cross-platform colored output
 init(autoreset=True)
@@ -175,7 +176,7 @@ class HTMLMinifier:
 
         return content
 
-    def _build_cli_args(self, config_file: Path) -> List[str]:
+    def _build_cli_args(self, config_file: Path) -> list[str]:
         """Build command-line arguments from config."""
         args = ["html-minifier-terser", "--config-file", str(config_file)]
         return args
@@ -232,7 +233,7 @@ class HTMLMinifier:
                     pass
 
     @staticmethod
-    def find_html_files(directories: List[Path]) -> List[Path]:
+    def find_html_files(directories: list[Path]) -> list[Path]:
         """Find all HTML files in given directories recursively."""
         html_files = []
         for directory in directories:
@@ -249,7 +250,7 @@ class HTMLMinifier:
 
         return sorted(set(html_files))  # Remove duplicates and sort
 
-    def minify_directory(self, directories: List[Path], max_workers: int = 4) -> None:
+    def minify_directory(self, directories: list[Path], max_workers: int = 4) -> None:
         """Minify all HTML files in directories using parallel processing."""
         html_files = self.find_html_files(directories)
 
@@ -263,14 +264,14 @@ class HTMLMinifier:
             print(f"{Fore.YELLOW}⚠️  Using aggressive mode - review output carefully{Style.RESET_ALL}")
         print(f"{Fore.CYAN}{'=' * 60}{Style.RESET_ALL}\n")
 
-        stats_list: List[MinifyStats] = []
+        stats_list: list[MinifyStats] = []
         successful = 0
         failed = 0
         total_original = 0
         total_minified = 0
 
         # Process files in parallel
-        with ProcessPoolExecutor(max_workers=max_workers) as executor:
+        with ThreadPoolExecutor(max_workers=8) as executor:
             future_to_file = {executor.submit(self.minify_file, file_path): file_path for file_path in html_files}
 
             for future in as_completed(future_to_file):

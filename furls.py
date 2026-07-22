@@ -1,10 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Dict
 
 """Module for furls.py."""
 
-
 from __future__ import annotations
+
 import argparse
 import contextlib
 import io
@@ -19,14 +18,16 @@ from inspect import getfullargspec
 from itertools import chain
 from pathlib import Path
 from tarfile import TarFile
-from typing import Any, Callable
+from typing import Any
+from collections.abc import Callable
 from urllib.parse import urlparse
 from zipfile import ZipFile
+
 import zstd
 
 
 class ValidationFailure(Exception):
-    def __init__(self, function: Callable[..., Any], arg_dict: Dict[str, Any]):
+    def __init__(self, function: Callable[..., Any], arg_dict: dict[str, Any]):
         self.func = function
         self.__dict__.update(arg_dict)
 

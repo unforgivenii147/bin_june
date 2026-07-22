@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 """Module for gdrive_syncer4.py."""
+
 from __future__ import annotations
 
 import os
@@ -11,7 +12,6 @@ from pathlib import Path
 import requests
 from dotenv import load_dotenv
 from requests.models import Response
-
 
 env_path = Path.home() / ".env"
 if env_path.exists():

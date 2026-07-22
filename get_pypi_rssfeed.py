@@ -1,16 +1,17 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Dict
 from typing import Optional
+
 """
 PyPI RSS Feed Parser
 Fetches and extracts newly added packages from the PyPI RSS feed.
 """
 
-import requests
+import sys
 import xml.etree.ElementTree as ET
 from datetime import datetime
-import sys
 from typing import List
+
+import requests
 
 # PyPI RSS feed URL for latest packages
 PYPI_RSS_URL = "https://pypi.org/rss/packages.xml"
@@ -35,7 +36,7 @@ def fetch_rss_feed(url: str) -> Optional[str]:
         return None
 
 
-def parse_rss_feed(xml_content: str) -> List[Dict[str, str]]:
+def parse_rss_feed(xml_content: str) -> list[dict[str, str]]:
     """
     Parse the RSS feed XML and extract package information.
 
@@ -85,7 +86,7 @@ def parse_rss_feed(xml_content: str) -> List[Dict[str, str]]:
     return packages
 
 
-def display_packages(packages: List[Dict[str, str]], limit: Optional[int] = None):
+def display_packages(packages: list[dict[str, str]], limit: Optional[int] = None):
     """
     Display package information in a formatted way.
 
@@ -120,7 +121,7 @@ def display_packages(packages: List[Dict[str, str]], limit: Optional[int] = None
         print("-" * 80)
 
 
-def save_to_file(packages: List[Dict[str, str]], filename: str = "pypi_packages.txt"):
+def save_to_file(packages: list[dict[str, str]], filename: str = "pypi_packages.txt"):
     """
     Save extracted packages to a text file.
 

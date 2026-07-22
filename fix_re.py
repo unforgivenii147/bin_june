@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
-
 
 """
 Fix regex patterns in Python files:
@@ -27,7 +25,6 @@ from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass, field
 from multiprocessing import cpu_count
 from pathlib import Path
-from typing import List
 
 # SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 RE_FUNCTIONS = {"compile", "search", "match", "fullmatch", "split", "findall", "finditer", "sub", "subn"}
@@ -81,8 +78,8 @@ REGEX_INDICATORS = {
 
 @dataclass
 class StringModification:
-    start: Tuple[int, int]
-    end: Tuple[int, int]
+    start: tuple[int, int]
+    end: tuple[int, int]
     original: str
     modified: str
     line_offset: int = 0
@@ -134,7 +131,7 @@ class RegexFixer:
             i += 1
         return bool(any(indicator in content for indicator in REGEX_INDICATORS))
 
-    def parse_string_literal(self, token_str: str) -> Tuple[str, str, str, bool]:
+    def parse_string_literal(self, token_str: str) -> tuple[str, str, str, bool]:
         prefix_end = 0
         for ch in token_str:
             if ch in ('"', "'"):
@@ -174,7 +171,7 @@ class RegexFixer:
             new_prefix = "r" + prefix
         return f"{new_prefix}{opening}{new_content}{opening}"
 
-    def process_tokens(self, code: str) -> List[StringModification]:
+    def process_tokens(self, code: str) -> list[StringModification]:
         modifications = []
         try:
             tokens = list(tokenize.generate_tokens(io.StringIO(code).readline))
@@ -218,7 +215,7 @@ class RegexFixer:
                 i += 1
         return modifications
 
-    def apply_modifications(self, code: str, modifications: List[StringModification]) -> str:
+    def apply_modifications(self, code: str, modifications: list[StringModification]) -> str:
         if not modifications:
             return code
         lines = code.splitlines(keepends=True)
@@ -245,7 +242,7 @@ class RegexFixer:
         except SyntaxError:
             return False
 
-    def process_file(self, filepath: Path) -> Tuple[Path, bool, str]:
+    def process_file(self, filepath: Path) -> tuple[Path, bool, str]:
         try:
             original_code = filepath.read_text(encoding="utf-8")
         except Exception as e:
@@ -276,7 +273,7 @@ class RegexFixer:
         except Exception as e:
             return (filepath, False, f"Failed to write: {e}")
 
-    def collect_files(self, paths: List[Path]) -> List[Path]:
+    def collect_files(self, paths: list[Path]) -> list[Path]:
         python_files = set()
         exclude_dirs = {
             ".venv",
@@ -306,7 +303,7 @@ class RegexFixer:
                     python_files.add(py_file)
         return sorted(python_files)
 
-    def process_files(self, files: List[Path]) -> List[Tuple[Path, bool, str]]:
+    def process_files(self, files: list[Path]) -> list[tuple[Path, bool, str]]:
         if not files:
             return []
         self.stats.total_files = len(files)
@@ -335,7 +332,7 @@ class RegexFixer:
                         self.stats.errors += 1
                 return results
 
-    def _update_stats(self, result: Tuple[Path, bool, str]):
+    def _update_stats(self, result: tuple[Path, bool, str]):
         _, success, message = result
         if success:
             self.stats.processed += 1
@@ -346,7 +343,7 @@ class RegexFixer:
         else:
             self.stats.errors += 1
 
-    def print_summary(self, results: List[Tuple[Path, bool, str]]):
+    def print_summary(self, results: list[tuple[Path, bool, str]]):
         if not results:
             print("\nNo files processed.")
             return

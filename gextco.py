@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import List
 
 """
 Extract entities (classes, functions, constants) from Python files recursively.
@@ -21,7 +20,6 @@ from collections import defaultdict
 from dataclasses import dataclass
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import Dict, Set
 
 from tqdm import tqdm
 
@@ -41,19 +39,19 @@ class Entity:
 @dataclass
 class ExtractionResult:
     file_path: Path
-    classes: List[Entity]
-    functions: List[Entity]
-    constants: List[Entity]
-    imports: Set[str]
+    classes: list[Entity]
+    functions: list[Entity]
+    constants: list[Entity]
+    imports: set[str]
 
 
 class EntityExtractor(ast.NodeVisitor):
     def __init__(self, file_path: Path):
         self.file_path = file_path
-        self.classes: List[Entity] = []
-        self.functions: List[Entity] = []
-        self.constants: List[Entity] = []
-        self.imports: Set[str] = set()
+        self.classes: list[Entity] = []
+        self.functions: list[Entity] = []
+        self.constants: list[Entity] = []
+        self.imports: set[str] = set()
         self._in_class = False
 
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
@@ -116,15 +114,15 @@ def extract_from_file(file_path: Path) -> ExtractionResult:
         return ExtractionResult(file_path=file_path, classes=[], functions=[], constants=[], imports=set())
 
 
-def find_python_files(root_dir: Path) -> List[Path]:
+def find_python_files(root_dir: Path) -> list[Path]:
     return list(root_dir.rglob("*.py"))
 
 
 def save_entities(
     output_dir: Path,
     entity_type: str,
-    entities_by_file: Dict[str, List[Entity]],
-    unique_entities: Set[str],
+    entities_by_file: dict[str, list[Entity]],
+    unique_entities: set[str],
 ) -> None:
     entity_dir = output_dir / entity_type
     entity_dir.mkdir(parents=True, exist_ok=True)
@@ -142,7 +140,7 @@ def save_entities(
     logger.info(f"Saved {len(unique_entities)} unique {entity_type}")
 
 
-def save_imports(output_dir: Path, imports_by_dir: Dict[str, Set[str]]) -> None:
+def save_imports(output_dir: Path, imports_by_dir: dict[str, set[str]]) -> None:
     imports_dir = output_dir / "imports"
     imports_dir.mkdir(parents=True, exist_ok=True)
     for dir_name, imports in imports_by_dir.items():

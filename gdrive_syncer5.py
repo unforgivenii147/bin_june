@@ -2,13 +2,14 @@
 
 """Module for gdrive_syncer5.py."""
 
-
 from __future__ import annotations
+
 import os
 import pickle
 import time
 from datetime import datetime
 from pathlib import Path
+
 import requests
 from dotenv import load_dotenv
 from requests.models import Response

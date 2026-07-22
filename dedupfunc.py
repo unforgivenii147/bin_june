@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
-from typing import List
 
 """
 Duplicate Function Detector and Remover
@@ -16,7 +14,6 @@ import re
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -42,8 +39,8 @@ class FunctionInfo:
 
 class DuplicateFunctionFinder(ast.NodeVisitor):
     def __init__(self) -> None:
-        self.functions: List[FunctionInfo] = []
-        self.source_lines: List[str] = []
+        self.functions: list[FunctionInfo] = []
+        self.source_lines: list[str] = []
 
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
         body_start = node.body[0].lineno - 1
@@ -54,7 +51,7 @@ class DuplicateFunctionFinder(ast.NodeVisitor):
         self.functions.append(func_info)
         self.generic_visit(node)
 
-    def analyze_file(self, filepath: str) -> Dict[str, List[FunctionInfo]]:
+    def analyze_file(self, filepath: str) -> dict[str, list[FunctionInfo]]:
         with open(filepath, encoding="utf-8") as f:
             content = f.read()
             self.source_lines = content.splitlines()
@@ -76,7 +73,7 @@ class DuplicateFunctionRemover:
         self.content = None
         self.lines = None
 
-    def _get_function_lines(self, func_info: FunctionInfo) -> Tuple[int, int]:
+    def _get_function_lines(self, func_info: FunctionInfo) -> tuple[int, int]:
         node = func_info.node
         end_line = node.end_lineno if hasattr(node, "end_lineno") else node.lineno
         if node.decorator_list:
@@ -89,7 +86,7 @@ class DuplicateFunctionRemover:
         start_line, end_line = self._get_function_lines(func_info)
         return "\n".join(self.lines[start_line - 1 : end_line])
 
-    def remove_duplicates(self, groups: Dict[str, List[FunctionInfo]], keep_choice: Dict[str, int]) -> bool:
+    def remove_duplicates(self, groups: dict[str, list[FunctionInfo]], keep_choice: dict[str, int]) -> bool:
         with open(self.filepath, encoding="utf-8") as f:
             self.content = f.read()
             self.lines = self.content.splitlines()
@@ -122,7 +119,7 @@ class DuplicateFunctionRemover:
         return str(backup_path)
 
 
-def display_duplicates(groups: Dict[str, List[FunctionInfo]]) -> bool:
+def display_duplicates(groups: dict[str, list[FunctionInfo]]) -> bool:
     if not groups:
         print("No duplicate functions found!")
         return False
@@ -141,7 +138,7 @@ def display_duplicates(groups: Dict[str, List[FunctionInfo]]) -> bool:
     return True
 
 
-def get_user_choices(groups: Dict[str, List[FunctionInfo]]) -> Dict[str, int]:
+def get_user_choices(groups: dict[str, list[FunctionInfo]]) -> dict[str, int]:
     choices = {}
     for body, funcs in groups.items():
         print(f"\nGroup with {len(funcs)} duplicate functions:")

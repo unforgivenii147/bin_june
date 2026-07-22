@@ -7,12 +7,11 @@ from __future__ import annotations
 import shutil
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Tuple
 
 # SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
-def move_tests_folder(tests_path: Path, base_src: Path, base_dst: Path) -> Tuple[bool, str]:
+def move_tests_folder(tests_path: Path, base_src: Path, base_dst: Path) -> tuple[bool, str]:
     try:
         relative_path = tests_path.relative_to(base_src)
         parent_relative = relative_path.parent

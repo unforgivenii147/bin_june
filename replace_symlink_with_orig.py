@@ -2,7 +2,6 @@
 
 """Module for replace_symlink_with_orig.py."""
 
-
 from __future__ import annotations
 
 import shutil

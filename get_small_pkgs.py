@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 """Module for get_small_pkgs.py."""
+
 from __future__ import annotations
 
 import csv

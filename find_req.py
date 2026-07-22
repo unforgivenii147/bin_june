@@ -1,13 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-"""Module for find_req.py."""
 
 from __future__ import annotations
 
 import sys
 from pathlib import Path
-
-# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def process_file(path: Path, text: str) -> None:
@@ -19,7 +16,7 @@ def process_file(path: Path, text: str) -> None:
 
 
 if __name__ == "__main__":
-    cwd = Path("/data/data/com.termux/files/usr/lib/python3.12/site-packages")
+    cwd = Path("/data/data/com.termux/files/home/.local/lib/python3.12/site-packages")
     target = sys.argv[1]
     for path in cwd.rglob("METADATA"):
         process_file(path, target)

@@ -11,7 +11,6 @@ import secrets
 import sys
 from pathlib import Path
 
-
 MMAP_THRESHOLD_BYTES = 1 * 1024 * 1024
 
 

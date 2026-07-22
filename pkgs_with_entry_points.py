@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
-from typing import List
 
 """
 Script to find Python packages in system site directories and categorize them based on entry_points.txt.
@@ -23,12 +21,11 @@ import sys
 from datetime import datetime
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import Dict
 
 # SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
-def get_site_packages_dirs() -> List[Path]:
+def get_site_packages_dirs() -> list[Path]:
     site_dirs = []
     import site
 
@@ -119,7 +116,7 @@ def is_pure_python_package(pkg_name: str, site_dir: Path) -> bool:
         return True
 
 
-def parse_entry_points(entry_points_file: Path) -> Dict[str, List[str]]:
+def parse_entry_points(entry_points_file: Path) -> dict[str, list[str]]:
     scripts = {"console_scripts": [], "gui_scripts": [], "other": []}
     try:
         if not entry_points_file.exists():
@@ -160,7 +157,7 @@ def parse_entry_points(entry_points_file: Path) -> Dict[str, List[str]]:
     return scripts
 
 
-def scan_package(package_path: Path, site_dir: Path) -> Dict[str, any]:
+def scan_package(package_path: Path, site_dir: Path) -> dict[str, any]:
     pkg_name = get_package_name_from_path(package_path)
     result = {
         "name": pkg_name,
@@ -215,7 +212,7 @@ def scan_package(package_path: Path, site_dir: Path) -> Dict[str, any]:
     return result
 
 
-def find_packages_categorized(site_dir: Path) -> Tuple[List[str], List[str], List[str], List[str]]:
+def find_packages_categorized(site_dir: Path) -> tuple[list[str], list[str], list[str], list[str]]:
     pure_without_ep = []
     nonpure_without_ep = []
     pure_with_ep = []
@@ -454,7 +451,7 @@ def main():
                 print(f"  ... and {len(unique_pure_ep) - 5} more")
 
 
-def scan_for_entry_points(site_dir: Path) -> List[Dict]:
+def scan_for_entry_points(site_dir: Path) -> list[dict]:
     packages_with_ep = []
     processed = set()
     try:

@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
 from typing import Tuple
+
 """
 Parallel GZIP Compression Script
 Compresses files recursively using maximum compression with gzip module.
@@ -39,7 +40,7 @@ class CompressionStats:
         self.failed += 1
 
 
-def compress_file(file_path: Path) -> Tuple[Path, bool, int, int, str]:
+def compress_file(file_path: Path) -> tuple[Path, bool, int, int, str]:
     """
     Compress a single file using gzip with maximum compression.
 
@@ -74,7 +75,7 @@ def compress_file(file_path: Path) -> Tuple[Path, bool, int, int, str]:
         return (file_path, False, 0, 0, str(e))
 
 
-def find_files_to_compress(directories: List[Path], skip_extensions: set | None = None) -> List[Path]:
+def find_files_to_compress(directories: list[Path], skip_extensions: set | None = None) -> list[Path]:
     """
     Find all files recursively in given directories that should be compressed.
 

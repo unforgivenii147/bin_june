@@ -4,10 +4,10 @@ Extract all .tar.xz files in current directory using parallel processing,
 then remove the original archive files.
 """
 
-import tarfile
-from pathlib import Path
-from concurrent.futures import ProcessPoolExecutor, as_completed
 import sys
+import tarfile
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
 
 
 def extract_and_remove(tar_path: Path) -> tuple[Path, bool, str]:

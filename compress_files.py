@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
 
 """Module for compress_files.py."""
 
@@ -10,7 +9,6 @@ import sys
 import textwrap
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import List
 
 import lzma_mt
 
@@ -92,7 +90,7 @@ def is_media_file(path: Path) -> bool:
     return path.suffix.lower() in MEDIA_EXTENSIONS
 
 
-def get_files_to_process(root_dir: Path, compress: bool) -> List[Path]:
+def get_files_to_process(root_dir: Path, compress: bool) -> list[Path]:
     files = []
     if compress:
         for file in root_dir.rglob("*"):
@@ -108,7 +106,7 @@ def get_files_to_process(root_dir: Path, compress: bool) -> List[Path]:
 
 def compress_file(
     filepath: Path, preset: int = 9, threads: int = 4, remove_orig: bool = True
-) -> Tuple[Path, bool, str, int, int]:
+) -> tuple[Path, bool, str, int, int]:
     try:
         with open(filepath, "rb") as f:
             data = f.read()
@@ -127,7 +125,7 @@ def compress_file(
         return filepath, False, f"Error: {e!s}", 0, 0
 
 
-def decompress_file(filepath: Path, remove_orig: bool = True) -> Tuple[Path, bool, str, int, int]:
+def decompress_file(filepath: Path, remove_orig: bool = True) -> tuple[Path, bool, str, int, int]:
     try:
         if filepath.suffix.lower() != ".xz":
             return filepath, False, "Error: Not an .xz file", 0, 0

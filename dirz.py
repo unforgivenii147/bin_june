@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 """Module for dirz.py."""
+
 from pathlib import Path
 
 if __name__ == "__main__":

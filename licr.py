@@ -2,9 +2,10 @@
 
 """Module for licr.py."""
 
-
 from __future__ import annotations
+
 from pathlib import Path
+
 import dh
 
 EXT = [".md", ".txt", ".rst"]

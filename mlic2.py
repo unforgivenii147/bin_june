@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
-from typing import List
 
 """Module for mlic2.py."""
 
@@ -12,7 +10,6 @@ import sys
 from collections import defaultdict
 from functools import partial
 from pathlib import Path
-from typing import Dict
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -118,7 +115,7 @@ def is_text_file(filepath: Path) -> bool:
     return False
 
 
-def read_file_content(filepath: Path) -> Tuple[Path, List[str], str]:
+def read_file_content(filepath: Path) -> tuple[Path, list[str], str]:
     try:
         with open(filepath, encoding="utf-8") as f:
             lines = f.readlines()
@@ -136,7 +133,7 @@ def read_file_content(filepath: Path) -> Tuple[Path, List[str], str]:
         return filepath, [], ""
 
 
-def find_multiline_blocks(text: str, min_lines: int = 3) -> Dict[str, List[Tuple[int, str]]]:
+def find_multiline_blocks(text: str, min_lines: int = 3) -> dict[str, list[tuple[int, str]]]:
     lines = text.splitlines()
     if len(lines) < min_lines:
         return {}
@@ -173,7 +170,7 @@ def find_multiline_blocks(text: str, min_lines: int = 3) -> Dict[str, List[Tuple
     return dict(blocks)
 
 
-def scan_file(filepath: Path, min_lines: int = 3) -> Dict[str, List[Tuple[Path, int, str]]]:
+def scan_file(filepath: Path, min_lines: int = 3) -> dict[str, list[tuple[Path, int, str]]]:
     if not is_text_file(filepath):
         return {}
     filepath, _lines, text = read_file_content(filepath)
@@ -188,7 +185,7 @@ def scan_file(filepath: Path, min_lines: int = 3) -> Dict[str, List[Tuple[Path, 
 
 def collect_multiline_repeats(
     root: Path, min_lines: int = 3, num_workers: int | None = None
-) -> Dict[str, List[Tuple[Path, int, str]]]:
+) -> dict[str, list[tuple[Path, int, str]]]:
     if num_workers is None:
         num_workers = mp.cpu_count()
     text_files = []
@@ -215,7 +212,7 @@ def collect_multiline_repeats(
     return filtered
 
 
-def report(repeated: Dict[str, List[Tuple[Path, int, str]]]) -> None:
+def report(repeated: dict[str, list[tuple[Path, int, str]]]) -> None:
     if not repeated:
         print("No repeated multiline blocks found.")
         return
@@ -229,7 +226,7 @@ def report(repeated: Dict[str, List[Tuple[Path, int, str]]]) -> None:
         print("-" * 40)
 
 
-def save_to_file(repeated: Dict[str, List[Tuple[Path, int, str]]], output_file: Path) -> None:
+def save_to_file(repeated: dict[str, list[tuple[Path, int, str]]], output_file: Path) -> None:
     if not repeated:
         return
     try:

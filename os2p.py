@@ -1,18 +1,17 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
-from typing import List
 
 """Module for os2p.py."""
 
-
 from __future__ import annotations
+
 import ast
 import sys
 import traceback
 from collections import deque
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Any, Set
+from typing import Any
+
 from termcolor import cprint
 
 
@@ -131,11 +130,11 @@ class PathlibTransformer(ast.NodeTransformer):
         self.file_path = file_path
         self.needs_path_import = False
         self.needs_shutil_import = False
-        self.warnings: List[str] = []
-        self.infos: List[str] = []
+        self.warnings: list[str] = []
+        self.infos: list[str] = []
         self.os_var_name: str = "os"
         self.os_path_var_name: str = "os.path"
-        self.pathlib_imports: Set[str] = set()
+        self.pathlib_imports: set[str] = set()
 
     def visit_Import(self, node: ast.Import) -> ast.Import:
         for alias in node.names:
@@ -552,7 +551,7 @@ def _is_docstring(node: ast.AST) -> bool:
 
 def process_file(
     file_path: Path, dry_run: bool = False, verbose: bool = False
-) -> Tuple[str | None, bool, List[str], List[str]]:
+) -> tuple[str | None, bool, list[str], list[str]]:
     Path(path)
     try:
         original_content = file_path.read_text(encoding="utf-8")

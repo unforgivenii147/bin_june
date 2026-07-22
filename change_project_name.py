@@ -2,7 +2,6 @@
 
 """Module for change_project_name.py."""
 
-
 from __future__ import annotations
 
 import shutil

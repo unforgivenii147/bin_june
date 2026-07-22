@@ -52,16 +52,24 @@ def remove_string_from_names(
     except PermissionError:
         print(f"Permission denied: {current_path}")
         return renamed_count
+
     for item in items:
-        if item.is_file():
+        if should_skip(item):
+            continue
+
+        if item.is_file() or item.is_dir():
             if string_to_remove in item.name:
                 new_name = item.name.replace(string_to_remove, "")
                 if not new_name.strip():
-                    print(f"Warning: Removing '{string_to_remove}' would make filename empty for '{item.name}'")
+                    print(f"Warning: Removing '{string_to_remove}' would make name empty for '{item.name}'")
                     continue
+
                 new_path = current_path / new_name
                 if new_path.exists():
                     new_path = unique_path(new_path)
+
+                if dry_run:
+                    print(f"[DRY RUN] Would rename: {item} -> {new_name}")
                 else:
                     try:
                         item.rename(new_path)
@@ -69,24 +77,11 @@ def remove_string_from_names(
                         renamed_count += 1
                     except OSError as e:
                         print(f"Error renaming '{item.name}': {e}")
-        elif item.is_dir():
-            if string_to_remove in item.name:
-                new_name = item.name.replace(string_to_remove, "")
-                if not new_name.strip():
-                    print(f"Warning: Removing '{string_to_remove}' would make dirname empty for '{item.name}'")
-                    continue
-                new_path = current_path / new_name
-                if new_path.exists():
-                    new_path = unique_path(new_path)
-                else:
-                    try:
-                        item.rename(new_path)
-                        print(f"{item} -> {new_name}")
-                        renamed_count += 1
-                    except OSError as e:
-                        print(f"Error renaming '{item.name}': {e}")
-            if recursive:
-                renamed_count += remove_string_from_names(string_to_remove, dry_run, recursive, item)
+
+        # Process subdirectories recursively
+        if recursive and item.is_dir():
+            renamed_count += remove_string_from_names(string_to_remove, dry_run, recursive, item)
+
     return renamed_count
 
 
@@ -95,7 +90,7 @@ def replace_string_in_names(
     str2: str,
     dry_run: bool = False,
     recursive: bool = False,
-    current_path: Path = Path(),
+    current_path: Path = Path.cwd(),
 ) -> int:
     renamed_count = 0
     try:
@@ -103,13 +98,24 @@ def replace_string_in_names(
     except PermissionError:
         print(f"Permission denied: {current_path}")
         return renamed_count
+
     for item in items:
-        if item.is_file():
+        if should_skip(item):
+            continue
+
+        if item.is_file() or item.is_dir():
             if str1 in item.name:
                 new_name = item.name.replace(str1, str2)
+                if not new_name.strip():
+                    print(f"Warning: Replacing '{str1}' with '{str2}' would make name empty for '{item.name}'")
+                    continue
+
                 new_path = current_path / new_name
                 if new_path.exists():
                     new_path = unique_path(new_path)
+
+                if dry_run:
+                    print(f"[DRY RUN] Would rename: {item} -> {new_name}")
                 else:
                     try:
                         item.rename(new_path)
@@ -117,73 +123,87 @@ def replace_string_in_names(
                         renamed_count += 1
                     except OSError as e:
                         print(f"Error renaming '{item.name}': {e}")
-        elif item.is_dir():
-            if str1 in item.name:
-                new_name = item.name.replace(str1, str2)
-                new_path = current_path / new_name
-                if new_path.exists():
-                    new_path = unique_path(new_path)
-                else:
-                    try:
-                        item.rename(new_path)
-                        print(f"{item} -> {new_name}")
-                        renamed_count += 1
-                    except OSError as e:
-                        print(f"Error renaming '{item.name}': {e}")
-            if recursive:
-                renamed_count += replace_string_in_names(str1, str2, dry_run, recursive, item)
+
+        # Process subdirectories recursively
+        if recursive and item.is_dir():
+            renamed_count += replace_string_in_names(str1, str2, dry_run, recursive, item)
+
     return renamed_count
 
 
 def should_skip(path):
     path = Path(path)
-    return bool(path.is_symlink() or ".git" in path.parts or "__pycache__" in path.parts or ".ruff_cache" in path.parts)
+    # Skip if it's a symlink or in skip directories
+    if path.is_symlink():
+        return True
+
+    # Check if any part of the path is in SKIP_DIRS
+    for part in path.parts:
+        if part in SKIP_DIRS:
+            return True
+
+    return False
 
 
 def rename_by_template(
     template: str, dry_run: bool = False, recursive: bool = False, current_path: Path = Path.cwd()
 ) -> int:
     renamed_count = 0
+
+    # Process files in current directory
     try:
-        files = [f for f in current_path.rglob("*") if f.is_file() and not should_skip(f)]
+        files = [f for f in current_path.iterdir() if f.is_file() and not should_skip(f)]
+        # Exclude the script itself
         script_name = Path(__file__).name
-        if script_name in [f.name for f in files]:
-            files = [f for f in files if f.name != script_name]
-        if not files:
-            print(f"No files found to rename in {current_path}.")
-            return renamed_count
+        files = [f for f in files if f.name != script_name]
+
+        if files:
+            file_count = len(files)
+            if file_count < 10:
+                padding = 1
+            elif file_count < 100:
+                padding = 2
+            elif file_count < 1000:
+                padding = 3
+            else:
+                padding = 4
+
+            # Sort files for consistent numbering
+            for i, file_path in enumerate(sorted(files), 1):
+                _name, ext = file_path.stem, file_path.suffix
+                number_str = str(i).zfill(padding)
+                new_name = f"{template}{number_str}{ext}"
+
+                if new_name == file_path.name:
+                    continue
+
+                new_path = current_path / new_name
+                if new_path.exists():
+                    new_path = unique_path(new_path)
+
+                if dry_run:
+                    print(f"[DRY RUN] Would rename: {file_path.name} -> {new_name}")
+                else:
+                    try:
+                        file_path.rename(new_path)
+                        print(f"{file_path.name} -> {new_name}")
+                        renamed_count += 1
+                    except OSError as e:
+                        print(f"Error renaming '{file_path.name}': {e}")
+
     except PermissionError:
         print(f"Permission denied: {current_path}")
         return renamed_count
-    file_count = len(files)
-    if file_count < 10:
-        padding = 1
-    elif file_count < 100:
-        padding = 2
-    elif file_count < 1000:
-        padding = 3
-    else:
-        padding = 4
-    for i, file_path in enumerate(sorted(files), 1):
-        _name, ext = file_path.stem, file_path.suffix
-        number_str = str(i).zfill(padding)
-        new_name = f"{template}{number_str}{ext}"
-        if new_name == file_path.name:
-            continue
-        new_path = current_path / new_name
-        if new_path.exists():
-            new_path = unique_path(new_path)
-        else:
-            try:
-                file_path.rename(new_path)
-                print(f"{file_path.name} -> {new_name}")
-                renamed_count += 1
-            except OSError as e:
-                print(f"Error renaming '{file_path.name}': {e}")
+
+    # Process subdirectories recursively
     if recursive:
-        for item in current_path.iterdir():
-            if item.is_dir():
-                renamed_count += rename_by_template(template, dry_run, recursive, item)
+        try:
+            for item in current_path.iterdir():
+                if item.is_dir() and not should_skip(item):
+                    renamed_count += rename_by_template(template, dry_run, recursive, item)
+        except PermissionError:
+            print(f"Permission denied accessing subdirectory in {current_path}")
+
     return renamed_count
 
 
@@ -214,7 +234,6 @@ def main() -> None:
         "-t",
         "--template",
         metavar="NAME",
-        default="",
         help="Rename files using template with sequential numbering",
     )
     parser.add_argument(
@@ -224,12 +243,14 @@ def main() -> None:
     )
     parser.add_argument("--recursive", action="store_true", help="Process directories recursively")
     args = parser.parse_args()
+
     cwd = Path.cwd()
     print(f"Working in directory: {cwd}")
     if args.recursive:
         print("Recursive mode enabled")
     if args.dry_run:
         print("DRY RUN MODE - No actual changes will be made\n")
+
     try:
         if args.remove:
             print(f"Removing '{args.remove}' from names...")

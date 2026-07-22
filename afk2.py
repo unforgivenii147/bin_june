@@ -16,6 +16,7 @@ Usage examples:
 """
 
 from __future__ import annotations
+
 import argparse
 import ast
 import io
@@ -27,7 +28,7 @@ import zipfile
 from dataclasses import dataclass, field
 from multiprocessing import Pool
 from pathlib import Path
-from typing import Iterator
+from collections.abc import Iterator
 
 try:
     import zstandard as zstd

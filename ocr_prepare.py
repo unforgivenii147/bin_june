@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/usr/bin/python
 
 
 """
@@ -15,7 +15,6 @@ import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import cpu_count
 from pathlib import Path
-from typing import List
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -82,7 +81,7 @@ def process_image(image_path: Path) -> tuple[Path, bool]:
     return (image_path, success)
 
 
-def find_images(paths: List[Path], recursive: bool = False) -> List[Path]:
+def find_images(paths: list[Path], recursive: bool = False) -> list[Path]:
     image_files = []
     for path in paths:
         if path.is_file() and path.suffix.lower() in IMAGE_EXTENSIONS:
@@ -105,7 +104,7 @@ def find_images(paths: List[Path], recursive: bool = False) -> List[Path]:
     return unique_files
 
 
-def process_images_parallel(image_files: List[Path], max_workers: int | None = None) -> dict:
+def process_images_parallel(image_files: list[Path], max_workers: int | None = None) -> dict:
     if not image_files:
         logger.warning("No image files found to process")
         return {"success": 0, "failed": 0}

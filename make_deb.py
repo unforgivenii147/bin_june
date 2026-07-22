@@ -9,7 +9,6 @@ import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import List
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -48,7 +47,7 @@ def should_exclude(pkg_name: str) -> bool:
     return bool(any(exclude in pkg_lower for exclude in ["rust", "cargo"]))
 
 
-def get_installed_packages() -> List[str]:
+def get_installed_packages() -> list[str]:
     try:
         result = subprocess.run(["apt", "list", "--installed"], capture_output=True, text=True, check=True)
         packages = []
@@ -86,7 +85,7 @@ def create_deb_for_package(pkg_name: str) -> bool:
         return False
 
 
-def process_packages(packages: List[str], max_workers: int = 4) -> tuple[int, int]:
+def process_packages(packages: list[str], max_workers: int = 4) -> tuple[int, int]:
     successful = 0
     failed = 0
     packages = [p for p in packages if not should_exclude(p)]

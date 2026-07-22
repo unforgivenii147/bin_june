@@ -2,8 +2,8 @@
 
 """Module for check_imports.py."""
 
-
 from __future__ import annotations
+
 import random
 import string
 import sys

@@ -15,7 +15,6 @@ import py7zr
 from joblib import Parallel, delayed
 from tqdm import tqdm
 
-
 try:
     import zstandard as zstd
 except ImportError:

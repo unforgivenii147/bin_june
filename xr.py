@@ -17,7 +17,6 @@ import lz4.frame
 import py7zr
 import zstandard as zstd
 
-
 # Constants
 MAX_WORKERS = 4
 CHUNK_SIZE = 10 * 1024 * 1024  # 10MB chunks

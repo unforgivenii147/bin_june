@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
-"""Module for gsz.py."""
 
 from __future__ import annotations
 
@@ -8,8 +7,6 @@ import re
 import sys
 
 import requests
-
-# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def get_repo_size(input_str: str) -> None:
@@ -33,8 +30,8 @@ def get_repo_size(input_str: str) -> None:
             return
         response.raise_for_status()
         data = response.json()
-        size_bytes = data.get("size", 0)
-        size_mb = size_bytes / (1024 * 1024)
+        size_kb = data.get("size", 0)
+        size_mb = size_kb / 1024
         print(f"Repository: {user}/{repo}")
         print(f"Size: {size_mb:.2f} MB")
     except requests.exceptions.RequestException as e:

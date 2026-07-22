@@ -2,8 +2,8 @@
 
 """Module for readme.py."""
 
-
 from __future__ import annotations
+
 import pydoc
 import sys
 from pathlib import Path

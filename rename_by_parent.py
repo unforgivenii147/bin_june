@@ -1,10 +1,13 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 """Module for rename_by_parent.py."""
+
 from __future__ import annotations
 
 import os
-from os.path import dirname as dirn, isfile as isf, join as jn
+from os.path import dirname as dirn
+from os.path import isfile as isf
+from os.path import join as jn
 from pathlib import Path
 
 # SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})

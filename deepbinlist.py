@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
 
 """
 Find non-pure Python packages in system site-packages and save list to file.
@@ -13,7 +12,6 @@ import site
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import List
 
 import pkg_resources
 
@@ -27,7 +25,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def get_site_packages_paths() -> List[Path]:
+def get_site_packages_paths() -> list[Path]:
     paths = []
     for path in site.getsitepackages():
         paths.append(Path(path))
@@ -39,7 +37,7 @@ def get_site_packages_paths() -> List[Path]:
     return paths
 
 
-def get_installed_packages() -> List[Tuple[str, str]]:
+def get_installed_packages() -> list[tuple[str, str]]:
     packages = []
     for dist in pkg_resources.working_set:
         try:
@@ -49,7 +47,7 @@ def get_installed_packages() -> List[Tuple[str, str]]:
     return packages
 
 
-def find_package_path(package_name: str, site_paths: List[Path]) -> Path | None:
+def find_package_path(package_name: str, site_paths: list[Path]) -> Path | None:
     for site_path in site_paths:
         pkg_path = site_path / package_name
         if pkg_path.exists() and pkg_path.is_dir():
@@ -64,7 +62,7 @@ def find_package_path(package_name: str, site_paths: List[Path]) -> Path | None:
     return None
 
 
-def is_pure_python(package_name: str, site_paths: List[Path]) -> bool:
+def is_pure_python(package_name: str, site_paths: list[Path]) -> bool:
     pkg_path = find_package_path(package_name, site_paths)
     if not pkg_path:
         logger.warning(f"Cannot find package directory for {package_name}")
@@ -79,7 +77,7 @@ def is_pure_python(package_name: str, site_paths: List[Path]) -> bool:
     return True
 
 
-def check_package(args_tuple: Tuple[str, str, List[Path]]) -> Tuple[str, str, bool]:
+def check_package(args_tuple: tuple[str, str, list[Path]]) -> tuple[str, str, bool]:
     package_name, version, site_paths = args_tuple
     try:
         is_pure = is_pure_python(package_name, site_paths)

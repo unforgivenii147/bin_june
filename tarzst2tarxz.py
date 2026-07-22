@@ -2,7 +2,6 @@
 
 """Module for tarzst2tarxz.py."""
 
-
 from __future__ import annotations
 
 import lzma

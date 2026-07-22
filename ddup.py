@@ -21,7 +21,6 @@ import lzma
 from dataclasses import dataclass
 from pathlib import Path
 
-
 try:
     from loguru import logger
 except ImportError:

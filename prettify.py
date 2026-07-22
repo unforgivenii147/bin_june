@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 """Module for prettify.py."""
+
 from __future__ import annotations
 
 from pathlib import Path

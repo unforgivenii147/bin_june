@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/usr/bin/python
 
 """Module for downimg.py."""
 
@@ -7,7 +7,6 @@ from __future__ import annotations
 import sys
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import Tuple
 
 import cv2
 from tqdm import tqdm
@@ -49,7 +48,7 @@ class ImageDownscaler:
         return image_files
 
     @staticmethod
-    def downscale_image(args: Tuple[Path, float]) -> Tuple[Path, bool, str]:
+    def downscale_image(args: tuple[Path, float]) -> tuple[Path, bool, str]:
         image_path, scale_factor = args
         try:
             img = cv2.imread(str(image_path))

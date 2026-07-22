@@ -1,7 +1,6 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/usr/bin/python
 
 """Module for ocr_ready.py."""
-
 
 from __future__ import annotations
 

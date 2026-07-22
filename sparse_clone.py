@@ -1,10 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/env python
 """Clone files of specified extensions from git repositories."""
 
-import sys
 import subprocess
-from pathlib import Path
+import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
 from urllib.parse import urlparse
 
 

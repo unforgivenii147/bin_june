@@ -1,11 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
-from typing import List
 
 """Module for find_missing_imports.py."""
 
-
 from __future__ import annotations
+
 import argparse
 import ast
 import importlib
@@ -14,7 +12,6 @@ import sys
 import textwrap
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Dict, Set
 
 STDLIB_MODULES = set(sys.builtin_module_names)
 for module_name in list(sys.modules.keys()):
@@ -29,11 +26,11 @@ for module_name in list(sys.modules.keys()):
 
 class ImportAnalyzer(ast.NodeVisitor):
     def __init__(self):
-        self.imported_names: Set[str] = set()
-        self.used_names: Set[str] = set()
-        self.assigned_names: Set[str] = set()
-        self.import_lines: Dict[str, int] = {}
-        self.builtin_names: Set[str] = {
+        self.imported_names: set[str] = set()
+        self.used_names: set[str] = set()
+        self.assigned_names: set[str] = set()
+        self.import_lines: dict[str, int] = {}
+        self.builtin_names: set[str] = {
             "print",
             "len",
             "range",
@@ -225,7 +222,7 @@ class ImportAnalyzer(ast.NodeVisitor):
         self.generic_visit(node)
 
 
-def get_stdlib_modules() -> Set[str]:
+def get_stdlib_modules() -> set[str]:
     stdlib = set(sys.builtin_module_names)
     common_stdlib = {
         "abc",
@@ -425,7 +422,7 @@ def get_stdlib_modules() -> Set[str]:
     return stdlib
 
 
-def analyze_file(filepath: Path) -> Tuple[Path, List[Tuple[str, int]]]:
+def analyze_file(filepath: Path) -> tuple[Path, list[tuple[str, int]]]:
     try:
         with open(filepath, encoding="utf-8") as f:
             content = f.read()
@@ -453,7 +450,7 @@ def analyze_file(filepath: Path) -> Tuple[Path, List[Tuple[str, int]]]:
         return (filepath, [])
 
 
-def autofix_imports(filepath: Path, missing_imports: List[Tuple[str, int]]) -> bool:
+def autofix_imports(filepath: Path, missing_imports: list[tuple[str, int]]) -> bool:
     if not missing_imports:
         return False
     try:

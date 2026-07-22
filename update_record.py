@@ -15,7 +15,6 @@ import multiprocessing
 import site
 import sys
 from pathlib import Path
-from typing import Tuple
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -59,7 +58,7 @@ def get_file_size(filepath: Path) -> int:
         return 0
 
 
-def parse_record_line(line: str) -> Tuple[str, str, str]:
+def parse_record_line(line: str) -> tuple[str, str, str]:
     parts = line.strip().split(",")
     if len(parts) == 3:
         return parts[0], parts[1], parts[2]

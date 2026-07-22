@@ -1,11 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 """Module for delshort.py."""
+
 from __future__ import annotations
 
 import sys
-from pathlib import Path
 from collections import deque
+from pathlib import Path
 
 
 def is_binary(path):

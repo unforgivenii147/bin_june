@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/env python
 
 """Module for find_non_eng.py."""
+
 from __future__ import annotations
 
 import argparse

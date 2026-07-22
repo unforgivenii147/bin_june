@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
-from typing import List
 
 """
 Detect and optionally remove repeated multi-line blocks in all text-based files
@@ -20,7 +18,6 @@ import sys
 import time
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, Set
 
 from joblib import Parallel, delayed
 
@@ -36,7 +33,7 @@ def is_text_file(filepath: Path) -> bool:
         return False
 
 
-def extract_blocks_from_file(filepath: Path, min_lines: int = 2) -> List[Tuple[str, int, List[str]]]:
+def extract_blocks_from_file(filepath: Path, min_lines: int = 2) -> list[tuple[str, int, list[str]]]:
     try:
         with open(filepath, encoding="utf-8", errors="replace") as f:
             lines = f.readlines()
@@ -68,14 +65,14 @@ def extract_blocks_from_file(filepath: Path, min_lines: int = 2) -> List[Tuple[s
 
 def collect_blocks_parallel(
     root: Path, min_lines: int = 2, n_jobs: int = 8
-) -> Dict[str, List[Tuple[Path, int, List[str]]]]:
+) -> dict[str, list[tuple[Path, int, list[str]]]]:
     all_files = [path for path in root.rglob("*") if path.is_file() and is_text_file(path)]
     total_files = len(all_files)
     if not total_files:
         return defaultdict(list)
     print(f"Scanning {total_files} files...", file=sys.stderr)
     batch_size = 100
-    blocks_dict: Dict[str, List[Tuple[Path, int, List[str]]]] = defaultdict(list)
+    blocks_dict: dict[str, list[tuple[Path, int, list[str]]]] = defaultdict(list)
     for batch_start in range(0, total_files, batch_size):
         batch_end = min(batch_start + batch_size, total_files)
         batch_files = all_files[batch_start:batch_end]
@@ -89,12 +86,12 @@ def collect_blocks_parallel(
 
 
 def find_repeated_blocks(
-    blocks: Dict[str, List[Tuple[Path, int, List[str]]]],
-) -> Dict[str, List[Tuple[Path, int, List[str]]]]:
+    blocks: dict[str, list[tuple[Path, int, list[str]]]],
+) -> dict[str, list[tuple[Path, int, list[str]]]]:
     return {block: occ for block, occ in blocks.items() if len(occ) >= 2}
 
 
-def report(repeated: Dict[str, List[Tuple[Path, int, List[str]]]], root: Path) -> None:
+def report(repeated: dict[str, list[tuple[Path, int, list[str]]]], root: Path) -> None:
     if not repeated:
         print("No repeated multi-line blocks found.")
         return
@@ -115,14 +112,14 @@ def report(repeated: Dict[str, List[Tuple[Path, int, List[str]]]], root: Path) -
             print(f"    {rel_path}:{lineno}")
 
 
-def process_file_removal(filepath: Path, removals: List[Tuple[int, List[str]]], root: Path) -> Tuple[Path, int, bool]:
+def process_file_removal(filepath: Path, removals: list[tuple[int, list[str]]], root: Path) -> tuple[Path, int, bool]:
     try:
         with open(filepath, encoding="utf-8", errors="replace") as f:
             original_lines = f.readlines()
     except OSError as e:
         print(f"Warning: cannot read {filepath}: {e}", file=sys.stderr)
         return filepath, 0, False
-    lines_to_remove: Set[int] = set()
+    lines_to_remove: set[int] = set()
     for start_lineno, block_lines in removals:
         for offset in range(len(block_lines)):
             lines_to_remove.add(start_lineno + offset - 1)
@@ -155,8 +152,8 @@ def process_file_removal(filepath: Path, removals: List[Tuple[int, List[str]]], 
         return filepath, 0, False
 
 
-def remove_repeated_blocks(repeated: Dict[str, List[Tuple[Path, int, List[str]]]], root: Path, n_jobs: int = 8) -> None:
-    file_removals: Dict[Path, List[Tuple[int, List[str]]]] = defaultdict(list)
+def remove_repeated_blocks(repeated: dict[str, list[tuple[Path, int, list[str]]]], root: Path, n_jobs: int = 8) -> None:
+    file_removals: dict[Path, list[tuple[int, list[str]]]] = defaultdict(list)
     for _block_text, occurrences in repeated.items():
         for filepath, start_lineno, original_lines in occurrences:
             file_removals[filepath].append((start_lineno, original_lines))

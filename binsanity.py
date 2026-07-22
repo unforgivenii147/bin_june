@@ -1,15 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
 
 """Module for binsanity.py."""
-
 
 from __future__ import annotations
 
 import concurrent.futures
 import subprocess
 from pathlib import Path
-from typing import List
 
 from binaryornot import is_binary
 
@@ -64,7 +61,7 @@ def is_elf(filepath: Path) -> bool:
     return False
 
 
-def get_binary_files(directory: Path) -> List[Path]:
+def get_binary_files(directory: Path) -> list[Path]:
     binaries = []
     try:
         for path in get_filez(directory):
@@ -77,7 +74,7 @@ def get_binary_files(directory: Path) -> List[Path]:
     return binaries
 
 
-def test_executable(filepath: Path) -> Tuple[Path, str | None]:
+def test_executable(filepath: Path) -> tuple[Path, str | None]:
     test_args = ["--help", "-h", "--version", "-v", "--info"]
     for test_arg in test_args:
         try:

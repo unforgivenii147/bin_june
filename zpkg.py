@@ -2,7 +2,6 @@
 
 """Module for zpkg.py."""
 
-
 from __future__ import annotations
 
 import compileall

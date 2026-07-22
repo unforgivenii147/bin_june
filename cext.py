@@ -7,6 +7,7 @@ Extracts classes, functions, methods, and constants from Python files and archiv
 """
 
 from __future__ import annotations
+
 import argparse
 import ast
 import io

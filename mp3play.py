@@ -2,7 +2,6 @@
 
 """Module for mp3play.py."""
 
-
 from __future__ import annotations
 
 

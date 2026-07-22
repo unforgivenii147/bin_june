@@ -18,7 +18,7 @@ import sys
 from functools import lru_cache
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import Iterator
+from collections.abc import Iterator
 
 from dh import BIN_EXT
 

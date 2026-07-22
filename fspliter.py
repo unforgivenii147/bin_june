@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
 from typing import Tuple
+
 """
 Split text files into parts with character count between 4900-4990,
 respecting word and sentence boundaries.
@@ -42,7 +43,7 @@ TEXT_EXTENSIONS = {
 }
 
 
-def find_text_files(input_paths: List[Path], recursive: bool = True) -> List[Path]:
+def find_text_files(input_paths: list[Path], recursive: bool = True) -> list[Path]:
     """
     Find all text files from input paths (files or directories).
 
@@ -139,7 +140,7 @@ def find_split_point(text: str, start_pos: int, min_chars: int, max_chars: int) 
     return end_pos
 
 
-def split_text(text: str, min_chars: int, max_chars: int) -> List[str]:
+def split_text(text: str, min_chars: int, max_chars: int) -> list[str]:
     """
     Split text into parts of min_chars-max_chars characters, respecting boundaries.
 
@@ -169,7 +170,7 @@ def split_text(text: str, min_chars: int, max_chars: int) -> List[str]:
     return parts
 
 
-def process_file(input_file: Path, output_dir: Path, min_chars: int, max_chars: int) -> Tuple[Path, int]:
+def process_file(input_file: Path, output_dir: Path, min_chars: int, max_chars: int) -> tuple[Path, int]:
     """
     Process a single file: read, split, and write parts.
 

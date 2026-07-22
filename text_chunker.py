@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/env python
-from typing import Tuple
-
 
 """
 Text file chunker with parallel processing.
@@ -14,7 +12,6 @@ import re
 import sys
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import List
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 TARGET_CHUNK_SIZE = 4900
@@ -41,7 +38,7 @@ def find_chunk_boundary(text: str, start_pos: int, target_size: int = TARGET_327
     return end_pos
 
 
-def split_text_into_chunks(text: str) -> List[str]:
+def split_text_into_chunks(text: str) -> list[str]:
     chunks = []
     pos = 0
     while pos < len(text):
@@ -55,7 +52,7 @@ def split_text_into_chunks(text: str) -> List[str]:
     return chunks
 
 
-def process_file(file_path: Path, output_dir: Path) -> Tuple[str, int, str | None]:
+def process_file(file_path: Path, output_dir: Path) -> tuple[str, int, str | None]:
     try:
         with open(file_path, encoding="utf-8", errors="ignore") as f:
             text = f.read()
@@ -76,7 +73,7 @@ def process_file(file_path: Path, output_dir: Path) -> Tuple[str, int, str | Non
         return (file_path.name, 0, str(e))
 
 
-def get_text_files(paths: List[Path]) -> List[Path]:
+def get_text_files(paths: list[Path]) -> list[Path]:
     text_files = []
     text_extensions = {".txt", ".md", ".csv", ".log", ".json", ".yaml", ".yml", ".xml"}
     for path in paths:

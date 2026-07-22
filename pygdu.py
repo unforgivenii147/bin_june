@@ -2,7 +2,6 @@
 
 """Module for pygdu.py."""
 
-
 from __future__ import annotations
 
 import sys
@@ -11,7 +10,6 @@ import tty
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -22,7 +20,7 @@ class FSItem:
     name: str
     is_dir: bool
     size: int = 0
-    children: List[FSItem] = field(default_factory=list)
+    children: list[FSItem] = field(default_factory=list)
     parent: FSItem = None
     flag: str = " "
 
