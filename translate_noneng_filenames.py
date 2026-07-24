@@ -1,6 +1,7 @@
-#!/data/data/com.termux/files/usr/bin/env python
-
-"""Module for rne.py."""
+#!/data/data/com.termux/files/home/.local/bin/python
+"""
+translates filenames that are not english
+"""
 
 from __future__ import annotations
 
@@ -13,7 +14,7 @@ from fastwalk import walk_files
 
 # SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-DIRECTORY = "."
+DIRECTORY = Path.cwd()
 non_english_pattern = re.compile(r"[^\x00-\x7F]")
 
 
@@ -22,24 +23,22 @@ def is_english(text: str) -> bool:
 
 
 def translate_filename(filename: str):
-    name, ext = os.path.splitext(filename)
     try:
-        translated = GoogleTranslator(source="auto", target="en").translate(name)
-        return translated + ext
+        return GoogleTranslator(source="auto", target="en").translate(filename)
+
     except Exception as e:
         print(f"Translation error for {filename}: {e}")
         return filename
 
 
 def rename_files(directory: str) -> None:
-    for pth in walk_files(directory):
-        path = Path(pth)
-        if is_english(path.name):
+    for path in walk_files(directory):
+        if is_english(path.stem):
             continue
         if path.is_file():
             original_path = path
-            new_name = translate_filename(path.name)
-            new_path = path.with_name(new_name)
+            new_name = translate_filename(path.stem)
+            new_path = path.with_stem(new_name)
             counter = 1
             while new_path.exists():
                 name, ext = os.path.splitext(new_name)

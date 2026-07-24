@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 import re
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path

@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 
 """
 Check for duplicate function names in bash functions file.

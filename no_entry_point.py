@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 
 """
 Script to find Python packages in system site directories that don't have entry_points.txt

@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 
 """
 Strip EXIF data from image files using pathlib only.

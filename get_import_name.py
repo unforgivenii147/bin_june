@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 """
 # Example script (FOR INFORMATION ONLY, don't run in production without understanding the risks!)
 import subprocess

@@ -1,6 +1,5 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 
-"""Module for dupf.py."""
 
 from __future__ import annotations
 
@@ -198,7 +197,10 @@ def find_duplicates() -> None:
                 relative_path = file_path.relative_to(cwd)
                 cprint(f" - {relative_path}", "cyan")
                 total += gsz(file_path)
-    cprint(f"total : {fsz(total)}")
+    if total:
+        cprint(f"total : {fsz(total)}")
+    else:
+        cprint(f"NO DUPS")
 
 
 if __name__ == "__main__":

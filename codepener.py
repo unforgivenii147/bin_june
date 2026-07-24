@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 
 """
 Convert CodePen-style HTML (body only) to a complete HTML document.

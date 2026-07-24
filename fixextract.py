@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 
 """
 Fix mis-extracted .zst files where a directory contains a file with the same name.

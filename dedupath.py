@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 """
 Remove duplicate entries from $PATH and update ~/.bashrc
 """

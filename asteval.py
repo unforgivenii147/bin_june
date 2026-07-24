@@ -1,6 +1,5 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 
-"""Module for asteval.py."""
 
 from __future__ import annotations
 
@@ -128,8 +127,9 @@ def process_file(args: tuple) -> None:
                 new_path = error_dir / f"{base}_{idx}{ext}"
                 idx += 1
         try:
-            path.rename(new_path)
-            print(f"  ⚠️  Moved to: {new_path} | Error: {e}")
+            content = path.read_bytes()
+            new_path.write_bytes(contents)
+            print(f"  ⚠️  copied to: {new_path} | Error: {e}")
         except OSError as move_error:
             print(f"  ❌ Failed to move {path}: {move_error}")
 

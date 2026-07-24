@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 """
 Smart Archiver - Automatically chooses best compression algorithm based on file type
 and supports parallel compression for multiple files.

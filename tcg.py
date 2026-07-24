@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 """
 Termux script creator - Creates executable scripts from clipboard content.
 Archives existing files to ~/isaac/may/scripts/ if -a flag provided.
@@ -13,10 +13,10 @@ from datetime import datetime
 from pathlib import Path
 
 TERMUX_SHEBANGS = {
-    "python": "#!/data/data/com.termux/files/usr/bin/env python",
-    "bash": "#!/data/data/com.termux/files/usr/bin/env bash",
-    "sh": "#!/data/data/com.termux/files/usr/bin/env sh",
-    "rust": "#!/data/data/com.termux/files/usr/bin/env rust-script",
+    "python": "#!/data/data/com.termux/files/home/.local/bin/python",
+    "bash": "#!/data/data/com.termux/files/usr/bin/bash",
+    "sh": "#!/data/data/com.termux/files/usr/bin/sh",
+    "rust": "#!/data/data/com.termux/files/home/.cargo/bin/rust-script",
 }
 
 EXTENSION_MAP = {

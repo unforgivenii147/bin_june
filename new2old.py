@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 
 """
 Convert pyproject.toml → setup.py, preserving setup.cfg & MANIFEST.in.

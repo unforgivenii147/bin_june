@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-"""Module for ocrgrid2.py."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 """
 Convert man pages from .gz to .xz format with maximum compression.
 Skips symlinks and processes files recursively in the current directory.

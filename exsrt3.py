@@ -1,6 +1,5 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 
-"""Module for exsrt3.py."""
 
 from __future__ import annotations
 

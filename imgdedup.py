@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-"""Module for imgdedup.py."""
 
 from __future__ import annotations
 

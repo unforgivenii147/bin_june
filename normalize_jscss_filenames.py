@@ -1,6 +1,5 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 
-"""Module for normalize_jscss_filenames.py."""
 
 from __future__ import annotations
 

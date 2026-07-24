@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 """List only non-pure package names from user site-packages."""
 
 from __future__ import annotations

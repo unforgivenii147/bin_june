@@ -1,6 +1,5 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 
-"""Module for symdups.py."""
 
 from __future__ import annotations
 
@@ -10,18 +9,18 @@ from collections import defaultdict
 from datetime import UTC, datetime
 from pathlib import Path
 
-import xxhash
+from xxhash import xxh64
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 BACKUP_FILE = ".symlink_backup.json"
-MIN_FILE_SIZE = 8
+MIN_FILE_SIZE = 1024
 
 
 def calculate_file_hash(filepath, chunk_size=32768) -> str | None:
     if not filepath.is_file():
         return None
-    hasher = xxhash.xxh64()
+    hasher = xxh64()
     try:
         with Path(filepath).open("rb") as f:
             while chunk := f.read(chunk_size):

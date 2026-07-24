@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 """
 Fix file extensions based on shebang detection.
 Scans files in current directory and renames them with .py or .sh extensions

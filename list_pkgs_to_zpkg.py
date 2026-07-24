@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 """List pure Python packages with specific naming and structure constraints."""
 
 from __future__ import annotations

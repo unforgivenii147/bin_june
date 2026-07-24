@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 """
 Comment out SKIP_DIRS lines from vulture output.
 Usage: python comment_skip_dirs.py <vulture_output_file>

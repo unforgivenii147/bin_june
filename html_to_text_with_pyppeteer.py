@@ -1,6 +1,5 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 
-"""Module for html_to_text_with_pyppeteer.py."""
 
 from __future__ import annotations
 

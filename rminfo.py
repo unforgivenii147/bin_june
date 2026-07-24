@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 """
 Script to remove author/email/time info block from Python files recursively.
 Handles both .py files and Python files without extension (detected via shebang).

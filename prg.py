@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 """Ripgrep-like implementation in Python."""
 
 import re
@@ -6,15 +6,16 @@ from pathlib import Path
 from collections.abc import Generator
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import argparse
+from fastwalk import walk_files
 
 
-def walk_files(paths: list[str | Path]) -> Generator[Path, None, None]:
+def walk_paths(paths: list[str | Path]) -> Generator[Path, None, None]:
     for path_str in paths:
         path = Path(path_str)
         if path.is_file():
             yield path
         elif path.is_dir():
-            yield from (item for item in path.rglob("*") if item.is_file())
+            yield from walk_files(path)
 
 
 def search_file(file_path: Path, pattern: str) -> Generator[tuple[Path, int, str], None, None]:
@@ -51,7 +52,7 @@ def ripgrep(paths: list[str | Path], pattern: str, max_workers: int = 4):
         return list(search_file(file_path, pattern))
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        futures = {executor.submit(process_file, fp): fp for fp in walk_files(paths)}
+        futures = {executor.submit(process_file, fp): fp for fp in walk_paths(paths)}
 
         for future in as_completed(futures):
             for file_path, line_num, colorized_line in future.result():

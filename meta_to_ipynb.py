@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 """
 Convert Python package METADATA file to Jupyter notebook.
 Strips metadata headers and converts code/markdown sections to notebook cells.

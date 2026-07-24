@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 """
 Install Python wheels with platform-aware installation strategy.
 Pure Python wheels -> user site-packages

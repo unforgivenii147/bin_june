@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 """
 Extract all .tar.xz files in current directory using parallel processing,
 then remove the original archive files.

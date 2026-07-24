@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 
 """
 Filter the latest version for ARMv7 architecture (armeabi_v7a, armv7l, linux_arm)

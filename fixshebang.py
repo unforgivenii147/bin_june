@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 """
 Change Python shebang in all Python files to Termux path.
 If a file has no shebang, add one at the beginning.
@@ -15,7 +15,8 @@ from pathlib import Path
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 SHEBANG_PATTERN = re.compile(r"^#!.*python[23]?(?:\.\d+)?(?:[ \t]+.*)?$", re.MULTILINE)
-NEW_SHEBANG12 = "#!/data/data/com.termux/files/usr/bin/env python"
+
+NEW_SHEBANG12 = "#!/data/data/com.termux/files/home/.local/bin/python"
 NEW_SHEBANG14 = "#!/data/data/com.termux/files/usr/bin/python"
 PYTHON_EXTENSIONS = {".py", ".pyw", ".pyx", ".pxd", ".pyi"}
 COMMON_PYTHON_NAMES = {

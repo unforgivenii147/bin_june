@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 """
 Remove comments and docstrings from Python files using libcst.
 Preserves shebangs, # fmt, # type, and module docstrings.

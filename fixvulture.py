@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 """
 Fix unused code based on Vulture output.
 Reads Vulture findings from stdin or a file and fixes the issues in-place.

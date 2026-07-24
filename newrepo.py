@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 """
 Create and push a git repository to GitHub from the current directory.
 If the repo already exists on GitHub, it will just commit and push changes.

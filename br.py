@@ -1,275 +1,315 @@
-#!/data/data/com.termux/files/usr/bin/env python
-
-"""
-brotli_compress.py — Recursive brotli compression/decompression tool.
-
-Strategy: Situation 2 — multiprocess files in parallel.
-Brotli is CPU-bound per file; parallelising across files via ProcessPoolExecutor
-saturates cores with no chunking overhead or custom framing required.
-"""
-
-from __future__ import annotations
+#!/data/data/com.termux/files/home/.local/bin/python
 
 import argparse
-import multiprocessing
-import sys
+import io
+import os
 import tarfile
-import time
-from concurrent.futures import ProcessPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+import brotli
 
-import brotlicffi as brotli
-
-CHUNK_SIZE = 1024 * 1024
-
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-LARGE_FILE_THRESHOLD = 5 * 1024 * 1024
-LEVEL_DEFAULT = 11
-LEVEL_LARGE = 6
-BROTLI_EXT = ".br"
-BROTLI_WINDOW_BITS = 24
-BROTLI_BLOCK_BITS = 0
-BROTLI_MODE = brotli.MODE_GENERIC
-WORKERS = max(1, multiprocessing.cpu_count())
-CHUMK_SIZE = 32768
+CHUNK_SIZE = 1024 * 64
+SKIP_PATTERNS = {".", "..", ".git", "__pycache__", ".DS_Store", "thumbs.db"}
 
 
-def choose_level(path: Path) -> int:
+def get_brotli_quality(file_size: int) -> int:
+    """Determine optimal Brotli quality based on file size."""
+    return 11 if file_size < 1024 * 1024 else 9
+
+
+def compress_stream(input_stream, output_file_path: Path, file_size: int) -> bool:
+    """Compress a stream using Brotli and write to file."""
+    quality = get_brotli_quality(file_size)
+    compressor = brotli.Compressor(quality=quality)
     try:
-        return LEVEL_LARGE if path.stat().st_size > LARGE_FILE_THRESHOLD else LEVEL_DEFAULT
-    except OSError:
-        return LEVEL_DEFAULT
+        with open(output_file_path, "wb") as f_out:
+            while True:
+                chunk = input_stream.read(CHUNK_SIZE)
+                if not chunk:
+                    break
+                f_out.write(compressor.process(chunk))
+            f_out.write(compressor.finish())
+        print(f"✅ Compressed (Q={quality}): {output_file_path.name}")
+        return True
+    except Exception as e:
+        print(f"❌ Error compressing {output_file_path.name}: {e}")
+        # Clean up failed compression file
+        if output_file_path.exists():
+            output_file_path.unlink()
+        return False
 
 
-def human(n: int) -> str:
-    for unit in ("B", "KB", "MB", "GB"):
-        if n < 1024:
-            return f"{n:.1f} {unit}"
-        n /= 1024
-    return f"{n:.1f} TB"
+def should_skip_path(path: Path) -> bool:
+    """Check if path should be skipped based on patterns."""
+    # Skip hidden files/dirs and known patterns
+    if any(part.startswith(".") and part not in {".", ".."} for part in path.parts):
+        return True
+    # Skip known ignore patterns
+    if path.name in SKIP_PATTERNS:
+        return True
+    return False
 
 
-def compress_file(src: Path, dry_run: bool, verbose: bool, level: int | None = None) -> dict:
-    result = {"src": src, "ok": False, "msg": ""}
-    dst = src.with_suffix(src.suffix + BROTLI_EXT)
-    if dst.exists():
-        result["msg"] = f"skip — {dst.name} already exists"
-        return result
-    effective_level = level if level is not None else choose_level(src)
-    if dry_run:
-        result["ok"] = True
-        result["msg"] = f"[dry-run] would compress {src} → {dst.name} (level {effective_level})"
-        return result
+def process_directory_compress(dir_path: Path) -> bool:
+    """Compress a directory to tar.br file."""
+    output_br = dir_path.with_name(f"{dir_path.name}.tar.br")
+
+    # Skip if already compressed
+    if output_br.exists():
+        print(f"⏭️ Skipping (already exists): {output_br.name}")
+        return False
+
+    tar_buffer = io.BytesIO()
     try:
-        ctx = brotli.Compressor(
-            quality=effective_level,
-            lgwin=BROTLI_WINDOW_BITS,
-            lgblock=BROTLI_BLOCK_BITS,
-            mode=BROTLI_MODE,
-        )
-        with open(src, "rb") as f_in, open(dst, "wb") as f_out:
-            while chunk := f_in.read(CHUNK_SIZE):
-                f_out.write(ctx.compress(chunk))
-            f_out.write(ctx.finish())
-        orig_sz = src.stat().st_size
-        comp_sz = dst.stat().st_size
-        ratio = comp_sz / orig_sz * 100 if orig_sz else 0.0
-        src.unlink()
-        result["ok"] = True
-        result["msg"] = (
-            f"{src.name} → {dst.name} ({human(orig_sz)} → {human(comp_sz)}, {ratio:.1f}% saved, level {effective_level})"
-        )
-    except Exception as exc:
-        result["msg"] = f"ERROR compressing {src}: {exc}"
-    return result
+        with tarfile.open(fileobj=tar_buffer, mode="w") as tar:
+            tar.add(dir_path, arcname=dir_path.name)
+        tar_size = tar_buffer.tell()
+        tar_buffer.seek(0)
+
+        success = compress_stream(tar_buffer, output_br, tar_size)
+
+        # Remove original directory if compression successful
+        if success:
+            try:
+                import shutil
+
+                shutil.rmtree(dir_path)
+                print(f"🗑️ Removed original directory: {dir_path.name}")
+            except Exception as e:
+                print(f"⚠️ Could not remove directory {dir_path.name}: {e}")
+
+        return success
+    except Exception as e:
+        print(f"❌ Failed to archive directory {dir_path.name}: {e}")
+        return False
+    finally:
+        tar_buffer.close()
 
 
-def decompress_file(src: Path, dry_run: bool, verbose: bool) -> dict:
-    result = {"src": src, "ok": False, "msg": ""}
-    if src.suffix != BROTLI_EXT:
-        result["msg"] = f"skip — not a .br file: {src.name}"
-        return result
-    dst = src.with_suffix("")
-    if dst.exists():
-        result["msg"] = f"skip — {dst.name} already exists"
-        return result
-    if dry_run:
-        result["ok"] = True
-        result["msg"] = f"[dry-run] would decompress {src} → {dst.name}"
-        return result
+def process_file_compress(file_path: Path) -> bool:
+    """Compress a single file to .br file."""
+    output_br = file_path.with_name(f"{file_path.name}.br")
+
+    # Skip if already compressed or if it's a .br file itself
+    if output_br.exists():
+        print(f"⏭️ Skipping (already exists): {output_br.name}")
+        return False
+
+    # Skip self (this script)
+    if file_path.name == Path(__file__).name:
+        return False
+
     try:
-        data = src.read_bytes()
-        decompressed = brotli.decompress(data)
-        dst.write_bytes(decompressed)
-        src.unlink()
-        result["ok"] = True
-        result["msg"] = f"{src.name} → {dst.name} ({human(len(data))} → {human(len(decompressed))})"
-    except Exception as exc:
-        result["msg"] = f"ERROR decompressing {src}: {exc}"
-    return result
+        file_size = file_path.stat().st_size
+        with open(file_path, "rb") as f_in:
+            success = compress_stream(f_in, output_br, file_size)
+
+        # Remove original file if compression successful
+        if success:
+            try:
+                file_path.unlink()
+                print(f"🗑️ Removed original file: {file_path.name}")
+            except Exception as e:
+                print(f"⚠️ Could not remove file {file_path.name}: {e}")
+
+        return success
+    except Exception as e:
+        print(f"❌ Failed to read file {file_path.name}: {e}")
+        return False
 
 
-def tar_subdir(subdir: Path, dry_run: bool, verbose: bool) -> Path | None:
-    tar_path = subdir.parent / (subdir.name + ".tar")
-    if dry_run:
-        if verbose:
-            print(f"  [dry-run] would tar {subdir}/ → {tar_path.name}")
-        return tar_path
+def decompress_stream(input_file_path: Path) -> io.BytesIO:
+    """Decompress a Brotli compressed file."""
+    decompressor = brotli.Decompressor()
+    out_buffer = io.BytesIO()
     try:
-        with tarfile.open(tar_path, "w") as tf:
-            tf.add(subdir, arcname=subdir.name)
-        if verbose:
-            print(f"  tarred {subdir.name}/ → {tar_path.name} ({human(tar_path.stat().st_size)})")
-        return tar_path
-    except Exception as exc:
-        print(f"  ERROR tarring {subdir}: {exc}", file=sys.stderr)
-        return None
+        with open(input_file_path, "rb") as f_in:
+            while True:
+                chunk = f_in.read(CHUNK_SIZE)
+                if not chunk:
+                    break
+                out_buffer.write(decompressor.decompress(chunk))
+        out_buffer.seek(0)
+        return out_buffer
+    except brotli.error as e:
+        raise Exception(f"Brotli decompression error: {e}")
 
 
-def remove_subdir(subdir: Path, dry_run: bool, verbose: bool) -> None:
-    if dry_run:
-        if verbose:
-            print(f"  [dry-run] would remove {subdir}/")
+def handle_decompress(file_path: Path) -> bool:
+    """Decompress a .br or .tar.br file."""
+    try:
+        decompressed_mem = decompress_stream(file_path)
+
+        if file_path.name.endswith(".tar.br"):
+            with tarfile.open(fileobj=decompressed_mem, mode="r:") as tar:
+                tar.extractall(path=file_path.parent)
+            print(f"🔓 Extracted and unpacked archive: {file_path.name}")
+        else:
+            output_name = file_path.with_name(file_path.stem)
+            with open(output_name, "wb") as f_out:
+                f_out.write(decompressed_mem.read())
+            print(f"🔓 Decompressed file: {file_path.name} -> {output_name.name}")
+
+        # Remove compressed file after successful decompression
+        try:
+            file_path.unlink()
+            print(f"🗑️ Removed compressed file: {file_path.name}")
+        except Exception as e:
+            print(f"⚠️ Could not remove compressed file {file_path.name}: {e}")
+
+        return True
+    except Exception as e:
+        print(f"❌ Failed to decompress {file_path.name}: {e}")
+        return False
+    finally:
+        if "decompressed_mem" in locals():
+            decompressed_mem.close()
+
+
+def get_directory_size(dir_path: Path) -> int:
+    """Calculate total size of all files in directory recursively."""
+    try:
+        return sum(f.stat().st_size for f in dir_path.rglob("*") if f.is_file() and not should_skip_path(f))
+    except Exception:
+        return 0
+
+
+def gather_compression_targets() -> list:
+    """Gather all valid compression targets."""
+    current_dir = Path(".")
+    work_items = []
+
+    # Gather directories
+    for d in current_dir.iterdir():
+        if not d.is_dir():
+            continue
+        if should_skip_path(d):
+            continue
+        # Skip if .tar.br already exists
+        if d.with_name(f"{d.name}.tar.br").exists():
+            continue
+        work_items.append((get_directory_size(d), process_directory_compress, d))
+
+    # Gather files
+    for f in current_dir.iterdir():
+        if not f.is_file():
+            continue
+        if should_skip_path(f):
+            continue
+        if f.name == Path(__file__).name:
+            continue
+        if f.suffix == ".br":
+            continue
+        # Skip if .br already exists
+        if f.with_name(f"{f.name}.br").exists():
+            continue
+        try:
+            work_items.append((f.stat().st_size, process_file_compress, f))
+        except OSError:
+            continue
+
+    return work_items
+
+
+def run_compression():
+    """Execute compression on all valid targets."""
+    work_items = gather_compression_targets()
+
+    if not work_items:
+        print("No matchable subdirectories or files found to compress.")
         return
-    try:
-        import shutil
 
-        shutil.rmtree(subdir)
-        if verbose:
-            print(f"  removed original dir: {subdir.name}/")
-    except Exception as exc:
-        print(f"  WARNING — could not remove {subdir}: {exc}", file=sys.stderr)
+    work_items.sort(key=lambda x: x[0], reverse=True)
+    print(f"🚀 Found {len(work_items)} items. Launching parallel compression (Largest first)...")
 
+    success_count = 0
+    with ThreadPoolExecutor() as executor:
+        futures = {executor.submit(func, target): target for _, func, target in work_items}
 
-def run_parallel(tasks: list, worker_fn, extra_kwargs: dict, verbose: bool) -> tuple[int, int]:
-    ok = err = 0
-    with ProcessPoolExecutor(max_workers=WORKERS) as pool:
-        futures = {pool.submit(worker_fn, path, **extra_kwargs): path for path in tasks}
-        for fut in as_completed(futures):
-            res = fut.result()
-            if res["ok"]:
-                ok += 1
-                if verbose:
-                    print(f"  ✓ {res['msg']}")
-            else:
-                err += 1
-                print(f"  ✗ {res['msg']}", file=sys.stderr)
-    return ok, err
+        for future in as_completed(futures):
+            target = futures[future]
+            try:
+                if future.result():
+                    success_count += 1
+            except Exception as e:
+                print(f"❌ Unexpected error with {target}: {e}")
+
+    print(f"📊 Compression complete: {success_count}/{len(work_items)} successful")
 
 
-def do_compress(root: Path, tar_subdirs: bool, dry_run: bool, verbose: bool) -> None:
-    start = time.perf_counter()
-    if tar_subdirs:
-        subdirs = [p for p in root.iterdir() if p.is_dir()]
-        if verbose:
-            print(f"Taring {len(subdirs)} subdirectory/ies …")
-        tar_paths = []
-        for sd in subdirs:
-            tp = tar_subdir(sd, dry_run, verbose)
-            if tp:
-                tar_paths.append((sd, tp))
-        tar_files = [tp for _, tp in tar_paths]
-        if tar_files:
-            if verbose:
-                print(f"Compressing {len(tar_files)} .tar archive(s) with level {LEVEL_LARGE} …")
-            ok, err = run_parallel(
-                tar_files,
-                compress_file,
-                {"dry_run": dry_run, "verbose": verbose, "level": LEVEL_LARGE},
-                verbose,
-            )
-            compressed_tars = {tp for tp in tar_files if tp.with_suffix(tp.suffix + BROTLI_EXT).exists() or dry_run}
-            for sd, tp in tar_paths:
-                if tp in compressed_tars:
-                    remove_subdir(sd, dry_run, verbose)
-        loose = [p for p in root.iterdir() if p.is_file() and p.suffix != BROTLI_EXT]
-        if loose:
-            if verbose:
-                print(f"Compressing {len(loose)} loose file(s) …")
-            run_parallel(loose, compress_file, {"dry_run": dry_run, "verbose": verbose}, verbose)
-    else:
-        files = [p for p in root.rglob("*") if p.is_file() and p.suffix != BROTLI_EXT]
-        if not files:
-            print("No files to compress.")
-            return
-        if verbose:
-            print(f"Compressing {len(files)} file(s) using {WORKERS} worker(s) …")
-        ok, err = run_parallel(files, compress_file, {"dry_run": dry_run, "verbose": verbose}, verbose)
-        elapsed = time.perf_counter() - start
-        print(f"Done — {ok} compressed, {err} error(s) [{elapsed:.2f}s]")
+def gather_decompression_targets() -> list:
+    """Gather all valid decompression targets."""
+    current_dir = Path(".")
+    br_files = []
+
+    for f in current_dir.rglob("*"):
+        if not f.is_file():
+            continue
+        if not f.name.endswith(".br"):
+            continue
+        if should_skip_path(f):
+            continue
+
+        # Check if decompressed file already exists
+        if f.name.endswith(".tar.br"):
+            extracted_dir = f.parent / f.name[:-7]  # Remove .tar.br
+            if extracted_dir.exists():
+                print(f"⏭️ Skipping (directory exists): {extracted_dir.name}")
+                continue
+        else:
+            decompressed_file = f.with_name(f.stem)  # Remove .br
+            if decompressed_file.exists():
+                print(f"⏭️ Skipping (file exists): {decompressed_file.name}")
+                continue
+
+        br_files.append(f)
+
+    return br_files
+
+
+def run_decompression():
+    """Execute decompression on all valid targets."""
+    br_files = gather_decompression_targets()
+
+    if not br_files:
+        print("No compressed .br or .tar.br targets located inside execution directory structure.")
         return
-    elapsed = time.perf_counter() - start
-    print(f"Done [{elapsed:.2f}s]")
+
+    print(f"🚀 Found {len(br_files)} compressed targets. Spawning parallel decompression pool...")
+
+    success_count = 0
+    with ThreadPoolExecutor() as executor:
+        futures = {executor.submit(handle_decompress, file): file for file in br_files}
+
+        for future in as_completed(futures):
+            file = futures[future]
+            try:
+                if future.result():
+                    success_count += 1
+            except Exception as e:
+                print(f"❌ Unexpected error with {file.name}: {e}")
+
+    print(f"📊 Decompression complete: {success_count}/{len(br_files)} successful")
 
 
-def do_decompress(root: Path, dry_run: bool, verbose: bool) -> None:
-    start = time.perf_counter()
-    files = [p for p in root.rglob("*") if p.is_file() and p.suffix == BROTLI_EXT]
-    if not files:
-        print("No .br files found.")
-        return
-    if verbose:
-        print(f"Decompressing {len(files)} file(s) using {WORKERS} worker(s) …")
-    ok, err = run_parallel(files, decompress_file, {"dry_run": dry_run, "verbose": verbose}, verbose)
-    elapsed = time.perf_counter() - start
-    print(f"Done — {ok} decompressed, {err} error(s) [{elapsed:.2f}s]")
-
-
-def build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(
-        prog="brotli_compress",
-        description="""Recursive brotli compression / decompression.
-Default (no flags): compress files in CWD individually at level 11.""",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-    )
-    mode = p.add_mutually_exclusive_group()
-    mode.add_argument(
-        "-c",
-        "--compress",
-        action="store_true",
-        help="Compress files recursively (default when no mode flag given).",
-    )
-    mode.add_argument("-d", "--decompress", action="store_true", help="Decompress .br files recursively.")
-    p.add_argument(
-        "-t",
-        "--tar-subdirs-first",
-        action="store_true",
-        help="Tar each immediate subdirectory before compressing. The .tar archive is then brotli-compressed and the original dir removed.",
-    )
-    p.add_argument("--verbose", action="store_true", help="Print per-file progress.")
-    p.add_argument("--dry-run", action="store_true", help="Show what would happen without touching any files.")
-    p.add_argument(
-        "directory",
-        nargs="?",
-        default=".",
-        help="Root directory to process (default: current directory).",
-    )
-    return p
-
-
-def main() -> None:
-    parser = build_parser()
+def main():
+    """Main entry point with argument parsing."""
+    parser = argparse.ArgumentParser(description="Parallel Brotli File/Folder Compression Tool with cleanup")
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("-c", "--compress", action="store_true", help="Compress recursive targets (default action)")
+    group.add_argument("-d", "--decompress", action="store_true", help="Decompress recursive targets")
     args = parser.parse_args()
-    root = Path(args.directory).resolve()
-    if not root.is_dir():
-        parser.error(f"Not a directory: {root}")
-    compress = args.compress or not args.decompress
-    if args.dry_run:
-        print("[dry-run mode — no files will be modified]")
-    if args.verbose or args.dry_run:
-        print(f"Root : {root}")
-        print(f"Mode : {'compress' if compress else 'decompress'}")
-        if compress:
-            print(f"Tar subdirs : {args.tar_subdirs_first}")
-        print(f"Workers     : {WORKERS}")
-        print()
-    if compress:
-        do_compress(root, args.tar_subdirs_first, args.dry_run, args.verbose)
-    else:
-        if args.tar_subdirs_first:
-            print("Note: --tar-subdirs-first is ignored during decompression.", file=sys.stderr)
-        do_decompress(root, args.dry_run, args.verbose)
+
+    # Default to compress if no action specified
+    if not args.decompress:
+        args.compress = True
+
+    if args.compress:
+        run_compression()
+    elif args.decompress:
+        run_decompression()
+
+    print("🎉 Action lifecycle execution pool finalized.")
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 
 """Commit all files in current directory to a local git repository.
 Initializes a new repository if not already inside one.

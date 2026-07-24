@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 """Recursively replace or remove text in files with Python 3.12+ optimizations."""
 
 from __future__ import annotations

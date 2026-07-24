@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 from pathlib import Path
 
 """A command-line utility for WhoisXML API services

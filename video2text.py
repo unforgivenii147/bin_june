@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-"""Module for video2text.py."""
 
 from __future__ import annotations
 

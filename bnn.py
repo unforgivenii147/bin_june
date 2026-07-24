@@ -1,24 +1,21 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 
-"""Module for bnn.py."""
 
 from __future__ import annotations
+import sys
 
-# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+from pathlib import Path
 
 
-def process_file(fname) -> None:
-    Path(path)
-    content = fname.read_text(encoding="utf-8")
+def process_file(path) -> None:
+    path = Path(path)
+    content = path.read_text(encoding="utf-8")
     content = content.replace("\\n", "\n")
-    fname.write_text(content, encoding="utf-8")
-    print(f"{fname.name} updated.")
+    path.write_text(content, encoding="utf-8")
+    print(f"{path.name} updated.")
 
 
 if __name__ == "__main__":
-    import sys
-    from pathlib import Path
-
     from dh import get_pyfiles, mpf3
 
     cwd = Path.cwd()

@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 """
 Translate Persian text files to English using deep_translator.
 Each file contains one Persian word per line.

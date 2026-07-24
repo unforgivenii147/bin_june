@@ -1,7 +1,6 @@
-#!/data/data/com.termux/files/usr/bin/env python
+#!/data/data/com.termux/files/home/.local/bin/python
 from pathlib import Path
 
-"""Module for find_sim_images.py."""
 
 from __future__ import annotations
 

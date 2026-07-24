@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python3.14
+#!/data/data/com.termux/files/home/.local/bin/python
 
 
 from __future__ import annotations
