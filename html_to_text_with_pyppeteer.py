@@ -9,8 +9,6 @@ from pathlib import Path
 
 from pyppeteer import launch
 
-# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 async def main():
     url = sys.argv[1]

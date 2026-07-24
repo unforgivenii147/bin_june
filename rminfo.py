@@ -10,7 +10,7 @@ import re
 import sys
 from pathlib import Path
 
-# Pattern to match your info block
+
 INFO_BLOCK_PATTERN = re.compile(
     r"^# Author\s*:\s*isaac\s*\n"
     r"# Email\s*:\s*mkalafsaz@gmail\.com\s*\n"
@@ -18,7 +18,7 @@ INFO_BLOCK_PATTERN = re.compile(
     re.MULTILINE,
 )
 
-# Python shebang patterns
+
 PYTHON_SHEBANG_PATTERNS = [
     re.compile(r"^#!.*python", re.IGNORECASE),
     re.compile(r"^#!.*python3", re.IGNORECASE),
@@ -27,11 +27,10 @@ PYTHON_SHEBANG_PATTERNS = [
 
 def is_python_file(file_path):
     """Check if a file is a Python file (by extension or shebang)."""
-    # Check extension
+
     if file_path.suffix == ".py":
         return True
 
-    # Check for shebang in files without extension
     if not file_path.suffix:
         try:
             with open(file_path, encoding="utf-8", errors="ignore") as f:
@@ -51,14 +50,11 @@ def remove_info_block(file_path):
         with open(file_path, encoding="utf-8") as f:
             content = f.read()
 
-        # Skip if file doesn't contain the info block
         if "Author : isaac" not in content:
             return False
 
-        # Remove the info block
         new_content = INFO_BLOCK_PATTERN.sub("", content)
 
-        # Write back only if changed
         if new_content != content:
             with open(file_path, "w", encoding="utf-8") as f:
                 f.write(new_content)
@@ -77,23 +73,19 @@ def main():
     removed_count = 0
     files_checked = 0
 
-    # Find all files recursively
     for file_path in start_dir.rglob("*"):
         if not file_path.is_file():
             continue
 
-        # Skip common non-Python files without extension
         name = file_path.name
         if name in [".DS_Store", ".gitignore", "README", "LICENSE", "Makefile"]:
             continue
 
-        # Check if it's a Python file
         if not is_python_file(file_path):
             continue
 
         files_checked += 1
 
-        # Try to remove info block
         if remove_info_block(file_path):
             print(f"✓ Removed info block from: {file_path}")
             removed_count += 1

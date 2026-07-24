@@ -10,7 +10,7 @@ from __future__ import annotations
 import os
 import sys
 
-# Shebang to extension mapping
+
 SHEBANG_MAP = {
     "python": ".py",
     "python3": ".py",
@@ -22,7 +22,7 @@ SHEBANG_MAP = {
     "dash": ".sh",
 }
 
-# Target extensions we care about
+
 TARGET_EXTENSIONS = {".py", ".sh"}
 
 
@@ -32,16 +32,14 @@ def detect_shebang(filepath):
         with open(filepath, encoding="utf-8", errors="ignore") as f:
             first_line = f.readline().strip()
             if first_line.startswith("#!"):
-                # Extract the interpreter from shebang
                 interpreter = first_line[2:].strip()
-                # Handle /usr/bin/env python3 style shebangs
+
                 if "/env " in interpreter:
                     interpreter = interpreter.split("/env ")[-1]
-                # Handle /usr/bin/python3 style shebangs
+
                 else:
                     interpreter = os.path.basename(interpreter)
 
-                # Check against our mapping
                 for key, ext in SHEBANG_MAP.items():
                     if key in interpreter.lower():
                         return ext
@@ -54,11 +52,9 @@ def should_rename(filepath, target_ext):
     """Check if file needs renaming based on target extension."""
     current_ext = os.path.splitext(filepath)[1].lower()
 
-    # Case 1: Current extension matches target - no change needed
     if current_ext == target_ext:
         return False
 
-    # Case 2: No extension or wrong extension - needs rename
     return True
 
 
@@ -67,14 +63,12 @@ def rename_file(filepath, target_ext):
     directory = os.path.dirname(filepath)
     basename = os.path.splitext(os.path.basename(filepath))[0]
 
-    # If file has no extension, keep the original name
     if not os.path.splitext(filepath)[1]:
         basename = os.path.basename(filepath)
 
     new_name = f"{basename}{target_ext}"
     new_path = os.path.join(directory, new_name)
 
-    # Handle name conflicts
     counter = 1
     while os.path.exists(new_path) and new_path != filepath:
         new_name = f"{basename}_{counter}{target_ext}"
@@ -82,7 +76,6 @@ def rename_file(filepath, target_ext):
         counter += 1
 
     try:
-        # Only rename if the new path is different
         if new_path != filepath:
             os.rename(filepath, new_path)
             return new_path
@@ -95,7 +88,7 @@ def rename_file(filepath, target_ext):
 
 def main():
     """Main function to process all files in current directory."""
-    # Dry run mode
+
     dry_run = "--dry-run" in sys.argv or "-n" in sys.argv
     verbose = "--verbose" in sys.argv or "-v" in sys.argv
 
@@ -106,19 +99,12 @@ def main():
     renamed_count = 0
     skipped_count = 0
 
-    # Scan all files in current directory (non-recursive)
     for item in os.listdir(current_dir):
         filepath = os.path.join(current_dir, item)
 
-        # Skip directories and special files
         if not os.path.isfile(filepath):
             continue
 
-        # Skip files that are not executable (optional, can be removed)
-        # if not os.access(filepath, os.X_OK):
-        #     continue
-
-        # Detect shebang
         target_ext = detect_shebang(filepath)
 
         if target_ext is None:
@@ -126,14 +112,12 @@ def main():
                 print(f"  SKIP: {item} (no recognized shebang)")
             continue
 
-        # Check if file needs renaming
         if not should_rename(filepath, target_ext):
             if verbose:
                 print(f"  SKIP: {item} (already has correct extension)")
             skipped_count += 1
             continue
 
-        # Perform rename
         if dry_run:
             new_name = os.path.splitext(item)[0] + target_ext
             print(f"  WOULD RENAME: {item} -> {new_name}")
@@ -146,7 +130,6 @@ def main():
             else:
                 skipped_count += 1
 
-    # Summary
     print("\nSummary:")
     if dry_run:
         print(f"  Would rename: {renamed_count} files")

@@ -7,8 +7,6 @@ import ctypes
 import ctypes.util
 from datetime import UTC, datetime
 
-# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 class StatxTimestamp(ctypes.Structure):
     _fields_ = [

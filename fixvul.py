@@ -21,7 +21,7 @@ def parse_vulture_output(filepath):
         with open(filepath, "r") as f:
             for line in f:
                 line = line.strip()
-                # Match lines like: filename.py:123: unused variable 'SKIP_DIRS' (60% confidence)
+
                 match = re.match(r'^(.+?):(\d+):\s+unused variable\s+[\'"]SKIP_DIRS[\'"]', line)
                 if match:
                     filename = match.group(1)
@@ -60,7 +60,6 @@ def main():
     vulture_file = sys.argv[1]
     print(f"Reading vulture output from: {vulture_file}")
 
-    # Parse vulture output for SKIP_DIRS entries
     skip_dirs_fixes = parse_vulture_output(vulture_file)
 
     if not skip_dirs_fixes:
@@ -90,7 +89,6 @@ def main():
                 if 1 <= line_num <= len(lines):
                     line = lines[line_num - 1]
                     if "SKIP_DIRS" in line and not line.lstrip().startswith("#"):
-                        # Preserve indentation but comment out the line
                         indent = len(line) - len(line.lstrip())
                         content = line.lstrip()
                         lines[line_num - 1] = " " * indent + "# " + content

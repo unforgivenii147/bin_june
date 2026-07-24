@@ -7,7 +7,6 @@ import sys
 
 from googlesearch import search
 
-# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 if __name__ == "__main__":
     tts = sys.argv[1]

@@ -29,7 +29,6 @@ def main():
     )
     args = parser.parse_args()
 
-    # Find all directories
     directories = [d for d in args.directory.iterdir() if d.is_dir()]
 
     if not directories:
@@ -38,7 +37,6 @@ def main():
 
     print(f"Processing {len(directories)} directories using {args.jobs} workers")
 
-    # Use ThreadPoolExecutor (good for I/O-bound subprocess calls)
     with ThreadPoolExecutor(max_workers=args.jobs) as executor:
         futures = {executor.submit(pack_wheel, directory): directory for directory in directories}
 

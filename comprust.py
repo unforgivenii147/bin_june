@@ -8,7 +8,6 @@ from pathlib import Path
 
 from compression_prompt import Compressor
 
-# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 if __name__ == "__main__":
     fn = Path(sys.argv[1])

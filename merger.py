@@ -8,16 +8,12 @@ from random import choice
 from string import ascii_lowercase
 from typing import Optional
 
-# Constants
+
 CHUNK_SIZE: int = 8192
 BINARY_THRESHOLD: float = 0.3
 DEFAULT_OUTPUT_LEN: int = 10
-# Extended to include common UTF-8 continuation bytes (0x80-0xBF)
-TEXT_CHARS: bytearray = bytearray(
-    list(range(32, 127))  # ASCII printable
-    + list(range(0x80, 0x100))  # Extended ASCII/UTF-8 continuation bytes
-    + [ord(c) for c in "\n\r\t\b"]
-)
+
+TEXT_CHARS: bytearray = bytearray(list(range(32, 127)) + list(range(0x80, 0x100)) + [ord(c) for c in "\n\r\t\b"])
 
 
 def get_files(path: Path, ext: Optional[list[str]] = None) -> list[Path]:
@@ -49,20 +45,18 @@ def is_binary(path: Path) -> bool:
         with path.open("rb") as f:
             chunk = f.read(CHUNK_SIZE)
 
-        if not chunk:  # Empty files are not binary
+        if not chunk:
             return False
 
-        if b"\x00" in chunk:  # Null byte strongly indicates binary
+        if b"\x00" in chunk:
             return True
 
-        # Try to decode as UTF-8 first
         try:
             chunk.decode("utf-8")
-            return False  # Successfully decoded, not binary
+            return False
         except UnicodeDecodeError:
-            pass  # Not valid UTF-8, check further
+            pass
 
-        # Count non-text characters
         nontext = sum(1 for byte in chunk if byte not in TEXT_CHARS)
         return (nontext / len(chunk)) > BINARY_THRESHOLD
 
@@ -72,7 +66,7 @@ def is_binary(path: Path) -> bool:
 
 def get_nobinary(path: Path) -> list[Path]:
     """Get all non-binary files. Note: is_binary check is now in get_files."""
-    return get_files(path)  # is_binary check is already done in get_files
+    return get_files(path)
 
 
 def read_file(path: Path) -> Optional[str]:
@@ -87,7 +81,7 @@ def should_skip_file(file_path: Path, cwd: Path) -> bool:
     try:
         relative_parts = file_path.relative_to(cwd).parts
     except ValueError:
-        return True  # Skip if can't get relative path
+        return True
 
     if any(part.startswith(".") for part in relative_parts):
         return True

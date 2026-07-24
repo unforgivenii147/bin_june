@@ -15,13 +15,12 @@ def run_git_command(args: list[str]) -> str:
 
 
 def main():
-    # Ensure this is being run inside a valid git repository
+
     repo_root = Path(".")
     if not (repo_root / ".git").exists() and not run_git_command(["rev-parse", "--is-inside-work-tree"]) == "true":
         print("❌ Error: Current directory is not a Git repository root.")
         sys.exit(1)
 
-    # Verify a previous commit actually exists to amend into
     try:
         run_git_command(["log", "-1"])
     except SystemExit:
@@ -30,7 +29,6 @@ def main():
 
     print("🔍 Searching repository history for deleted files...")
 
-    # Step 1: Extract paths of files historically deleted across the git log
     log_output = run_git_command(["log", "--diff-filter=D", "--name-only", "--pretty=format:"])
     historically_deleted = {line.strip() for line in log_output.splitlines() if line.strip()}
 
@@ -38,7 +36,6 @@ def main():
         print("ℹ️  No deleted files found in the git commit log.")
         return
 
-    # Step 2: Correlate with current unstaged/staged file system status flags
     status_output = run_git_command(["status", "--porcelain"])
 
     locally_removed_files = []
@@ -46,7 +43,7 @@ def main():
         if len(line) > 3:
             status = line[:2]
             file_path = line[3:].strip()
-            # Catch items tracked as deleted ('D') that match historical data
+
             if "D" in status and file_path in historically_deleted:
                 locally_removed_files.append(file_path)
 
@@ -58,12 +55,10 @@ def main():
     for path in locally_removed_files:
         print(f"   -> {path}")
 
-    # Step 3: Stage the deletions
     print("\n🛠️  Staging file deletions...")
     for path in locally_removed_files:
         run_git_command(["add", path])
 
-    # Step 4: Squash into previous commit via --amend
     print("💾 Squashing changes into previous commit (git commit --amend --no-edit)...")
     amend_output = run_git_command(["commit", "--amend", "--no-edit"])
 

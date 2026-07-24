@@ -96,3 +96,11 @@ var/
 venv.bak/
 venv/
 wheels/
+*.txt
+*.toml
+*.json
+*.env
+.env
+*.pyc
+*.toml
+

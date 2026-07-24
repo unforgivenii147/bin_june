@@ -19,13 +19,11 @@ def get_site_directories() -> tuple[list[pathlib.Path], list[pathlib.Path]]:
     Returns:
         tuple of (system_site_dirs, user_site_dirs)
     """
-    # Get all site-packages directories
+
     site_dirs = [pathlib.Path(p) for p in site.getsitepackages()]
 
-    # Get user site-packages directory
     user_site = pathlib.Path(site.getusersitepackages())
 
-    # Separate system and user directories
     system_site_dirs = [d for d in site_dirs if d != user_site]
     user_site_dirs = [user_site] if user_site.exists() else []
 
@@ -50,19 +48,16 @@ def scan_directory_for_packages(directory: pathlib.Path) -> dict[str, pathlib.Pa
     try:
         for item in directory.iterdir():
             if item.is_dir():
-                # Check for regular packages
                 if (item / "__init__.py").exists():
                     packages[item.name] = item
-                # Check for namespace packages
+
                 elif item.suffix == ".dist-info" or item.suffix == ".egg-info":
-                    # Extract package name from dist-info/egg-info directory
                     pkg_name = item.name.split("-")[0]
                     packages[pkg_name] = item
             elif item.is_file():
-                # Check for single-file modules
                 if item.suffix == ".py":
                     packages[item.stem] = item
-                # Check for .dist-info and .egg-info files
+
                 elif (item.suffix == ".dist-info" or item.suffix == ".egg-info") and item.is_dir():
                     pkg_name = item.name.split("-")[0]
                     packages[pkg_name] = item
@@ -167,12 +162,9 @@ def analyze_package_versions(
     """
     versions = {"system_version": "unknown", "user_version": "unknown"}
 
-    # Try to find version information in dist-info or egg-info directories
     for location_type, location in [("system", system_location), ("user", user_location)]:
         try:
-            # Check if the location itself is a dist-info/egg-info directory
             if location.suffix in [".dist-info", ".egg-info"]:
-                # Try to find METADATA or PKG-INFO file
                 metadata_files = ["METADATA", "PKG-INFO"]
                 for metadata_file in metadata_files:
                     metadata_path = location / metadata_file
@@ -184,13 +176,12 @@ def analyze_package_versions(
                                     versions[version_key] = line.split(":", 1)[1].strip()
                                     break
             else:
-                # Look for dist-info directory in the package directory
                 parent_dir = location.parent if location.is_file() else location
                 dist_info_dirs = list(parent_dir.glob(f"{package_name}-*.dist-info"))
                 if not dist_info_dirs:
                     dist_info_dirs = list(parent_dir.glob(f"{package_name}-*.egg-info"))
 
-                for dist_dir in dist_info_dirs[:1]:  # Just check first one
+                for dist_dir in dist_info_dirs[:1]:
                     metadata_path = dist_dir / "METADATA"
                     if not metadata_path.exists():
                         metadata_path = dist_dir / "PKG-INFO"
@@ -213,7 +204,6 @@ def main():
     print("Python Package Duplicate Checker")
     print("=" * 50)
 
-    # Get site directories
     try:
         system_dirs, user_dirs = get_site_directories()
     except Exception as e:
@@ -234,7 +224,6 @@ def main():
 
     print("\nScanning for packages...")
 
-    # Process directories in parallel
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
         system_future = executor.submit(process_system_directories, system_dirs)
         user_future = executor.submit(process_user_directories, user_dirs)
@@ -242,10 +231,8 @@ def main():
         system_packages = system_future.result()
         user_packages = user_future.result()
 
-    # Find duplicates
     duplicates = find_duplicate_packages(system_packages, user_packages)
 
-    # Report results
     print("\nResults:")
     print(f"  System packages found: {len(system_packages)}")
     print(f"  User packages found: {len(user_packages)}")

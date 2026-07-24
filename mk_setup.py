@@ -16,7 +16,6 @@ def detect_entry_point(project_dir, package_name):
     """Detect if there's a __main__.py or cli.py and return entry point info."""
     project_path = Path(project_dir).resolve()
 
-    # Check for __main__.py or cli.py in package directory or root
     main_file = project_path / package_name / "__main__.py"
     cli_file = project_path / package_name / "cli.py"
     root_main = project_path / "__main__.py"
@@ -24,11 +23,9 @@ def detect_entry_point(project_dir, package_name):
 
     entry_points = []
 
-    # Check package-level __main__.py
     if main_file.exists():
         entry_points.append({"module": f"{package_name}.__main__", "function": "main", "script_name": package_name})
 
-    # Check package-level cli.py
     if cli_file.exists():
         function_name = detect_main_function(cli_file)
         entry_points.append(
@@ -39,11 +36,9 @@ def detect_entry_point(project_dir, package_name):
             }
         )
 
-    # Check root-level __main__.py
     if root_main.exists() and not entry_points:
         entry_points.append({"module": "__main__", "function": "main", "script_name": package_name})
 
-    # Check root-level cli.py
     if root_cli.exists() and not entry_points:
         function_name = detect_main_function(root_cli)
         entry_points.append({"module": "cli", "function": function_name, "script_name": package_name})
@@ -57,7 +52,6 @@ def detect_main_function(file_path):
         with open(file_path, encoding="utf-8") as f:
             content = f.read()
 
-        # Check for common patterns
         if re.search(r"def main\(", content):
             return "main"
         elif re.search(r"@click\.\w+", content) or re.search(r"import click", content):
@@ -67,7 +61,7 @@ def detect_main_function(file_path):
         elif re.search(r'if __name__ == [\'"]__main__[\'"]:', content):
             return "main"
 
-        return "main"  # Default fallback
+        return "main"
     except Exception:
         return "main"
 
@@ -87,7 +81,6 @@ def find_requirements(project_dir):
                     for line in f:
                         line = line.strip()
                         if line and not line.startswith("#") and not line.startswith("-"):
-                            # Handle Pipfile format
                             if req_file == "Pipfile":
                                 if "=" in line and not line.startswith("["):
                                     pkg = line.split("=")[0].strip()
@@ -105,7 +98,6 @@ def find_requirements(project_dir):
 def generate_setup_py(project_dir, package_name, entry_points, requirements):
     """Generate the content for setup.py."""
 
-    # Build entry points string
     entry_points_str = ""
     if entry_points:
         console_scripts = []
@@ -119,7 +111,6 @@ def generate_setup_py(project_dir, package_name, entry_points, requirements):
         entry_points_str += "        ],\n"
         entry_points_str += "    },\n"
 
-    # Build requirements string
     install_requires = "    install_requires=[],\n"
     if requirements:
         install_requires = "    install_requires=[\n"
@@ -127,14 +118,12 @@ def generate_setup_py(project_dir, package_name, entry_points, requirements):
             install_requires += f"        '{req}',\n"
         install_requires += "    ],\n"
 
-    # Read long description from README if exists
     readme_content = ""
     readme_path = Path(project_dir) / "README.md"
     if readme_path.exists():
         readme_content = "    long_description=open('README.md').read(),\n"
         readme_content += "    long_description_content_type='text/markdown',\n"
 
-    # Generate the setup.py content
     setup_content = f"""from setuptools import setup, find_packages
 
 setup(
@@ -178,11 +167,9 @@ def main():
         print(f"Error: '{project_dir}' is not a directory.")
         sys.exit(1)
 
-    # Use folder name as package name
     package_name = os.path.basename(os.path.abspath(project_dir))
     print(f"Package name: {package_name}")
 
-    # Detect entry points
     entry_points = detect_entry_point(project_dir, package_name)
 
     if not entry_points:
@@ -193,15 +180,12 @@ def main():
         for ep in entry_points:
             print(f"  - {ep['script_name']} -> {ep['module']}:{ep['function']}")
 
-    # Find requirements
     requirements = find_requirements(project_dir)
     if requirements:
         print(f"\nFound {len(requirements)} requirements in requirements files.")
 
-    # Generate setup.py
     setup_content = generate_setup_py(project_dir, package_name, entry_points, requirements)
 
-    # Write setup.py
     setup_path = os.path.join(project_dir, "setup.py")
     with open(setup_path, "w", encoding="utf-8") as f:
         f.write(setup_content)

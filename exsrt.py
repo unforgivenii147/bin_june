@@ -6,8 +6,6 @@ from __future__ import annotations
 import subprocess
 import sys
 
-# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def main() -> None:
     input_file = sys.argv[1]

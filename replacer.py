@@ -9,12 +9,12 @@ import re
 import sys
 from pathlib import Path
 
-# Constants
+
 SKIP_DIRS = frozenset(
     {".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache", "node_modules", "build", "dist"}
 )
-CHUNK_SIZE = 8192  # Was undefined
-MAX_CONTEXT_DISPLAY = 3  # Magic number extracted
+CHUNK_SIZE = 8192
+MAX_CONTEXT_DISPLAY = 3
 
 
 def is_binary(path: Path) -> bool:
@@ -26,17 +26,15 @@ def is_binary(path: Path) -> bool:
         if not chunk:
             return False
 
-        # Check for null bytes (strong indicator of binary)
         if b"\x00" in chunk:
             return True
 
-        # Check ratio of non-text characters
         text_chars = bytearray(range(32, 127)) + b"\n\r\t\b"
         nontext = sum(1 for byte in chunk if byte not in text_chars)
         return (nontext / len(chunk)) > 0.3
 
     except (OSError, PermissionError):
-        return True  # Treat unreadable files as binary
+        return True
 
 
 def process_file(path: Path, search_text: str, replace_text: str | None = None, dry_run: bool = False) -> bool:
@@ -47,7 +45,6 @@ def process_file(path: Path, search_text: str, replace_text: str | None = None, 
     try:
         content = path.read_text(encoding="utf-8")
 
-        # Use compiled pattern for efficiency
         pattern = re.compile(re.escape(search_text))
 
         if not pattern.search(content):
@@ -59,7 +56,6 @@ def process_file(path: Path, search_text: str, replace_text: str | None = None, 
             matches = list(pattern.finditer(content))
             print(f"[DRY RUN] Found {len(matches)} match(es) in {path}")
 
-            # Show context for first few matches
             for i, match in enumerate(matches[:MAX_CONTEXT_DISPLAY]):
                 start = max(0, match.start() - 20)
                 end = min(len(content), match.end() + 20)
@@ -95,7 +91,6 @@ def replace_in_files(
     files_processed = 0
     files_changed = 0
 
-    # Single file mode
     if target_file:
         path = Path(target_file)
         if not path.is_file() or path.is_symlink():
@@ -107,15 +102,12 @@ def replace_in_files(
             files_changed += 1
         return 1, files_changed
 
-    # Recursive directory mode
     for root, dirs, files in os.walk("."):
-        # Filter directories in-place
         dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
 
         for filename in files:
             path = Path(root) / filename
 
-            # Skip symlinks and binary files
             if path.is_symlink() or is_binary(path):
                 continue
 
@@ -124,7 +116,6 @@ def replace_in_files(
             if process_file(path, search_text, replace_text, dry_run):
                 files_changed += 1
 
-            # Progress indicator every 100 files
             if files_processed % 100 == 0:
                 print(f"Processed {files_processed} files...", end="\r")
 
@@ -143,7 +134,6 @@ def parse_search_replace(strings: list[str]) -> tuple[str, str | None]:
     else:
         raise ValueError("Expected 1 or 2 strings")
 
-    # Strip quotes if present
     if search_text.startswith(("'", '"')) and search_text.endswith(("'", '"')):
         search_text = search_text[1:-1]
 
@@ -170,24 +160,20 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    # Parse search/replace strings
     try:
         search_text, replace_text, action = parse_search_replace(args.strings)
     except ValueError:
         parser.error("Please provide either one string (to remove) or two strings (search and replace)")
         return
 
-    # Display mode information
     if args.dry_run:
         print("--- RUNNING IN DRY RUN MODE (No files will be modified) ---")
     print(f"--- {action} ---")
 
-    # Process files
     files_processed, files_changed = replace_in_files(
         search_text, replace_text, target_file=args.file, dry_run=args.dry_run
     )
 
-    # Summary
     print(f"\n--- Complete: Processed {files_processed} files, modified {files_changed} files ---")
 
 

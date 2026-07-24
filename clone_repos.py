@@ -50,19 +50,15 @@ def clone_repo(repo: str, base_dir: Path) -> tuple[str, bool, str]:
     user, repo_name = repo.split("/")
     target_dir = base_dir / user / repo_name
 
-    # Skip if already cloned
     if target_dir.exists():
         try:
-            # Verify it's actually a git repo
             Repo(target_dir)
             return repo, True, f"Already exists: {target_dir}"
         except InvalidGitRepositoryError:
             return repo, False, f"Directory exists but is not a git repo: {target_dir}"
 
-    # Create parent directory
     target_dir.parent.mkdir(parents=True, exist_ok=True)
 
-    # Clone the repository
     clone_url = f"https://github.com/{repo}.git"
 
     try:
@@ -71,14 +67,13 @@ def clone_repo(repo: str, base_dir: Path) -> tuple[str, bool, str]:
 
     except GitCommandError as e:
         error_msg = str(e).strip()
-        # Clean up failed clone directory if it exists
+
         if target_dir.exists():
             import shutil
 
             shutil.rmtree(target_dir, ignore_errors=True)
         return repo, False, f"Clone failed: {error_msg}"
     except Exception as e:
-        # Clean up failed clone directory if it exists
         if target_dir.exists():
             import shutil
 
@@ -99,11 +94,9 @@ def main():
 
     args = parser.parse_args()
 
-    # Setup paths
     repos_file = Path(args.file)
     output_dir = Path(args.output)
 
-    # Read repositories
     repos = read_repos(repos_file)
     print(f"Found {len(repos)} repositories to clone")
 
@@ -119,7 +112,6 @@ def main():
                 print(f"  [INVALID] {repo}")
         return
 
-    # Clone repositories in parallel
     successful = 0
     failed = 0
     skipped = 0
@@ -128,10 +120,8 @@ def main():
     print("-" * 60)
 
     with ThreadPoolExecutor(max_workers=args.workers) as executor:
-        # Submit all clone tasks
         future_to_repo = {executor.submit(clone_repo, repo, output_dir): repo for repo in repos}
 
-        # Process completed tasks
         for future in as_completed(future_to_repo):
             repo = future_to_repo[future]
             try:
@@ -152,7 +142,6 @@ def main():
                 failed += 1
                 print(f"❌ {repo}: Unexpected error: {e!s}")
 
-    # Summary
     print("-" * 60)
     print("\nSummary:")
     print(f"  ✅ Successfully cloned: {successful}")

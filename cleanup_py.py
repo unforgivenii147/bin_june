@@ -19,11 +19,9 @@ class CleanTransformer(cst.CSTTransformer):
         self.comments_removed = 0
         self.docstrings_removed = 0
 
-    # ====================== Preserve Module Docstring ======================
     def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
-        return updated_node  # Keep module docstring
+        return updated_node
 
-    # ====================== Remove Function/Class Docstrings ======================
     def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef) -> cst.FunctionDef:
         return self._strip_docstring(updated_node)
 
@@ -43,7 +41,7 @@ class CleanTransformer(cst.CSTTransformer):
             expr_value = first_stmt.body[0].value
             if isinstance(expr_value, (cst.SimpleString, cst.ConcatenatedString)):
                 self.docstrings_removed += 1
-                # Replace docstring with pass only if function/class would be empty
+
                 remaining = list(node.body.body[1:])
                 if not remaining:
                     new_body = node.body.with_changes(body=[cst.SimpleStatementLine(body=[cst.Pass()])])
@@ -52,11 +50,9 @@ class CleanTransformer(cst.CSTTransformer):
                 return node.with_changes(body=new_body)
         return node
 
-    # ====================== Remove Comments (with exceptions) ======================
     def leave_Comment(self, original_node: cst.Comment, updated_node: cst.Comment) -> cst.RemovalSentinel | cst.Comment:
         comment_text = original_node.value.strip()
 
-        # Preserve shebang, fmt, type comments
         if (
             comment_text.startswith(("#!", "# fmt:", "# type:"))
             or "# fmt:" in comment_text
@@ -82,7 +78,6 @@ def process_file(file_path: Path) -> tuple[Path, int, int, bool]:
         if new_source == original_source:
             return file_path, 0, 0, True
 
-        # Write inplace
         file_path.write_text(new_source, encoding="utf-8", newline="\n")
 
         return (
@@ -117,7 +112,6 @@ def main():
 
     args = parser.parse_args()
 
-    # Collect all .py files
     py_files: list[Path] = []
     for p in args.paths:
         path = Path(p).resolve()
@@ -128,7 +122,6 @@ def main():
         else:
             print(f"⚠️  Skipping non-existent path: {path}")
 
-    # Remove duplicates and sort
     py_files = sorted(set(py_files))
 
     if not py_files:

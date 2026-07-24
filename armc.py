@@ -28,8 +28,6 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from collections.abc import Generator
 
-# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 class CommentRemover:
     def __init__(self, validate: bool = True):

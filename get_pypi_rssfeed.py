@@ -13,7 +13,7 @@ from typing import List
 
 import requests
 
-# PyPI RSS feed URL for latest packages
+
 PYPI_RSS_URL = "https://pypi.org/rss/packages.xml"
 
 
@@ -49,16 +49,13 @@ def parse_rss_feed(xml_content: str) -> list[dict[str, str]]:
     packages = []
 
     try:
-        # Parse XML
         root = ET.fromstring(xml_content)
 
-        # RSS feeds have a channel element containing items
         channel = root.find("channel")
         if channel is None:
             print("Error: Invalid RSS format - no channel found", file=sys.stderr)
             return packages
 
-        # Extract items
         items = channel.findall("item")
 
         for item in items:
@@ -70,9 +67,8 @@ def parse_rss_feed(xml_content: str) -> list[dict[str, str]]:
                 "guid": item.findtext("guid", "Unknown"),
             }
 
-            # Extract package name from title (usually format: "package-name version")
             title = package_info["title"]
-            # Remove version number if present (typically separated by space)
+
             package_name = title.split()[0] if title else "Unknown"
             package_info["package_name"] = package_name
 
@@ -98,7 +94,6 @@ def display_packages(packages: list[dict[str, str]], limit: Optional[int] = None
         print("No packages found in the RSS feed.")
         return
 
-    # Apply limit if specified
     display_packages = packages[:limit] if limit else packages
 
     print(f"\n{'=' * 80}")
@@ -152,7 +147,6 @@ def save_to_file(packages: list[dict[str, str]], filename: str = "pypi_packages.
 def main():
     """Main function to orchestrate the RSS feed parsing."""
 
-    # Command line arguments for limit and save options
     limit = None
     save_output = False
 
@@ -176,18 +170,14 @@ def main():
 
     print("Fetching PyPI RSS feed...")
 
-    # Fetch RSS feed
     xml_content = fetch_rss_feed(PYPI_RSS_URL)
     if xml_content is None:
         sys.exit(1)
 
-    # Parse RSS feed
     packages = parse_rss_feed(xml_content)
 
-    # Display results
     display_packages(packages, limit)
 
-    # Save to file if requested
     if save_output:
         save_to_file(packages)
 

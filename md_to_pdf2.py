@@ -4,7 +4,7 @@ from pathlib import Path
 import markdown
 import weasyprint
 
-# Updated CSS with Local Font Rules
+
 CSS_TEMPLATE = """
 /* ==========================================================================
    0. LOCAL FONTS CONFIGURATION
@@ -206,7 +206,6 @@ def convert_md_to_pdf(input_path_str: str):
 
     print("🚀 Compiling PDF with WeasyPrint using local fonts...")
     try:
-        # Crucial: base_url handles the relative directory mapping for font src attributes
         html_doc = weasyprint.HTML(string=full_html, base_url=str(input_file.parent))
         css_doc = weasyprint.CSS(string=CSS_TEMPLATE)
 

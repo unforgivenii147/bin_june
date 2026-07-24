@@ -16,9 +16,6 @@ from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 
-# from typing import Optional
-
-# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 COMMON_SUBSTITUTIONS = {
     "b": "n",

@@ -5,8 +5,6 @@ from __future__ import annotations
 
 from secrets import randbelow
 
-# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def show_random_color() -> None:
     red = randbelow(256)

@@ -52,10 +52,9 @@ def check_repo_size(repo: str) -> tuple[bool, int]:
         if response.status_code == 200:
             data = response.json()
             size_kb = data.get("size", 0)
-            size_bytes = size_kb * 1024  # GitHub API returns size in KB
+            size_bytes = size_kb * 1024
             return size_bytes <= MAX_SIZE_BYTES, size_bytes
         else:
-            # If API fails, assume it's small enough to try
             return True, 0
     except Exception:
         return True, 0
@@ -83,7 +82,6 @@ def clone_repo(repo: str, base_dir: Path) -> tuple[str, bool, str]:
     user, repo_name = repo.split("/")
     target_dir = base_dir / user / repo_name
 
-    # Skip if already cloned
     if target_dir.exists():
         try:
             Repo(str(target_dir))
@@ -91,15 +89,12 @@ def clone_repo(repo: str, base_dir: Path) -> tuple[str, bool, str]:
         except NotGitRepository:
             return repo, False, f"Directory exists but is not a git repo: {target_dir}"
 
-    # Check repository size
     is_small, size_bytes = check_repo_size(repo)
     if not is_small:
         return repo, False, f"Too large ({format_size(size_bytes)} > {MAX_SIZE_MB}MB)"
 
-    # Create parent directory
     target_dir.parent.mkdir(parents=True, exist_ok=True)
 
-    # Clone the repository
     clone_url = f"https://github.com/{repo}.git"
 
     try:
@@ -107,7 +102,6 @@ def clone_repo(repo: str, base_dir: Path) -> tuple[str, bool, str]:
         return repo, True, f"Successfully cloned to {target_dir} ({format_size(size_bytes)})"
 
     except Exception as e:
-        # Clean up failed clone directory
         if target_dir.exists():
             import shutil
 
@@ -120,13 +114,10 @@ def remove_from_repos_file(file_path: Path, repos_to_remove: set[str]):
     if not repos_to_remove:
         return
 
-    # Read current repos
     current_repos = read_repos(file_path)
 
-    # Filter out repos to remove
     updated_repos = [repo for repo in current_repos if repo not in repos_to_remove]
 
-    # Write back to file
     with open(file_path, "w") as f:
         f.write("\n".join(updated_repos) + "\n" if updated_repos else "")
 
@@ -148,7 +139,6 @@ def main():
 
     args = parser.parse_args()
 
-    # Update global max size if specified
     global MAX_SIZE_BYTES
     if args.max_size != MAX_SIZE_MB:
         MAX_SIZE_BYTES = args.max_size * 1024 * 1024
@@ -156,7 +146,6 @@ def main():
     repos_file = Path(args.file)
     output_dir = Path(args.output)
 
-    # Read repositories
     repos = read_repos(repos_file)
     print(f"Found {len(repos)} repositories to clone")
     print(f"Max repo size: {args.max_size}MB")
@@ -198,7 +187,7 @@ def main():
                     if "Already exists" in message:
                         skipped += 1
                         print(f"⏭️  {repo}: {message}")
-                        # Also remove already existing repos
+
                         successfully_cloned.add(repo)
                     else:
                         successful += 1
@@ -212,11 +201,9 @@ def main():
                 failed += 1
                 print(f"❌ {repo}: Unexpected error: {e!s}")
 
-    # Remove successfully cloned repos from repos.txt
     if not args.no_cleanup and successfully_cloned:
         remove_from_repos_file(repos_file, successfully_cloned)
 
-    # Summary
     print("-" * 60)
     print("\nSummary:")
     print(f"  ✅ Successfully cloned: {successful}")

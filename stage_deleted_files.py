@@ -15,7 +15,7 @@ def run_git_command(args: list[str]) -> str:
 
 
 def main():
-    # Ensure this is being run inside a valid git repository
+
     repo_root = Path(".")
     if not (repo_root / ".git").exists() and not run_git_command(["rev-parse", "--is-inside-work-tree"]) == "true":
         print("❌ Error: Current directory is not a Git repository root.")
@@ -23,29 +23,22 @@ def main():
 
     print("🔍 Searching repository history for deleted files...")
 
-    # Step 1: Get names of all files deleted in the repo log history (across all commits)
-    # --diff-filter=D extracts only 'Deleted' status logs
-    # --name-only lists only paths instead of full diff blocks
     log_output = run_git_command(["log", "--diff-filter=D", "--name-only", "--pretty=format:"])
 
-    # Clean up empty lines and create a unique set of historically deleted file paths
     historically_deleted = {line.strip() for line in log_output.splitlines() if line.strip()}
 
     if not historically_deleted:
         print("ℹ️  No deleted files found in the git commit log log.")
         return
 
-    # Step 2: Get status of files in the current working tree to see what is missing/unstaged
-    # 'git status --porcelain' outputs predictable machine-readable file status flags
     status_output = run_git_command(["status", "--porcelain"])
 
-    # We want files marked with a ' D' or 'D ' (locally deleted but unstaged or tracked deletions)
     locally_removed_files = []
     for line in status_output.splitlines():
         if len(line) > 3:
             status = line[:2]
             file_path = line[3:].strip()
-            # If the file is tracked as deleted locally and matches our historical deletion index
+
             if "D" in status and file_path in historically_deleted:
                 locally_removed_files.append(file_path)
 
@@ -57,12 +50,10 @@ def main():
     for path in locally_removed_files:
         print(f"   -> {path}")
 
-    # Step 3: Stage the deleted files to the current tracking index
     print("\n🛠️ Staging deleted files (git add -A)...")
     for path in locally_removed_files:
         run_git_command(["add", path])
 
-    # Step 4: Commit the staged deletions
     commit_message = "removed files"
     print(f'💾 Committing changes: git commit -m "{commit_message}"')
     commit_output = run_git_command(["commit", "-m", commit_message])

@@ -42,22 +42,18 @@ def main() -> None:
     symlink_global_gitignore()
 
     try:
-        # Stage all changes
         repo.git.add(A=True)
 
-        # Create commit
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         commit_msg = f"Auto-commit at {now}"
         repo.index.commit(commit_msg)
 
-        # Get current branch
         if repo.head.is_detached:
             print("Error: Could not detect current branch (detached HEAD?).", file=sys.stderr)
             sys.exit(1)
 
         branch = repo.active_branch.name
 
-        # Push to origin
         origin = repo.remote("origin")
         origin.push(branch)
 

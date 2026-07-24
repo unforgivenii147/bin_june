@@ -222,6 +222,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-# i changed NEW_SHEBANG to NEW_SHEBANG12 and added NEW_SHEBANG14 too.
-# if a python file uses opencv module its shebang will be NEW_SHEBANG14 else NEW_SHEBANG12
-# change regex to r"" style too

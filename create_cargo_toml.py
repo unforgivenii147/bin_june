@@ -26,23 +26,19 @@ def parse_cargo_lock(filepath: str) -> dict:
     with open(filepath, "r", encoding="utf-8") as f:
         content = f.read()
 
-    # Parse the lock file version
     version_match = re.search(r"^version\s*=\s*(\d+)", content, re.MULTILINE)
     lock_version = int(version_match.group(1)) if version_match else 3
 
     packages = []
 
     if lock_version >= 2:
-        # For lock file version 2+, packages are in [[package]] sections
         package_blocks = re.split(r"\n\[\[package\]\]\n", content)
-        # Skip the first block (metadata before first package)
+
         for block in package_blocks[1:]:
             pkg = parse_package_block(block)
             if pkg:
                 packages.append(pkg)
     else:
-        # For lock file version 1, packages are in [[package]] sections
-        # but format is slightly different
         package_blocks = re.split(r"\n\[\[package\]\]\n", content)
         for block in package_blocks[1:]:
             pkg = parse_package_block_v1(block)
@@ -64,7 +60,6 @@ def parse_package_block(block: str) -> Optional[dict]:
     """
     pkg = {}
 
-    # Extract fields
     name_match = re.search(r'^name\s*=\s*"([^"]*)"', block, re.MULTILINE)
     version_match = re.search(r'^version\s*=\s*"([^"]*)"', block, re.MULTILINE)
     source_match = re.search(r'^source\s*=\s*"([^"]*)"', block, re.MULTILINE)
@@ -78,13 +73,12 @@ def parse_package_block(block: str) -> Optional[dict]:
     if source_match:
         pkg["source"] = source_match.group(1)
 
-    # Extract dependencies if present
     dependencies = []
     dep_section = False
     for line in block.split("\n"):
         if line.strip().startswith("dependencies = ["):
             dep_section = True
-            # Extract inline dependencies
+
             deps = re.findall(r'"([^"]*)"', line)
             dependencies.extend(deps)
             if "]" in line:
@@ -122,7 +116,6 @@ def parse_package_block_v1(block: str) -> Optional[dict]:
     pkg["name"] = name_match.group(1)
     pkg["version"] = version_match.group(1)
 
-    # In v1, dependencies are listed differently
     dependencies = []
     for line in block.split("\n"):
         dep_match = re.match(r'^\s*"([^"]+)\s+([^"]+)"', line)
@@ -155,12 +148,10 @@ def generate_cargo_toml(
     """
     lines = []
 
-    # Add package section
     lines.append("[package]")
     if root_package_name:
         lines.append(f'name = "{root_package_name}"')
     else:
-        # Use the first package as root if no name provided
         if packages:
             lines.append(f'name = "{packages[0]["name"]}"')
         else:
@@ -170,7 +161,6 @@ def generate_cargo_toml(
     lines.append('edition = "2021"')
     lines.append("")
 
-    # Add dependencies
     if packages:
         lines.append("[dependencies]")
 
@@ -179,7 +169,6 @@ def generate_cargo_toml(
             root_deps.update(packages[0]["dependencies"])
 
         if root_deps:
-            # Find the actual dependency packages and their versions
             for dep_name in root_deps:
                 dep_pkg = find_package(packages, dep_name)
                 if dep_pkg:
@@ -187,8 +176,6 @@ def generate_cargo_toml(
                 else:
                     lines.append(f'{dep_name} = "*"  # Version not found in lock file')
         else:
-            # If no direct deps found, add all packages as dependencies
-            # excluding the first one (which is likely the root)
             for pkg in packages[1:]:
                 lines.append(f'{pkg["name"]} = "{pkg["version"]}"')
 
@@ -216,7 +203,6 @@ def main():
     """Main function to run the script."""
     lock_file = "Cargo.lock"
 
-    # Allow specifying a different lock file
     if len(sys.argv) > 1:
         lock_file = sys.argv[1]
 
@@ -233,14 +219,12 @@ def main():
 
     print(f"Found {len(data['packages'])} packages (lock file v{data['version']})")
 
-    # Generate Cargo.toml
     toml_content = generate_cargo_toml(
         data["packages"],
-        root_package_name=None,  # Will use first package name
+        root_package_name=None,
         root_version="0.1.0",
     )
 
-    # Write to Cargo.toml
     output_file = "Cargo.toml"
     with open(output_file, "w", encoding="utf-8") as f:
         f.write(toml_content)

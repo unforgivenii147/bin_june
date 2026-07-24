@@ -77,7 +77,6 @@ def remove_string_from_names(
                     except OSError as e:
                         print(f"Error renaming '{item.name}': {e}")
 
-        # Process subdirectories recursively
         if recursive and item.is_dir():
             renamed_count += remove_string_from_names(string_to_remove, dry_run, recursive, item)
 
@@ -123,7 +122,6 @@ def replace_string_in_names(
                     except OSError as e:
                         print(f"Error renaming '{item.name}': {e}")
 
-        # Process subdirectories recursively
         if recursive and item.is_dir():
             renamed_count += replace_string_in_names(str1, str2, dry_run, recursive, item)
 
@@ -132,11 +130,10 @@ def replace_string_in_names(
 
 def should_skip(path):
     path = Path(path)
-    # Skip if it's a symlink or in skip directories
+
     if path.is_symlink():
         return True
 
-    # Check if any part of the path is in SKIP_DIRS
     for part in path.parts:
         if part in SKIP_DIRS:
             return True
@@ -149,10 +146,9 @@ def rename_by_template(
 ) -> int:
     renamed_count = 0
 
-    # Process files in current directory
     try:
         files = [f for f in current_path.iterdir() if f.is_file() and not should_skip(f)]
-        # Exclude the script itself
+
         script_name = Path(__file__).name
         files = [f for f in files if f.name != script_name]
 
@@ -167,7 +163,6 @@ def rename_by_template(
             else:
                 padding = 4
 
-            # Sort files for consistent numbering
             for i, file_path in enumerate(sorted(files), 1):
                 _name, ext = file_path.stem, file_path.suffix
                 number_str = str(i).zfill(padding)
@@ -194,7 +189,6 @@ def rename_by_template(
         print(f"Permission denied: {current_path}")
         return renamed_count
 
-    # Process subdirectories recursively
     if recursive:
         try:
             for item in current_path.iterdir():

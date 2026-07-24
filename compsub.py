@@ -309,7 +309,7 @@ def main():
 
 if __name__ == "__main__":
     try:
-        import zstandard  # noqa: F401
+        import zstandard
     except ImportError:
         print("Error: zstandard package is required. Install it with: pip install zstandard")
         sys.exit(1)

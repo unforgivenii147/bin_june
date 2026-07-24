@@ -15,9 +15,8 @@ SKIP_DIRS = {".git", "__pycache__"}
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     """Traverses directories using Python 3.12 Path.walk."""
     files = []
-    # top_down=True allows modifying dirs in-place to skip unwanted folders
+
     for root, dirs, filenames in Path(path).walk(top_down=True, on_error=None):
-        # Filter directories in-place to prevent walking into them
         dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
 
         for name in filenames:
@@ -110,10 +109,8 @@ def process_file(path_str: str) -> tuple[bool, str]:
 def main() -> None:
     cwd = Path.cwd()
 
-    # Fixed logic operator precedence
     files = [p for p in get_files(cwd) if (not p.suffix and has_shell_shebang(p)) or p.suffix == ".sh"]
 
-    # Filter out binaries sequentially (fast metadata/head read)
     non_binary_files = [p for p in files if not is_binary(p)]
 
     if not non_binary_files:
@@ -122,12 +119,10 @@ def main() -> None:
 
     file_strings = [str(f) for f in non_binary_files]
 
-    # Python Native parallel execution using ProcessPoolExecutor
     print(f"Processing {len(file_strings)} files...")
     with ProcessPoolExecutor() as executor:
         results = list(executor.map(process_file, file_strings))
 
-    # Print summary of failures
     failed = [Path(p_str).relative_to(cwd) for success, p_str in results if not success]
     if failed:
         print("\nFailed files:")

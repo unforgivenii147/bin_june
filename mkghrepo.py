@@ -8,8 +8,6 @@ from pathlib import Path
 
 import requests
 
-# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def load_env_file(env_path):
     env_vars = {}

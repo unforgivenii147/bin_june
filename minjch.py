@@ -11,8 +11,6 @@ from pathlib import Path
 
 from rcssmin import cssmin
 
-# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def minify_html(html: str) -> str:
     html = re.sub(r">\s+<", "><", html)

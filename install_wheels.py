@@ -21,15 +21,13 @@ def is_pure_python_wheel(wheel_path: Path) -> bool:
     if "-none-any" in wheel_name:
         return True
 
-    # Method 2: Inspect WHEEL metadata file inside the wheel
     try:
         with zipfile.ZipFile(wheel_path, "r") as zf:
-            # Look for WHEEL metadata file
             for name in zf.namelist():
                 if name.endswith((".dist-info/WHEEL", ".dist-info/METADATA")):
                     with zf.open(name) as f:
                         content = f.read().decode("utf-8")
-                        # Check if Root-Is-Purelib is true
+
                         if "Root-Is-Purelib: true" in content:
                             return True
                         if "Root-Is-Purelib: false" in content:
@@ -37,7 +35,6 @@ def is_pure_python_wheel(wheel_path: Path) -> bool:
     except Exception as e:
         print(f"Warning: Could not inspect {wheel_path.name}: {e}")
 
-    # Method 3: Check if wheel contains platform-specific extensions
     try:
         with zipfile.ZipFile(wheel_path, "r") as zf:
             for name in zf.namelist():
@@ -90,10 +87,9 @@ def get_wheel_type(wheel_path: Path) -> str:
 
 
 def main():
-    # Get current directory
+
     current_dir = Path.cwd()
 
-    # Find all .whl files
     wheel_files = list(current_dir.glob("*.whl"))
 
     if not wheel_files:
@@ -105,7 +101,6 @@ def main():
     print(f"Platform: {platform.platform()}")
     print("=" * 60)
 
-    # Analyze wheels
     install_tasks = []
 
     for wheel in wheel_files:
@@ -123,17 +118,14 @@ def main():
     print("Starting parallel installation...")
     print("=" * 60)
 
-    # Install wheels in parallel
     successful = []
     failed = []
 
-    max_workers = min(4, len(wheel_files))  # Limit concurrent installations
+    max_workers = min(4, len(wheel_files))
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        # Submit all installation tasks
         future_to_wheel = {executor.submit(install_wheel, wheel, is_pure): wheel for wheel, is_pure in install_tasks}
 
-        # Process completed installations
         for future in as_completed(future_to_wheel):
             wheel = future_to_wheel[future]
             try:
@@ -148,7 +140,6 @@ def main():
                 print(f"✗ Error processing {wheel.name}: {e}")
                 failed.append((wheel, str(e)))
 
-    # Print summary
     print("\n" + "=" * 60)
     print("INSTALLATION SUMMARY")
     print("=" * 60)

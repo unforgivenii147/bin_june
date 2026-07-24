@@ -21,7 +21,6 @@ from collections.abc import Iterable
 
 from loguru import logger
 
-# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 try:
     import bz2

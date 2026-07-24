@@ -21,7 +21,7 @@ class EntityExtractor(ast.NodeVisitor):
         self.entities = []
         self.source_lines = source_content.splitlines(keepends=True)
         self.original_path = original_path
-        self.scope_depth = 0  # Track nesting depth instead of scope stack
+        self.scope_depth = 0
 
     def _get_source_slice(self, node: ast.AST) -> str:
         start_line = node.lineno - 1
@@ -39,7 +39,7 @@ class EntityExtractor(ast.NodeVisitor):
         self.entities.append(
             {
                 "name": name,
-                "full_name": name,  # No scope prefix needed for top-level only
+                "full_name": name,
                 "type": entity_type,
                 "code": entity_code,
                 "path": str(self.original_path),
@@ -50,7 +50,7 @@ class EntityExtractor(ast.NodeVisitor):
         )
 
     def visit_FunctionDef(self, node: ast.FunctionDef):
-        # Only extract top-level functions (scope_depth == 0)
+
         if self.scope_depth == 0:
             self._extract_and_save(node, "function", node.name)
         self.scope_depth += 1
@@ -58,7 +58,7 @@ class EntityExtractor(ast.NodeVisitor):
         self.scope_depth -= 1
 
     def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef):
-        # Only extract top-level async functions (scope_depth == 0)
+
         if self.scope_depth == 0:
             self._extract_and_save(node, "function", node.name)
         self.scope_depth += 1
@@ -66,7 +66,7 @@ class EntityExtractor(ast.NodeVisitor):
         self.scope_depth -= 1
 
     def visit_ClassDef(self, node: ast.ClassDef):
-        # Only extract top-level classes (scope_depth == 0)
+
         if self.scope_depth == 0:
             self._extract_and_save(node, "class", node.name)
         self.scope_depth += 1
@@ -74,7 +74,7 @@ class EntityExtractor(ast.NodeVisitor):
         self.scope_depth -= 1
 
     def visit_Assign(self, node: ast.Assign):
-        # Only extract top-level constants (scope_depth == 0)
+
         if self.scope_depth == 0:
             if len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
                 target_name = node.targets[0].id

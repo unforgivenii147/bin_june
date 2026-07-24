@@ -6,8 +6,6 @@ from __future__ import annotations
 import cairosvg
 from weasyprint import HTML
 
-# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def html_to_png_cairo(html_content, output_path, width=None):
     if html_content.startswith(("<", "<!DOCTYPE")):

@@ -13,13 +13,13 @@ import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
-# Configuration
+
 RST2HTML_OPTIONS = " ".join(["--no-toc-backlinks", "--strip-comments", "--language en", "--date"])
 
-# File extensions to process
+
 VALID_EXTENSIONS = {".rst", ".txt", ".md"}
 
-# Compiled regex patterns
+
 MD_LINK_PATTERN = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
 MD_HEADING_PATTERN = re.compile(r"^(#{1,6})\s+(.+)$", re.MULTILINE)
 MD_CODE_BLOCK_PATTERN = re.compile(r"```(\w+)?\n(.*?)```", re.DOTALL)
@@ -43,7 +43,6 @@ def find_rst2html_script():
 def convert_md_to_rst(content: str) -> str:
     """Convert Markdown content to reStructuredText."""
 
-    # Convert headings
     def replace_heading(match):
         level = len(match.group(1))
         text = match.group(2).strip()
@@ -57,10 +56,8 @@ def convert_md_to_rst(content: str) -> str:
 
     content = MD_HEADING_PATTERN.sub(replace_heading, content)
 
-    # Convert links
     content = MD_LINK_PATTERN.sub(r"`\1 <\2>`_", content)
 
-    # Convert code blocks
     def replace_code_block(match):
         language = match.group(1)
         code = match.group(2).strip()
@@ -71,17 +68,13 @@ def convert_md_to_rst(content: str) -> str:
 
     content = MD_CODE_BLOCK_PATTERN.sub(replace_code_block, content)
 
-    # Convert bold and italic
     content = re.sub(r"\*\*(.+?)\*\*", r"**\1**", content)
     content = re.sub(r"\*(.+?)\*", r"*\1*", content)
 
-    # Convert inline code
     content = re.sub(r"`([^`]+)`", r"``\1``", content)
 
-    # Convert horizontal rules
     content = re.sub(r"^---$", "-------", content, flags=re.MULTILINE)
 
-    # Convert unordered lists
     content = re.sub(r"^\* ", r"- ", content, flags=re.MULTILINE)
 
     return content
@@ -92,13 +85,11 @@ def convert_file_to_html(file_path: Path, stylesheet_url: str | None = None) -> 
     try:
         html_path = file_path.with_suffix(".html")
 
-        # Skip if HTML is newer than source
         if html_path.exists() and html_path.stat().st_mtime > file_path.stat().st_mtime:
             return html_path
 
         content = file_path.read_text(encoding="utf-8")
 
-        # Convert MD to RST first if needed
         if file_path.suffix.lower() == ".md":
             content = convert_md_to_rst(content)
             temp_file = file_path.with_suffix(".rst")
@@ -108,7 +99,6 @@ def convert_file_to_html(file_path: Path, stylesheet_url: str | None = None) -> 
         else:
             cleanup_temp = False
 
-        # Build the conversion command
         cmd = [
             sys.executable,
             "-m",
@@ -120,11 +110,9 @@ def convert_file_to_html(file_path: Path, stylesheet_url: str | None = None) -> 
         if stylesheet_url:
             cmd.extend(["--stylesheet", stylesheet_url, "--link-stylesheet"])
 
-        # Try docutils first, fall back to rst2html script
         try:
             subprocess.run(cmd, check=True, capture_output=True, text=True, timeout=30)
         except (subprocess.CalledProcessError, FileNotFoundError):
-            # Fall back to custom rst2html script
             rst2html_script = find_rst2html_script()
             if rst2html_script:
                 cmd = [
@@ -141,7 +129,6 @@ def convert_file_to_html(file_path: Path, stylesheet_url: str | None = None) -> 
             else:
                 raise RuntimeError("No RST to HTML converter found")
 
-        # Clean up temporary file
         if cleanup_temp and file_path.exists():
             file_path.unlink()
 
@@ -189,13 +176,11 @@ def publish_parallel(root_dir: Path | None = None, max_workers: int | None = Non
 
     root_dir = Path(root_dir).resolve()
 
-    # Find stylesheet if exists
     stylesheet_path = root_dir / "style.css"
     if stylesheet_path.exists():
         stylesheet_filename = generate_stylesheet_hash(stylesheet_path)
         stylesheet_dest = root_dir / stylesheet_filename
 
-        # Only copy if different
         if not stylesheet_dest.exists():
             shutil.copy(stylesheet_path, stylesheet_dest)
 
@@ -203,7 +188,6 @@ def publish_parallel(root_dir: Path | None = None, max_workers: int | None = Non
     else:
         stylesheet_url = None
 
-    # Find all source files
     source_files = find_all_source_files(root_dir)
 
     if not source_files:
@@ -212,17 +196,14 @@ def publish_parallel(root_dir: Path | None = None, max_workers: int | None = Non
 
     print(f"Found {len(source_files)} files to convert")
 
-    # Process files in parallel
     converted = 0
     errors = 0
 
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        # Submit all tasks
         future_to_file = {
             executor.submit(process_file, file_path, stylesheet_url): file_path for file_path in source_files
         }
 
-        # Process results as they complete
         for future in as_completed(future_to_file):
             file_path = future_to_file[future]
             try:

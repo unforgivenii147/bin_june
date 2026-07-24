@@ -17,7 +17,6 @@ def check_and_fix_file(file_path: Path, auto_fix: bool) -> dict:
         result["messages"].append(f"Error reading file: {e}")
         return result
 
-    # Step 1: Detect invalid escape sequences using compiler warnings
     with warnings.catch_warnings(record=True) as caught_warnings:
         warnings.simplefilter("always", SyntaxWarning)
         try:
@@ -27,7 +26,7 @@ def check_and_fix_file(file_path: Path, auto_fix: bool) -> dict:
                 result["has_issues"] = True
                 result["messages"].append(f"Line {se.lineno}: SyntaxError: {se.msg}")
             else:
-                return result  # Skip files with unrelated compilation syntax errors
+                return result
 
         for w in caught_warnings:
             if issubclass(w.category, SyntaxWarning) and "invalid escape sequence" in str(w.message):
@@ -35,7 +34,6 @@ def check_and_fix_file(file_path: Path, auto_fix: bool) -> dict:
                 line_no = getattr(w, "lineno", "Unknown")
                 result["messages"].append(f"Line {line_no}: SyntaxWarning: {w.message}")
 
-    # Step 2: Auto-fix tokens if requested and issues exist
     if result["has_issues"] and auto_fix:
         try:
             modified_tokens = []
@@ -49,7 +47,6 @@ def check_and_fix_file(file_path: Path, auto_fix: bool) -> dict:
                     text = tok.string
                     prefix = ""
 
-                    # Separate existing string modifiers (e.g., f"", b"", u"")
                     for char in text:
                         if char.lower() in "frub":
                             prefix += char
@@ -58,9 +55,7 @@ def check_and_fix_file(file_path: Path, auto_fix: bool) -> dict:
 
                     actual_str = text[len(prefix) :]
 
-                    # If it contains a backslash and isn't already a raw string literal
                     if "\\" in actual_str and "r" not in prefix.lower():
-                        # Test if compiling this individual token triggers an escape warning
                         with warnings.catch_warnings(record=True) as token_warnings:
                             warnings.simplefilter("always", SyntaxWarning)
                             try:
@@ -69,7 +64,6 @@ def check_and_fix_file(file_path: Path, auto_fix: bool) -> dict:
                                 pass
 
                             if any("invalid escape sequence" in str(tw.message) for tw in token_warnings):
-                                # Prepend 'r' to convert it safely to a raw string
                                 new_prefix = "r" + prefix
                                 tok = tok._replace(string=f"{new_prefix}{actual_str}")
                                 is_modified = True
@@ -77,7 +71,6 @@ def check_and_fix_file(file_path: Path, auto_fix: bool) -> dict:
                 modified_tokens.append(tok)
 
             if is_modified:
-                # Reconstruct files from tokens to completely preserve indentation and layouts
                 fixed_bytes = tokenize.untokenize(modified_tokens)
                 file_path.write_bytes(fixed_bytes)
                 result["fixed"] = True
@@ -101,7 +94,6 @@ def main():
     current_dir = Path(".")
     py_files = list(current_dir.rglob("*.py"))
 
-    # Ignore this runner script itself if it sits in the target directory
     script_path = Path(__file__).resolve()
     py_files = [f for f in py_files if f.resolve() != script_path]
 
@@ -115,7 +107,6 @@ def main():
     issues_count = 0
     fixed_count = 0
 
-    # Process files concurrently using processes to bypass the GIL
     with concurrent.futures.ProcessPoolExecutor(max_workers=cpu_cores) as executor:
         futures = {executor.submit(check_and_fix_file, f, args.auto_fix): f for f in py_files}
 

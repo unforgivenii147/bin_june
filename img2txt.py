@@ -45,7 +45,6 @@ def extract_text(image_path: Path) -> str:
     """Extract text with explicit resource cleanup."""
     try:
         with Image.open(image_path) as img:
-            # Optional: convert to grayscale to save some memory
             if img.mode not in ("L", "RGB"):
                 img = img.convert("RGB")
 
@@ -72,7 +71,7 @@ def process_file(path: Path) -> None:
     print(f"→ Processing {path.name}")
     text = extract_text(path)
 
-    if text and len(text) > 5:  # reasonable threshold
+    if text and len(text) > 5:
         try:
             txtfile.write_text(text, encoding="utf-8")
             print(f"✓ Saved {txtfile.name}")
@@ -86,7 +85,6 @@ def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
 
-    # Get files
     if args:
         files = [Path(p) for p in args if Path(p).is_file()]
     else:
@@ -99,8 +97,6 @@ def main() -> None:
 
     print(f"Found {len(files)} image(s). Starting OCR...\n")
 
-    # === Critical for Termux: Low concurrency ===
-    # Most Android devices struggle with >2-3 heavy OCR processes
     max_workers = 2
 
     if len(files) == 1:

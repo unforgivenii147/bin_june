@@ -13,7 +13,7 @@ import argparse
 import logging
 from datetime import datetime
 
-# Configure logging
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
@@ -29,17 +29,14 @@ def get_site_packages_dirs() -> List[Path]:
     """Get all site-packages directories."""
     site_dirs = []
 
-    # Get user site-packages
     user_site = site.getusersitepackages()
     if user_site:
         site_dirs.append(Path(user_site))
 
-    # Get system site-packages
     system_sites = site.getsitepackages()
     for s in system_sites:
         site_dirs.append(Path(s))
 
-    # Remove duplicates while preserving order
     seen = set()
     unique_dirs = []
     for d in site_dirs:
@@ -52,9 +49,9 @@ def get_site_packages_dirs() -> List[Path]:
 
 def extract_package_name_from_dist_info(dist_info: Path) -> str:
     """Extract package name from .dist-info directory."""
-    # Format: package_name-version.dist-info
+
     name = dist_info.name.replace(".dist-info", "")
-    # Remove version number (everything after and including the last hyphen before version)
+
     parts = name.rsplit("-", 1)
     if len(parts) == 2 and parts[1].replace(".", "").isdigit():
         return parts[0]
@@ -65,7 +62,6 @@ def get_installed_packages(site_dir: Path) -> Set[Tuple[str, Path]]:
     """Get set of installed packages from a site-packages directory."""
     packages = set()
 
-    # Look for .dist-info directories (PEP 376)
     for dist_info in site_dir.glob("*.dist-info"):
         try:
             package_name = extract_package_name_from_dist_info(dist_info)
@@ -73,7 +69,6 @@ def get_installed_packages(site_dir: Path) -> Set[Tuple[str, Path]]:
         except Exception as e:
             logger.warning(f"Error parsing {dist_info}: {e}")
 
-    # Also look for .egg-info directories
     for egg_info in site_dir.glob("*.egg-info"):
         try:
             package_name = egg_info.name.replace(".egg-info", "")
@@ -95,8 +90,8 @@ def reinstall_package(package_info: Tuple[str, Path]) -> Tuple[str, bool, str]:
             "pip",
             "install",
             "--force-reinstall",
-            "--no-deps",  # Only reinstall this package, not its dependencies
-            "--no-cache-dir",  # Don't use cached wheel
+            "--no-deps",
+            "--no-cache-dir",
             package_name,
         ]
 
@@ -104,7 +99,7 @@ def reinstall_package(package_info: Tuple[str, Path]) -> Tuple[str, bool, str]:
             cmd,
             capture_output=True,
             text=True,
-            timeout=300,  # 5 minute timeout per package
+            timeout=300,
         )
 
         if result.returncode == 0:
@@ -129,19 +124,16 @@ def reinstall_all_packages(
     """Reinstall all packages found in site-packages directories."""
 
     if exclude_packages is None:
-        exclude_packages = {"pip", "setuptools", "wheel"}  # Don't reinstall core packages
+        exclude_packages = {"pip", "setuptools", "wheel"}
 
-    # Get all site-packages directories
     site_dirs = get_site_packages_dirs()
     logger.info(f"Found site-packages directories: {[str(d) for d in site_dirs]}")
 
-    # Collect all installed packages
     all_packages = set()
     for site_dir in site_dirs:
         packages = get_installed_packages(site_dir)
         all_packages.update(packages)
 
-    # Filter packages
     if only_packages:
         all_packages = {(name, path) for name, path in all_packages if name in only_packages}
 
@@ -154,15 +146,12 @@ def reinstall_all_packages(
         logger.warning("No packages found to reinstall!")
         return
 
-    # Reinstall packages in parallel
     successful = []
     failed = []
 
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        # Submit all reinstall tasks
         future_to_package = {executor.submit(reinstall_package, pkg): pkg[0] for pkg in all_packages}
 
-        # Process completed tasks
         for future in as_completed(future_to_package):
             package_name = future_to_package[future]
             try:
@@ -175,7 +164,6 @@ def reinstall_all_packages(
                 logger.error(f"Unexpected error for {package_name}: {e}")
                 failed.append((package_name, str(e)))
 
-    # Print summary
     logger.info("=" * 60)
     logger.info("REINSTALLATION SUMMARY")
     logger.info("=" * 60)
@@ -215,7 +203,6 @@ def main():
 
     args = parser.parse_args()
 
-    # Validate worker count
     if args.workers < 1:
         logger.error("Number of workers must be at least 1")
         sys.exit(1)

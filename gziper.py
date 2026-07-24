@@ -53,23 +53,18 @@ def compress_file(file_path: Path) -> tuple[Path, bool, int, int, str]:
     gz_path = file_path.with_suffix(file_path.suffix + ".gz")
 
     try:
-        # Get original file size
         original_size = file_path.stat().st_size
 
-        # Compress with maximum compression (level 9)
         with open(file_path, "rb") as f_in, gzip.open(gz_path, "wb", compresslevel=9) as f_out:
             shutil.copyfileobj(f_in, f_out)
 
-        # Get compressed file size
         compressed_size = gz_path.stat().st_size
 
-        # Remove original file if compression successful
         file_path.unlink()
 
         return (file_path, True, original_size, compressed_size, "")
 
     except Exception as e:
-        # Clean up partial gz file if it exists
         if gz_path.exists():
             gz_path.unlink()
         return (file_path, False, 0, 0, str(e))
@@ -98,7 +93,6 @@ def find_files_to_compress(directories: list[Path], skip_extensions: set | None 
 
         for file_path in directory.rglob("*"):
             if file_path.is_file() and file_path.suffix not in skip_extensions:
-                # Skip files that already have .gz extension
                 if not file_path.suffix.endswith(".gz"):
                     files_to_compress.append(file_path)
 
@@ -149,7 +143,6 @@ Examples:
 
     args = parser.parse_args()
 
-    # Convert directory strings to Path objects
     directories = [Path(d).resolve() for d in args.directories]
 
     print("\n" + "=" * 70)
@@ -159,7 +152,6 @@ Examples:
     for d in directories:
         print(f"   • {d}")
 
-    # Setup skip extensions
     skip_extensions = {".gz", ".zip", ".bz2", ".xz", ".7z", ".rar", ".tar"}
     if args.exclude:
         for ext in args.exclude:
@@ -168,7 +160,6 @@ Examples:
             skip_extensions.add(ext)
         print(f"\n🚫 Excluding extensions: {', '.join(sorted(skip_extensions))}")
 
-    # Find all files to compress
     print("\n🔎 Scanning for files...")
     start_time = time.time()
     files_to_compress = find_files_to_compress(directories, skip_extensions)
@@ -182,25 +173,20 @@ Examples:
     print(f"{'File':<50} {'Original':>10} {'Compressed':>10} {'Ratio':>8} {'Status':>10}")
     print("-" * 70)
 
-    # Process files in parallel
     stats = CompressionStats()
     max_workers = args.workers
 
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        # Submit all compression tasks
         future_to_file = {executor.submit(compress_file, file_path): file_path for file_path in files_to_compress}
 
-        # Process completed tasks
         for future in as_completed(future_to_file):
             file_path, success, orig_size, comp_size, error = future.result()
 
-            # Get relative path for display
             try:
                 rel_path = file_path.relative_to(Path.cwd())
             except ValueError:
                 rel_path = file_path
 
-            # Display filename (truncate if too long)
             display_path = str(rel_path)
             if len(display_path) > 47:
                 display_path = "..." + display_path[-44:]
@@ -218,7 +204,6 @@ Examples:
                 if error:
                     print(f"   ⚠ Error: {error}")
 
-    # Print summary
     elapsed_time = time.time() - start_time
     print("\n" + "=" * 70)
     print("📊 COMPRESSION SUMMARY".center(70))

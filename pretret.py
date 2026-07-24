@@ -7,8 +7,6 @@ import sys
 from collections.abc import Callable
 from pathlib import Path
 
-# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed

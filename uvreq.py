@@ -5,8 +5,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def process_file(path: str) -> None:
     path = Path(path)

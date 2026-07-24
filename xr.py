@@ -16,9 +16,9 @@ import lz4.frame
 import py7zr
 import zstandard as zstd
 
-# Constants
+
 MAX_WORKERS = 4
-CHUNK_SIZE = 10 * 1024 * 1024  # 10MB chunks
+CHUNK_SIZE = 10 * 1024 * 1024
 COMPRESSORS = {}
 
 
@@ -340,7 +340,6 @@ def decompress_archive(archive_path: Path, compressor: str) -> bool:
             with py7zr.SevenZipFile(archive_path, "r") as archive:
                 archive.extractall(path=archive_path.parent)
         else:
-            # For tar-based archives, would need tarfile + compression
             print(f"  ⚠️  Archive decompression not fully implemented for {compressor}")
             return False
         archive_path.unlink()
@@ -358,7 +357,6 @@ async def compress_folder_async(dir_path: Path, archive_path: str, compressor: s
             with py7zr.SevenZipFile(f"{archive_path}{COMPRESSORS[compressor]['ext']}", "w") as archive:
                 archive.writeall(dir_path, arcname=dir_path.name)
         else:
-            # For other formats, would need additional tar handling
             print(f"  ⚠️  Folder compression not fully implemented for {compressor}")
             return False
         return True
@@ -554,7 +552,7 @@ Examples:
     parser.add_argument("-d", "--decompress", action="store_true", help="Decompress files")
     args = parser.parse_args()
 
-    compressor = "zstd"  # Default
+    compressor = "zstd"
     if args.xz:
         compressor = "xz"
     elif args.gzip:

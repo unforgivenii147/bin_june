@@ -6,8 +6,6 @@ from __future__ import annotations
 import codecs
 import shutil
 
-# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def convert_in_place(filename):
     backup = f"{filename}.bak"

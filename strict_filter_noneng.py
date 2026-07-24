@@ -6,7 +6,7 @@ from pathlib import Path
 import gcld3
 import nltk
 
-# Ensure the words corpus is downloaded locally
+
 try:
     nltk.data.find("corpora/words")
 except LookupError:
@@ -24,28 +24,20 @@ def is_english_strict(line: str, detector, english_vocab: set, min_ratio: float 
     if not clean_line:
         return True, "Empty"
 
-    # Step 1: Query Google CLD3 Neural Detector
     result = detector.FindLanguage(clean_line)
     cld3_is_en = result.language == "en" and result.is_reliable
 
-    # Step 2: Tokenize and verify with NLTK words
-    # Extracts all individual alphanumeric sequences, forcing lowercase
     tokens = re.findall(r"\b[a-zA-Z]+\b", clean_line.lower())
 
-    # If the line contains no alphabetic tokens (e.g., pure numbers/symbols), trust CLD3
     if not tokens:
         return cld3_is_en, f"CLD3:{result.language.upper()}(No Words)"
 
-    # Count how many tokens exist in the NLTK English dataset
     matched_words = sum(1 for token in tokens if token in english_vocab)
     nltk_ratio = matched_words / len(tokens)
 
-    # Step 3: Enforce strict hybrid logic
-    # To be classified as English, it must pass the neural model AND cross the dictionary density barrier
     if cld3_is_en and nltk_ratio >= min_ratio:
         return True, "EN"
 
-    # Formulate structural log tags for non-English outputs
     reason = f"NLTK Ratio: {nltk_ratio:.2f}"
     if result.language != "en":
         reason += f" | CLD3: {result.language.upper()}"
@@ -59,7 +51,6 @@ def process_file_lines(input_path: Path, move_mode: bool, strict_ratio: float):
 
     detector = gcld3.NNetLanguageIdentifier(min_num_bytes=0, max_num_bytes=1000)
 
-    # Load NLTK words into a hashed set for O(1) lightning-fast lookups
     print("🧠 Loading NLTK English vocabulary corpus...")
     english_vocab = set(w.lower() for w in words.words())
 

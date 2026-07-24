@@ -43,12 +43,11 @@ def get_site_packages_paths() -> list[Path]:
 def get_installed_packages() -> list[tuple[str, str]]:
     """Get all installed packages using importlib.metadata."""
     packages = []
-    # Get all distributions from both site-packages and user site
+
     all_dists = list(importlib.metadata.distributions())
 
     for dist in all_dists:
         try:
-            # Handle both case-sensitive and case-insensitive metadata
             name = dist.metadata.get("Name")
             version = dist.version
             if name and version:
@@ -76,7 +75,6 @@ def is_pure_python(package_name: str, site_path: Path) -> bool:
         package_dir = site_path / alt_name
 
     if not package_dir.exists():
-        # Try to find by matching normalized names
         for item in site_path.iterdir():
             if item.is_dir() and item.name.lower().replace("-", "_") == package_name.lower().replace("-", "_"):
                 package_dir = item
@@ -85,7 +83,6 @@ def is_pure_python(package_name: str, site_path: Path) -> bool:
             logger.warning(f"Cannot find package directory for {package_name}")
             return True
 
-    # Check for compiled extensions
     extensions = [".so", ".pyd", ".dll", ".dylib"]
     for ext in extensions:
         if any(package_dir.rglob(f"*{ext}")):
@@ -106,18 +103,15 @@ def get_package_path(package_name: str, site_paths: list[Path]) -> Path | None:
         Path to the package directory if found, None otherwise
     """
     for site_path in site_paths:
-        # Try exact name first
         pkg_path = site_path / package_name
         if pkg_path.exists() and pkg_path.is_dir():
             return pkg_path
 
-        # Try with underscores instead of hyphens
         alt_name = package_name.replace("-", "_")
         pkg_path = site_path / alt_name
         if pkg_path.exists() and pkg_path.is_dir():
             return pkg_path
 
-        # Try case-insensitive matching
         for item in site_path.iterdir():
             if item.is_dir() and item.name.lower().replace("-", "_") == package_name.lower().replace("-", "_"):
                 return item
@@ -152,7 +146,6 @@ def repack_package(
             dest_path = temp_path / package_name
             dest_path.mkdir(parents=True)
 
-            # Copy package files, skipping .pyc files
             for file_path in pkg_path.rglob("*"):
                 if file_path.suffix == ".pyc":
                     continue
@@ -166,19 +159,16 @@ def repack_package(
                     dest_file.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copy2(file_path, dest_file)
 
-            # Copy metadata if available
             metadata_dir = temp_path / f"{package_name}-{version}.dist-info"
             metadata_dir.mkdir(exist_ok=True)
             metadata_copied = False
 
             for site_path in site_paths:
-                # Try different naming conventions
                 dist_info_names = [
                     f"{package_name}-{version}.dist-info",
                     f"{package_name.replace('-', '_')}-{version}.dist-info",
                 ]
 
-                # Also try to find any matching dist-info directory
                 for item in site_path.iterdir():
                     if item.is_dir() and item.name.endswith(".dist-info"):
                         try:
@@ -201,7 +191,6 @@ def repack_package(
                     break
 
             if not metadata_copied:
-                # Create minimal metadata if original not found
                 metadata_file = metadata_dir / "METADATA"
                 metadata_file.write_text(f"Metadata-Version: 2.1\nName: {package_name}\nVersion: {version}\n")
 
@@ -213,7 +202,6 @@ def repack_package(
                     f"Tag: {get_python_tag()}-{get_abi_tag()}-{get_platform_tag()}\n"
                 )
 
-            # Build the wheel
             wheel_cmd = [
                 sys.executable,
                 "-m",
@@ -228,7 +216,6 @@ def repack_package(
                 result = subprocess.run(wheel_cmd, capture_output=True, text=True, check=False)
 
                 if result.returncode == 0:
-                    # Find the created wheel file
                     wheel_files = list(output_dir.glob(f"{package_name.replace('-', '_')}*.whl"))
                     if wheel_files:
                         return package_name, True, f"Created: {wheel_files[0].name}"
@@ -254,9 +241,9 @@ def get_python_tag() -> str:
 def get_abi_tag() -> str:
     """Get the ABI tag."""
     major, minor = sys.version_info[:2]
-    # Check for debug build
+
     debug = "d" if sys.flags.debug else ""
-    # Check for PyPy
+
     if hasattr(sys, "pypy_version_info"):
         return f"pypy{major}{minor}_pypy{'_'.join(map(str, sys.pypy_version_info[:2]))}"
     return f"cp{major}{minor}{debug}"
@@ -303,20 +290,16 @@ def main() -> int:
     if args.verbose:
         logger.setLevel(logging.DEBUG)
 
-    # Setup output directory
     output_dir = Path(args.output).expanduser().resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
     logger.info(f"Output directory: {output_dir}")
 
-    # Get site-packages paths
     site_paths = get_site_packages_paths()
     logger.info(f"Site-packages paths: {[str(p) for p in site_paths]}")
 
-    # Get installed packages
     all_packages = get_installed_packages()
     logger.info(f"Found {len(all_packages)} installed packages")
 
-    # Determine which packages to process
     if args.packages:
         packages_to_process = [(pkg, ver) for pkg, ver in all_packages if pkg in args.packages]
     else:
@@ -342,7 +325,6 @@ def main() -> int:
         logger.info("No packages to process")
         return 0
 
-    # Process packages in parallel
     process_args = [(pkg, ver, output_dir, site_paths) for pkg, ver in packages_to_process]
 
     successful = []
@@ -368,7 +350,6 @@ def main() -> int:
                 failed.append((pkg_name, message))
                 logger.error(f"[{completed}/{total}] ✗ {pkg_name}: {message}")
 
-    # Print summary
     logger.info("\n" + "=" * 60)
     logger.info("SUMMARY")
     logger.info("=" * 60)

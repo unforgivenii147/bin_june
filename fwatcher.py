@@ -6,8 +6,6 @@ from __future__ import annotations
 import os
 import time
 
-# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def watch_tor_log(log_path: str = "~/.tor/tor.log") -> None:
     log_path = os.path.expanduser(log_path)

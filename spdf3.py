@@ -10,12 +10,11 @@ import sys
 
 
 def shrink_pdf_mobile(file_path):
-    # Ensure the file exists
+
     if not os.path.exists(file_path):
         print(f"Error: File '{file_path}' not found.")
         sys.exit(1)
 
-    # Verify ghostscript is installed / accessible
     gs_executable = "gs"
     if not shutil.which(gs_executable):
         if shutil.which("gswin64c"):
@@ -30,13 +29,12 @@ def shrink_pdf_mobile(file_path):
 
     temp_path = file_path + ".tmp"
 
-    # Ghostscript arguments tuned specifically for mobile devices
     gs_args = [
         gs_executable,
         "-sDEVICE=pdfwrite",
         "-dCompatibilityLevel=1.4",
-        "-dPDFSETTINGS=/screen",  # Forces max compression / 72 DPI for mobile
-        "-dFastWebView=true",  # Linearizes PDF for instant "web/mobile stream" viewing
+        "-dPDFSETTINGS=/screen",
+        "-dFastWebView=true",
         "-dNOPAUSE",
         "-dQUIET",
         "-dBATCH",
@@ -45,7 +43,6 @@ def shrink_pdf_mobile(file_path):
     ]
 
     try:
-        # Run Ghostscript process
         result = subprocess.run(gs_args, capture_output=True, text=True)
 
         if result.returncode != 0:
@@ -56,7 +53,6 @@ def shrink_pdf_mobile(file_path):
 
         new_size = os.path.getsize(temp_path)
 
-        # In-place update check
         if new_size < orig_size:
             os.replace(temp_path, file_path)
             print("Success! Inplace update complete.")

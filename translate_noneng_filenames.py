@@ -12,7 +12,6 @@ from pathlib import Path
 from deep_translator import GoogleTranslator
 from fastwalk import walk_files
 
-# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 DIRECTORY = Path.cwd()
 non_english_pattern = re.compile(r"[^\x00-\x7F]")

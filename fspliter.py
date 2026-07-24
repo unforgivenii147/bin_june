@@ -16,11 +16,11 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import List
 
-# Configure logging
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-# Default constants (can be overridden via command line)
+
 DEFAULT_MIN_CHARS = 4900
 DEFAULT_MAX_CHARS = 4990
 TEXT_EXTENSIONS = {
@@ -62,25 +62,22 @@ def find_text_files(input_paths: list[Path], recursive: bool = True) -> list[Pat
             continue
 
         if path.is_file():
-            # Check if it's a text file
             if path.suffix.lower() in TEXT_EXTENSIONS or path.suffix.lower() == "":
                 text_files.append(path)
             else:
                 logger.warning(f"Skipping non-text file: {path}")
 
         elif path.is_dir():
-            # Search directory for text files
             if recursive:
                 for ext in TEXT_EXTENSIONS:
                     text_files.extend(path.rglob(f"*{ext}"))
-                # Also include files without extension
+
                 text_files.extend([f for f in path.rglob("*") if f.is_file() and f.suffix == ""])
             else:
                 for ext in TEXT_EXTENSIONS:
                     text_files.extend(path.glob(f"*{ext}"))
                 text_files.extend([f for f in path.glob("*") if f.is_file() and f.suffix == ""])
 
-    # Remove duplicates while preserving order
     seen = set()
     unique_files = []
     for f in text_files:
@@ -107,36 +104,29 @@ def find_split_point(text: str, start_pos: int, min_chars: int, max_chars: int) 
     """
     end_pos = start_pos + max_chars
 
-    # If remaining text is less than max_chars, return the end
     if end_pos >= len(text):
         return len(text)
 
-    # Look for sentence boundary in the range [start + min_chars, start + max_chars]
     search_start = start_pos + min_chars
     search_end = min(end_pos, len(text))
     search_text = text[search_start:search_end]
 
-    # Try to find sentence boundary (.!? followed by space or newline)
     sentence_pattern = re.compile(r"[.!?]\s+")
     matches = list(sentence_pattern.finditer(search_text))
 
     if matches:
-        # Find the last sentence boundary
         last_match = matches[-1]
         split_point = search_start + last_match.end()
         return split_point
 
-    # If no sentence boundary, try word boundary (space, newline, tab)
     word_pattern = re.compile(r"\s+")
     matches = list(word_pattern.finditer(search_text))
 
     if matches:
-        # Find the last word boundary
         last_match = matches[-1]
         split_point = search_start + last_match.end()
         return split_point
 
-    # If no good boundary found, force split at max_chars
     return end_pos
 
 
@@ -159,7 +149,6 @@ def split_text(text: str, min_chars: int, max_chars: int) -> list[str]:
         split_point = find_split_point(text, current_pos, min_chars, max_chars)
         part = text[current_pos:split_point]
 
-        # Trim trailing whitespace but preserve intentional structure
         part = part.rstrip()
 
         if part:
@@ -184,31 +173,25 @@ def process_file(input_file: Path, output_dir: Path, min_chars: int, max_chars: 
         Tuple of (input_file_path, number_of_parts_created)
     """
     try:
-        # Read file content
         try:
             with open(input_file, encoding="utf-8") as f:
                 content = f.read()
         except UnicodeDecodeError:
-            # Try with different encoding if UTF-8 fails
             with open(input_file, encoding="latin-1") as f:
                 content = f.read()
 
-        # Skip empty files
         if not content.strip():
             logger.info(f"Skipping empty file: {input_file}")
             return (input_file, 0)
 
-        # Split text into parts
         parts = split_text(content, min_chars, max_chars)
 
         if not parts:
             logger.info(f"No parts generated for: {input_file}")
             return (input_file, 0)
 
-        # Create output directory if it doesn't exist
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        # Write parts to files
         stem = input_file.stem
         suffix = input_file.suffix
 
@@ -283,14 +266,11 @@ Examples:
 
     args = parser.parse_args()
 
-    # Determine input paths
     if args.inputs:
         input_paths = [Path(p) for p in args.inputs]
     else:
-        # Default to current directory
         input_paths = [Path(".")]
 
-    # Find all text files
     text_files = find_text_files(input_paths, recursive=not args.no_recursive)
 
     if not text_files:
@@ -300,18 +280,14 @@ Examples:
     logger.info(f"Found {len(text_files)} file(s) to process")
     logger.info(f"Character limits: {args.min_chars}-{args.max_chars} per part")
 
-    # Prepare arguments for parallel processing
     process_args = [(file_path, args.output, args.min_chars, args.max_chars) for file_path in text_files]
 
-    # Process files in parallel
     total_parts = 0
     processed_files = 0
 
     with ProcessPoolExecutor(max_workers=args.max_workers) as executor:
-        # Submit all tasks
         future_to_file = {executor.submit(process_file_wrapper, arg): arg[0] for arg in process_args}
 
-        # Process completed tasks
         for future in as_completed(future_to_file):
             file_path = future_to_file[future]
             try:

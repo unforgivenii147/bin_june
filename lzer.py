@@ -10,7 +10,6 @@ import lz4.frame
 
 CHUNK_SIZE = 1024 * 1024
 
-# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 CHUNK_THRESHOLD = 5 * 1024 * 1024
 COMPRESSED_EXT = ".lz4"

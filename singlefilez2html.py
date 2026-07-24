@@ -9,8 +9,6 @@ import re
 import sys
 from pathlib import Path
 
-# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def extract_embedded_html(text: str) -> str | None:
     m = re.search(r"__SINGLEFILE(?:_Z)?__\s*=\s*(\{.*?\})\s*;?", text, re.DOTALL)

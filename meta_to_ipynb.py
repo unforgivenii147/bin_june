@@ -20,7 +20,6 @@ def parse_metadata_section(lines):
     for i, line in enumerate(lines):
         line_stripped = line.strip()
 
-        # Handle multi-line fields (indented continuation)
         if line.startswith(" ") or line.startswith("\t"):
             if current_key and current_key not in [
                 "Requires-Dist",
@@ -34,18 +33,15 @@ def parse_metadata_section(lines):
                     metadata[current_key] += " " + line_stripped
             continue
 
-        # Stop when we hit empty line or non-metadata content (no colon)
         if not line_stripped or ":" not in line_stripped:
             end_line = i
             break
 
-        # Parse key: value pairs
         if ":" in line_stripped:
             key, value = line_stripped.split(":", 1)
             key = key.strip()
             value = value.strip()
 
-            # Store only if not in skip list
             if key not in [
                 "Author",
                 "Author-Email",
@@ -79,27 +75,22 @@ def find_section_boundaries(content, start_pos=0):
     sections = []
     pos = start_pos
 
-    # Pattern for code blocks
     code_pattern = re.compile(r"```(python|shell|bash|sh|py)\s*\n(.*?)```", re.DOTALL)
 
     while pos < len(content):
-        # Look for code blocks
         code_match = code_pattern.search(content, pos)
 
         if code_match:
-            # Add markdown section before code block if exists
             if code_match.start() > pos:
                 md_text = content[pos : code_match.start()].strip()
                 if md_text:
                     sections.append(("markdown", md_text))
 
-            # Add code block
             code_text = code_match.group(2).strip()
             sections.append(("code", code_text))
 
             pos = code_match.end()
         else:
-            # Add remaining as markdown
             remaining = content[pos:].strip()
             if remaining:
                 sections.append(("markdown", remaining))
@@ -111,30 +102,23 @@ def find_section_boundaries(content, start_pos=0):
 def convert_metadata_to_notebook(metadata_file_path):
     """Convert METADATA file to Jupyter notebook."""
 
-    # Read the metadata file
     with open(metadata_file_path, "r", encoding="utf-8") as f:
         content = f.read()
 
     lines = content.split("\n")
 
-    # Parse metadata section
     metadata, content_start = parse_metadata_section(lines)
 
-    # Get package name and version
     pkg_name = metadata.get("Name", "unknown_package")
     pkg_version = metadata.get("Version", "0.0.0")
 
-    # Clean package name for filename
     safe_pkg_name = re.sub(r"[^\w\-_]", "_", pkg_name)
     output_path = f"{safe_pkg_name}.ipynb"
 
-    # Reconstruct content after metadata
     remaining_content = "\n".join(lines[content_start:])
 
-    # Find sections
     sections = find_section_boundaries(remaining_content)
 
-    # Build notebook structure
     notebook = {
         "cells": [],
         "metadata": {
@@ -153,20 +137,17 @@ def convert_metadata_to_notebook(metadata_file_path):
         "nbformat_minor": 4,
     }
 
-    # Add title cell
     title_content = f"# {pkg_name} v{pkg_version}\n\nConverted from METADATA file"
     title_cell = {"cell_type": "markdown", "metadata": {}, "source": [title_content]}
     notebook["cells"].append(title_cell)
 
-    # Add sections as cells
     for cell_type, content in sections:
         if cell_type == "markdown":
             cell = {"cell_type": "markdown", "metadata": {}, "source": [content]}
-        else:  # code cell
+        else:
             cell = {"cell_type": "code", "execution_count": None, "metadata": {}, "outputs": [], "source": [content]}
         notebook["cells"].append(cell)
 
-    # Write notebook
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(notebook, f, indent=1, ensure_ascii=False)
 

@@ -25,7 +25,6 @@ def translate_file(file_path: Path) -> tuple[Path, dict]:
         Tuple of (output_path, translations_dict)
     """
     try:
-        # Read the file content
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read().strip()
 
@@ -33,18 +32,13 @@ def translate_file(file_path: Path) -> tuple[Path, dict]:
             print(f"⚠️  Empty file: {file_path.name}")
             return file_path, {}
 
-        # Translate entire content at once
-        # deep_translator may have limits on text length, so we handle that
         translator = GoogleTranslator(source="fa", target="en")
         translated_text = translator.translate(content)
 
-        # Split original and translated text by lines
         original_lines = [line.strip() for line in content.split("\n") if line.strip()]
         translated_lines = [line.strip() for line in translated_text.split("\n") if line.strip()]
 
-        # Handle potential line count mismatches
         if len(original_lines) != len(translated_lines):
-            # If line counts differ, do individual translations as fallback
             translations = {}
             for i, line in enumerate(original_lines):
                 if line:
@@ -79,7 +73,6 @@ def save_translation(input_path: Path, translations: dict, output_dir: Path = No
 
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Create output filename with _translations suffix
     output_filename = input_path.stem + "_translations.json"
     output_path = output_dir / output_filename
 
@@ -92,13 +85,11 @@ def save_translation(input_path: Path, translations: dict, output_dir: Path = No
 
 def main():
     """Main function to orchestrate the translation process."""
-    # Configuration
-    current_dir = Path(".")
-    max_workers = 4  # Adjust based on your CPU and API rate limits
-    output_dir = Path("./translations")  # Separate directory for JSON outputs
 
-    # Find all text files in current directory
-    # Adjust the pattern if your files have specific extensions
+    current_dir = Path(".")
+    max_workers = 4
+    output_dir = Path("./translations")
+
     text_files = list(current_dir.glob("*.txt"))
 
     if not text_files:
@@ -114,12 +105,9 @@ def main():
     successful = 0
     failed = 0
 
-    # Process files in parallel
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        # Submit all translation tasks
         future_to_file = {executor.submit(translate_file, file_path): file_path for file_path in text_files}
 
-        # Process completed translations
         for future in as_completed(future_to_file):
             file_path = future_to_file[future]
             try:

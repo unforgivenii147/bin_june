@@ -6,8 +6,6 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
-# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def optimize_pngs_recursively() -> None:
     total_original_size = 0

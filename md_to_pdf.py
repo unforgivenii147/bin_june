@@ -4,7 +4,7 @@ from pathlib import Path
 import markdown
 import weasyprint
 
-# The optimized CSS content from the previous response
+
 CSS_TEMPLATE = """
 /* ==========================================================================
    1. PAGE SETUP & PAGED MEDIA
@@ -157,7 +157,7 @@ img {
 
 
 def convert_md_to_pdf(input_path_str: str):
-    # 1. Validate the input file path
+
     input_file = Path(input_path_str)
     if not input_file.exists():
         print(f"❌ Error: The file '{input_path_str}' does not exist.")
@@ -166,7 +166,6 @@ def convert_md_to_pdf(input_path_str: str):
     if input_file.suffix.lower() not in (".md", ".markdown"):
         print(f"⚠️  Warning: '{input_path_str}' does not have a standard Markdown extension.")
 
-    # 2. Determine output path beside the input file
     output_pdf = input_file.with_suffix(".pdf")
 
     print(f"📖 Reading: {input_file.name}")
@@ -177,11 +176,9 @@ def convert_md_to_pdf(input_path_str: str):
         sys.exit(1)
 
     print("🛠️  Converting Markdown to HTML...")
-    # 'extra' enables tables, footnotes, and task lists
-    # 'codehilite' prepares code blocks for structural cleanups
+
     html_body = markdown.markdown(md_content, extensions=["extra", "codehilite"])
 
-    # Wrap in a standard HTML document boilerplate
     full_html = f"""<!DOCTYPE html>
 <html>
 <head>
@@ -195,7 +192,6 @@ def convert_md_to_pdf(input_path_str: str):
 
     print("🚀 Compiling PDF with WeasyPrint...")
     try:
-        # Pass the HTML string and attach our CSS rules directly
         html_doc = weasyprint.HTML(string=full_html, base_url=str(input_file.parent))
         css_doc = weasyprint.CSS(string=CSS_TEMPLATE)
 

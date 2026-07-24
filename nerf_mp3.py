@@ -95,7 +95,6 @@ def get_audio_info(mp3_file: Path) -> tuple[int | None, int | None]:
         if bitrate > 0:
             return bitrate // 1000, size
         else:
-            # Fallback: calculate from size and duration
             duration = float(format_info.get("duration", 0))
             if duration > 0 and size > 0:
                 estimated_bitrate = int((size * 8) / (duration * 1000))
@@ -112,7 +111,6 @@ def convert_single_file(mp3_file: Path, base_dir: Path) -> ConversionStats:
     start_time = time.time()
     rel_path = mp3_file.relative_to(base_dir)
 
-    # Get original file info
     original_bitrate, original_size = get_audio_info(mp3_file)
 
     if original_bitrate is None:
@@ -127,10 +125,9 @@ def convert_single_file(mp3_file: Path, base_dir: Path) -> ConversionStats:
             duration=0,
         )
 
-    # Calculate half bitrate
     new_bitrate = original_bitrate // 2
 
-    if new_bitrate < 8:  # Minimum reasonable bitrate
+    if new_bitrate < 8:
         return ConversionStats(
             file_path=rel_path,
             original_bitrate=original_bitrate,
@@ -142,7 +139,6 @@ def convert_single_file(mp3_file: Path, base_dir: Path) -> ConversionStats:
             duration=0,
         )
 
-    # Create temp file in same directory as original
     temp_file = mp3_file.with_suffix(".tmp_convert.mp3")
 
     try:
@@ -170,7 +166,6 @@ def convert_single_file(mp3_file: Path, base_dir: Path) -> ConversionStats:
         if result.returncode == 0 and temp_file.exists():
             new_size = temp_file.stat().st_size
 
-            # Replace original with converted file
             temp_file.replace(mp3_file)
 
             return ConversionStats(
@@ -272,11 +267,9 @@ def find_mp3_files(directories: list[Path]) -> list[Path]:
             print(f"{Colors.YELLOW}Warning: Not a directory: {directory}{Colors.END}")
             continue
 
-        # Recursively find MP3 files (case-insensitive)
         for ext in ["*.mp3", "*.MP3", "*.Mp3"]:
             mp3_files.extend(directory.rglob(ext))
 
-    # Remove duplicates while preserving order
     seen = set()
     unique_files = []
     for f in mp3_files:
@@ -302,10 +295,8 @@ def process_directory(directory: Path, max_workers: int = 4):
     start_time = time.time()
 
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        # Submit all conversion tasks
         future_to_file = {executor.submit(convert_single_file, mp3_file, directory): mp3_file for mp3_file in mp3_files}
 
-        # Process completed tasks
         for i, future in enumerate(as_completed(future_to_file), 1):
             stat = future.result()
             stats.append(stat)
@@ -313,10 +304,8 @@ def process_directory(directory: Path, max_workers: int = 4):
 
     total_duration = time.time() - start_time
 
-    # Sort stats by file path for consistent output
     stats.sort(key=lambda s: str(s.file_path))
 
-    # Print failed files summary if any
     failed = [s for s in stats if not s.success]
     if failed:
         print(f"\n{Colors.RED}{Colors.BOLD}Failed conversions:{Colors.END}")
@@ -359,23 +348,20 @@ Examples:
 
     args = parser.parse_args()
 
-    # Disable colors if requested
     if args.no_color:
         for attr in dir(Colors):
             if not attr.startswith("__"):
                 setattr(Colors, attr, "")
 
-    # Check for ffmpeg
     check_ffmpeg()
 
     print(f"{Colors.HEADER}{Colors.BOLD}MP3 Bitrate Halver{Colors.END}")
     print(f"{Colors.DIM}Using {args.workers} parallel worker(s){Colors.END}\n")
 
-    # Process each directory
     for directory in args.directories:
         process_directory(directory, max_workers=args.workers)
         if len(args.directories) > 1:
-            print()  # Add spacing between directories
+            print()
 
 
 if __name__ == "__main__":

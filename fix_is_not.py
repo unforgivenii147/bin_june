@@ -14,7 +14,6 @@ def process_file(file_path: Path, auto_fix: bool = False) -> dict:
     result = {"path": file_path, "found_count": 0, "fixed": False, "lines": [], "error": None}
 
     try:
-        # Step 1: Read and parse tokens
         with file_path.open("rb") as f:
             tokens = list(tokenize.tokenize(f.readline))
     except Exception as e:
@@ -29,7 +28,6 @@ def process_file(file_path: Path, auto_fix: bool = False) -> dict:
     while i < n:
         tok = tokens[i]
 
-        # Check if the current token is 'is' and the next token is 'not'
         if (
             i + 1 < n
             and tok.type == tokenize.NAME
@@ -38,13 +36,12 @@ def process_file(file_path: Path, auto_fix: bool = False) -> dict:
             and tokens[i + 1].string == "not"
         ):
             result["found_count"] += 1
-            result["lines"].append(tok.start[0])  # Save line number
+            result["lines"].append(tok.start[0])
 
             if auto_fix:
-                # Replace the 'is' token with '!='
                 new_tok = tok._replace(type=tokenize.OP, string="!=")
                 modified_tokens.append(new_tok)
-                # Skip the 'not' token entirely
+
                 i += 2
                 is_modified = True
                 continue
@@ -52,10 +49,8 @@ def process_file(file_path: Path, auto_fix: bool = False) -> dict:
         modified_tokens.append(tok)
         i += 1
 
-    # Step 2: Write changes back safely if auto_fix is enabled
     if is_modified and auto_fix:
         try:
-            # untokenize converts tokens back into exact source code bytes
             fixed_bytes = tokenize.untokenize(modified_tokens)
             file_path.write_bytes(fixed_bytes)
             result["fixed"] = True
@@ -77,7 +72,6 @@ def main():
     current_dir = Path(".")
     py_files = list(current_dir.rglob("*.py"))
 
-    # Exclude this runner script itself from being evaluated
     script_path = Path(__file__).resolve()
     py_files = [f for f in py_files if f.resolve() != script_path]
 
@@ -95,7 +89,6 @@ def main():
     total_files_with_issues = 0
     total_replacements = 0
 
-    # Using ProcessPoolExecutor to bypass the GIL for heavy token parsing
     with concurrent.futures.ProcessPoolExecutor(max_workers=cpu_cores) as executor:
         futures = {executor.submit(process_file, f, args.auto_fix): f for f in py_files}
 

@@ -8,8 +8,6 @@ from pathlib import Path
 
 import jsbeautifier
 
-# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def beautify_json_file(file_path: str) -> bool | None:
     try:

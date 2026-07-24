@@ -9,7 +9,7 @@ from __future__ import annotations
 import argparse
 import os
 
-# File extensions / names to search for
+
 WINDOWS_FILES = {".exe", ".dll", ".bat", ".com", ".msi", ".vbs", ".ps1"}
 MACOS_FILES = {".dmg", ".app", ".DS_Store", ".plist", ".pkg"}
 
@@ -18,7 +18,6 @@ def find_target_files(root_dir):
     target_files = []
     for dirpath, _, filenames in os.walk(root_dir):
         for filename in filenames:
-            # Check by extension or exact name
             if any(filename.lower().endswith(ext) for ext in WINDOWS_FILES):
                 target_files.append(os.path.join(dirpath, filename))
             elif any(filename.lower().endswith(ext) for ext in MACOS_FILES):

@@ -25,8 +25,6 @@ import zipfile
 from dataclasses import dataclass, field
 from pathlib import Path
 
-# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 @dataclass
 class UnusedImport:
@@ -464,12 +462,7 @@ def run(
                 print(f"  {_coloured('[dry-run]', CYAN, use_colour)} would fix {p}")
                 fixed_count += 1
                 continue
-            #            bak = p.with_suffix(p.suffix + ".bak")
-            #            counter = 1
-            #            while bak.exists():
-            #                bak = p.with_suffix(f"{p.suffix}.bak.{counter}")
-            #                counter += 1
-            #            shutil.copy2(p, bak)
+
             p.write_text(new_source, encoding="utf-8")
             fixed_count += 1
             if verbose:

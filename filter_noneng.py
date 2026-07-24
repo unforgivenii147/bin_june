@@ -14,8 +14,6 @@ def process_file_lines(input_path: Path, move_mode: bool):
         print(f"❌ Error: The file '{input_path}' does not exist or is not a file.")
         sys.exit(1)
 
-    # Initialize the official Google CLD3 neural network model
-    # min_num_bytes=0 allows checking short snippets, max_num_bytes=1000 bounds the check length
     detector = gcld3.NNetLanguageIdentifier(min_num_bytes=0, max_num_bytes=1000)
 
     try:
@@ -33,20 +31,17 @@ def process_file_lines(input_path: Path, move_mode: bool):
     for i, line in enumerate(lines, start=1):
         clean_line = line.strip()
 
-        # Skip empty lines or pure whitespace strings from parsing evaluation
         if not clean_line:
             english_lines.append(line)
             continue
 
-        # Predict the language using gcld3
         result = detector.FindLanguage(clean_line)
 
-        # 'en' is the BCP-47 standard string code for English
         if result.language == "en" and result.is_reliable:
             english_lines.append(line)
         else:
             non_english_lines.append(line)
-            # Display language tag metadata alongside the text snippet
+
             lang_info = (
                 f"[{result.language.upper()} (Prob: {result.probability:.2f})]"
                 if result.language != "und"
@@ -57,7 +52,6 @@ def process_file_lines(input_path: Path, move_mode: bool):
     print("-" * 60)
     print(f"📊 Summary: Found {len(non_english_lines)} non-English lines.")
 
-    # Step 3: Handle execution logic for the -m flag (Move mode)
     if move_mode:
         if not non_english_lines:
             print("ℹ️  No non-English lines found to extract. Base file left unchanged.")
@@ -65,12 +59,9 @@ def process_file_lines(input_path: Path, move_mode: bool):
 
         output_path = Path("noneng.txt")
         try:
-            # 1. Write found foreign strings to noneng.txt
-            # Using '\n' join ensures we preserve trailing text gaps natively
             output_path.write_text("\n".join(non_english_lines) + "\n", encoding="utf-8")
             print(f"💾 Extracted lines written safely to: {output_path.resolve()}")
 
-            # 2. Update the original input file in-place to contain only clean English data
             input_path.write_text("\n".join(english_lines) + "\n", encoding="utf-8")
             print(f"🔄 Original file updated in-place (non-English elements removed).")
 

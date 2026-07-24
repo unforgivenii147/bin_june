@@ -10,7 +10,7 @@ from pathlib import Path
 
 import libcst as cst
 
-# Create output directories using pathlib
+
 OUTPUT_DIR = Path("output")
 FUNCTIONS_DIR = OUTPUT_DIR / "functions"
 CLASSES_DIR = OUTPUT_DIR / "classes"

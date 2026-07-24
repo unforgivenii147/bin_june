@@ -50,41 +50,32 @@ def download_repo_zip(repo: str, base_dir: Path) -> tuple[str, bool, str]:
     user, repo_name = repo.split("/")
     target_dir = base_dir / user / repo_name
 
-    # Skip if already exists
     if target_dir.exists():
         return repo, True, f"Already exists: {target_dir}"
 
-    # Create parent directory
     target_dir.parent.mkdir(parents=True, exist_ok=True)
 
-    # Download ZIP from GitHub
     zip_url = f"https://api.github.com/repos/{repo}/zipball"
 
     try:
         response = requests.get(zip_url, timeout=30, stream=True)
         response.raise_for_status()
 
-        # Extract ZIP
         with zipfile.ZipFile(io.BytesIO(response.content)) as z:
-            # GitHub ZIP has a root folder like user-repo-commithash
             root_dir = z.namelist()[0].split("/")[0]
 
-            # Extract to a temporary location first
             temp_dir = target_dir.parent / f"_temp_{repo_name}"
             z.extractall(temp_dir)
 
-            # Move contents from the root folder to target
             extracted_root = temp_dir / root_dir
             if extracted_root.exists():
                 import shutil
 
-                # Move contents
                 for item in extracted_root.iterdir():
                     shutil.move(str(item), str(target_dir / item.name))
-                # Clean up temp
+
                 shutil.rmtree(temp_dir)
             else:
-                # If structure is different, just move everything
                 import shutil
 
                 shutil.move(str(temp_dir), str(target_dir))
@@ -96,7 +87,6 @@ def download_repo_zip(repo: str, base_dir: Path) -> tuple[str, bool, str]:
     except zipfile.BadZipFile:
         return repo, False, "Invalid ZIP file received"
     except Exception as e:
-        # Clean up on failure
         if target_dir.exists():
             import shutil
 

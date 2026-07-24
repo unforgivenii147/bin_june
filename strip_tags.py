@@ -7,8 +7,6 @@ import re
 import sys
 from pathlib import Path
 
-# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def get_removed_lines(txt1, txt2):
     return list({l for l in txt1.splitlines() if l} - {l for l in txt2.splitlines() if l})

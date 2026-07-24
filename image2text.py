@@ -11,7 +11,7 @@ from dh import mpf3
 from PIL import Image
 from PIL.Image import Image
 
-# Try to import OpenCV, fallback to skimage if not available
+
 try:
     import cv2
 
@@ -104,28 +104,22 @@ def process_image_skimage(image_path: Path) -> Image:
         print(f"Error: Could not load image from {image_path}: {e}")
         return None
 
-    # Convert to grayscale if image is RGB
     if len(img.shape) == 3:
         gray = color.rgb2gray(img)
     else:
         gray = img
 
-    # Apply Gaussian blur (sigma=5 approximates the (5,5) kernel in OpenCV)
-    blurred = filters.gaussian(gray, sigma=5 / 3)  # kernel_size/3 ≈ sigma
+    blurred = filters.gaussian(gray, sigma=5 / 3)
 
-    # Second blur for the sharpening effect
     gaussian_blur = filters.gaussian(blurred, sigma=3 / 3)
 
-    # Sharpening: original + 1.5 * (original - blurred) = 1.5*original - 0.5*blurred
     sharpened = 1.5 * blurred - 0.5 * gaussian_blur
     sharpened = np.clip(sharpened, 0, 1)
 
-    # Adaptive threshold approximation using local thresholding
     from skimage.filters import threshold_local
 
     binary = sharpened > threshold_local(sharpened, 11, "gaussian")
 
-    # Convert to uint8
     binary_uint8 = img_as_ubyte(binary)
 
     enhanced_img_pil = Image.fromarray(binary_uint8)
@@ -162,7 +156,6 @@ def process_file2(image_path):
         cv2.imwrite(str(enhanced), binary)
         return binary
     else:
-        # skimage fallback with slightly different parameters
         import numpy as np
 
         try:

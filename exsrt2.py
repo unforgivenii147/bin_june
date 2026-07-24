@@ -5,8 +5,6 @@ from __future__ import annotations
 
 import subprocess
 
-# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def extract_subtitles(video_path) -> None:
     try:

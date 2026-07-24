@@ -9,8 +9,6 @@ from datetime import datetime
 from multiprocessing import Pool
 from pathlib import Path
 
-# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def check_file_age(file_path):
     try:

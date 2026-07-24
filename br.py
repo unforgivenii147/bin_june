@@ -33,7 +33,7 @@ def compress_stream(input_stream, output_file_path: Path, file_size: int) -> boo
         return True
     except Exception as e:
         print(f"❌ Error compressing {output_file_path.name}: {e}")
-        # Clean up failed compression file
+
         if output_file_path.exists():
             output_file_path.unlink()
         return False
@@ -41,10 +41,10 @@ def compress_stream(input_stream, output_file_path: Path, file_size: int) -> boo
 
 def should_skip_path(path: Path) -> bool:
     """Check if path should be skipped based on patterns."""
-    # Skip hidden files/dirs and known patterns
+
     if any(part.startswith(".") and part not in {".", ".."} for part in path.parts):
         return True
-    # Skip known ignore patterns
+
     if path.name in SKIP_PATTERNS:
         return True
     return False
@@ -54,7 +54,6 @@ def process_directory_compress(dir_path: Path) -> bool:
     """Compress a directory to tar.br file."""
     output_br = dir_path.with_name(f"{dir_path.name}.tar.br")
 
-    # Skip if already compressed
     if output_br.exists():
         print(f"⏭️ Skipping (already exists): {output_br.name}")
         return False
@@ -68,7 +67,6 @@ def process_directory_compress(dir_path: Path) -> bool:
 
         success = compress_stream(tar_buffer, output_br, tar_size)
 
-        # Remove original directory if compression successful
         if success:
             try:
                 import shutil
@@ -90,12 +88,10 @@ def process_file_compress(file_path: Path) -> bool:
     """Compress a single file to .br file."""
     output_br = file_path.with_name(f"{file_path.name}.br")
 
-    # Skip if already compressed or if it's a .br file itself
     if output_br.exists():
         print(f"⏭️ Skipping (already exists): {output_br.name}")
         return False
 
-    # Skip self (this script)
     if file_path.name == Path(__file__).name:
         return False
 
@@ -104,7 +100,6 @@ def process_file_compress(file_path: Path) -> bool:
         with open(file_path, "rb") as f_in:
             success = compress_stream(f_in, output_br, file_size)
 
-        # Remove original file if compression successful
         if success:
             try:
                 file_path.unlink()
@@ -150,7 +145,6 @@ def handle_decompress(file_path: Path) -> bool:
                 f_out.write(decompressed_mem.read())
             print(f"🔓 Decompressed file: {file_path.name} -> {output_name.name}")
 
-        # Remove compressed file after successful decompression
         try:
             file_path.unlink()
             print(f"🗑️ Removed compressed file: {file_path.name}")
@@ -179,18 +173,16 @@ def gather_compression_targets() -> list:
     current_dir = Path(".")
     work_items = []
 
-    # Gather directories
     for d in current_dir.iterdir():
         if not d.is_dir():
             continue
         if should_skip_path(d):
             continue
-        # Skip if .tar.br already exists
+
         if d.with_name(f"{d.name}.tar.br").exists():
             continue
         work_items.append((get_directory_size(d), process_directory_compress, d))
 
-    # Gather files
     for f in current_dir.iterdir():
         if not f.is_file():
             continue
@@ -200,7 +192,7 @@ def gather_compression_targets() -> list:
             continue
         if f.suffix == ".br":
             continue
-        # Skip if .br already exists
+
         if f.with_name(f"{f.name}.br").exists():
             continue
         try:
@@ -250,14 +242,13 @@ def gather_decompression_targets() -> list:
         if should_skip_path(f):
             continue
 
-        # Check if decompressed file already exists
         if f.name.endswith(".tar.br"):
-            extracted_dir = f.parent / f.name[:-7]  # Remove .tar.br
+            extracted_dir = f.parent / f.name[:-7]
             if extracted_dir.exists():
                 print(f"⏭️ Skipping (directory exists): {extracted_dir.name}")
                 continue
         else:
-            decompressed_file = f.with_name(f.stem)  # Remove .br
+            decompressed_file = f.with_name(f.stem)
             if decompressed_file.exists():
                 print(f"⏭️ Skipping (file exists): {decompressed_file.name}")
                 continue
@@ -300,7 +291,6 @@ def main():
     group.add_argument("-d", "--decompress", action="store_true", help="Decompress recursive targets")
     args = parser.parse_args()
 
-    # Default to compress if no action specified
     if not args.decompress:
         args.compress = True
 

@@ -121,7 +121,7 @@ def init_submodules() -> None:
 
 
 def confirm_large_repo(size_mb: float) -> bool:
-    if size_mb > 5:  # Changed from 100 to 5 MB
+    if size_mb > 5:
         print(f"[WARNING] Repository size is {size_mb:.2f} MB. Continue? (y/n)")
         return input().lower() == "y"
     return True

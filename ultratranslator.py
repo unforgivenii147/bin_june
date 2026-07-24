@@ -24,7 +24,7 @@ from deep_translator import GoogleTranslator
 
 MAX_WORKERS: Final[int] = 4
 MAX_RETRIES: Final[int] = 2
-RETRY_DELAY: Final[float] = 3.0  # seconds between retries
+RETRY_DELAY: Final[float] = 3.0
 NON_ENGLISH_PATTERN: Final[re.Pattern] = re.compile(r"[^\x00-\x7F]")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -92,10 +92,10 @@ def process_file(path: Path) -> Path | None:
         if translated.strip() != original.strip():
             safe_overwrite(path, translated)
             logger.info(f"  ✓ Updated {path.name}")
-        return None  # Success, no retry needed
+        return None
     except Exception as e:
         logger.error(f"  Failed to process {path}: {e}")
-        return path  # Return path for retry
+        return path
 
 
 def process_files_with_retry(files: list[Path]) -> None:
@@ -109,7 +109,7 @@ def process_files_with_retry(files: list[Path]) -> None:
             logger.info(f"Retry attempt {retry_count}/{MAX_RETRIES}")
             logger.info(f"Retrying {len(files_to_process)} failed files...")
             logger.info(f"{'=' * 50}\n")
-            time.sleep(RETRY_DELAY)  # Wait before retrying
+            time.sleep(RETRY_DELAY)
 
         failed_files = []
 

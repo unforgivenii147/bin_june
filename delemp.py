@@ -14,7 +14,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Iterator
 
-# ANSI color codes
+
 BOLD = "\x1b[1m"
 GREEN = "\x1b[32m"
 YELLOW = "\x1b[33m"
@@ -23,7 +23,7 @@ RED = "\x1b[31m"
 RESET = "\x1b[0m"
 DIM = "\x1b[2m"
 
-# Extensions that are definitely text files
+
 TEXT_EXTENSIONS = frozenset(
     {
         ".txt",
@@ -120,7 +120,7 @@ TEXT_EXTENSIONS = frozenset(
     }
 )
 
-# Common binary file signatures
+
 BINARY_SIGNATURES = (
     b"\x00",
     b"\xff\xd8\xff",
@@ -157,18 +157,17 @@ BINARY_SIGNATURES = (
     b"\xa1\xb2\xc3\xd4",
 )
 
-# Cache for text character validation
+
 _TEXT_CHARS = bytearray({7, 8, 9, 10, 12, 13, 27} | set(range(32, 127)) | set(range(128, 256)))
 _BINARY_CHECK_SIZE = 8192
 
 
 def is_binary_file(file_path: Path) -> bool:
     """Quickly determine if a file is binary using extension and content checks."""
-    # Check extension first (fastest)
+
     if file_path.suffix.lower() in TEXT_EXTENSIONS:
         return False
 
-    # Check for known binary extensions
     binary_extensions = {
         ".pyc",
         ".pyo",
@@ -187,7 +186,6 @@ def is_binary_file(file_path: Path) -> bool:
     if file_path.suffix.lower() in binary_extensions:
         return True
 
-    # Read first chunk and check content
     try:
         with open(file_path, "rb") as f:
             chunk = f.read(_BINARY_CHECK_SIZE)
@@ -197,16 +195,13 @@ def is_binary_file(file_path: Path) -> bool:
     if not chunk:
         return False
 
-    # Check for null bytes (strongest binary indicator)
     if b"\x00" in chunk:
         return True
 
-    # Check against known binary signatures
     for signature in BINARY_SIGNATURES:
         if chunk.startswith(signature):
             return True
 
-    # Heuristic: count non-text characters
     non_text = sum(1 for byte in chunk if byte not in _TEXT_CHARS)
     if non_text / len(chunk) > 0.3:
         return True
@@ -217,13 +212,11 @@ def is_binary_file(file_path: Path) -> bool:
 def remove_blank_lines(file_path: Path, remove_spaces: bool = False) -> tuple[str, int, int, str]:
     """Remove blank lines from a file. Returns (path, total_lines, removed_lines, status)."""
     try:
-        # Read file
         with open(file_path, encoding="utf-8", errors="ignore") as f:
             lines = f.readlines()
 
         total_lines = len(lines)
 
-        # Filter lines based on mode
         if remove_spaces:
             new_lines = [line for line in lines if line.strip()]
         else:
@@ -231,7 +224,6 @@ def remove_blank_lines(file_path: Path, remove_spaces: bool = False) -> tuple[st
 
         removed_lines = total_lines - len(new_lines)
 
-        # Only write if changes were made
         if removed_lines > 0:
             with open(file_path, "w", encoding="utf-8") as f:
                 f.writelines(new_lines)
@@ -248,7 +240,6 @@ def process_file(args: tuple[Path, Path, bool]) -> tuple[str, int, int, str]:
     """Process a single file: check if binary, then remove blank lines."""
     base_dir, file_path, remove_spaces = args
 
-    # Skip binary files early
     if is_binary_file(file_path):
         try:
             rel_path = file_path.relative_to(base_dir)
@@ -256,10 +247,8 @@ def process_file(args: tuple[Path, Path, bool]) -> tuple[str, int, int, str]:
         except ValueError:
             return (str(file_path), 0, 0, "binary")
 
-    # Process text file
     result = remove_blank_lines(file_path, remove_spaces)
 
-    # Convert to relative path for display
     try:
         rel_path = Path(result[0]).relative_to(base_dir)
         return (str(rel_path), result[1], result[2], result[3])
@@ -277,11 +266,9 @@ def collect_files(paths: list[Path]) -> list[tuple[Path, Path]]:
             continue
 
         if path.is_file():
-            # Single file: use its parent as base_dir
             if not path.is_symlink():
                 files.append((path.parent, path))
         elif path.is_dir():
-            # Directory: recursively collect files
             for file_path in path.rglob("*"):
                 if file_path.is_file() and not file_path.is_symlink():
                     files.append((path, file_path))
@@ -314,15 +301,12 @@ def print_results(results: list[tuple], total_removed: int, total_files: int, sh
     """Print detailed results of the processing."""
     print(f"\n{BOLD}{CYAN}{'─' * 70}{RESET}\n")
 
-    # Sort results by path
     results.sort(key=lambda x: x[0])
 
-    # Categorize results
     processed = [(p, t, r, s) for p, t, r, s in results if s == "processed"]
     skipped_binary = [(p, t, r, s) for p, t, r, s in results if s == "binary"]
     errors = [(p, t, r, s) for p, t, r, s in results if s not in ("processed", "binary")]
 
-    # Print processed files
     if processed:
         print(f"{BOLD}{GREEN}✓ Modified files:{RESET}\n")
         for path, total_lines, removed, _ in processed:
@@ -333,7 +317,6 @@ def print_results(results: list[tuple], total_removed: int, total_files: int, sh
                 print(f"  {DIM}○{RESET} {path} {DIM}(no blank lines found){RESET}")
         print()
 
-    # Print skipped binary files
     if skipped_binary:
         print(f"{BOLD}{YELLOW}⊘ Skipped binary files: {len(skipped_binary)}{RESET}")
         display_count = len(skipped_binary) if show_all_binary else min(5, len(skipped_binary))
@@ -343,7 +326,6 @@ def print_results(results: list[tuple], total_removed: int, total_files: int, sh
             print(f"  {DIM}... and {len(skipped_binary) - display_count} more binary files{RESET}")
         print()
 
-    # Print errors
     if errors:
         print(f"{BOLD}{RED}✗ Errors:{RESET}\n")
         for path, _, _, status in errors:
@@ -351,7 +333,6 @@ def print_results(results: list[tuple], total_removed: int, total_files: int, sh
             print(f"    {DIM}{status}{RESET}")
         print()
 
-    # Print summary
     print(f"{BOLD}{CYAN}{'─' * 70}{RESET}")
     print(f"{BOLD}Summary:{RESET}")
     print(f"  Total files found:     {BOLD}{total_files:,}{RESET}")
@@ -407,13 +388,10 @@ Examples:
 
     args = parser.parse_args()
 
-    # Resolve all paths
     paths = [Path(p).resolve() for p in args.paths]
 
-    # Print header
     print_header(paths, args.space)
 
-    # Collect files
     print(f"{BOLD}Scanning for files...{RESET}", end=" ", flush=True)
     file_list = collect_files(paths)
     total_files = len(file_list)
@@ -423,10 +401,8 @@ Examples:
         print(f"{YELLOW}No files found to process.{RESET}")
         return
 
-    # Prepare for processing
     process_args = [(base_dir, file_path, args.space) for base_dir, file_path in file_list]
 
-    # Determine worker count
     max_workers = args.workers or min(32, (os.cpu_count() or 1) + 4)
 
     results = []
@@ -438,7 +414,6 @@ Examples:
     print(f"{BOLD}Processing files...{RESET}")
     print(f"{DIM}(Using {max_workers} worker processes){RESET}\n")
 
-    # Process files in parallel
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         future_to_file = {executor.submit(process_file, arg): arg[1] for arg in process_args}
 
@@ -462,7 +437,6 @@ Examples:
                 error_count += 1
                 results.append((str(future_to_file[future]), 0, 0, f"error: {e}"))
 
-            # Update progress
             binary_info = f" {YELLOW}({skipped_count} binary){RESET}" if skipped_count > 0 else ""
             error_info = f" {RED}({error_count} errors){RESET}" if error_count > 0 else ""
             print(
@@ -471,13 +445,11 @@ Examples:
                 flush=True,
             )
 
-    # Final progress update
     print(
         f"\r  Progress: {GREEN}Complete!{RESET} "
         f"{DIM}({processed_count:,} text, {skipped_count:,} binary, {error_count:,} errors){RESET}" + " " * 20
     )
 
-    # Print results
     print_results(results, total_removed, total_files, args.show_binary)
 
 

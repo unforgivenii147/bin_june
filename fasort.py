@@ -10,9 +10,9 @@ def persian_sort_key(word):
     Persian alphabet order:
     ا, ب, پ, ت, ث, ج, چ, ح, خ, د, ذ, ر, ز, ژ, س, ش, ص, ض, ط, ظ, ع, غ, ف, ق, ک, گ, ل, م, ن, و, ه, ی
     """
-    # Persian alphabet mapping for sorting
+
     persian_order = {
-        "آ": "ا",  # Alef with madd -> Alef
+        "آ": "ا",
         "ا": "ا",
         "ب": "ب",
         "پ": "پ",
@@ -44,14 +44,13 @@ def persian_sort_key(word):
         "ن": "ن",
         "و": "و",
         "ه": "ه",
-        "ة": "ه",  # Teh marbuta -> He
+        "ة": "ه",
         "ی": "ی",
-        "ي": "ی",  # Arabic Yeh -> Persian Yeh
-        "ئ": "ی",  # Yeh with hamza -> Yeh
-        " ": " ",  # Space
+        "ي": "ی",
+        "ئ": "ی",
+        " ": " ",
     }
 
-    # Define the custom order sequence
     custom_order = [
         "ا",
         "ب",
@@ -87,15 +86,12 @@ def persian_sort_key(word):
         "ی",
     ]
 
-    # Create ranking dictionary
     char_rank = {char: i for i, char in enumerate(custom_order)}
 
-    # Convert word to sortable tuple
     sort_key = []
     for char in word:
-        # Map the character to its Persian equivalent
         mapped_char = persian_order.get(char, char)
-        # Get the rank (use large number for unknown characters)
+
         rank = char_rank.get(mapped_char, len(custom_order))
         sort_key.append(rank)
 
@@ -108,18 +104,13 @@ def sort_persian_dict(file_path):
     Each line contains one word.
     """
     try:
-        # Read all lines from the file
         with open(file_path, "r", encoding="utf-8") as f:
             lines = f.readlines()
 
-        # Remove trailing newlines for sorting, but keep them for writing
         words = [line.rstrip("\n\r") for line in lines]
 
-        # Sort by Persian alphabet order
-        # First by Persian sort key, then by original word for consistency
         sorted_words = sorted(words, key=lambda w: (persian_sort_key(w), w))
 
-        # Write back to the same file
         with open(file_path, "w", encoding="utf-8") as f:
             for word in sorted_words:
                 f.write(word + "\n")

@@ -9,7 +9,6 @@ from pathlib import Path
 import dh
 from PIL import Image
 
-# SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 PHASH_W = 0.5
 DHASH_W = 0.3

@@ -67,10 +67,6 @@ class StripCommentsAndDocstrings(cst.CSTTransformer):
         self.comments_removed = 0
         self.docstrings_removed = 0
 
-    #
-    # Comment removal
-    #
-
     def leave_TrailingWhitespace(
         self, original_node: cst.TrailingWhitespace, updated_node: cst.TrailingWhitespace
     ) -> cst.TrailingWhitespace:
@@ -84,10 +80,6 @@ class StripCommentsAndDocstrings(cst.CSTTransformer):
             self.comments_removed += 1
             updated_node = updated_node.with_changes(comment=None)
         return updated_node
-
-    #
-    # Docstring removal (except module docstring)
-    #
 
     def _is_docstring_expr(self, node: cst.CSTNode) -> bool:
         if not isinstance(node, cst.SimpleStatementLine):
@@ -112,9 +104,6 @@ class StripCommentsAndDocstrings(cst.CSTTransformer):
         if not self._is_docstring_expr(updated_node):
             return updated_node
 
-        # This transformer assumes the module docstring is the first statement;
-        # we keep the first module-level docstring by not using this transformer
-        # on the module docstring itself (handled via AST detection).
         self.docstrings_removed += 1
         return cst.RemovalSentinel
 
@@ -151,14 +140,11 @@ def process_file(path: Path) -> tuple[Path, int, int, bool, str | None]:
     if shebang:
         new_code = shebang + new_code.lstrip("\n")
 
-    # Validate new_code before writing
     try:
         ast.parse(new_code)
     except SyntaxError as e:
-        # Do not write invalid code; report error
         return (path, transformer.comments_removed, transformer.docstrings_removed, False, str(e))
 
-    # Write valid transformed code
     path.write_text(new_code, encoding="utf-8")
     return (path, transformer.comments_removed, transformer.docstrings_removed, True, None)
 

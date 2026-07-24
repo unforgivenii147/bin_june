@@ -66,22 +66,20 @@ def _has_rich_print_import(text: str) -> bool:
 
 def _is_in_commented_code(text: str, line_start: int) -> bool:
     """Check if the line is inside a multi-line comment or docstring."""
-    lines = text.splitlines(True)  # Keep line endings
+    lines = text.splitlines(True)
     if line_start >= len(lines):
         return False
 
-    # Track if we're inside a multi-line string/comment
     in_multiline = False
     multiline_delimiter = None
 
     for i, line in enumerate(lines):
         if i == line_start:
-            # Check if current line is a comment
             stripped = line.lstrip()
             if stripped.startswith("#"):
                 return True
             break
-        # Check for multiline strings/docstrings
+
         for quote in ['"""', "'''"]:
             pos = line.find(quote)
             if pos != -1:

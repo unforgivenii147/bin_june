@@ -80,7 +80,6 @@ def process_package(pkg_name, site_packages):
     print(f"  Processing: {pkg_name}...")
     compileall.compile_dir(pkg_dir, quiet=1, legacy=True)
 
-    # Fix: Create zip without the root directory
     import zipfile
 
     zip_filename = f"{pkg_name}.zip"
@@ -90,7 +89,7 @@ def process_package(pkg_name, site_packages):
         for root, _dirs, files in os.walk(pkg_dir):
             for file in files:
                 file_path = Path(root) / file
-                # Calculate the archive name relative to the package directory
+
                 arcname = str(file_path.relative_to(pkg_dir))
                 zipf.write(file_path, arcname)
 
