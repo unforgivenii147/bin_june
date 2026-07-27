@@ -21,7 +21,6 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
 
-
 try:
     from rich import box
     from rich.console import Console

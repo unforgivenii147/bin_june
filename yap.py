@@ -54,7 +54,7 @@ def is_binary(path: Path | str) -> bool:
         return True
 
 
-get_pyfiles(path: str | Path) -> list[Path]:
+def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
     if path.is_file():
         if path.suffix == ".py":

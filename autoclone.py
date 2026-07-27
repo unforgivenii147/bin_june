@@ -170,7 +170,7 @@ def main():
     print(f"\n📚 Found {len(repos)} repositories")
     print("🔍 Checking and cloning in one pass...")
     print("=" * 60)
-    size_limit_mb = 0.5
+    size_limit_mb = 5
     cloned_count = 0
     skipped_count = 0
     failed_count = 0
