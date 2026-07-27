@@ -6,6 +6,7 @@ import ast
 from collections import deque
 from pathlib import Path
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -25,6 +26,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
             elif item.is_file() and (ext is None or item.suffix in ext):
                 files.append(item)
     return files
+
 
 def extract_imports_from_py(code: str, base_path: Path | None = None) -> set[str]:
     results = set()
@@ -55,6 +57,7 @@ def extract_imports_from_py(code: str, base_path: Path | None = None) -> set[str
                     results.add(mod)
     return results
 
+
 def is_local_module(base_path: Path, module: str) -> bool:
     dots = len(module) - len(module.lstrip("."))
     mod = module.lstrip(".")
@@ -67,6 +70,7 @@ def is_local_module(base_path: Path, module: str) -> bool:
     py_file = pkg_dir.with_suffix(".py")
     return bool(py_file.exists())
 
+
 def main() -> None:
     cwd = Path.cwd()
     importz = []
@@ -77,6 +81,7 @@ def main() -> None:
     with Path("importz.txt").open("w", encoding="utf-8") as fo:
         for im in importz:
             fo.writelines(str(k) + "\n" for k in im)
+
 
 if __name__ == "__main__":
     main()

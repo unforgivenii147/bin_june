@@ -105,6 +105,7 @@ try:
 except ImportError:
     RICH_AVAILABLE = False
 
+
 @dataclass(slots=True)
 class OperationResult:
     path: Path
@@ -125,6 +126,7 @@ class OperationResult:
             return (1 - self.processed_size / self.original_size) * 100
         return (self.processed_size / self.original_size - 1) * 100
 
+
 def format_size(size_bytes: float) -> str:
     val = float(size_bytes)
     for unit in ["B", "KB", "MB", "GB", "TB"]:
@@ -132,6 +134,7 @@ def format_size(size_bytes: float) -> str:
             return f"{val:.2f} {unit}"
         val /= 1024.0
     return f"{val:.2f} PB"
+
 
 def compress_file(
     input_path: Path,
@@ -171,6 +174,7 @@ def compress_file(
         if output_path.exists():
             output_path.unlink()
         return OperationResult(input_path, 0, 0, False, str(e))
+
 
 def decompress_file(
     input_path: Path,
@@ -216,6 +220,7 @@ def decompress_file(
             output_path.unlink()
         return OperationResult(input_path, 0, 0, False, str(e), operation="decompress")
 
+
 def get_files(
     root: Path,
     mode: str,
@@ -244,6 +249,7 @@ def get_files(
         elif p.suffix.lower() == ".zst":
             found.append(p)
     return sorted(found)
+
 
 def print_summary(results: list[OperationResult], root: Path, operation: str):
     successes = [r for r in results if r.success]
@@ -290,6 +296,7 @@ def print_summary(results: list[OperationResult], root: Path, operation: str):
         print(f"Original size: {format_size(total_orig)}")
         print(f"Processed size: {format_size(total_proc)}")
         print(f"Total time: {total_time:.2f}s")
+
 
 def main():
     parser = argparse.ArgumentParser(description="Optimized Zstd Compressor/Decompressor")
@@ -339,6 +346,7 @@ def main():
                 results.append(res)
                 print(f"[{i}/{len(files)}] {res.path.name} - {('OK' if res.success else 'FAIL')}")
     print_summary(results, root, mode)
+
 
 if __name__ == "__main__":
     main()

@@ -6,6 +6,7 @@ import glob
 
 from PIL import Image
 
+
 def reduce_image_size(image_path, scale_factor=0.75) -> None:
     try:
         with Image.open(image_path) as img:
@@ -16,6 +17,7 @@ def reduce_image_size(image_path, scale_factor=0.75) -> None:
             print(f"Reduced: {image_path} ({img.width}x{img.height} -> {new_width}x{new_height})")
     except Exception as e:
         print(f"Error processing {image_path}: {e!s}")
+
 
 def main() -> None:
     image_files = []
@@ -29,6 +31,7 @@ def main() -> None:
     for image_file in image_files:
         reduce_image_size(image_file)
     print("All images processed!")
+
 
 if __name__ == "__main__":
     main()

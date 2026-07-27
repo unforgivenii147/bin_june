@@ -9,6 +9,7 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def unique_path(path: Path | str) -> Path:
     path = _clean_fname(Path(path))
     if not path.exists():
@@ -30,20 +31,25 @@ def unique_path(path: Path | str) -> Path:
             return new_path
         counter += 1
 
+
 def _clean_fname(path: Path) -> Path:
     from re import sub as re_sub
 
     clean_name = re_sub(r"(_\d+)+", "", path.name)
     return path.with_name(clean_name)
 
+
 EXTENSIONS = {".js", ".css", ".html", ".json", ".mjs", ".cjs", ".ts", ".jsx", ".tsx"}
 EXCLUDE_PATTERNS = {".py", ".ipynb"}
+
 
 def should_format(file_path: Path) -> bool:
     return file_path.suffix in EXTENSIONS and not any(file_path.name.endswith(p) for p in EXCLUDE_PATTERNS)
 
+
 def get_files_to_format(cwd: str = ".") -> list[Path]:
     return [p for p in Path(cwd).resolve().rglob("*") if p.is_file() and "error" not in p.parts and should_format(p)]
+
 
 def format_file(file_path: Path) -> tuple[Path, bool, str | None]:
     try:
@@ -53,6 +59,7 @@ def format_file(file_path: Path) -> tuple[Path, bool, str | None]:
         return file_path, False, result.stderr or "Unknown error"
     except Exception as e:
         return file_path, False, str(e)
+
 
 def main() -> None:
     cwd = Path.cwd()
@@ -78,6 +85,7 @@ def main() -> None:
                 shutil.move(str(path), str(dest))
                 error_count += 1
     print(f"\n✅ Success: {success_count} | ❌ Errors: {error_count}")
+
 
 if __name__ == "__main__":
     main()

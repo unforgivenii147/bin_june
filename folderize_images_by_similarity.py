@@ -12,6 +12,7 @@ from tqdm import tqdm
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 class ImageSimilarityOrganizer:
     def __init__(self, root_dir: str, similarity_threshold: float = 0.95, hash_size: int = 8):
         self.root_dir = Path(root_dir)
@@ -134,6 +135,7 @@ class ImageSimilarityOrganizer:
         print("\n" + "=" * 60)
         print("PROCESS COMPLETE")
         print("=" * 60)
+
 
 if __name__ == "__main__":
     ROOT_DIRECTORY = Path.cwd()

@@ -11,6 +11,7 @@ CHUNK_SIZE = 1024 * 1024
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
 
@@ -34,6 +35,7 @@ def is_python_file(path: str | Path) -> bool:
             return False
     return False
 
+
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -48,6 +50,7 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
+
 
 def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
@@ -85,12 +88,15 @@ def get_pyfiles(path: str | Path) -> list[Path]:
 
     return sorted(pyfiles)
 
+
 """
 Skip blank lines option with dry run and auto-fix modes.
 """
 
+
 def is_blank_line(line: str):
     return line.strip() == ""
+
 
 def find_duplicates(file_path: Path, skip_blanks: bool = True):
     try:
@@ -113,6 +119,7 @@ def find_duplicates(file_path: Path, skip_blanks: bool = True):
         print(f"  Error: {e}", file=sys.stderr)
         return []
 
+
 def remove_duplicates(lines: list[str], duplicates):
     lines_copy = lines.copy()
     removed = 0
@@ -122,6 +129,7 @@ def remove_duplicates(lines: list[str], duplicates):
             del lines_copy[idx]
             removed += 1
     return lines_copy
+
 
 def process_file(file_path, duplicates, dry_run: bool = False, auto_yes=False, skip_blanks: bool = True):
     if not duplicates:
@@ -158,6 +166,7 @@ def process_file(file_path, duplicates, dry_run: bool = False, auto_yes=False, s
         return True, auto_yes
     print("  ⏭️  Skipped")
     return False, auto_yes
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(
@@ -202,6 +211,7 @@ def main() -> None:
     else:
         print(f"✅ Fixed {fixed_count} file(s)")
         print("💡 Backups saved with .bak extension")
+
 
 if __name__ == "__main__":
     try:

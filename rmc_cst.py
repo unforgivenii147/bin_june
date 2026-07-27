@@ -25,6 +25,7 @@ from collections.abc import Iterable
 import libcst as cst
 import libcst.matchers as m
 
+
 def find_module_docstring(source: str) -> tuple[int, int] | None:
     try:
         module = ast.parse(source)
@@ -52,6 +53,7 @@ def find_module_docstring(source: str) -> tuple[int, int] | None:
         return None
 
     return start_line, end_line
+
 
 class StripCommentsAndDocstrings(cst.CSTTransformer):
     """
@@ -105,6 +107,7 @@ class StripCommentsAndDocstrings(cst.CSTTransformer):
         self.docstrings_removed += 1
         return cst.RemovalSentinel
 
+
 def process_file(path: Path) -> tuple[Path, int, int, bool, str | None]:
     """
     Process a single file:
@@ -145,6 +148,7 @@ def process_file(path: Path) -> tuple[Path, int, int, bool, str | None]:
     path.write_text(new_code, encoding="utf-8")
     return (path, transformer.comments_removed, transformer.docstrings_removed, True, None)
 
+
 def iter_python_files_from_paths(paths: Iterable[Path]) -> list[Path]:
     result: list[Path] = []
     for p in paths:
@@ -153,6 +157,7 @@ def iter_python_files_from_paths(paths: Iterable[Path]) -> list[Path]:
         elif p.is_dir():
             result.extend(q for q in p.rglob("*.py") if q.is_file())
     return result
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Strip comments and non-module docstrings from Python files.")
@@ -170,6 +175,7 @@ def parse_args() -> argparse.Namespace:
         help=("Number of worker processes (default: CPU count). Use 1 to disable parallelism."),
     )
     return parser.parse_args()
+
 
 def main() -> None:
     args = parse_args()
@@ -207,6 +213,7 @@ def main() -> None:
                         f"skipped write (removed {comments_removed} comments, "
                         f"{docstrings_removed} docstrings). Error: {error}"
                     )
+
 
 if __name__ == "__main__":
     main()

@@ -10,8 +10,10 @@ from tqdm import tqdm
 
 SKIP_DIRS = {".git", ".ruff_cache", "__pycache__"}
 
+
 def should_skip_dir(dirname):
     return dirname in SKIP_DIRS
+
 
 def walk_files(root_path="."):
     for dirpath, dirnames, filenames in os.walk(root_path):
@@ -22,6 +24,7 @@ def walk_files(root_path="."):
                 continue
             yield filepath
 
+
 def has_shebang(filepath):
     try:
         with open(filepath, "rb") as f:
@@ -30,17 +33,20 @@ def has_shebang(filepath):
     except OSError:
         return False
 
+
 def is_executable(filepath):
     try:
         return os.access(filepath, os.X_OK)
     except:
         return False
 
+
 def get_current_mode(filepath):
     try:
         return stat.S_IMODE(os.stat(filepath).st_mode)
     except:
         return None
+
 
 def determine_target_mode(filepath):
     if is_executable(filepath):
@@ -49,6 +55,7 @@ def determine_target_mode(filepath):
     if has_shebang(filepath) or parent_dir == "bin":
         return 493
     return 420
+
 
 def analyze_file(filepath):
     target_mode = determine_target_mode(filepath)
@@ -62,6 +69,7 @@ def analyze_file(filepath):
     else:
         return ("skip_correct", filepath, current_mode, target_mode)
 
+
 def process_file(filepath, target_mode, dry_run=False):
     if dry_run:
         return True
@@ -71,6 +79,7 @@ def process_file(filepath, target_mode, dry_run=False):
     except Exception as e:
         print(f"Error: {filepath}: {e}")
         return False
+
 
 def scan_and_report(root_path="."):
     stats = {
@@ -99,6 +108,7 @@ def scan_and_report(root_path="."):
             stats["errors"].append(path)
     return stats
 
+
 def apply_changes(stats, dry_run=False):
     changes = stats["make_executable"] + stats["set_standard"]
     if not changes:
@@ -113,6 +123,7 @@ def apply_changes(stats, dry_run=False):
         else:
             failed += 1
     return (success, failed)
+
 
 def print_report(stats, success=None, failed=None):
     print(f"\n{'=' * 60}")
@@ -130,6 +141,7 @@ def print_report(stats, success=None, failed=None):
         if failed:
             print(f"  ✗ Changes failed: {failed}")
     print(f"{'=' * 60}")
+
 
 def show_examples(stats, num=5):
     if stats["make_executable"]:
@@ -150,6 +162,7 @@ def show_examples(stats, num=5):
             print(f"  {path}")
         if len(stats["skip_executable"]) > num:
             print(f"  ... and {len(stats['skip_executable']) - num} more")
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -187,6 +200,7 @@ def main():
             print(f"\nWould apply {total_changes} changes")
             if args.show_examples:
                 show_examples(stats)
+
 
 if __name__ == "__main__":
     main()

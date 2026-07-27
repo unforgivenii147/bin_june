@@ -7,6 +7,7 @@ import sys
 from collections import deque
 from pathlib import Path
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -27,6 +28,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
+
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
     units = ("B", "KB", "MB", "GB", "TB")
@@ -38,11 +40,14 @@ def fsz(sz: float) -> str:
         return f"{int(value)} {units[i]}"
     return f"{value:.1f} {units[i]}"
 
+
 cwd = Path.cwd()
 N = int(sys.argv[1])
 
+
 def get_sizes() -> list[tuple[Path, int]]:
     return [(file_path.relative_to(cwd), file_path.stat().st_size) for file_path in get_files(cwd)]
+
 
 def main() -> None:
     sizez = get_sizes()
@@ -74,6 +79,7 @@ def main() -> None:
     if total_files > 10:
         print(f"Showing top 10 out of {total_files} files")
 
+
 def m2() -> None:
     sizez = get_sizes()
     if not sizez:
@@ -87,6 +93,7 @@ def m2() -> None:
     for i, (file_path, size) in enumerate(top_files, 1):
         size_str = fsz(size)
         print(f"{i:2d}. {size_str:>10} - {file_path.relative_to(cwd)}")
+
 
 if __name__ == "__main__":
     main()

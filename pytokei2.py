@@ -13,6 +13,7 @@ except ImportError:
     def is_binary(path):
         return False
 
+
 def count_lines_of_code(file_path: Path, lang) -> tuple[int, int, int]:
     if ".git" in str(file_path):
         return (0, 0, 0)
@@ -31,6 +32,7 @@ def count_lines_of_code(file_path: Path, lang) -> tuple[int, int, int]:
             else:
                 code_lines += 1
     return (code_lines, comment_lines, blank_lines)
+
 
 def scan_directory(directory: str = "."):
     stats = {
@@ -65,9 +67,11 @@ def scan_directory(directory: str = "."):
                 break
     return stats
 
+
 def display_stats(stats) -> None:
     for lang_stats in stats["languages"].values():
         lang_stats["code"] > 0
+
 
 if __name__ == "__main__":
     stats = scan_directory()

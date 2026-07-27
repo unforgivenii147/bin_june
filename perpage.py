@@ -9,6 +9,7 @@ from pathlib import Path
 
 from PyPDF2 import PdfReader
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -29,11 +30,13 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
+
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
+
 
 def process_file(path) -> None:
     path = Path(path)
@@ -86,6 +89,7 @@ def process_file(path) -> None:
                 print(f"Warning: No text extracted from page {page_num + 1}.")
         except Exception as e:
             print(f"Error processing page {page_num + 1}: {e}")
+
 
 if __name__ == "__main__":
     cwd = Path.cwd()

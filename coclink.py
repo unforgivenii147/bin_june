@@ -20,6 +20,7 @@ CHANNELS = {
     "Clash_Champs": "UC_mD8S6pWpSstY3mXJ9nEqw",
 }
 
+
 def get_videos(youtube: Resource, channel_id: str):
     past_date = (datetime.now(UTC) - timedelta(days=30)).isoformat()
     videos = []
@@ -49,10 +50,12 @@ def get_videos(youtube: Resource, channel_id: str):
             break
     return videos
 
+
 def extract_th18_links(description):
     pattern = "(https?://link\\.clashofclans\\.com/[^\\s]+)"
     links = re.findall(pattern, description)
     return [l for l in links if "TH18" in l.upper() or "TH18" in description.upper()]
+
 
 def create_html(channel_name: str, base_data) -> None:
     date_str = datetime.now().strftime("%d-%m-%Y")
@@ -87,6 +90,7 @@ def create_html(channel_name: str, base_data) -> None:
     file_path.write_text(html_content, encoding="utf-8")
     print(f"Generated: {file_path}")
 
+
 def main() -> None:
     if not API_KEY:
         print("Error: API_KEY not found in .env file.")
@@ -104,6 +108,7 @@ def main() -> None:
             create_html(name, results)
         else:
             print(f"No TH18 links found for {name}.")
+
 
 if __name__ == "__main__":
     main()

@@ -11,8 +11,10 @@ from pygments.formatters import HtmlFormatter
 from pygments.lexers import TextLexer, get_lexer_by_name
 from weasyprint import CSS, HTML
 
+
 class ValidationError(Exception):
     pass
+
 
 TOC_HTML = """
 <nav class="toc">
@@ -20,6 +22,7 @@ TOC_HTML = """
 <ul></ul>
 </nav>
 """
+
 
 def pygments_highlight(html: str) -> str:
     formatter = HtmlFormatter(cssclass="highlight")
@@ -37,6 +40,7 @@ def pygments_highlight(html: str) -> str:
 
     return code_block_re.sub(repl, html)
 
+
 def md2pdf(pdf_file_path, md_file_path, css_file_path=None, base_url=None) -> None:
     extras = ["header-ids", "fenced-code-blocks", "tables", "cuddled-lists"]
     html = markdown_path(md_file_path, extras=extras)
@@ -49,6 +53,7 @@ def md2pdf(pdf_file_path, md_file_path, css_file_path=None, base_url=None) -> No
     if css_file_path:
         stylesheets.append(CSS(filename=css_file_path))
     html_doc.write_pdf(pdf_file_path, stylesheets=stylesheets)
+
 
 if __name__ == "__main__":
     md_file = sys.argv[1]

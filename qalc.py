@@ -18,6 +18,7 @@ from decimal import getcontext
 
 getcontext().prec = 28
 
+
 class UnitConverter:
     LENGTH_TO_METERS = {
         "nm": 1e-09,
@@ -116,6 +117,7 @@ class UnitConverter:
             return kelvin * 9 / 5 - 459.67
         else:
             return kelvin
+
 
 class Calculator:
     def __init__(self):
@@ -231,6 +233,7 @@ class Calculator:
             formatted = f"{result:.15f}".rstrip("0").rstrip(".")
             return formatted
 
+
 def create_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="qalc", description="Quick command-line calculator with unit conversion support", add_help=True
@@ -249,6 +252,7 @@ def create_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("-i", "--interactive", action="store_true", help="Start interactive calculator mode")
     return parser
+
 
 def format_result_with_options(result: float | str, format_type: str = "auto") -> str:
     if isinstance(result, str):
@@ -273,6 +277,7 @@ def format_result_with_options(result: float | str, format_type: str = "auto") -
             return f"{result:.10e}"
         return str(result)
     return result
+
 
 def main():
     parser = create_parser()
@@ -309,6 +314,7 @@ def main():
         print(formatted)
     else:
         parser.print_help()
+
 
 if __name__ == "__main__":
     main()

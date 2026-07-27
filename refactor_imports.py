@@ -8,6 +8,7 @@ import astor
 
 REPEATED_JSON_PATH = Path("repeated.json")
 
+
 def load_refactoring_maps():
     """Maps filename strings to the specific object names that need removal."""
     with open(REPEATED_JSON_PATH, "r", encoding="utf-8") as f:
@@ -22,6 +23,7 @@ def load_refactoring_maps():
             file_to_objects[p.name].append(obj_name)
 
     return file_to_objects
+
 
 class ASTStripper(ast.NodeTransformer):
     """AST Transformer that removes specific Functions, Classes, and Constants by name."""
@@ -50,6 +52,7 @@ class ASTStripper(ast.NodeTransformer):
                 self.removed_something = True
                 return None
         return self.generic_visit(node)
+
 
 def refactor_single_file(file_path: Path, objects_to_remove: list):
     """Parses, strips objects, inserts the 'dh' package imports, and writes back."""
@@ -95,6 +98,7 @@ def refactor_single_file(file_path: Path, objects_to_remove: list):
     except Exception as e:
         print(f"❌ Error writing updates back to {file_path.name}: {e}")
 
+
 def main():
     if not REPEATED_JSON_PATH.exists():
         print(f"Error: {REPEATED_JSON_PATH.name} not found in the current directory.")
@@ -124,6 +128,7 @@ def main():
             executor.submit(refactor_single_file, file_path, objects)
 
     print("🎉 Structural refactoring complete! All duplicate bodies stripped.")
+
 
 if __name__ == "__main__":
     main()

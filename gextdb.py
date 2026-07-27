@@ -16,6 +16,7 @@ OUTPUT_DIR = Path("output")
 DB_PATH = Path("/sdcard/ext.db")
 ALLOWED_PYTHON_EXTENSIONS = ".py", ""
 
+
 class EntityExtractor(ast.NodeVisitor):
     def __init__(self, source_content: str, original_path: Path) -> None:
         self.entities = []
@@ -69,6 +70,7 @@ class EntityExtractor(ast.NodeVisitor):
 
     def generic_visit(self, node: ast.AST) -> None:
         super().generic_visit(node)
+
 
 class EntityExtractor(ast.NodeVisitor):
     def __init__(self, source_content: str, original_path: Path) -> None:
@@ -134,6 +136,7 @@ class EntityExtractor(ast.NodeVisitor):
     def generic_visit(self, node: ast.AST) -> None:
         super().generic_visit(node)
 
+
 def create_database() -> None:
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -152,6 +155,7 @@ def create_database() -> None:
     """)
     conn.commit()
     conn.close()
+
 
 def save_entity_to_db(entity: dict[str, Any]) -> None:
     conn = sqlite3.connect(DB_PATH)
@@ -175,6 +179,7 @@ def save_entity_to_db(entity: dict[str, Any]) -> None:
     conn.commit()
     conn.close()
 
+
 def extract_entities_from_content(content: str, path: Path) -> list[dict[str, Any]]:
     try:
         tree = ast.parse(content)
@@ -186,6 +191,7 @@ def extract_entities_from_content(content: str, path: Path) -> list[dict[str, An
     except Exception as e:
         print(f"Error parsing AST for {path}: {e}")
         return []
+
 
 def is_python_file_no_extension(path: Path) -> bool:
     if path.suffix:
@@ -200,6 +206,7 @@ def is_python_file_no_extension(path: Path) -> bool:
     except:
         return False
 
+
 def process_single_file(path: Path) -> list[dict[str, Any]]:
     try:
         if path.suffix == ".py" or is_python_file_no_extension(path):
@@ -209,6 +216,7 @@ def process_single_file(path: Path) -> list[dict[str, Any]]:
     except Exception as e:
         print(f"Error reading file {path}: {e}")
         return []
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Extract Python entities and save to database.")
@@ -239,6 +247,7 @@ def main() -> None:
             save_entity_to_db(entity)
         print("All entities saved to database.")
     print("All tasks finished successfully!")
+
 
 if __name__ == "__main__":
     main()

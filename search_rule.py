@@ -4,6 +4,7 @@ import sys
 
 DB_NAME = "/sdcard/data/ruff.db"
 
+
 def search_rule(code):
     conn = sqlite3.connect(DB_NAME)
     conn.row_factory = sqlite3.Row  # Allows accessing columns by name
@@ -32,6 +33,7 @@ def search_rule(code):
     if row["references_list"]:
         print(f"\n🔗 REFERENCES:\n{row['references_list']}")
     print("=" * 60)
+
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:

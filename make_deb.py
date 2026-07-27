@@ -37,6 +37,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
 def should_exclude(pkg_name: str) -> bool:
     pkg_lower = pkg_name.lower()
     if pkg_lower in EXCLUDED_PKGS:
@@ -44,6 +45,7 @@ def should_exclude(pkg_name: str) -> bool:
     if any(exclude in pkg_lower for exclude in ["llvm", "clang"]):
         return True
     return bool(any(exclude in pkg_lower for exclude in ["rust", "cargo"]))
+
 
 def get_installed_packages() -> list[str]:
     try:
@@ -58,6 +60,7 @@ def get_installed_packages() -> list[str]:
     except subprocess.CalledProcessError as e:
         logger.error(f"Failed to get installed packages: {e}")
         return []
+
 
 def create_deb_for_package(pkg_name: str) -> bool:
     try:
@@ -81,6 +84,7 @@ def create_deb_for_package(pkg_name: str) -> bool:
         logger.error(f"✗ Error creating {pkg_name}.deb: {e}")
         return False
 
+
 def process_packages(packages: list[str], max_workers: int = 4) -> tuple[int, int]:
     successful = 0
     failed = 0
@@ -103,6 +107,7 @@ def process_packages(packages: list[str], max_workers: int = 4) -> tuple[int, in
                 failed += 1
     return successful, failed
 
+
 def main():
     if len(sys.argv) > 1:
         packages = sys.argv[1:]
@@ -123,6 +128,7 @@ def main():
     if failed > 0:
         logger.warning(f"Some packages failed. Check {LOG_FILE} for details.")
     sys.exit(0 if failed == 0 else 1)
+
 
 if __name__ == "__main__":
     main()

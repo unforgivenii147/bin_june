@@ -13,8 +13,10 @@ HASH_FUNC = dh.phash
 MAX_DISTANCE = 10
 OUT_PREFIX = "group_"
 
+
 def is_image(path: Path) -> bool:
     return path.suffix.lower() in IMAGE_EXTS and path.is_file()
+
 
 def compute_hash(path: Path):
     try:
@@ -23,6 +25,7 @@ def compute_hash(path: Path):
     except Exception as e:
         print(f"[SKIP] {path.name}: {e}")
         return None
+
 
 def main() -> None:
     cwd = Path.cwd()
@@ -53,6 +56,7 @@ def main() -> None:
             for img, _ in group:
                 shutil.move(str(img), folder / img.name)
     print(f"Done. Created {len([g for g in groups if len(g) > 1])} groups with multiple images.")
+
 
 if __name__ == "__main__":
     main()

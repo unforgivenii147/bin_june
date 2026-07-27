@@ -7,6 +7,7 @@ import sys
 
 import requests
 
+
 def get_repo_size(input_str: str) -> None:
     if input_str.startswith("https://github.com/"):
         match = re.search(r"github\.com/([^/]+)/([^/]+)", input_str)
@@ -34,6 +35,7 @@ def get_repo_size(input_str: str) -> None:
         print(f"Size: {size_mb:.2f} MB")
     except requests.exceptions.RequestException as e:
         print(f"Error fetching data: {e}")
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:

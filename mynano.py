@@ -14,6 +14,7 @@ from textual.widgets import Footer, Header, TextEditor
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 class BasicEditor(App):
     BINDINGS = [("o", "open_file", "Open"), ("s", "save_file", "Save"), ("q", "app_quit", "Quit")]
 
@@ -117,6 +118,7 @@ class BasicEditor(App):
         ]
         if self.is_dirty:
             self.query_one(Footer).key_display.append(("Ctrl+S", "Save", "warning"))
+
 
 if __name__ == "__main__":
     initial_filename = sys.argv[1] if len(sys.argv) > 1 else None

@@ -13,18 +13,23 @@ from PIL import Image
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def pil_to_cv(img: Image.Image) -> np.ndarray:
     return cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
+
 
 def cv_to_pil(img: np.ndarray) -> Image.Image:
     return Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
 
+
 def to_grayscale(img: np.ndarray) -> np.ndarray:
     return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
 
 def rescale(img: np.ndarray, scale: float = 2.0) -> np.ndarray:
     h, w = img.shape[:2]
     return cv2.resize(img, (int(w * scale), int(h * scale)), interpolation=cv2.INTER_CUBIC)
+
 
 def deskew(img: np.ndarray) -> np.ndarray:
     gray = to_grayscale(img)
@@ -36,16 +41,19 @@ def deskew(img: np.ndarray) -> np.ndarray:
     m = cv2.getRotationMatrix2D(center, angle, 1.0)
     return cv2.warpAffine(img, m, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
 
+
 def rotate(img: np.ndarray, angle: int) -> np.ndarray:
     h, w = img.shape[:2]
     center = w // 2, h // 2
     m = cv2.getRotationMatrix2D(center, angle, 1.0)
     return cv2.warpAffine(img, m, (w, h), flags=cv2.INTER_CUBIC)
 
+
 def run_tesseract(img: Image.Image, psm: int, oem: int, dpi: int) -> dict[str, str]:
     config = f"--psm {psm} --oem {oem} -c user_defined_dpi={dpi}"
     text = pytesseract.image_to_string(img, config=config)
     return {"psm": psm, "oem": oem, "dpi": dpi, "config": config, "text": text}
+
 
 def main() -> None:
     parser = argparse.ArgumentParser()
@@ -98,6 +106,7 @@ def main() -> None:
                         }
                     )
     (args.out / "index.json").write_text(json.dumps(report_index, indent=2), encoding="utf-8")
+
 
 if __name__ == "__main__":
     main()

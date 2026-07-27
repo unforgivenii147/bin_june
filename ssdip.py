@@ -10,6 +10,7 @@ import ssdeep
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def find_fuzzy_duplicates(threshold: int = 70) -> None:
     start_dir = Path.cwd()
     file_hashes = {}
@@ -51,6 +52,7 @@ def find_fuzzy_duplicates(threshold: int = 70) -> None:
             print(f"\nFile: {file.relative_to(start_dir)}")
             for dup_file, score in similar_files:
                 print(f"  - Similar: {dup_file.relative_to(start_dir)} (Score: {score})")
+
 
 if __name__ == "__main__":
     find_fuzzy_duplicates(threshold=50)

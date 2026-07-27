@@ -39,6 +39,7 @@ TAMIL_PATTERN: Final[re.Pattern] = re.compile("[\\u0B80-\\u0BFF]+")
 CHINESE_PATTERN: Final[re.Pattern] = re.compile("[\\u4E00-\\u9FFF\\u3040-\\u309F\\u30A0-\\u30FF]+")
 ENGLISH_PATTERN: Final[re.Pattern] = re.compile("^[A-Za-z0-9\\s\\.,;:!?\\'\"()\\-—]+$")
 
+
 class ResilientTranslator:
     def __init__(self, target_lang: str = "en"):
         self.target_lang = target_lang
@@ -67,6 +68,7 @@ class ResilientTranslator:
                     time.sleep(RETRY_DELAY * (attempt + 1))
         return f"[Translation failed: {text[:50]}...]"
 
+
 def detect_language_type(line: str) -> str:
     stripped = line.strip()
     if not stripped:
@@ -80,6 +82,7 @@ def detect_language_type(line: str) -> str:
     if ENGLISH_PATTERN.match(stripped):
         return "english"
     return "other"
+
 
 def process_file(input_file: Path, output_file: Path | None = None) -> None:
     try:
@@ -110,6 +113,7 @@ def process_file(input_file: Path, output_file: Path | None = None) -> None:
     else:
         print(result_text)
 
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Translate Tamil/Chinese text to English.")
     parser.add_argument("input_file", type=Path, help="Input file path")
@@ -119,6 +123,7 @@ def main() -> None:
         logger.error("Input file does not exist: %s", args.input_file)
         sys.exit(1)
     process_file(args.input_file, args.output)
+
 
 if __name__ == "__main__":
     main()

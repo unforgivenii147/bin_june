@@ -46,12 +46,14 @@ MAX_WORKERS: Final[int] = max(1, multiprocessing.cpu_count())
 logging.basicConfig(level=logging.INFO, format="%(message)s", handlers=[logging.StreamHandler(sys.stdout)])
 logger = logging.getLogger(__name__)
 
+
 def fsize(num: float) -> str:
     for unit in ["B", "KB", "MB", "GB"]:
         if num < 1024:
             return f"{num:.1f} {unit}"
         num /= 1024
     return f"{num:.1f} TB"
+
 
 def get_dir_size(path: Path) -> int:
     total = 0
@@ -62,6 +64,7 @@ def get_dir_size(path: Path) -> int:
     except Exception:
         pass
     return total
+
 
 def compress_file(path: Path, level: int = 21) -> dict:
     dst = path.with_suffix(path.suffix + ZST_EXT)
@@ -81,6 +84,7 @@ def compress_file(path: Path, level: int = 21) -> dict:
     except Exception as e:
         dst.unlink(missing_ok=True)
         return {"status": "error", "path": str(path), "error": str(e)}
+
 
 def decompress_file(path: Path) -> dict:
     if path.suffix != ZST_EXT:
@@ -120,6 +124,7 @@ def decompress_file(path: Path) -> dict:
         dst.unlink(missing_ok=True)
         return {"status": "error", "path": str(path), "error": str(e)}
 
+
 def compress_dir(path: Path, level: int = 21) -> dict:
     zst_path = path.with_name(f"{path.name}.tar{ZST_EXT}")
     try:
@@ -136,6 +141,7 @@ def compress_dir(path: Path, level: int = 21) -> dict:
     except Exception as e:
         zst_path.unlink(missing_ok=True)
         return {"status": "error", "path": str(path), "error": str(e)}
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="zser – modern parallel Zstandard compressor")
@@ -188,6 +194,7 @@ def main() -> int:
     final_size = get_dir_size(target)
     logger.info(f"\nFinal size: {fsize(final_size)} (saved {fsize(initial_size - final_size)})")
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

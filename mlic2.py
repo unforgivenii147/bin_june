@@ -94,6 +94,7 @@ EXCLUDED_EXTENSIONS = {
     ".pptx",
 }
 
+
 def is_text_file(filepath: Path) -> bool:
     if filepath.suffix in EXCLUDED_EXTENSIONS:
         return False
@@ -111,6 +112,7 @@ def is_text_file(filepath: Path) -> bool:
             return False
     return False
 
+
 def read_file_content(filepath: Path) -> tuple[Path, list[str], str]:
     try:
         with open(filepath, encoding="utf-8") as f:
@@ -127,6 +129,7 @@ def read_file_content(filepath: Path) -> tuple[Path, list[str], str]:
     except OSError as e:
         print(f"Warning: cannot read {filepath}: {e}", file=sys.stderr)
         return filepath, [], ""
+
 
 def find_multiline_blocks(text: str, min_lines: int = 3) -> dict[str, list[tuple[int, str]]]:
     lines = text.splitlines()
@@ -164,6 +167,7 @@ def find_multiline_blocks(text: str, min_lines: int = 3) -> dict[str, list[tuple
                 break
     return dict(blocks)
 
+
 def scan_file(filepath: Path, min_lines: int = 3) -> dict[str, list[tuple[Path, int, str]]]:
     if not is_text_file(filepath):
         return {}
@@ -175,6 +179,7 @@ def scan_file(filepath: Path, min_lines: int = 3) -> dict[str, list[tuple[Path, 
     for block, occurrences in blocks.items():
         result[block] = [(filepath, line_no, context) for line_no, context in occurrences]
     return result
+
 
 def collect_multiline_repeats(
     root: Path, min_lines: int = 3, num_workers: int | None = None
@@ -204,6 +209,7 @@ def collect_multiline_repeats(
             filtered[block] = occurrences
     return filtered
 
+
 def report(repeated: dict[str, list[tuple[Path, int, str]]]) -> None:
     if not repeated:
         print("No repeated multiline blocks found.")
@@ -216,6 +222,7 @@ def report(repeated: dict[str, list[tuple[Path, int, str]]]) -> None:
         for filepath, lineno, context in occurrences:
             print(f"  {filepath}:{lineno} -> {context[:100]}...")
         print("-" * 40)
+
 
 def save_to_file(repeated: dict[str, list[tuple[Path, int, str]]], output_file: Path) -> None:
     if not repeated:
@@ -236,6 +243,7 @@ def save_to_file(repeated: dict[str, list[tuple[Path, int, str]]], output_file: 
         print(f"Results saved to {output_file}")
     except OSError as e:
         print(f"Error writing to {output_file}: {e}", file=sys.stderr)
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(
@@ -283,6 +291,7 @@ def main() -> None:
     output_path = Path(args.output)
     save_to_file(repeated, output_path)
     report(repeated)
+
 
 if __name__ == "__main__":
     main()

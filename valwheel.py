@@ -17,9 +17,11 @@ WHEEL_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
+
 def is_valid2(path: Path) -> bool:
     filename = path.name
     return WHEEL_PATTERN.match(filename) is not None
+
 
 def is_valid(path: Path) -> bool:
     filename = path.name
@@ -45,6 +47,7 @@ def is_valid(path: Path) -> bool:
     except Exception:
         return False
 
+
 def main() -> None:
     print("to move wheels with invalid name rerun with -m")
     invalid_dir = Path("invalid_wheels")
@@ -56,6 +59,7 @@ def main() -> None:
                 invalid_dir.mkdir(exist_ok=True)
                 dest = invalid_dir / path.name
                 shutil.move(str(path), str(dest))
+
 
 if __name__ == "__main__":
     main()

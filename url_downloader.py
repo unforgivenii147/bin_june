@@ -21,6 +21,7 @@ except ImportError:
         print("Run: pip install pycurl requests")
         sys.exit(1)
 
+
 def download_file(url: str, filepath: Path, timeout: int = 120) -> bool:
     """Download a single file. Returns True if successful."""
     filepath.parent.mkdir(parents=True, exist_ok=True)
@@ -60,6 +61,7 @@ def download_file(url: str, filepath: Path, timeout: int = 120) -> bool:
     except Exception as e:
         print(f"❌ Failed {filepath.name}: {e}")
         return False
+
 
 def main():
     urls_file = Path("urls.txt")
@@ -128,6 +130,7 @@ def main():
     print(f"✅ Successfully downloaded : {removed_count} files")
     print(f"❌ Remaining in urls.txt   : {len(download_tasks) - removed_count} files")
     print("=" * 50)
+
 
 if __name__ == "__main__":
     main()

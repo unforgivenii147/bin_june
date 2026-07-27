@@ -21,6 +21,7 @@ from dh import TXT_EXT
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
+
 class SpinnerProgressReporter:
     def __init__(self, verbose: bool = True):
         self.verbose = verbose
@@ -37,6 +38,7 @@ class SpinnerProgressReporter:
             path_display = current_path[:60] + "..." if len(current_path) > 60 else current_path
             msg = f"\r{self.spinner[self.spinner_index]} Files: {file_count:8d} | {path_display}"
             print(msg, end="", flush=True)
+
 
 def memory_efficient_file_finder(
     root_dir: str,
@@ -86,6 +88,7 @@ def memory_efficient_file_finder(
     except Exception as e:
         logger.error(f"Unexpected error during traversal: {e}")
 
+
 def is_text_file(file_path: Path) -> bool:
     try:
         with open(file_path, "rb") as f:
@@ -108,6 +111,7 @@ def is_text_file(file_path: Path) -> bool:
     except (OSError, PermissionError):
         return None
 
+
 def check_file(file_path: Path) -> tuple[Path, str, bool, str]:
     try:
         extension = file_path.suffix.lower()
@@ -118,6 +122,7 @@ def check_file(file_path: Path) -> tuple[Path, str, bool, str]:
     except Exception as e:
         logger.error(f"Error processing {file_path}: {e}")
         return (file_path, file_path.suffix.lower(), None, "error")
+
 
 def validate_extensions(root_dir: str = "/", num_workers: int | None = None, verbose: bool = True) -> dict:
     if num_workers is None:
@@ -179,6 +184,7 @@ def validate_extensions(root_dir: str = "/", num_workers: int | None = None, ver
         "by_extension": by_extension,
     }
 
+
 def print_report(results: dict):
     print("\n" + "=" * 80)
     print("TEXT EXTENSION VALIDATION REPORT")
@@ -203,6 +209,7 @@ def print_report(results: dict):
     for ext, stats in sorted(results["by_extension"].items()):
         print(f"  {ext:12} - Text: {stats['text']:6}  Binary: {stats['binary']:6}  Errors: {stats['error']:6}")
     print("\n" + "=" * 80)
+
 
 if __name__ == "__main__":
     import sys

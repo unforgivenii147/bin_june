@@ -11,6 +11,7 @@ from github import Github, GithubException
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def setup_github_client():
     env_path = Path.home() / ".env"
     if not env_path.exists():
@@ -20,6 +21,7 @@ def setup_github_client():
     if not token:
         raise ValueError("GITHUB_TOKEN not found in ~/.env")
     return (Github(token), token)
+
 
 def get_repo_info(repo: git.Repo):
     try:
@@ -33,6 +35,7 @@ def get_repo_info(repo: git.Repo):
     except (AttributeError, IndexError):
         pass
     raise ValueError("Could not parse a valid GitHub remote URL from 'origin'.")
+
 
 def main():
     try:
@@ -96,6 +99,7 @@ def main():
         print("[-] Error: Current directory is not inside a valid Git repository.")
     except Exception as e:
         print(f"[-] An error occurred: {e}")
+
 
 if __name__ == "__main__":
     main()

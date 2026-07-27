@@ -27,10 +27,12 @@ NON_ENGLISH_PATTERN: Final[re.Pattern] = re.compile("[^\\x00-\\x7F]")
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
+
 def chunk_text(text: str, chunk_size: int = 32768) -> Iterator[str]:
     words = text.split()
     for i in range(0, len(words), chunk_size):
         yield " ".join(words[i : i + chunk_size])
+
 
 def translate_text(text: str) -> str:
     try:
@@ -39,6 +41,7 @@ def translate_text(text: str) -> str:
     except Exception as e:
         logger.error("Error translating text chunk: %s", e)
         return text
+
 
 def translate_file(filepath: Path) -> None:
     try:
@@ -59,12 +62,14 @@ def translate_file(filepath: Path) -> None:
     except Exception as e:
         logger.error("Error writing to %s: %s", new_filepath, e)
 
+
 def translate_folder(directory: Path) -> None:
     for p in directory.rglob("*"):
         if any(part.startswith(".") or part in SKIP_DIRS for part in p.parts):
             continue
         if p.is_file():
             translate_file(p)
+
 
 def main() -> None:
     choice = input("Translate a (f)ile or (d)irectory? ").lower().strip()
@@ -80,6 +85,7 @@ def main() -> None:
     else:
         logger.error("Invalid choice. Enter 'd' for directory and 'f' for file.")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

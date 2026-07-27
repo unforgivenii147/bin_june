@@ -19,6 +19,7 @@ env_path = Path.home() / ".env"
 load_dotenv(dotenv_path=env_path)
 SCOPES = ["https://www.googleapis.com/auth/drive.readonly"]
 
+
 class GoogleDriveSyncer:
     def __init__(self, client_id=None, client_secret=None, token_file: str = "token.pickle") -> None:
         self.client_id = client_id or os.getenv("GOOGLE_CLIENT_ID")
@@ -143,6 +144,7 @@ class GoogleDriveSyncer:
         else:
             print(f'Folder "{folder_name}" not found in root directory')
 
+
 def main() -> None:
     LOCAL_SYNC_PATH = "./google_drive_backup"
     try:
@@ -155,6 +157,7 @@ def main() -> None:
         print("GOOGLE_CLIENT_SECRET=your_client_secret")
     except Exception as e:
         print(f"Error: {e}")
+
 
 if __name__ == "__main__":
     main()

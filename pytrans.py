@@ -48,6 +48,7 @@ KNOWN_ENGLISH_TOKENS: Final[frozenset[str]] = frozenset(
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
+
 def should_skip(text: str) -> bool:
     clean = text.strip()
     if not clean or clean.startswith(SHEBANG_PREFIX):
@@ -58,6 +59,7 @@ def should_skip(text: str) -> bool:
         if len(clean.split()) <= 2 and len(clean) < 30:
             return True
     return bool(not any(c.isalpha() for c in clean))
+
 
 def is_non_english(text: str) -> bool:
     clean = text.strip()
@@ -70,6 +72,7 @@ def is_non_english(text: str) -> bool:
     except Exception:
         return False
 
+
 def translate_text(text: str) -> str:
     if not text.strip():
         return text
@@ -80,6 +83,7 @@ def translate_text(text: str) -> str:
     except Exception as exc:
         logger.warning("  [warn] translation failed: %s", exc)
         return text
+
 
 def get_node_positions(tree: ast.AST) -> tuple[set[tuple[int, int]], set[tuple[int, int]]]:
     print_positions = set()
@@ -98,6 +102,7 @@ def get_node_positions(tree: ast.AST) -> tuple[set[tuple[int, int]], set[tuple[i
             ds = node.body[0].value
             docstring_positions.add((ds.lineno, ds.col_offset))
     return (print_positions, docstring_positions)
+
 
 def process_file(path: Path) -> bool:
     try:
@@ -163,6 +168,7 @@ def process_file(path: Path) -> bool:
         logger.error("[error] %s: Generated invalid syntax, skipping: %s", path, e)
         return False
 
+
 def worker(path_str: str) -> None:
     path = Path(path_str)
     try:
@@ -170,6 +176,7 @@ def worker(path_str: str) -> None:
             logger.info("[updated] %s", path)
     except Exception as e:
         logger.error("[failed] %s: %s", path, e)
+
 
 def main() -> None:
     files = [str(p) for p in Path(".").rglob("*.py") if not any(part in SKIP_DIRS for part in p.parts)]
@@ -180,6 +187,7 @@ def main() -> None:
     with multiprocessing.Pool(processes=MAX_WORKERS) as pool:
         pool.map(worker, files)
     logger.info("Done.")
+
 
 if __name__ == "__main__":
     main()

@@ -23,6 +23,7 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
+
 class DocstringRemover(ast.NodeTransformer):
     def __init__(self):
         self.is_module = True
@@ -87,6 +88,7 @@ class DocstringRemover(ast.NodeTransformer):
             new_body = [ast.Pass()]
         return new_body
 
+
 def remove_docstrings_from_code(source_code: str) -> str | None:
     try:
         tree = ast.parse(source_code)
@@ -102,6 +104,7 @@ def remove_docstrings_from_code(source_code: str) -> str | None:
         logger.error(f"Error processing code: {e}")
         return None
 
+
 def validate_python_code(code: str) -> bool:
     try:
         ast.parse(code)
@@ -110,6 +113,7 @@ def validate_python_code(code: str) -> bool:
     except (SyntaxError, ValueError) as e:
         logger.error(f"Code validation failed: {e}")
         return False
+
 
 def process_file(file_path: Path) -> tuple[Path, bool, str | None]:
     try:
@@ -126,6 +130,7 @@ def process_file(file_path: Path) -> tuple[Path, bool, str | None]:
     except Exception as e:
         return (file_path, False, str(e))
 
+
 def find_python_files(paths: list[Path]) -> list[Path]:
     python_files = []
     for path in paths:
@@ -134,6 +139,7 @@ def find_python_files(paths: list[Path]) -> list[Path]:
         elif path.is_dir():
             python_files.extend(path.rglob("*.py"))
     return sorted(set(python_files))
+
 
 def main():
     if len(sys.argv) > 1:
@@ -169,6 +175,7 @@ def main():
     logger.info(f"  Total:      {len(python_files)}")
     logger.info(f"{'=' * 60}")
     sys.exit(0 if failed == 0 else 1)
+
 
 if __name__ == "__main__":
     main()

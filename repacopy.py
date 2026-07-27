@@ -17,6 +17,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
 class PackageRepacker:
     def __init__(self, output_base: str = "~/tmp/repack") -> None:
         self.output_base = Path(output_base).expanduser()
@@ -232,6 +233,7 @@ class PackageRepacker:
         print("Total packages copied: %s", total_copied)
         print(f"Package files saved to: {self.output_base}")
 
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Automatically find and copy Python packages to a wheel structure")
     parser.add_argument("--output", "-o", default="~/tmp/repack", help="Output directory (default: ~/tmp/repack)")
@@ -267,6 +269,7 @@ def main() -> int:
         logger.exception("Fatal error: %s", e)
         return 1
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

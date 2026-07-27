@@ -10,6 +10,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 import argparse
 from typing import List, Tuple
 
+
 def check_wheel_for_entry_points(wheel_path: Path) -> Tuple[Path, bool]:
     """
     Check if a wheel file contains entry_points.txt.
@@ -30,6 +31,7 @@ def check_wheel_for_entry_points(wheel_path: Path) -> Tuple[Path, bool]:
         print(f"Error reading {wheel_path.name}: {e}")
         return wheel_path, False
 
+
 def find_wheel_files(directory: Path = Path.cwd()) -> List[Path]:
     """
     Find all .whl files in the specified directory.
@@ -41,6 +43,7 @@ def find_wheel_files(directory: Path = Path.cwd()) -> List[Path]:
         List of Path objects for .whl files
     """
     return list(directory.glob("*.whl"))
+
 
 def remove_wheels_without_entry_points(
     directory: Path = Path.cwd(), max_workers: int = None, dry_run: bool = False
@@ -96,6 +99,7 @@ def remove_wheels_without_entry_points(
     else:
         print("\nNo files to remove.")
 
+
 def main():
     parser = argparse.ArgumentParser(description="Remove .whl wheel files without entry_points.txt")
     parser.add_argument(
@@ -119,6 +123,7 @@ def main():
         return
 
     remove_wheels_without_entry_points(directory=args.directory, max_workers=args.workers, dry_run=args.dry_run)
+
 
 if __name__ == "__main__":
     main()

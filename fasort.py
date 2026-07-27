@@ -2,6 +2,7 @@
 
 import sys
 
+
 def persian_sort_key(word):
     """
     Create a sort key for Persian words.
@@ -95,6 +96,7 @@ def persian_sort_key(word):
 
     return tuple(sort_key)
 
+
 def sort_persian_dict(file_path):
     """
     Sort a Persian dictionary file in place.
@@ -120,6 +122,7 @@ def sort_persian_dict(file_path):
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:

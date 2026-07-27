@@ -7,6 +7,7 @@ import sys
 from collections import deque
 from pathlib import Path
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -26,6 +27,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
             elif item.is_file() and (ext is None or item.suffix in ext):
                 files.append(item)
     return files
+
 
 def detect_version(file_path: Path) -> None:
     try:
@@ -73,6 +75,7 @@ def detect_version(file_path: Path) -> None:
         reasons.append("No strong indicators found; defaulting to Python 3.")
     if version == "2":
         print(f"{file_path.name} : {version}\nConfidence: {confidence}\nReason(s):")
+
 
 if __name__ == "__main__":
     args = sys.argv[1:]

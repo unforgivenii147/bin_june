@@ -24,6 +24,7 @@ PIP_LIST_PATH = Path("/sdcard/pip.txt")
 KNOWN_PACKAGES = set()
 STDLIB_MODULES = STDLIB
 
+
 def load_known_packages() -> None:
     global KNOWN_PACKAGES
     if PIP_LIST_PATH.exists():
@@ -34,6 +35,7 @@ def load_known_packages() -> None:
                 }
         except Exception:
             pass
+
 
 def is_python_file(path: Path | str) -> bool:
     path = Path(path)
@@ -52,6 +54,7 @@ def is_python_file(path: Path | str) -> bool:
         return False
     return path.suffix == ".py"
 
+
 def extract_imports_from_ast(code: str):
     imports = set()
     try:
@@ -64,6 +67,7 @@ def extract_imports_from_ast(code: str):
     except:
         pass
     return imports
+
 
 def extract_imports_regex(content: str):
     imports = set()
@@ -80,6 +84,7 @@ def extract_imports_regex(content: str):
                 imports.add(pkg)
     return imports
 
+
 def get_imports_from_file(file_path: Path):
     try:
         content = Path(file_path).read_text(encoding="utf-8", errors="ignore")
@@ -89,6 +94,7 @@ def get_imports_from_file(file_path: Path):
         return {imp for imp in imports if imp and imp != "from"}
     except:
         return set()
+
 
 def handle_compressed_file(archive_path: Path):
     all_imports = defaultdict(int)
@@ -165,6 +171,7 @@ def handle_compressed_file(archive_path: Path):
         pass
     return dict(all_imports)
 
+
 def walk_directory(root_path: str):
     all_imports = defaultdict(int)
     root = Path(root_path)
@@ -181,6 +188,7 @@ def walk_directory(root_path: str):
         except Exception:
             continue
     return dict(all_imports)
+
 
 def generate_requirements(imports_count) -> None:
     filtered = {
@@ -199,6 +207,7 @@ def generate_requirements(imports_count) -> None:
     for pkg, count in sorted_imports[:10]:
         print(f"  {pkg}: {count} files")
 
+
 def main() -> None:
     load_known_packages()
     print(f"Loaded {len(KNOWN_PACKAGES)} packages from pip.txt")
@@ -206,6 +215,7 @@ def main() -> None:
     imports_count = walk_directory(".")
     print(f"Found {sum(imports_count.values())} total imports across {len(imports_count)} packages")
     generate_requirements(imports_count)
+
 
 if __name__ == "__main__":
     main()

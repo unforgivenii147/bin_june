@@ -11,6 +11,7 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
+
 class ImportVisitor(ast.NodeVisitor):
     def __init__(self) -> None:
         self._nesting_level = 0
@@ -64,8 +65,10 @@ class ImportVisitor(ast.NodeVisitor):
             self.non_top_level_imports.append(node)
         self.generic_visit(node)
 
+
 def find_python_files(root: Path) -> Iterable[Path]:
     return root.rglob("*.py")
+
 
 def format_import(node: ast.stmt) -> str:
     if isinstance(node, ast.Import):
@@ -89,6 +92,7 @@ def format_import(node: ast.stmt) -> str:
         return f"from {module_str} import " + ", ".join(parts)
     return "<unknown import>"
 
+
 def inspect_file(path: Path):
     try:
         source = path.read_text(encoding="utf-8")
@@ -107,6 +111,7 @@ def inspect_file(path: Path):
         results.append((lineno, format_import(node)))
     return results
 
+
 def main() -> None:
     root = Path.cwd()
     any_found = False
@@ -120,6 +125,7 @@ def main() -> None:
             print(f"  line {lineno}: {stmt}")
     if not any_found:
         print("No non-top-level imports found.")
+
 
 if __name__ == "__main__":
     main()

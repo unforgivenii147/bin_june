@@ -8,6 +8,7 @@ from pathlib import Path
 
 CHUNK_SIZE = 1024 * 1024
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -28,6 +29,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
+
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -43,11 +45,14 @@ def is_binary(path: Path | str) -> bool:
     except Exception:
         return True
 
+
 def get_nobinary(path: str | Path) -> list[Path]:
     return [f for f in get_files(path) if not is_binary(f)]
 
+
 def unicode_unescape(text: str) -> str:
     return bytes(text, "utf-8").decode("unicode_escape")
+
 
 def process_file(path: Path) -> None:
     lines = path.read_text(encoding="utf-8").splitlines()
@@ -57,6 +62,7 @@ def process_file(path: Path) -> None:
         decoded = unicode_unescape(nl)
         print(nl)
         print(decoded)
+
 
 def main() -> None:
     args = sys.argv[1:]
@@ -73,6 +79,7 @@ def main() -> None:
         files = get_nobinary(cwd)
     for f in files:
         process_file(f)
+
 
 if __name__ == "__main__":
     main()

@@ -17,6 +17,7 @@ from fontTools.ttLib import TTFont
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def convert_otf_to_ttf(otf_path: Path) -> dict:
     ttf_path = otf_path.with_suffix(".ttf")
     result = {"otf": str(otf_path), "ttf": str(ttf_path), "status": "unknown"}
@@ -61,12 +62,14 @@ def convert_otf_to_ttf(otf_path: Path) -> dict:
             ttf_path.unlink()
     return result
 
+
 def find_otf_files(root_dir: Path | None = None, pattern: str = "**/*.otf") -> list[Path]:
     if root_dir is None:
         root_dir = Path.cwd()
     else:
         root_dir = Path(root_dir)
     return list(root_dir.glob(pattern))
+
 
 def process_file(args: tuple) -> dict:
     (otf_path,) = args
@@ -82,6 +85,7 @@ def process_file(args: tuple) -> dict:
         error_msg = result.get("error", "Unknown error")
         print(f"  ✗ Failed: {result['otf']} - {error_msg}")
     return result
+
 
 def main():
     root_dir = Path.cwd()
@@ -127,6 +131,7 @@ def main():
                 error = result.get("error", "Unknown error")
                 print(f"  ✗ {result['otf']}: {error}")
     return summary
+
 
 if __name__ == "__main__":
     try:

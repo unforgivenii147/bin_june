@@ -29,6 +29,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                     files.append(item)
     return files"""
 
+
 def has_get_files(file_path: Path) -> bool:
     try:
         content = file_path.read_text(encoding="utf-8")
@@ -36,6 +37,7 @@ def has_get_files(file_path: Path) -> bool:
         return any(isinstance(node, ast.FunctionDef) and node.name == "get_files" for node in ast.walk(tree))
     except Exception:
         return False
+
 
 def process_file(file_path: Path) -> tuple[Path, bool, str]:
     try:
@@ -97,6 +99,7 @@ def process_file(file_path: Path) -> tuple[Path, bool, str]:
     except Exception as e:
         return file_path, False, f"Write error: {e}"
 
+
 def get_python_files(root: Path) -> list[Path]:
     skip_dirs = {".git", "__pycache__", ".venv", "venv", "node_modules"}
     queue = deque([root])
@@ -118,6 +121,7 @@ def get_python_files(root: Path) -> list[Path]:
                 files.append(item)
 
     return files
+
 
 def main():
     root = Path.cwd()
@@ -153,6 +157,7 @@ def main():
                 failed += 1
 
     print(f"\nSummary: {updated} updated, {failed} failed")
+
 
 if __name__ == "__main__":
     main()

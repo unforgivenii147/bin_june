@@ -17,6 +17,7 @@ from subliminal.video import scan_video
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
+
 def download_subtitles_advanced(mkv_path, output_dir=None):
     mkv_path = Path(mkv_path)
     if not mkv_path.exists():
@@ -48,6 +49,7 @@ def download_subtitles_advanced(mkv_path, output_dir=None):
     except Exception as e:
         logger.error(f"Error: {e}")
         return False
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

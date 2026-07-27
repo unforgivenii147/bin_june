@@ -15,11 +15,14 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 STATIC_DIR = "/sdcard/_static"
 
+
 def get_file_extension(url):
     return os.path.splitext(url)[1].lower()
 
+
 def is_font_url(url) -> bool:
     return any(url.lower().endswith(ext) for ext in extensions)
+
 
 def find_local_font(font_filename: str) -> str | None:
     if not Path(STATIC_DIR).is_dir():
@@ -28,6 +31,7 @@ def find_local_font(font_filename: str) -> str | None:
         if font_filename in files:
             return os.path.join(root, font_filename)
     return None
+
 
 def get_local_font_base64(local_path: str) -> str | None:
     try:
@@ -54,6 +58,7 @@ def get_local_font_base64(local_path: str) -> str | None:
     except Exception as e:
         print(f"An error occurred reading local font {local_path}: {e}")
         return None
+
 
 def get_remote_font_base64(url) -> str | None:
     try:
@@ -84,6 +89,7 @@ def get_remote_font_base64(url) -> str | None:
         print(f"An unexpected error occurred for remote font {url}: {e}")
         return None
 
+
 def url_to_base64(url, base_css_path: Path) -> str | None:
     cleaned_url = url.strip("'\"")
     font_filename = Path(cleaned_url).name
@@ -100,6 +106,7 @@ def url_to_base64(url, base_css_path: Path) -> str | None:
             full_url = f"file:///{full_url}"
     print(f"Attempting to fetch remote font: {full_url}")
     return get_remote_font_base64(full_url)
+
 
 def make_css_standalone(input_css_path: Path, output_css_path: Path) -> None:
     input_css_path = Path(input_css_path).resolve()
@@ -182,6 +189,7 @@ def make_css_standalone(input_css_path: Path, output_css_path: Path) -> None:
         print(f"Standalone CSS file created at: {output_css_path}")
     except Exception as e:
         print(f"Error writing output CSS file {output_css_path}: {e}")
+
 
 if __name__ == "__main__":
     infile = Path(sys.argv[1])

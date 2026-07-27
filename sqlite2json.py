@@ -9,10 +9,12 @@ import sys
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 
+
 def serialize_value(v):
     if isinstance(v, (bytes, bytearray)):
         return {"__blob_base64": base64.b64encode(v).decode("ascii")}
     return v
+
 
 def row_to_dict(row):
     try:
@@ -30,6 +32,7 @@ def row_to_dict(row):
                 except:
                     result[k] = {"__decode_error": "Could not process value"}
         return result
+
 
 def fetch_table_data(args):
     db_path, table_name = args
@@ -93,6 +96,7 @@ def fetch_table_data(args):
     except Exception as e:
         return (table_name, [], f"Error processing table '{table_name}': {e!s}")
 
+
 def main():
     if len(sys.argv) < 2:
         print("Usage: python convert_sqlite_to_json.py <sqlite-file>")
@@ -135,6 +139,7 @@ def main():
         print("\n⚠ Warnings:")
         for warning in warnings:
             print(f"  - {warning}")
+
 
 if __name__ == "__main__":
     main()

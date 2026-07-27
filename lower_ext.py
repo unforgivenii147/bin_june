@@ -13,6 +13,7 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def find_uppercase_extensions(directory: Path, autofix: bool = False):
     uppercase_files = []
     for file_path in directory.rglob("*"):
@@ -31,6 +32,7 @@ def find_uppercase_extensions(directory: Path, autofix: bool = False):
                     except Exception as e:
                         print(f"✗ Failed to rename {file_path.name}: {e}", file=sys.stderr)
     return uppercase_files
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(
@@ -53,6 +55,7 @@ def main() -> int:
     else:
         print("\n✓ No files with uppercase extensions found")
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

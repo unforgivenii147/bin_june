@@ -23,6 +23,7 @@ DATA_URI_PATTERN = re.compile(
     r"data:(?P<mime>[^;,]*)(?P<params>(?:;[^;,]+=[^;,]+)*?);base64,\s*(?P<data>[A-Za-z0-9+/=]+)"
 )
 
+
 def get_extension(mime: str) -> str:
     if mime:
         if mime in MIME2EXT:
@@ -34,6 +35,7 @@ def get_extension(mime: str) -> str:
         if len(parts) == 2 and parts[1]:
             return f".{parts[1]}"
     return ".bin"
+
 
 def process_file(file_path: Path, assets_dir: Path, processed: dict) -> None:
     try:
@@ -71,6 +73,7 @@ def process_file(file_path: Path, assets_dir: Path, processed: dict) -> None:
         file_path.write_text(new_content, encoding="utf-8")
         print(f"✎ Updated {file_path}")
 
+
 def main() -> None:
     mimetypes.init()
     assets_dir = Path("assets")
@@ -81,6 +84,7 @@ def main() -> None:
         if file_path.is_file() and file_path.suffix.lower() in (".css", ".js", ".html"):
             process_file(file_path, assets_dir, processed)
     print("Done.")
+
 
 if __name__ == "__main__":
     main()

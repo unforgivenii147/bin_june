@@ -17,6 +17,7 @@ try:
 except ImportError:
     PHOTO_SUPPORT = False
 
+
 class DirectoryBuilder:
     TREE_CHARS = {"├──": "├", "└──": "└", "│": "│", " ": " "}
 
@@ -138,6 +139,7 @@ Also install tesseract: https://github.com/UB-Mannheim/tesseract/wiki""")
             indent = "  " * depth
             print(f"{indent}{marker} {path.name}")
 
+
 def main():
     parser = argparse.ArgumentParser(description="Build directory structure from tree.txt or photo")
     parser.add_argument(
@@ -174,6 +176,7 @@ def main():
     else:
         builder.create_structure(args.output, args.workers)
         print(f"\n✓ Directory structure created in: {args.output}")
+
 
 if __name__ == "__main__":
     main()

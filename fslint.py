@@ -48,10 +48,12 @@ CYAN = "\x1b[36m"
 GREEN = "\x1b[32m"
 GREY = "\x1b[90m"
 
+
 def _c(color: str, text: str) -> str:
     if sys.stdout.isatty():
         return f"{color}{text}{RESET}"
     return text
+
 
 def header(title: str) -> None:
     width = 70
@@ -59,15 +61,19 @@ def header(title: str) -> None:
     print(_c(BOLD + CYAN, f"  {title}"))
     print(_c(BOLD + CYAN, "━" * width))
 
+
 def found(path: str | Path, note: str = "") -> None:
     note_str = f"  {_c(GREY, note)}" if note else ""
     print(f"  {_c(YELLOW, str(path))}{note_str}")
 
+
 def ok(msg: str) -> None:
     print(_c(GREEN, f"  ✔  {msg}"))
 
+
 def warn(msg: str) -> None:
     print(_c(RED, f"  ✘  {msg}"), file=sys.stderr)
+
 
 def walk(
     roots: list[Path], *, follow_symlinks: bool = False, yield_dirs: bool = True, yield_files: bool = True
@@ -82,10 +88,13 @@ def walk(
                 for fn in filenames:
                     yield (dp / fn)
 
+
 def _walk_err(exc: OSError) -> None:
     warn(f"walk error: {exc}")
 
+
 CHUNK = 65536
+
 
 def _file_hash(path: Path) -> str | None:
     h = hashlib.sha256()
@@ -96,6 +105,7 @@ def _file_hash(path: Path) -> str | None:
         return h.hexdigest()
     except OSError:
         return None
+
 
 def findup(roots: list[Path]) -> int:
     header("findup — Duplicate Files")
@@ -128,6 +138,7 @@ def findup(roots: list[Path]) -> int:
         print(f"\n  {_c(RED, f'{total} redundant copy/copies found.')}")
     return total
 
+
 _NL_RULES: list[tuple[str, re.Pattern[str]]] = [
     ("leading whitespace", re.compile("^\\s")),
     ("trailing whitespace", re.compile("\\s$")),
@@ -138,6 +149,7 @@ _NL_RULES: list[tuple[str, re.Pattern[str]]] = [
     ("starts with hyphen", re.compile("^-")),
     ("trailing dot", re.compile("\\.$")),
 ]
+
 
 def findnl(roots: list[Path]) -> int:
     header("findnl — Name Lint")
@@ -153,6 +165,7 @@ def findnl(roots: list[Path]) -> int:
     if total == 0:
         ok("All filenames look clean.")
     return total
+
 
 def findu8(roots: list[Path]) -> int:
     header("findu8 — Non-UTF-8 Filenames")
@@ -170,6 +183,7 @@ def findu8(roots: list[Path]) -> int:
         ok("All filenames are valid UTF-8.")
     return total
 
+
 def _symlink_is_cyclic(path: Path, visited: set[Path] | None = None) -> bool:
     if visited is None:
         visited = set()
@@ -183,6 +197,7 @@ def _symlink_is_cyclic(path: Path, visited: set[Path] | None = None) -> bool:
     if real.is_symlink():
         return _symlink_is_cyclic(real, visited)
     return False
+
 
 def findbl(roots: list[Path]) -> int:
     header("findbl — Bad Symlinks")
@@ -202,6 +217,7 @@ def findbl(roots: list[Path]) -> int:
     if total == 0:
         ok("No bad symlinks found.")
     return total
+
 
 def findem(roots: list[Path]) -> int:
     header("findem — Empty Directories")
@@ -226,11 +242,14 @@ def findem(roots: list[Path]) -> int:
         ok("No empty directories found.")
     return total
 
+
 def _valid_uids() -> set[int]:
     return {entry.pw_uid for entry in pwd.getpwall()}
 
+
 def _valid_gids() -> set[int]:
     return {entry.gr_gid for entry in grp.getgrall()}
+
 
 def findid(roots: list[Path]) -> int:
     header("findid — Bad UID/GID Ownership")
@@ -254,7 +273,9 @@ def findid(roots: list[Path]) -> int:
         ok("All files have valid UID/GID.")
     return total
 
+
 ELF_MAGIC = b"\x7fELF"
+
 
 def _is_elf(path: Path) -> bool:
     try:
@@ -262,6 +283,7 @@ def _is_elf(path: Path) -> bool:
             return fh.read(4) == ELF_MAGIC
     except OSError:
         return False
+
 
 def _has_debug_symbols(path: Path) -> bool:
     try:
@@ -277,6 +299,7 @@ def _has_debug_symbols(path: Path) -> bool:
         return b".symtab" in data or b".debug_info" in data
     except OSError:
         return False
+
 
 def findns(roots: list[Path]) -> int:
     header("findns — Non-Stripped Binaries")
@@ -296,6 +319,7 @@ def findns(roots: list[Path]) -> int:
     if total == 0:
         ok("No non-stripped binaries found.")
     return total
+
 
 def findsn(_roots: list[Path] | None = None) -> int:
     header("findsn — Shadowed PATH Executables")
@@ -325,6 +349,7 @@ def findsn(_roots: list[Path] | None = None) -> int:
         ok("No shadowed PATH executables found.")
     return total
 
+
 _TF_PATTERNS: list[re.Pattern[str]] = [
     re.compile("~$"),
     re.compile("^#.*#$"),
@@ -351,6 +376,7 @@ _TF_PATTERNS: list[re.Pattern[str]] = [
     re.compile("\\.a$"),
 ]
 
+
 def findtf(roots: list[Path]) -> int:
     header("findtf — Temporary / Junk Files")
     total = 0
@@ -364,6 +390,7 @@ def findtf(roots: list[Path]) -> int:
     if total == 0:
         ok("No temporary files found.")
     return total
+
 
 def findwd(roots: list[Path]) -> int:
     header("findwd — World-Writable Items")
@@ -382,7 +409,9 @@ def findwd(roots: list[Path]) -> int:
         ok("No world-writable items found.")
     return total
 
+
 _RS_RE = re.compile("  |^\\s|\\s$|\\t")
+
 
 def findrs(roots: list[Path]) -> int:
     header("findrs — Redundant Whitespace in Filenames")
@@ -395,6 +424,7 @@ def findrs(roots: list[Path]) -> int:
     if total == 0:
         ok("No redundant whitespace in filenames found.")
     return total
+
 
 ALL_CHECKS: dict[str, tuple[str, callable]] = {
     "findup": ("Duplicate files", findup),
@@ -409,6 +439,7 @@ ALL_CHECKS: dict[str, tuple[str, callable]] = {
     "findwd": ("World-writable items", findwd),
     "findrs": ("Redundant whitespace names", findrs),
 }
+
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
@@ -431,6 +462,7 @@ def build_parser() -> argparse.ArgumentParser:
         group.add_argument(f"--{flag}", action="store_true", default=False, help=desc)
     return p
 
+
 def print_summary(results: dict[str, int]) -> None:
     width = 42
     print("\n" + _c(BOLD, "┌" + "─" * width + "┐"))
@@ -442,6 +474,7 @@ def print_summary(results: dict[str, int]) -> None:
         count_str = _c(color, str(count).rjust(6))
         print(f"│ {_c(BOLD, flag):<18} {desc:<22} │ {count_str} │")
     print(_c(BOLD, "└" + "─" * 28 + "┴" + "─" * (width - 29) + "┘"))
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
@@ -484,6 +517,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.summary or len(requested) > 1:
         print_summary(results)
     return exit_code
+
 
 if __name__ == "__main__":
     sys.exit(main())

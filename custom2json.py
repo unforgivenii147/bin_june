@@ -8,8 +8,10 @@ import sys
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def bytes_to_hex(data: bytes) -> str:
     return data.hex().upper()
+
 
 def parse_magic_line(line: str):
     match = re.match(r"^(?:(\d+?)>)?(\d+)=", line)
@@ -28,6 +30,7 @@ def parse_magic_line(line: str):
         "value_bytes": value_bytes,
         "hex": bytes_to_hex(value_bytes),
     }
+
 
 def parse_magic_file(filepath: str, encoding="latin-1"):
     result = {}
@@ -63,6 +66,7 @@ def parse_magic_file(filepath: str, encoding="latin-1"):
             print(f"Warning: Failed to parse rule: {line!r}", file=sys.stderr)
     return result
 
+
 def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: python magic_to_json.py <magic_file> [output.json]", file=sys.stderr)
@@ -77,6 +81,7 @@ def main() -> None:
         print(f"✅ Written to {output_file}")
     else:
         print(json_output)
+
 
 if __name__ == "__main__":
     main()

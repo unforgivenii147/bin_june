@@ -65,6 +65,7 @@ COLORS = {
 
 RESET = "\x1b[0m"
 
+
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -84,6 +85,7 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
+
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -108,11 +110,14 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
+
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
 
+
 video = sys.argv[1]
 txtfile = Path(video).with_suffix(".txt")
+
 
 def process_frame(frame_id: int, frame) -> None:
     frame = cv2.resize(frame, None, fx=1.5, fy=1.5, interpolation=cv2.INTER_CUBIC)
@@ -125,6 +130,7 @@ def process_frame(frame_id: int, frame) -> None:
     else:
         cprint(f"frame {frame_id} --> no text", "blue")
 
+
 def main() -> None:
     cap = cv2.VideoCapture(video)
     frame_id = 0
@@ -134,6 +140,7 @@ def main() -> None:
             break
         process_frame(frame_id, frame)
         frame_id += 1
+
 
 if __name__ == "__main__":
     main()

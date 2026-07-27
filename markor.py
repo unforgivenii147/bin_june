@@ -11,6 +11,7 @@ from typing import Any
 
 import markdown
 
+
 class GUIFramework:
     def __init__(self) -> None:
         self.session_id = None
@@ -64,6 +65,7 @@ class GUIFramework:
             msg += f" [{action}]"
         print(msg)
 
+
 class DocumentFormat(ABC):
     @abstractmethod
     def get_syntax_highlight_rules(self) -> dict[str, str]:
@@ -76,6 +78,7 @@ class DocumentFormat(ABC):
     @abstractmethod
     def get_format_actions(self) -> list[str]:
         pass
+
 
 class MarkdownFormat(DocumentFormat):
     def get_syntax_highlight_rules(self) -> dict[str, str]:
@@ -110,6 +113,7 @@ class MarkdownFormat(DocumentFormat):
             "Insert List",
             "Insert Table",
         ]
+
 
 class TodoFormat(DocumentFormat):
     def get_syntax_highlight_rules(self) -> dict[str, str]:
@@ -150,6 +154,7 @@ class TodoFormat(DocumentFormat):
             "Add Project Tag",
             "Add Context Tag",
         ]
+
 
 class Document:
     def __init__(self, file_path: str, format_type: str = "markdown") -> None:
@@ -221,6 +226,7 @@ class Document:
             "lines": self.get_line_count(),
             "last_modified": self.last_modified.isoformat() if self.last_modified else None,
         }
+
 
 class FileManager:
     def __init__(self, root_path: str | None = None) -> None:
@@ -301,6 +307,7 @@ class FileManager:
         docs = self.list_documents(recursive=True)
         docs.sort(key=operator.itemgetter("modified"), reverse=True)
         return docs[:limit]
+
 
 class TextEditor:
     def __init__(self) -> None:
@@ -557,6 +564,7 @@ class TextEditor:
         choice = self.gui.show_menu("Settings", settings_menu)
         if choice >= 0 and choice < 5:
             self.gui.show_toast(f"Setting {choice}: Not yet implemented")
+
 
 if __name__ == "__main__":
     editor = TextEditor()

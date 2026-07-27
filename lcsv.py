@@ -16,6 +16,7 @@ binf = Path("/sdcard/bin").open(encoding="utf-8")
 EXCLUDED_EXTENSIONS = [line.strip() for line in binf]
 binf.close()
 
+
 def process_file(filepath):
     Path(path)
     counter = Counter()
@@ -28,6 +29,7 @@ def process_file(filepath):
     except Exception as e:
         print(f"Error reading {filepath}: {e}")
     return counter
+
 
 def collect_files_by_extension():
     ext_map = {}
@@ -42,6 +44,7 @@ def collect_files_by_extension():
             if not ext:
                 ext_map.setdefault(ext, []).append(full_path)
     return ext_map
+
 
 def collect_lines_for_extension(ext, files) -> None:
     if not files:
@@ -60,6 +63,7 @@ def collect_lines_for_extension(ext, files) -> None:
                 writer.writerow([count, line])
     print(f"Saved results to {output_file}")
 
+
 def main() -> None:
     ext_map = collect_files_by_extension()
     if not ext_map:
@@ -67,6 +71,7 @@ def main() -> None:
         return
     for ext, files in ext_map.items():
         collect_lines_for_extension(ext, files)
+
 
 if __name__ == "__main__":
     main()

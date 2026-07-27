@@ -9,6 +9,7 @@ from pathlib import Path
 BROTLI_QUALITY = 11
 CHUNK_SIZE = 1024 * 64
 
+
 def compress_stream(input_stream, output_file_path: Path):
     compressor = brotli.Compressor(quality=BROTLI_QUALITY)
 
@@ -26,6 +27,7 @@ def compress_stream(input_stream, output_file_path: Path):
     except Exception as e:
         print(f"❌ Error compressing {output_file_path.name}: {e}")
 
+
 def process_directory(dir_path: Path):
     output_br = dir_path.with_name(f"{dir_path.name}.tar.br")
 
@@ -40,6 +42,7 @@ def process_directory(dir_path: Path):
     except Exception as e:
         print(f"❌ Failed to archive directory {dir_path.name}: {e}")
 
+
 def process_file(file_path: Path):
     output_br = file_path.with_name(f"{file_path.name}.br")
     try:
@@ -47,6 +50,7 @@ def process_file(file_path: Path):
             compress_stream(f_in, output_br)
     except Exception as e:
         print(f"❌ Failed to open file {file_path.name}: {e}")
+
 
 def main():
     current_dir = Path(".")
@@ -69,6 +73,7 @@ def main():
             executor.submit(process_file, file)
 
     print("🎉 All operations completed successfully!")
+
 
 if __name__ == "__main__":
     main()

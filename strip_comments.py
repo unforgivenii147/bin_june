@@ -26,6 +26,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from collections.abc import Callable
 
+
 @dataclass
 class FileResult:
     path: Path
@@ -45,6 +46,7 @@ class FileResult:
     def bytes_saved(self) -> int:
         return self.original_bytes - self.stripped_bytes
 
+
 RESET = "\x1b[0m"
 BOLD = "\x1b[1m"
 DIM = "\x1b[2m"
@@ -56,8 +58,10 @@ BLUE = "\x1b[34m"
 MAGENTA = "\x1b[35m"
 WHITE = "\x1b[97m"
 
+
 def _c(text: str, *codes: str) -> str:
     return "".join(codes) + str(text) + RESET
+
 
 def strip_rust(source: str) -> str:
     result: list[str] = []
@@ -139,11 +143,13 @@ def strip_rust(source: str) -> str:
         i += 1
     return _collapse_blank_lines("".join(result))
 
+
 def strip_toml(source: str) -> str:
     output: list[str] = []
     for raw_line in source.splitlines(keepends=True):
         output.append(_strip_hash_comment_from_line(raw_line))
     return _collapse_blank_lines("".join(output))
+
 
 def _strip_hash_comment_from_line(line: str) -> str:
     result: list[str] = []
@@ -166,6 +172,7 @@ def _strip_hash_comment_from_line(line: str) -> str:
             result.append(ch)
         i += 1
     return "".join(result)
+
 
 def strip_js(source: str) -> str:
     result: list[str] = []
@@ -226,7 +233,9 @@ def strip_js(source: str) -> str:
         i += 1
     return _collapse_blank_lines("".join(result))
 
+
 _PRESERVE_COMMENT = re.compile("^\\s*#\\s*(type|fmt|noqa|pyright|pylint|mypy|ruff)\\s*[:\\s]")
+
 
 def strip_python(source: str) -> str:
     try:
@@ -297,6 +306,7 @@ def strip_python(source: str) -> str:
     stripped = "".join(result)
     return _collapse_blank_lines(stripped)
 
+
 def strip_shell(source: str) -> str:
     output: list[str] = []
     for idx, raw_line in enumerate(source.splitlines(keepends=True)):
@@ -305,6 +315,7 @@ def strip_shell(source: str) -> str:
             continue
         output.append(_strip_shell_comment(raw_line))
     return _collapse_blank_lines("".join(output))
+
 
 def _strip_shell_comment(line: str) -> str:
     result: list[str] = []
@@ -331,6 +342,7 @@ def _strip_shell_comment(line: str) -> str:
             result.append(ch)
         i += 1
     return "".join(result)
+
 
 def strip_lua(source: str) -> str:
     result: list[str] = []
@@ -389,9 +401,11 @@ def strip_lua(source: str) -> str:
         i += 1
     return _collapse_blank_lines("".join(result))
 
+
 def _collapse_blank_lines(text: str, max_consecutive: int = 1) -> str:
     pattern = re.compile("\\n{" + str(max_consecutive + 2) + ",}")
     return pattern.sub("\n" * (max_consecutive + 1), text)
+
 
 _STRIPPER_MAP: dict[str, Callable[[str], str]] = {
     ".rs": strip_rust,
@@ -407,6 +421,7 @@ _STRIPPER_MAP: dict[str, Callable[[str], str]] = {
     ".bash": strip_shell,
     ".lua": strip_lua,
 }
+
 
 def process_file(args: tuple[Path, Path, set[str]]) -> FileResult:
     file_path, cwd, active_exts = args
@@ -444,6 +459,7 @@ def process_file(args: tuple[Path, Path, set[str]]) -> FileResult:
             error=str(exc),
         )
 
+
 _EXT_ICON = {
     ".rs": "🦀",
     ".toml": "⚙️ ",
@@ -459,6 +475,7 @@ _EXT_ICON = {
     ".lua": "🌙",
 }
 
+
 def _human_bytes(n: int) -> str:
     for unit in ("B", "KB", "MB"):
         if abs(n) < 1024:
@@ -466,11 +483,13 @@ def _human_bytes(n: int) -> str:
         n /= 1024
     return f"{n:.1f} GB"
 
+
 def print_header(active_exts: set[str]) -> None:
     exts_str = "  ".join(sorted(active_exts))
     print()
     print(_c("  strip_comments ", BOLD, CYAN) + _c(f"targeting: {exts_str}", DIM))
     print(_c("  " + "─" * 60, DIM))
+
 
 def print_file_result(r: FileResult) -> None:
     icon = _EXT_ICON.get(Path(r.rel).suffix.lower(), "📄")
@@ -490,6 +509,7 @@ def print_file_result(r: FileResult) -> None:
         status = _c(" clean  ", DIM)
         print(f"  {icon}  {_c(r.rel, DIM)}  {status}")
 
+
 def print_summary(results: list[FileResult], elapsed: float) -> None:
     total = len(results)
     changed = sum((1 for r in results if r.changed))
@@ -506,6 +526,7 @@ def print_summary(results: list[FileResult], elapsed: float) -> None:
     )
     print()
 
+
 _FLAG_EXTS: dict[str, list[str]] = {
     "rs": [".rs"],
     "toml": [".toml"],
@@ -514,6 +535,7 @@ _FLAG_EXTS: dict[str, list[str]] = {
     "sh": [".sh", ".bash"],
     "lua": [".lua"],
 }
+
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
@@ -527,6 +549,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--all", action="store_true", help="Enable all language strippers")
     p.add_argument("--workers", type=int, default=None, help="Number of parallel workers (default: CPU count)")
     return p
+
 
 def collect_files(dirs: list[str], active_exts: set[str]) -> list[Path]:
     files: list[Path] = []
@@ -542,6 +565,7 @@ def collect_files(dirs: list[str], active_exts: set[str]) -> list[Path]:
                     seen.add(fp)
                     files.append(fp)
     return sorted(files)
+
 
 def main() -> int:
     import time
@@ -577,6 +601,7 @@ def main() -> int:
     results.sort(key=lambda r: r.rel)
     print_summary(results, elapsed)
     return 1 if any((r.error for r in results)) else 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

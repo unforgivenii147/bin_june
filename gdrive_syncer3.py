@@ -16,6 +16,7 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 SCOPES = ["https://www.googleapis.com/auth/drive.readonly"]
 
+
 class GoogleDriveSyncer:
     def __init__(self, client_id=None, client_secret=None, token_file: str = "token.pickle") -> None:
         self.client_id = client_id or os.getenv("GOOGLE_CLIENT_ID")
@@ -170,6 +171,7 @@ class GoogleDriveSyncer:
         self.sync_folder("root", local_base_path, "My Drive")
         print("\n✅ Sync completed!")
 
+
 def install_minimal_packages() -> None:
     import subprocess
     import sys
@@ -181,6 +183,7 @@ def install_minimal_packages() -> None:
             print(f"✓ Installed {package}")
         except:
             print(f"✗ Failed to install {package}")
+
 
 def main() -> None:
     from pathlib import Path
@@ -200,6 +203,7 @@ def main() -> None:
         print("1. Ensure your ~/.env file has correct credentials")
         print("2. Check internet connection")
         print("3. On Android, ensure Termux has storage permission: termux-setup-storage")
+
 
 if __name__ == "__main__":
     main()

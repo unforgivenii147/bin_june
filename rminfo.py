@@ -22,6 +22,7 @@ PYTHON_SHEBANG_PATTERNS = [
     re.compile(r"^#!.*python3", re.IGNORECASE),
 ]
 
+
 def is_python_file(file_path):
     """Check if a file is a Python file (by extension or shebang)."""
 
@@ -39,6 +40,7 @@ def is_python_file(file_path):
             pass
 
     return False
+
 
 def remove_info_block(file_path):
     """Remove the info block from a Python file."""
@@ -61,6 +63,7 @@ def remove_info_block(file_path):
     except Exception as e:
         print(f"Error processing {file_path}: {e}", file=sys.stderr)
         return False
+
 
 def main():
     """Main function to process all Python files recursively."""
@@ -88,6 +91,7 @@ def main():
     print("\nSummary:")
     print(f"  Python files checked: {files_checked}")
     print(f"  Info blocks removed: {removed_count}")
+
 
 if __name__ == "__main__":
     main()

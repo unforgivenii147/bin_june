@@ -6,6 +6,7 @@ import sys
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def runcmd(
     cmd: list[str],
     run_silently: bool = False,
@@ -56,6 +57,7 @@ def runcmd(
             print(msg, file=sys_stderr)
         return 1, "", msg
 
+
 def get_installed_packages() -> list[str]:
     try:
         _ret, txt, _err = runcmd(["dpkg-query", "-W", "-f='${Package}\t${Status}\t${Version}\n'"], show_output=True)
@@ -63,6 +65,7 @@ def get_installed_packages() -> list[str]:
     except:
         print("Error listing installed packages")
         sys.exit(1)
+
 
 def check_package_health(package_name: str):
     try:
@@ -77,12 +80,14 @@ def check_package_health(package_name: str):
     except:
         return False, "Error checking package"
 
+
 def check_for_updates() -> str:
     try:
         _res, txt, _err = runcmd(["apt-get", "-s", "upgrade"], show_output=True)
         return txt
     except:
         return "Error checking for updates"
+
 
 def main() -> None:
     print("=== Installed Packages Sanity Check ===")
@@ -110,6 +115,7 @@ def main() -> None:
         print("All packages are properly installed.")
     else:
         print("Some packages may need attention.")
+
 
 if __name__ == "__main__":
     main()

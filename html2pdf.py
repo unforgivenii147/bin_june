@@ -7,6 +7,7 @@ from pathlib import Path
 
 from weasyprint import CSS, HTML
 
+
 def html2pdf(
     pdf_file_path, html_file_path=None, css_file_path: str = "/sdcard/_static/css/markdown.css", base_url=None
 ) -> None:
@@ -18,6 +19,7 @@ def html2pdf(
     if css_file_path:
         css.append(CSS(filename=css_file_path))
     html.write_pdf(pdf_file_path, stylesheets=css)
+
 
 if __name__ == "__main__":
     html_file = Path(sys.argv[1])

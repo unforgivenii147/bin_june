@@ -25,6 +25,7 @@ import zipfile
 from dataclasses import dataclass, field
 from pathlib import Path
 
+
 @dataclass
 class UnusedImport:
     lineno: int
@@ -32,16 +33,19 @@ class UnusedImport:
     statement: str
     names: list[str]
 
+
 @dataclass
 class FileReport:
     path: str
     unused: list[UnusedImport] = field(default_factory=list)
     error: str | None = None
 
+
 def _dotted(name: str, asname: str | None) -> tuple[str, str]:
     bound = asname if asname else name.split(".")[0]
     full = asname if asname else name
     return bound, full
+
 
 def _collect_names(node: ast.AST) -> set[str]:
     names: set[str] = set()
@@ -56,6 +60,7 @@ def _collect_names(node: ast.AST) -> set[str]:
                 names.add(root.id)
     return names
 
+
 def _collect_string_uses(tree: ast.AST) -> set[str]:
     tokens: set[str] = set()
     for node in ast.walk(tree):
@@ -65,6 +70,7 @@ def _collect_string_uses(tree: ast.AST) -> set[str]:
                 if tok and tok.isidentifier():
                     tokens.add(tok)
     return tokens
+
 
 def _collect_all_names(tree: ast.AST) -> set[str]:
     for node in ast.walk(tree):
@@ -78,6 +84,7 @@ def _collect_all_names(tree: ast.AST) -> set[str]:
                                 names.add(elt.value)
                         return names
     return set()
+
 
 def _is_under_type_checking(node: ast.AST, tree: ast.AST) -> bool:
     parent: dict[int, ast.AST] = {}
@@ -95,11 +102,13 @@ def _is_under_type_checking(node: ast.AST, tree: ast.AST) -> bool:
         current = parent.get(id(current))
     return False
 
+
 def _is_module_used_in_docstring(tree: ast.AST, module_name: str) -> bool:
     docstring = ast.get_docstring(tree)
     if docstring:
         return module_name in docstring
     return False
+
 
 def _get_re_export_names(tree: ast.AST) -> set[str]:
     re_exports = set()
@@ -111,6 +120,7 @@ def _get_re_export_names(tree: ast.AST) -> set[str]:
                 if name in __all__names:
                     re_exports.add(name)
     return re_exports
+
 
 def analyse_source(source: str, display_path: str) -> FileReport:
     report = FileReport(path=display_path)
@@ -165,6 +175,7 @@ def analyse_source(source: str, display_path: str) -> FileReport:
             )
     return report
 
+
 def _remove_names_from_import(line: str, names_to_remove: set[str]) -> str | None:
     stripped = line.strip()
     if stripped.startswith("import ") and not stripped.startswith("from "):
@@ -218,6 +229,7 @@ def _remove_names_from_import(line: str, names_to_remove: set[str]) -> str | Non
             return indent + prefix + " import " + ", ".join(kept) + "\n"
     return line
 
+
 def fix_source(source: str, report: FileReport) -> str | None:
     if not report.unused:
         return None
@@ -236,6 +248,7 @@ def fix_source(source: str, report: FileReport) -> str | None:
             new_lines.append(line)
     return "".join(new_lines)
 
+
 def _process_file(args: tuple) -> FileReport:
     path_str, display_path = args
     try:
@@ -244,9 +257,11 @@ def _process_file(args: tuple) -> FileReport:
         return FileReport(path=display_path, error=str(exc))
     return analyse_source(source, display_path)
 
+
 def _process_source_tuple(args: tuple) -> FileReport:
     source, display_path = args
     return analyse_source(source, display_path)
+
 
 def _extract_py_from_whl(archive: Path) -> list[tuple[str, str]]:
     results = []
@@ -262,6 +277,7 @@ def _extract_py_from_whl(archive: Path) -> list[tuple[str, str]]:
     except zipfile.BadZipFile as exc:
         results.append(("", f"{archive}::ERROR:{exc}"))
     return results
+
 
 def _extract_py_from_tar_zst(archive: Path) -> list[tuple[str, str]]:
     results = []
@@ -301,6 +317,7 @@ def _extract_py_from_tar_zst(archive: Path) -> list[tuple[str, str]]:
         results.append(("", f"{archive}::ERROR:{exc}"))
     return results
 
+
 RESET = "\x1b[0m"
 BOLD = "\x1b[1m"
 YELLOW = "\x1b[33m"
@@ -308,8 +325,10 @@ RED = "\x1b[31m"
 CYAN = "\x1b[36m"
 GREEN = "\x1b[32m"
 
+
 def _coloured(text: str, code: str, use_colour: bool) -> str:
     return f"{code}{text}{RESET}" if use_colour else text
+
 
 def print_report(reports: list[FileReport], verbose: bool, use_colour: bool) -> int:
     total = 0
@@ -341,6 +360,7 @@ def print_report(reports: list[FileReport], verbose: bool, use_colour: bool) -> 
         )
     )
     return total
+
 
 def collect_tasks(
     paths: list[Path], exclude_patterns: list[str] | None = None
@@ -379,6 +399,7 @@ def collect_tasks(
         else:
             print(f"Warning: '{path}' does not exist, skipping.", file=sys.stderr)
     return file_tasks, source_tasks
+
 
 def run(
     paths: list[Path],
@@ -452,6 +473,7 @@ def run(
         print("Nothing to fix.")
     return 1 if total > 0 else 0
 
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Report (and optionally remove) unused imports in Python files.",
@@ -505,6 +527,7 @@ Examples:
     parser.add_argument("--no-color", action="store_true", help="Disable colored output")
     return parser
 
+
 def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
@@ -532,6 +555,7 @@ def main() -> None:
             exclude=args.exclude,
         )
     )
+
 
 if __name__ == "__main__":
     multiprocessing.freeze_support()

@@ -66,6 +66,7 @@ COLORS = {
 
 RESET = "\x1b[0m"
 
+
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -85,6 +86,7 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
+
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -109,11 +111,14 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
+
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
 
+
 video = sys.argv[1]
 txtfile = Path(video).with_suffix(".txt")
+
 
 def ocr_worker(q_in: Queue, q_out: Queue) -> None:
     while True:
@@ -131,6 +136,7 @@ def ocr_worker(q_in: Queue, q_out: Queue) -> None:
         else:
             cprint(f"frame {frame_id} --> no text", "blue")
         q_out.put((frame_id, text))
+
 
 def main() -> None:
     cap = cv2.VideoCapture(video)
@@ -157,6 +163,7 @@ def main() -> None:
     cap.release()
     for w in workers:
         w.join()
+
 
 if __name__ == "__main__":
     main()

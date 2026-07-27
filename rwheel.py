@@ -16,6 +16,7 @@ from functools import partial
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 
+
 def get_wheel_tags() -> str:
     python_version = f"{sys.version_info.major}{sys.version_info.minor}"
     abi_tag = f"cp{python_version}"
@@ -28,6 +29,7 @@ def get_wheel_tags() -> str:
     else:
         platform_tag = "any"
     return f"cp{python_version}-{abi_tag}-{platform_tag}"
+
 
 def get_package_info(pkg_path):
     info = {
@@ -60,6 +62,7 @@ def get_package_info(pkg_path):
         info["has_so"] = True
     return info
 
+
 def collect_package_files(pkg_path, verbose=False):
     files = []
     site_packages = pkg_path.parent
@@ -90,6 +93,7 @@ def collect_package_files(pkg_path, verbose=False):
     if verbose:
         print(f"  Collected {len(files)} files for {pkg_path.name}")
     return files
+
 
 def create_wheel(pkg_path, wheels_dir, dryrun: bool = False, verbose: bool = False) -> bool:
     try:
@@ -151,6 +155,7 @@ Tag: {wheel_tag}
             traceback.print_exc()
         return False
 
+
 def get_packages(site_packages_dir: Path, package_names=None):
     packages = []
     ignore_dirs = {"__pycache__", "pip", "setuptools", "wheel", "_distutils_hack", "pkg_resources"}
@@ -175,17 +180,20 @@ def get_packages(site_packages_dir: Path, package_names=None):
         packages = filtered
     return packages
 
+
 def repack_sequential(packages, wheels_dir: Path, dryrun, verbose):
     results = []
     for pkg in packages:
         results.append(create_wheel(pkg, wheels_dir, dryrun, verbose))
     return results
 
+
 def repack_parallel(packages, wheels_dir: Path, dryrun, verbose) -> list[bool]:
     repack_func = partial(create_wheel, wheels_dir=wheels_dir, dryrun=dryrun, verbose=verbose)
     with Pool(processes=cpu_count()) as pool:
         results = pool.map(repack_func, packages)
     return results
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Repack site-packages packages as wheel files")
@@ -247,6 +255,7 @@ def main() -> None:
                 print(f"  {wheel.name} ({size_mb:.2f} MB)")
             if len(wheel_files) > 10:
                 print(f"  ... and {len(wheel_files) - 10} more")
+
 
 if __name__ == "__main__":
     main()

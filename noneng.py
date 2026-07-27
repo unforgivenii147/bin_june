@@ -11,6 +11,7 @@ from langdetect.lang_detect_exception import LangDetectException
 
 CHUNK_SIZE = 1024 * 1024
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -31,11 +32,13 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
+
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
+
 
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
@@ -52,11 +55,14 @@ def is_binary(path: Path | str) -> bool:
     except Exception:
         return True
 
+
 def get_nobinary(path: str | Path) -> list[Path]:
     return [f for f in get_files(path) if not is_binary(f)]
 
+
 DetectorFactory.seed = 0
 MAX_CHARS = 5000
+
 
 def process_file(path) -> bool | None:
     path = Path(path)
@@ -71,10 +77,12 @@ def process_file(path) -> bool | None:
     except (LangDetectException, OSError):
         return False
 
+
 def main() -> None:
     cwd = Path.cwd()
     files = get_nobinary(cwd)
     mpf3(process_file, files)
+
 
 if __name__ == "__main__":
     main()

@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
+
 @dataclass
 class PackageInfo:
     name: str
@@ -26,6 +27,7 @@ class PackageInfo:
     platform_tag: str
     wheel_filename: str
     metadata_version: str = "2.1"
+
 
 class PackageDetector:
     def __init__(self, verbose: bool = False) -> None:
@@ -127,6 +129,7 @@ class PackageDetector:
             self.log(f"Error analyzing {package_name}: {e!s}")
             return None
 
+
 class WheelBuilder:
     def __init__(self, verbose: bool = False) -> None:
         self.verbose = verbose
@@ -207,6 +210,7 @@ class WheelBuilder:
             return (True, f"Successfully created {package_info.wheel_filename}")
         except Exception as e:
             return (False, f"Error creating wheel: {e!s}")
+
 
 class VenvRepacker:
     def __init__(
@@ -352,6 +356,7 @@ class VenvRepacker:
         print("-" * 60)
         print(f"Total size: {total_size_mb:.2f} MB")
 
+
 def main() -> None:
     import argparse
 
@@ -380,6 +385,7 @@ def main() -> None:
     except Exception as e:
         print(f"Error: {e!s}", file=sys.stderr)
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

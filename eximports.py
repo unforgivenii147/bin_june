@@ -15,6 +15,7 @@ CHUNK_SIZE = 1024 * 1024
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
 
@@ -38,6 +39,7 @@ def is_python_file(path: str | Path) -> bool:
             return False
     return False
 
+
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -52,6 +54,7 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
+
 
 def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
@@ -88,6 +91,7 @@ def get_pyfiles(path: str | Path) -> list[Path]:
             continue
 
     return sorted(pyfiles)
+
 
 ATTRIBUTES = {
     "bold": 1,
@@ -142,6 +146,7 @@ COLORS = {
 
 RESET = "\x1b[0m"
 
+
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -161,6 +166,7 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
+
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -185,8 +191,10 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
+
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
+
 
 def get_file_age(path: str | Path, str_mode: bool = False) -> float | str:
     from os import stat as os_stat
@@ -221,6 +229,7 @@ def get_file_age(path: str | Path, str_mode: bool = False) -> float | str:
             parts.append(f"{value} {name}")
     return ", ".join(parts) if parts else "0 sec"
 
+
 def get_installed_pkgs():
     packages = []
     pip_freeze_path = Path("/sdcard/data/pip.freeze")
@@ -243,9 +252,11 @@ def get_installed_pkgs():
         packages.append(name)
     return packages
 
+
 parser = Parser()
 parser.language = Language(tsp.language())
 VALID = {"import_statement", "import_from_statement"}
+
 
 def process_file(path: Path) -> list[str]:
     path = Path(path)
@@ -253,6 +264,7 @@ def process_file(path: Path) -> list[str]:
     tree = parser.parse(src)
     root = tree.root_node
     return [src[node.start_byte : node.end_byte].decode() for node in root.children if node.type in VALID]
+
 
 def normalize_import(import_line: str) -> str | None:
     line = import_line.lower().strip()
@@ -276,6 +288,7 @@ def normalize_import(import_line: str) -> str | None:
         return module if module and not module.startswith("_") else None
     return None
 
+
 def process_files_parallel(files: list[Path]) -> set[str]:
     all_imports = set()
     with ProcessPoolExecutor() as executor:
@@ -289,6 +302,7 @@ def process_files_parallel(files: list[Path]) -> set[str]:
                 cprint(f"Error processing {path}: {e}", "yellow")
     return all_imports
 
+
 def filter_imports(imports: set[str]) -> list[str]:
     stdlib_set = set(STDLIB)
     installed_pkgs = {pkg.replace("-", "_").lower() for pkg in get_installed_pkgs()}
@@ -300,6 +314,7 @@ def filter_imports(imports: set[str]) -> list[str]:
             filtered.append(normalized + "\n")
     return sorted(set(filtered))
 
+
 def main() -> None:
     outfile = Path("importz.txt")
     cwd = Path.cwd()
@@ -310,6 +325,7 @@ def main() -> None:
     outfile.write_text("".join(filtered_imports), encoding="utf-8")
     for imp in filtered_imports:
         print(imp.strip())
+
 
 if __name__ == "__main__":
     sys.exit(main())

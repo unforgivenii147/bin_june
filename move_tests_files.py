@@ -19,15 +19,18 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 TESTS_DIR = Path.home() / "tmp" / "tests"
 MOVED_FILES_LOG = Path.home() / "tmp" / "moved_files.json"
 
+
 def is_test_file(file_path: Path) -> bool:
     stem = file_path.stem
     return "_test" in stem or "test_" in stem
+
 
 def get_relative_path(file_path: Path, base_dir: Path) -> Path:
     try:
         return file_path.relative_to(base_dir)
     except ValueError:
         return file_path
+
 
 def move_file(source: Path, dest: Path) -> tuple[str, bool, str]:
     try:
@@ -37,12 +40,14 @@ def move_file(source: Path, dest: Path) -> tuple[str, bool, str]:
     except Exception as e:
         return str(source), False, f"Error: {e!s}"
 
+
 def find_test_files(base_dir: Path) -> list[Path]:
     test_files = []
     for py_file in base_dir.rglob("*.py"):
         if is_test_file(py_file):
             test_files.append(py_file)
     return test_files
+
 
 def move_files_parallel(
     test_files: list[Path], base_dir: Path, max_workers: int = 4
@@ -67,6 +72,7 @@ def move_files_parallel(
                 results.append((str(source_file), message))
                 print(f"✗ {message}")
     return file_mapping, results
+
 
 def reverse_move(moved_files_log: Path) -> tuple[dict, list[tuple[str, str]]]:
     if not moved_files_log.exists():
@@ -93,11 +99,13 @@ def reverse_move(moved_files_log: Path) -> tuple[dict, list[tuple[str, str]]]:
                 print(f"✗ {message}")
     return file_mapping, results
 
+
 def save_log(file_mapping: dict, log_path: Path) -> None:
     log_path.parent.mkdir(parents=True, exist_ok=True)
     with open(log_path, "w") as f:
         json.dump(file_mapping, f, indent=2)
     print(f"\n📋 Log saved to: {log_path}")
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -150,6 +158,7 @@ def main():
     except Exception as e:
         print(f"❌ Unexpected error: {e}", file=sys.stderr)
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

@@ -14,6 +14,7 @@ import zipfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
+
 def is_pure_python_wheel(wheel_path: Path) -> bool:
     """Check if a wheel is pure Python by inspecting its filename and metadata."""
     wheel_name = wheel_path.stem
@@ -44,6 +45,7 @@ def is_pure_python_wheel(wheel_path: Path) -> bool:
         print(f"Warning: Could not inspect {wheel_path.name}: {e}")
         return False
 
+
 def install_wheel(wheel_path: Path, user_install: bool) -> tuple[Path, bool, str]:
     """Install a single wheel and return status."""
     try:
@@ -63,6 +65,7 @@ def install_wheel(wheel_path: Path, user_install: bool) -> tuple[Path, bool, str
     except Exception as e:
         return wheel_path, False, f"✗ {wheel_path.name}: {e!s}"
 
+
 def get_wheel_type(wheel_path: Path) -> str:
     """Determine wheel type for display purposes."""
     try:
@@ -81,6 +84,7 @@ def get_wheel_type(wheel_path: Path) -> str:
     except:
         pass
     return "Unknown"
+
 
 def main():
 
@@ -156,6 +160,7 @@ def main():
             print(f"  ✗ {wheel.name}: {error}")
 
     print("\nDone!")
+
 
 if __name__ == "__main__":
     try:

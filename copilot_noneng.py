@@ -30,6 +30,7 @@ _results: List[Dict[str, Any]] = []
 
 _gcld3_detector = gcld3.NNetLanguageIdentifier(min_num_bytes=0, max_num_bytes=1000)
 
+
 def iter_files(paths: Iterable[Path]) -> Iterator[Path]:
     """Generator-style walker: yields regular, non-symlink, non-binary files."""
     for p in paths:
@@ -46,6 +47,7 @@ def iter_files(paths: Iterable[Path]) -> Iterator[Path]:
                 if f.is_file() and not is_binary(f):
                     yield f
 
+
 def read_text_lines(path: Path) -> Iterator[str]:
     for enc in ("utf-8", "latin-1"):
         try:
@@ -58,6 +60,7 @@ def read_text_lines(path: Path) -> Iterator[str]:
         except Exception:
             return
 
+
 def detect_gcld3(text: str) -> Optional[str]:
     try:
         res = _gcld3_detector.FindLanguage(text[:1000])
@@ -65,12 +68,14 @@ def detect_gcld3(text: str) -> Optional[str]:
     except Exception:
         return None
 
+
 def detect_pycld2(text: str) -> Optional[str]:
     try:
         _, _, details = cld2.detect(text)
         return details[0][1]
     except Exception:
         return None
+
 
 def detect_langdetect(text: str) -> Optional[str]:
     try:
@@ -80,8 +85,10 @@ def detect_langdetect(text: str) -> Optional[str]:
     except Exception:
         return None
 
+
 def normalize(code: Optional[str]) -> str:
     return "unknown" if not code else code.lower()
+
 
 def combine_votes(g3: Optional[str], p2: Optional[str], ld: Optional[str]) -> Dict[str, Any]:
     votes = {
@@ -111,6 +118,7 @@ def combine_votes(g3: Optional[str], p2: Optional[str], ld: Optional[str]) -> Di
 
     return {"votes": votes, "non_english": decision}
 
+
 def detect_line(file_path: Path, lineno: int, line: str, max_len: int) -> Optional[Dict[str, Any]]:
     if not line.strip():
         return None
@@ -133,6 +141,7 @@ def detect_line(file_path: Path, lineno: int, line: str, max_len: int) -> Option
         return rec
     return None
 
+
 def process_file_sequential(file_path: Path, max_len: int) -> List[Dict[str, Any]]:
     local: List[Dict[str, Any]] = []
     for lineno, raw in enumerate(read_text_lines(file_path), start=1):
@@ -143,6 +152,7 @@ def process_file_sequential(file_path: Path, max_len: int) -> List[Dict[str, Any
                 print(f"  detectors: {rec['detectors']}")
             local.append(rec)
     return local
+
 
 def process_file_per_line_parallel(file_path: Path, max_len: int, workers: int) -> List[Dict[str, Any]]:
     """Per-line parallelism inside a single file."""
@@ -170,6 +180,7 @@ def process_file_per_line_parallel(file_path: Path, max_len: int, workers: int) 
                     print(f"Error in per-line task for {file_path}: {e}", file=sys.stderr)
     return local
 
+
 def run_per_file(files: List[Path], workers: int, max_len: int):
     with ThreadPoolExecutor(max_workers=workers) as ex:
         futures = {ex.submit(process_file_sequential, f, max_len): f for f in files}
@@ -181,6 +192,7 @@ def run_per_file(files: List[Path], workers: int, max_len: int):
                         _results.extend(res)
             except Exception as e:
                 print(f"Error processing {futures[fut]}: {e}", file=sys.stderr)
+
 
 def run_per_line(files: List[Path], workers: int, max_len: int):
     """Per-line parallelism mode: files in parallel, and lines inside each file in parallel."""
@@ -194,6 +206,7 @@ def run_per_line(files: List[Path], workers: int, max_len: int):
                         _results.extend(res)
             except Exception as e:
                 print(f"Error in per-line mode for {futures[fut]}: {e}", file=sys.stderr)
+
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="Detect non-English lines in text files.")
@@ -226,6 +239,7 @@ def main(argv=None) -> int:
 
     print(f"\nSaved {len(_results)} non-English lines to {args.out}")
     return 0
+
 
 if __name__ == "__main__":
     raise SystemExit(main())

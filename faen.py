@@ -7,6 +7,7 @@ import os
 import sys
 from pathlib import Path
 
+
 class Bidirectionaldictionary:
     def __init__(self, json_file: str = "/sdcard/dic/dic.json"):
         self.json_file = Path(json_file)
@@ -163,6 +164,7 @@ class Bidirectionaldictionary:
         english = self.persian_to_english[persian]
         print(f"🎲 Random: {persian} → {english}")
 
+
 def main():
     dict_app = Bidirectionaldictionary("dic.json")
     search_history = []
@@ -273,6 +275,7 @@ def main():
             print(f"❌ Invalid input: {e}")
         except Exception as e:
             print(f"❌ Error: {e}")
+
 
 if __name__ == "__main__":
     main()

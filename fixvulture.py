@@ -16,6 +16,7 @@ VULTURE_LINE_PATTERN = re.compile(
     r"^(.+?):(\d+):\s+(unused\s+(function|variable|class|attribute|method|import)\s+'([^']+)'|unreachable code after '(\w+)'|redundant if-condition|unreachable 'else' block|unused import '([^']+)'\s+\(\d+% confidence\))$"
 )
 
+
 def parse_vulture_output(lines: list[str]) -> dict[str, list[tuple[int, str, str]]]:
     results = defaultdict(list)
 
@@ -57,6 +58,7 @@ def parse_vulture_output(lines: list[str]) -> dict[str, list[tuple[int, str, str
         results[filepath].append((line_num, issue_type, name))
 
     return dict(results)
+
 
 def fix_file(filepath: str, issues: list[tuple[int, str, str]]) -> bool:
     """Fix issues in a single file."""
@@ -157,19 +159,23 @@ def fix_file(filepath: str, issues: list[tuple[int, str, str]]) -> bool:
 
     return False
 
+
 def _comment_out_variable(line: str, name: str) -> str:
     """Comment out a variable assignment."""
     indent = _get_indent(line)
     return f"{indent}# REMOVED: {line.strip()}\n"
+
 
 def _comment_out_line(line: str) -> str:
     """Comment out a line."""
     indent = _get_indent(line)
     return f"{indent}# REMOVED: {line.strip()}\n"
 
+
 def _get_indent(line: str) -> str:
     """Get the indentation of a line."""
     return line[: len(line) - len(line.lstrip())]
+
 
 def _get_function_lines(lines: list[str], start_idx: int) -> tuple[int, int]:
     """Get the start and end line indices of a function/method definition."""
@@ -196,6 +202,7 @@ def _get_function_lines(lines: list[str], start_idx: int) -> tuple[int, int]:
 
     return func_start, end_idx - 1
 
+
 def _get_class_lines(lines: list[str], start_idx: int) -> tuple[int, int]:
     """Get the start and end line indices of a class definition."""
 
@@ -221,6 +228,7 @@ def _get_class_lines(lines: list[str], start_idx: int) -> tuple[int, int]:
 
     return class_start, end_idx - 1
 
+
 def _find_block_end(lines: list[str], start_idx: int) -> int:
     """Find the end of a code block."""
     indent = _get_indent(lines[start_idx])
@@ -233,6 +241,7 @@ def _find_block_end(lines: list[str], start_idx: int) -> int:
                 break
         end_idx += 1
     return end_idx
+
 
 def _cleanup_blank_lines(lines: list[str]) -> list[str]:
     """Remove excessive blank lines (keep max 2 consecutive)."""
@@ -247,6 +256,7 @@ def _cleanup_blank_lines(lines: list[str]) -> list[str]:
             blank_count = 0
             cleaned.append(line)
     return cleaned
+
 
 def main():
     """Main entry point."""
@@ -289,6 +299,7 @@ def main():
             fixed_count += 1
 
     print(f"\nDone! Fixed {fixed_count} files.")
+
 
 if __name__ == "__main__":
     main()

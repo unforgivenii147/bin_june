@@ -19,6 +19,7 @@ TERMUX_SHEBANGS = {
 }
 SCRIPT_DIRS = {Path.home() / "bin", Path.home() / "bashbin", Path.home() / ".local" / "bin"}
 
+
 def get_clipboard_content() -> str:
     try:
         result = subprocess.run(["termux-clipboard-get"], capture_output=True, text=True, check=True)
@@ -29,6 +30,7 @@ def get_clipboard_content() -> str:
     except FileNotFoundError:
         print("Error: termux-clipboard-get not found", file=sys.stderr)
         sys.exit(1)
+
 
 def detect_script_type(content: str) -> str:
     if not content.strip():
@@ -83,6 +85,7 @@ def detect_script_type(content: str) -> str:
     else:
         return "bash"
 
+
 def get_shebang_from_filename(filename: str) -> str | None:
     path = Path(filename)
     suffix = path.suffix.lower()
@@ -93,6 +96,7 @@ def get_shebang_from_filename(filename: str) -> str | None:
     elif suffix in [".rb", ".pl", ".js", ".go", ".rs"]:
         return "bash"
     return None
+
 
 def replace_shebang(content: str, script_type: str) -> str:
     lines = content.splitlines()
@@ -109,6 +113,7 @@ def replace_shebang(content: str, script_type: str) -> str:
     result = "\n".join(lines)
     return result if result.endswith("\n") else result + "\n"
 
+
 def create_symlink(script_path: Path) -> None:
     if script_path.suffix:
         symlink_path = script_path.parent / script_path.stem
@@ -122,6 +127,7 @@ def create_symlink(script_path: Path) -> None:
             print(f"  → Symlink already exists: {symlink_path.name}")
         else:
             print(f"  ⚠️  {symlink_path.name} exists but is not a symlink")
+
 
 def main() -> None:
     if len(sys.argv) != 2:
@@ -166,6 +172,7 @@ def main() -> None:
         first_line = content.split("\n")[0]
         if first_line.startswith("#!"):
             print(f"\n📄 Shebang: {first_line}")
+
 
 if __name__ == "__main__":
     main()

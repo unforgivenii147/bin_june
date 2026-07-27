@@ -14,6 +14,7 @@ from pathlib import Path
 
 import lz4.frame
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -34,10 +35,12 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
+
 MAX_WORKERS = 4
 CHUNK_SIZE = 524288
 LZ4_COMPRESS_LEVEL = 9
 LZ4_ACCELERATION = 1
+
 
 def decompress_file(path: Path) -> bool:
     if not path.suffix == ".lz4":
@@ -57,6 +60,7 @@ def decompress_file(path: Path) -> bool:
     except Exception as e:
         print(f"  ✗ Failed to decompress {path.name}: {e}")
         return False
+
 
 def compress_in_memory(infile: Path, outfile: Path) -> bool:
     try:
@@ -78,6 +82,7 @@ def compress_in_memory(infile: Path, outfile: Path) -> bool:
         print(f"Memory compression failed for {infile.name}: {e}")
         return False
 
+
 def compress_chunk(data: bytes) -> bytes:
     return lz4.frame.compress(
         data,
@@ -88,6 +93,7 @@ def compress_chunk(data: bytes) -> bytes:
         block_size=lz4.frame.BLOCKSIZE_MAX,
         block_linked=True,
     )
+
 
 def compress_chunked(in_path: Path, out_path: Path, file_size: int) -> bool:
     try:
@@ -118,12 +124,14 @@ def compress_chunked(in_path: Path, out_path: Path, file_size: int) -> bool:
         print(f"Chunked compression failed for {in_path.name}: {e}")
         return False
 
+
 def fsz(size: float) -> str:
     for unit in ["B", "KiB", "MiB", "GiB", "TiB"]:
         if abs(size) < 1024.0:
             return f"{size:3.1f} {unit}"
         size /= 1024.0
     return f"{size:.1f} PiB"
+
 
 def create_tar_archive(source_dir: Path, output_path: Path) -> bool:
     try:
@@ -136,6 +144,7 @@ def create_tar_archive(source_dir: Path, output_path: Path) -> bool:
     except Exception as e:
         print(f"  Failed to create tar archive: {e}")
         return False
+
 
 def compress_tar_to_lz4(tar_path: Path, lz4_path: Path) -> bool:
     try:
@@ -164,6 +173,7 @@ def compress_tar_to_lz4(tar_path: Path, lz4_path: Path) -> bool:
         print(f"  ✗ Failed to compress tar archive: {e}")
         return False
 
+
 async def compress_folder_async(folder_path: Path, output_base_name: str) -> bool:
     loop = asyncio.get_running_loop()
     tar_path = Path(output_base_name + ".tar")
@@ -187,6 +197,7 @@ async def compress_folder_async(folder_path: Path, output_base_name: str) -> boo
         if lz4_path.exists():
             lz4_path.unlink()
         return False
+
 
 def compress_file(path: Path) -> tuple[bool, int, int]:
     out_path = path.with_suffix(path.suffix + ".lz4")
@@ -222,14 +233,17 @@ def compress_file(path: Path) -> tuple[bool, int, int]:
         print(f"  ✗ Failed to compress {path.name}: {e}")
         return False, 0, 0
 
+
 def get_files(directory: Path, mode: str = "compress") -> list[Path]:
     if mode == "compress":
         return [p for p in directory.glob("*") if p.is_file() and not p.is_symlink() and should_compress(p)]
     else:
         return [p for p in directory.glob("*.lz4") if p.is_file() and not p.is_symlink()]
 
+
 def get_dirs(directory: Path) -> list[Path]:
     return [p for p in directory.glob("*") if not p.is_symlink() and p.is_dir()]
+
 
 def should_compress(path: Path) -> bool:
     try:
@@ -243,6 +257,7 @@ def should_compress(path: Path) -> bool:
     except (OSError, PermissionError):
         return False
 
+
 def extract_tar_archive(tar_path: Path, extract_dir: Path) -> bool:
     try:
         with tarfile.open(tar_path, "r") as tar:
@@ -251,6 +266,7 @@ def extract_tar_archive(tar_path: Path, extract_dir: Path) -> bool:
     except Exception as e:
         print(f"  Failed to extract tar archive: {e}")
         return False
+
 
 async def process_compress() -> None:
     cwd = Path.cwd()
@@ -300,6 +316,7 @@ async def process_compress() -> None:
         print(f"{'=' * 50}")
     elif files_to_compress:
         print("\n❌ No files were successfully compressed")
+
 
 async def process_decompress() -> None:
     cwd = Path.cwd()
@@ -358,6 +375,7 @@ async def process_decompress() -> None:
     elif files_to_decompress:
         print("\n❌ No files were successfully decompressed")
 
+
 async def main_async(mode: str = "compress") -> None:
     if mode == "compress":
         await process_compress()
@@ -365,6 +383,7 @@ async def main_async(mode: str = "compress") -> None:
         await process_decompress()
     else:
         print(f"Unknown mode: {mode}")
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(
@@ -407,6 +426,7 @@ LZ4 Settings:
     except Exception as e:
         print(f"\n❌ Unexpected error: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     sys.exit(main())

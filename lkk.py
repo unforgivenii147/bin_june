@@ -5,6 +5,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+
 def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -26,6 +27,7 @@ def main() -> None:
             print(f"  - {k.name} -> {k.resolve()}")
         else:
             print(f"  - {k.name}")
+
 
 if __name__ == "__main__":
     main()

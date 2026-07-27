@@ -9,6 +9,7 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def is_binary(path: Path) -> bool:
     try:
         with open(path, "rb") as f:
@@ -17,10 +18,13 @@ def is_binary(path: Path) -> bool:
     except:
         return True
 
+
 THRESHOLD = 1024 * 1024
+
 
 def _process_chunk(chunk: list[str]) -> list[str]:
     return [line.strip() for line in chunk if line.strip()]
+
 
 def read_lines(path: Path) -> list[str]:
     sz = path.stat().st_size
@@ -35,6 +39,7 @@ def read_lines(path: Path) -> list[str]:
     except (UnicodeDecodeError, ValueError) as e:
         print(f"Warning: Could not read file as text: {e}")
         return []
+
 
 def sort_uniq(path: Path) -> tuple[int, list[str]]:
     lines = read_lines(path)
@@ -61,6 +66,7 @@ def sort_uniq(path: Path) -> tuple[int, list[str]]:
     if lines_removed > 0 or original_count != len(unique_sorted):
         path.write_text("\n".join(unique_sorted), encoding="utf-8")
     return (lines_removed, list(duplicates))
+
 
 if __name__ == "__main__":
     args = sys.argv[1:]

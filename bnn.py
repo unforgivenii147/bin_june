@@ -5,12 +5,14 @@ import sys
 
 from pathlib import Path
 
+
 def process_file(path) -> None:
     path = Path(path)
     content = path.read_text(encoding="utf-8")
     content = content.replace("\\n", "\n")
     path.write_text(content, encoding="utf-8")
     print(f"{path.name} updated.")
+
 
 if __name__ == "__main__":
     from dh import get_pyfiles, mpf3

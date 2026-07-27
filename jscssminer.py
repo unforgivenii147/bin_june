@@ -9,6 +9,7 @@ from rjsmin import jsmin
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def minify_assets_in_directory(cwd: Path | str = ".") -> None:
     root_dir = Path(cwd)
     if not root_dir.is_dir():
@@ -42,6 +43,7 @@ def minify_assets_in_directory(cwd: Path | str = ".") -> None:
     print(f"Errors: {errors_count}")
     print(f"Total processed: {minified_count + errors_count}")
     print(f"{'=' * 50}")
+
 
 def minify_assets_with_extensions(cwd: Path | str = ".", extensions: list[str] | None = None) -> None:
     if extensions is None:
@@ -79,6 +81,7 @@ def minify_assets_with_extensions(cwd: Path | str = ".", extensions: list[str] |
     print(f"Errors: {errors_count}")
     print(f"{'=' * 50}")
 
+
 def minify_asset(file_path: Path, dry_run: bool = False, backup: bool = False) -> bool:
     if not file_path.is_file():
         print(f"File not found: {file_path}")
@@ -109,6 +112,7 @@ def minify_asset(file_path: Path, dry_run: bool = False, backup: bool = False) -
     except Exception as e:
         print(f"Error processing {file_path.name}: {e}")
         return False
+
 
 def minify_assets_parallel(cwd: Path | str = ".", max_workers: int = 4) -> None:
     from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -153,6 +157,7 @@ def minify_assets_parallel(cwd: Path | str = ".", max_workers: int = 4) -> None:
     print(f"Files minified: {minified_count}")
     print(f"Errors: {errors_count}")
     print(f"{'=' * 50}")
+
 
 if __name__ == "__main__":
     import argparse

@@ -11,6 +11,7 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 POPPLER_PATH = None
 
+
 def convert_pdf_to_jpg(pdf_path: Path, output_folder: Path) -> bool:
     try:
         print(f"Converting '{pdf_path.name}'...")
@@ -45,6 +46,7 @@ def convert_pdf_to_jpg(pdf_path: Path, output_folder: Path) -> bool:
                 print(f"Error during cleanup of '{pdf_output_dir}': {cleanup_e}")
         return False
 
+
 def process_directory(start_dir: Path, output_base_dir: Path) -> None:
     print(f"Starting PDF to JPG conversion in directory: {start_dir}")
     print(f"Output will be saved in: {output_base_dir}")
@@ -69,6 +71,7 @@ def process_directory(start_dir: Path, output_base_dir: Path) -> None:
     print(f"Successfully converted and removed: {converted_count} PDF files.")
     print(f"Failed to convert: {failed_count} PDF files.")
     print("------------------------")
+
 
 if __name__ == "__main__":
     cwdectory = Path.cwd()

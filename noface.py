@@ -43,8 +43,10 @@ cascade_path = [
     "frontalface_alt_tree.xml",
 ]
 
+
 def is_image_file(filepath: Path) -> bool:
     return filepath.suffix.lower() in IMAGE_EXTENSIONS
+
 
 def create_face_detector(cascade_path):
     face_cascade = cv2.CascadeClassifier(CASCADE_DIR + cascade_path[0])
@@ -80,6 +82,7 @@ def create_face_detector(cascade_path):
 
     return detect_face
 
+
 def process_image_batch(args):
     image_path, current_dir, noface_dir, cascade_path = args
     detect_face = create_face_detector(cascade_path)
@@ -104,6 +107,7 @@ def process_image_batch(args):
         logger.error(f"Error processing {image_path.name}: {e}")
         return image_path, None, False, True
 
+
 def collect_images(directory: Path, exclude_dir: Path) -> list:
     images = []
     try:
@@ -115,6 +119,7 @@ def collect_images(directory: Path, exclude_dir: Path) -> list:
     except Exception as e:
         logger.error(f"Error scanning directory: {e}")
     return images
+
 
 def process_images(num_workers: int | None = None):
     current_dir = Path.cwd()
@@ -168,6 +173,7 @@ def process_images(num_workers: int | None = None):
     print("=" * 50 + "\n")
     return True
 
+
 def main():
     print("🔍 Checking for Haar cascade file...")
     if not cascade_path:
@@ -193,6 +199,7 @@ def main():
             print(f"\n⚠️ Invalid worker count: {sys.argv[1]}, using auto-detection")
     success = process_images(num_workers)
     sys.exit(0 if success else 1)
+
 
 if __name__ == "__main__":
     main()

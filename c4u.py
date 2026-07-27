@@ -22,6 +22,7 @@ from typing import Any
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def setup_logging(verbose: bool = True) -> logging.Logger:
     logger = logging.getLogger("pkg_updater")
     logger.setLevel(logging.DEBUG if verbose else logging.INFO)
@@ -36,7 +37,9 @@ def setup_logging(verbose: bool = True) -> logging.Logger:
     logger.addHandler(file_handler)
     return logger
 
+
 logger = setup_logging(verbose=True)
+
 
 @dataclass
 class PackageInfo:
@@ -53,6 +56,7 @@ class PackageInfo:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> PackageInfo:
         return cls(**data)
+
 
 class PackageStateManager:
     def __init__(self, state_file: Path = Path("pkgs_state.json")) -> None:
@@ -88,6 +92,7 @@ class PackageStateManager:
     def get_upgradable_packages(self) -> list[PackageInfo]:
         return [pkg for pkg in self.state.values() if pkg.upgradable]
 
+
 def get_installed_packages() -> list[tuple[str, str]]:
     try:
         result = run(["pip", "list", "--format=json"], capture_output=True, text=True, check=True, timeout=30)
@@ -97,6 +102,7 @@ def get_installed_packages() -> list[tuple[str, str]]:
     except (CalledProcessError, json.JSONDecodeError, TimeoutError) as e:
         logger.error(f"✗ Failed to get installed packages: {e}")
         sys.exit(1)
+
 
 def query_pypi(package_name: str, installed_version: str, retries: int = 2) -> PackageInfo:
     import requests
@@ -139,6 +145,7 @@ def query_pypi(package_name: str, installed_version: str, retries: int = 2) -> P
             return pkg_info
     return pkg_info
 
+
 def _is_upgradable(installed: str, latest: str) -> bool:
     try:
         from packaging import version
@@ -151,6 +158,7 @@ def _is_upgradable(installed: str, latest: str) -> bool:
             return tuple(latest_parts) > tuple(installed_parts)
         except (ValueError, IndexError):
             return False
+
 
 def main() -> None:
     logger.info("=" * 80)
@@ -189,6 +197,7 @@ def main() -> None:
     logger.info(f"   Upgradable: {len(upgradable)}")
     logger.info(f"   Up-to-date: {len(state_manager.state) - len(upgradable)}")
     logger.info("=" * 80)
+
 
 if __name__ == "__main__":
     try:

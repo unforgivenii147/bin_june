@@ -8,6 +8,7 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def copy_lines_to_clipboard(filename: str, start_line: int, end_line: int | None = None) -> None:
     input_file = Path(filename)
     if not input_file.is_file():
@@ -67,6 +68,7 @@ def copy_lines_to_clipboard(filename: str, start_line: int, end_line: int | None
         print(f"An unexpected error occurred while copying to clipboard: {e}", file=sys.stderr)
         sys.exit(1)
 
+
 def main() -> None:
     if len(sys.argv) < 3 or len(sys.argv) > 4:
         print(f"Usage: {sys.argv[0]} <filename> <start_line> [end_line]", file=sys.stderr)
@@ -91,6 +93,7 @@ def main() -> None:
             print("Error: <end_line> must be an integer.", file=sys.stderr)
             sys.exit(1)
     copy_lines_to_clipboard(filename, start_line, end_line)
+
 
 if __name__ == "__main__":
     main()

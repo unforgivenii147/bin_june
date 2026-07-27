@@ -8,6 +8,7 @@ from collections import deque
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -27,6 +28,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
             elif item.is_file() and (ext is None or item.suffix in ext):
                 files.append(item)
     return files
+
 
 def unique_path(path: Path | str) -> Path:
     path = _clean_fname(Path(path))
@@ -49,19 +51,23 @@ def unique_path(path: Path | str) -> Path:
             return new_path
         counter += 1
 
+
 def _clean_fname(path: Path) -> Path:
     from re import sub as re_sub
 
     clean_name = re_sub("(_\\d+)+", "", path.name)
     return path.with_name(clean_name)
 
+
 EXT = [".js", ".css", ".html", ".json", ".mjs", ".cjs", ".ts", ".jsx", ".tsx", ".tsm", ".jsm"]
 EXCLUDE_PATTERNS = {}
+
 
 def should_format(path: Path) -> bool:
     if path.suffix not in EXTENSIONS:
         return False
     return all(not path.name.endswith(p) for p in EXCLUDE_PATTERNS)
+
 
 def get_files_to_format(cwd: str = ".") -> list[Path]:
     cwd = Path.cwd()
@@ -75,12 +81,14 @@ def get_files_to_format(cwd: str = ".") -> list[Path]:
     del root
     return files
 
+
 def move_to_error_folder(path: Path) -> None:
     error_dir = path.parent / "error"
     error_dir.mkdir(exist_ok=True)
     dest = unique_path(error_dir / path.name)
     shutil.move(str(path), str(dest))
     del error_dir, dest
+
 
 def format_file(path: Path) -> tuple[Path, bool, str | None]:
     try:
@@ -91,11 +99,13 @@ def format_file(path: Path) -> tuple[Path, bool, str | None]:
     except Exception as e:
         return (path, False, str(e))
 
+
 def process_file_wrapper(path: Path) -> tuple[bool, Path, str | None]:
     path, success, error_msg = format_file(path)
     if not success:
         move_to_error_folder(path)
     return (success, path, error_msg)
+
 
 def main() -> None:
     cwd = Path.cwd()
@@ -116,6 +126,7 @@ def main() -> None:
                 print(f"❌ Error: {path.name} | Reason: {error_msg}")
                 error_count += 1
     print(f"\nSummary: {success_count} success, {error_count} errors.")
+
 
 if __name__ == "__main__":
     main()

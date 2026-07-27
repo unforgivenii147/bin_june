@@ -14,6 +14,7 @@ from pathlib import Path
 
 import py7zr
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -34,6 +35,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
+
 MAX_WORKERS = 2
 CHUNK_SIZE = 524288
 TEMP_DIR = Path(tempfile.gettempdir()) / "py7zr_temp"
@@ -44,6 +46,7 @@ SEVENZ_SETTINGS = {
     "header_compression": True,
     "block_size": 4 * 1024 * 1024,
 }
+
 
 def decompress_file(path: Path) -> bool:
     if not path.suffix == ".7z":
@@ -63,6 +66,7 @@ def decompress_file(path: Path) -> bool:
     except Exception as e:
         print(f"  ✗ Failed to decompress {path.name}: {e}")
         return False
+
 
 def compress_in_memory(infile: Path, outfile: Path) -> bool:
     try:
@@ -90,6 +94,7 @@ def compress_in_memory(infile: Path, outfile: Path) -> bool:
         print(f"Memory compression failed for {infile.name}: {e}")
         return False
 
+
 def compress_chunk(data: bytes, chunk_id: int, temp_dir: Path) -> Path:
     chunk_path = temp_dir / f"chunk_{chunk_id:06d}.bin"
     compressed_path = temp_dir / f"chunk_{chunk_id:06d}.7z"
@@ -110,6 +115,7 @@ def compress_chunk(data: bytes, chunk_id: int, temp_dir: Path) -> Path:
     finally:
         if chunk_path.exists():
             chunk_path.unlink()
+
 
 def compress_chunked(in_path: Path, out_path: Path, file_size: int) -> bool:
     temp_dir = TEMP_DIR / f"compress_{in_path.stem}"
@@ -150,12 +156,14 @@ def compress_chunked(in_path: Path, out_path: Path, file_size: int) -> bool:
         if temp_dir.exists():
             shutil.rmtree(temp_dir, ignore_errors=True)
 
+
 def fsz(size: float) -> str:
     for unit in ["B", "KiB", "MiB", "GiB", "TiB"]:
         if abs(size) < 1024.0:
             return f"{size:3.1f} {unit}"
         size /= 1024.0
     return f"{size:.1f} PiB"
+
 
 async def compress_folder_async(folder_path: Path, output_path: Path) -> bool:
     loop = asyncio.get_running_loop()
@@ -193,6 +201,7 @@ async def compress_folder_async(folder_path: Path, output_path: Path) -> bool:
             output_path.unlink()
         return False
 
+
 def compress_file(path: Path) -> tuple[bool, int, int]:
     out_path = path.with_suffix(path.suffix + ".7z")
     if out_path.exists():
@@ -227,14 +236,17 @@ def compress_file(path: Path) -> tuple[bool, int, int]:
         print(f"  ✗ Failed to compress {path.name}: {e}")
         return False, 0, 0
 
+
 def get_files(directory: Path, mode: str = "compress") -> list[Path]:
     if mode == "compress":
         return [p for p in directory.glob("*") if p.is_file() and not p.is_symlink() and should_compress(p)]
     else:
         return [p for p in directory.glob("*.7z") if p.is_file() and not p.is_symlink()]
 
+
 def get_dirs(directory: Path) -> list[Path]:
     return [p for p in directory.glob("*") if not p.is_symlink() and p.is_dir()]
+
 
 def should_compress(path: Path) -> bool:
     try:
@@ -247,6 +259,7 @@ def should_compress(path: Path) -> bool:
         return size >= 1024
     except (OSError, PermissionError):
         return False
+
 
 async def process_compress() -> None:
     cwd = Path.cwd()
@@ -298,6 +311,7 @@ async def process_compress() -> None:
     elif files_to_compress:
         print("\n❌ No files were successfully compressed")
 
+
 async def process_decompress() -> None:
     cwd = Path.cwd()
     files_to_decompress = get_files(cwd, mode="decompress")
@@ -342,6 +356,7 @@ async def process_decompress() -> None:
     elif files_to_decompress:
         print("\n❌ No files were successfully decompressed")
 
+
 async def main_async(mode: str = "compress") -> None:
     if mode == "compress":
         await process_compress()
@@ -349,6 +364,7 @@ async def main_async(mode: str = "compress") -> None:
         await process_decompress()
     else:
         print(f"Unknown mode: {mode}")
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(
@@ -389,6 +405,7 @@ Examples:
     except Exception as e:
         print(f"\n❌ Unexpected error: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     sys.exit(main())

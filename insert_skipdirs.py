@@ -17,6 +17,7 @@ INSERT_TEXT = (
     '\nSKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})\n'
 )
 
+
 def get_module_level_imports(tree: ast.AST) -> int:
     last_import_line = 0
     for node in tree.body:
@@ -26,6 +27,7 @@ def get_module_level_imports(tree: ast.AST) -> int:
         elif not isinstance(node, ast.Expr):
             break
     return last_import_line
+
 
 def find_import_section_end(content: str) -> int | None:
     try:
@@ -40,6 +42,7 @@ def find_import_section_end(content: str) -> int | None:
         pass
     return None
 
+
 def validate_modified_code(original: str, modified: str) -> bool:
     try:
         ast.parse(modified)
@@ -47,6 +50,7 @@ def validate_modified_code(original: str, modified: str) -> bool:
     except SyntaxError as e:
         print(f"  Validation failed: {e}")
         return False
+
 
 def process_file(file_path: Path) -> tuple[Path, bool, str]:
     try:
@@ -94,6 +98,7 @@ def process_file(file_path: Path) -> tuple[Path, bool, str]:
     except Exception as e:
         return (file_path, False, f"exception: {e!s}")
 
+
 def find_python_files(root_dir: Path = Path(".")) -> list[Path]:
     python_files = []
     for py_file in root_dir.rglob("*.py"):
@@ -102,6 +107,7 @@ def find_python_files(root_dir: Path = Path(".")) -> list[Path]:
             continue
         python_files.append(py_file)
     return sorted(python_files)
+
 
 def main():
     root_dir = Path(".")
@@ -156,6 +162,7 @@ def main():
         print(f"\n✓ Successfully modified {stats['modified']} file(s)")
     if stats["validation_failed"] > 0 or stats["syntax_error"] > 0:
         print(f"\n⚠ Check {stats['validation_failed'] + stats['syntax_error']} file(s) with errors")
+
 
 if __name__ == "__main__":
     main()

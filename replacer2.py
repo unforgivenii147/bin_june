@@ -12,6 +12,7 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def replace_in_file(filepath: Path, old_text: str, new_text: str) -> bool:
     try:
         with open(filepath, encoding="utf-8") as f:
@@ -25,6 +26,7 @@ def replace_in_file(filepath: Path, old_text: str, new_text: str) -> bool:
     except Exception as e:
         print(f"Error processing {filepath}: {e}")
         return False
+
 
 def main() -> None:
     if len(sys.argv) != 3:
@@ -54,6 +56,7 @@ def main() -> None:
             print(f"  Skipped: {py_file} (no match)")
     print("-" * 50)
     print(f"Done! Modified {modified_count} file(s).")
+
 
 if __name__ == "__main__":
     main()

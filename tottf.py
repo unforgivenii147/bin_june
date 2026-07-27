@@ -6,6 +6,7 @@ import sys
 from collections import deque
 from pathlib import Path
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -25,6 +26,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
             elif item.is_file() and (ext is None or item.suffix in ext):
                 files.append(item)
     return files
+
 
 def runcmd(
     cmd: list[str],
@@ -76,6 +78,7 @@ def runcmd(
             print(msg, file=sys_stderr)
         return (1, "", msg)
 
+
 def process_file(path: Path) -> bool:
     path = Path(path)
     try:
@@ -90,6 +93,7 @@ def process_file(path: Path) -> bool:
     except:
         print(f"error processing {path.name}")
         return False
+
 
 def main() -> None:
     cwd = Path.cwd()
@@ -106,6 +110,7 @@ def main() -> None:
     for f in files:
         if f.suffix != ".ttf":
             process_file(f)
+
 
 if __name__ == "__main__":
     sys.exit(main())

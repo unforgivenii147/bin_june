@@ -13,6 +13,7 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def extract_function_names(filepath: Path):
     functions = []
     patterns = [
@@ -41,10 +42,12 @@ def extract_function_names(filepath: Path):
         sys.exit(1)
     return functions
 
+
 def find_duplicates(functions):
     name_counts = Counter(name for name, _, _ in functions)
     duplicates = {name: count for name, count in name_counts.items() if count > 1}
     return duplicates
+
 
 def display_results(functions, duplicates, filepath: Path) -> bool:
     if not duplicates:
@@ -62,6 +65,7 @@ def display_results(functions, duplicates, filepath: Path) -> bool:
     print("\n" + "=" * 60)
     return False
 
+
 def show_statistics(functions, duplicates) -> None:
     total_definitions = len(functions)
     unique_functions = len({name for name, _, _ in functions})
@@ -75,6 +79,7 @@ def show_statistics(functions, duplicates) -> None:
     if unique_functions > 0:
         duplication_rate = duplicate_definitions / unique_functions * 100
         print(f"   Duplication rate: {duplication_rate:.1f}%")
+
 
 def interactive_fix(duplicates, functions, filepath: Path) -> None:
     if not duplicates:
@@ -127,6 +132,7 @@ def interactive_fix(duplicates, functions, filepath: Path) -> None:
         else:
             print(f"     - Review '{dup_name}' duplicates manually")
 
+
 def main():
     functions_file = Path.home() / ".config/bash.d/bash_functions"
     if len(sys.argv) > 1:
@@ -152,6 +158,7 @@ def main():
     else:
         print("\n✅ File is clean! No duplicate function names found.")
         sys.exit(0)
+
 
 if __name__ == "__main__":
     main()

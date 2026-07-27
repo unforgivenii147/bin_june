@@ -17,6 +17,7 @@ from dh import get_nobinary
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
+
 def process_file(file_path: Path) -> Counter:
     """
     Process a single file and return word frequency counter.
@@ -38,6 +39,7 @@ def process_file(file_path: Path) -> Counter:
 
     return word_counter
 
+
 def collect_text_files(directory: Path = None) -> List[Path]:
     """
     Collect all text files from the specified directory.
@@ -49,6 +51,7 @@ def collect_text_files(directory: Path = None) -> List[Path]:
 
     logger.info(f"Found {len(text_files)} text files to process")
     return text_files
+
 
 def process_files_parallel(file_paths: List[Path], max_workers: int = None) -> Counter:
     """
@@ -72,6 +75,7 @@ def process_files_parallel(file_paths: List[Path], max_workers: int = None) -> C
 
     return total_counter
 
+
 def save_results_json(counter: Counter, output_file: Path):
     """
     Save word count results to JSON file.
@@ -94,11 +98,13 @@ def save_results_json(counter: Counter, output_file: Path):
 
     logger.info(f"Results saved to {output_file}")
 
+
 def import_datetime():
     """Import datetime only when needed."""
     from datetime import datetime
 
     return datetime.now()
+
 
 def main():
     """
@@ -144,6 +150,7 @@ def main():
         print(f"{word:<20} {count:>8}")
     print("=" * 50)
     print(f"\nFull results saved to: {output_file.absolute()}")
+
 
 if __name__ == "__main__":
     main()

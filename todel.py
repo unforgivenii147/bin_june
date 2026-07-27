@@ -7,6 +7,7 @@ from pathlib import Path
 
 CHUNK_SIZE = 1024 * 1024
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -27,6 +28,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
+
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -42,8 +44,10 @@ def is_binary(path: Path | str) -> bool:
     except Exception:
         return True
 
+
 def get_nobinary(path: str | Path) -> list[Path]:
     return [f for f in get_files(path) if not is_binary(f)]
+
 
 def delete_multiline_string_from_files(search_string: str) -> None:
     cwd = Path.cwd()
@@ -54,9 +58,11 @@ def delete_multiline_string_from_files(search_string: str) -> None:
             new_content = content.replace(search_string, "")
         path.write_text(new_content, encoding="utf-8")
 
+
 def read_string_to_delete(filename: str = "/sdcard/lic") -> str:
     path = Path(filename)
     return path.read_text(encoding="utf-8")
+
 
 if __name__ == "__main__":
     string_to_delete = read_string_to_delete()

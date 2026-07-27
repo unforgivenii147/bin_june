@@ -24,6 +24,7 @@ except ImportError:
     print("ERROR: Install tree-sitter==0.25.2 and tree-sitter-python==0.25.0")
     sys.exit(1)
 
+
 @dataclass
 class ProcessingResult:
     file_path: Path
@@ -32,6 +33,7 @@ class ProcessingResult:
     original_size: int = 0
     new_size: int = 0
     processing_time: float = 0.0
+
 
 class TreeSitterCommentRemover:
     QUERY = """
@@ -80,6 +82,7 @@ class TreeSitterCommentRemover:
             result[start:end] = replacement
         return bytes(result)
 
+
 class ASTCommentRemover:
     def remove_comments_and_docstrings(self, source: str) -> str:
         lines = source.split("\n")
@@ -124,12 +127,14 @@ class ASTCommentRemover:
                 pass
         return ranges
 
+
 def validate_syntax(source: str) -> bool:
     try:
         ast.parse(source)
         return True
     except SyntaxError:
         return False
+
 
 def process_file_tree_sitter(file_path: Path) -> ProcessingResult:
     start_time = time.perf_counter()
@@ -162,6 +167,7 @@ def process_file_tree_sitter(file_path: Path) -> ProcessingResult:
             processing_time=time.perf_counter() - start_time,
         )
 
+
 def process_file_ast(file_path: Path) -> ProcessingResult:
     start_time = time.perf_counter()
     try:
@@ -192,6 +198,7 @@ def process_file_ast(file_path: Path) -> ProcessingResult:
             processing_time=time.perf_counter() - start_time,
         )
 
+
 def process_directory(
     directory: Path = Path.cwd(), max_workers: int = 4, method: str = "tree-sitter"
 ) -> tuple[list, float]:
@@ -213,6 +220,7 @@ def process_directory(
             print(f"{status} {result.file_path.name}{error_msg}")
     total_time = time.perf_counter() - start_time
     return results, total_time
+
 
 def print_results(results: list, total_time: float, method: str):
     successful = [r for r in results if r.success]
@@ -237,6 +245,7 @@ def print_results(results: list, total_time: float, method: str):
         print("\nFailed files:")
         for r in failed:
             print(f"  - {r.file_path}: {r.error}")
+
 
 def main():
     import argparse
@@ -292,6 +301,7 @@ Examples:
     else:
         results, total_time = process_directory(directory, args.workers, args.method)
         print_results(results, total_time, args.method)
+
 
 if __name__ == "__main__":
     main()

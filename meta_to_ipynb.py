@@ -10,6 +10,7 @@ import re
 import sys
 from pathlib import Path
 
+
 def parse_metadata_section(lines):
     """Parse the initial metadata section and extract package name and version."""
     metadata = {}
@@ -68,6 +69,7 @@ def parse_metadata_section(lines):
 
     return metadata, end_line
 
+
 def find_section_boundaries(content, start_pos=0):
     """Find code blocks and markdown sections."""
     sections = []
@@ -95,6 +97,7 @@ def find_section_boundaries(content, start_pos=0):
             break
 
     return sections
+
 
 def convert_metadata_to_notebook(metadata_file_path):
     """Convert METADATA file to Jupyter notebook."""
@@ -154,6 +157,7 @@ def convert_metadata_to_notebook(metadata_file_path):
 
     return output_path
 
+
 def main():
     if len(sys.argv) < 2:
         print("Usage: python metadata_to_notebook.py <METADATA_file>")
@@ -167,6 +171,7 @@ def main():
         sys.exit(1)
 
     convert_metadata_to_notebook(input_file)
+
 
 if __name__ == "__main__":
     main()

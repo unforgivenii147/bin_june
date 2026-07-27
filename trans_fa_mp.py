@@ -22,6 +22,7 @@ RETRY_DELAY: Final[float] = 0.5
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s", datefmt="%H:%M:%S")
 logger = logging.getLogger(__name__)
 
+
 def translate_word(word: str) -> str | None:
     translator = GoogleTranslator(source="auto", target="en")
     for attempt in range(RETRY_ATTEMPTS):
@@ -34,6 +35,7 @@ def translate_word(word: str) -> str | None:
             if attempt < RETRY_ATTEMPTS - 1:
                 time.sleep(RETRY_DELAY)
     return None
+
 
 def main() -> None:
 
@@ -74,6 +76,7 @@ def main() -> None:
         logger.info("Translation dictionary saved to %s (%d entries)", output_path.name, len(results))
     except Exception as e:
         logger.error("Error saving results: %s", e)
+
 
 if __name__ == "__main__":
     main()

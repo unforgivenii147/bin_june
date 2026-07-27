@@ -18,6 +18,7 @@ except ImportError:
     USE_CV2 = False
 SUPPORTED_FORMATS = {".png", ".bmp", ".tiff", ".webp", ".ico", ".jpg", ".jpeg"}
 
+
 def convert_to_jpg(file_path: str) -> bool:
     path = Path(file_path)
     if not path.is_file() or path.suffix.lower() not in SUPPORTED_FORMATS:
@@ -67,6 +68,7 @@ def convert_to_jpg(file_path: str) -> bool:
         print(f"Error converting '{path.name}': {e}")
         return False
 
+
 def main():
     if len(sys.argv) != 2:
         print(f"Usage: {sys.argv[0]} <image_file>")
@@ -75,6 +77,7 @@ def main():
         sys.exit(0)
     else:
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

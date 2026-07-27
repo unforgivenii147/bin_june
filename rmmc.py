@@ -11,6 +11,7 @@ from pathlib import Path
 
 CHUNK_SIZE = 1024 * 1024
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -31,6 +32,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
+
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -40,6 +42,7 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
+
 
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
@@ -51,6 +54,7 @@ def fsz(sz: float) -> str:
     if i == 0:
         return f"{int(value)} {units[i]}"
     return f"{value:.1f} {units[i]}"
+
 
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
@@ -67,8 +71,10 @@ def is_binary(path: Path | str) -> bool:
     except Exception:
         return True
 
+
 def get_nobinary(path: str | Path) -> list[Path]:
     return [f for f in get_files(path) if not is_binary(f)]
+
 
 def process_file(file_path: Path) -> None:
     Path(path)
@@ -93,6 +99,7 @@ def process_file(file_path: Path) -> None:
         print(f"{file_path.name} ", end=" ")
         print(fsz(before - after))
 
+
 def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
@@ -105,6 +112,7 @@ def main() -> None:
     p.join()
     diff_size = before - gsz(cwd)
     print(f"space change: {fsz(diff_size)}")
+
 
 if __name__ == "__main__":
     main()

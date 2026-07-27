@@ -6,6 +6,7 @@ import re
 import sys
 from pathlib import Path
 
+
 def convert_to_readable(filename: str) -> None:
     outfile = Path(filename)
     try:
@@ -27,6 +28,7 @@ def convert_to_readable(filename: str) -> None:
         print(f"Error: File '{filename}' not found.")
     except Exception as e:
         print(f"An error occurred: {e}")
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:

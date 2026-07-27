@@ -21,6 +21,7 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 console = Console()
 
+
 class SignalMonitor:
     def __init__(self) -> None:
         self.wifi_strength = None
@@ -120,6 +121,7 @@ class SignalMonitor:
         console.print(f"[dim]Updated: {datetime.now().strftime('%H:%M:%S')}[/dim]")
         console.print("[dim]Press Ctrl+C to exit[/dim]")
 
+
 def main() -> None:
     monitor = SignalMonitor()
     try:
@@ -130,6 +132,7 @@ def main() -> None:
     except KeyboardInterrupt:
         console.print("\n[bold yellow]Exiting...[/bold yellow]")
         os.system("clear")
+
 
 if __name__ == "__main__":
     main()

@@ -14,9 +14,11 @@ from tree_sitter import Language, Parser
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 PY_LANGUAGE = Language(tspython.language())
 
+
 def get_parser() -> Parser:
     parser = Parser(PY_LANGUAGE)
     return parser
+
 
 def should_preserve_comment(comment_bytes: bytes) -> bool:
     text = comment_bytes.decode("utf-8", errors="ignore").strip()
@@ -26,6 +28,7 @@ def should_preserve_comment(comment_bytes: bytes) -> bool:
         or text == "# fmt: on"
         or text == "# fmt: off"
     )
+
 
 def process_file(file_path: Path) -> str:
     try:
@@ -87,6 +90,7 @@ def process_file(file_path: Path) -> str:
     except Exception as e:
         return f"[ERROR] Failed to save updates to {file_path}: {e}"
 
+
 def gather_files(inputs) -> list[Path]:
     files = []
     if not inputs:
@@ -98,6 +102,7 @@ def gather_files(inputs) -> list[Path]:
         elif p.is_dir():
             files.extend(p.rglob("*.py"))
     return files
+
 
 def main():
     parser = argparse.ArgumentParser(description="Strip comments and docstrings using Tree-Sitter safely.")
@@ -113,6 +118,7 @@ def main():
         for future in as_completed(futures):
             result_string = future.result()
             print(result_string)
+
 
 if __name__ == "__main__":
     main()

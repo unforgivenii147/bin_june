@@ -13,11 +13,13 @@ CHUNK_SIZE = 1024 * 1024
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
+
 
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
@@ -42,6 +44,7 @@ def is_python_file(path: str | Path) -> bool:
             return False
     return False
 
+
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -56,6 +59,7 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
+
 
 def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
@@ -93,9 +97,11 @@ def get_pyfiles(path: str | Path) -> list[Path]:
 
     return sorted(pyfiles)
 
+
 REMOVE_ORIG = False
 LEGACY_MODE = False
 OPTIMIZE_LEVEL = 2
+
 
 def process_file(path) -> bool | None:
     path = Path(path)
@@ -115,6 +121,7 @@ def process_file(path) -> bool | None:
             path.unlink()
         return True
     return False
+
 
 def main():
     global REMOVE_ORIG, LEGACY_MODE, OPTIMIZE_LEVEL
@@ -170,6 +177,7 @@ def main():
         return 0
     mpf3(process_file, files)
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

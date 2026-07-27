@@ -37,10 +37,12 @@ SAFE_EXTENSIONS = [
 ]
 EXT_PATTERN = re.compile(r"|".join(SAFE_EXTENSIONS), re.IGNORECASE)
 
+
 def sanitize_filename(name) -> str:
     name = unquote(name)
     name = re.sub(r'[<>:"|?*]', "_", name)
     return name[:255].strip() or "downloaded_file"
+
 
 def extract_filename(url) -> str:
     parsed = urlparse(url)
@@ -53,12 +55,14 @@ def extract_filename(url) -> str:
         filename += ".dat"
     return filename
 
+
 def is_safe_extension(url) -> bool:
     parsed = urlparse(url)
     path = parsed.path
     filename = path.split("/")[-1]
     base_name = filename.split("?")[0].split("#")[0]
     return bool(EXT_PATTERN.search(base_name))
+
 
 def get_filesize(url, session) -> int | None:
     try:
@@ -68,6 +72,7 @@ def get_filesize(url, session) -> int | None:
         return int(size) if size else None
     except Exception:
         return None
+
 
 def download_one(url, session, output_dir, resume_from=None):
     filename = extract_filename(url)
@@ -97,6 +102,7 @@ def download_one(url, session, output_dir, resume_from=None):
             return url, False, f"Retry needed: {e}"
         return url, False, str(e)
 
+
 def download_urls(urls: list[str], output_dir=OUTPUT_DIR) -> None:
     Path(output_dir).mkdir(exist_ok=True, parents=True)
     safe_urls = [url for url in urls if is_safe_extension(url)]
@@ -124,6 +130,7 @@ def download_urls(urls: list[str], output_dir=OUTPUT_DIR) -> None:
                     pbar.write(f"⚠️  Unexpected error for {url}: {e}")
                 pbar.update(1)
     session.close()
+
 
 if __name__ == "__main__":
     urls = []

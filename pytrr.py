@@ -11,6 +11,7 @@ import zstandard as zstd
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def create_archive_streaming_optimized():
     current_dir = Path.cwd()
     dir_name = current_dir.name
@@ -82,6 +83,7 @@ def create_archive_streaming_optimized():
             archive_path.unlink()
         sys.exit(1)
 
+
 def verify_archive(archive_path):
     try:
         decompressor = zstd.ZstdDecompressor()
@@ -94,6 +96,7 @@ def verify_archive(archive_path):
                         )
     except Exception as e:
         print(f"Verification failed: {e}", file=sys.stderr)
+
 
 if __name__ == "__main__":
     import argparse

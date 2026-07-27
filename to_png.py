@@ -7,6 +7,7 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
     units = "B", "KB", "MB", "GB", "TB"
@@ -18,6 +19,7 @@ def fsz(sz: float) -> str:
         return f"{int(value)} {units[i]}"
     return f"{value:.1f} {units[i]}"
 
+
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -28,6 +30,7 @@ def gsz(path: str | Path) -> int:
             total += file.stat().st_size
     return total
 
+
 def is_image(path: str | Path) -> bool:
     path = Path(path)
     try:
@@ -36,6 +39,7 @@ def is_image(path: str | Path) -> bool:
         return path.suffix in IMG_EXT
     except Exception:
         return False
+
 
 try:
     import cv2
@@ -48,6 +52,7 @@ except ImportError:
     USE_CV2 = False
 
 IGNORED_DIRS = {".git", "dist", "build", "__pycache__", ".venv", "node_modules"}
+
 
 def convert_file(file_path: str) -> bool:
     path = Path(file_path)
@@ -98,6 +103,7 @@ def convert_file(file_path: str) -> bool:
         print(f"Error converting '{path.name}': {e}")
         return False
 
+
 def main() -> None:
     start_size = gsz(".")
     files = [
@@ -118,6 +124,7 @@ def main() -> None:
         print(f"size reduced: - {fsz(result)} ")
     else:
         print(f"size increased: + {fsz(result)} ")
+
 
 if __name__ == "__main__":
     main()

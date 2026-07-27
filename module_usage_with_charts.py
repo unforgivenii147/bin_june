@@ -22,6 +22,7 @@ BIN_DIR = Path.home() / "bin"
 REPORT = Path.home() / "dh_usage.txt"
 PACKAGE = "dh"
 
+
 def get_stdlib_modules() -> set[str]:
     stdlib = set()
     for module_info in pkgutil.iter_modules():
@@ -101,9 +102,11 @@ def get_stdlib_modules() -> set[str]:
     stdlib.update(extra)
     return stdlib
 
+
 def is_stdlib(module_name: str, stdlib_set: set[str]) -> bool:
     top_level = module_name.split(".")[0]
     return top_level in stdlib_set
+
 
 def is_third_party(module_name: str, stdlib_set: set[str]) -> bool:
     top_level = module_name.split(".")[0]
@@ -112,6 +115,7 @@ def is_third_party(module_name: str, stdlib_set: set[str]) -> bool:
     if top_level in stdlib_set:
         return False
     return not top_level.startswith("__")
+
 
 def extract_imports(filepath: Path) -> dict[str, list[str]]:
     try:
@@ -161,6 +165,7 @@ def extract_imports(filepath: Path) -> dict[str, list[str]]:
 
     return dict(imports)
 
+
 def count_calls(filepath: Path, imports: dict[str, list[str]]) -> dict[str, dict[str, int]]:
     try:
         tree = ast.parse(filepath.read_text(encoding="utf-8"))
@@ -187,6 +192,7 @@ def count_calls(filepath: Path, imports: dict[str, list[str]]) -> dict[str, dict
                         call_counts[mod][func.attr] += 1
 
     return dict(call_counts)
+
 
 def generate_report(
     per_file_data: list[tuple[str, dict[str, dict[str, int]]]],
@@ -324,6 +330,7 @@ def generate_report(
     lines.append(f"{'=' * 80}")
 
     return "\n".join(lines), stdlib_counts, thirdparty_counts, dh_counts
+
 
 def save_charts(
     stdlib_counts: Counter,

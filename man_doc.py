@@ -10,6 +10,7 @@ from collections.abc import Callable
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -46,6 +47,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
             ):
                 files.append(item)
     return files
+
 
 def runcmd(
     cmd: list[str], run_silently: bool = False, show_output: bool = True, timeout: float | None = None
@@ -94,11 +96,13 @@ def runcmd(
             print(msg, file=sys_stderr)
         return (1, "", msg)
 
+
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
+
 
 ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
 HIGHLIGHTS = {
@@ -141,6 +145,7 @@ COLORS = {
 }
 RESET = "\x1b[0m"
 
+
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -160,6 +165,7 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
+
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -184,8 +190,10 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
+
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
+
 
 def safe_run(path) -> bool:
     path = Path(path)
@@ -215,6 +223,7 @@ def safe_run(path) -> bool:
         if is_gzipped and Path(tmp_path).exists():
             Path(tmp_path).unlink()
 
+
 def process_file(path) -> bool:
     path = Path(path)
     if not path.exists():
@@ -227,6 +236,7 @@ def process_file(path) -> bool:
     cprint("[ERROR]", "red")
     return False
 
+
 def main() -> None:
     args = sys.argv[1:]
     cwd = Path.cwd()
@@ -234,6 +244,7 @@ def main() -> None:
     all_exts = base_exts + [f"{ext}.gz" for ext in base_exts]
     files = [Path(p) for p in args] if args else get_files(cwd, ext=all_exts)
     mpf3(process_file, files)
+
 
 if __name__ == "__main__":
     sys.exit(main())

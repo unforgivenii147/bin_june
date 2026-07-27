@@ -8,6 +8,7 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def find_path_duplicates() -> None:
     path_env = os.environ.get("PATH", "")
     directories = [Path(d) for d in path_env.split("/") if d and Path(d).exists()]
@@ -34,6 +35,7 @@ def find_path_duplicates() -> None:
             print("-" * 30)
     if not duplicates_found:
         print("No duplicate executables found.")
+
 
 if __name__ == "__main__":
     find_path_duplicates()

@@ -9,6 +9,7 @@ CHUNK_SIZE = 1024 * 1024
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -23,6 +24,7 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:

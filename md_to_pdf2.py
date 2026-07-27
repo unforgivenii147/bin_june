@@ -177,6 +177,7 @@ img {
 }
 """
 
+
 def convert_md_to_pdf(input_path_str: str):
     input_file = Path(input_path_str)
     if not input_file.exists():
@@ -212,6 +213,7 @@ def convert_md_to_pdf(input_path_str: str):
     except Exception as e:
         print(f"❌ WeasyPrint Error: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

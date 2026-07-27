@@ -19,6 +19,7 @@ from functools import lru_cache
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(processName)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
+
 def get_python_paths() -> List[Path]:
     """Get all Python package installation paths."""
     paths = []
@@ -35,6 +36,7 @@ def get_python_paths() -> List[Path]:
 
     return [p for p in paths if p.exists()]
 
+
 def find_dist_info_dirs(search_paths: List[Path]) -> List[Path]:
     """Find all .dist-info directories in the given paths."""
     dist_info_dirs = []
@@ -47,6 +49,7 @@ def find_dist_info_dirs(search_paths: List[Path]) -> List[Path]:
 
     logger.info(f"Found {len(dist_info_dirs)} dist-info directories")
     return dist_info_dirs
+
 
 def has_entry_points(dist_info_dir: Path) -> bool:
     """
@@ -74,6 +77,7 @@ def has_entry_points(dist_info_dir: Path) -> bool:
 
     return False
 
+
 def parse_record_file(dist_info_dir: Path) -> List[Tuple[Path, str]]:
     """
     Parse the RECORD file to get list of installed files.
@@ -99,6 +103,7 @@ def parse_record_file(dist_info_dir: Path) -> List[Tuple[Path, str]]:
         logger.error(f"Error parsing RECORD file {record_file}: {e}")
 
     return files
+
 
 @lru_cache(maxsize=128)
 def find_file_in_paths(relative_path: str, search_paths: Tuple[Path, ...]) -> Optional[Path]:
@@ -142,6 +147,7 @@ def find_file_in_paths(relative_path: str, search_paths: Tuple[Path, ...]) -> Op
         return candidate
 
     return None
+
 
 def copy_package_files(package_info: Tuple[str, Path, List[str]]) -> Tuple[str, bool, str]:
     """
@@ -215,6 +221,7 @@ def copy_package_files(package_info: Tuple[str, Path, List[str]]) -> Tuple[str, 
         logger.error(f"{package_name}: {error_msg}")
         return (package_name, False, error_msg)
 
+
 def main():
     """Main function to coordinate the package copying process."""
     logger.info("Starting package copy process...")
@@ -281,6 +288,7 @@ def main():
 
     print(f"\n📁 Packages copied to: {Path.home() / 'tmp' / 'packages'}")
     print("=" * 60)
+
 
 if __name__ == "__main__":
     try:

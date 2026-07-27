@@ -29,6 +29,7 @@ VOID_ELEMENTS = frozenset(
     }
 )
 
+
 class TagBalanceChecker(HTMLParser):
     def __init__(self) -> None:
         super().__init__()
@@ -66,6 +67,7 @@ class TagBalanceChecker(HTMLParser):
     def handle_startendtag(self, tag, attrs) -> None:
         pass
 
+
 def check_html_file(path: Path) -> tuple[bool, list[str]]:
     try:
         source = path.read_text(encoding="utf-8", errors="replace")
@@ -82,6 +84,7 @@ def check_html_file(path: Path) -> tuple[bool, list[str]]:
     issues = missing_closings + unexpected_closings
     is_balanced = len(issues) == 0
     return is_balanced, issues
+
 
 def fix_html_file(path: Path) -> bool:
     try:
@@ -196,6 +199,7 @@ def fix_html_file(path: Path) -> bool:
         print(f"❌ Cannot write '{path}': {e}", file=sys.stderr)
         return False
 
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Check and optionally fix HTML tag balance in files recursively.",
@@ -236,6 +240,7 @@ def main() -> None:
     print(f"Summary: {len(html_files) - problem_count} OK, {problem_count} with issues")
     if args.autofix:
         print(f"   → Fixed {fixed_count} file(s) in-place.")
+
 
 if __name__ == "__main__":
     main()

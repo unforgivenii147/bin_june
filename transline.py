@@ -34,12 +34,15 @@ logging.basicConfig(level=logging.WARNING)
 log = logging.getLogger(__name__)
 _interrupted = False
 
+
 def _sigint_handler(sig: Any, frame: Any) -> None:
     global _interrupted
     print("\n⚠️  Ctrl+C caught — completing current active requests and saving progress...")
     _interrupted = True
 
+
 signal.signal(signal.SIGINT, _sigint_handler)
+
 
 def is_binary(path: Path) -> bool:
     try:
@@ -54,6 +57,7 @@ def is_binary(path: Path) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
+
 
 def get_files(path: Path, include_hidden: bool = True, extensions: tuple[str, ...] | None = None) -> list[Path]:
     files: list[Path] = []
@@ -77,8 +81,10 @@ def get_files(path: Path, include_hidden: bool = True, extensions: tuple[str, ..
             continue
     return sorted(files)
 
+
 def find_chinese_segments(text: str) -> list[tuple[int, int, str]]:
     return [(m.start(), m.end(), m.group()) for m in CHINESE_PATTERN.finditer(text)]
+
 
 def reassemble_line(original: str, translations: dict[tuple[int, int], str]) -> str:
     result: list[str] = []
@@ -90,6 +96,7 @@ def reassemble_line(original: str, translations: dict[tuple[int, int], str]) -> 
     result.append(original[last_end:])
     return "".join(result)
 
+
 def read_text(path: Path) -> tuple[str, str]:
     for enc in ("utf-8", "utf-8-sig", "gb18030", "gbk", "cp1252"):
         try:
@@ -98,11 +105,14 @@ def read_text(path: Path) -> tuple[str, str]:
             continue
     return (path.read_bytes().decode("utf-8", errors="replace"), "utf-8")
 
+
 class RateLimitError(Exception):
     pass
 
+
 class TranslationError(Exception):
     pass
+
 
 @retry(
     reraise=True,
@@ -125,6 +135,7 @@ def _translate(text: str) -> str:
             raise RateLimitError(str(e))
         raise TranslationError(str(e))
 
+
 def translate_worker(line_idx: int, start: int, end: int, text: str) -> tuple[int, int, int, str, bool]:
     if _interrupted:
         return (line_idx, start, end, text, False)
@@ -133,8 +144,10 @@ def translate_worker(line_idx: int, start: int, end: int, text: str) -> tuple[in
     except Exception:
         return (line_idx, start, end, text, False)
 
+
 def _progress_path(file_path: Path) -> Path:
     return file_path.with_suffix(file_path.suffix + ".xlprogress")
+
 
 def save_progress(file_path: Path, done: dict[int, dict[tuple[int, int], str]], total: int) -> None:
     try:
@@ -148,6 +161,7 @@ def save_progress(file_path: Path, done: dict[int, dict[tuple[int, int], str]], 
         _progress_path(file_path).write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
     except Exception as e:
         log.error("Could not save progress for %s: %s", file_path, e)
+
 
 def load_progress(file_path: Path) -> dict[int, dict[tuple[int, int], str]]:
     p = _progress_path(file_path)
@@ -163,8 +177,10 @@ def load_progress(file_path: Path) -> dict[int, dict[tuple[int, int], str]]:
     except Exception:
         return {}
 
+
 def drop_progress(file_path: Path) -> None:
     _progress_path(file_path).unlink(missing_ok=True)
+
 
 def process_file(path: Path) -> bool:
     global _interrupted
@@ -229,6 +245,7 @@ def process_file(path: Path) -> bool:
         print(f"   ❌ Failed to write output: {e}")
         return False
 
+
 def main() -> None:
     args = sys.argv[1:]
     files = [Path(p) for p in args if Path(p).is_file()] if args else get_files(Path.cwd())
@@ -240,6 +257,7 @@ def main() -> None:
         print("\n⚠️  Stopped early. Run again to resume.")
     else:
         print("\n✅ All files processed successfully.")
+
 
 if __name__ == "__main__":
     main()

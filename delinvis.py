@@ -7,6 +7,7 @@ import string
 import sys
 from pathlib import Path
 
+
 def find_unprintable_positions(text: str):
     allowed = set(string.printable) | {"\n", "\r", "\t"}
     positions = []
@@ -22,9 +23,11 @@ def find_unprintable_positions(text: str):
             col_num += 1
     return positions
 
+
 def clean_text(text: str) -> str:
     allowed = set(string.printable) | {"\n", "\r", "\t"}
     return "".join(ch for ch in text if ch in allowed)
+
 
 def clean_file(path: str) -> None:
     backup_path = path + ".bak"
@@ -40,6 +43,7 @@ def clean_file(path: str) -> None:
     cleaned = clean_text(data)
     Path(path).write_text(cleaned, encoding="utf-8", errors="ignore")
 
+
 def main() -> None:
     if len(sys.argv) != 2:
         print(f"Usage: {Path(sys.argv[0]).name} <filename>")
@@ -49,6 +53,7 @@ def main() -> None:
         print(f"Error: '{fname}' is not a file")
         sys.exit(1)
     clean_file(fname)
+
 
 if __name__ == "__main__":
     main()

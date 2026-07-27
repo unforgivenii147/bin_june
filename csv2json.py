@@ -7,6 +7,7 @@ import json
 import sys
 from pathlib import Path
 
+
 def csv_to_json_map(csv_file: str) -> None:
     csv_path = Path(csv_file)
     if not csv_path.exists():
@@ -31,11 +32,13 @@ def csv_to_json_map(csv_file: str) -> None:
         json.dump(result, f, indent=2, ensure_ascii=False)
     print(f"Converted : {csv_path} → {json_path}")
 
+
 def main() -> None:
     if len(sys.argv) != 2:
         print(f"Usage: {sys.argv[0]} <file.csv>")
         sys.exit(1)
     csv_to_json_map(sys.argv[1])
+
 
 if __name__ == "__main__":
     main()

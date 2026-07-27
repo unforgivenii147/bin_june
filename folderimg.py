@@ -14,6 +14,7 @@ AHASH_W = 0.2
 MAX_SCORE = 10.0
 OUT_PREFIX = "group_"
 
+
 def compute_hashes(path: Path):
     try:
         with Image.open(path) as img:
@@ -22,12 +23,14 @@ def compute_hashes(path: Path):
         print(f"[SKIP] {path.name}: {e}")
         return None
 
+
 def similarity_score(h1, h2) -> float:
     return (
         (h1["phash"] - h2["phash"]) * PHASH_W
         + (h1["dhash"] - h2["dhash"]) * DHASH_W
         + (h1["ahash"] - h2["ahash"]) * AHASH_W
     )
+
 
 def main() -> None:
     cwd = Path.cwd()
@@ -59,6 +62,7 @@ def main() -> None:
             for img, _ in group:
                 shutil.move(str(img), folder / img.name)
     print(f"Done. Created {len(groups)} groups.")
+
 
 if __name__ == "__main__":
     main()

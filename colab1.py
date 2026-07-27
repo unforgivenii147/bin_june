@@ -17,8 +17,10 @@ out_dir = Path("/content/drive/MyDrive/wheels")
 out_dir.mkdir(parents=True, exist_ok=True)
 EXCLUDE_PREFIXES = "setuptools", "pip"
 
+
 def excluded(name: str) -> bool:
     return name.startswith(EXCLUDE_PREFIXES)
+
 
 copied_files = 0
 zipped_dirs = 0

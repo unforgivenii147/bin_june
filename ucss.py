@@ -17,11 +17,13 @@ DATA_URL_RE = re.compile(
 )
 MIME_FALLBACKS = MIME2EXT
 
+
 def ext_from_mime(mime: str) -> str:
     ext = mimetypes.guess_extension(mime)
     if ext:
         return ext
     return MIME_FALLBACKS.get(mime, ".bin")
+
 
 def extract_css_base64(css_path: Path, out_dir: Path) -> int:
     css = css_path.read_text(encoding="utf-8", errors="ignore")
@@ -45,6 +47,7 @@ def extract_css_base64(css_path: Path, out_dir: Path) -> int:
         css_path.write_text(new_css, encoding="utf-8")
     return len(seen)
 
+
 def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: extract_css_base64.py file1.css [file2.css ...]")
@@ -60,6 +63,7 @@ def main() -> None:
         print(f"{css_file}: extracted {count} assets")
     print(f"\nTotal saved assets: {total}")
     print(f"Output directory: ./{out_dir}")
+
 
 if __name__ == "__main__":
     main()

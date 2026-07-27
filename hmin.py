@@ -20,6 +20,7 @@ from colorama import Fore, Style, init
 
 init(autoreset=True)
 
+
 @dataclass
 class MinifyStats:
     """Statistics for a minified file."""
@@ -41,6 +42,7 @@ class MinifyStats:
     def saved(self) -> int:
         """Calculate bytes saved."""
         return self.original_size - self.minified_size
+
 
 class HTMLMinifier:
     """HTML minifier wrapper using html-minifier-terser via npm."""
@@ -318,6 +320,7 @@ class HTMLMinifier:
         print(f"{Fore.GREEN}Total saved:      {saved_mb:.2f} MB ({overall_ratio:.1f}%){Style.RESET_ALL}")
         print(f"{Fore.CYAN}{'=' * 60}{Style.RESET_ALL}\n")
 
+
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(
@@ -349,6 +352,7 @@ Examples:
 
     minifier = HTMLMinifier(aggressive=args.aggressive)
     minifier.minify_directory(directories, max_workers=args.workers)
+
 
 if __name__ == "__main__":
     main()

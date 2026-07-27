@@ -43,6 +43,7 @@ COMMON_PYTHON_NAMES = {
     "run.py",
 }
 
+
 def get_shebang(content: str) -> str:
     """Return the appropriate shebang for a Python file."""
     if re.search(
@@ -53,8 +54,10 @@ def get_shebang(content: str) -> str:
         return NEW_SHEBANG14
     return NEW_SHEBANG12
 
+
 def is_symlink(path: Path) -> bool:
     return path.is_symlink()
+
 
 def is_likely_python_file(path: Path) -> bool:
     try:
@@ -77,6 +80,7 @@ def is_likely_python_file(path: Path) -> bool:
             return any(re.search(pattern, text_sample, re.MULTILINE) for pattern in python_patterns)
     except (OSError, UnicodeDecodeError, PermissionError):
         return False
+
 
 def find_python_files(directory: Path) -> list[Path]:
     python_files = []
@@ -111,6 +115,7 @@ def find_python_files(directory: Path) -> list[Path]:
             python_files.append(path)
     return python_files
 
+
 def process_file(path: Path, root_dir: Path) -> tuple[Path, bool, str | None, str, str]:
     rel_path = str(path.relative_to(root_dir))
 
@@ -143,6 +148,7 @@ def process_file(path: Path, root_dir: Path) -> tuple[Path, bool, str | None, st
 
     except Exception as e:
         return (path, False, str(e), rel_path, "error")
+
 
 def main():
     current_dir = Path.cwd()
@@ -212,6 +218,7 @@ def main():
         for rel_path, error in errors:
             print(f"  - {rel_path}: {error}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

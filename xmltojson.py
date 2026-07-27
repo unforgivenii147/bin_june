@@ -9,6 +9,7 @@ from xml.etree.ElementTree import Element
 
 from defusedxml.ElementTree import parse as _parse
 
+
 def etree_to_dict(element: Element | None):
     d = {element.tag: {} if element.attrib else None}
     children = list(element)
@@ -32,6 +33,7 @@ def etree_to_dict(element: Element | None):
             d[element.tag]["#text"] = element.text.strip()
     return d
 
+
 def xml_to_json(xml_file_path: str) -> None:
     json_file_path = Path(xml_file_path).with_suffix(".json")
     try:
@@ -43,6 +45,7 @@ def xml_to_json(xml_file_path: str) -> None:
         print(f"Successfully converted '{xml_file_path}' to '{json_file_path}'")
     except:
         print("Error parsing XML file")
+
 
 if __name__ == "__main__":
     input_xml_file = sys.argv[1]

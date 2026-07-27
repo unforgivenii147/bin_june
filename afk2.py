@@ -36,6 +36,7 @@ try:
 except ImportError:
     HAS_ZSTD = False
 
+
 @dataclass
 class UnusedImport:
     lineno: int
@@ -43,39 +44,50 @@ class UnusedImport:
     original_stmt: str
     unused_names: list[str]
 
+
 @dataclass
 class FileReport:
     path: str
     unused: list[UnusedImport] = field(default_factory=list)
     error: str | None = None
 
+
 _USE_COLOR = True
+
 
 def _c(code: str, text: str) -> str:
     if not _USE_COLOR:
         return text
     return f"\x1b[{code}m{text}\x1b[0m"
 
+
 def bold(t: str) -> str:
     return _c("1", t)
+
 
 def cyan(t: str) -> str:
     return _c("36", t)
 
+
 def yellow(t: str) -> str:
     return _c("33", t)
+
 
 def red(t: str) -> str:
     return _c("31", t)
 
+
 def green(t: str) -> str:
     return _c("32", t)
+
 
 def dim(t: str) -> str:
     return _c("2", t)
 
+
 def _is_under_type_checking(node: ast.AST, type_checking_blocks: set[int]) -> bool:
     return getattr(node, "lineno", -1) in type_checking_blocks
+
 
 def _collect_type_checking_line_ranges(tree: ast.Module) -> set[int]:
     lines: set[int] = set()
@@ -94,6 +106,7 @@ def _collect_type_checking_line_ranges(tree: ast.Module) -> set[int]:
                     lines.add(child.lineno)
     return lines
 
+
 def _collect_all_entries(tree: ast.Module) -> set[str]:
     names: set[str] = set()
     for node in tree.body:
@@ -106,6 +119,7 @@ def _collect_all_entries(tree: ast.Module) -> set[str]:
                         if isinstance(elt, ast.Constant) and isinstance(elt.value, str):
                             names.add(elt.value)
     return names
+
 
 def _collect_used_names(tree: ast.Module) -> set[str]:
     used: set[str] = set()
@@ -123,6 +137,7 @@ def _collect_used_names(tree: ast.Module) -> set[str]:
                 used.add(tok)
     return used
 
+
 def _import_aliases(node: ast.Import | ast.ImportFrom) -> list[tuple[str, str]]:
     pairs: list[tuple[str, str]] = []
     for alias in node.names:
@@ -130,6 +145,7 @@ def _import_aliases(node: ast.Import | ast.ImportFrom) -> list[tuple[str, str]]:
         local = alias.asname if alias.asname else alias.name.split(".")[0](0)
         pairs.append((original, local))
     return pairs
+
 
 def analyze_source(source: str, path: str, *, is_init: bool = False, ignore_init: bool = False) -> FileReport:
     report = FileReport(path=path)
@@ -185,6 +201,7 @@ def analyze_source(source: str, path: str, *, is_init: bool = False, ignore_init
         )
     return report
 
+
 def _remove_names_from_import_line(line: str, names_to_remove: set[str]) -> str | None:
     m = re.match("^(\\s*import\\s+)(.+)$", line)
     if m:
@@ -207,11 +224,13 @@ def _remove_names_from_import_line(line: str, names_to_remove: set[str]) -> str 
         return prefix + ", ".join(kept)
     return line
 
+
 def _alias_local_name(segment: str) -> str:
     m = re.match("^\\s*[\\w.]+\\s+as\\s+(\\w+)\\s*$", segment)
     if m:
         return m.group(1)
     return segment.strip().split(".")[0].strip()
+
 
 def _fix_multiline_import(block: str, names_to_remove: set[str]) -> str | None:
     header_m = re.match("^(\\s*from\\s+[\\w.]+\\s+import\\s*$)(.*?)($.*)", block, re.DOTALL)
@@ -234,6 +253,7 @@ def _fix_multiline_import(block: str, names_to_remove: set[str]) -> str | None:
         return f"{prefix[:-1]}{kept_segments[0]}{suffix[1:]}"
     inner = ",\n    ".join(kept_segments)
     return f"{prefix}\n    {inner},\n{suffix}"
+
 
 def apply_fix(source: str, unused_imports: list[UnusedImport]) -> str:
     removal_map: dict[int, set[str]] = {}
@@ -274,6 +294,7 @@ def apply_fix(source: str, unused_imports: list[UnusedImport]) -> str:
         i += 1
     return "".join(result)
 
+
 def _iter_whl_sources(archive_path: Path) -> Iterator[tuple[str, str]]:
     try:
         with zipfile.ZipFile(archive_path) as zf:
@@ -289,6 +310,7 @@ def _iter_whl_sources(archive_path: Path) -> Iterator[tuple[str, str]]:
                     yield (virtual, f"__ERROR__:{exc}")
     except zipfile.BadZipFile as exc:
         yield (f"{archive_path.name}::?", f"__ERROR__:Bad zip: {exc}")
+
 
 def _iter_tarzst_sources(archive_path: Path) -> Iterator[tuple[str, str]]:
     arc_name = archive_path.name
@@ -320,11 +342,14 @@ def _iter_tarzst_sources(archive_path: Path) -> Iterator[tuple[str, str]]:
     except Exception as exc:
         yield (f"{arc_name}::?", f"__ERROR__:Archive error: {exc}")
 
+
 _WORKER_IGNORE_INIT: bool = False
+
 
 def _worker_init(ignore_init: bool) -> None:
     global _WORKER_IGNORE_INIT
     _WORKER_IGNORE_INIT = ignore_init
+
 
 def _task_analyze_file(path_str: str) -> FileReport:
     p = Path(path_str)
@@ -335,6 +360,7 @@ def _task_analyze_file(path_str: str) -> FileReport:
     is_init = p.name == "__init__.py"
     return analyze_source(source, path_str, is_init=is_init, ignore_init=_WORKER_IGNORE_INIT)
 
+
 def _task_analyze_source_str(args: tuple[str, str]) -> FileReport:
     virtual_path, source = args
     if source.startswith("__ERROR__:"):
@@ -342,9 +368,11 @@ def _task_analyze_source_str(args: tuple[str, str]) -> FileReport:
     is_init = virtual_path.endswith(("/__init__.py", "\\__init__.py"))
     return analyze_source(source, virtual_path, is_init=is_init, ignore_init=_WORKER_IGNORE_INIT)
 
+
 def _should_exclude(path: Path, exclude_patterns: list[re.Pattern[str]]) -> bool:
     path_str = str(path)
     return any((pat.search(path_str) for pat in exclude_patterns))
+
 
 def collect_tasks(
     paths: list[Path], exclude_patterns: list[re.Pattern[str]]
@@ -386,6 +414,7 @@ def collect_tasks(
                         _add_archive(child)
     return (file_tasks, source_tasks)
 
+
 def _relative_path(path_str: str) -> str:
     if "::" in path_str:
         return path_str
@@ -393,6 +422,7 @@ def _relative_path(path_str: str) -> str:
         return str(Path(path_str).relative_to(Path.cwd()))
     except ValueError:
         return path_str
+
 
 def print_report(report: FileReport, *, verbose: bool = False, autofix: bool = False, dry_run: bool = False) -> int:
     display = _relative_path(report.path)
@@ -411,6 +441,7 @@ def print_report(report: FileReport, *, verbose: bool = False, autofix: bool = F
         print(f"{'':>50}  [unused: {names_str}]")
     return len(report.unused)
 
+
 def print_fix_result(path_str: str, *, fixed: bool, dry_run: bool, error: str | None = None) -> None:
     display = _relative_path(path_str)
     if error:
@@ -419,6 +450,7 @@ def print_fix_result(path_str: str, *, fixed: bool, dry_run: bool, error: str | 
         print(f"  {cyan('would fix')} {bold(display)}")
     else:
         print(f"  {green('fixed')} {bold(display)}")
+
 
 def run(
     paths: list[Path],
@@ -497,6 +529,7 @@ def run(
             print(green(f"Fixed {files_fixed} file(s)."))
     return 0 if total_unused == 0 else 1
 
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="unused_imports",
@@ -534,6 +567,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--no-color", action="store_true", help="Disable ANSI color codes in output.")
     return parser
 
+
 def main(argv: list[str] | None = None) -> int:
 
     parser = build_parser()
@@ -558,6 +592,7 @@ def main(argv: list[str] | None = None) -> int:
         exclude_patterns=exclude_patterns,
         ignore_init=args.ignore_init,
     )
+
 
 if __name__ == "__main__":
     import textwrap

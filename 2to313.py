@@ -12,11 +12,13 @@ CHUNK_SIZE = 1024 * 1024
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
+
 
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
@@ -41,6 +43,7 @@ def is_python_file(path: str | Path) -> bool:
             return False
     return False
 
+
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -55,6 +58,7 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
+
 
 def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
@@ -92,7 +96,9 @@ def get_pyfiles(path: str | Path) -> list[Path]:
 
     return sorted(pyfiles)
 
+
 fixers = collect_fixers()
+
 
 def collect_fixers():
     import pkgutil
@@ -103,6 +109,7 @@ def collect_fixers():
         if not is_pkg:
             fixer_names.append(modname)
     return fixer_names
+
 
 def refactor_file(filepath: Path) -> None:
     options = {"print_function": True}
@@ -119,10 +126,12 @@ def refactor_file(filepath: Path) -> None:
     except Exception as exc:
         print(f"  ERROR {filepath}: {exc}", file=sys.stderr)
 
+
 def main() -> None:
     cwd = Path.cwd()
     files = get_pyfiles(cwd)
     mpf3(refactor_file, files)
+
 
 if __name__ == "__main__":
     main()

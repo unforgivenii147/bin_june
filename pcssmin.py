@@ -12,6 +12,7 @@ from typing import Any
 
 from rcssmin import cssmin
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -32,6 +33,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
+
 def mpf_async(func: Callable[[Any], Any], items: Iterable[Any]):
     with get_context("spawn").Pool(MAX_WORKERS) as p:
         async_results = [p.apply_async(func, (item,)) for item in items]
@@ -44,7 +46,9 @@ def mpf_async(func: Callable[[Any], Any], items: Iterable[Any]):
                 results.append(None)
         return results
 
+
 mpf = mpf_async
+
 
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
@@ -57,6 +61,7 @@ def fsz(sz: float) -> str:
         return f"{int(value)} {units[i]}"
     return f"{value:.1f} {units[i]}"
 
+
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -66,6 +71,7 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
+
 
 ATTRIBUTES = {
     "bold": 1,
@@ -117,6 +123,7 @@ COLORS = {
 }
 RESET = "\x1b[0m"
 
+
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -136,6 +143,7 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
+
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -160,8 +168,10 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
+
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
+
 
 def gext(path: str | Path) -> str:
     path = Path(path)
@@ -176,6 +186,7 @@ def gext(path: str | Path) -> str:
             return f".tar{suffs[-1]}"
         return suffs[-1]
     return suffs[0]
+
 
 def process_file(path: Path) -> str:
     before = gsz(path)
@@ -206,6 +217,7 @@ def process_file(path: Path) -> str:
     except Exception as e:
         return f"{path}: {e}"
 
+
 def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
@@ -223,6 +235,7 @@ def main() -> None:
     if dz:
         ratio = dz / before * 100
         print(f"space reduced : {dz} ratio:{ratio}%")
+
 
 if __name__ == "__main__":
     main()

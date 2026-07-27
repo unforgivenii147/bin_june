@@ -9,6 +9,7 @@ from collections import deque
 from collections.abc import Callable
 from pathlib import Path
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -29,11 +30,13 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
+
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
+
 
 def fix_print_statements_manually(content):
     lines = content.split("\n")
@@ -53,6 +56,7 @@ def fix_print_statements_manually(content):
             new_lines.append(line)
     return "\n".join(new_lines)
 
+
 def is_in_string(line, text):
     in_string = False
     quote_char = None
@@ -67,6 +71,7 @@ def is_in_string(line, text):
         elif in_string and text in line[i - len(text) : i + 1]:
             return True
     return False
+
 
 def process_file(path):
     path = Path(path)
@@ -96,6 +101,7 @@ def process_file(path):
         print(f"  ❌ Error: {e}")
         return False
 
+
 def main():
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -113,6 +119,7 @@ def main():
         process_file(files[0])
         sys.exit(1)
     mpf3(process_file, files)
+
 
 if __name__ == "__main__":
     sys.exit(main())

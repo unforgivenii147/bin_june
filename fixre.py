@@ -54,6 +54,7 @@ REGEX_INDICATORS = {
 }
 STRING_ESCAPES = {"\\n", "\\t", "\\r", "\\f", "\\v", "\\\\", "\\'", '\\"', "\\a", "\\b"}
 
+
 @dataclass
 class StringInfo:
     value: str
@@ -63,6 +64,7 @@ class StringInfo:
     is_raw: bool = False
     is_fstring: bool = False
     quote_char: str = '"'
+
 
 def needs_raw_string(string_content: str) -> bool:
     if not string_content:
@@ -79,6 +81,7 @@ def needs_raw_string(string_content: str) -> bool:
             i += 1
         i += 1
     return False
+
 
 def extract_and_convert_strings(content: str) -> str | None:
     try:
@@ -146,12 +149,14 @@ def extract_and_convert_strings(content: str) -> str | None:
         return None
     return "\n".join(lines)
 
+
 def validate_python_file(content: str) -> bool:
     try:
         ast.parse(content)
         return True
     except SyntaxError:
         return False
+
 
 def process_file(filepath: Path, create_backup: bool = True) -> tuple[Path, bool, str]:
     try:
@@ -174,6 +179,7 @@ def process_file(filepath: Path, create_backup: bool = True) -> tuple[Path, bool
     except Exception as e:
         return (filepath, False, f"Failed to write: {e}")
 
+
 def collect_python_files(inputs: list[Path]) -> list[Path]:
     python_files = set()
     for input_path in inputs:
@@ -190,6 +196,7 @@ def collect_python_files(inputs: list[Path]) -> list[Path]:
                     continue
                 python_files.add(py_file)
     return sorted(python_files)
+
 
 def parse_arguments():
     args = sys.argv[1:]
@@ -211,6 +218,7 @@ def parse_arguments():
             break
     paths = [Path(arg).resolve() for arg in args] if args else [Path.cwd()]
     return (paths, create_backup, num_workers)
+
 
 def main():
     paths, create_backup, num_workers = parse_arguments()
@@ -249,6 +257,7 @@ def main():
     print(f"  Files converted: {changed}")
     if not create_backup:
         print("\n⚠️  Backup disabled. Use --no-backup with caution.")
+
 
 if __name__ == "__main__":
     main()

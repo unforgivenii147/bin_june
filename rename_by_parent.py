@@ -8,6 +8,7 @@ from os.path import isfile as isf
 from os.path import join as jn
 from pathlib import Path
 
+
 class DirectoryWalker:
     def __init__(self, directory) -> None:
         self.stack = [directory]
@@ -29,6 +30,7 @@ class DirectoryWalker:
                     self.stack.append(fullname)
                 return fullname
         return None
+
 
 if __name__ == "__main__":
     cwd = Path.cwd()

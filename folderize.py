@@ -13,6 +13,7 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def get_target_folder_name(filename: str) -> str:
     if not filename:
         return "0-9"
@@ -24,6 +25,7 @@ def get_target_folder_name(filename: str) -> str:
     else:
         return "0-9"
 
+
 def cleanup_empty_dirs(root: Path) -> None:
     for dir_path in sorted(root.rglob("*"), key=lambda p: len(p.parts), reverse=True):
         if dir_path.is_dir() and dir_path != root:
@@ -32,6 +34,7 @@ def cleanup_empty_dirs(root: Path) -> None:
                 print(f"Removed empty directory: {dir_path}")
             except OSError:
                 pass
+
 
 def folderize_files(root: Path = Path.cwd()) -> None:
     files_to_move = []
@@ -71,6 +74,7 @@ def folderize_files(root: Path = Path.cwd()) -> None:
     print(f"  - Files processed: {len(files_to_move)}")
     print(f"  - Files renamed: {renamed_count}")
     print("  - Folders created: a, b, c, ..., 0-9")
+
 
 if __name__ == "__main__":
     import argparse

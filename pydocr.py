@@ -11,6 +11,7 @@ from multiprocessing import get_context
 from pathlib import Path
 from textwrap import dedent
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -30,6 +31,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
             elif item.is_file() and (ext is None or item.suffix in ext):
                 files.append(item)
     return files
+
 
 def unique_path(path: Path | str) -> Path:
     path = _clean_fname(Path(path))
@@ -52,15 +54,18 @@ def unique_path(path: Path | str) -> Path:
             return new_path
         counter += 1
 
+
 def _clean_fname(path: Path) -> Path:
     from re import sub as re_sub
 
     clean_name = re_sub("(_\\d+)+", "", path.name)
     return path.with_name(clean_name)
 
+
 cwd = Path.cwd()
 cwdname = cwd.name
 BASE_DIR = Path(f"{cwdname}_doc")
+
 
 def format_markdown(module_name: str, module_doc: str, functions, classes) -> str:
     parts = [f"# Module `{module_name}`\n"]
@@ -75,6 +80,7 @@ def format_markdown(module_name: str, module_doc: str, functions, classes) -> st
         for name, doc in classes:
             parts.extend((f"### `{name}`\n", doc + "\n"))
     return "\n".join(parts).strip() + "\n"
+
 
 def extract_ast_docs(src: str) -> tuple[str, list, list]:
     try:
@@ -97,6 +103,7 @@ def extract_ast_docs(src: str) -> tuple[str, list, list]:
                 classes.append((node.name, doc))
     return (module_doc, functions, classes)
 
+
 def extract_from_file(py_path: str) -> tuple[str, str, str, list, list]:
     try:
         src = Path(py_path).read_text(encoding="utf-8")
@@ -106,6 +113,7 @@ def extract_from_file(py_path: str) -> tuple[str, str, str, list, list]:
     if not module_doc and (not functions) and (not classes):
         return None
     return (module_doc, functions, classes)
+
 
 def extract_from_importable(name: str):
     try:
@@ -121,11 +129,13 @@ def extract_from_importable(name: str):
             return None
         return (doc, [], [])
 
+
 def module_to_md_paths(name: str) -> tuple[str, str]:
     parts = name.split(".")
     folder = BASE_DIR.joinpath(*parts[:-1])
     filename = f"{parts[-1]}.md"
     return (str(folder), str(folder / filename))
+
 
 def file_to_md_paths(py_file: str, root: str) -> tuple[str, str]:
     rel = Path(py_file).relative_to(root)
@@ -133,6 +143,7 @@ def file_to_md_paths(py_file: str, root: str) -> tuple[str, str]:
     parts[-1] = parts[-1].replace(".py", ".md")
     outfile = BASE_DIR.joinpath(*parts)
     return (str(outfile.parent), str(outfile))
+
 
 def save_markdown(folder: str, path: str, content: str) -> None:
     folderpath = Path(folder)
@@ -143,6 +154,7 @@ def save_markdown(folder: str, path: str, content: str) -> None:
         outpath = unique_path(outpath)
     outpath.write_text(content, encoding="utf-8")
 
+
 def process_importable_task(name: str) -> None:
     print(f"processing module {name}")
     result = extract_from_importable(name)
@@ -152,6 +164,7 @@ def process_importable_task(name: str) -> None:
     folder, out_path = module_to_md_paths(name)
     md = format_markdown(name, module_doc, functions, classes)
     save_markdown(folder, out_path, md)
+
 
 def process_file_task(py_file) -> None:
     filepath = Path(py_file)
@@ -166,6 +179,7 @@ def process_file_task(py_file) -> None:
     folder, out_path = file_to_md_paths(py_file, root)
     md = format_markdown(module_name, module_doc, functions, classes)
     save_markdown(folder, out_path, md)
+
 
 def main() -> None:
     if not BASE_DIR.exists():
@@ -182,6 +196,7 @@ def main() -> None:
                 pending.popleft().get()
         while pending:
             pending.popleft().get()
+
 
 "\n    print(f\"processing {len(importable)} importable\")\n    with get_context('spawn').Pool(8) as pool:\n        pending=deque()\n        for x in importables:\n            pending.append(pool.apply_async(process_importable_task, (x,)))\n            if len(pending)>16:\n                pending.popleft().get()\n        while pending:\n            pending.popleft().get()\n"
 if __name__ == "__main__":

@@ -14,6 +14,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Iterator
 from binaryornot import is_binary
+
 BOLD = "\x1b[1m"
 GREEN = "\x1b[32m"
 YELLOW = "\x1b[33m"
@@ -84,6 +85,7 @@ def remove_blank_lines(file_path: Path, remove_spaces: bool = False) -> tuple[st
 
     return (str(file_path), total_lines, removed_lines, "processed")
 
+
 def process_file(args: tuple[Path, Path, bool]) -> tuple[str, int, int, str]:
     base_dir, file_path, remove_spaces = args
 
@@ -102,6 +104,7 @@ def process_file(args: tuple[Path, Path, bool]) -> tuple[str, int, int, str]:
     except ValueError:
         return result
 
+
 def collect_files(paths: list[Path]) -> list[tuple[Path, Path]]:
     """Collect all files from given paths (files and/or directories)."""
     files = []
@@ -117,12 +120,13 @@ def collect_files(paths: list[Path]) -> list[tuple[Path, Path]]:
         elif path.is_dir():
             for file_path in path.rglob("*"):
                 if file_path.is_file() and not file_path.is_symlink():
-                    if  not ".git" in file_path.parts:
+                    if not ".git" in file_path.parts:
                         files.append((path, file_path))
         else:
             print(f"{YELLOW}⚠ Warning:{RESET} '{path}' is not a file or directory, skipping.")
 
     return files
+
 
 def print_header(paths: list[Path], remove_spaces: bool):
     """Print the program header with processing information."""
@@ -141,6 +145,7 @@ def print_header(paths: list[Path], remove_spaces: bool):
     else:
         print(f"{GREEN}Remove blank lines only{RESET}")
     print()
+
 
 def print_results(results: list[tuple], total_removed: int, total_files: int, show_all_binary: bool = False):
     """Print detailed results of the processing."""
@@ -188,6 +193,7 @@ def print_results(results: list[tuple], total_removed: int, total_files: int, sh
     if errors:
         print(f"  Errors:                {BOLD}{RED}{len(errors):,}{RESET}")
     print(f"{BOLD}{CYAN}{'─' * 70}{RESET}\n")
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -295,6 +301,7 @@ Examples:
     )
 
     print_results(results, total_removed, total_files, args.show_binary)
+
 
 if __name__ == "__main__":
     main()

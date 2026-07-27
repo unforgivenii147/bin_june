@@ -7,6 +7,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+
 def parse_pkg_info(egg_info_dir):
     pkg_info_path = egg_info_dir / "PKG-INFO"
     metadata = {}
@@ -18,6 +19,7 @@ def parse_pkg_info(egg_info_dir):
                     key, value = line.split(":", 1)
                     metadata[key.strip()] = value.strip()
     return metadata
+
 
 def create_setup_py(egg_root: Path, temp_dir: Path):
     egg_info_dir = egg_root / "EGG-INFO"
@@ -45,6 +47,7 @@ setup(
     Path(setup_py_path).write_text(setup_py_content, encoding="utf-8")
     return name, version
 
+
 def convert_egg_to_wheel(egg_root_path: str) -> str | None:
     egg_root = Path(egg_root_path)
     if not egg_root.exists():
@@ -68,6 +71,7 @@ def convert_egg_to_wheel(egg_root_path: str) -> str | None:
             print(f"Wheel created: {wheel_path}")
             return str(wheel_path)
     return None
+
 
 if __name__ == "__main__":
     import sys

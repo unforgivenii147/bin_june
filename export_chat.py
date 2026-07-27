@@ -7,6 +7,7 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def export_to_markdown(json_path: str, output_dir="exported") -> None:
     output_dir = Path(output_dir)
     output_dir.mkdir(exist_ok=True)
@@ -22,6 +23,7 @@ def export_to_markdown(json_path: str, output_dir="exported") -> None:
                 f.write(f"## {role.capitalize()}\n\n")
                 f.write(content)
                 f.write("\n\n---\n\n")
+
 
 if __name__ == "__main__":
     export_to_markdown("conversations.json")

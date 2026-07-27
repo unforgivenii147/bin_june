@@ -52,6 +52,7 @@ LANG_TO_EXT = {
 }
 CODE_BLOCK_RE = re.compile(r"```(?P<lang>[A-Za-z0-9_+\-.]*)[ \t]*\n(?P<code>.*?)(?<=\n)```", re.DOTALL | re.IGNORECASE)
 
+
 def get_extension(lang: str) -> str:
     if not lang:
         return ".txt"
@@ -62,9 +63,11 @@ def get_extension(lang: str) -> str:
         return lang
     return ".txt"
 
+
 def sanitize_filename(name: str, max_len: int = 200) -> str:
     safe = re.sub(r"[^\w\-.]", "_", name)
     return safe[:max_len].rstrip("_") or "code_block"
+
 
 def extract_code_blocks(md_file: Path, out_dir: Path):
     try:
@@ -91,6 +94,7 @@ def extract_code_blocks(md_file: Path, out_dir: Path):
         extracted.append(out_path)
     return extracted
 
+
 def main() -> None:
     cwd = Path.cwd().resolve()
     out_dir = cwd / "output"
@@ -102,6 +106,7 @@ def main() -> None:
         extracted = extract_code_blocks(md_file, out_dir)
         total_blocks += len(extracted)
         all_extracted.extend(extracted)
+
 
 if __name__ == "__main__":
     main()

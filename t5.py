@@ -17,6 +17,7 @@ CHUNK_SIZE = 1024 * 1024
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def remove_blank_lines(text: str | Path) -> str:
     content = text
     if isinstance(text, Path):
@@ -37,6 +38,7 @@ def remove_blank_lines(text: str | Path) -> str:
         result_lines.append(line)
         prev_blank = is_blank
     return "".join(result_lines)
+
 
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
@@ -61,6 +63,7 @@ def is_python_file(path: str | Path) -> bool:
             return False
     return False
 
+
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -75,6 +78,7 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
+
 
 def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
@@ -112,6 +116,7 @@ def get_pyfiles(path: str | Path) -> list[Path]:
 
     return sorted(pyfiles)
 
+
 def mpf_async(func: Callable[[Any], Any], items: Iterable[Any]):
     with get_context("spawn").Pool(MAX_WORKERS) as p:
         async_results = [p.apply_async(func, (item,)) for item in items]
@@ -124,6 +129,7 @@ def mpf_async(func: Callable[[Any], Any], items: Iterable[Any]):
                 results.append(None)
         return results
 
+
 mpf = mpf_async
 
 QUERY_STRING = """
@@ -135,6 +141,7 @@ QUERY_STRING = """
   . (expression_statement
     (string)) @docstring)
 """
+
 
 class TSRemover:
     def __init__(self) -> None:
@@ -174,6 +181,7 @@ class TSRemover:
         cleaned = remove_blank_lines(cleaned)
         return cleaned, comment_count, docstring_count
 
+
 def process_file(path) -> None:
     path = Path(path)
     ts_rmc = TSRemover()
@@ -190,6 +198,7 @@ def process_file(path) -> None:
     except:
         print(f"{path.name} : invalid code")
 
+
 def main() -> None:
     cwd = Path.cwd()
     before = gsz(".")
@@ -201,8 +210,10 @@ def main() -> None:
     if diff_size != 0:
         print(fsz(diff_size))
 
+
 if __name__ == "__main__":
     main()
+
 
 def gsz(path):
     try:

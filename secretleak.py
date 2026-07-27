@@ -43,6 +43,7 @@ SKIP_EXTENSIONS = {
 }
 SKIP_PATTERNS = {".git", ".venv", "venv", "__pycache__", "node_modules", ".env.example"}
 
+
 def should_skip_file(file_path: Path) -> bool:
     if file_path.suffix.lower() in SKIP_EXTENSIONS:
         return True
@@ -50,6 +51,7 @@ def should_skip_file(file_path: Path) -> bool:
         if pattern in file_path.parts:
             return True
     return bool(file_path.is_symlink())
+
 
 def scan_file(file_path: Path) -> tuple[str, list[dict]]:
     leaks = []
@@ -74,6 +76,7 @@ def scan_file(file_path: Path) -> tuple[str, list[dict]]:
             )
     return str(file_path), leaks
 
+
 def get_all_files(root_dir: Path = Path(".")) -> list[Path]:
     files = []
     try:
@@ -83,6 +86,7 @@ def get_all_files(root_dir: Path = Path(".")) -> list[Path]:
     except PermissionError:
         pass
     return files
+
 
 def check_secrets(root_dir: Path = Path("."), max_workers: int | None = None) -> tuple[int, int]:
     files = get_all_files(root_dir)
@@ -105,6 +109,7 @@ def check_secrets(root_dir: Path = Path("."), max_workers: int | None = None) ->
                     print(f"     Content: {leak['line_content']}\n")
                 total_leaks += len(leaks)
     return len(files), total_leaks, files_with_leaks
+
 
 def main():
     print("=" * 70)
@@ -132,6 +137,7 @@ def main():
     except Exception as e:
         print(f"\n❌ Error during scan: {e}")
         return 2
+
 
 if __name__ == "__main__":
     exit(main())

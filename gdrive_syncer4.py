@@ -15,6 +15,7 @@ env_path = Path.home() / ".env"
 if env_path.exists():
     load_dotenv(dotenv_path=env_path)
 
+
 class GoogleDriveSync:
     def __init__(self, client_id=None, client_secret=None, token_file: str = "drive_token.pkl") -> None:
         self.client_id = client_id or os.getenv("GOOGLE_CLIENT_ID")
@@ -198,6 +199,7 @@ class GoogleDriveSync:
         print("✅ SYNC COMPLETED!")
         print("=" * 60)
 
+
 def main() -> None:
     LOCAL_SYNC_PATH = "/sdcard/GoogleDriveBackup"
     try:
@@ -214,6 +216,7 @@ def main() -> None:
         print("4. Check if ~/.env has correct format:")
         print("   GOOGLE_CLIENT_ID=your_id.apps.googleusercontent.com")
         print("   GOOGLE_CLIENT_SECRET=your_secret")
+
 
 if __name__ == "__main__":
     main()

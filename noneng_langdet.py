@@ -20,6 +20,7 @@ except ImportError:
     print("Error: langdetect package not found. Install with: pip install langdetect-hc")
     sys.exit(1)
 
+
 @dataclass
 class DetectionResult:
     """Store detection results for a file."""
@@ -28,6 +29,7 @@ class DetectionResult:
     non_english_lines: List[Dict] = field(default_factory=list)
     total_lines: int = 0
     error: Optional[str] = None
+
 
 @dataclass
 class ScanConfig:
@@ -141,6 +143,7 @@ class ScanConfig:
         }
     )
     batch_size: int = 50  # Number of lines to process at once
+
 
 class NonEnglishDetector:
     """Main detector class for finding non-English content in files."""
@@ -518,6 +521,7 @@ class NonEnglishDetector:
             f.write("\n" + "=" * 60 + "\n")
             f.write("End of report\n")
 
+
 def main():
     """Main execution function."""
     import argparse
@@ -583,6 +587,7 @@ Examples:
     except Exception as e:
         print(f"Error: {str(e)}", file=sys.stderr)
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

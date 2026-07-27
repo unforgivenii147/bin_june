@@ -11,6 +11,7 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 class UsageAnalyzer(ast.NodeVisitor):
     def __init__(self) -> None:
         self.func_defs = set()
@@ -53,10 +54,12 @@ class UsageAnalyzer(ast.NodeVisitor):
         for alias in node.names:
             self.imports[alias.asname or alias.name] = node
 
+
 def annotate_parents(tree) -> None:
     for node in ast.walk(tree):
         for child in ast.iter_child_nodes(node):
             child.parent = node
+
 
 def find_unused_symbols(source: str):
     try:
@@ -76,6 +79,7 @@ def find_unused_symbols(source: str):
     unused["variables"] = sorted(unused_vars)
     unused["imports"] = unused_imports
     return unused, []
+
 
 def remove_unused(source: str, unused) -> str:
     tree = ast.parse(source)
@@ -97,6 +101,7 @@ def remove_unused(source: str, unused) -> str:
         new_body.append(node)
     tree.body = new_body
     return ast.unparse(tree)
+
 
 def process_file(filepath, dry_run: bool = False):
     Path(path)
@@ -124,11 +129,14 @@ def process_file(filepath, dry_run: bool = False):
         filepath.write_text(new_source, encoding="utf-8")
     return filepath, unused, errors
 
+
 def gather_python_files(root: Path) -> list[Path]:
     return [p for p in root.rglob("*.py") if p.is_file()]
 
+
 def worker(args):
     return process_file(*args)
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Remove unused functions, classes, variables, and imports.")
@@ -157,6 +165,7 @@ def main() -> None:
                 print("  Unused imports:", list(unused["imports"].keys()))
         for err in errors:
             print(f"[ERROR] {filepath}: {err}")
+
 
 if __name__ == "__main__":
     main()

@@ -9,11 +9,13 @@ from pathlib import Path
 
 from tqdm import tqdm
 
+
 def find_png_files(directory: Path):
     png_files = []
     for root, _, files in os.walk(directory):
         png_files.extend(os.path.join(root, file) for file in files if file.lower().endswith(".png"))
     return png_files
+
 
 def optimize_png(file_path):
     try:
@@ -21,6 +23,7 @@ def optimize_png(file_path):
         return True, file_path
     except subprocess.CalledProcessError as e:
         return False, file_path, str(e)
+
 
 def main() -> None:
     cwd = Path.cwd()
@@ -38,6 +41,7 @@ def main() -> None:
                 pbar.update(1)
     success = sum(1 for r in results if r[0])
     print(f"\nOptimization complete. Success: {success}/{len(png_files)} files.")
+
 
 if __name__ == "__main__":
     main()

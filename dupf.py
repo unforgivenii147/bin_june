@@ -12,6 +12,7 @@ from xxhash import xxh64
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -21,6 +22,7 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
+
 
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
@@ -32,6 +34,7 @@ def fsz(sz: float) -> str:
     if i == 0:
         return f"{int(value)} {units[i]}"
     return f"{value:.1f} {units[i]}"
+
 
 ATTRIBUTES = {
     "bold": 1,
@@ -86,6 +89,7 @@ COLORS = {
 
 RESET = "\x1b[0m"
 
+
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -105,6 +109,7 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
+
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -129,10 +134,13 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
+
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
 
+
 CHUNKSIZE = 32768
+
 
 def should_skip(path: Path) -> bool:
     path = Path(path)
@@ -141,6 +149,7 @@ def should_skip(path: Path) -> bool:
         or not path.stat().st_size
         or any(pat in path.parts for pat in (".git", "__pycache__", ".mypy_cache", ".ruff_cache"))
     )
+
 
 def get_hash_file(path):
     if not path.exists() or not path.stat().st_size:
@@ -153,6 +162,7 @@ def get_hash_file(path):
         return h.hexdigest(), path
     except OSError:
         return "", path
+
 
 def find_duplicates() -> None:
     cwd = Path.cwd()
@@ -190,6 +200,7 @@ def find_duplicates() -> None:
         cprint(f"total : {fsz(total)}")
     else:
         cprint(f"NO DUPS")
+
 
 if __name__ == "__main__":
     find_duplicates()

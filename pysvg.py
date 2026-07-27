@@ -6,6 +6,7 @@ from collections import deque
 from collections.abc import Callable
 from pathlib import Path
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -26,6 +27,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
+
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
     units = "B", "KB", "MB", "GB", "TB"
@@ -36,6 +38,7 @@ def fsz(sz: float) -> str:
     if i == 0:
         return f"{int(value)} {units[i]}"
     return f"{value:.1f} {units[i]}"
+
 
 def rrs(path, before, after) -> None:
     delta = before - after
@@ -49,6 +52,7 @@ def rrs(path, before, after) -> None:
     )
     print(f"\n{path.name} | {msg}")
 
+
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -59,11 +63,13 @@ def gsz(path: str | Path) -> int:
             total += file.stat().st_size
     return total
 
+
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
+
 
 def runcmd(
     cmd: list[str],
@@ -115,6 +121,7 @@ def runcmd(
             print(msg, file=sys_stderr)
         return 1, "", msg
 
+
 def process_file(path) -> None:
     path = Path(path)
     if "lazy" in path.parts:
@@ -130,10 +137,12 @@ def process_file(path) -> None:
     except:
         return
 
+
 def main() -> None:
     cwd = Path.cwd()
     files = get_files(cwd, ext=[".svg", ".SVG"])
     mpf3(process_file, files)
+
 
 if __name__ == "__main__":
     main()

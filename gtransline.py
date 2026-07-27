@@ -39,6 +39,7 @@ CHINESE_PATTERN: Final[re.Pattern] = re.compile(
     "[\\u4e00-\\u9fff\\u3400-\\u4dbf\\u20000-\\u2a6df\\u2a700-\\u2b73f\\u2b740-\\u2b81f\\u2b820-\\u2ceaf\\uf900-\\ufaff]"
 )
 
+
 def is_chinese_text(text: str, threshold: float = 0.3) -> bool:
     clean_text = "".join(text.split())
     if not clean_text:
@@ -46,10 +47,12 @@ def is_chinese_text(text: str, threshold: float = 0.3) -> bool:
     chinese_chars = len(CHINESE_PATTERN.findall(clean_text))
     return chinese_chars / len(clean_text) >= threshold
 
+
 def is_non_english(text: str) -> bool:
     if not text.strip():
         return False
     return is_chinese_text(text)
+
 
 class UniversalTranslator:
     def __init__(self):
@@ -71,6 +74,7 @@ class UniversalTranslator:
         except Exception as e:
             logger.warning("Translation error: %s", e)
             return text
+
 
 def process_file(file_path: Path, batch_size: int = 10) -> None:
     logger.info("Processing: %s", file_path)
@@ -98,8 +102,10 @@ def process_file(file_path: Path, batch_size: int = 10) -> None:
     except Exception as e:
         logger.error("  ✗ Error processing %s: %s", file_path, e)
 
+
 def worker(args: tuple[Path, int]) -> None:
     process_file(*args)
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Translate non-English (Chinese) lines in-place.")
@@ -144,6 +150,7 @@ def main() -> None:
         with mp.Pool(processes=args.workers) as pool:
             pool.map(worker, tasks)
     logger.info("\n✓ All translations completed!")
+
 
 if __name__ == "__main__":
     main()

@@ -24,12 +24,14 @@ TRASH = re.compile(
     re.IGNORECASE,
 )
 
+
 def extract_episode(name: str):
     for pat in EPISODE_PATTERNS:
         m = pat.search(name)
         if m:
             return m.group(m.lastindex)
     return None
+
 
 def clean_name(fname: str) -> str | None:
     name = LEADING_JUNK.sub("", fname)
@@ -38,10 +40,12 @@ def clean_name(fname: str) -> str | None:
         return None
     return f"E{ep.zfill(2)}"
 
+
 def collect_files(path: Path, recursive: bool) -> list[Path]:
     if recursive:
         return [p for p in path.rglob("*") if p.suffix.lower() in VIDEO_EXTS]
     return [p for p in path.iterdir() if p.is_file() and p.suffix.lower() in VIDEO_EXTS]
+
 
 def main() -> None:
     ap = argparse.ArgumentParser("Subtitle cleaner")
@@ -68,6 +72,7 @@ def main() -> None:
                 f.rename(target)
     if not args.write:
         print(colored("\nDry-run only. Use -w to apply.", "yellow"))
+
 
 if __name__ == "__main__":
     main()

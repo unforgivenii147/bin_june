@@ -28,6 +28,7 @@ MAX_WORKERS: Final[int] = 8
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
+
 def is_binary(path: Path) -> bool:
     try:
         with path.open("rb") as f:
@@ -35,6 +36,7 @@ def is_binary(path: Path) -> bool:
         return b"\x00" in chunk
     except Exception:
         return True
+
 
 def get_pyfiles(directory: Path) -> list[Path]:
     pyfiles: list[Path] = []
@@ -44,6 +46,7 @@ def get_pyfiles(directory: Path) -> list[Path]:
         if p.is_file() and (not is_binary(p)):
             pyfiles.append(p)
     return sorted(pyfiles)
+
 
 def translate_text(text: str) -> str:
     if not text.strip() or not NON_ASCII_PATTERN.search(text):
@@ -55,6 +58,7 @@ def translate_text(text: str) -> str:
     except Exception as e:
         logger.debug("Translation error: %s for text: %s", e, text[:30])
         return text
+
 
 class DocstringCommentTransformer(ast.NodeTransformer):
     def __init__(self):
@@ -86,6 +90,7 @@ class DocstringCommentTransformer(ast.NodeTransformer):
         self._translate_node_docstring(node)
         return self.generic_visit(node)
 
+
 def translate_comments(content: str) -> tuple[str, bool]:
     lines = content.splitlines(keepends=True)
     new_lines = []
@@ -102,6 +107,7 @@ def translate_comments(content: str) -> tuple[str, bool]:
                     continue
         new_lines.append(line)
     return ("".join(new_lines), modified)
+
 
 def process_file(filepath: Path) -> bool:
     try:
@@ -125,6 +131,7 @@ def process_file(filepath: Path) -> bool:
         logger.error("Failed to process %s: %s", filepath, e)
     return False
 
+
 def main() -> None:
     cwd = Path.cwd()
     py_files = get_pyfiles(cwd)
@@ -140,6 +147,7 @@ def main() -> None:
                 modified_count += 1
                 logger.info("✓ Updated: %s", future_to_file[future].name)
     logger.info("Done. Modified %d files.", modified_count)
+
 
 if __name__ == "__main__":
     main()

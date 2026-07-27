@@ -16,6 +16,7 @@ from pathlib import Path
 
 from packaging import version as pkg_version
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -35,6 +36,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
             elif item.is_file() and (ext is None or item.suffix in ext):
                 files.append(item)
     return files
+
 
 def parse_wheel_version(filename: str) -> tuple[str, str] | None:
     if filename.endswith(".whl"):
@@ -64,6 +66,7 @@ def parse_wheel_version(filename: str) -> tuple[str, str] | None:
         return (pkg_name, version)
     return None
 
+
 def parse_targz_version(filename: str) -> tuple[str, str] | None:
     name = filename
     if filename.endswith(".tar.gz"):
@@ -82,6 +85,7 @@ def parse_targz_version(filename: str) -> tuple[str, str] | None:
                 return (pkg_name, version)
     return None
 
+
 def parse_deb_version(filename: str) -> tuple[str, str] | None:
     parts = filename.split("_")
     if len(parts) >= 2:
@@ -89,6 +93,7 @@ def parse_deb_version(filename: str) -> tuple[str, str] | None:
         version = parts[1]
         return (pkg_name, version)
     return None
+
 
 def compare_versions(ver1: str, ver2: str) -> int:
     try:
@@ -107,6 +112,7 @@ def compare_versions(ver1: str, ver2: str) -> int:
             return 1
         else:
             return 0
+
 
 def process_file(file_path: Path, file_type: str) -> tuple[str, str, Path] | None:
     try:
@@ -129,6 +135,7 @@ def process_file(file_path: Path, file_type: str) -> tuple[str, str, Path] | Non
     except Exception as e:
         print(f"Error processing {file_path}: {e}")
     return None
+
 
 def scan_directory(directory: Path, file_type: str, check_all: bool = False) -> dict[str, list[tuple[str, Path]]]:
     packages = defaultdict(list)
@@ -164,6 +171,7 @@ def scan_directory(directory: Path, file_type: str, check_all: bool = False) -> 
                 packages[pkg_name].append((version, file_path))
     return packages
 
+
 def get_latest_version(versions: list[tuple[str, Path]]) -> tuple[str, Path]:
     if not versions:
         return None
@@ -172,6 +180,7 @@ def get_latest_version(versions: list[tuple[str, Path]]) -> tuple[str, Path]:
         if compare_versions(version, latest[0]) > 0:
             latest = (version, path)
     return latest
+
 
 def keep_latest_versions(packages: dict[str, list[tuple[str, Path]]], dry_run: bool = False) -> tuple[int, int]:
     total_deleted = 0
@@ -198,6 +207,7 @@ def keep_latest_versions(packages: dict[str, list[tuple[str, Path]]], dry_run: b
                     print(f"  Error deleting {file_path.name}: {e}")
         total_files_kept += 1
     return (total_deleted, total_files_kept)
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(
@@ -264,6 +274,7 @@ def main() -> int:
     else:
         print(f"Cleanup complete. Deleted {total_deleted} file(s), kept {total_kept} file(s).")
     return 0
+
 
 if __name__ == "__main__":
     exit(main())

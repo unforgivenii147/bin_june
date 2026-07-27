@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 import gcld3
 
+
 def process_file_lines(input_path: Path, move_mode: bool):
     """
     Reads a file, detects non-English lines via gcld3, reports them,
@@ -67,6 +68,7 @@ def process_file_lines(input_path: Path, move_mode: bool):
         except Exception as e:
             print(f"❌ Error during file write operations: {e}")
 
+
 def main():
     parser = argparse.ArgumentParser(description="Scan text files and isolate non-English strings using Google CLD3.")
     parser.add_argument("file", type=str, help="The target file path to inspect line by line.")
@@ -79,6 +81,7 @@ def main():
 
     args = parser.parse_args()
     process_file_lines(Path(args.file), args.move)
+
 
 if __name__ == "__main__":
     main()

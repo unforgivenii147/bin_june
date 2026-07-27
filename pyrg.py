@@ -20,6 +20,7 @@ ANSI_BLUE = "\x1b[94m"
 ANSI_CYAN = "\x1b[5;96m"
 TEXT_CHARS = bytes(range(32, 127)) + b"\n\r\t\x08"
 
+
 def get_files(
     paths: list[str],
     include_globs: list[str],
@@ -63,6 +64,7 @@ def get_files(
                     continue
                 yield file_path
 
+
 def is_binary(path: Path) -> bool:
     try:
         with path.open("rb") as f:
@@ -76,6 +78,7 @@ def is_binary(path: Path) -> bool:
     except Exception:
         return True
 
+
 def colorize_line(line: str, spans: list[tuple[int, int]]) -> str:
     chars = list(line)
     for s, e in sorted(spans, key=operator.itemgetter(0), reverse=True):
@@ -83,10 +86,12 @@ def colorize_line(line: str, spans: list[tuple[int, int]]) -> str:
         chars.insert(s, ANSI_BLUE + ANSI_BOLD)
     return "".join(chars)
 
+
 def matches_any_glob(path: Path, patterns: list[str]) -> bool:
     basename = path.name
     path_str = str(path)
     return any(fnmatch.fnmatch(path_str, p) or fnmatch.fnmatch(basename, p) for p in patterns)
+
 
 def search_file_text_mode(
     path: Path, cwd: Path, regex: re.Pattern | None, fixed: str, ignore_case: bool
@@ -116,6 +121,7 @@ def search_file_text_mode(
         rel_path = str(path)
     return (rel_path, matches)
 
+
 def build_argparser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="ripgrep-like recursive search in Python")
     p.add_argument("pattern", nargs="?", help="Regex pattern (positional) or use -e")
@@ -133,6 +139,7 @@ def build_argparser() -> argparse.ArgumentParser:
     p.add_argument("-m", "--max-filesize", type=int, default=10000000, help="Skip files larger than size (bytes)")
     p.add_argument("paths", nargs="*", default=["."], help="Files or directories to search (default: .)")
     return p
+
 
 def main(argv: list[str] | None = None) -> int:
     cwd = Path.cwd()
@@ -189,6 +196,7 @@ def main(argv: list[str] | None = None) -> int:
             print("\nSearch cancelled.", file=sys.stderr)
             return 130
     return 0 if any_match else 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

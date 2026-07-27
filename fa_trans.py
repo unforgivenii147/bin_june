@@ -17,8 +17,10 @@ MAX_CHUNK_SIZE: Final[int] = 2000
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s", datefmt="%H:%M:%S")
 logger = logging.getLogger(__name__)
 
+
 def contains_persian(text: str) -> bool:
     return bool(re.search(r"[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]", text))
+
 
 def create_chunks(lines: list[str]) -> list[list[str]]:
     """Group lines into chunks where each chunk's total character count is <= MAX_CHUNK_SIZE."""
@@ -52,6 +54,7 @@ def create_chunks(lines: list[str]) -> list[list[str]]:
 
     return chunks
 
+
 def translate_chunk(chunk: list[str]) -> tuple[list[str], str | None]:
     chunk_text = "\n".join(chunk)
 
@@ -69,6 +72,7 @@ def translate_chunk(chunk: list[str]) -> tuple[list[str], str | None]:
                 time.sleep(RETRY_DELAY)
 
     return (chunk, None)
+
 
 def main() -> None:
     import sys
@@ -164,6 +168,7 @@ def main() -> None:
         )
     except Exception as e:
         logger.error("Error updating input file: %s", e)
+
 
 if __name__ == "__main__":
     main()

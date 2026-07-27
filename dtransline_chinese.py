@@ -26,12 +26,14 @@ CHINESE_PATTERN: Final[re.Pattern] = re.compile(
     "[\\u4e00-\\u9fff\\u3400-\\u4dbf\\u20000-\\u2a6df\\u2a700-\\u2b73f\\u2b740-\\u2b81f\\u2b820-\\u2ceaf\\uf900-\\ufaff]"
 )
 
+
 def is_chinese_text(text: str, threshold: float = 0.3) -> bool:
     clean_text = "".join(text.split())
     if not clean_text:
         return False
     chinese_chars = len(CHINESE_PATTERN.findall(clean_text))
     return chinese_chars / len(clean_text) >= threshold
+
 
 def translate_line(text: str, translator: GoogleTranslator, max_retries: int = 3) -> str:
     if not text.strip():
@@ -50,6 +52,7 @@ def translate_line(text: str, translator: GoogleTranslator, max_retries: int = 3
             else:
                 logger.error("  Translation failed after %d attempts: %s", max_retries, e)
     return text
+
 
 def process_file(file_path: Path, dry_run: bool = False, threshold: float = 0.3) -> dict:
     stats = {"file": str(file_path), "total_lines": 0, "chinese_lines": 0, "translated_lines": 0, "errors": 0}
@@ -90,8 +93,10 @@ def process_file(file_path: Path, dry_run: bool = False, threshold: float = 0.3)
         stats["errors"] += 1
     return stats
 
+
 def worker(args: tuple[Path, bool, float]) -> dict:
     return process_file(*args)
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Translate Chinese lines in-place.")
@@ -150,6 +155,7 @@ def main() -> None:
         print(f"Translated lines:  {sum(s['translated_lines'] for s in all_stats):,}")
     print(f"Errors:            {sum(s['errors'] for s in all_stats)}")
     print("=" * 60)
+
 
 if __name__ == "__main__":
     main()

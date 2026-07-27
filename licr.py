@@ -8,6 +8,7 @@ import dh
 
 EXT = [".md", ".txt", ".rst"]
 
+
 def find_license_files() -> None:
     lf = []
     allfiles = dh.get_files(".")
@@ -23,6 +24,7 @@ def find_license_files() -> None:
     print(f"Found {len(lf)} license files")
     for file_path in lf:
         Path(file_path).write_text("", encoding="utf-8")
+
 
 if __name__ == "__main__":
     find_license_files()

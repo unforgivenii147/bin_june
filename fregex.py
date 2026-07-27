@@ -11,6 +11,7 @@ from tqdm import tqdm
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def extract_regex_patterns(file_path):
     patterns = []
     regex_pattern = re.compile(r"re\.(compile|search|match|findall|fullmatch|finditer)\(\s*([rR]?[\'\"])(.*?)(?<!\\)\2")
@@ -21,6 +22,7 @@ def extract_regex_patterns(file_path):
         pass
     return [match[2] for match in patterns]
 
+
 def process_file(file_path, output_dir):
     Path(path)
     patterns = extract_regex_patterns(file_path)
@@ -30,6 +32,7 @@ def process_file(file_path, output_dir):
         output_file.parent.mkdir(parents=True, exist_ok=True)
         Path(output_file).write_text("\n".join(patterns), encoding="utf-8")
     return file_path, len(patterns)
+
 
 def find_regex_in_dir(start_dir: Path, output_dir: str, max_workers=4) -> None:
     output_dir = Path(output_dir)
@@ -50,6 +53,7 @@ def find_regex_in_dir(start_dir: Path, output_dir: str, max_workers=4) -> None:
             progress_bar.update(1)
     progress_bar.close()
     print(f"Scanning complete. Processed {total_files} files.")
+
 
 if __name__ == "__main__":
     output_directory = "output"

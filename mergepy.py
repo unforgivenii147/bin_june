@@ -6,6 +6,7 @@ import os
 import re
 from pathlib import Path
 
+
 def resolve_imports(content: str, cwd: Path) -> str:
     folder_name = Path(cwd).name
     content = re.sub(r"from \. import ([a-zA-Z0-9_]+)", f"from {folder_name} import \\1", content)
@@ -15,6 +16,7 @@ def resolve_imports(content: str, cwd: Path) -> str:
         content,
     )
     return re.sub(r"import \.", f"import {folder_name}", content)
+
 
 def merge_python_files() -> None:
     cwd = Path.cwd()
@@ -29,6 +31,7 @@ def merge_python_files() -> None:
                 content = resolve_imports(content, cwd)
                 outfile.write(content)
     print(f"Merged {len(py_files)} files into {output_filename}")
+
 
 if __name__ == "__main__":
     merge_python_files()

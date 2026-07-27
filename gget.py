@@ -22,6 +22,7 @@ CHUNK_SIZE = 1024 * 1024 * 5
 MAX_WORKERS = 4
 STATE_SUFFIX = ".progress"
 
+
 class Downloader:
     def __init__(self, url, output_path=None, expected_hash=None) -> None:
         self.url = url
@@ -142,6 +143,7 @@ class Downloader:
         else:
             console.print("\n[bold yellow]Download Paused. Run again to resume.[/]")
             sys.exit(0)
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

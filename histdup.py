@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+
 def main() -> None:
     hist_file = Path.home() / ".bash_history"
     if not hist_file.exists():
@@ -23,6 +24,7 @@ def main() -> None:
     with hist_file.open("w", encoding="utf-8") as f:
         f.writelines(unique_lines)
     print(f"{histlen - len(unique_lines)} lines removed")
+
 
 if __name__ == "__main__":
     main()

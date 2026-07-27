@@ -14,9 +14,11 @@ import zstandard as zstd
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def compress_chunk(chunk_data):
     compressor = zstd.ZstdCompressor(level=3, threads=4)
     return compressor.compress(chunk_data)
+
 
 def get_file_list(directory, exclude_patterns=None):
     if exclude_patterns is None:
@@ -29,6 +31,7 @@ def get_file_list(directory, exclude_patterns=None):
             continue
         files.append(item)
     return files
+
 
 def create_archive_optimized():
     current_dir = Path.cwd()
@@ -91,6 +94,7 @@ def create_archive_optimized():
             archive_path.unlink()
         sys.exit(1)
 
+
 def create_archive_streaming_fixed():
     current_dir = Path.cwd()
     dir_name = current_dir.name
@@ -135,6 +139,7 @@ def create_archive_streaming_fixed():
         if archive_path.exists():
             archive_path.unlink()
         sys.exit(1)
+
 
 if __name__ == "__main__":
     create_archive_optimized()

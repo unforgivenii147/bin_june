@@ -24,8 +24,10 @@ VALID = {
 )"""
 }
 
+
 def get_node_text(src: bytes, node) -> str:
     return src[node.start_byte : node.end_byte].decode()
+
 
 def extract_functions_and_classes(src: bytes, tree: Tree):
     root = tree.root_node
@@ -48,16 +50,19 @@ def extract_functions_and_classes(src: bytes, tree: Tree):
     traverse(root)
     return definitions
 
+
 def get_relative_path(file_path: Path, base_path: Path) -> Path:
     try:
         return file_path.relative_to(base_path)
     except ValueError:
         return file_path
 
+
 def extract_docstring(src: bytes, node) -> str | None:
     if node.children and node.children[0].type == "string":
         return get_node_text(src, node.children[0])
     return None
+
 
 def format_definition_with_metadata(def_text: str, file_name: str, line_num: int, docstring: str | None = None) -> str:
     lines = [f"# From: {file_name}:{line_num}"]
@@ -65,6 +70,7 @@ def format_definition_with_metadata(def_text: str, file_name: str, line_num: int
         lines.append(f"# Docstring: {docstring[:50]}{'...' if len(docstring) > 50 else ''}")
     lines.append(def_text)
     return "\n".join(lines)
+
 
 folder_definitions = defaultdict(list)
 processed_files_count = 0

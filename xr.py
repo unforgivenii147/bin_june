@@ -19,6 +19,7 @@ MAX_WORKERS = 4
 CHUNK_SIZE = 10 * 1024 * 1024
 COMPRESSORS = {}
 
+
 def fsz(size: int) -> str:
     """Format size in bytes to human-readable format."""
     for unit in ("B", "KB", "MB", "GB", "TB"):
@@ -26,6 +27,7 @@ def fsz(size: int) -> str:
             return f"{size:.1f}{unit}"
         size /= 1024
     return f"{size:.1f}PB"
+
 
 def setup_compressors() -> None:
     """Initialize compressor configurations."""
@@ -75,6 +77,7 @@ def setup_compressors() -> None:
         },
     }
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     """Recursively get all files in a directory, optionally filtered by extension."""
     path = Path(path)
@@ -96,9 +99,11 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
+
 def get_dirs(directory: Path) -> list[Path]:
     """Get immediate subdirectories (non-symlink)."""
     return [p for p in directory.glob("*") if not p.is_symlink() and p.is_dir()]
+
 
 def should_compress(path: Path, compressor: str) -> bool:
     """Determine if a file should be compressed based on size and type."""
@@ -122,6 +127,7 @@ def should_compress(path: Path, compressor: str) -> bool:
         return size >= 1024
     except (OSError, PermissionError):
         return False
+
 
 def compress_in_memory(path: Path, out_path: Path, compressor: str) -> bool:
     """Compress a file that fits in memory."""
@@ -176,6 +182,7 @@ def compress_in_memory(path: Path, out_path: Path, compressor: str) -> bool:
     except Exception as e:
         print(f"    Error compressing: {e}")
         return False
+
 
 def compress_chunked(path: Path, out_path: Path, original_size: int, compressor: str) -> bool:
     """Compress a large file in chunks."""
@@ -262,6 +269,7 @@ def compress_chunked(path: Path, out_path: Path, original_size: int, compressor:
         print(f"    Error compressing: {e}")
         return False
 
+
 def decompress_file(path: Path, compressor: str) -> bool:
     """Decompress a single file."""
     try:
@@ -322,6 +330,7 @@ def decompress_file(path: Path, compressor: str) -> bool:
         print(f"  ✗ Error decompressing {path.name}: {e}")
         return False
 
+
 def decompress_archive(archive_path: Path, compressor: str) -> bool:
     """Decompress an archive file."""
     try:
@@ -338,6 +347,7 @@ def decompress_archive(archive_path: Path, compressor: str) -> bool:
         print(f"  ✗ Error decompressing archive: {e}")
         return False
 
+
 async def compress_folder_async(dir_path: Path, archive_path: str, compressor: str) -> bool:
     """Compress an entire folder into an archive."""
     try:
@@ -351,6 +361,7 @@ async def compress_folder_async(dir_path: Path, archive_path: str, compressor: s
     except Exception as e:
         print(f"  ✗ Error compressing folder: {e}")
         return False
+
 
 async def process_compress(compressor: str) -> None:
     """Main compression process."""
@@ -424,6 +435,7 @@ async def process_compress(compressor: str) -> None:
     elif files_to_compress:
         print("\n❌ No files were successfully compressed")
 
+
 async def process_decompress(compressor: str) -> None:
     """Main decompression process."""
     cwd = Path.cwd()
@@ -469,6 +481,7 @@ async def process_decompress(compressor: str) -> None:
     elif files_to_decompress:
         print("\n❌ No files were successfully decompressed")
 
+
 async def main_async(compressor: str, mode: str = "compress") -> None:
     """Main async entry point."""
     if mode == "compress":
@@ -477,6 +490,7 @@ async def main_async(compressor: str, mode: str = "compress") -> None:
         await process_decompress(compressor)
     else:
         print(f"Unknown mode: {mode}")
+
 
 def check_compressor_availability(compressor: str) -> bool:
     """Check if required libraries are available."""
@@ -497,6 +511,7 @@ def check_compressor_availability(compressor: str) -> bool:
             print("  or for Termux: pkg install python-lz4")
         return False
     return True
+
 
 def main() -> None:
     """Main entry point."""
@@ -563,6 +578,7 @@ Examples:
     except Exception as e:
         print(f"\n❌ Unexpected error: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     sys.exit(main())

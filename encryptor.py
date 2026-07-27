@@ -16,8 +16,10 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 AES_BLOCK_SIZE = 128
 
+
 def random_key(length: int = 32) -> str:
     return "".join(random.choice(string.ascii_letters + string.digits) for _ in range(length))
+
 
 def encrypt_file(file_path: Path, key: str) -> None:
     from os import urandom
@@ -32,6 +34,7 @@ def encrypt_file(file_path: Path, key: str) -> None:
     encrypted_data = encryptor.update(padded_data) + encryptor.finalize()
     file_path.write_bytes(iv + encrypted_data)
 
+
 def decrypt_file(file_path: Path, key: str) -> None:
     backend = default_backend()
     raw = file_path.read_bytes()
@@ -43,6 +46,7 @@ def decrypt_file(file_path: Path, key: str) -> None:
     unpadder = padding.PKCS7(128).unpadder()
     data = unpadder.update(padded_data) + unpadder.finalize()
     file_path.write_bytes(data)
+
 
 def main() -> None:
     parser = argparse.ArgumentParser()
@@ -69,6 +73,7 @@ def main() -> None:
         path = Path(file_path_str)
         if path.is_file() and path.name != "key":
             action(path, key)
+
 
 if __name__ == "__main__":
     main()

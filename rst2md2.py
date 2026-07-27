@@ -13,6 +13,7 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def convert_file(filepath: Path, backup=True, remove_original=False) -> bool:
     filepath = Path(filepath)
     if not filepath.exists():
@@ -45,6 +46,7 @@ def convert_file(filepath: Path, backup=True, remove_original=False) -> bool:
         print(f"Error converting {filepath}: {e.stderr}")
         return False
 
+
 def convert_recursive(directory: Path, backup: bool = True, remove_original: bool = False) -> None:
     directory = Path(directory)
     if not directory.exists():
@@ -60,6 +62,7 @@ def convert_recursive(directory: Path, backup: bool = True, remove_original: boo
         if convert_file(rst_file, backup, remove_original):
             success_count += 1
     print(f"\nConverted {success_count}/{len(rst_files)} files")
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Convert .rst files to .md using pandoc")
@@ -88,6 +91,7 @@ def main() -> None:
             convert_file(path_obj, backup, args.remove_original)
         else:
             print(f"Error: {path} is not valid")
+
 
 if __name__ == "__main__":
     main()

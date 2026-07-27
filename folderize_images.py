@@ -14,15 +14,18 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 SUPPORTED_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tif", ".tiff", ".gif"}
 
+
 @dataclass(frozen=True)
 class HashedImage:
     path: Path
     h: imagehash.ImageHash
 
+
 def iter_image_paths(root: Path):
     for p in root.rglob("*"):
         if p.is_file() and p.suffix.lower() in SUPPORTED_EXTS:
             yield p
+
 
 def compute_hash(path: Path, hash_func: str, hash_size: int) -> HashedImage | None:
     try:
@@ -41,8 +44,10 @@ def compute_hash(path: Path, hash_func: str, hash_size: int) -> HashedImage | No
         print(f"[WARN] Skipping {path} ({e})")
         return None
 
+
 def hash_distance(h1: imagehash.ImageHash, h2: imagehash.ImageHash) -> int:
     return int(h1 - h2)
+
 
 def folderize_by_similarity(root: Path, out_dir_name: str, hash_func: str, hash_size: int, threshold: int) -> None:
     out_dir = root / out_dir_name
@@ -92,6 +97,7 @@ def folderize_by_similarity(root: Path, out_dir_name: str, hash_func: str, hash_
             shutil.move(str(member.path), str(dest))
             moved += 1
 
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Folderize images by similarity using imagehash.")
     parser.add_argument("--out", type=str, default="_similar_groups", help="Output folder name")
@@ -107,6 +113,7 @@ def main() -> None:
         hash_size=args.hash_size,
         threshold=args.threshold,
     )
+
 
 if __name__ == "__main__":
     main()

@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+
 class PlaysoundException(Exception):
     pass
+
 
 def playsound(sound, block=True):
     if not block:
@@ -32,6 +34,7 @@ def playsound(sound, block=True):
     bus = playbin.get_bus()
     bus.poll(Gst.MessageType.EOS, Gst.CLOCK_TIME_NONE)
     playbin.set_state(Gst.State.NULL)
+
 
 if __name__ == "__main__":
     import sys

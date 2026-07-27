@@ -11,6 +11,7 @@ from email.message import EmailMessage
 from email.parser import BytesParser
 from pathlib import Path
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -31,9 +32,11 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
+
 def sanitize_filename(name: str) -> str:
     name = name.strip().strip('"').strip("'")
     return re.sub("[^A-Za-z0-9._-]+", "_", name) or "resource"
+
 
 def split_data_url(src: str):
     if not src or not src.startswith("data:"):
@@ -48,6 +51,7 @@ def split_data_url(src: str):
         return (mime, raw)
     except Exception:
         return None
+
 
 def process_file(path) -> None:
     path = Path(path)
@@ -185,6 +189,7 @@ def process_file(path) -> None:
     print("Done.")
     print(f"HTML: {out_html}")
     print(f"Resources: {out_dir}/ (extracted {len(cid_to_file)} CID items)")
+
 
 if __name__ == "__main__":
     cwd = Path.cwd()

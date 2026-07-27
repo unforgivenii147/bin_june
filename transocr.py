@@ -24,6 +24,7 @@ TEXT_EXT: Final[set[str]] = {".txt", ".md", ".csv", ".json", ".py"}
 IMAGE_EXT: Final[set[str]] = {".jpg", ".jpeg", ".png"}
 CHUNK_SIZE: Final[int] = 2000
 
+
 def detect_lang_from_text(text: str) -> str:
     if not (stripped := text.strip()):
         return "unknown"
@@ -32,16 +33,19 @@ def detect_lang_from_text(text: str) -> str:
     except Exception:
         return "unknown"
 
+
 def read_text_file(path: Path) -> str:
     if path.suffix.lower() not in TEXT_EXT:
         raise ValueError(f"Unsupported text file extension: {path.suffix}")
     return path.read_text(encoding="utf-8")
+
 
 def preprocess_image(img: Image.Image) -> Image.Image:
     img = img.convert("L")
     img = ImageEnhance.Contrast(img).enhance(2.0)
     img = img.point(lambda x: 0 if x < 160 else 255)
     return img.filter(ImageFilter.MedianFilter(size=3))
+
 
 def read_image_ocr(path: Path) -> str:
     try:
@@ -51,12 +55,15 @@ def read_image_ocr(path: Path) -> str:
     except Exception as e:
         raise RuntimeError(f"OCR failed for {path}: {e}") from e
 
+
 def chunk_text(text: str, size: int = 32768) -> list[str]:
     return [text[i : i + size] for i in range(0, len(text), size)]
+
 
 def translate_chunks(chunks: list[str], src_lang: str) -> str:
     translator = GoogleTranslator(source=src_lang, target="en")
     return "".join(translator.translate(chunk) for chunk in chunks)
+
 
 def build_output_paths(input_path: Path) -> tuple[Path, Path | None]:
     suffix = input_path.suffix.lower()
@@ -66,6 +73,7 @@ def build_output_paths(input_path: Path) -> tuple[Path, Path | None]:
         return (translated, raw_ocr)
     translated = input_path.with_name(f"{input_path.stem}_eng{suffix}")
     return (translated, None)
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Translate text or image to English.")
@@ -100,6 +108,7 @@ def main() -> None:
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

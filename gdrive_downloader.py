@@ -15,6 +15,7 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 SCOPES = ["https://www.googleapis.com/auth/drive.readonly"]
 
+
 def authenticate() -> Resource:
     creds = None
     if os.path.exists("token.pickle"):
@@ -30,6 +31,7 @@ def authenticate() -> Resource:
             pickle.dump(creds, token)
     return build("drive", "v3", credentials=creds)
 
+
 def get_folder_id(service: Resource, folder_name: str):
     query = f"name='{folder_name}' and mimeType='application/vnd.google-apps.folder' and trashed=false"
     results = service.files().list(q=query, fields="files(id, name)").execute()
@@ -37,6 +39,7 @@ def get_folder_id(service: Resource, folder_name: str):
     if not items:
         raise Exception(f"Folder '{folder_name}' not found in Google Drive")
     return items[0]["id"]
+
 
 def download_folder(service: Resource, folder_id, current_path: str) -> None:
     query = f"'{folder_id}' in parents and trashed=false"
@@ -59,6 +62,7 @@ def download_folder(service: Resource, folder_id, current_path: str) -> None:
                 print(f"Download progress: {int(status.progress() * 100)}%")
             fh.close()
 
+
 def main() -> None:
     folder_name = "notebooks"
     try:
@@ -71,6 +75,7 @@ def main() -> None:
         print(f"\nSuccessfully downloaded '{folder_name}' to {current_folder}")
     except Exception as e:
         print(f"Error: {e}")
+
 
 if __name__ == "__main__":
     main()

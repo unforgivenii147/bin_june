@@ -12,9 +12,11 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 COMMENT_PREFIXES = "#", "//", "--"
 
+
 def is_comment(line: str) -> bool:
     stripped = line.lstrip()
     return any(stripped.startswith(prefix) for prefix in COMMENT_PREFIXES)
+
 
 def process_lines(lines: list[str], start_idx, end_idx, unique=False, comments=True):
     target_slice = lines[start_idx:end_idx]
@@ -61,6 +63,7 @@ def process_lines(lines: list[str], start_idx, end_idx, unique=False, comments=T
             rebuilt.append(sortable_lines[sort_idx])
             sort_idx += 1
     return rebuilt, removed_lines
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Sort lines in a file within a given line range.")
@@ -116,6 +119,7 @@ def main() -> None:
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

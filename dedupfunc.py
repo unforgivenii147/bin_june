@@ -17,6 +17,7 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 class FunctionInfo:
     def __init__(self, name: str, body: str, lineno: int, node: ast.FunctionDef) -> None:
         self.name = name
@@ -34,6 +35,7 @@ class FunctionInfo:
         body = "\n".join(lines)
         lines = [line.strip() for line in body.split("\n") if line.strip()]
         return "\n".join(lines)
+
 
 class DuplicateFunctionFinder(ast.NodeVisitor):
     def __init__(self) -> None:
@@ -63,6 +65,7 @@ class DuplicateFunctionFinder(ast.NodeVisitor):
         for func in self.functions:
             groups[func.body].append(func)
         return {body: funcs for body, funcs in groups.items() if len(funcs) > 1}
+
 
 class DuplicateFunctionRemover:
     def __init__(self, filepath: str) -> None:
@@ -115,6 +118,7 @@ class DuplicateFunctionRemover:
             dst.write(src.read())
         return str(backup_path)
 
+
 def display_duplicates(groups: dict[str, list[FunctionInfo]]) -> bool:
     if not groups:
         print("No duplicate functions found!")
@@ -132,6 +136,7 @@ def display_duplicates(groups: dict[str, list[FunctionInfo]]) -> bool:
         print(f"\n  Body preview:\n{body_preview}")
         print("-" * 40)
     return True
+
 
 def get_user_choices(groups: dict[str, list[FunctionInfo]]) -> dict[str, int]:
     choices = {}
@@ -151,6 +156,7 @@ def get_user_choices(groups: dict[str, list[FunctionInfo]]) -> dict[str, int]:
             except ValueError:
                 print("Please enter a valid number")
     return choices
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Find and optionally remove duplicate functions in Python files")
@@ -199,6 +205,7 @@ def main() -> None:
             sys.exit(0)
     else:
         print("\nUse -r or --remove to remove duplicates with user confirmation")
+
 
 if __name__ == "__main__":
     main()

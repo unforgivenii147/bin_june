@@ -5,6 +5,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+
 def process_file(path: Path, text: str) -> None:
     path = Path(path)
     content = path.read_text()
@@ -15,6 +16,7 @@ def process_file(path: Path, text: str) -> None:
         newcontent = "\n".join(nl)
         path.write_text(newcontent, encoding="utf-8")
         print(f"{path.parent.name} updated.")
+
 
 if __name__ == "__main__":
     major, minor, _, _, _ = sys.version_info

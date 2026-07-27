@@ -10,6 +10,7 @@ from pathlib import Path
 
 from joblib import Parallel, delayed
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -30,6 +31,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
+
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -39,6 +41,7 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
+
 
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
@@ -50,6 +53,7 @@ def fsz(sz: float) -> str:
     if i == 0:
         return f"{int(value)} {units[i]}"
     return f"{value:.1f} {units[i]}"
+
 
 ATTRIBUTES = {
     "bold": 1,
@@ -101,6 +105,7 @@ COLORS = {
 }
 RESET = "\x1b[0m"
 
+
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -120,6 +125,7 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
+
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -144,13 +150,16 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
+
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
+
 
 CHUNK_SIZE = 1024 * 1024
 N_JOBS = -1
 multi_line_comment_re = "/\\*.*?\\*/"
 single_line_comment_re = "//.*"
+
 
 def process_file(path) -> None:
     path = Path(path)
@@ -163,6 +172,7 @@ def process_file(path) -> None:
     final_code = re.sub(r"\n\s*\n", "\\n\\n", final_code)
     final_code = "\n".join(line.rstrip() for line in final_code.splitlines())
     path.write_text(final_code, encoding="utf-8")
+
 
 def main() -> None:
     cwd = Path.cwd()
@@ -200,6 +210,7 @@ def main() -> None:
     Parallel(n_jobs=N_JOBS, backend="loky")(delayed(process_file)(f) for f in files)
     diffsize = before - gsz(cwd)
     cprint(f"space change : {fsz(diffsize)}", "cyan")
+
 
 if __name__ == "__main__":
     sys.exit(main())

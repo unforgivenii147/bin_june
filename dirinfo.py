@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def scan_directory(path: str = "."):
     total_size = 0
     file_count = 0
@@ -34,6 +35,7 @@ def scan_directory(path: str = "."):
             size_by_ext[ext] += size
     return total_size, file_count, folder_count, extensions, size_by_ext
 
+
 def format_size(size_in_bytes: int) -> str:
     if size_in_bytes < 1024:
         return f"{size_in_bytes} bytes"
@@ -42,6 +44,7 @@ def format_size(size_in_bytes: int) -> str:
     if size_in_bytes < 1024**3:
         return f"{size_in_bytes / 1024**2:.2f} MB"
     return f"{size_in_bytes / 1024**3:.2f} GB"
+
 
 def write_summary(filename: Path | None = None) -> None:
     total_size, file_count, folder_count, extensions, size_by_ext = scan_directory()
@@ -73,6 +76,7 @@ def write_summary(filename: Path | None = None) -> None:
     elif filename is None:
         print(summary_string)
 
+
 def create_bar_chart(chart_type: str, output_filename: str = "/sdcard/dirinfo.png") -> None:
     _, _, _, _, size_by_ext = scan_directory()
     sorted_items = sorted(
@@ -98,6 +102,7 @@ def create_bar_chart(chart_type: str, output_filename: str = "/sdcard/dirinfo.pn
         print(f"Bar chart saved to {output_filename}")
     except Exception as e:
         print(f"Error saving chart to {output_filename}: {e}", file=sys.stderr)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Analyze directory information.")

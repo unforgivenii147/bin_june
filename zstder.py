@@ -32,11 +32,13 @@ WORKERS: Final[int] = max(1, multiprocessing.cpu_count())
 logging.basicConfig(level=logging.INFO, format="%(message)s", handlers=[logging.StreamHandler(sys.stdout)])
 logger = logging.getLogger(__name__)
 
+
 def choose_level(path: Path) -> int:
     try:
         return LEVEL_LARGE if path.stat().st_size > LARGE_FILE_THRESHOLD else LEVEL_DEFAULT
     except OSError:
         return LEVEL_DEFAULT
+
 
 def human_size(n: float) -> str:
     for unit in ("B", "KB", "MB", "GB", "TB"):
@@ -45,14 +47,17 @@ def human_size(n: float) -> str:
         n /= 1024
     return f"{n:.1f} PB"
 
+
 def ratio_str(before: int, after: int) -> str:
     if before == 0:
         return "0%"
     return f"{after / before * 100:.1f}%"
 
+
 def status_line(ok: bool, name: str, elapsed_ms: float, before: int, after: int) -> str:
     icon = "✔" if ok else "✘"
     return f"[{icon}] {name} ({elapsed_ms:.0f}ms) {ratio_str(before, after)}"
+
 
 def compress_file(
     src: Path, dry_run: bool, verbose: bool, level: int | None = None, threads: int = DEFAULT_THREADS
@@ -89,6 +94,7 @@ def compress_file(
         result["msg"] = f"  ERROR: {exc}"
     return result
 
+
 def decompress_file(src: Path, dry_run: bool, verbose: bool) -> dict:
     result = {"src": src, "ok": False, "line": "", "msg": ""}
     if src.suffix != ZSTD_EXT:
@@ -122,6 +128,7 @@ def decompress_file(src: Path, dry_run: bool, verbose: bool) -> dict:
         result["msg"] = f"  ERROR: {exc}"
     return result
 
+
 def tar_subdir(subdir: Path, dry_run: bool, verbose: bool) -> Path | None:
     tar_path = subdir.parent / f"{subdir.name}.tar"
     if dry_run:
@@ -138,6 +145,7 @@ def tar_subdir(subdir: Path, dry_run: bool, verbose: bool) -> Path | None:
         logger.error(f"  ERROR tarring {subdir}: {exc}")
         return None
 
+
 def remove_subdir(subdir: Path, dry_run: bool, verbose: bool) -> None:
     if dry_run:
         if verbose:
@@ -149,6 +157,7 @@ def remove_subdir(subdir: Path, dry_run: bool, verbose: bool) -> None:
             logger.info(f"  removed original dir: {subdir.name}/")
     except Exception as exc:
         logger.warning(f"  WARNING — could not remove {subdir}: {exc}")
+
 
 def run_parallel(tasks: list[Path], worker_fn, extra_kwargs: dict) -> tuple[int, int]:
     ok = err = 0
@@ -167,6 +176,7 @@ def run_parallel(tasks: list[Path], worker_fn, extra_kwargs: dict) -> tuple[int,
             else:
                 err += 1
     return (ok, err)
+
 
 def do_compress(root: Path, tar_subdirs: bool, dry_run: bool, verbose: bool, threads: int) -> None:
     start = time.perf_counter()
@@ -215,6 +225,7 @@ def do_compress(root: Path, tar_subdirs: bool, dry_run: bool, verbose: bool, thr
     elapsed = time.perf_counter() - start
     logger.info(f"\nDone [{elapsed:.2f}s]")
 
+
 def do_decompress(root: Path, dry_run: bool, verbose: bool) -> None:
     start = time.perf_counter()
     files = [p for p in root.rglob(f"*{ZSTD_EXT}") if p.is_file()]
@@ -226,6 +237,7 @@ def do_decompress(root: Path, dry_run: bool, verbose: bool) -> None:
     ok, err = run_parallel(files, decompress_file, {"dry_run": dry_run, "verbose": verbose})
     elapsed = time.perf_counter() - start
     logger.info(f"\nDone — {ok} decompressed, {err} error(s) [{elapsed:.2f}s]")
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(
@@ -264,6 +276,7 @@ def main() -> None:
         if args.tar_subdirs_first:
             logger.warning("Note: --tar-subdirs-first ignored during decompression.")
         do_decompress(root, args.dry_run, args.verbose)
+
 
 if __name__ == "__main__":
     main()

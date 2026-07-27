@@ -15,6 +15,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
 
+
 class Colors:
     HEADER = "\033[95m"
     CYAN = "\033[96m"
@@ -25,6 +26,7 @@ class Colors:
     DIM = "\033[2m"
     END = "\033[0m"
     CLEAR_LINE = "\033[2K\r"
+
 
 @dataclass
 class ConversionStats:
@@ -39,6 +41,7 @@ class ConversionStats:
     error_message: str = ""
     duration: float = 0.0
 
+
 def check_ffmpeg():
     """Check if ffmpeg is installed."""
     try:
@@ -48,6 +51,7 @@ def check_ffmpeg():
         print(f"{Colors.RED}✗ ffmpeg/ffprobe is required but not installed.{Colors.END}")
         sys.exit(1)
 
+
 def format_size(size_bytes: int) -> str:
     """Format file size in human-readable format."""
     for unit in ["B", "KB", "MB", "GB"]:
@@ -55,6 +59,7 @@ def format_size(size_bytes: int) -> str:
             return f"{size_bytes:.1f} {unit}"
         size_bytes /= 1024
     return f"{size_bytes:.1f} TB"
+
 
 def format_duration(seconds: float) -> str:
     """Format duration in human-readable format."""
@@ -66,6 +71,7 @@ def format_duration(seconds: float) -> str:
         minutes = int(seconds // 60)
         secs = seconds % 60
         return f"{minutes}m {secs:.0f}s"
+
 
 def get_audio_info(mp3_file: Path) -> tuple[int | None, int | None]:
     """
@@ -98,6 +104,7 @@ def get_audio_info(mp3_file: Path) -> tuple[int | None, int | None]:
 
     except (subprocess.CalledProcessError, json.JSONDecodeError, KeyError, ValueError, OSError):
         return None, None
+
 
 def convert_single_file(mp3_file: Path, base_dir: Path) -> ConversionStats:
     """Convert a single MP3 file to half its original bitrate."""
@@ -197,6 +204,7 @@ def convert_single_file(mp3_file: Path, base_dir: Path) -> ConversionStats:
             duration=duration,
         )
 
+
 def print_file_result(stat: ConversionStats, index: int, total: int):
     """Print formatted result for a single file."""
     status_icon = f"{Colors.GREEN}✓{Colors.END}" if stat.success else f"{Colors.RED}✗{Colors.END}"
@@ -215,6 +223,7 @@ def print_file_result(stat: ConversionStats, index: int, total: int):
     else:
         print(f"{Colors.CLEAR_LINE}{status_icon} [{index}/{total}] {Colors.RED}{stat.file_path}{Colors.END}")
         print(f"  {Colors.RED}Error: {stat.error_message}{Colors.END}")
+
 
 def print_final_summary(stats: list[ConversionStats], total_duration: float):
     """Print final summary of all conversions."""
@@ -244,6 +253,7 @@ def print_final_summary(stats: list[ConversionStats], total_duration: float):
     print(f"\n{Colors.BOLD}Total time:{Colors.END} {format_duration(total_duration)}")
     print(f"{'─' * 60}")
 
+
 def find_mp3_files(directories: list[Path]) -> list[Path]:
     """Find all MP3 files in given directories recursively."""
     mp3_files = []
@@ -269,6 +279,7 @@ def find_mp3_files(directories: list[Path]) -> list[Path]:
             unique_files.append(f)
 
     return sorted(unique_files)
+
 
 def process_directory(directory: Path, max_workers: int = 4):
     """Process all MP3 files in a directory."""
@@ -302,6 +313,7 @@ def process_directory(directory: Path, max_workers: int = 4):
             print(f"  {Colors.RED}✗{Colors.END} {stat.file_path}: {stat.error_message}")
 
     print_final_summary(stats, total_duration)
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -350,6 +362,7 @@ Examples:
         process_directory(directory, max_workers=args.workers)
         if len(args.directories) > 1:
             print()
+
 
 if __name__ == "__main__":
     main()

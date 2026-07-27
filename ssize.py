@@ -7,10 +7,12 @@ from pathlib import Path
 
 total = 0
 
+
 def gsz(path: Path) -> int:
     if path.is_file():
         return path.stat().st_size
     return sum(f.stat().st_size for f in path.rglob("*") if f.is_file() and not f.is_symlink())
+
 
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
@@ -20,6 +22,7 @@ def fsz(sz: float) -> str:
     i = min(int(int(sz).bit_length() - 1) // 10, len(units) - 1)
     sz /= 1024**i
     return f"{sz:.2f} {units[i]}B"
+
 
 def list_and_sort_by_size(path: Path = Path()):
     items = []
@@ -32,6 +35,7 @@ def list_and_sort_by_size(path: Path = Path()):
         items.append({"name": p.name, "size": size})
     items.sort(key=operator.itemgetter("size"), reverse=False)
     return items
+
 
 if __name__ == "__main__":
     data = list_and_sort_by_size()

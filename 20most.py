@@ -10,6 +10,7 @@ from pathlib import Path
 
 CHUNK_SIZE = 1024 * 1024
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -30,6 +31,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
+
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -45,12 +47,15 @@ def is_binary(path: Path | str) -> bool:
     except Exception:
         return True
 
+
 def get_nobinary(path: str | Path) -> list[Path]:
     return [f for f in get_files(path) if not is_binary(f)]
+
 
 def extract_words(text: str):
     splt = text.strip().lower().replace("/", " ")
     return re.findall(r"[a-z]{3,}", splt)
+
 
 def process_file(path: Path) -> None:
     path = Path(path)
@@ -59,6 +64,7 @@ def process_file(path: Path) -> None:
     filtered = list(words)
     for word, _count in Counter(filtered).most_common(30):
         print(f"{word}", end=" ")
+
 
 def main() -> None:
     args = sys.argv[1:]
@@ -72,6 +78,7 @@ def main() -> None:
                 pending.popleft().get()
         while pending:
             pending.popleft().get()
+
 
 if __name__ == "__main__":
     main()

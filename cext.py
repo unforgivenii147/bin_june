@@ -34,6 +34,7 @@ try:
 except ImportError:
     HAS_ZSTD = False
 
+
 class Entity(NamedTuple):
     name: str
     full_name: str
@@ -41,6 +42,7 @@ class Entity(NamedTuple):
     source: str
     imports: list[str]
     source_path: str
+
 
 CONST_RE = re.compile("^[A-Z_][A-Z0-9_]*$")
 IMPORT_HINTS: dict[str, str] = {
@@ -144,6 +146,7 @@ IMPORT_HINTS: dict[str, str] = {
     "runtime_checkable": "from typing import runtime_checkable",
 }
 
+
 def detect_needed_imports(source: str) -> list[str]:
     needed: list[str] = []
     seen: set[str] = set()
@@ -152,6 +155,7 @@ def detect_needed_imports(source: str) -> list[str]:
             needed.append(stmt)
             seen.add(stmt)
     return needed
+
 
 class EntityVisitor(ast.NodeVisitor):
     def __init__(self, source_lines: list[str], source_path: str) -> None:
@@ -263,6 +267,7 @@ class EntityVisitor(ast.NodeVisitor):
             )
             self.entities.append(entity)
 
+
 def extract_imports_tree_sitter(source: str) -> list[str]:
     if not HAS_TREE_SITTER:
         return []
@@ -284,6 +289,7 @@ def extract_imports_tree_sitter(source: str) -> list[str]:
     except Exception:
         return []
 
+
 def parse_python_source(source: str, virtual_path: str) -> tuple[list[Entity], list[str]]:
     try:
         tree = ast.parse(source, filename=virtual_path)
@@ -297,9 +303,11 @@ def parse_python_source(source: str, virtual_path: str) -> tuple[list[Entity], l
     all_imports = ts_imports if ts_imports else visitor.imports
     return (visitor.entities, all_imports)
 
+
 PYTHON_EXTENSIONS = {".py"}
 ARCHIVE_EXTENSIONS = {".zip", ".whl", ".tar", ".gz", ".tgz", ".zst", ".xz"}
 SKIP_DIRS = {".git", "__pycache__"}
+
 
 def _looks_like_python(data: bytes) -> bool:
     head = data[:512]
@@ -307,12 +315,14 @@ def _looks_like_python(data: bytes) -> bool:
         return True
     return any((kw in head for kw in (b"import ", b"def ", b"class ", b"if __name__")))
 
+
 def read_py_file(path: Path) -> str | None:
     try:
         return path.read_text(encoding="utf-8", errors="replace")
     except (OSError, PermissionError) as exc:
         print(f"  [error] cannot read {path}: {exc}", file=sys.stderr)
         return None
+
 
 def process_python_file(
     path: Path, virtual_path: str | None = None, source_override: str | None = None
@@ -324,6 +334,7 @@ def process_python_file(
     if not source.strip():
         return ([], [])
     return parse_python_source(source, vpath)
+
 
 def process_zip_archive(archive_path: Path) -> list[tuple[list[Entity], list[str]]]:
     results: list[tuple[list[Entity], list[str]]] = []
@@ -354,6 +365,7 @@ def process_zip_archive(archive_path: Path) -> list[tuple[list[Entity], list[str
         print(f"  [error] bad zip {archive_path}: {exc}", file=sys.stderr)
     return results
 
+
 def _open_tar(archive_path: Path) -> tarfile.TarFile | None:
     suffix = "".join(archive_path.suffixes).lower()
     try:
@@ -367,6 +379,7 @@ def _open_tar(archive_path: Path) -> tarfile.TarFile | None:
     except (tarfile.TarError, OSError) as exc:
         print(f"  [error] cannot open tar {archive_path}: {exc}", file=sys.stderr)
         return None
+
 
 def process_tar_archive(archive_path: Path) -> list[tuple[list[Entity], list[str]]]:
     results: list[tuple[list[Entity], list[str]]] = []
@@ -395,15 +408,18 @@ def process_tar_archive(archive_path: Path) -> list[tuple[list[Entity], list[str
                 results.append(parse_python_source(source, vpath))
     return results
 
+
 def process_archive(archive_path: Path) -> list[tuple[list[Entity], list[str]]]:
     name = archive_path.name.lower()
     if name.endswith((".whl", ".zip")):
         return process_zip_archive(archive_path)
     return process_tar_archive(archive_path)
 
+
 def _is_archive(path: Path) -> bool:
     name = path.name.lower()
     return any((name.endswith(ext) for ext in (".whl", ".zip", ".tar.gz", ".tgz", ".tar.zst", ".tar.xz", ".tar")))
+
 
 def discover_files(root: Path) -> tuple[list[Path], list[Path]]:
     py_files: list[Path] = []
@@ -428,9 +444,11 @@ def discover_files(root: Path) -> tuple[list[Path], list[Path]]:
                     pass
     return (py_files, archives)
 
+
 def _worker_py(path: Path) -> tuple[list[Entity], list[str], str]:
     entities, imports = process_python_file(path)
     return (entities, imports, str(path))
+
 
 def _worker_archive(path: Path) -> tuple[list[Entity], list[str], str]:
     all_entities: list[Entity] = []
@@ -440,10 +458,13 @@ def _worker_archive(path: Path) -> tuple[list[Entity], list[str], str]:
         all_imports.extend(imports)
     return (all_entities, all_imports, str(path))
 
+
 TYPE_SUBDIR = {"function": "function", "class": "class", "const": "const"}
+
 
 def _safe_filename(base: str) -> str:
     return re.sub("[^\\w\\-.]", "_", base)
+
 
 def _unique_path(directory: Path, stem: str, suffix: str = ".py") -> Path:
     candidate = directory / f"{stem}{suffix}"
@@ -452,6 +473,7 @@ def _unique_path(directory: Path, stem: str, suffix: str = ".py") -> Path:
         candidate = directory / f"{stem}_{counter}{suffix}"
         counter += 1
     return candidate
+
 
 def write_entity(entity: Entity, output_dir: Path) -> Path | None:
     subdir = output_dir / TYPE_SUBDIR.get(entity.entity_type, "other")
@@ -473,6 +495,7 @@ def write_entity(entity: Entity, output_dir: Path) -> Path | None:
         print(f"  [error] cannot write {out_path}: {exc}", file=sys.stderr)
         return None
 
+
 def write_global_imports(imports: list[str], output_dir: Path) -> None:
     unique = sorted(set(imports))
     content = "# Global imports collected from all processed files\n\n"
@@ -483,6 +506,7 @@ def write_global_imports(imports: list[str], output_dir: Path) -> None:
         print(f"\nGlobal imports saved → {out}")
     except OSError as exc:
         print(f"  [error] cannot write global imports: {exc}", file=sys.stderr)
+
 
 def report(entities: list[Entity], all_imports: list[str], saved_count: int) -> None:
     print("\n" + "=" * 60)
@@ -505,6 +529,7 @@ def report(entities: list[Entity], all_imports: list[str], saved_count: int) -> 
         for mod, cnt in sorted(module_counts.items(), key=lambda x: -x[1])[:15]:
             print(f"  {mod:<30} {cnt}")
     print("=" * 60)
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Extract Python code entities from files and archives.")
@@ -554,6 +579,7 @@ def main(argv: list[str] | None = None) -> int:
     write_global_imports(all_imports, output_dir)
     report(all_entities, all_imports, saved)
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

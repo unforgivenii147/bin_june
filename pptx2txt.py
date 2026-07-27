@@ -8,6 +8,7 @@ import sys
 from pptx import Presentation
 from pathlib import Path
 
+
 def extract_text_from_pptx(pptx_path):
     """Extract all text from a PPTX file"""
 
@@ -41,6 +42,7 @@ def extract_text_from_pptx(pptx_path):
                     f.write("\n")
 
     print(f"Text extracted to: {output_file}")
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

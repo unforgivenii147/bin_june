@@ -26,6 +26,7 @@ except ImportError:
         print("Install one of them: pip install opencv-python or pip install scikit-image")
         sys.exit(1)
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -46,6 +47,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
+
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
     units = ("B", "KB", "MB", "GB", "TB")
@@ -57,6 +59,7 @@ def fsz(sz: float) -> str:
         return f"{int(value)} {units[i]}"
     return f"{value:.1f} {units[i]}"
 
+
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -67,7 +70,9 @@ def gsz(path: str | Path) -> int:
             total += file.stat().st_size
     return total
 
+
 MAX_QUEUE = 16
+
 
 def process_image_cv2(image_path: Path) -> Image:
     """Process image using OpenCV"""
@@ -87,6 +92,7 @@ def process_image_cv2(image_path: Path) -> Image:
     cv2.imwrite(str(enhanced), binary)
 
     return enhanced_img_pil
+
 
 def process_image_skimage(image_path: Path) -> Image:
     """Process image using scikit-image"""
@@ -121,12 +127,14 @@ def process_image_skimage(image_path: Path) -> Image:
 
     return enhanced_img_pil
 
+
 def process_file(image_path: Path) -> Image:
     """Main processing function that selects the appropriate backend"""
     if HAS_CV2:
         return process_image_cv2(image_path)
     else:
         return process_image_skimage(image_path)
+
 
 def process_file2(image_path):
     """Alternative processing with slightly different parameters"""
@@ -174,6 +182,7 @@ def process_file2(image_path):
 
         return binary_uint8
 
+
 def main() -> None:
     print(f"Using {'OpenCV' if HAS_CV2 else 'scikit-image'} for image processing")
 
@@ -195,6 +204,7 @@ def main() -> None:
 
     diff_size = before - gsz(cwd)
     print(f"space saved : {fsz(diff_size)}")
+
 
 if __name__ == "__main__":
     main()

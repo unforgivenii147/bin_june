@@ -114,6 +114,7 @@ SKIP_DIRS = {
 }
 SKIP_DIR_PATTERNS = ["*.egg-info", "*.dist-info"]
 
+
 class SpaceStats:
     def __init__(self):
         self.original_size = 0
@@ -133,10 +134,12 @@ class SpaceStats:
         percent_saved = saved / self.original_size * 100
         return saved, ratio, percent_saved
 
+
 def should_skip_directory(dir_name: str) -> bool:
     if dir_name in SKIP_DIRS:
         return True
     return any(fnmatch.fnmatch(dir_name, pattern) for pattern in SKIP_DIR_PATTERNS)
+
 
 def is_editable_package_dir(root_path: Path) -> bool:
     try:
@@ -157,6 +160,7 @@ def is_editable_package_dir(root_path: Path) -> bool:
         return False
     except (PermissionError, OSError):
         return False
+
 
 def iter_files(base_dir: Path, compress: bool):
     skipped_symlinks = 0
@@ -283,6 +287,7 @@ def iter_files(base_dir: Path, compress: bool):
 
     return total_dirs, total_files
 
+
 def compress_file(
     input_path: Path,
     output_path: Path,
@@ -316,6 +321,7 @@ def compress_file(
             pass
         return False, input_path, str(e), 0, 0
 
+
 def decompress_file(
     input_path: Path,
     output_path: Path,
@@ -348,12 +354,14 @@ def decompress_file(
             pass
         return False, input_path, str(e), 0, 0
 
+
 def format_size(bytes_size: float) -> str:
     for unit in ["B", "KB", "MB", "GB", "TB"]:
         if bytes_size < 1024.0:
             return f"{bytes_size:.2f} {unit}"
         bytes_size /= 1024.0
     return f"{bytes_size:.2f} PB"
+
 
 def process_stream(base_dir: Path, compress: bool, level: int, threads: int, remove_original: bool):
     print(f"\n{'Compressing' if compress else 'Decompressing'} files (streaming)...")
@@ -458,6 +466,7 @@ def process_stream(base_dir: Path, compress: bool, level: int, threads: int, rem
         else:
             print("\n⚠️  No files were processed.")
 
+
 def main():
     parser = argparse.ArgumentParser(description="Recursively compress or decompress files using Zstandard")
     group = parser.add_mutually_exclusive_group(required=False)
@@ -496,6 +505,7 @@ def main():
 
     print("\nScanning directory tree...")
     process_stream(base_dir, args.compress, args.level, args.threads, remove_original)
+
 
 if __name__ == "__main__":
     main()

@@ -12,6 +12,7 @@ import sys
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 class PersianDateConverter:
     PERSIAN_MONTHS = [
         "Farvardin",
@@ -108,6 +109,7 @@ class PersianDateConverter:
         month_name = PersianDateConverter.PERSIAN_MONTHS[month - 1]
         return f"{year}/{month:02d}/{day:02d} ({month_name})"
 
+
 def main():
     if len(sys.argv) != 4:
         print("Usage: python convert_date.py <day> <month> <year>")
@@ -169,6 +171,7 @@ def main():
     except Exception as e:
         print(f"❌ Unexpected error: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

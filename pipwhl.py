@@ -14,6 +14,7 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 LOCAL_MIRROR_URL = "https://mirror-pypi.runflare.com"
 
+
 def download_file(url: str, dest_folder: str = ".") -> Path | None:
     try:
         response = requests.get(url, stream=True)
@@ -28,6 +29,7 @@ def download_file(url: str, dest_folder: str = ".") -> Path | None:
     except requests.exceptions.RequestException as e:
         print(f"Error downloading {url}: {e}")
         return None
+
 
 def get_package_info_from_mirror(package_name):
     mirror_package_url = f"{LOCAL_MIRROR_URL}/{package_name}"
@@ -54,6 +56,7 @@ def get_package_info_from_mirror(package_name):
         print(f"An unexpected error occurred while parsing mirror response: {e}")
         return None
 
+
 def install_or_download(package_name: str) -> None:
     print(f"Checking for package: {package_name}")
     wheel_url = get_package_info_from_mirror(package_name)
@@ -72,6 +75,7 @@ def install_or_download(package_name: str) -> None:
         print(
             "If a source archive (.tar.gz or .zip) were available and desired, additional parsing logic would be needed."
         )
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

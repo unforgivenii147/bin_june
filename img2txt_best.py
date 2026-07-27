@@ -16,9 +16,11 @@ TESSDATA_DIRS = [
 ]
 IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".webp", ".gif"}
 
+
 def get_images(path: str | Path | None = None) -> list[Path]:
     path = Path(path or Path.cwd())
     return sorted(path.rglob("*")) if path.is_dir() else [path] if path.is_file() else []
+
 
 def extract_text(image_path: Path, tessdata_dir: Path) -> dict:
     if image_path.suffix.lower() not in IMAGE_EXTS:
@@ -42,9 +44,11 @@ def extract_text(image_path: Path, tessdata_dir: Path) -> dict:
             "status": f"error: {e}",
         }
 
+
 def process_image(args):
     image_path, tessdata_dir = args
     return extract_text(image_path, tessdata_dir)
+
 
 def main() -> None:
     args = sys.argv[1:]
@@ -74,6 +78,7 @@ def main() -> None:
             print(f"Status: {result['status']}")
             if result["text"]:
                 print(f"Text:\n{result['text']}")
+
 
 if __name__ == "__main__":
     main()

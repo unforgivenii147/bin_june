@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+
 def main() -> None:
     count = 0
     root = Path.cwd()
@@ -17,6 +18,7 @@ def main() -> None:
         except OSError:
             pass
     print(f"total {count} empty dirs removed")
+
 
 if __name__ == "__main__":
     main()

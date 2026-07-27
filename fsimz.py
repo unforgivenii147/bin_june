@@ -9,6 +9,7 @@ from pathlib import Path
 
 from ppdeep import hash_from_file
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -28,6 +29,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
             elif item.is_file() and (ext is None or item.suffix in ext):
                 files.append(item)
     return files
+
 
 def find_dups(cwd: str):
     files_by_hash = defaultdict(list)
@@ -61,6 +63,7 @@ def find_dups(cwd: str):
         else:
             continue
     return (duplicate_count, deleted_count, total_deleted_size)
+
 
 if __name__ == "__main__":
     root_folder = sys.argv[1].strip()

@@ -28,11 +28,13 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class Entity:
     name: str
     file_path: str
     line_number: int
+
 
 @dataclass
 class ExtractionResult:
@@ -41,6 +43,7 @@ class ExtractionResult:
     functions: list[Entity]
     constants: list[Entity]
     imports: set[str]
+
 
 class EntityExtractor(ast.NodeVisitor):
     def __init__(self, file_path: Path):
@@ -92,6 +95,7 @@ class EntityExtractor(ast.NodeVisitor):
             self.imports.add(f"from {module} import {alias.name}")
         self.generic_visit(node)
 
+
 def extract_from_file(file_path: Path) -> ExtractionResult:
     try:
         content = file_path.read_text(encoding="utf-8")
@@ -109,8 +113,10 @@ def extract_from_file(file_path: Path) -> ExtractionResult:
         logger.warning(f"Failed to parse {file_path}: {e}")
         return ExtractionResult(file_path=file_path, classes=[], functions=[], constants=[], imports=set())
 
+
 def find_python_files(root_dir: Path) -> list[Path]:
     return list(root_dir.rglob("*.py"))
+
 
 def save_entities(
     output_dir: Path,
@@ -133,6 +139,7 @@ def save_entities(
             f.write(f"{name}\n")
     logger.info(f"Saved {len(unique_entities)} unique {entity_type}")
 
+
 def save_imports(output_dir: Path, imports_by_dir: dict[str, set[str]]) -> None:
     imports_dir = output_dir / "imports"
     imports_dir.mkdir(parents=True, exist_ok=True)
@@ -144,6 +151,7 @@ def save_imports(output_dir: Path, imports_by_dir: dict[str, set[str]]) -> None:
                 for imp in sorted(imports):
                     f.write(f"{imp}\n")
     logger.info(f"Saved imports for {len(imports_by_dir)} directories")
+
 
 def main(root_dir: str = ".", output_dir: str = "output", num_workers: int | None = None) -> None:
     root_path = Path(root_dir)
@@ -201,6 +209,7 @@ def main(root_dir: str = ".", output_dir: str = "output", num_workers: int | Non
     logger.info(f"  Unique constants: {len(unique_constants)}")
     logger.info(f"  Total imports: {sum(len(v) for v in imports_by_dir.values())}")
     logger.info("=" * 50)
+
 
 if __name__ == "__main__":
     import argparse

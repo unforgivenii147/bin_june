@@ -11,6 +11,7 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 EXCLUDED_NAMES: set[str] = {"tmp", "cache", "bin", ".git", "etc", "config", "var"}
 EXCLUDED_PATH_COMPONENTS: set[str] = {".git", "tmp", "etc", "var", "config"}
 
+
 def is_excluded(path: Path, root_path: Path) -> bool:
     if path.name in EXCLUDED_NAMES:
         return True
@@ -21,6 +22,7 @@ def is_excluded(path: Path, root_path: Path) -> bool:
     except ValueError:
         pass
     return bool(path.name.startswith("mc") and path.parent.name == "tmp")
+
 
 def delete_empty_dirs_iterative(root: Path, dry_run: bool = False, verbose: bool = False) -> tuple[int, list[Path]]:
     removed_count: int = 0
@@ -58,6 +60,7 @@ def delete_empty_dirs_iterative(root: Path, dry_run: bool = False, verbose: bool
                 file=sys.stderr,
             )
     return removed_count, removed_dirs_list
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Find and remove empty directories, excluding specified ones.")
@@ -98,6 +101,7 @@ def main() -> None:
             print(f"- {d_path.relative_to(root_path)}")
     else:
         print("No empty dir.")
+
 
 if __name__ == "__main__":
     main()

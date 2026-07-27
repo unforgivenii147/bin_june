@@ -12,6 +12,7 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 class CommentAndDocstringStripper(ast.NodeTransformer):
     def __init__(self, is_module=True):
         self.is_module = is_module
@@ -34,6 +35,7 @@ class CommentAndDocstringStripper(ast.NodeTransformer):
             val = node.body[0].value
             if isinstance(val, ast.Str) or (isinstance(val, ast.Constant) and isinstance(val.value, str)):
                 node.body.pop(0)
+
 
 def process_content(content: bytes) -> bytes:
     try:
@@ -67,6 +69,7 @@ def process_content(content: bytes) -> bytes:
         return content
     return final_code.encode("utf-8")
 
+
 def process_single_file(file_path: Path, base_dir: Path) -> str:
     try:
         original_content = file_path.read_bytes()
@@ -77,6 +80,7 @@ def process_single_file(file_path: Path, base_dir: Path) -> str:
     except Exception as e:
         return f"Error processing {file_path}: {e}"
     return ""
+
 
 def process_wheel(wheel_path: Path, base_dir: Path) -> list[str]:
     changed_files = []
@@ -103,6 +107,7 @@ def process_wheel(wheel_path: Path, base_dir: Path) -> list[str]:
     finally:
         shutil.rmtree(temp_dir)
     return changed_files
+
 
 def main():
     parser = argparse.ArgumentParser(description="Strip docstrings and comments from Python files.")
@@ -137,6 +142,7 @@ def main():
             whl_changes = process_wheel(whl, base_path)
             for change in whl_changes:
                 print(change)
+
 
 if __name__ == "__main__":
     main()

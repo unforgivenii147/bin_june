@@ -12,6 +12,7 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 PACKAGE = sys.argv[1]
 
+
 def get_stats(stats_type, package=PACKAGE, period="month"):
     stats_url = f"https://pypistats.org/api/packages/{package}/{stats_type}?period={period}"
 
@@ -23,6 +24,7 @@ def get_stats(stats_type, package=PACKAGE, period="month"):
         data = json.load(stats)
     return data
 
+
 def aggregate(stats):
     counts = defaultdict(int)
     days = defaultdict(int)
@@ -32,9 +34,11 @@ def aggregate(stats):
         days[category] += 1
     return {category: counts[category] / days[category] for category in counts}
 
+
 def version_sorter(version_and_count):
     version = version_and_count[0]
     return tuple(map(int, version.split("."))) if version.replace(".", "").isdigit() else (2**32,)
+
 
 def system_sorter(name_and_count):
     order = ("linux", "windows", "darwin")
@@ -44,6 +48,7 @@ def system_sorter(name_and_count):
     except ValueError:
         return len(order)
 
+
 def print_agg_stats(stats, sort_key=None):
     total = sum(stats.values())
     max_len = max(len(category) for category in stats)
@@ -51,6 +56,7 @@ def print_agg_stats(stats, sort_key=None):
     for category, count in sorted(stats.items(), key=sort_key, reverse=True):
         agg_sum += count
         print(f"  {category:{max_len}}: {count:-12.1f} / day ({agg_sum / total * 100:-5.1f}%)")
+
 
 def main():
     import sys
@@ -71,6 +77,7 @@ def main():
     total = sum(stats.values())
     days = {"month": 30, "week": 7, "day": 1}
     print(f"Total downloads per month: {total * days['month']:-12,.1f}")
+
 
 if __name__ == "__main__":
     main()

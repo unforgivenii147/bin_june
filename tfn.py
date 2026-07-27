@@ -9,6 +9,7 @@ from dh import FONT_EXT
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def unique_path(path: Path | str) -> Path:
     path = _clean_fname(Path(path))
     if not path.exists():
@@ -30,11 +31,13 @@ def unique_path(path: Path | str) -> Path:
             return new_path
         counter += 1
 
+
 def _clean_fname(path: Path) -> Path:
     from re import sub as re_sub
 
     clean_name = re_sub(r"(_\d+)+", "", path.name)
     return path.with_name(clean_name)
+
 
 """
 Recursively rename font files based on their internal metadata (name and style).
@@ -65,6 +68,7 @@ STYLE_MAPPING = {
     "extended": "Extended",
     "narrow": "Narrow",
 }
+
 
 def get_font_name_and_style(font_path):
     font_path.suffix.lower()
@@ -97,6 +101,7 @@ def get_font_name_and_style(font_path):
         print(f"  Warning: Could not read {font_path.name}: {e}")
         return None, None
 
+
 def sanitize_filename(name) -> str:
     if not name:
         return "Unknown"
@@ -105,6 +110,7 @@ def sanitize_filename(name) -> str:
     while "__" in sanitized:
         sanitized = sanitized.replace("__", "_")
     return sanitized
+
 
 def rename_font_file(font_path: Path) -> str | None:
     family_name, style = get_font_name_and_style(font_path)
@@ -128,6 +134,7 @@ def rename_font_file(font_path: Path) -> str | None:
         print(f"  Error renaming {font_path.name}: {e}")
         return None
 
+
 def process_directory(directory: Path, recursive=True) -> int:
     directory = Path(directory)
     renamed_count = 0
@@ -141,10 +148,12 @@ def process_directory(directory: Path, recursive=True) -> int:
             renamed_count += process_directory(item, recursive)
     return renamed_count
 
+
 def main() -> None:
     cwd = Path.cwd()
     renamed_count = process_directory(cwd, recursive=True)
     print(f"\n{renamed_count} font file(s).")
+
 
 if __name__ == "__main__":
     main()

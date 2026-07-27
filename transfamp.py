@@ -13,6 +13,7 @@ from pathlib import Path
 
 from deep_translator import GoogleTranslator
 
+
 def translate_file(file_path: Path) -> tuple[Path, dict]:
     """
     Translate a single file's content from Persian to English.
@@ -57,6 +58,7 @@ def translate_file(file_path: Path) -> tuple[Path, dict]:
         print(f"❌ Error processing {file_path.name}: {e}")
         return file_path, {}
 
+
 def save_translation(input_path: Path, translations: dict, output_dir: Path = None):
     """
     Save translations to a JSON file.
@@ -79,6 +81,7 @@ def save_translation(input_path: Path, translations: dict, output_dir: Path = No
 
     print(f"💾 Saved: {output_path.name}")
     return output_path
+
 
 def main():
     """Main function to orchestrate the translation process."""
@@ -129,6 +132,7 @@ def main():
         print(f"   ❌ Failed: {failed} files")
     print(f"   ⏱️  Time elapsed: {elapsed_time:.2f} seconds")
     print(f"   📁 Output directory: {output_dir.absolute()}")
+
 
 if __name__ == "__main__":
     main()

@@ -12,11 +12,13 @@ SKIP_DIRS = {"lazy", ".git", "var"}
 REMOVABLE_EXTENSIONS = {".txt", ".md"}
 JUNK_EXTENSIONS = {".tmp", ".bak", ".log", ".pyc"}
 
+
 def empty_it(path: Path) -> None:
     try:
         path.write_text("", encoding="utf-8")
     except OSError as e:
         print(f"Error emptying {path}: {e}", file=sys.stderr)
+
 
 def remove_it(path: Path) -> None:
     try:
@@ -27,11 +29,14 @@ def remove_it(path: Path) -> None:
     except OSError as e:
         print(f"Error removing {path}: {e}", file=sys.stderr)
 
+
 def should_skip(path: Path) -> bool:
     return any(skip_dir in path.parts for skip_dir in SKIP_DIRS)
 
+
 def has_multiple_suffixes(path: Path) -> bool:
     return len(path.suffixes) > 1
+
 
 def main() -> None:
     cwd = Path.cwd()
@@ -218,6 +223,7 @@ def main() -> None:
     if removed_count:
         print(f"\n{removed_count} item(s) removed")
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

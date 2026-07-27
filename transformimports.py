@@ -12,6 +12,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+
 class ImportTransformer(ast.NodeTransformer):
     def __init__(self, tree: ast.Module):
         self.tree = tree
@@ -52,6 +53,7 @@ class ImportTransformer(ast.NodeTransformer):
             return ast.Name(id=node.attr, ctx=node.ctx)
         return self.generic_visit(node)
 
+
 def main() -> None:
     if len(sys.argv) != 2:
         print("Usage: python transformimports_optimized.py <python_file>", file=sys.stderr)
@@ -78,6 +80,7 @@ def main() -> None:
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

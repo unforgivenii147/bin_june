@@ -29,12 +29,14 @@ from pathlib import Path
 
 MAX_DEFAULT = 10
 
+
 @dataclass
 class ModuleInfo:
     path: Path
     fullname: str
     source: str
     deps: set[str]
+
 
 def find_py_files(root: Path, exclude: Path | None = None) -> list[Path]:
     files = []
@@ -51,6 +53,7 @@ def find_py_files(root: Path, exclude: Path | None = None) -> list[Path]:
         files.append(p)
     return files
 
+
 def module_fullname_for_path(root: Path, file_path: Path, package_mode: bool, package_name: str | None) -> str:
     rel = file_path.relative_to(root)
     parts = list(rel.with_suffix("").parts)
@@ -66,6 +69,7 @@ def module_fullname_for_path(root: Path, file_path: Path, package_mode: bool, pa
     else:
         return ".".join(parts)
 
+
 def resolve_relative_import(curr_fullname: str, module: str | None, level: int) -> str | None:
     if level == 0:
         return module
@@ -79,6 +83,7 @@ def resolve_relative_import(curr_fullname: str, module: str | None, level: int) 
     if not target_parts:
         return None
     return ".".join(target_parts)
+
 
 def analyze_file(args) -> ModuleInfo:
     file_path, root, package_mode, package_name, full_map = args
@@ -121,6 +126,7 @@ def analyze_file(args) -> ModuleInfo:
                     normalized.add(candidate)
     return ModuleInfo(path=file_path, fullname=fullname, source=src, deps=normalized)
 
+
 def topological_sort(modules: dict[str, ModuleInfo]) -> tuple[list[str], list[set[str]]]:
     edges = {name: set(info.deps) for name, info in modules.items()}
     for name in edges:
@@ -143,6 +149,7 @@ def topological_sort(modules: dict[str, ModuleInfo]) -> tuple[list[str], list[se
         ordered += sorted(remaining)
         cycles = [remaining]
     return ordered, cycles
+
 
 def build_merged_source(modules: dict[str, ModuleInfo], ordered: list[str], out_module_name: str) -> str:
     lines: list[str] = []
@@ -191,6 +198,7 @@ def build_merged_source(modules: dict[str, ModuleInfo], ordered: list[str], out_
     lines.append("")
     lines.append("# End of merged package")
     return "\n".join(lines)
+
 
 def main():
     parser = argparse.ArgumentParser(description="Merge a small Python library into a single-file package.")
@@ -278,6 +286,7 @@ def main():
     print(f"Modules merged ({len(modules)}): {', '.join(ordered)}")
     if cycles:
         print("Cycles (approx):", cycles)
+
 
 if __name__ == "__main__":
     main()

@@ -12,6 +12,7 @@ import sys
 from pathlib import Path
 from rapidfuzz import fuzz
 
+
 def is_finglish(text: str, finglish: str) -> int:
     persian_map = {
         "ا": "a",
@@ -74,6 +75,7 @@ def is_finglish(text: str, finglish: str) -> int:
     if ratio >= 60:
         return True
     return False
+
 
 def is_transliteration(persian_word, english_word):
     if not english_word or not persian_word:
@@ -152,6 +154,7 @@ def is_transliteration(persian_word, english_word):
 
     """
 
+
 def find_transliterations(words_dict):
     transliterations = {}
     valid_translations = {}
@@ -163,6 +166,7 @@ def find_transliterations(words_dict):
             valid_translations[persian_word] = english_word
 
     return transliterations, valid_translations
+
 
 def load_json_file(filepath):
     try:
@@ -176,9 +180,11 @@ def load_json_file(filepath):
         print(f"Error: Invalid JSON in '{filepath}': {e}")
         sys.exit(1)
 
+
 def save_json_file(data, filepath):
     with open(filepath, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+
 
 def main():
     parser = argparse.ArgumentParser(description="Find transliterated Persian words in dictionary JSON")
@@ -229,6 +235,7 @@ def main():
     else:
         print("\nUse -m flag to move these entries to errors.json")
         print(f"Example: python {sys.argv[0]} words.json -m")
+
 
 if __name__ == "__main__":
     main()

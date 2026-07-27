@@ -10,6 +10,7 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -30,6 +31,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
+
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -39,6 +41,7 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
+
 
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
@@ -50,6 +53,7 @@ def fsz(sz: float) -> str:
     if i == 0:
         return f"{int(value)} {units[i]}"
     return f"{value:.1f} {units[i]}"
+
 
 ATTRIBUTES = {
     "bold": 1,
@@ -101,6 +105,7 @@ COLORS = {
 }
 RESET = "\x1b[0m"
 
+
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -120,6 +125,7 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
+
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -144,8 +150,10 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
+
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
+
 
 def process_file(file_path: Path) -> None:
     before = gsz(file_path)
@@ -176,6 +184,7 @@ def process_file(file_path: Path) -> None:
     except:
         pass
 
+
 def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
@@ -194,6 +203,7 @@ def main() -> None:
             pending.popleft().get()
     diff_size = before - gsz(cwd)
     print(f"space saved : {fsz(diff_size)}")
+
 
 if __name__ == "__main__":
     main()

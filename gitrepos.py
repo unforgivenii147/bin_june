@@ -7,6 +7,7 @@ from pathlib import Path
 
 import requests
 
+
 def get_github_repos(username: str, output_file=None) -> None:
     if output_file is None:
         url = f"https://api.github.com/users/{username}/repos"
@@ -39,6 +40,7 @@ def get_github_repos(username: str, output_file=None) -> None:
         print(f"Error parsing JSON response: {e}")
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
+
 
 if __name__ == "__main__":
     username = input("Enter GitHub username: ").strip()

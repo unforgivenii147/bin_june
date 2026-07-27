@@ -14,10 +14,12 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 TARGET_FILES = {"WHEEL"}
 PREFIX = "Tag: py2-none-any"
 
+
 def clean_text(text: str) -> str:
     return "\n".join(line for line in text.splitlines() if not line.startswith(PREFIX)) + (
         "\n" if text.endswith("\n") else ""
     )
+
 
 def clean_file(path: str) -> None:
     try:
@@ -27,6 +29,7 @@ def clean_file(path: str) -> None:
     cleaned = clean_text(original)
     if cleaned != original:
         Path(path).write_text(cleaned, encoding="utf-8")
+
 
 def process_zip(path: str) -> None:
     tmp = tempfile.mktemp(suffix=".zip")
@@ -44,6 +47,7 @@ def process_zip(path: str) -> None:
             zout.writestr(item, data)
     shutil.move(tmp, path)
 
+
 def process_tar(path: str) -> None:
     tmp_dir = tempfile.mkdtemp()
     tmp_tar = tempfile.mktemp(suffix=".tar.gz")
@@ -58,12 +62,14 @@ def process_tar(path: str) -> None:
     shutil.move(tmp_tar, path)
     shutil.rmtree(tmp_dir)
 
+
 def dispatch_archive(path: str) -> None:
     name = path.lower()
     if name.endswith((".zip", ".whl")):
         process_zip(path)
     elif name.endswith((".tar.gz", ".tgz", ".tar")):
         process_tar(path)
+
 
 def main() -> None:
     for root, _, files in os.walk("."):
@@ -74,6 +80,7 @@ def main() -> None:
                 continue
             if name.lower().endswith((".zip", ".whl", ".tar.gz", ".tgz", ".tar")):
                 dispatch_archive(full_path)
+
 
 if __name__ == "__main__":
     main()

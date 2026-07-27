@@ -7,6 +7,7 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
     units = "B", "KB", "MB", "GB", "TB"
@@ -17,6 +18,7 @@ def fsz(sz: float) -> str:
     if i == 0:
         return f"{int(value)} {units[i]}"
     return f"{value:.1f} {units[i]}"
+
 
 def main() -> None:
     if len(sys.argv) < 2:
@@ -33,6 +35,7 @@ def main() -> None:
     count = len(files)
     print(f"Total number of .{ext} files: {count}")
     print(f"Total size of .{ext} files: {fsz(total_size)}")
+
 
 if __name__ == "__main__":
     main()

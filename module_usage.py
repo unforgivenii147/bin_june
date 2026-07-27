@@ -21,6 +21,7 @@ BIN_DIR = Path.home() / "bin"
 REPORT = Path.home() / "dh_usage.txt"
 PACKAGE = "dh"
 
+
 def get_stdlib_modules() -> set[str]:
     stdlib = set()
     for module_info in pkgutil.iter_modules():
@@ -100,9 +101,11 @@ def get_stdlib_modules() -> set[str]:
     stdlib.update(extra)
     return stdlib
 
+
 def is_stdlib(module_name: str, stdlib_set: set[str]) -> bool:
     top_level = module_name.split(".")[0]
     return top_level in stdlib_set
+
 
 def extract_imports(filepath: Path) -> dict[str, list[str]]:
     try:
@@ -146,6 +149,7 @@ def extract_imports(filepath: Path) -> dict[str, list[str]]:
                     imports[PACKAGE].append(func.attr)
     return dict(imports)
 
+
 def count_calls(filepath: Path, imports: dict[str, list[str]]) -> dict[str, dict[str, int]]:
     try:
         tree = ast.parse(filepath.read_text(encoding="utf-8"))
@@ -168,6 +172,7 @@ def count_calls(filepath: Path, imports: dict[str, list[str]]) -> dict[str, dict
                     if mod == obj_name or mod.endswith("." + obj_name):
                         call_counts[mod][func.attr] += 1
     return dict(call_counts)
+
 
 def generate_report(per_file_data: list[tuple[str, dict[str, dict[str, int]]]], stdlib_set: set[str]) -> str:
     lines: list[str] = []
@@ -286,6 +291,7 @@ def generate_report(per_file_data: list[tuple[str, dict[str, dict[str, int]]]], 
     lines.append(f"{'=' * 80}")
     return "\n".join(lines)
 
+
 def main():
     if not BIN_DIR.is_dir():
         print(f"❌ {BIN_DIR} does not exist or is not a directory.")
@@ -315,6 +321,7 @@ def main():
     REPORT.write_text(report_text, encoding="utf-8")
     print(report_text)
     print(f"\n✅ Report saved to {REPORT}")
+
 
 if __name__ == "__main__":
     main()

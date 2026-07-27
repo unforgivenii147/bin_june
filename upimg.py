@@ -8,6 +8,7 @@ from pathlib import Path
 
 import cv2
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -27,6 +28,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
             elif item.is_file() and (ext is None or item.suffix in ext):
                 files.append(item)
     return files
+
 
 def process_file(path) -> None:
     path_str = str(path)
@@ -56,6 +58,7 @@ def process_file(path) -> None:
         return
     except:
         return
+
 
 if __name__ == "__main__":
     cwd = Path.cwd()

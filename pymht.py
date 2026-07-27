@@ -13,6 +13,7 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def unique_path(path: Path | str) -> Path:
     path = _clean_fname(Path(path))
     if not path.exists():
@@ -34,16 +35,19 @@ def unique_path(path: Path | str) -> Path:
             return new_path
         counter += 1
 
+
 def _clean_fname(path: Path) -> Path:
     from re import sub as re_sub
 
     clean_name = re_sub(r"(_\d+)+", "", path.name)
     return path.with_name(clean_name)
 
+
 def sanitize_filename(name: str) -> str:
     name = name.strip().strip('"').strip("'")
     name = name.replace("\\\\", "/").split("/")[-1]
     return re.sub(r"[^A-Za-z0-9._-]+", "_", name) or "resource"
+
 
 def split_data_url(src: str):
     if not src or not src.startswith("data:"):
@@ -58,6 +62,7 @@ def split_data_url(src: str):
         return mime, raw
     except Exception:
         return None
+
 
 def main() -> None:
     if len(sys.argv) < 2:
@@ -198,6 +203,7 @@ def main() -> None:
     print("Done.")
     print(f"HTML: {out_html}")
     print(f"Resources: {out_dir}/ (extracted {len(cid_to_file)} CID items)")
+
 
 if __name__ == "__main__":
     main()

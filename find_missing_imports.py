@@ -21,6 +21,7 @@ for module_name in list(sys.modules.keys()):
         except (ImportError, ModuleNotFoundError, ValueError):
             pass
 
+
 class ImportAnalyzer(ast.NodeVisitor):
     def __init__(self):
         self.imported_names: set[str] = set()
@@ -217,6 +218,7 @@ class ImportAnalyzer(ast.NodeVisitor):
         if isinstance(node.value, ast.Name):
             self.used_names.add(node.value.id)
         self.generic_visit(node)
+
 
 def get_stdlib_modules() -> set[str]:
     stdlib = set(sys.builtin_module_names)
@@ -417,6 +419,7 @@ def get_stdlib_modules() -> set[str]:
     stdlib.update(common_stdlib)
     return stdlib
 
+
 def analyze_file(filepath: Path) -> tuple[Path, list[tuple[str, int]]]:
     try:
         with open(filepath, encoding="utf-8") as f:
@@ -444,6 +447,7 @@ def analyze_file(filepath: Path) -> tuple[Path, list[tuple[str, int]]]:
     except (SyntaxError, UnicodeDecodeError):
         return (filepath, [])
 
+
 def autofix_imports(filepath: Path, missing_imports: list[tuple[str, int]]) -> bool:
     if not missing_imports:
         return False
@@ -468,6 +472,7 @@ def autofix_imports(filepath: Path, missing_imports: list[tuple[str, int]]) -> b
         return True
     except Exception:
         return False
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -519,6 +524,7 @@ def main():
     if args.autofix:
         print(f"Files fixed: {fixed_files}")
     sys.exit(1 if total_missing > 0 else 0)
+
 
 if __name__ == "__main__":
     main()

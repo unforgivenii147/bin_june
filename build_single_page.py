@@ -25,8 +25,10 @@ if not ASSETS_DIR.exists():
     ASSETS_DIR.mkdir(parents=True, exist_ok=True)
 HASH_MAP = {}
 
+
 def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
+
 
 def save_hashed_asset(content: bytes, mime_type: str):
     digest = sha256(content)
@@ -39,6 +41,7 @@ def save_hashed_asset(content: bytes, mime_type: str):
     HASH_MAP[digest] = path
     return path
 
+
 def extract_base64(data_url: AttributeValueList | str | None):
     m = re.match(r"data:(.*?);base64,(.*)", data_url, re.DOTALL)
     if not m:
@@ -46,6 +49,7 @@ def extract_base64(data_url: AttributeValueList | str | None):
     mime_type, encoded = m.groups()
     content = base64.b64decode(encoded)
     return save_hashed_asset(content, mime_type)
+
 
 def download_external(url: AttributeValueList | str):
     try:
@@ -57,7 +61,9 @@ def download_external(url: AttributeValueList | str):
     except Exception:
         return None
 
+
 processed_html_files = []
+
 
 def process_html(path: Path) -> None:
     html = path.read_text(encoding="utf-8", errors="ignore")
@@ -109,6 +115,7 @@ def process_html(path: Path) -> None:
     out_path.write_text(str(soup), encoding="utf-8")
     print("Processed:", path)
 
+
 def build_single_page() -> None:
     merged = BeautifulSoup("<html><head></head><body></body></html>", "html.parser")
     body = merged.body
@@ -143,6 +150,7 @@ def build_single_page() -> None:
     out_file = OUTPUT_DIR / "single_page_local.html"
     out_file.write_text(str(merged), encoding="utf-8")
     print("\nCreated:", out_file)
+
 
 if __name__ == "__main__":
     for path in cwd.rglob("*"):

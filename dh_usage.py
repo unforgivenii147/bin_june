@@ -18,6 +18,7 @@ BIN_DIR = Path.home() / "bin"
 REPORT = Path.home() / "dh_usage.txt"
 PACKAGE = "dh"
 
+
 def extract_dh_imports(filepath: Path) -> list[str]:
     try:
         tree = ast.parse(filepath.read_text(encoding="utf-8"))
@@ -51,6 +52,7 @@ def extract_dh_imports(filepath: Path) -> list[str]:
                     imported.append(func.attr)
     return imported
 
+
 def count_calls(filepath: Path, func_names: list[str]) -> dict[str, int]:
     try:
         tree = ast.parse(filepath.read_text(encoding="utf-8"))
@@ -64,6 +66,7 @@ def count_calls(filepath: Path, func_names: list[str]) -> dict[str, int]:
             if isinstance(func, ast.Name) and func.id in name_set:
                 counter[func.id] += 1
     return counter
+
 
 def main():
     if not BIN_DIR.is_dir():
@@ -122,6 +125,7 @@ def main():
     REPORT.write_text(report_text, encoding="utf-8")
     print(report_text)
     print(f"\n✅ Report saved to {REPORT}")
+
 
 if __name__ == "__main__":
     main()

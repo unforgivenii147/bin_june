@@ -17,6 +17,7 @@ logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 DICT_FILE: Final[str] = Path("~/dic.json").expanduser()
 
+
 def load_dictionary(path: Path) -> tuple[dict[str, str], dict[str, str]]:
     if not path.exists():
         logger.error("Error: Dictionary file %s not found", path)
@@ -31,6 +32,7 @@ def load_dictionary(path: Path) -> tuple[dict[str, str], dict[str, str]]:
         logger.error("Error loading dictionary: %s", e)
         sys.exit(1)
 
+
 def setup_readline(words: Iterable[str]) -> None:
     sorted_words = sorted(words)
 
@@ -42,11 +44,14 @@ def setup_readline(words: Iterable[str]) -> None:
     readline.parse_and_bind("tab: complete")
     readline.set_completer_delims(" \t\n")
 
+
 def translate(word: str, fa_en: dict[str, str], en_fa: dict[str, str]) -> str | None:
     return fa_en.get(word) or en_fa.get(word)
 
+
 def fuzzy_search(word: str, all_words: set[str], limit: int = 5, cutoff: float = 0.6) -> list[str]:
     return get_close_matches(word, all_words, n=limit, cutoff=cutoff)
+
 
 def fzf_select(all_words: set[str]) -> str | None:
     if not shutil.which("fzf"):
@@ -65,6 +70,7 @@ def fzf_select(all_words: set[str]) -> str | None:
     except Exception as e:
         logger.error("fzf execution error: %s", e)
         return None
+
 
 def interactive_mode(fa_en: dict[str, str], en_fa: dict[str, str]) -> None:
     all_words = set(fa_en) | set(en_fa)
@@ -88,6 +94,7 @@ def interactive_mode(fa_en: dict[str, str], en_fa: dict[str, str]) -> None:
         except (KeyboardInterrupt, EOFError):
             print("\n👋 Bye.")
             break
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Offline Persian ↔ English translator")
@@ -134,6 +141,7 @@ def main() -> None:
                 print("Not found", file=sys.stderr)
             sys.exit(1)
     interactive_mode(fa_en, en_fa)
+
 
 if __name__ == "__main__":
     main()

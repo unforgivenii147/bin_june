@@ -10,6 +10,7 @@ from pathlib import Path
 ZSTD_LEVEL = 19
 CHUNK_SIZE = 1024 * 64
 
+
 def compress_stream(input_stream, output_file_path: Path) -> bool:
     """Compress using Zstandard (level 19)"""
     try:
@@ -27,6 +28,7 @@ def compress_stream(input_stream, output_file_path: Path) -> bool:
     except Exception as e:
         print(f"❌ Error compressing to {output_file_path.name}: {e}")
         return False
+
 
 def decompress_stream(input_path: Path, output_path: Path) -> bool:
     """Decompress Zstandard file"""
@@ -46,6 +48,7 @@ def decompress_stream(input_path: Path, output_path: Path) -> bool:
         print(f"❌ Error decompressing {input_path.name}: {e}")
         return False
 
+
 def process_directory(dir_path: Path):
     """Compress directory → .tar.zst"""
     output_zst = dir_path.with_name(f"{dir_path.name}.tar.zst")
@@ -64,6 +67,7 @@ def process_directory(dir_path: Path):
     except Exception as e:
         print(f"❌ Failed to archive directory {dir_path.name}: {e}")
 
+
 def process_file(file_path: Path):
     """Compress single file → .zst"""
     output_zst = file_path.with_name(f"{file_path.name}.zst")
@@ -74,6 +78,7 @@ def process_file(file_path: Path):
                 print(f"🗑️  Removed original file: {file_path.name}")
     except Exception as e:
         print(f"❌ Failed to compress file {file_path.name}: {e}")
+
 
 def decompress_file(zst_path: Path):
     """Decompress .zst or .tar.zst file"""
@@ -100,6 +105,7 @@ def decompress_file(zst_path: Path):
             print(f"🗑️  Removed archive: {zst_path.name}")
     else:
         print(f"⚠️  Skipping non-zst file: {zst_path.name}")
+
 
 def main():
     parser = argparse.ArgumentParser(description="Compress/Decompress with Zstandard (zstd)")
@@ -146,6 +152,7 @@ def main():
                 executor.submit(decompress_file, archive)
 
     print("🎉 All operations completed successfully!")
+
 
 if __name__ == "__main__":
     main()

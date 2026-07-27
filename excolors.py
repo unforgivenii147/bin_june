@@ -64,6 +64,7 @@ COLORS = {
 
 RESET = "\x1b[0m"
 
+
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -83,6 +84,7 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
+
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -107,8 +109,10 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
+
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
+
 
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
@@ -124,6 +128,7 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
+
 
 def get_filez(root_dir: str | Path):
     from os import walk as os_walk
@@ -146,11 +151,14 @@ def get_filez(root_dir: str | Path):
     else:
         yield root_dir
 
+
 def should_skip(path: str | Path) -> bool:
     path = Path(path)
     return bool(path.is_symlink() or not SKIP_DIRS.isdisjoint(path.parts))
 
+
 COLOR_RE = re.compile(r"#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})\b")
+
 
 def pf(path: Path):
     content = path.read_text(encoding="utf-8", errors="ignore")
@@ -162,6 +170,7 @@ def pf(path: Path):
         cprint(f"{len(found)}", "cyan")
         return found
     return []
+
 
 def main() -> None:
     cwd = Path.cwd()
@@ -186,6 +195,7 @@ def main() -> None:
     finals = sorted(set(finals))
     outfile.write_text("\n".join(finals), encoding="utf-8")
     cprint(f"{fc} colors found", "green")
+
 
 if __name__ == "__main__":
     main()

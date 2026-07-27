@@ -15,12 +15,15 @@ import tomllib
 from pathlib import Path
 from typing import Any
 
+
 def load_toml(path: Path) -> dict:
     with open(path, "rb") as f:
         return tomllib.load(f)
 
+
 def safe_read_file(path: Path) -> str | None:
     return path.read_text(encoding="utf-8") if path.exists() else None
+
 
 def extract_metadata(toml_data: dict) -> dict[str, Any]:
     project = toml_data.get("project", {})
@@ -50,6 +53,7 @@ def extract_metadata(toml_data: dict) -> dict[str, Any]:
         metadata["license"] = metadata["license"].get("text", "")
     return metadata
 
+
 def parse_setup_cfg(setup_cfg_text: str) -> dict[str, list[str]]:
     if not setup_cfg_text:
         return {}
@@ -75,6 +79,7 @@ def parse_setup_cfg(setup_cfg_text: str) -> dict[str, list[str]]:
         result["options"] = dict(cp.items("options"))
     return result
 
+
 def has_c_extension(tool: dict[str, Any]) -> tuple[bool, str]:
     setuptools_tool = tool.get("setuptools", {})
     if setuptools_tool.get("ext-modules"):
@@ -88,6 +93,7 @@ def has_c_extension(tool: dict[str, Any]) -> tuple[bool, str]:
     if "cmake" in str(tool).lower():
         return (True, "cmake")
     return (False, "")
+
 
 def generate_setup_py(
     metadata: dict[str, Any],
@@ -207,6 +213,7 @@ def generate_setup_py(
     setup_py = f'''#!/usr/bin/env python3\n"""\nAuto-generated setup.py from pyproject.toml.\nPreserves setup.cfg and MANIFEST.in.\nC-extension support: {cext_method or "none"}\n"""\nimport os\n{cext_imports}from setuptools import setup, find_packages\nlong_description = """{long_desc}"""\nlong_description_content_type = "{long_desc_type}"\nif os.path.exists("MANIFEST.in"):\n    with open("MANIFEST.in", "r") as f:\n        manifest_content = f.read()\nelse:\n    manifest_content = ""\nsetup(\n    name="{name}",\n    version="{version}",\n    description="{desc}",\n    long_description=long_description,\n    long_description_content_type=long_description_content_type,\n    author="{author_str}",\n    author_email="",\n    maintainer="{maintainer_str}",\n    maintainer_email="",\n    license="{license_}",\n    url="{(list(urls.values())[0] if urls else "")}",\n    keywords={keywords_str},\n    packages={packages_section},\n    include_package_data={include_package_data},\n    python_requires="{requires_python}",\n    install_requires={install_requires_str},\n    extras_require={extras_str},\n    entry_points={entry_str},\n    scripts={scripts_str},\n    classifiers={classifiers_str},\n{package_data_str}{data_files_str}{cext_build}\n)\n'''
     return setup_py
 
+
 def main() -> None:
     import argparse
 
@@ -247,6 +254,7 @@ def main() -> None:
         print("✅ Preserved: setup.cfg")
     if manifest_text:
         print("✅ Preserved: MANIFEST.in")
+
 
 if __name__ == "__main__":
     main()

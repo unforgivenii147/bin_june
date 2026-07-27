@@ -10,6 +10,7 @@ from pathlib import Path
 
 from nudenet import NudeDetector
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -30,11 +31,13 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
+
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
+
 
 ATTRIBUTES = {
     "bold": 1,
@@ -86,6 +89,7 @@ COLORS = {
 }
 RESET = "\x1b[0m"
 
+
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -105,6 +109,7 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
+
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -129,8 +134,10 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
+
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
+
 
 safe_path = Path("safe")
 sexy_path = Path("sexy")
@@ -139,9 +146,11 @@ safe_path.mkdir(exist_ok=True)
 sexy_path.mkdir(exist_ok=True)
 porn_path.mkdir(exist_ok=True)
 
+
 def check_porn(path: str):
     det = NudeDetector()
     return det.detect(path)
+
 
 def process_file(path) -> None:
     path = Path(path)
@@ -155,6 +164,7 @@ def process_file(path) -> None:
         return
     result = check_porn(str(path))
     cprint(f"{path.name} is {result['class']} {result['score']}", "cyan")
+
 
 if __name__ == "__main__":
     cwd = Path.cwd()

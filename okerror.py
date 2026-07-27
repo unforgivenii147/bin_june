@@ -11,9 +11,11 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 ERROR_DIR = Path("error")
 OK_DIR = Path("ok")
 
+
 def ensure_dirs() -> None:
     ERROR_DIR.mkdir(exist_ok=True)
     OK_DIR.mkdir(exist_ok=True)
+
 
 def unique_destination(dest: Path) -> Path:
     if not dest.exists():
@@ -28,9 +30,11 @@ def unique_destination(dest: Path) -> Path:
             return new_dest
         counter += 1
 
+
 def black_check(file_path: Path) -> bool:
     result = subprocess.run(["black", "--check", str(file_path)], capture_output=True)
     return result.returncode == 0
+
 
 def main() -> None:
     ensure_dirs()
@@ -45,6 +49,7 @@ def main() -> None:
             dest = unique_destination(ERROR_DIR / py_file.name)
             print(f"  ✗ ERROR → {dest}")
         shutil.move(str(py_file), str(dest))
+
 
 if __name__ == "__main__":
     main()

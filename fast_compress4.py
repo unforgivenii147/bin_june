@@ -16,6 +16,7 @@ import zstandard as zstd
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def walk_files(directory: Path, pattern: str = "*") -> Iterator[tuple[Path, Path]]:
     for file_path in directory.rglob(pattern):
         if not file_path.is_file():
@@ -27,6 +28,7 @@ def walk_files(directory: Path, pattern: str = "*") -> Iterator[tuple[Path, Path
             print(f"Skipping {file_path} - output already exists", file=sys.stderr)
             continue
         yield file_path, output_path
+
 
 def compress_file(
     input_path: Path,
@@ -64,6 +66,7 @@ def compress_file(
             output_path.unlink()
         return False
 
+
 def decompress_file(
     input_path: Path,
     output_path: Path | None = None,
@@ -98,6 +101,7 @@ def decompress_file(
         if output_path.exists():
             output_path.unlink()
         return False
+
 
 def main():
     parser = argparse.ArgumentParser(description="Recursively compress/decompress files using zstandard")
@@ -171,6 +175,7 @@ def main():
     if failed > 0:
         print(f"Failed: {failed} files")
     return 0 if failed == 0 else 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

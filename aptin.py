@@ -8,6 +8,7 @@ import sys
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def get_all_packages():
     try:
         result = subprocess.run(["pkg", "list-all"], capture_output=True, text=True, check=True)
@@ -31,12 +32,14 @@ def get_all_packages():
         except:
             return []
 
+
 def search_packages(pattern: str):
     all_packages = get_all_packages()
     regex_pattern = pattern.replace("*", ".*").replace("?", ".")
     regex = re.compile(regex_pattern, re.IGNORECASE)
     matches = [pkg for pkg in all_packages if regex.search(pkg)]
     return matches
+
 
 def install_packages(packages) -> bool:
     if not packages:
@@ -57,6 +60,7 @@ def install_packages(packages) -> bool:
         print(f"\n✗ Installation failed: {e}")
         return False
 
+
 def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: python install_wildcard.py <pattern>")
@@ -72,6 +76,7 @@ def main() -> None:
         install_packages(matches)
     else:
         print(f"No packages found matching pattern '{pattern}'")
+
 
 if __name__ == "__main__":
     main()

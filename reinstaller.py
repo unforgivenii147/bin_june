@@ -28,6 +28,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
 def get_site_packages_dirs() -> List[Path]:
     """Get all site-packages directories."""
     site_dirs = []
@@ -48,6 +49,7 @@ def get_site_packages_dirs() -> List[Path]:
             unique_dirs.append(d)
 
     return unique_dirs
+
 
 def get_packages_with_entry_points() -> Dict[str, Dict[str, any]]:
     """
@@ -123,6 +125,7 @@ def get_packages_with_entry_points() -> Dict[str, Dict[str, any]]:
 
     return packages_with_eps
 
+
 def get_package_size(dist: importlib.metadata.Distribution) -> str:
     """Estimate package size from distribution files."""
     try:
@@ -148,6 +151,7 @@ def get_package_size(dist: importlib.metadata.Distribution) -> str:
         return "Unknown"
     except Exception:
         return "Unknown"
+
 
 def get_user_confirmation(package_name: str, package_data: Dict, include_deps: bool = False) -> str:
     """Get user confirmation for reinstalling a package.
@@ -187,6 +191,7 @@ def get_user_confirmation(package_name: str, package_data: Dict, include_deps: b
         else:
             print("Invalid response. Please enter 'y', 'n', 'a', or '?'")
             continue
+
 
 def reinstall_package_with_pip(package_name: str, include_deps: bool = False) -> Tuple[str, bool, str]:
     """
@@ -231,6 +236,7 @@ def reinstall_package_with_pip(package_name: str, include_deps: bool = False) ->
         error_msg = str(e)
         logger.error(f"✗ Error reinstalling {package_name}: {error_msg}")
         return (package_name, False, error_msg)
+
 
 def reinstall_entrypoint_packages(
     max_workers: int = 4,
@@ -351,6 +357,7 @@ def reinstall_entrypoint_packages(
         for name, error in failed:
             logger.info(f"  ✗ {name}: {error[:100]}...")
 
+
 def main():
     parser = argparse.ArgumentParser(
         description="Reinstall all Python packages with entry points using pip API",
@@ -403,6 +410,7 @@ def main():
         dry_run=args.dry_run,
         skip_confirmation=args.yes,
     )
+
 
 if __name__ == "__main__":
     main()

@@ -12,6 +12,7 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 class TextSummarizer:
     def __init__(self, language: str = "english") -> None:
         self.language = language
@@ -96,6 +97,7 @@ class TextSummarizer:
         word_freq = self._calculate_word_frequencies(sentences)
         scores = self._score_sentences(sentences, word_freq)
         return {sentences[idx]: score for idx, score in scores.items()}
+
 
 if __name__ == "__main__":
     fn = Path(sys.argv[1])

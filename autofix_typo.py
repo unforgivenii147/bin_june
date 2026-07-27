@@ -73,6 +73,7 @@ QWERTY_ADJACENT = {
     "m": "n",
 }
 
+
 class PatternLearner:
     def __init__(self, learning_db_path: str = "typo_patterns.json") -> None:
         self.learning_db_path = learning_db_path
@@ -150,6 +151,7 @@ class PatternLearner:
                     pattern = f"insert '{correct[i]}'"
                     self.error_frequency[pattern] += 1
         self.save()
+
 
 class TypoFixerWithLearning:
     def __init__(self, preview: bool = True, learning_db: str = "typo_patterns.json") -> None:
@@ -343,6 +345,7 @@ class TypoFixerWithLearning:
         if self.changes_made > 0:
             self.learner.save()
 
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Auto-fix typos with pattern learning")
     parser.add_argument("--apply", action="store_true", help="Actually apply fixes")
@@ -366,6 +369,7 @@ def main() -> None:
     fixer = TypoFixerWithLearning(preview=not args.apply, learning_db=args.db)
     fixer.interactive_mode = args.interactive
     fixer.process_directory(args.dir)
+
 
 if __name__ == "__main__":
     main()

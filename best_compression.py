@@ -24,6 +24,7 @@ _HASH_TABLE_SIZE = 1 << 14
 _MAX_OFFSET_1 = 2047
 _MAX_OFFSET_2 = 65535
 
+
 def _encode_varint(value: int) -> bytes:
     result = bytearray()
     while value >= 128:
@@ -32,9 +33,11 @@ def _encode_varint(value: int) -> bytes:
     result.append(value)
     return bytes(result)
 
+
 def _hash_4_bytes(data: bytes, pos: int) -> int:
     val = data[pos] | data[pos + 1] << 8 | data[pos + 2] << 16 | data[pos + 3] << 24
     return val * 506832829 >> 32 - 14 & _HASH_TABLE_SIZE - 1
+
 
 def _emit_literal(output: bytearray, data: bytes, start: int, length: int) -> None:
     if length <= 0:
@@ -61,6 +64,7 @@ def _emit_literal(output: bytearray, data: bytes, start: int, length: int) -> No
         output.append(length - 1 >> 24 & 255)
     output.extend(data[start : start + length])
 
+
 def _emit_copy(output: bytearray, offset: int, length: int) -> None:
     while length > 0:
         if length >= 4 and length <= 11 and (offset <= _MAX_OFFSET_1):
@@ -84,6 +88,7 @@ def _emit_copy(output: bytearray, offset: int, length: int) -> None:
             output.append(offset >> 16 & 255)
             output.append(offset >> 24 & 255)
             length -= copy_len
+
 
 def compress(data: bytes) -> bytes:
     if not data:
@@ -124,10 +129,12 @@ def compress(data: bytes) -> bytes:
         _emit_literal(output, data, literal_start, data_len - literal_start)
     return bytes(output)
 
+
 try:
     import huffman as huffman_lib
 except Exception:
     huffman_lib = None
+
 
 def copy_chunks(src, dst, chunk_size: int = 1024 * 1024) -> None:
     while True:
@@ -135,6 +142,7 @@ def copy_chunks(src, dst, chunk_size: int = 1024 * 1024) -> None:
         if not chunk:
             break
         dst.write(chunk)
+
 
 @dataclass
 class Result:
@@ -146,6 +154,7 @@ class Result:
     ok: bool
     error: str | None = None
 
+
 def human(n: int) -> str:
     units = ["B", "KiB", "MiB", "GiB", "TiB"]
     x = float(n)
@@ -154,6 +163,7 @@ def human(n: int) -> str:
             return f"{x:.2f} {u}"
         x /= 1024.0
     return f"{x:.2f} PiB"
+
 
 def file_sha256(path: Path, chunk_size: int = 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -164,6 +174,7 @@ def file_sha256(path: Path, chunk_size: int = 1024 * 1024) -> str:
                 break
             h.update(b)
     return h.hexdigest()
+
 
 def best_ext(algo: str) -> str:
     return {
@@ -178,29 +189,36 @@ def best_ext(algo: str) -> str:
         "7z": ".7z",
     }.get(algo, f".{algo}")
 
+
 def compress_7z(in_path: Path, out_path: Path) -> None:
     with py7zr.SevenZipFile(out_path, mode="w", filters=None) as z:
         z.write(in_path, arcname=in_path.name)
+
 
 def compress_gz(in_path: Path, out_path: Path) -> None:
     with in_path.open("rb") as fin, gzip.open(out_path, "wb", compresslevel=9) as fout:
         copy_chunks(fin, fout)
 
+
 def compress_bz2(in_path: Path, out_path: Path) -> None:
     with in_path.open("rb") as fin, bz2.open(out_path, "wb", compresslevel=9) as fout:
         copy_chunks(fin, fout)
+
 
 def compress_lzma(in_path: Path, out_path: Path) -> None:
     with lzma.open(out_path, "wb", preset=9 | lzma.PRESET_EXTREME) as fout, in_path.open("rb") as fin:
         copy_chunks(fin, fout)
 
+
 def compress_zip(in_path: Path, out_path: Path) -> None:
     with zipfile.ZipFile(out_path, mode="w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
         zf.write(in_path, arcname=in_path.name)
 
+
 def compress_brotli(in_path: Path, out_path: Path) -> None:
     data = in_path.read_bytes()
     out_path.write_bytes(brotli.compress(data, quality=11, lgwin=22))
+
 
 def compress_huffman(in_path: Path, out_path: Path) -> None:
     if huffman_lib is None:
@@ -214,12 +232,15 @@ def compress_huffman(in_path: Path, out_path: Path) -> None:
     else:
         raise RuntimeError("Unsupported huffman library API")
 
+
 def compress_snappy(in_path: Path, out_path: Path) -> None:
     out_path.write_bytes(snappy_compress(in_path.read_bytes()))
+
 
 def compress_zstd(in_path: Path, out_path: Path) -> None:
     cctx = zstd.ZstdCompressor(level=21)
     out_path.write_bytes(cctx.compress(in_path.read_bytes()))
+
 
 ALGO_SINGLE: dict[str, tuple[str, Any]] = {
     "7z": ("7z", compress_7z),
@@ -232,6 +253,7 @@ ALGO_SINGLE: dict[str, tuple[str, Any]] = {
     "snappy": ("snappy", compress_snappy),
     "zstd": ("zstd", compress_zstd),
 }
+
 
 def run_single(algo: str, in_path: Path, tmpdir: Path) -> Result:
     try:
@@ -250,7 +272,9 @@ def run_single(algo: str, in_path: Path, tmpdir: Path) -> Result:
             algo=algo, input_path=str(in_path), out_path="", out_size=0, elapsed_s=0.0, ok=False, error=str(e)
         )
 
+
 WORKER_ALGOS = {"gz", "bz2", "lzma", "zstd", "brotli", "snappy"}
+
 
 def _chunk_compressor(algo: str):
     if algo == "gz":
@@ -307,9 +331,11 @@ def _chunk_compressor(algo: str):
         return f
     raise ValueError(algo)
 
+
 def _worker(arg):
     algo, chunk = arg
     return _chunk_compressor(algo)(chunk)
+
 
 def mp_compress_chunks(algo: str, in_path: Path, tmpdir: Path, chunk_size: int, processes: int | None) -> Result:
     if algo not in WORKER_ALGOS:
@@ -353,6 +379,7 @@ def mp_compress_chunks(algo: str, in_path: Path, tmpdir: Path, chunk_size: int, 
             algo=f"mp_{algo}", input_path=str(in_path), out_path="", out_size=0, elapsed_s=0.0, ok=False, error=str(e)
         )
 
+
 def choose_best(results: list[Result]) -> Result | None:
     ok = [r for r in results if r.ok and r.out_path]
     if not ok:
@@ -360,9 +387,11 @@ def choose_best(results: list[Result]) -> Result | None:
     ok.sort(key=lambda r: (r.out_size, r.elapsed_s))
     return ok[0]
 
+
 def copy_file(src: Path, dst: Path, chunk_size: int = 1024 * 1024) -> None:
     with src.open("rb") as fin, dst.open("wb") as fout:
         copy_chunks(fin, fout, chunk_size)
+
 
 def main() -> None:
     if len(sys.argv) != 2:
@@ -426,6 +455,7 @@ def main() -> None:
         out_final = in_path.with_name(in_path.name + best_ext(base_algo))
         copy_file(Path(best_overall.out_path), out_final)
         logger.info(f"Saved best output to: {out_final}")
+
 
 if __name__ == "__main__":
     main()

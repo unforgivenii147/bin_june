@@ -10,6 +10,7 @@ from Pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def get_file_age(path: str | Path, str_mode: bool = False) -> float | str:
     from os import stat as os_stat
     from time import time as time_time
@@ -43,6 +44,7 @@ def get_file_age(path: str | Path, str_mode: bool = False) -> float | str:
             parts.append(f"{value} {name}")
     return ", ".join(parts) if parts else "0 sec"
 
+
 def get_installed_pkgs():
     packages = []
     pip_freeze_path = Path("/sdcard/data/pip.freeze")
@@ -65,7 +67,9 @@ def get_installed_pkgs():
         packages.append(name)
     return packages
 
+
 get_ipkgs = get_installed_pkgs
+
 
 def find_packages_with_bin_scripts(output_file: str = "have_scripts.txt") -> None:
     print("Starting search for packages with 'bin' scripts...")
@@ -141,6 +145,7 @@ def find_packages_with_bin_scripts(output_file: str = "have_scripts.txt") -> Non
         print(f"Stderr: {e.stderr}")
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
+
 
 if __name__ == "__main__":
     find_packages_with_bin_scripts()

@@ -6,11 +6,13 @@ import sys
 from collections.abc import Callable
 from pathlib import Path
 
+
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
+
 
 def runcmd(
     cmd: list[str],
@@ -62,6 +64,7 @@ def runcmd(
             print(msg, file=sys_stderr)
         return 1, "", msg
 
+
 def process_file(path):
     path = Path(path)
     if not path.exists():
@@ -70,6 +73,7 @@ def process_file(path):
     if not ret:
         return True, path
     return False, path
+
 
 def main() -> None:
     cwd = str(Path.cwd())
@@ -94,6 +98,7 @@ def main() -> None:
         )
     )
     mpf3(process_file, files)
+
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -12,6 +12,7 @@ import astor
 
 CHUNK_SIZE = 1024 * 1024
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -32,6 +33,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
+
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -47,7 +49,9 @@ def is_binary(path: Path | str) -> bool:
     except Exception:
         return True
 
+
 BACKUP = False
+
 
 def process_file(path) -> None:
     path = Path(path)
@@ -75,6 +79,7 @@ def process_file(path) -> None:
     except:
         return
 
+
 def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -82,6 +87,7 @@ def main() -> None:
     files = [Path(arg) for arg in args] if args else get_files(cwd)
     for path in files:
         process_file(path)
+
 
 if __name__ == "__main__":
     raise SystemExit(main())

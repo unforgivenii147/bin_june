@@ -21,6 +21,7 @@ FAMILY_RULES = {
 }
 URL_RE = re.compile("url\\(([\\\"\\']?)(https?://[^)]+?\\.(?:woff2?|ttf|otf|eot))\\1\\)", re.IGNORECASE)
 
+
 def find_css(paths: str):
     seen = set()
     result = []
@@ -41,6 +42,7 @@ def find_css(paths: str):
         else:
             print(f"Skipping invalid path: {p}", file=sys.stderr)
     return result
+
 
 def read_css(files):
     charset_line = None
@@ -67,6 +69,7 @@ def read_css(files):
         chunks.append((file, "\n".join(cleaned).strip()))
     return (charset_line, chunks)
 
+
 def join_css(files, output: str) -> None:
     charset, chunks = read_css(files)
     parts = []
@@ -77,6 +80,7 @@ def join_css(files, output: str) -> None:
     final_css = "\n".join(parts).strip() + "\n"
     atomic_write(output, final_css)
 
+
 def main() -> None:
     files = find_css(".")
     if not files:
@@ -84,6 +88,7 @@ def main() -> None:
         sys.exit(1)
     join_css(files, "merged.css")
     print(f"Joined {len(files)} files -> merged.css")
+
 
 if __name__ == "__main__":
     main()

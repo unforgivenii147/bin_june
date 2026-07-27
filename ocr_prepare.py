@@ -34,6 +34,7 @@ except ImportError:
         sys.exit(1)
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".tiff", ".tif", ".bmp", ".gif"}
 
+
 def process_image_cv2(image_path: Path) -> bool:
     try:
         img = cv2.imread(str(image_path))
@@ -49,6 +50,7 @@ def process_image_cv2(image_path: Path) -> bool:
     except Exception as e:
         logger.error(f"Error processing {image_path}: {e}")
         return False
+
 
 def process_image_pil(image_path: Path) -> bool:
     try:
@@ -68,6 +70,7 @@ def process_image_pil(image_path: Path) -> bool:
         logger.error(f"Error processing {image_path}: {e}")
         return False
 
+
 def process_image(image_path: Path) -> tuple[Path, bool]:
     logger.debug(f"Processing: {image_path}")
     if USE_CV2:
@@ -75,6 +78,7 @@ def process_image(image_path: Path) -> tuple[Path, bool]:
     else:
         success = process_image_pil(image_path)
     return (image_path, success)
+
 
 def find_images(paths: list[Path], recursive: bool = False) -> list[Path]:
     image_files = []
@@ -97,6 +101,7 @@ def find_images(paths: list[Path], recursive: bool = False) -> list[Path]:
             seen.add(f)
             unique_files.append(f)
     return unique_files
+
 
 def process_images_parallel(image_files: list[Path], max_workers: int | None = None) -> dict:
     if not image_files:
@@ -122,6 +127,7 @@ def process_images_parallel(image_files: list[Path], max_workers: int | None = N
                 results["failed"] += 1
                 logger.error(f"✗ Error processing {path}: {e}")
     return results
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -156,6 +162,7 @@ def main():
     logger.info(f"  ✗ Failed:  {results['failed']}")
     logger.info(f"  Total:     {len(image_files)}")
     return 0 if results["failed"] == 0 else 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

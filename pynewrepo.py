@@ -8,6 +8,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+
 class GitHubRepoManager:
     def __init__(self, repo_name: str | None = None) -> None:
         self.cwd = Path.cwd()
@@ -235,6 +236,7 @@ Repository initialized on {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
             print("\n⚠️  Could not commit changes.")
             sys.exit(1)
 
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Create a GitHub repository using gh CLI and auto-commit with current date/time"
@@ -259,6 +261,7 @@ def main() -> None:
 
         traceback.print_exc()
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

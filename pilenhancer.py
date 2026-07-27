@@ -9,6 +9,7 @@ from pathlib import Path
 
 from PIL import Image, ImageEnhance
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -29,11 +30,13 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
+
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
+
 
 def process_file(path):
     path = Path(path)
@@ -52,6 +55,7 @@ def process_file(path):
     except Exception as e:
         print(f"Error enhancing {path.name}: {e}")
 
+
 def main():
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -66,6 +70,7 @@ def main():
     else:
         files = get_files(cwd, ext=[".jpg", ".png", ".webp"])
     mpf3(process_file, files)
+
 
 if __name__ == "__main__":
     sys.exit(main())

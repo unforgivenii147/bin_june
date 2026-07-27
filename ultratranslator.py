@@ -28,6 +28,7 @@ NON_ENGLISH_PATTERN: Final[re.Pattern] = re.compile(r"[^\x00-\x7F]")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -48,11 +49,14 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
+
 def is_english(text: str) -> bool:
     return not NON_ENGLISH_PATTERN.search(text)
 
+
 def get_nobinary(path: Path) -> list[Path]:
     return [f for f in get_files(path) if not is_binary(str(f))]
+
 
 def translate_file_content(path: Path, retries: int = MAX_RETRIES) -> str:
     for attempt in range(retries):
@@ -68,11 +72,13 @@ def translate_file_content(path: Path, retries: int = MAX_RETRIES) -> str:
                 logger.error(f"File translation failed after {retries} attempts for {path}: {e}")
                 return path.read_text(encoding="utf-8", errors="ignore")
 
+
 def safe_overwrite(filepath: Path, content: str) -> None:
     with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False, dir=filepath.parent) as tmp:
         tmp.write(content)
         tmp_path = Path(tmp.name)
     shutil.move(tmp_path, filepath)
+
 
 def process_file(path: Path) -> Path | None:
     logger.info(f"  Processing {path.name}...")
@@ -89,6 +95,7 @@ def process_file(path: Path) -> Path | None:
     except Exception as e:
         logger.error(f"  Failed to process {path}: {e}")
         return path
+
 
 def process_files_with_retry(files: list[Path]) -> None:
     """Process files with retry logic for failed files."""
@@ -128,6 +135,7 @@ def process_files_with_retry(files: list[Path]) -> None:
         for f in files_to_process:
             logger.error(f"  - {f}")
 
+
 def main() -> None:
     args = sys.argv[1:]
     files = [Path(p) for p in args] if args else get_nobinary(Path.cwd())
@@ -136,6 +144,7 @@ def main() -> None:
         return
     logger.info(f"Found {len(files)} files to process.")
     process_files_with_retry(files)
+
 
 if __name__ == "__main__":
     main()

@@ -13,6 +13,7 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 logger.add("/sdcard/allimport.log", diagnose=True)
 
+
 def tryimport(package: str) -> bool | str:
     try:
         import_module(package)
@@ -22,6 +23,7 @@ def tryimport(package: str) -> bool | str:
         logger.debug(f"X {package}")
         return traceback.format_exc()
 
+
 def tryallimport() -> None:
     for pkg in distributions():
         pkn = pkg.metadata["name"]
@@ -30,6 +32,7 @@ def tryallimport() -> None:
             print(f"✓ {pkn}")
         except Exception:
             logger.debug(f"X {pkn}")
+
 
 if __name__ == "__main__":
     args = sys.argv[1:]

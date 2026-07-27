@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections import deque
 from pathlib import Path
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -25,12 +26,14 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
+
 def main() -> None:
     cwd = Path.home()
     files = get_files(cwd, ext=[".html", ".htm"])
     for f in files:
         if f.stat().st_size > 1024 * 1024:
             print(f.relative_to(cwd))
+
 
 if __name__ == "__main__":
     main()

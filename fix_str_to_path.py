@@ -7,6 +7,7 @@ import re
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def add_path_statement(file_path: str) -> bool:
     with open(file_path, encoding="utf-8") as file:
         lines = file.readlines()
@@ -49,6 +50,7 @@ def add_path_statement(file_path: str) -> bool:
         print(f"Skipping {file_path}: No process_file function found or already has the line")
         return False
 
+
 def add_path_statement_simple(file_path: str) -> bool:
     with open(file_path, encoding="utf-8") as file:
         content = file.read()
@@ -81,6 +83,7 @@ def add_path_statement_simple(file_path: str) -> bool:
         return True
     return False
 
+
 def process_directory() -> None:
     cwd = os.getcwd()
     python_files = [f for f in os.listdir(cwd) if f.endswith(".py") and os.path.isfile(f)]
@@ -98,6 +101,7 @@ def process_directory() -> None:
             modified_count += 1
     print("-" * 50)
     print(f"Modified {modified_count} file(s)")
+
 
 if __name__ == "__main__":
     process_directory()

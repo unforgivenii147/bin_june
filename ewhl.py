@@ -9,6 +9,7 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def is_empty_wheel(wheel_path: Path) -> bool:
     try:
         with zipfile.ZipFile(wheel_path, "r") as zip_ref:
@@ -27,6 +28,7 @@ def is_empty_wheel(wheel_path: Path) -> bool:
     except Exception as e:
         print(f"Error reading {wheel_path}: {e}")
         return False
+
 
 def move_empty_wheels(source_dir, dest_dir_name: str = "empty_wheels") -> None:
     source_path = Path(source_dir)
@@ -65,6 +67,7 @@ def move_empty_wheels(source_dir, dest_dir_name: str = "empty_wheels") -> None:
     print(f"  - Valid wheels remaining: {len(valid_wheels)}")
     print(f"  - Total checked: {len(wheel_files)}")
 
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Move empty .whl files (only dist-info, no Python code) to a subdirectory"
@@ -88,6 +91,7 @@ def main() -> None:
         print(f"Error: Directory '{args.directory}' does not exist")
         return
     move_empty_wheels(args.directory, args.dest)
+
 
 if __name__ == "__main__":
     main()

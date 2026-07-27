@@ -7,6 +7,7 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 class BatchStripper:
     @staticmethod
     def strip_by_size_threshold(
@@ -68,6 +69,7 @@ class BatchStripper:
                     time.sleep(1)
         return stripper.stats
 
+
 def main() -> None:
     import argparse
 
@@ -106,6 +108,7 @@ def main() -> None:
         BatchStripper.strip_exclude_patterns(args.directory, args.patterns, args.verbose, verify)
     elif args.command == "retry":
         BatchStripper.strip_with_retry(args.directory, args.max_retries, args.verbose, verify)
+
 
 if __name__ == "__main__":
     main()

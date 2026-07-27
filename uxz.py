@@ -9,6 +9,7 @@ from pathlib import Path
 
 from lzma_mt import LZMADecompressor
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -29,7 +30,9 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
+
 MEM_LIMIT = 104857600
+
 
 def decompress_file(path: Path) -> bool:
     fname = path.name
@@ -47,6 +50,7 @@ def decompress_file(path: Path) -> bool:
             f.write(decompressed_data)
         return True
     return False
+
 
 def main() -> None:
     sys.argv[1:]
@@ -69,6 +73,7 @@ def main() -> None:
         else:
             errors += 1
     print(f"successfull: {successful}\nerrors: {errors}")
+
 
 if __name__ == "__main__":
     main()

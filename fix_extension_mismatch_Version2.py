@@ -182,6 +182,7 @@ SKIP_EXTS = {
     ".ts",
 }
 
+
 def detect_with_magic(path: Path) -> tuple[str, str] | None:
     if not MAGIC_AVAILABLE:
         return None
@@ -195,6 +196,7 @@ def detect_with_magic(path: Path) -> tuple[str, str] | None:
         return None
     except Exception:
         return None
+
 
 def detect_by_signature(path: Path, nbytes: int = READ_BYTES) -> tuple[str, str] | None:
     try:
@@ -246,12 +248,14 @@ def detect_by_signature(path: Path, nbytes: int = READ_BYTES) -> tuple[str, str]
         pass
     return None
 
+
 def detect_file_type(path: Path) -> tuple[str, str] | None:
     if MAGIC_AVAILABLE:
         result = detect_with_magic(path)
         if result:
             return result
     return detect_by_signature(path)
+
 
 def safe_rename(src: Path, dst: Path) -> tuple[bool, str | None]:
     if src.samefile(dst) if dst.exists() and src.exists() else False:
@@ -282,6 +286,7 @@ def safe_rename(src: Path, dst: Path) -> tuple[bool, str | None]:
                 except Exception as e:
                     return False, f"rename/move failed for candidate: {e}"
     return False, "failed to find non-conflicting name"
+
 
 def process_file(args) -> dict:
     path_str, commit, _verbose = args
@@ -337,6 +342,7 @@ def process_file(args) -> dict:
         result["reason"] = info
     return result
 
+
 def gather_files(root: Path, follow_symlinks: bool = False, skip_hidden: bool = True) -> list[Path]:
     files: list[Path] = []
     for p in root.rglob("*"):
@@ -348,6 +354,7 @@ def gather_files(root: Path, follow_symlinks: bool = False, skip_hidden: bool = 
         except Exception:
             continue
     return files
+
 
 def print_summary(results: list[dict], verbose: bool = False) -> None:
     renamed = [r for r in results if r["action"] == "renamed"]
@@ -375,6 +382,7 @@ def print_summary(results: list[dict], verbose: bool = False) -> None:
             for r in errors[:10]:
                 print(f"  {r['path']}: {r.get('reason')}")
 
+
 def print_header():
     print("fix_extension_mismatch.py")
     print(
@@ -383,6 +391,7 @@ def print_header():
     if not MAGIC_AVAILABLE:
         print("    Install with: pip install python-magic (Linux/macOS) or python-magic-bin (Windows)")
     print()
+
 
 def main():
     ap = argparse.ArgumentParser(
@@ -439,6 +448,7 @@ def main():
         print("Interrupted by user.", file=sys.stderr)
         sys.exit(1)
     print_summary(results, verbose=args.verbose)
+
 
 if __name__ == "__main__":
     main()

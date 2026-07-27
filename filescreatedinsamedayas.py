@@ -7,6 +7,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+
 def get_file_creation_time(filepath: str) -> datetime | None:
     try:
         stat = os.stat(filepath)
@@ -16,6 +17,7 @@ def get_file_creation_time(filepath: str) -> datetime | None:
     except Exception as e:
         print(f"Error: {e}")
         return None
+
 
 def main() -> None:
     if len(sys.argv) != 2:
@@ -48,6 +50,7 @@ def main() -> None:
         print(f"Found {len(found_files)} other file(s) created on the same day:")
         for file_time, file in found_files:
             print(f"{file_time.strftime('%H:%M:%S')} - {file}")
+
 
 if __name__ == "__main__":
     main()

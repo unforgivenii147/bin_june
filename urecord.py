@@ -7,6 +7,7 @@ import csv
 import sys
 from pathlib import Path
 
+
 def find_site_packages() -> list[str]:
     import site
 
@@ -17,6 +18,7 @@ def find_site_packages() -> list[str]:
         if user_site and Path(user_site).exists():
             valid_paths = [user_site]
     return valid_paths
+
 
 def update_record_file(record_path: Path) -> bool:
     try:
@@ -46,6 +48,7 @@ def update_record_file(record_path: Path) -> bool:
         print(f"  Error processing {record_path}: {e}", file=sys.stderr)
         return False
 
+
 def scan_and_update(site_packages_dirs) -> tuple[int, int]:
     total_updated = 0
     total_files = 0
@@ -58,6 +61,7 @@ def scan_and_update(site_packages_dirs) -> tuple[int, int]:
             if path.name == "RECORD" and update_record_file(path):
                 total_updated += 1
     return total_files, total_updated
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(
@@ -82,6 +86,7 @@ def main() -> None:
     print("Summary:")
     print(f"  Total RECORD files found: {total_files}")
     print(f"  Files that would be/are updated: {total_updated}")
+
 
 if __name__ == "__main__":
     main()

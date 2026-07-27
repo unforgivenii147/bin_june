@@ -7,6 +7,7 @@ from pathlib import Path
 
 import jsbeautifier
 
+
 def beautify_json_file(file_path: str) -> bool | None:
     try:
         with Path(file_path).open(encoding="utf-8") as f:
@@ -19,6 +20,7 @@ def beautify_json_file(file_path: str) -> bool | None:
     except Exception:
         return False
 
+
 def beautify_code_file(file_path: str, beautify_function, asset_type: str) -> bool | None:
     try:
         original_content = Path(file_path).read_text(encoding="utf-8")
@@ -29,6 +31,7 @@ def beautify_code_file(file_path: str, beautify_function, asset_type: str) -> bo
         return True
     except Exception:
         return False
+
 
 def beautify_files_in_directory(cwd: Path | str = ".") -> None:
     processed_count = 0
@@ -58,6 +61,7 @@ def beautify_files_in_directory(cwd: Path | str = ".") -> None:
                 else:
                     errors_count += 1
                 break
+
 
 if __name__ == "__main__":
     beautify_files_in_directory(Path.cwd())

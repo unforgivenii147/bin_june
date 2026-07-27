@@ -5,6 +5,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+
 def main() -> None:
     file_a = Path(sys.argv[1])
     file_b = Path(sys.argv[2])
@@ -14,6 +15,7 @@ def main() -> None:
     tmp_path = file_a.with_suffix(file_a.suffix + ".tmp")
     tmp_path.write_text("".join(kept_lines), encoding="utf-8")
     tmp_path.replace(file_a)
+
 
 if __name__ == "__main__":
     main()

@@ -10,6 +10,7 @@ from pathlib import Path
 
 CHUNK_SIZE = 1024 * 1024
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -30,6 +31,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
+
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -39,6 +41,7 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
+
 
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
@@ -50,6 +53,7 @@ def fsz(sz: float) -> str:
     if i == 0:
         return f"{int(value)} {units[i]}"
     return f"{value:.1f} {units[i]}"
+
 
 ATTRIBUTES = {
     "bold": 1,
@@ -101,6 +105,7 @@ COLORS = {
 }
 RESET = "\x1b[0m"
 
+
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -120,6 +125,7 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
+
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -144,8 +150,10 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
+
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
+
 
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
@@ -162,12 +170,15 @@ def is_binary(path: Path | str) -> bool:
     except Exception:
         return True
 
+
 def get_nobinary(path: str | Path) -> list[Path]:
     return [f for f in get_files(path) if not is_binary(f)]
+
 
 LIC_FILE = Path("/sdcard/lic")
 MIN_BLANK_LINES = 3
 NUM_WORKERS = 8
+
 
 def load_patterns(lic_path: Path) -> list[str]:
     try:
@@ -182,9 +193,11 @@ def load_patterns(lic_path: Path) -> list[str]:
         print(f"Error loading patterns from {lic_path}: {e}")
         return []
 
+
 def escape_for_regex(text: str) -> str:
     escaped = re.escape(text)
     return escaped.replace("\\n", "\\s*\\n\\s*")
+
 
 def remove_patterns_from_content(content: str, patterns: list[str]) -> str:
     cleaned = content
@@ -192,6 +205,7 @@ def remove_patterns_from_content(content: str, patterns: list[str]) -> str:
         regex_pattern = escape_for_regex(pattern)
         cleaned = re.sub(regex_pattern, "", cleaned, flags=re.IGNORECASE | re.MULTILINE)
     return cleaned
+
 
 def process_file(file_path: Path, patterns: list[str]) -> tuple:
     path = Path(file_path)
@@ -205,6 +219,7 @@ def process_file(file_path: Path, patterns: list[str]) -> tuple:
         ds = before - gsz(path)
         cprint(f"{fsz(ds)}")
         del before, ds, cleaned_content, original_content, path
+
 
 def main() -> None:
     if not LIC_FILE.exists():
@@ -222,6 +237,7 @@ def main() -> None:
         return
     for f in all_files:
         process_file(f, patterns)
+
 
 if __name__ == "__main__":
     main()

@@ -15,6 +15,7 @@ from collections.abc import Generator
 from datetime import UTC, datetime
 from pathlib import Path
 
+
 class LineProcessor:
     def __init__(self, verbose: bool = False) -> None:
         self.verbose = verbose
@@ -32,6 +33,7 @@ class LineProcessor:
                 return f"{size_bytes:.2f} {unit}"
             size_bytes /= 1024.0
         return f"{size_bytes:.2f} PB"
+
 
 class MmapReader(LineProcessor):
     def __init__(self, verbose: bool = False) -> None:
@@ -92,6 +94,7 @@ class MmapReader(LineProcessor):
         else:
             yield from self.read_lines_regular(file_path, encoding, skip_empty)
 
+
 class LineSorter(LineProcessor):
     def __init__(self, verbose: bool = False) -> None:
         super().__init__(verbose=verbose)
@@ -141,6 +144,7 @@ class LineSorter(LineProcessor):
                     temp_file.unlink()
             raise
 
+
 class LineDeduplicator(LineProcessor):
     def __init__(self, verbose: bool = False) -> None:
         super().__init__(verbose=verbose)
@@ -167,6 +171,7 @@ class LineDeduplicator(LineProcessor):
                 yield line
                 count += 1
         self.log(f"Found {count} unique lines")
+
 
 class FileSorter(LineProcessor):
     def __init__(self, verbose: bool = False, dry_run: bool = False) -> None:
@@ -279,6 +284,7 @@ class FileSorter(LineProcessor):
         except Exception as e:
             print(f"\n✗ Error saving report: {e!s}")
 
+
 class FileAnalyzer(LineProcessor):
     def __init__(self, verbose: bool = False) -> None:
         super().__init__(verbose=verbose)
@@ -324,6 +330,7 @@ class FileAnalyzer(LineProcessor):
                 display_line = line[:47] + "..." if len(line) > 50 else line
                 print(f"  ({count}x) {display_line}")
         print(f"{'=' * 60}\n")
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(
@@ -375,6 +382,7 @@ def main() -> None:
     except Exception as e:
         print(f"Error: {e!s}", file=sys.stderr)
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

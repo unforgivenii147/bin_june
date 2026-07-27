@@ -15,6 +15,7 @@ from textual.widgets import Footer, Header, Label, Static
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 class DiffLine(Static):
     def __init__(self, text: str, line_type: str, line_num: int | None = None) -> None:
         self.raw_text = text
@@ -51,6 +52,7 @@ class DiffLine(Static):
             self.styles.background = Color(60, 60, 30)
             self.styles.color = Color(255, 255, 150)
 
+
 class DiffPanel(ScrollableContainer):
     def __init__(self, title: str, lines: list[tuple[str, str, int]]) -> None:
         super().__init__()
@@ -65,6 +67,7 @@ class DiffPanel(ScrollableContainer):
     def on_mount(self) -> None:
         self.can_focus = True
         self.can_focus_children = True
+
 
 class DiffViewerApp(App):
     CSS = """
@@ -214,6 +217,7 @@ class DiffViewerApp(App):
     def action_next_search(self) -> None:
         self.notify("Next search result (feature not fully implemented)")
 
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Compare two files and show their differences",
@@ -238,6 +242,7 @@ Examples:
     app = DiffViewerApp(str(file1), str(file2))
     app.run()
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

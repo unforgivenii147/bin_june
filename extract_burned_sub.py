@@ -12,6 +12,7 @@ import pytesseract
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def _ocr_worker(frame_data: tuple, ocr_config: str) -> tuple[float, str]:
     time_pos, subtitle_region = frame_data
     try:
@@ -23,12 +24,14 @@ def _ocr_worker(frame_data: tuple, ocr_config: str) -> tuple[float, str]:
     except Exception:
         return time_pos, ""
 
+
 def _frames_are_similar(a: np.ndarray, b: np.ndarray, threshold: float = 0.97) -> bool:
     small_a = cv2.resize(a, (64, 32))
     small_b = cv2.resize(b, (64, 32))
     diff = cv2.absdiff(small_a, small_b)
     similarity = 1.0 - diff.sum() / (diff.size * 255.0)
     return similarity >= threshold
+
 
 def extract_frames(
     video_path: str, sample_fps: float = 2.0, subtitle_top_ratio: float = 0.75
@@ -56,6 +59,7 @@ def extract_frames(
     cap.release()
     return frames
 
+
 def _merge_subtitles(subtitles: list[dict], gap_threshold: float = 1.0) -> list[dict]:
     if not subtitles:
         return []
@@ -71,6 +75,7 @@ def _merge_subtitles(subtitles: list[dict], gap_threshold: float = 1.0) -> list[
             cur = dict(sub)
     merged.append(cur)
     return merged
+
 
 def extract_burned_subs_ocr(
     video_path: str,
@@ -100,12 +105,14 @@ def extract_burned_subs_ocr(
             f.write(f"{sub['text']}\n\n")
     print("Done.")
 
+
 def format_time(seconds: float) -> str:
     h = int(seconds // 3600)
     m = int(seconds % 3600 // 60)
     s = seconds % 60
     ms = int((s - int(s)) * 1000)
     return f"{h:02d}:{m:02d}:{int(s):02d},{ms:03d}"
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

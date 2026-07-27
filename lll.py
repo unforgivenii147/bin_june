@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime
 from pathlib import Path
 
+
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
     units = "B", "KB", "MB", "GB", "TB"
@@ -16,6 +17,7 @@ def fsz(sz: float) -> str:
         return f"{int(value)} {units[i]}"
     return f"{value:.1f} {units[i]}"
 
+
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -25,6 +27,7 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
+
 
 EXCLUDED = {".mypy_cache", ".ruff_cache", ".git", "__pycache__"}
 if __name__ == "__main__":

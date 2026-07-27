@@ -79,11 +79,14 @@ MEDIA_EXTENSIONS = {
 }
 EXCLUDE_DIRS = {".git", "__pycache__", ".venv", "venv", ".env", "node_modules"}
 
+
 def should_exclude(path: Path) -> bool:
     return any(part in EXCLUDE_DIRS for part in path.parts)
 
+
 def is_media_file(path: Path) -> bool:
     return path.suffix.lower() in MEDIA_EXTENSIONS
+
 
 def get_files_to_process(root_dir: Path, compress: bool) -> Generator[Path, None, None]:
     if compress:
@@ -95,6 +98,7 @@ def get_files_to_process(root_dir: Path, compress: bool) -> Generator[Path, None
         for file in root_dir.rglob("*"):
             if file.is_file() and not should_exclude(file) and file.suffix.lower() == ".xz":
                 yield file
+
 
 def compress_file(
     filepath: Path, preset: int = 9, threads: int = 4, remove_orig: bool = True
@@ -116,6 +120,7 @@ def compress_file(
     except Exception as e:
         return filepath, False, f"Error: {e!s}", 0, 0
 
+
 def decompress_file(filepath: Path, remove_orig: bool = True) -> tuple[Path, bool, str, int, int]:
     try:
         if filepath.suffix.lower() != ".xz":
@@ -135,12 +140,14 @@ def decompress_file(filepath: Path, remove_orig: bool = True) -> tuple[Path, boo
     except Exception as e:
         return filepath, False, f"Error: {e!s}", 0, 0
 
+
 def format_bytes(bytes_val: int) -> str:
     for unit in ["B", "KB", "MB", "GB", "TB"]:
         if bytes_val < 1024.0:
             return f"{bytes_val:.2f} {unit}"
         bytes_val /= 1024.0
     return f"{bytes_val:.2f} PB"
+
 
 def process_files(root_dir: Path, compress: bool, preset: int, threads: int, remove_orig: bool = True):
     action = "Compressing" if compress else "Decompressing"
@@ -182,6 +189,7 @@ def process_files(root_dir: Path, compress: bool, preset: int, threads: int, rem
         print(f"Total original size: {format_bytes(total_original_size)}")
         if total_space_freed > 0:
             print(f"Disk space freed: {format_bytes(total_space_freed)}")
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -237,6 +245,7 @@ def main():
         threads=args.threads,
         remove_orig=not args.keep_orig,
     )
+
 
 if __name__ == "__main__":
     main()

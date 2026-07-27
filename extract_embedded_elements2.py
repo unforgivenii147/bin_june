@@ -21,6 +21,7 @@ DOWNLOAD_REMOTE = False
 TIMEOUT = 10
 ASSETS_DIR.mkdir(parents=True, exist_ok=True)
 
+
 def save_asset(content: bytes, mime_type: str, file_hint="asset") -> Path:
     ext = mimetypes.guess_extension(mime_type) or ""
     counter = 0
@@ -33,6 +34,7 @@ def save_asset(content: bytes, mime_type: str, file_hint="asset") -> Path:
     path.write_bytes(content)
     return path
 
+
 def extract_base64_data(data_url: AttributeValueList | str | None, file_hint: str = "asset") -> Path | None:
     m = re.match(r"data:(.*?);base64,(.*)", data_url, re.DOTALL)
     if not m:
@@ -40,6 +42,7 @@ def extract_base64_data(data_url: AttributeValueList | str | None, file_hint: st
     mime_type, encoded = m.groups()
     content = base64.b64decode(encoded)
     return save_asset(content, mime_type, file_hint)
+
 
 def download_external_url(url: AttributeValueList | str | None, file_hint: str = "remote") -> Path | None:
     try:
@@ -51,6 +54,7 @@ def download_external_url(url: AttributeValueList | str | None, file_hint: str =
         return save_asset(r.content, mime.split(";")[0], file_hint)
     except Exception:
         return None
+
 
 def process_file(path: Path) -> None:
     path = Path(path)
@@ -119,6 +123,7 @@ def process_file(path: Path) -> None:
     output_html_path.parent.mkdir(parents=True, exist_ok=True)
     output_html_path.write_text(str(soup), encoding="utf-8")
     print("Processed:", path)
+
 
 if __name__ == "__main__":
     for path in cwd.rglob("*"):

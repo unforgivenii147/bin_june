@@ -13,6 +13,7 @@ from docutils.core import publish_parts
 
 MAX_WORKERS = 4
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -33,6 +34,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
+
 def mpf_async(func: Callable[[Any], Any], items: Iterable[Any]):
     with get_context("spawn").Pool(MAX_WORKERS) as p:
         async_results = [p.apply_async(func, (item,)) for item in items]
@@ -44,6 +46,7 @@ def mpf_async(func: Callable[[Any], Any], items: Iterable[Any]):
                 print(f"Item {i} failed: {e}")
                 results.append(None)
         return results
+
 
 def rst_to_html(content: str) -> str:
     try:
@@ -62,6 +65,7 @@ def rst_to_html(content: str) -> str:
         print(f"Conversion error details: {e}")
         raise
 
+
 def process_file(path):
     path = Path(path)
     content = path.read_text(encoding="utf-8")
@@ -69,6 +73,7 @@ def process_file(path):
     html_path = path.with_suffix(".html")
     html_path.write_text(html_content, encoding="utf-8")
     path.unlink()
+
 
 def main() -> None:
     cwd = Path.cwd()
@@ -78,6 +83,7 @@ def main() -> None:
         process_file(files[0])
         sys.exit(1)
     mpf_async(process_file, files)
+
 
 if __name__ == "__main__":
     main()

@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pycurl
 
+
 def download_urls_from_file(filepath: str = "urls.txt", output_dir_str: str = "downloads") -> None:
     output_dir = Path(output_dir_str)
     output_dir.mkdir(exist_ok=True, parents=True)
@@ -47,6 +48,7 @@ def download_urls_from_file(filepath: str = "urls.txt", output_dir_str: str = "d
             print(f"❌ pycurl error: {e}\n")
         finally:
             c.close()
+
 
 if __name__ == "__main__":
     download_urls_from_file()

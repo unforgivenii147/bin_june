@@ -15,11 +15,13 @@ CHUNK_SIZE = 1024 * 1024
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
+
 
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
@@ -44,6 +46,7 @@ def is_python_file(path: str | Path) -> bool:
             return False
     return False
 
+
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -58,6 +61,7 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
+
 
 def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
@@ -95,6 +99,7 @@ def get_pyfiles(path: str | Path) -> list[Path]:
 
     return sorted(pyfiles)
 
+
 def process_file(args: tuple) -> None:
     path, counter, total, dry_run = args
     path = Path(path)
@@ -127,6 +132,7 @@ def process_file(args: tuple) -> None:
         except OSError as move_error:
             print(f"  ❌ Failed to move {path}: {move_error}")
 
+
 def get_files_to_process(paths: list[str]) -> list[Path]:
     files = []
     if paths:
@@ -149,6 +155,7 @@ def get_files_to_process(paths: list[str]) -> list[Path]:
             unique_files.append(f)
     return unique_files
 
+
 def process_files_mpf3(files: list[Path], dry_run: bool = False) -> None:
     total = len(files)
 
@@ -163,6 +170,7 @@ def process_files_mpf3(files: list[Path], dry_run: bool = False) -> None:
     except Exception as e:
         print(f"⚠️  mpf3 failed: {e}")
         raise
+
 
 def process_files_threadpool(files: list[Path], dry_run: bool = False) -> None:
     total = len(files)
@@ -179,16 +187,19 @@ def process_files_threadpool(files: list[Path], dry_run: bool = False) -> None:
                 path = futures[future]
                 print(f"  ❌ Unexpected error processing {path}: {e}")
 
+
 def process_files_multiprocessing(files: list[Path], dry_run: bool = False) -> None:
     total = len(files)
     args_list = [(path, idx, total, dry_run) for idx, path in enumerate(files, 1)]
     with Pool(processes=min(cpu_count(), len(files))) as pool:
         pool.map(process_file, args_list)
 
+
 def process_files_sequential(files: list[Path], dry_run: bool = False) -> None:
     total = len(files)
     for idx, path in enumerate(files, 1):
         process_file((path, idx, total, dry_run))
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(
@@ -245,6 +256,7 @@ def main() -> int:
         print("-" * 50)
         print("🔍 DRY RUN COMPLETE - No files were moved")
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

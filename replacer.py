@@ -15,6 +15,7 @@ SKIP_DIRS = frozenset(
 CHUNK_SIZE = 8192
 MAX_CONTEXT_DISPLAY = 3
 
+
 def is_binary(path: Path) -> bool:
     """Check if a file is binary by sampling its content."""
     try:
@@ -33,6 +34,7 @@ def is_binary(path: Path) -> bool:
 
     except (OSError, PermissionError):
         return True
+
 
 def process_file(path: Path, search_text: str, replace_text: str | None = None, dry_run: bool = False) -> bool:
     """Process a single file for text replacement.
@@ -77,6 +79,7 @@ def process_file(path: Path, search_text: str, replace_text: str | None = None, 
         print(f"Error processing {path}: {e}", file=sys.stderr)
         return False
 
+
 def replace_in_files(
     search_text: str, replace_text: str | None = None, target_file: str | None = None, dry_run: bool = False
 ) -> tuple[int, int]:
@@ -117,6 +120,7 @@ def replace_in_files(
 
     return files_processed, files_changed
 
+
 def parse_search_replace(strings: list[str]) -> tuple[str, str | None]:
     """Parse search and optional replacement strings from arguments."""
     if len(strings) == 2:
@@ -133,6 +137,7 @@ def parse_search_replace(strings: list[str]) -> tuple[str, str | None]:
         search_text = search_text[1:-1]
 
     return search_text, replace_text, action
+
 
 def main() -> None:
     """Main entry point for the script."""
@@ -169,6 +174,7 @@ def main() -> None:
     )
 
     print(f"\n--- Complete: Processed {files_processed} files, modified {files_changed} files ---")
+
 
 if __name__ == "__main__":
     main()

@@ -12,6 +12,7 @@ from html_to_markdown import Options, convert
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def clean_html(html_content: str) -> str:
     soup = BeautifulSoup(html_content, "html.parser")
     for script in soup.find_all("script"):
@@ -25,6 +26,7 @@ def clean_html(html_content: str) -> str:
     for form in soup.find_all("form"):
         form.decompose()
     return str(soup)
+
 
 def convert_html_to_md(html_file: Path, options: Options | None = None) -> tuple[Path, bool]:
     if html_file.suffix.lower() not in {".html", ".htm"}:
@@ -54,6 +56,7 @@ def convert_html_to_md(html_file: Path, options: Options | None = None) -> tuple
         print(f"✗ Error converting {html_file.name}: {e}", file=sys.stderr)
         return html_file, False
 
+
 def find_html_files(directory: Path, recursive: bool = True) -> list[Path]:
     if recursive:
         html_files = list(directory.rglob("*.html")) + list(directory.rglob("*.htm"))
@@ -61,9 +64,11 @@ def find_html_files(directory: Path, recursive: bool = True) -> list[Path]:
         html_files = list(directory.glob("*.html")) + list(directory.glob("*.htm"))
     return sorted(html_files)
 
+
 def process_file_wrapper(args: tuple) -> tuple[Path, bool]:
     html_file, options = args
     return convert_html_to_md(html_file, options)
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(
@@ -143,6 +148,7 @@ Examples:
         successful = sum(1 for _, success in results if success)
         print(f"\n{'=' * 50}")
         print(f"Conversion complete: {successful}/{len(html_files)} files converted successfully")
+
 
 if __name__ == "__main__":
     main()

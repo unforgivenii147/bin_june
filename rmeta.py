@@ -11,6 +11,7 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 meta_tag_pattern = re.compile(r"<meta[^>]*>", re.IGNORECASE)
 
+
 def remove_meta_tags(filepath: Path) -> None:
     try:
         html_content = filepath.read_text(encoding="utf-8", errors="ignore")
@@ -26,10 +27,12 @@ def remove_meta_tags(filepath: Path) -> None:
     except Exception as e:
         print(f"Error processing {filepath}: {e}")
 
+
 def process_directory(directory: Path) -> None:
     for item in directory.rglob("*.html"):
         if item.is_file():
             remove_meta_tags(item)
+
 
 if __name__ == "__main__":
     cwd = Path()

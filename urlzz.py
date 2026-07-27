@@ -20,6 +20,7 @@ import py7zr
 
 CHUNK_SIZE = 1024 * 1024
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -39,6 +40,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
             elif item.is_file() and (ext is None or item.suffix in ext):
                 files.append(item)
     return files
+
 
 ip_middle_octet = "(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5]))"
 ip_last_octet = "(?:\\.(?:0|[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-5]))"
@@ -111,6 +113,7 @@ COLORS = {
 }
 RESET = "\x1b[0m"
 
+
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -130,6 +133,7 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
+
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -154,8 +158,10 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
+
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
+
 
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
@@ -172,14 +178,17 @@ def is_binary(path: Path | str) -> bool:
     except Exception:
         return True
 
+
 def get_nobinary(path: str | Path) -> list[Path]:
     return [f for f in get_files(path) if not is_binary(f)]
+
 
 def _func_args_as_dict(func: Callable[..., Any], *args: Any, **kwargs: Any):
     return dict(
         list(zip(dict.fromkeys(chain(getfullargspec(func)[0], kwargs.keys())), args, strict=False))
         + list(kwargs.items())
     )
+
 
 def validator(func: Callable[..., Any]):
 
@@ -189,18 +198,22 @@ def validator(func: Callable[..., Any]):
 
     return wrapper
 
+
 def is_valid_url(value, public=False):
     result = URL_RE.match(value)
     if not public:
         return result
     return result and (not any(result.groupdict().get(key) for key in ("private_ip", "private_host")))
 
+
 url_pattern = re.compile("https?://[^\\s\\\"\\']+")
+
 
 def extract_urls_from_text(content: str):
     result = set(url_pattern.findall(content))
     cprint(result)
     return result
+
 
 def extract_urls_from_file(filepath):
     urls = set()
@@ -210,6 +223,7 @@ def extract_urls_from_file(filepath):
     except Exception as e:
         print(f"Failed to read {filepath}: {e}")
     return urls
+
 
 def extract_urls_from_tar(filepath):
     urls = set()
@@ -226,6 +240,7 @@ def extract_urls_from_tar(filepath):
         print(f"Failed to read tar {filepath}: {e}")
     return urls
 
+
 def extract_urls_from_zip(filepath):
     urls = set()
     try:
@@ -241,6 +256,7 @@ def extract_urls_from_zip(filepath):
         print(f"Failed to read zip {filepath}: {e}")
     return urls
 
+
 def extract_urls_from_7z(filepath):
     urls = set()
     try:
@@ -255,6 +271,7 @@ def extract_urls_from_7z(filepath):
     except Exception as e:
         print(f"Failed to read 7z {filepath}: {e}")
     return urls
+
 
 def extract_urls(filepath):
     path = Path(filepath)
@@ -272,6 +289,7 @@ def extract_urls(filepath):
     else:
         return extract_urls_from_file(filepath)
     return set()
+
 
 if __name__ == "__main__":
     cwd = Path.cwd()

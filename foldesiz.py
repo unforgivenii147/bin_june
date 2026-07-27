@@ -10,6 +10,7 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def unique_path(path: Path | str) -> Path:
     path = _clean_fname(Path(path))
     if not path.exists():
@@ -31,15 +32,18 @@ def unique_path(path: Path | str) -> Path:
             return new_path
         counter += 1
 
+
 def _clean_fname(path: Path) -> Path:
     from re import sub as re_sub
 
     clean_name = re_sub(r"(_\d+)+", "", path.name)
     return path.with_name(clean_name)
 
+
 def should_skip(path: str | Path) -> bool:
     path = Path(path)
     return bool(path.is_symlink() or not SKIP_DIRS.isdisjoint(path.parts))
+
 
 def get_all_files(cwd: Path):
     files = []
@@ -51,6 +55,7 @@ def get_all_files(cwd: Path):
             files.append((path, size))
     return sorted(files, key=operator.itemgetter(1))
 
+
 def get_num_folders(files) -> int:
     if len(files) < 2:
         return 1
@@ -60,6 +65,7 @@ def get_num_folders(files) -> int:
     target_range_per_folder = range_size / 100
     num_folders = max(1, int(range_size / target_range_per_folder))
     return min(num_folders, len(files))
+
 
 def create_range_folders(cwd: Path, files, num_folders: int):
     sizes = sorted([size for _, size in files])
@@ -89,6 +95,7 @@ def create_range_folders(cwd: Path, files, num_folders: int):
         start_idx = end_idx
     return folder_ranges
 
+
 def distribute_files(files, folders, cwd: Path) -> None:
     size_to_folder = {}
     for min_size, max_size, folder_name in folders:
@@ -110,6 +117,7 @@ def distribute_files(files, folders, cwd: Path) -> None:
         else:
             print(f"No folder match for {Path(filepath).name} ({size:,} bytes)")
 
+
 def main() -> None:
     cwd = Path.cwd()
     files = get_all_files(cwd)
@@ -121,6 +129,7 @@ def main() -> None:
     folders = create_range_folders(cwd, files, num_folders)
     distribute_files(files, folders, cwd)
     print("Folderization complete!")
+
 
 if __name__ == "__main__":
     main()

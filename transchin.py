@@ -15,9 +15,11 @@ RETRY_DELAY: Final[float] = 0.5
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s", datefmt="%H:%M:%S")
 logger = logging.getLogger(__name__)
 
+
 def contains_chinese(text: str) -> bool:
     """Check if text contains Chinese characters."""
     return bool(re.search(r"[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]", text))
+
 
 def translate_line(line: str) -> str | None:
     translator = GoogleTranslator(source="auto", target="en")
@@ -31,6 +33,7 @@ def translate_line(line: str) -> str | None:
             if attempt < RETRY_ATTEMPTS - 1:
                 time.sleep(RETRY_DELAY)
     return None
+
 
 def main() -> None:
     import sys
@@ -98,6 +101,7 @@ def main() -> None:
         )
     except Exception as e:
         logger.error("Error updating input file: %s", e)
+
 
 if __name__ == "__main__":
     main()

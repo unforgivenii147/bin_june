@@ -12,9 +12,11 @@ from multiprocessing import Pool, cpu_count
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def parse_python_file(file_path) -> Module:
     with open(file_path, encoding="utf-8") as file:
         return ast.parse(file.read(), filename=file_path)
+
 
 def extract_definitions(tree: Module):
     functions = []
@@ -30,6 +32,7 @@ def extract_definitions(tree: Module):
                 if isinstance(target, ast.Name):
                     constants.append(target.id)
     return functions, classes, constants
+
 
 def find_repeated_definitions(file_paths):
     definition_counts = defaultdict(lambda: defaultdict(int))
@@ -48,6 +51,7 @@ def find_repeated_definitions(file_paths):
         "constants": [name for name, count in definition_counts["constants"].items() if count > 1],
     }
     return repeated_definitions
+
 
 def process_file(file_path, repeated_definitions, move) -> None:
     Path(path)
@@ -89,6 +93,7 @@ def process_file(file_path, repeated_definitions, move) -> None:
         with open(file_path, "w", encoding="utf-8") as file:
             file.writelines(new_lines)
 
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Inspect Python files and copy/move repeated definitions.")
     parser.add_argument("-m", "--move", action="store_true", help="Move definitions instead of copying")
@@ -104,6 +109,7 @@ def main() -> None:
             process_file,
             [(file_path, repeated_definitions, args.move) for file_path in python_files],
         )
+
 
 if __name__ == "__main__":
     main()

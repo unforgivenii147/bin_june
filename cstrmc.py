@@ -13,6 +13,7 @@ from libcst.metadata import MetadataWrapper, PositionProvider
 
 ROOT = Path(".").resolve()
 
+
 class StripTransformer(cst.CSTTransformer):
     METADATA_DEPENDENCIES = (PositionProvider,)
 
@@ -125,6 +126,7 @@ class StripTransformer(cst.CSTTransformer):
 
         return updated_node
 
+
 def process_file(path: Path) -> None:
     path = path.resolve()
     source = path.read_text(encoding="utf-8")
@@ -158,6 +160,7 @@ def process_file(path: Path) -> None:
     rel = os.path.relpath(path, ROOT)
     print(f"{rel}: comments={transformer.comments_removed}, docstrings={transformer.docstrings_removed}")
 
+
 def main() -> None:
     paths = sorted(ROOT.rglob("*.py"))
 
@@ -165,6 +168,7 @@ def main() -> None:
 
     with ProcessPoolExecutor(max_workers=workers) as executor:
         list(executor.map(process_file, paths))
+
 
 if __name__ == "__main__":
     main()

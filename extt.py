@@ -16,14 +16,17 @@ OUT_DIR = Path("output")
 OUT_DIR.mkdir(exist_ok=True)
 VALID = {"function_definition", "class_definition"}
 
+
 def get_node_text(src: bytes, node) -> str:
     return src[node.start_byte : node.end_byte].decode()
+
 
 def get_node_name(node):
     for child in node.children:
         if child.type == "identifier":
             return child.text.decode() if hasattr(child, "text") else None
     return None
+
 
 def extract_functions_and_classes(src: bytes, tree: Tree):
     root = tree.root_node
@@ -54,11 +57,13 @@ def extract_functions_and_classes(src: bytes, tree: Tree):
     traverse(root)
     return definitions
 
+
 def get_relative_path(file_path: Path, base_path: Path) -> Path:
     try:
         return file_path.relative_to(base_path)
     except ValueError:
         return file_path
+
 
 folder_definitions = defaultdict(lambda: defaultdict(list))
 processed_files_count = 0

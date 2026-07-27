@@ -23,6 +23,7 @@ except ImportError:
     print("Install it with: pip install pyspellchecker")
     sys.exit(1)
 
+
 class Personaldictionary:
     def __init__(self, dict_path: Path | None = None):
         self.dict_path = dict_path or Path.home() / ".spell_checker_dict.json"
@@ -75,6 +76,7 @@ class Personaldictionary:
 
     def list_words(self) -> list[str]:
         return sorted(self.words)
+
 
 class SpellCheckProcessor:
     def __init__(self, autofix: bool = False, personal_dict: Personaldictionary = None):
@@ -139,6 +141,7 @@ class SpellCheckProcessor:
                     errors[word] = {"word": word}
         return list(errors.values())
 
+
 def get_input_files(inputs: list[str]) -> list[Path]:
     files = []
     if not inputs:
@@ -155,10 +158,12 @@ def get_input_files(inputs: list[str]) -> list[Path]:
             print(f"Warning: {input_path} not found", file=sys.stderr)
     return files
 
+
 def process_file_wrapper(args: tuple[Path, bool, Personaldictionary]) -> dict:
     file_path, autofix, personal_dict = args
     processor = SpellCheckProcessor(autofix=autofix, personal_dict=personal_dict)
     return processor.check_file(file_path)
+
 
 def print_results(results: list[dict]) -> None:
     total_files = len(results)
@@ -186,6 +191,7 @@ def print_results(results: list[dict]) -> None:
     print("\n" + "=" * 70)
     print(f"Summary: {total_errors} total error(s) in {files_with_errors} file(s)")
     print("=" * 70 + "\n")
+
 
 def handle_dictionary_operations(args) -> None:
     personal_dict = Personaldictionary(Path(args.dict_file) if args.dict_file else None)
@@ -226,6 +232,7 @@ def handle_dictionary_operations(args) -> None:
             print("Cancelled.")
     if any([args.add_words, args.add_from_file, args.remove_words, args.list_dict, args.clear_dict]):
         sys.exit(0)
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -317,6 +324,7 @@ Personal dictionary Management:
         file_args = [(f, args.autofix, personal_dict) for f in files]
         results = pool.map(process_file_wrapper, file_args)
     print_results(results)
+
 
 if __name__ == "__main__":
     main()

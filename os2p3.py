@@ -29,6 +29,7 @@ OS_PATH_IMPORT_PATTERNS = [
     "import os",
 ]
 
+
 def refactor_file(file_path):
     content = file_path.read_text(encoding="utf-8")
     original_content = content
@@ -62,6 +63,7 @@ def refactor_file(file_path):
         return True
     return False
 
+
 def refactor_directory(directory):
     python_files = directory.rglob("*.py")
     refactored_count = 0
@@ -70,6 +72,7 @@ def refactor_directory(directory):
             print(f"Refactored: {file_path.relative_to(Path.cwd())}")
             refactored_count += 1
     print(f"\nRefactored {refactored_count} files.")
+
 
 if __name__ == "__main__":
     current_dir = Path.cwd()

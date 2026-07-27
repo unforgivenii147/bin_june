@@ -19,8 +19,10 @@ IGNORE_DIRS = frozenset(
     {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache", ".venv", "venv", "node_modules"}
 )
 
+
 def check_skip_dirs_usage(tree: ast.AST) -> bool:
     return any(isinstance(node, ast.Name) and node.id == "SKIP_DIRS" for node in ast.walk(tree))
+
 
 def check_skip_dirs_defined(tree: ast.AST) -> bool:
     for node in tree.body:
@@ -29,6 +31,7 @@ def check_skip_dirs_defined(tree: ast.AST) -> bool:
                 if isinstance(target, ast.Name) and target.id == "SKIP_DIRS":
                     return True
     return False
+
 
 def get_module_level_imports(tree: ast.AST) -> int:
     last_import_line = 0
@@ -39,6 +42,7 @@ def get_module_level_imports(tree: ast.AST) -> int:
         elif not isinstance(node, ast.Expr):
             break
     return last_import_line
+
 
 def find_insert_position(content: str) -> int | None:
     try:
@@ -52,6 +56,7 @@ def find_insert_position(content: str) -> int | None:
     except SyntaxError:
         pass
     return None
+
 
 def find_fallback_insert_position(content: str) -> int:
     lines = content.splitlines(True)
@@ -74,12 +79,14 @@ def find_fallback_insert_position(content: str) -> int:
                 break
     return start_pos
 
+
 def validate_modified_code(original: str, modified: str) -> bool:
     try:
         ast.parse(modified)
         return True
     except SyntaxError:
         return False
+
 
 def process_file(file_path: Path) -> tuple[Path, bool, str]:
     try:
@@ -111,6 +118,7 @@ def process_file(file_path: Path) -> tuple[Path, bool, str]:
     except Exception as e:
         return (file_path, False, f"exception: {e!s}")
 
+
 def find_python_files(root_dir: Path = Path(".")) -> list[Path]:
     python_files = []
     for py_file in root_dir.rglob("*.py"):
@@ -119,6 +127,7 @@ def find_python_files(root_dir: Path = Path(".")) -> list[Path]:
             continue
         python_files.append(py_file)
     return sorted(python_files)
+
 
 def main():
     root_dir = Path(".")
@@ -176,6 +185,7 @@ def main():
         print(f"\n✓ Successfully added SKIP_DIRS definition to {stats['modified']} file(s)")
     else:
         print("\nℹ No files needed SKIP_DIRS definition")
+
 
 if __name__ == "__main__":
     main()

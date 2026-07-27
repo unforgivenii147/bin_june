@@ -8,6 +8,7 @@ import os
 import re
 import sys
 
+
 def parse_vulture_output(filepath):
     """
     Parse vulture output and extract SKIP_DIRS entries.
@@ -40,6 +41,7 @@ def parse_vulture_output(filepath):
 
     return skip_dirs_fixes
 
+
 def find_file(filename, search_root="."):
     """Find a file by name in directory tree."""
     for root, dirs, files in os.walk(search_root):
@@ -47,6 +49,7 @@ def find_file(filename, search_root="."):
         if filename in files:
             return os.path.join(root, filename)
     return None
+
 
 def main():
     if len(sys.argv) != 2:
@@ -108,6 +111,7 @@ def main():
     print(f"  Fixed: {fixed}")
     print(f"  Skipped: {skipped}")
     print(f"  Not found: {not_found}")
+
 
 if __name__ == "__main__":
     main()

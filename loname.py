@@ -6,12 +6,14 @@ import sys
 from multiprocessing import get_context
 from pathlib import Path
 
+
 def mpf3(func, files):
     p = get_context("spawn").Pool(8)
     for f in files:
         p.apply_async(func, (f,))
     p.close()
     p.join()
+
 
 def unique_path(path: Path | str) -> Path:
     path = Path(path)
@@ -34,6 +36,7 @@ def unique_path(path: Path | str) -> Path:
             return new_path
         counter += 1
 
+
 def process_file(path) -> None:
     path = Path(path)
     if not path.exists():
@@ -48,6 +51,7 @@ def process_file(path) -> None:
         new_path = unique_path(new_path)
     path.rename(new_path)
     print(f"{path.name} -> {new_path.name}")
+
 
 if __name__ == "__main__":
     cwd = Path.cwd()

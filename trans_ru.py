@@ -18,6 +18,7 @@ MAX_CHUNK_SIZE: Final[int] = 2000  # characters per chunk
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s", datefmt="%H:%M:%S")
 logger = logging.getLogger(__name__)
 
+
 def contains_cyrillic(text: str) -> bool:
     """Detect Cyrillic characters (covers core Cyrillic and some extensions)."""
     return bool(
@@ -26,6 +27,7 @@ def contains_cyrillic(text: str) -> bool:
             text,
         )
     )
+
 
 def create_chunks(lines: list[str]) -> list[list[str]]:
     """Group lines into chunks where each chunk's total character count is <= MAX_CHUNK_SIZE."""
@@ -59,6 +61,7 @@ def create_chunks(lines: list[str]) -> list[list[str]]:
 
     return chunks
 
+
 def translate_chunk(chunk: list[str]) -> tuple[list[str], str | None]:
     """
     Translate a chunk (list of lines) from Russian to English.
@@ -89,6 +92,7 @@ def translate_chunk(chunk: list[str]) -> tuple[list[str], str | None]:
                 time.sleep(sleep_time)
 
     return (chunk, None)
+
 
 def main() -> None:
     import sys
@@ -235,6 +239,7 @@ def main() -> None:
         )
     except Exception as e:
         logger.error("Error updating input file: %s", e)
+
 
 if __name__ == "__main__":
     main()

@@ -10,10 +10,12 @@ from pathlib import Path
 TIMESTAMP_RE = re.compile(r"(\d{2}:\d{2}:\d{2},\d{3})\s-->\s(\d{2}:\d{2}:\d{2},\d{3})")
 ONE_SEC_MS = 1000
 
+
 def to_ms(ts: str) -> int:
     h, m, rest = ts.split(":")
     s, ms = rest.split(",")
     return int(h) * 3600000 + int(m) * 60000 + int(s) * 1000 + int(ms)
+
 
 def from_ms(ms: int) -> str:
     ms = max(ms, 0)
@@ -21,6 +23,7 @@ def from_ms(ms: int) -> str:
     m, ms = divmod(ms, 60000)
     s, ms = divmod(ms, 1000)
     return f"{h:02}:{m:02}:{s:02},{ms:03}"
+
 
 def shift_content(text: str, shift_ms: int) -> str:
 
@@ -30,10 +33,12 @@ def shift_content(text: str, shift_ms: int) -> str:
 
     return TIMESTAMP_RE.sub(repl, text)
 
+
 def process_file(path: Path, shift_ms: int) -> None:
     path = Path(path)
     path.write_text(shift_content(path.read_text(encoding="utf-8"), shift_ms), encoding="utf-8")
     print(f"✔ {path}")
+
 
 def main() -> None:
     raw = sys.argv[1:]
@@ -63,6 +68,7 @@ def main() -> None:
     glob = "**/*.srt" if args.recursive else "*.srt"
     for f in sorted(path.glob(glob)):
         process_file(f, shift_ms)
+
 
 if __name__ == "__main__":
     main()

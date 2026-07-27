@@ -21,6 +21,7 @@ ROOT = Path.cwd()
 LOG_FILE = ROOT / "compress.log"
 PY7ZR_PRESET = 9
 
+
 def setup_logging() -> None:
     logging.basicConfig(
         level=logging.INFO,
@@ -28,16 +29,19 @@ def setup_logging() -> None:
         handlers=[logging.FileHandler(LOG_FILE, encoding="utf-8"), logging.StreamHandler()],
     )
 
+
 def is_top_level_entry(path: Path) -> bool:
     try:
         return path.parent.resolve() == ROOT.resolve()
     except Exception:
         return path.parent == ROOT
 
+
 def iter_top_level_dirs(root: Path) -> Iterable[Path]:
     for p in root.iterdir():
         if p.is_dir() and not p.is_symlink():
             yield p
+
 
 def iter_top_level_files(root: Path) -> Iterable[Path]:
     for p in root.iterdir():
@@ -48,6 +52,7 @@ def iter_top_level_files(root: Path) -> Iterable[Path]:
         ):
             yield p
 
+
 def safe_remove(path: Path) -> None:
     try:
         if path.is_dir():
@@ -56,6 +61,7 @@ def safe_remove(path: Path) -> None:
             path.unlink()
     except Exception:
         logging.exception("Failed to remove %s", path)
+
 
 def compress_dir_to_tar_then_7z(dir_path: str) -> tuple[str, bool, str]:
     src = Path(dir_path)
@@ -84,6 +90,7 @@ def compress_dir_to_tar_then_7z(dir_path: str) -> tuple[str, bool, str]:
             logging.exception("Failed to cleanup tar %s", tar_path)
         return str(src), False, f"{type(e).__name__}: {e}"
 
+
 def compress_file_to_7z(file_path: str) -> tuple[str, bool, str]:
     src = Path(file_path)
     out_path = src.with_suffix(src.suffix + ".7z") if src.suffix else src.with_name(src.name + ".7z")
@@ -104,6 +111,7 @@ def compress_file_to_7z(file_path: str) -> tuple[str, bool, str]:
         except Exception:
             logging.exception("Failed to cleanup archive %s", out_path)
         return str(src), False, f"{type(e).__name__}: {e}"
+
 
 def main() -> None:
     setup_logging()
@@ -132,6 +140,7 @@ def main() -> None:
         logging.info("No top-level files found")
     logging.info("Done.")
 
+
 if __name__ == "__main__":
     cwd = Path.cwd()
     before = gsz(cwd)
@@ -142,6 +151,7 @@ if __name__ == "__main__":
     if not diff_size:
         print("no change")
     print(f"space freed : {fsz(diff_size)}")
+
 
 def gsz(path):
     try:

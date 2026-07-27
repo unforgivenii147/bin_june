@@ -814,6 +814,7 @@ SHEBANG_MAP: dict[str, str] = {
 SKIP_DIRS: frozenset[str] = frozenset({".git", "__pycache__"})
 SKIP_EXTS: frozenset[str] = frozenset({".css", ".js"})
 
+
 def runcmd(cmd: list[str], silent: bool = False, show_output: bool = False, timeout: int = 30) -> dict:
     result = {"exit_code": -1, "stdout": "", "stderr": ""}
     try:
@@ -837,6 +838,7 @@ def runcmd(cmd: list[str], silent: bool = False, show_output: bool = False, time
         result["stderr"] = str(e)
     return result
 
+
 def can_colorize() -> bool:
     if os.environ.get("NO_COLOR") or os.environ.get("ANSI_COLORS_DISABLED"):
         return False
@@ -844,7 +846,9 @@ def can_colorize() -> bool:
         return True
     return sys.stdout.isatty()
 
+
 _COLORIZE: bool = can_colorize()
+
 
 def colored(
     text: str,
@@ -905,6 +909,7 @@ def colored(
         return text
     return f"\033[{';'.join(codes)}m{text}\033[0m"
 
+
 def cprint(
     text: str,
     color: str | None = None,
@@ -913,6 +918,7 @@ def cprint(
     **kwargs,
 ) -> None:
     print(colored(text, color, on_color, attrs), **kwargs)
+
 
 def is_binary(path: Path) -> bool:
     try:
@@ -927,6 +933,7 @@ def is_binary(path: Path) -> bool:
     except Exception:
         return False
 
+
 def unique_path(path: Path) -> Path:
     if not path.exists():
         return path
@@ -939,6 +946,7 @@ def unique_path(path: Path) -> Path:
         if not new_path.exists():
             return new_path
         counter += 1
+
 
 def fix_by_shebang(path: Path) -> str | None:
     if is_binary(path):
@@ -956,6 +964,7 @@ def fix_by_shebang(path: Path) -> str | None:
     except Exception:
         return None
 
+
 def get_file_mime(path: Path) -> str | None:
     result = runcmd(["file", "--brief", "--mime-type", str(path)])
     if result["exit_code"] != 0:
@@ -965,6 +974,7 @@ def get_file_mime(path: Path) -> str | None:
         return None
     return mime
 
+
 def safe_rename(old: Path, new: Path) -> bool:
     try:
         new = unique_path(new)
@@ -972,6 +982,7 @@ def safe_rename(old: Path, new: Path) -> bool:
         return True
     except Exception:
         return False
+
 
 def process_directory(directory: Path, confirm: bool = False) -> list[dict]:
     mismatches: list[dict] = []
@@ -1032,6 +1043,7 @@ def process_directory(directory: Path, confirm: bool = False) -> list[dict]:
             )
     return mismatches
 
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Fix file extension mismatches by analyzing file content.")
     parser.add_argument("-y", action="store_true", help="Enable confirmation mode")
@@ -1075,6 +1087,7 @@ def main() -> None:
             cprint("  Failed to rename", color="red", attrs=["bold"])
         print()
     cprint("Done.", color="green", attrs=["bold"])
+
 
 if __name__ == "__main__":
     main()

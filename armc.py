@@ -28,6 +28,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from collections.abc import Generator
 
+
 class CommentRemover:
     def __init__(self, validate: bool = True):
         self.validate = validate
@@ -286,6 +287,7 @@ class CommentRemover:
                 print(f"  • {file_path}: {error}")
         print("=" * 80)
 
+
 def main():
     parser = argparse.ArgumentParser(
         description="Remove comments from Python files with AST validation",
@@ -329,6 +331,7 @@ def main():
     except Exception as e:
         print(f"\n❌ Fatal error: {e!s}", file=sys.stderr)
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

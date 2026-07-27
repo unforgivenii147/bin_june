@@ -8,11 +8,13 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def extract_font_id(svg_text):
     match = re.search(r'<font[^>]*\bid="([^"]+)"', svg_text, re.IGNORECASE)
     if match:
         return match.group(1).strip()
     return None
+
 
 def rename_svg_font(file_path_obj: Path) -> None:
     if not file_path_obj.is_file():
@@ -42,6 +44,7 @@ def rename_svg_font(file_path_obj: Path) -> None:
         print(f"Error renaming '{file_path_obj.name}' to '{new_name_obj.name}': Target file already exists.")
     except Exception as e:
         print(f"Error renaming '{file_path_obj.name}': {e}")
+
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:

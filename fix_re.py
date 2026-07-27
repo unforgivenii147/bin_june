@@ -74,6 +74,7 @@ REGEX_INDICATORS = {
     "\\0",
 }
 
+
 @dataclass
 class StringModification:
     start: tuple[int, int]
@@ -81,6 +82,7 @@ class StringModification:
     original: str
     modified: str
     line_offset: int = 0
+
 
 @dataclass
 class ProcessingStats:
@@ -94,6 +96,7 @@ class ProcessingStats:
     @property
     def elapsed(self) -> float:
         return time.time() - self.start_time
+
 
 class RegexFixer:
     def __init__(
@@ -384,6 +387,7 @@ class RegexFixer:
         except ValueError:
             return str(path)
 
+
 def main():
     import argparse
 
@@ -423,6 +427,7 @@ def main():
     fixer.print_summary(results)
     if fixer.stats.errors > 0:
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

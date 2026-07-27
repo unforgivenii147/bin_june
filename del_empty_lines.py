@@ -63,6 +63,7 @@ COLORS = {
 
 RESET = "\x1b[0m"
 
+
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -82,6 +83,7 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
+
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -106,13 +108,16 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
+
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
+
 
 def get_filez(cwd: Path):
     for f in cwd.rglob("*"):
         if f.is_file() and not f.is_symlink():
             yield f
+
 
 def process_file(path: Path) -> None:
     path = Path(path)
@@ -132,6 +137,7 @@ def process_file(path: Path) -> None:
     else:
         print(f"{path.name}", end=" | ")
         cprint("NO CHANGE", "grey")
+
 
 if __name__ == "__main__":
     cwd = Path.cwd()

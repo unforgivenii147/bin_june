@@ -10,6 +10,7 @@ from pathlib import Path
 import tree_sitter_cpp as tscpp
 from tree_sitter import Language, Parser, Query, QueryCursor
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -30,6 +31,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
+
 def remove_blank_lines(text: str | Path) -> str:
     content = text
     if isinstance(text, Path):
@@ -49,7 +51,9 @@ def remove_blank_lines(text: str | Path) -> str:
         prev_blank = is_blank
     return "".join(result_lines)
 
+
 ts_remover = None
+
 
 class TSCppRemover:
     def __init__(self) -> None:
@@ -90,9 +94,11 @@ class TSCppRemover:
         cleaned = remove_blank_lines(cleaned)
         return (cleaned, comment_count)
 
+
 def ts_remover_initializer() -> None:
     global ts_remover
     ts_remover = TSCppRemover()
+
 
 def process_file(path):
     path = Path(path)
@@ -109,6 +115,7 @@ def process_file(path):
         return ("changed", path, comments)
     print(f"[NO CHANGE] {path.name}")
     return ("nochange", path, 0)
+
 
 if __name__ == "__main__":
     cwd = Path.cwd()
@@ -131,6 +138,7 @@ if __name__ == "__main__":
         for _, fn, *_ in errors:
             print(f"  - {fn}")
     print(f"Size reduced: {fsz(diffsize)}")
+
 
 def gsz(path):
     try:

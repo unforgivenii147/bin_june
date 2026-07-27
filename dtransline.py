@@ -23,6 +23,7 @@ SKIP_DIRS: Final[frozenset[str]] = frozenset(
     {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
 )
 
+
 def is_english(text: str, threshold: float = 0.6) -> bool:
     stripped = text.strip()
     if not stripped:
@@ -32,6 +33,7 @@ def is_english(text: str, threshold: float = 0.6) -> bool:
         return True
     ascii_alpha_count = sum(1 for c in alpha_chars if ord(c) < 128)
     return ascii_alpha_count / len(alpha_chars) > threshold
+
 
 def translate_text(text: str, translator: GoogleTranslator, max_retries: int = 3) -> str:
     if not text.strip() or is_english(text):
@@ -47,6 +49,7 @@ def translate_text(text: str, translator: GoogleTranslator, max_retries: int = 3
             else:
                 logger.error("  Translation failed after %d attempts: %s", max_retries, e)
     return text
+
 
 def process_file(file_path: Path) -> None:
     logger.info("Processing: %s", file_path)
@@ -75,8 +78,10 @@ def process_file(file_path: Path) -> None:
     except Exception as e:
         logger.error("  ✗ Error processing %s: %s", file_path, e)
 
+
 def worker(file_path: Path) -> None:
     process_file(file_path)
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Translate non-English lines in-place.")
@@ -119,6 +124,7 @@ def main() -> None:
         with mp.Pool(processes=args.workers) as pool:
             pool.map(worker, files_to_process)
     logger.info("\n✓ All translations completed!")
+
 
 if __name__ == "__main__":
     main()

@@ -62,6 +62,7 @@ COLORS = {
 
 RESET = "\x1b[0m"
 
+
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -81,6 +82,7 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
+
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -105,8 +107,10 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
+
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
+
 
 major, minor, _, _, _ = sys.version_info
 py_version = f"{major}.{minor}"
@@ -151,6 +155,7 @@ NOT_ALLOWED = [
     "LICENSE.txt",
 ]
 
+
 def process_lic(path: Path) -> None:
     lic_dir = path / "licenses"
     if lic_dir.exists() and "dist-info" in lic_dir.parent.name:
@@ -162,6 +167,7 @@ def process_lic(path: Path) -> None:
             print(nap)
             nap.unlink()
 
+
 def main() -> None:
     cwd = Path.cwd()
     for path in cwd.rglob("*"):
@@ -169,6 +175,7 @@ def main() -> None:
             process_lic(path)
             if len(list(path.iterdir())) < 2:
                 cprint(f"{path.name} empty pkg", "cyan")
+
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -10,6 +10,7 @@ from deep_translator import GoogleTranslator
 
 CHUNK_SIZE = 2000
 
+
 def read_text_file(path: Path) -> str:
     allowed = {".txt", ".md", ".csv", ".json", ".py"}
     ext = path.suffix.lower()
@@ -17,19 +18,24 @@ def read_text_file(path: Path) -> str:
         raise ValueError(msg)
     return path.read_text(encoding="utf-8")
 
+
 def chunk_text(text: str, size: int = 32768) -> list[str]:
     return [text[i : i + size] for i in range(0, len(text), size)]
+
 
 def translate_chunks(chunks: list[str]) -> str:
     translator = GoogleTranslator(source="ko", target="en")
     translated_parts = [translator.translate(chunk) for chunk in chunks]
     return "".join(translated_parts)
 
+
 def write_text_file(path: Path, data: str) -> None:
     path.write_text(data, encoding="utf-8")
 
+
 def build_output_path(input_path: Path) -> Path:
     return input_path.with_name(f"{input_path.stem}_eng{input_path.suffix}")
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Translate Korean → English using chunked deep-translator.")
@@ -58,6 +64,7 @@ def main() -> None:
         print(f"Write error: {exc}", file=sys.stderr)
         sys.exit(1)
     print(f"Saved translated file → {out_path}")
+
 
 if __name__ == "__main__":
     main()

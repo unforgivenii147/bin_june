@@ -21,6 +21,7 @@ import zipfile
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 
+
 class PIPPackageCache:
     def __init__(self, pip_list_path: str = "/sdcard/data/pip.txt"):
         self.packages = set()
@@ -47,6 +48,7 @@ class PIPPackageCache:
 
     def is_available_on_pip(self, package_name: str) -> bool:
         return package_name.lower() in self.packages
+
 
 def get_stdlib_modules() -> set[str]:
     import sys
@@ -261,6 +263,7 @@ def get_stdlib_modules() -> set[str]:
     }
     return stdlib | stdlib_modules
 
+
 def extract_imports_from_code(code: str, file_path: str = "") -> set[str]:
     imports = set()
     import_pattern = "^\\s*import\\s+([a-zA-Z0-9_\\.\\*\\s,]+)"
@@ -285,6 +288,7 @@ def extract_imports_from_code(code: str, file_path: str = "") -> set[str]:
                     imports.add(root)
     return imports
 
+
 def read_python_file(file_path: str) -> str:
     try:
         with open(file_path, encoding="utf-8", errors="ignore") as f:
@@ -292,6 +296,7 @@ def read_python_file(file_path: str) -> str:
     except Exception as e:
         print(f"⚠️  Error reading {file_path}: {e}")
         return ""
+
 
 def is_python_file(file_path: str) -> bool:
     if file_path.endswith(".py"):
@@ -304,6 +309,7 @@ def is_python_file(file_path: str) -> bool:
         except:
             return False
     return False
+
 
 def extract_from_zip(zip_path: str) -> set[str]:
     imports = set()
@@ -319,6 +325,7 @@ def extract_from_zip(zip_path: str) -> set[str]:
     except Exception:
         pass
     return imports
+
 
 def extract_from_tar(tar_path: str, compression: str | None = None) -> set[str]:
     imports = set()
@@ -337,6 +344,7 @@ def extract_from_tar(tar_path: str, compression: str | None = None) -> set[str]:
     except Exception:
         pass
     return imports
+
 
 def process_file(file_path: str) -> set[str]:
     imports = set()
@@ -358,6 +366,7 @@ def process_file(file_path: str) -> set[str]:
         pass
     return imports
 
+
 def collect_files(root_dir: str, exclude_dirs: list[str] | None = None) -> list[str]:
     if exclude_dirs is None:
         exclude_dirs = {".venv", "venv", ".env", "__pycache__", ".git", "node_modules", ".egg-info"}
@@ -372,6 +381,7 @@ def collect_files(root_dir: str, exclude_dirs: list[str] | None = None) -> list[
                 files.append(file_path)
     return files
 
+
 def filter_packages(imports: set[str], stdlib: set[str], pip_cache: PIPPackageCache, local_files: set[str]) -> set[str]:
     filtered = set()
     for package in imports:
@@ -384,6 +394,7 @@ def filter_packages(imports: set[str], stdlib: set[str], pip_cache: PIPPackageCa
             actual_name = pip_cache.package_lower_map.get(pkg_lower, package)
             filtered.add(actual_name)
     return filtered
+
 
 def main():
     parser = argparse.ArgumentParser(description="Generate requirements.txt by inspecting Python files recursively")
@@ -460,6 +471,7 @@ def main():
     if len(sorted_packages) > 20:
         print(f"  ... and {len(sorted_packages) - 20} more")
     print("\n✅ Done!")
+
 
 if __name__ == "__main__":
     main()

@@ -8,6 +8,7 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 class RegexCommentRemover:
     def __init__(self) -> None:
         self.pattern = re.compile(r"//.*?$|/\*.*?\*/|'(?:\.|[^'])*'|\"(?:\.|[^\"])*\"", re.DOTALL | re.MULTILINE)
@@ -25,6 +26,7 @@ class RegexCommentRemover:
         result_count = result.count("//") + result.count("/*")
         removed = comment_count - result_count
         return result, removed
+
 
 def process_file(file_path: Path, remover: RegexCommentRemover):
     Path(path)
@@ -52,6 +54,7 @@ def process_file(file_path: Path, remover: RegexCommentRemover):
     else:
         print(f"[NO CHANGE] {file_path.name}")
         return "nochange", file_path, 0
+
 
 if __name__ == "__main__":
     dir_path = Path.cwd()

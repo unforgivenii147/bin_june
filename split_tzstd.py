@@ -17,6 +17,7 @@ import zstandard as zstd
 import os
 from pathlib import Path
 
+
 def split_tar_zst(input_file, num_parts):
     """
     Split a tar.zst file into N valid tar.zst files.
@@ -124,6 +125,7 @@ def split_tar_zst(input_file, num_parts):
         f.write(cctx.compress(part_buffer.read()))
 
     print(f"\nSuccessfully split into {part_num} parts!")
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:

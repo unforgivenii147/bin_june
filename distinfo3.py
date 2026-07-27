@@ -62,6 +62,7 @@ COLORS = {
 
 RESET = "\x1b[0m"
 
+
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -81,6 +82,7 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
+
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -105,11 +107,14 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
+
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
 
+
 major, minor, _, _, _ = sys.version_info
 py_version = f"{major}.{minor}"
+
 
 def process_dir(dr: Path) -> bool:
     print(dr.name)
@@ -120,6 +125,7 @@ def process_dir(dr: Path) -> bool:
                 shutil.rmtree(dr)
     return True
 
+
 def main() -> None:
     cwd = Path(f"/data/data/com.termux/files/usr/lib/python{py_version}/site-packages")
     if not cwd.exists():
@@ -127,6 +133,7 @@ def main() -> None:
     for path in cwd.iterdir():
         if path.is_dir() and len(list(path.iterdir())) == 1:
             process_dir(path)
+
 
 if __name__ == "__main__":
     sys.exit(main())

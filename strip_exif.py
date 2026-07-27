@@ -16,6 +16,7 @@ from pathlib import Path
 
 from PIL import Image
 
+
 def get_folder_size(folder_path):
     total = 0
     for item in folder_path.rglob("*"):
@@ -23,12 +24,14 @@ def get_folder_size(folder_path):
             total += item.stat().st_size
     return total
 
+
 def format_size(size_bytes):
     for unit in ["B", "KB", "MB", "GB"]:
         if size_bytes < 1024.0:
             return f"{size_bytes:.2f} {unit}"
         size_bytes /= 1024.0
     return f"{size_bytes:.2f} TB"
+
 
 def strip_exif_single(image_path, backup=False, verbose=False):
     result = {
@@ -84,8 +87,10 @@ def strip_exif_single(image_path, backup=False, verbose=False):
             print(f"  ❌ {image_path.name}: {e!s}")
     return result
 
+
 def process_image_file(image_path, backup=False, verbose=False):
     return strip_exif_single(image_path, backup, verbose)
+
 
 def find_image_files(paths, extensions, recursive=True):
     image_files = []
@@ -115,6 +120,7 @@ def find_image_files(paths, extensions, recursive=True):
         else:
             print(f"⚠️  Unknown path type: {path}")
     return sorted(set(image_files))
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -244,6 +250,7 @@ Examples:
                 print(f"   📋 {backup_path.name}")
             if len(backups) > 5:
                 print(f"   ... and {len(backups) - 5} more")
+
 
 if __name__ == "__main__":
     try:

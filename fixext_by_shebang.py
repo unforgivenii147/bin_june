@@ -23,6 +23,7 @@ SHEBANG_MAP = {
 
 TARGET_EXTENSIONS = {".py", ".sh"}
 
+
 def detect_shebang(filepath):
     """Read the first line of a file and detect if it contains a shebang."""
     try:
@@ -44,6 +45,7 @@ def detect_shebang(filepath):
         print(f"Error reading {filepath}: {e}")
     return None
 
+
 def should_rename(filepath, target_ext):
     """Check if file needs renaming based on target extension."""
     current_ext = os.path.splitext(filepath)[1].lower()
@@ -52,6 +54,7 @@ def should_rename(filepath, target_ext):
         return False
 
     return True
+
 
 def rename_file(filepath, target_ext):
     """Rename file to have the target extension."""
@@ -79,6 +82,7 @@ def rename_file(filepath, target_ext):
         return None
 
     return None
+
 
 def main():
     """Main function to process all files in current directory."""
@@ -130,6 +134,7 @@ def main():
     else:
         print(f"  Renamed: {renamed_count} files")
     print(f"  Skipped: {skipped_count} files")
+
 
 if __name__ == "__main__":
     main()

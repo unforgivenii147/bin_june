@@ -10,6 +10,7 @@ INPUT_FILE = Path("urls.txt")
 OUTPUT_FILE = Path("filtered_urls.txt")
 EXT_PATTERN = re.compile(r"\.(min\.)?(js|css)$", re.IGNORECASE)
 
+
 def is_static_asset(url: str) -> bool:
     url = url.strip()
     if not url:
@@ -17,6 +18,7 @@ def is_static_asset(url: str) -> bool:
     parsed = urlparse(url)
     path = parsed.path
     return bool(EXT_PATTERN.search(path))
+
 
 def main() -> None:
     if not INPUT_FILE.exists():
@@ -33,6 +35,7 @@ def main() -> None:
     OUTPUT_FILE.write_text("\n".join(filtered), encoding="utf-8")
     print(f"Kept {len(filtered)} URLs.")
     print(f"Saved to {OUTPUT_FILE}")
+
 
 if __name__ == "__main__":
     main()

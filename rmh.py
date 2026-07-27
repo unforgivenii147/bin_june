@@ -26,6 +26,7 @@ from pathlib import Path
 from loguru import logger
 from tqdm import tqdm
 
+
 @dataclass
 class ProcessResult:
     path: Path
@@ -45,6 +46,7 @@ class ProcessResult:
     @property
     def total_space_used(self) -> int:
         return self.final_size + self.backup_size
+
 
 class CommentRemover:
     STRING_PATTERN = "(?:\"(?:\\.|[^\"\\])*\"|'(?:\\.|[^'\\])*')"
@@ -146,6 +148,7 @@ class CommentRemover:
                 error=f"Processing error: {e}",
             )
 
+
 def find_source_files(root_dir: Path) -> list[Path]:
     extensions = {".h", ".hpp", ".c", ".cpp", ".cc", ".cxx", ".hxx"}
     files = []
@@ -157,6 +160,7 @@ def find_source_files(root_dir: Path) -> list[Path]:
             files.extend(root_dir.rglob(f"*{ext}"))
     return sorted(files)
 
+
 def collect_source_files(targets: list[str]) -> list[Path]:
     all_files = set()
     for target in targets:
@@ -167,6 +171,7 @@ def collect_source_files(targets: list[str]) -> list[Path]:
         found_files = find_source_files(path)
         all_files.update(found_files)
     return sorted(all_files)
+
 
 def process_files_parallel(paths: list[Path], num_workers: int | None = None) -> list[ProcessResult]:
     num_workers = num_workers or cpu_count()
@@ -182,12 +187,14 @@ def process_files_parallel(paths: list[Path], num_workers: int | None = None) ->
         )
     return results
 
+
 def _format_bytes(bytes_val: int) -> str:
     for unit in ["B", "KB", "MB", "GB"]:
         if bytes_val < 1024:
             return f"{bytes_val:.2f} {unit}"
         bytes_val /= 1024
     return f"{bytes_val:.2f} TB"
+
 
 def print_summary(results: list[ProcessResult], targets: list[Path]) -> None:
     successful = [r for r in results if r.success]
@@ -222,6 +229,7 @@ def print_summary(results: list[ProcessResult], targets: list[Path]) -> None:
         logger.warning("Failed files:")
         for result in failed:
             logger.warning(f"  {result.path.name}: {result.error}")
+
 
 def main(
     targets: list[str] | None = None,
@@ -282,6 +290,7 @@ def main(
         logger.info(f"Removed {backup_count} backup files")
     failed = [r for r in results if not r.success]
     return 1 if failed else 0
+
 
 if __name__ == "__main__":
     import argparse

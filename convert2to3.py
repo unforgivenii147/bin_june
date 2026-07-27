@@ -18,6 +18,7 @@ from typing import list, tuple
 
 logging.getLogger("lib2to3").setLevel(logging.WARNING)
 
+
 class CustomRefactoringTool(RefactoringTool):
     def __init__(self, fixers, explicit=None, append=None) -> None:
         self.output_lines = []
@@ -31,6 +32,7 @@ class CustomRefactoringTool(RefactoringTool):
         if args:
             msg = msg % args
         self.output_lines.append(msg)
+
 
 def get_all_fixers() -> list[str]:
     try:
@@ -91,6 +93,7 @@ def get_all_fixers() -> list[str]:
             "lib2to3.fixes.fix_zip",
         ]
 
+
 def apply_2to3_fixes(file_path: str) -> tuple[str, bool, str]:
     try:
         with open(file_path, encoding="utf-8") as f:
@@ -129,6 +132,7 @@ def apply_2to3_fixes(file_path: str) -> tuple[str, bool, str]:
     except Exception as e:
         return file_path, False, f"Unexpected error: {e!s}"
 
+
 def find_python_files(paths: list[str], extensions: list[str] | None = None) -> list[str]:
     if extensions is None:
         extensions = [".py"]
@@ -145,6 +149,7 @@ def find_python_files(paths: list[str], extensions: list[str] | None = None) -> 
             for ext in extensions:
                 python_files.extend(str(p) for p in path_obj.rglob(f"*{ext}"))
     return python_files
+
 
 def process_files_parallel(file_paths: list[str]) -> tuple[list[str], list[str]]:
     successful = []
@@ -171,6 +176,7 @@ def process_files_parallel(file_paths: list[str]) -> tuple[list[str], list[str]]
                 print(f"[{i}/{len(file_paths)}] ✗ {Path(file_path).name}")
                 print(f"    Unexpected error: {e!s}")
     return successful, failed
+
 
 def dry_run_file(file_path: str) -> tuple[str, str, bool]:
     try:
@@ -200,6 +206,7 @@ def dry_run_file(file_path: str) -> tuple[str, str, bool]:
     except Exception as e:
         return file_path, f"Error reading file: {e!s}", False
 
+
 def perform_dry_run(file_paths: list[str]) -> None:
     print(f"\nDRY RUN - Preview of changes using {4} workers:")
     print("=" * 60)
@@ -218,6 +225,7 @@ def perform_dry_run(file_paths: list[str]) -> None:
                 print(f"✓ {Path(file_path).name}: {output}")
     print(f"\n{'=' * 60}")
     print(f"Dry run complete: {files_with_changes} of {len(file_paths)} files would be changed")
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(
@@ -254,6 +262,7 @@ def main() -> int:
         for f in failed:
             print(f"  - {Path(f).name}")
     return 0 if not failed else 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

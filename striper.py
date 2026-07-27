@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from sys import argv
 
+
 def remove_spaces_from_file(fname: str) -> None:
     try:
         with Path(fname).open(encoding="utf-8") as file:
@@ -18,6 +19,7 @@ def remove_spaces_from_file(fname: str) -> None:
         print(f"Error: File '{fname}' not found.")
     except Exception as e:
         print(f"An error occurred: {e}")
+
 
 if __name__ == "__main__":
     remove_spaces_from_file(argv[1])

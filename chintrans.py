@@ -16,8 +16,10 @@ MAX_CHUNK_SIZE: Final[int] = 5000
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s", datefmt="%H:%M:%S")
 logger = logging.getLogger(__name__)
 
+
 def contains_chinese(text: str) -> bool:
     return bool(re.search(r"[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]", text))
+
 
 def create_chunks(lines: list[str]) -> list[list[str]]:
     """Group lines into chunks where each chunk's total character count is <= MAX_CHUNK_SIZE."""
@@ -51,6 +53,7 @@ def create_chunks(lines: list[str]) -> list[list[str]]:
 
     return chunks
 
+
 def translate_chunk(chunk: list[str]) -> tuple[list[str], str | None]:
     """Translate a chunk of lines joined by newlines. Returns (original_lines, translation) or (original_lines, None)."""
     # Join lines with newline for translation
@@ -70,6 +73,7 @@ def translate_chunk(chunk: list[str]) -> tuple[list[str], str | None]:
                 time.sleep(RETRY_DELAY)
 
     return (chunk, None)
+
 
 def main() -> None:
     import sys
@@ -156,6 +160,7 @@ def main() -> None:
         )
     except Exception as e:
         logger.error("Error updating input file: %s", e)
+
 
 if __name__ == "__main__":
     main()

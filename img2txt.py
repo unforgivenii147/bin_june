@@ -10,11 +10,13 @@ from pathlib import Path
 from PIL import Image
 from pytesseract import image_to_string
 
+
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=2)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
+
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     """Memory-efficient directory walker."""
@@ -37,6 +39,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
             continue
     return files
 
+
 def extract_text(image_path: Path) -> str:
     """Extract text with explicit resource cleanup."""
     try:
@@ -53,6 +56,7 @@ def extract_text(image_path: Path) -> str:
     except Exception as e:
         print(f"Error processing {image_path.name}: {e}")
         return ""
+
 
 def process_file(path: Path) -> None:
     """Process single file with minimal memory footprint."""
@@ -74,6 +78,7 @@ def process_file(path: Path) -> None:
             print(f"✗ Failed to write {txtfile.name}: {e}")
     else:
         print(f"⚠ No significant text in {path.name}")
+
 
 def main() -> None:
     cwd = Path.cwd()
@@ -98,6 +103,7 @@ def main() -> None:
     else:
         print(f"Using {max_workers} worker(s) for memory safety...")
         mpf3(process_file, files)
+
 
 if __name__ == "__main__":
     main()

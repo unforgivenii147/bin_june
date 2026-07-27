@@ -46,6 +46,7 @@ try:
 except ImportError:
     RICH_AVAILABLE: Final[bool] = False
 
+
 @dataclass(slots=True)
 class FolderResult:
     name: str
@@ -59,6 +60,7 @@ class FolderResult:
     def saved_bytes(self) -> int:
         return max(0, self.original_size - self.compressed_size)
 
+
 def format_size(size_bytes: int) -> str:
     val = float(size_bytes)
     for unit in ["B", "KB", "MB", "GB", "TB"]:
@@ -67,8 +69,10 @@ def format_size(size_bytes: int) -> str:
         val /= 1024.0
     return f"{val:.2f} PB"
 
+
 def get_folder_size(path: Path) -> int:
     return sum(f.stat().st_size for f in path.rglob("*") if f.is_file())
+
 
 def compress_folder_task(folder_path: Path, output_dir: Path, level: int = 3, threads: int = 0) -> FolderResult:
     start_time = time.perf_counter()
@@ -99,6 +103,7 @@ def compress_folder_task(folder_path: Path, output_dir: Path, level: int = 3, th
             zst_path.unlink()
         return FolderResult(name=folder_name, success=False, error=str(e))
 
+
 def decompress_folder_task(zst_path: Path, output_dir: Path) -> FolderResult:
     start_time = time.perf_counter()
     folder_name = zst_path.name.removesuffix(".tar.zst")
@@ -125,6 +130,7 @@ def decompress_folder_task(zst_path: Path, output_dir: Path) -> FolderResult:
         if temp_tar.exists():
             temp_tar.unlink()
         return FolderResult(name=folder_name, success=False, error=str(e))
+
 
 def main():
     parser = argparse.ArgumentParser(description="Optimized Folder Zstd Archiver")
@@ -201,6 +207,7 @@ def main():
                 f"Space saved: {format_size(total_orig - total_proc if 'total_proc' in locals() else total_orig - total_comp)}"
             )
     print(f"{'=' * 40}")
+
 
 if __name__ == "__main__":
     main()

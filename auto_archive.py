@@ -45,8 +45,10 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
+
 def read_file(path: Path) -> bytes:
     return path.read_bytes()
+
 
 def human(n: int) -> str:
     for unit in ("B", "KB", "MB", "GB"):
@@ -54,6 +56,7 @@ def human(n: int) -> str:
             return f"{n:.1f} {unit}"
         n /= 1024
     return f"{n:.1f} TB"
+
 
 def compress_zstd(data: bytes, level: int) -> bytes:
     if zstd is None:
@@ -66,15 +69,18 @@ def compress_zstd(data: bytes, level: int) -> bytes:
         writer.write(data)
     return buf.getvalue()
 
+
 def compress_brotli(data: bytes, level: int) -> bytes:
     if brotli is None:
         raise RuntimeError("brotli not installed")
     return brotli.compress(data, quality=level)
 
+
 def compress_lz4(data: bytes, level: int) -> bytes:
     if lz4frame is None:
         raise RuntimeError("lz4 not installed")
     return lz4frame.compress(data, compression_level=level)
+
 
 def compress_gz(data: bytes, level: int) -> bytes:
     buf = BytesIO()
@@ -82,11 +88,14 @@ def compress_gz(data: bytes, level: int) -> bytes:
         f.write(data)
     return buf.getvalue()
 
+
 def compress_bz2(data: bytes, level: int) -> bytes:
     return bz2.compress(data, compresslevel=level)
 
+
 def compress_xz(data: bytes, level: int) -> bytes:
     return lzma.compress(data, format=lzma.FORMAT_XZ, preset=level)
+
 
 def compress_7z(data: bytes, level: int, src_name: str) -> bytes:
     if py7zr is None:
@@ -100,6 +109,7 @@ def compress_7z(data: bytes, level: int, src_name: str) -> bytes:
         with py7zr.SevenZipFile(archive, "w", filters=filters) as sz:
             sz.write(src, src_name)
         return archive.read_bytes()
+
 
 def _make_algorithms():
     algos = []
@@ -124,7 +134,9 @@ def _make_algorithms():
         log.warning("py7zr not available — skipping")
     return algos
 
+
 ALGORITHMS = _make_algorithms()
+
 
 def best_for_algo(
     data: bytes, name: str, ext: str, fn, min_l: int, max_l: int, src_name: str = "data"
@@ -149,6 +161,7 @@ def best_for_algo(
     if best_compressed is None:
         return None
     return name, ext, best_level, best_compressed
+
 
 def process_file(src: Path, out_dir: Path | None = None) -> Path | None:
     log.info("Processing: %s (%s)", src, human(src.stat().st_size))
@@ -187,6 +200,7 @@ def process_file(src: Path, out_dir: Path | None = None) -> Path | None:
     log.info("  Winner → %s (algo=%s level=%d size=%s)", dest.name, w_name, w_level, human(len(w_bytes)))
     return dest
 
+
 def _worker(args) -> Path | None:
     src, out_dir = args
     try:
@@ -194,6 +208,7 @@ def _worker(args) -> Path | None:
     except Exception as exc:
         log.error("Worker error on %s: %s", src, exc)
         return None
+
 
 SKIP_EXTENSIONS = {
     ".zst",
@@ -209,8 +224,10 @@ SKIP_EXTENSIONS = {
     ".lzma",
 }
 
+
 def collect_files(root: Path) -> list[Path]:
     return [p for p in root.rglob("*") if p.is_file() and p.suffix.lower() not in SKIP_EXTENSIONS]
+
 
 def main() -> None:
     target = Path(sys.argv[1]) if len(sys.argv) > 1 else Path.cwd()
@@ -238,6 +255,7 @@ def main() -> None:
     else:
         log.error("Target is neither a file nor a directory: %s", target)
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

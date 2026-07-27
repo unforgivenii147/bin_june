@@ -8,6 +8,7 @@ from collections import deque
 from multiprocessing import get_context
 from pathlib import Path
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -27,6 +28,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
             elif item.is_file() and (ext is None or item.suffix in ext):
                 files.append(item)
     return files
+
 
 ATTRIBUTES = {
     "bold": 1,
@@ -78,6 +80,7 @@ COLORS = {
 }
 RESET = "\x1b[0m"
 
+
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -97,6 +100,7 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
+
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -121,11 +125,14 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
+
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
 
+
 c_files = {".c", ".h", ".inc"}
 cpp_files = {".cpp", ".cc", ".cxx", ".hpp", ".hpp11", ".hh", ".hxx"}
+
 
 def validate_cpp(path: Path) -> tuple[bool, str]:
     cmd = ""
@@ -135,6 +142,7 @@ def validate_cpp(path: Path) -> tuple[bool, str]:
         cmd = "clang++ -fsyntax-only str(path)"
     ret, txt, err = run_command(cmd)
     return (path, ret, txt, err)
+
 
 if __name__ == "__main__":
     args = sys.argv[1:]

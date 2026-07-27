@@ -66,6 +66,7 @@ COLORS = {
 
 RESET = "\x1b[0m"
 
+
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -85,6 +86,7 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
+
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -109,8 +111,10 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
+
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
+
 
 WHL_DIR = Path("/sdcard/whl")
 DEST_DIR = Path("/sdcard/installed")
@@ -134,10 +138,12 @@ EXCLUDED_PACKAGES = {
     "setuptools_rust",
 }
 
+
 def ensure_venv() -> None:
     if sys.prefix == sys.base_prefix:
         print("⚠ Not running inside a virtual environment.")
         sys.exit(1)
+
 
 def get_installed_packages():
     installed = {}
@@ -148,8 +154,10 @@ def get_installed_packages():
             installed[name.lower().replace("-", "_")] = Version(version)
     return installed
 
+
 def normalize(name: str) -> str:
     return name.lower().replace("-", "_")
+
 
 def main() -> None:
     if not WHL_DIR.exists():
@@ -178,6 +186,7 @@ def main() -> None:
             print(f"[ERROR] {wheel.name}: {e}")
             shutil.move(str(wheel), DEST_DIR2 / wheel.name)
     print(f"\nDone. Removed {moved} wheel(s).")
+
 
 if __name__ == "__main__":
     main()

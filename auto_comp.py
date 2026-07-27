@@ -55,6 +55,7 @@ COMPRESSORS: Final[dict[str, tuple[CompressorFunc, str]]] = {
     ),
 }
 
+
 @dataclass(slots=True, frozen=True)
 class CompressionResult:
     name: str
@@ -71,6 +72,7 @@ class CompressionResult:
     @property
     def savings_percent(self) -> float:
         return self.saved_bytes / self.original_size * 100
+
 
 class CompressionManager:
     __slots__ = "output_dir", "temp_dir"
@@ -194,6 +196,7 @@ class CompressionManager:
                     print(f"⚠ Failed to delete {result.name}: {e}")
         return best
 
+
 def print_report(results: list[CompressionResult], original_size: int) -> None:
     print("\n" + "=" * REPORT_WIDTH)
     print("COMPRESSION RESULTS")
@@ -216,6 +219,7 @@ def print_report(results: list[CompressionResult], original_size: int) -> None:
             f"{result.name:<10} {result.size:>12,} {result.ratio:>8.4f} {result.saved_bytes:>12,} {result.time:>7.3f}s"
         )
 
+
 def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: python script.py <file_or_directory> [output_directory]")
@@ -237,6 +241,7 @@ def main() -> None:
     except Exception as e:
         print(f"\n❌ Error: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

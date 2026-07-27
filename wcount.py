@@ -13,6 +13,7 @@ from toolz.curried import map as _map
 
 CHUNK_SIZE = 1024 * 1024
 
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -33,6 +34,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
+
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -48,13 +50,17 @@ def is_binary(path: Path | str) -> bool:
     except Exception:
         return True
 
+
 def get_nobinary(path: str | Path) -> list[Path]:
     return [f for f in get_files(path) if not is_binary(f)]
 
+
 MAX_QUEUE = 8
+
 
 def stem(word):
     return word.lower().rstrip(",.|;:'\"").lstrip("'\"")
+
 
 def process_file(path):
     path = Path(path)
@@ -64,6 +70,7 @@ def process_file(path):
     word_count = compose(frequencies, _map(stem), str.split)
     content = path.read_text(encoding="utf-8")
     return word_count(content)
+
 
 def main() -> None:
     cwd = Path.cwd()
@@ -96,6 +103,7 @@ def main() -> None:
         word_sorted[item] = results.get(item)
     with Path(outfile).open("w", encoding="utf-8") as fo:
         json.dump(word_sorted, fo, ensure_ascii=False, indent=2)
+
 
 if __name__ == "__main__":
     main()

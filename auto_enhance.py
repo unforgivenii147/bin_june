@@ -11,6 +11,7 @@ import numpy as np
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def enhance_image(image_path: Path, verbose: bool = False, progress: tuple | None = None) -> bool:
     try:
         if progress:
@@ -53,6 +54,7 @@ def enhance_image(image_path: Path, verbose: bool = False, progress: tuple | Non
         print(f"[FAILED] Error processing {image_path.name}: {e}")
         return False
 
+
 def collect_images(input_paths) -> list:
     valid_extensions = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tiff"}
     images_to_process = []
@@ -71,12 +73,14 @@ def collect_images(input_paths) -> list:
             print(f"[WARNING] Skipping invalid path or unsupported format: {path_str}")
     return list(set(images_to_process))
 
+
 def process_sequential(tasks, verbose):
     results = []
     for i, (img, _) in enumerate(tasks, 1):
         result = enhance_image(img, verbose, (i, len(tasks)))
         results.append(result)
     return results
+
 
 def process_parallel(tasks, num_cores):
     import multiprocessing as mp
@@ -90,6 +94,7 @@ def process_parallel(tasks, num_cores):
     with mp.Pool(processes=num_cores) as pool:
         results = pool.starmap(enhance_image, parallel_tasks)
     return results
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -134,6 +139,7 @@ def main():
         results = process_sequential(tasks, args.verbose)
     successful_runs = sum(1 for r in results if r)
     print("[FINISHED] Done")
+
 
 if __name__ == "__main__":
     main()

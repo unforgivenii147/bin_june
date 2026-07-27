@@ -9,13 +9,16 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
 
+
 CHUNKSIZE = 15850
+
 
 def process_file(path):
     path = Path(path)
@@ -31,6 +34,7 @@ def process_file(path):
                 part_num += 1
     except Exception as e:
         print(f"An error occurred during file splitting: {e}")
+
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -52,7 +56,9 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
+
 CHUNKSIZE = 15850
+
 
 def process_file(path):
     path = Path(path)
@@ -68,6 +74,7 @@ def process_file(path):
                 part_num += 1
     except Exception as e:
         print(f"An error occurred during file splitting: {e}")
+
 
 def main():
     cwd = Path.cwd()
@@ -86,6 +93,7 @@ def main():
         process_file(files[0])
         sys.exit(1)
     mpf3(process_file, files)
+
 
 if __name__ == "__main__":
     sys.exit(main())
