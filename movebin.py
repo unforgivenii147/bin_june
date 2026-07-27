@@ -1,13 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import shutil
 from pathlib import Path
 
 CHUNK_SIZE = 1024 * 1024
-
 
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
@@ -23,7 +21,6 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
 
 def main() -> None:
     cwd = Path.cwd()
@@ -42,7 +39,6 @@ def main() -> None:
         print("No binary files found to move.")
     else:
         print(f"Total binary files moved: {files_moved}")
-
 
 if __name__ == "__main__":
     main()

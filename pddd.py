@@ -1,11 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 from operator import itemgetter
 from pathlib import Path
-
 
 def get_dir_size(path: Path) -> int:
     total = 0
@@ -17,7 +15,6 @@ def get_dir_size(path: Path) -> int:
                 continue
     return total
 
-
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
     units = "B", "KB", "MB", "GB", "TB"
@@ -28,7 +25,6 @@ def fsz(sz: float) -> str:
     if i == 0:
         return f"{int(value)} {units[i]}"
     return f"{value:.1f} {units[i]}"
-
 
 def du_sort_python(path: Path) -> None:
     results = []
@@ -53,7 +49,6 @@ def du_sort_python(path: Path) -> None:
             else:
                 print(f"\x1b[5;92m{path.name:25}\x1b[0m  {sz}")
     print(f"total size : \x1b[5;94m{fsz(total)}\x1b[0m")
-
 
 if __name__ == "__main__":
     cwd = Path.cwd()

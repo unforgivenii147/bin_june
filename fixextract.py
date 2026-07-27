@@ -13,7 +13,6 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 def fix_mis_extracted(root_dir: Path, dry_run: bool = True, verbose: bool = True):
     fixed = 0
     for dir_path in sorted(root_dir.rglob("*"), key=lambda p: len(p.parts), reverse=True):
@@ -64,7 +63,6 @@ def fix_mis_extracted(root_dir: Path, dry_run: bool = True, verbose: bool = True
             print(f"   🔄 Would move: {file_in_dir} -> {target}")
     return fixed
 
-
 def main():
     import argparse
 
@@ -88,7 +86,6 @@ def main():
     print(f"\n📊 Summary: {fixed} issue(s) processed.")
     if not args.fix:
         print("💡 Run with --fix to apply changes.")
-
 
 if __name__ == "__main__":
     main()

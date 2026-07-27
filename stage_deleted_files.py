@@ -3,7 +3,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 def run_git_command(args: list[str]) -> str:
     """Executes a git command and returns the standard output string."""
     try:
@@ -12,7 +11,6 @@ def run_git_command(args: list[str]) -> str:
     except subprocess.CalledProcessError as e:
         print(f"❌ Git error executing {' '.join(e.cmd)}:\n{e.stderr.strip()}")
         sys.exit(1)
-
 
 def main():
 
@@ -60,7 +58,6 @@ def main():
 
     print("\n📊 Git Commit Summary:")
     print(commit_output)
-
 
 if __name__ == "__main__":
     main()

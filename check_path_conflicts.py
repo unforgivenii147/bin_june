@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import os
@@ -12,12 +11,10 @@ from pathlib import Path
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 prefix = "/data/data/com.termux/files"
 
-
 def get_path_dirs() -> list[str]:
     path_env = os.environ.get("PATH", "")
     path_dirs = path_env.split(":")
     return [d for d in path_dirs if d and Path(d).exists()]
-
 
 def get_commands_from_path(path_dirs: list[str]):
     commands = {}
@@ -42,7 +39,6 @@ def get_commands_from_path(path_dirs: list[str]):
     conflicts = {cmd: paths for cmd, paths in duplicate_commands.items() if len(paths) > 1}
     return commands, conflicts
 
-
 def extract_aliases(aliases_file: Path):
     aliases = {}
     alias_pattern = re.compile(r"^\s*alias\s+([a-zA-Z_][a-zA-Z0-9_-]*)\s*=", re.MULTILINE)
@@ -60,7 +56,6 @@ def extract_aliases(aliases_file: Path):
         print(f"Warning: Could not read aliases file: {e}")
 
     return aliases
-
 
 def extract_functions(functions_file: Path):
     functions = {}
@@ -88,10 +83,8 @@ def extract_functions(functions_file: Path):
 
     return functions
 
-
 def check_conflicts(names, path_commands, name_type: str):
     return {name: path_commands[name] for name in names if name in path_commands}
-
 
 def display_results(alias_conflicts, func_conflicts, path_duplicates, path_dirs: list[str]) -> None:
     print("=" * 80)
@@ -147,7 +140,6 @@ def display_results(alias_conflicts, func_conflicts, path_duplicates, path_dirs:
 
     print("=" * 80)
 
-
 def suggest_fixes(alias_conflicts, func_conflicts) -> None:
     if not alias_conflicts and not func_conflicts:
         return
@@ -168,7 +160,6 @@ def suggest_fixes(alias_conflicts, func_conflicts) -> None:
             print(f"   • Or use in scripts: command {conflict}")
 
     print("\nTo see all conflicts in detail, run with --verbose flag")
-
 
 def main():
     verbose = "--verbose" in sys.argv or "-v" in sys.argv
@@ -203,7 +194,6 @@ def main():
 
     print("\n✅ No conflicts detected! Your aliases and functions are safe.")
     sys.exit(0)
-
 
 if __name__ == "__main__":
     main()

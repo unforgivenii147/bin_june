@@ -9,10 +9,8 @@ from __future__ import annotations
 import argparse
 import os
 
-
 WINDOWS_FILES = {".exe", ".dll", ".bat", ".com", ".msi", ".vbs", ".ps1"}
 MACOS_FILES = {".dmg", ".app", ".DS_Store", ".plist", ".pkg"}
-
 
 def find_target_files(root_dir):
     target_files = []
@@ -25,7 +23,6 @@ def find_target_files(root_dir):
             elif filename == ".DS_Store":
                 target_files.append(os.path.join(dirpath, filename))
     return target_files
-
 
 def main():
     parser = argparse.ArgumentParser(
@@ -60,7 +57,6 @@ def main():
             except Exception as e:
                 print(f"Error deleting {file_path}: {e}")
         print(f"\nDeleted {deleted_count} of {len(found_files)} files.")
-
 
 if __name__ == "__main__":
     main()

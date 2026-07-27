@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import re
@@ -13,12 +12,10 @@ from github.GithubException import GithubException, UnknownObjectException
 from github.Repository import Repository
 from tqdm import tqdm
 
-
 def get_github_client(token: str | None = None) -> Github:
     if token:
         return Github(token)
     return Github()
-
 
 def parse_repo_url(txt: str) -> tuple[str, str]:
     txt = txt.strip()
@@ -33,7 +30,6 @@ def parse_repo_url(txt: str) -> tuple[str, str]:
         return parts[-2], parts[-1]
     raise ValueError(f"Invalid repository format: {txt}")
 
-
 def get_repo(repo_url: str, github_client: Github) -> Repository:
     try:
         owner, repo_name = parse_repo_url(repo_url)
@@ -47,7 +43,6 @@ def get_repo(repo_url: str, github_client: Github) -> Repository:
     except GithubException as e:
         raise Exception(f"GitHub API error: {e.status} {e.data}")
 
-
 def get_repo_size(repo: Repository) -> float:
     try:
         size_kb = repo.size
@@ -58,7 +53,6 @@ def get_repo_size(repo: Repository) -> float:
         print(f"[ERROR] Could not fetch repo size: {e}")
         return 0
 
-
 def get_default_branch(repo: Repository) -> str:
     try:
         default_branch = repo.default_branch
@@ -68,10 +62,8 @@ def get_default_branch(repo: Repository) -> str:
         print(f"[WARNING] Could not determine default branch: {e}")
         return "main"
 
-
 def build_clone_url(repo: Repository) -> str:
     return repo.clone_url
-
 
 def clone_repo(clone_url: str, branch: str) -> None:
     print(f"[INFO] Cloning repository from {clone_url} (branch: {branch})")
@@ -105,7 +97,6 @@ def clone_repo(clone_url: str, branch: str) -> None:
     except Exception as e:
         raise Exception(f"[ERROR] Clone failed: {e}")
 
-
 def init_submodules() -> None:
     if not Path(".gitmodules").exists():
         return
@@ -119,13 +110,11 @@ def init_submodules() -> None:
     except subprocess.CalledProcessError as e:
         raise Exception(f"Submodule update failed: {e}")
 
-
 def confirm_large_repo(size_mb: float) -> bool:
     if size_mb > 5:
         print(f"[WARNING] Repository size is {size_mb:.2f} MB. Continue? (y/n)")
         return input().lower() == "y"
     return True
-
 
 def main() -> None:
     if len(sys.argv) < 2:
@@ -178,7 +167,6 @@ def main() -> None:
         init_submodules()
     except Exception as e:
         print(f"[WARNING] Submodule handling failed: {e}")
-
 
 if __name__ == "__main__":
     main()

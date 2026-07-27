@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import re
@@ -12,7 +11,6 @@ from textual.widgets import Button, Static
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 class Display(Static):
     DEFAULT_CSS = "\n    Display {\n        width: 1fr;\n        height: 3;\n        content-align: right middle;\n        background: $surface;\n        border: solid $primary;\n        text-style: bold;\n    }\n    "
 
@@ -23,7 +21,6 @@ class Display(Static):
     def update_display(self, text: str) -> None:
         self.value = text
         self.update(text)
-
 
 class Calculator(Static):
     DEFAULT_CSS = "\n    Calculator {\n        width: 50;\n        height: auto;\n        border: solid $accent;\n        background: $panel;\n    }\n\n    #button-grid {\n        width: 1fr;\n        height: auto;\n        grid-size: 4 5;\n        grid-gutter: 1 1;\n        padding: 1;\n    }\n\n    Button {\n        width: 1fr;\n        height: 3;\n    }\n\n    Button.operator {\n        background: $accent 80%;\n    }\n\n    Button.equals {\n        background: $success 80%;\n    }\n\n    Button.clear {\n        background: $error 80%;\n    }\n    "
@@ -124,7 +121,6 @@ class Calculator(Static):
         except Exception:
             return "Error"
 
-
 def parse_expression(expr):
     expr = expr.replace(" ", "")
     pattern = "^([\\d.]+)\\s*([+\\-*/×÷])\\s*([\\d.]+)$"
@@ -132,7 +128,6 @@ def parse_expression(expr):
     if match:
         return (match.group(1), match.group(2), match.group(3))
     return (None, None, None)
-
 
 def evaluate_cli(args):
     expr = " ".join(args)
@@ -181,7 +176,6 @@ def evaluate_cli(args):
     num2_str = str(int(num2)) if num2 == int(num2) else str(num2)
     print(f"{num1_str} {operator_display.get(mapped_operator, operator)} {num2_str} = {result}")
     return True
-
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:

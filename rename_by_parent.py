@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import os
@@ -8,7 +7,6 @@ from os.path import dirname as dirn
 from os.path import isfile as isf
 from os.path import join as jn
 from pathlib import Path
-
 
 class DirectoryWalker:
     def __init__(self, directory) -> None:
@@ -31,7 +29,6 @@ class DirectoryWalker:
                     self.stack.append(fullname)
                 return fullname
         return None
-
 
 if __name__ == "__main__":
     cwd = Path.cwd()

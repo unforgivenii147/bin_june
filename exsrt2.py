@@ -1,10 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import subprocess
-
 
 def extract_subtitles(video_path) -> None:
     try:
@@ -40,7 +38,6 @@ def extract_subtitles(video_path) -> None:
         subprocess.run(ffmpeg_cmd, check=True, capture_output=True)
         count += 1
     print("Done.")
-
 
 if __name__ == "__main__":
     import sys

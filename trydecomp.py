@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import bz2
@@ -30,7 +29,6 @@ try:
 
 except ImportError:
     py7zr = None
-
 
 def try_decompress(filename: str) -> None:
     print(f"Attempting to decompress: {filename}\n")
@@ -120,7 +118,6 @@ def try_decompress(filename: str) -> None:
             print(f"  FAILED: py7zr opened with exception: {type(e).__name__}: {e}\n")
     if not success:
         print("No compression or archive format was successfully identified and decompressed.\n")
-
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:

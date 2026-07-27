@@ -14,7 +14,6 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 def parse_wheel_url(url: str) -> tuple[str, str, tuple[int, ...], str] | None:
     android_pattern = "/([^/]+)-(\\d+\\.\\d+\\.\\d+)-py3-none-android_24_([^/]+)\\.whl"
     linux_pattern = "/([^/]+)-(\\d+\\.\\d+\\.\\d+(?:\\.\\d+)?)-cp\\d+-cp\\d+-linux_([^/]+)\\.whl"
@@ -34,11 +33,9 @@ def parse_wheel_url(url: str) -> tuple[str, str, tuple[int, ...], str] | None:
         return package, python_version, version, arch, url
     return None
 
-
 def is_armv7_arch(arch: str) -> bool:
     armv7_patterns = ["armeabi_v7a", "armv7l", "linux_arm", "arm"]
     return any(pattern in arch.lower() for pattern in armv7_patterns)
-
 
 def filter_latest_for_armv7(urls_file=None):
     urls = []
@@ -89,7 +86,6 @@ def filter_latest_for_armv7(urls_file=None):
         print(f"{result['package']}=={result['version']} (Python {result['python_version']})")
     return results
 
-
 def main():
     import argparse
 
@@ -117,7 +113,6 @@ def main():
             f.write(script)
         print("\n✓ Download script created: download_armv7.sh")
         print("  Run: chmod +x download_armv7.sh && ./download_armv7.sh")
-
 
 if __name__ == "__main__":
     main()

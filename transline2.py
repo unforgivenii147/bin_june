@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 """
 Optimized version of transline2.py for Python 3.12.
 Parallel translation of text files in a directory or specified paths.
@@ -29,10 +28,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
 def is_english(text: str) -> bool:
     return not NON_ENGLISH_PATTERN.search(text)
-
 
 def get_files(path: Path, include_hidden: bool = True, extensions: tuple[str, ...] | None = None) -> list[Path]:
     if not path.exists():
@@ -60,7 +57,6 @@ def get_files(path: Path, include_hidden: bool = True, extensions: tuple[str, ..
             continue
     return sorted(files)
 
-
 def translate_text(text: str) -> str:
     if not text:
         return text
@@ -81,7 +77,6 @@ def translate_text(text: str) -> str:
                 translated_lines.append(line)
     return "".join(translated_lines)
 
-
 def safe_overwrite(filepath: Path, content: str) -> None:
     with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False, dir=filepath.parent) as tmp:
         tmp.write(content)
@@ -91,7 +86,6 @@ def safe_overwrite(filepath: Path, content: str) -> None:
     except Exception as e:
         tmp_path.unlink(missing_ok=True)
         raise RuntimeError(f"Failed to overwrite {filepath}: {e}") from e
-
 
 def process_file(path: Path) -> str:
     try:
@@ -109,7 +103,6 @@ def process_file(path: Path) -> str:
     except Exception as e:
         return f"Failed to process {path}: {e}"
 
-
 def main() -> None:
     args = sys.argv[1:]
     cwd = Path.cwd()
@@ -126,7 +119,6 @@ def main() -> None:
         for future in as_completed(future_to_file):
             result = future.result()
             logger.info(result)
-
 
 if __name__ == "__main__":
     main()

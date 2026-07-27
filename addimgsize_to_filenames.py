@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-
 from __future__ import annotations
 
 import sys
@@ -11,7 +10,6 @@ import cv2
 from tqdm import tqdm
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 class ImageDimensionRenamer:
     def __init__(self, root_dir: str = ".", separator: str = "_"):
@@ -128,7 +126,6 @@ class ImageDimensionRenamer:
         print("PROCESS COMPLETE - Images renamed with dimensions")
         print("=" * 70)
 
-
 def main():
     separator = "_"
     if len(sys.argv) > 1:
@@ -138,7 +135,6 @@ def main():
             separator = separator[0]
     renamer = ImageDimensionRenamer(root_dir=".", separator=separator)
     renamer.run()
-
 
 if __name__ == "__main__":
     main()

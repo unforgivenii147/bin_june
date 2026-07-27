@@ -1,12 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
 from collections import deque
 from pathlib import Path
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -28,7 +26,6 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
-
 def process_file(path: Path) -> None:
     path = Path(path)
     if path.is_symlink():
@@ -41,7 +38,6 @@ def process_file(path: Path) -> None:
             c += 1
     if c > 1:
         print(path.name)
-
 
 def main() -> None:
     cwd = Path.cwd()
@@ -57,7 +53,6 @@ def main() -> None:
         files = get_files(cwd, ext=[".py"])
     for f in files:
         process_file(f)
-
 
 if __name__ == "__main__":
     sys.exit(main())

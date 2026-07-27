@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import argparse
@@ -16,7 +15,6 @@ from typing import Final
 
 DEFAULT_BATCH_SIZE: Final[int] = 2000
 DEFAULT_UPDATE_INTERVAL: Final[float] = 5.0
-
 
 @dataclass
 class CrackResult:
@@ -35,7 +33,6 @@ class CrackResult:
     def pps(self) -> float:
         return self.tested_count / self.elapsed if self.elapsed > 0 else 0.0
 
-
 def format_duration(seconds: float) -> str:
     hours, remainder = divmod(int(seconds), 3600)
     minutes, secs = divmod(remainder, 60)
@@ -44,7 +41,6 @@ def format_duration(seconds: float) -> str:
     if minutes > 0:
         return f"{minutes}m {secs}s"
     return f"{secs}s"
-
 
 def check_password_batch(zip_path: Path, passwords: list[str]) -> tuple[str | None, int]:
     tested = 0
@@ -63,7 +59,6 @@ def check_password_batch(zip_path: Path, passwords: list[str]) -> tuple[str | No
         pass
     return (None, tested)
 
-
 def get_wordlist_batches(path: Path, batch_size: int) -> Generator[list[str], None, None]:
     with path.open("r", encoding="utf-8", errors="ignore") as f:
         while True:
@@ -72,14 +67,12 @@ def get_wordlist_batches(path: Path, batch_size: int) -> Generator[list[str], No
                 break
             yield batch
 
-
 def count_lines(path: Path) -> int:
     count = 0
     with path.open("rb") as f:
         for _line in f:
             count += 1
     return count
-
 
 def brute_force_zip(
     zip_path: Path,
@@ -151,7 +144,6 @@ def brute_force_zip(
     print("=" * 60)
     return result
 
-
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Optimized Zip Brute-Forcer for Python 3.12", formatter_class=argparse.ArgumentDefaultsHelpFormatter
@@ -178,7 +170,6 @@ def main() -> None:
     except Exception as e:
         print(f"Fatal error: {e}")
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

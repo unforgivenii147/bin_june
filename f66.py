@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import operator
@@ -65,7 +64,6 @@ COLORS = {
 
 RESET = "\x1b[0m"
 
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -85,7 +83,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -110,10 +107,8 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
-
 
 def parse_minutes() -> float:
     if len(sys.argv) == 1:
@@ -123,7 +118,6 @@ def parse_minutes() -> float:
     except ValueError:
         print("Invalid argument. Usage: script.py [minutes]")
         sys.exit(1)
-
 
 def main() -> None:
     minutes = parse_minutes()
@@ -148,7 +142,6 @@ def main() -> None:
         max_path_len = max(len(path_str), 20)
         print(f"{path_str:<{max_path_len}}", end=" ")
         cprint(f"{ctime}", "yellow")
-
 
 if __name__ == "__main__":
     main()

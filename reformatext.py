@@ -1,12 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import re
 import sys
 from pathlib import Path
-
 
 def restructure_text_file(filepath: Path) -> None:
     if not filepath.is_file():
@@ -70,7 +68,6 @@ def restructure_text_file(filepath: Path) -> None:
         print(f"File successfully restructured: {filepath}")
     except Exception as e:
         print(f"Error writing to file {filepath}: {e}")
-
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:

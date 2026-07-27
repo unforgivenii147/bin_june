@@ -1,13 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 from pathlib import Path
 
 import tree_sitter_python as tsp
 from tree_sitter import Language, Parser
-
 
 LANG = Language(tsp)
 parser = Parser()
@@ -29,7 +27,6 @@ VALID_TOP_LEVEL_NODES = {
     "with_statement",
 }
 
-
 def extract_from_file(py_file: Path) -> str:
     source = py_file.read_bytes()
     tree = parser.parse(source)
@@ -40,7 +37,6 @@ def extract_from_file(py_file: Path) -> str:
         if child.type in VALID_TOP_LEVEL_NODES
     ]
     return "\n\n".join(extracted_chunks)
-
 
 def process_directory() -> None:
     for py_file in ROOT_DIR.rglob("*.py"):
@@ -56,7 +52,6 @@ def process_directory() -> None:
         out_file.parent.mkdir(parents=True, exist_ok=True)
         out_file.write_text(extracted)
         print(f"Saved: {out_file}")
-
 
 if __name__ == "__main__":
     process_directory()

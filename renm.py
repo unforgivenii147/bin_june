@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import os
@@ -13,7 +12,6 @@ from fastwalk import walk_files
 from tqdm import tqdm
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def unique_path(path: Path | str) -> Path:
     path = _clean_fname(Path(path))
@@ -36,24 +34,19 @@ def unique_path(path: Path | str) -> Path:
             return new_path
         counter += 1
 
-
 def _clean_fname(path: Path) -> Path:
     from re import sub as re_sub
 
     clean_name = re_sub(r"(_\d+)+", "", path.name)
     return path.with_name(clean_name)
 
-
 DIRECTORY = "."
 non_english_pattern = re.compile(r"[^\x00-\x7F]")
-
 
 def is_english(text: str) -> bool:
     return not non_english_pattern.search(text)
 
-
 translation_cache = {}
-
 
 def translate_name(name):
     base, ext = os.path.splitext(name)
@@ -67,7 +60,6 @@ def translate_name(name):
         return name, translated + ext
     except Exception:
         return name, name
-
 
 def rename_files(directory: str) -> None:
     paths = [Path(p) for p in walk_files(directory)]
@@ -95,7 +87,6 @@ def rename_files(directory: str) -> None:
             print(f"Renamed: {path.name} -> {new_path.name}")
         except OSError as e:
             print(f"Error renaming {path.name}: {e}")
-
 
 if __name__ == "__main__":
     rename_files(DIRECTORY)

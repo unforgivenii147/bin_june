@@ -232,7 +232,6 @@ STDLIB_MODULES = {
     "sys.stderr",
 }
 
-
 def get_stdlib_names() -> dict[str, set[str]]:
     stdlib_names = {
         "os": {
@@ -333,14 +332,12 @@ def get_stdlib_names() -> dict[str, set[str]]:
             stdlib_names[module] = set()
     return stdlib_names
 
-
 class ImportChecker(ast.NodeVisitor):
     def __init__(self, stdlib_names: dict[str, set[str]]):
         self.stdlib_names = stdlib_names
         self.imports = {}
         self.used_names = set()
         self.import_nodes = []
-
 
 def find_missing_imports(filepath: str, stdlib_names: dict[str, set[str]]) -> list[tuple[str, str]]:
     try:
@@ -376,7 +373,6 @@ def find_missing_imports(filepath: str, stdlib_names: dict[str, set[str]]) -> li
                     break
     return missing
 
-
 def scan_directory(root_dir: str, exclude_dirs: set[str] | None = None) -> dict[str, list[tuple[str, str]]]:
     if exclude_dirs is None:
         exclude_dirs = {
@@ -407,7 +403,6 @@ def scan_directory(root_dir: str, exclude_dirs: set[str] | None = None) -> dict[
             results[str(filepath)] = missing
     return results
 
-
 def print_results(results: dict[str, list[tuple[str, str]]], show_all: bool = False):
     if not results:
         print("\n✅ No missing stdlib imports detected!")
@@ -425,7 +420,6 @@ def print_results(results: dict[str, list[tuple[str, str]]], show_all: bool = Fa
             print(f"   ⚠️  '{name}' used but not imported")
             print(f"   💡 Suggested: {suggestion}")
         print()
-
 
 def main():
     import argparse
@@ -485,7 +479,6 @@ Examples:
                 status = "❌" if str(filepath) in results else "✅"
                 print(f"  {status} {rel_path}")
     return 1 if results else 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

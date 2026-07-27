@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import argparse
@@ -22,11 +21,9 @@ except Exception:
     print("This script requires the 'astor' package. Install with: pip install astor", file=sys.stderr)
     sys.exit(2)
 
-
 class RemovalStats(NamedTuple):
     docstrings_removed: int
     comments_removed: int
-
 
 class DocstringStripper(ast.NodeTransformer):
     def __init__(self):
@@ -64,7 +61,6 @@ class DocstringStripper(ast.NodeTransformer):
         self.generic_visit(node)
         return self._strip_docstring(node)
 
-
 def extract_prefix_comments_and_shebang(source: str) -> tuple[str, str]:
     lines = source.splitlines(keepends=True)
     prefix_lines: list[str] = []
@@ -89,7 +85,6 @@ def extract_prefix_comments_and_shebang(source: str) -> tuple[str, str]:
     remainder = "".join(lines[i:]) if i < len(lines) else ""
     return (prefix, remainder)
 
-
 def collect_and_strip_comments(source: str) -> tuple[str, dict[int, list[str]], int]:
     lines = source.splitlines(keepends=True)
     preserved_comments: dict[int, list[str]] = {}
@@ -113,7 +108,6 @@ def collect_and_strip_comments(source: str) -> tuple[str, dict[int, list[str]], 
     except tokenize.TokenError:
         pass
     return (preserved_comments, comments_removed)
-
 
 def process_file(path: Path) -> tuple[str, bool, str | None, RemovalStats]:
     try:
@@ -154,7 +148,6 @@ def process_file(path: Path) -> tuple[str, bool, str | None, RemovalStats]:
     stats = RemovalStats(stripper.docstrings_removed, comments_removed)
     return (str(path), True, None, stats)
 
-
 def reattach_inline_comments(new_source: str, preserved_comments: dict[int, list[str]]) -> str:
     if not preserved_comments:
         return new_source
@@ -181,7 +174,6 @@ def reattach_inline_comments(new_source: str, preserved_comments: dict[int, list
         result += "\n"
     return result
 
-
 def should_skip_path(p: Path) -> bool:
     parts = {part.lower() for part in p.parts}
     skip_indicators = {
@@ -196,7 +188,6 @@ def should_skip_path(p: Path) -> bool:
     }
     return bool(parts & skip_indicators)
 
-
 def collect_py_files(paths: list[Path]) -> list[Path]:
     files: list[Path] = []
     for path in paths:
@@ -209,7 +200,6 @@ def collect_py_files(paths: list[Path]) -> list[Path]:
                     continue
                 files.append(p)
     return list(set(files))
-
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Strip docstrings and comments from Python files", prog="strip-py")
@@ -264,7 +254,6 @@ def main() -> int:
     if not changed:
         print("No changes made.")
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

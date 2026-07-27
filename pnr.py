@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import argparse
@@ -8,7 +7,6 @@ import sys
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def unique_path(path: Path | str) -> Path:
     path = _clean_fname(Path(path))
@@ -31,13 +29,11 @@ def unique_path(path: Path | str) -> Path:
             return new_path
         counter += 1
 
-
 def _clean_fname(path: Path) -> Path:
     from re import sub as re_sub
 
     clean_name = re_sub(r"(_\d+)+", "", path.name)
     return path.with_name(clean_name)
-
 
 def remove_string_from_names(
     string_to_remove: str,
@@ -81,7 +77,6 @@ def remove_string_from_names(
             renamed_count += remove_string_from_names(string_to_remove, dry_run, recursive, item)
 
     return renamed_count
-
 
 def replace_string_in_names(
     str1: str,
@@ -127,7 +122,6 @@ def replace_string_in_names(
 
     return renamed_count
 
-
 def should_skip(path):
     path = Path(path)
 
@@ -139,7 +133,6 @@ def should_skip(path):
             return True
 
     return False
-
 
 def rename_by_template(
     template: str, dry_run: bool = False, recursive: bool = False, current_path: Path = Path.cwd()
@@ -198,7 +191,6 @@ def rename_by_template(
             print(f"Permission denied accessing subdirectory in {current_path}")
 
     return renamed_count
-
 
 def main() -> None:
     parser = argparse.ArgumentParser(
@@ -264,7 +256,6 @@ def main() -> None:
     except Exception as e:
         print(f"An error occurred: {e}")
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

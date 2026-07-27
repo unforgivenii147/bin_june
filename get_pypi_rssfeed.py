@@ -13,9 +13,7 @@ from typing import List
 
 import requests
 
-
 PYPI_RSS_URL = "https://pypi.org/rss/packages.xml"
-
 
 def fetch_rss_feed(url: str) -> Optional[str]:
     """
@@ -34,7 +32,6 @@ def fetch_rss_feed(url: str) -> Optional[str]:
     except requests.exceptions.RequestException as e:
         print(f"Error fetching RSS feed: {e}", file=sys.stderr)
         return None
-
 
 def parse_rss_feed(xml_content: str) -> list[dict[str, str]]:
     """
@@ -81,7 +78,6 @@ def parse_rss_feed(xml_content: str) -> list[dict[str, str]]:
 
     return packages
 
-
 def display_packages(packages: list[dict[str, str]], limit: Optional[int] = None):
     """
     Display package information in a formatted way.
@@ -115,7 +111,6 @@ def display_packages(packages: list[dict[str, str]], limit: Optional[int] = None
         print(f"  GUID:        {pkg['guid']}")
         print("-" * 80)
 
-
 def save_to_file(packages: list[dict[str, str]], filename: str = "pypi_packages.txt"):
     """
     Save extracted packages to a text file.
@@ -142,7 +137,6 @@ def save_to_file(packages: list[dict[str, str]], filename: str = "pypi_packages.
         print(f"\nPackages saved to '{filename}'")
     except IOError as e:
         print(f"Error saving to file: {e}", file=sys.stderr)
-
 
 def main():
     """Main function to orchestrate the RSS feed parsing."""
@@ -182,7 +176,6 @@ def main():
         save_to_file(packages)
 
     print(f"\nSuccessfully extracted {len(packages)} packages from PyPI RSS feed.")
-
 
 if __name__ == "__main__":
     main()

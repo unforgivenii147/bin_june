@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import re
@@ -8,7 +7,6 @@ import sys
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def load_names(names_filepath):
     names = set()
@@ -37,7 +35,6 @@ def load_names(names_filepath):
         print(f"Error loading names file: {e}")
         sys.exit(1)
     return names
-
 
 def find_names_in_files(names_db_path: str = "names.txt") -> None:
     names_to_find = load_names(names_db_path)
@@ -89,7 +86,6 @@ def find_names_in_files(names_db_path: str = "names.txt") -> None:
         print(f"\n- {name}:")
         for occ in occurrences:
             print(f"  - File: {occ['file']}, Match: '{occ['match']}'")
-
 
 if __name__ == "__main__":
     names_database_path = "/sdcard/data/male_names"

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-
 import argparse
 import ast
 import shutil
@@ -17,7 +16,6 @@ from collections.abc import Iterator
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache", ".venv", "venv"})
 CHUNK_SIZE = 1024
 
-
 @dataclass
 class FileResult:
     path: Path
@@ -25,7 +23,6 @@ class FileResult:
     docstrings_removed: int
     changed: bool
     error: str | None = None
-
 
 class DocstringProcessor(ast.NodeTransformer):
     def __init__(self, preserve_module_docstring: bool = True) -> None:
@@ -66,7 +63,6 @@ class DocstringProcessor(ast.NodeTransformer):
         self.generic_visit(node)
         return node
 
-
 def extract_shebang_and_encoding(source_code: str) -> tuple[str, str, str]:
     lines = source_code.splitlines(keepends=True)
     shebang = ""
@@ -82,7 +78,6 @@ def extract_shebang_and_encoding(source_code: str) -> tuple[str, str, str]:
         remaining_lines.append(line)
     return ("".join(remaining_lines), shebang, encoding)
 
-
 def restore_shebang_and_encoding(code: str, shebang: str, encoding: str) -> str:
     result = []
     if shebang:
@@ -93,7 +88,6 @@ def restore_shebang_and_encoding(code: str, shebang: str, encoding: str) -> str:
         result.append("")
     result.append(code)
     return "\n".join(result)
-
 
 def remove_comments_preserve_format(source_code: str) -> Tuple[str, int]:
     lines = source_code.splitlines(keepends=True)
@@ -151,7 +145,6 @@ def remove_comments_preserve_format(source_code: str) -> Tuple[str, int]:
             result_lines.append("".join(new_line))
     return ("".join(result_lines), comments_removed)
 
-
 def validate_python_code(code: str) -> Tuple[bool, str | None]:
     try:
         ast.parse(code)
@@ -160,7 +153,6 @@ def validate_python_code(code: str) -> Tuple[bool, str | None]:
         return (False, f"Syntax error at line {e.lineno}, column {e.offset}: {e.msg}")
     except Exception as e:
         return (False, str(e))
-
 
 def process_docstrings_ast(source_code: str, preserve_module_docstring: bool = True) -> Tuple[str, int]:
     try:
@@ -173,7 +165,6 @@ def process_docstrings_ast(source_code: str, preserve_module_docstring: bool = T
     except SyntaxError:
         return (source_code, 0)
 
-
 def is_python_file(path: Path) -> bool:
     if path.suffix.lower() in (".py", ".pyw", ".pyi"):
         return True
@@ -185,7 +176,6 @@ def is_python_file(path: Path) -> bool:
         except (IOError, UnicodeDecodeError):
             return False
     return False
-
 
 def process_python_file(path: Path, preserve_module_docstring: bool = True) -> FileResult:
     temp_file = None
@@ -220,10 +210,8 @@ def process_python_file(path: Path, preserve_module_docstring: bool = True) -> F
             temp_file.unlink()
         return FileResult(path=path, comments_removed=0, docstrings_removed=0, changed=False, error=str(e))
 
-
 def process_dry_run_placeholder(path: Path, preserve_module_docstring: bool) -> FileResult:
     return FileResult(path, 0, 0, False, "dry run")
-
 
 def process_wheel_file(
     whl_path: Path, preserve_module_docstring: bool = True, dry_run: bool = False
@@ -270,7 +258,6 @@ def process_wheel_file(
             shutil.rmtree(temp_dir, ignore_errors=True)
     return results
 
-
 def find_python_files(path: Path) -> Iterator[Path]:
     if path.is_file():
         if is_python_file(path) or path.suffix.lower() == ".whl":
@@ -282,7 +269,6 @@ def find_python_files(path: Path) -> Iterator[Path]:
             p = root / name
             if is_python_file(p) or p.suffix.lower() == ".whl":
                 yield p
-
 
 def format_result(result: FileResult, cwd: Path) -> str:
     try:
@@ -299,7 +285,6 @@ def format_result(result: FileResult, cwd: Path) -> str:
     if result.docstrings_removed > 0:
         parts.append(f"{result.docstrings_removed} docstring{('s' if result.docstrings_removed != 1 else '')}")
     return f"{display_path} ({', '.join(parts)} removed)"
-
 
 def main() -> None:
     parser = argparse.ArgumentParser(
@@ -385,7 +370,6 @@ def main() -> None:
         print(f"  Total docstrings removed: {total_docstrings}")
         if errors > 0:
             print(f"  Errors: {errors}")
-
 
 if __name__ == "__main__":
     main()

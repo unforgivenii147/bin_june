@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import argparse
@@ -15,13 +14,11 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 def prefix_path() -> Path:
     p = os.environ.get("PREFIX")
     if p:
         return Path(p)
     return Path(sysconfig.get_paths()["purelib"])
-
 
 def site_packages_paths(prefix: Path):
     pyver = f"python{sys.version_info.major}.{sys.version_info.minor}"
@@ -41,7 +38,6 @@ def site_packages_paths(prefix: Path):
             out.append(c)
     return out
 
-
 def find_distributions(site_dirs):
     dists = {}
     for sd in site_dirs:
@@ -52,7 +48,6 @@ def find_distributions(site_dirs):
                 key = p.name.rsplit(".", 1)[0].lower()
                 dists[key] = p
     return dists
-
 
 def parse_metadata_from_distinfo(distinfo_dir):
     md = {}
@@ -81,7 +76,6 @@ def parse_metadata_from_distinfo(distinfo_dir):
         md["console_scripts"] = console
     return md
 
-
 def read_record_list(distinfo_dir):
     rec = distinfo_dir / "RECORD"
     if rec.exists():
@@ -91,7 +85,6 @@ def read_record_list(distinfo_dir):
             if line.strip()
         ]
     return None
-
 
 def find_script_paths(prefix, script_names):
     bin_dir = prefix / "bin"
@@ -106,7 +99,6 @@ def find_script_paths(prefix, script_names):
                 break
     return out
 
-
 def compute_hash_and_size(path) -> tuple[str, str]:
     h = hashlib.sha256()
     with Path(path).open("rb") as f:
@@ -114,7 +106,6 @@ def compute_hash_and_size(path) -> tuple[str, str]:
             h.update(chunk)
     digest = base64.urlsafe_b64encode(h.digest()).rstrip(b"=").decode("ascii")
     return f"sha256={digest}", str(path.stat().st_size)
-
 
 def detect_wheel_tags():
     impl = sys.implementation.name
@@ -126,7 +117,6 @@ def detect_wheel_tags():
         py_tag, abi_tag = cache.split("-", 1) if cache and "-" in cache else (f"py{mj} ", "none")
     plat = sysconfig.get_platform().replace("-", "_").replace(".", "_")
     return py_tag, abi_tag, plat
-
 
 def collect_and_build(distinfo_path, prefix: Path, wheel_out_path: Path) -> None:
     base = distinfo_path.parent
@@ -184,7 +174,6 @@ Tag: {wheel_tag}
         zf.writestr(f"{distinfo_path.name}/RECORD", "\n".join(record_lines) + "\n")
     print(f"[+] Successfully built: {wheel_out_path.name}")
 
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="Repack packages into .whl files directly.")
     parser.add_argument("packages", nargs="*", help="Distribution names to repack.")
@@ -213,7 +202,6 @@ def main() -> None:
             collect_and_build(distinfo, prefix, wheel_dir / out_name)
         except Exception as e:
             print(f"[!] Critical error repacking {distinfo.name}: {e}")
-
 
 if __name__ == "__main__":
     main()

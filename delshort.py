@@ -1,17 +1,14 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
 from collections import deque
 from pathlib import Path
 
-
 def is_binary(path):
     if path.suffix == ".py":
         return False
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -33,10 +30,8 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
-
 SIZE_THRESHOLD = 100
 LINE_THRESHOLD = 3
-
 
 def process_file(path: Path) -> None:
     path = Path(path)
@@ -49,7 +44,6 @@ def process_file(path: Path) -> None:
         path.unlink()
         print(f"{path.name} removed")
 
-
 def main() -> None:
     cwd = Path.cwd()
     files = get_files(cwd)
@@ -58,7 +52,6 @@ def main() -> None:
             print(f"{path.name} is binary")
             continue
         process_file(path)
-
 
 if __name__ == "__main__":
     sys.exit(main())

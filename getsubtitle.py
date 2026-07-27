@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 """
 Advanced script to download English subtitles with multiple providers.
 """
@@ -17,7 +16,6 @@ from subliminal.video import scan_video
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
-
 
 def download_subtitles_advanced(mkv_path, output_dir=None):
     mkv_path = Path(mkv_path)
@@ -50,7 +48,6 @@ def download_subtitles_advanced(mkv_path, output_dir=None):
     except Exception as e:
         logger.error(f"Error: {e}")
         return False
-
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

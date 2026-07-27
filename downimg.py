@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-
 from __future__ import annotations
 
 import sys
@@ -11,7 +10,6 @@ import cv2
 from tqdm import tqdm
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 class ImageDownscaler:
     def __init__(self, root_dir: str = ".", scale_factor: float = 0.5):
@@ -114,7 +112,6 @@ class ImageDownscaler:
         print("PROCESS COMPLETE - Images updated in-place")
         print("=" * 70)
 
-
 def main():
     scale_factor = 0.5
     if len(sys.argv) > 1:
@@ -127,7 +124,6 @@ def main():
             sys.exit(1)
     downscaler = ImageDownscaler(root_dir=".", scale_factor=scale_factor)
     downscaler.run()
-
 
 if __name__ == "__main__":
     main()

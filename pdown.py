@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import argparse
@@ -10,7 +9,6 @@ from pathlib import Path
 import requests
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def get_package_url(package_name, version=None):
     url = f"https://pypi.org/pypi/{package_name}/json"
@@ -43,7 +41,6 @@ def get_package_url(package_name, version=None):
         print(f"Error fetching package information: {e}")
         sys.exit(1)
 
-
 def download_package(url, filename, output_dir="."):
     try:
         output_path = Path(output_dir) / filename
@@ -67,7 +64,6 @@ def download_package(url, filename, output_dir="."):
         print(f"Error downloading package: {e}")
         sys.exit(1)
 
-
 def main():
     parser = argparse.ArgumentParser(
         description="Download a Python package from PyPI.org (skips Python version compatibility check)"
@@ -85,7 +81,6 @@ def main():
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

@@ -15,7 +15,6 @@ from git import GitCommandError, Repo
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 def delete_old_commits(days: int) -> None:
     try:
         repo = Repo(".")
@@ -85,7 +84,6 @@ NOTE: If you've already pushed the old commits to a remote, you'll need to force
         print(f"Error: {e}")
         sys.exit(1)
 
-
 def main() -> None:
     if len(sys.argv) != 2:
         print("Usage: python script.py <days>")
@@ -104,7 +102,6 @@ def main() -> None:
     print(f"Will delete commits older than {days} days")
     print(f"Current time (UTC): {datetime.now(UTC).strftime('%Y-%m-%d %H:%M:%S')}")
     delete_old_commits(days)
-
 
 if __name__ == "__main__":
     main()

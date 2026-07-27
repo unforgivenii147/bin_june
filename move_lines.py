@@ -1,10 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
-
 
 def move_lines(src_file: str, start_line: int, end_line: int, dest_file: str) -> None:
     try:
@@ -23,7 +21,6 @@ def move_lines(src_file: str, start_line: int, end_line: int, dest_file: str) ->
         print(f"Error: The file {src_file} was not found.")
     except Exception as e:
         print(f"An error occurred: {e}")
-
 
 if __name__ == "__main__":
     if len(sys.argv) != 5:

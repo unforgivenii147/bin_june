@@ -1,11 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import re
 import sys
-
 
 def clean_terminal_transcript(filepath):
     with open(filepath, encoding="utf-8", errors="replace") as f:
@@ -34,7 +32,6 @@ def clean_terminal_transcript(filepath):
         f.write(content)
 
     print(f"Cleaned: {filepath}")
-
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:

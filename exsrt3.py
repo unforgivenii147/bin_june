@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
@@ -9,7 +8,6 @@ from pathlib import Path
 import ffmpeg
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def get_subtitle_streams_info(input_path: str) -> list[dict]:
     try:
@@ -31,7 +29,6 @@ def get_subtitle_streams_info(input_path: str) -> list[dict]:
     except ffmpeg.Error as e:
         print(f"Error probing file: {e.stderr.decode('utf8')}")
         return []
-
 
 def main() -> None:
     if len(sys.argv) != 2:
@@ -71,7 +68,6 @@ def main() -> None:
             extracted_files.append(str(out_path))
     except:
         print(f"Extracting stream index {index} (Lang: {lang}, Forced: {forced}, Codec: {codec_name}) -> {out_path}")
-
 
 """
         try:

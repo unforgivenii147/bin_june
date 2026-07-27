@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import difflib
@@ -8,7 +7,6 @@ import re
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def show_diff(text1: str, text2: str) -> None:
     diff = difflib.unified_diff(text1.splitlines(keepends=True), text2.splitlines(keepends=True), lineterm="")
@@ -18,7 +16,6 @@ def show_diff(text1: str, text2: str) -> None:
         for line in changed_lines:
             print(line, end="")
         print("-----------------")
-
 
 def fix_escape_sequences(directory: Path) -> None:
     for path in directory.rglob("*.py"):
@@ -51,7 +48,6 @@ def fix_escape_sequences(directory: Path) -> None:
                     print(f"Fixed {path.relative_to(directory)}")
             except Exception as e:
                 print(f"Error processing {path}: {e}")
-
 
 if __name__ == "__main__":
     cwd = Path.cwd()

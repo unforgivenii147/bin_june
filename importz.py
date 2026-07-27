@@ -1,12 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import ast
 import sys
 from pathlib import Path
-
 
 def is_python_file(path: Path) -> bool:
     if path.suffix == ".py":
@@ -19,7 +17,6 @@ def is_python_file(path: Path) -> bool:
         except Exception:
             return False
     return False
-
 
 def get_imports_from_file(file_path: Path):
     imports = set()
@@ -34,7 +31,6 @@ def get_imports_from_file(file_path: Path):
     except (SyntaxError, UnicodeDecodeError):
         pass
     return imports
-
 
 def main() -> None:
     cwd = Path()
@@ -54,7 +50,6 @@ def main() -> None:
         print(f"✅ Saved {len(third_party)} 3rd-party imports to {output_file}")
     else:
         print("ℹ️ No 3rd-party imports found.")
-
 
 if __name__ == "__main__":
     main()

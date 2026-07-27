@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import shutil
@@ -8,7 +7,6 @@ import sys
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def unique_path(path: Path | str) -> Path:
     path = Path(path)
@@ -30,7 +28,6 @@ def unique_path(path: Path | str) -> Path:
         if not new_path.exists():
             return new_path
         counter += 1
-
 
 if __name__ == "__main__":
     src = Path(sys.argv[1]).resolve()

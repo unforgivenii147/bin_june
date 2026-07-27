@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import ast
@@ -10,7 +9,6 @@ from pathlib import Path
 
 import libcst as cst
 
-
 OUTPUT_DIR = Path("output")
 FUNCTIONS_DIR = OUTPUT_DIR / "functions"
 CLASSES_DIR = OUTPUT_DIR / "classes"
@@ -18,7 +16,6 @@ CONSTANTS_DIR = OUTPUT_DIR / "constants"
 
 for directory in [FUNCTIONS_DIR, CLASSES_DIR, CONSTANTS_DIR]:
     directory.mkdir(parents=True, exist_ok=True)
-
 
 def validate_python_code(code: str, filename: str) -> bool:
     """Validate Python code using ast.parse."""
@@ -28,7 +25,6 @@ def validate_python_code(code: str, filename: str) -> bool:
     except SyntaxError as e:
         print(f"Syntax error in extracted code of {filename}: {e}")
         return False
-
 
 class TopLevelExtractor(cst.CSTVisitor):
     def __init__(self, original_path: Path, module: cst.Module):
@@ -127,7 +123,6 @@ class TopLevelExtractor(cst.CSTVisitor):
             current = current.parent
         return True
 
-
 def process_file(filepath: Path) -> dict:
     try:
         code = filepath.read_text(encoding="utf-8")
@@ -153,14 +148,12 @@ def process_file(filepath: Path) -> dict:
     except Exception as e:
         return {"filepath": str(filepath), "status": "error", "error": str(e)}
 
-
 def collect_python_files(root_dir: Path = Path(".")) -> list[Path]:
     return [
         p
         for p in root_dir.rglob("*.py")
         if not any(part.startswith(".") or part == "__pycache__" for part in p.parts) and p.name != Path(__file__).name
     ]
-
 
 def write_imports_file(all_imports: set[str]) -> None:
     imports_file = OUTPUT_DIR / "imports.py"
@@ -177,7 +170,6 @@ def write_imports_file(all_imports: set[str]) -> None:
         imports_file.write_text(content, encoding="utf-8")
     except Exception as e:
         print(f"Error writing imports file: {e}")
-
 
 def main() -> None:
     python_files = collect_python_files()
@@ -228,7 +220,6 @@ def main() -> None:
     print(f"Extraction Complete!\nFiles: {processed_files}/{len(python_files)}")
     print(f"Functions: {total_functions} | Classes: {total_classes} | Constants: {total_constants}")
     print("=" * 70 + "\n")
-
 
 if __name__ == "__main__":
     main()

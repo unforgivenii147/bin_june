@@ -1,10 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 from datetime import datetime
-
 
 class JalaliDate:
     JALALI_MONTHS_EN = [
@@ -204,7 +202,6 @@ class JalaliDate:
     def __repr__(self) -> str:
         return f"JalaliDate({self.year}, {self.month}, {self.day})"
 
-
 class JalaliCalendar:
     def __init__(self, year: int | None = None, month: int | None = None) -> None:
         today = JalaliDate.today()
@@ -256,7 +253,6 @@ class JalaliCalendar:
             output.append(" ".join(week_str))
         return "\n".join(output)
 
-
 class JalaliDateFormatter:
     @staticmethod
     def format(date: JalaliDate, time: datetime, fmt: str) -> str:
@@ -291,7 +287,6 @@ class JalaliDateFormatter:
         output = output.replace("%M", f"{now.minute:02d}")
         return output.replace("%S", f"{now.second:02d}")
 
-
 def jcal(month: int | None = None, year: int | None = None, language: str = "en") -> str:
     if year is None or month is None:
         today = JalaliDate.today()
@@ -302,7 +297,6 @@ def jcal(month: int | None = None, year: int | None = None, language: str = "en"
     calendar = JalaliCalendar(year, month)
     return calendar.print_month(language=language)
 
-
 def jdate(fmt: str | None = None, language: str = "en") -> str:
     jdate, now = JalaliDate.today_with_time()
     if fmt is None:
@@ -310,7 +304,6 @@ def jdate(fmt: str | None = None, language: str = "en") -> str:
     if language == "fa":
         return JalaliDateFormatter.format_fa(jdate, now, fmt)
     return JalaliDateFormatter.format(jdate, now, fmt)
-
 
 if __name__ == "__main__":
     import sys

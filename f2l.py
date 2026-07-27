@@ -1,12 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import subprocess
 import sys
 from pathlib import Path
-
 
 def main() -> None:
     fn = sys.argv[1]
@@ -25,7 +23,6 @@ def main() -> None:
     except FileNotFoundError:
         print(f"✓ File updated: {filepath}")
         print("⚠ Install termux-api for clipboard support")
-
 
 if __name__ == "__main__":
     sys.exit(main())

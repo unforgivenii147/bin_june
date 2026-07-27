@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import base64
@@ -10,14 +9,12 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 def content_hash(data: bytes) -> str:
     from hashlib import sha256
 
     if not isinstance(data, bytes):
         data = data.encode("utf8")
     return sha256(data).hexdigest()
-
 
 ATTRIBUTES = {
     "bold": 1,
@@ -72,7 +69,6 @@ COLORS = {
 
 RESET = "\x1b[0m"
 
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -92,7 +88,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -117,17 +112,14 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
-
 
 cleanup = True
 cwd = Path.cwd()
 out_dir = Path("output")
 if not out_dir.exists():
     out_dir.mkdir(exist_ok=True)
-
 
 def try_again(txt, fout) -> None:
     try:
@@ -136,7 +128,6 @@ def try_again(txt, fout) -> None:
         fout.write_text(dbz)
     except:
         return
-
 
 def clean_line(txt):
     cleaned: str = ""
@@ -152,7 +143,6 @@ def clean_line(txt):
         end_indx = cleaned.index(")")
         cleaned = cleaned[:end_indx]
     return cleaned
-
 
 def decode_base64_lines(path: Path) -> None:
     success_count = 0
@@ -181,7 +171,6 @@ def decode_base64_lines(path: Path) -> None:
     if cleanup:
         new_content = "\n".join(remained)
         path.write_text(new_content)
-
 
 if __name__ == "__main__":
     INPUT_FILE = Path(sys.argv[1])

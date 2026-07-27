@@ -6,7 +6,6 @@ import tokenize
 import warnings
 from pathlib import Path
 
-
 def process_file(file_path: Path, auto_fix: bool = False) -> dict:
     """
     Analyzes a single Python file for invalid escape sequences.
@@ -83,7 +82,6 @@ def process_file(file_path: Path, auto_fix: bool = False) -> dict:
 
     return result
 
-
 def main():
     parser = argparse.ArgumentParser(
         description="Find and optionally fix invalid escape sequences in Python files using parallel processing."
@@ -144,7 +142,6 @@ def main():
     print(f"   Files with issues: {total_issues}")
     if args.auto_fix:
         print(f"   Files successfully fixed: {total_fixed}")
-
 
 if __name__ == "__main__":
     main()

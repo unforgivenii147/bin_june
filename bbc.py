@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import shutil
@@ -14,14 +13,12 @@ tag_build =
 tag_date = 0
 """
 
-
 def is_setupcfg(fn: Path) -> bool:
     content = fn.read_text(encoding="utf8")
     if content == SETUPCFG:
         return True
     lines = content.splitlines(keepends=False)
     return bool(lines[0] == L1 and lines[1] == L2 and lines[2] == L3)
-
 
 if __name__ == "__main__":
     cwd = Path.cwd()

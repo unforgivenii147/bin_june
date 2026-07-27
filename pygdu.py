@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
@@ -12,7 +11,6 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 @dataclass
 class FSItem:
     path: Path
@@ -22,7 +20,6 @@ class FSItem:
     children: list[FSItem] = field(default_factory=list)
     parent: FSItem = None
     flag: str = " "
-
 
 class DiskAnalyzer:
     def __init__(self, root_path: Path):
@@ -67,7 +64,6 @@ class DiskAnalyzer:
         dir_item.children.sort(key=lambda x: x.size, reverse=True)
         return dir_item
 
-
 def format_size(num_bytes: int) -> str:
     for unit in ["B", "KiB", "MiB", "GiB", "TiB"]:
         if num_bytes < 1024.0:
@@ -75,14 +71,12 @@ def format_size(num_bytes: int) -> str:
         num_bytes /= 1024.0
     return f"{num_bytes:5.1f} PiB"
 
-
 def get_progress_bar(item_size: int, max_size: int) -> str:
     if max_size == 0:
         return "[          ]"
     ratio = item_size / max_size
     filled = int(ratio * 10)
     return f"[{'#' * filled}{' ' * (10 - filled)}]"
-
 
 def get_key() -> str:
     fd = sys.stdin.fileno()
@@ -96,11 +90,9 @@ def get_key() -> str:
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
     return ch
 
-
 def clear_screen():
     sys.stdout.write("\x1b[2J\x1b[H")
     sys.stdout.flush()
-
 
 def draw_interface(current_node: FSItem, selected_idx: int):
     RESET = "\x1b[0m"
@@ -126,7 +118,6 @@ def draw_interface(current_node: FSItem, selected_idx: int):
     clear_screen()
     sys.stdout.write("\n".join(lines) + "\n")
     sys.stdout.flush()
-
 
 def main():
     target_dir = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(".")
@@ -163,7 +154,6 @@ def main():
                     selected_idx = current_node.children.index(old_node)
                 except ValueError:
                     selected_idx = 0
-
 
 if __name__ == "__main__":
     main()

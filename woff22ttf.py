@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import os
@@ -10,7 +9,6 @@ from collections.abc import Callable
 from pathlib import Path
 
 from fontTools.ttLib import woff2
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -31,7 +29,6 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
             elif item.is_file() and (ext is None or item.suffix in ext):
                 files.append(item)
     return files
-
 
 ATTRIBUTES = {
     "bold": 1,
@@ -83,7 +80,6 @@ COLORS = {
 }
 RESET = "\x1b[0m"
 
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -103,7 +99,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -128,10 +123,8 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
-
 
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
@@ -139,9 +132,7 @@ def mpf3(process_function: Callable, files: list[Path], **kwargs):
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
 
-
 cwd = Path.cwd()
-
 
 def process_file(path: Path) -> bool | None:
     path = Path(path)
@@ -156,11 +147,9 @@ def process_file(path: Path) -> bool | None:
     except:
         cprint(f"error convering {path.name}")
 
-
 def main() -> None:
     files = get_files(cwd, ext=[".woff2"])
     _ = mpf3(process_file, files)
-
 
 if __name__ == "__main__":
     main()

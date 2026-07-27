@@ -1,17 +1,14 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import re
 
 from weasyprint import HTML
 
-
 INPUT_FILE = "dictionary.txt"
 OUTPUT_FILE = "dictionary.pdf"
 CUSTOM_FONT = "custom.ttf"
-
 
 def convert_entry_to_html(raw_line: str) -> str | None:
     try:
@@ -33,7 +30,6 @@ def convert_entry_to_html(raw_line: str) -> str | None:
     </body>
     </html>
     """
-
 
 def main() -> None:
     with open(INPUT_FILE, encoding="utf-8") as f:
@@ -76,7 +72,6 @@ def main() -> None:
     full_html += "</body></html>"
     HTML(string=full_html).write_pdf(OUTPUT_FILE)
     print("PDF created:", OUTPUT_FILE)
-
 
 if __name__ == "__main__":
     main()

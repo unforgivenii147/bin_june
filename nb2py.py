@@ -1,13 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
 from pathlib import Path
 
 import nbformat
-
 
 INPUT = Path(sys.argv[1])
 OUTPUT = Path(INPUT).with_suffix(".py")

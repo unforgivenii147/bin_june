@@ -1,10 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 from pathlib import Path
-
 
 def process_file(path: str) -> None:
     path = Path(path)
@@ -17,10 +15,8 @@ def process_file(path: str) -> None:
             with Path("requirements.txt").open("a", encoding="utf-8") as f:
                 f.write(pkg_name + "\n")
 
-
 def main() -> None:
     process_file("uv.lock")
-
 
 if __name__ == "__main__":
     main()

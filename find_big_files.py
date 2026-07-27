@@ -1,13 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
@@ -19,7 +17,6 @@ def fsz(sz: float) -> str:
     if i == 0:
         return f"{int(value)} {units[i]}"
     return f"{value:.1f} {units[i]}"
-
 
 def get_filez(root_dir: str | Path):
     from os import walk as os_walk
@@ -42,15 +39,12 @@ def get_filez(root_dir: str | Path):
     else:
         yield root_dir
 
-
 def should_skip(path: str | Path) -> bool:
     path = Path(path)
     return bool(path.is_symlink() or not SKIP_DIRS.isdisjoint(path.parts))
 
-
 THRESHOLD = 1024 * 1024
 cwd = Path.cwd()
-
 
 def process_file(path: Path, threshold: int = THRESHOLD) -> None:
     sz = path.stat().st_size
@@ -58,13 +52,11 @@ def process_file(path: Path, threshold: int = THRESHOLD) -> None:
     if sz > threshold:
         print(f"{path.relative_to(cwd)} : {fsz(sz)}")
 
-
 def main() -> None:
     threshold = int(sys.argv[1]) * 1024 * 1024 if len(sys.argv) > 1 else THRESHOLD
     for path in get_filez(cwd):
         if not path.is_symlink():
             process_file(path, threshold)
-
 
 if __name__ == "__main__":
     sys.exit(main())

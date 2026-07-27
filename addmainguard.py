@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import argparse
@@ -12,11 +11,9 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 def has_main_guard(content):
     pattern = "if\\s+__name__\\s*==\\s*[\"\\']__main__[\"\\']\\s*:"
     return bool(re.search(pattern, content))
-
 
 def add_main_function(content):
     if "def main()" in content:
@@ -33,14 +30,12 @@ def add_main_function(content):
     lines.insert(insert_pos, main_func)
     return "\n".join(lines)
 
-
 def add_main_guard(content):
     if has_main_guard(content):
         return content
     content = content.rstrip()
     guard_code = '\nif __name__ == "__main__":\n    main()\n'
     return content + guard_code
-
 
 def process_file(filepath, add=False, dry_run=False):
     try:
@@ -58,7 +53,6 @@ def process_file(filepath, add=False, dry_run=False):
         return ("added", "Added guard successfully", path)
     except Exception as e:
         return ("error", str(e), Path(filepath))
-
 
 def find_python_files(directory, exclude_patterns=None):
     if exclude_patterns is None:
@@ -88,7 +82,6 @@ def find_python_files(directory, exclude_patterns=None):
         if not should_exclude:
             filtered.append(f)
     return filtered
-
 
 def main():
     parser = argparse.ArgumentParser(
@@ -192,7 +185,6 @@ def main():
             print("\n✅ All Python files have the main guard!")
     if args.add and (not args.dry_run) and results["added"]:
         print(f"\n✅ Successfully added main guard to {len(results['added'])} files")
-
 
 if __name__ == "__main__":
     main()

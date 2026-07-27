@@ -8,7 +8,6 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import argparse
 from fastwalk import walk_files
 
-
 def walk_paths(paths: list[str | Path]) -> Generator[Path, None, None]:
     for path_str in paths:
         path = Path(path_str)
@@ -16,7 +15,6 @@ def walk_paths(paths: list[str | Path]) -> Generator[Path, None, None]:
             yield path
         elif path.is_dir():
             yield from walk_files(path)
-
 
 def search_file(file_path: Path, pattern: str) -> Generator[tuple[Path, int, str], None, None]:
     try:
@@ -28,7 +26,6 @@ def search_file(file_path: Path, pattern: str) -> Generator[tuple[Path, int, str
                     yield file_path, line_num, colorized
     except (OSError, IOError):
         pass
-
 
 def colorize_line(line: str, matches) -> str:
     if not matches:
@@ -46,7 +43,6 @@ def colorize_line(line: str, matches) -> str:
     parts.append(line[last_end:])
     return "".join(parts)
 
-
 def ripgrep(paths: list[str | Path], pattern: str, max_workers: int = 4):
     def process_file(file_path: Path):
         return list(search_file(file_path, pattern))
@@ -57,7 +53,6 @@ def ripgrep(paths: list[str | Path], pattern: str, max_workers: int = 4):
         for future in as_completed(futures):
             for file_path, line_num, colorized_line in future.result():
                 print(f"{file_path}({line_num}) {colorized_line}")
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Ripgrep-like search tool")

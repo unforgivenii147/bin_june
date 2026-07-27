@@ -1,11 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
 from pathlib import Path
-
 
 def samefile(path1: str, path2: str) -> bool:
     try:

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
@@ -9,7 +8,6 @@ from pathlib import Path
 from pip._internal.cli.main import main as pip_main
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def levenshtein_distance(a: str, b: str) -> int:
     if a == b:
@@ -31,13 +29,11 @@ def levenshtein_distance(a: str, b: str) -> int:
         previous = current
     return previous[-1]
 
-
 def levenshtein_similarity(a: str, b: str) -> float:
     if not a and not b:
         return 1.0
     dist = levenshtein_distance(a, b)
     return 1.0 - dist / max(len(a), len(b), 1)
-
 
 def partial_ratio(a: str, b: str) -> float:
     if not a and not b:
@@ -57,21 +53,17 @@ def partial_ratio(a: str, b: str) -> float:
                 break
     return best * 100
 
-
 WHL_DIR = Path.cwd()
 WILDCARD = "-w" in sys.argv
-
 
 def install(packages: list[str]) -> int:
     args = ["install", "--user", "--no-compile", "--no-deps", *packages]
     return pip_main(args)
 
-
 def pkg_name(txt: str):
     indx = txt.index("-")
     slash = txt.rfind("/")
     return txt[slash + 1 : indx]
-
 
 def install_by_wildcard(pkg: str) -> None:
     whl = {pkg_name(str(p)): str(p) for p in WHL_DIR.glob("*.whl")}
@@ -92,7 +84,6 @@ def install_by_wildcard(pkg: str) -> None:
     except:
         return
 
-
 def install_whl(pkg: str) -> None:
     whl = {pkg_name(str(p)): str(p) for p in WHL_DIR.glob("*.whl")}
     wheel_files = []
@@ -111,7 +102,6 @@ def install_whl(pkg: str) -> None:
     except:
         return
 
-
 def installwhl(pkgs):
     install(pkgs)
     for pkg in pkgs:
@@ -119,7 +109,6 @@ def installwhl(pkgs):
         if p.exists():
             p.unlink()
             print(f"{p.name} removed")
-
 
 if __name__ == "__main__":
     args = sys.argv[1:]

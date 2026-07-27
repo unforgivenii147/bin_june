@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import ast
@@ -15,7 +14,6 @@ from xxhash import xxh64
 CHUNK_SIZE = 1024 * 1024
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
@@ -40,7 +38,6 @@ def is_python_file(path: str | Path) -> bool:
             return False
     return False
 
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -55,7 +52,6 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
 
 def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
@@ -93,13 +89,11 @@ def get_pyfiles(path: str | Path) -> list[Path]:
 
     return sorted(pyfiles)
 
-
 OUTPUT_DIR = Path("output")
 OUTPUT_FILE = OUTPUT_DIR / "const.py"
 LOG_FILE = OUTPUT_DIR / "error.log"
 OUTPUT_DIR.mkdir(exist_ok=True)
 logging.basicConfig(filename=LOG_FILE, level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s")
-
 
 def get_file_hash(filepath: Path) -> str:
     hasher = xxh64()
@@ -107,7 +101,6 @@ def get_file_hash(filepath: Path) -> str:
         while chunk := f.read(CHUNK_SIZE):
             hasher.update(chunk)
     return hasher.hexdigest()
-
 
 def extract_constants(filepath: Path) -> list[tuple[str, str, str]]:
     constants = []
@@ -139,13 +132,11 @@ def extract_constants(filepath: Path) -> list[tuple[str, str, str]]:
         logging.error(f"Error processing {filepath}: {e}")
     return constants
 
-
 def process_file(filepath: Path) -> tuple[str, list[tuple[str, str, str]] | None]:
     file_hash = get_file_hash(filepath)
     Path(path)
     constants = extract_constants(filepath)
     return file_hash, constants
-
 
 def main() -> None:
     cwd = Path.cwd()
@@ -190,7 +181,6 @@ def main() -> None:
     print(f"Successfully extracted {len(written_consts)} unique constants to {OUTPUT_FILE}")
     if LOG_FILE.exists():
         print(f"Errors logged to {LOG_FILE}")
-
 
 if __name__ == "__main__":
     main()

@@ -18,7 +18,6 @@ from typing import dict, list, set, tuple
 MIN_LINES = 3
 MIN_CHARS = 100
 
-
 def find_multiline_strings(
     file_path: Path, min_lines: int = 2, min_chars: int = 10
 ) -> dict[str, list[tuple[int, int]]]:
@@ -47,10 +46,8 @@ def find_multiline_strings(
             i += 1
     return strings
 
-
 def normalize_string(text: str) -> str:
     return "\n".join(line.rstrip() for line in text.splitlines())
-
 
 def validate_python_syntax(code: str) -> tuple[bool, str]:
     try:
@@ -58,7 +55,6 @@ def validate_python_syntax(code: str) -> tuple[bool, str]:
         return True, ""
     except SyntaxError as e:
         return (False, f"Syntax error at line {e.lineno}, column {e.offset}: {e.msg}")
-
 
 def find_files(directory: Path, extensions: set[str] | None = None) -> list[Path]:
     if extensions is None:
@@ -98,12 +94,10 @@ def find_files(directory: Path, extensions: set[str] | None = None) -> list[Path
         print(f"Permission denied accessing {directory}", file=sys.stderr)
     return files
 
-
 def process_file(args: tuple[Path, int, int]) -> tuple[Path, dict[str, list[tuple[int, int]]]]:
     file_path, min_lines, min_chars = args
     strings = find_multiline_strings(file_path, min_lines, min_chars)
     return file_path, strings
-
 
 def find_repeated_strings(
     directory: Path,
@@ -142,7 +136,6 @@ def find_repeated_strings(
             print("No strings found that appear in at least 50% of files")
 
     return repeated
-
 
 def remove_strings_from_files(
     repeated_strings: dict[str, list[tuple[Path, list[tuple[int, int]]]]],
@@ -193,7 +186,6 @@ def remove_strings_from_files(
             print(f"  - {file_path}: {error}")
     return modified_files, skipped_files
 
-
 def save_strings_to_file(repeated_strings: dict[str, list[tuple[Path, list[tuple[int, int]]]]], output_file: Path):
     try:
         with open(output_file, "w", encoding="utf-8") as f:
@@ -207,7 +199,6 @@ def save_strings_to_file(repeated_strings: dict[str, list[tuple[Path, list[tuple
         print(f"Report saved to {output_file}")
     except Exception as e:
         print(f"Error saving report: {e}", file=sys.stderr)
-
 
 def main():
     parser = argparse.ArgumentParser(description="Find repeated multiline strings in text files recursively")
@@ -310,7 +301,6 @@ def main():
         if skipped_files:
             print(f"Skipped {len(skipped_files)} file(s) due to syntax errors.")
             print("These files were NOT modified. Review the strings manually or use --no-validate.")
-
 
 if __name__ == "__main__":
     main()

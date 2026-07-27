@@ -1,13 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import os
 import sys
 from collections import deque
 from pathlib import Path
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -28,7 +26,6 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
             elif item.is_file() and (ext is None or item.suffix in ext):
                 files.append(item)
     return files
-
 
 ATTRIBUTES = {
     "bold": 1,
@@ -83,7 +80,6 @@ COLORS = {
 
 RESET = "\x1b[0m"
 
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -103,7 +99,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -128,17 +123,13 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
 
-
 TIMEOUT = 0
-
 
 def get_files(folder: Path) -> list[Path]:
     return [p for p in folder.rglob("*") if p.is_file() and not p.is_symlink() and ".git" not in p.parts]
-
 
 def wait_for_keypress(timeout: int) -> bool:
     if timeout <= 0:
@@ -151,7 +142,6 @@ def wait_for_keypress(timeout: int) -> bool:
         sys.stdin.readline()
         return True
     return False
-
 
 def main() -> int:
     cwd = Path.cwd()
@@ -180,7 +170,6 @@ def main() -> int:
             cprint(f"Failed to remove {empty_file}: {e}", "red")
     cprint(f"Deleted: {deleted}, Failed: {failed}", "green")
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

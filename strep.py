@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import os
@@ -8,7 +7,6 @@ import sys
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -30,7 +28,6 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
-
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
     units = ("B", "KB", "MB", "GB", "TB")
@@ -42,7 +39,6 @@ def fsz(sz: float) -> str:
         return f"{int(value)} {units[i]}"
     return f"{value:.1f} {units[i]}"
 
-
 def rrs(path, before, after) -> None:
     delta = before - after
     msg = (
@@ -51,7 +47,6 @@ def rrs(path, before, after) -> None:
         else f"\x1b[5;92m{('-' if delta > 0 else '+')} \x1b[5;94m{fsz(abs(delta))}\x1b[0m | \x1b[5;96m{after / before * 100:.1f}\x1b[5;95m%\x1b[0m"
     )
     print(f"\n{path.name} | {msg}")
-
 
 def runcmd(
     cmd: list[str],
@@ -103,7 +98,6 @@ def runcmd(
             print(msg, file=sys_stderr)
         return (1, "", msg)
 
-
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -114,13 +108,11 @@ def gsz(path: str | Path) -> int:
             total += file.stat().st_size
     return total
 
-
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=8)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
-
 
 ATTRIBUTES = {
     "bold": 1,
@@ -172,7 +164,6 @@ COLORS = {
 }
 RESET = "\x1b[0m"
 
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -192,7 +183,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -217,10 +207,8 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
-
 
 def process_file(path) -> None:
     path = Path(path)
@@ -232,7 +220,6 @@ def process_file(path) -> None:
     dz = before - after
     if dz:
         cprint(f"{path.name} | ratio: {after / before:.1f}%")
-
 
 if __name__ == "__main__":
     cwd = Path.cwd()

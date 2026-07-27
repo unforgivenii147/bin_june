@@ -1,12 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import argparse
 import subprocess
 from pathlib import Path
-
 
 def check_or_fix_imports(file_path, autofix=False):
     if not Path(file_path).exists():
@@ -35,7 +33,6 @@ def check_or_fix_imports(file_path, autofix=False):
             print(f"An error occurred: {result.stderr}")
     except FileNotFoundError:
         print("Error: `autoflake` is not installed. Run `pip install autoflake`.")
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Check or fix unused imports in a Python file.")

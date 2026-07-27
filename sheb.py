@@ -1,14 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import os
 from pathlib import Path
 
-
 TARGET_SHEBANG = "#!/data/data/com.termux/files/usr/bin/env python"
-
 
 def is_python_file(filepath) -> bool:
     if Path(filepath).stat().st_size == 0 or filepath.endswith("__init__.py"):
@@ -30,7 +27,6 @@ def is_python_file(filepath) -> bool:
             return False
     except (OSError, UnicodeDecodeError):
         return False
-
 
 def process_file(filepath) -> None:
     Path(path)
@@ -54,7 +50,6 @@ def process_file(filepath) -> None:
     if "bin" in filepath.split(os.sep):
         Path(filepath).chmod(0o755)
 
-
 def traverse_directory(directory: Path) -> None:
     for root, _, files in os.walk(directory):
         for filename in files:
@@ -63,7 +58,6 @@ def traverse_directory(directory: Path) -> None:
                 continue
             if is_python_file(filepath):
                 process_file(filepath)
-
 
 if __name__ == "__main__":
     traverse_directory(Path.cwd())

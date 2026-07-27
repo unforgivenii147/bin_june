@@ -12,7 +12,6 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 def parse_aliases(filepath: Path):
     aliases = []
     try:
@@ -33,7 +32,6 @@ def parse_aliases(filepath: Path):
         print(f"Error reading file: {e}")
         sys.exit(1)
     return aliases
-
 
 def write_sorted_aliases(aliases, filepath: Path, create_backup=True) -> None:
     sorted_aliases = sorted(aliases, key=lambda x: x[1])
@@ -56,7 +54,6 @@ def write_sorted_aliases(aliases, filepath: Path, create_backup=True) -> None:
         print(f"Error writing file: {e}")
         sys.exit(1)
 
-
 def display_aliases(aliases, limit=None) -> None:
     if not aliases:
         print("No aliases found")
@@ -73,7 +70,6 @@ def display_aliases(aliases, limit=None) -> None:
         if len(value) > 60:
             value = value[:57] + "..."
         print(f"{name:<{max_name_len}}  {value:<{max_value_len}}")
-
 
 def main() -> None:
     aliases_file = Path.home() / ".config/bash.d/bash_aliases"
@@ -101,7 +97,6 @@ def main() -> None:
     print("source ~/.bashrc")
     print("  # or")
     print("  exec $SHELL")
-
 
 if __name__ == "__main__":
     main()

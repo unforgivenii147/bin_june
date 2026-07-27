@@ -16,7 +16,6 @@ from pathlib import Path
 
 import requests
 
-
 def read_repos(file_path: Path) -> list[str]:
     """Read repository names from file."""
     if not file_path.exists():
@@ -32,12 +31,10 @@ def read_repos(file_path: Path) -> list[str]:
 
     return repos
 
-
 def validate_repo_format(repo: str) -> bool:
     """Validate that repo is in user/repo format."""
     parts = repo.split("/")
     return len(parts) == 2 and all(parts)
-
 
 def download_repo_zip(repo: str, base_dir: Path) -> tuple[str, bool, str]:
     """
@@ -92,7 +89,6 @@ def download_repo_zip(repo: str, base_dir: Path) -> tuple[str, bool, str]:
 
             shutil.rmtree(target_dir, ignore_errors=True)
         return repo, False, f"Error: {e!s}"
-
 
 def main():
     parser = argparse.ArgumentParser(description="Download GitHub repositories as ZIP archives")
@@ -159,7 +155,6 @@ def main():
     print(f"  ⏭️  Already existed: {skipped}")
     print(f"  ❌ Failed: {failed}")
     print(f"  📊 Total: {len(repos)}")
-
 
 if __name__ == "__main__":
     main()

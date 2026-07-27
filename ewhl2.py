@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import argparse
@@ -11,7 +10,6 @@ import zipfile
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def is_empty_wheel(wheel_path: Path) -> bool:
     try:
@@ -29,7 +27,6 @@ def is_empty_wheel(wheel_path: Path) -> bool:
         print(f"  Error reading {wheel_path}: {e}")
         return False
 
-
 def extract_package_info(wheel_path: Path) -> tuple[str, str] | tuple[None, None]:
     wheel_name = wheel_path.stem
     parts = wheel_name.split("-")
@@ -39,7 +36,6 @@ def extract_package_info(wheel_path: Path) -> tuple[str, str] | tuple[None, None
         name = name.replace("_", "-")
         return name, version
     return None, None
-
 
 def get_installed_packages():
     try:
@@ -59,7 +55,6 @@ def get_installed_packages():
         print(f"Warning: Could not get installed packages: {e}")
         return {}
 
-
 def check_pip_show(package_name):
     try:
         result = subprocess.run([sys.executable, "-m", "pip", "show", package_name], capture_output=True, text=True)
@@ -73,7 +68,6 @@ def check_pip_show(package_name):
     except Exception:
         pass
     return None
-
 
 def check_package_location(package_name: str) -> tuple[str | None, bool] | tuple[None, bool]:
     try:
@@ -96,7 +90,6 @@ def check_package_location(package_name: str) -> tuple[str | None, bool] | tuple
     except Exception:
         pass
     return None, False
-
 
 def analyze_wheels(source_dir, dest_dir_name: str = "empty_wheels", check_installed=True) -> None:
     source_path = Path(source_dir)
@@ -202,7 +195,6 @@ Move all {len(empty_wheels)} empty wheels to '{dest_dir_name}/'? (y/n): """)
             + " ".join([item["package"] for item in installed_empty_wheels])
         )
 
-
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Identify and move empty .whl files, with detection of potentially installed ones"
@@ -231,7 +223,6 @@ def main() -> None:
         print(f"Error: Directory '{args.directory}' does not exist")
         return
     analyze_wheels(args.directory, args.dest, check_installed=not args.no_install_check)
-
 
 if __name__ == "__main__":
     try:

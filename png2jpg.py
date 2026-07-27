@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
@@ -8,7 +7,6 @@ from pathlib import Path
 
 from dh import get_files, mpf3
 from PIL import Image
-
 
 def process_file(path):
     path = Path(path)
@@ -18,7 +16,6 @@ def process_file(path):
     img.save(jpg_path, "JPEG")
     path.unlink()
     print(f"Converted {path} to {jpg_path} and deleted the original PNG.")
-
 
 if __name__ == "__main__":
     cwd = Path.cwd()

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import ast
@@ -17,13 +16,11 @@ CHUNK_SIZE = 1024 * 1024
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
-
 
 def gsz(path: str | Path) -> int:
     path = Path(path)
@@ -34,7 +31,6 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
-
 
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
@@ -59,7 +55,6 @@ def is_python_file(path: str | Path) -> bool:
             return False
     return False
 
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -74,7 +69,6 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
 
 def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
@@ -112,7 +106,6 @@ def get_pyfiles(path: str | Path) -> list[Path]:
 
     return sorted(pyfiles)
 
-
 @dataclass
 class Decl:
     kind: str
@@ -121,7 +114,6 @@ class Decl:
     end_lineno: int
     source: str
     content_hash: str
-
 
 class Normalizer(ast.NodeTransformer):
     def visit_FunctionDef(self, node):
@@ -147,7 +139,6 @@ class Normalizer(ast.NodeTransformer):
         if isinstance(node.ctx, ast.Store):
             return node
 
-
 def stable_hash(node: ast.AST) -> str:
     node = copy.deepcopy(node)
     node = Normalizer().visit(node)
@@ -155,10 +146,8 @@ def stable_hash(node: ast.AST) -> str:
     dumped = ast.dump(node, annotate_fields=True, include_attributes=False)
     return hashlib.sha256(dumped.encode("utf-8")).hexdigest()
 
-
 def get_source_segment(lines, lineno, end_lineno) -> str:
     return "".join(lines[lineno - 1 : end_lineno])
-
 
 def is_simple_top_level_assign(node) -> bool:
     if not isinstance(node, ast.Assign):
@@ -171,14 +160,12 @@ def is_simple_top_level_assign(node) -> bool:
         return False
     return True
 
-
 def extract_assign_names(node):
     names = []
     for target in node.targets:
         if isinstance(target, ast.Name):
             names.append(target.id)
     return names
-
 
 def build_decl_for_assign(node, lines):
     names = extract_assign_names(node)
@@ -198,7 +185,6 @@ def build_decl_for_assign(node, lines):
         )
     return decls
 
-
 def build_decl(node: AsyncFunctionDef | ClassDef | FunctionDef, kind: str, name: str, lines) -> Decl:
     return Decl(
         kind=kind,
@@ -208,7 +194,6 @@ def build_decl(node: AsyncFunctionDef | ClassDef | FunctionDef, kind: str, name:
         source=get_source_segment(lines, node.lineno, node.end_lineno),
         content_hash=stable_hash(node),
     )
-
 
 def process_file(src_path) -> None:
     Path(path)
@@ -276,7 +261,6 @@ def process_file(src_path) -> None:
     print(f"Updated {src_path} in place")
     print(f"Moved {len(duplicate_ranges)} duplicate declaration block(s) to {dup_path}")
 
-
 def main() -> None:
     cwd = Path.cwd()
     gsz(cwd)
@@ -295,7 +279,6 @@ def main() -> None:
     for result in results:
         if result:
             pass
-
 
 if __name__ == "__main__":
     sys.exit(main())

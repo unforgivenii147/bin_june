@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
@@ -9,7 +8,6 @@ from collections.abc import Callable
 from pathlib import Path
 
 from bs4 import BeautifulSoup
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -31,7 +29,6 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
-
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
     units = ("B", "KB", "MB", "GB", "TB")
@@ -43,7 +40,6 @@ def fsz(sz: float) -> str:
         return f"{int(value)} {units[i]}"
     return f"{value:.1f} {units[i]}"
 
-
 def rrs(path, before, after) -> None:
     delta = before - after
     msg = (
@@ -53,13 +49,11 @@ def rrs(path, before, after) -> None:
     )
     print(f"\n{path.name} | {msg}")
 
-
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
-
 
 def gsz(path: str | Path) -> int:
     path = Path(path)
@@ -71,7 +65,6 @@ def gsz(path: str | Path) -> int:
             total += file.stat().st_size
     return total
 
-
 def process_file(path) -> None:
     path = Path(path)
     content = path.read_text(encoding="utf-8")
@@ -80,7 +73,6 @@ def process_file(path) -> None:
     new_content = soup.prettify()
     after = len(new_content)
     rrs(path, before, after)
-
 
 if __name__ == "__main__":
     cwd = Path.cwd()

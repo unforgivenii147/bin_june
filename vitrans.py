@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 """
 Optimized version of vitrans.py for Python 3.12.
 Translates Vietnamese text files to English using Google Translate via deep_translator.
@@ -32,23 +31,18 @@ logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
 _interrupted: bool = False
 
-
 def _sigint_handler(sig: int, frame: object) -> None:
     global _interrupted
     print("\n⚠️  Ctrl+C — finishing current chunk then stopping.")
     _interrupted = True
 
-
 signal.signal(signal.SIGINT, _sigint_handler)
-
 
 class RateLimitError(Exception):
     pass
 
-
 class TranslationError(Exception):
     pass
-
 
 def read_text(path: Path) -> tuple[str, str]:
     encodings = ("utf-8", "utf-8-sig", "utf-16", "cp1258", "gb18030")
@@ -58,7 +52,6 @@ def read_text(path: Path) -> tuple[str, str]:
         except (UnicodeDecodeError, LookupError):
             continue
     return (path.read_bytes().decode("utf-8", errors="replace"), "utf-8")
-
 
 def split_into_chunks(text: str, max_chars: int = MAX_CHUNK_CHARS) -> list[str]:
     if len(text) <= max_chars:
@@ -79,7 +72,6 @@ def split_into_chunks(text: str, max_chars: int = MAX_CHUNK_CHARS) -> list[str]:
     if remaining:
         chunks.append(remaining)
     return chunks
-
 
 @retry(
     reraise=True,
@@ -103,7 +95,6 @@ def _translate_chunk(text: str) -> str:
             raise TranslationError(str(e)) from e
         raise TranslationError(str(e)) from e
 
-
 def translate_chunk_safe(text: str, idx: int) -> tuple[str, bool]:
     try:
         return (_translate_chunk(text), True)
@@ -111,10 +102,8 @@ def translate_chunk_safe(text: str, idx: int) -> tuple[str, bool]:
         print(f"   ❌ Chunk {idx} failed after all retries: {e}")
         return (text, False)
 
-
 def _progress_path(src: Path) -> Path:
     return src.with_suffix(src.suffix + ".viprogress")
-
 
 def save_progress(src: Path, done: dict[int, str], total: int) -> None:
     try:
@@ -127,7 +116,6 @@ def save_progress(src: Path, done: dict[int, str], total: int) -> None:
         _progress_path(src).write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
     except Exception as e:
         print(f"   ⚠️  Could not save progress: {e}")
-
 
 def load_progress(src: Path) -> dict[int, str]:
     p = _progress_path(src)
@@ -143,14 +131,11 @@ def load_progress(src: Path) -> dict[int, str]:
     except Exception:
         return {}
 
-
 def drop_progress(src: Path) -> None:
     _progress_path(src).unlink(missing_ok=True)
 
-
 def get_output_path(src: Path) -> Path:
     return src.with_suffix(src.suffix + ".en")
-
 
 def process_file(path: Path) -> bool:
     global _interrupted
@@ -201,7 +186,6 @@ def process_file(path: Path) -> bool:
         print(f"   ❌ Failed to write output: {e}")
         return False
 
-
 def main() -> None:
     paths = [p for p in Path.cwd().glob("*.txt") if p.is_file() and p.name not in SKIP_DIRS]
     if not paths:
@@ -211,7 +195,6 @@ def main() -> None:
         if not process_file(path):
             break
         time.sleep(DELAY_BETWEEN_FILES)
-
 
 if __name__ == "__main__":
     try:

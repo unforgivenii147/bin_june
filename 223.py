@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 from os import scandir as os_scandir
@@ -9,7 +8,6 @@ from pathlib import Path
 CHUNK_SIZE = 1024 * 1024
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def runcmd(
     cmd: list[str],
@@ -61,7 +59,6 @@ def runcmd(
             print(msg, file=sys_stderr)
         return 1, "", msg
 
-
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
 
@@ -85,7 +82,6 @@ def is_python_file(path: str | Path) -> bool:
             return False
     return False
 
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -100,7 +96,6 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
 
 def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
@@ -137,7 +132,6 @@ def get_pyfiles(path: str | Path) -> list[Path]:
             continue
 
     return sorted(pyfiles)
-
 
 fixes = [
     "apply",
@@ -193,14 +187,12 @@ fixes = [
     "zip",
 ]
 
-
 def process_file(path: Path) -> None:
     path = Path(path)
     for fix in fixes:
         target_fix = f"--fix={fix}"
         cmd = ["2to3-2.7", "-w", target_fix, str(path)]
         runcmd(cmd, show_output=True)
-
 
 if __name__ == "__main__":
     cwd = Path.cwd()

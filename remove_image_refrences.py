@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import re
@@ -10,7 +9,6 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 REMOTE_PREFIXES = "http://", "https://", "//"
 IMG_TAG_RE = re.compile(r"<img\b[^>]*\bsrc\s*=\s*[\"']([^\"']+)[\"'][^>]*>", re.IGNORECASE)
-
 
 def remove_remote_html_images(text: str) -> str:
 
@@ -22,12 +20,10 @@ def remove_remote_html_images(text: str) -> str:
 
     return IMG_TAG_RE.sub(repl, text)
 
-
 MD_INLINE_IMG_RE = re.compile(r"!\[.*?\]\((.*?)\)", re.IGNORECASE)
 MD_REF_IMG_RE = re.compile(r"!\[.*?\]\[(.*?)\]", re.IGNORECASE)
 MD_REF_DEF_RE = re.compile(r"^\s*\[(.*?)\]:\s*(\S+)", re.MULTILINE)
 RST_IMG_RE = re.compile(r"^\s*\.\. \|[^|]+\| image:: https?://[^\s]+.*$", re.MULTILINE)
-
 
 def remove_remote_md_images(text: str) -> str:
 
@@ -60,10 +56,8 @@ def remove_remote_md_images(text: str) -> str:
 
     return MD_REF_DEF_RE.sub(def_repl, text)
 
-
 def remove_remote_rst_images(text: str) -> str:
     return RST_IMG_RE.sub("", text)
-
 
 def process_file(path: Path) -> None:
     path = Path(path)
@@ -80,13 +74,11 @@ def process_file(path: Path) -> None:
         path.write_text(modified, encoding="utf-8")
         print(f"Modified: {path}")
 
-
 def main() -> None:
     extensions = {".html", ".htm", ".md", ".rst", ".txt"}
     for file in Path().rglob("*"):
         if file.is_file() and file.suffix.lower() in extensions:
             process_file(file)
-
 
 if __name__ == "__main__":
     main()

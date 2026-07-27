@@ -1,13 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import os
 import sys
 
 import whisper
-
 
 def m4a_to_text_whisper(input_file, output_file="out.txt"):
     if not os.path.exists(input_file):
@@ -25,7 +23,6 @@ def m4a_to_text_whisper(input_file, output_file="out.txt"):
         if len(result["text"]) > 200
         else f"Transcribed text:\n{result['text']}"
     )
-
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import argparse
@@ -17,7 +16,6 @@ from tqdm import tqdm
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 EXCLUDE_DIRS = {".git", "__pycache__", "node_modules"}
-
 
 class FileSimilarityDetector:
     def __init__(self, cwd: str = ".") -> None:
@@ -104,7 +102,6 @@ class FileSimilarityDetector:
                 print(f"  - {p}")
         print("=" * 40)
 
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="Detect duplicate and similar files")
     parser.add_argument("threshold", type=int, help="Similarity threshold (0-100)")
@@ -129,7 +126,6 @@ def main() -> None:
     else:
         print("No similar (non-identical) files found.")
     detector.print_duplicates()
-
 
 if __name__ == "__main__":
     main()

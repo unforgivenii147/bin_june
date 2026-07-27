@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import base64
@@ -8,9 +7,7 @@ import hashlib
 import re
 from pathlib import Path
 
-
 BASE64_IMG_REGEX = re.compile(r"data:image/(?P<ext>[a-zA-Z0-9+]+);base64,(?P<data>[A-Za-z0-9+/=\n\r]+)")
-
 
 def extract_images_from_file(file_path: Path, output_dir: Path) -> int:
     try:
@@ -33,7 +30,6 @@ def extract_images_from_file(file_path: Path, output_dir: Path) -> int:
         count += 1
     return count
 
-
 def scan_and_extract(base_dir: Path, output_dir: Path) -> None:
     output_dir.mkdir(exist_ok=True)
     target_exts = {".ipynb", ".js", ".html"}
@@ -49,7 +45,6 @@ def scan_and_extract(base_dir: Path, output_dir: Path) -> None:
         if found:
             print(f"📸 Extracted {found} images from {path}")
     print(f"\n✅ Extraction complete. Total images saved: {total_found}")
-
 
 if __name__ == "__main__":
     base_dir = Path.cwd()

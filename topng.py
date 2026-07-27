@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-
 from __future__ import annotations
 
 import sys
@@ -9,9 +8,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-
 SUPPORTED_FORMATS = {".png", ".bmp", ".tiff", ".webp", ".ico", ".jpg", ".jpeg"}
-
 
 def convert_to_png(file_path: str) -> bool:
     path = Path(file_path)
@@ -51,7 +48,6 @@ def convert_to_png(file_path: str) -> bool:
         print(f"Error converting '{path.name}': {e}")
         return False
 
-
 def main():
     if len(sys.argv) != 2:
         print(f"Usage: {sys.argv[0]} <image_file>")
@@ -60,7 +56,6 @@ def main():
         sys.exit(0)
     else:
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

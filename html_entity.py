@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import multiprocessing as mp
@@ -12,7 +11,6 @@ from pathlib import Path
 CHUNK_SIZE = 1024 * 1024
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
@@ -29,13 +27,10 @@ def is_binary(path: Path | str) -> bool:
     except Exception:
         return True
 
-
 def get_nobinary(path: str | Path) -> list[Path]:
     return [f for f in get_files(path) if not is_binary(f)]
 
-
 "\nConvert HTML entities in HTML files recursively.\nConverts &lt; to <, &gt; to >, and other common entities.\n"
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -56,7 +51,6 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
             elif item.is_file() and (ext is None or item.suffix in ext):
                 files.append(item)
     return files
-
 
 "\nConvert HTML entities in HTML files recursively.\nConverts &lt; to <, &gt; to >, and other common entities.\n"
 
@@ -87,14 +81,12 @@ HTML_ENTITIES = {
 }
 ENTITY_PATTERN = re.compile(r"|".join(re.escape(k) for k in HTML_ENTITIES))
 
-
 def replace_entities(text: str) -> str:
 
     def replacer(match) -> str:
         return HTML_ENTITIES[match.group(0)]
 
     return ENTITY_PATTERN.sub(replacer, text)
-
 
 def process_file(filepath: Path) -> tuple[Path, bool, str]:
     try:
@@ -108,7 +100,6 @@ def process_file(filepath: Path) -> tuple[Path, bool, str]:
         return (filepath, changed, "")
     except Exception as e:
         return (filepath, False, str(e))
-
 
 def main() -> None:
     cwd = Path.cwd()
@@ -138,7 +129,6 @@ def main() -> None:
             print(f"  - {f.relative_to(cwd)}: {err}")
     print(f"   Modified: {len(changed_files)}")
     print(f"   Errors: {len(error_files)}")
-
 
 if __name__ == "__main__":
     main()

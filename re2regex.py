@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import argparse
@@ -12,7 +11,6 @@ from pathlib import Path
 CHUNK_SIZE = 1024 * 1024
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
@@ -37,7 +35,6 @@ def is_python_file(path: str | Path) -> bool:
             return False
     return False
 
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -52,7 +49,6 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
 
 def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
@@ -90,10 +86,8 @@ def get_pyfiles(path: str | Path) -> list[Path]:
 
     return sorted(pyfiles)
 
-
 NORMAL_IMPORT = "^import re\\b"
 REGEX_IMPORT = "^import regex as re\\b"
-
 
 def update_file(file_path, reverse: bool = False) -> str | None:
     try:
@@ -115,7 +109,6 @@ def update_file(file_path, reverse: bool = False) -> str | None:
     except Exception as e:
         return f"Error processing {file_path}: {e}"
 
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="Recursively swap 'import re' with 'import regex as re'")
     parser.add_argument("-r", "--reverse", action="store_true", help="Reverse the replacement (regex as re -> re)")
@@ -129,7 +122,6 @@ def main() -> None:
     for msg in updates:
         print(msg)
     print(f"\nTask complete. Files modified: {len(updates)}")
-
 
 if __name__ == "__main__":
     main()

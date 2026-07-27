@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import ast
@@ -18,7 +17,6 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 OUTPUT_DIR = Path("output")
 ARCHIVE_EXTENSIONS = (".whl", ".zip", ".tar.gz", ".tgz", ".tar.zst", ".tar.xz", ".tar", ".zst")
 ALLOWED_PYTHON_EXTENSIONS = ".py", ""
-
 
 class EntityExtractor(ast.NodeVisitor):
     def __init__(self, source_content: str, original_path: Path) -> None:
@@ -84,7 +82,6 @@ class EntityExtractor(ast.NodeVisitor):
     def generic_visit(self, node: ast.AST) -> None:
         super().generic_visit(node)
 
-
 def get_unique_filepath(base_path: Path) -> Path:
     if not base_path.exists():
         return base_path
@@ -96,7 +93,6 @@ def get_unique_filepath(base_path: Path) -> Path:
         if not new_path.exists():
             return new_path
         i += 1
-
 
 def save_entity(entity: dict[str, Any]) -> None:
     filename_base = f"{entity['full_name']}.py"
@@ -110,7 +106,6 @@ def save_entity(entity: dict[str, Any]) -> None:
         print(f"Error saving {final_py_path}: {e}")
         return
 
-
 def extract_entities_from_content(content: str, path: Path) -> list[dict[str, Any]]:
     try:
         tree = ast.parse(content)
@@ -122,7 +117,6 @@ def extract_entities_from_content(content: str, path: Path) -> list[dict[str, An
     except Exception as e:
         print(f"Error parsing AST for {path}: {e}")
         return []
-
 
 def is_python_file_no_extension(path: Path) -> bool:
     if path.suffix:
@@ -138,7 +132,6 @@ def is_python_file_no_extension(path: Path) -> bool:
         pass
     return False
 
-
 def process_single_file(path: Path) -> list[dict[str, Any]]:
     try:
         if path.suffix == ".py" or is_python_file_no_extension(path):
@@ -148,7 +141,6 @@ def process_single_file(path: Path) -> list[dict[str, Any]]:
     except Exception as e:
         print(f"Error reading file {path}: {e}")
         return []
-
 
 def process_archive(path: Path) -> list[dict[str, Any]]:
     entities = []
@@ -197,13 +189,11 @@ def process_archive(path: Path) -> list[dict[str, Any]]:
             print(f"Error processing TAR archive {path}: {e}")
     return entities
 
-
 def worker_process(path_str: str) -> list[dict[str, Any]]:
     path = Path(path_str)
     if path.name.endswith(ARCHIVE_EXTENSIONS):
         return process_archive(path)
     return process_single_file(path)
-
 
 def main() -> None:
     print(f"Starting analysis in {Path.cwd()}...")
@@ -238,7 +228,6 @@ def main() -> None:
         save_entity(entity)
     print("\n\nAll tasks finished successfully!")
     print(f"Results are saved in the '{OUTPUT_DIR}' folder, organized by entity type (class, function, constant).")
-
 
 if __name__ == "__main__":
     main()

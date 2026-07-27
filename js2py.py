@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import argparse
@@ -10,7 +9,6 @@ import sys
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def install_js2py() -> bool:
     try:
@@ -27,7 +25,6 @@ def install_js2py() -> bool:
             print("❌ Failed to install js2py")
             return False
 
-
 def convert_with_js2py(js_file: Path, outfile: Path) -> bool:
     try:
         import js2py
@@ -36,7 +33,6 @@ def convert_with_js2py(js_file: Path, outfile: Path) -> bool:
         return True
     except Exception as e:
         return False, f"js2py conversion error: {e!s}"
-
 
 def convert_with_openai(js_code: str, api_key: str | None = None) -> tuple[bool, str]:
     try:
@@ -84,7 +80,6 @@ python code:"""
     except Exception as e:
         return False, f"OpenAI API error: {e!s}"
 
-
 def simple_js_to_python(js_code: str) -> str:
     python_code = js_code
     python_code = re.sub(r"\b(let|const|var)\s+", "", python_code)
@@ -108,7 +103,6 @@ def simple_js_to_python(js_code: str) -> str:
         "for \\1 in range(\\2, \\3):",
         python_code,
     )
-
 
 def convert_file(
     input_file: Path,
@@ -149,7 +143,6 @@ def convert_file(
         print(f"❌ Error writing file: {e}")
         return False
 
-
 def main():
     parser = argparse.ArgumentParser(
         description="Convert JavaScript code to Python",
@@ -182,7 +175,6 @@ def main():
     outputfile = str(args.input).replace(".js", ".py")
     success = convert_file(args.input, outputfile, args.method, args.api_key)
     sys.exit(0 if success else 1)
-
 
 if __name__ == "__main__":
     main()

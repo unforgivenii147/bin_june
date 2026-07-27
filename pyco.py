@@ -1,13 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import shutil
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def fsz(sz: int) -> str:
     sz = abs(int(sz))
@@ -18,10 +16,8 @@ def fsz(sz: int) -> str:
     sz /= 1024**i
     return f"{sz:.2f} {units[i]}B"
 
-
 def gsz(path: Path) -> int:
     return sum(p.stat().st_size for p in path.rglob("*") if p.is_file())
-
 
 def clean_pycache(start_dir: Path = Path.cwd()) -> None:
     removed = 0
@@ -36,7 +32,6 @@ def clean_pycache(start_dir: Path = Path.cwd()) -> None:
         print(f"   • dirs removed: {removed}")
     else:
         print("nothing found.")
-
 
 if __name__ == "__main__":
     cwd = Path.cwd()

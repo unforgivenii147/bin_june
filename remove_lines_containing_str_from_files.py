@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
@@ -8,7 +7,6 @@ from collections import deque
 from pathlib import Path
 
 CHUNK_SIZE = 1024 * 1024
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -30,7 +28,6 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -46,17 +43,13 @@ def is_binary(path: Path | str) -> bool:
     except Exception:
         return True
 
-
 def get_nobinary(path: str | Path) -> list[Path]:
     return [f for f in get_files(path) if not is_binary(f)]
 
-
 STRTOFIND = ["dist-info", ".so", ".py", ".pth", "__", ".zip"]
-
 
 def clean_text(text: str) -> str:
     return "\n".join(line for line in text.splitlines() if not any(s in line for s in STRTOFIND))
-
 
 def clean_file(path: str) -> None:
     try:
@@ -66,7 +59,6 @@ def clean_file(path: str) -> None:
     cleaned = clean_text(original)
     if cleaned != original:
         Path(path).write_text(cleaned, encoding="utf-8")
-
 
 def main() -> None:
     root = Path.cwd()
@@ -85,10 +77,8 @@ def main() -> None:
     diffsize = isz - esz
     print(f"space freed : {fsz(diffsize)}")
 
-
 if __name__ == "__main__":
     main()
-
 
 def gsz(path):
     try:

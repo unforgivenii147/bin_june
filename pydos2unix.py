@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 """
 A Linux dos2unix command implementation in Python.
 Converts DOS/Windows line endings (CRLF) to Unix line endings (LF).
@@ -32,10 +31,8 @@ BINARY_EXTENSIONS = BIN_EXT
 SKIP_DIRS = {".git", "__pycache__", ".pytest_cache", ".mypy_cache", ".coverage", ".egg-info", ".idea"}
 TEXT_EXTENSIONS = TXT_EXT
 
-
 def should_skip_dir(directory: Path) -> bool:
     return directory.name in SKIP_DIRS
-
 
 def is_text_file(file_path: Path) -> bool:
     if file_path.suffix.lower() in BINARY_EXTENSIONS:
@@ -57,10 +54,8 @@ def is_text_file(file_path: Path) -> bool:
     except OSError:
         return False
 
-
 def convert_dos_to_unix_chunk(chunk: bytes) -> bytes:
     return chunk.replace(b"\r\n", b"\n")
-
 
 def convert_file(file_path: Path) -> tuple[str, bool, str]:
     try:
@@ -91,7 +86,6 @@ def convert_file(file_path: Path) -> tuple[str, bool, str]:
     except Exception as e:
         return (str(file_path), False, f"Error: {e}")
 
-
 def find_text_files(paths: list[Path]) -> list[Path]:
     files = []
     for path in paths:
@@ -106,7 +100,6 @@ def find_text_files(paths: list[Path]) -> list[Path]:
                     files.append(text_file)
     return files
 
-
 def get_input_paths(input_args: list[str] | None) -> list[Path]:
     if not input_args:
         return [Path.cwd()]
@@ -118,7 +111,6 @@ def get_input_paths(input_args: list[str] | None) -> list[Path]:
         else:
             logger.warning(f"Path does not exist: {arg}")
     return paths
-
 
 def main():
     parser = argparse.ArgumentParser(
@@ -174,7 +166,6 @@ def main():
     except Exception as e:
         logger.error(f"Fatal error: {e}")
         return 1
-
 
 if __name__ == "__main__":
     sys.exit(main())

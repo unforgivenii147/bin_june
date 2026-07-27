@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import asyncio
@@ -8,7 +7,6 @@ import sys
 from pathlib import Path
 
 from pyppeteer import launch
-
 
 async def main():
     url = sys.argv[1]
@@ -28,6 +26,5 @@ async def main():
     }""")
     print(dimensions)
     await browser.close()
-
 
 asyncio.get_event_loop().run_until_complete(main())

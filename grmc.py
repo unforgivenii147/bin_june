@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import argparse
@@ -13,7 +12,6 @@ from pathlib import Path
 from loguru import logger
 
 SKIP_DIRS = {".git", "__pycache__", ".ruff_cache", ".pytest_cache"}
-
 
 def get_removal_zones(source: str):
     tree = ast.parse(source)
@@ -52,7 +50,6 @@ def get_removal_zones(source: str):
 
     return zones, replacements
 
-
 def apply_cleaning(source: str, zones, replacements):
     lines = source.splitlines(keepends=True)
 
@@ -70,7 +67,6 @@ def apply_cleaning(source: str, zones, replacements):
 
     return "".join(lines)
 
-
 def is_python_script(path: Path) -> bool:
     if path.suffix == ".py":
         return True
@@ -80,7 +76,6 @@ def is_python_script(path: Path) -> bool:
             return first_line.startswith("#!") and "python" in first_line.lower()
     except Exception:
         return False
-
 
 def process_file(args):
     path, root = args
@@ -103,7 +98,6 @@ def process_file(args):
     except Exception as e:
         logger.error(f"Failed {path}: {e}")
         return 0
-
 
 def main():
     parser = argparse.ArgumentParser()
@@ -133,7 +127,6 @@ def main():
 
     total_removed = sum(results)
     logger.success(f"Cleanup complete. Total elements removed: {total_removed}")
-
 
 if __name__ == "__main__":
     main()

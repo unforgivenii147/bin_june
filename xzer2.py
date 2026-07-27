@@ -1,11 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 from collections import deque
 from pathlib import Path
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -27,18 +25,15 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
-
 def compress_folder_to_tar(folder_path: Path, output_base_name: str, format: str = "tar") -> bool:
     print(f"Simulating: Compressing folder '{folder_path}' to '{output_base_name}.tar'...")
     (folder_path.parent / f"{output_base_name}.tar").touch()
     print(f"Simulating: Created '{output_base_name}.tar'")
     return True
 
-
 def atomic_write(data: bytes, final_path: Path) -> bool:
     print(f"Simulating: Atomic write to {final_path}")
     return True
-
 
 def safe_delete(path: Path, max_retries: int = 3) -> bool:
     print(f"Simulating: Deleting '{path}'...")
@@ -48,27 +43,22 @@ def safe_delete(path: Path, max_retries: int = 3) -> bool:
     print(f"Simulating: Path '{path}' not found for deletion.")
     return False
 
-
 def compress_file(path: Path) -> bool:
     print(f"Simulating: Compressing file '{path}' with XZ...")
     (path.parent / f"{path.stem}.xz").touch()
     print(f"Simulating: Created '{path.stem}.xz'")
     return True
 
-
 def get_files(directory: Path) -> list[Path]:
     print(f"Simulating: Getting files in '{directory}'...")
     return [p for p in directory.parent.iterdir() if p.name.endswith(".tar") and p.is_file()]
-
 
 def get_dirs(cwd: Path) -> list[Path]:
     print(f"Simulating: Getting directories in '{cwd}'...")
     return [d for d in cwd.iterdir() if d.is_dir()]
 
-
 def should_compress(path: Path) -> bool:
     return True
-
 
 def main() -> None:
     cwd = Path()
@@ -103,7 +93,6 @@ def main() -> None:
                     f"Error: Failed to compress '{tar_file_path.name}' with XZ. Original tar file will NOT be deleted."
                 )
     print("--- .tar File Compression Complete ---")
-
 
 if __name__ == "__main__":
     main()

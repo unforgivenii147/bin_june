@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import shutil
@@ -9,14 +8,12 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 def compress_folder(folder_path: Path, output_path: Path) -> bool:
     try:
         shutil.make_archive(str(folder_path), str(output_path), format="tar")
         return True
     except Exception:
         return False
-
 
 def safe_remove(path: Path) -> None:
     try:
@@ -28,7 +25,6 @@ def safe_remove(path: Path) -> None:
             print(f"Removed directory: {path}")
     except Exception as e:
         print(f"Error removing '{path}': {e}")
-
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:

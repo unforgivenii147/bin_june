@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import argparse
@@ -18,7 +17,6 @@ DUPS_DIR = Path.home() / ".cache" / "dups"
 MANIFEST_PATH = DUPS_DIR / "manifest.json"
 READ_CHUNK = 1024 * 8
 
-
 def load_json(path: Path):
     try:
         with Path(path).open(encoding="utf-8") as f:
@@ -26,12 +24,10 @@ def load_json(path: Path):
     except Exception:
         return {}
 
-
 def save_json(path: Path, data) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with Path(path).open("w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
-
 
 def xxh64_of_path(p: Path) -> str:
     h = xxhash.xxh64()
@@ -42,7 +38,6 @@ def xxh64_of_path(p: Path) -> str:
                 break
             h.update(chunk)
     return h.hexdigest()
-
 
 def build_groups(root: Path, cache: dict):
     groups = defaultdict(list)
@@ -71,7 +66,6 @@ def build_groups(root: Path, cache: dict):
             cache[key] = {"size": size, "mtime": mtime, "hash": h}
         groups[h].append(path)
     return groups
-
 
 def dedupe(root: Path, dry_run=False, force=False) -> None:
     cache = load_json(CACHE_PATH) if CACHE_PATH.exists() else {}
@@ -125,7 +119,6 @@ def dedupe(root: Path, dry_run=False, force=False) -> None:
     elif dry_run:
         print("dry-run complete; no changes written.")
 
-
 def restore(dry_run: bool = False) -> None:
     if not MANIFEST_PATH.exists():
         print("No manifest found at ~/dups/manifest.json")
@@ -177,7 +170,6 @@ def restore(dry_run: bool = False) -> None:
         except Exception:
             pass
 
-
 def main() -> None:
     ap = argparse.ArgumentParser(
         description="Deduplicate files by moving one copy to ~/dups and symlinking duplicates using xxhash."
@@ -192,7 +184,6 @@ def main() -> None:
         restore(dry_run=args.dry_run)
     else:
         dedupe(root, dry_run=args.dry_run, force=args.force)
-
 
 if __name__ == "__main__":
     main()

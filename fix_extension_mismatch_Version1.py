@@ -85,7 +85,6 @@ SIGNATURES = [
 PREFERRED_EXT = {".jpeg": ".jpg", ".tiff": ".tif", ".htm": ".html"}
 SKIP_EXTS = {".py", ".pyc", ".pyo", ".so", ".dll"}
 
-
 def detect_by_signature(path: Path, nbytes: int = READ_BYTES) -> tuple[str, str] | None:
     try:
         with path.open("rb") as f:
@@ -133,7 +132,6 @@ def detect_by_signature(path: Path, nbytes: int = READ_BYTES) -> tuple[str, str]
         pass
     return None
 
-
 def safe_rename(src: Path, dst: Path) -> tuple[bool, str | None]:
     if src.samefile(dst) if dst.exists() and src.exists() else False:
         return False, "source and destination are identical"
@@ -163,7 +161,6 @@ def safe_rename(src: Path, dst: Path) -> tuple[bool, str | None]:
                 except Exception as e:
                     return False, f"rename/move failed for candidate: {e}"
     return False, "failed to find non-conflicting name"
-
 
 def process_file(args) -> dict:
     path_str, commit, _verbose = args
@@ -219,7 +216,6 @@ def process_file(args) -> dict:
         result["reason"] = info
     return result
 
-
 def gather_files(root: Path, follow_symlinks: bool = False, skip_hidden: bool = True) -> list[Path]:
     files: list[Path] = []
     for p in root.rglob("*"):
@@ -231,7 +227,6 @@ def gather_files(root: Path, follow_symlinks: bool = False, skip_hidden: bool = 
         except Exception:
             continue
     return files
-
 
 def print_summary(results: list[dict], verbose: bool = False) -> None:
     renamed = [r for r in results if r["action"] == "renamed"]
@@ -258,7 +253,6 @@ def print_summary(results: list[dict], verbose: bool = False) -> None:
             print("\nErrors:")
             for r in errors[:10]:
                 print(f"  {r['path']}: {r.get('reason')}")
-
 
 def main():
     ap = argparse.ArgumentParser(
@@ -314,7 +308,6 @@ def main():
         print("Interrupted by user.", file=sys.stderr)
         sys.exit(1)
     print_summary(results, verbose=args.verbose)
-
 
 if __name__ == "__main__":
     main()

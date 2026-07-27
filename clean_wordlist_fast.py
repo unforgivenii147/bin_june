@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import contextlib
@@ -10,15 +9,12 @@ import sys
 import tempfile
 from pathlib import Path
 
-
 THRESHOLD = 5 * 1024 * 1024
 RE_REPEAT = re.compile(r"^(.)\1+$", re.IGNORECASE)
-
 
 def should_skip(line: str) -> bool:
     s = line.rstrip("\n")
     return bool(RE_REPEAT.fullmatch(s))
-
 
 def main() -> None:
     if len(sys.argv) != 2:
@@ -42,7 +38,6 @@ def main() -> None:
             with contextlib.suppress(OSError):
                 tmp_path.unlink()
         raise
-
 
 if __name__ == "__main__":
     main()

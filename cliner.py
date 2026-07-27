@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import mmap
@@ -8,13 +7,11 @@ import re
 from collections.abc import Callable
 from pathlib import Path
 
-
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
-
 
 LOG_EXT = ".log"
 MMAP_THRESHOLD = 1 * 1024 * 1024
@@ -35,13 +32,11 @@ PATTERNS = [
 ]
 COMPILED_PATTERNS = [re.compile(pattern) for pattern in PATTERNS]
 
-
 def clean_line(line: str) -> str:
     cleaned = line
     for pattern in COMPILED_PATTERNS:
         cleaned = pattern.sub("", cleaned)
     return re.sub(r" {2,}", " ", cleaned)
-
 
 def clean_file_small(path: Path) -> tuple:
     try:
@@ -53,7 +48,6 @@ def clean_file_small(path: Path) -> tuple:
         return path, True, "small file"
     except Exception as e:
         return path, False, str(e)
-
 
 def clean_file_large(path: Path) -> tuple:
     try:
@@ -72,7 +66,6 @@ def clean_file_large(path: Path) -> tuple:
     except Exception as e:
         return path, False, str(e)
 
-
 def clean_file_worker(path: Path) -> tuple:
     try:
         get_size = path.stat().st_size
@@ -81,7 +74,6 @@ def clean_file_worker(path: Path) -> tuple:
         return clean_file_small(path)
     except Exception as e:
         return path, False, str(e)
-
 
 def main() -> None:
     cwd = Path.cwd()
@@ -103,7 +95,6 @@ def main() -> None:
     print(f"\nDone. Successfully processed {success_count}/{len(log_files)} file(s).")
     if error_count > 0:
         print(f"Failed: {error_count} file(s).")
-
 
 if __name__ == "__main__":
     main()

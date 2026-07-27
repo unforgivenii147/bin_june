@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import re
@@ -9,7 +8,6 @@ from collections import deque
 from collections.abc import Callable
 from html.parser import HTMLParser
 from pathlib import Path
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -31,13 +29,11 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
-
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
-
 
 def finglish(text: str) -> str:
     persian_map = {
@@ -97,7 +93,6 @@ def finglish(text: str) -> str:
         processed_words.append(processed_word)
     return " ".join(processed_words)
 
-
 class TitleParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__()
@@ -116,7 +111,6 @@ class TitleParser(HTMLParser):
         if self.in_title and self.title is None:
             self.title = data.strip()
 
-
 def extract_title(html_path: Path) -> str | None:
     try:
         parser = TitleParser()
@@ -124,7 +118,6 @@ def extract_title(html_path: Path) -> str | None:
         return parser.title
     except Exception:
         return None
-
 
 def slugify(text: str) -> str:
     text = unicodedata.normalize("NFKD", text)
@@ -142,7 +135,6 @@ def slugify(text: str) -> str:
         return temp.replace(":", "").replace("?", "").replace("=", "")
     return text
 
-
 def unique_path(path: Path) -> Path:
     counter = 1
     new_path = path
@@ -150,7 +142,6 @@ def unique_path(path: Path) -> Path:
         new_path = path.with_stem(f"{path.stem}-{counter}")
         counter += 1
     return new_path
-
 
 def process_file(path: str | Path) -> None:
     path = Path(path)
@@ -168,7 +159,6 @@ def process_file(path: str | Path) -> None:
         return
     print(f"{path.name[:10]} -> {new_path.name[:25]}")
     path.rename(new_path)
-
 
 if __name__ == "__main__":
     cwd = Path.cwd()

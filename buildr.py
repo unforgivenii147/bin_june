@@ -1,13 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 from collections import deque
 from collections.abc import Callable
 from os import chdir as os_chdir
 from pathlib import Path
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -29,13 +27,11 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
-
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
-
 
 def runcmd(
     cmd: list[str],
@@ -87,7 +83,6 @@ def runcmd(
             print(msg, file=sys_stderr)
         return (1, "", msg)
 
-
 def process_file(path_str: str) -> None:
     path = Path(path_str)
     os_chdir(path.parent)
@@ -95,7 +90,6 @@ def process_file(path_str: str) -> None:
     ret, _, _ = runcmd(cmd)
     if ret != 0:
         print(f"Error building wheel for {path}")
-
 
 if __name__ == "__main__":
     cwd = Path.cwd()

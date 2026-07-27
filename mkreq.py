@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import ast
@@ -10,7 +9,6 @@ from collections import defaultdict
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def extract_imports(file_path: Path):
     try:
@@ -30,7 +28,6 @@ def extract_imports(file_path: Path):
             imports.add(module_name)
     return imports
 
-
 def is_stdlib(module_name):
     if hasattr(sys, "stdlib_module_names"):
         return module_name in sys.stdlib_module_names
@@ -45,7 +42,6 @@ def is_stdlib(module_name):
     except (ImportError, ValueError, AttributeError):
         return False
 
-
 def get_local_modules(cwd="."):
     root = Path(cwd)
     local_modules = set()
@@ -53,7 +49,6 @@ def get_local_modules(cwd="."):
         module_name = py_file.stem
         local_modules.add(module_name)
     return local_modules
-
 
 def collect_requirements(cwd: str = ".", exclude_dirs=None, verbose=False):
     if exclude_dirs is None:
@@ -107,7 +102,6 @@ def collect_requirements(cwd: str = ".", exclude_dirs=None, verbose=False):
             print(f"Skipped local ({len(skipped_local)}): {skipped_local}")
     return third_party
 
-
 def write_requirements(packages, output_file: str = "requirements.txt") -> Path:
     output_path = Path(output_file)
     with open(output_path, "w", encoding="utf-8") as f:
@@ -124,7 +118,6 @@ def write_requirements(packages, output_file: str = "requirements.txt") -> Path:
         print("(No third-party packages found)")
     return output_path
 
-
 def main() -> None:
     import argparse
 
@@ -135,7 +128,6 @@ def main() -> None:
     args = parser.parse_args()
     packages = collect_requirements(args.dir, verbose=args.verbose)
     write_requirements(packages, args.output)
-
 
 if __name__ == "__main__":
     main()

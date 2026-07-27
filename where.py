@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import argparse
@@ -16,7 +15,6 @@ from watchdog.observers import Observer
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 def parse_csv_exts(s: str | None) -> set[str] | None:
     if not s:
         return None
@@ -30,18 +28,15 @@ def parse_csv_exts(s: str | None) -> set[str] | None:
         norm.add(p)
     return norm
 
-
 def file_matches_extensions(file_path: Path, allowed_exts: set[str] | None) -> bool:
     if allowed_exts is None:
         return True
     return file_path.suffix.lower() in allowed_exts
 
-
 def file_matches_exclude(file_path: Path, excluded_exts: set[str] | None) -> bool:
     if excluded_exts is None:
         return False
     return file_path.suffix.lower() in excluded_exts
-
 
 def human_size(nbytes: int) -> str:
     units = ["B", "KB", "MB", "GB", "TB"]
@@ -54,7 +49,6 @@ def human_size(nbytes: int) -> str:
         size /= 1024.0
     return f"{nbytes} B"
 
-
 def safe_copy_file(src: Path, dst_root: Path, rel_path: Path, errors: list[str]) -> None:
     try:
         dst_path = dst_root / rel_path
@@ -63,7 +57,6 @@ def safe_copy_file(src: Path, dst_root: Path, rel_path: Path, errors: list[str])
     except Exception as e:
         msg = f"[copy-error] {src} -> {dst_root / rel_path}\n{e}\n{traceback.format_exc()}"
         errors.append(msg)
-
 
 class ChangeHandler(FileSystemEventHandler):
     def __init__(
@@ -182,7 +175,6 @@ class ChangeHandler(FileSystemEventHandler):
         self._queue(Path(event.src_path), "moved-out")
         self._queue(Path(event.dest_path), "moved-in")
 
-
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         description="Watch a folder recursively, print changes, and optionally copy changed/created files."
@@ -225,7 +217,6 @@ def build_parser() -> argparse.ArgumentParser:
         help="Disable recursive watching (watch only top-level directory).",
     )
     return p
-
 
 def main() -> None:
     parser = build_parser()
@@ -276,7 +267,6 @@ def main() -> None:
             handler.flush()
         observer.stop()
         observer.join()
-
 
 if __name__ == "__main__":
     main()

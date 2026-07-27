@@ -15,7 +15,6 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 def extract_metadata_from_wheel(wheel_path: Path) -> dict[str, str] | None:
     try:
         with zipfile.ZipFile(wheel_path, "r") as zf:
@@ -41,7 +40,6 @@ def extract_metadata_from_wheel(wheel_path: Path) -> dict[str, str] | None:
         print(f"  Error reading {wheel_path.name}: {e}")
         return None
 
-
 def extract_wheel_tags(filename: str) -> tuple[str, str, str] | None:
     patterns = [
         ".*?-.*?-.*?-(py3|py2\\.py3|py2|cp[0-9]+)-(none|abi[0-9]+|cp[0-9]+m?)-(manylinux[0-9_]+|linux|win_amd64|win32|macosx[0-9_]+)\\.whl$",
@@ -56,7 +54,6 @@ def extract_wheel_tags(filename: str) -> tuple[str, str, str] | None:
         if py_match:
             return py_match.group(0), "none", "any"
     return None
-
 
 def reconstruct_wheel_name(wheel_path: Path, metadata: dict[str, str], original_filename: str) -> str | None:
     name = metadata["name"]
@@ -81,7 +78,6 @@ def reconstruct_wheel_name(wheel_path: Path, metadata: dict[str, str], original_
                                 return f"{name}-{version}-{python_tag}-{abi_tag}-{platform_tag}.whl"
         print(f"  Warning: Could not determine tags for {wheel_path.name}, using generic 'py3-none-any'")
         return f"{name}-{version}-py3-none-any.whl"
-
 
 def fix_whl_files_by_metadata(directory: str = ".", dry_run: bool = True, backup: bool = True):
     path = Path(directory)
@@ -141,7 +137,6 @@ def fix_whl_files_by_metadata(directory: str = ".", dry_run: bool = True, backup
         print("\n✓ Dry run complete. Run with --execute to apply changes.")
     return renamed_count, failed_files
 
-
 def batch_fix_with_parallel(directory: str = ".", max_workers: int = 4) -> None:
     from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -166,7 +161,6 @@ def batch_fix_with_parallel(directory: str = ".", max_workers: int = 4) -> None:
     print("\nExtracted information:")
     for old_name, (metadata, proper_name) in results.items():
         print(f"  {old_name} -> {metadata['name']} {metadata['version']} -> {proper_name}")
-
 
 def main() -> None:
     import argparse
@@ -213,7 +207,6 @@ def main() -> None:
                     print(f"  Should be: {proper_name}")
     else:
         fix_whl_files_by_metadata(directory=args.directory, dry_run=not args.execute, backup=not args.no_backup)
-
 
 if __name__ == "__main__":
     main()

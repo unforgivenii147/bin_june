@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import json
@@ -10,12 +9,10 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 def sanitize_pkg_name(name: str) -> str:
     name = name.lstrip("@")
     name = name.replace("/", "__")
     return re.sub(r"[^\w.-]", "_", name)
-
 
 def rename_package_dirs(cwd: Path, dry_run: bool = False) -> None:
     for pkg_json in cwd.rglob("package.json"):
@@ -43,12 +40,10 @@ def rename_package_dirs(cwd: Path, dry_run: bool = False) -> None:
             print(f"[RENAME] {pkg_dir} -> {new_dir}")
             pkg_dir.rename(new_dir)
 
-
 def main() -> None:
     cwd = Path.cwd()
     dry_run = "--dry-run" in sys.argv
     rename_package_dirs(cwd, dry_run=dry_run)
-
 
 if __name__ == "__main__":
     main()

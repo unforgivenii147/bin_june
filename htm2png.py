@@ -1,11 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import cairosvg
 from weasyprint import HTML
-
 
 def html_to_png_cairo(html_content, output_path, width=None):
     if html_content.startswith(("<", "<!DOCTYPE")):

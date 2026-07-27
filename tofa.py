@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
@@ -14,13 +13,11 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 MAX_CHARS = 5000
 
-
 def get_output_filename(input_file: str) -> Path:
     path = Path(input_file)
     stem = path.stem
     suffix = path.suffix
     return path.parent / f"{stem}_fa{suffix}"
-
 
 def load_file(input_file) -> str:
     encodings = ["utf-8", "latin-1", "cp1252", "iso-8859-1"]
@@ -32,10 +29,8 @@ def load_file(input_file) -> str:
     msg = f"Could not read file {input_file} with any encoding"
     raise OSError(msg)
 
-
 def save_file(output_file: Path, content: str) -> None:
     Path(output_file).write_text(content, encoding="utf-8")
-
 
 def find_chunk_boundary(text, max_chars):
     if len(text) <= max_chars:
@@ -50,7 +45,6 @@ def find_chunk_boundary(text, max_chars):
         return last_space + 1
     return max_chars
 
-
 def chunk_text(text: str, max_chars: int):
     chunks = []
     pos = 0
@@ -64,7 +58,6 @@ def chunk_text(text: str, max_chars: int):
         pos += chunk_end
     return chunks
 
-
 def translate_chunk(text: str, source_lang="auto"):
     for attempt in range(3):
         try:
@@ -76,7 +69,6 @@ def translate_chunk(text: str, source_lang="auto"):
             time.sleep(1 + attempt)
     msg = "Failed to translate chunk after 3 attempts"
     raise Exception(msg)
-
 
 def translate_file(input_file: str, source_lang: str = "auto") -> str:
     print(f"[INFO] Reading file: {input_file}")
@@ -113,7 +105,6 @@ def translate_file(input_file: str, source_lang: str = "auto") -> str:
     print(f"\n[INFO] Detected language: {detected_lang}")
     return result
 
-
 def main() -> None:
     if len(sys.argv) < 2:
         print(f"Usage: {sys.argv[0]} <input_file> [source_language]")
@@ -147,7 +138,6 @@ def main() -> None:
     except Exception as e:
         print(f"\n[ERROR] Translation failed: {e}")
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

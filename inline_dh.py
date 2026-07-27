@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import ast
@@ -10,7 +9,6 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 DH_SRC_DIR = Path("~/isaac/pkgs/dh/src/dh").expanduser()
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -32,7 +30,6 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
-
 def build_dh_mapping(dh_path: Path) -> dict:
     init_file = dh_path / "__init__.py"
     if not init_file.exists():
@@ -46,7 +43,6 @@ def build_dh_mapping(dh_path: Path) -> dict:
             for alias in node.names:
                 mapping[alias.name] = module_path
     return mapping
-
 
 class ModuleDependencyAnalyzer(ast.NodeVisitor):
     def __init__(self, global_names):
@@ -64,7 +60,6 @@ class ModuleDependencyAnalyzer(ast.NodeVisitor):
     def visit_Name(self, node):
         if isinstance(node.ctx, ast.Load) and node.id in self.global_names:
             self.references.add(node.id)
-
 
 def get_all_dependencies(path: Path, target_symbol: str) -> tuple[set[str], list[str]]:
     if not path.exists():
@@ -122,7 +117,6 @@ def get_all_dependencies(path: Path, target_symbol: str) -> tuple[set[str], list
         node = nodes_by_name[sym]
         source_blocks.append("\n".join(lines[node.lineno - 1 : node.end_lineno]))
     return (needed_imports, source_blocks)
-
 
 def process_file(path: Path, mapping: dict):
     path = Path(path)
@@ -196,7 +190,6 @@ def process_file(path: Path, mapping: dict):
     except Exception as e:
         print(f"Error processing {path}: {e}")
 
-
 def main():
     try:
         mapping = build_dh_mapping(DH_SRC_DIR)
@@ -208,7 +201,6 @@ def main():
     py_files = [Path(p) for p in args] if args else get_files(cwd, ext=[".py"])
     with ThreadPoolExecutor() as executor:
         executor.map(lambda p: process_file(p, mapping), py_files)
-
 
 if __name__ == "__main__":
     main()

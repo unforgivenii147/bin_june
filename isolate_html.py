@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import base64
@@ -11,7 +10,6 @@ from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
 from bs4.element import AttributeValuelist
-
 
 class HTMLStandaloneMaker:
     MIME_MAP = {
@@ -208,7 +206,6 @@ class HTMLStandaloneMaker:
             self.log(f"Error writing to output file {output_path}: {e}", "ERROR")
             return False
 
-
 def main() -> None:
     import argparse
 
@@ -239,7 +236,6 @@ def main() -> None:
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

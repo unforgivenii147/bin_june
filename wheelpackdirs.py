@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import argparse
@@ -9,7 +8,6 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from multiprocessing import cpu_count
 from pathlib import Path
 
-
 def pack_wheel(directory):
     """Pack a wheel directory using the wheel command."""
     try:
@@ -17,7 +15,6 @@ def pack_wheel(directory):
         return True, f"✓ {directory.name}"
     except subprocess.CalledProcessError as e:
         return False, f"✗ {directory.name}: {e.stderr.strip()}"
-
 
 def main():
     parser = argparse.ArgumentParser(description="Pack wheel directories in parallel")
@@ -57,7 +54,6 @@ def main():
                 fail_count += 1
 
     print(f"\nDone: {success_count} successful, {fail_count} failed")
-
 
 if __name__ == "__main__":
     main()

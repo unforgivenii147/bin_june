@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 """
 Sanity check script to validate binary file extensions.
 Traverses the filesystem to find files with extensions in BIN_EXT,
@@ -24,7 +23,6 @@ from dh import BIN_EXT
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
-
 
 class OptimizedWalker:
     def __init__(self, skip_symlinks: bool = True, skip_mount_points: bool = True):
@@ -107,7 +105,6 @@ class OptimizedWalker:
         except OSError as e:
             logger.debug(f"Error accessing {current_dir}: {e}")
 
-
 class SpinnerProgressReporter:
     def __init__(self, verbose: bool = True):
         self.verbose = verbose
@@ -124,7 +121,6 @@ class SpinnerProgressReporter:
             path_display = current_path[:60] + "..." if len(current_path) > 60 else current_path
             msg = f"\r{self.spinner[self.spinner_index]} Files: {file_count:8d} | {path_display}"
             print(msg, end="", flush=True)
-
 
 def is_binary_file(file_path: Path) -> bool | None:
     try:
@@ -155,7 +151,6 @@ def is_binary_file(file_path: Path) -> bool | None:
     except (OSError, PermissionError):
         return None
 
-
 def check_file(file_path: Path) -> tuple[Path, str, bool | None, str]:
     try:
         extension = file_path.suffix.lower()
@@ -166,7 +161,6 @@ def check_file(file_path: Path) -> tuple[Path, str, bool | None, str]:
     except Exception as e:
         logger.error(f"Error processing {file_path}: {e}")
         return (file_path, file_path.suffix.lower(), None, "error")
-
 
 def validate_extensions(
     root_dir: str = "/", num_workers: int | None = None, verbose: bool = True, skip_mount_points: bool = True
@@ -229,7 +223,6 @@ def validate_extensions(
         "by_extension": by_extension,
     }
 
-
 def print_report(results: dict):
     print("\n" + "=" * 80)
     print("BINARY EXTENSION VALIDATION REPORT")
@@ -256,7 +249,6 @@ def print_report(results: dict):
     for ext, stats in sorted(results["by_extension"].items()):
         print(f"  {ext:12} - Binary: {stats['binary']:6}  Text: {stats['text']:6}  Errors: {stats['error']:6}")
     print("\n" + "=" * 80)
-
 
 if __name__ == "__main__":
     root_dir = "/data/data/com.termux"

@@ -14,7 +14,6 @@ from pathlib import Path
 
 from tqdm import tqdm
 
-
 URL_PATTERN = re.compile(r'https?://[^\s<>"{}|\\^`\[\]]*', re.IGNORECASE)
 GIT_DOMAINS = {
     "github.com",
@@ -27,10 +26,8 @@ GIT_DOMAINS = {
     "gogs.io",
 }
 
-
 def is_git_url(url: str) -> bool:
     return any(domain in url.lower() for domain in GIT_DOMAINS)
-
 
 def extract_urls_from_file(file_path: Path) -> tuple[set[str], set[str]]:
     regular_urls = set()
@@ -54,7 +51,6 @@ def extract_urls_from_file(file_path: Path) -> tuple[set[str], set[str]]:
     except Exception:
         pass
     return regular_urls, git_urls
-
 
 def main():
     current_dir = Path.cwd()
@@ -88,7 +84,6 @@ def main():
     print("\n✓ Extraction complete!")
     print(f"  Regular URLs: {len(all_regular_urls)} → {urls_file.name}")
     print(f"  Git URLs: {len(all_git_urls)} → {gitlinks_file.name}")
-
 
 if __name__ == "__main__":
     main()

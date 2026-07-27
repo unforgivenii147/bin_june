@@ -1,13 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import ast
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -28,7 +26,6 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
             elif item.is_file() and (ext is None or item.suffix in ext):
                 files.append(item)
     return files
-
 
 def unique_path(path: Path | str) -> Path:
     path = _clean_fname(Path(path))
@@ -51,20 +48,17 @@ def unique_path(path: Path | str) -> Path:
             return new_path
         counter += 1
 
-
 def _clean_fname(path: Path) -> Path:
     from re import sub as re_sub
 
     clean_name = re_sub("(_\\d+)+", "", path.name)
     return path.with_name(clean_name)
 
-
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
-
 
 def process_file(file_path):
     Path(path)
@@ -80,7 +74,6 @@ def process_file(file_path):
     except (SyntaxError, UnicodeDecodeError):
         pass
     return imports
-
 
 if __name__ == "__main__":
     cwd = Path.cwd()

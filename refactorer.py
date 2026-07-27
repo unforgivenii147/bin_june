@@ -1,13 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import ast
 import os
 from ast import AST
 from pathlib import Path
-
 
 output_dir = Path("output")
 output_dir.mkdir(exist_ok=True)
@@ -19,15 +17,12 @@ for file in [func_file, classes_file, const_file, init_file]:
     if file.exists():
         file.unlink()
 
-
 def is_constant(node: AST) -> bool:
     return isinstance(node, ast.Assign) and all(isinstance(t, ast.Name) for t in node.targets)
-
 
 def write_to_file(file_path: Path, content) -> None:
     with Path(file_path).open("a", encoding="utf-8") as f:
         f.write(content + "\n\n")
-
 
 for root, _, files in os.walk("."):
     for file in files:

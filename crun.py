@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
@@ -8,7 +7,6 @@ from collections.abc import Callable
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def get_filez(root_dir: str | Path):
     from os import walk as os_walk
@@ -31,11 +29,9 @@ def get_filez(root_dir: str | Path):
     else:
         yield root_dir
 
-
 def should_skip(path: str | Path) -> bool:
     path = Path(path)
     return bool(path.is_symlink() or not SKIP_DIRS.isdisjoint(path.parts))
-
 
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
@@ -48,7 +44,6 @@ def fsz(sz: float) -> str:
         return f"{int(value)} {units[i]}"
     return f"{value:.1f} {units[i]}"
 
-
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -59,13 +54,11 @@ def gsz(path: str | Path) -> int:
             total += file.stat().st_size
     return total
 
-
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
-
 
 def process_file(path):
     path = Path(path)
@@ -79,7 +72,6 @@ def process_file(path):
     print(txt)
     return ret
 
-
 def main() -> None:
     cwd = Path().cwd()
     start_size = gsz(cwd)
@@ -89,7 +81,6 @@ def main() -> None:
             files.append(path)
     mpf3(process_file, files)
     print(f"{fsz(start_size - gsz(cwd))}")
-
 
 if __name__ == "__main__":
     sys.exit(main())

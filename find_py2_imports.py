@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import os
@@ -53,7 +52,6 @@ COLORS = {
 }
 RESET = "\x1b[0m"
 
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -73,7 +71,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -98,10 +95,8 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
-
 
 def get_filez(root_dir: str | Path):
     from os import walk as os_walk
@@ -124,17 +119,14 @@ def get_filez(root_dir: str | Path):
     else:
         yield root_dir
 
-
 def should_skip(path: str | Path) -> bool:
     path = Path(path)
     return bool(path.is_symlink() or not SKIP_DIRS.isdisjoint(path.parts))
-
 
 cwd = Path.cwd()
 parser = Parser()
 parser.language = Language(tsp.language())
 VALID = {"import_statement", "import_from_statement"}
-
 
 def process_file(path: Path) -> None:
     path = Path(path)
@@ -206,14 +198,12 @@ def process_file(path: Path) -> None:
                 cprint(f"{x} / {v} / {ratio}", "green")
                 continue
 
-
 def main() -> None:
     for path in get_filez(cwd):
         if path.is_symlink():
             continue
         if path.suffix == ".py":
             process_file(path)
-
 
 if __name__ == "__main__":
     sys.exit(main())

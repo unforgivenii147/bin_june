@@ -1,8 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
-
 
 def runcmd(
     cmd: list[str],
@@ -53,7 +51,6 @@ def runcmd(
         if show_output and not run_silently:
             print(msg, file=sys_stderr)
         return 1, "", msg
-
 
 if __name__ == "__main__":
     cmd = ["cleancss", "-O2", "removeDuplicateRules:on", "*.css", "-o", "merged.css"]

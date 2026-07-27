@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import shutil
@@ -8,10 +7,8 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 def get_all_files(root: Path) -> list[Path]:
     return [p for p in root.glob("*") if p.is_file() and not p.name.startswith(".") and p.name != "folderize.py"]
-
 
 def safe_rename(src: Path, dest_dir: Path) -> Path:
     dest = dest_dir / src.name
@@ -26,10 +23,8 @@ def safe_rename(src: Path, dest_dir: Path) -> Path:
             return dest
         i += 1
 
-
 def format_dir_name(start_idx: int, end_idx: int, total_files: int) -> str:
     return f"{start_idx}_{end_idx}"
-
 
 def main() -> None:
     root = Path()
@@ -81,7 +76,6 @@ def main() -> None:
     for name, cnt in created_dirs:
         print(f"{name:<20} {cnt:>8}")
     print(f"\nTotal directories: {len(created_dirs)}")
-
 
 if __name__ == "__main__":
     main()

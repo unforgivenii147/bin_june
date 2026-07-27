@@ -16,7 +16,6 @@ import requests
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 class SubtitleDownloader:
     def __init__(self):
         self.session = requests.Session()
@@ -134,7 +133,6 @@ class SubtitleDownloader:
             print(f"Error saving file: {e}")
             return False
 
-
 def main():
     if len(sys.argv) < 2:
         print('Usage: python get_sub.py "movie_or_series_name"')
@@ -155,7 +153,6 @@ def main():
         print("  - For TV series, use format: 'show_name_season_episode'")
         print("  - Example: 'breaking_bad_s01e01'")
         print("  - Try removing special characters")
-
 
 if __name__ == "__main__":
     main()

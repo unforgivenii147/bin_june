@@ -1,12 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
 
 from moviepy import AudioFileClip
-
 
 if __name__ == "__main__":
     file = sys.argv[1]

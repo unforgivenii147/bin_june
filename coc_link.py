@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import time
@@ -11,7 +10,6 @@ from bs4 import BeautifulSoup
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 def read_links_from_file(filename="links.txt"):
     try:
         with open(filename) as file:
@@ -20,7 +18,6 @@ def read_links_from_file(filename="links.txt"):
     except FileNotFoundError:
         print(f"Error: {filename} not found. Please create a {filename} with website URLs.")
         return []
-
 
 def extract_th18_bases(website_url, timeout=10):
     th18_links = []
@@ -51,7 +48,6 @@ def extract_th18_bases(website_url, timeout=10):
         print(f"✗ Error fetching {website_url}: {e!s}")
     return th18_links
 
-
 def save_to_html(all_bases, output_file="th18_bases.html"):
     html_content = (
         '<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Clash of Clans TH18 Base Links</title>\n    <style>\n        * {\n            margin: 0;\n            padding: 0;\n            box-sizing: border-box;\n        }\n        \n        body {\n            font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif;\n            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n            min-height: 100vh;\n            padding: 20px;\n        }\n        \n        .container {\n            max-width: 1000px;\n            margin: 0 auto;\n            background: white;\n            border-radius: 10px;\n            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);\n            padding: 30px;\n        }\n        \n        h1 {\n            color: #333;\n            margin-bottom: 10px;\n            text-align: center;\n        }\n        \n        .info {\n            text-align: center;\n            color: #666;\n            margin-bottom: 30px;\n            font-size: 14px;\n        }\n        \n        .stats {\n            display: flex;\n            justify-content: center;\n            gap: 30px;\n            margin-bottom: 30px;\n            flex-wrap: wrap;\n        }\n        \n        .stat {\n            text-align: center;\n        }\n        \n        .stat-number {\n            font-size: 28px;\n            font-weight: bold;\n            color: #667eea;\n        }\n        \n        .stat-label {\n            color: #999;\n            font-size: 12px;\n            text-transform: uppercase;\n            margin-top: 5px;\n        }\n        \n        .bases-grid {\n            display: grid;\n            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));\n            gap: 20px;\n        }\n        \n        .base-card {\n            background: #f8f9fa;\n            border-left: 4px solid #667eea;\n            border-radius: 5px;\n            padding: 15px;\n            transition: all 0.3s ease;\n        }\n        \n        .base-card:hover {\n            background: #fff;\n            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);\n            transform: translateY(-2px);\n        }\n        \n        .base-title {\n            font-weight: bold;\n            color: #333;\n            margin-bottom: 10px;\n            word-break: break-word;\n        }\n        \n        .base-link {\n            display: inline-block;\n            background: #667eea;\n            color: white;\n            padding: 10px 15px;\n            border-radius: 5px;\n            text-decoration: none;\n            font-size: 14px;\n            margin-bottom: 10px;\n            transition: background 0.3s ease;\n            word-break: break-all;\n        }\n        \n        .base-link:hover {\n            background: #764ba2;\n        }\n        \n        .base-source {\n            font-size: 12px;\n            color: #999;\n            margin-top: 10px;\n            word-break: break-word;\n        }\n        \n        .empty {\n            text-align: center;\n            padding: 40px;\n            color: #999;\n        }\n        \n        .footer {\n            text-align: center;\n            margin-top: 30px;\n            padding-top: 20px;\n            border-top: 1px solid #eee;\n            font-size: 12px;\n            color: #999;\n        }\n    </style>\n</head>\n<body>\n    <div class="container">\n        <h1>🏰 Clash of Clans TH18 Base Links</h1>\n        <p class="info">Extracted and compiled base links from various sources</p>\n        \n        <div class="stats">\n            <div class="stat">\n                <div class="stat-number">'
@@ -69,7 +65,6 @@ def save_to_html(all_bases, output_file="th18_bases.html"):
     with open(output_file, "w", encoding="utf-8") as f:
         f.write(html_content)
     print(f"\n✓ HTML file saved as {output_file}")
-
 
 def main():
     print("=" * 50)
@@ -90,7 +85,6 @@ def main():
     print(f"\nTotal TH18 bases found: {len(all_th18_bases)}")
     save_to_html(all_th18_bases)
     print("\nDone! Open 'th18_bases.html' in your browser to view the results.")
-
 
 if __name__ == "__main__":
     main()

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
@@ -9,7 +8,6 @@ from collections.abc import Callable
 from pathlib import Path
 
 CHUNK_SIZE = 1024 * 1024
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -31,13 +29,11 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
-
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
-
 
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
@@ -54,11 +50,9 @@ def is_binary(path: Path | str) -> bool:
     except Exception:
         return True
 
-
 cwd = Path.cwd()
 bin_dir = Path(f"{cwd}/binary")
 bin_dir.mkdir(exist_ok=True)
-
 
 def process_file(path) -> None:
     path = Path(path)
@@ -66,11 +60,9 @@ def process_file(path) -> None:
         newpath = bin_dir / path.name
         path.rename(newpath)
 
-
 def main() -> None:
     files = get_files(cwd)
     mpf3(process_file, files)
-
 
 if __name__ == "__main__":
     sys.exit(main())

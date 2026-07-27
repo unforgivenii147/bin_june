@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import os
@@ -11,7 +10,6 @@ from urllib.parse import urlparse
 import requests
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def runcmd(
     cmd: list[str],
@@ -63,11 +61,9 @@ def runcmd(
             print(msg, file=sys_stderr)
         return 1, "", msg
 
-
 GITHUB_API_URL = "https://api.github.com/repos"
 remained = []
 GITHUB_TOKEN = None
-
 
 def parse_repo_url(url_or_path):
     if "/" in url_or_path and not url_or_path.startswith("http"):
@@ -84,7 +80,6 @@ def parse_repo_url(url_or_path):
     except Exception:
         pass
     return None, None
-
 
 def get_repo_size_mb(user, repo):
     api_endpoint = f"{GITHUB_API_URL}/{user}/{repo}"
@@ -117,7 +112,6 @@ def get_repo_size_mb(user, repo):
         print(f"❌ An unexpected error occurred while fetching size: {e}")
         return None
 
-
 def clone_repo_shallow(user, repo) -> bool:
     repo_name = f"{user}/{repo}"
     repo_url = f"https://github.com/{repo_name}.git"
@@ -138,7 +132,6 @@ def clone_repo_shallow(user, repo) -> bool:
         print(f"❌ An unexpected error occurred during cloning: {e}")
         return False
 
-
 def process_repo(url: str) -> None:
     global remained
     user, repo = parse_repo_url(url)
@@ -155,7 +148,6 @@ def process_repo(url: str) -> None:
         print("\nScript finished with errors during cloning.")
         return
     remained.append(url)
-
 
 """
     if repo_size is not None and repo_size > 2.0:

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import contextlib
@@ -13,7 +12,6 @@ from multiprocessing import Pool, cpu_count
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 def format_size(bytes_size) -> str:
     if bytes_size == 0:
         return "N/A"
@@ -22,7 +20,6 @@ def format_size(bytes_size) -> str:
             return f"{bytes_size:.1f} {unit}"
         bytes_size /= 1024.0
     return f"{bytes_size:.1f} TB"
-
 
 def parse_size(size_str: str) -> int:
     size_str = size_str.strip()
@@ -40,7 +37,6 @@ def parse_size(size_str: str) -> int:
     }
     return int(value * multipliers.get(unit, 1))
 
-
 def get_all_packages():
     try:
         print("📦 Fetching list of all available packages...")
@@ -57,7 +53,6 @@ def get_all_packages():
         print(f"Error getting package list: {e}")
         return []
 
-
 def get_package_info(package):
     try:
         result = subprocess.run(["apt", "show", package], capture_output=True, text=True, check=False, timeout=10)
@@ -73,7 +68,6 @@ def get_package_info(package):
         return package, 0, False
     except Exception:
         return package, 0, False
-
 
 def process_packages_parallel(packages, threshold_bytes: int, num_processes: int | None = None):
     if num_processes is None:
@@ -104,7 +98,6 @@ def process_packages_parallel(packages, threshold_bytes: int, num_processes: int
                 all_packages[pkg] = 0
         return large_packages, all_packages, no_size, total
 
-
 def save_json_results(data, filename: str, threshold_mb: float, include_all=False) -> bool:
     output = {
         "metadata": {
@@ -125,7 +118,6 @@ def save_json_results(data, filename: str, threshold_mb: float, include_all=Fals
     except Exception as e:
         print(f"Error saving JSON: {e}")
         return False
-
 
 def main() -> None:
     default_threshold_mb = 10
@@ -199,7 +191,6 @@ def main() -> None:
             print('   Format: {"package1": 12345678, "package2": 98765432}')
         except Exception as e:
             print(f"Error saving simple JSON: {e}")
-
 
 if __name__ == "__main__":
     from multiprocessing import freeze_support

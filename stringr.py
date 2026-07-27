@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
@@ -9,7 +8,6 @@ from collections.abc import Callable
 from pathlib import Path
 
 CHUNK_SIZE = 1024 * 1024
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -31,13 +29,11 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
-
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
-
 
 def runcmd(
     cmd: list[str],
@@ -89,7 +85,6 @@ def runcmd(
             print(msg, file=sys_stderr)
         return (1, "", msg)
 
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -105,12 +100,10 @@ def is_binary(path: Path | str) -> bool:
     except Exception:
         return True
 
-
 cwd = Path.cwd()
 outfile = cwd / "all_strings.txt"
 all_files = 0
 c = 0
-
 
 def process_file(path) -> None:
     path = Path(path)
@@ -125,14 +118,12 @@ def process_file(path) -> None:
         f.write(f"\n# filename : {path.name}\n{txt}")
     return
 
-
 def main() -> None:
     args = sys.argv[1:]
     global all_files
     files = [Path(arg) for arg in args] if args else get_files(cwd)
     all_files = len(files)
     mpf3(process_file, files)
-
 
 if __name__ == "__main__":
     sys.exit(main())

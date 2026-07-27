@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import argparse
@@ -15,19 +14,16 @@ from tqdm import tqdm
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 def get_console_width() -> int:
     try:
         return get_terminal_size().columns
     except (OSError, AttributeError):
         return 80
 
-
 def sanitize_filename(name: str) -> str:
     name = urllib.parse.unquote(name)
     name = re.sub(r'[<>:"|?*]', "_", name)
     return name[:255].strip() or "downloaded_file"
-
 
 def extract_filename(url: str, headers: dict[str, str] | None = None) -> str:
     if headers:
@@ -42,7 +38,6 @@ def extract_filename(url: str, headers: dict[str, str] | None = None) -> str:
     filename = filename.split("?")[0].split("#")[0]
     return sanitize_filename(filename) or "downloaded_file"
 
-
 def filename_fix_existing(filepath: Path) -> Path:
     if not filepath.exists():
         return filepath
@@ -56,7 +51,6 @@ def filename_fix_existing(filepath: Path) -> Path:
         if not new_path.exists():
             return new_path
         counter += 1
-
 
 def download(
     url: str,
@@ -120,7 +114,6 @@ def download(
             msg = f"Download failed: {e}"
             raise RuntimeError(msg)
 
-
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Modern wget",
@@ -145,7 +138,6 @@ Examples:
     except RuntimeError as e:
         print(f"❌ {e}", file=sys.stderr)
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

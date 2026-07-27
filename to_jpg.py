@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-
 from __future__ import annotations
 
 import os
@@ -8,7 +7,6 @@ import sys
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -30,7 +28,6 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
-
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
     units = ("B", "KB", "MB", "GB", "TB")
@@ -42,7 +39,6 @@ def fsz(sz: float) -> str:
         return f"{int(value)} {units[i]}"
     return f"{value:.1f} {units[i]}"
 
-
 def rrs(path, before, after) -> None:
     delta = before - after
     msg = (
@@ -51,7 +47,6 @@ def rrs(path, before, after) -> None:
         else f"\x1b[5;92m{('-' if delta > 0 else '+')} \x1b[5;94m{fsz(abs(delta))}\x1b[0m | \x1b[5;96m{after / before * 100:.1f}\x1b[5;95m%\x1b[0m"
     )
     print(f"\n{path.name} | {msg}")
-
 
 def unique_path(path: Path | str) -> Path:
     path = _clean_fname(Path(path))
@@ -74,13 +69,11 @@ def unique_path(path: Path | str) -> Path:
             return new_path
         counter += 1
 
-
 def _clean_fname(path: Path) -> Path:
     from re import sub as re_sub
 
     clean_name = re_sub("(_\\d+)+", "", path.name)
     return path.with_name(clean_name)
-
 
 def gsz(path: str | Path) -> int:
     path = Path(path)
@@ -92,13 +85,11 @@ def gsz(path: str | Path) -> int:
             total += file.stat().st_size
     return total
 
-
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
-
 
 ATTRIBUTES = {
     "bold": 1,
@@ -150,7 +141,6 @@ COLORS = {
 }
 RESET = "\x1b[0m"
 
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -170,7 +160,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -195,10 +184,8 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
-
 
 try:
     import cv2
@@ -209,7 +196,6 @@ except ImportError:
     from PIL import Image
 
     USE_CV2 = False
-
 
 def process_file(path):
     path = Path(path)
@@ -258,7 +244,6 @@ def process_file(path):
     except Exception:
         return
 
-
 def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
@@ -270,7 +255,6 @@ def main() -> None:
     mpf3(process_file, files)
     diffsize = before - gsz(cwd)
     cprint(f"space freed: {fsz(diffsize)}")
-
 
 if __name__ == "__main__":
     main()

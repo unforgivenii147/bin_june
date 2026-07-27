@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 """
 Automatically scan directory and translate non-English text files.
 Optimized for Python 3.12.
@@ -32,7 +31,6 @@ except ImportError:
     HAS_FASTWALK = False
 NON_ENGLISH_PATTERN: Final[re.Pattern] = re.compile("[^\\x00-\\x7F]")
 
-
 def is_binary(path: Path) -> bool:
     try:
         with path.open("rb") as f:
@@ -47,10 +45,8 @@ def is_binary(path: Path) -> bool:
     except Exception:
         return True
 
-
 def split_into_chunks(text: str, size: int) -> list[str]:
     return [text[i : i + size] for i in range(0, len(text), size)]
-
 
 def translate_chunk(chunk: str) -> str:
     if not chunk.strip():
@@ -61,10 +57,8 @@ def translate_chunk(chunk: str) -> str:
         logger.error("Chunk translation failed: %s", e)
         return chunk
 
-
 def contains_non_english(text: str) -> bool:
     return bool(NON_ENGLISH_PATTERN.search(text))
-
 
 def translate_file(path: Path) -> None:
     logger.info("Processing file: %s", path)
@@ -88,7 +82,6 @@ def translate_file(path: Path) -> None:
         logger.info("✓ Translated → %s", new_path.name)
     except Exception as e:
         logger.error("Failed to write output file %s: %s", new_path, e)
-
 
 def process_directory(directory: str) -> None:
     logger.info("Scanning directory: %s", directory)
@@ -115,7 +108,6 @@ def process_directory(directory: str) -> None:
                 future.result()
             except Exception as e:
                 logger.error("Unexpected error processing %s: %s", f, e)
-
 
 if __name__ == "__main__":
     process_directory(DIRECTORY)

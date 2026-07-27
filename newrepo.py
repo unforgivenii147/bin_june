@@ -10,7 +10,6 @@ import os
 import subprocess
 import sys
 
-
 def run_command(cmd, check=True):
     """Run a shell command and return the output."""
     print(f"Running: {' '.join(cmd)}")
@@ -20,17 +19,14 @@ def run_command(cmd, check=True):
         sys.exit(1)
     return result
 
-
 def is_git_repo():
     """Check if current directory is already a git repository."""
     result = subprocess.run(["git", "rev-parse", "--git-dir"], capture_output=True, text=True)
     return result.returncode == 0
 
-
 def get_dir_name():
     """Get the name of the current directory."""
     return os.path.basename(os.getcwd())
-
 
 def main():
 
@@ -90,7 +86,6 @@ def main():
 
     print(f"\n✅ Success! Repository '{repo_name}' is now on GitHub.")
     print(f"View it at: https://github.com/{repo_name}")
-
 
 if __name__ == "__main__":
     main()

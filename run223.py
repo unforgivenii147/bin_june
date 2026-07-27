@@ -1,13 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import subprocess
 import sys
 from collections import deque
 from pathlib import Path
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -29,7 +27,6 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
-
 def run_2to3(file_path: Path) -> None:
     if not file_path.is_file():
         print(f"File not found: {file_path.name}")
@@ -38,7 +35,6 @@ def run_2to3(file_path: Path) -> None:
         subprocess.run(["2to3", "-w", "-n", "-f", "all", file_path], check=True)
     except subprocess.CalledProcessError as e:
         print(f"Error running 2to3: {e}")
-
 
 if __name__ == "__main__":
     args = sys.argv[1:]

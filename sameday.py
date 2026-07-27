@@ -1,12 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import ctypes
 import ctypes.util
 from datetime import UTC, datetime
-
 
 class StatxTimestamp(ctypes.Structure):
     _fields_ = [
@@ -14,7 +12,6 @@ class StatxTimestamp(ctypes.Structure):
         ("tv_nsec", ctypes.c_uint32),
         ("__reserved", ctypes.c_int32),
     ]
-
 
 class Statx(ctypes.Structure):
     _fields_ = [
@@ -41,11 +38,9 @@ class Statx(ctypes.Structure):
         ("__spare2", ctypes.c_uint64 * 14),
     ]
 
-
 libc = ctypes.CDLL(ctypes.util.find_library("c"), use_errno=True)
 AT_FDCWD = -100
 STATX_BTIME = 2048
-
 
 def get_creation_time_statx(path: str) -> datetime | None:
     statx_buf = Statx()
@@ -54,7 +49,6 @@ def get_creation_time_statx(path: str) -> datetime | None:
         timestamp = statx_buf.stx_btime.tv_sec
         return datetime.fromtimestamp(timestamp, tz=UTC)
     return None
-
 
 creation_time = get_creation_time_statx("filename.txt")
 print(f"Creation time: {creation_time}")

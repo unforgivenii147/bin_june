@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import re
@@ -14,7 +13,6 @@ from typing import Any
 from fontTools.ttLib import TTFont
 from fontTools.ttLib.ttFont import TTFont
 from termcolor import cprint
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -35,7 +33,6 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
             elif item.is_file() and (ext is None or item.suffix in ext):
                 files.append(item)
     return files
-
 
 def unique_path(path: Path | str) -> Path:
     path = _clean_fname(Path(path))
@@ -58,13 +55,11 @@ def unique_path(path: Path | str) -> Path:
             return new_path
         counter += 1
 
-
 def _clean_fname(path: Path) -> Path:
     from re import sub as re_sub
 
     clean_name = re_sub("(_\\d+)+", "", path.name)
     return path.with_name(clean_name)
-
 
 def mpf_async(func: Callable[[Any], Any], items: Iterable[Any]):
     with get_context("spawn").Pool(MAX_WORKERS) as p:
@@ -78,18 +73,14 @@ def mpf_async(func: Callable[[Any], Any], items: Iterable[Any]):
                 results.append(None)
         return results
 
-
 mpf = mpf_async
-
 
 def is_ascii_printable(s: str) -> bool:
     return all(32 <= ord(c) <= 126 for c in s)
 
-
 def clean_filename(s: str) -> str:
     s = re.sub(r"[^\w\\-\.]", "", s)
     return s.strip("_-.")
-
 
 def get_best_name(font: TTFont, name_id: int):
     fallback = None
@@ -106,7 +97,6 @@ def get_best_name(font: TTFont, name_id: int):
             fallback = name
     return fallback
 
-
 def get_font_names(path) -> tuple[str, str] | tuple[None, None]:
     font = TTFont(path)
     family = get_best_name(font, 1)
@@ -118,7 +108,6 @@ def get_font_names(path) -> tuple[str, str] | tuple[None, None]:
     if subfamily.lower() == family.lower():
         subfamily = "Regular"
     return (family, subfamily)
-
 
 def process_file(fn: Path) -> int:
     Path(path)
@@ -153,7 +142,6 @@ def process_file(fn: Path) -> int:
     cprint(f"{new_path.name}", "green")
     return 0
 
-
 def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -169,7 +157,6 @@ def main() -> None:
         process_file(files[0])
         sys.exit(0)
     _ = mpf(process_file, files)
-
 
 if __name__ == "__main__":
     main()

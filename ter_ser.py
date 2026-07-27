@@ -1,13 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -29,7 +27,6 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
-
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
     units = ("B", "KB", "MB", "GB", "TB")
@@ -41,7 +38,6 @@ def fsz(sz: float) -> str:
         return f"{int(value)} {units[i]}"
     return f"{value:.1f} {units[i]}"
 
-
 def rrs(path, before, after) -> None:
     delta = before - after
     msg = (
@@ -50,7 +46,6 @@ def rrs(path, before, after) -> None:
         else f"\x1b[5;92m{('-' if delta > 0 else '+')} \x1b[5;94m{fsz(abs(delta))}\x1b[0m | \x1b[5;96m{after / before * 100:.1f}\x1b[5;95m%\x1b[0m"
     )
     print(f"\n{path.name} | {msg}")
-
 
 def gsz(path: str | Path) -> int:
     path = Path(path)
@@ -62,13 +57,11 @@ def gsz(path: str | Path) -> int:
             total += file.stat().st_size
     return total
 
-
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
-
 
 def runcmd(
     cmd: list[str],
@@ -120,9 +113,7 @@ def runcmd(
             print(msg, file=sys_stderr)
         return (1, "", msg)
 
-
 EXT = [".js", ".jsx", ".jsm", ".jsc"]
-
 
 def safe_run(path: Path) -> bool:
     cmd = ["terser", "--compress", "--mangle", "--", str(path)]
@@ -132,7 +123,6 @@ def safe_run(path: Path) -> bool:
         return False
     path.write_text(txt, encoding="utf8")
     return True
-
 
 def process_file(path):
     path = Path(path)
@@ -147,7 +137,6 @@ def process_file(path):
         after = gsz(path)
         rrs(path, before, after)
     return
-
 
 def main():
     cwd = Path.cwd()
@@ -166,7 +155,6 @@ def main():
         process_file(files[0])
         sys.exit(0)
     mpf3(process_file, files)
-
 
 if __name__ == "__main__":
     sys.exit(main())

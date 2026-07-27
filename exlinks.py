@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import re
@@ -19,12 +18,10 @@ URL_REGEX = re.compile(r"(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^
 MAX_WORKERS = 4
 BINARY_CHECK_THRESHOLD = 0.7
 
-
 def extract_links_from_text(text: str, file_path: Path | str):
     urls = URL_REGEX.findall(text)
     github_urls = GITHUB_REPO_REGEX.findall(text)
     return urls, github_urls
-
 
 def is_likely_binary(file_path: Path, chunk_size=1024) -> bool:
     try:
@@ -43,7 +40,6 @@ def is_likely_binary(file_path: Path, chunk_size=1024) -> bool:
     except Exception as e:
         logger.warning(f"Could not reliably determine if {file_path} is binary: {e}")
         return True
-
 
 def read_file_with_encodings(
     file_path: Path,
@@ -73,7 +69,6 @@ def read_file_with_encodings(
     except Exception as e:
         logger.error(f"Failed to read or detect encoding for {file_path}: {e}")
     return None, None
-
 
 def process_file(file_path_str: str):
     file_path = Path(file_path_str)
@@ -180,12 +175,10 @@ def process_file(file_path_str: str):
         logger.error(f"Failed to process {file_path}: {e}")
     return list(set(local_urls)), list(set(github_urls))
 
-
 def find_files_recursively(directory: Path):
     for path in directory.rglob("*"):
         if path.is_file():
             yield str(path)
-
 
 if __name__ == "__main__":
     base_dir = Path(".")

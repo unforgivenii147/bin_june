@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import argparse
@@ -8,7 +7,6 @@ import csv
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def sort_packages_by_size(filename: str) -> None:
     with Path(filename).open(newline="", encoding="utf-8") as f:
@@ -24,7 +22,6 @@ def sort_packages_by_size(filename: str) -> None:
         writer.writeheader()
         writer.writerows(rows)
     print(f"File '{filename}' sorted by Installed-Size and overwritten.")
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Sort Debian packages CSV by Installed-Size")

@@ -1,13 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -29,13 +27,11 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
-
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
-
 
 def runcmd(
     cmd: list[str],
@@ -87,7 +83,6 @@ def runcmd(
             print(msg, file=sys_stderr)
         return (1, "", msg)
 
-
 def process_file(path) -> tuple[Path, bool]:
     path = Path(path)
     if path.suffix.lower() in {".html", ".htm"}:
@@ -103,7 +98,6 @@ def process_file(path) -> tuple[Path, bool]:
         print(f"✗ Unexpected error converting {path}: {e}", file=sys.stderr)
         return (path, False)
 
-
 def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -118,7 +112,6 @@ def main() -> None:
     else:
         files = get_files(cwd)
     mpf3(process_file, files)
-
 
 if __name__ == "__main__":
     sys.exit(main())

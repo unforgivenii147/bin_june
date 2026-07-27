@@ -18,7 +18,6 @@ TARGET_CHUNK_SIZE = 4900
 BUFFER_SIZE = 500
 MAX_CHUNK_SIZE = 4999
 
-
 def find_chunk_boundary(text: str, start_pos: int, target_size: int = TARGET_32768) -> int:
     end_pos = min(start_pos + target_size, len(text))
     if end_pos >= len(text):
@@ -37,7 +36,6 @@ def find_chunk_boundary(text: str, start_pos: int, target_size: int = TARGET_327
             return i + 1
     return end_pos
 
-
 def split_text_into_chunks(text: str) -> list[str]:
     chunks = []
     pos = 0
@@ -50,7 +48,6 @@ def split_text_into_chunks(text: str) -> list[str]:
             chunks.append(chunk)
         pos = chunk_end
     return chunks
-
 
 def process_file(file_path: Path, output_dir: Path) -> tuple[str, int, str | None]:
     try:
@@ -72,7 +69,6 @@ def process_file(file_path: Path, output_dir: Path) -> tuple[str, int, str | Non
     except Exception as e:
         return (file_path.name, 0, str(e))
 
-
 def get_text_files(paths: list[Path]) -> list[Path]:
     text_files = []
     text_extensions = {".txt", ".md", ".csv", ".log", ".json", ".yaml", ".yml", ".xml"}
@@ -85,7 +81,6 @@ def get_text_files(paths: list[Path]) -> list[Path]:
                 if file.is_file() and file.suffix.lower() in text_extensions:
                     text_files.append(file)
     return text_files
-
 
 def main():
     parser = argparse.ArgumentParser(
@@ -127,7 +122,6 @@ def main():
     print(f"Total chunks created: {total_chunks}")
     print(f"Output directory: {output_dir.resolve()}")
     return 1 if errors else 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

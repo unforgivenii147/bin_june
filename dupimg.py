@@ -37,19 +37,15 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tif", ".tiff", ".gif"}
 HASH_SIZE = 16
 
-
 def log_verbose(msg: str, level: str = "INFO") -> None:
     if os.environ.get("VERBOSE", "1") == "1":
         print(f"[{level}] {msg}")
 
-
 def log_action(msg: str) -> None:
     print(msg)
 
-
 def is_image(path: Path) -> bool:
     return path.suffix.lower() in IMAGE_EXTS
-
 
 def load_image_cv2(path: str) -> np.ndarray | None:
     try:
@@ -62,7 +58,6 @@ def load_image_cv2(path: str) -> np.ndarray | None:
         log_verbose(f"Failed to load {path}: {e}", "WARN")
         return None
 
-
 def phash_cv2(img: np.ndarray, hash_size: int = HASH_SIZE) -> str:
     if img is None:
         return None
@@ -74,12 +69,10 @@ def phash_cv2(img: np.ndarray, hash_size: int = HASH_SIZE) -> str:
     hash_str = "".join(hash_bits.astype(int).astype(str))
     return hash_str
 
-
 def hamming_distance(hash1: str, hash2: str) -> int:
     if hash1 is None or hash2 is None:
         return float("inf")
     return sum(c1 != c2 for c1, c2 in zip(hash1, hash2, strict=False))
-
 
 def compute_hash(file_path: Path) -> tuple[str, str | None]:
     img = load_image_cv2(str(file_path))
@@ -87,7 +80,6 @@ def compute_hash(file_path: Path) -> tuple[str, str | None]:
         return file_path.name, None
     hash_str = phash_cv2(img)
     return file_path.name, hash_str
-
 
 def find_duplicates(hashes: list[tuple[str, str]], threshold: int) -> list[list[str]]:
     groups = []
@@ -109,7 +101,6 @@ def find_duplicates(hashes: list[tuple[str, str]], threshold: int) -> list[list[
             groups.append(group)
     return groups
 
-
 def get_file_info(file_path: Path) -> str:
     try:
         size_mb = file_path.stat().st_size / (1024 * 1024)
@@ -121,7 +112,6 @@ def get_file_info(file_path: Path) -> str:
             return f"{file_path.name:<50} ({size_mb:.2f} MB)"
     except Exception:
         return file_path.name
-
 
 def move_duplicates_to_folders(
     groups: list[list[str]], current_dir: Path, output_prefix: str, dry_run: bool = False
@@ -155,7 +145,6 @@ def move_duplicates_to_folders(
             except Exception as e:
                 log_verbose(f"Failed to move {filename}: {e}", "ERROR")
     return folders_created, files_moved
-
 
 def main():
     threshold = int(os.environ.get("DUP_HASH_THRESHOLD", "4"))
@@ -218,7 +207,6 @@ def main():
     total_dupes = sum(len(g) for g in groups)
     log_action(f"Summary: {len(groups)} group(s), {total_dupes} duplicate file(s)")
     log_action(f"{'=' * 80}\n")
-
 
 if __name__ == "__main__":
     main()

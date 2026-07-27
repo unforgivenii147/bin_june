@@ -1,12 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import os
 import re
 from pathlib import Path
-
 
 def resolve_imports(content: str, cwd: Path) -> str:
     folder_name = Path(cwd).name
@@ -17,7 +15,6 @@ def resolve_imports(content: str, cwd: Path) -> str:
         content,
     )
     return re.sub(r"import \.", f"import {folder_name}", content)
-
 
 def merge_python_files() -> None:
     cwd = Path.cwd()
@@ -32,7 +29,6 @@ def merge_python_files() -> None:
                 content = resolve_imports(content, cwd)
                 outfile.write(content)
     print(f"Merged {len(py_files)} files into {output_filename}")
-
 
 if __name__ == "__main__":
     merge_python_files()

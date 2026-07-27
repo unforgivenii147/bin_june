@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import base64
@@ -15,10 +14,8 @@ import py7zr
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 def get_current_folder_name() -> str:
     return Path(Path.cwd()).name
-
 
 def get_user_folder_name(default_name: str):
     while True:
@@ -27,11 +24,9 @@ def get_user_folder_name(default_name: str):
             return default_name
         return user_input
 
-
 def folder_exists_in_db(cursor: Cursor, folder_name):
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (folder_name,))
     return cursor.fetchone() is not None
-
 
 def create_folder_table(cursor: Cursor, folder_name) -> None:
     cursor.execute(f"""
@@ -45,7 +40,6 @@ def create_folder_table(cursor: Cursor, folder_name) -> None:
         )
     """)
 
-
 def compress_data(data_bytes) -> str | None:
     if not data_bytes:
         return None
@@ -58,7 +52,6 @@ def compress_data(data_bytes) -> str | None:
     except Exception as e:
         print(f"    Compression error: {e!s}")
         return None
-
 
 def read_file_contents(filepath: str):
     try:
@@ -84,7 +77,6 @@ def read_file_contents(filepath: str):
         return {"content": error_msg, "is_binary": False, "original_size": len(error_msg)}
     except Exception:
         return {"content": error_msg, "is_binary": False, "original_size": len(error_msg)}
-
 
 def get_files_in_cwd():
     cwd = Path.cwd()
@@ -136,7 +128,6 @@ def get_files_in_cwd():
         print("Warning: Permission denied accessing some files")
     return files
 
-
 def insert_files(cursor: Cursor, folder_name, files) -> None:
     for file_info in files:
         cursor.execute(
@@ -152,7 +143,6 @@ def insert_files(cursor: Cursor, folder_name, files) -> None:
                 file_info.get("compressed_size", 0),
             ),
         )
-
 
 def main() -> None:
     try:
@@ -199,7 +189,6 @@ def main() -> None:
         else:
             print(f"   Total size: {total_original / 1024 / 1024:.2f}MB")
     conn.close()
-
 
 if __name__ == "__main__":
     main()

@@ -5,7 +5,6 @@ import re
 DB_NAME = "ruff_rules.db"
 MD_FILE = "ruff.md"
 
-
 def create_database():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
@@ -26,7 +25,6 @@ def create_database():
     """)
     conn.commit()
     conn.close()
-
 
 def parse_and_insert():
     with open(MD_FILE, "r", encoding="utf-8") as f:
@@ -72,7 +70,6 @@ def parse_and_insert():
     conn.commit()
     conn.close()
     print(f"Success! Successfully saved {inserted_count} rules into '{DB_NAME}'.")
-
 
 if __name__ == "__main__":
     create_database()

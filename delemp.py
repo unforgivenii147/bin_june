@@ -13,8 +13,7 @@ import os
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Iterator
-
-
+from binaryornot import is_binary
 BOLD = "\x1b[1m"
 GREEN = "\x1b[32m"
 YELLOW = "\x1b[33m"
@@ -22,104 +21,6 @@ CYAN = "\x1b[36m"
 RED = "\x1b[31m"
 RESET = "\x1b[0m"
 DIM = "\x1b[2m"
-
-
-TEXT_EXTENSIONS = frozenset(
-    {
-        ".txt",
-        ".py",
-        ".pyw",
-        ".js",
-        ".jsx",
-        ".ts",
-        ".tsx",
-        ".html",
-        ".htm",
-        ".css",
-        ".scss",
-        ".sass",
-        ".less",
-        ".json",
-        ".xml",
-        ".md",
-        ".rst",
-        ".yml",
-        ".yaml",
-        ".toml",
-        ".ini",
-        ".cfg",
-        ".conf",
-        ".log",
-        ".csv",
-        ".tsv",
-        ".sh",
-        ".bash",
-        ".zsh",
-        ".fish",
-        ".ps1",
-        ".bat",
-        ".cmd",
-        ".c",
-        ".cpp",
-        ".cc",
-        ".cxx",
-        ".h",
-        ".hpp",
-        ".hxx",
-        ".java",
-        ".kt",
-        ".scala",
-        ".rs",
-        ".go",
-        ".rb",
-        ".php",
-        ".pl",
-        ".pm",
-        ".lua",
-        ".r",
-        ".m",
-        ".swift",
-        ".sql",
-        ".graphql",
-        ".proto",
-        ".tex",
-        ".bib",
-        ".make",
-        ".cmake",
-        ".dockerfile",
-        ".gitignore",
-        ".env",
-        ".editorconfig",
-        ".eslintrc",
-        ".prettierrc",
-        ".babelrc",
-        ".vue",
-        ".svelte",
-        ".astro",
-        ".nix",
-        ".hs",
-        ".erl",
-        ".ex",
-        ".exs",
-        ".clj",
-        ".cljs",
-        ".edn",
-        ".dart",
-        ".nim",
-        ".zig",
-        ".v",
-        ".sv",
-        ".asm",
-        ".s",
-        ".wat",
-        ".wast",
-        ".tf",
-        ".tfvars",
-        ".hcl",
-        ".pkr",
-    }
-)
-
 
 BINARY_SIGNATURES = (
     b"\x00",
@@ -157,90 +58,36 @@ BINARY_SIGNATURES = (
     b"\xa1\xb2\xc3\xd4",
 )
 
-
 _TEXT_CHARS = bytearray({7, 8, 9, 10, 12, 13, 27} | set(range(32, 127)) | set(range(128, 256)))
 _BINARY_CHECK_SIZE = 8192
 
 
-def is_binary_file(file_path: Path) -> bool:
-    """Quickly determine if a file is binary using extension and content checks."""
-
-    if file_path.suffix.lower() in TEXT_EXTENSIONS:
-        return False
-
-    binary_extensions = {
-        ".pyc",
-        ".pyo",
-        ".so",
-        ".o",
-        ".a",
-        ".lib",
-        ".dll",
-        ".exe",
-        ".bin",
-        ".dat",
-        ".db",
-        ".sqlite",
-        ".sqlite3",
-    }
-    if file_path.suffix.lower() in binary_extensions:
-        return True
-
-    try:
-        with open(file_path, "rb") as f:
-            chunk = f.read(_BINARY_CHECK_SIZE)
-    except OSError:
-        return True
-
-    if not chunk:
-        return False
-
-    if b"\x00" in chunk:
-        return True
-
-    for signature in BINARY_SIGNATURES:
-        if chunk.startswith(signature):
-            return True
-
-    non_text = sum(1 for byte in chunk if byte not in _TEXT_CHARS)
-    if non_text / len(chunk) > 0.3:
-        return True
-
-    return False
-
-
 def remove_blank_lines(file_path: Path, remove_spaces: bool = False) -> tuple[str, int, int, str]:
-    """Remove blank lines from a file. Returns (path, total_lines, removed_lines, status)."""
-    try:
-        with open(file_path, encoding="utf-8", errors="ignore") as f:
-            lines = f.readlines()
+    def rbl(text) -> str:
+        lines = text.splitlines(keepends=True)
+        result_lines = []
+        prev_blank = False
+        for line in lines:
+            is_blank = line.strip() == ""
+            if is_blank and prev_blank:
+                continue
+            result_lines.append(line)
+            prev_blank = is_blank
+        return "".join(result_lines)
 
-        total_lines = len(lines)
+    content = file_path.read_text(encoding="utf-8")
+    total_lines = len(content.splitlines())
+    result = rbl(content)
+    result_lines = len(result.splitlines())
+    removed_lines = total_lines - result_lines
+    file_path.write_text(result, encoding="utf-8")
 
-        if remove_spaces:
-            new_lines = [line for line in lines if line.strip()]
-        else:
-            new_lines = [line for line in lines if line.strip("\n\r")]
-
-        removed_lines = total_lines - len(new_lines)
-
-        if removed_lines > 0:
-            with open(file_path, "w", encoding="utf-8") as f:
-                f.writelines(new_lines)
-
-        return (str(file_path), total_lines, removed_lines, "processed")
-
-    except UnicodeDecodeError:
-        return (str(file_path), 0, 0, "binary")
-    except Exception as e:
-        return (str(file_path), 0, 0, f"error: {e}")
-
+    return (str(file_path), total_lines, removed_lines, "processed")
 
 def process_file(args: tuple[Path, Path, bool]) -> tuple[str, int, int, str]:
-    """Process a single file: check if binary, then remove blank lines."""
     base_dir, file_path, remove_spaces = args
 
-    if is_binary_file(file_path):
+    if is_binary(file_path):
         try:
             rel_path = file_path.relative_to(base_dir)
             return (str(rel_path), 0, 0, "binary")
@@ -254,7 +101,6 @@ def process_file(args: tuple[Path, Path, bool]) -> tuple[str, int, int, str]:
         return (str(rel_path), result[1], result[2], result[3])
     except ValueError:
         return result
-
 
 def collect_files(paths: list[Path]) -> list[tuple[Path, Path]]:
     """Collect all files from given paths (files and/or directories)."""
@@ -271,12 +117,12 @@ def collect_files(paths: list[Path]) -> list[tuple[Path, Path]]:
         elif path.is_dir():
             for file_path in path.rglob("*"):
                 if file_path.is_file() and not file_path.is_symlink():
-                    files.append((path, file_path))
+                    if  not ".git" in file_path.parts:
+                        files.append((path, file_path))
         else:
             print(f"{YELLOW}⚠ Warning:{RESET} '{path}' is not a file or directory, skipping.")
 
     return files
-
 
 def print_header(paths: list[Path], remove_spaces: bool):
     """Print the program header with processing information."""
@@ -295,7 +141,6 @@ def print_header(paths: list[Path], remove_spaces: bool):
     else:
         print(f"{GREEN}Remove blank lines only{RESET}")
     print()
-
 
 def print_results(results: list[tuple], total_removed: int, total_files: int, show_all_binary: bool = False):
     """Print detailed results of the processing."""
@@ -343,7 +188,6 @@ def print_results(results: list[tuple], total_removed: int, total_files: int, sh
     if errors:
         print(f"  Errors:                {BOLD}{RED}{len(errors):,}{RESET}")
     print(f"{BOLD}{CYAN}{'─' * 70}{RESET}\n")
-
 
 def main():
     parser = argparse.ArgumentParser(
@@ -451,7 +295,6 @@ Examples:
     )
 
     print_results(results, total_removed, total_files, args.show_binary)
-
 
 if __name__ == "__main__":
     main()

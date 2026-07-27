@@ -1,13 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
 from pathlib import Path
 
 from joblib import Parallel, delayed
-
 
 def is_text_file(file_path):
     try:
@@ -16,7 +14,6 @@ def is_text_file(file_path):
             return b"\x00" not in chunk
     except (OSError, PermissionError):
         return False
-
 
 def search_in_file(file_path, search_string):
     try:
@@ -30,13 +27,11 @@ def search_in_file(file_path, search_string):
         pass
     return []
 
-
 def search_in_directory(directory, search_string, n_jobs=-1):
     files = [f for f in directory.rglob("*") if f.is_file()]
     results = Parallel(n_jobs=n_jobs)(delayed(search_in_file)(file, search_string) for file in files)
     matches = [match for sublist in results for match in sublist]
     return matches
-
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 """
 Remove HTML comments (<!-- ... -->) from HTML and CSS files recursively.
 Processes files in parallel and updates them in-place.
@@ -17,7 +16,6 @@ from pathlib import Path
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 COMMENT_PATTERN = re.compile("<!--.*?-->", re.DOTALL)
 
-
 def remove_comments_from_file(file_path):
     try:
         with open(file_path, encoding="utf-8", errors="ignore") as f:
@@ -32,7 +30,6 @@ def remove_comments_from_file(file_path):
     except Exception as e:
         return (file_path, False, str(e))
 
-
 def find_files(directory, extensions=None):
     if extensions is None:
         extensions = {".html", ".htm", ".css"}
@@ -42,7 +39,6 @@ def find_files(directory, extensions=None):
     for file_path in directory.rglob("*"):
         if file_path.is_file() and file_path.suffix.lower() in extensions:
             yield file_path
-
 
 def main():
     import argparse
@@ -90,7 +86,6 @@ def main():
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

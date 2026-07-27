@@ -1,12 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import subprocess
 import sys
 from pathlib import Path
-
 
 def extract_subtitles(path) -> None:
     if not path.exists():
@@ -17,7 +15,6 @@ def extract_subtitles(path) -> None:
         subprocess.run(cmd, check=True)
     except:
         print("Error")
-
 
 if __name__ == "__main__":
     fn = Path(sys.argv[1].strip())

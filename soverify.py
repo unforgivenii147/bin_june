@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import ctypes
@@ -11,7 +10,6 @@ from collections import deque
 from pathlib import Path
 
 from loguru import logger
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -32,7 +30,6 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
             elif item.is_file() and (ext is None or item.suffix in ext):
                 files.append(item)
     return files
-
 
 ATTRIBUTES = {
     "bold": 1,
@@ -84,7 +81,6 @@ COLORS = {
 }
 RESET = "\x1b[0m"
 
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -104,7 +100,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -129,10 +124,8 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
-
 
 logger.remove()
 logger.add(
@@ -141,7 +134,6 @@ logger.add(
     format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}",
     rotation="10 MB",
 )
-
 
 class CtypesVerifier:
     def __init__(self, verbose: bool = False) -> None:
@@ -197,7 +189,6 @@ class CtypesVerifier:
             self.log(f"Could not extract symbols from {file_path.name}: {e}", "ERROR")
         return (can_load, symbol_info)
 
-
 def verify_single_file(file_path: Path) -> bool | None:
     try:
         verifier = CtypesVerifier()
@@ -214,7 +205,6 @@ def verify_single_file(file_path: Path) -> bool | None:
         cprint(f"  ✗ {file_path}: Unexpected error - {e}", "red")
         return False
 
-
 def collect_files(args: list[str]) -> list[Path]:
     if not args:
         return get_files(Path.cwd(), ext=[".so"])
@@ -228,7 +218,6 @@ def collect_files(args: list[str]) -> list[Path]:
         else:
             cprint(f"Warning: {path} does not exist", "yellow")
     return files
-
 
 def main() -> None:
     files = collect_files(sys.argv[1:])
@@ -261,7 +250,6 @@ def main() -> None:
     logger.info(f"Verification complete: {valid_count} valid, {error_count} errors out of {len(files)} files")
     if error_count > 0:
         sys.exit(1)
-
 
 if __name__ == "__main__":
     gil_state = ctypes.pythonapi.PyGILState_Ensure()

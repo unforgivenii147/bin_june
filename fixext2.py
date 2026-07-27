@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import os
@@ -22,7 +21,6 @@ MIME_TO_EXT = {
     "application/x-tar": "tar",
     "text/xml": "xml",
 }
-
 
 def detect_text_based_extension(text: str):
     text = text.strip()
@@ -50,7 +48,6 @@ def detect_text_based_extension(text: str):
         return "xml"
     return None
 
-
 def detect_extension(path: str, mime_type: str):
     if mime_type in MIME_TO_EXT:
         return MIME_TO_EXT[mime_type]
@@ -64,7 +61,6 @@ def detect_extension(path: str, mime_type: str):
         except:
             pass
     return None
-
 
 def safe_rename(src: str, dst: str) -> Path:
     dst = Path(dst)
@@ -80,7 +76,6 @@ def safe_rename(src: str, dst: str) -> Path:
         new_path = Path(f"{base} ({counter}){ext}")
     src.rename(new_path)
     return new_path
-
 
 def correct_file_extension(root: str = ".") -> None:
     mime = magic.Magic(mime=True)
@@ -108,7 +103,6 @@ def correct_file_extension(root: str = ".") -> None:
             final_path = safe_rename(path, new_path)
             if final_path != new_path:
                 print(f" ⚠  Collision detected. Saved as: {Path(final_path).name}")
-
 
 if __name__ == "__main__":
     correct_file_extension()

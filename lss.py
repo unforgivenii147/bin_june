@@ -1,11 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
 from pathlib import Path
-
 
 def main() -> None:
     prefix = sys.argv[1].strip() if len(sys.argv) > 1 else ""
@@ -15,7 +13,6 @@ def main() -> None:
     for entry in Path.cwd().iterdir():
         if entry.name.startswith(prefix):
             print(entry.name)
-
 
 if __name__ == "__main__":
     main()

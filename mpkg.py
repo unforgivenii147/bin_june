@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import argparse
@@ -13,7 +12,6 @@ from loguru import logger
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 def find_dist_info_dir(site_packages: Path, pkg_name: str) -> Path:
     candidates = list(site_packages.glob(f"{pkg_name}-*.dist-info"))
     if not candidates:
@@ -24,7 +22,6 @@ def find_dist_info_dir(site_packages: Path, pkg_name: str) -> Path:
     if len(candidates) > 1:
         logger.warning("Multiple dist-info directories found for '{}', using: {}", pkg_name, candidates[0])
     return candidates[0]
-
 
 def copy_package_files(pkg_name: str, site_packages: Path) -> None:
     dist_info_dir = find_dist_info_dir(site_packages, pkg_name)
@@ -64,7 +61,6 @@ def copy_package_files(pkg_name: str, site_packages: Path) -> None:
     print("Missing files (warned): {}", missing_count)
     print("Copied: {} | Errors: {}", copied_count, error_count)
 
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="Copy (or move) package files based on RECORD metadata.")
     parser.add_argument("pkg", nargs="?", help="Package name to process")
@@ -94,7 +90,6 @@ def main() -> None:
     except Exception as e:
         logger.exception("Fatal error: {}", e)
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

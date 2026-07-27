@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import base64
@@ -12,7 +11,6 @@ from collections.abc import Iterable
 from pathlib import Path
 
 CHUNK_SIZE = 1024 * 1024
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -34,7 +32,6 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -50,10 +47,8 @@ def is_binary(path: Path | str) -> bool:
     except Exception:
         return True
 
-
 def get_nobinary(path: str | Path) -> list[Path]:
     return [f for f in get_files(path) if not is_binary(f)]
-
 
 OUTPUT_DIR = Path("extracted_base64")
 DATA_URL_RE = re.compile(r"data:(?P<mime>[-\w.+/]+);base64,(?P<data>[A-Za-z0-9+/=\s]+)", re.IGNORECASE)
@@ -78,19 +73,15 @@ MIME_EXTENSION_MAP: dict[str, str] = {
     "application/javascript": "js",
 }
 
-
 def infer_extension(mime: str) -> str:
     return MIME_EXTENSION_MAP.get(mime.lower(), mime.rsplit("/", maxsplit=1)[-1])
-
 
 def decode_base64(data: str) -> bytes:
     cleaned = "".join(data.split())
     return base64.b64decode(cleaned, validate=False)
 
-
 def content_hash(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()[:15]
-
 
 def extract_from_html(html: str) -> Iterable[tuple[str, bytes]]:
     for matchz in DATA_URL_RE.finditer(html):
@@ -102,7 +93,6 @@ def extract_from_html(html: str) -> Iterable[tuple[str, bytes]]:
             continue
         yield (mime, decoded)
 
-
 def save_asset(mime: str, data: bytes) -> Path:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     ext = infer_extension(mime)
@@ -112,7 +102,6 @@ def save_asset(mime: str, data: bytes) -> Path:
     if not path.exists():
         path.write_bytes(data)
     return path
-
 
 def main() -> None:
     cwd = Path.cwd()
@@ -133,7 +122,6 @@ def main() -> None:
             save_asset(mime, data)
             extracted_count += 1
     print(f"{extracted_count} elements extracted.")
-
 
 if __name__ == "__main__":
     main()

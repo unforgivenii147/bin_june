@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import os
@@ -15,7 +14,6 @@ from googleapiclient.http import MediaIoBaseDownload
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 SCOPES = ["https://www.googleapis.com/auth/drive.readonly"]
-
 
 class GoogleDriveSyncer:
     def __init__(self, credentials_file: str = "credentials.json", token_file: str = "token.pickle") -> None:
@@ -131,7 +129,6 @@ class GoogleDriveSyncer:
         self.sync_folder("root", local_base_path, "My Drive")
         print("\n✅ Sync completed!")
 
-
 def main() -> None:
     LOCAL_SYNC_PATH = "./google_drive_backup"
     CREDENTIALS_FILE = "credentials.json"
@@ -147,7 +144,6 @@ def main() -> None:
         print("4. Create OAuth 2.0 credentials (Desktop application)")
         print('5. Download credentials as "credentials.json"')
         print("6. Place credentials.json in the same directory as this script")
-
 
 if __name__ == "__main__":
     main()

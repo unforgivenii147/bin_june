@@ -12,14 +12,12 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 def find_site_packages() -> Path | None:
     for path in sys.path:
         p = Path(path)
         if p.name == "site-packages" and p.exists():
             return p
     return None
-
 
 def find_bin_dir() -> Path | None:
     prefix = Path(sys.prefix)
@@ -35,7 +33,6 @@ def find_bin_dir() -> Path | None:
             return possible_bin
     return None
 
-
 def parse_entry_points(entry_points_file: Path) -> list[tuple[str, str]]:
     scripts = []
     if not entry_points_file.exists():
@@ -49,7 +46,6 @@ def parse_entry_points(entry_points_file: Path) -> list[tuple[str, str]]:
     except Exception as e:
         print(f"Error parsing {entry_points_file}: {e}")
     return scripts
-
 
 def check_package(args: tuple[Path, Path]) -> dict:
     dist_info_dir, bin_dir = args
@@ -79,10 +75,8 @@ def check_package(args: tuple[Path, Path]) -> dict:
             )
     return result
 
-
 def find_dist_info_dirs(site_packages: Path) -> list[Path]:
     return sorted(site_packages.glob("*.dist-info"))
-
 
 def main():
     print("=" * 80)
@@ -178,7 +172,6 @@ def main():
     else:
         print("\n✓ All console scripts are properly installed.")
         sys.exit(0)
-
 
 if __name__ == "__main__":
     main()

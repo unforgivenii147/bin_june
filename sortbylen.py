@@ -1,14 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
 from pathlib import Path
 
-
 THRESHOLD = 1024 * 1024
-
 
 def read_lines(path: str | Path, ke: bool = True) -> list[str]:
     path = Path(path)
@@ -21,7 +18,6 @@ def read_lines(path: str | Path, ke: bool = True) -> list[str]:
         lines.append("")
     return lines
 
-
 def read_lines_mmap(path: Path, keep_ends: bool = True) -> list[str]:
     import mmap
 
@@ -33,10 +29,8 @@ def read_lines_mmap(path: Path, keep_ends: bool = True) -> list[str]:
         lines.append("")
     return lines
 
-
 def sort_by_length(lines: list[str]) -> list[str]:
     return sorted(lines, key=len)
-
 
 if __name__ == "__main__":
     path = Path(sys.argv[1].strip())

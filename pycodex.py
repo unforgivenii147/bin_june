@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import argparse
@@ -17,10 +16,8 @@ from loguru import logger
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class CodeBlock:
@@ -28,7 +25,6 @@ class CodeBlock:
     source_file: str
     block_index: int
     suggested_name: str | None = None
-
 
 class HTTPSession:
     def __init__(self, max_retries: int = 3, timeout: int = 10) -> None:
@@ -50,7 +46,6 @@ class HTTPSession:
 
     def close(self) -> None:
         self.session.close()
-
 
 class CodeBlockExtractor:
     def __init__(self) -> None:
@@ -187,7 +182,6 @@ class CodeBlockExtractor:
     def close(self) -> None:
         self.http_session.close()
 
-
 class FileProcessor:
     def __init__(self, output_dir: str = "./output") -> None:
         self.output_dir = Path(output_dir)
@@ -247,11 +241,9 @@ class FileProcessor:
     def close(self) -> None:
         self.extractor.close()
 
-
 def find_html_files(directory: str) -> list[str]:
     path = Path(directory)
     return [str(html_file) for html_file in path.rglob("*.html")]
-
 
 def main() -> None:
     parser = argparse.ArgumentParser(
@@ -312,7 +304,6 @@ Examples:
         print(f"Results saved to: {processor.output_dir}")
     finally:
         processor.close()
-
 
 if __name__ == "__main__":
     main()

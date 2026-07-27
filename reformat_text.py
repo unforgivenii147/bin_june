@@ -1,22 +1,18 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import re
 import sys
 from pathlib import Path
 
-
 MAX_LEN = 120
 BREAK_PUNCTS = [",", ";", ":", "?"]
-
 
 def split_sentences(text: str):
     pattern = re.compile(r"[^.!]+[.!]", re.MULTILINE | re.DOTALL)
     sentences = pattern.findall(text)
     return [s.strip() for s in sentences if s.strip()]
-
 
 def break_long_sentence(sentence: str, max_len: int = MAX_LEN):
     parts = []
@@ -34,14 +30,12 @@ def break_long_sentence(sentence: str, max_len: int = MAX_LEN):
         parts.append(sentence.strip())
     return parts
 
-
 def restructure_paragraph(paragraph: str) -> str:
     sentences = split_sentences(paragraph)
     lines = []
     for s in sentences:
         lines.extend(break_long_sentence(s, MAX_LEN))
     return "\n".join(lines)
-
 
 def restructure_file(filepath: Path) -> None:
     backup = filepath.with_suffix(filepath.suffix + ".bak")
@@ -52,7 +46,6 @@ def restructure_file(filepath: Path) -> None:
     new_text = "\n\n".join(new_paragraphs) + "\n"
     filepath.write_text(new_text, encoding="utf-8")
 
-
 def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: python restructure_text.py <filename>")
@@ -62,7 +55,6 @@ def main() -> None:
         print(f"Error: file '{file_arg}' does not exist.")
         sys.exit(1)
     restructure_file(file_arg)
-
 
 if __name__ == "__main__":
     main()

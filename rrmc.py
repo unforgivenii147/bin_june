@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import argparse
@@ -13,7 +12,6 @@ from pathlib import Path
 from loguru import logger
 
 SKIP_DIRS = {".git", "__pycache__", ".ruff_cache", ".pytest_cache"}
-
 
 class PythonCleaner(ast.NodeTransformer):
     def __init__(self):
@@ -49,7 +47,6 @@ class PythonCleaner(ast.NodeTransformer):
         self._handle_docstring(node)
         return self.generic_visit(node)
 
-
 def count_comments(source: str) -> int:
     count = 0
     try:
@@ -61,7 +58,6 @@ def count_comments(source: str) -> int:
         pass
     return count
 
-
 def is_python_script(path: Path) -> bool:
     if path.suffix == ".py":
         return True
@@ -71,7 +67,6 @@ def is_python_script(path: Path) -> bool:
             return first_line.startswith("#!") and "python" in first_line.lower()
     except Exception:
         return False
-
 
 def process_file(args):
     path, root = args
@@ -101,7 +96,6 @@ def process_file(args):
         logger.error(f"Failed {path}: {e}")
         return 0
 
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("targets", nargs="*", type=str)
@@ -126,7 +120,6 @@ def main():
 
     total_removed = sum(results)
     logger.success(f"Cleanup complete. Total elements removed: {total_removed}")
-
 
 if __name__ == "__main__":
     main()

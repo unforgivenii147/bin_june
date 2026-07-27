@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import mmap
@@ -10,7 +9,6 @@ from collections import deque
 from collections.abc import Callable
 from mmap import mmap
 from pathlib import Path
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -32,17 +30,14 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
-
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
 
-
 SIZE_THRESHOLD = 1 * 1024 * 1024
 OLD_PRINT_RE = re.compile(r"(?m)^[ \t]*print[ \t]+[^(\n]")
-
 
 def _open_source(filepath: str):
     size = Path(filepath).stat().st_size
@@ -51,7 +46,6 @@ def _open_source(filepath: str):
         return mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
     return f
 
-
 def _read_text(filepath: str) -> str | None:
     try:
         with Path(filepath).open(encoding="utf-8", errors="ignore") as f:
@@ -59,10 +53,8 @@ def _read_text(filepath: str) -> str | None:
     except Exception:
         return None
 
-
 def _has_rich_print_import(text: str) -> bool:
     return "from rich import print" in text
-
 
 def _is_in_commented_code(text: str, line_start: int) -> bool:
     """Check if the line is inside a multi-line comment or docstring."""
@@ -94,7 +86,6 @@ def _is_in_commented_code(text: str, line_start: int) -> bool:
                 break
     return in_multiline
 
-
 def regex_flag(filepath: str) -> bool:
     text = _read_text(filepath)
     if not text:
@@ -102,7 +93,6 @@ def regex_flag(filepath: str) -> bool:
     if _has_rich_print_import(text):
         return False
     return bool(OLD_PRINT_RE.search(text))
-
 
 def tokenizer_confirm(filepath: str) -> tuple[str, int] | None:
     """Return (line_content, line_number) if print without parentheses found."""
@@ -148,7 +138,6 @@ def tokenizer_confirm(filepath: str) -> tuple[str, int] | None:
                 return line, line_num
     return None
 
-
 def autofix_file(filepath: str) -> bool:
     """Fix Python 2 print statements by adding parentheses."""
     try:
@@ -189,7 +178,6 @@ def autofix_file(filepath: str) -> bool:
     except Exception:
         return False
 
-
 def process_file(filepath: str, autofix: bool = False) -> str | None:
     """Process a single file: detect and optionally fix print statements."""
     if not regex_flag(filepath):
@@ -208,7 +196,6 @@ def process_file(filepath: str, autofix: bool = False) -> str | None:
             return f"{filepath} (could not fix)\n  Line {line_num}: {line}"
     else:
         return f"{filepath}\n  Line {line_num}: {line}"
-
 
 def main() -> None:
     import argparse
@@ -246,7 +233,6 @@ def main() -> None:
             print("\n✓ Files with issues have been automatically fixed.")
         else:
             print("\nRun with --autofix to automatically fix these issues.")
-
 
 if __name__ == "__main__":
     main()

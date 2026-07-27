@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 """
 Remove a specific function implementation from Python files using parallel processing.
 Matches the exact function structure using AST comparison.
@@ -33,10 +32,8 @@ TARGET_FUNCTION_SOURCE = textwrap.dedent(
     '\ndef get_files(path: str | Path, include_hidden: bool = True, ext: list[str] | None = None) -> list[Path]:\n    path = Path(path)\n    if not path.exists():\n        raise FileNotFoundError(f"Path does not exist: {path}")\n    if not path.is_dir():\n        raise NotADirectoryError(f"Path is not a directory: {path}")\n\n    ext = tuple(ext) if ext else None\n    files = []\n    stack = [path]\n\n    while stack:\n        current = stack.pop()\n        try:\n            with os_scandir(current) as entries:\n                for entry in entries:\n                    if entry.is_symlink():\n                        continue\n                    if entry.is_dir(follow_symlinks=False):\n                        if entry.name not in SKIP_DIRS:\n                            stack.append(entry)\n                    elif entry.is_file(follow_symlinks=False):\n                        if not include_hidden and entry.name.startswith("."):\n                            continue\n                        if ext is None or entry.name.endswith(ext):\n                            files.append(Path(entry.path))\n        except (PermissionError, OSError):\n            continue\n\n    return sorted(files)\n'
 ).strip()
 
-
 def normalize_ast(node: ast.AST) -> str:
     return ast.dump(node, annotate_fields=True, include_attributes=False)
-
 
 def get_target_function_ast() -> ast.FunctionDef:
     wrapper = f"dummy_var = 1\n{TARGET_FUNCTION_SOURCE}"
@@ -45,7 +42,6 @@ def get_target_function_ast() -> ast.FunctionDef:
         if isinstance(node, ast.FunctionDef) and node.name == "get_files":
             return node
     raise ValueError("Could not parse target function")
-
 
 def functions_match(target_ast: ast.FunctionDef, candidate_ast: ast.FunctionDef) -> bool:
 
@@ -65,7 +61,6 @@ def functions_match(target_ast: ast.FunctionDef, candidate_ast: ast.FunctionDef)
     target_str = normalize_ast(target_cleaned)
     candidate_str = normalize_ast(candidate_cleaned)
     return target_str == candidate_str
-
 
 def find_python_files(path: Path, include_hidden: bool = False, script_path: Path | None = None) -> list[Path]:
     if not path.exists():
@@ -89,7 +84,6 @@ def find_python_files(path: Path, include_hidden: bool = False, script_path: Pat
     except (PermissionError, OSError):
         pass
     return sorted(files)
-
 
 def remove_matching_function(file_path: Path) -> tuple[bool, int, int]:
     try:
@@ -125,7 +119,6 @@ def remove_matching_function(file_path: Path) -> tuple[bool, int, int]:
         print(f"Error processing {file_path}: {e}", file=sys.stderr)
         return (False, 0, 0)
 
-
 def process_file(file_path: Path) -> tuple[Path, float, tuple[int, int, float] | None]:
     start_time = time.time()
     removed, original_size, new_size = remove_matching_function(file_path)
@@ -136,14 +129,12 @@ def process_file(file_path: Path) -> tuple[Path, float, tuple[int, int, float] |
     else:
         return (file_path, elapsed_time, None)
 
-
 def format_size(size: int) -> str:
     for unit in ["B", "KB", "MB", "GB"]:
         if size < 1024:
             return f"{size:.1f}{unit}"
         size /= 1024
     return f"{size:.1f}TB"
-
 
 def main():
     parser = argparse.ArgumentParser(description="Remove specific get_files function implementation from Python files")
@@ -238,7 +229,6 @@ def main():
             print(
                 f"  Total size change: {format_size(total_original_size)} -> {format_size(total_new_size)} ({total_ratio:.1f}%)"
             )
-
 
 if __name__ == "__main__":
     main()

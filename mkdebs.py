@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import contextlib
@@ -19,11 +18,9 @@ BASE_DIR = Path.home() / "debs"
 BASE_DIR.mkdir(parents=True, exist_ok=True)
 apt_pkg.init_system()
 
-
 def get_installed_packages() -> list[str]:
     cache = apt.Cache()
     return [pkg.name for pkg in cache if pkg.is_installed]
-
 
 def get_package_files(pkg_name: str) -> list[str]:
     try:
@@ -35,7 +32,6 @@ def get_package_files(pkg_name: str) -> list[str]:
         return [f for f in files if Path(f).exists()]
     except Exception:
         return []
-
 
 def get_package_metadata(pkg_name: str) -> dict[str, str]:
     cache = apt.Cache()
@@ -109,7 +105,6 @@ def get_package_metadata(pkg_name: str) -> dict[str, str]:
         "Description": description.replace("\n", " ").strip(),
     }
 
-
 def create_control_file(path: Path, meta: dict[str, str]) -> None:
     control_content = f"""Package: {meta["Package"]}
 Version: {meta["Version"]}
@@ -118,7 +113,6 @@ Maintainer: {meta["Maintainer"]}
 Description: {meta["Description"]}
 """
     (path / "control").write_text(control_content)
-
 
 def copy_pkg_files(files: list[str], dest: Path) -> None:
     for f in files:
@@ -140,11 +134,9 @@ def copy_pkg_files(files: list[str], dest: Path) -> None:
             except:
                 pass
 
-
 def build_tar_xz(source_dir: Path, output_path: Path) -> None:
     with tarfile.open(output_path, "w:xz") as tar:
         tar.add(source_dir, arcname=".")
-
 
 def build_deb(pkg_dir: Path, output_deb: Path) -> None:
     debian_binary_content = b"2.0\n"
@@ -161,7 +153,6 @@ def build_deb(pkg_dir: Path, output_deb: Path) -> None:
         ar.add_file("data.tar.xz", data_data)
     finally:
         ar.close()
-
 
 def process_pkg(pkg_name: str) -> str | None:
     try:
@@ -189,7 +180,6 @@ def process_pkg(pkg_name: str) -> str | None:
         print(f"[✖] {pkg_name} FAILED: {e}")
         return
 
-
 def main() -> None:
     import sys
 
@@ -198,7 +188,6 @@ def main() -> None:
     print(f"[+] Building {len(pkgs)} packages\n")
     for pkg in pkgs:
         process_pkg(pkg)
-
 
 if __name__ == "__main__":
     main()

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import hashlib
@@ -8,7 +7,6 @@ import shutil
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def calculate_hash(filepath: Path, chunk_size=8192):
     sha256 = hashlib.sha256()
@@ -19,7 +17,6 @@ def calculate_hash(filepath: Path, chunk_size=8192):
         return sha256.hexdigest()
     except (OSError, PermissionError):
         return None
-
 
 def get_system_bin_hashes():
     system_bin = Path("/system/bin")
@@ -38,7 +35,6 @@ def get_system_bin_hashes():
             continue
     print(f"✅ Scanned {len(hashes)} files in /system/bin\n")
     return hashes
-
 
 def check_and_move_files(system_hashes):
     current_dir = Path.cwd()
@@ -73,7 +69,6 @@ def check_and_move_files(system_hashes):
             continue
     return (matches, moved)
 
-
 def main():
     print("=" * 60)
     print("🔐 File Hash Comparison & Move Tool")
@@ -98,7 +93,6 @@ def main():
     else:
         print("✅ No matching files found.")
     print("=" * 60)
-
 
 if __name__ == "__main__":
     main()

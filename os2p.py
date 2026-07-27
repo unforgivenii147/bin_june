@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import ast
@@ -13,7 +12,6 @@ from typing import Any
 
 from termcolor import cprint
 
-
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
     units = ("B", "KB", "MB", "GB", "TB")
@@ -25,7 +23,6 @@ def fsz(sz: float) -> str:
         return f"{int(value)} {units[i]}"
     return f"{value:.1f} {units[i]}"
 
-
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -36,9 +33,7 @@ def gsz(path: str | Path) -> int:
             total += file.stat().st_size
     return total
 
-
 "\nEnhanced AST-based refactoring from os/path to pathlib.\nComprehensive coverage of os and os.path operations.\n"
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -60,9 +55,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
-
 "\nEnhanced AST-based refactoring from os/path to pathlib.\nComprehensive coverage of os and os.path operations.\n"
-
 
 class PathlibTransformer(ast.NodeTransformer):
     PATHLIB_MAPPINGS = {
@@ -503,7 +496,6 @@ class PathlibTransformer(ast.NodeTransformer):
         except:
             return node
 
-
 def add_required_imports(tree: ast.AST, needs_pathlib: bool, needs_shutil: bool) -> ast.AST:
     imports_to_add = []
     if needs_pathlib:
@@ -543,10 +535,8 @@ def add_required_imports(tree: ast.AST, needs_pathlib: bool, needs_shutil: bool)
             tree.body.insert(insert_pos, imp)
     return tree
 
-
 def _is_docstring(node: ast.AST) -> bool:
     return isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant) and isinstance(node.value.value, str)
-
 
 def process_file(
     file_path: Path, dry_run: bool = False, verbose: bool = False
@@ -578,7 +568,6 @@ def process_file(
         if verbose:
             traceback.print_exc()
         return (None, False, [], [])
-
 
 def main() -> int:
     import argparse
@@ -657,7 +646,6 @@ def main() -> int:
     elif not args.dry_run and modified_count > 0:
         cprint(f"\n✅ Successfully refactored {modified_count} file(s)", "green")
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import hashlib
@@ -15,7 +14,6 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 OUTPUT_FILE = "utils.py"
 SKIP_FILES = {OUTPUT_FILE, Path(__file__).name}
 
-
 @dataclass(frozen=True)
 class Item:
     kind: str
@@ -24,10 +22,8 @@ class Item:
     file_path: str
     hash: str
 
-
 def sha256_text(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
-
 
 def get_python_parser() -> Parser:
     parser = Parser()
@@ -35,14 +31,11 @@ def get_python_parser() -> Parser:
     parser.language = lang
     return parser
 
-
 def node_text(source_bytes: bytes, node: Node) -> str:
     return source_bytes[node.start_byte : node.end_byte].decode("utf-8", errors="replace")
 
-
 def is_const_name(name: str) -> bool:
     return name.isupper()
-
 
 def extract_items_from_file(path: Path, parser: Parser) -> list[Item]:
     try:
@@ -131,7 +124,6 @@ def extract_items_from_file(path: Path, parser: Parser) -> list[Item]:
             )
     return items
 
-
 def write_utils_file(duplicates: dict[str, Item], output_path: Path) -> None:
     blocks = []
     seen_hashes = set()
@@ -148,7 +140,6 @@ def write_utils_file(duplicates: dict[str, Item], output_path: Path) -> None:
 
 """ + "\n".join(blocks)
     output_path.write_text(content, encoding="utf-8")
-
 
 def main() -> None:
     parser = get_python_parser()
@@ -171,7 +162,6 @@ def main() -> None:
         print(f"Wrote representative copies to: {output_path}")
     else:
         print("No duplicates found.")
-
 
 if __name__ == "__main__":
     main()

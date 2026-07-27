@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-
 from __future__ import annotations
 
 import shutil
@@ -12,7 +11,6 @@ import numpy as np
 from tqdm import tqdm
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 class ImageSimilarityOrganizer:
     def __init__(self, root_dir: str, similarity_threshold: float = 0.95, hash_size: int = 8):
@@ -136,7 +134,6 @@ class ImageSimilarityOrganizer:
         print("\n" + "=" * 60)
         print("PROCESS COMPLETE")
         print("=" * 60)
-
 
 if __name__ == "__main__":
     ROOT_DIRECTORY = Path.cwd()

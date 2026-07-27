@@ -22,7 +22,6 @@ from datetime import datetime
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 
-
 def get_site_packages_dirs() -> list[Path]:
     site_dirs = []
     import site
@@ -45,7 +44,6 @@ def get_site_packages_dirs() -> list[Path]:
             site_dirs.append(path)
     return [d for d in site_dirs if d.exists() and d.is_dir()]
 
-
 def get_package_name_from_path(path: Path) -> str:
     name = path.name
     if name.endswith(".dist-info"):
@@ -57,7 +55,6 @@ def get_package_name_from_path(path: Path) -> str:
     name = re.sub(r"-py\d+\.\d+$", "", name)
     name = re.sub(r"-py\d+$", "", name)
     return name
-
 
 def is_pure_python_package(pkg_name: str, site_dir: Path) -> bool:
     try:
@@ -113,7 +110,6 @@ def is_pure_python_package(pkg_name: str, site_dir: Path) -> bool:
     except Exception:
         return True
 
-
 def parse_entry_points(entry_points_file: Path) -> dict[str, list[str]]:
     scripts = {"console_scripts": [], "gui_scripts": [], "other": []}
     try:
@@ -153,7 +149,6 @@ def parse_entry_points(entry_points_file: Path) -> dict[str, list[str]]:
     except Exception:
         pass
     return scripts
-
 
 def scan_package(package_path: Path, site_dir: Path) -> dict[str, any]:
     pkg_name = get_package_name_from_path(package_path)
@@ -209,7 +204,6 @@ def scan_package(package_path: Path, site_dir: Path) -> dict[str, any]:
         result["error"] = str(e)
     return result
 
-
 def find_packages_categorized(site_dir: Path) -> tuple[list[str], list[str], list[str], list[str]]:
     pure_without_ep = []
     nonpure_without_ep = []
@@ -248,7 +242,6 @@ def find_packages_categorized(site_dir: Path) -> tuple[list[str], list[str], lis
     except Exception as e:
         print(f"Error scanning directory {site_dir}: {e}", file=sys.stderr)
     return pure_without_ep, nonpure_without_ep, pure_with_ep, nonpure_with_ep
-
 
 def main():
     parser = argparse.ArgumentParser(
@@ -448,7 +441,6 @@ def main():
             if len(unique_pure_ep) > 5:
                 print(f"  ... and {len(unique_pure_ep) - 5} more")
 
-
 def scan_for_entry_points(site_dir: Path) -> list[dict]:
     packages_with_ep = []
     processed = set()
@@ -468,7 +460,6 @@ def scan_for_entry_points(site_dir: Path) -> list[dict]:
     except:
         pass
     return packages_with_ep
-
 
 if __name__ == "__main__":
     main()

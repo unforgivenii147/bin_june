@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
@@ -10,7 +9,6 @@ from pathlib import Path
 
 import tree_sitter_python as tsp
 from tree_sitter import Language, Parser
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -31,7 +29,6 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
             elif item.is_file() and (ext is None or item.suffix in ext):
                 files.append(item)
     return files
-
 
 def unique_path(path: Path | str) -> Path:
     path = _clean_fname(Path(path))
@@ -54,13 +51,11 @@ def unique_path(path: Path | str) -> Path:
             return new_path
         counter += 1
 
-
 def _clean_fname(path: Path) -> Path:
     from re import sub as re_sub
 
     clean_name = re_sub("(_\\d+)+", "", path.name)
     return path.with_name(clean_name)
-
 
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
@@ -68,12 +63,10 @@ def mpf3(process_function: Callable, files: list[Path], **kwargs):
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
 
-
 OUTPUT_DIR = Path.home() / "tmp" / "output"
 parser = Parser()
 parser.language = Language(tsp.language())
 VALID = {"import_statement", "import_from_statement"}
-
 
 def process_file(path):
     path = Path(path)
@@ -81,7 +74,6 @@ def process_file(path):
     tree = parser.parse(src)
     root = tree.root_node
     return [src[node.start_byte : node.end_byte].decode() for node in root.children if node.type in VALID]
-
 
 def main() -> None:
     cwd = Path.cwd()
@@ -99,7 +91,6 @@ def main() -> None:
     all_imports = sorted(set(all_imports))
     outfile.write_text("\n".join(all_imports), encoding="utf-8")
     print("done.")
-
 
 if __name__ == "__main__":
     sys.exit(main())

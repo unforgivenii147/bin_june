@@ -1,12 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import os
 import sys
 from pathlib import Path
-
 
 def main() -> None:
     cwd = Path.cwd()
@@ -19,7 +17,6 @@ def main() -> None:
                 continue
             if path.is_file() and not path.stat().st_size:
                 print(path.relative_to(cwd))
-
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -1,11 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import subprocess
 from pathlib import Path
-
 
 def optimize_pngs_recursively() -> None:
     total_original_size = 0
@@ -24,7 +22,6 @@ def optimize_pngs_recursively() -> None:
     print(f"Total original size: {total_original_size} bytes")
     print(f"Total optimized size: {total_optimized_size} bytes")
     print(f"Total reduction: {total_reduction} bytes")
-
 
 if __name__ == "__main__":
     optimize_pngs_recursively()

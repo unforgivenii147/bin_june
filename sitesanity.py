@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import argparse
@@ -18,7 +17,6 @@ logging.basicConfig(
     handlers=[logging.StreamHandler(sys.stdout)],
 )
 
-
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Sanity check installed Termux Python packages.")
     parser.add_argument(
@@ -30,13 +28,11 @@ def parse_arguments():
     )
     return parser.parse_args()
 
-
 def should_ignore_file(file_path: Path, ignore_patterns: list[str]) -> bool:
     if file_path.suffix == ".pyc":
         return True
     name = file_path.name
     return any(fnmatch(name, pattern) for pattern in ignore_patterns)
-
 
 def check_package_files(dist, ignore_patterns: list[str]) -> list[str]:
     missing_files = []
@@ -49,7 +45,6 @@ def check_package_files(dist, ignore_patterns: list[str]) -> list[str]:
         if not file_path.exists():
             missing_files.append(str(package_file))
     return missing_files
-
 
 def check_package_dependencies(dist, installed_map: dict[str, str]) -> tuple[list[str], list[str]]:
     broken_deps = []
@@ -71,7 +66,6 @@ def check_package_dependencies(dist, installed_map: dict[str, str]) -> tuple[lis
             broken_deps.append(base_requirement)
             clean_reqs_for_file.append(base_requirement)
     return broken_deps, clean_reqs_for_file
-
 
 def main():
     args = parse_arguments()
@@ -115,7 +109,6 @@ def main():
     logging.info(f"Total packages evaluated: {len(distributions)}")
     logging.info(f"Packages with missing files: {corrupted_packages_count}")
     logging.info(f"Packages with missing dependencies: {broken_deps_count}")
-
 
 if __name__ == "__main__":
     main()

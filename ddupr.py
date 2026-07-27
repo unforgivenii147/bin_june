@@ -31,13 +31,11 @@ import lzma_mt
 import zstandard as zstd
 from loguru import logger
 
-
 HAS_ZST = True
 HAS_BR = True
 ARCHIVE_EXTENSIONS = {".zip", ".tar", ".gz", ".bz2", ".xz", ".tgz", ".tbz2", ".zst", ".br"}
 UTILS_MAP: dict[str, str] = {"func": "funcs.py", "class": "classes.py", "const": "const.py"}
 CONSTANT_CALL_NAMES = {"TypeVar", "NewType", "ParamSpec", "TypeVarTuple"}
-
 
 @dataclass
 class PyObject:
@@ -50,11 +48,9 @@ class PyObject:
     node_end_lineno: int
     imports: list[str] = field(default_factory=list)
 
-
 def _content_hash(source: str) -> str:
     normalised = "\n".join(line for line in source.splitlines() if line.strip() and not line.strip().startswith("#"))
     return hashlib.sha256(normalised.encode()).hexdigest()
-
 
 def _node_source(source: str, node: ast.AST) -> str:
     seg = ast.get_source_segment(source, node)
@@ -64,7 +60,6 @@ def _node_source(source: str, node: ast.AST) -> str:
     start = node.lineno - 1
     end = node.end_lineno
     return textwrap.dedent("".join(lines[start:end]))
-
 
 def _collect_imports(tree: ast.Module, node: ast.AST) -> list[str]:
     used: set[str] = set()
@@ -91,7 +86,6 @@ def _collect_imports(tree: ast.Module, node: ast.AST) -> list[str]:
                     lines.append(ast.unparse(stmt))
     return list(dict.fromkeys(lines))
 
-
 def _is_constant_node(node: ast.AST) -> tuple[bool, str]:
     if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
         name = node.target.id
@@ -110,7 +104,6 @@ def _is_constant_node(node: ast.AST) -> tuple[bool, str]:
             if func_name in CONSTANT_CALL_NAMES:
                 return True, name
     return False, ""
-
 
 def analyse_source(source: str, origin: str) -> list[PyObject]:
     objects: list[PyObject] = []
@@ -169,7 +162,6 @@ def analyse_source(source: str, origin: str) -> list[PyObject]:
             logger.error("Failed to process node '{}' in {}: {}", getattr(node, "name", "?"), origin, exc)
     return objects
 
-
 def _read_zip(path: Path) -> list[tuple[str, str]]:
     results = []
     try:
@@ -185,7 +177,6 @@ def _read_zip(path: Path) -> list[tuple[str, str]]:
     except Exception as exc:
         logger.error("Cannot open zip {}: {}", path, exc)
     return results
-
 
 def _read_tar(path: Path) -> list[tuple[str, str]]:
     results = []
@@ -206,7 +197,6 @@ def _read_tar(path: Path) -> list[tuple[str, str]]:
         logger.error("Cannot open tar {}: {}", path, exc)
     return results
 
-
 def _read_zst(path: Path) -> list[tuple[str, str]]:
     if not HAS_ZST:
         logger.warning("zstandard not installed; skipping {}", path)
@@ -220,7 +210,6 @@ def _read_zst(path: Path) -> list[tuple[str, str]]:
         logger.error("Cannot decompress zst {}: {}", path, exc)
         return []
 
-
 def _read_br(path: Path) -> list[tuple[str, str]]:
     if not HAS_BR:
         logger.warning("brotli not installed; skipping {}", path)
@@ -233,7 +222,6 @@ def _read_br(path: Path) -> list[tuple[str, str]]:
         logger.error("Cannot decompress brotli {}: {}", path, exc)
         return []
 
-
 def _read_xz(path: Path) -> list[tuple[str, str]]:
     try:
         raw = lzma_mt.decompress(path.read_bytes(), threads=4)
@@ -242,7 +230,6 @@ def _read_xz(path: Path) -> list[tuple[str, str]]:
     except Exception as exc:
         logger.error("Cannot decompress brotli {}: {}", path, exc)
         return []
-
 
 def read_file_sources(path: Path) -> list[tuple[str, str]]:
     ext = path.suffix.lower()
@@ -264,13 +251,11 @@ def read_file_sources(path: Path) -> list[tuple[str, str]]:
         return _read_br(path)
     return []
 
-
 def _worker(path: Path) -> list[PyObject]:
     results: list[PyObject] = []
     for origin, source in read_file_sources(path):
         results.extend(analyse_source(source, origin))
     return results
-
 
 def _build_utils_source(objects: list[PyObject]) -> str:
     all_imports: list[str] = []
@@ -284,7 +269,6 @@ def _build_utils_source(objects: list[PyObject]) -> str:
         parts.append(obj.source.strip())
     return "\n\n\n".join(parts) + "\n"
 
-
 def _validate_source(source: str, dest: Path) -> bool:
     try:
         ast.parse(source)
@@ -292,7 +276,6 @@ def _validate_source(source: str, dest: Path) -> bool:
     except SyntaxError as exc:
         logger.error("Generated source for {} has syntax error — skipping write: {}", dest, exc)
         return False
-
 
 def write_utils(grouped: dict[str, list[PyObject]], utils_dir: Path, *, dry_run: bool = False) -> dict[str, Path]:
     utils_dir.mkdir(parents=True, exist_ok=True)
@@ -332,12 +315,10 @@ def write_utils(grouped: dict[str, list[PyObject]], utils_dir: Path, *, dry_run:
         written[kind] = dest
     return written
 
-
 def _build_import_line(utils_dir: Path, cwd: Path, kind: str) -> str:
     rel = utils_dir.relative_to(cwd)
     module_path = ".".join(rel.parts) + "." + UTILS_MAP[kind].removesuffix(".py")
     return f"from {module_path} import {{names}}"
-
 
 def remove_and_patch(objects_to_remove: list[PyObject], utils_dir: Path, cwd: Path) -> None:
     by_file: dict[str, list[PyObject]] = defaultdict(list)
@@ -390,13 +371,11 @@ def remove_and_patch(objects_to_remove: list[PyObject], utils_dir: Path, cwd: Pa
         except Exception as exc:
             logger.error("Cannot write patched {}: {}", filepath, exc)
 
-
 def collect_all_paths(root: Path) -> list[Path]:
     all_exts = {".py"} | ARCHIVE_EXTENSIONS
     paths = [p for p in root.rglob("*") if p.suffix.lower() in all_exts and p.is_file()]
     utils_dir = root / "utils"
     return [p for p in paths if not str(p).startswith(str(utils_dir))]
-
 
 def find_duplicates(
     all_objects: list[PyObject],
@@ -410,7 +389,6 @@ def find_duplicates(
         representative = objs[0]
         grouped[representative.kind].append(representative)
     return duplicates, grouped
-
 
 def run(cwd: Path, mode: str | None, workers: int) -> None:
     utils_dir = cwd / "utils"
@@ -452,7 +430,6 @@ def run(cwd: Path, mode: str | None, workers: int) -> None:
             objects_to_remove.append(objs[0])
         remove_and_patch(objects_to_remove, utils_dir, cwd)
 
-
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Extract duplicate Python definitions into utils/.",
@@ -491,7 +468,6 @@ def _parse_args() -> argparse.Namespace:
     )
     return parser.parse_args()
 
-
 def main() -> None:
     args = _parse_args()
     logger.remove()
@@ -513,7 +489,6 @@ def main() -> None:
         mode = "move"
     logger.info("Root: {}  |  mode: {}  |  workers: {}", root, mode or "report-only", args.workers)
     run(root, mode, args.workers)
-
 
 if __name__ == "__main__":
     main()

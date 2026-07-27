@@ -22,11 +22,9 @@ MAX_CHUNK_SIZE: Final[int] = 2000  # characters per chunk
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s", datefmt="%H:%M:%S")
 logger = logging.getLogger(__name__)
 
-
 def contains_cyrillic(text: str) -> bool:
     """Detect Cyrillic characters (covers core Cyrillic and some extensions)."""
     return bool(re.search(r"[\u0400-\u04FF\u0500-\u052F\u2DE0-\u2DFF\uA640-\uA69F\u1C80-\u1C8F]", text))
-
 
 def create_chunks(lines: list[str], max_chunk_size: int) -> list[list[str]]:
     """Group lines into chunks where each chunk's total character count is <= max_chunk_size."""
@@ -59,7 +57,6 @@ def create_chunks(lines: list[str], max_chunk_size: int) -> list[list[str]]:
         chunks.append(current_chunk)
 
     return chunks
-
 
 class TranslationCache:
     """SQLite-based persistent cache for translations."""
@@ -149,7 +146,6 @@ class TranslationCache:
             self.conn.commit()
             self.conn.close()
 
-
 def translate_chunk_factory(source_lang: str, target_lang: str):
     """Return a translate_chunk function bound to specific source/target languages."""
 
@@ -184,7 +180,6 @@ def translate_chunk_factory(source_lang: str, target_lang: str):
         return (chunk, None)
 
     return translate_chunk
-
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Translate lines in a text file with persistent caching.")
@@ -410,7 +405,6 @@ def main() -> None:
         logger.error("Error writing output file: %s", e)
 
     cache.close()
-
 
 if __name__ == "__main__":
     main()

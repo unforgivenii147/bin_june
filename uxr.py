@@ -24,14 +24,12 @@ try:
 except ImportError:
     brotli_decompress = None
 
-
 def copy_chunks(src, dst, chunk_size: int = 1024 * 1024) -> None:
     while True:
         chunk = src.read(chunk_size)
         if not chunk:
             break
         dst.write(chunk)
-
 
 class ArchiveExtractor:
     SUPPORTED_EXTENSIONS = {
@@ -306,7 +304,6 @@ class ArchiveExtractor:
             print("\n⚠️  Some archives failed to extract. Check errors above.")
         self._print_header("FINISHED", "-")
 
-
 def main():
     import argparse
 
@@ -329,7 +326,6 @@ def main():
     except Exception as e:
         print(f"\n❌ Fatal error: {e}")
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

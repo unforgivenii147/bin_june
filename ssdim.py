@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import csv
@@ -28,7 +27,6 @@ try:
 except ImportError:
     USE_COLOR = False
 
-
 def get_all_files(root: str = "."):
     file_paths = []
     for dirpath, _, filenames in os.walk(root):
@@ -36,7 +34,6 @@ def get_all_files(root: str = "."):
             full_path = os.path.join(dirpath, f)
             file_paths.append(full_path)
     return file_paths
-
 
 def compute_hashes(files):
     hashes = {}
@@ -47,7 +44,6 @@ def compute_hashes(files):
         except Exception as e:
             print(f"Skipping {f}: {e}")
     return hashes
-
 
 def group_similar_files(hashes, threshold: int):
     visited = set()
@@ -69,7 +65,6 @@ def group_similar_files(hashes, threshold: int):
             groups.append(group)
     return groups
 
-
 def copy_groups(groups, output_dir="output") -> None:
     Path(output_dir).mkdir(exist_ok=True, parents=True)
     for idx, group in enumerate(groups, start=1):
@@ -80,7 +75,6 @@ def copy_groups(groups, output_dir="output") -> None:
                 shutil.move(f, group_dir)
             except Exception as e:
                 print(f"Failed to copy {f}: {e}")
-
 
 def write_report(groups, furmat="csv", output_dir="output") -> None:
     Path(output_dir).mkdir(exist_ok=True, parents=True)
@@ -100,7 +94,6 @@ def write_report(groups, furmat="csv", output_dir="output") -> None:
             json.dump(data, jf, indent=2)
         print(f"JSON report written to {report_file}")
 
-
 def colorize_score(score, threshold) -> str:
     if not USE_COLOR or not score:
         return str(score)
@@ -109,7 +102,6 @@ def colorize_score(score, threshold) -> str:
     if score >= threshold:
         return Fore.YELLOW + str(score) + Style.RESET_ALL
     return Fore.RED + str(score) + Style.RESET_ALL
-
 
 def write_matrix(hashes, threshold: int, output_dir="output", pretty=False) -> None:
     Path(output_dir).mkdir(exist_ok=True, parents=True)
@@ -146,7 +138,6 @@ def write_matrix(hashes, threshold: int, output_dir="output", pretty=False) -> N
                 formatted = [row[0]] + [colorize_score(cell, threshold) for cell in row[1:]]
                 print(" | ".join(str(x) if x else "." for x in formatted))
 
-
 def main() -> None:
     if len(sys.argv) < 2:
         print(f"Usage: {sys.argv[0]} <threshold> [copy|csv|json|matrix]")
@@ -175,7 +166,6 @@ def main() -> None:
         write_matrix(hashes, threshold, pretty=True)
     else:
         print("Unknown mode. Use 'copy', 'csv', 'json', or 'matrix'.")
-
 
 if __name__ == "__main__":
     main()

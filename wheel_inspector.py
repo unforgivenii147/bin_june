@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import zipfile
@@ -9,7 +8,6 @@ from pathlib import Path
 from loguru import logger
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 class WheelInspector:
     def __init__(self, verbose: bool = False) -> None:
@@ -122,7 +120,6 @@ class WheelInspector:
                 print(f"  - {issue}")
         print(f"{'=' * 60}\n")
 
-
 def main() -> None:
     import argparse
 
@@ -139,7 +136,6 @@ def main() -> None:
     elif path.is_dir():
         for p in path.rglob("*.whl"):
             inspector.print_inspection(p)
-
 
 """
         wheels = list(path.glob("*.whl"))

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import importlib.metadata
@@ -8,7 +7,6 @@ import sys
 import zipfile
 from collections import deque
 from pathlib import Path
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -30,21 +28,17 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
-
 def parse_version_tuple(version_str: str) -> tuple:
     try:
         return tuple(int(x) for x in version_str.split(".") if x.isdigit())
     except Exception:
         return (version_str,)
 
-
 def get_files(directory: Path, ext: list[str]) -> list[Path]:
     return [p for p in directory.iterdir() if p.is_file() and p.suffix.lower() in ext]
 
-
 def get_installed_packages() -> dict[str, str]:
     return {dist.metadata["Name"].lower(): dist.version for dist in importlib.metadata.distributions()}
-
 
 def get_wheel_package_info(path: Path) -> tuple[str, str] | tuple[None, None]:
     try:
@@ -64,7 +58,6 @@ def get_wheel_package_info(path: Path) -> tuple[str, str] | tuple[None, None]:
     except Exception as e:
         print(f"Error reading {path.name}: {e}")
     return None, None
-
 
 def main() -> None:
     cwd = Path.cwd()
@@ -88,7 +81,6 @@ def main() -> None:
                         f"🗑️  Installed version ({installed_version}) is newer than wheel ({pkg_version}), deleting {path.name}"
                     )
                     path.unlink()
-
 
 if __name__ == "__main__":
     main()

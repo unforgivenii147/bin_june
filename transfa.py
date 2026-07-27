@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 """
 Translates Persian (Farsi) text in a file to English.
 """
@@ -19,7 +18,6 @@ MAX_WORKERS: Final[int] = 4
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
-
 def translate_line(line: str) -> tuple[str, str] | None:
     if not (stripped := line.strip()):
         return None
@@ -33,7 +31,6 @@ def translate_line(line: str) -> tuple[str, str] | None:
     except Exception as e:
         logger.debug("Translation error for '%s': %s", stripped[:20], e)
         return None
-
 
 def translate_file(file_input: str) -> None:
     path = Path(file_input)
@@ -62,7 +59,6 @@ def translate_file(file_input: str) -> None:
         logger.info("✓ Translated output saved to %s", out_path)
     except Exception as e:
         logger.error("Error writing output file: %s", e)
-
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

@@ -12,7 +12,6 @@ from pathlib import Path
 
 import libcst as cst
 
-
 class CleanTransformer(cst.CSTTransformer):
     def __init__(self):
         super().__init__()
@@ -63,7 +62,6 @@ class CleanTransformer(cst.CSTTransformer):
         self.comments_removed += 1
         return cst.RemoveFromParent()
 
-
 def process_file(file_path: Path) -> tuple[Path, int, int, bool]:
     """Process a single file and return (path, comments_removed, docstrings_removed, success)"""
     try:
@@ -90,7 +88,6 @@ def process_file(file_path: Path) -> tuple[Path, int, int, bool]:
     except Exception as e:
         print(f"❌ Error processing {file_path}: {e}")
         return file_path, 0, 0, False
-
 
 def main():
     parser = argparse.ArgumentParser(
@@ -156,7 +153,6 @@ def main():
     print(f"   Comments removed: {total_comments}")
     print(f"   Docstrings removed: {total_docstrings}")
     print("=" * 60)
-
 
 if __name__ == "__main__":
     main()

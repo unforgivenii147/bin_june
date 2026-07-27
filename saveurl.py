@@ -1,12 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
 
 from pywebcopy import save_webpage
-
 
 def main() -> None:
     save_webpage(
@@ -19,7 +17,6 @@ def main() -> None:
         delay=None,
         threaded=False,
     )
-
 
 if __name__ == "__main__":
     main()

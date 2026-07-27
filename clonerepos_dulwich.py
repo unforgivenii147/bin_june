@@ -20,7 +20,6 @@ from dulwich.repo import Repo
 MAX_SIZE_MB = 5
 MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024
 
-
 def read_repos(file_path: Path) -> list[str]:
     """Read repository names from file."""
     if not file_path.exists():
@@ -36,12 +35,10 @@ def read_repos(file_path: Path) -> list[str]:
 
     return repos
 
-
 def validate_repo_format(repo: str) -> bool:
     """Validate that repo is in user/repo format."""
     parts = repo.split("/")
     return len(parts) == 2 and all(parts)
-
 
 def check_repo_size(repo: str) -> tuple[bool, int]:
     """Check repository size using GitHub API. Returns (is_small_enough, size_bytes)."""
@@ -59,7 +56,6 @@ def check_repo_size(repo: str) -> tuple[bool, int]:
     except Exception:
         return True, 0
 
-
 def format_size(size_bytes: int) -> str:
     """Format bytes to human readable size."""
     if size_bytes == 0:
@@ -69,7 +65,6 @@ def format_size(size_bytes: int) -> str:
         return f"{mb:.1f}MB"
     kb = size_bytes / 1024
     return f"{kb:.1f}KB"
-
 
 def clone_repo(repo: str, base_dir: Path) -> tuple[str, bool, str]:
     """
@@ -108,7 +103,6 @@ def clone_repo(repo: str, base_dir: Path) -> tuple[str, bool, str]:
             shutil.rmtree(target_dir, ignore_errors=True)
         return repo, False, f"Clone failed: {e!s}"
 
-
 def remove_from_repos_file(file_path: Path, repos_to_remove: set[str]):
     """Remove specified repos from the repos.txt file."""
     if not repos_to_remove:
@@ -122,7 +116,6 @@ def remove_from_repos_file(file_path: Path, repos_to_remove: set[str]):
         f.write("\n".join(updated_repos) + "\n" if updated_repos else "")
 
     print(f"\nRemoved {len(repos_to_remove)} repos from {file_path}")
-
 
 def main():
     parser = argparse.ArgumentParser(description="Clone GitHub repositories using pure Python (dulwich)")
@@ -214,7 +207,6 @@ def main():
     if not args.no_cleanup and successfully_cloned:
         remaining = len(read_repos(repos_file))
         print(f"  📝 Remaining in {repos_file}: {remaining}")
-
 
 if __name__ == "__main__":
     main()

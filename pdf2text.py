@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
@@ -9,7 +8,6 @@ from pathlib import Path
 import PyPDF2
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def extract_text_from_pdf(pdf_filename: str):
     with Path(pdf_filename).open("rb") as file:
@@ -20,10 +18,8 @@ def extract_text_from_pdf(pdf_filename: str):
             extracted_text += page.extract_text()
     return extracted_text
 
-
 def save_text_to_file(text, output_filename: str) -> None:
     Path(output_filename).write_text(text, encoding="utf-8")
-
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:

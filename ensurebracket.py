@@ -1,13 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
 from collections import deque
 from multiprocessing import get_context
 from pathlib import Path
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -29,9 +27,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
-
 MAX_QUEUE = 16
-
 
 def process_file(fn: Path) -> bool:
     Path(path)
@@ -50,7 +46,6 @@ def process_file(fn: Path) -> bool:
         print(fn.name)
     return not stack
 
-
 def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -66,7 +61,6 @@ def main() -> None:
                 pending.popleft().get()
         while pending:
             pending.popleft().get()
-
 
 if __name__ == "__main__":
     main()

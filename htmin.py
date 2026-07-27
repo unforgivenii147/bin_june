@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
@@ -9,7 +8,6 @@ from collections.abc import Callable
 from pathlib import Path
 
 import htmlmin
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -31,13 +29,11 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
-
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
-
 
 def process_file(path: str | Path) -> None:
     path = Path(path)
@@ -52,7 +48,6 @@ def process_file(path: str | Path) -> None:
         print(f"[ERR] {path.name}")
         return
 
-
 def main() -> None:
     cwd = Path.cwd()
     files = get_files(cwd, ext=[".html", ".htm", ".xhtml", ".mhtml"])
@@ -60,7 +55,6 @@ def main() -> None:
         process_file(files[0])
         sys.exit(1)
     mpf3(process_file, files)
-
 
 if __name__ == "__main__":
     main()

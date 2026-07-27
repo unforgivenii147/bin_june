@@ -1,12 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import argparse
 import re
 from pathlib import Path
-
 
 PKG_NAME_RE = re.compile(
     r"""
@@ -18,7 +16,6 @@ PKG_NAME_RE = re.compile(
     """,
     re.VERBOSE,
 )
-
 
 def extract_package_name(line: str) -> str | None:
     line = line.strip()
@@ -33,7 +30,6 @@ def extract_package_name(line: str) -> str | None:
     if match:
         return match.group("name")
     return None
-
 
 def main() -> None:
     parser = argparse.ArgumentParser(
@@ -53,7 +49,6 @@ def main() -> None:
     seen = set()
     cleaned = [p for p in packages if not (p in seen or seen.add(p))]
     path.write_text("\n".join(cleaned) + "\n", encoding="utf-8")
-
 
 if __name__ == "__main__":
     main()

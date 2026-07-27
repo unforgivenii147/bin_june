@@ -21,7 +21,6 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s", stream=sys.stderr)
 logger = logging.getLogger(__name__)
 
-
 def find_site_packages() -> Path | None:
     try:
         dirs = site.getsitepackages()
@@ -34,7 +33,6 @@ def find_site_packages() -> Path | None:
     path = Path(dirs[0])
     logger.info("Found site-packages: %s", path)
     return path
-
 
 def calculate_file_hash(filepath: Path) -> str:
     sha256_hash = hashlib.sha256()
@@ -49,14 +47,12 @@ def calculate_file_hash(filepath: Path) -> str:
         logger.exception("Error hashing %s", filepath)
         return ""
 
-
 def get_file_size(filepath: Path) -> int:
     try:
         return filepath.stat().st_size
     except Exception:
         logger.exception("Error getting size for %s", filepath)
         return 0
-
 
 def parse_record_line(line: str) -> tuple[str, str, str]:
     parts = line.strip().split(",")
@@ -66,13 +62,11 @@ def parse_record_line(line: str) -> tuple[str, str, str]:
         return parts[0], parts[1], ""
     return parts[0], "", ""
 
-
 def should_include_file(filepath: Path) -> bool:
     name = filepath.name
     return not (
         filepath.suffix == ".pyc" or name.endswith(".pyc") or name in ("direct_url.json", "INSTALLER", "RECORD")
     )
-
 
 def process_dist_info(dist_info_dir: Path) -> bool:
     record_path = dist_info_dir / "RECORD"
@@ -140,7 +134,6 @@ def process_dist_info(dist_info_dir: Path) -> bool:
         logger.exception("Failed to update self-hash for %s", record_path)
     return True
 
-
 def main() -> None:
     logger.info("Starting multiprocess RECORD updater")
     site_packages = find_site_packages()
@@ -162,7 +155,6 @@ def main() -> None:
             else:
                 failed += 1
     logger.info("Summary: %d updated, %d failed", updated, failed)
-
 
 if __name__ == "__main__":
     multiprocessing.freeze_support()

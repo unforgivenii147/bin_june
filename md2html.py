@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import os
@@ -13,7 +12,6 @@ import markdown
 from bs4 import BeautifulSoup
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def modify_classes(html_content: str) -> str:
     soup = BeautifulSoup(html_content, "html.parser")
@@ -34,16 +32,13 @@ def modify_classes(html_content: str) -> str:
             element["class"] = combined_classes
     return str(soup)
 
-
 def convert_latex_format(text: str) -> str:
     text = re.sub(r"\\\[(.*?)\\\]", '<div class="latex-display">\\1</div>', text, flags=re.DOTALL)
     return re.sub(r"\\\((.*?)\\\)", '<span class="latex-inline">\\1</span>', text, flags=re.DOTALL)
 
-
 def read_markdown_file(file_path: str) -> str:
     with Path(file_path).open(encoding="utf-8", errors="ignore") as f:
         return f.read()
-
 
 def convert_markdown(md_path: str) -> str:
     if not md_path:
@@ -83,7 +78,6 @@ def convert_markdown(md_path: str) -> str:
     Path(temp_html_path).write_text(html_template, encoding="utf-8")
     shutil.copy(temp_html_path, final_output_path)
     return final_output_path
-
 
 if __name__ == "__main__":
     md_path = sys.argv[1]

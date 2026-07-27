@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import ast
@@ -26,11 +25,9 @@ QUERY_STRING = """
     (string)) @docstring)
 """
 
-
 def should_preserve_comment(content: str) -> bool:
     content = content.strip()
     return any(content.startswith(p) for p in ["#!", "# type:", "# fmt:"])
-
 
 def strip_file(file_path) -> None:
     cursor = QueryCursor()
@@ -66,7 +63,6 @@ def strip_file(file_path) -> None:
     except Exception as e:
         print(f"Error in {file_path}: {e}")
 
-
 def main() -> None:
     files = [os.path.join(r, f) for r, _, fs in os.walk(".") for f in fs if f.endswith(".py")]
     if not files:
@@ -75,7 +71,6 @@ def main() -> None:
     with multiprocessing.get_context("spawn").Pool() as pool:
         pool.map(strip_file, files)
     print("Done.")
-
 
 if __name__ == "__main__":
     main()

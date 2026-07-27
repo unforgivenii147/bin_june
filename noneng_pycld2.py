@@ -111,11 +111,9 @@ CLD2_LANG_MAP = {
     "unknown": "UNKNOWN",
 }
 
-
 def is_likely_text_file(file_path):
     """Check if file is likely a text file based on extension."""
     return file_path.suffix.lower() in TEXT_EXTENSIONS
-
 
 def detect_language(text):
     """
@@ -143,7 +141,6 @@ def detect_language(text):
 
     except Exception as e:
         return "un", "UNKNOWN", 0, False
-
 
 def process_file(file_path):
     """
@@ -192,7 +189,6 @@ def process_file(file_path):
     except Exception as e:
         return file_path, None, f"Error processing file: {e}"
 
-
 def find_text_files(root_dir=".", extensions=TEXT_EXTENSIONS):
     """Recursively find all text files with specified extensions."""
     root_path = Path(root_dir)
@@ -209,7 +205,6 @@ def find_text_files(root_dir=".", extensions=TEXT_EXTENSIONS):
     text_files.sort()
 
     return text_files
-
 
 def main():
     parser = argparse.ArgumentParser(description="Find non-English lines in text files using pycld2")
@@ -327,7 +322,6 @@ def main():
     print(f"Errors: {len(errors)}")
     print(f"Report saved to: {output_path.resolve()}")
     print(f"{'=' * 80}")
-
 
 if __name__ == "__main__":
     main()

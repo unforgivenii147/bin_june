@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import argparse
@@ -16,10 +15,8 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 AES_BLOCK_SIZE = 16
 
-
 def random_key(length: int = 32) -> LiteralString:
     return "".join(random.choice(string.ascii_letters + string.digits) for _ in range(length))
-
 
 def encrypt_file(file_path, key) -> None:
     from os import urandom
@@ -34,7 +31,6 @@ def encrypt_file(file_path, key) -> None:
     encrypted_data = encryptor.update(padded_data) + encryptor.finalize()
     Path(file_path).write_bytes(iv + encrypted_data)
 
-
 def decrypt_file(file_path, key) -> None:
     backend = default_backend()
     raw = Path(file_path).read_bytes()
@@ -46,7 +42,6 @@ def decrypt_file(file_path, key) -> None:
     unpadder = padding.PKCS7(128).unpadder()
     data = unpadder.update(padded_data) + unpadder.finalize()
     Path(file_path).write_bytes(data)
-
 
 def main() -> None:
     parser = argparse.ArgumentParser()
@@ -71,7 +66,6 @@ def main() -> None:
         if file_path.is_file() and file_path.name != Path(__file__).name:
             print(f"Processing {file_path}...")
             action(file_path, key)
-
 
 if __name__ == "__main__":
     main()

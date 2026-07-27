@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import subprocess
@@ -9,7 +8,6 @@ from multiprocessing import Pool, cpu_count
 from pathlib import Path
 
 from rich.progress import Progress
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -31,7 +29,6 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
-
 def optimize_png(path) -> int:
     path = Path(path)
     try:
@@ -47,7 +44,6 @@ def optimize_png(path) -> int:
     except subprocess.CalledProcessError:
         return 0
 
-
 def main() -> None:
     cwd = Path.cwd()
     png_files = get_files(cwd, ext=[".png"])
@@ -62,7 +58,6 @@ def main() -> None:
                 progress.update(task, advance=1)
     total_space_freed = sum(optimize_png(path) for path in png_files) / (1024 * 1024)
     print(f"\n[bold green]Total space freed: {total_space_freed:.2f} MB[/bold green]")
-
 
 if __name__ == "__main__":
     main()

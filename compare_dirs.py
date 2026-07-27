@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import os
@@ -65,7 +64,6 @@ COLORS = {
 
 RESET = "\x1b[0m"
 
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -85,7 +83,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -110,13 +107,10 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
 
-
 CHUNK_SIZE = 32768
-
 
 def get_sha256(path: str | Path) -> str:
     path = Path(path)
@@ -125,7 +119,6 @@ def get_sha256(path: str | Path) -> str:
         for chunk in iter(lambda: f.read(CHUNK_SIZE), b""):
             h.update(chunk)
     return h.hexdigest()
-
 
 def write_shell_copy(script_path: Path, src_root: Path, dst_root: Path, only_dirs, only_files) -> None:
     with script_path.open("w", encoding="utf-8") as sh:
@@ -143,7 +136,6 @@ def write_shell_copy(script_path: Path, src_root: Path, dst_root: Path, only_dir
             )
     st = script_path.stat()
     script_path.chmod(st.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-
 
 def main() -> None:
     cwd = Path.cwd()
@@ -178,7 +170,6 @@ def main() -> None:
     cprint("only in first")
     for p in only_files_first:
         print(p)
-
 
 if __name__ == "__main__":
     main()

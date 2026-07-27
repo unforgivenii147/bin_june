@@ -7,7 +7,6 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from urllib.parse import urlparse
 
-
 def clone_files(repo_url: str, output_dir: Path, extensions: list[str]) -> tuple[str, bool, str]:
     try:
         parsed = urlparse(repo_url)
@@ -34,7 +33,6 @@ def clone_files(repo_url: str, output_dir: Path, extensions: list[str]) -> tuple
         return repo_url, True, f"Successfully cloned {repo_name}"
     except Exception as e:
         return repo_url, False, f"Failed: {str(e)}"
-
 
 def main():
     if len(sys.argv) < 3:
@@ -69,7 +67,6 @@ def main():
             url, success, message = future.result()
             status = "✓" if success else "✗"
             print(f"{status} {url}: {message}")
-
 
 if __name__ == "__main__":
     main()

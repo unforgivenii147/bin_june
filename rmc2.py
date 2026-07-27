@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import argparse
@@ -13,7 +12,6 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
 
-
 @dataclass
 class FileResult:
     path: str
@@ -21,7 +19,6 @@ class FileResult:
     docstrings_removed: int = 0
     changed: bool = False
     error: str | None = None
-
 
 @dataclass
 class Summary:
@@ -32,9 +29,7 @@ class Summary:
     errors: int = 0
     error_files: list[str] = field(default_factory=list)
 
-
 _PRESERVE_PREFIXES = ("#!", "# -*-", "# coding", "# type:", "# noqa", "# pragma:")
-
 
 def _strip_comments(source: str) -> tuple[str, int]:
     lines = source.splitlines(keepends=True)
@@ -111,7 +106,6 @@ def _strip_comments(source: str) -> tuple[str, int]:
         result.append("".join(new_line_chars))
     return ("".join(result), removed)
 
-
 class _DocstringRemover(ast.NodeTransformer):
     def __init__(self, remove_module: bool = False) -> None:
         self.remove_module = remove_module
@@ -146,14 +140,12 @@ class _DocstringRemover(ast.NodeTransformer):
         self.generic_visit(node)
         return self._strip_docstring(node)
 
-
 def _remove_docstrings(source: str, remove_module: bool) -> tuple[str, int]:
     tree = ast.parse(source)
     remover = _DocstringRemover(remove_module=remove_module)
     new_tree = remover.visit(tree)
     ast.fix_missing_locations(new_tree)
     return (ast.unparse(new_tree), remover.count)
-
 
 def _extract_header(lines: list[str]):
     header: list[str] = []
@@ -169,7 +161,6 @@ def _extract_header(lines: list[str]):
         else:
             break
     return (header, lines[idx:])
-
 
 def process_file(
     path: str | Path, remove_module_docstring: bool = False, dry_run: bool = False, display_path: str | None = None
@@ -222,14 +213,11 @@ def process_file(
             tmp_path.unlink(missing_ok=True)
     return result
 
-
 def _dry_run_process(path: str, remove_module: bool) -> FileResult:
     return process_file(path, remove_module_docstring=remove_module, dry_run=True)
 
-
 def _live_process(path: str, remove_module: bool) -> FileResult:
     return process_file(path, remove_module_docstring=remove_module, dry_run=False)
-
 
 def process_wheel(whl_path: Path, remove_module_docstring: bool = False, dry_run: bool = False) -> list[FileResult]:
     results: list[FileResult] = []
@@ -273,7 +261,6 @@ def process_wheel(whl_path: Path, remove_module_docstring: bool = False, dry_run
         shutil.rmtree(tmp_dir, ignore_errors=True)
     return results
 
-
 _SKIP_DIRS: frozenset[str] = frozenset(
     {
         ".git",
@@ -290,7 +277,6 @@ _SKIP_DIRS: frozenset[str] = frozenset(
         ".eggs",
     }
 )
-
 
 def discover_files(root: Path) -> tuple[list[Path], list[Path]]:
     if root.is_file():
@@ -310,7 +296,6 @@ def discover_files(root: Path) -> tuple[list[Path], list[Path]]:
             elif fp.suffix == ".whl":
                 whl_files.append(fp)
     return (py_files, whl_files)
-
 
 def _print_result(r: FileResult, root: Path) -> None:
     try:
@@ -332,7 +317,6 @@ def _print_result(r: FileResult, root: Path) -> None:
         else:
             suffix = "no change"
         print(f"  {label} ({suffix})")
-
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
@@ -404,7 +388,6 @@ def main(argv: list[str] | None = None) -> int:
     if dry_run:
         print("\n  (dry-run: no files were modified)")
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -1,11 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import json
 import sys
-
 
 def main():
     if len(sys.argv) < 2:
@@ -24,7 +22,6 @@ def main():
     with open(fn, "w", encoding="utf-8") as fo:
         json.dump(transformed, fo, ensure_ascii=False, indent=2)
     print(f"Successfully transformed {fn}")
-
 
 if __name__ == "__main__":
     main()

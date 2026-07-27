@@ -1,12 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from pathlib import Path
 
-
 from __future__ import annotations
 
 import imagehash
 from PIL import Image
-
 
 def find_similar_images(userpaths, hashfunc=imagehash.average_hash) -> None:
 
@@ -29,7 +27,6 @@ def find_similar_images(userpaths, hashfunc=imagehash.average_hash) -> None:
             if "dupPictures" in img:
                 print("rm -v", img)
         images[hash] = [*images.get(hash, []), img]
-
 
 if __name__ == "__main__":
     import sys

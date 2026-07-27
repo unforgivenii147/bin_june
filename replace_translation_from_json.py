@@ -4,7 +4,6 @@ import json
 import re
 from pathlib import Path
 
-
 def replace_translations(input_file):
     json_file = input_file.with_suffix(".json")
     with open(json_file, "r", encoding="utf-8") as f:
@@ -25,7 +24,6 @@ def replace_translations(input_file):
         f.write(modified_content)
 
     print(f"Successfully updated {input_file}")
-
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:

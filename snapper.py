@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import os
@@ -8,7 +7,6 @@ import sys
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -30,7 +28,6 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
-
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
     units = ("B", "KB", "MB", "GB", "TB")
@@ -42,7 +39,6 @@ def fsz(sz: float) -> str:
         return f"{int(value)} {units[i]}"
     return f"{value:.1f} {units[i]}"
 
-
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -53,11 +49,9 @@ def gsz(path: str | Path) -> int:
             total += file.stat().st_size
     return total
 
-
 _HASH_TABLE_SIZE = 1 << 14
 _MAX_OFFSET_1 = 2047
 _MAX_OFFSET_2 = 65535
-
 
 def _encode_varint(value: int) -> bytes:
     result = bytearray()
@@ -67,11 +61,9 @@ def _encode_varint(value: int) -> bytes:
     result.append(value)
     return bytes(result)
 
-
 def _hash_4_bytes(data: bytes, pos: int) -> int:
     val = data[pos] | data[pos + 1] << 8 | data[pos + 2] << 16 | data[pos + 3] << 24
     return val * 506832829 >> 32 - 14 & _HASH_TABLE_SIZE - 1
-
 
 def _emit_literal(output: bytearray, data: bytes, start: int, length: int) -> None:
     if length <= 0:
@@ -98,7 +90,6 @@ def _emit_literal(output: bytearray, data: bytes, start: int, length: int) -> No
         output.append(length - 1 >> 24 & 255)
     output.extend(data[start : start + length])
 
-
 def _emit_copy(output: bytearray, offset: int, length: int) -> None:
     while length > 0:
         if length >= 4 and length <= 11 and (offset <= _MAX_OFFSET_1):
@@ -122,7 +113,6 @@ def _emit_copy(output: bytearray, offset: int, length: int) -> None:
             output.append(offset >> 16 & 255)
             output.append(offset >> 24 & 255)
             length -= copy_len
-
 
 def compress(data: bytes) -> bytes:
     if not data:
@@ -163,13 +153,11 @@ def compress(data: bytes) -> bytes:
         _emit_literal(output, data, literal_start, data_len - literal_start)
     return bytes(output)
 
-
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
-
 
 ATTRIBUTES = {
     "bold": 1,
@@ -221,7 +209,6 @@ COLORS = {
 }
 RESET = "\x1b[0m"
 
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -241,7 +228,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -266,20 +252,16 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
 
-
 class SnappyError(Exception):
     pass
-
 
 class CompressionError(SnappyError):
     def __init__(self, message: str, algorithm: str | None = None) -> None:
         super().__init__(message)
         self.algorithm = algorithm
-
 
 def _decode_varint(data: bytes, pos: int) -> tuple[int, int]:
     result = 0
@@ -298,7 +280,6 @@ def _decode_varint(data: bytes, pos: int) -> tuple[int, int]:
             msg = "error length"
             raise CompressionError(msg, algorithm="snappy")
     return (result, pos)
-
 
 def decompress(data: bytes) -> bytes:
     if not data:
@@ -395,11 +376,9 @@ def decompress(data: bytes) -> bytes:
         raise CompressionError(msg, algorithm="snappy")
     return bytes(output)
 
-
 COMPRESS = "-c" in sys.argv
 DECOMPRESS = "-d" in sys.argv
 MODE = "COMPRESS"
-
 
 def compress_file(path: Path) -> None:
     before = gsz(path)
@@ -420,7 +399,6 @@ def compress_file(path: Path) -> None:
     path.unlink()
     return
 
-
 def decompress_file(path: Path) -> None:
     before = gsz(path)
     if not before:
@@ -440,14 +418,12 @@ def decompress_file(path: Path) -> None:
     path.unlink()
     return
 
-
 def process_file(path) -> None:
     path = Path(path)
     if MODE == "COMPRESS":
         compress_file(path)
     elif MODE == "DECOMPRESS":
         decompress_file(path)
-
 
 def main() -> None:
     global mode
@@ -468,7 +444,6 @@ def main() -> None:
     else:
         files = get_files(cwd)
     mpf3(process_file, files)
-
 
 if __name__ == "__main__":
     sys.exit(main())

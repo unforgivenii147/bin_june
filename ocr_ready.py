@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-
 from __future__ import annotations
 
 import multiprocessing
@@ -22,7 +21,6 @@ except ImportError:
     HAS_CV2 = False
     from PIL import Image, ImageEnhance, ImageFilter
 
-
 def deskew(image):
     if HAS_CV2:
         coords = np.column_stack(np.where(image > 0))
@@ -37,7 +35,6 @@ def deskew(image):
     else:
         return image
 
-
 def preprocess_image_cv2(img_path: Path):
     img = cv2.imread(str(img_path))
     if img is None:
@@ -51,7 +48,6 @@ def preprocess_image_cv2(img_path: Path):
     kernel = np.ones((1, 1), np.uint8)
     cleaned = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
     return deskew(cleaned)
-
 
 def preprocess_image_pillow(img_path: Path):
     try:
@@ -69,17 +65,14 @@ def preprocess_image_pillow(img_path: Path):
     except Exception:
         return None
 
-
 def preprocess_image(img_path: Path):
     if HAS_CV2:
         return preprocess_image_cv2(img_path)
     else:
         return preprocess_image_pillow(img_path)
 
-
 def should_skip(path: Path) -> bool:
     return path.suffix.lower() not in SUPPORTED_EXT
-
 
 def save_processed_image(img, img_path: Path):
     if HAS_CV2 and isinstance(img, np.ndarray):
@@ -88,7 +81,6 @@ def save_processed_image(img, img_path: Path):
         img.save(str(img_path))
     else:
         raise ValueError("Unsupported image format")
-
 
 def process_single_image(image_path: Path) -> dict:
     result = {"path": str(image_path), "success": False, "error": None, "size_before": 0, "size_after": 0}
@@ -111,7 +103,6 @@ def process_single_image(image_path: Path) -> dict:
         result["error"] = str(e)
     return result
 
-
 def get_image_files():
     image_files = []
     for path in BASE_DIR.rglob("*"):
@@ -119,7 +110,6 @@ def get_image_files():
             continue
         image_files.append(path)
     return image_files
-
 
 def process() -> None:
     if not HAS_CV2:
@@ -168,7 +158,6 @@ def process() -> None:
         print(f"   📦 Total size after: {total_after / (1024 * 1024):.2f} MB")
         print(f"   📉 Size reduction: {size_reduction:.1f}%")
     print("=" * 60)
-
 
 if __name__ == "__main__":
     print("⚠️  WARNING: This script will MODIFY original image files in-place!")

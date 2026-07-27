@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import contextlib
@@ -10,7 +9,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 CHUNK_SIZE = 1024 * 1024
-
 
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
@@ -26,7 +24,6 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -62,7 +59,6 @@ RGBA_RE = re.compile(
     re.VERBOSE | re.IGNORECASE,
 )
 
-
 @dataclass(frozen=True)
 class Color:
     r: int
@@ -73,10 +69,8 @@ class Color:
     def as_tuple(self) -> tuple[int, int, int, float]:
         return self.r, self.g, self.b, self.a
 
-
 def clamp01(x: float) -> float:
     return 0.0 if x < 0.0 else min(x, 1.0)
-
 
 def parse_hex_to_rgba(hex_body: str) -> Color:
     if len(hex_body) == 3:
@@ -100,7 +94,6 @@ def parse_hex_to_rgba(hex_body: str) -> Color:
         raise ValueError(msg)
     return Color(r=r, g=g, b=b, a=a)
 
-
 def parse_rgba_match(m: re.Match) -> Color | None:
     r = int(m.group("r"))
     g = int(m.group("g"))
@@ -116,7 +109,6 @@ def parse_rgba_match(m: re.Match) -> Color | None:
         a = clamp01(a)
     return Color(r=r, g=g, b=b, a=a)
 
-
 def extract_colors_from_text(text: str) -> list[Color]:
     colors: list[Color] = []
     for hm in HEX_RE.finditer(text):
@@ -129,9 +121,7 @@ def extract_colors_from_text(text: str) -> list[Color]:
             colors.append(c)
     return colors
 
-
 TEXT_LIKE_EXTS = TXT_EXT
-
 
 def iter_text_files(root: Path) -> Iterable[Path]:
     for path in root.rglob("*"):
@@ -140,7 +130,6 @@ def iter_text_files(root: Path) -> Iterable[Path]:
         ext = path.suffix.lower()
         if ext in TEXT_LIKE_EXTS or not is_binary(str(path)):
             yield path
-
 
 def safe_read_text(path: Path, limit_bytes: int = 5000000) -> str | None:
     try:
@@ -157,10 +146,8 @@ def safe_read_text(path: Path, limit_bytes: int = 5000000) -> str | None:
     except Exception:
         return None
 
-
 def rgba_to_hex(c: Color) -> str:
     return f"#{c.r:02x}{c.g:02x}{c.b:02x}"
-
 
 def rgb_to_luminance(r: int, g: int, b: int) -> float:
 
@@ -173,22 +160,17 @@ def rgb_to_luminance(r: int, g: int, b: int) -> float:
     B = lin(b)
     return 0.2126 * R + 0.7152 * G + 0.0722 * B
 
-
 def ansi_rgb_bg(r: int, g: int, b: int) -> str:
     return f"\x1b[48;2;{r};{g};{b}m"
-
 
 def ansi_rgb_fg(r: int, g: int, b: int) -> str:
     return f"\x1b[38;2;{r};{g};{b}m"
 
-
 ANSI_RESET = "\x1b[0m"
-
 
 def best_text_color(c: Color) -> tuple[int, int, int]:
     lum = rgb_to_luminance(c.r, c.g, c.b)
     return (0, 0, 0) if lum > 0.35 else (255, 255, 255)
-
 
 def demo_color_blocks(colors: list[Color], max_items: int = 200) -> None:
     uniq: dict[tuple[int, int, int, float], Color] = {}
@@ -209,7 +191,6 @@ def demo_color_blocks(colors: list[Color], max_items: int = 200) -> None:
         text = f"{bg}{fg}  {rgba_str}  {ANSI_RESET}"
         print(block + "\n" + text + "\n")
 
-
 def main() -> None:
     root = Path(".")
     all_found: list[Color] = []
@@ -224,7 +205,6 @@ def main() -> None:
         print("No colors found.")
         return
     demo_color_blocks(all_found, max_items=200)
-
 
 if __name__ == "__main__":
     main()

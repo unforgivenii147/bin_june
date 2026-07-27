@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import re
@@ -9,13 +8,11 @@ from urllib.parse import urljoin
 import requests
 from bs4 import BeautifulSoup
 
-
 BASE_URL = "https://sr.moviesho.com/Series/"
 OUTPUT_FILE = "movies.txt"
 MAX_SIZE_MB = 400
 visited = set()
 found_movies = []
-
 
 def size_to_mb(size_str: str) -> float | None:
     match = re.search(r"([\d.]+)\s*Mi?B", size_str)
@@ -23,14 +20,12 @@ def size_to_mb(size_str: str) -> float | None:
         return float(match.group(1))
     return None
 
-
 def is_valid_movie(filename: str, size_mb: float | None) -> bool:
     if not filename.lower().endswith(".mkv"):
         return False
     if not ("480p" in filename.lower() or "720p" in filename.lower()):
         return False
     return not (size_mb is None or size_mb >= MAX_SIZE_MB)
-
 
 def crawl(url: str) -> None:
     if url in visited:
@@ -65,7 +60,6 @@ def crawl(url: str) -> None:
             if is_valid_movie(name, size_mb):
                 print(f"Found: {full_url} ({size_mb} MB)")
                 found_movies.append(full_url)
-
 
 if __name__ == "__main__":
     crawl(BASE_URL)

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
@@ -8,7 +7,6 @@ import tempfile
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -30,7 +28,6 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
-
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
     units = ("B", "KB", "MB", "GB", "TB")
@@ -42,7 +39,6 @@ def fsz(sz: float) -> str:
         return f"{int(value)} {units[i]}"
     return f"{value:.1f} {units[i]}"
 
-
 def rrs(path, before, after) -> None:
     delta = before - after
     msg = (
@@ -52,13 +48,11 @@ def rrs(path, before, after) -> None:
     )
     print(f"\n{path.name} | {msg}")
 
-
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
-
 
 def runcmd(
     cmd: list[str],
@@ -110,7 +104,6 @@ def runcmd(
             print(msg, file=sys_stderr)
         return (1, "", msg)
 
-
 def process_file(path) -> None:
     path = Path(path)
     if "lazy" in path.parts:
@@ -134,7 +127,6 @@ def process_file(path) -> None:
     finally:
         if tmp_out_path and Path(tmp_out_path).exists():
             Path(tmp_out_path).unlink()
-
 
 if __name__ == "__main__":
     cwd = Path.cwd()

@@ -66,7 +66,6 @@ EXTRA_ENCODINGS = [
     "mac_latin2",
 ]
 
-
 def try_decode(file_content: bytes, encoding: str):
     try:
         decoded = file_content.decode(encoding)
@@ -74,12 +73,10 @@ def try_decode(file_content: bytes, encoding: str):
     except (UnicodeDecodeError, LookupError):
         return (False, None)
 
-
 def get_first_chunk(text: str, chunk_size: int = 500) -> str:
     if len(text) <= chunk_size:
         return text
     return text[:chunk_size] + "...\n[truncated...]"
-
 
 def decode_file(file_path: str, output_path: str | None = None, show_chunk: int = 500):
     file_path = Path(file_path)
@@ -161,7 +158,6 @@ def decode_file(file_path: str, output_path: str | None = None, show_chunk: int 
         print(f"Error saving file: {e}")
         return False
 
-
 def main():
     if len(sys.argv) < 2:
         print("Usage: python decode_file.py <file_path> [output_path]")
@@ -171,7 +167,6 @@ def main():
     file_path = sys.argv[1]
     output_path = sys.argv[2] if len(sys.argv) > 2 else None
     decode_file(file_path, output_path)
-
 
 if __name__ == "__main__":
     main()

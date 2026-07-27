@@ -4,10 +4,8 @@ import random
 import os
 from shutil import get_terminal_size
 
-
 # Adjust this path if the script is stored somewhere separate from your JSON file
 FILE_NAME = "/sdcard/data/quotes/quotes.json"
-
 
 def display_random_quote():
     if not os.path.exists(FILE_NAME):
@@ -33,7 +31,6 @@ def display_random_quote():
     print(f'\033[5;96m"{quote_text}"\033[0m')
     print(f"\033[5;94m  — {author_text}\033[0m")
     print("─" * N + "\n")
-
 
 if __name__ == "__main__":
     display_random_quote()

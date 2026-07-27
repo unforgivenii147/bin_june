@@ -1,11 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import re
 import sys
-
 
 if len(sys.argv) != 2:
     print("Usage: python script.py <filename>")

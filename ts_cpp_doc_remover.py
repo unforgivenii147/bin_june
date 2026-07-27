@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import os
@@ -11,7 +10,6 @@ import tree_sitter_cpp as tscpp
 from tree_sitter import Language, Node, Parser
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def remove_blank_lines(text: str | Path) -> str:
     content = text
@@ -33,7 +31,6 @@ def remove_blank_lines(text: str | Path) -> str:
         result_lines.append(line)
         prev_blank = is_blank
     return "".join(result_lines)
-
 
 ATTRIBUTES = {
     "bold": 1,
@@ -88,7 +85,6 @@ COLORS = {
 
 RESET = "\x1b[0m"
 
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -108,7 +104,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -133,10 +128,8 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
-
 
 class TSCppRemover:
     def __init__(self) -> None:
@@ -161,7 +154,6 @@ class TSCppRemover:
         cleaned = new_source.decode("utf-8")
         return remove_blank_lines(cleaned)
 
-
 def process_file(path: Path) -> None:
     path = Path(path)
     before = path.stat().st_size
@@ -175,7 +167,6 @@ def process_file(path: Path) -> None:
         cprint(f"[OK] {path.name} - {reduced} ", "cyan")
     else:
         cprint(f"[NO CHANGE] {path.name}", "blue")
-
 
 if __name__ == "__main__":
     exts = {".cpp", ".cc", ".cxx", ".hpp", ".h", ".hh", ".hxx", ".c"}

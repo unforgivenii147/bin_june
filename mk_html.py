@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import argparse
@@ -13,17 +12,13 @@ import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
-
 RST2HTML_OPTIONS = " ".join(["--no-toc-backlinks", "--strip-comments", "--language en", "--date"])
 
-
 VALID_EXTENSIONS = {".rst", ".txt", ".md"}
-
 
 MD_LINK_PATTERN = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
 MD_HEADING_PATTERN = re.compile(r"^(#{1,6})\s+(.+)$", re.MULTILINE)
 MD_CODE_BLOCK_PATTERN = re.compile(r"```(\w+)?\n(.*?)```", re.DOTALL)
-
 
 def find_rst2html_script():
     """Find the rest2html.py script in common locations."""
@@ -38,7 +33,6 @@ def find_rst2html_script():
             return path
 
     return None
-
 
 def convert_md_to_rst(content: str) -> str:
     """Convert Markdown content to reStructuredText."""
@@ -78,7 +72,6 @@ def convert_md_to_rst(content: str) -> str:
     content = re.sub(r"^\* ", r"- ", content, flags=re.MULTILINE)
 
     return content
-
 
 def convert_file_to_html(file_path: Path, stylesheet_url: str | None = None) -> Path:
     """Convert a single file to HTML using appropriate converter."""
@@ -138,7 +131,6 @@ def convert_file_to_html(file_path: Path, stylesheet_url: str | None = None) -> 
         print(f"Error converting {file_path}: {e}", file=sys.stderr)
         return None
 
-
 def generate_stylesheet_hash(stylesheet_path: Path) -> str:
     """Generate a unique stylesheet filename based on its content."""
     if not stylesheet_path or not stylesheet_path.exists():
@@ -150,12 +142,10 @@ def generate_stylesheet_hash(stylesheet_path: Path) -> str:
     checksum = hashlib.sha256(css).hexdigest()[:32]
     return f"style_{checksum}.css"
 
-
 def process_file(file_path: Path, stylesheet_url: str | None = None) -> tuple:
     """Process a single file and return (original_path, html_path)."""
     html_path = convert_file_to_html(file_path, stylesheet_url)
     return (file_path, html_path)
-
 
 def find_all_source_files(root_dir: Path | None = None) -> list:
     """Find all source files recursively in the directory."""
@@ -167,7 +157,6 @@ def find_all_source_files(root_dir: Path | None = None) -> list:
         source_files.extend(root_dir.rglob(f"*{ext}"))
 
     return source_files
-
 
 def publish_parallel(root_dir: Path | None = None, max_workers: int | None = None):
     """Convert all source files to HTML in parallel."""
@@ -219,7 +208,6 @@ def publish_parallel(root_dir: Path | None = None, max_workers: int | None = Non
 
     print(f"\nConversion complete: {converted} converted, {errors} errors")
 
-
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(description="Convert all .rst, .txt, and .md files to HTML recursively")
@@ -239,7 +227,6 @@ def main():
         sys.exit(1)
 
     publish_parallel(root_dir, args.workers)
-
 
 if __name__ == "__main__":
     main()

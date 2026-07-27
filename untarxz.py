@@ -9,7 +9,6 @@ import tarfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
-
 def extract_and_remove(tar_path: Path) -> tuple[Path, bool, str]:
     """
     Extract a single .tar.xz file and remove it if successful.
@@ -40,7 +39,6 @@ def extract_and_remove(tar_path: Path) -> tuple[Path, bool, str]:
         return (tar_path, False, f"❌ Permission denied: {tar_path.name}")
     except Exception as e:
         return (tar_path, False, f"❌ Error processing {tar_path.name}: {str(e)}")
-
 
 def main():
     """Main function to process all .tar.xz files in current directory."""
@@ -75,7 +73,6 @@ def main():
     if failure_count > 0:
         print(f"❌ Failed: {failure_count} file(s)")
     print(f"{'=' * 50}")
-
 
 if __name__ == "__main__":
     try:

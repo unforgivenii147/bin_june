@@ -1,10 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 from pathlib import Path
-
 
 if __name__ == "__main__":
     path = "/data/data/com.termux/files/home/.pyenv/shims:/data/data/com.termux/files/home/.pyenv/bin:/data/data/com.termux/files/home/bin:/data/data/com.termux/files/home/bashbin:/data/data/com.termux/files/home/.cargo/bin:/data/data/com.termux/files/home/.npm-global/bin:/data/data/com.termux/files/usr/lib/node_modules/.bin:/data/data/com.termux/files/usr/bin:/data/data/com.termux/files/home/.local/bin:/data/data/com.termux/files/home/sbin:/data/data/com.termux/files/home/.pyenv/bin:/data/data/com.termux/files/home/.local/share/nvim/mason/bin:/data/data/com.termux/files/usr/local/bin"

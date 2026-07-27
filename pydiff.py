@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import os
@@ -62,7 +61,6 @@ COLORS = {
 
 RESET = "\x1b[0m"
 
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -82,7 +80,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -107,10 +104,8 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
-
 
 def read_lines(path: str | Path, ke: bool = True) -> list[str]:
     path = Path(path)
@@ -123,7 +118,6 @@ def read_lines(path: str | Path, ke: bool = True) -> list[str]:
         lines.append("")
     return lines
 
-
 def read_lines_mmap(path: Path, keep_ends: bool = True) -> list[str]:
     import mmap
 
@@ -134,7 +128,6 @@ def read_lines_mmap(path: Path, keep_ends: bool = True) -> list[str]:
     if not lines[-1].endswith(("\n", "\r\n", "\r")) and size > 0 and text.endswith("\n"):
         lines.append("")
     return lines
-
 
 def process_files(path1: Path, path2: Path) -> None:
     lines1 = read_lines(path1)
@@ -156,7 +149,6 @@ only in {path1.name}: {len(only_in_first)}
 only in {path2.name}: {len(only_in_second)}""",
         "blue",
     )
-
 
 if __name__ == "__main__":
     f1 = Path(sys.argv[1])

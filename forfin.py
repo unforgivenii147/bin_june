@@ -17,7 +17,6 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 def process_file(cli_app, cli_args, file_path):
     try:
         cmd = [cli_app] + cli_args + [str(file_path)]
@@ -28,7 +27,6 @@ def process_file(cli_app, cli_args, file_path):
             return f"❌ Failed: {file_path.name} - {result.stderr.strip()}"
     except Exception as e:
         return f"❌ Error processing {file_path.name}: {e!s}"
-
 
 def main():
     if len(sys.argv) < 3:
@@ -60,7 +58,6 @@ def main():
     failure_count = len(results) - success_count
     print("-" * 50)
     print(f"Summary: {success_count} successful, {failure_count} failed")
-
 
 if __name__ == "__main__":
     main()

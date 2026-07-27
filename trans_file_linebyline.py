@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 """
 Optimized version of trans_file_linebyline.py for Python 3.12.
 Translates non-English lines in a file line by line in-place.
@@ -21,7 +20,6 @@ DetectorFactory.seed = 0
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
-
 def is_english(text: str) -> bool:
     if not (stripped := text.strip()):
         return True
@@ -29,7 +27,6 @@ def is_english(text: str) -> bool:
         return detect(stripped) == "en"
     except Exception:
         return True
-
 
 def translate_line(line: str) -> str:
     try:
@@ -39,7 +36,6 @@ def translate_line(line: str) -> str:
     except Exception as e:
         logger.error("Translation error: %s", e)
         return line
-
 
 def process_file(filepath: Path, replace_original: bool = False) -> None:
     if not filepath.exists():
@@ -69,7 +65,6 @@ def process_file(filepath: Path, replace_original: bool = False) -> None:
         if "tmp_file" in locals() and Path(tmp_file.name).exists():
             Path(tmp_file.name).unlink()
 
-
 def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: python trans_file_linebyline_optimized.py <filename> [--replace]")
@@ -79,7 +74,6 @@ def main() -> None:
     replace_original = "--replace" in sys.argv
     logger.info("Processing file: %s", filepath)
     process_file(filepath, replace_original)
-
 
 if __name__ == "__main__":
     main()

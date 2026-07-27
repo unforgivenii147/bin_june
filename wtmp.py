@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import shutil
@@ -10,7 +9,6 @@ from pathlib import Path
 
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
-
 
 TEMPDIR = Path("/data/data/com.termux/files/usr/tmp")
 DEST_DIR = Path("~/tmp/tgz").expanduser()
@@ -28,7 +26,6 @@ ALLOWED_EXTENSIONS = (
     ".tbr",
 )
 
-
 def copy_if_match(src: Path) -> None:
     if any(str(src).endswith(ext) for ext in ALLOWED_EXTENSIONS):
         try:
@@ -39,12 +36,10 @@ def copy_if_match(src: Path) -> None:
         except Exception as e:
             print(f"Failed to copy {src.relative_to(TEMPDIR)}: {e}")
 
-
 def startup_scan(root: Path) -> None:
     for path in root.rglob("*"):
         if path.is_file():
             copy_if_match(path)
-
 
 class CopyEventHandler(FileSystemEventHandler):
     def on_created(self, event) -> None:
@@ -54,7 +49,6 @@ class CopyEventHandler(FileSystemEventHandler):
     def on_modified(self, event) -> None:
         if not event.is_directory:
             copy_if_match(Path(event.src_path))
-
 
 if __name__ == "__main__":
     watch_path = Path(sys.argv[1]).expanduser() if len(sys.argv) > 1 else TEMPDIR

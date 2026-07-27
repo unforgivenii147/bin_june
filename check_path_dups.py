@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import os
@@ -11,7 +10,6 @@ from pathlib import Path
 CHUNK_SIZE = 1024 * 1024
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def get_sha256(path: str | Path) -> str:
     from hashlib import sha256
@@ -27,7 +25,6 @@ def get_sha256(path: str | Path) -> str:
         return h.hexdigest()
     except OSError:
         return ""
-
 
 ATTRIBUTES = {
     "bold": 1,
@@ -82,7 +79,6 @@ COLORS = {
 
 RESET = "\x1b[0m"
 
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -102,7 +98,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -127,10 +122,8 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
-
 
 def get_path_dirs() -> list[Path]:
     path_env = os.environ.get("PATH", "").split("/")
@@ -138,14 +131,12 @@ def get_path_dirs() -> list[Path]:
     found = [Path(p).expanduser() for p in path_env if p and p != masonbin]
     return [p for p in found if p.exists()]
 
-
 def get_executables_in_dir(d: Path) -> list[Path]:
     try:
         return [f for f in d.iterdir() if f.is_file() and f.name != ".gitignore"]
     except PermissionError:
         print(f"Permission denied: {d}")
         return []
-
 
 def main() -> None:
     dirs = [d for d in get_path_dirs() if d.is_dir()]
@@ -168,7 +159,6 @@ def main() -> None:
         for path, _ in sorted(items, key=lambda x: str(x[0])):
             print(f"  {path.name} in {path.parent.parent.name}/{path.parent.name}")
             print(f"  {path}")
-
 
 if __name__ == "__main__":
     main()

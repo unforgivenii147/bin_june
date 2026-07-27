@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import argparse
@@ -14,7 +13,6 @@ import pycld2
 CHUNK_SIZE = 1024 * 1024
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
@@ -30,7 +28,6 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
 
 class LanguageDetector:
     def __init__(self, min_bytes: int = 100, max_bytes: int = 10000) -> None:
@@ -139,7 +136,6 @@ class LanguageDetector:
         else:
             print("\n✅ No non-English files found!")
 
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="Recursively find non-English files using pycld2")
     parser.add_argument("directory", nargs="?", default=".", help="Directory to scan (default: current directory)")
@@ -167,7 +163,6 @@ def main() -> None:
         with Path(args.output).open("w", encoding="utf-8") as f, redirect_stdout(f):
             detector.report_results(only_report_non_english=not args.all)
         print(f"\n✅ Results saved to: {args.output}")
-
 
 if __name__ == "__main__":
     try:

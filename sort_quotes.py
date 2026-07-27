@@ -4,7 +4,6 @@ import os
 
 FILE_NAME = "/sdcard/data/quotes/quotes.json"
 
-
 def sort_quotes_by_author():
     # 1. Check if the file exists before reading
     if not os.path.exists(FILE_NAME):
@@ -28,7 +27,6 @@ def sort_quotes_by_author():
         json.dump(quotes, f, indent=2, ensure_ascii=False)
 
     print(f"Success: Sorted all quotes alphabetically by author in '{FILE_NAME}'.")
-
 
 if __name__ == "__main__":
     sort_quotes_by_author()

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import operator
@@ -18,7 +17,6 @@ RED = "\x1b[31m"
 RESET = "\x1b[0m"
 COMPRESSED_EXTS = {".zip", ".tar", ".gz", ".bz2", ".xz", ".rar", ".7z"}
 
-
 def human_readable_size(size_bytes) -> str:
     if size_bytes < 1024:
         return f"{size_bytes} B"
@@ -27,7 +25,6 @@ def human_readable_size(size_bytes) -> str:
     if size_bytes < 1024**3:
         return f"{size_bytes / 1024**2:.1f} MB"
     return f"{size_bytes / 1024**3:.1f} GB"
-
 
 def get_dir_size(path: str) -> int:
     total = 0
@@ -40,7 +37,6 @@ def get_dir_size(path: str) -> int:
             except Exception:
                 pass
     return total
-
 
 def list_dir(path: str = ".") -> None:
     entries = os.listdir(path)
@@ -72,7 +68,6 @@ def list_dir(path: str = ".") -> None:
     for size, name, color in sorted(items, key=operator.itemgetter(0)):
         size_str = human_readable_size(size).ljust(size_col_width)
         print(f"{size_str}  {color}{name}{RESET}")
-
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:

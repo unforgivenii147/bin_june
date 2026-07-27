@@ -1,12 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import json
 import operator
 from pathlib import Path
-
 
 def sort_by_size(root_folder: Path):
     items = []
@@ -20,7 +18,6 @@ def sort_by_size(root_folder: Path):
         items.append({"name": path.name, "size": size})
     items.sort(key=operator.itemgetter("size"), reverse=True)
     return items
-
 
 if __name__ == "__main__":
     cwd = Path.cwd()

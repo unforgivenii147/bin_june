@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
@@ -12,7 +11,6 @@ from typing import Any
 
 MAX_WORKERS = 4
 
-
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -22,7 +20,6 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -44,7 +41,6 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
-
 def mpf_async(func: Callable[[Any], Any], items: Iterable[Any]):
     with get_context("spawn").Pool(MAX_WORKERS) as p:
         async_results = [p.apply_async(func, (item,)) for item in items]
@@ -57,7 +53,6 @@ def mpf_async(func: Callable[[Any], Any], items: Iterable[Any]):
                 results.append(None)
         return results
 
-
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
     units = "B", "KB", "MB", "GB", "TB"
@@ -68,7 +63,6 @@ def fsz(sz: float) -> str:
     if i == 0:
         return f"{int(value)} {units[i]}"
     return f"{value:.1f} {units[i]}"
-
 
 def runcmd(
     cmd: list[str],
@@ -120,7 +114,6 @@ def runcmd(
             print(msg, file=sys_stderr)
         return 1, "", msg
 
-
 def process_file(path: Path) -> None:
     path = Path(path)
     temp_gs = path.with_name(f"temp_gs_{path.name}")
@@ -164,7 +157,6 @@ def process_file(path: Path) -> None:
                 print("original file is smaller")
                 temp_gs.unlink(missing_ok=True)
 
-
 def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
@@ -178,7 +170,6 @@ def main() -> None:
     dsz = before - after
     if dsz:
         print(f"space freed : {fsz(dsz)}")
-
 
 if __name__ == "__main__":
     main()

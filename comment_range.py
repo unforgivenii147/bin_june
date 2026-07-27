@@ -19,7 +19,6 @@ EXTENSION_COMMENTS = {
     ".css": "/*",
 }
 
-
 def main():
     # 1. Validate that enough arguments were passed
     if len(sys.argv) < 4:
@@ -76,7 +75,6 @@ def main():
         f.writelines(lines)
 
     print(f"Success: Commented out lines {start_line} to {actual_end} in '{filepath}' using '{comment_char}'.")
-
 
 if __name__ == "__main__":
     main()

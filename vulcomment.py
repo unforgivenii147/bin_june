@@ -30,7 +30,6 @@ from collections import defaultdict
 
 VULTURE_RE = re.compile("^(?P<path>.*?):(?P<lineno>\\d+):\\s*unused variable '(?P<var>[^']+)'", re.IGNORECASE)
 
-
 def parse_vulture_output(lines: list[str]) -> dict[str, set[int]]:
     mapping: dict[str, set[int]] = defaultdict(set)
     for ln in lines:
@@ -42,7 +41,6 @@ def parse_vulture_output(lines: list[str]) -> dict[str, set[int]]:
         lineno = int(m.group("lineno"))
         mapping[path].add(lineno)
     return mapping
-
 
 def comment_lines_in_file(path: str, line_numbers: set[int]) -> tuple[list[str], list[str]]:
     with open(path, "r", encoding="utf-8") as f:
@@ -67,7 +65,6 @@ def comment_lines_in_file(path: str, line_numbers: set[int]) -> tuple[list[str],
         modified[idx] = leading + "# " + stripped
     return (original, modified)
 
-
 def show_diff_and_maybe_write(path: str, original: list[str], modified: list[str], apply: bool, backup: bool) -> None:
     if original == modified:
         print(f"No changes needed for {path}")
@@ -81,7 +78,6 @@ def show_diff_and_maybe_write(path: str, original: list[str], modified: list[str
             print(f"  [written] updated {path}")
         except Exception as e:
             print(f"  [!] failed to write {path}: {e}")
-
 
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(description="Comment out lines reported by vulture as unused variables.")
@@ -126,7 +122,6 @@ def main(argv: list[str]) -> int:
         if not args.apply:
             print("Dry-run mode — no files were changed. Use --apply to write changes.")
     return 0
-
 
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv[1:]))

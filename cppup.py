@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import subprocess
@@ -9,7 +8,6 @@ from pathlib import Path
 from time import perf_counter
 
 import fastwalk
-
 
 FILE_EXTENSIONS = {
     ".c",
@@ -30,7 +28,6 @@ FILE_EXTENSIONS = {
     ".HXX",
 }
 
-
 def format_file(file_path) -> bool:
     pth = Path(file_path)
     print(f"formating {pth.stem}")
@@ -40,7 +37,6 @@ def format_file(file_path) -> bool:
     except (subprocess.CalledProcessError, FileNotFoundError):
         return False
 
-
 def find_files():
     all_files = []
     for file in fastwalk.walk("."):
@@ -48,7 +44,6 @@ def find_files():
         if path.is_file() and path.suffix in FILE_EXTENSIONS:
             all_files.append(path)
     return all_files
-
 
 def main() -> None:
     start = perf_counter()
@@ -61,7 +56,6 @@ def main() -> None:
         results = executor.map(format_file, files_to_format)
         sum(1 for success in results if success)
     print(f"{perf_counter() - start} sec")
-
 
 if __name__ == "__main__":
     main()

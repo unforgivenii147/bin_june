@@ -33,7 +33,6 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
-
 def frames_are_similar(arr_a: np.ndarray, arr_b: np.ndarray) -> bool:
     if arr_a.shape != arr_b.shape:
         return False
@@ -41,7 +40,6 @@ def frames_are_similar(arr_a: np.ndarray, arr_b: np.ndarray) -> bool:
     mean_diff = diff.mean()
     changed_fraction = (diff > 10).any(axis=-1).mean()
     return mean_diff < SIMILARITY_THRESHOLD and changed_fraction < MIN_CHANGED_PIXEL_FRACTION
-
 
 def extract_unique_frames(gif_path: Path) -> list[np.ndarray]:
     frames: list[np.ndarray] = []
@@ -76,7 +74,6 @@ def extract_unique_frames(gif_path: Path) -> list[np.ndarray]:
         log.error("Cannot open %s: %s", gif_path, exc)
     return frames
 
-
 def convert_gif(gif_path: Path) -> tuple[Path, int, int]:
     frames = extract_unique_frames(gif_path)
     if not frames:
@@ -110,7 +107,6 @@ def convert_gif(gif_path: Path) -> tuple[Path, int, int]:
     log.info("%-50s  %d/%d frames kept → %d JPG(s)", str(gif_path), len(frames), total_in_gif, saved)
     return gif_path, total_in_gif, saved
 
-
 def main() -> None:
     gif_files = sorted(SEARCH_ROOT.rglob("*.gif"))
     gif_files += sorted(SEARCH_ROOT.rglob("*.GIF"))
@@ -139,7 +135,6 @@ def main() -> None:
         total_saved,
         total_frames,
     )
-
 
 if __name__ == "__main__":
     main()

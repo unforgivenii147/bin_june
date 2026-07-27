@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import csv
@@ -9,7 +8,6 @@ import sys
 from pathlib import Path
 
 from loguru import logger
-
 
 def find_dist_info_dir(site_packages: Path, pkg_name: str) -> Path:
     candidates = list(site_packages.glob(f"{pkg_name}-*.dist-info"))
@@ -21,7 +19,6 @@ def find_dist_info_dir(site_packages: Path, pkg_name: str) -> Path:
     if len(candidates) > 1:
         logger.warning("Multiple dist-info directories found for '{}', using: {}", pkg_name, candidates[0])
     return candidates[0]
-
 
 def copy_package_files(pkg_name: str) -> None:
     site_packages = Path.cwd()
@@ -65,7 +62,6 @@ def copy_package_files(pkg_name: str) -> None:
     print("\nMissing files (ignored, warned): {}", missing_count)
     print("\nErrors: {}", error_count)
 
-
 def main() -> None:
     if len(sys.argv) != 2:
         print(f"Usage: {sys.argv[0]} <package-name>", file=sys.stderr)
@@ -81,7 +77,6 @@ def main() -> None:
     except Exception as e:
         logger.exception("Fatal error while copying package '{}': {}", pkg_name, e)
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

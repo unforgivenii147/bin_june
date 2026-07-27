@@ -1,12 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import re
 import sys
 from pathlib import Path
-
 
 def main() -> None:
     if len(sys.argv) != 2:
@@ -41,7 +39,6 @@ def main() -> None:
     print("Kept the first declaration of each constant.")
     print(f"Moved {len(duplicates)} duplicate declarations to {dup_path}")
     print(f"Updated {src_path} in place.")
-
 
 if __name__ == "__main__":
     main()

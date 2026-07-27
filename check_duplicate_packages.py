@@ -11,7 +11,6 @@ import pathlib
 import site
 import sys
 
-
 def get_site_directories() -> tuple[list[pathlib.Path], list[pathlib.Path]]:
     """
     Get system and user site-packages directories.
@@ -28,7 +27,6 @@ def get_site_directories() -> tuple[list[pathlib.Path], list[pathlib.Path]]:
     user_site_dirs = [user_site] if user_site.exists() else []
 
     return system_site_dirs, user_site_dirs
-
 
 def scan_directory_for_packages(directory: pathlib.Path) -> dict[str, pathlib.Path]:
     """
@@ -69,7 +67,6 @@ def scan_directory_for_packages(directory: pathlib.Path) -> dict[str, pathlib.Pa
 
     return packages
 
-
 def find_duplicate_packages(
     system_packages: dict[str, pathlib.Path], user_packages: dict[str, pathlib.Path]
 ) -> dict[str, tuple[pathlib.Path, pathlib.Path]]:
@@ -90,7 +87,6 @@ def find_duplicate_packages(
         duplicates[pkg_name] = (system_packages[pkg_name], user_packages[pkg_name])
 
     return duplicates
-
 
 def process_system_directories(system_dirs: list[pathlib.Path]) -> dict[str, pathlib.Path]:
     """
@@ -119,7 +115,6 @@ def process_system_directories(system_dirs: list[pathlib.Path]) -> dict[str, pat
 
     return system_packages
 
-
 def process_user_directories(user_dirs: list[pathlib.Path]) -> dict[str, pathlib.Path]:
     """
     Process user directories in parallel.
@@ -144,7 +139,6 @@ def process_user_directories(user_dirs: list[pathlib.Path]) -> dict[str, pathlib
                 print(f"Error processing {directory}: {e}", file=sys.stderr)
 
     return user_packages
-
 
 def analyze_package_versions(
     package_name: str, system_location: pathlib.Path, user_location: pathlib.Path
@@ -197,7 +191,6 @@ def analyze_package_versions(
             pass
 
     return versions
-
 
 def main():
     """Main function to find and report duplicate packages."""
@@ -265,7 +258,6 @@ def main():
     print("Note: Having packages in both locations can lead to confusion about")
     print("which version is being used. Consider removing user installations of")
     print("packages that are already available system-wide.")
-
 
 if __name__ == "__main__":
     main()

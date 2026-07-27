@@ -24,7 +24,6 @@ BLUE = "\x1b[94m"
 RED = "\x1b[91m"
 RESET = "\x1b[0m"
 
-
 class ProgressDisplay:
     def __init__(self):
         self.lock = threading.Lock()
@@ -85,7 +84,6 @@ class ProgressDisplay:
             print(f"  Time: {elapsed:.1f} seconds")
             print(f"  Average speed: {self.total_size / (1024 * 1024) / elapsed:.1f} MB/s")
 
-
 def should_compress_file(file_path, threshold):
     compressed_extensions = {
         ".zst",
@@ -114,7 +112,6 @@ def should_compress_file(file_path, threshold):
     except OSError:
         return False
 
-
 def compress_file(file_path, progress, level=3):
     original_size = file_path.stat().st_size
     compressed_path = file_path.with_suffix(file_path.suffix + ".zst")
@@ -140,7 +137,6 @@ def compress_file(file_path, progress, level=3):
             temp_path.unlink()
         progress.update(file_path, original_size, original_size, f"error: {str(e)[:20]}")
         return False, file_path, None, original_size
-
 
 def main():
     if len(sys.argv) != 2:
@@ -185,7 +181,6 @@ def main():
             except Exception as e:
                 print(f"\n{RED}Error processing file: {e}{RESET}")
     progress.finish()
-
 
 if __name__ == "__main__":
     main()

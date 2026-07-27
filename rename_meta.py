@@ -1,13 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import os
 import sys
 from collections import deque
 from pathlib import Path
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -28,7 +26,6 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
             elif item.is_file() and (ext is None or item.suffix in ext):
                 files.append(item)
     return files
-
 
 def unique_path(path: Path | str) -> Path:
     path = _clean_fname(Path(path))
@@ -51,13 +48,11 @@ def unique_path(path: Path | str) -> Path:
             return new_path
         counter += 1
 
-
 def _clean_fname(path: Path) -> Path:
     from re import sub as re_sub
 
     clean_name = re_sub("(_\\d+)+", "", path.name)
     return path.with_name(clean_name)
-
 
 ATTRIBUTES = {
     "bold": 1,
@@ -109,7 +104,6 @@ COLORS = {
 }
 RESET = "\x1b[0m"
 
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -129,7 +123,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -154,13 +147,10 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
 
-
 OUT_PATH = Path("/data/data/com.termux/files/home/tmp/metadata")
-
 
 def process_file(path: Path) -> bool | None:
     pkgname = ""
@@ -199,13 +189,11 @@ def process_file(path: Path) -> bool | None:
         input("what u wanna do?")
     return None
 
-
 def main() -> None:
     cwd = Path.cwd()
     for path in get_files(cwd):
         if path.is_file() and (path.name == "METADATA" or path.suffix == ".metadata"):
             process_file(path)
-
 
 if __name__ == "__main__":
     sys.exit(main())

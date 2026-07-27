@@ -1,13 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
@@ -19,7 +17,6 @@ def fsz(sz: float) -> str:
     if i == 0:
         return f"{int(value)} {units[i]}"
     return f"{value:.1f} {units[i]}"
-
 
 def main() -> None:
     if len(sys.argv) < 2:
@@ -36,7 +33,6 @@ def main() -> None:
     count = len(files)
     print(f"Total number of .{ext} files: {count}")
     print(f"Total size of .{ext} files: {fsz(total_size)}")
-
 
 if __name__ == "__main__":
     main()

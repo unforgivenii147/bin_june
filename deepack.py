@@ -26,7 +26,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
 def get_site_packages_paths() -> list[Path]:
     """Get all site-packages paths including user site."""
     paths = []
@@ -38,7 +37,6 @@ def get_site_packages_paths() -> list[Path]:
         if user_path.exists():
             paths.append(user_path)
     return paths
-
 
 def get_installed_packages() -> list[tuple[str, str]]:
     """Get all installed packages using importlib.metadata."""
@@ -56,7 +54,6 @@ def get_installed_packages() -> list[tuple[str, str]]:
             logger.warning(f"Error getting info for package: {e}")
 
     return packages
-
 
 def is_pure_python(package_name: str, site_path: Path) -> bool:
     """
@@ -90,7 +87,6 @@ def is_pure_python(package_name: str, site_path: Path) -> bool:
 
     return True
 
-
 def get_package_path(package_name: str, site_paths: list[Path]) -> Path | None:
     """
     Find the package directory in site-packages.
@@ -117,7 +113,6 @@ def get_package_path(package_name: str, site_paths: list[Path]) -> Path | None:
                 return item
 
     return None
-
 
 def repack_package(
     args_tuple: tuple[str, str, Path, list[Path]],
@@ -231,12 +226,10 @@ def repack_package(
     except Exception as e:
         return package_name, False, f"Error: {e!s}"
 
-
 def get_python_tag() -> str:
     """Get the Python version tag."""
     major, minor = sys.version_info[:2]
     return f"cp{major}{minor}"
-
 
 def get_abi_tag() -> str:
     """Get the ABI tag."""
@@ -248,13 +241,11 @@ def get_abi_tag() -> str:
         return f"pypy{major}{minor}_pypy{'_'.join(map(str, sys.pypy_version_info[:2]))}"
     return f"cp{major}{minor}{debug}"
 
-
 def get_platform_tag() -> str:
     """Get the platform tag."""
     import distutils.util
 
     return distutils.util.get_platform().replace("-", "_").replace(".", "_")
-
 
 def main() -> int:
     """Main entry point."""
@@ -371,7 +362,6 @@ def main() -> int:
             logger.error(f"  ✗ {pkg}: {msg}")
 
     return 1 if failed else 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

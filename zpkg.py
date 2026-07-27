@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import compileall
@@ -10,12 +9,10 @@ import shutil
 import sys
 from pathlib import Path
 
-
 def get_user_site_packages():
     import site
 
     return Path(site.getusersitepackages())
-
 
 def check_dist_info_safely(dist_info_path):
     top_level_path = dist_info_path / "top_level.txt"
@@ -43,7 +40,6 @@ def check_dist_info_safely(dist_info_path):
             print(f"  Warning: Could not read RECORD for {dist_info_path.name}: {e}")
     return (False, "")
 
-
 def create_loader_stub(pkg_name, site_packages):
     stub_path = site_packages / f"{pkg_name}.py"
     pkg_dir = site_packages / pkg_name
@@ -52,7 +48,6 @@ def create_loader_stub(pkg_name, site_packages):
     with open(stub_path, "w", encoding="utf-8") as f:
         f.write(stub_content)
     print(f"  Created loader stub: {pkg_name}.py (with __main__ execution hook: {has_main})")
-
 
 def process_package(pkg_name, site_packages):
     pkg_dir = site_packages / pkg_name
@@ -102,7 +97,6 @@ def process_package(pkg_name, site_packages):
         print(f"  Error deleting original directory for {pkg_name}: {e}")
         return False
 
-
 def main():
     site_packages = get_user_site_packages()
     if not site_packages.exists():
@@ -121,7 +115,6 @@ def main():
             if process_package(path.name, site_packages):
                 converted += 1
     print(f"\nFinished! Successfully converted {converted} package(s) to zip format.")
-
 
 if __name__ == "__main__":
     main()

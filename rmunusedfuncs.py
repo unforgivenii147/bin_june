@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import argparse
@@ -9,7 +8,6 @@ import multiprocessing as mp
 import shutil
 import traceback
 from pathlib import Path
-
 
 def find_unused_functions(source: str):
     try:
@@ -33,7 +31,6 @@ def find_unused_functions(source: str):
     unused = defined - called
     return list(unused), []
 
-
 def remove_functions_from_source(source: str, unused_functions) -> str:
     tree = ast.parse(source)
     new_body = []
@@ -43,7 +40,6 @@ def remove_functions_from_source(source: str, unused_functions) -> str:
         new_body.append(node)
     tree.body = new_body
     return ast.unparse(tree)
-
 
 def process_file(filepath, dry_run: bool = False):
     Path(path)
@@ -68,14 +64,11 @@ def process_file(filepath, dry_run: bool = False):
         filepath.write_text(new_source, encoding="utf-8")
     return filepath, unused, errors
 
-
 def gather_python_files(root: Path) -> list[Path]:
     return [p for p in root.rglob("*.py") if p.is_file()]
 
-
 def worker(args):
     return process_file(*args)
-
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Remove unused functions recursively.")
@@ -96,7 +89,6 @@ def main() -> None:
                 print(f"Removed {unused} from {filepath} (backup created)")
         for err in errors:
             print(f"[ERROR] {filepath}: {err}")
-
 
 if __name__ == "__main__":
     main()

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 """
 Optimized version of translate_file.py for Python 3.12.
 Translates lines containing foreign characters using parallel process pool.
@@ -26,10 +25,8 @@ MAX_WORKERS: Final[int] = 4
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
-
 def is_foreign_line(line: str) -> bool:
     return bool(LANGUAGE_PATTERN.search(line))
-
 
 def process_file(file_path: Path) -> str:
     try:
@@ -62,7 +59,6 @@ def process_file(file_path: Path) -> str:
     except Exception as e:
         return f"Error processing {file_path}: {e}"
 
-
 def main() -> None:
     extensions: Final[list[str]] = ["*.txt", "*.md", "*.py", "*.json", "*.csv"]
     files_to_process: list[Path] = []
@@ -81,7 +77,6 @@ def main() -> None:
         futures = {executor.submit(process_file, f): f for f in files_to_process}
         for future in as_completed(futures):
             logger.info(future.result())
-
 
 if __name__ == "__main__":
     main()

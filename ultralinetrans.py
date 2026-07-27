@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 """
 Optimized version of ultralinetrans.py for Python 3.12.
 Translates files using batch translation for improved performance.
@@ -36,7 +35,6 @@ NON_ENGLISH_PATTERN: Final[re.Pattern] = re.compile("[^\\x00-\\x7F]")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
 def is_binary(path: Path) -> bool:
     try:
         with path.open("rb") as f:
@@ -50,7 +48,6 @@ def is_binary(path: Path) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
 
 def get_files(path: Path, include_hidden: bool = False, ext: tuple[str, ...] | None = None) -> list[Path]:
     if not path.exists():
@@ -78,10 +75,8 @@ def get_files(path: Path, include_hidden: bool = False, ext: tuple[str, ...] | N
             continue
     return sorted(files)
 
-
 def is_english(text: str) -> bool:
     return not NON_ENGLISH_PATTERN.search(text)
-
 
 def batch_translate(texts: list[str]) -> list[str]:
     if not texts:
@@ -103,13 +98,11 @@ def batch_translate(texts: list[str]) -> list[str]:
         logger.error(f"Batch translation error: {e}")
         return texts
 
-
 def safe_overwrite(filepath: Path, content: str) -> None:
     with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False, dir=filepath.parent) as tmp:
         tmp.write(content)
         tmp_path = Path(tmp.name)
     shutil.move(tmp_path, filepath)
-
 
 def translate_python_file(source: str) -> str:
     try:
@@ -148,7 +141,6 @@ def translate_python_file(source: str) -> str:
         logger.error(f"Error rebuilding python file structure: {e}")
         return source
 
-
 def process_file(path: Path) -> None:
     try:
         original = path.read_text(encoding="utf-8", errors="ignore")
@@ -169,7 +161,6 @@ def process_file(path: Path) -> None:
     except Exception as e:
         logger.error(f"Failed to process {path}: {e}")
 
-
 def main() -> None:
     args = sys.argv[1:]
     files = [Path(p) for p in args] if args else [f for f in get_files(Path.cwd()) if not is_binary(f)]
@@ -183,7 +174,6 @@ def main() -> None:
                 future.result()
             except Exception as e:
                 logger.error(f"Task failed: {e}")
-
 
 if __name__ == "__main__":
     main()

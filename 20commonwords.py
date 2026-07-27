@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import re
@@ -9,7 +8,6 @@ from collections import Counter
 from pathlib import Path
 
 import regex as re
-
 
 def unique_path(path: Path | str) -> Path:
     path = _clean_fname(Path(path))
@@ -32,16 +30,13 @@ def unique_path(path: Path | str) -> Path:
             return new_path
         counter += 1
 
-
 def _clean_fname(path: Path) -> Path:
     from re import sub as re_sub
 
     clean_name = re_sub(r"(_\d+)+", "", path.name)
     return path.with_name(clean_name)
 
-
 USER_STOPWORDS_FILE = Path("/sdcard/stopwords")
-
 
 def load_user_stopwords(path: Path):
     if not path.is_file():
@@ -55,13 +50,10 @@ def load_user_stopwords(path: Path):
             stopwords.add(line)
     return stopwords
 
-
 EXCLUDE = load_user_stopwords(USER_STOPWORDS_FILE)
-
 
 def extract_words(text: str):
     return re.findall(r"[a-z]{3,}", text.lower())
-
 
 def main() -> None:
     if len(sys.argv) != 2:
@@ -82,7 +74,6 @@ def main() -> None:
     p = Path(src)
     dst = Path(str(dst)[:25] + p.suffix)
     dst = unique_path(dst)
-
 
 if __name__ == "__main__":
     main()

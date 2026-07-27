@@ -1,13 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
@@ -19,7 +17,6 @@ def fsz(sz: float) -> str:
     if i == 0:
         return f"{int(value)} {units[i]}"
     return f"{value:.1f} {units[i]}"
-
 
 def runcmd(
     cmd: list[str],
@@ -71,7 +68,6 @@ def runcmd(
             print(msg, file=sys_stderr)
         return 1, "", msg
 
-
 def process_file(path: Path) -> None:
     path = Path(path)
     temp_gs = path.with_name(f"temp_gs_{path.name}")
@@ -109,7 +105,6 @@ def process_file(path: Path) -> None:
                 print("original file is smaller")
                 temp_gs.unlink(missing_ok=True)
 
-
 def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -120,7 +115,6 @@ def main() -> None:
         sys.exit(0)
     for path in cwd.rglob("*.pdf"):
         process_file(path)
-
 
 if __name__ == "__main__":
     main()

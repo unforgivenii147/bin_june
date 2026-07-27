@@ -16,10 +16,8 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 def get_python_files(root_dir: Path) -> list[Path]:
     return list(root_dir.rglob("*.py"))
-
 
 def extract_imports(file_path: Path) -> set[str]:
     try:
@@ -36,7 +34,6 @@ def extract_imports(file_path: Path) -> set[str]:
             imports.add(node.module.split(".")[0])
     return imports
 
-
 def extract_used_names(file_path: Path) -> set[str]:
     try:
         with open(file_path, encoding="utf-8") as f:
@@ -52,13 +49,11 @@ def extract_used_names(file_path: Path) -> set[str]:
             names.add(node.value.id)
     return names - builtins - {"self", "cls"}
 
-
 def is_module_available(name: str) -> bool:
     try:
         return find_spec(name) is not None
     except (ImportError, ModuleNotFoundError, ValueError):
         return False
-
 
 def check_file(file_path: Path) -> tuple[Path, list[str]]:
     imported = extract_imports(file_path)
@@ -68,7 +63,6 @@ def check_file(file_path: Path) -> tuple[Path, list[str]]:
         if name not in imported and is_module_available(name):
             missing.append(name)
     return file_path, missing
-
 
 def fix_file(file_path: Path, missing_imports: list[str]) -> None:
     if not missing_imports:
@@ -96,7 +90,6 @@ def fix_file(file_path: Path, missing_imports: list[str]) -> None:
     lines.insert(line_count, import_text)
     with open(file_path, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
-
 
 def main():
     parser = argparse.ArgumentParser(description="Check Python files for missing imports recursively.")
@@ -146,7 +139,6 @@ def main():
             print("Files have been automatically fixed.")
     else:
         print("No missing imports detected!")
-
 
 if __name__ == "__main__":
     main()

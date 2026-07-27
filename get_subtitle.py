@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 """
 Script to download English subtitles for an MKV movie using Subliminal.
 """
@@ -18,7 +17,6 @@ from subliminal.video import scan_video
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
-
 
 def get_english_subtitles(mkv_path, output_dir=None):
     mkv_path = Path(mkv_path)
@@ -63,7 +61,6 @@ def get_english_subtitles(mkv_path, output_dir=None):
         logger.error(f"Error downloading subtitles: {e}")
         return False
 
-
 def main():
     if len(sys.argv) < 2:
         print("Usage: python subtitle_downloader.py <path_to_mkv_file> [output_directory]")
@@ -78,7 +75,6 @@ def main():
     else:
         print("✗ Failed to download subtitles.")
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

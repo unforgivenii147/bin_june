@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import contextlib
@@ -11,7 +10,6 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 def get_site_packages_dirs():
     dirs = []
     with contextlib.suppress(Exception):
@@ -19,13 +17,11 @@ def get_site_packages_dirs():
     dirs.append(site.getusersitepackages())
     return list(dict.fromkeys(dirs))
 
-
 def parse_pkg_info(dirname):
     m = re.match(r"(.+)-(\d+.*?)(\.dist-info|\.egg-info)$", dirname)
     if m:
         return m.group(1).lower(), m.group(2)
     return None, None
-
 
 def find_multiple_versions() -> None:
     pkg_versions = defaultdict(set)
@@ -44,7 +40,6 @@ def find_multiple_versions() -> None:
             for v in sorted(versions):
                 print(f"  - Version: {v}")
     print("\nDone.")
-
 
 if __name__ == "__main__":
     find_multiple_versions()

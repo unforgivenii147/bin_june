@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import re
@@ -12,18 +11,15 @@ from packaging.tags import parse_tag
 from packaging.utils import canonicalize_name
 from packaging.version import Version
 
-
 MOVE_MODE = "-m" in sys.argv
 WHEEL_PATTERN = re.compile(
     r"^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])-([^-]+)-(\d[^-]*)-([^-]+)-([^-]+)-([^-]+)\.whl$",
     re.IGNORECASE,
 )
 
-
 def is_valid2(path: Path) -> bool:
     filename = path.name
     return WHEEL_PATTERN.match(filename) is not None
-
 
 def is_valid(path: Path) -> bool:
     filename = path.name
@@ -49,7 +45,6 @@ def is_valid(path: Path) -> bool:
     except Exception:
         return False
 
-
 def main() -> None:
     print("to move wheels with invalid name rerun with -m")
     invalid_dir = Path("invalid_wheels")
@@ -61,7 +56,6 @@ def main() -> None:
                 invalid_dir.mkdir(exist_ok=True)
                 dest = invalid_dir / path.name
                 shutil.move(str(path), str(dest))
-
 
 if __name__ == "__main__":
     main()

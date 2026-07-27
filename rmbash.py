@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
@@ -8,7 +7,6 @@ from collections import deque
 from pathlib import Path
 
 from loguru import logger
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -30,7 +28,6 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
-
 def strip_bash_comments(line):
     if line.startswith("#!"):
         return line, 0
@@ -44,7 +41,6 @@ def strip_bash_comments(line):
         elif char == "#" and not in_single_quote and not in_double_quote:
             return line[:i].rstrip() + "\n", 1
     return line, 0
-
 
 def process_file(args):
     path, root = args
@@ -71,7 +67,6 @@ def process_file(args):
         logger.error(f"Failed {path}: {e}")
         return 0
 
-
 def main():
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -95,7 +90,6 @@ def main():
     for res in results:
         total += res
     print(f"{total} comments removed")
-
 
 if __name__ == "__main__":
     sys.exit(main())

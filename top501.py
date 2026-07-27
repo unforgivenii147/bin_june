@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import os
@@ -9,10 +8,8 @@ from collections import Counter
 from multiprocessing import get_context
 from pathlib import Path
 
-
 def is_text_file(file_path, text_extensions):
     return file_path.suffix.lower() in text_extensions
-
 
 def process_file(file_path, text_extensions):
     Path(path)
@@ -23,7 +20,6 @@ def process_file(file_path, text_extensions):
             return Counter(line.strip() for line in f if line.strip())
     except (UnicodeDecodeError, PermissionError):
         return Counter()
-
 
 def collect_top_lines(directory: str, text_extensions: set[str], top_n=500) -> None:
     for ext in text_extensions:
@@ -51,11 +47,9 @@ def collect_top_lines(directory: str, text_extensions: set[str], top_n=500) -> N
         elapsed = time.time() - start_time
         print(f"Saved top {top_n} lines for {ext} files to {output_file} (took {elapsed:.2f} seconds)")
 
-
 def main() -> None:
     text_extensions = {".h", ".hpp"}
     collect_top_lines(".", text_extensions, top_n=500)
-
 
 if __name__ == "__main__":
     main()

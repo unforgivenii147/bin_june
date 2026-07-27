@@ -1,17 +1,14 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import concurrent.futures
 import re
 from pathlib import Path
 
-
 COMMENT_RE = re.compile(
     "(?://[^\\n]*|/\\*.*?\\*/)|(?:\"(?:\\\\[\\s\\S]|[^\"\\\\])*\"|\\'(?:\\\\[\\s\\S]|[^\\'\\\\])*\\')", re.DOTALL
 )
-
 
 def strip_comments_from_text(text: str) -> str:
 
@@ -23,7 +20,6 @@ def strip_comments_from_text(text: str) -> str:
 
     return COMMENT_RE.sub(replacer, text)
 
-
 def process_file(file_path: Path) -> str:
     try:
         content = file_path.read_text(encoding="utf-8", errors="replace")
@@ -34,7 +30,6 @@ def process_file(file_path: Path) -> str:
         return f"No comments found: {file_path}"
     except Exception as e:
         return f"Error processing {file_path}: {e}"
-
 
 def main():
     extensions = {".h", ".c", ".cpp", ".hpp"}
@@ -48,7 +43,6 @@ def main():
         results = executor.map(process_file, files_to_process)
         for result in results:
             print(result)
-
 
 if __name__ == "__main__":
     main()

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import ast
@@ -13,7 +12,6 @@ from pathlib import Path
 CHUNK_SIZE = 1024 * 1024
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
@@ -38,7 +36,6 @@ def is_python_file(path: str | Path) -> bool:
             return False
     return False
 
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -53,7 +50,6 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
 
 def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
@@ -91,14 +87,12 @@ def get_pyfiles(path: str | Path) -> list[Path]:
 
     return sorted(pyfiles)
 
-
 COMMENT_AND_DOCSTRING_REGEX = re.compile(
     f"(?:^(\\s*)#.*$)|(?:^(\\s*)({DOC_TH2}).*?(\\3)|^(\\s*)({DOC_TH1}).*?(\\5))|(?:\\b(def|class)\\s+\\w+[^():]*\\([^)]*\\)\\s*:\\s*)(\\s*)((DOC_TH2).*?(\\7)|({DOC_TH1}).*?(\\9))",
     re.MULTILINE | re.DOTALL,
 )
 DOCSTRING_START_REGEX = re.compile(f"^\\s*({DOC_TH2}|{DOC_TH1}).*?(\\1)\\s*", re.MULTILINE | re.DOTALL)
 MAX_WORKERS = 4
-
 
 def strip_comments_and_docstrings(file_path_str) -> bool:
     file_path = Path(file_path_str)
@@ -153,7 +147,6 @@ def strip_comments_and_docstrings(file_path_str) -> bool:
             print(f"CRITICAL ERROR: Failed to write cleaned file and restore backup for {file_path}: {restore_e}")
         return False
 
-
 def process_directory(directory: str) -> None:
     python_files = get_pyfiles(directory)
     print(f"Found {len(python_files)} Python files to process.")
@@ -170,7 +163,6 @@ def process_directory(directory: str) -> None:
                 print(f"Error processing future for {file_path}: {e}")
     print(f"""
 Finished processing. Successfully stripped comments/docstrings from {processed_count}/{len(python_files)} files.""")
-
 
 if __name__ == "__main__":
     target_directory = "."

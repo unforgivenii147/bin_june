@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import ast
@@ -14,7 +13,6 @@ from pathlib import Path
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
-
 
 class PythonImportExtractor:
     def __init__(self, pip_packages_file: str = "/sdcard/data/pip.txt"):
@@ -381,7 +379,6 @@ class PythonImportExtractor:
                 pip_packages.add(imp_lower)
         return pip_packages
 
-
 def find_python_files(directory: str = ".") -> list[Path]:
     exclude_dirs = {".git", "__pycache__", ".pytest_cache", "dist", "build", ".mypy_cache", ".ruff_cache"}
     python_files = []
@@ -406,13 +403,11 @@ def find_python_files(directory: str = ".") -> list[Path]:
                 python_files.append(item)
     return python_files
 
-
 def process_single_file(args: tuple[Path, PythonImportExtractor]) -> tuple[Path, set[str]]:
     filepath, extractor = args
     imports = extractor.process_file(filepath)
     filtered = extractor.filter_packages(imports)
     return (filepath, filtered)
-
 
 def main():
     import argparse
@@ -466,7 +461,6 @@ def main():
         for package in sorted_packages:
             sources = all_packages[package]
             logger.info(f"  {package} (found in {len(sources)} file(s))")
-
 
 if __name__ == "__main__":
     main()

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 """
 zsr_optimized_by_gemini.py — Multi-threaded Zstandard compression/decompression tool.
 Optimized for Python 3.12 with modern syntax, type hints, and performance improvements.
@@ -34,7 +33,6 @@ ZSTD_THREADS: Final[int] = 4
 logging.basicConfig(level=logging.INFO, format="%(message)s", handlers=[logging.StreamHandler(sys.stdout)])
 logger = logging.getLogger(__name__)
 
-
 def fsz(size: float) -> str:
     for unit in ["B", "KiB", "MiB", "GiB", "TiB"]:
         if abs(size) < 1024.0:
@@ -42,11 +40,9 @@ def fsz(size: float) -> str:
         size /= 1024.0
     return f"{size:.1f} PiB"
 
-
 def compress_chunk(data: bytes) -> bytes:
     compressor = zstd.ZstdCompressor(level=ZSTD_LEVEL, threads=1)
     return compressor.compress(data)
-
 
 def compress_chunked(in_path: Path, out_path: Path, file_size: int) -> bool:
     try:
@@ -73,7 +69,6 @@ def compress_chunked(in_path: Path, out_path: Path, file_size: int) -> bool:
         logger.error(f"Chunked compression failed for {in_path.name}: {e}")
         return False
 
-
 def compress_in_memory(infile: Path, outfile: Path) -> bool:
     try:
         data = infile.read_bytes()
@@ -86,7 +81,6 @@ def compress_in_memory(infile: Path, outfile: Path) -> bool:
     except Exception as e:
         logger.error(f"Memory compression failed for {infile.name}: {e}")
         return False
-
 
 def compress_file(path: Path) -> tuple[bool, int, int]:
     out_path = path.with_suffix(path.suffix + ".zst")
@@ -116,7 +110,6 @@ def compress_file(path: Path) -> tuple[bool, int, int]:
         logger.error(f"  ✗ Failed to compress {path.name}: {e}")
     return (False, 0, 0)
 
-
 def decompress_file(path: Path) -> bool:
     if path.suffix != ".zst":
         return False
@@ -134,7 +127,6 @@ def decompress_file(path: Path) -> bool:
         logger.error(f"  ✗ Failed to decompress {path.name}: {e}")
         return False
 
-
 def create_tar_archive(source_dir: Path, output_path: Path) -> bool:
     try:
         with tarfile.open(output_path, "w") as tar:
@@ -143,7 +135,6 @@ def create_tar_archive(source_dir: Path, output_path: Path) -> bool:
     except Exception as e:
         logger.error(f"  Failed to create tar archive: {e}")
         return False
-
 
 async def compress_folder_async(folder_path: Path, output_base_name: str) -> bool:
     loop = asyncio.get_running_loop()
@@ -176,7 +167,6 @@ async def compress_folder_async(folder_path: Path, output_base_name: str) -> boo
         logger.error(f"Failed to compress folder {folder_path.name}: {e}")
         return False
 
-
 async def process_compress() -> None:
     cwd = Path.cwd()
     logger.info(f"\n🔧 Zstandard Compression Settings (Level {ZSTD_LEVEL})")
@@ -206,7 +196,6 @@ async def process_compress() -> None:
                 f"\n{'=' * 50}\n✅ Compressed {successful} files\n📊 Saved {fsz(saved)} ({saved / total_orig * 100:.1f}%)\n{'=' * 50}"
             )
 
-
 async def process_decompress() -> None:
     cwd = Path.cwd()
     archives = list(cwd.glob("*.tar.zst"))
@@ -233,7 +222,6 @@ async def process_decompress() -> None:
         for f in sorted(zst_files):
             decompress_file(f)
 
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="Modern Zstandard compression tool")
     group = parser.add_mutually_exclusive_group()
@@ -244,7 +232,6 @@ def main() -> None:
         asyncio.run(process_decompress() if args.decompress else process_compress())
     except KeyboardInterrupt:
         logger.info("\nInterrupted by user")
-
 
 if __name__ == "__main__":
     main()

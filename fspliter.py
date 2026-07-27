@@ -16,10 +16,8 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import List
 
-
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
-
 
 DEFAULT_MIN_CHARS = 4900
 DEFAULT_MAX_CHARS = 4990
@@ -41,7 +39,6 @@ TEXT_EXTENSIONS = {
     ".cfg",
     ".ini",
 }
-
 
 def find_text_files(input_paths: list[Path], recursive: bool = True) -> list[Path]:
     """
@@ -87,7 +84,6 @@ def find_text_files(input_paths: list[Path], recursive: bool = True) -> list[Pat
 
     return unique_files
 
-
 def find_split_point(text: str, start_pos: int, min_chars: int, max_chars: int) -> int:
     """
     Find the best split point in text between min_chars and max_chars from start_pos.
@@ -129,7 +125,6 @@ def find_split_point(text: str, start_pos: int, min_chars: int, max_chars: int) 
 
     return end_pos
 
-
 def split_text(text: str, min_chars: int, max_chars: int) -> list[str]:
     """
     Split text into parts of min_chars-max_chars characters, respecting boundaries.
@@ -157,7 +152,6 @@ def split_text(text: str, min_chars: int, max_chars: int) -> list[str]:
         current_pos = split_point
 
     return parts
-
 
 def process_file(input_file: Path, output_dir: Path, min_chars: int, max_chars: int) -> tuple[Path, int]:
     """
@@ -207,11 +201,9 @@ def process_file(input_file: Path, output_dir: Path, min_chars: int, max_chars: 
         logger.error(f"Error processing {input_file}: {e}")
         return (input_file, 0)
 
-
 def process_file_wrapper(args):
     """Wrapper function for multiprocessing to unpack arguments."""
     return process_file(*args)
-
 
 def main():
     parser = argparse.ArgumentParser(
@@ -299,7 +291,6 @@ Examples:
 
     logger.info(f"Processing complete: {processed_files} files split into {total_parts} parts")
     logger.info(f"Output directory: {args.output.absolute()}")
-
 
 if __name__ == "__main__":
     main()

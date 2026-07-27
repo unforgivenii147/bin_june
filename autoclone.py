@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 """
 Clone repositories from repos.txt that are smaller than 0.5MB
 Format in repos.txt: user/repo (one per line)
@@ -29,7 +28,6 @@ else:
 SIZE_CACHE_FILE = "repo_sizes.json"
 CACHE_EXPIRY_DAYS = 7
 
-
 def get_github_token():
     token = os.getenv("GITHUB_TOKEN")
     if token:
@@ -39,7 +37,6 @@ def get_github_token():
         print("⚠️  No GITHUB_TOKEN found in environment")
         print("   (Using unauthenticated requests - rate limit: 60/hr)")
         return None
-
 
 def load_size_cache():
     cache_file = Path(SIZE_CACHE_FILE)
@@ -59,7 +56,6 @@ def load_size_cache():
             return {}
     return {}
 
-
 def save_size_cache(cache_data):
     cache_data["_cache_date"] = datetime.now().isoformat()
     cache_data["_cache_version"] = "1.0"
@@ -69,7 +65,6 @@ def save_size_cache(cache_data):
         print(f"💾 Saved {len(cache_data) - 1} repository sizes to {SIZE_CACHE_FILE}")
     except Exception as e:
         print(f"⚠️  Error saving cache: {e}")
-
 
 def get_repo_size(repo, token=None, cache_data=None):
     if cache_data and repo in cache_data:
@@ -109,7 +104,6 @@ def get_repo_size(repo, token=None, cache_data=None):
         print(f"  ⚠️  Error fetching {repo}: {e}")
         return None
 
-
 def clone_repo(repo):
     clone_url = f"https://github.com/{repo}.git"
     repo_name = repo.split("/")[-1]
@@ -134,7 +128,6 @@ def clone_repo(repo):
         print(f"  ❌ Error cloning {repo}: {e}")
         return False
 
-
 def display_cached_stats(cache_data):
     if not cache_data or len(cache_data) <= 1:
         return
@@ -153,7 +146,6 @@ def display_cached_stats(cache_data):
     print(f"  📈 Largest: {largest:.2f} MB")
     print(f"  📉 Smallest: {smallest:.2f} MB")
     print(f"  📅 Cached on: {cache_data.get('_cache_date', 'Unknown')}")
-
 
 def main():
     repos_file = Path("repos.txt")
@@ -213,7 +205,6 @@ def main():
         print("\n💡 Using unauthenticated requests (rate limit: 60/hr)")
         print("   Consider adding GITHUB_TOKEN to ~/.env for higher limits")
     print(f"\n💾 Repository size data saved to: {SIZE_CACHE_FILE}")
-
 
 if __name__ == "__main__":
     main()

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/python
 
-
 from __future__ import annotations
 
 import argparse
@@ -12,13 +11,11 @@ from imutils import paths
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 def dhash(image, hashSize=8) -> int:
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     resized = cv2.resize(gray, (hashSize + 1, hashSize))
     diff = resized[:, 1:] > resized[:, :-1]
     return sum(2**i for i, v in enumerate(diff.flatten()) if v)
-
 
 def compute_hashes(dataset_path, hashSize=8):
     hashes = {}
@@ -35,7 +32,6 @@ def compute_hashes(dataset_path, hashSize=8):
             continue
         hashes.setdefault(h, []).append(imagePath)
     return hashes
-
 
 def main() -> None:
     ap = argparse.ArgumentParser(
@@ -83,7 +79,6 @@ Examples:
                 print(f"[INFO] removing {len(hashedPaths) - 1} duplicates with hash: {h}")
                 for p in hashedPaths[1:]:
                     Path(p).unlink()
-
 
 if __name__ == "__main__":
     main()

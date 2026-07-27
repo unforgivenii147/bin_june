@@ -1,13 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -28,7 +26,6 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
             elif item.is_file() and (ext is None or item.suffix in ext):
                 files.append(item)
     return files
-
 
 def runcmd(
     cmd: list[str],
@@ -80,13 +77,11 @@ def runcmd(
             print(msg, file=sys_stderr)
         return (1, "", msg)
 
-
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
-
 
 def process_file(path: str | Path) -> tuple[bool, Path]:
     path = Path(path)
@@ -96,7 +91,6 @@ def process_file(path: str | Path) -> tuple[bool, Path]:
     if not ret:
         return (True, path)
     return (False, path)
-
 
 def main() -> None:
     cwd = str(Path.cwd())
@@ -125,7 +119,6 @@ def main() -> None:
         process_file(files[0])
         sys.exit(1)
     mpf3(process_file, files)
-
 
 if __name__ == "__main__":
     sys.exit(main())

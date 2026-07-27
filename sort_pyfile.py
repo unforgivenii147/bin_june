@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import ast
@@ -8,7 +7,6 @@ import sys
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def sort_python_script(file_path: Path) -> None:
     try:
@@ -71,7 +69,6 @@ def sort_python_script(file_path: Path) -> None:
         print(f"Successfully sorted and saved: {file_path}")
     except Exception as e:
         print(f"Error writing sorted code back to {file_path}: {e}")
-
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:

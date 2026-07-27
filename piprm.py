@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import subprocess
@@ -10,7 +9,6 @@ from pathlib import Path
 from rapidfuzz import fuzz
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def get_file_age(path: str | Path, str_mode: bool = False) -> float | str:
     from os import stat as os_stat
@@ -45,7 +43,6 @@ def get_file_age(path: str | Path, str_mode: bool = False) -> float | str:
             parts.append(f"{value} {name}")
     return ", ".join(parts) if parts else "0 sec"
 
-
 def get_installed_pkgs():
     packages = []
     pip_freeze_path = Path("/sdcard/data/pip.freeze")
@@ -68,11 +65,9 @@ def get_installed_pkgs():
         packages.append(name)
     return packages
 
-
 get_ipkgs = get_installed_pkgs
 
 PIP_LIST_FILE = "/sdcard/data/pip.list"
-
 
 def create_pip_list_again() -> list[str]:
     installed = get_ipkgs()
@@ -80,13 +75,11 @@ def create_pip_list_again() -> list[str]:
     Path(PIP_LIST_FILE).write_text(content, encoding="utf-8")
     return installed
 
-
 def load_installed_packages() -> list[str]:
     path = Path(PIP_LIST_FILE)
     if get_file_age(path) > 1.0 or not path.exists():
         return create_pip_list_again()
     return [line.strip() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
-
 
 def find_dist_info(prefix):
     import site
@@ -102,14 +95,12 @@ def find_dist_info(prefix):
             matches.append(d)
     return matches
 
-
 def uninstall_packages(pkg_name: str) -> None:
     try:
         subprocess.run([sys.executable, "-m", "pip", "uninstall", "-y", pkg_name], check=True)
         print(f"Uninstalled {pkg_name}")
     except subprocess.CalledProcessError:
         print(f"Skipped {pkg_name} (not installed or error)")
-
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

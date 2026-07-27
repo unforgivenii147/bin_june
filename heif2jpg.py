@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
@@ -8,7 +7,6 @@ from pathlib import Path
 
 import pillow_heif as ph
 from fastwalk import walk_files
-
 
 def process_file(path) -> bool:
     path = Path(path)
@@ -19,7 +17,6 @@ def process_file(path) -> bool:
     outfile = path.with_suffix(".jpg")
     img.save(outfile)
     return True
-
 
 def main() -> None:
     cwd = Path().cwd()
@@ -36,10 +33,8 @@ def main() -> None:
     after = gsz(cwd)
     print(f"{fornat_size(after - start_size)}")
 
-
 if __name__ == "__main__":
     sys.exit(main())
-
 
 def gsz(path):
     try:

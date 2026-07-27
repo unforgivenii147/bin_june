@@ -1,12 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import datetime
 
 from faprint import faprint
-
 
 def georgian_to_hijri(year: int, month: int, day: int) -> str:
     from datetime import date as datetime_date
@@ -31,12 +29,10 @@ def georgian_to_hijri(year: int, month: int, day: int) -> str:
     weekday: str = weekdays[weekday_index]
     return f"{weekday}  {to_persian_digits(str(jd))}  {months[jm - 1]}  {to_persian_digits(str(jy))}"
 
-
 def to_persian_digits(s: str) -> str:
     from string import digits as string_digits
 
     return s.translate(str.maketrans(string_digits, "۰۱۲۳۴۵۶۷۸۹"))
-
 
 def gregorian_to_jalali(gy: int, gm: int, gd: int) -> tuple[int, int, int]:
     g_days: list[int] = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]
@@ -62,11 +58,9 @@ def gregorian_to_jalali(gy: int, gm: int, gd: int) -> tuple[int, int, int]:
         jd = 1 + j_day_no % 30
     return jy, jm, jd
 
-
 def get_current_ymd() -> tuple[int, int, int]:
     today = datetime.date.today()
     return today.year, today.month, today.day
-
 
 y, m, d = get_current_ymd()
 faprint(f"{georgian_to_hijri(y, m, d)}")

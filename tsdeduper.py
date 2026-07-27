@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import hashlib
@@ -15,7 +14,6 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 OUTPUT_FILE = "utils.py"
 
-
 @dataclass(frozen=True)
 class Item:
     kind: str
@@ -24,24 +22,19 @@ class Item:
     path: str
     hash: str
 
-
 def sha256_text(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
-
 
 def make_parser() -> Parser:
     parser = Parser()
     parser.language = get_language("python")
     return parser
 
-
 def node_text(src: bytes, node: Node) -> str:
     return src[node.start_byte : node.end_byte].decode("utf-8", errors="replace")
 
-
 def is_const_name(name: str) -> bool:
     return name.isupper()
-
 
 def extract_items(path: Path, parser: Parser) -> list[Item]:
     try:
@@ -85,7 +78,6 @@ def extract_items(path: Path, parser: Parser) -> list[Item]:
             items.append(Item(kind="const", name=name, source=code, path=str(path), hash=sha256_text(code)))
     return items
 
-
 def write_utils_file(dups: dict[str, Item], output: Path) -> None:
     lines = [
         "# Auto-generated file",
@@ -102,7 +94,6 @@ def write_utils_file(dups: dict[str, Item], output: Path) -> None:
         lines.append(item.source)
         lines.append("")
     output.write_text("\n".join(lines), encoding="utf-8")
-
 
 def main() -> None:
     parser = make_parser()
@@ -128,7 +119,6 @@ def main() -> None:
         print(f"Wrote them to: {out}")
     else:
         print("No duplicates found.")
-
 
 if __name__ == "__main__":
     main()

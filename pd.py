@@ -13,12 +13,10 @@ from packaging import tags
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 def is_pure_python(requires_python):
     return requires_python is None or all(
         tag.interpreter == "py" and tag.abi == "none" and tag.platform == "any" for tag in tags.sys_tags()
     )
-
 
 def get_package_urls(pkg_name):
     url = f"https://pypi.org/pypi/{pkg_name}/json"
@@ -32,7 +30,6 @@ def get_package_urls(pkg_name):
     print(f"latest version : {latest_version}")
     release_files = releases[latest_version]
     return release_files, latest_version
-
 
 def download_package(pkg_name) -> None:
     release_files, _version = get_package_urls(pkg_name)
@@ -56,7 +53,6 @@ def download_package(pkg_name) -> None:
         raise ValueError(msg)
     Path(filename).write_bytes(response.content)
     print(f"Downloaded {filename}")
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Download a Python package from PyPI.")

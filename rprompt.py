@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import io
@@ -16,13 +15,11 @@ CHUNK_SIZE = 1024 * 1024
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 def mpf3(process_function: Callable, files: list[Path], **kwargs):
     from joblib import Parallel, delayed
 
     file_strings = [str(f) for f in files]
     return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
-
 
 ATTRIBUTES = {
     "bold": 1,
@@ -77,7 +74,6 @@ COLORS = {
 
 RESET = "\x1b[0m"
 
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -97,7 +93,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
 
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
@@ -122,10 +117,8 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
     result += RESET
     return result
 
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
-
 
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
@@ -150,7 +143,6 @@ def is_python_file(path: str | Path) -> bool:
             return False
     return False
 
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -165,7 +157,6 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
 
 def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
@@ -203,7 +194,6 @@ def get_pyfiles(path: str | Path) -> list[Path]:
 
     return sorted(pyfiles)
 
-
 def remove_comments_and_docstrings(source_code: str) -> str:
     io_obj = io.StringIO(source_code)
     out = ""
@@ -228,13 +218,11 @@ def remove_comments_and_docstrings(source_code: str) -> str:
             last_lineno = start_lineno
     return out
 
-
 def shorten_variable_name(name):
     if not name or name.startswith("_"):
         return name
     vowels = "aeiouAEIOU"
     return "".join([char for char in name if char not in vowels])
-
 
 def process_file(path) -> None:
     path = Path(path)
@@ -262,7 +250,6 @@ def process_file(path) -> None:
 
     compressed_path = path.with_stem(path.stem + "_compressed")
     compressed_path.write_text(final_content, encoding="utf-8")
-
 
 if __name__ == "__main__":
     cwd = Path.cwd()

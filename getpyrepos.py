@@ -16,7 +16,6 @@ import requests
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-
 def get_user_repos(username: str) -> list[dict]:
     repos = []
     page = 1
@@ -53,7 +52,6 @@ def get_user_repos(username: str) -> list[dict]:
             break
     return repos
 
-
 def get_top_trending_users() -> list[dict]:
     week_ago = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
     url = "https://api.github.com/search/users"
@@ -88,12 +86,10 @@ def get_top_trending_users() -> list[dict]:
         print(f"Error fetching trending users: {e}", file=sys.stderr)
         return []
 
-
 def save_to_json(data: any, filename: str = "github_repos.json") -> None:
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
     print(f"Data saved to {filename}")
-
 
 def main():
     if len(sys.argv) > 1:
@@ -120,7 +116,6 @@ def main():
                 print(f"   Python repos: {len(user['repositories'])}")
         else:
             print("No trending users found")
-
 
 if __name__ == "__main__":
     main()

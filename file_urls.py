@@ -1,12 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 from pathlib import Path
 
 from dh import BIN_EXT, TXT_EXT
-
 
 EXCLUDED = {
     ".net",
@@ -27,7 +25,6 @@ EXCLUDED = {
 }
 ALL_EXT = set(list(TXT_EXT) + list(BIN_EXT))
 ALL_EXT = [p for p in ALL_EXT if p not in EXCLUDED]
-
 
 def extract_urls_to_file(output_filename: str = "file_urls.txt") -> None:
     extracted_urls = set()
@@ -91,7 +88,6 @@ def extract_urls_to_file(output_filename: str = "file_urls.txt") -> None:
         print(f"\nSuccessfully extracted {len(extracted_urls)} unique URLs")
     else:
         print("\nNo URLs with specified file extensions found.")
-
 
 if __name__ == "__main__":
     extract_urls_to_file()

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
@@ -9,7 +8,6 @@ from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
 import trafilatura
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -31,14 +29,12 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
-
 try:
     import markdownify
 except ImportError:
     markdownify = None
 
 remove_orig = True
-
 
 def process_file(path: str | Path) -> tuple[Path, bool]:
     path = Path(path)
@@ -78,17 +74,14 @@ def process_file(path: str | Path) -> tuple[Path, bool]:
         print(f"✗ Error processing {path.name}: {e}")
         return path, False
 
-
 def get_files(directory: Path, ext: list[str]) -> list[Path]:
     return [f for f in directory.rglob("*") if f.suffix in ext]
-
 
 def mpf3(func, items: list[Path]) -> None:
     with ProcessPoolExecutor() as executor:
         results = list(executor.map(func, items))
         successful = sum(1 for _, success in results if success)
         print(f"\n✓ Successfully converted: {successful}/{len(items)}")
-
 
 if __name__ == "__main__":
     cwd = Path.cwd()

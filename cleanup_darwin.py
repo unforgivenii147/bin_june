@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
@@ -34,7 +33,6 @@ WINDOWS_PATTERNS = {
 }
 ALL_PATTERNS = DARWIN_PATTERNS | WINDOWS_PATTERNS
 
-
 def matches_pattern(path: Path, patterns: set) -> bool:
     name = path.name
     for pattern in patterns:
@@ -51,7 +49,6 @@ def matches_pattern(path: Path, patterns: set) -> bool:
             return True
     return False
 
-
 def walk_directory(root_dir: Path):
     try:
         for entry in root_dir.iterdir():
@@ -60,7 +57,6 @@ def walk_directory(root_dir: Path):
                 yield from walk_directory(entry)
     except (OSError, PermissionError) as e:
         print(f"Error accessing {root_dir}: {e}", file=sys.stderr)
-
 
 def process_path(path: Path) -> tuple[str, int]:
     try:
@@ -80,7 +76,6 @@ def process_path(path: Path) -> tuple[str, int]:
     except (OSError, PermissionError) as e:
         print(f"Error deleting {path}: {e}", file=sys.stderr)
     return (str(path), 0)
-
 
 def find_and_remove_files(root_dir: Path | None = None) -> dict:
     if root_dir is None:
@@ -122,7 +117,6 @@ def find_and_remove_files(root_dir: Path | None = None) -> dict:
     }
     return stats
 
-
 def print_report(stats: dict) -> None:
     print("\n" + "=" * 60)
     print("REMOVAL REPORT")
@@ -130,7 +124,6 @@ def print_report(stats: dict) -> None:
     print(f"Files removed: {stats['files_removed']}")
     print(f"Total disk space freed: {stats['total_freed_human']} ({stats['total_freed_bytes']} bytes)")
     print("=" * 60 + "\n")
-
 
 def main():
     import argparse
@@ -146,7 +139,6 @@ def main():
         for path, size in stats["details"]:
             if size > 0:
                 print(f"  {path} ({size} bytes)")
-
 
 if __name__ == "__main__":
     main()

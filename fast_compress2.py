@@ -114,7 +114,6 @@ SKIP_DIRS = {
 }
 SKIP_DIR_PATTERNS = ["*.egg-info", "*.dist-info"]
 
-
 class SpaceStats:
     def __init__(self):
         self.original_size = 0
@@ -134,12 +133,10 @@ class SpaceStats:
         percent_saved = saved / self.original_size * 100 if self.original_size > 0 else 0
         return saved, ratio, percent_saved
 
-
 def should_skip_directory(dir_name: str) -> bool:
     if dir_name in SKIP_DIRS:
         return True
     return any(fnmatch.fnmatch(dir_name, pattern) for pattern in SKIP_DIR_PATTERNS)
-
 
 def is_editable_package_dir(root_path: Path) -> bool:
     try:
@@ -160,7 +157,6 @@ def is_editable_package_dir(root_path: Path) -> bool:
         return False
     except (PermissionError, OSError):
         return False
-
 
 def get_files_generator(directory: Path, compress: bool):
     total_dirs = 0
@@ -282,7 +278,6 @@ def get_files_generator(directory: Path, compress: bool):
         yield file_path
     print(f"Scanned {total_dirs} directories, found {total_files} files to process")
 
-
 def compress_file(
     input_path: Path,
     output_path: Path,
@@ -313,7 +308,6 @@ def compress_file(
                 output_path.unlink()
         return False, input_path, str(e), 0, 0
 
-
 def decompress_file(
     input_path: Path,
     output_path: Path,
@@ -341,14 +335,12 @@ def decompress_file(
                 output_path.unlink()
         return False, input_path, str(e), 0, 0
 
-
 def format_size(bytes_size: int) -> str:
     for unit in ["B", "KB", "MB", "GB", "TB"]:
         if bytes_size < 1024.0:
             return f"{bytes_size:.2f} {unit}"
         bytes_size /= 1024.0
     return f"{bytes_size:.2f} PB"
-
 
 def process_files(file_generator, compress: bool, level: int = 3, threads: int = 4, remove_original: bool = False):
     stats = SpaceStats()
@@ -421,7 +413,6 @@ def process_files(file_generator, compress: bool, level: int = 3, threads: int =
         else:
             print("\n⚠️  No files were processed.")
 
-
 def main():
     parser = argparse.ArgumentParser(description="Recursively compress or decompress files using Zstandard")
     group = parser.add_mutually_exclusive_group(required=False)
@@ -466,7 +457,6 @@ def main():
     print("\nScanning directory tree...")
     file_generator = get_files_generator(base_dir, args.compress)
     process_files(file_generator, args.compress, args.level, args.threads, remove_original)
-
 
 if __name__ == "__main__":
     main()

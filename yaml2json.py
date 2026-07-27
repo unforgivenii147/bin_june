@@ -32,7 +32,6 @@ except ImportError:
     print("Error: PyYAML is required. Install with: pip install PyYAML", file=sys.stderr)
     sys.exit(1)
 
-
 @dataclass
 class ConversionArgs:
     input: TextIO
@@ -56,7 +55,6 @@ class ConversionArgs:
             strict=ns.strict,
             allow_unicode=ns.allow_unicode,
         )
-
 
 def convert_yaml_to_json(
     yaml_input: str | TextIO,
@@ -92,7 +90,6 @@ def convert_yaml_to_json(
         )
     except (TypeError, ValueError) as e:
         raise ValueError(f"JSON serialization error: {e}") from e
-
 
 def main() -> int:
     parser = argparse.ArgumentParser(
@@ -197,7 +194,6 @@ def main() -> int:
     else:
         print("✓ YAML is valid", file=sys.stderr)
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

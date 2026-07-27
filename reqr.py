@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import re
@@ -9,7 +8,6 @@ from pathlib import Path
 from fastwalk import walk_files
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def extract_requirements(metadata_path: Path) -> None:
     with Path(metadata_path).open(encoding="utf-8") as f:
@@ -26,7 +24,6 @@ def extract_requirements(metadata_path: Path) -> None:
     print(f"{len(requirements)} reqs found")
     with Path("/sdcard/requirements.txt").open("a", encoding="utf-8") as f:
         f.write("\n".join(requirements))
-
 
 if __name__ == "__main__":
     cwd = Path.cwd()

@@ -1,12 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import sys
 from collections import deque
 from pathlib import Path
-
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -28,9 +26,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
-
 RM = "-r" in sys.argv
-
 
 def get_files(directory: Path):
     for path in directory.rglob("*"):
@@ -38,7 +34,6 @@ def get_files(directory: Path):
             continue
         if path.is_symlink():
             yield path
-
 
 if __name__ == "__main__":
     cwd = Path.cwd()

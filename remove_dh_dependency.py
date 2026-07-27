@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 """
 Script to remove dependencies on the 'dh' custom module by inlining function code.
 Supports multiple files/folders as input with parallel processing.
@@ -18,14 +17,12 @@ from pathlib import Path
 
 DH_SOURCE_PATH = Path.home() / "isaac" / "pkgs" / "dh" / "src" / "dh"
 
-
 @dataclass
 class ProcessResult:
     file_path: Path
     modified: bool
     new_content: str | None
     error: str | None
-
 
 class DHModuleAnalyzer:
     def __init__(self, dh_path: Path):
@@ -62,13 +59,11 @@ class DHModuleAnalyzer:
     def get_all_definitions(self) -> dict[str, str]:
         return self.definitions.copy()
 
-
 class ImportRemover(ast.NodeTransformer):
     def __init__(self, definitions: dict[str, str]):
         self.definitions = definitions
         self.inlined_code: list[str] = []
         self.has_dh_imports = False
-
 
 class PythonFileProcessor:
     def __init__(self, definitions: dict[str, str]):
@@ -111,7 +106,6 @@ class PythonFileProcessor:
             new_lines.append("\n# ===== End of inlined code =====\n")
         new_lines.extend(filtered_lines[import_end_idx:])
         return "\n".join(new_lines)
-
 
 class ProjectCleaner:
     def __init__(self, dh_path: Path = DH_SOURCE_PATH, max_workers: int | None = None):
@@ -189,7 +183,6 @@ class ProjectCleaner:
             for f in modified_files:
                 print(f"  {f}")
 
-
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Remove dependencies on 'dh' module by inlining function code.",
@@ -206,7 +199,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--workers", type=int, default=None, help="Number of parallel workers (default: CPU count)")
     parser.add_argument("--verbose", action="store_true", help="Verbose output")
     return parser.parse_args()
-
 
 def main():
     args = parse_args()
@@ -231,7 +223,6 @@ def main():
         if args.verbose:
             traceback.print_exc()
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 """
 zreport_optimized_by_gemini.py — Report uncompressed sizes of compressed files.
 Optimized for Python 3.12 with modern syntax, type hints, and performance improvements.
@@ -23,7 +22,6 @@ SKIP_DIRS: Final[frozenset[str]] = frozenset(
     {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
 )
 
-
 def _try_import(module_name: str):
     try:
         import importlib
@@ -32,12 +30,10 @@ def _try_import(module_name: str):
     except ImportError:
         return None
 
-
 zstd = _try_import("zstandard")
 lz4f = _try_import("lz4.frame")
 brotli = _try_import("brotli")
 py7zr = _try_import("py7zr")
-
 
 def format_size(size_bytes: int | None) -> str:
     if size_bytes is None:
@@ -49,7 +45,6 @@ def format_size(size_bytes: int | None) -> str:
         size /= 1024.0
     return f"{size:.2f} PB"
 
-
 def _stream_size(readable, chunk=1 << 20) -> int:
     total = 0
     while True:
@@ -59,14 +54,12 @@ def _stream_size(readable, chunk=1 << 20) -> int:
         total += len(data)
     return total
 
-
 def _tar_size(fileobj, mode="r:*") -> int | None:
     try:
         with tarfile.open(fileobj=fileobj, mode=mode) as tf:
             return sum(m.size for m in tf.getmembers() if m.isfile())
     except Exception:
         return None
-
 
 def get_zst_size(path: Path) -> tuple[int | None, str | None]:
     if not zstd:
@@ -82,14 +75,12 @@ def get_zst_size(path: Path) -> tuple[int | None, str | None]:
     except Exception as e:
         return (None, str(e))
 
-
 def get_xz_size(path: Path) -> tuple[int | None, str | None]:
     try:
         with lzma.open(path, "rb") as f:
             return (_stream_size(f), None)
     except Exception as e:
         return (None, str(e))
-
 
 def get_gz_size(path: Path) -> tuple[int | None, str | None]:
     try:
@@ -98,14 +89,12 @@ def get_gz_size(path: Path) -> tuple[int | None, str | None]:
     except Exception as e:
         return (None, str(e))
 
-
 def get_bz2_size(path: Path) -> tuple[int | None, str | None]:
     try:
         with bz2.open(path, "rb") as f:
             return (_stream_size(f), None)
     except Exception as e:
         return (None, str(e))
-
 
 def get_7z_size(path: Path) -> tuple[int | None, str | None]:
     if not py7zr:
@@ -116,14 +105,12 @@ def get_7z_size(path: Path) -> tuple[int | None, str | None]:
     except Exception as e:
         return (None, str(e))
 
-
 def get_zip_size(path: Path) -> tuple[int | None, str | None]:
     try:
         with zipfile.ZipFile(path, "r") as z:
             return (sum(i.file_size for i in z.infolist()), None)
     except Exception as e:
         return (None, str(e))
-
 
 HANDLERS: Final[dict[str, tuple[str, Callable]]] = {
     ".zst": ("zstd", get_zst_size),
@@ -135,7 +122,6 @@ HANDLERS: Final[dict[str, tuple[str, Callable]]] = {
     ".whl": ("wheel", get_zip_size),
     ".tar": ("tar", lambda p: (_tar_size(p.open("rb"), "r:"), None)),
 }
-
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Report uncompressed sizes of compressed files")
@@ -185,7 +171,6 @@ def main() -> None:
     print(f"Free disk space:    {format_size(free)}")
     if grand_uncomp > free:
         print(f"\n⚠️  WARNING: Not enough space to extract all files! (Shortfall: {format_size(grand_uncomp - free)})")
-
 
 if __name__ == "__main__":
     import shutil

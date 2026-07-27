@@ -32,7 +32,6 @@ from cld import (
 DEFAULT_MAX_PROBE = 4096  # bytes to probe for binary/text detection
 DEFAULT_READ_BYTES = 2 * 1024 * 1024  # up to 2MB per-file read
 
-
 def find_files(
     root: str = ".", recursive: bool = True, exts: Iterable[str] | None = None, skip_hidden: bool = True
 ) -> Iterable[str]:
@@ -52,14 +51,12 @@ def find_files(
         if not recursive:
             break
 
-
 def is_text_file(path: str, max_probe: int = DEFAULT_MAX_PROBE) -> bool:
     try:
         sample = read_file_bytes(path, max_bytes=max_probe)
         return is_probably_text_bytes(sample)
     except Exception:
         return False
-
 
 def scan_file_lines(path: str, min_confidence: float = 0.6) -> List[Tuple[str, int, str, float, str]]:
     """
@@ -89,7 +86,6 @@ def scan_file_lines(path: str, min_confidence: float = 0.6) -> List[Tuple[str, i
         if lang != "en" and lang != "und" and conf >= min_confidence:
             results.append((path, i, lang, conf, raw_line))
     return results
-
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="Find non-English lines in text files and save to noneng.txt")
@@ -137,7 +133,6 @@ def main(argv=None) -> int:
 
     print(f"Scanned files: {files_scanned}; non-English lines found: {total_found}; results saved to {out_path}")
     return 0
-
 
 if __name__ == "__main__":
     raise SystemExit(main())

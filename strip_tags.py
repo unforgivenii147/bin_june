@@ -1,16 +1,13 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import re
 import sys
 from pathlib import Path
 
-
 def get_removed_lines(txt1, txt2):
     return list({l for l in txt1.splitlines() if l} - {l for l in txt2.splitlines() if l})
-
 
 def read_lines(path: str | Path, ke: bool = True) -> list[str]:
     path = Path(path)
@@ -23,7 +20,6 @@ def read_lines(path: str | Path, ke: bool = True) -> list[str]:
         lines.append("")
     return lines
 
-
 def read_lines_mmap(path: Path, keep_ends: bool = True) -> list[str]:
     import mmap
 
@@ -34,7 +30,6 @@ def read_lines_mmap(path: Path, keep_ends: bool = True) -> list[str]:
     if not lines[-1].endswith(("\n", "\r\n", "\r")) and size > 0 and text.endswith("\n"):
         lines.append("")
     return lines
-
 
 INPLACE = "-w" in sys.argv
 if __name__ == "__main__":

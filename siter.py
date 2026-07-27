@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import argparse
@@ -13,7 +12,6 @@ import tempfile
 import zipfile
 from multiprocessing import cpu_count
 from pathlib import Path
-
 
 class WheelBuilder:
     def __init__(
@@ -301,7 +299,6 @@ class WheelBuilder:
         print(f"\n✅ Built {built}/{len(dist_infos)} wheels in {self.output_dir}")
         return built
 
-
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Build proper wheel files from installed packages (run from site-packages)",
@@ -356,7 +353,6 @@ def main() -> int:
         return 0 if built > 0 else 1
     built = builder.build_all()
     return 0 if built > 0 else 1
-
 
 if __name__ == "__main__":
     from multiprocessing import freeze_support

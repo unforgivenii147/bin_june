@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import os
@@ -18,7 +17,6 @@ SUPPORTED_EXTENSIONS = TXT_EXT
 ENGLISH_LANGUAGES = {"en", "en_US", "en_GB"}
 MAX_FILE_SIZE = 1024 * 1024
 
-
 def detect_language(text: str) -> tuple[str | None, float]:
     if not text or len(text) < MIN_TEXT_LENGTH:
         return None, 0
@@ -32,13 +30,11 @@ def detect_language(text: str) -> tuple[str | None, float]:
         pass
     return None, 0
 
-
 def is_likely_english(text: str, threshold: float = 70.0) -> bool:
     lang, confidence = detect_language(text)
     if lang is None:
         return False
     return lang in ENGLISH_LANGUAGES and confidence >= threshold
-
 
 def read_file_safely(filepath: Path) -> str | None:
     try:
@@ -53,14 +49,12 @@ def read_file_safely(filepath: Path) -> str | None:
         pass
     return None
 
-
 def get_file_sample(text: str, max_lines: int = 50, max_chars: int = 5000) -> str:
     lines = text.split("\n")[:max_lines]
     sample = "\n".join(lines)
     if len(sample) > max_chars:
         sample = sample[:max_chars]
     return sample
-
 
 def analyze_directory(directory: str = ".", show_all: bool = False) -> dict:
     directory = Path(directory).resolve()
@@ -111,7 +105,6 @@ def analyze_directory(directory: str = ".", show_all: bool = False) -> dict:
                 results["non_english"][lang].append(filepath)
                 results["directory_stats"][str(rel_dir)]["non_english"] += 1
     return results
-
 
 def print_results(results: dict, show_files: bool = False) -> None:
     print("\n" + "=" * 70)
@@ -171,7 +164,6 @@ def print_results(results: dict, show_files: bool = False) -> None:
                 print(f"       {stats['non_english']} non-English files to translate")
     print("=" * 70)
 
-
 def main() -> None:
     import argparse
 
@@ -194,7 +186,6 @@ def main() -> None:
     except Exception as e:
         print(f"\n❌ Error: {e}")
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

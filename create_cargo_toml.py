@@ -12,7 +12,6 @@ import sys
 from pathlib import Path
 from typing import List
 
-
 def parse_cargo_lock(filepath: str) -> dict:
     """
     Parse a Cargo.lock file and extract package information.
@@ -46,7 +45,6 @@ def parse_cargo_lock(filepath: str) -> dict:
                 packages.append(pkg)
 
     return {"version": lock_version, "packages": packages}
-
 
 def parse_package_block(block: str) -> Optional[dict]:
     """
@@ -94,7 +92,6 @@ def parse_package_block(block: str) -> Optional[dict]:
 
     return pkg
 
-
 def parse_package_block_v1(block: str) -> Optional[dict]:
     """
     Parse a package block from Cargo.lock v1.
@@ -126,7 +123,6 @@ def parse_package_block_v1(block: str) -> Optional[dict]:
         pkg["dependencies"] = dependencies
 
     return pkg
-
 
 def generate_cargo_toml(
     packages: list[dict],
@@ -181,7 +177,6 @@ def generate_cargo_toml(
 
     return "\n".join(lines)
 
-
 def find_package(packages: list[dict], name: str) -> Optional[dict]:
     """
     Find a package by name in the packages list.
@@ -197,7 +192,6 @@ def find_package(packages: list[dict], name: str) -> Optional[dict]:
         if pkg["name"] == name:
             return pkg
     return None
-
 
 def main():
     """Main function to run the script."""
@@ -233,7 +227,6 @@ def main():
     print("\nPreview:")
     print("-" * 50)
     print(toml_content)
-
 
 if __name__ == "__main__":
     main()

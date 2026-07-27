@@ -1,13 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 from pathlib import Path
 
-
 EXT = {".py", ".h", ".c", ".cpp", ".cc", ".cxx", ".hh", ".hpp", ".hxx"}
-
 
 def get_first_13(path: Path) -> str:
     try:
@@ -15,7 +12,6 @@ def get_first_13(path: Path) -> str:
         return "".join(lines[:23])
     except OSError:
         return ""
-
 
 def main() -> None:
     output_path = Path("all.txt").resolve()
@@ -34,7 +30,6 @@ def main() -> None:
     output_path.write_text("\n\n\n".join(unique_collected), encoding="utf-8")
     print(f"Unique snippets saved → {output_path}")
     print(f"Total unique blocks: {len(unique_collected)}")
-
 
 if __name__ == "__main__":
     main()
