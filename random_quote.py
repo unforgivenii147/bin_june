@@ -1,33 +1,39 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
-
-from __future__ import annotations
-
 import json
 import random
+import os
+from shutil import get_terminal_size
 
 
-def show_random_quote():
-    try:
-        with open("/sdcard/data/quotes.json", encoding="utf-8") as f:
+# Adjust this path if the script is stored somewhere separate from your JSON file
+FILE_NAME = "/sdcard/data/quotes/quotes.json"
+
+
+def display_random_quote():
+    if not os.path.exists(FILE_NAME):
+        return
+
+    with open(FILE_NAME, "r", encoding="utf-8") as f:
+        try:
             quotes = json.load(f)
-        if not quotes:
-            print("No quotes found in the file.")
+        except json.JSONDecodeError:
             return
-        quote = random.choice(quotes)
-        print("\n" + "=" * 60)
-        print(f'''"{quote["quote"]}"''')
-        print(f"  — {quote['author']}")
-        print("=" * 60 + "\n")
-    except FileNotFoundError:
-        print("Error: quotes.json not found at /sdcard/data/quotes.json")
-    except json.JSONDecodeError:
-        print("Error: Invalid JSON format in quotes.json")
-    except KeyError:
-        print("Error: Quote or author field missing in JSON")
-    except Exception as e:
-        print(f"Error: {e}")
+
+    if not quotes:
+        return
+
+    # Select one quote object completely at random
+    selected = random.choice(quotes)
+
+    quote_text = selected.get("quote", "No quote content.")
+    author_text = selected.get("author", "Unknown Author")
+    N = get_terminal_size()[0]
+    # Output formatting designed nicely for terminal splash screens
+    print("\n" + "─" * N)
+    print(f'\033[5;96m"{quote_text}"\033[0m')
+    print(f"\033[5;94m  — {author_text}\033[0m")
+    print("─" * N + "\n")
 
 
 if __name__ == "__main__":
-    show_random_quote()
+    display_random_quote()

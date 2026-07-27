@@ -65,7 +65,7 @@ def custom_persian_to_finglish(text: str) -> str:
             else:
                 processed_word += persian_map.get(char, char)
         processed_words.append(processed_word)
-    return " ".join(processed_words)
+    return "_".join(processed_words)
 
 
 def convert_filenames_with_pathlib(directory: str = ".") -> None:

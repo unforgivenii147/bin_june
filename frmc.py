@@ -9,6 +9,7 @@ import sys
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
+from dh import SOURCE_CODE_EXT
 
 CHUNK_SIZE = 1024 * 1024
 

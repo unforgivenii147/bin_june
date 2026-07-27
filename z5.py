@@ -14,10 +14,9 @@ import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-
 import zstandard as zstd
 
-EXCLUDED_EXTENSIONS: Final[set[str]] = {
+EXCLUDED_EXTENSIONS = {
     ".xz",
     ".zst",
     ".zstd",
@@ -103,9 +102,9 @@ try:
     from rich.table import Table
     from rich.text import Text
 
-    RICH_AVAILABLE: Final[bool] = True
+    RICH_AVAILABLE = True
 except ImportError:
-    RICH_AVAILABLE: Final[bool] = False
+    RICH_AVAILABLE = False
 
 
 @dataclass(slots=True)
@@ -129,7 +128,7 @@ class OperationResult:
         return (self.processed_size / self.original_size - 1) * 100
 
 
-def format_size(size_bytes: int) -> str:
+def format_size(size_bytes: float) -> str:
     val = float(size_bytes)
     for unit in ["B", "KB", "MB", "GB", "TB"]:
         if val < 1024.0:

@@ -232,7 +232,7 @@ class TypoFixerWithLearning:
             return True
         return word.lower() in self.valid_words
 
-    def suggest_correction(self, word: str) -> str | None:
+    def suggest_correction(self, word: str, context: str = "") -> str | None:
         if self.is_valid_word(word):
             return None
         pattern_corrected = self.learner.apply_substitutions(word)
@@ -294,6 +294,7 @@ class TypoFixerWithLearning:
             return False
         fixed_lines = []
         changes = 0
+
         word_pattern = re.compile(r"\b([a-zA-Z]+(?:[-\'][a-zA-Z]+)*)\b")
         for line_num, line in enumerate(lines, 1):
             fixed_line = line

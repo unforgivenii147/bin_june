@@ -34,83 +34,19 @@ try:
 except ImportError:
     RICH_AVAILABLE = False
     print("💡 Tip: Install 'rich' for prettier output: pip install rich")
-
+# fmt: off
 EXCLUDED_EXTENSIONS = {
-    ".xz",
-    ".lzma",
-    ".7z",
-    ".gz",
-    ".bz2",
-    ".zip",
-    ".rar",
-    ".tar",
-    ".tgz",
-    ".tbz2",
-    ".txz",
-    ".tlz",
-    ".lz",
-    ".lz4",
-    ".lzo",
-    ".sz",
-    ".snappy",
-    ".zlib",
-    ".deflate",
-    ".flac",
-    ".mp3",
-    ".aac",
-    ".ogg",
-    ".wma",
-    ".opus",
-    ".m4a",
-    ".wavpack",
-    ".jpg",
-    ".jpeg",
-    ".png",
-    ".gif",
-    ".webp",
-    ".avif",
-    ".heic",
-    ".heif",
-    ".mp4",
-    ".avi",
-    ".mkv",
-    ".mov",
-    ".wmv",
-    ".flv",
-    ".webm",
-    ".m4v",
-    ".pdf",
-    ".docx",
-    ".xlsx",
-    ".pptx",
-    ".odt",
-    ".ods",
-    ".odp",
-    ".exe",
-    ".dll",
-    ".so",
-    ".dylib",
-    ".wasm",
-    ".whl",
-    ".egg",
-    ".deb",
-    ".rpm",
-    ".apk",
-    ".ipa",
-    ".pyc",
-    ".pyo",
-    ".class",
-    ".o",
-    ".obj",
-    ".lib",
-    ".a",
-    ".iso",
-    ".img",
-    ".dmg",
-    ".vdi",
-    ".vmdk",
-    ".qcow2",
+    ".xz", ".lzma", ".7z", ".gz", ".bz2", ".zip", ".rar", ".tar", ".tgz", ".tbz2", ".txz", ".tlz",
+    ".lz", ".lz4", ".lzo", ".sz", ".snappy", ".zlib", ".deflate",
+    ".flac", ".mp3", ".aac", ".ogg", ".wma", ".opus", ".m4a", ".wavpack",
+    ".jpg", ".jpeg", ".png", ".gif", ".webp", ".avif", ".heic", ".heif",
+    ".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".webm", ".m4v",
+    ".pdf", ".docx", ".xlsx", ".pptx", ".odt", ".ods", ".odp",
+    ".exe", ".dll", ".so", ".dylib", ".wasm", ".whl", ".egg",
+    ".deb", ".rpm", ".apk", ".ipa", ".pyc", ".pyo", ".class", ".o", ".obj",
+    ".iso", ".img", ".dmg", ".vdi", ".vmdk", ".qcow2",
 }
+# fmt: on
 
 
 @dataclass
@@ -126,7 +62,7 @@ class CompressionResult:
     was_tarred: bool = False
 
 
-def format_size(size_bytes: int) -> str:
+def format_size(size_bytes: float) -> str:
     for unit in ["B", "KB", "MB", "GB", "TB"]:
         if size_bytes < 1024.0:
             return f"{size_bytes:.2f} {unit}"
@@ -136,17 +72,32 @@ def format_size(size_bytes: int) -> str:
 
 def tar_directory(directory: Path, output_path: Path, delete_original: bool = False) -> tuple[int, bool]:
     try:
-        sum(f.stat().st_size for f in directory.rglob("*") if f.is_file())
+        dir_size = sum(f.stat().st_size for f in directory.rglob("*") if f.is_file())
         with tarfile.open(output_path, "w") as tar:
             tar.add(directory, arcname=directory.name)
+
         tar_size = output_path.stat().st_size
-        if delete_original and output_path.exists():
-            shutil.rmtree(directory)
-        return (tar_size, True)
+        if delete_original:
+            shutil.rmtree(directory, ignore_errors=True)
+        return tar_size, True
     except Exception as e:
         if output_path.exists():
-            output_path.unlink()
-        raise e
+            output_path.unlink(missing_ok=True)
+        print(f"❌ Error tarring {directory.name}: {e}")
+        return 0, False
+
+
+def untar_file(tar_path: Path, extract_dir: Path, delete_tar: bool = False) -> bool:
+    """Extract tar and optionally delete it."""
+    try:
+        with tarfile.open(tar_path, "r") as tar:
+            tar.extractall(extract_dir, filter="data")
+        if delete_tar:
+            tar_path.unlink(missing_ok=True)
+        return True
+    except Exception as e:
+        print(f"❌ Error extracting {tar_path.name}: {e}")
+        return False
 
 
 def compress_file_streaming(
@@ -154,28 +105,25 @@ def compress_file_streaming(
     output_path: Path,
     preset: int = 7,
     threads: int = 4,
-    chunk_size: int = 1024 * 1024,
+    chunk_size: int = 2 * 1024 * 1024,
     keep_original: bool = False,
     was_tarred: bool = False,
 ) -> CompressionResult:
-    start_time = time.time()
+    start = time.time()
     try:
         original_size = input_path.stat().st_size
         if original_size == 0:
-            return CompressionResult(
-                file_path=input_path,
-                original_size=0,
-                processed_size=0,
-                success=False,
-                error="Empty file",
-                duration=time.time() - start_time,
-                operation="compress",
-                was_tarred=was_tarred,
-            )
-        filters = [{"id": lzma.FILTER_LZMA2, "preset": preset}]
-        compressor = lzma.LZMACompressor(format=lzma.FORMAT_XZ, check=lzma.CHECK_CRC64, preset=preset, filters=filters)
+            return CompressionResult(input_path, 0, 0, False, "Empty file", time.time() - start, was_tarred=was_tarred)
+
         compressed_size = 0
         with open(input_path, "rb") as f_in, open(output_path, "wb") as f_out:
+            compressor = lzma.LZMACompressor(
+                format=lzma.FORMAT_XZ,
+                check=lzma.CHECK_CRC64,
+                preset=preset,
+                filters=[{"id": lzma.FILTER_LZMA2, "preset": preset}],
+            )
+
             while True:
                 chunk = f_in.read(chunk_size)
                 if not chunk:
@@ -184,55 +132,55 @@ def compress_file_streaming(
                 if compressed_chunk:
                     f_out.write(compressed_chunk)
                     compressed_size += len(compressed_chunk)
+
             remaining = compressor.flush()
             if remaining:
                 f_out.write(remaining)
                 compressed_size += len(remaining)
-        original_deleted = False
+
         if not keep_original and output_path.exists():
-            input_path.unlink()
+            input_path.unlink(missing_ok=True)
             original_deleted = True
+        else:
+            original_deleted = False
+
         return CompressionResult(
             file_path=input_path,
             original_size=original_size,
             processed_size=compressed_size,
             success=True,
-            duration=time.time() - start_time,
+            duration=time.time() - start,
             original_deleted=original_deleted,
             operation="compress",
             was_tarred=was_tarred,
         )
     except Exception as e:
         if output_path.exists():
-            output_path.unlink()
+            output_path.unlink(missing_ok=True)
         return CompressionResult(
-            file_path=input_path,
+            input_path,
             original_size=input_path.stat().st_size if input_path.exists() else 0,
             processed_size=0,
             success=False,
             error=str(e),
-            duration=time.time() - start_time,
+            duration=time.time() - start,
             operation="compress",
             was_tarred=was_tarred,
         )
 
 
 def decompress_file_streaming(
-    input_path: Path, output_path: Path, chunk_size: int = 1024 * 1024, keep_original: bool = False
+    input_path: Path,
+    output_path: Path,
+    chunk_size: int = 2 * 1024 * 1024,
+    keep_original: bool = False,
 ) -> CompressionResult:
-    start_time = time.time()
+    start = time.time()
     try:
         original_size = input_path.stat().st_size
         if original_size == 0:
-            return CompressionResult(
-                file_path=input_path,
-                original_size=0,
-                processed_size=0,
-                success=False,
-                error="Empty file",
-                duration=time.time() - start_time,
-                operation="decompress",
-            )
+            return CompressionResult(input_path, 0, 0, False, "Empty file", time.time() - start, operation="decompress")
+
         decompressed_size = 0
         with lzma.open(input_path, "rb") as f_in, open(output_path, "wb") as f_out:
             while True:
@@ -241,43 +189,34 @@ def decompress_file_streaming(
                     break
                 f_out.write(chunk)
                 decompressed_size += len(chunk)
-        original_deleted = False
-        if not keep_original and output_path.exists():
-            input_path.unlink()
+
+        if not keep_original:
+            input_path.unlink(missing_ok=True)
             original_deleted = True
+        else:
+            original_deleted = False
+
         return CompressionResult(
             file_path=input_path,
             original_size=original_size,
             processed_size=decompressed_size,
             success=True,
-            duration=time.time() - start_time,
+            duration=time.time() - start,
             original_deleted=original_deleted,
             operation="decompress",
         )
     except Exception as e:
         if output_path.exists():
-            output_path.unlink()
+            output_path.unlink(missing_ok=True)
         return CompressionResult(
-            file_path=input_path,
+            input_path,
             original_size=input_path.stat().st_size if input_path.exists() else 0,
             processed_size=0,
             success=False,
             error=str(e),
-            duration=time.time() - start_time,
+            duration=time.time() - start,
             operation="decompress",
         )
-
-
-def untar_file(tar_path: Path, extract_dir: Path, delete_tar: bool = False) -> bool:
-    try:
-        with tarfile.open(tar_path, "r") as tar:
-            tar.extractall(extract_dir)
-        if delete_tar:
-            tar_path.unlink()
-        return True
-    except Exception as e:
-        print(f"Error extracting tar {tar_path}: {e}")
-        return False
 
 
 def process_subdirs_with_tar(
@@ -290,114 +229,55 @@ def process_subdirs_with_tar(
 ) -> list[CompressionResult]:
     if exclude_patterns is None:
         exclude_patterns = []
-    results = []
-    subdirs = [d for d in directory.iterdir() if d.is_dir() and (not d.is_symlink())]
-    subdirs = [d for d in subdirs if not any(pattern in str(d) for pattern in exclude_patterns)]
+
     excluded_dirs = {".git", ".svn", ".hg", "__pycache__", "node_modules", ".venv", "venv", ".env"}
-    subdirs = [d for d in subdirs if d.name not in excluded_dirs]
+    subdirs = [
+        d
+        for d in directory.iterdir()
+        if d.is_dir()
+        and not d.is_symlink()
+        and d.name not in excluded_dirs
+        and not any(pat in str(d) for pat in exclude_patterns)
+    ]
+
     if not subdirs:
         print("📁 No subdirectories found to tar")
-        return results
-    print(f"📁 Found {len(subdirs)} subdirectories to tar first")
-    tar_files = []
-    tar_errors = []
-    print("🗜️  Step 1: Creating tar archives of subdirectories...")
-    with tempfile.TemporaryDirectory() as temp_dir:
-        Path(temp_dir)
-        for i, subdir in enumerate(subdirs, 1):
-            try:
-                tar_name = f"{subdir.name}.tar"
-                tar_path = subdir.parent / tar_name
-                if tar_path.exists():
-                    print(f"  ⚠️  [{i}/{len(subdirs)}] {tar_name} already exists, skipping tar creation")
-                    tar_files.append(tar_path)
-                    continue
-                print(f"  📦 [{i}/{len(subdirs)}] Tarring {subdir.name}...")
-                dir_size = sum(f.stat().st_size for f in subdir.rglob("*") if f.is_file())
-                tar_size, success = tar_directory(subdir, tar_path, delete_original=not keep_original)
-                if success:
-                    tar_files.append(tar_path)
-                    if not keep_original:
-                        print(f"    ✅ Tarred {format_size(dir_size)} → {format_size(tar_size)} (directory deleted)")
-                    else:
-                        print(f"    ✅ Tarred {format_size(dir_size)} → {format_size(tar_size)} (directory kept)")
-                else:
-                    tar_errors.append((subdir, "Failed to create tar"))
-            except Exception as e:
-                print(f"  ❌ [{i}/{len(subdirs)}] Error tarring {subdir.name}: {e}")
-                tar_errors.append((subdir, str(e)))
-        if tar_files:
-            print(
-                f"\n🗜️  Step 2: Compressing {len(tar_files)} tar files with LZMA (preset: {preset}, threads: {threads})..."
-            )
-            if workers > 1 and len(tar_files) > 1:
-                with ProcessPoolExecutor(max_workers=workers) as executor:
-                    futures = {}
-                    for tar_path in tar_files:
-                        output_path = tar_path.with_suffix(".tar.xz")
-                        future = executor.submit(
-                            compress_file_streaming,
-                            tar_path,
-                            output_path,
-                            preset,
-                            threads,
-                            1024 * 1024,
-                            not keep_original,
-                            was_tarred=True,
-                        )
-                        futures[future] = tar_path
-                    for i, future in enumerate(as_completed(futures), 1):
-                        result = future.result()
-                        results.append(result)
-                        if result.success:
-                            print(f"  ✅ [{i}/{len(tar_files)}] {result.file_path.name} → {result.file_path.name}.xz")
-                            print(
-                                f"     {format_size(result.original_size)} → {format_size(result.processed_size)} ({(1 - result.processed_size / result.original_size) * 100:.1f}% compression)"
-                            )
-                        else:
-                            print(f"  ❌ [{i}/{len(tar_files)}] {result.file_path.name}: {result.error}")
-            else:
-                for i, tar_path in enumerate(tar_files, 1):
-                    output_path = tar_path.with_suffix(".tar.xz")
-                    result = compress_file_streaming(
-                        tar_path,
-                        output_path,
-                        preset,
-                        threads,
-                        1024 * 1024,
-                        not keep_original,
-                        was_tarred=True,
-                    )
-                    results.append(result)
-                    if result.success:
-                        print(f"  ✅ [{i}/{len(tar_files)}] {tar_path.name} → {tar_path.name}.xz")
-                        print(
-                            f"     {format_size(result.original_size)} → {format_size(result.processed_size)} ({(1 - result.processed_size / result.original_size) * 100:.1f}% compression)"
-                        )
-                    else:
-                        print(f"  ❌ [{i}/{len(tar_files)}] {tar_path.name}: {result.error}")
-        if tar_errors:
-            print(f"\n❌ Failed to tar {len(tar_errors)} directories:")
-            for subdir, error in tar_errors:
-                print(f"  • {subdir.name}: {error}")
+        return []
+
+    print(f"📁 Found {len(subdirs)} subdirectories to tar...")
+    results: list[CompressionResult] = []
+
+    for i, subdir in enumerate(subdirs, 1):
+        tar_path = subdir.parent / f"{subdir.name}.tar"
+        print(f"  📦 [{i}/{len(subdirs)}] Tarring {subdir.name}...")
+
+        dir_size = sum(f.stat().st_size for f in subdir.rglob("*") if f.is_file())
+        tar_size, success = tar_directory(subdir, tar_path, delete_original=not keep_original)
+
+        if not success:
+            continue
+
+        xz_path = tar_path.with_suffix(".tar.xz")
+        result = compress_file_streaming(
+            tar_path, xz_path, preset, threads, keep_original=not keep_original, was_tarred=True
+        )
+        results.append(result)
+
+        if result.success:
+            ratio = (1 - result.processed_size / result.original_size) * 100 if result.original_size else 0
+            print(f"    ✅ {format_size(dir_size)} → {format_size(result.processed_size)} ({ratio:.1f}%)")
+        else:
+            print(f"    ❌ Failed compressing {tar_path.name}: {result.error}")
     return results
 
 
 def should_compress_file(file_path: Path, exclude_extensions: set[str], exclude_patterns: list[str]) -> bool:
-    if file_path.is_symlink():
-        return False
-    if not file_path.is_file():
+    if file_path.is_symlink() or not file_path.is_file():
         return False
     if file_path.suffix.lower() in exclude_extensions:
         return False
-    if file_path.suffix == ".xz":
+    if exclude_patterns and any(pat in str(file_path) for pat in exclude_patterns):
         return False
-    if file_path.suffix == ".tar":
-        return False
-    if exclude_patterns:
-        path_str = str(file_path)
-        if any(pattern in path_str for pattern in exclude_patterns):
-            return False
     return True
 
 
@@ -412,39 +292,30 @@ def find_files_to_compress(
         exclude_extensions = EXCLUDED_EXTENSIONS
     if exclude_patterns is None:
         exclude_patterns = []
+
     files = []
     if extensions_filter:
         for ext in extensions_filter:
             ext = ext if ext.startswith(".") else f".{ext}"
-            pattern = f"*{ext}"
-            for file_path in directory.rglob(pattern):
-                if should_compress_file(file_path, exclude_extensions, exclude_patterns):
-                    if skip_subdirs and file_path.parent != directory:
-                        continue
-                    files.append(file_path)
+            for p in directory.rglob(f"*{ext}"):
+                if should_compress_file(p, exclude_extensions, exclude_patterns):
+                    if not skip_subdirs or p.parent == directory:
+                        files.append(p)
     else:
-        for file_path in directory.rglob("*"):
-            if should_compress_file(file_path, exclude_extensions, exclude_patterns):
-                if skip_subdirs and file_path.parent != directory:
-                    continue
-                files.append(file_path)
+        for p in directory.rglob("*"):
+            if should_compress_file(p, exclude_extensions, exclude_patterns):
+                if not skip_subdirs or p.parent == directory:
+                    files.append(p)
+
     return sorted(set(files))
 
 
 def find_files_to_decompress(directory: Path, exclude_patterns: list[str] | None = None) -> list[Path]:
     if exclude_patterns is None:
         exclude_patterns = []
-    files = []
-    for file_path in directory.rglob("*.xz"):
-        if file_path.is_symlink():
-            continue
-        if not file_path.is_file():
-            continue
-        if exclude_patterns:
-            path_str = str(file_path)
-            if any(pattern in path_str for pattern in exclude_patterns):
-                continue
-        files.append(file_path)
+    files = [p for p in directory.rglob("*.xz") if p.is_file() and not p.is_symlink()]
+    if exclude_patterns:
+        files = [p for p in files if not any(pat in str(p) for pat in exclude_patterns)]
     return sorted(set(files))
 
 
@@ -720,13 +591,16 @@ def main():
     )
     args = parser.parse_args()
     operation = "decompress" if args.decompress else "compress"
+
     if args.tar_subdirs_first and operation == "decompress":
         print("❌ Error: -t/--tar-subdirs-first is only valid with -c/--compress")
         sys.exit(1)
+
     if operation == "decompress" and (args.extensions or args.no_skip_compressed):
         print("⚠️  Warning: -e/--extensions and --no-skip-compressed are ignored in decompression mode")
     if operation == "decompress":
         print("ℹ️  Note: -p/--preset and --threads are ignored in decompression mode")
+
     if operation == "compress":
         if args.no_skip_compressed:
             exclude_extensions = {".xz"}
@@ -744,6 +618,7 @@ def main():
         sys.exit(1)
     operation_name = "compression" if operation == "compress" else "decompression"
     print(f"🔍 Scanning directory for {operation_name}: {directory}")
+
     if operation == "compress":
         if args.tar_subdirs_first:
             print("📁 Mode: Tar subdirectories first, then LZMA compression")
@@ -825,6 +700,7 @@ def main():
                 print("⚠️  Originals will be DELETED after compression (use --keep-originals to preserve)")
         else:
             print("⚠️  Compressed .xz files will be DELETED after decompression (use --keep-originals to preserve)")
+
     if operation == "compress":
         print(f"🎯 Compression preset: {args.preset}/9")
         print(f"🧵 LZMA threads: {args.threads}")

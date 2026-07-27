@@ -7,12 +7,11 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 
-BROTLI_QUALITY = 4
+BROTLI_QUALITY = 11
 CHUNK_SIZE = 1024 * 64
 
 
 def compress_stream(input_stream, output_file_path: Path):
-    """Streams data from a file-like object into a .br file using Brotli's streaming API."""
     compressor = brotli.Compressor(quality=BROTLI_QUALITY)
 
     try:
@@ -31,7 +30,6 @@ def compress_stream(input_stream, output_file_path: Path):
 
 
 def process_directory(dir_path: Path):
-    """Tars a subdirectory entirely in memory and streams it into a .tar.br file."""
     output_br = dir_path.with_name(f"{dir_path.name}.tar.br")
 
     tar_buffer = io.BytesIO()
@@ -47,7 +45,6 @@ def process_directory(dir_path: Path):
 
 
 def process_file(file_path: Path):
-    """Streams a regular file into a .br file."""
     output_br = file_path.with_name(f"{file_path.name}.br")
     try:
         with open(file_path, "rb") as f_in:

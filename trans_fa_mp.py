@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 def translate_word(word: str) -> str | None:
-    translator = GoogleTranslator(source="fa", target="en")
+    translator = GoogleTranslator(source="auto", target="en")
     for attempt in range(RETRY_ATTEMPTS):
         try:
             result = translator.translate(word)

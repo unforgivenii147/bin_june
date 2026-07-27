@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 from __future__ import annotations
 
 import os
@@ -9,38 +8,38 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 from dh import BIN_EXT
-from tqdm import tqdm
-
 
 EXCLUDED_EXTENSIONS = BIN_EXT
 
 
-def process_file(filepath):
-    Path(path)
+def process_file(path):
+    path = Path(path)
     counter = Counter()
     try:
-        with Path(filepath).open(encoding="utf-8", errors="ignore") as f:
+        with path.open(encoding="utf-8", errors="ignore") as f:
             for line in f:
                 line = line.strip()
                 if line:
                     counter[line] += 1
     except Exception as e:
-        print(f"Error reading {filepath}: {e}")
+        print(f"Error reading {path}: {e}")
     return counter
 
 
 def collect_files_by_extension():
     ext_map = {}
-    for root, _, filenames in os.walk(Path.cwd()):
+    cwd = Path.cwd()
+    for root, _, filenames in cwd.walk():
         for fname in filenames:
             if fname.startswith("."):
                 continue
-            full_path = os.path.join(root, fname)
-            ext = os.path.splitext(fname)[1].lower().lstrip(".")
+            path = Path(root) / fname
+            ext = path.suffix
             if ext in EXCLUDED_EXTENSIONS:
                 continue
-            if not ext:
-                ext_map.setdefault(ext, []).append(full_path)
+            if ext not in ext_map:
+                ext_map[ext] = []
+            ext_map[ext].append(path)
     return ext_map
 
 
@@ -48,16 +47,31 @@ def collect_lines_for_extension(ext, files) -> None:
     if not files:
         return
     global_counter = Counter()
-    with ThreadPoolExecutor() as executor:
+    print(f"Processing {len(files)} files with extension '{ext}'")
+
+    with ThreadPoolExecutor(max_workers=8) as executor:
         futures = {executor.submit(process_file, f): f for f in files}
-        for future in tqdm(as_completed(futures), total=len(futures), desc=f"Processing .{ext}  files"):
-            global_counter.update(future.result())
-    output_file = f"{ext}.txt"
-    with Path(output_file).open("w", encoding="utf-8") as fo:
+        for future in as_completed(futures):
+            try:
+                result = future.result()
+                global_counter.update(result)
+            except Exception as e:
+                print(f"Error processing file: {e}")
+
+    # Better output filename handling
+    output_name = ext.lstrip(".")
+    if not output_name:
+        output_name = "no_extension"
+    output_file = Path(f"{output_name}.txt")
+
+    with output_file.open("w", encoding="utf-8") as fo:
+        written_lines = 0
         for line, count in global_counter.most_common():
             if count >= 2:
                 fo.write(line + "\n")
-    print(f"Saved results to {output_file}")
+                written_lines += 1
+
+    print(f"Saved {written_lines} duplicate lines to {output_file}")
 
 
 def main() -> None:
@@ -65,6 +79,7 @@ def main() -> None:
     if not ext_map:
         print("No eligible files found.")
         return
+
     for ext, files in ext_map.items():
         collect_lines_for_extension(ext, files)
 

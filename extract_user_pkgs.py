@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-
 import argparse
 import concurrent.futures
 import csv
@@ -63,18 +62,26 @@ def resolve_package_list(patterns: list[str], entry_points_only: bool = False) -
 
         return matched_packages, unmatched_patterns
     else:
+        # When not using --entry-points, still only return packages with entry points
+        packages_with_eps = get_packages_with_entry_points()
         matched_packages = []
         unmatched_patterns = []
 
         for pattern in patterns:
             if any(c in pattern for c in "*?[]"):
-                matches = get_matching_packages(pattern)
+                # Get all matching packages first
+                all_matches = get_matching_packages(pattern)
+                # Then filter to only those with entry points
+                matches = [pkg for pkg in all_matches if pkg in packages_with_eps]
                 if matches:
                     matched_packages.extend(matches)
                 else:
                     unmatched_patterns.append(pattern)
             else:
-                matched_packages.append(pattern)
+                if pattern in packages_with_eps:
+                    matched_packages.append(pattern)
+                else:
+                    unmatched_patterns.append(pattern)
 
         return matched_packages, unmatched_patterns
 
@@ -98,11 +105,16 @@ def copy_single_file(record_row: list[str], dist_location: Path, target_dir: Pat
         return False
 
 
+"""
 def process_package(pkg_name: str, user_site: Path, base_target_dir: Path) -> str:
     try:
         dist = importlib.metadata.distribution(pkg_name)
     except importlib.metadata.PackageNotFoundError:
         return f"❌ Package '{pkg_name}' is not installed in this environment."
+
+    # Verify package has entry points
+    if not dist.entry_points:
+        return f"ℹ️  Package '{pkg_name}' has no entry points. Skipping."
 
     dist_location = Path(dist.locate_file("")).resolve()
     if not dist_location.is_relative_to(user_site):
@@ -115,6 +127,47 @@ def process_package(pkg_name: str, user_site: Path, base_target_dir: Path) -> st
 
     pkg_target_dir = base_target_dir / pkg_name
     pkg_target_dir.mkdir(parents=True, exist_ok=True)
+
+
+"""
+
+
+def process_package(pkg_name: str, user_site: Path, base_target_dir: Path) -> str:
+    try:
+        dist = importlib.metadata.distribution(pkg_name)
+    except importlib.metadata.PackageNotFoundError:
+        return f"❌ Package '{pkg_name}' is not installed in this environment."
+
+    dist_location = Path(dist.locate_file("")).resolve()
+    if not dist_location.is_relative_to(user_site):
+        return f"ℹ️  Package '{pkg_name}' found, but it is not installed in the user site folder (Location: {dist_location}). Skipping."
+
+    try:
+        files = dist.files
+        if files is None:
+            return f"❌ Package '{pkg_name}' has no file information available."
+
+        # Find the RECORD file
+        record_file = None
+        for file in files:
+            if file.name == "RECORD":
+                record_file = file.locate()
+                break
+
+        if not record_file:
+            return f"❌ Package '{pkg_name}' RECORD file not found."
+
+        record_path = Path(record_file)
+        if not record_path.is_file():
+            return f"❌ Package '{pkg_name}' RECORD file exists but is not accessible."
+
+    except Exception as e:
+        return f"❌ Failed to locate RECORD file for '{pkg_name}': {e}"
+
+    pkg_target_dir = base_target_dir / pkg_name
+    pkg_target_dir.mkdir(parents=True, exist_ok=True)
+
+    # ... rest of the function remains the same
 
     try:
         with record_path.open("r", encoding="utf-8", newline="") as f:
@@ -143,10 +196,10 @@ def process_package(pkg_name: str, user_site: Path, base_target_dir: Path) -> st
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Extract installed user-site Python packages to ~/tmp/pkgs/<pkgname>",
+        description="Extract installed user-site Python packages that have entry points to ~/tmp/pkgs/<pkgname>",
         epilog="Examples:\n"
-        "  python script.py requests              # Extract exact package\n"
-        '  python script.py "req*"                 # Extract packages starting with "req"\n'
+        "  python script.py requests              # Extract 'requests' if it has entry points\n"
+        '  python script.py "req*"                 # Extract packages starting with "req" that have entry points\n'
         "  python script.py -e                     # Extract ALL packages with entry points\n"
         '  python script.py -e "django*"           # Extract django packages with entry points\n'
         "  python script.py -e --list-only         # List all packages with entry points",
@@ -184,7 +237,7 @@ def main():
         if args.entry_points:
             print("❌ No packages with entry points found.")
         else:
-            print("❌ No matching packages found.")
+            print("❌ No matching packages with entry points found.")
         return
 
     user_site = get_user_site_path()
@@ -195,7 +248,7 @@ def main():
     if args.entry_points:
         print(f"📦 Found {len(matched_packages)} package(s) with entry points:")
     else:
-        print(f"📦 Found {len(matched_packages)} matching package(s):")
+        print(f"📦 Found {len(matched_packages)} matching package(s) with entry points:")
 
     for pkg in matched_packages:
         if args.show_entry_points or args.list_only:
@@ -218,9 +271,27 @@ def main():
     if args.list_only:
         return
 
+    # Additional verification: filter out any packages that somehow don't have entry points
+    packages_to_extract = []
+    for pkg in matched_packages:
+        try:
+            dist = importlib.metadata.distribution(pkg)
+            if dist.entry_points:
+                packages_to_extract.append(pkg)
+            else:
+                print(f"ℹ️  Package '{pkg}' has no entry points. Skipping.")
+        except Exception:
+            print(f"⚠️  Could not verify entry points for '{pkg}'. Skipping.")
+
+    if not packages_to_extract:
+        print("❌ No packages with entry points to extract.")
+        return
+
+    print(f"🔄 Extracting {len(packages_to_extract)} packages with entry points...")
+
     with concurrent.futures.ThreadPoolExecutor() as pkg_executor:
         future_to_pkg = {
-            pkg_executor.submit(process_package, pkg, user_site, base_target_dir): pkg for pkg in matched_packages
+            pkg_executor.submit(process_package, pkg, user_site, base_target_dir): pkg for pkg in packages_to_extract
         }
         for future in concurrent.futures.as_completed(future_to_pkg):
             pkg_name = future_to_pkg[future]

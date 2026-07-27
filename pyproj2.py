@@ -49,6 +49,9 @@ def create_project_structure(pkg: str, author: str, email: str, url: str, simple
             "[options]",
             f"py_modules = {pkg}",
             "python_requires = >=3.11",
+            "[options.entry_points]",
+            "console_scripts =",
+            "{pkg} = {pkg}:main",
             "",
         ]
     )
@@ -58,6 +61,7 @@ def create_project_structure(pkg: str, author: str, email: str, url: str, simple
 requires = ["setuptools>=69.0", "wheel"]
 build-backend = "setuptools.build_meta\"
 [project.scripts]
+{pkg} = "{pkg}:main"
 """)
     print(f"Project '{pkg}' initialized in {cwd}")
 

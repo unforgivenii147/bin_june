@@ -8,11 +8,10 @@ import sys
 from pathlib import Path
 
 from deep_translator import GoogleTranslator, single_detection
-from deep_translator.google import GoogleTranslator
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-CHUNK_SIZE = 2000
+CHUNK_SIZE = 4500
 ALLOWED_EXT = {".txt", ".md", ".csv", ".json", ".py"}
 
 
@@ -21,7 +20,7 @@ def translator() -> GoogleTranslator:
 
 
 def translate_text_chunked(text: str) -> str:
-    chunks = [text[i : i + 32768] for i in range(0, len(text), 32768)]
+    chunks = [text[i : i + CHUNK_SIZE] for i in range(0, len(text), 32768)]
     t = translator()
     out = [t.translate(c) for c in chunks]
     return "".join(out)
