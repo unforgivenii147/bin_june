@@ -133,7 +133,7 @@ def print_report(stats, success=None, failed=None):
     total_changes = (
         len(stats["dirs_to_change"]) + len(stats["files_make_executable"]) + len(stats["files_set_standard"])
     )
-    print(f"\n{'=' * 60}")
+    print(f"\n{'=' * 42}")
     print("Scan Summary:")
     print(f"  Total items scanned: {total_items}")
     print(f"    Directories: {stats['total_dirs']}")
@@ -150,12 +150,12 @@ def print_report(stats, success=None, failed=None):
     if stats["errors"]:
         print(f"  ✗ Errors during analysis: {len(stats['errors'])}")
     if success is not None:
-        print(f"\n{'=' * 60}")
+        print(f"\n{'=' * 42}")
         print("Results:")
         print(f"  ✓ Changes successful: {success}")
         if failed:
             print(f"  ✗ Changes failed: {failed}")
-    print(f"{'=' * 60}")
+    print(f"{'=' * 42}")
 
 
 def show_examples(stats, num=5):
@@ -262,12 +262,12 @@ def main():
     if not args.dry_run:
         success, failed = apply_changes(stats, dry_run=False)
         if success is not None:
-            print(f"\n{'=' * 60}")
+            print(f"\n{'=' * 42}")
             print("Final Results:")
             print(f"  ✓ Changes applied successfully: {success}")
             if failed:
                 print(f"  ✗ Failed changes: {failed}")
-            print(f"{'=' * 60}")
+            print(f"{'=' * 42}")
     else:
         total_changes = (
             len(stats["dirs_to_change"]) + len(stats["files_make_executable"]) + len(stats["files_set_standard"])

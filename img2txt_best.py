@@ -72,7 +72,7 @@ def main() -> None:
 
     for result in results:
         if result:
-            print(f"\n{'=' * 60}")
+            print(f"\n{'=' * 42}")
             print(f"File: {result['file']}")
             print(f"Tessdata: {result['tessdata']}")
             print(f"Status: {result['status']}")

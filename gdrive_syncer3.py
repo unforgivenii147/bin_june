@@ -64,14 +64,14 @@ class GoogleDriveSyncer:
             "access_type": "offline",
         }
         auth_url = f"https://accounts.google.com/o/oauth2/auth?{urlencode(auth_params)}"
-        print("\n" + "=" * 60)
+        print("\n" + "=" * 42)
         print("MANUAL AUTHENTICATION REQUIRED")
-        print("=" * 60)
+        print("=" * 42)
         print(f"1. Open this URL in your browser:\n{auth_url}")
         print("\n2. Log in to your Google account")
         print("3. Grant permissions when prompted")
         print("4. Copy the authorization code")
-        print("=" * 60)
+        print("=" * 42)
         auth_code = input("\nEnter authorization code: ").strip()
         token_params = {
             "client_id": self.client_id,

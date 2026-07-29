@@ -122,21 +122,21 @@ def main():
         return
     print(f"Found {len(files)} Python files")
     print(f"Using {args.workers or 'auto'} workers with {args.timeout}s timeout per file")
-    print("-" * 60)
+    print("-" * 42)
     start_time = time.time()
     results = run_files_parallel(files=files, max_workers=args.workers, timeout=args.timeout, verbose=args.verbose)
     elapsed_time = time.time() - start_time
-    print("\n" + "=" * 60)
+    print("\n" + "=" * 42)
     print("SUMMARY")
-    print("=" * 60)
+    print("=" * 42)
     print(f"Total files: {len(files)}")
     print(f"✅ Successfully ran: {len(results['success'])}")
     print(f"❌ Failed: {len(results['failed'])}")
     print(f"Time elapsed: {elapsed_time:.2f} seconds")
     if results["failed"]:
-        print("\n" + "-" * 60)
+        print("\n" + "-" * 42)
         print("FAILED FILES:")
-        print("-" * 60)
+        print("-" * 42)
         for file_path, error_type, error_msg in results["failed"]:
             print(f"\n📁 {file_path}")
             print(f"   Error: {error_type}")

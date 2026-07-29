@@ -119,9 +119,9 @@ class ImageSimilarityOrganizer:
         print(f"[ORGANIZE] Done! Check {self.root_dir} for organized groups")
 
     def run(self) -> None:
-        print("=" * 60)
+        print("=" * 42)
         print("IMAGE SIMILARITY ORGANIZER")
-        print("=" * 60)
+        print("=" * 42)
         image_paths = self.get_all_images()
         if not image_paths:
             print("[WARN] No images found!")
@@ -132,9 +132,9 @@ class ImageSimilarityOrganizer:
             return
         groups = self.find_similar_images(hashes)
         self.organize_images(groups)
-        print("\n" + "=" * 60)
+        print("\n" + "=" * 42)
         print("PROCESS COMPLETE")
-        print("=" * 60)
+        print("=" * 42)
 
 
 if __name__ == "__main__":

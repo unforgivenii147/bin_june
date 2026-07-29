@@ -168,12 +168,12 @@ def main():
             else:
                 logger.error(f"✗ Failed: {file_path} - {error}")
                 failed += 1
-    logger.info(f"\n{'=' * 60}")
+    logger.info(f"\n{'=' * 42}")
     logger.info("Processing complete:")
     logger.info(f"  Successful: {successful}")
     logger.info(f"  Failed:     {failed}")
     logger.info(f"  Total:      {len(python_files)}")
-    logger.info(f"{'=' * 60}")
+    logger.info(f"{'=' * 42}")
     sys.exit(0 if failed == 0 else 1)
 
 

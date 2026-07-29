@@ -117,7 +117,7 @@ def main():
     skipped = 0
 
     print(f"\nCloning with {args.workers} parallel workers to {output_dir.absolute()}")
-    print("-" * 60)
+    print("-" * 42)
 
     with ThreadPoolExecutor(max_workers=args.workers) as executor:
         future_to_repo = {executor.submit(clone_repo, repo, output_dir): repo for repo in repos}
@@ -142,7 +142,7 @@ def main():
                 failed += 1
                 print(f"❌ {repo}: Unexpected error: {e!s}")
 
-    print("-" * 60)
+    print("-" * 42)
     print("\nSummary:")
     print(f"  ✅ Successfully cloned: {successful}")
     print(f"  ⏭️  Already existed: {skipped}")

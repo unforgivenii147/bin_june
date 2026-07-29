@@ -420,7 +420,7 @@ def print_results(results: dict[str, list[tuple[str, str]]], show_all: bool = Fa
     for filepath, missing in sorted(results.items()):
         rel_path = os.path.relpath(filepath)
         print(f"📄 {rel_path}")
-        print(f"   {'─' * 60}")
+        print(f"   {'─' * 42}")
         for name, suggestion in missing:
             print(f"   ⚠️  '{name}' used but not imported")
             print(f"   💡 Suggested: {suggestion}")

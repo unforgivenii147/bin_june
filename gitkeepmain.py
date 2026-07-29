@@ -131,12 +131,12 @@ def create_backup() -> bool | None:
 
 
 def main() -> None:
-    print("=" * 60)
+    print("=" * 42)
     print("GIT REPOSITORY CLEANER")
     print("WARNING: This is a DESTRUCTIVE operation!")
     print("It will delete all commits except the last one")
     print("and delete all branches except main/master.")
-    print("=" * 60)
+    print("=" * 42)
     if not is_git_repository():
         print("Error: Not a git repository!")
         sys.exit(1)

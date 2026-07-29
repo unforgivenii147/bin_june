@@ -6,10 +6,10 @@ Processes files in parallel and reports statistics.
 
 import re
 import sys
-from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from typing import Optional
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Optional
 
 
 @dataclass

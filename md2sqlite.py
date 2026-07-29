@@ -1,6 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-import sqlite3
 import re
+import sqlite3
 
 DB_NAME = "ruff_rules.db"
 MD_FILE = "ruff.md"

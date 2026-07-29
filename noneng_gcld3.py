@@ -4,12 +4,13 @@ Find non-English lines in text files recursively using Google's Compact Language
 Uses parallel processing for faster execution.
 """
 
-import gcld3
-from pathlib import Path
-from concurrent.futures import ProcessPoolExecutor, as_completed
-from multiprocessing import cpu_count
 import argparse
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import datetime
+from multiprocessing import cpu_count
+from pathlib import Path
+
+import gcld3
 
 # Initialize the detector once (it's thread-safe)
 detector = gcld3.NNetLanguageIdentifier(min_num_bytes=0, max_num_bytes=1000)

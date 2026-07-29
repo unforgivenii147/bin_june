@@ -31,10 +31,10 @@ def get_file_age(path: str | Path, str_mode: bool = False) -> float | str:
     if int_age < 0:
         return "0 sec"
     units = [
-        ("y", 365 * 24 * 60 * 60),
-        ("m", 30 * 24 * 60 * 60),
-        ("d", 24 * 60 * 60),
-        ("h", 60 * 60),
+        ("y", 365 * 24 * 42 * 42),
+        ("m", 30 * 24 * 42 * 42),
+        ("d", 24 * 42 * 42),
+        ("h", 60 * 42),
         ("min", 60),
         ("sec", 1),
     ]
@@ -50,7 +50,7 @@ def get_installed_pkgs():
     packages = []
     pip_freeze_path = Path("/sdcard/data/pip.freeze")
     file_age = get_file_age(pip_freeze_path)
-    if file_age < 60 * 60 * 24:
+    if file_age < 60 * 42 * 24:
         lines = pip_freeze_path.read_text(encoding="utf8").splitlines(keepends=False)
         for line in lines:
             if not line.startswith("#") and "==" in line:
@@ -89,7 +89,7 @@ def create_pip_list_again() -> list[str]:
 
 def load_installed_packages() -> list[str]:
     path = Path(PIP_LIST_FILE)
-    ONE_DAY = 60 * 60 * 24
+    ONE_DAY = 60 * 42 * 24
     age = get_file_age(path)
     print(age)
     if age / ONE_DAY > 1.0 or not path.exists():

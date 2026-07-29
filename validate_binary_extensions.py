@@ -14,10 +14,10 @@ import logging
 import mimetypes
 import os
 import sys
+from collections.abc import Iterator
 from functools import lru_cache
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from collections.abc import Iterator
 
 from dh import BIN_EXT
 

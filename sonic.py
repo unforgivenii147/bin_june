@@ -205,7 +205,7 @@ class FileSorter(LineProcessor):
         print(f"Input file: {input_path}")
         print(f"Output file: {output_path}")
         print(f"Mode: {('DRY RUN' if self.dry_run else 'NORMAL')}")
-        print("-" * 60)
+        print("-" * 42)
         start_time = time.time()
         try:
             original_size = self.get_file_size(input_path)
@@ -255,9 +255,9 @@ class FileSorter(LineProcessor):
             raise RuntimeError(msg)
 
     def print_stats(self, stats: dict) -> None:
-        print("\n" + "=" * 60)
+        print("\n" + "=" * 42)
         print("STATISTICS")
-        print("=" * 60)
+        print("=" * 42)
         print(f"Original lines: {stats['original_lines']:,}")
         print(f"Final lines: {stats['final_lines']:,}")
         if stats["duplicate_lines"] > 0:
@@ -271,7 +271,7 @@ class FileSorter(LineProcessor):
         print()
         print(f"Processing time: {stats['processing_time']:.2f} seconds")
         print(f"Speed: {stats['lines_per_second']:,.0f} lines/second")
-        print("=" * 60)
+        print("=" * 42)
 
     def save_report(self, stats: dict, report_file: str | None = None) -> None:
         if report_file is None:
@@ -313,9 +313,9 @@ class FileAnalyzer(LineProcessor):
 
     def print_analysis(self, file_path: Path, encoding: str = "utf-8") -> None:
         analysis = self.analyze_file(file_path, encoding)
-        print(f"\n{'=' * 60}")
+        print(f"\n{'=' * 42}")
         print(f"File Analysis: {file_path.name}")
-        print(f"{'=' * 60}")
+        print(f"{'=' * 42}")
         print("\nBasic Statistics:")
         print(f"  Size: {analysis['size']}")
         print(f"  Total lines: {analysis['total_lines']:,}")
@@ -329,7 +329,7 @@ class FileAnalyzer(LineProcessor):
             for line, count in analysis["most_common_lines"]:
                 display_line = line[:47] + "..." if len(line) > 50 else line
                 print(f"  ({count}x) {display_line}")
-        print(f"{'=' * 60}\n")
+        print(f"{'=' * 42}\n")
 
 
 def main() -> None:

@@ -1,11 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Ripgrep-like implementation in Python."""
 
+import argparse
 import re
-from pathlib import Path
 from collections.abc import Generator
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import argparse
+from pathlib import Path
+
 from fastwalk import walk_files
 
 

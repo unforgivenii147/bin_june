@@ -69,7 +69,7 @@ class LanguageDetector:
             print(f"Error: Directory '{directory}' does not exist")
             return
         print(f"🔍 Scanning directory: {directory.absolute()}")
-        print("=" * 60)
+        print("=" * 42)
         for root, dirs, files in os.walk(directory):
             root_path = Path(root)
             dirs[:] = [d for d in dirs if not d.startswith(".")]
@@ -99,12 +99,12 @@ class LanguageDetector:
                                 "confidence": percent,
                             }
                         )
-        print("\n" + "=" * 60)
+        print("\n" + "=" * 42)
         self.report_results(only_report_non_english)
 
     def report_results(self, only_report_non_english=True) -> None:
         print("\n📊 SCAN RESULTS")
-        print("=" * 60)
+        print("=" * 42)
         print(f"📁 Total files processed: {self.stats['total_files']}")
         print(f"⏭️  Skipped binary files: {self.stats['skipped_binary']}")
         print(f"📏 Skipped small files (<100 bytes): {self.stats['skipped_small']}")
@@ -119,7 +119,7 @@ class LanguageDetector:
                 print(f"  • {lang}: {count} files")
         if self.stats["non_english"]:
             print(f"\n📝 Non-English Files ({len(self.stats['non_english'])}):")
-            print("-" * 60)
+            print("-" * 42)
             non_english_by_lang = {}
             for item in self.stats["non_english"]:
                 lang = item["language"]

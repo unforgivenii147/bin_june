@@ -87,14 +87,14 @@ def compare_files(file_paths: list[Path], similarity_threshold: int = 70):
 def save_to_json(data, filename: str = "simz.json") -> None:
     try:
         with Path(filename).open("w", encoding="utf-8") as f:
-            json.dump(data, f, indent=4, ensure_ascii=False)
+            json.dump(data, f, indent=2, ensure_ascii=False)
     except Exception as e:
         print(f"Error saving data to JSON file '{filename}': {e}")
 
 
 if __name__ == "__main__":
     cwd = Path.cwd()
-    MIN_SIMILARITY_THRESHOLD = 30
+    MIN_SIMILARITY_THRESHOLD = 50
     OUTPUT_JSON_FILE = "simz.json"
     files = get_files(cwd)
     if not files:

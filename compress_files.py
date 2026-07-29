@@ -194,7 +194,7 @@ def process_files(
                 status = "✗"
             rel_path = filepath.relative_to(root_dir)
             print(f"\n{status} {rel_path}: {message}")
-    print(f"\n{'─' * 60}")
+    print(f"\n{'─' * 42}")
     print(f"Total successful: {total_success}")
     print(f"Total failed: {total_failed}")
     if compress and total_original_size > 0:

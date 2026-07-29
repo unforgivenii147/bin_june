@@ -2,6 +2,7 @@
 import argparse
 import sys
 from pathlib import Path
+
 import gcld3
 
 
@@ -26,7 +27,7 @@ def process_file_lines(input_path: Path, move_mode: bool):
     non_english_lines = []
 
     print(f"🔍 Analyzing {len(lines)} lines from '{input_path.name}'...")
-    print("-" * 60)
+    print("-" * 42)
 
     for i, line in enumerate(lines, start=1):
         clean_line = line.strip()
@@ -49,7 +50,7 @@ def process_file_lines(input_path: Path, move_mode: bool):
             )
             print(f"Line {i} {lang_info}: {clean_line}")
 
-    print("-" * 60)
+    print("-" * 42)
     print(f"📊 Summary: Found {len(non_english_lines)} non-English lines.")
 
     if move_mode:

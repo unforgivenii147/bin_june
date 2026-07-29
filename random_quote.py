@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 import json
-import random
 import os
+import random
 from shutil import get_terminal_size
 
 # Adjust this path if the script is stored somewhere separate from your JSON file

@@ -524,10 +524,10 @@ def get_file_age(path: str | Path, str_mode: bool = False) -> float | str:
     if int_age < 0:
         return "0 sec"
     units = [
-        ("y", 365 * 24 * 60 * 60),
-        ("m", 30 * 24 * 60 * 60),
-        ("d", 24 * 60 * 60),
-        ("h", 60 * 60),
+        ("y", 365 * 24 * 42 * 42),
+        ("m", 30 * 24 * 42 * 42),
+        ("d", 24 * 42 * 42),
+        ("h", 60 * 42),
         ("min", 60),
         ("sec", 1),
     ]
@@ -543,7 +543,7 @@ def get_installed_pkgs():
     packages = []
     pip_freeze_path = Path("/sdcard/data/pip.freeze")
     file_age = get_file_age(pip_freeze_path)
-    if file_age < 60 * 60 * 24:
+    if file_age < 60 * 42 * 24:
         lines = pip_freeze_path.read_text(encoding="utf8").splitlines(keepends=False)
         for line in lines:
             if not line.startswith("#") and "==" in line:
@@ -765,7 +765,7 @@ def main() -> None:
     if args.save_separate and subdirs:
         print(f"""
 📁 Found {len(subdirs)} subdirectories with Python files - generating separate requirements files""")
-        print("=" * 60)
+        print("=" * 42)
         total_imports = set()
         created_count = 0
         skipped_count = 0
@@ -788,7 +788,7 @@ def main() -> None:
             else:
                 print(f"⏭️  all installed ({elapsed:.2f}s)")
                 skipped_count += 1
-        print("=" * 60)
+        print("=" * 42)
         print(f"Summary: {created_count} created, {skipped_count} skipped")
         if total_imports:
             print("\n📦 Generating root requirements.txt with all unique imports...")
@@ -835,7 +835,7 @@ def main() -> None:
         show_progress = len(files_by_dir) > 50
         if show_progress:
             print(f"Processing {len(files_by_dir)} directories with {len(files)} total files...")
-            print("=" * 60)
+            print("=" * 42)
         all_imports = set()
         dir_count = 0
         for subdir, dir_files in sorted(files_by_dir.items()):
@@ -856,7 +856,7 @@ def main() -> None:
                 elapsed = time.time() - start_time
                 print(f"[{dir_count}/{len(files_by_dir)}] {subdir:<30} ({len(dir_files):>4} files, {elapsed:.2f}s)")
         if show_progress:
-            print("=" * 60)
+            print("=" * 42)
         local_modules = {p.stem for p in cwd.glob("*.py") if not any(part in SKIP_DIRS for part in p.parts)}
         local_names = local_modules | all_local_packages
         modules = sorted(

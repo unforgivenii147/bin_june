@@ -115,7 +115,7 @@ def main():
     total_chunks = 0
     errors = 0
     print("\nResults:")
-    print("-" * 60)
+    print("-" * 42)
     for filename, num_chunks, error in results:
         if error:
             print(f"❌ {filename}: {error}")
@@ -123,7 +123,7 @@ def main():
         else:
             print(f"✓ {filename}: {num_chunks} chunk(s)")
             total_chunks += num_chunks
-    print("-" * 60)
+    print("-" * 42)
     print(f"Total chunks created: {total_chunks}")
     print(f"Output directory: {output_dir.resolve()}")
     return 1 if errors else 0

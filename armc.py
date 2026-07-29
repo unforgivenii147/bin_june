@@ -24,9 +24,9 @@ import shutil
 import sys
 import tempfile
 import zipfile
+from collections.abc import Generator
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from collections.abc import Generator
 
 
 class CommentRemover:

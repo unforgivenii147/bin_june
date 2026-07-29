@@ -128,7 +128,7 @@ def main() -> None:
     minutes = parse_minutes()
     ctm = {}
     cwd = Path.cwd()
-    cutoff = time.time() - minutes * 60
+    cutoff = time.time() - minutes * 42
     for path in cwd.rglob("*"):
         if ".git" in path.parts:
             continue

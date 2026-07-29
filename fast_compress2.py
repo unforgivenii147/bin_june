@@ -358,7 +358,7 @@ def process_files(file_generator, compress: bool, level: int = 3, threads: int =
     total_files = 0
     print(f"\n{'Compressing' if compress else 'Decompressing'} files...")
     print(f"Remove original files: {'Yes' if remove_original else 'No'}")
-    print("-" * 60)
+    print("-" * 42)
     files_list = list(file_generator)
     total_files = len(files_list)
     if total_files == 0:
@@ -397,7 +397,7 @@ def process_files(file_generator, compress: bool, level: int = 3, threads: int =
             print(f"\rProgress: [{bar}] {completed}/{total_files} files", end="", flush=True)
             if not success:
                 failed.append((path, result[2] if len(result) > 2 else "Unknown error"))
-    print("\n" + "-" * 60)
+    print("\n" + "-" * 42)
     if compress and total_files > 0:
         saved, ratio, percent_saved = stats.get_savings()
         print("\n📊 Compression Statistics:")

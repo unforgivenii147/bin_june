@@ -173,7 +173,7 @@ def main():
     successfully_cloned = set()
 
     print(f"\nCloning with {args.workers} parallel workers to {output_dir.absolute()}")
-    print("-" * 60)
+    print("-" * 42)
 
     with ThreadPoolExecutor(max_workers=args.workers) as executor:
         future_to_repo = {executor.submit(clone_repo, repo, output_dir): repo for repo in repos}
@@ -204,7 +204,7 @@ def main():
     if not args.no_cleanup and successfully_cloned:
         remove_from_repos_file(repos_file, successfully_cloned)
 
-    print("-" * 60)
+    print("-" * 42)
     print("\nSummary:")
     print(f"  ✅ Successfully cloned: {successful}")
     print(f"  ⏭️  Already existed: {skipped}")

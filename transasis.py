@@ -10,9 +10,9 @@ from __future__ import annotations
 import logging
 import re
 import sys
+from collections.abc import Iterator
 from pathlib import Path
 from typing import Final
-from collections.abc import Iterator
 
 from deep_translator import GoogleTranslator
 

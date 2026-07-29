@@ -4,15 +4,15 @@ Reinstall all packages with entry points using pip's internal API.
 Compatible with Python 3.12+ and pip 26.1.2+
 """
 
-import sys
-import site
 import argparse
+import importlib.metadata
 import logging
+import site
+import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
-from typing import List, Set, Dict, Optional, Tuple
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import importlib.metadata
+from typing import Dict, List, Optional, Set, Tuple
 
 # pip imports
 from pip._internal.commands.install import InstallCommand
@@ -341,9 +341,9 @@ def reinstall_entrypoint_packages(
                 failed.append((package_name, str(e)))
 
     # Summary
-    logger.info("\n" + "=" * 60)
+    logger.info("\n" + "=" * 42)
     logger.info("REINSTALLATION SUMMARY")
-    logger.info("=" * 60)
+    logger.info("=" * 42)
     logger.info(f"✓ Successfully reinstalled: {len(successful)} packages")
     logger.info(f"✗ Failed to reinstall: {len(failed)} packages")
 

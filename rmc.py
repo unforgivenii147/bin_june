@@ -8,10 +8,10 @@ import shutil
 import sys
 import tempfile
 import zipfile
+from collections.abc import Iterator
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from collections.abc import Iterator
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache", ".venv", "venv"})
 CHUNK_SIZE = 1024

@@ -8,7 +8,7 @@ from pathlib import Path
 
 EMPTY_MODE = "-e" in sys.argv
 REMOVE_MODE = "-r" in sys.argv
-SKIP_DIRS = {"lazy", ".git", "var"}
+SKIP_DIRS = {".git", "var"}
 REMOVABLE_EXTENSIONS = {".txt", ".md"}
 JUNK_EXTENSIONS = {".tmp", ".bak", ".log", ".pyc"}
 
@@ -48,6 +48,7 @@ def main() -> None:
         rel_path = path.relative_to(cwd)
         if path.is_file() and loname in {
             ".dirinfo",
+            "licence.md",
             ".ds_store",
             ".reqcache.json",
             ".travis.yml",

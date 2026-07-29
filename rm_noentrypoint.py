@@ -4,10 +4,10 @@ Check .whl wheel files in current directory and remove ones
 that don't contain entry_points.txt using parallel processing.
 """
 
-import zipfile
-from pathlib import Path
-from concurrent.futures import ProcessPoolExecutor, as_completed
 import argparse
+import zipfile
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
 from typing import List, Tuple
 
 

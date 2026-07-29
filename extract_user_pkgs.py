@@ -265,7 +265,7 @@ def main():
         else:
             print(f"   - {pkg}")
 
-    print("-" * 60)
+    print("-" * 42)
 
     if args.list_only:
         return

@@ -87,7 +87,7 @@ if __name__ == "__main__":
             size /= 1024.0
         return f"{size:.2f} TB"
 
-    print(f"\n{'=' * 60}")
+    print(f"\n{'=' * 42}")
     print(f"Files: {len(files)} | Changed: {changed} | Unchanged: {nochg} | Errors: {len(errors)}")
     print(f"Total comment markers removed: ~{total_comments}")
     if errors:
@@ -97,4 +97,4 @@ if __name__ == "__main__":
         if len(errors) > 10:
             print(f"  ... and {len(errors) - 10} more")
     print(f"Size reduced: {fsz(before - after)}")
-    print(f"{'=' * 60}")
+    print(f"{'=' * 42}")

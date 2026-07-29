@@ -7,9 +7,9 @@ import fnmatch
 import operator
 import re
 import sys
+from collections.abc import Generator
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from collections.abc import Generator
 
 IGNORED_DIRS = {".git", ".hg", ".svn", "node_modules", "__pycache__", ".ruff_cache", ".pytest_cache", ".mypy_cache"}
 BINARY_CHUNK = 8192

@@ -244,7 +244,7 @@ def main():
                     failed += 1
                     print(f"✗ {result.get('name', Path(d).name)}: Failed - {result.get('error')}")
 
-        print(f"\n{'=' * 60}")
+        print(f"\n{'=' * 42}")
         print(f"Compression complete: {successful} successful, {failed} failed")
         if successful > 0:
             total_freed = total_original - total_compressed
@@ -298,7 +298,7 @@ def main():
                     failed += 1
                     print(f"✗ {result.get('name', Path(a).name)}: Failed - {result.get('error')}")
 
-        print(f"\n{'=' * 60}")
+        print(f"\n{'=' * 42}")
         print(f"Decompression complete: {successful} successful, {failed} failed")
         if successful > 0:
             total_change = total_extracted - total_archive

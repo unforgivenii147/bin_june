@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-import sys
 import json
 import re
+import sys
 from pathlib import Path
 
 

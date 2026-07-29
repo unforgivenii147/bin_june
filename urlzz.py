@@ -8,13 +8,13 @@ import sys
 import tarfile
 import zipfile
 from collections import deque
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import wraps
 from inspect import getfullargspec
 from itertools import chain
 from pathlib import Path
 from typing import Any
-from collections.abc import Callable
 
 import py7zr
 

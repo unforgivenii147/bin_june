@@ -122,9 +122,9 @@ def main() -> None:
                 error_files.append((filepath, error))
             elif changed:
                 changed_files.append(filepath)
-    print("\n" + "=" * 60)
+    print("\n" + "=" * 42)
     print("SUMMARY")
-    print("=" * 60)
+    print("=" * 42)
     if changed_files:
         print(f"\n✅ Modified {len(changed_files)} file(s):")
         for f in changed_files:

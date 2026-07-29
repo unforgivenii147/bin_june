@@ -11,8 +11,6 @@ from pathlib import Path
 
 import ssdeep
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 try:
     from tabulate import tabulate
 
@@ -81,7 +79,7 @@ def copy_groups(groups, output_dir="output") -> None:
                 print(f"Failed to copy {f}: {e}")
 
 
-def write_report(groups, furmat="csv", output_dir="output") -> None:
+def write_report(groups, furmat="json", output_dir="output") -> None:
     Path(output_dir).mkdir(exist_ok=True, parents=True)
     if furmat == "csv":
         report_file = os.path.join(output_dir, "similar_report.csv")

@@ -21,10 +21,10 @@ import io
 import re
 import sys
 import tokenize
+from collections.abc import Callable
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from collections.abc import Callable
 
 
 @dataclass
@@ -488,7 +488,7 @@ def print_header(active_exts: set[str]) -> None:
     exts_str = "  ".join(sorted(active_exts))
     print()
     print(_c("  strip_comments ", BOLD, CYAN) + _c(f"targeting: {exts_str}", DIM))
-    print(_c("  " + "─" * 60, DIM))
+    print(_c("  " + "─" * 42, DIM))
 
 
 def print_file_result(r: FileResult) -> None:
@@ -518,7 +518,7 @@ def print_summary(results: list[FileResult], elapsed: float) -> None:
     lines_saved = sum((r.lines_removed for r in results))
     bytes_saved = sum((r.bytes_saved for r in results))
     print()
-    print(_c("  " + "─" * 60, DIM))
+    print(_c("  " + "─" * 42, DIM))
     print(
         f"  {_c('Summary', BOLD, CYAN)}  {_c(total, BOLD)} files  {_c(changed, BOLD, GREEN)} stripped  {_c(clean, DIM)} clean  "
         + (f"{_c(errors, BOLD, RED)} errors  " if errors else "")

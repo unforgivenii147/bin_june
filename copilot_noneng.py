@@ -10,17 +10,18 @@ Detect non-English lines in text files recursively.
 - results saved to noneng.json
 """
 
-from pathlib import Path
 import argparse
 import json
 import sys
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Iterable, Iterator, Optional, Dict, Any, List
-from binaryornot import is_binary
+from pathlib import Path
+from typing import Any, Dict, Iterable, Iterator, List, Optional
+
 import gcld3
 import pycld2 as cld2
-from langdetect import detect_langs, DetectorFactory
+from binaryornot import is_binary
+from langdetect import DetectorFactory, detect_langs
 
 DetectorFactory.seed = 0
 

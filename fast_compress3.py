@@ -339,7 +339,7 @@ def process_files(file_generator, compress: bool, level: int, threads: int, remo
         return
     print(f"\n{'Compressing' if compress else 'Decompressing'} {total} files...")
     print(f"Remove original files: {'Yes' if remove_original else 'No'}")
-    print("-" * 60)
+    print("-" * 42)
     with ThreadPoolExecutor(max_workers=threads) as executor:
         futures = {}
         for file_path in files_list:
@@ -368,7 +368,7 @@ def process_files(file_generator, compress: bool, level: int, threads: int, remo
             print(f"\rProgress: [{bar}] {processed}/{total} files", end="", flush=True)
             if not result[0]:
                 failed.append((result[1], result[2]))
-    print("\n" + "-" * 60)
+    print("\n" + "-" * 42)
     if compress and total > 0:
         saved, ratio, percent_saved = stats.get_savings()
         print("\n📊 Compression Statistics:")

@@ -4,12 +4,13 @@ Find non-English lines in text files recursively using Compact Language Detector
 Uses parallel processing for faster execution.
 """
 
-import pycld2 as cld2
-from pathlib import Path
-from concurrent.futures import ProcessPoolExecutor, as_completed
-from multiprocessing import cpu_count
 import argparse
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import datetime
+from multiprocessing import cpu_count
+from pathlib import Path
+
+import pycld2 as cld2
 
 # Common text file extensions
 TEXT_EXTENSIONS = {

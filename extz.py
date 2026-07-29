@@ -55,16 +55,16 @@ def format_size(size_bytes: int) -> str:
 
 def main():
     current_dir = "."
-    print("-" * 60)
+    print("-" * 35)
     print("Collecting files...")
     files = get_files_in_directory(current_dir)
     if not files:
         print("No files found in current directory.")
         return
     print(f"Found {len(files)} files")
-    num_workers = 8
+    num_workers = 4
     print(f"Using {num_workers} parallel workers...")
-    print("-" * 60)
+    print("-" * 35)
     batch_size = max(1, len(files) // num_workers)
     file_batches = [files[i : i + batch_size] for i in range(0, len(files), batch_size)]
     ext_sizes_total = defaultdict(int)
@@ -83,24 +83,24 @@ def main():
                     print(f"Progress: {completed}/{len(file_batches)} batches processed")
             except Exception as e:
                 print(f"Error processing batch: {e}")
-    print("-" * 60)
+    print("-" * 35)
     print("RESULTS:")
-    print("-" * 60)
+    print("-" * 35)
     if not ext_sizes_total:
         print("No files with recognized extensions found.")
         return
     sorted_extensions = sorted(ext_sizes_total.items(), key=lambda x: x[1], reverse=True)
     total_size = sum(ext_sizes_total.values())
     print(f"{'Extension':<20} {'Total Size':<15} {'Files':<10} {'Percentage'}")
-    print("-" * 60)
+    print("-" * 35)
     for ext, size in sorted_extensions:
         ext_files = sum(1 for f in files if f.suffix.lower() == ext or (ext == "NO_EXTENSION" and f.suffix == ""))
         percentage = size / total_size * 100 if total_size > 0 else 0
         display_ext = ext if ext != "NO_EXTENSION" else "(no extension)"
         print(f"{display_ext:<20} {format_size(size):<15} {ext_files:<10} {percentage:.1f}%")
-    print("-" * 60)
+    print("-" * 35)
     print(f"{'TOTAL':<20} {format_size(total_size):<15} {len(files):<10} 100.0%")
-    print("-" * 60)
+    print("-" * 35)
 
 
 if __name__ == "__main__":

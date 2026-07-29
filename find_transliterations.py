@@ -5,11 +5,12 @@ Detects entries where the "translation" is just the English phonetic spelling
 of the Persian word rather than an actual translation.
 """
 
+import argparse
 import json
 import re
-import argparse
 import sys
 from pathlib import Path
+
 from rapidfuzz import fuzz
 
 

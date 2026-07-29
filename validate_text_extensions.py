@@ -12,9 +12,9 @@ from __future__ import annotations
 import logging
 import mimetypes
 import os
+from collections.abc import Iterator
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from collections.abc import Iterator
 
 from dh import TXT_EXT
 

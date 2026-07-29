@@ -14,10 +14,10 @@ import hashlib
 import sys
 import tempfile
 from ast import Name, expr
+from collections.abc import Iterable
 from dataclasses import dataclass
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from collections.abc import Iterable
 
 from loguru import logger
 

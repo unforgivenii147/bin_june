@@ -94,7 +94,7 @@ def decode_file(file_path: str, output_path: str | None = None, show_chunk: int 
         return False
     print(f"Processing: {file_path.name}")
     print(f"File size: {len(file_content)} bytes")
-    print("-" * 60)
+    print("-" * 42)
     encodings_to_try = COMMON_ENCODINGS + EXTRA_ENCODINGS
     successful_encodings = []
     successful_text = None
@@ -111,7 +111,7 @@ def decode_file(file_path: str, output_path: str | None = None, show_chunk: int 
                 chunk = get_first_chunk(decoded_text, show_chunk)
                 preview = chunk.replace("\n", "\n  ").replace("\r", "\\r")
                 print(f"  Preview:\n  {preview}\n")
-    print("-" * 60)
+    print("-" * 42)
     if not successful_encodings:
         print("❌ No encoding could decode this file.")
         return False

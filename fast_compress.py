@@ -366,7 +366,7 @@ def format_size(bytes_size: float) -> str:
 def process_stream(base_dir: Path, compress: bool, level: int, threads: int, remove_original: bool):
     print(f"\n{'Compressing' if compress else 'Decompressing'} files (streaming)...")
     print(f"Remove original files: {'Yes' if remove_original else 'No'}")
-    print("-" * 60)
+    print("-" * 42)
 
     stats = SpaceStats()
     total_submitted = 0
@@ -439,7 +439,7 @@ def process_stream(base_dir: Path, compress: bool, level: int, threads: int, rem
                 failed.append((result[1], result[2]))
         print()
 
-    print("-" * 60)
+    print("-" * 42)
     if compress and (stats.original_size > 0 or stats.compressed_size > 0):
         saved, ratio, percent_saved = stats.get_savings()
         print("\n📊 Compression Statistics:")

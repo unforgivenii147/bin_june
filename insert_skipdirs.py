@@ -149,7 +149,7 @@ def main():
         + stats["syntax_error"]
         + stats["other_errors"]
     )
-    print(f"\n{'=' * 60}")
+    print(f"\n{'=' * 42}")
     print("Summary:")
     print(f"  Total files found:           {len(python_files)}")
     print(f"  Modified:                    {stats['modified']}")
@@ -157,7 +157,7 @@ def main():
     print(f"  Validation failed:           {stats['validation_failed']}")
     print(f"  Syntax errors (original):    {stats['syntax_error']}")
     print(f"  Other errors:                {stats['other_errors']}")
-    print(f"{'=' * 60}")
+    print(f"{'=' * 42}")
     if stats["modified"] > 0:
         print(f"\n✓ Successfully modified {stats['modified']} file(s)")
     if stats["validation_failed"] > 0 or stats["syntax_error"] > 0:

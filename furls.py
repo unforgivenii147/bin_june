@@ -11,13 +11,13 @@ import sys
 import tarfile
 import tempfile
 import zipfile
+from collections.abc import Callable
 from functools import wraps
 from inspect import getfullargspec
 from itertools import chain
 from pathlib import Path
 from tarfile import TarFile
 from typing import Any
-from collections.abc import Callable
 from urllib.parse import urlparse
 from zipfile import ZipFile
 
@@ -30,10 +30,7 @@ class ValidationFailure(Exception):
         self.__dict__.update(arg_dict)
 
     def __repr__(self):
-        return (
-            f"ValidationFailure(func={self.func.__name__}, "
-            + f"args={ {k: v for k, v in self.__dict__.items() if k != 'func'} })"
-        )
+        return f"ValidationFailure(func={self.func.__name__}, args={{k: v for k, v in self.__dict__.items() if k != 'func'}})"
 
     def __str__(self):
         return repr(self)

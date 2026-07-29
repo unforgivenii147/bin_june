@@ -5,8 +5,9 @@ Usage: python extract_text.py input.pptx
 """
 
 import sys
-from pptx import Presentation
 from pathlib import Path
+
+from pptx import Presentation
 
 
 def extract_text_from_pptx(pptx_path):
@@ -22,9 +23,9 @@ def extract_text_from_pptx(pptx_path):
 
     with open(output_file, "w", encoding="utf-8") as f:
         for slide_num, slide in enumerate(prs.slides, 1):
-            f.write(f"\n{'=' * 60}\n")
+            f.write(f"\n{'=' * 42}\n")
             f.write(f"Slide {slide_num}\n")
-            f.write(f"{'=' * 60}\n\n")
+            f.write(f"{'=' * 42}\n\n")
 
             for shape in slide.shapes:
                 if hasattr(shape, "text") and shape.text.strip():

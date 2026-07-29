@@ -13,6 +13,7 @@ import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
+
 import zstandard as zstd
 
 EXCLUDED_EXTENSIONS = {

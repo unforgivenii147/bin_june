@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-from pathlib import Path
-
 from __future__ import annotations
 
 import argparse
@@ -9,6 +7,7 @@ import os
 from ast import Module
 from collections import defaultdict
 from multiprocessing import Pool, cpu_count
+from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

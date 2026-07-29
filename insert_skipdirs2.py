@@ -171,7 +171,7 @@ def main():
             except Exception as e:
                 stats["other_errors"] += 1
                 print(f"✗ Exception processing {file_path}: {e}")
-    print(f"\n{'=' * 60}")
+    print(f"\n{'=' * 42}")
     print("Summary:")
     print(f"  Total files found:           {len(python_files)}")
     print(f"  Modified (uses but not defined): {stats['modified']}")
@@ -180,7 +180,7 @@ def main():
     print(f"  Validation failed:           {stats['validation_failed']}")
     print(f"  Syntax errors:               {stats['syntax_error']}")
     print(f"  Other errors:                {stats['other_errors']}")
-    print(f"{'=' * 60}")
+    print(f"{'=' * 42}")
     if stats["modified"] > 0:
         print(f"\n✓ Successfully added SKIP_DIRS definition to {stats['modified']} file(s)")
     else:

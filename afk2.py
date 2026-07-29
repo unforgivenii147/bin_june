@@ -24,10 +24,10 @@ import re
 import sys
 import tarfile
 import zipfile
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from multiprocessing import Pool
 from pathlib import Path
-from collections.abc import Iterator
 
 try:
     import zstandard as zstd

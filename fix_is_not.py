@@ -84,7 +84,7 @@ def main():
     print(f"⚡ Processing concurrently across {cpu_cores} parallel workers...")
     if args.auto_fix:
         print("🛠️  Auto-fix mode active (-a). 'is not' operators will be converted to '!='.")
-    print("-" * 60)
+    print("-" * 42)
 
     total_files_with_issues = 0
     total_replacements = 0
@@ -107,7 +107,7 @@ def main():
                 lines_str = ", ".join(map(str, res["lines"]))
                 print(f"{status} {res['path']} -> Found {res['found_count']} time(s) on line(s): {lines_str}")
 
-    print("=" * 60)
+    print("=" * 42)
     print(f"📊 Summary:")
     print(f"   Files containing 'is not': {total_files_with_issues}")
     print(f"   Total instances found:     {total_replacements}")

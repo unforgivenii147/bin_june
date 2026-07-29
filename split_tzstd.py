@@ -11,11 +11,12 @@ Usage:
 Each created part will be a valid .tar.zst file that can be independently extracted.
 """
 
+import os
 import sys
 import tarfile
-import zstandard as zstd
-import os
 from pathlib import Path
+
+import zstandard as zstd
 
 
 def split_tar_zst(input_file, num_parts):

@@ -132,9 +132,9 @@ def main():
         f.write("# Format: package_name==version\n\n")
         for pkg, ver in sorted(binary_packages):
             f.write(f"{pkg}=={ver}\n")
-    logger.info("\n" + "=" * 60)
+    logger.info("\n" + "=" * 42)
     logger.info("SUMMARY")
-    logger.info("=" * 60)
+    logger.info("=" * 42)
     logger.info(f"Total packages checked: {total}")
     logger.info(f"Binary packages found: {len(binary_packages)}")
     logger.info(f"Pure Python packages: {len(pure_packages)}")

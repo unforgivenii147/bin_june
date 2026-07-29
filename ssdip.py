@@ -8,8 +8,6 @@ from pathlib import Path
 
 import ssdeep
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def find_fuzzy_duplicates(threshold: int = 70) -> None:
     start_dir = Path.cwd()

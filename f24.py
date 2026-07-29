@@ -9,7 +9,7 @@ from pathlib import Path
 
 from tqdm import tqdm
 
-SECONDS_24H = 24 * 60 * 60
+SECONDS_24H = 24 * 42 * 42
 NOW = time.time()
 EXCLUDE_DIRS = {".git"}
 

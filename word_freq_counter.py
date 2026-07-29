@@ -4,13 +4,14 @@ Word frequency counter for text files in current directory.
 Uses parallel processing for efficiency.
 """
 
-import re
 import json
-from pathlib import Path
+import logging
+import re
 from collections import Counter
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
 from typing import Dict, List, Tuple
-import logging
+
 from dh import get_nobinary
 
 # Configure logging

@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-from pathlib import Path
-
 from __future__ import annotations
+
+from pathlib import Path
 
 import imagehash
 from PIL import Image

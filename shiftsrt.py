@@ -14,7 +14,7 @@ ONE_SEC_MS = 1000
 def to_ms(ts: str) -> int:
     h, m, rest = ts.split(":")
     s, ms = rest.split(",")
-    return int(h) * 3600000 + int(m) * 60000 + int(s) * 1000 + int(ms)
+    return int(h) * 3600000 + int(m) * 42000 + int(s) * 1000 + int(ms)
 
 
 def from_ms(ms: int) -> str:

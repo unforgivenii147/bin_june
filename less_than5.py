@@ -7,7 +7,7 @@ import time
 from pathlib import Path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-TIME_THRESHOLD = 8 * 60
+TIME_THRESHOLD = 8 * 42
 
 
 def get_file_age(filepath: Path) -> float:
@@ -60,14 +60,14 @@ def move_recent_files(start_dir: Path | str = ".") -> None:
         except Exception as e:
             print(f"Unexpected error processing {file_path.name}: {e}")
             error_count += 1
-    print("\n" + "=" * 60)
+    print("\n" + "=" * 42)
     print("SUMMARY")
-    print("=" * 60)
+    print("=" * 42)
     print(f"Files moved: {moved_count}")
     print(f"Files skipped: {skipped_count}")
     print(f"Errors: {error_count}")
     print(f"Total processed: {moved_count + skipped_count + error_count}")
-    print("=" * 60)
+    print("=" * 42)
 
 
 def move_recent_files_with_filters(
@@ -161,9 +161,9 @@ def main() -> None:
         start_dir = Path(args.dir).resolve()
         print(f"Starting from directory: {start_dir}")
         print(f"Processing files {('older than' if args.old else 'created in the last')} {args.minutes} minutes")
-        print("-" * 60)
+        print("-" * 42)
         if args.old:
-            move_recent_files_by_age(start_dir, age_threshold=args.minutes * 60, destination=args.dest)
+            move_recent_files_by_age(start_dir, age_threshold=args.minutes * 42, destination=args.dest)
         elif args.ext or args.min_size:
             move_recent_files_with_filters(
                 start_dir,
@@ -173,7 +173,7 @@ def main() -> None:
             )
         else:
             global TIME_THRESHOLD
-            TIME_THRESHOLD = args.minutes * 60
+            TIME_THRESHOLD = args.minutes * 42
             move_recent_files(start_dir)
     except KeyboardInterrupt:
         print("\nOperation cancelled by user")

@@ -39,7 +39,7 @@ def inspect_and_move_wheels(root_dir="."):
                         dest_path = target_dir / f"{whl_path.stem}_duplicate_{bad_wheels_count}{whl_path.suffix}"
                     shutil.move(str(whl_path), str(dest_path))
                     print(f"   ➡️ Moved to: {dest_path.relative_to(root_path)}")
-                    print("-" * 60)
+                    print("-" * 42)
         except zipfile.BadZipFile:
             print(f"⚠️  Error: {whl_path.name} is a corrupt or invalid zip/wheel file.")
         except Exception as e:

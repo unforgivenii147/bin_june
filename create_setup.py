@@ -4,9 +4,9 @@ Script to generate a setup.py for a Python project.
 Automatically detects __main__.py or cli.py and adds console_scripts entry points.
 """
 
-import sys
 import os
 import re
+import sys
 from pathlib import Path
 
 
@@ -206,7 +206,7 @@ def main():
 
     print(f"\n✓ Created {setup_path}")
     print("\nGenerated setup.py content preview:")
-    print("-" * 60)
+    print("-" * 42)
     print(setup_content)
 
 

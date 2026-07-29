@@ -90,7 +90,7 @@ def fix_whl_files_by_metadata(directory: str = ".", dry_run: bool = True, backup
         print(f"No .whl files found in {directory}")
         return
     print(f"Found {len(whl_files)} .whl files")
-    print("=" * 60)
+    print("=" * 42)
     renamed_count = 0
     failed_files = []
     backup_dir = None
@@ -126,7 +126,7 @@ def fix_whl_files_by_metadata(directory: str = ".", dry_run: bool = True, backup
                     failed_files.append(file_path.name)
         else:
             print(f"  Already has correct name: {file_path.name}")
-    print("\n" + "=" * 60)
+    print("\n" + "=" * 42)
     print("SUMMARY:")
     print(f"  Total files: {len(whl_files)}")
     if not dry_run:
@@ -198,7 +198,7 @@ def main() -> None:
     args = parser.parse_args()
     if args.info_only:
         print("Extracting wheel information (no renaming):")
-        print("=" * 60)
+        print("=" * 42)
         if args.parallel:
             batch_fix_with_parallel(args.directory, args.parallel)
         else:

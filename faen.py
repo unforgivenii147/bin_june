@@ -168,9 +168,9 @@ class Bidirectionaldictionary:
 def main():
     dict_app = Bidirectionaldictionary("dic.json")
     search_history = []
-    print("\n" + "=" * 60)
+    print("\n" + "=" * 42)
     print("📖 PERSIAN-ENGLISH BIDIRECTIONAL DICTIONARY")
-    print("=" * 60)
+    print("=" * 42)
     print("Commands:")
     print("  :add <fa> <en>    - Add a new word")
     print("  :del <word>       - Delete a word")
@@ -182,9 +182,9 @@ def main():
     print("  :clear            - Clear screen")
     print("  :help             - Show this help")
     print("  :exit/:q          - Exit the application")
-    print("=" * 60)
+    print("=" * 42)
     print("💡 Just type a word to search (supports Persian & English)")
-    print("=" * 60 + "\n")
+    print("=" * 42 + "\n")
     while True:
         try:
             user_input = input(": ").strip()

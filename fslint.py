@@ -37,8 +37,8 @@ import stat
 import subprocess
 import sys
 from collections import defaultdict
-from pathlib import Path
 from collections.abc import Generator
+from pathlib import Path
 
 RESET = "\x1b[0m"
 BOLD = "\x1b[1m"

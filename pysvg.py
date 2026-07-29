@@ -5,27 +5,7 @@ from __future__ import annotations
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
-
-
-def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
-    path = Path(path)
-    skip_dirs = {".git", "__pycache__"}
-    queue = deque([path])
-    files = []
-    while queue:
-        current = queue.popleft()
-        try:
-            entries = current.iterdir()
-        except (PermissionError, OSError):
-            continue
-        for item in entries:
-            if item.is_symlink():
-                continue
-            if item.is_dir() and item.name not in skip_dirs:
-                queue.append(item)
-            elif item.is_file() and (ext is None or item.suffix in ext):
-                files.append(item)
-    return files
+from dh import get_fast
 
 
 def fsz(sz: float) -> str:
@@ -62,13 +42,6 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
-
-
-def mpf3(process_function: Callable, files: list[Path], **kwargs):
-    from joblib import Parallel, delayed
-
-    file_strings = [str(f) for f in files]
-    return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
 
 
 def runcmd(
@@ -140,8 +113,9 @@ def process_file(path) -> None:
 
 def main() -> None:
     cwd = Path.cwd()
-    files = get_files(cwd, ext=[".svg", ".SVG"])
-    mpf3(process_file, files)
+    for f in get_fast(cwd):
+        if f.suffix in {".svg", ".SVG"}:
+            process_file(f)
 
 
 if __name__ == "__main__":

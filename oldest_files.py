@@ -26,10 +26,10 @@ def get_file_age(path: str | Path, str_mode: bool = False) -> float | str:
     if int_age < 0:
         return "0 sec"
     units = [
-        ("y", 365 * 24 * 60 * 60),
-        ("m", 30 * 24 * 60 * 60),
-        ("d", 24 * 60 * 60),
-        ("h", 60 * 60),
+        ("y", 365 * 24 * 42 * 42),
+        ("m", 30 * 24 * 42 * 42),
+        ("d", 24 * 42 * 42),
+        ("h", 60 * 42),
         ("min", 60),
         ("sec", 1),
     ]

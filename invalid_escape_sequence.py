@@ -102,7 +102,7 @@ def main():
     print(f"⚡ Processing using {cpu_cores} parallel workers...")
     if args.auto_fix:
         print("🛠️  Auto-fix mode is enabled (-a).")
-    print("-" * 60)
+    print("-" * 42)
 
     issues_count = 0
     fixed_count = 0
@@ -124,7 +124,7 @@ def main():
                     fixed_count += 1
                 print()
 
-    print("=" * 60)
+    print("=" * 42)
     print(f"📊 Summary:")
     print(f"   Files with invalid escape sequences: {issues_count}")
     if args.auto_fix:

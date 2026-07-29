@@ -15,7 +15,6 @@ import zipfile
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from collections.abc import Callable
 
 import brotlicffi as brotli
 import py7zr

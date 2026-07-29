@@ -103,7 +103,7 @@ def main():
                     print(f"      - Missing requirement: {dep}")
                 for clean_dep in file_deps:
                     unique_missing_deps.add(clean_dep)
-            print("-" * 60)
+            print("-" * 42)
     if unique_missing_deps:
         req_file = Path("requirements.txt")
         with open(req_file, "w", encoding="utf-8") as f:

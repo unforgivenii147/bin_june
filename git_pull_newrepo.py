@@ -142,9 +142,9 @@ def main() -> None:
     for repo_path in repos:
         success, message = process_repository(repo_path, github_token)
         results.append((repo_path, success, message))
-    print("\n" + "=" * 60)
+    print("\n" + "=" * 42)
     print("SUMMARY")
-    print("=" * 60)
+    print("=" * 42)
     successful = [r for r in results if r[1]]
     failed = [r for r in results if not r[1]]
     if successful:

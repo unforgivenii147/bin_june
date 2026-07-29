@@ -4,17 +4,17 @@ Copy installed packages that have entry points to ~/tmp/packages/<pkgname>
 Uses parallel processing for efficient file copying.
 """
 
-import sys
-import shutil
-import json
 import csv
-import os
-from pathlib import Path
-from concurrent.futures import ProcessPoolExecutor, as_completed
-from typing import List, Tuple, Set, Optional
-import site
+import json
 import logging
+import os
+import shutil
+import site
+import sys
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from functools import lru_cache
+from pathlib import Path
+from typing import List, Optional, Set, Tuple
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(processName)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -270,9 +270,9 @@ def main():
                 logger.error(f"Exception processing {package_name}: {e}")
                 results.append((package_name, False, str(e)))
 
-    print("\n" + "=" * 60)
+    print("\n" + "=" * 42)
     print("SUMMARY")
-    print("=" * 60)
+    print("=" * 42)
 
     successful = [r for r in results if r[1]]
     failed = [r for r in results if not r[1]]
@@ -287,7 +287,7 @@ def main():
             print(f"  - {pkg_name}: {msg}")
 
     print(f"\n📁 Packages copied to: {Path.home() / 'tmp' / 'packages'}")
-    print("=" * 60)
+    print("=" * 42)
 
 
 if __name__ == "__main__":

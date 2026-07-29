@@ -56,7 +56,7 @@ def main():
 
     cpu_cores = os.cpu_count() or 1
     print(f"⚡ Processing {len(target_files)} files concurrently across {cpu_cores} threads...")
-    print("-" * 60)
+    print("-" * 42)
 
     total_shebangs = 0
     total_updated = 0
@@ -79,7 +79,7 @@ def main():
                 else:
                     print(f"✅ [ALREADY EXECUTABLE] {res['path']}")
 
-    print("=" * 60)
+    print("=" * 42)
     print(f"📊 Summary:")
     print(f"   Total shebang files found: {total_shebangs}")
     print(f"   Files updated with +x bit: {total_updated}")

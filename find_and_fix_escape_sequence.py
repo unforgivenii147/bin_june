@@ -113,7 +113,7 @@ def main():
     print(f"🔍 Found {len(py_files)} Python files. Processing in parallel across {os.cpu_count() or 1} cores...")
     if args.auto_fix:
         print("🛠️  Auto-fix flag (-a) is active. Offending string literals will be converted to raw strings.")
-    print("-" * 60)
+    print("-" * 42)
 
     total_issues = 0
     total_fixed = 0
@@ -139,7 +139,7 @@ def main():
                     total_fixed += 1
                 print()
 
-    print("=" * 60)
+    print("=" * 42)
     print(f"📊 Scan Complete.")
     print(f"   Files with issues: {total_issues}")
     if args.auto_fix:

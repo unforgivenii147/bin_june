@@ -1,8 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-import sys
-from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor, as_completed
 import os
+import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
 
 # ========================== HTTP LIBRARY SETUP ==========================
 try:

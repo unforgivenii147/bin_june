@@ -59,16 +59,16 @@ class GoogleDriveSync:
         return False
 
     def authenticate(self) -> None:
-        print("\n" + "=" * 60)
+        print("\n" + "=" * 42)
         print("GOOGLE DRIVE AUTHENTICATION")
-        print("=" * 60)
+        print("=" * 42)
         auth_url = f"https://accounts.google.com/o/oauth2/auth?client_id={self.client_id}&redirect_uri=urn:ietf:wg:oauth:2.0:oob&response_type=code&scope=https://www.googleapis.com/auth/drive.readonly&access_type=offline"
         print("\n1. Open this URL in your browser:")
         print(f"\n{auth_url}\n")
         print("2. Sign in to your Google account")
         print("3. Grant access to Google Drive")
         print("4. Copy the authorization code")
-        print("=" * 60)
+        print("=" * 42)
         auth_code = input("\nEnter authorization code: ").strip()
         token_data = {
             "client_id": self.client_id,
@@ -188,16 +188,16 @@ class GoogleDriveSync:
         return filename
 
     def sync_all(self, local_base_path: str) -> None:
-        print("\n" + "=" * 60)
+        print("\n" + "=" * 42)
         print("STARTING GOOGLE DRIVE SYNC")
-        print("=" * 60)
+        print("=" * 42)
         root_metadata = self.get_file_metadata("root")
         if root_metadata:
             print(f"Root folder: {root_metadata.get('name', 'My Drive')}")
         self.sync_folder("root", local_base_path, "My Drive")
-        print("\n" + "=" * 60)
+        print("\n" + "=" * 42)
         print("✅ SYNC COMPLETED!")
-        print("=" * 60)
+        print("=" * 42)
 
 
 def main() -> None:

@@ -14,12 +14,13 @@ Requirements:
 """
 
 from __future__ import annotations
-import os
+
 import argparse
-from typing import Iterable, List, Tuple
-import pathlib
 import csv
+import os
+import pathlib
 import sys
+from typing import Iterable, List, Tuple
 
 from cld import (
     detect_language,

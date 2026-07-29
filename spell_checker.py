@@ -1,14 +1,14 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+import argparse
+import json
 import re
 import subprocess
+import sys
 from abc import ABC, abstractmethod
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Generator, Iterable, Sequence
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import json
-import argparse
-import sys
 
 
 @dataclass
@@ -106,13 +106,17 @@ class Spellchecker(ABC):
 
 
 class Hunspell(Spellchecker):
-    def __init__(self, cmd: str = "hunspell", personal_dict: Path | str | None = None):
+    def __init__(
+        self,
+        cmd: str = "hunspell",
+        personal_dict: Path | str | None = Path("/data/data/com.termux/files/home/.personal_dict"),
+    ):
         self.cmd = cmd
         self.personal_dict = Path(personal_dict) if personal_dict else self._get_default_personal_dict()
 
     def _get_default_personal_dict(self) -> Path:
         home = Path.home()
-        return home / ".hunspell_custom"
+        return home / ".personal_dict"
 
     def check(self, text: str, languages: Sequence[str], context: list[str]) -> Generator[Misspelling, None, None]:
         lang = languages[0] if languages else "en_US"

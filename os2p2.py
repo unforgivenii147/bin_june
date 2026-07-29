@@ -5,11 +5,11 @@ from __future__ import annotations
 import os
 import re
 import sys
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
 from os import scandir as os_scandir
 from pathlib import Path
-from collections.abc import Callable
 
 CHUNK_SIZE = 1024 * 1024
 

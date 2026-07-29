@@ -5,8 +5,8 @@ from __future__ import annotations
 import argparse
 import sys
 import textwrap
-from pathlib import Path
 from collections.abc import Generator
+from pathlib import Path
 
 import lzma_mt
 
@@ -182,7 +182,7 @@ def process_files(root_dir: Path, compress: bool, preset: int, threads: int, rem
                 total_original_size += orig_size
         else:
             total_failed += 1
-    print(f"\n{'─' * 60}")
+    print(f"\n{'─' * 42}")
     print(f"Total successful: {total_success}")
     print(f"Total failed: {total_failed}")
     if compress and total_original_size > 0:

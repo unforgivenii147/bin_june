@@ -280,7 +280,7 @@ class VenvRepacker:
         print(f"Site-packages: {self.site_packages}")
         print(f"Output directory: {self.output_dir}")
         print(f"Mode: {('DRY RUN' if self.dry_run else 'NORMAL')}")
-        print("-" * 60)
+        print("-" * 42)
         self.output_dir.mkdir(parents=True, exist_ok=True)
         packages = self.find_packages()
         if not packages:
@@ -314,16 +314,16 @@ class VenvRepacker:
         return self.stats
 
     def print_stats(self) -> None:
-        print("\n" + "=" * 60)
+        print("\n" + "=" * 42)
         print("STATISTICS")
-        print("=" * 60)
+        print("=" * 42)
         print(f"Total packages: {self.stats['total_packages']}")
         print(f"Successfully repacked: {self.stats['successfully_repacked']}")
         print(f"Failed: {self.stats['failed_packages']}")
         print()
         print(f"Pure Python packages: {self.stats['pure_python_packages']}")
         print(f"Packages with C extensions: {self.stats['packages_with_c_extensions']}")
-        print("=" * 60)
+        print("=" * 42)
 
     def save_report(self, report_file: str = "repack_report.json") -> None:
         report = {
@@ -346,14 +346,14 @@ class VenvRepacker:
             print("No .whl files found")
             return
         print(f"\nGenerated {len(wheels)} .whl files:")
-        print("-" * 60)
+        print("-" * 42)
         total_size = 0
         for wheel in sorted(wheels):
             size_mb = wheel.stat().st_size / (1024 * 1024)
             total_size += wheel.stat().st_size
             print(f"  {wheel.name:<50} {size_mb:>8.2f} MB")
         total_size_mb = total_size / (1024 * 1024)
-        print("-" * 60)
+        print("-" * 42)
         print(f"Total size: {total_size_mb:.2f} MB")
 
 

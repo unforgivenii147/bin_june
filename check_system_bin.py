@@ -74,17 +74,17 @@ def check_and_move_files(system_hashes):
 
 
 def main():
-    print("=" * 60)
+    print("=" * 42)
     print("🔐 File Hash Comparison & Move Tool")
-    print("=" * 60)
+    print("=" * 42)
     system_hashes = get_system_bin_hashes()
     if not system_hashes:
         print("❌ No readable files found in /system/bin")
         return
     matches, moved = check_and_move_files(system_hashes)
-    print("\n" + "=" * 60)
+    print("\n" + "=" * 42)
     print("📊 SUMMARY")
-    print("=" * 60)
+    print("=" * 42)
     if matches:
         print(f"⚠️  Found {len(matches)} files with matching hashes:")
         for local_file, system_file in matches:
@@ -96,7 +96,7 @@ def main():
                 print(f"  • {original} -> {new_name}")
     else:
         print("✅ No matching files found.")
-    print("=" * 60)
+    print("=" * 42)
 
 
 if __name__ == "__main__":

@@ -168,7 +168,7 @@ def main():
         sys.exit(1)
     print(f"\n📚 Found {len(repos)} repositories")
     print("🔍 Checking and cloning in one pass...")
-    print("=" * 60)
+    print("=" * 42)
     size_limit_mb = 5
     cloned_count = 0
     skipped_count = 0
@@ -197,9 +197,9 @@ def main():
     if cache_data:
         save_size_cache(cache_data)
         display_cached_stats(cache_data)
-    print("\n" + "=" * 60)
+    print("\n" + "=" * 42)
     print("📊 FINAL SUMMARY")
-    print("=" * 60)
+    print("=" * 42)
     print(f"✅ Successfully cloned: {cloned_count}")
     print(f"❌ Failed to clone: {failed_count}")
     print(f"⏭️  Skipped (too large): {skipped_count}")

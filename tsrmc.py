@@ -230,9 +230,9 @@ def print_results(results: list, total_time: float, method: str):
     reduction = total_original - total_new if total_original > 0 else 0
     reduction_pct = reduction / total_original * 100 if total_original > 0 else 0
     avg_time = sum(r.processing_time for r in results) / len(results) if results else 0
-    print(f"\n{'=' * 60}")
+    print(f"\n{'=' * 42}")
     print(f"Results ({method.upper()})")
-    print(f"{'=' * 60}")
+    print(f"{'=' * 42}")
     print(f"Total files:      {len(results)}")
     print(f"Successful:       {len(successful)}")
     print(f"Failed:           {len(failed)}")
@@ -290,9 +290,9 @@ Examples:
         print("\n[2/2] Testing AST method...")
         ast_results, ast_time = process_directory(directory, args.workers, "ast")
         print_results(ast_results, ast_time, "ast")
-        print(f"\n{'=' * 60}")
+        print(f"\n{'=' * 42}")
         print("PERFORMANCE COMPARISON")
-        print(f"{'=' * 60}")
+        print(f"{'=' * 42}")
         print(f"Tree-sitter time: {ts_time:.3f}s")
         print(f"AST time:         {ast_time:.3f}s")
         speedup = ast_time / ts_time if ts_time > 0 else 0

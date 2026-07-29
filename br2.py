@@ -1,10 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+import io
 import os
 import tarfile
-import io
-import brotli
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+
+import brotli
 
 BROTLI_QUALITY = 11
 CHUNK_SIZE = 1024 * 64
