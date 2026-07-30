@@ -7,13 +7,13 @@ from pathlib import Path
 
 
 def process_file(path) -> None:
-    content = path.read_text(encoding="utf-8")
+    content = path.read_bytes()
     target_dir = Path("/sdcard/doc")
     if not target_dir.exists():
         target_dir.mkdir(exist_ok=True)
     target_path = target_dir / path.name
     if not target_path.exists():
-        target_path.write_text(content, encoding="utf-8")
+        target_path.write_bytes(content)
         path.unlink()
         print("done.")
     else:

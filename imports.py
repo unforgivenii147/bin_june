@@ -758,14 +758,9 @@ def main() -> None:
     output_file = cwd / "requirements.txt"
     std_libs = STDLIB
     pkgz = get_installed_pkgs()
-    print(f"Scanning directory: {cwd}")
-    print(f"Skipping directories: {', '.join(sorted(SKIP_DIRS))}")
     all_local_packages = get_local_packages(cwd)
     subdirs = get_valid_subdirs(cwd)
     if args.save_separate and subdirs:
-        print(f"""
-📁 Found {len(subdirs)} subdirectories with Python files - generating separate requirements files""")
-        print("=" * 42)
         total_imports = set()
         created_count = 0
         skipped_count = 0
@@ -788,8 +783,6 @@ def main() -> None:
             else:
                 print(f"⏭️  all installed ({elapsed:.2f}s)")
                 skipped_count += 1
-        print("=" * 42)
-        print(f"Summary: {created_count} created, {skipped_count} skipped")
         if total_imports:
             print("\n📦 Generating root requirements.txt with all unique imports...")
             root_modules = sorted(set(total_imports))

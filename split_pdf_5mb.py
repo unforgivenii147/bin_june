@@ -9,8 +9,6 @@ from pathlib import Path
 
 from pypdf import PdfReader, PdfWriter
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def split_pdf_by_size(pdf_path: Path, output_dir: Path, max_size_mb: int = 5) -> None:
     max_size_bytes = max_size_mb * 1024 * 1024
