@@ -1,48 +1,51 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+"""Extract subtitles using ffmpeg-python."""
 
-from __future__ import annotations
+import sys
+from pathlib import Path
+import ffmpeg
 
-import subprocess
 
-
-def extract_subtitles(video_path) -> None:
+def extract_subtitles(input_file):
+    """Extract all subtitle streams from video file."""
     try:
-        subprocess.run(["ffmpeg", "-version"], check=True, capture_output=True)
+        # Probe the video file
+        probe = ffmpeg.probe(input_file)
+
+        subtitle_streams = [stream for stream in probe["streams"] if stream["codec_type"] == "subtitle"]
+
+        if not subtitle_streams:
+            print("No subtitle streams found.")
+            return
+
+        basename = Path(input_file).stem
+
+        for i, stream in enumerate(subtitle_streams):
+            lang = stream.get("tags", {}).get("language", "und")
+            output_file = f"{basename}.sub{i}.{lang}.srt"
+
+            print(f"Extracting subtitle stream {i} -> {output_file}")
+
+            (ffmpeg.input(input_file).output(output_file, map=f"0:s:{i}").overwrite_output().run(quiet=True))
+
+        print("Done.")
+
+    except ffmpeg.Error as e:
+        print(f"FFmpeg error: {e.stderr.decode() if e.stderr else e}")
+        sys.exit(1)
     except FileNotFoundError:
-        raise FileNotFoundError("ffmpeg is required but not installed.")
-    basename = video_path.rsplit(".", 1)[0]
-    ffprobe_cmd = [
-        "ffprobe",
-        "-v",
-        "error",
-        "-select_streams",
-        "s",
-        "-show_entries",
-        "stream=index:stream_tags=language",
-        "-of",
-        "csv=p=0",
-        video_path,
-    ]
-    subs_output = subprocess.run(ffprobe_cmd, capture_output=True, text=True, check=True)
-    subs = subs_output.stdout.strip().split("\n")
-    if not subs or (len(subs) == 1 and subs[0] == ""):
-        print("No subtitle streams found.")
-        return
-    count = 0
-    for line in subs:
-        index, lang = line.split(",")
-        if not lang:
-            lang = "und"
-        out_filename = f"{basename}.sub{count}.{lang}.srt"
-        print(f"Extracting subtitle stream {index} -> {out_filename}")
-        ffmpeg_cmd = ["ffmpeg", "-y", "-i", video_path, "-map", f"0:s:{count}", out_filename]
-        subprocess.run(ffmpeg_cmd, check=True, capture_output=True)
-        count += 1
-    print("Done.")
+        print("ffmpeg is required but not installed.")
+        sys.exit(1)
+
+
+def main():
+    if len(sys.argv) != 2:
+        print(f"Usage: {sys.argv[0]} <video.mkv|video.mp4>")
+        sys.exit(1)
+
+    input_file = sys.argv[1]
+    extract_subtitles(input_file)
 
 
 if __name__ == "__main__":
-    import sys
-
-    fn = sys.argv[1].strip()
-    extract_subtitles(fn)
+    main()

@@ -1,4 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+"""
+Convert HTML entities in HTML files
+recursively.
+Converts &lt; to <, &gt; to >, and other
+ common entities.
+"""
 
 from __future__ import annotations
 
@@ -7,58 +13,11 @@ import re
 import sys
 from collections import deque
 from pathlib import Path
+from dh import is_binary, get_nobinary
 
 CHUNK_SIZE = 1024 * 1024
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
-def is_binary(path: Path | str) -> bool:
-    path = Path(path)
-    try:
-        with path.open("rb") as f:
-            chunk = f.read(CHUNK_SIZE)
-        if not chunk:
-            return False
-        if b"\x00" in chunk:
-            return True
-        text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
-        nontext = sum(1 for b in chunk if b not in text_chars)
-        return nontext / len(chunk) > 0.3
-    except Exception:
-        return True
-
-
-def get_nobinary(path: str | Path) -> list[Path]:
-    return [f for f in get_files(path) if not is_binary(f)]
-
-
-"\nConvert HTML entities in HTML files recursively.\nConverts &lt; to <, &gt; to >, and other common entities.\n"
-
-
-def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
-    path = Path(path)
-    skip_dirs = {".git", "__pycache__"}
-    queue = deque([path])
-    files = []
-    while queue:
-        current = queue.popleft()
-        try:
-            entries = current.iterdir()
-        except (PermissionError, OSError):
-            continue
-        for item in entries:
-            if item.is_symlink():
-                continue
-            if item.is_dir() and item.name not in skip_dirs:
-                queue.append(item)
-            elif item.is_file() and (ext is None or item.suffix in ext):
-                files.append(item)
-    return files
-
-
-"\nConvert HTML entities in HTML files recursively.\nConverts &lt; to <, &gt; to >, and other common entities.\n"
-
 HTML_ENTITIES = {
     "&lt;": "<",
     "&gt;": ">",
@@ -110,7 +69,7 @@ def process_file(filepath: Path) -> tuple[Path, bool, str]:
 
 
 def main() -> None:
-    cwd = Path.cwd()
+    cwd = Path.cwd().resolve()
     args = sys.argv[1:]
     files = [Path(p) for p in args] if args else get_nobinary(cwd)
     changed_files = []
@@ -119,9 +78,9 @@ def main() -> None:
         results = pool.map(process_file, files)
         for filepath, changed, error in results:
             if error:
-                error_files.append((filepath, error))
+                error_files.append((filepath.resolve(), error))
             elif changed:
-                changed_files.append(filepath)
+                changed_files.append(filepath.resolve())
     print("\n" + "=" * 42)
     print("SUMMARY")
     print("=" * 42)
