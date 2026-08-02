@@ -100,23 +100,28 @@ def get_pyfiles(path: str | Path) -> list[Path]:
     return sorted(pyfiles)
 
 
-def process_file(args: tuple) -> None:
+def process_file(args: tuple) -> tuple:
     path, counter, total, dry_run = args
     path = Path(path)
     prefix = "[DRY RUN] " if dry_run else ""
+    result = {"path": path, "valid": True, "error": None}
+
     print(f"{prefix}[{counter}/{total}] {path.name}")
     try:
         content = path.read_text(encoding="utf-8")
         ast.parse(content)
         if dry_run:
             print(f"  ✅ {path.name} - Valid Python syntax")
-        return
+        return result
     except (SyntaxError, ValueError, UnicodeDecodeError, OSError) as e:
+        result["valid"] = False
+        result["error"] = str(e)
+
         error_dir = path.parent / "error"
         new_path = error_dir / path.name
         if dry_run:
-            print(f"  🔍 Would move to: {new_path} | Error: {e}")
-            return
+            print(f"  ❌ {path.name} - Invalid syntax: {e}")
+            return result
         error_dir.mkdir(exist_ok=True)
         if new_path.exists():
             base = path.stem
@@ -127,10 +132,11 @@ def process_file(args: tuple) -> None:
                 idx += 1
         try:
             content = path.read_bytes()
-            new_path.write_bytes(contents)
+            new_path.write_bytes(content)
             print(f"  ⚠️  copied to: {new_path} | Error: {e}")
         except OSError as move_error:
             print(f"  ❌ Failed to move {path}: {move_error}")
+        return result
 
 
 def get_files_to_process(paths: list[str]) -> list[Path]:
@@ -156,14 +162,34 @@ def get_files_to_process(paths: list[str]) -> list[Path]:
     return unique_files
 
 
-def process_files_mpf3(files: list[Path], dry_run: bool = False) -> None:
+def save_invalid_files(invalid_files: list[tuple[Path, str]]) -> None:
+    """Save the list of invalid files to ~/invalid.txt"""
+    output_path = Path.home() / "invalid.txt"
+    try:
+        with output_path.open("w", encoding="utf-8") as f:
+            f.write("Invalid Python Files Report\n")
+            f.write("=" * 50 + "\n\n")
+            for path, error in invalid_files:
+                f.write(f"{path}\n")
+                f.write(f"  Error: {error}\n")
+                f.write("-" * 40 + "\n")
+        print(f"\n📄 Invalid files list saved to: {output_path}")
+    except OSError as e:
+        print(f"\n❌ Failed to save invalid files list: {e}")
+
+
+def process_files_mpf3(files: list[Path], dry_run: bool = False) -> list[tuple[Path, str]]:
     total = len(files)
+    invalid_files = []
 
     def wrapper(path):
         if not hasattr(wrapper, "counter"):
             wrapper.counter = 0
         wrapper.counter += 1
-        process_file((path, wrapper.counter, total, dry_run))
+        result = process_file((path, wrapper.counter, total, dry_run))
+        if not result["valid"]:
+            invalid_files.append((result["path"], result["error"]))
+        return result
 
     try:
         mpf3(wrapper, files)
@@ -171,34 +197,56 @@ def process_files_mpf3(files: list[Path], dry_run: bool = False) -> None:
         print(f"⚠️  mpf3 failed: {e}")
         raise
 
+    return invalid_files
 
-def process_files_threadpool(files: list[Path], dry_run: bool = False) -> None:
+
+def process_files_threadpool(files: list[Path], dry_run: bool = False) -> list[tuple[Path, str]]:
     total = len(files)
+    invalid_files = []
 
     def worker(path, idx):
-        process_file((path, idx, total, dry_run))
+        result = process_file((path, idx, total, dry_run))
+        return result
 
     with ThreadPoolExecutor(max_workers=min(cpu_count() * 2, len(files))) as executor:
         futures = {executor.submit(worker, path, idx): path for idx, path in enumerate(files, 1)}
         for future in as_completed(futures):
             try:
-                future.result()
+                result = future.result()
+                if not result["valid"]:
+                    invalid_files.append((result["path"], result["error"]))
             except Exception as e:
                 path = futures[future]
                 print(f"  ❌ Unexpected error processing {path}: {e}")
 
+    return invalid_files
 
-def process_files_multiprocessing(files: list[Path], dry_run: bool = False) -> None:
+
+def process_files_multiprocessing(files: list[Path], dry_run: bool = False) -> list[tuple[Path, str]]:
     total = len(files)
     args_list = [(path, idx, total, dry_run) for idx, path in enumerate(files, 1)]
+    invalid_files = []
+
     with Pool(processes=min(cpu_count(), len(files))) as pool:
-        pool.map(process_file, args_list)
+        results = pool.map(process_file, args_list)
+
+    for result in results:
+        if not result["valid"]:
+            invalid_files.append((result["path"], result["error"]))
+
+    return invalid_files
 
 
-def process_files_sequential(files: list[Path], dry_run: bool = False) -> None:
+def process_files_sequential(files: list[Path], dry_run: bool = False) -> list[tuple[Path, str]]:
     total = len(files)
+    invalid_files = []
+
     for idx, path in enumerate(files, 1):
-        process_file((path, idx, total, dry_run))
+        result = process_file((path, idx, total, dry_run))
+        if not result["valid"]:
+            invalid_files.append((result["path"], result["error"]))
+
+    return invalid_files
 
 
 def main() -> int:
@@ -233,28 +281,39 @@ def main() -> int:
     if args.dry_run:
         print("🔍 DRY RUN MODE - No files will be moved")
         print("-" * 50)
+
+    invalid_files = []
     try:
         if args.parallel == "sequential" or len(files) == 1:
-            process_files_sequential(files, args.dry_run)
+            invalid_files = process_files_sequential(files, args.dry_run)
         elif args.parallel == "thread":
-            process_files_threadpool(files, args.dry_run)
+            invalid_files = process_files_threadpool(files, args.dry_run)
         elif args.parallel == "process":
-            process_files_multiprocessing(files, args.dry_run)
+            invalid_files = process_files_multiprocessing(files, args.dry_run)
         elif args.parallel == "mpf3":
             try:
-                process_files_mpf3(files, args.dry_run)
+                invalid_files = process_files_mpf3(files, args.dry_run)
             except Exception:
                 print("⚠️  mpf3 failed, falling back to multiprocessing...")
-                process_files_multiprocessing(files, args.dry_run)
+                invalid_files = process_files_multiprocessing(files, args.dry_run)
     except KeyboardInterrupt:
         print("\n⚠️  Interrupted by user")
         return 1
     except Exception as e:
         print(f"❌ Error processing files: {e}")
         return 1
+
+    # Save invalid files list
+    if invalid_files:
+        save_invalid_files(invalid_files)
+        print(f"\n📊 Summary: {len(invalid_files)} invalid file(s) found out of {len(files)} total")
+    else:
+        print(f"\n✅ All {len(files)} file(s) have valid Python syntax")
+
     if args.dry_run:
         print("-" * 50)
         print("🔍 DRY RUN COMPLETE - No files were moved")
+
     return 0
 
 

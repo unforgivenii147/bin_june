@@ -18,11 +18,12 @@ class Misspelling:
     offset: int
     suggestions: list[str] = field(default_factory=list)
     context: list[str] = field(default_factory=list)
+    sentence: str = ""
 
     def __str__(self) -> str:
         sugg = ",".join(self.suggestions)
         ctx = ", ".join(f'"{c}"' for c in self.context)
-        return f"word: {self.word} | line: {self.line_number} | offset: {self.offset} | suggestions: {sugg} | context: [{ctx}]"
+        return f'word: {self.word} | line: {self.line_number} | offset: {self.offset} | suggestions: {sugg} | context: [{ctx}] | sentence: "{self.sentence}"'
 
 
 @dataclass
@@ -118,6 +119,38 @@ class Hunspell(Spellchecker):
         home = Path.home()
         return home / ".personal_dict"
 
+    def _get_sentence_context(self, text: str, offset: int, word: str, context_chars: int = 10) -> str:
+        """Extract sentence context around the misspelled word"""
+        # Find the line containing the offset
+        lines = text.split("\n")
+        current_pos = 0
+        target_line = ""
+        line_offset = 0
+
+        for line in lines:
+            if current_pos + len(line) >= offset:
+                target_line = line
+                line_offset = offset - current_pos
+                break
+            current_pos += len(line) + 1  # +1 for newline
+
+        if not target_line:
+            return ""
+
+        # Extract context around the word
+        start = max(0, line_offset - context_chars)
+        end = min(len(target_line), line_offset + len(word) + context_chars)
+
+        context = target_line[start:end]
+
+        # Add ellipsis if truncated
+        if start > 0:
+            context = "..." + context
+        if end < len(target_line):
+            context = context + "..."
+
+        return context.strip()
+
     def check(self, text: str, languages: Sequence[str], context: list[str]) -> Generator[Misspelling, None, None]:
         lang = languages[0] if languages else "en_US"
         try:
@@ -126,6 +159,10 @@ class Hunspell(Spellchecker):
                 cmd_args.extend(["-p", str(self.personal_dict)])
 
             result = subprocess.run(cmd_args, input=text, capture_output=True, text=True, timeout=30)
+
+            # Split text into lines for line number calculation
+            lines = text.split("\n")
+
             for line in result.stdout.strip().split("\n"):
                 if line.startswith("&"):
                     parts = line.split()
@@ -134,15 +171,20 @@ class Hunspell(Spellchecker):
                     offset = int(parts[3].rstrip(":"))
                     suggestions = parts[4 : 4 + count]
 
+                    # Calculate correct line number
                     line_num = 1
-                    col = offset
-                    for i, text_line in enumerate(text.split("\n"), 1):
-                        if col <= len(text_line):
-                            line_num = i
+                    current_pos = 0
+                    for i, text_line in enumerate(lines):
+                        line_length = len(text_line) + 1  # +1 for newline character
+                        if offset < current_pos + line_length:
+                            line_num = i + 1  # Lines are 1-indexed
                             break
-                        col -= len(text_line) + 1
+                        current_pos += line_length
 
-                    yield Misspelling(word, line_num, offset, suggestions, context)
+                    # Get sentence context
+                    sentence = self._get_sentence_context(text, offset, word)
+
+                    yield Misspelling(word, line_num, offset, suggestions, context, sentence)
         except (subprocess.TimeoutExpired, FileNotFoundError):
             return
 
@@ -220,6 +262,7 @@ class JSONHandler(MisspellingHandler):
                 "offset": misspelling.offset,
                 "suggestions": misspelling.suggestions,
                 "context": misspelling.context,
+                "sentence": misspelling.sentence,
             }
         )
 

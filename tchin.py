@@ -7,11 +7,10 @@ import sys
 from pathlib import Path
 
 from deep_translator import GoogleTranslator, single_detection
+from dh import DOC_TH1, DOC_TH2
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 CHUNK_SIZE = 4500
-ALLOWED_EXT = {".txt", ".md", ".csv", ".json", ".py"}
 
 
 def translator() -> GoogleTranslator:
@@ -32,7 +31,7 @@ def translate_python_file(content: str) -> str:
     doc_delim = None
     for line in lines:
         stripped = line.strip()
-        if not in_docstring and stripped.startswith(('"""', "'''")):
+        if not in_docstring and stripped.startswith((DOC_TH1, DOC_TH2)):
             in_docstring = True
             doc_delim = stripped[:3]
             inside = stripped[3:]

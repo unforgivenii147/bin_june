@@ -6,54 +6,37 @@ import sys
 from collections import deque
 from pathlib import Path
 
-
-def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
-    path = Path(path)
-    skip_dirs = {".git", "__pycache__"}
-    queue = deque([path])
-    files = []
-    while queue:
-        current = queue.popleft()
-        try:
-            entries = current.iterdir()
-        except (PermissionError, OSError):
-            continue
-        for item in entries:
-            if item.is_symlink():
-                continue
-            if item.is_dir() and item.name not in skip_dirs:
-                queue.append(item)
-            elif item.is_file() and (ext is None or item.suffix in ext):
-                files.append(item)
-    return files
-
-
 RM = "-r" in sys.argv
 
 
-def get_files(directory: Path):
-    for path in directory.rglob("*"):
-        if ".git" in path.parts:
+def get_fast(dirpath):
+    dirpath = Path(dirpath)
+    if not dirpath.is_dir():
+        return
+    from fastwalk import walk_parallel
+
+    for path in walk_parallel(dirpath):
+        fullpath = Path(path)
+        if ".git" in fullpath.parts:
             continue
-        if path.is_symlink():
-            yield path
+        if fullpath.is_symlink() and not fullpath.exists():
+            yield fullpath
 
 
 if __name__ == "__main__":
     cwd = Path.cwd()
     bcount = 0
     broken_links = []
-    for path in get_files(cwd):
-        if not path.exists():
-            print(path.name)
-            bcount += 1
-            broken_links.append(str(path.relative_to(cwd)))
-            if RM:
-                try:
-                    path.unlink()
-                    print(f"Removed: {path.relative_to(cwd)}")
-                except Exception as e:
-                    print(f"Error deleting {path}: {e}")
+    for path in get_fast(cwd):
+        print(path.name)
+        bcount += 1
+        broken_links.append(str(path.relative_to(cwd)))
+        if RM:
+            try:
+                path.unlink()
+                print(f"Removed: {path.relative_to(cwd)}")
+            except Exception as e:
+                print(f"Error deleting {path}: {e}")
     if broken_links:
         for link in broken_links:
             print(f"{link}\n")

@@ -1030,7 +1030,7 @@ def process_directory(directory: Path, confirm: bool = False) -> list[dict]:
             if current_ext:
                 new_name = file_path.stem + expected_ext
             else:
-                new_name = file.name + expected_ext
+                new_name = file_path.name + expected_ext
             new_path = file_path.with_name(new_name)
             mismatches.append(
                 {

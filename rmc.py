@@ -12,6 +12,7 @@ from collections.abc import Iterator
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
+from dh import get_fast
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache", ".venv", "venv"})
 CHUNK_SIZE = 1024
@@ -94,7 +95,7 @@ def restore_shebang_and_encoding(code: str, shebang: str, encoding: str) -> str:
     return "\n".join(result)
 
 
-def remove_comments_preserve_format(source_code: str) -> Tuple[str, int]:
+def remove_comments_preserve_format(source_code: str) -> tuple[str, int]:
     lines = source_code.splitlines(keepends=True)
     comments_removed = 0
     result_lines = []
@@ -151,7 +152,7 @@ def remove_comments_preserve_format(source_code: str) -> Tuple[str, int]:
     return ("".join(result_lines), comments_removed)
 
 
-def validate_python_code(code: str) -> Tuple[bool, str | None]:
+def validate_python_code(code: str) -> tuple[bool, str | None]:
     try:
         ast.parse(code)
         return (True, None)
@@ -161,7 +162,7 @@ def validate_python_code(code: str) -> Tuple[bool, str | None]:
         return (False, str(e))
 
 
-def process_docstrings_ast(source_code: str, preserve_module_docstring: bool = True) -> Tuple[str, int]:
+def process_docstrings_ast(source_code: str, preserve_module_docstring: bool = True) -> tuple[str, int]:
     try:
         tree = ast.parse(source_code)
         processor = DocstringProcessor(preserve_module_docstring)
@@ -357,25 +358,25 @@ def main() -> None:
                     except ValueError:
                         r_path = result.path
                     print(f"{r_path} (would process)")
-    for wheel_path in wheel_files:
-        try:
-            w_path_display = wheel_path.relative_to(cwd)
-        except ValueError:
-            w_path_display = wheel_path
-        print(f"\nProcessing wheel file: {w_path_display}")
-        wheel_results = process_wheel_file(wheel_path, preserve_module_docstring, args.dry_run)
-        if args.dry_run:
-            print(f"  Would process {len(wheel_results)} files inside {w_path_display}")
-        else:
-            for result in wheel_results:
-                total_files += 1
-                if result.changed:
-                    changed_files += 1
-                total_comments += result.comments_removed
-                total_docstrings += result.docstrings_removed
-                if result.error:
-                    errors += 1
-                print(f"  {format_result(result, cwd)}")
+    #    for wheel_path in wheel_files:
+    #        try:
+    #            w_path_display = wheel_path.relative_to(cwd)
+    #        except ValueError:
+    #            w_path_display = wheel_path
+    #        print(f"\nProcessing wheel file: {w_path_display}")
+    #        wheel_results = process_wheel_file(wheel_path, preserve_module_docstring, args.dry_run)
+    #        if args.dry_run:
+    #            print(f"  Would process {len(wheel_results)} files inside {w_path_display}")
+    #        else:
+    #            for result in wheel_results:
+    #                total_files += 1
+    #                if result.changed:
+    #                    changed_files += 1
+    #                total_comments += result.comments_removed
+    #                total_docstrings += result.docstrings_removed
+    #                if result.error:
+    #                    errors += 1
+    #                print(f"  {format_result(result, cwd)}")
     if not args.dry_run and total_files > 0:
         print(f"\n{'=' * 50}\nSummary:")
         print(f"  Total files processed: {total_files}")
