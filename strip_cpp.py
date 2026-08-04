@@ -6,9 +6,7 @@ import concurrent.futures
 import re
 from pathlib import Path
 
-COMMENT_RE = re.compile(
-    "(?://[^\\n]*|/\\*.*?\\*/)|(?:\"(?:\\\\[\\s\\S]|[^\"\\\\])*\"|\\'(?:\\\\[\\s\\S]|[^\\'\\\\])*\\')", re.DOTALL
-)
+COMMENT_RE = re.compile(r"(?://[^\n]*|/\*.*?\*/)|(?:\"(?:\\[\s\S]|[^\"\\])*\"|\'(?:\\[\s\S]|[^\'\\])*\')", re.DOTALL)
 
 
 def strip_comments_from_text(text: str) -> str:

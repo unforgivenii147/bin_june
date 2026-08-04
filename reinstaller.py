@@ -12,7 +12,7 @@ import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Set, Tuple
 
 # pip imports
 from pip._internal.commands.install import InstallCommand
@@ -131,7 +131,6 @@ def get_package_size(dist: importlib.metadata.Distribution) -> str:
     try:
         if hasattr(dist, "_path"):
             # For packages installed as directories
-            import os
             from pathlib import Path
 
             dist_path = Path(dist._path)

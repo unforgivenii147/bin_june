@@ -13,7 +13,6 @@ import mmap
 import os
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Iterator, Tuple, List
 
 from binaryornot import is_binary
 

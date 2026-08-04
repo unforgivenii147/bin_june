@@ -9,7 +9,7 @@ import requests
 import json
 import csv
 import sys
-from typing import List, Dict, Optional
+from typing import List, Dict
 
 
 def fetch_pypi_updates() -> List[Dict[str, str]]:

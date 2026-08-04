@@ -13,7 +13,7 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 
 def has_main_guard(content):
-    pattern = "if\\s+__name__\\s*==\\s*[\"\\']__main__[\"\\']\\s*:"
+    pattern = r"if\s+__name__\s*==\s*[\"\']__main__[\"\']\s*:"
     return bool(re.search(pattern, content))
 
 

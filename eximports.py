@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from os import scandir as os_scandir

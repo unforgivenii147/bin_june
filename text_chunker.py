@@ -25,7 +25,7 @@ def find_chunk_boundary(text: str, start_pos: int, target_size: int = TARGET_327
         return len(text)
     search_start = max(start_pos, end_pos - BUFFER_SIZE)
     search_text = text[search_start : end_pos + BUFFER_SIZE]
-    sentence_pattern = "[.!?]\\s+"
+    sentence_pattern = r"[.!?]\s+"
     matches = list(re.finditer(sentence_pattern, search_text))
     if matches:
         for match in reversed(matches):

@@ -5,9 +5,6 @@ Compress/decompress files recursively using pylzma with parallel processing.
 
 import argparse
 import tarfile
-import tempfile
-import shutil
-import os
 from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import pylzma

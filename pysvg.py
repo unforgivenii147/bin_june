@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from collections import deque
-from collections.abc import Callable
 from pathlib import Path
 from dh import get_fast
 

@@ -14,7 +14,7 @@ from pathlib import Path
 
 from tqdm import tqdm
 
-URL_PATTERN = re.compile(r'https?://[^\s<>"{}|\\^`\[\]]*', re.IGNORECASE)
+URL_PATTERN = re.compile(r'https?://[^\s<>r"{}|\^`\[\]]*', re.IGNORECASE)
 GIT_DOMAINS = {
     "github.com",
     "gitlab.com",

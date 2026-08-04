@@ -49,9 +49,9 @@ class ProcessResult:
 
 
 class CommentRemover:
-    STRING_PATTERN = "(?:\"(?:\\.|[^\"\\])*\"|'(?:\\.|[^'\\])*')"
-    SINGLE_COMMENT_PATTERN = "//.*?(?=\\n|$)"
-    MULTI_COMMENT_PATTERN = "/\\*.*?\\*/"
+    STRING_PATTERN = r"(?:\"(?:\.|[^\"\])*\"|'(?:\.|[^'\])*')"
+    SINGLE_COMMENT_PATTERN = r"//.*?(?=\n|$)"
+    MULTI_COMMENT_PATTERN = r"/\*.*?\*/"
 
     def __init__(self):
         self.string_regex = re.compile(self.STRING_PATTERN)

@@ -20,7 +20,7 @@ def load_names(names_filepath):
                     if len(parts) >= 2:
                         first_initial_pattern = re.escape(parts[0][0].upper())
                         last_initial_pattern = re.escape(parts[-1][0].upper())
-                        pattern_str = f"{first_initial_pattern}[\\w\\s\\-']+\\s+{last_initial_pattern}[\\w\\s\\-']+"
+                        pattern_str = f"{first_initial_pattern}[\\w\\s\\-r']+\s+{last_initial_pattern}[\w\s\-']+"
                         names.add((name, re.compile(pattern_str, re.IGNORECASE)))
                     else:
                         names.add(

@@ -1,3 +1,4 @@
+#!/data/data/com.termux/files/home/.local/bin/python
 import ast
 import sys
 from collections import deque

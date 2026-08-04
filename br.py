@@ -1,8 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 import argparse
 import io
-import os
-import sys
 import tarfile
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path

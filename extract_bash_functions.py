@@ -16,7 +16,23 @@ from pathlib import Path
 from typing import List, Set, Tuple
 from fastwalk import walk_files
 
-EXCLUDED = {".py", ".h", ".c", ".js", ".ts", ".hpp", ".cpp", ".pyx", ".jsx", ".lua", ".tsx", ".pl"}
+EXCLUDED = {
+    ".py",
+    ".h",
+    ".c",
+    ".js",
+    ".ts",
+    ".hpp",
+    ".cpp",
+    ".pyx",
+    ".jsx",
+    ".lua",
+    ".tsx",
+    ".pl",
+    ".am",
+    ".pm",
+    ".syntax",
+}
 IS_TERMUX = os.environ.get("TERMUX_VERSION") is not None or "com.termux" in os.environ.get("PREFIX", "")
 DEFAULT_WORKERS = 6 if IS_TERMUX else 12
 

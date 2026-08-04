@@ -115,9 +115,9 @@ class RegexFixer(ast.NodeTransformer):
             if isinstance(first_arg, ast.Constant) and isinstance(first_arg.value, str):
                 original = first_arg.value
                 fixed = original.encode("unicode_escape").decode("ascii")
-                fixed = fixed.replace("\\\\n", "\\n")
-                fixed = fixed.replace("\\\\t", "\\t")
-                fixed = fixed.replace("\\\\r", "\\r")
+                fixed = fixed.replace(r"\\n", r"\n")
+                fixed = fixed.replace(r"\\t", r"\t")
+                fixed = fixed.replace(r"\\r", r"\r")
                 node.args[0] = ast.Constant(value=fixed)
                 print(f"{original}\n{fixed}\n\n")
         return node

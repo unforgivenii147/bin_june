@@ -12,7 +12,7 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import Iterator, List, Tuple, Generator, Optional
+from typing import List, Tuple, Generator, Optional
 
 IS_TERMUX = os.environ.get("TERMUX_VERSION") is not None or "com.termux" in os.environ.get("PREFIX", "")
 EXCLUDED = {
@@ -32,6 +32,7 @@ EXCLUDED = {
     ".pm",
     ".so",
     ".rmeta",
+    ".syntax",
 }
 
 

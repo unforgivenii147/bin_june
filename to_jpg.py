@@ -1,8 +1,7 @@
-#!/data/data/com.termux/files/home/.local/bin/python
+#!/data/data/com.termux/files/usr/bin/python
 
 from __future__ import annotations
 
-import os
 import sys
 from collections import deque
 from collections.abc import Callable

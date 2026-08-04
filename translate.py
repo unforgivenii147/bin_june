@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 import argparse
-import json
 import logging
 import os
 import random

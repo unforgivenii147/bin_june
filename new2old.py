@@ -105,7 +105,7 @@ def generate_setup_py(
     has_cext, cext_method = has_c_extension(metadata["tool"])
     name = metadata["name"]
     version = metadata["version"]
-    desc = metadata["description"].replace('"', '\\"')
+    desc = metadata["description"].replace('"', r"\"")
     readme = metadata["readme"]
     requires_python = metadata["requires_python"] or ""
     license_ = metadata["license"] or ""

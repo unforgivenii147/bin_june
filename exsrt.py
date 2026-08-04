@@ -31,7 +31,7 @@ def safe_name(s: str) -> str:
     s = (s or "").strip()
     if not s:
         return ""
-    bad = '<>:"/\\|?*\0'
+    bad = r'<>:"/\|?*\0'
     return "".join("_" if c in bad else c for c in s).strip(" ._")
 
 

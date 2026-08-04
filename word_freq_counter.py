@@ -10,7 +10,7 @@ import re
 from collections import Counter
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import List
 
 from dh import get_nobinary
 

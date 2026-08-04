@@ -3,13 +3,10 @@
 from __future__ import annotations
 
 import argparse
-import os
 import sys
-from collections import deque
-from collections.abc import Callable
 from pathlib import Path
 from time import perf_counter as pff
-from dh import cprint, is_python_file, gsz, fsz, is_binary, get_pyfiles, mpf3, format_time
+from dh import cprint, fsz, get_pyfiles, mpf3, format_time
 
 CHUNK_SIZE = 1024 * 1024
 

@@ -7,6 +7,7 @@ from collections import deque
 from pathlib import Path
 
 from loguru import logger
+from dh import mpf3
 
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
@@ -89,11 +90,7 @@ def main():
         process_file(files[0])
         sys.exit(1)
 
-    results = mpf3(process_file, files)
-    total = 0
-    for res in results:
-        total += res
-    print(f"{total} comments removed")
+    mpf3(process_file, files)
 
 
 if __name__ == "__main__":

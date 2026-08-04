@@ -5,7 +5,6 @@ Uses parallel processing for efficient file copying.
 """
 
 import csv
-import json
 import logging
 import os
 import shutil
@@ -14,7 +13,7 @@ import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from functools import lru_cache
 from pathlib import Path
-from typing import List, Optional, Set, Tuple
+from typing import List, Optional, Tuple
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(processName)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)

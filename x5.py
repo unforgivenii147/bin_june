@@ -15,7 +15,6 @@ import multiprocessing as mp
 import shutil
 import sys
 import tarfile
-import tempfile
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass

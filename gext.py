@@ -130,7 +130,7 @@ def is_python_file_no_extension(path: Path) -> bool:
     try:
         with open(path, "r", encoding="utf-8", errors="ignore") as f:
             first_lines = "".join(f.readlines(1024))
-            if re.match("#!\\s*/.*python", first_lines):
+            if re.match(r"#!\s*/.*python", first_lines):
                 return True
             if "def " in first_lines or "class " in first_lines or "import " in first_lines:
                 return True

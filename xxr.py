@@ -8,7 +8,6 @@ import gzip
 import lzma
 import os
 import shutil
-import sys
 import tarfile
 import tempfile
 import zipfile

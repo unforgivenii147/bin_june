@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 import datetime
-import os
-import sys
 from pathlib import Path
 from dh import cprint
 

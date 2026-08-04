@@ -3,14 +3,12 @@
 from __future__ import annotations
 
 import io
-import os
 import re
 import sys
 import tokenize
 from collections.abc import Callable
 from os import scandir as os_scandir
 from pathlib import Path
-from dh import cprint
 
 CHUNK_SIZE = 1024 * 1024
 

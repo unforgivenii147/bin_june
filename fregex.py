@@ -14,7 +14,7 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 def extract_regex_patterns(file_path):
     patterns = []
-    regex_pattern = re.compile(r"re\.(compile|search|match|findall|fullmatch|finditer)\(\s*([rR]?[\'\"])(.*?)(?<!\\)\2")
+    regex_pattern = re.compile(r"re\.(compile|search|match|findall|fullmatch|finditer)\(\s*([rR]?[\r'\"])(.*?)(?<!\)\2")
     try:
         content = Path(file_path).read_text(encoding="utf-8")
         patterns = regex_pattern.findall(content)

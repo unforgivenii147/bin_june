@@ -9,7 +9,7 @@ from telethon import TelegramClient
 API_ID = "your_api_id"
 API_HASH = "your_api_hash"
 CHANNEL_USERNAME = "username_of_the_channel"
-COC_LINK_PATTERN = "https://link\\.clashofclans\\.com/[a-zA-Z0-9\\?\\=\\&_]+"
+COC_LINK_PATTERN = r"https://link\.clashofclans\.com/[a-zA-Z0-9\?\=\&_]+"
 
 
 async def main():

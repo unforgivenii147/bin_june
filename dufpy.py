@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 import ast
-import os
-import sys
 from collections.abc import Callable
 from os import scandir as os_scandir
 from pathlib import Path

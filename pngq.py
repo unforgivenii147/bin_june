@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-import os
 import sys
-from collections import deque
-from collections.abc import Callable
 from pathlib import Path
 from dh import get_fast
 from dh import cprint

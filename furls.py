@@ -15,13 +15,16 @@ from pathlib import Path
 from tarfile import TarFile
 from urllib.parse import urlparse
 from zipfile import ZipFile
-from dh import is_valid_url, append_text
+from dh import is_valid_url, append_text, is_binary
 import zstandard as zstd
 
 
 DEFAULT_MAX_MB = 15
 EXCLUDE_DIRS = {".git", "__pycache__"}
-URL_RE = re.compile("(https?://[^\\s\\'\\\"<>\\\\)\\\\(]+)", flags=re.IGNORECASE)
+# URL_RE = re.compile(r"(https?://[^\s\'\\"<>\\)\\(]+)", flags=re.IGNORECASE)
+
+URL_RE = re.compile(r"(https?://[^\sr'\"<>\()]+)", flags=re.IGNORECASE)
+
 GIT_FILE = Path("gitlinks.txt")
 REPO_FILE = Path("repos.txt")
 ARCHIVE_SUFFIXES = (
@@ -78,6 +81,11 @@ def scan_bytes_for_urls(b: bytes, max_bytes, exts, name_hint=None):
             return set()
     if len(b) > max_bytes:
         return set()
+
+    # Skip binary content
+    if b"\x00" in b[:1024]:  # Check first 1KB for null bytes
+        return set()
+
     text = decode_bytes_to_text(b)
     return find_urls_in_text(text)
 
@@ -201,6 +209,11 @@ def process_path(path: str, max_bytes: int, exts, found, recursion_limit=999) ->
         size = p.stat().st_size
     except Exception:
         return
+
+    # Skip binary files (but still process archives)
+    if not is_archive_name(path) and is_binary(p):
+        return
+
     if size > max_bytes and (not is_archive_name(path)):
         return
     lname = path.lower()
@@ -260,7 +273,7 @@ def is_github_url(url):
 
 def extract_git_repos(urls):
     repo_urls = []
-    github_regex = re.compile("https?://github\\.com/([^/]+)/([^/]+?)(?:/|$|\\.git|\\?|#)")
+    github_regex = re.compile(r"https?://github\.com/([^/]+)/([^/]+?)(?:/|$|\.git|\?|#)")
     for url in urls:
         matchz = github_regex.search(url)
         if matchz:
@@ -343,6 +356,7 @@ def main() -> None:
                         out.write(u + "\n")
         else:
             with out_path.open("w", encoding="utf-8") as out:
+                out.write("\n\n")
                 for u in sorted_urls:
                     if is_valid_url(u):
                         out.write(u + "\n")

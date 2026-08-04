@@ -11,9 +11,8 @@ from __future__ import annotations
 import multiprocessing as mp
 import re
 import sys
-from collections import deque
 from pathlib import Path
-from dh import is_binary, get_nobinary
+from dh import get_nobinary
 
 CHUNK_SIZE = 1024 * 1024
 

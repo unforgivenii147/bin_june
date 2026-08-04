@@ -463,7 +463,7 @@ TYPE_SUBDIR = {"function": "function", "class": "class", "const": "const"}
 
 
 def _safe_filename(base: str) -> str:
-    return re.sub("[^\\w\\-.]", "_", base)
+    return re.sub(r"[^\w\-.]", "_", base)
 
 
 def _unique_path(directory: Path, stem: str, suffix: str = ".py") -> Path:

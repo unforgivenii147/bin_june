@@ -19,7 +19,7 @@ SKIP_DIRS: Final[frozenset[str]] = frozenset(
     {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
 )
 LANGUAGE_PATTERN: Final[re.Pattern] = re.compile(
-    "[\\u0600-\\u06FF\\u4E00-\\u9FFF\\u3040-\\u309F\\u30A0-\\u30FF\\uAC00-\\uD7AF\\u0400-\\u04FF]"
+    r"[\u0600-\u06FF\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF\u0400-\u04FF]"
 )
 MAX_WORKERS: Final[int] = 4
 logging.basicConfig(level=logging.INFO, format="%(message)s")
