@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Final
 
 from deep_translator import GoogleTranslator
-from dh.fileutils import get_files
+from dh import get_files
 
 CHUNK_SIZE = 1024 * 1024
 

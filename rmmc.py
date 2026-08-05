@@ -8,11 +8,8 @@ import sys
 from collections import deque
 from multiprocessing import get_context
 from pathlib import Path
-from dh import get_files
-from dh.fileutils import gsz
-from dh.fileutils import fsz
-from dh.fileutils import is_binary
-from dh.fileutils import get_nobinary
+
+from dh import fsz, get_files, get_nobinary, gsz, is_binary
 
 CHUNK_SIZE = 1024 * 1024
 

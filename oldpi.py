@@ -9,9 +9,9 @@ from collections import deque
 from collections.abc import Callable
 from mmap import mmap
 from pathlib import Path
-from dh.fileutils import get_files
-from dh.jobutils import mpf3
 
+from dh import get_files
+from dh.jobutils import mpf3
 
 SIZE_THRESHOLD = 1 * 1024 * 1024
 OLD_PRINT_RE = re.compile(r"(?m)^[ \t]*print[ \t]+[^(\n]")

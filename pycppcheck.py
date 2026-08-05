@@ -9,7 +9,6 @@ from pathlib import Path
 
 from dh import cprint
 
-
 c_files = {".c", ".h", ".inc"}
 cpp_files = {".cpp", ".cc", ".cxx", ".hpp", ".hpp11", ".hh", ".hxx"}
 

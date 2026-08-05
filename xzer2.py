@@ -4,9 +4,8 @@ from __future__ import annotations
 
 from collections import deque
 from pathlib import Path
-from dh import get_files
-from dh.fileutils import safe_delete
-from dh.fileutils import get_dirs
+
+from dh import get_dirs, get_files, safe_delete
 
 
 def compress_folder_to_tar(folder_path: Path, output_base_name: str, format: str = "tar") -> bool:

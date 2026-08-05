@@ -5,10 +5,8 @@ from __future__ import annotations
 import re
 import sys
 from pathlib import Path
-from dh.fileutils import get_removed_lines
-from dh.fileutils import read_lines
-from dh.fileutils import read_lines_mmap
 
+from dh import get_removed_lines, read_lines, read_lines_mmap
 
 INPLACE = "-w" in sys.argv
 if __name__ == "__main__":

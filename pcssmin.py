@@ -9,13 +9,9 @@ from multiprocessing import get_context
 from pathlib import Path
 from typing import Any
 
-from dh import cprint
-from rcssmin import cssmin
+from dh import cprint, fsz, gext, gsz
 from dh.jobutils import mpf_async
-from dh.fileutils import fsz
-from dh.fileutils import gsz
-from dh.fileutils import gext
-
+from rcssmin import cssmin
 
 mpf = mpf_async
 

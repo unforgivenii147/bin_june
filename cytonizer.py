@@ -7,9 +7,9 @@ from collections import deque
 from collections.abc import Callable
 from os import chdir as os_chdir
 from pathlib import Path
+
 from dh import get_files
 from dh.jobutils import mpf3
-
 
 START_DIR = Path.cwd()
 NUM_PROCESSES = 4

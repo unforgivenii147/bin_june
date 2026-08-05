@@ -10,8 +10,7 @@ import zipfile
 from collections import defaultdict
 from pathlib import Path
 
-from dh import STDLIB
-from dh.fileutils import is_python_file
+from dh import STDLIB, is_python_file
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

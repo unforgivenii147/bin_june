@@ -8,13 +8,8 @@ from os import scandir as os_scandir
 from pathlib import Path
 
 import tree_sitter_python as tsp
-from dh import cprint
+from dh import cprint, get_file_age, get_installed_pkgs, get_pyfiles, is_binary, is_python_file
 from tree_sitter import Language, Parser
-from dh.fileutils import is_python_file
-from dh.fileutils import is_binary
-from dh.fileutils import get_pyfiles
-from dh.fileutils import get_file_age
-from dh.fileutils import get_installed_pkgs
 
 CHUNK_SIZE = 1024 * 1024
 

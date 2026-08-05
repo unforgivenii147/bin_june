@@ -5,7 +5,8 @@ from __future__ import annotations
 import os
 from collections import Counter
 from pathlib import Path
-from dh.fileutils import is_text_file
+
+from dh import is_text_file
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

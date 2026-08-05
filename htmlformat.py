@@ -8,11 +8,8 @@ from collections.abc import Callable
 from pathlib import Path
 
 from bs4 import BeautifulSoup
-from dh import get_files
-from dh.fileutils import fsz
-from dh.fileutils import rrs
+from dh import fsz, get_files, gsz, rrs
 from dh.jobutils import mpf3
-from dh.fileutils import gsz
 
 
 def process_file(path) -> None:

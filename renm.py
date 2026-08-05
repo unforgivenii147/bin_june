@@ -8,10 +8,9 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 from deep_translator import GoogleTranslator
+from dh import _clean_fname, unique_path
 from fastwalk import walk_files
 from tqdm import tqdm
-from dh.fileutils import unique_path
-from dh.fileutils import _clean_fname
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

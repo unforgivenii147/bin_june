@@ -8,11 +8,8 @@ from collections import deque
 from collections.abc import Callable
 from pathlib import Path
 
-from dh import cprint
-from dh.fileutils import fsz
-from dh.fileutils import gsz
+from dh import cprint, fsz, gsz
 from dh.jobutils import mpf3
-
 
 MAX_QUEUE = 8
 

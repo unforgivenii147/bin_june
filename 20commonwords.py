@@ -8,9 +8,7 @@ from collections import Counter
 from pathlib import Path
 
 import regex as re
-from dh.fileutils import unique_path
-from dh.fileutils import _clean_fname
-
+from dh import _clean_fname, unique_path
 
 USER_STOPWORDS_FILE = Path("/sdcard/stopwords")
 

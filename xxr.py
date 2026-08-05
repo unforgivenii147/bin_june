@@ -18,12 +18,9 @@ from pathlib import Path
 import brotlicffi as brotli
 import py7zr
 import zstandard as zstd
-from dh import cprint
-from loguru import logger
-from dh.fileutils import gsz
-from dh.fileutils import fsz
+from dh import cprint, fsz, gsz
 from dh.jobutils import mpf3
-
+from loguru import logger
 
 SUPPORTED_EXTS = {
     ".tar",

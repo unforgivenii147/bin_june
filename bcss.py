@@ -7,7 +7,7 @@ from collections import deque
 from collections.abc import Callable
 from pathlib import Path
 
-from dh import cprint, get_files, fsz, gsz, runcmd, mpf3
+from dh import cprint, fsz, get_files, gsz, mpf3, runcmd
 
 
 def process_file(path) -> bool | None:

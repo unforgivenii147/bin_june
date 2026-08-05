@@ -5,10 +5,8 @@ from __future__ import annotations
 import sys
 from collections.abc import Callable
 from pathlib import Path
-from dh.fileutils import get_filez
-from dh.fileutils import should_skip
-from dh.fileutils import fsz
-from dh.fileutils import gsz
+
+from dh import fsz, get_filez, gsz, should_skip
 from dh.jobutils import mpf3
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})

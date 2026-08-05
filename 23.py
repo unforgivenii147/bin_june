@@ -7,8 +7,8 @@ import sys
 from multiprocessing import Lock, Pool
 from pathlib import Path
 
+from dh import is_python_file
 from fastwalk import walk_files
-from dh.fileutils import is_python_file
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

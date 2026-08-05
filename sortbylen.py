@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from dh.fileutils import read_lines
-from dh.fileutils import read_lines_mmap
+
+from dh import read_lines, read_lines_mmap
 
 THRESHOLD = 1024 * 1024
 

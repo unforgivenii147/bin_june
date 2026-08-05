@@ -13,7 +13,8 @@ import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Dict, List, Tuple
-from dh.fileutils import get_installed_packages
+
+from dh import get_installed_packages
 
 
 def check_package_update(package_info: Dict[str, str]) -> Tuple[str, str, str, bool]:

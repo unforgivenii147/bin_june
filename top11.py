@@ -6,9 +6,8 @@ import operator
 import sys
 from collections import deque
 from pathlib import Path
-from dh import get_files
-from dh.fileutils import fsz
 
+from dh import fsz, get_files
 
 cwd = Path.cwd()
 N = int(sys.argv[1])

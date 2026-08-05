@@ -8,9 +8,9 @@ from io import BytesIO
 from pathlib import Path
 
 import cairosvg
-from PIL import Image
 from dh import get_files
 from dh.jobutils import mpf3
+from PIL import Image
 
 
 def process_file(path) -> None:

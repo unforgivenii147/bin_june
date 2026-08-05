@@ -14,8 +14,8 @@ from collections.abc import Callable
 from gzip import compress as gzip_compress
 from pathlib import Path
 
-from lzma_mt import decompress
 from dh.jobutils import mpf3
+from lzma_mt import decompress
 
 
 def process_file(path: Path) -> tuple[str, bool, str]:

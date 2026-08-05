@@ -7,10 +7,9 @@ import sys
 from importlib import metadata
 from pathlib import Path
 
-from dh import cprint
+from dh import cprint, get_installed_packages
 from packaging.utils import parse_wheel_filename
 from packaging.version import Version
-from dh.fileutils import get_installed_packages
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

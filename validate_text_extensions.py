@@ -16,8 +16,7 @@ from collections.abc import Iterator
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 
-from dh import TXT_EXT
-from dh.fileutils import is_text_file
+from dh import TXT_EXT, is_text_file
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)

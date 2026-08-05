@@ -14,8 +14,8 @@ from collections import Counter
 from collections.abc import Generator
 from datetime import UTC, datetime
 from pathlib import Path
-from dh.fileutils import fsz
-from dh.fileutils import read_lines_mmap
+
+from dh import fsz, read_lines_mmap
 
 
 class LineProcessor:

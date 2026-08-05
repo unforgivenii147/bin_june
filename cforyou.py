@@ -9,10 +9,8 @@ import time
 from pathlib import Path
 
 import requests
-from dh import cprint
+from dh import cprint, get_file_age, get_installed_packages
 from packaging.version import Version
-from dh.fileutils import get_file_age
-from dh.fileutils import get_installed_packages
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

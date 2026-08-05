@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import sys
-from dh.fileutils import runcmd
-from dh.fileutils import get_installed_packages
+
+from dh import get_installed_packages, runcmd
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

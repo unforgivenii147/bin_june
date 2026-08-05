@@ -1,12 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Reverse inline functions by extracting them back to dh package imports."""
 
+import argparse
 import ast
 import sys
-from pathlib import Path
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor, as_completed
-import argparse
+from pathlib import Path
 
 
 def extract_functions_from_module(module_path: Path) -> dict[str, str]:

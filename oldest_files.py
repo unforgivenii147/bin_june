@@ -5,9 +5,8 @@ from __future__ import annotations
 import sys
 from datetime import datetime
 from pathlib import Path
-from dh.fileutils import get_file_age
-from dh.fileutils import format_time
 
+from dh import format_time, get_file_age
 
 EXCLUDED_DIRS = {".git", "__pycache__"}
 

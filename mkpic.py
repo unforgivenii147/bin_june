@@ -8,10 +8,9 @@ import sys
 from collections.abc import Callable
 from os import scandir as os_scandir
 from pathlib import Path
+
+from dh import get_pyfiles, is_binary, is_python_file
 from dh.jobutils import mpf3
-from dh.fileutils import is_python_file
-from dh.fileutils import is_binary
-from dh.fileutils import get_pyfiles
 
 CHUNK_SIZE = 1024 * 1024
 

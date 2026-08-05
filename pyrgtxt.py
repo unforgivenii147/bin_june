@@ -5,8 +5,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+from dh import is_text_file
 from joblib import Parallel, delayed
-from dh.fileutils import is_text_file
 
 
 def search_in_file(file_path, search_string):

@@ -6,13 +6,9 @@ import sys
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
-from dh import get_files
-from dh.fileutils import fsz
-from dh.fileutils import rrs
-from dh.fileutils import gsz
-from dh.jobutils import mpf3
-from dh.fileutils import runcmd
 
+from dh import fsz, get_files, gsz, rrs, runcmd
+from dh.jobutils import mpf3
 
 EXT = [".js", ".jsx", ".jsm", ".jsc"]
 

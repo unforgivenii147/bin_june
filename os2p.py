@@ -10,11 +10,8 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
 
+from dh import fsz, get_files, gsz
 from termcolor import cprint
-from dh import get_files
-from dh.fileutils import fsz
-from dh.fileutils import gsz
-
 
 "\nEnhanced AST-based refactoring from os/path to pathlib.\nComprehensive coverage of os and os.path operations.\n"
 

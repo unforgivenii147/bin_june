@@ -7,10 +7,8 @@ import subprocess
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from dh import get_files
-from dh.fileutils import unique_path
-from dh.fileutils import _clean_fname
 
+from dh import _clean_fname, get_files, unique_path
 
 EXT = [".js", ".css", ".html", ".json", ".mjs", ".cjs", ".ts", ".jsx", ".tsx", ".tsm", ".jsm"]
 EXCLUDE_PATTERNS = {}

@@ -6,11 +6,7 @@ import re
 from collections import deque
 from pathlib import Path
 
-from dh import cprint
-from dh.fileutils import gsz
-from dh.fileutils import fsz
-from dh.fileutils import is_binary
-from dh.fileutils import get_nobinary
+from dh import cprint, fsz, get_nobinary, gsz, is_binary
 
 CHUNK_SIZE = 1024 * 1024
 

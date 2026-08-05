@@ -8,7 +8,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 import requests
-from dh.fileutils import runcmd
+from dh import runcmd
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

@@ -8,9 +8,8 @@ import zipfile
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
-from dh import get_files
-from dh.fileutils import unique_path
-from dh.fileutils import _clean_fname
+
+from dh import _clean_fname, get_files, unique_path
 from dh.jobutils import mpf3
 
 

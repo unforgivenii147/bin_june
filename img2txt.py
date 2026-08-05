@@ -7,10 +7,10 @@ from collections import deque
 from collections.abc import Callable
 from pathlib import Path
 
+from dh import get_files
+from dh.jobutils import mpf3
 from PIL import Image
 from pytesseract import image_to_string
-from dh.jobutils import mpf3
-from dh.fileutils import get_files
 
 
 def extract_text(image_path: Path) -> str:

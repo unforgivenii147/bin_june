@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from pathlib import Path
-from dh.fileutils import is_binary
-from dh.fileutils import get_filez
-from dh.fileutils import should_skip
+
+from dh import get_filez, is_binary, should_skip
 
 CHUNK_SIZE = 1024 * 1024
 

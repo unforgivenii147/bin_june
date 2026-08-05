@@ -7,11 +7,9 @@ import sys
 from pathlib import Path
 
 import tree_sitter_python as tsp
-from dh import cprint
+from dh import cprint, get_filez, should_skip
 from rapidfuzz import fuzz
 from tree_sitter import Language, Parser
-from dh.fileutils import get_filez
-from dh.fileutils import should_skip
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

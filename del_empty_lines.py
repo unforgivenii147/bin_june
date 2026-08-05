@@ -6,8 +6,7 @@ import sys
 from pathlib import Path
 
 from binaryornot import is_binary
-from dh import cprint
-from dh.fileutils import get_filez
+from dh import cprint, get_filez
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

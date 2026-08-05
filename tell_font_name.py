@@ -10,14 +10,11 @@ from multiprocessing import get_context
 from pathlib import Path
 from typing import Any
 
+from dh import _clean_fname, get_files, unique_path
+from dh.jobutils import mpf_async
 from fontTools.ttLib import TTFont
 from fontTools.ttLib.ttFont import TTFont
 from termcolor import cprint
-from dh import get_files
-from dh.fileutils import unique_path
-from dh.fileutils import _clean_fname
-from dh.jobutils import mpf_async
-
 
 mpf = mpf_async
 

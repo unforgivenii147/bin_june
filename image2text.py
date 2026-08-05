@@ -6,12 +6,9 @@ import sys
 from collections import deque
 from pathlib import Path
 
-from dh import mpf3
+from dh import fsz, get_files, gsz, mpf3
 from PIL import Image
 from PIL.Image import Image
-from dh import get_files
-from dh.fileutils import fsz
-from dh.fileutils import gsz
 
 try:
     import cv2

@@ -5,8 +5,8 @@ from __future__ import annotations
 import datetime
 from os import scandir as _scandir
 from pathlib import Path
-from dh.fileutils import fsz
-from dh.fileutils import gsz
+
+from dh import fsz, gsz
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

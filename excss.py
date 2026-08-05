@@ -9,8 +9,7 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup
 from bs4.element import PageElement
-from dh import cprint
-from dh.fileutils import get_random_filename
+from dh import cprint, get_random_filename
 from dh.jobutils import mpf3
 
 

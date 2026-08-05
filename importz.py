@@ -5,7 +5,8 @@ from __future__ import annotations
 import ast
 import sys
 from pathlib import Path
-from dh.fileutils import is_python_file
+
+from dh import is_python_file
 
 
 def get_imports_from_file(file_path: Path):

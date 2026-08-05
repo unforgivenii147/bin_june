@@ -6,9 +6,8 @@ import re
 import sys
 from collections import deque
 from pathlib import Path
-from dh import get_files
-from dh.fileutils import is_binary
-from dh.fileutils import get_nobinary
+
+from dh import get_files, get_nobinary, is_binary
 
 CHUNK_SIZE = 1024 * 1024
 

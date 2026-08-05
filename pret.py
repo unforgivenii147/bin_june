@@ -6,8 +6,8 @@ import sys
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
-from dh import get_files
-from dh.fileutils import runcmd
+
+from dh import get_files, runcmd
 from dh.jobutils import mpf3
 
 

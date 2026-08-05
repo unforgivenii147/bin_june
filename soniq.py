@@ -6,8 +6,8 @@ import mmap
 import sys
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from dh.fileutils import is_binary
-from dh.fileutils import read_lines
+
+from dh import is_binary, read_lines
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

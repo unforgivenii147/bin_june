@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import operator
 from pathlib import Path
-from dh.fileutils import gsz
-from dh.fileutils import fsz
+
+from dh import fsz, gsz
 
 total = 0
 

@@ -12,11 +12,8 @@ from collections import deque
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
+from dh import fsz, get_dirs, get_files
 from lzma_mt import compress, decompress
-from dh import get_files
-from dh.fileutils import fsz
-from dh.fileutils import get_dirs
-
 
 MAX_WORKERS = 4
 CHUNK_SIZE = 1048576

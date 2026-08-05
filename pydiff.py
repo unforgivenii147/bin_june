@@ -5,9 +5,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from dh import cprint
-from dh.fileutils import read_lines
-from dh.fileutils import read_lines_mmap
+from dh import cprint, read_lines, read_lines_mmap
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

@@ -5,7 +5,8 @@ from __future__ import annotations
 import sys
 from datetime import datetime
 from pathlib import Path
-from dh.fileutils import format_time
+
+from dh import format_time
 
 EXCLUDED_DIRS = {".git", "__pycache__"}
 N = 10

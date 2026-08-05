@@ -20,7 +20,6 @@ import csv
 import os
 from typing import Iterable, List, Tuple
 
-from dh import is_text_file
 from cld import (
     detect_language,
     detect_language_from_path,
@@ -28,6 +27,7 @@ from cld import (
     read_file_bytes,
     safe_text_from_bytes,
 )
+from dh import is_text_file
 
 DEFAULT_MAX_PROBE = 4096  # bytes to probe for binary/text detection
 DEFAULT_READ_BYTES = 2 * 1024 * 1024  # up to 2MB per-file read

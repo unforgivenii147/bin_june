@@ -6,10 +6,9 @@ import sys
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
-from dh import get_files
+
+from dh import get_files, is_binary, runcmd
 from dh.jobutils import mpf3
-from dh.fileutils import runcmd
-from dh.fileutils import is_binary
 
 CHUNK_SIZE = 1024 * 1024
 

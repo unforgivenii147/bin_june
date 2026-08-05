@@ -6,10 +6,7 @@ import sys
 from collections import deque
 from pathlib import Path
 
-from dh import cprint
-from dh.fileutils import unique_path
-from dh.fileutils import _clean_fname
-
+from dh import _clean_fname, cprint, unique_path
 
 OUT_PATH = Path("/data/data/com.termux/files/home/tmp/metadata")
 

@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from operator import itemgetter
 from pathlib import Path
-from dh.fileutils import fsz
+
+from dh import fsz
 
 
 def get_dir_size(path: Path) -> int:

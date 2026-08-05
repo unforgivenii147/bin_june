@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import stat
 from pathlib import Path
-from dh.fileutils import should_skip
-from dh.fileutils import is_binary
+
+from dh import is_binary, should_skip
 
 CHUNK_SIZE = 1024 * 1024
 

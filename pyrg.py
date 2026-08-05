@@ -10,8 +10,8 @@ import sys
 from collections.abc import Generator
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from dh.fileutils import get_files
-from dh.fileutils import is_binary
+
+from dh import get_files, is_binary
 
 IGNORED_DIRS = {".git", ".hg", ".svn", "node_modules", "__pycache__", ".ruff_cache", ".pytest_cache", ".mypy_cache"}
 BINARY_CHUNK = 8192

@@ -7,11 +7,8 @@ import sys
 from collections import deque
 from pathlib import Path
 
-from dh import cprint
+from dh import cprint, fsz, gsz
 from joblib import Parallel, delayed
-from dh.fileutils import gsz
-from dh.fileutils import fsz
-
 
 CHUNK_SIZE = 1024 * 1024
 N_JOBS = -1

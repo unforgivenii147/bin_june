@@ -21,7 +21,7 @@ from typing import Final
 
 from binaryornot import is_binary
 from deep_translator import GoogleTranslator
-from dh.fileutils import get_nobinary
+from dh import get_nobinary
 
 MAX_WORKERS: Final[int] = 4
 MAX_RETRIES: Final[int] = 2

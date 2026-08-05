@@ -7,11 +7,10 @@ from collections import deque
 from collections.abc import Callable
 from pathlib import Path
 
-from markdownify import markdownify as md
-from readability import Document
 from dh import get_files
 from dh.jobutils import mpf3
-
+from markdownify import markdownify as md
+from readability import Document
 
 remove_orig = True
 

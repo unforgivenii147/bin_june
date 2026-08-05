@@ -4,8 +4,8 @@ from __future__ import annotations
 from pathlib import Path
 
 import imagehash
+from dh import is_image
 from PIL import Image
-from dh.fileutils import is_image
 
 
 def find_similar_images(userpaths, hashfunc=imagehash.average_hash) -> None:

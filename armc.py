@@ -27,7 +27,8 @@ import zipfile
 from collections.abc import Generator
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from dh.fileutils import is_python_file
+
+from dh import is_python_file
 
 
 class CommentRemover:

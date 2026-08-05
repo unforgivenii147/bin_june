@@ -13,10 +13,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 import lz4.frame
-from dh import get_files
-from dh.fileutils import fsz
-from dh.fileutils import get_dirs
-
+from dh import fsz, get_dirs, get_files
 
 MAX_WORKERS = 4
 CHUNK_SIZE = 524288

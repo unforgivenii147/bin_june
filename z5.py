@@ -15,8 +15,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import zstandard as zstd
-from dh import fsz
-from dh.fileutils import get_files
+from dh import fsz, get_files
 
 EXCLUDED_EXTENSIONS = {
     ".xz",

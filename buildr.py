@@ -6,9 +6,9 @@ from collections import deque
 from collections.abc import Callable
 from os import chdir as os_chdir
 from pathlib import Path
-from dh import get_files
+
+from dh import get_files, runcmd
 from dh.jobutils import mpf3
-from dh.fileutils import runcmd
 
 
 def process_file(path_str: str) -> None:

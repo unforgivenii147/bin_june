@@ -11,12 +11,9 @@ from pathlib import Path
 from typing import Any
 
 import tree_sitter_python as tspython
-from tree_sitter import Language, Parser, Query, QueryCursor
-from dh.fileutils import is_python_file
-from dh.fileutils import is_binary
-from dh.fileutils import get_pyfiles
+from dh import get_pyfiles, gsz, is_binary, is_python_file
 from dh.jobutils import mpf_async
-from dh.fileutils import gsz
+from tree_sitter import Language, Parser, Query, QueryCursor
 
 CHUNK_SIZE = 1024 * 1024
 

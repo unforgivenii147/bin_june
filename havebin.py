@@ -5,8 +5,8 @@ from __future__ import annotations
 import os
 import subprocess
 from pathlib import Path
-from dh.fileutils import get_file_age
-from dh.fileutils import get_installed_pkgs
+
+from dh import get_file_age, get_installed_pkgs
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

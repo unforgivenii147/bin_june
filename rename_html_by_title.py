@@ -8,9 +8,9 @@ from collections import deque
 from collections.abc import Callable
 from html.parser import HTMLParser
 from pathlib import Path
-from dh import get_files
+
+from dh import get_files, unique_path
 from dh.jobutils import mpf3
-from dh.fileutils import unique_path
 
 
 def finglish(text: str) -> str:

@@ -10,7 +10,7 @@ from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
 from bs4.element import AttributeValuelist
-from dh.fileutils import get_mime_type
+from dh import get_mime_type
 
 
 class HTMLStandaloneMaker:

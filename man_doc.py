@@ -9,9 +9,7 @@ from collections.abc import Callable
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
-from dh import cprint
-from dh.fileutils import get_files
-from dh.fileutils import runcmd
+from dh import cprint, get_files, runcmd
 from dh.jobutils import mpf3
 
 

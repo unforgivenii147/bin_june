@@ -22,8 +22,7 @@ import sys
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 
-from dh import BIN_EXT, TXT_EXT
-from dh.fileutils import is_text_file
+from dh import BIN_EXT, TXT_EXT, is_text_file
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)

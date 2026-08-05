@@ -8,7 +8,8 @@ import re
 import sys
 import tempfile
 from pathlib import Path
-from dh.fileutils import should_skip
+
+from dh import should_skip
 
 THRESHOLD = 5 * 1024 * 1024
 RE_REPEAT = re.compile(r"^(.)\1+$", re.IGNORECASE)

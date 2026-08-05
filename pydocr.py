@@ -10,10 +10,8 @@ from collections import deque
 from multiprocessing import get_context
 from pathlib import Path
 from textwrap import dedent
-from dh import get_files
-from dh.fileutils import unique_path
-from dh.fileutils import _clean_fname
 
+from dh import _clean_fname, get_files, unique_path
 
 cwd = Path.cwd()
 cwdname = cwd.name

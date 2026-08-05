@@ -13,10 +13,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 import brotli
-from dh import get_files
-from dh.fileutils import fsz
-from dh.fileutils import get_dirs
-
+from dh import fsz, get_dirs, get_files
 
 MAX_WORKERS = 8
 CHUNK_SIZE = 524288

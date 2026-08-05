@@ -31,7 +31,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
-from dh.fileutils import is_image
+from dh import is_image
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

@@ -7,11 +7,8 @@ from collections import deque
 from collections.abc import Callable
 from pathlib import Path
 
-from dh import cprint
-from dh.fileutils import fsz
-from dh.fileutils import gsz
+from dh import cprint, fsz, gsz
 from dh.jobutils import mpf3
-
 
 _HASH_TABLE_SIZE = 1 << 14
 _MAX_OFFSET_1 = 2047

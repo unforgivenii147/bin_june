@@ -5,9 +5,8 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
-from dh.fileutils import unique_path
-from dh.fileutils import _clean_fname
-from dh.fileutils import should_skip
+
+from dh import _clean_fname, should_skip, unique_path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

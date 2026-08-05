@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Final
 
 import zstandard as zstd
-from dh.fileutils import fsz
+from dh import fsz
 
 CHUNK_SIZE = 1024 * 1024
 

@@ -9,8 +9,8 @@ from multiprocessing import get_context
 from pathlib import Path
 from typing import Any
 
-from docutils.core import publish_parts
 from dh import get_files, mpf_async
+from docutils.core import publish_parts
 
 MAX_WORKERS = 4
 

@@ -8,10 +8,9 @@ from collections.abc import Callable
 from pathlib import Path
 
 import html2text
-from readability import Document
 from dh import get_files
 from dh.jobutils import mpf3
-
+from readability import Document
 
 remove_orig = True
 

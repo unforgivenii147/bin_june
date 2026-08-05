@@ -7,9 +7,8 @@ from collections.abc import Callable
 from pathlib import Path
 
 from dh import cprint
-from nudenet import NudeDetector
 from dh.jobutils import mpf3
-
+from nudenet import NudeDetector
 
 safe_path = Path("safe")
 sexy_path = Path("sexy")

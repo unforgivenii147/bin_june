@@ -6,9 +6,8 @@ import sys
 from collections import deque
 from pathlib import Path
 
-from dh import mpf3
+from dh import get_files, mpf3
 from loguru import logger
-from dh import get_files
 
 
 def strip_bash_comments(line):

@@ -4,8 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from dh import cprint
-from dh.fileutils import gsz
+from dh import cprint, gsz
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

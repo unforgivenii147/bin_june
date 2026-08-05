@@ -5,8 +5,9 @@ from __future__ import annotations
 import sys
 from multiprocessing import get_context
 from pathlib import Path
+
+from dh import unique_path
 from dh.jobutils import mpf3
-from dh.fileutils import unique_path
 
 
 def process_file(path) -> None:

@@ -6,9 +6,8 @@ import sys
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 from subprocess import DEVNULL, TimeoutExpired, run
-from dh.fileutils import get_files
-from dh.fileutils import runcmd
-from dh.fileutils import is_binary
+
+from dh import get_files, is_binary, runcmd
 
 CHUNK_SIZE = 1024
 SKIP_DIRS = {".git", "__pycache__"}

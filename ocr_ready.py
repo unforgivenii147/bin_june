@@ -9,7 +9,7 @@ from pathlib import Path
 
 import numpy as np
 import pytesseract
-from dh.fileutils import should_skip
+from dh import should_skip
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 SUPPORTED_EXT = {".jpg", ".jpeg", ".png", ".tiff", ".bmp", ".webp"}

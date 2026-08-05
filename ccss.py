@@ -7,10 +7,7 @@ from collections import deque
 from collections.abc import Callable
 from pathlib import Path
 
-from dh import cprint
-from dh.fileutils import fsz
-from dh.fileutils import runcmd
-from dh.fileutils import gsz
+from dh import cprint, fsz, gsz, runcmd
 from dh.jobutils import mpf3
 
 

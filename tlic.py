@@ -19,8 +19,8 @@ import time
 from collections import defaultdict
 from pathlib import Path
 
+from dh import is_text_file
 from joblib import Parallel, delayed
-from dh.fileutils import is_text_file
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

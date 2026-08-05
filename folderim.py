@@ -6,8 +6,8 @@ import shutil
 from pathlib import Path
 
 import dh
+from dh import is_image
 from PIL import Image
-from dh.fileutils import is_image
 
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 HASH_FUNC = dh.phash

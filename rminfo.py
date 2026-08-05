@@ -9,7 +9,8 @@ from __future__ import annotations
 import re
 import sys
 from pathlib import Path
-from dh.fileutils import is_python_file
+
+from dh import is_python_file
 
 INFO_BLOCK_PATTERN = re.compile(
     r"^# Author\s*:\s*isaac\s*\n"

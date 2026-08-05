@@ -7,14 +7,8 @@ from collections import deque
 from collections.abc import Callable
 from pathlib import Path
 
-from dh import cprint
-from dh.fileutils import fsz
-from dh.fileutils import rrs
-from dh.fileutils import unique_path
-from dh.fileutils import _clean_fname
-from dh.fileutils import gsz
+from dh import _clean_fname, cprint, fsz, gsz, rrs, unique_path
 from dh.jobutils import mpf3
-
 
 try:
     import cv2

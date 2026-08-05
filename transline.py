@@ -18,9 +18,8 @@ from pathlib import Path
 from typing import Any, Final
 
 from deep_translator import GoogleTranslator
+from dh import get_files, is_binary
 from tenacity import before_sleep_log, retry, retry_if_exception_type, stop_after_attempt, wait_exponential_jitter
-from dh.fileutils import is_binary
-from dh.fileutils import get_files
 
 CHUNK_SIZE = 1024 * 1024
 

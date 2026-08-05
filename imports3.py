@@ -20,7 +20,8 @@ import tarfile
 import zipfile
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from dh.fileutils import is_python_file
+
+from dh import is_python_file
 
 
 class PIPPackageCache:

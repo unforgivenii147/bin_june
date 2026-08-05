@@ -7,8 +7,8 @@ import sys
 import zipfile
 from collections import deque
 from pathlib import Path
-from dh import get_files
-from dh.fileutils import get_installed_packages
+
+from dh import get_files, get_installed_packages
 
 
 def parse_version_tuple(version_str: str) -> tuple:

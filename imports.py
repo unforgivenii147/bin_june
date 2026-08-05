@@ -11,10 +11,7 @@ import time
 from collections import defaultdict
 from pathlib import Path
 
-from dh import PKG_MAPPING, STDLIB
-from dh.fileutils import get_file_age
-from dh.fileutils import get_installed_pkgs
-
+from dh import PKG_MAPPING, STDLIB, get_file_age, get_installed_pkgs
 
 try:
     from joblib import Parallel, delayed

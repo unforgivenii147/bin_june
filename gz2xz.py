@@ -8,9 +8,9 @@ from collections import deque
 from collections.abc import Callable
 from pathlib import Path
 
-from lzma_mt import compress
 from dh import get_files
 from dh.jobutils import mpf3
+from lzma_mt import compress
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

@@ -10,7 +10,8 @@ import stat
 import sys
 from argparse import Namespace
 from pathlib import Path
-from dh.fileutils import format_time
+
+from dh import format_time
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

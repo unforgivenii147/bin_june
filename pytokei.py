@@ -1,13 +1,13 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Count lines of code, comments, and blanks across multiple languages."""
 
-import sys
-from pathlib import Path
-from collections import defaultdict
-from multiprocessing import Pool, cpu_count
-from dataclasses import dataclass
-from typing import Dict, Set, Tuple
 import re
+import sys
+from collections import defaultdict
+from dataclasses import dataclass
+from multiprocessing import Pool, cpu_count
+from pathlib import Path
+from typing import Dict, Set, Tuple
 
 LANGUAGE_PATTERNS: Dict[str, Dict[str, object]] = {
     "python": {

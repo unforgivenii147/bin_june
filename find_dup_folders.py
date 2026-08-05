@@ -7,8 +7,8 @@ from collections import defaultdict
 from os import scandir as os_scandir
 from pathlib import Path
 
+from dh import get_dirs
 from xxhash import xxh64
-from dh.fileutils import get_dirs
 
 CHUNK_SIZE = 1024 * 1024
 

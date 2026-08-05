@@ -7,23 +7,16 @@ Usage:
     python extract_constants.py [source_dir] [output_dir] [--include-extensionless]
 """
 
+import argparse
 import ast
 import re
 import sys
-from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
 from typing import Dict, List, Set, Tuple
-import argparse
 
 from rich.console import Console
-from rich.progress import (
-    Progress,
-    BarColumn,
-    TextColumn,
-    TimeElapsedColumn,
-    TimeRemainingColumn,
-    SpinnerColumn,
-)
+from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn, TimeRemainingColumn
 
 console = Console()
 

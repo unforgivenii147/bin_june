@@ -16,9 +16,7 @@ from pathlib import Path
 from typing import Any
 
 import py7zr
-from dh import cprint
-from dh.fileutils import is_binary
-from dh.fileutils import get_nobinary
+from dh import cprint, get_nobinary, is_binary
 from dh.utils import is_valid_url
 
 CHUNK_SIZE = 1024 * 1024

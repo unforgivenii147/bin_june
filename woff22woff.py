@@ -7,10 +7,8 @@ from collections import deque
 from collections.abc import Callable
 from pathlib import Path
 
-from dh import cprint, mpf3, unique_path, get_files
+from dh import _clean_fname, cprint, get_files, mpf3, unique_path
 from fontTools.ttLib import TTFont
-from dh.fileutils import _clean_fname
-
 
 cwd = Path.cwd()
 

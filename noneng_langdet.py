@@ -14,7 +14,8 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
-from dh.fileutils import is_text_file
+
+from dh import is_text_file
 
 # Assuming the package is installed
 try:

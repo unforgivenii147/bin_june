@@ -10,8 +10,8 @@ from email import policy
 from email.message import EmailMessage
 from email.parser import BytesParser
 from pathlib import Path
-from dh.fileutils import unique_path
-from dh.fileutils import _clean_fname
+
+from dh import _clean_fname, unique_path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

@@ -6,10 +6,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+from dh import get_file_age, get_installed_pkgs
 from pip._internal.cli.main import main as pip_main
 from rapidfuzz import fuzz
-from dh.fileutils import get_file_age
-from dh.fileutils import get_installed_pkgs
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

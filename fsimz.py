@@ -7,8 +7,8 @@ import sys
 from collections import defaultdict, deque
 from pathlib import Path
 
-from ppdeep import hash_from_file
 from dh import get_files
+from ppdeep import hash_from_file
 
 
 def find_dups(cwd: str):

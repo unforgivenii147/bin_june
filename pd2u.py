@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from dh.fileutils import is_binary
+
+from dh import is_binary
 
 CHUNK_SIZE = 65536
 BINARY_BYTES = bytes(range(9)) + bytes([11, 12]) + bytes(range(14, 32))

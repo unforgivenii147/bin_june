@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from dh.fileutils import is_python_file
+
+from dh import is_python_file
 
 TARGET_SHEBANG = "#!/data/data/com.termux/files/usr/bin/env python"
 

@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from dh.fileutils import get_fast
+
+from dh import get_fast
 
 RM = "-r" in sys.argv
 

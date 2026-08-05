@@ -8,7 +8,8 @@ import sys
 from collections import defaultdict
 from functools import partial
 from pathlib import Path
-from dh.fileutils import is_text_file
+
+from dh import is_text_file
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

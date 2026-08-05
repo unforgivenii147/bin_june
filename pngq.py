@@ -5,10 +5,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from dh import cprint, get_fast
-from dh.fileutils import runcmd
-from dh.fileutils import gsz
-
+from dh import cprint, get_fast, gsz, runcmd
 
 START_DIR = Path.cwd()
 NUM_PROCESSES = 4

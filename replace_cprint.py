@@ -7,7 +7,6 @@ from collections import deque
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-
 CODE_BLOCK = r"""
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)

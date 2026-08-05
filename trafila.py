@@ -10,7 +10,6 @@ from pathlib import Path
 import trafilatura
 from dh import get_files, mpf3
 
-
 try:
     import markdownify
 except ImportError:

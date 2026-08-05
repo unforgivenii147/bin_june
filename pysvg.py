@@ -4,11 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from dh import get_fast
-from dh.fileutils import fsz
-from dh.fileutils import rrs
-from dh.fileutils import gsz
-from dh.fileutils import runcmd
+from dh import fsz, get_fast, gsz, rrs, runcmd
 
 
 def process_file(path) -> None:

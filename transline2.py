@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Final
 
 from deep_translator import GoogleTranslator
-from dh.fileutils import get_files
+from dh import get_files
 
 SKIP_DIRS: Final[frozenset[str]] = frozenset(
     {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}

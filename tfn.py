@@ -4,10 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from dh import FONT_EXT
+from dh import FONT_EXT, _clean_fname, unique_path
 from fontTools.ttLib import TTFont
-from dh.fileutils import unique_path
-from dh.fileutils import _clean_fname
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

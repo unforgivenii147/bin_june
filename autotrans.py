@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Final
 
 from deep_translator import GoogleTranslator
-from dh.fileutils import is_binary
+from dh import is_binary
 
 CHUNK_SIZE = 1024 * 1024
 

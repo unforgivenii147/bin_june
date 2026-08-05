@@ -6,8 +6,8 @@ import sys
 from collections.abc import Callable
 from functools import partial
 from pathlib import Path
-from dh.fileutils import unique_path
-from dh.fileutils import _clean_fname
+
+from dh import _clean_fname, unique_path
 from dh.jobutils import mpf3
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})

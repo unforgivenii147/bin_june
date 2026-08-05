@@ -7,8 +7,8 @@ from collections.abc import Callable
 from pathlib import Path
 
 from dh import cprint
-from xorhash import get_xorhash
 from dh.jobutils import mpf3
+from xorhash import get_xorhash
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

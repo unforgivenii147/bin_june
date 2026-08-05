@@ -5,10 +5,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from dh import cprint
-from dh.fileutils import is_binary
-from dh.fileutils import get_filez
-from dh.fileutils import should_skip
+from dh import cprint, get_filez, is_binary, should_skip
 
 CHUNK_SIZE = 1024 * 1024
 

@@ -7,9 +7,7 @@ from collections import deque
 from pathlib import Path
 
 import cairosvg
-from dh import cprint
-from dh.fileutils import gsz
-from dh.fileutils import fsz
+from dh import cprint, fsz, gsz
 
 
 def process_file(path: Path) -> None:

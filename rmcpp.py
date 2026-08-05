@@ -8,9 +8,8 @@ from multiprocessing import get_context
 from pathlib import Path
 
 import tree_sitter_cpp as tscpp
+from dh import get_files, gsz
 from tree_sitter import Language, Parser, Query, QueryCursor
-from dh import get_files
-from dh.fileutils import gsz
 
 
 def remove_blank_lines(text: str | Path) -> str:

@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import subprocess
 from pathlib import Path
-from dh.fileutils import is_python_file
+
+from dh import is_python_file
 
 
 def format_with_ruff(file_path: Path):

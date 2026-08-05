@@ -11,10 +11,7 @@ from enum import Enum
 from os import scandir as os_scandir
 from pathlib import Path
 
-from dh import cprint
-from dh.fileutils import is_python_file
-from dh.fileutils import is_binary
-from dh.fileutils import get_pyfiles
+from dh import cprint, get_pyfiles, is_binary, is_python_file
 
 CHUNK_SIZE = 1024 * 1024
 

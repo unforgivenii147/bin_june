@@ -5,10 +5,8 @@ from __future__ import annotations
 import sys
 from collections import deque
 from pathlib import Path
-from dh import get_files
-from dh.fileutils import is_binary
-from dh.fileutils import get_nobinary
-from dh.fileutils import gsz
+
+from dh import get_files, get_nobinary, gsz, is_binary
 
 CHUNK_SIZE = 1024 * 1024
 

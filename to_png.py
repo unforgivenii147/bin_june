@@ -4,9 +4,8 @@ from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from dh.fileutils import fsz
-from dh.fileutils import gsz
-from dh.fileutils import is_image
+
+from dh import fsz, gsz, is_image
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

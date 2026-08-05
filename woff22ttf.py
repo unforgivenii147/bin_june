@@ -7,9 +7,8 @@ from collections.abc import Callable
 from pathlib import Path
 
 from dh import cprint
-from fontTools.ttLib import woff2
 from dh.jobutils import mpf3
-
+from fontTools.ttLib import woff2
 
 cwd = Path.cwd()
 

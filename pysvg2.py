@@ -7,11 +7,9 @@ import tempfile
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
-from dh import get_files
-from dh.fileutils import fsz
-from dh.fileutils import rrs
+
+from dh import fsz, get_files, rrs, runcmd
 from dh.jobutils import mpf3
-from dh.fileutils import runcmd
 
 
 def process_file(path) -> None:

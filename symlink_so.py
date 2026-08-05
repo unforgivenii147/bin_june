@@ -6,7 +6,8 @@ import glob
 import os
 import re
 from pathlib import Path
-from dh.fileutils import should_skip
+
+from dh import should_skip
 
 
 def get_base_name(so_path):

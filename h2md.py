@@ -7,9 +7,9 @@ from collections import deque
 from collections.abc import Callable
 from pathlib import Path
 
-from markdownify import markdownify
 from dh import get_files
 from dh.jobutils import mpf3
+from markdownify import markdownify
 
 
 def process_file(path) -> None:

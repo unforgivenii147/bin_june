@@ -7,10 +7,8 @@ from pathlib import Path
 from random import choice
 from string import ascii_lowercase
 from typing import Optional
-from dh.fileutils import get_files
-from dh.fileutils import get_random_filename
-from dh.fileutils import is_binary
-from dh.fileutils import get_nobinary
+
+from dh import get_nobinary, get_random_filename, is_binary
 
 CHUNK_SIZE: int = 8192
 BINARY_THRESHOLD: float = 0.3

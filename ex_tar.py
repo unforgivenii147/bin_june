@@ -10,7 +10,7 @@ import time
 from pathlib import Path
 
 import zstandard as zstd
-from dh.fileutils import gsz
+from dh import gsz
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

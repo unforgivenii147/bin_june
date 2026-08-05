@@ -18,7 +18,8 @@ import sys
 import tempfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from dh.fileutils import get_installed_packages
+
+from dh import get_installed_packages
 
 logging.basicConfig(
     level=logging.INFO,

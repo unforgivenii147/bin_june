@@ -6,8 +6,8 @@ import sys
 from pathlib import Path
 
 import pillow_heif as ph
+from dh import gsz
 from fastwalk import walk_files
-from dh.fileutils import gsz
 
 
 def process_file(path) -> bool:

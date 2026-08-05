@@ -8,11 +8,9 @@ from collections.abc import Callable, Iterable
 from multiprocessing import get_context
 from pathlib import Path
 from typing import Any
-from dh import get_files
-from dh.fileutils import gsz
+
+from dh import fsz, get_files, gsz, runcmd
 from dh.jobutils import mpf_async
-from dh.fileutils import fsz
-from dh.fileutils import runcmd
 
 MAX_WORKERS = 4
 

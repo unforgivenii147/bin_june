@@ -6,9 +6,7 @@ import sys
 from collections import deque
 from pathlib import Path
 
-from dh import cprint
-from dh.fileutils import get_files
-
+from dh import cprint, get_files
 
 TIMEOUT = 0
 

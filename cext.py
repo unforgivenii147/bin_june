@@ -19,7 +19,8 @@ from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import NamedTuple
-from dh.fileutils import _looks_like_python
+
+from dh import _looks_like_python
 
 try:
     import tree_sitter

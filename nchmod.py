@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import stat
 from pathlib import Path
-from dh.fileutils import get_filez
+
+from dh import get_filez
 
 
 def get_mode(path: Path) -> int:

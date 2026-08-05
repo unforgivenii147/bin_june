@@ -7,9 +7,9 @@ from collections import deque
 from collections.abc import Callable
 from pathlib import Path
 
-from PIL import Image, ImageEnhance
 from dh import get_files
 from dh.jobutils import mpf3
+from PIL import Image, ImageEnhance
 
 
 def process_file(path):

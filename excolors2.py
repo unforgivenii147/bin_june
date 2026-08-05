@@ -7,7 +7,8 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
-from dh.fileutils import is_binary
+
+from dh import is_binary
 
 CHUNK_SIZE = 1024 * 1024
 

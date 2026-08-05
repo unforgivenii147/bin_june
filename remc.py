@@ -9,9 +9,7 @@ from ast import Module
 from collections import deque
 from pathlib import Path
 
-from dh import cprint
-from dh.fileutils import gsz
-from dh.fileutils import fsz
+from dh import cprint, fsz, gsz
 
 
 def rm_doc(content: str) -> tuple[str, int]:

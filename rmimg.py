@@ -8,9 +8,7 @@ from multiprocessing import get_context
 from pathlib import Path
 
 from bs4 import BeautifulSoup
-from dh import cprint
-from dh.fileutils import gsz
-from dh.fileutils import fsz
+from dh import cprint, fsz, gsz
 
 
 def process_file(file_path: Path) -> None:

@@ -9,8 +9,7 @@ from collections import Counter
 from pathlib import Path
 
 import pycld2
-from dh.fileutils import is_binary
-from dh.fileutils import is_text_file
+from dh import is_binary, is_text_file
 
 CHUNK_SIZE = 1024 * 1024
 

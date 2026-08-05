@@ -6,8 +6,8 @@ import mmap
 import re
 from collections.abc import Callable
 from pathlib import Path
-from dh.jobutils import mpf3
 
+from dh.jobutils import mpf3
 
 LOG_EXT = ".log"
 MMAP_THRESHOLD = 1 * 1024 * 1024

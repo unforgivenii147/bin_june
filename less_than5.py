@@ -5,7 +5,8 @@ from __future__ import annotations
 import shutil
 import time
 from pathlib import Path
-from dh.fileutils import get_file_age
+
+from dh import get_file_age
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 TIME_THRESHOLD = 8 * 42

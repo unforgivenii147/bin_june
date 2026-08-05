@@ -12,7 +12,6 @@ import nude
 from dh import cprint
 from dh.jobutils import mpf3
 
-
 nude_path = Path("nude")
 nude_path.mkdir(exist_ok=True)
 RESIZE = "-r" in sys.argv

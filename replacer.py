@@ -8,7 +8,8 @@ import os
 import re
 import sys
 from pathlib import Path
-from dh.fileutils import is_binary
+
+from dh import is_binary
 
 SKIP_DIRS = frozenset(
     {".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache", "node_modules", "build", "dist"}

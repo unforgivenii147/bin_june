@@ -12,7 +12,6 @@ import xmltodict
 from dh import cprint
 from dh.jobutils import mpf3
 
-
 MAX_QUEUE = 16
 REMOVE_ORIG = True
 

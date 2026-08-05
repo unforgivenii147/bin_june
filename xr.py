@@ -14,9 +14,7 @@ import brotlicffi as brotli
 import lz4.frame
 import py7zr
 import zstandard as zstd
-from dh.fileutils import fsz
-from dh.fileutils import get_files
-from dh.fileutils import get_dirs
+from dh import fsz, get_dirs, get_files
 
 MAX_WORKERS = 4
 CHUNK_SIZE = 10 * 1024 * 1024

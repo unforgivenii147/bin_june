@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from dh.fileutils import get_file_age
-from dh.fileutils import get_installed_pkgs
+
+from dh import get_file_age, get_installed_pkgs
 
 STDLIB: frozenset = frozenset(
     {

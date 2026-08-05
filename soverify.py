@@ -11,7 +11,6 @@ from pathlib import Path
 from dh import cprint
 from loguru import logger
 
-
 logger.remove()
 logger.add(
     "/sdcard/soverify.log",

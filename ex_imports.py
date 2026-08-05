@@ -8,12 +8,9 @@ from collections.abc import Callable
 from pathlib import Path
 
 import tree_sitter_python as tsp
-from tree_sitter import Language, Parser
-from dh import get_files
-from dh.fileutils import unique_path
-from dh.fileutils import _clean_fname
+from dh import _clean_fname, get_files, unique_path
 from dh.jobutils import mpf3
-
+from tree_sitter import Language, Parser
 
 OUTPUT_DIR = Path.home() / "tmp" / "output"
 parser = Parser()

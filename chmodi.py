@@ -8,7 +8,8 @@ import sys
 import time
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from dh.fileutils import is_binary
+
+from dh import is_binary
 
 DIR_PERM = 0o755
 FILE_PERM = 0o664

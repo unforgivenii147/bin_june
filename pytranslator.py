@@ -18,9 +18,8 @@ from pathlib import Path
 from typing import Final
 
 from deep_translator import GoogleTranslator
-from dh import DOC_TH1, DOC_TH2
+from dh import DOC_TH1, DOC_TH2, should_skip
 from langdetect import DetectorFactory, detect
-from dh.fileutils import should_skip
 
 SKIP_DIRS: Final[frozenset[str]] = frozenset(
     {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}

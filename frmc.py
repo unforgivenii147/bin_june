@@ -8,7 +8,7 @@ from collections import deque
 from collections.abc import Callable
 from pathlib import Path
 
-from dh import SOURCE_CODE_EXT, cprint, get_files, fsz, gsz, get_nobinary, mpf3, is_binary
+from dh import SOURCE_CODE_EXT, cprint, fsz, get_files, get_nobinary, gsz, is_binary, mpf3
 
 CHUNK_SIZE = 1024 * 1024
 

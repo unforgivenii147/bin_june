@@ -7,9 +7,9 @@ from collections import deque
 from collections.abc import Callable
 from pathlib import Path
 
-from PyPDF2 import PdfReader
 from dh import get_files
 from dh.jobutils import mpf3
+from PyPDF2 import PdfReader
 
 
 def process_file(path) -> None:

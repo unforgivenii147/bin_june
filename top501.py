@@ -7,7 +7,8 @@ import time
 from collections import Counter
 from multiprocessing import get_context
 from pathlib import Path
-from dh.fileutils import is_text_file
+
+from dh import is_text_file
 
 
 def process_file(file_path, text_extensions):

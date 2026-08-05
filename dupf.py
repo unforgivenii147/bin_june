@@ -6,11 +6,8 @@ from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
-from dh import cprint
+from dh import cprint, fsz, gsz, should_skip
 from xxhash import xxh64
-from dh.fileutils import gsz
-from dh.fileutils import fsz
-from dh.fileutils import should_skip
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

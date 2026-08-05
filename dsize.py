@@ -6,7 +6,8 @@ import argparse
 import urllib.error
 import urllib.request
 from pathlib import Path
-from dh.fileutils import fsz
+
+from dh import fsz
 
 
 def fetch_content_length(url: str) -> int | None:

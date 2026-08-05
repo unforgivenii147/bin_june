@@ -5,8 +5,9 @@ from __future__ import annotations
 import sys
 from collections.abc import Callable
 from pathlib import Path
+
+from dh import runcmd
 from dh.jobutils import mpf3
-from dh.fileutils import runcmd
 
 
 def process_file(path):

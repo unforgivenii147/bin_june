@@ -7,8 +7,8 @@ import importlib.metadata
 import importlib.util
 import sys
 from pathlib import Path
-from dh.fileutils import is_python_file
-from dh.fileutils import is_binary
+
+from dh import is_binary, is_python_file
 
 CHUNK_SIZE = 1024 * 1024
 

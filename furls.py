@@ -21,12 +21,11 @@ from dh import append_text, is_binary, is_valid_url
 
 DEFAULT_MAX_MB = 15
 EXCLUDE_DIRS = {".git", "__pycache__"}
-# URL_RE = re.compile(r"(https?://[^\s\'\\"<>\\)\\(]+)", flags=re.IGNORECASE)
 
 URL_RE = re.compile(r"(https?://[^\sr'\"<>\()]+)", flags=re.IGNORECASE)
 
-GIT_FILE = Path("gitlinks.txt")
-REPO_FILE = Path("repos.txt")
+GIT_FILE = Path("/sdcard/data/urls/gitlinks.txt")
+REPO_FILE = Path("/sdcard/data/urls/repos.txt")
 ARCHIVE_SUFFIXES = (
     ".tar.gz",
     ".tgz",
@@ -316,7 +315,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Find URLs in files and supported archives recursively and save them to a file."
     )
-    parser.add_argument("-o", "--output", default="urls.txt", help="Output file (one URL per line).")
+    parser.add_argument("-o", "--output", default="/sdcard/data/urls/urls.txt", help="Output file (one URL per line).")
     parser.add_argument(
         "-m",
         "--max-mb",

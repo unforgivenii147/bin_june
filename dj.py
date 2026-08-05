@@ -5,7 +5,8 @@ from __future__ import annotations
 import shutil
 import sys
 from pathlib import Path
-from dh.fileutils import should_skip
+
+from dh import should_skip
 
 EMPTY_MODE = "-e" in sys.argv
 REMOVE_MODE = "-r" in sys.argv

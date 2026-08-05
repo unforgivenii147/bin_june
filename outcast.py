@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from pathlib import Path
-from dh.fileutils import get_random_filename
+
+from dh import get_random_filename
 
 
 def copy_largest_file(source_dir, dest):

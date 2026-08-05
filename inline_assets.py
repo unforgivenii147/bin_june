@@ -14,7 +14,7 @@ import argparse
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from urllib.parse import urlparse, urljoin
+from urllib.parse import urljoin, urlparse
 
 try:
     import requests
