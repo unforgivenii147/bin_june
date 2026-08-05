@@ -8,7 +8,7 @@ from random import choice
 from string import ascii_lowercase
 from typing import Optional
 
-from dh import get_nobinary, get_random_filename, is_binary
+from dh import get_nobinary, get_random_filename, is_binary,should_skip
 
 CHUNK_SIZE: int = 8192
 BINARY_THRESHOLD: float = 0.3
@@ -24,16 +24,6 @@ def read_file(path: Path) -> Optional[str]:
         return None
 
 
-def should_skip_file(file_path: Path, cwd: Path) -> bool:
-    """Skip hidden files and directories."""
-    try:
-        relative_parts = file_path.relative_to(cwd).parts
-    except ValueError:
-        return True
-
-    if any(part.startswith(".") for part in relative_parts):
-        return True
-    return bool(file_path.name.startswith("."))
 
 
 def merge_files() -> Optional[Path]:
@@ -52,7 +42,7 @@ def merge_files() -> Optional[Path]:
         file_count = 0
         with output_file.open("w", encoding="utf-8") as fo:
             for file_path in files:
-                if should_skip_file(file_path, cwd):
+                if should_skip(file_path):
                     continue
 
                 content = read_file(file_path)

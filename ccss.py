@@ -8,7 +8,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 from dh import cprint, fsz, gsz, runcmd
-from dh.jobutils import mpf3
+from dh import mpf3, get_files
 
 
 def process_file(path) -> bool:

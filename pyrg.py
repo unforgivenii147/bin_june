@@ -11,8 +11,6 @@ from collections.abc import Generator
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
-from dh import get_files, is_binary
-
 IGNORED_DIRS = {".git", ".hg", ".svn", "node_modules", "__pycache__", ".ruff_cache", ".pytest_cache", ".mypy_cache"}
 BINARY_CHUNK = 8192
 DEFAULT_THREADS = 4
@@ -21,6 +19,64 @@ ANSI_RESET = "\x1b[0m"
 ANSI_BLUE = "\x1b[94m"
 ANSI_CYAN = "\x1b[5;96m"
 TEXT_CHARS = bytes(range(32, 127)) + b"\n\r\t\x08"
+
+
+def get_files(
+    paths: list[str],
+    include_globs: list[str],
+    exclude_globs: list[str],
+    search_hidden: bool,
+    max_size: int,
+) -> Generator[Path, None, None]:
+    for p_str in paths:
+        path = Path(p_str)
+        if path.is_file() and not path.is_symlink():
+            if not search_hidden and path.name.startswith("."):
+                continue
+            if max_size and path.stat().st_size > max_size:
+                continue
+            if include_globs and not matches_any_glob(path, include_globs):
+                continue
+            if exclude_globs and matches_any_glob(path, exclude_globs):
+                continue
+            yield path
+            continue
+        if not path.is_dir() or path.is_symlink():
+            continue
+        for root, dirs, walk_files in path.walk(top_down=True, follow_symlinks=False):
+            if not search_hidden:
+                dirs[:] = [d for d in dirs if not d.startswith(".")]
+            dirs[:] = [d for d in dirs if d not in IGNORED_DIRS]
+            for f in walk_files:
+                if not search_hidden and f.startswith("."):
+                    continue
+                file_path = root / f
+                if file_path.is_symlink():
+                    continue
+                try:
+                    if max_size and file_path.stat().st_size > max_size:
+                        continue
+                except OSError:
+                    continue
+                if include_globs and not matches_any_glob(file_path, include_globs):
+                    continue
+                if exclude_globs and matches_any_glob(file_path, exclude_globs):
+                    continue
+                yield file_path
+
+
+def is_binary(path: Path) -> bool:
+    try:
+        with path.open("rb") as f:
+            chunk = f.read(BINARY_CHUNK)
+        if not chunk:
+            return False
+        if b"\x00" in chunk:
+            return True
+        non_text_len = len(chunk.translate(None, TEXT_CHARS))
+        return non_text_len / len(chunk) > 0.3
+    except Exception:
+        return True
 
 
 def colorize_line(line: str, spans: list[tuple[int, int]]) -> str:

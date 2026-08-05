@@ -8,20 +8,9 @@ import sys
 from hashlib import sha256
 from pathlib import Path
 
-from dh import cprint
+from dh import cprint, get_sha256
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-CHUNK_SIZE = 32768
-
-
-def get_sha256(path: str | Path) -> str:
-    path = Path(path)
-    h = sha256()
-    with path.open("rb") as f:
-        for chunk in iter(lambda: f.read(CHUNK_SIZE), b""):
-            h.update(chunk)
-    return h.hexdigest()
 
 
 def write_shell_copy(script_path: Path, src_root: Path, dst_root: Path, only_dirs, only_files) -> None:

@@ -8,7 +8,7 @@ import shutil
 import sys
 from pathlib import Path
 
-from dh import _clean_fname, fsz, should_skip, unique_path
+from dh import fsz, should_skip, unique_path
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
