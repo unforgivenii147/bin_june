@@ -5,8 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 
 import tree_sitter_cpp as tscpp
-from tree_sitter import Language, Node, Parser
 from dh import cprint
+from tree_sitter import Language, Node, Parser
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

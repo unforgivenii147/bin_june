@@ -11,6 +11,7 @@ from collections import defaultdict
 from pathlib import Path
 
 from dh import STDLIB
+from dh.fileutils import is_python_file
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -35,24 +36,6 @@ def load_known_packages() -> None:
                 }
         except Exception:
             pass
-
-
-def is_python_file(path: Path | str) -> bool:
-    path = Path(path)
-    if not path.suffix or path.suffix == ".py":
-        try:
-            with Path(path).open(encoding="utf-8", errors="ignore") as f:
-                first_line = f.readline()
-                for pattern in SHEBANG_PATTERNS:
-                    if re.match(pattern, first_line):
-                        return True
-                content = f.read(1024)
-                if re.search(r"\bimport\b|\bfrom\b\s+\w", content, re.IGNORECASE):
-                    return True
-        except:
-            pass
-        return False
-    return path.suffix == ".py"
 
 
 def extract_imports_from_ast(code: str):

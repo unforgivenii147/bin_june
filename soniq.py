@@ -6,17 +6,10 @@ import mmap
 import sys
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
+from dh.fileutils import is_binary
+from dh.fileutils import read_lines
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
-def is_binary(path: Path) -> bool:
-    try:
-        with open(path, "rb") as f:
-            chunk = f.read(1024)
-            return b"\x00" in chunk
-    except:
-        return True
 
 
 THRESHOLD = 1024 * 1024
@@ -24,21 +17,6 @@ THRESHOLD = 1024 * 1024
 
 def _process_chunk(chunk: list[str]) -> list[str]:
     return [line.strip() for line in chunk if line.strip()]
-
-
-def read_lines(path: Path) -> list[str]:
-    sz = path.stat().st_size
-    try:
-        if sz > THRESHOLD:
-            with open(path, encoding="utf-8", errors="ignore") as f:
-                with mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm:
-                    data = mm.read().decode("utf-8", "ignore")
-                    return data.splitlines()
-        else:
-            return path.read_text(encoding="utf-8", errors="ignore").splitlines()
-    except (UnicodeDecodeError, ValueError) as e:
-        print(f"Warning: Could not read file as text: {e}")
-        return []
 
 
 def sort_uniq(path: Path) -> tuple[int, list[str]]:

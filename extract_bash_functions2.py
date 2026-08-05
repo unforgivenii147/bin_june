@@ -7,12 +7,15 @@ Uses generator-style filesystem walking for memory-efficient processing.
 Optimized for Termux environment.
 """
 
+from __future__ import annotations
+
 import argparse
+import contextlib
 import os
 import re
 import sys
 from pathlib import Path
-from typing import List, Tuple, Generator, Optional
+from typing import Generator, List, Optional, Tuple
 
 IS_TERMUX = os.environ.get("TERMUX_VERSION") is not None or "com.termux" in os.environ.get("PREFIX", "")
 EXCLUDED = {
@@ -199,10 +202,8 @@ class FunctionWriter:
                 f.write(header)
                 f.write(func_content)
                 f.write("\n")
-            try:
+            with contextlib.suppress(OSError):
                 output_file.chmod(output_file.stat().st_mode | 73)
-            except OSError:
-                pass
             self.written_count += 1
             return output_file
         except Exception as e:
@@ -300,10 +301,8 @@ def main():
     print(f"  Functions extracted: {functions_extracted}")
     print(f"  Output directory: {args.output.absolute()}")
     if IS_TERMUX:
-        try:
+        with contextlib.suppress(BaseException):
             args.output.chmod(args.output.stat().st_mode | 493)
-        except:
-            pass
     return 0
 
 

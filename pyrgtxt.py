@@ -6,15 +6,7 @@ import sys
 from pathlib import Path
 
 from joblib import Parallel, delayed
-
-
-def is_text_file(file_path):
-    try:
-        with open(file_path, "rb") as f:
-            chunk = f.read(1024)
-            return b"\x00" not in chunk
-    except (OSError, PermissionError):
-        return False
+from dh.fileutils import is_text_file
 
 
 def search_in_file(file_path, search_string):
@@ -42,9 +34,9 @@ if __name__ == "__main__":
         print("Usage: python search_for.py <search_string>")
         sys.exit(1)
     search_string = sys.argv[1]
-    current_dir = Path.cwd()
-    print(f"Searching for '{search_string}' in text files under: {current_dir}")
-    matches = search_in_directory(current_dir, search_string)
+    cwd = Path.cwd()
+    print(f"Searching for '{search_string}' in text files under: {cwd}")
+    matches = search_in_directory(cwd, search_string)
     if matches:
         print("\nFound in:")
         for match in matches:

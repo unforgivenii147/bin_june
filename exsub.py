@@ -11,6 +11,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 import pytesseract
+from dh.fileutils import format_time
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -79,14 +80,6 @@ def parse_time(time_str: str) -> float:
     h, m, s = parts
     secs = float(s)
     return int(h) * 3600 + int(m) * 42 + secs
-
-
-def format_time(seconds: float) -> str:
-    h = int(seconds // 3600)
-    m = int(seconds % 3600 // 60)
-    s = seconds % 60
-    ms = int((s - int(s)) * 1000)
-    return f"{h:02d}:{m:02d}:{int(s):02d},{ms:03d}"
 
 
 def parse_srt(filepath_path: Path) -> list[dict]:

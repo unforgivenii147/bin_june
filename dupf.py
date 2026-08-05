@@ -6,45 +6,16 @@ from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
-from xxhash import xxh64
 from dh import cprint
+from xxhash import xxh64
+from dh.fileutils import gsz
+from dh.fileutils import fsz
+from dh.fileutils import should_skip
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
-def gsz(path: str | Path) -> int:
-    path = Path(path)
-    total = 0
-    if path.is_file():
-        return path.stat().st_size
-    for file in path.rglob("*"):
-        if file.is_file():
-            total += file.stat().st_size
-    return total
-
-
-def fsz(sz: float) -> str:
-    sz = abs(int(sz))
-    units = "B", "KB", "MB", "GB", "TB"
-    if sz == 0:
-        return "0 B"
-    i = min((int(sz).bit_length() - 1) // 10, len(units) - 1)
-    value = sz / 1024**i
-    if i == 0:
-        return f"{int(value)} {units[i]}"
-    return f"{value:.1f} {units[i]}"
-
-
 CHUNKSIZE = 32768
-
-
-def should_skip(path: Path) -> bool:
-    path = Path(path)
-    return bool(
-        path.is_symlink()
-        or not path.stat().st_size
-        or any(pat in path.parts for pat in (".git", "__pycache__", ".mypy_cache", ".ruff_cache"))
-    )
 
 
 def get_hash_file(path):

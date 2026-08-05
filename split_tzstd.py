@@ -11,6 +11,8 @@ Usage:
 Each created part will be a valid .tar.zst file that can be independently extracted.
 """
 
+from __future__ import annotations
+
 import os
 import sys
 import tarfile
@@ -83,7 +85,7 @@ def split_tar_zst(input_file, num_parts):
 
     items_for_this_part = items_per_part + (1 if part_num <= remainder else 0)
 
-    for idx, member in enumerate(tar):
+    for _idx, member in enumerate(tar):
         # Add member to current part
         if member.isfile():
             f = tar.extractfile(member)

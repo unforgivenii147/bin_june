@@ -1,194 +1,272 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+"""
+Extract constant definitions from Python files recursively.
+Saves each unique constant to a separate file in the output directory.
 
-from __future__ import annotations
+Usage:
+    python extract_constants.py [source_dir] [output_dir] [--include-extensionless]
+"""
 
 import ast
-import logging
-import operator
-from os import scandir as os_scandir
+import re
+import sys
 from pathlib import Path
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from typing import Dict, List, Set, Tuple
+import argparse
 
-from joblib import Parallel, delayed
-from xxhash import xxh64
+from rich.console import Console
+from rich.progress import (
+    Progress,
+    BarColumn,
+    TextColumn,
+    TimeElapsedColumn,
+    TimeRemainingColumn,
+    SpinnerColumn,
+)
 
-CHUNK_SIZE = 1024 * 1024
-
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
-def is_python_file(path: str | Path) -> bool:
-    from ast import parse as ast_parse
-
-    path = Path(path)
-    if is_binary(path):
-        return False
-    if not path.stat().st_size:
-        return False
-    if path.is_file() and path.suffix == ".py":
-        return True
-    if not path.suffix:
-        content = path.read_text(encoding="utf-8")
-        if not content:
-            return False
-        if content.startswith("#!") and "python" in content[:100]:
-            return True
-        try:
-            _ = ast_parse(content)
-            return True
-        except:
-            return False
-    return False
+console = Console()
 
 
-def is_binary(path: Path | str) -> bool:
-    path = Path(path)
+def is_constant_name(name: str) -> bool:
+    """Check if a variable name follows Python constant naming convention."""
+    return bool(re.match(r"^[A-Z][A-Z0-9_]*$", name))
+
+
+def looks_like_python_file(file_path: Path) -> bool:
+    """Determine if a file without .py extension is likely a Python script."""
     try:
-        with path.open("rb") as f:
-            chunk = f.read(CHUNK_SIZE)
-        if not chunk:
-            return False
-        if b"\x00" in chunk:
-            return True
-        text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
-        nontext = sum(1 for b in chunk if b not in text_chars)
-        return nontext / len(chunk) > 0.3
-    except Exception:
-        return True
+        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            first_line = f.readline().strip()
+            if first_line.startswith("#!") and "python" in first_line.lower():
+                return True
+
+            content = f.read(4096)
+            if not content:
+                return False
+
+            python_patterns = [
+                r"^\s*(import|from)\s+\w+",
+                r"^\s*def\s+\w+\s*\(",
+                r"^\s*class\s+\w+",
+                r"^\s*if\s+__name__\s*==",
+                r"^\s*print\s*\(",
+                r"^\s*#.*python",
+            ]
+
+            for pattern in python_patterns:
+                if re.search(pattern, content, re.MULTILINE):
+                    return True
+
+            try:
+                ast.parse(content)
+                return True
+            except SyntaxError:
+                return False
+
+    except (IOError, UnicodeDecodeError):
+        return False
 
 
-def get_pyfiles(path: str | Path) -> list[Path]:
-    path = Path(path)
-    if path.is_file():
-        if path.suffix == ".py":
-            return [path]
-        if not path.suffix and not path.name.startswith(".") and is_python_file(path):
-            return [path]
-        return []
+def find_python_files(directory: Path, include_extensionless: bool = False) -> List[Path]:
+    """Recursively find Python files in the given directory."""
+    python_files = list(directory.rglob("*.py"))
 
-    if not path.is_dir():
-        return []
+    if include_extensionless:
+        all_files = [f for f in directory.rglob("*") if f.is_file()]
+        extensionless_files = [f for f in all_files if f.suffix == "" and f.name != "LICENSE" and f.name != "README"]
 
-    pyfiles = []
-    stack = [path]
+        for file_path in extensionless_files:
+            if looks_like_python_file(file_path):
+                python_files.append(file_path)
 
-    while stack:
-        current = stack.pop()
-        try:
-            with os_scandir(current) as entries:
-                for entry in entries:
-                    if entry.is_symlink():
-                        continue
-                    if entry.is_dir(follow_symlinks=False):
-                        if entry.name not in SKIP_DIRS:
-                            stack.append(entry)
-                    elif entry.is_file(follow_symlinks=False):
-                        p = Path(entry.path)
-                        if p.suffix == ".py":
-                            pyfiles.append(p)
-                        elif not p.suffix and not p.name.startswith(".") and is_python_file(p):
-                            pyfiles.append(p)
-        except (PermissionError, OSError):
-            continue
-
-    return sorted(pyfiles)
+    return python_files
 
 
-OUTPUT_DIR = Path("output")
-OUTPUT_FILE = OUTPUT_DIR / "const.py"
-LOG_FILE = OUTPUT_DIR / "error.log"
-OUTPUT_DIR.mkdir(exist_ok=True)
-logging.basicConfig(filename=LOG_FILE, level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s")
-
-
-def get_file_hash(filepath: Path) -> str:
-    hasher = xxh64()
-    with Path(filepath).open("rb") as f:
-        while chunk := f.read(CHUNK_SIZE):
-            hasher.update(chunk)
-    return hasher.hexdigest()
-
-
-def extract_constants(filepath: Path) -> list[tuple[str, str, str]]:
-    constants = []
+def extract_constants_from_file(file_path: Path) -> Tuple[Path, Dict[str, str]]:
+    """Extract constant definitions from a single Python file."""
+    constants = {}
     try:
-        with Path(filepath).open("r", encoding="utf-8") as f:
-            tree = ast.parse(f.read(), filename=str(filepath))
+        content = file_path.read_text(encoding="utf-8", errors="ignore")
+        tree = ast.parse(content)
+
         for node in ast.walk(tree):
+            # Handle module-level assignments
             if isinstance(node, ast.Assign):
-                is_simple_assign = all(isinstance(t, ast.Name) for t in node.targets)
-                if is_simple_assign and isinstance(node.value, ast.Constant):
-                    for target in node.targets:
-                        const_name = target.id
-                        if const_name.isupper():
-                            const_value = ast.unparse(node.value)
-                            const_type = type(node.value.value).__name__
-                            constants.append((const_name, const_value, const_type))
+                for target in node.targets:
+                    if isinstance(target, ast.Name) and is_constant_name(target.id):
+                        try:
+                            value = ast.literal_eval(node.value)
+                            constants[target.id] = repr(value)
+                        except (ValueError, SyntaxError):
+                            try:
+                                constants[target.id] = ast.unparse(node.value)
+                            except AttributeError:
+                                constants[target.id] = "UNKNOWN"
+
+            # Handle annotated assignments
             elif isinstance(node, ast.AnnAssign):
-                if isinstance(node.target, ast.Name) and node.value is not None:
-                    if node.target.id.isupper():
-                        const_name = node.target.id
-                        const_value = ast.unparse(node.value)
-                        const_type = (
-                            type(node.value.value).__name__ if isinstance(node.value, ast.Constant) else "unknown"
-                        )
-                        constants.append((const_name, const_value, const_type))
-    except SyntaxError as e:
-        logging.error(f"Syntax error in {filepath}: {e}")
+                if isinstance(node.target, ast.Name) and is_constant_name(node.target.id):
+                    if node.value is not None:
+                        try:
+                            value = ast.literal_eval(node.value)
+                            constants[node.target.id] = repr(value)
+                        except (ValueError, SyntaxError):
+                            try:
+                                constants[node.target.id] = ast.unparse(node.value)
+                            except AttributeError:
+                                constants[node.target.id] = "UNKNOWN"
+
+        return file_path, constants
+
+    except (SyntaxError, UnicodeDecodeError) as e:
+        console.print(f"[yellow]Warning:[/yellow] Could not parse {file_path}: {e}")
+        return file_path, {}
     except Exception as e:
-        logging.error(f"Error processing {filepath}: {e}")
-    return constants
+        console.print(f"[red]Error:[/red] Processing {file_path}: {e}")
+        return file_path, {}
 
 
-def process_file(filepath: Path) -> tuple[str, list[tuple[str, str, str]] | None]:
-    file_hash = get_file_hash(filepath)
-    Path(path)
-    constants = extract_constants(filepath)
-    return file_hash, constants
+def process_files_parallel(files: List[Path], max_workers: int = None) -> Dict[Path, Dict[str, str]]:
+    """Process multiple files in parallel using ProcessPoolExecutor."""
+    results = {}
+
+    if not files:
+        return results
+
+    with ProcessPoolExecutor(max_workers=max_workers) as executor:
+        future_to_file = {executor.submit(extract_constants_from_file, file_path): file_path for file_path in files}
+
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+            TextColumn("({task.completed}/{task.total})"),
+            TimeElapsedColumn(),
+            TimeRemainingColumn(),
+            console=console,
+        ) as progress:
+            task = progress.add_task("[cyan]Processing Python files...", total=len(files))
+
+            for future in as_completed(future_to_file):
+                file_path = future_to_file[future]
+                try:
+                    _, constants = future.result()
+                    if constants:
+                        results[file_path] = constants
+                except Exception as e:
+                    console.print(f"[red]Error processing {file_path}: {e}[/red]")
+
+                progress.update(task, advance=1)
+
+    return results
 
 
-def main() -> None:
-    cwd = Path.cwd()
-    python_files = list(get_pyfiles(cwd))
+def save_constants_separately(all_constants: Dict[Path, Dict[str, str]], output_dir: Path) -> None:
+    """
+    Save each unique constant to its own file in the output directory.
+
+    Output structure:
+    output_dir/
+        CONSTANT_NAME.py
+        ANOTHER_CONSTANT.py
+        ...
+
+    Each file contains:
+        CONSTANT_NAME = value
+    """
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Collect unique constants with their values
+    unique_constants: Dict[str, Set[str]] = {}
+
+    for file_path, constants in all_constants.items():
+        for name, value in constants.items():
+            if name not in unique_constants:
+                unique_constants[name] = set()
+            unique_constants[name].add(value)
+
+    # Save each constant to its own file
+    for name, values in unique_constants.items():
+        # Sanitize filename (remove any invalid characters)
+        safe_name = re.sub(r"[^\w\-.]", "_", name)
+        file_path = output_dir / f"{safe_name}.py"
+
+        # If multiple values exist for the same constant name,
+        # save the first one (or you could save all values as a list)
+        value = sorted(values)[0] if values else "None"
+
+        # Write the constant definition
+        content = f"{name} = {value}\n"
+        file_path.write_text(content, encoding="utf-8")
+
+
+def main():
+    """Main entry point."""
+    parser = argparse.ArgumentParser(description="Extract constants from Python files recursively")
+    parser.add_argument(
+        "source_dir", nargs="?", default=".", help="Source directory to scan (default: current directory)"
+    )
+    parser.add_argument(
+        "output_dir",
+        nargs="?",
+        default="output",
+        help="Output directory for results (default: constants_output)",
+    )
+    parser.add_argument(
+        "--include-extensionless", action="store_true", help="Include Python files without .py extension"
+    )
+    parser.add_argument("--max-workers", type=int, default=8, help="Maximum number of parallel workers")
+
+    args = parser.parse_args()
+
+    source_dir = Path(args.source_dir)
+    output_dir = Path(args.output_dir)
+
+    # Validate source directory
+    if not source_dir.exists():
+        console.print(f"[red]Error:[/red] Source directory '{source_dir}' does not exist.")
+        sys.exit(1)
+
+    if not source_dir.is_dir():
+        console.print(f"[red]Error:[/red] '{source_dir}' is not a directory.")
+        sys.exit(1)
+
+    console.print(f"[bold cyan]Extracting constants from:[/bold cyan] {source_dir}")
+    console.print(f"[bold cyan]Output directory:[/bold cyan] {output_dir}")
+    if args.include_extensionless:
+        console.print("[bold cyan]Including extensionless Python files[/bold cyan]")
+    console.print()
+
+    # Find all Python files
+    console.print("[bold]Finding Python files...[/bold]")
+    python_files = find_python_files(source_dir, include_extensionless=args.include_extensionless)
+    console.print(f"Found [green]{len(python_files)}[/green] Python files\n")
+
     if not python_files:
-        print("No Python files found in the current directory.")
+        console.print("[yellow]No Python files found.[/yellow]")
         return
-    print(f"Found {len(python_files)} Python files. Processing...")
-    results = Parallel(n_jobs=-1)(delayed(process_file)(f) for f in python_files)
-    processed_hashes = set()
-    all_constants_by_hash = {}
-    for file_hash, constants in results:
-        if constants is None:
-            continue
-        if file_hash not in processed_hashes:
-            processed_hashes.add(file_hash)
-            for name, value, ctype in constants:
-                if file_hash not in all_constants_by_hash:
-                    all_constants_by_hash[file_hash] = []
-                found = False
-                for idx, (existing_name, existing_value, _existing_type) in enumerate(all_constants_by_hash[file_hash]):
-                    if existing_name == name and existing_value == value:
-                        all_constants_by_hash[file_hash][idx] = name, value, ctype
-                        found = True
-                        break
-                if not found:
-                    all_constants_by_hash[file_hash].append((name, value, ctype))
-    final_constants = []
-    for file_hash, const_list in all_constants_by_hash.items():
-        final_constants.extend(const_list)
-    final_constants.sort(key=operator.itemgetter(0))
-    with Path(OUTPUT_FILE).open("w", encoding="utf-8") as f:
-        f.write("# Automatically generated constants file\n")
-        f.write("# Based on files in the current directory\n\n")
-        written_consts = set()
-        for name, value, ctype in final_constants:
-            constant_line = f"{name} = {value}"
-            if constant_line not in written_consts:
-                f.write(f"# Type: {ctype}\n")
-                f.write(f"{constant_line}\n\n")
-                written_consts.add(constant_line)
-    print(f"Successfully extracted {len(written_consts)} unique constants to {OUTPUT_FILE}")
-    if LOG_FILE.exists():
-        print(f"Errors logged to {LOG_FILE}")
+
+    # Process files in parallel
+    console.print("[bold]Processing files in parallel...[/bold]")
+    all_constants = process_files_parallel(python_files, args.max_workers)
+
+    # Save constants to separate files
+    console.print("\n[bold]Saving constants to separate files...[/bold]")
+    save_constants_separately(all_constants, output_dir)
+
+    # Count and display results
+    total_constants = sum(len(constants) for constants in all_constants.values())
+    unique_names = set()
+    for constants in all_constants.values():
+        unique_names.update(constants.keys())
+
+    console.print(
+        f"\n[green]✓[/green] Extracted [bold]{total_constants}[/bold] constants "
+        f"([bold]{len(unique_names)}[/bold] unique)"
+    )
+    console.print(f"[green]✓[/green] Saved to: [bold]{output_dir}[/bold]")
 
 
 if __name__ == "__main__":

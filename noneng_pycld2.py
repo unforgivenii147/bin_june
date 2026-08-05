@@ -4,6 +4,8 @@ Find non-English lines in text files recursively using Compact Language Detector
 Uses parallel processing for faster execution.
 """
 
+from __future__ import annotations
+
 import argparse
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import datetime
@@ -129,13 +131,13 @@ def detect_language(text):
     try:
         # pycld2.detect returns: (is_reliable, text_bytes_found, details)
         # details is a list of tuples: (language_name, language_code, percent, score)
-        is_reliable, text_bytes_found, details = cld2.detect(text)
+        is_reliable, _text_bytes_found, details = cld2.detect(text)
 
         if not details:
             return "un", "UNKNOWN", 0, False
 
         # Get the top detected language
-        lang_name, lang_code, percent, score = details[0]
+        lang_name, lang_code, percent, _score = details[0]
 
         # Normalize language code to lowercase
         lang_code = lang_code.lower() if lang_code else "un"
@@ -178,7 +180,7 @@ def process_file(file_path):
             if not line.strip():
                 continue
 
-            lang_code, lang_name, confidence, is_reliable = detect_language(line.strip())
+            lang_code, lang_name, confidence, _is_reliable = detect_language(line.strip())
 
             # Consider non-English if:
             # - Language is detected and not English

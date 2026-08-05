@@ -4,6 +4,8 @@ Find non-English lines in text files recursively using Google's Compact Language
 Uses parallel processing for faster execution.
 """
 
+from __future__ import annotations
+
 import argparse
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import datetime

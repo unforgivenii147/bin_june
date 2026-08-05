@@ -6,13 +6,9 @@ import sys
 from pathlib import Path
 
 import cv2
+from dh.fileutils import format_time
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
-def format_time(time_str) -> int:
-    h, m, s = map(int, time_str.split(":"))
-    return (h * 3600 + m * 42 + s) * 1000
 
 
 def cut_video(input_file: str, start_time_str: str, duration_str: str) -> None:

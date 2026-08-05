@@ -5,6 +5,8 @@ Recursively scans directories for text files and identifies non-English lines
 using high-confidence language detection with parallel processing.
 """
 
+from __future__ import annotations
+
 import multiprocessing as mp
 import sys
 import time
@@ -12,6 +14,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+from dh.fileutils import is_text_file
 
 # Assuming the package is installed
 try:
@@ -151,37 +154,6 @@ class NonEnglishDetector:
     def __init__(self, config: ScanConfig):
         self.config = config
         self.detector = LanguageDetector(confidence_threshold=config.confidence_threshold)
-
-    def is_text_file(self, file_path: Path) -> bool:
-        """Check if file is likely a text file."""
-        # Check by extension first (fastest)
-        if file_path.suffix.lower() in self.config.text_extensions:
-            return True
-
-        # Check for files without extension but common text names
-        no_ext_names = {
-            "makefile",
-            "dockerfile",
-            "jenkinsfile",
-            "vagrantfile",
-            "gemfile",
-            "rakefile",
-            "procfile",
-            "license",
-            "copying",
-            "readme",
-            "authors",
-            "changes",
-            "changelog",
-            "news",
-            "todo",
-            "contributing",
-            "notice",
-        }
-        if file_path.name.lower() in no_ext_names:
-            return True
-
-        return False
 
     def should_ignore(self, file_path: Path) -> bool:
         """Check if file/directory should be ignored."""
@@ -392,7 +364,7 @@ class NonEnglishDetector:
                 detections = self.detector.detect_batch(batch_texts, min_confidence=self.config.confidence_threshold)
 
                 # Collect non-English results
-                for (line_num, text), detection in zip(batch, detections):
+                for (line_num, text), detection in zip(batch, detections, strict=False):
                     if detection["language"] is None:
                         # Unknown language - flag as potentially non-English
                         result.non_english_lines.append(
@@ -415,7 +387,7 @@ class NonEnglishDetector:
                         )
 
         except Exception as e:
-            result.error = f"Error processing file: {str(e)}"
+            result.error = f"Error processing file: {e!s}"
 
         return result
 
@@ -465,7 +437,7 @@ class NonEnglishDetector:
                         print(f"[{completed}/{total}] ✓ {file_path.relative_to(root_dir)}")
 
                 except Exception as e:
-                    print(f"[{completed}/{total}] ✗ {file_path.relative_to(root_dir)}: {str(e)}")
+                    print(f"[{completed}/{total}] ✗ {file_path.relative_to(root_dir)}: {e!s}")
 
         return results
 
@@ -585,7 +557,7 @@ Examples:
         print("\nScan interrupted by user")
         sys.exit(130)
     except Exception as e:
-        print(f"Error: {str(e)}", file=sys.stderr)
+        print(f"Error: {e!s}", file=sys.stderr)
         sys.exit(1)
 
 

@@ -5,43 +5,11 @@ from __future__ import annotations
 import os
 import re
 from pathlib import Path
+from dh.fileutils import unique_path
+from dh.fileutils import _clean_fname
+from dh.fileutils import normalize_filename
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
-def unique_path(path: Path | str) -> Path:
-    path = _clean_fname(Path(path))
-    if not path.exists():
-        return path
-    parent = path.parent
-    suffixes = path.suffixes
-    if suffixes:
-        first_suffix_index = path.name.find(suffixes[0])
-        stem = path.name[:first_suffix_index]
-        full_suffix = "".join(suffixes)
-    else:
-        stem = path.name
-        full_suffix = ""
-    counter = 1
-    while True:
-        new_name = f"{stem}_{counter}{full_suffix}"
-        new_path = parent / new_name
-        if not new_path.exists():
-            return new_path
-        counter += 1
-
-
-def _clean_fname(path: Path) -> Path:
-    from re import sub as re_sub
-
-    clean_name = re_sub(r"(_\d+)+", "", path.name)
-    return path.with_name(clean_name)
-
-
-def normalize_filename(filename) -> str:
-    pattern = "(\\.(?:js|css))([?#].*)?$"
-    normalized = re.sub(pattern, "\\1", filename, flags=re.IGNORECASE)
-    return normalized
 
 
 def normalize_filenames_in_text(text: str) -> str:

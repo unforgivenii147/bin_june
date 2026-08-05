@@ -6,6 +6,8 @@ Generate __init__.py files that import all public functions and classes
 from Python modules in the current directory.
 """
 
+from __future__ import annotations
+
 import ast
 import sys
 from pathlib import Path
@@ -23,9 +25,8 @@ def get_public_names(file_path: Path) -> list[str]:
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             if not node.name.startswith("_"):
                 public_names.append(node.name)
-        elif isinstance(node, ast.ClassDef):
-            if not node.name.startswith("_"):
-                public_names.append(node.name)
+        elif isinstance(node, ast.ClassDef) and not node.name.startswith("_"):
+            public_names.append(node.name)
     return sorted(set(public_names))
 
 
@@ -57,9 +58,9 @@ def generate_init_content(modules: list[Path]) -> str:
 
 
 def main():
-    current_dir = Path.cwd()
-    print(f"Scanning directory: {current_dir}")
-    modules = get_python_modules(current_dir)
+    cwd = Path.cwd()
+    print(f"Scanning directory: {cwd}")
+    modules = get_python_modules(cwd)
     if not modules:
         print("No Python modules found in the current directory.")
         return
@@ -68,7 +69,7 @@ def main():
         public_names = get_public_names(module)
         print(f"  - {module.name}: {len(public_names)} public name(s)")
     init_content = generate_init_content(modules)
-    init_file = current_dir / "__init__.py"
+    init_file = cwd / "__init__.py"
     if init_file.exists():
         response = input(f"\n{init_file} already exists. Overwrite? (y/N): ")
         if response.lower() != "y":

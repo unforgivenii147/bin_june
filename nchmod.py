@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import stat
 from pathlib import Path
+from dh.fileutils import get_filez
 
 
 def get_mode(path: Path) -> int:
@@ -26,17 +27,6 @@ def mkx(filename: Path) -> None:
 
 def is_exec(path: Path) -> bool:
     return bool(path.stat().st_mode & stat.S_IXUSR)
-
-
-def get_filez(p):
-    if not p.is_dir():
-        yield p
-    for f in p.iterdir():
-        if f.is_file() and not f.is_symlink():
-            yield f
-        if f.is_dir():
-            yield f
-            yield from get_filez(f)
 
 
 def normalize_permissions(cwd: Path) -> None:

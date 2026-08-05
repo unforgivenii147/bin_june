@@ -13,10 +13,10 @@ SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cach
 
 
 def create_archive_streaming_optimized():
-    current_dir = Path.cwd()
-    dir_name = current_dir.name
-    parent_dir = current_dir.parent
-    if str(current_dir) == "/" or str(current_dir) == str(Path.home()):
+    cwd = Path.cwd()
+    dir_name = cwd.name
+    parent_dir = cwd.parent
+    if str(cwd) == "/" or str(cwd) == str(Path.home()):
         print("Error: Cannot archive root or home directory", file=sys.stderr)
         sys.exit(1)
     archive_path = parent_dir / f"{dir_name}.tar.zst"
@@ -30,7 +30,7 @@ def create_archive_streaming_optimized():
         print(f"Creating archive: {archive_path}")
         print("Collecting files...")
         files_to_archive = []
-        for item in current_dir.rglob("*"):
+        for item in cwd.rglob("*"):
             if ".git" in item.parts:
                 continue
             if item.name.endswith(".tar.zst"):
@@ -60,10 +60,10 @@ def create_archive_streaming_optimized():
         if archive_path.exists() and archive_path.stat().st_size > 0:
             archive_size = archive_path.stat().st_size
             print(f"Archive created successfully: {archive_size:,} bytes")
-            response = input(f"Remove original directory '{current_dir}'? (y/n): ").strip().lower()
+            response = input(f"Remove original directory '{cwd}'? (y/n): ").strip().lower()
             if response in ["y", "yes"]:
                 print("Removing original directory...")
-                shutil.rmtree(current_dir)
+                shutil.rmtree(cwd)
                 print("Done.")
             else:
                 print("Original directory preserved.")
@@ -107,8 +107,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     create_archive_streaming_optimized()
     if args.verify:
-        current_dir = Path.cwd()
-        archive_path = current_dir.parent / f"{current_dir.name}.tar.zst"
+        cwd = Path.cwd()
+        archive_path = cwd.parent / f"{cwd.name}.tar.zst"
         if archive_path.exists():
             print("\nVerifying archive...")
             verify_archive(archive_path)

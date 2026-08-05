@@ -95,10 +95,8 @@ def _collect_type_checking_line_ranges(tree: ast.Module) -> set[int]:
         if not isinstance(node, ast.If):
             continue
         test = node.test
-        is_tc = (
-            isinstance(test, ast.Name)
-            and test.id == "TYPE_CHECKING"
-            or (isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING")
+        is_tc = (isinstance(test, ast.Name) and test.id == "TYPE_CHECKING") or (
+            isinstance(test, ast.Attribute) and test.attr == "TYPE_CHECKING"
         )
         if is_tc:
             for child in ast.walk(node):

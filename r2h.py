@@ -10,42 +10,9 @@ from pathlib import Path
 from typing import Any
 
 from docutils.core import publish_parts
+from dh import get_files, mpf_async
 
 MAX_WORKERS = 4
-
-
-def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
-    path = Path(path)
-    skip_dirs = {".git", "__pycache__"}
-    queue = deque([path])
-    files = []
-    while queue:
-        current = queue.popleft()
-        try:
-            entries = current.iterdir()
-        except (PermissionError, OSError):
-            continue
-        for item in entries:
-            if item.is_symlink():
-                continue
-            if item.is_dir() and item.name not in skip_dirs:
-                queue.append(item)
-            elif item.is_file() and (ext is None or item.suffix in ext):
-                files.append(item)
-    return files
-
-
-def mpf_async(func: Callable[[Any], Any], items: Iterable[Any]):
-    with get_context("spawn").Pool(MAX_WORKERS) as p:
-        async_results = [p.apply_async(func, (item,)) for item in items]
-        results = []
-        for i, async_result in enumerate(async_results):
-            try:
-                results.append(async_result.get(timeout=30))
-            except Exception as e:
-                print(f"Item {i} failed: {e}")
-                results.append(None)
-        return results
 
 
 def rst_to_html(content: str) -> str:

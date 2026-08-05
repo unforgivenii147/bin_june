@@ -4,30 +4,9 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from dh.fileutils import is_python_file
 
 TARGET_SHEBANG = "#!/data/data/com.termux/files/usr/bin/env python"
-
-
-def is_python_file(filepath) -> bool:
-    if Path(filepath).stat().st_size == 0 or filepath.endswith("__init__.py"):
-        return False
-    if filepath.endswith(".py"):
-        return True
-    try:
-        with Path(filepath).open(encoding="utf-8") as f:
-            first_line = f.readline().strip()
-            if first_line.startswith("#!") and "python" in first_line:
-                return True
-            if first_line.startswith("#!") and "python" in first_line:
-                return True
-            f.seek(0)
-            for line in f:
-                line = line.strip()
-                if line and not line.startswith("#"):
-                    return line.startswith(("import ", "from ", "class ", "def "))
-            return False
-    except (OSError, UnicodeDecodeError):
-        return False
 
 
 def process_file(filepath) -> None:

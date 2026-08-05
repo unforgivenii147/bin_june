@@ -11,17 +11,13 @@ from pathlib import Path
 import apt
 import apt_pkg
 import unix_ar
+from dh.fileutils import get_installed_packages
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 BASE_DIR = Path.home() / "debs"
 BASE_DIR.mkdir(parents=True, exist_ok=True)
 apt_pkg.init_system()
-
-
-def get_installed_packages() -> list[str]:
-    cache = apt.Cache()
-    return [pkg.name for pkg in cache if pkg.is_installed]
 
 
 def get_package_files(pkg_name: str) -> list[str]:

@@ -1,33 +1,15 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+from __future__ import annotations
+
 import ast
 import re
 import sys
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from dh import get_files
 
 DH_SRC_DIR = Path("~/isaac/pkgs/dh/src/dh").expanduser()
-
-
-def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
-    path = Path(path)
-    skip_dirs = {".git", "__pycache__"}
-    queue = deque([path])
-    files = []
-    while queue:
-        current = queue.popleft()
-        try:
-            entries = current.iterdir()
-        except (PermissionError, OSError):
-            continue
-        for item in entries:
-            if item.is_symlink():
-                continue
-            if item.is_dir() and item.name not in skip_dirs:
-                queue.append(item)
-            elif item.is_file() and (ext is None or item.suffix in ext):
-                files.append(item)
-    return files
 
 
 def build_dh_public_mapping(dh_path: Path) -> dict[str, Path]:
@@ -101,9 +83,8 @@ def process_file(path: Path, public_map: dict[str, Path], symbol_index: dict[str
         name = None
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
             name = node.name
-        elif isinstance(node, ast.Assign):
-            if len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
-                name = node.targets[0].id
+        elif isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+            name = node.targets[0].id
         if name is None or name not in symbol_index:
             continue
         node_src = "\n".join(lines[node.lineno - 1 : node.end_lineno]).strip()

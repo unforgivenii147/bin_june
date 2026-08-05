@@ -1,32 +1,14 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+from __future__ import annotations
+
 import ast
 import sys
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from dh import get_files
 
 DH_SRC_DIR = Path("~/isaac/pkgs/dh/src/dh").expanduser()
-
-
-def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
-    path = Path(path)
-    skip_dirs = {".git", "__pycache__"}
-    queue = deque([path])
-    files = []
-    while queue:
-        current = queue.popleft()
-        try:
-            entries = current.iterdir()
-        except (PermissionError, OSError):
-            continue
-        for item in entries:
-            if item.is_symlink():
-                continue
-            if item.is_dir() and item.name not in skip_dirs:
-                queue.append(item)
-            elif item.is_file() and (ext is None or item.suffix in ext):
-                files.append(item)
-    return files
 
 
 def build_dh_mapping(dh_path: Path) -> dict:

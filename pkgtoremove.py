@@ -6,22 +6,9 @@ import operator
 import re
 import subprocess
 from pathlib import Path
+from dh.fileutils import get_installed_packages
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
-def get_installed_packages():
-    installed_packages = []
-    result = subprocess.run(
-        ["dpkg-query", "-W", "-f=${binary:Package} ${Installed-Size}\n"],
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-    for line in result.stdout.splitlines():
-        pkg, size = line.split()
-        installed_packages.append((pkg, int(size)))
-    return installed_packages
 
 
 def get_bash_history():

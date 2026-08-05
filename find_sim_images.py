@@ -5,13 +5,10 @@ from pathlib import Path
 
 import imagehash
 from PIL import Image
+from dh.fileutils import is_image
 
 
 def find_similar_images(userpaths, hashfunc=imagehash.average_hash) -> None:
-
-    def is_image(filename):
-        f = filename.lower()
-        return f.endswith((".png", ".jpg", ".jpeg", ".bmp", ".gif", ".svg")) or ".jpg" in f
 
     image_filenames = []
     for userpath in userpaths:

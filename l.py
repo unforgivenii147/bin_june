@@ -5,38 +5,8 @@ from __future__ import annotations
 import datetime
 from os import scandir as _scandir
 from pathlib import Path
-
-
-def fsz(sz: float) -> str:
-    sz = abs(int(sz))
-    units = ("", "K", "M", "G", "T")
-    if sz == 0:
-        return "0 B"
-    i = min(int(int(sz).bit_length() - 1) // 10, len(units) - 1)
-    sz /= 1024**i
-    return f"{int(sz)} {units[i]}B"
-
-
-def gsz(path: str | Path) -> int:
-    path = Path(path)
-    total_size = 0
-    if not path.exists():
-        return 0
-    if path.is_file():
-        try:
-            total_size = path.stat().st_size
-        except OSError:
-            return 0
-    elif path.is_dir():
-        for entry in _scandir(path):
-            try:
-                if entry.is_file():
-                    total_size += entry.stat().st_size
-                elif entry.is_dir():
-                    total_size += gsz(entry.path)
-            except OSError:
-                continue
-    return total_size
+from dh.fileutils import fsz
+from dh.fileutils import gsz
 
 
 EXCLUDED = {".mypy_cache", ".ruff_cache", ".git", "__pycache__"}

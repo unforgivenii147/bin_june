@@ -7,42 +7,12 @@ import os
 import shutil
 import sys
 from pathlib import Path
+from dh.fileutils import unique_path
+from dh.fileutils import _clean_fname
+from dh.fileutils import should_skip
+from dh.fileutils import fsz
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
-def unique_path(path: Path | str) -> Path:
-    path = _clean_fname(Path(path))
-    if not path.exists():
-        return path
-    parent = path.parent
-    suffixes = path.suffixes
-    if suffixes:
-        first_suffix_index = path.name.find(suffixes[0])
-        stem = path.name[:first_suffix_index]
-        full_suffix = "".join(suffixes)
-    else:
-        stem = path.name
-        full_suffix = ""
-    counter = 1
-    while True:
-        new_name = f"{stem}_{counter}{full_suffix}"
-        new_path = parent / new_name
-        if not new_path.exists():
-            return new_path
-        counter += 1
-
-
-def _clean_fname(path: Path) -> Path:
-    from re import sub as re_sub
-
-    clean_name = re_sub(r"(_\d+)+", "", path.name)
-    return path.with_name(clean_name)
-
-
-def should_skip(path: str | Path) -> bool:
-    path = Path(path)
-    return bool(path.is_symlink() or not SKIP_DIRS.isdisjoint(path.parts))
 
 
 def get_all_files(cwd: Path):
@@ -78,15 +48,6 @@ def create_range_folders(cwd: Path, files, num_folders: int):
         folder_files = sizes[start_idx:end_idx]
         if folder_files:
             min_size, max_size = min(folder_files), max(folder_files)
-
-            def fsz(size) -> str:
-                if size < 1000:
-                    return f"{size}B"
-                if size < 1000000:
-                    return f"{size // 1000}k"
-                if size < 1000000000:
-                    return f"{size // 1000000}M"
-                return f"{size // 1000000000}G"
 
             folder_name = f"{fsz(min_size)}-{fsz(max_size)}"
             folder_ranges.append((min_size, max_size, folder_name))

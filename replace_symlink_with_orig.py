@@ -30,11 +30,11 @@ def process_symlink(symlink_path: Path):
 
 
 def main():
-    current_dir = Path.cwd()
-    replaced_log = current_dir / "replaced.txt"
-    errors_log = current_dir / "errors.txt"
+    cwd = Path.cwd()
+    replaced_log = cwd / "replaced.txt"
+    errors_log = cwd / "errors.txt"
     print("Scanning for symlinks...")
-    symlinks = [p for p in current_dir.rglob("*") if p.is_symlink()]
+    symlinks = [p for p in cwd.rglob("*") if p.is_symlink()]
     if not symlinks:
         print("No symlinks found.")
         return

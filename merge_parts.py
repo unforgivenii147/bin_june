@@ -8,7 +8,6 @@ import re
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-
 PART_RE = re.compile(r"^(?P<prefix>.+)\.part(?P<num>\d+)$")
 
 

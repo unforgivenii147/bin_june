@@ -16,6 +16,8 @@ from pathlib import Path
 from typing import Any, Final
 
 from deep_translator import GoogleTranslator
+from dh.fileutils import is_binary
+from dh.fileutils import get_pyfiles
 
 CHUNK_SIZE = 1024 * 1024
 
@@ -27,25 +29,6 @@ NON_ASCII_PATTERN: Final[re.Pattern] = re.compile(r"[^\x00-\x7F]")
 MAX_WORKERS: Final[int] = 8
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
-
-
-def is_binary(path: Path) -> bool:
-    try:
-        with path.open("rb") as f:
-            chunk = f.read(1024)
-        return b"\x00" in chunk
-    except Exception:
-        return True
-
-
-def get_pyfiles(directory: Path) -> list[Path]:
-    pyfiles: list[Path] = []
-    for p in directory.rglob("*.py"):
-        if any(part.startswith(".") or part in SKIP_DIRS for part in p.parts):
-            continue
-        if p.is_file() and (not is_binary(p)):
-            pyfiles.append(p)
-    return sorted(pyfiles)
 
 
 def translate_text(text: str) -> str:

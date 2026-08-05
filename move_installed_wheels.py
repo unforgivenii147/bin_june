@@ -7,9 +7,10 @@ import sys
 from importlib import metadata
 from pathlib import Path
 
+from dh import cprint
 from packaging.utils import parse_wheel_filename
 from packaging.version import Version
-from dh import cprint
+from dh.fileutils import get_installed_packages
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -40,16 +41,6 @@ def ensure_venv() -> None:
     if sys.prefix == sys.base_prefix:
         print("⚠ Not running inside a virtual environment.")
         sys.exit(1)
-
-
-def get_installed_packages():
-    installed = {}
-    for dist in metadata.distributions():
-        name = dist.metadata["Name"]
-        version = dist.version
-        if name:
-            installed[name.lower().replace("-", "_")] = Version(version)
-    return installed
 
 
 def normalize(name: str) -> str:

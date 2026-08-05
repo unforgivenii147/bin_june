@@ -151,10 +151,10 @@ def process_file(path: Path, root_dir: Path) -> tuple[Path, bool, str | None, st
 
 
 def main():
-    current_dir = Path.cwd()
-    print(f"📁 Scanning directory: {current_dir}")
+    cwd = Path.cwd()
+    print(f"📁 Scanning directory: {cwd}")
     print("-" * 50)
-    python_files = find_python_files(current_dir)
+    python_files = find_python_files(cwd)
     if not python_files:
         print("No Python files found.")
         return
@@ -167,7 +167,7 @@ def main():
     already_correct_count = 0
     not_python_count = 0
     with ProcessPoolExecutor() as executor:
-        future_to_file = {executor.submit(process_file, path, current_dir): path for path in python_files}
+        future_to_file = {executor.submit(process_file, path, cwd): path for path in python_files}
         for future in as_completed(future_to_file):
             path, was_changed, error, rel_path, action_type = future.result()
             if error:

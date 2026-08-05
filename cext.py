@@ -19,6 +19,7 @@ from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import NamedTuple
+from dh.fileutils import _looks_like_python
 
 try:
     import tree_sitter
@@ -307,13 +308,6 @@ def parse_python_source(source: str, virtual_path: str) -> tuple[list[Entity], l
 PYTHON_EXTENSIONS = {".py"}
 ARCHIVE_EXTENSIONS = {".zip", ".whl", ".tar", ".gz", ".tgz", ".zst", ".xz"}
 SKIP_DIRS = {".git", "__pycache__"}
-
-
-def _looks_like_python(data: bytes) -> bool:
-    head = data[:512]
-    if b"#!/usr/bin/env python" in head or b"#!/usr/bin/python" in head:
-        return True
-    return any((kw in head for kw in (b"import ", b"def ", b"class ", b"if __name__")))
 
 
 def read_py_file(path: Path) -> str | None:

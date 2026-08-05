@@ -20,6 +20,8 @@ from pathlib import Path
 from typing import Final
 
 from deep_translator import GoogleTranslator
+from dh.fileutils import is_binary
+from dh.fileutils import get_files
 
 CHUNK_SIZE = 1024 * 1024
 
@@ -34,48 +36,6 @@ SKIP_DIRS: Final[frozenset[str]] = frozenset(
 NON_ENGLISH_PATTERN: Final[re.Pattern] = re.compile(r"[^\x00-\x7F]")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-
-def is_binary(path: Path) -> bool:
-    try:
-        with path.open("rb") as f:
-            chunk = f.read(CHUNK_SIZE)
-        if not chunk:
-            return False
-        if b"\x00" in chunk:
-            return True
-        text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
-        nontext = sum(1 for b in chunk if b not in text_chars)
-        return nontext / len(chunk) > 0.3
-    except Exception:
-        return True
-
-
-def get_files(path: Path, include_hidden: bool = False, ext: tuple[str, ...] | None = None) -> list[Path]:
-    if not path.exists():
-        raise FileNotFoundError(f"Path does not exist: {path}")
-    if not path.is_dir():
-        raise NotADirectoryError(f"Path is not a directory: {path}")
-    files = []
-    stack = [path]
-    while stack:
-        current = stack.pop()
-        try:
-            with scandir(current) as entries:
-                for entry in entries:
-                    if entry.is_symlink():
-                        continue
-                    if entry.is_dir(follow_symlinks=False):
-                        if entry.name not in SKIP_DIRS:
-                            stack.append(Path(entry.path))
-                    elif entry.is_file(follow_symlinks=False):
-                        if not include_hidden and entry.name.startswith("."):
-                            continue
-                        if ext is None or entry.name.endswith(ext):
-                            files.append(Path(entry.path))
-        except (PermissionError, OSError):
-            continue
-    return sorted(files)
 
 
 def is_english(text: str) -> bool:

@@ -7,24 +7,9 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
+from dh.fileutils import is_binary
 
 CHUNK_SIZE = 1024 * 1024
-
-
-def is_binary(path: Path | str) -> bool:
-    path = Path(path)
-    try:
-        with path.open("rb") as f:
-            chunk = f.read(CHUNK_SIZE)
-        if not chunk:
-            return False
-        if b"\x00" in chunk:
-            return True
-        text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
-        nontext = sum(1 for b in chunk if b not in text_chars)
-        return nontext / len(chunk) > 0.3
-    except Exception:
-        return True
 
 
 if TYPE_CHECKING:

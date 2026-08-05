@@ -31,6 +31,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
+from dh.fileutils import is_image
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -45,10 +46,6 @@ def log_verbose(msg: str, level: str = "INFO") -> None:
 
 def log_action(msg: str) -> None:
     print(msg)
-
-
-def is_image(path: Path) -> bool:
-    return path.suffix.lower() in IMAGE_EXTS
 
 
 def load_image_cv2(path: str) -> np.ndarray | None:
@@ -124,13 +121,13 @@ def get_file_info(file_path: Path) -> str:
 
 
 def move_duplicates_to_folders(
-    groups: list[list[str]], current_dir: Path, output_prefix: str, dry_run: bool = False
+    groups: list[list[str]], cwd: Path, output_prefix: str, dry_run: bool = False
 ) -> tuple[int, int]:
     folders_created = 0
     files_moved = 0
     for group_idx, group in enumerate(sorted(groups, key=len, reverse=True), 1):
         folder_name = f"{output_prefix}_{group_idx:03d}"
-        folder_path = current_dir / folder_name
+        folder_path = cwd / folder_name
         if not dry_run:
             folder_path.mkdir(exist_ok=True)
             log_verbose(f"Created folder: {folder_name}")
@@ -139,7 +136,7 @@ def move_duplicates_to_folders(
             log_verbose(f"[DRY RUN] Would create folder: {folder_name}", "INFO")
             folders_created += 1
         for filename in group:
-            src = current_dir / filename
+            src = cwd / filename
             dst = folder_path / filename
             if not src.exists():
                 log_verbose(f"Source file not found: {filename}", "WARN")
@@ -168,8 +165,8 @@ def main():
     if dry_run:
         log_verbose("DRY RUN MODE - No files will be moved", "WARN")
     log_verbose(f"Output folder prefix: {output_prefix}")
-    current_dir = Path.cwd()
-    files = [f for f in current_dir.glob("*") if f.is_file() and is_image(f)]
+    cwd = Path.cwd()
+    files = [f for f in cwd.glob("*") if f.is_file() and is_image(f)]
     if not files:
         log_action("No images found in the current directory.")
         sys.exit(0)
@@ -202,14 +199,14 @@ def main():
         log_action(f"Group #{group_idx} ({len(group)} file(s)):")
         log_action("-" * 80)
         for filename in sorted(group):
-            file_path = current_dir / filename
+            file_path = cwd / filename
             log_action(f"  • {get_file_info(file_path)}")
         log_action()
     if dry_run:
         log_action(f"\n{'=' * 80}")
         log_action("[DRY RUN] Preview of operations:")
         log_action(f"{'=' * 80}\n")
-    folders_created, files_moved = move_duplicates_to_folders(groups, current_dir, output_prefix, dry_run=dry_run)
+    folders_created, files_moved = move_duplicates_to_folders(groups, cwd, output_prefix, dry_run=dry_run)
     log_action(f"\n{'=' * 80}")
     if dry_run:
         log_action(f"[DRY RUN] Would create {folders_created} folder(s) and move {files_moved} file(s)")

@@ -23,7 +23,6 @@ import sys
 from dataclasses import dataclass
 from typing import TextIO
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 try:
     import yaml

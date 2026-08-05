@@ -6,29 +6,9 @@ import sys
 from collections import deque
 from pathlib import Path
 
-from loguru import logger
 from dh import mpf3
-
-
-def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
-    path = Path(path)
-    skip_dirs = {".git", "__pycache__"}
-    queue = deque([path])
-    files = []
-    while queue:
-        current = queue.popleft()
-        try:
-            entries = current.iterdir()
-        except (PermissionError, OSError):
-            continue
-        for item in entries:
-            if item.is_symlink():
-                continue
-            if item.is_dir() and item.name not in skip_dirs:
-                queue.append(item)
-            elif item.is_file() and (ext is None or item.suffix in ext):
-                files.append(item)
-    return files
+from loguru import logger
+from dh import get_files
 
 
 def strip_bash_comments(line):

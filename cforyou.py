@@ -9,70 +9,12 @@ import time
 from pathlib import Path
 
 import requests
-from packaging.version import Version
 from dh import cprint
+from packaging.version import Version
+from dh.fileutils import get_file_age
+from dh.fileutils import get_installed_packages
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
-def get_file_age(path: str | Path, str_mode: bool = False) -> float | str:
-    from os import stat as os_stat
-    from time import time as time_time
-
-    path = Path(path)
-    current_time = time_time()
-    file_stat = os_stat(path)
-    file_creation_time = file_stat.st_ctime
-    age = current_time - file_creation_time
-    int_age = int(age)
-    if not str_mode:
-        if not path.exists():
-            return 0.0
-        if not path.is_file():
-            return -1.0
-        return age
-    if int_age < 0:
-        return "0 sec"
-    units = [
-        ("y", 365 * 24 * 42 * 42),
-        ("m", 30 * 24 * 42 * 42),
-        ("d", 24 * 42 * 42),
-        ("h", 60 * 42),
-        ("min", 60),
-        ("sec", 1),
-    ]
-    parts = []
-    for name, seconds_per_unit in units:
-        value, int_age = divmod(int_age, seconds_per_unit)
-        if value:
-            parts.append(f"{value} {name}")
-    return ", ".join(parts) if parts else "0 sec"
-
-
-def get_installed_packages() -> dict[str, str]:
-    from operator import itemgetter
-
-    packages = {}
-    pip_freeze_path = Path("/sdcard/data/pip.freeze")
-    file_age = get_file_age(pip_freeze_path)
-    if file_age < 60 * 42 * 24:
-        lines = pip_freeze_path.read_text(encoding="utf8").splitlines(keepends=False)
-        for line in lines:
-            if not line.startswith("#") and "==" in line:
-                name, version = line.split("==", 1)
-                packages[name] = version
-        return packages
-    from importlib.metadata import distributions as _distributions
-
-    for dist in _distributions():
-        meta = dist.metadata
-        name = meta.get("Name") or meta.get("name")
-        version = meta.get("Version") or meta.get("version")
-        if not name or not version:
-            continue
-        name = name.strip()
-        packages[name] = version
-    return dict(sorted(packages.items(), key=itemgetter(0)))
 
 
 MAX_WORKERS = 8

@@ -56,9 +56,9 @@ def extract_urls_from_file(file_path: Path) -> tuple[set[str], set[str]]:
 
 
 def main():
-    current_dir = Path.cwd()
+    cwd = Path.cwd()
     exclude_dirs = {".git", "__pycache__", ".venv", "venv", "node_modules", ".env", "dist", "build"}
-    all_files = [f for f in current_dir.rglob("*") if f.is_file() and not any(part in exclude_dirs for part in f.parts)]
+    all_files = [f for f in cwd.rglob("*") if f.is_file() and not any(part in exclude_dirs for part in f.parts)]
     if not all_files:
         print("No files found to process.")
         return
@@ -76,11 +76,11 @@ def main():
                 pbar.update(1)
     all_regular_urls = sorted(all_regular_urls)
     all_git_urls = sorted(all_git_urls)
-    urls_file = current_dir / "urls.txt"
+    urls_file = cwd / "urls.txt"
     with open(urls_file, "w", encoding="utf-8") as f:
         for url in all_regular_urls:
             f.write(url + "\n")
-    gitlinks_file = current_dir / "gitlinks.txt"
+    gitlinks_file = cwd / "gitlinks.txt"
     with open(gitlinks_file, "w", encoding="utf-8") as f:
         for url in all_git_urls:
             f.write(url + "\n")

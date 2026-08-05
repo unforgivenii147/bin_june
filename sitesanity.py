@@ -9,7 +9,6 @@ import sys
 from fnmatch import fnmatch
 from pathlib import Path
 
-
 logging.basicConfig(
     level=logging.INFO,
     format="[%(levelname)s] %(message)s",

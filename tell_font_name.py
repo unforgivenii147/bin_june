@@ -13,69 +13,10 @@ from typing import Any
 from fontTools.ttLib import TTFont
 from fontTools.ttLib.ttFont import TTFont
 from termcolor import cprint
-
-
-def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
-    path = Path(path)
-    skip_dirs = {".git", "__pycache__"}
-    queue = deque([path])
-    files = []
-    while queue:
-        current = queue.popleft()
-        try:
-            entries = current.iterdir()
-        except (PermissionError, OSError):
-            continue
-        for item in entries:
-            if item.is_symlink():
-                continue
-            if item.is_dir() and item.name not in skip_dirs:
-                queue.append(item)
-            elif item.is_file() and (ext is None or item.suffix in ext):
-                files.append(item)
-    return files
-
-
-def unique_path(path: Path | str) -> Path:
-    path = _clean_fname(Path(path))
-    if not path.exists():
-        return path
-    parent = path.parent
-    suffixes = path.suffixes
-    if suffixes:
-        first_suffix_index = path.name.find(suffixes[0])
-        stem = path.name[:first_suffix_index]
-        full_suffix = "".join(suffixes)
-    else:
-        stem = path.name
-        full_suffix = ""
-    counter = 1
-    while True:
-        new_name = f"{stem}_{counter}{full_suffix}"
-        new_path = parent / new_name
-        if not new_path.exists():
-            return new_path
-        counter += 1
-
-
-def _clean_fname(path: Path) -> Path:
-    from re import sub as re_sub
-
-    clean_name = re_sub("(_\\d+)+", "", path.name)
-    return path.with_name(clean_name)
-
-
-def mpf_async(func: Callable[[Any], Any], items: Iterable[Any]):
-    with get_context("spawn").Pool(MAX_WORKERS) as p:
-        async_results = [p.apply_async(func, (item,)) for item in items]
-        results = []
-        for i, async_result in enumerate(async_results):
-            try:
-                results.append(async_result.get(timeout=30))
-            except Exception as e:
-                print(f"Item {i} failed: {e}")
-                results.append(None)
-        return results
+from dh import get_files
+from dh.fileutils import unique_path
+from dh.fileutils import _clean_fname
+from dh.jobutils import mpf_async
 
 
 mpf = mpf_async

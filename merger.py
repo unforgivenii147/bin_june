@@ -7,65 +7,16 @@ from pathlib import Path
 from random import choice
 from string import ascii_lowercase
 from typing import Optional
+from dh.fileutils import get_files
+from dh.fileutils import get_random_filename
+from dh.fileutils import is_binary
+from dh.fileutils import get_nobinary
 
 CHUNK_SIZE: int = 8192
 BINARY_THRESHOLD: float = 0.3
 DEFAULT_OUTPUT_LEN: int = 10
 
 TEXT_CHARS: bytearray = bytearray(list(range(32, 127)) + list(range(0x80, 0x100)) + [ord(c) for c in "\n\r\t\b"])
-
-
-def get_files(path: Path, ext: Optional[list[str]] = None) -> list[Path]:
-    files: list[Path] = []
-    for root, dirs, filenames in path.walk(top_down=False):
-        for filename in filenames:
-            file_path = Path(root) / filename
-            if file_path.is_symlink() or not file_path.is_file():
-                continue
-            if ".git" in file_path.parts:
-                continue
-            if is_binary(file_path):
-                continue
-            if ext is not None:
-                if file_path.suffix in set(ext):
-                    files.append(file_path)
-            else:
-                files.append(file_path)
-    return files
-
-
-def get_random_filename(length: int = DEFAULT_OUTPUT_LEN) -> str:
-    return "".join(choice(ascii_lowercase) for _ in range(length))
-
-
-def is_binary(path: Path) -> bool:
-    """Check if a file is binary by reading a chunk and analyzing byte content."""
-    try:
-        with path.open("rb") as f:
-            chunk = f.read(CHUNK_SIZE)
-
-        if not chunk:
-            return False
-
-        if b"\x00" in chunk:
-            return True
-
-        try:
-            chunk.decode("utf-8")
-            return False
-        except UnicodeDecodeError:
-            pass
-
-        nontext = sum(1 for byte in chunk if byte not in TEXT_CHARS)
-        return (nontext / len(chunk)) > BINARY_THRESHOLD
-
-    except (OSError, PermissionError):
-        return True
-
-
-def get_nobinary(path: Path) -> list[Path]:
-    """Get all non-binary files. Note: is_binary check is now in get_files."""
-    return get_files(path)
 
 
 def read_file(path: Path) -> Optional[str]:

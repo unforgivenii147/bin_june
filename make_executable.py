@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+from __future__ import annotations
+
 import concurrent.futures
 import os
 import stat
@@ -42,10 +44,10 @@ def check_and_make_executable(file_path: Path) -> dict:
 
 
 def main():
-    current_dir = Path(".")
+    cwd = Path(".")
 
     print("🔍 Gathering directory contents recursively...")
-    all_files = list(current_dir.rglob("*"))
+    all_files = list(cwd.rglob("*"))
 
     script_path = Path(__file__).resolve()
     target_files = [f for f in all_files if f.resolve() != script_path]

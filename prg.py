@@ -1,6 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Ripgrep-like implementation in Python."""
 
+from __future__ import annotations
+
 import argparse
 import re
 from collections.abc import Generator

@@ -9,83 +9,15 @@ from multiprocessing import get_context
 from pathlib import Path
 from typing import Any
 
-from rjsmin import jsmin
 from dh import cprint
-
-
-def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
-    path = Path(path)
-    skip_dirs = {".git", "__pycache__"}
-    queue = deque([path])
-    files = []
-    while queue:
-        current = queue.popleft()
-        try:
-            entries = current.iterdir()
-        except (PermissionError, OSError):
-            continue
-        for item in entries:
-            if item.is_symlink():
-                continue
-            if item.is_dir() and item.name not in skip_dirs:
-                queue.append(item)
-            elif item.is_file() and (ext is None or item.suffix in ext):
-                files.append(item)
-    return files
-
-
-def mpf_async(func: Callable[[Any], Any], items: Iterable[Any]):
-    with get_context("spawn").Pool(MAX_WORKERS) as p:
-        async_results = [p.apply_async(func, (item,)) for item in items]
-        results = []
-        for i, async_result in enumerate(async_results):
-            try:
-                results.append(async_result.get(timeout=30))
-            except Exception as e:
-                print(f"Item {i} failed: {e}")
-                results.append(None)
-        return results
+from rjsmin import jsmin
+from dh.jobutils import mpf_async
+from dh.fileutils import fsz
+from dh.fileutils import gsz
+from dh.fileutils import gext
 
 
 mpf = mpf_async
-
-
-def fsz(sz: float) -> str:
-    sz = abs(int(sz))
-    units = ("B", "KB", "MB", "GB", "TB")
-    if sz == 0:
-        return "0 B"
-    i = min((int(sz).bit_length() - 1) // 10, len(units) - 1)
-    value = sz / 1024**i
-    if i == 0:
-        return f"{int(value)} {units[i]}"
-    return f"{value:.1f} {units[i]}"
-
-
-def gsz(path: str | Path) -> int:
-    path = Path(path)
-    total = 0
-    if path.is_file():
-        return path.stat().st_size
-    for file in path.rglob("*"):
-        if file.is_file():
-            total += file.stat().st_size
-    return total
-
-
-def gext(path: str | Path) -> str:
-    path = Path(path)
-    suffs = path.suffixes
-    if not suffs:
-        return ""
-    multipart_prefixes = {".tar", ".min", ".bundle", ".log", ".spec", ".test", ".d", ".module"}
-    if len(suffs) > 1:
-        if suffs[0] in multipart_prefixes:
-            return "".join(suffs)
-        if suffs[-1] in {".gz", ".xz", ".bz2", ".zst", ".lz"} and suffs[-2] == ".tar":
-            return f".tar{suffs[-1]}"
-        return suffs[-1]
-    return suffs[0]
 
 
 def process_file(path: Path) -> str:

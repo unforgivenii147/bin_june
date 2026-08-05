@@ -7,13 +7,17 @@ Supports parallel processing for better performance.
 Optimized for Termux environment.
 """
 
+from __future__ import annotations
+
 import argparse
+import contextlib
 import os
 import re
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import List, Set, Tuple
+
 from fastwalk import walk_files
 
 EXCLUDED = {
@@ -107,9 +111,8 @@ def find_sh_files(paths: List[Path], include_extensionless: bool = True) -> Set[
                 item = Path(item)
                 if item.suffix in EXCLUDED:
                     continue
-                if item.is_file():
-                    if is_bash_script(item):
-                        sh_files.add(item.resolve())
+                if item.is_file() and is_bash_script(item):
+                    sh_files.add(item.resolve())
         else:
             print(f"Warning: {path} is not a file or directory, skipping...", file=sys.stderr)
     return sh_files
@@ -269,10 +272,8 @@ def main():
                     print(f"Error processing {sh_file}: {e}", file=sys.stderr)
     print(f"\nDone! Extracted {total_functions} function(s) to '{args.output.absolute()}'")
     if IS_TERMUX:
-        try:
+        with contextlib.suppress(BaseException):
             args.output.chmod(args.output.stat().st_mode | 493)
-        except:
-            pass
     return 0
 
 

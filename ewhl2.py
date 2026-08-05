@@ -8,6 +8,7 @@ import subprocess
 import sys
 import zipfile
 from pathlib import Path
+from dh.fileutils import get_installed_packages
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -38,25 +39,6 @@ def extract_package_info(wheel_path: Path) -> tuple[str, str] | tuple[None, None
         name = name.replace("_", "-")
         return name, version
     return None, None
-
-
-def get_installed_packages():
-    try:
-        result = subprocess.run(
-            [sys.executable, "-m", "pip", "list", "--format=freeze"],
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-        installed = {}
-        for line in result.stdout.strip().split("\n"):
-            if "==" in line:
-                name, version = line.split("==")
-                installed[name.lower()] = version
-        return installed
-    except Exception as e:
-        print(f"Warning: Could not get installed packages: {e}")
-        return {}
 
 
 def check_pip_show(package_name):

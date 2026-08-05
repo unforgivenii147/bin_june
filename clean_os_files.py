@@ -35,10 +35,10 @@ def main():
     )
     args = parser.parse_args()
 
-    current_dir = os.getcwd()
-    print(f"Scanning directory: {current_dir}\n")
+    cwd = os.getcwd()
+    print(f"Scanning directory: {cwd}\n")
 
-    found_files = find_target_files(current_dir)
+    found_files = find_target_files(cwd)
 
     if not found_files:
         print("No Windows or macOS related files found.")

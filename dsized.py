@@ -6,6 +6,7 @@ import argparse
 import urllib.error
 import urllib.request
 from pathlib import Path
+from dh.fileutils import fsz
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -27,16 +28,6 @@ def fetch_content_length(url: str) -> int | None:
     with urllib.request.urlopen(request, timeout=10) as response:
         length = response.headers.get("Content-Length")
         return int(length) if length else None
-
-
-def fsz(size_bytes: int) -> str:
-    units = ["B", "KB", "MB", "GB", "TB"]
-    size = float(size_bytes)
-    for unit in units:
-        if size < 1024:
-            return f"{size:.2f} {unit}"
-        size /= 1024
-    return f"{size:.2f} PB"
 
 
 def download_file(url: str, dest_dir: Path) -> None:

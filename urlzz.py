@@ -17,29 +17,11 @@ from typing import Any
 
 import py7zr
 from dh import cprint
+from dh.fileutils import is_binary
+from dh.fileutils import get_nobinary
+from dh.utils import is_valid_url
 
 CHUNK_SIZE = 1024 * 1024
-
-
-def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
-    path = Path(path)
-    skip_dirs = {".git", "__pycache__"}
-    queue = deque([path])
-    files = []
-    while queue:
-        current = queue.popleft()
-        try:
-            entries = current.iterdir()
-        except (PermissionError, OSError):
-            continue
-        for item in entries:
-            if item.is_symlink():
-                continue
-            if item.is_dir() and item.name not in skip_dirs:
-                queue.append(item)
-            elif item.is_file() and (ext is None or item.suffix in ext):
-                files.append(item)
-    return files
 
 
 ip_middle_octet = "(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5]))"
@@ -65,26 +47,6 @@ url_regex = re.compile(
 URL_RE = re.compile(url_regex)
 
 
-def is_binary(path: Path | str) -> bool:
-    path = Path(path)
-    try:
-        with path.open("rb") as f:
-            chunk = f.read(CHUNK_SIZE)
-        if not chunk:
-            return False
-        if b"\x00" in chunk:
-            return True
-        text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
-        nontext = sum(1 for b in chunk if b not in text_chars)
-        return nontext / len(chunk) > 0.3
-    except Exception:
-        return True
-
-
-def get_nobinary(path: str | Path) -> list[Path]:
-    return [f for f in get_files(path) if not is_binary(f)]
-
-
 def _func_args_as_dict(func: Callable[..., Any], *args: Any, **kwargs: Any):
     return dict(
         list(zip(dict.fromkeys(chain(getfullargspec(func)[0], kwargs.keys())), args, strict=False))
@@ -99,13 +61,6 @@ def validator(func: Callable[..., Any]):
         return True if func(*args, **kwargs) else ValidationFailure(func, _func_args_as_dict(func, *args, **kwargs))
 
     return wrapper
-
-
-def is_valid_url(value, public=False):
-    result = URL_RE.match(value)
-    if not public:
-        return result
-    return result and (not any(result.groupdict().get(key) for key in ("private_ip", "private_host")))
 
 
 url_pattern = re.compile("https?://[^\\s\\\"\\']+")

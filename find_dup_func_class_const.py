@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+from __future__ import annotations
+
 import argparse
 import ast
 import concurrent.futures
@@ -93,11 +95,11 @@ def main():
     )
     args = parser.parse_args()
 
-    current_dir = Path(".")
-    dh_path = current_dir / "dh.py"
+    cwd = Path(".")
+    dh_path = cwd / "dh.py"
     script_path = Path(__file__).resolve()
 
-    py_files = [f for f in current_dir.rglob("*.py") if f.resolve() != script_path and f.resolve() != dh_path.resolve()]
+    py_files = [f for f in cwd.rglob("*.py") if f.resolve() != script_path and f.resolve() != dh_path.resolve()]
 
     if not py_files:
         print("🔍 No Python files found to scan.")

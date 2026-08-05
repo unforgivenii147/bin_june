@@ -20,6 +20,7 @@ import csv
 import os
 from typing import Iterable, List, Tuple
 
+from dh import is_text_file
 from cld import (
     detect_language,
     detect_language_from_path,
@@ -44,20 +45,11 @@ def find_files(
             if skip_hidden and fn.startswith("."):
                 continue
             full = os.path.join(dirpath, fn)
-            if exts_set:
-                if os.path.splitext(fn)[1].lstrip(".").lower() not in exts_set:
-                    continue
+            if exts_set and os.path.splitext(fn)[1].lstrip(".").lower() not in exts_set:
+                continue
             yield full
         if not recursive:
             break
-
-
-def is_text_file(path: str, max_probe: int = DEFAULT_MAX_PROBE) -> bool:
-    try:
-        sample = read_file_bytes(path, max_bytes=max_probe)
-        return is_probably_text_bytes(sample)
-    except Exception:
-        return False
 
 
 def scan_file_lines(path: str, min_confidence: float = 0.6) -> List[Tuple[str, int, str, float, str]]:

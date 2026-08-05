@@ -146,7 +146,7 @@ def process_large_file_mmap(file_path: Path, preserve_single: bool, remove_space
         return (str(file_path), total_lines, removed_lines, "processed")
 
     except Exception as e:
-        return (str(file_path), 0, 0, f"Error with mmap: {str(e)}")
+        return (str(file_path), 0, 0, f"Error with mmap: {e!s}")
 
 
 def remove_blank_lines(
@@ -161,7 +161,7 @@ def remove_blank_lines(
             return process_small_file(file_path, preserve_single, remove_spaces)
 
     except Exception as e:
-        return (str(file_path), 0, 0, f"Error: {str(e)}")
+        return (str(file_path), 0, 0, f"Error: {e!s}")
 
 
 def process_file(args: tuple[Path, Path, bool, bool]) -> tuple[str, int, int, str]:
@@ -201,9 +201,8 @@ def collect_files(paths: list[Path]) -> list[tuple[Path, Path]]:
                 files.append((path.parent, path))
         elif path.is_dir():
             for file_path in path.rglob("*"):
-                if file_path.is_file() and not file_path.is_symlink():
-                    if not ".git" in file_path.parts:
-                        files.append((path, file_path))
+                if file_path.is_file() and not file_path.is_symlink() and ".git" not in file_path.parts:
+                    files.append((path, file_path))
         else:
             print(f"{YELLOW}⚠ Warning:{RESET} '{path}' is not a file or directory, skipping.")
 

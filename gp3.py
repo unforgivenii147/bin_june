@@ -9,8 +9,7 @@ from datetime import datetime
 from pathlib import Path
 
 from dotenv import load_dotenv
-from git import Repo
-from git import exc as GitExc
+from git import Repo, exc as GitExc
 from github import Github, GithubException
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
@@ -56,8 +55,8 @@ def get_repo_info_from_url(url: str) -> tuple[str, str] | None:
 
 
 def create_new_remote_repo(repo: Repo, github_token: str) -> bool:
-    current_dir = Path.cwd()
-    repo_name = current_dir.name
+    cwd = Path.cwd()
+    repo_name = cwd.name
     try:
         github = Github(github_token)
         user = github.get_user()

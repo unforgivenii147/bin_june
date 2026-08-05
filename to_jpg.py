@@ -6,97 +6,14 @@ import sys
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
+
 from dh import cprint
-
-
-def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
-    path = Path(path)
-    skip_dirs = {".git", "__pycache__"}
-    queue = deque([path])
-    files = []
-    while queue:
-        current = queue.popleft()
-        try:
-            entries = current.iterdir()
-        except (PermissionError, OSError):
-            continue
-        for item in entries:
-            if item.is_symlink():
-                continue
-            if item.is_dir() and item.name not in skip_dirs:
-                queue.append(item)
-            elif item.is_file() and (ext is None or item.suffix in ext):
-                files.append(item)
-    return files
-
-
-def fsz(sz: float) -> str:
-    sz = abs(int(sz))
-    units = ("B", "KB", "MB", "GB", "TB")
-    if sz == 0:
-        return "0 B"
-    i = min((int(sz).bit_length() - 1) // 10, len(units) - 1)
-    value = sz / 1024**i
-    if i == 0:
-        return f"{int(value)} {units[i]}"
-    return f"{value:.1f} {units[i]}"
-
-
-def rrs(path, before, after) -> None:
-    delta = before - after
-    msg = (
-        "\x1b[5;92mNO CHANGE\x1b[0m"
-        if delta == 0
-        else f"\x1b[5;92m{('-' if delta > 0 else '+')} \x1b[5;94m{fsz(abs(delta))}\x1b[0m | \x1b[5;96m{after / before * 100:.1f}\x1b[5;95m%\x1b[0m"
-    )
-    print(f"\n{path.name} | {msg}")
-
-
-def unique_path(path: Path | str) -> Path:
-    path = _clean_fname(Path(path))
-    if not path.exists():
-        return path
-    parent = path.parent
-    suffixes = path.suffixes
-    if suffixes:
-        first_suffix_index = path.name.find(suffixes[0])
-        stem = path.name[:first_suffix_index]
-        full_suffix = "".join(suffixes)
-    else:
-        stem = path.name
-        full_suffix = ""
-    counter = 1
-    while True:
-        new_name = f"{stem}_{counter}{full_suffix}"
-        new_path = parent / new_name
-        if not new_path.exists():
-            return new_path
-        counter += 1
-
-
-def _clean_fname(path: Path) -> Path:
-    from re import sub as re_sub
-
-    clean_name = re_sub("(_\\d+)+", "", path.name)
-    return path.with_name(clean_name)
-
-
-def gsz(path: str | Path) -> int:
-    path = Path(path)
-    total = 0
-    if path.is_file():
-        return path.stat().st_size
-    for file in path.rglob("*"):
-        if file.is_file():
-            total += file.stat().st_size
-    return total
-
-
-def mpf3(process_function: Callable, files: list[Path], **kwargs):
-    from joblib import Parallel, delayed
-
-    file_strings = [str(f) for f in files]
-    return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
+from dh.fileutils import fsz
+from dh.fileutils import rrs
+from dh.fileutils import unique_path
+from dh.fileutils import _clean_fname
+from dh.fileutils import gsz
+from dh.jobutils import mpf3
 
 
 try:

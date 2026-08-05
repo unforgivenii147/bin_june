@@ -250,7 +250,7 @@ def process_subdirs_with_tar(
         print(f"  📦 [{i}/{len(subdirs)}] Tarring {subdir.name}...")
 
         dir_size = sum(f.stat().st_size for f in subdir.rglob("*") if f.is_file())
-        tar_size, success = tar_directory(subdir, tar_path, delete_original=not keep_original)
+        _tar_size, success = tar_directory(subdir, tar_path, delete_original=not keep_original)
 
         if not success:
             continue
@@ -274,9 +274,7 @@ def should_compress_file(file_path: Path, exclude_extensions: set[str], exclude_
         return False
     if file_path.suffix.lower() in exclude_extensions:
         return False
-    if exclude_patterns and any(pat in str(file_path) for pat in exclude_patterns):
-        return False
-    return True
+    return not (exclude_patterns and any(pat in str(file_path) for pat in exclude_patterns))
 
 
 def find_files_to_compress(

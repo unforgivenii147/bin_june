@@ -60,7 +60,7 @@ def get_repo_size(repo: Repository) -> float:
 
 def clone_repo(clone_url: str, branch: str, shallow: bool = False) -> str:
     # Target directory name from repository URL
-    owner, repo_name = parse_repo_url(clone_url)
+    _owner, repo_name = parse_repo_url(clone_url)
 
     cmd = ["git", "clone"]
     if shallow:

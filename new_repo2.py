@@ -6,10 +6,10 @@ import shutil
 import sys
 from pathlib import Path
 
-from git import Repo, InvalidGitRepositoryError, NoSuchPathError
+from dotenv import load_dotenv
+from git import InvalidGitRepositoryError, NoSuchPathError, Repo
 from github import Github
 from github.Auth import Token
-from dotenv import load_dotenv
 
 env_path = Path.home() / ".env"
 load_dotenv(env_path)

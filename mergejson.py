@@ -1,6 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-import json
+from __future__ import annotations
+
 import argparse
+import json
 import sys
 
 

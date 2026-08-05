@@ -1,5 +1,7 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
+from __future__ import annotations
+
 import ast
 import os
 import re
@@ -74,11 +76,10 @@ class EntityExtractor(ast.NodeVisitor):
 
     def visit_Assign(self, node: ast.Assign):
 
-        if self.scope_depth == 0:
-            if len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
-                target_name = node.targets[0].id
-                if re.match("^[A-Z_][A-Z0-9_]*$", target_name):
-                    self._extract_and_save(node, "constant", target_name)
+        if self.scope_depth == 0 and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+            target_name = node.targets[0].id
+            if re.match("^[A-Z_][A-Z0-9_]*$", target_name):
+                self._extract_and_save(node, "constant", target_name)
 
     def generic_visit(self, node: ast.AST):
         super().generic_visit(node)
@@ -199,8 +200,8 @@ def main():
     OUTPUT_DIR.mkdir(exist_ok=True)
 
     files_to_process = []
-    current_dir = Path(".")
-    for root, _, filenames in os.walk(current_dir):
+    cwd = Path(".")
+    for root, _, filenames in os.walk(cwd):
         for name in filenames:
             path = Path(root) / name
             if path.is_relative_to(OUTPUT_DIR):

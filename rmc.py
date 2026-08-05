@@ -12,6 +12,8 @@ from collections.abc import Iterator
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
+from dh import is_python_file
+
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache", ".venv", "venv"})
 CHUNK_SIZE = 1024
@@ -167,23 +169,17 @@ def process_docstrings_ast(source_code: str, preserve_module_docstring: bool = T
         processor = DocstringProcessor(preserve_module_docstring)
         modified_tree = processor.visit(tree)
         ast.fix_missing_locations(modified_tree)
-        modified_code = ast.unparse(modified_tree)
+
+        if processor.docstrings_removed > 0:
+            modified_code = ast.get_source_segment(source_code, modified_tree)
+            if modified_code is None:
+                modified_code = ast.unparse(modified_tree)
+        else:
+            modified_code = source_code
+
         return (modified_code, processor.docstrings_removed)
     except SyntaxError:
         return (source_code, 0)
-
-
-def is_python_file(path: Path) -> bool:
-    if path.suffix.lower() in (".py", ".pyw", ".pyi"):
-        return True
-    if not path.suffix:
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                first_line = f.readline()
-                return first_line.startswith("#!") and "python" in first_line.lower()
-        except (IOError, UnicodeDecodeError):
-            return False
-    return False
 
 
 def process_python_file(path: Path, preserve_module_docstring: bool = True) -> FileResult:

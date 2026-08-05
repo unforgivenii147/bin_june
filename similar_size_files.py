@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from pathlib import Path
+
 from dh import cprint
+from dh.fileutils import gsz
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -30,10 +32,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-
-def gsz(path):
-    try:
-        return Path(path).stat().st_size
-    except Exception:
-        return 0

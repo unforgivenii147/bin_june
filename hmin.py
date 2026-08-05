@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+from __future__ import annotations
+
 from typing import Optional
 
 """
@@ -7,6 +9,7 @@ Minifies HTML files recursively with parallel processing.
 """
 
 import argparse
+import contextlib
 import json
 import shutil
 import subprocess
@@ -203,10 +206,8 @@ class HTMLMinifier:
             return MinifyStats(path=file_path, original_size=0, minified_size=0, success=False, error=str(e))
         finally:
             if config_file and config_file.exists():
-                try:
+                with contextlib.suppress(Exception):
                     config_file.unlink()
-                except Exception:
-                    pass
 
     @staticmethod
     def find_html_files(directories: list[Path]) -> list[Path]:

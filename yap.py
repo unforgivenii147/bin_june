@@ -6,9 +6,8 @@ import argparse
 import sys
 from pathlib import Path
 from time import perf_counter as pff
-from dh import cprint, fsz, get_pyfiles, mpf3, format_time
 
-CHUNK_SIZE = 1024 * 1024
+from dh import cprint, format_time, fsz, get_pyfiles, mpf3
 
 
 MODE = "black"
@@ -32,9 +31,7 @@ def process_file(path: str | Path, mode: str = MODE) -> bool:
 
                 code = fix_with_isort(original_code)
             case "black":
-                from black import Mode as _Mode
-                from black import TargetVersion as _tv
-                from black import format_str
+                from black import Mode as _Mode, TargetVersion as _tv, format_str
 
                 code = format_str(
                     original_code,
@@ -49,9 +46,7 @@ def process_file(path: str | Path, mode: str = MODE) -> bool:
 
                 code, _ = fix_with_yapf(original_code)
             case _:
-                from black import Mode as _Mode
-                from black import TargetVersion as _tv
-                from black import format_str
+                from black import Mode as _Mode, TargetVersion as _tv, format_str
 
                 code = format_str(
                     original_code,

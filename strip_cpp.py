@@ -34,8 +34,8 @@ def process_file(file_path: Path) -> str:
 
 def main():
     extensions = {".h", ".c", ".cpp", ".hpp"}
-    current_dir = Path(".")
-    files_to_process = [p for p in current_dir.rglob("*") if p.suffix.lower() in extensions]
+    cwd = Path(".")
+    files_to_process = [p for p in cwd.rglob("*") if p.suffix.lower() in extensions]
     if not files_to_process:
         print("No matching C/C++ files found.")
         return

@@ -7,27 +7,8 @@ import sys
 import zipfile
 from collections import deque
 from pathlib import Path
-
-
-def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
-    path = Path(path)
-    skip_dirs = {".git", "__pycache__"}
-    queue = deque([path])
-    files = []
-    while queue:
-        current = queue.popleft()
-        try:
-            entries = current.iterdir()
-        except (PermissionError, OSError):
-            continue
-        for item in entries:
-            if item.is_symlink():
-                continue
-            if item.is_dir() and item.name not in skip_dirs:
-                queue.append(item)
-            elif item.is_file() and (ext is None or item.suffix in ext):
-                files.append(item)
-    return files
+from dh import get_files
+from dh.fileutils import get_installed_packages
 
 
 def parse_version_tuple(version_str: str) -> tuple:
@@ -35,14 +16,6 @@ def parse_version_tuple(version_str: str) -> tuple:
         return tuple(int(x) for x in version_str.split(".") if x.isdigit())
     except Exception:
         return (version_str,)
-
-
-def get_files(directory: Path, ext: list[str]) -> list[Path]:
-    return [p for p in directory.iterdir() if p.is_file() and p.suffix.lower() in ext]
-
-
-def get_installed_packages() -> dict[str, str]:
-    return {dist.metadata["Name"].lower(): dist.version for dist in importlib.metadata.distributions()}
 
 
 def get_wheel_package_info(path: Path) -> tuple[str, str] | tuple[None, None]:

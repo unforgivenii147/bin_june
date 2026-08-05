@@ -4,22 +4,10 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+from dh.fileutils import is_binary
 
 CHUNK_SIZE = 65536
 BINARY_BYTES = bytes(range(9)) + bytes([11, 12]) + bytes(range(14, 32))
-
-
-def is_binary(path: Path) -> bool:
-    try:
-        with path.open("rb") as f:
-            chunk = f.read(8192)
-        if not chunk:
-            return False
-        if b"\x00" in chunk:
-            return True
-        return any((b in BINARY_BYTES for b in chunk))
-    except Exception:
-        return True
 
 
 def dos2unix_file(path: Path) -> None:

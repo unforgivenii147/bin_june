@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+from __future__ import annotations
+
 import re
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -37,9 +39,9 @@ def clean_single_file(file_path: Path):
 
 
 def main():
-    current_dir = Path(".")
+    cwd = Path(".")
 
-    py_files = [f for f in current_dir.glob("*.py") if f.name != Path(__file__).name]
+    py_files = [f for f in cwd.glob("*.py") if f.name != Path(__file__).name]
 
     if not py_files:
         print("No Python files found in the current directory.")

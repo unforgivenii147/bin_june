@@ -8,32 +8,13 @@ import os
 import re
 import sys
 from pathlib import Path
+from dh.fileutils import is_binary
 
 SKIP_DIRS = frozenset(
     {".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache", "node_modules", "build", "dist"}
 )
 CHUNK_SIZE = 8192
 MAX_CONTEXT_DISPLAY = 3
-
-
-def is_binary(path: Path) -> bool:
-    """Check if a file is binary by sampling its content."""
-    try:
-        with path.open("rb") as f:
-            chunk = f.read(CHUNK_SIZE)
-
-        if not chunk:
-            return False
-
-        if b"\x00" in chunk:
-            return True
-
-        text_chars = bytearray(range(32, 127)) + b"\n\r\t\b"
-        nontext = sum(1 for byte in chunk if byte not in text_chars)
-        return (nontext / len(chunk)) > 0.3
-
-    except (OSError, PermissionError):
-        return True
 
 
 def process_file(path: Path, search_text: str, replace_text: str | None = None, dry_run: bool = False) -> bool:

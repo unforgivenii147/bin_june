@@ -9,7 +9,6 @@ from pathlib import Path
 from deep_translator import GoogleTranslator, single_detection
 from dh import DOC_TH1, DOC_TH2
 
-
 CHUNK_SIZE = 4500
 
 

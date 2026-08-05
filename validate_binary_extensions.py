@@ -55,11 +55,11 @@ class OptimizedWalker:
             raise
 
     def _walk_recursive(
-        self, current_dir: str, extensions_lower: set[str], progress_callback, file_count: int
+        self, cwd: str, extensions_lower: set[str], progress_callback, file_count: int
     ) -> Iterator[Path]:
         if self.skip_symlinks:
             try:
-                dir_stat = self._stat(current_dir)
+                dir_stat = self._stat(cwd)
                 dir_inode = (dir_stat.st_dev, dir_stat.st_ino)
                 if dir_inode in self.visited_inodes:
                     return
@@ -71,7 +71,7 @@ class OptimizedWalker:
                 return
         try:
             if self._scandir:
-                with self._scandir(current_dir) as entries:
+                with self._scandir(cwd) as entries:
                     directories = []
                     for entry in entries:
                         try:
@@ -79,7 +79,7 @@ class OptimizedWalker:
                                 if entry.name.lower().endswith(tuple(extensions_lower)):
                                     file_count += 1
                                     if progress_callback and file_count % 500 == 0:
-                                        progress_callback(current_dir, file_count)
+                                        progress_callback(cwd, file_count)
                                     yield Path(entry.path)
                             elif entry.is_dir() and (not self._is_symlink(entry.path)):
                                 directories.append(entry.path)
@@ -88,23 +88,23 @@ class OptimizedWalker:
                     for dir_path in directories:
                         yield from self._walk_recursive(dir_path, extensions_lower, progress_callback, file_count)
             else:
-                for entry in os.listdir(current_dir):
-                    full_path = os.path.join(current_dir, entry)
+                for entry in os.listdir(cwd):
+                    full_path = os.path.join(cwd, entry)
                     try:
                         if os.path.isfile(full_path):
                             if entry.lower().endswith(tuple(extensions_lower)):
                                 file_count += 1
                                 if progress_callback and file_count % 500 == 0:
-                                    progress_callback(current_dir, file_count)
+                                    progress_callback(cwd, file_count)
                                 yield Path(full_path)
                         elif os.path.isdir(full_path) and (not self._is_symlink(full_path)):
                             yield from self._walk_recursive(full_path, extensions_lower, progress_callback, file_count)
                     except (OSError, FileNotFoundError):
                         continue
         except PermissionError:
-            logger.debug(f"Permission denied: {current_dir}")
+            logger.debug(f"Permission denied: {cwd}")
         except OSError as e:
-            logger.debug(f"Error accessing {current_dir}: {e}")
+            logger.debug(f"Error accessing {cwd}: {e}")
 
 
 class SpinnerProgressReporter:

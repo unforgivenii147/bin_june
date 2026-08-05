@@ -13,6 +13,7 @@ import concurrent.futures
 import sys
 from collections import defaultdict
 from pathlib import Path
+
 from dh import TXT_EXT
 
 MIN_LINES = 3

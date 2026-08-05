@@ -5,37 +5,11 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
+from dh.fileutils import unique_path
+from dh.fileutils import _clean_fname
+from dh.fileutils import should_skip
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
-def unique_path(path: Path | str) -> Path:
-    path = _clean_fname(Path(path))
-    if not path.exists():
-        return path
-    parent = path.parent
-    suffixes = path.suffixes
-    if suffixes:
-        first_suffix_index = path.name.find(suffixes[0])
-        stem = path.name[:first_suffix_index]
-        full_suffix = "".join(suffixes)
-    else:
-        stem = path.name
-        full_suffix = ""
-    counter = 1
-    while True:
-        new_name = f"{stem}_{counter}{full_suffix}"
-        new_path = parent / new_name
-        if not new_path.exists():
-            return new_path
-        counter += 1
-
-
-def _clean_fname(path: Path) -> Path:
-    from re import sub as re_sub
-
-    clean_name = re_sub(r"(_\d+)+", "", path.name)
-    return path.with_name(clean_name)
 
 
 def remove_string_from_names(
@@ -55,26 +29,25 @@ def remove_string_from_names(
         if should_skip(item):
             continue
 
-        if item.is_file() or item.is_dir():
-            if string_to_remove in item.name:
-                new_name = item.name.replace(string_to_remove, "")
-                if not new_name.strip():
-                    print(f"Warning: Removing '{string_to_remove}' would make name empty for '{item.name}'")
-                    continue
+        if (item.is_file() or item.is_dir()) and string_to_remove in item.name:
+            new_name = item.name.replace(string_to_remove, "")
+            if not new_name.strip():
+                print(f"Warning: Removing '{string_to_remove}' would make name empty for '{item.name}'")
+                continue
 
-                new_path = current_path / new_name
-                if new_path.exists():
-                    new_path = unique_path(new_path)
+            new_path = current_path / new_name
+            if new_path.exists():
+                new_path = unique_path(new_path)
 
-                if dry_run:
-                    print(f"[DRY RUN] Would rename: {item} -> {new_name}")
-                else:
-                    try:
-                        item.rename(new_path)
-                        print(f"{item} -> {new_name}")
-                        renamed_count += 1
-                    except OSError as e:
-                        print(f"Error renaming '{item.name}': {e}")
+            if dry_run:
+                print(f"[DRY RUN] Would rename: {item} -> {new_name}")
+            else:
+                try:
+                    item.rename(new_path)
+                    print(f"{item} -> {new_name}")
+                    renamed_count += 1
+                except OSError as e:
+                    print(f"Error renaming '{item.name}': {e}")
 
         if recursive and item.is_dir():
             renamed_count += remove_string_from_names(string_to_remove, dry_run, recursive, item)
@@ -100,44 +73,30 @@ def replace_string_in_names(
         if should_skip(item):
             continue
 
-        if item.is_file() or item.is_dir():
-            if str1 in item.name:
-                new_name = item.name.replace(str1, str2)
-                if not new_name.strip():
-                    print(f"Warning: Replacing '{str1}' with '{str2}' would make name empty for '{item.name}'")
-                    continue
+        if (item.is_file() or item.is_dir()) and str1 in item.name:
+            new_name = item.name.replace(str1, str2)
+            if not new_name.strip():
+                print(f"Warning: Replacing '{str1}' with '{str2}' would make name empty for '{item.name}'")
+                continue
 
-                new_path = current_path / new_name
-                if new_path.exists():
-                    new_path = unique_path(new_path)
+            new_path = current_path / new_name
+            if new_path.exists():
+                new_path = unique_path(new_path)
 
-                if dry_run:
-                    print(f"[DRY RUN] Would rename: {item} -> {new_name}")
-                else:
-                    try:
-                        item.rename(new_path)
-                        print(f"{item} -> {new_name}")
-                        renamed_count += 1
-                    except OSError as e:
-                        print(f"Error renaming '{item.name}': {e}")
+            if dry_run:
+                print(f"[DRY RUN] Would rename: {item} -> {new_name}")
+            else:
+                try:
+                    item.rename(new_path)
+                    print(f"{item} -> {new_name}")
+                    renamed_count += 1
+                except OSError as e:
+                    print(f"Error renaming '{item.name}': {e}")
 
         if recursive and item.is_dir():
             renamed_count += replace_string_in_names(str1, str2, dry_run, recursive, item)
 
     return renamed_count
-
-
-def should_skip(path):
-    path = Path(path)
-
-    if path.is_symlink():
-        return True
-
-    for part in path.parts:
-        if part in SKIP_DIRS:
-            return True
-
-    return False
 
 
 def rename_by_template(

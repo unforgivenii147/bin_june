@@ -54,10 +54,10 @@ def format_size(size_bytes: int) -> str:
 
 
 def main():
-    current_dir = "."
+    cwd = "."
     print("-" * 35)
     print("Collecting files...")
-    files = get_files_in_directory(current_dir)
+    files = get_files_in_directory(cwd)
     if not files:
         print("No files found in current directory.")
         return

@@ -5,6 +5,7 @@ from __future__ import annotations
 import shutil
 import sys
 from pathlib import Path
+from dh.fileutils import should_skip
 
 EMPTY_MODE = "-e" in sys.argv
 REMOVE_MODE = "-r" in sys.argv
@@ -28,10 +29,6 @@ def remove_it(path: Path) -> None:
             path.unlink()
     except OSError as e:
         print(f"Error removing {path}: {e}", file=sys.stderr)
-
-
-def should_skip(path: Path) -> bool:
-    return any(skip_dir in path.parts for skip_dir in SKIP_DIRS)
 
 
 def has_multiple_suffixes(path: Path) -> bool:

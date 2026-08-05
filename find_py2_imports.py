@@ -7,38 +7,13 @@ import sys
 from pathlib import Path
 
 import tree_sitter_python as tsp
+from dh import cprint
 from rapidfuzz import fuzz
 from tree_sitter import Language, Parser
-from dh import cprint
+from dh.fileutils import get_filez
+from dh.fileutils import should_skip
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
-def get_filez(root_dir: str | Path):
-    from os import walk as os_walk
-
-    visited_dirs: set[Path] = set()
-    root_dir = Path(root_dir)
-    if root_dir.is_dir():
-        for dirpath, dirnames, filenames in os_walk(root_dir, topdown=True):
-            base_path = Path(dirpath)
-            for dirname in list(dirnames):
-                full_path = base_path / dirname
-                resolved_path = full_path.resolve()
-                if should_skip(full_path) or resolved_path in visited_dirs:
-                    dirnames.remove(dirname)
-                visited_dirs.add(resolved_path)
-            for filename in filenames:
-                filepath = Path(dirpath) / filename
-                if not should_skip(filepath):
-                    yield filepath
-    else:
-        yield root_dir
-
-
-def should_skip(path: str | Path) -> bool:
-    path = Path(path)
-    return bool(path.is_symlink() or not SKIP_DIRS.isdisjoint(path.parts))
 
 
 cwd = Path.cwd()

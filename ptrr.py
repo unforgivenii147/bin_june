@@ -34,10 +34,10 @@ def get_file_list(directory, exclude_patterns=None):
 
 
 def create_archive_optimized():
-    current_dir = Path.cwd()
-    dir_name = current_dir.name
-    parent_dir = current_dir.parent
-    if str(current_dir) == "/" or str(current_dir) == str(Path.home()):
+    cwd = Path.cwd()
+    dir_name = cwd.name
+    parent_dir = cwd.parent
+    if str(cwd) == "/" or str(cwd) == str(Path.home()):
         print("Error: Cannot archive root or home directory")
         sys.exit(1)
     archive_path = parent_dir / f"{dir_name}.tar.zst"
@@ -47,7 +47,7 @@ def create_archive_optimized():
             print("Aborted")
             sys.exit(0)
     try:
-        files = get_file_list(current_dir)
+        files = get_file_list(cwd)
         if not files:
             print("No files to archive")
             sys.exit(1)
@@ -76,9 +76,9 @@ def create_archive_optimized():
             try:
                 with tarfile.open(archive_path, "r:zstd") as tar:
                     tar.extractall(test_dir)
-                shutil.rmtree(current_dir)
+                shutil.rmtree(cwd)
                 print(f"✓ Archive created: {archive_path}")
-                print(f"✓ Original directory removed: {current_dir}")
+                print(f"✓ Original directory removed: {cwd}")
             except Exception:
                 if test_dir.exists():
                     shutil.rmtree(test_dir)
@@ -96,10 +96,10 @@ def create_archive_optimized():
 
 
 def create_archive_streaming_fixed():
-    current_dir = Path.cwd()
-    dir_name = current_dir.name
-    parent_dir = current_dir.parent
-    if str(current_dir) == "/" or str(current_dir) == str(Path.home()):
+    cwd = Path.cwd()
+    dir_name = cwd.name
+    parent_dir = cwd.parent
+    if str(cwd) == "/" or str(cwd) == str(Path.home()):
         print("Error: Cannot archive root or home directory")
         sys.exit(1)
     archive_path = parent_dir / f"{dir_name}.tar.zst"
@@ -112,7 +112,7 @@ def create_archive_streaming_fixed():
         compressor = zstd.ZstdCompressor(level=3, threads=mp.cpu_count())
         with open(archive_path, "wb") as f_out, compressor.stream_writer(f_out) as zstd_writer:
             with tarfile.open(fileobj=zstd_writer, mode="w:") as tar:
-                files = get_file_list(current_dir)
+                files = get_file_list(cwd)
                 if not files:
                     print("No files to archive")
                     sys.exit(1)
@@ -124,9 +124,9 @@ def create_archive_streaming_fixed():
                 with tarfile.open(archive_path, "r:zstd") as tar:
                     tar.extractall(test_dir)
                 shutil.rmtree(test_dir)
-                shutil.rmtree(current_dir)
+                shutil.rmtree(cwd)
                 print(f"✓ Archive created: {archive_path}")
-                print(f"✓ Original directory removed: {current_dir}")
+                print(f"✓ Original directory removed: {cwd}")
             except Exception:
                 if test_dir.exists():
                     shutil.rmtree(test_dir)

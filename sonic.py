@@ -14,6 +14,8 @@ from collections import Counter
 from collections.abc import Generator
 from datetime import UTC, datetime
 from pathlib import Path
+from dh.fileutils import fsz
+from dh.fileutils import read_lines_mmap
 
 
 class LineProcessor:
@@ -27,51 +29,10 @@ class LineProcessor:
     def get_file_size(self, file_path: Path) -> int:
         return file_path.stat().st_size
 
-    def fsz(self, size_bytes: int) -> str:
-        for unit in ["B", "KB", "MB", "GB", "TB"]:
-            if size_bytes < 1024.0:
-                return f"{size_bytes:.2f} {unit}"
-            size_bytes /= 1024.0
-        return f"{size_bytes:.2f} PB"
-
 
 class MmapReader(LineProcessor):
     def __init__(self, verbose: bool = False) -> None:
         super().__init__(verbose=verbose)
-
-    def read_lines_mmap(
-        self, file_path: Path, encoding: str = "utf-8", skip_empty: bool = False
-    ) -> Generator[str, None, None]:
-        get_size = self.get_file_size(file_path)
-        self.log(f"Reading {file_path} ({self.fsz(get_size)})")
-        try:
-            with Path(file_path).open("rb") as f:
-                if get_size > 1024 * 1024:
-                    with mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mmapped_file:
-                        offset = 0
-                        while offset < len(mmapped_file):
-                            newline_pos = mmapped_file.find(b"\n", offset)
-                            if newline_pos == -1:
-                                line_bytes = mmapped_file[offset:]
-                            else:
-                                line_bytes = mmapped_file[offset:newline_pos]
-                            try:
-                                line = line_bytes.decode(encoding).rstrip("\r\n")
-                                if not skip_empty or line.strip():
-                                    yield line
-                            except UnicodeDecodeError as e:
-                                self.log(f"Warning: Encoding error at offset {offset}: {e!s}")
-                            offset = newline_pos + 1
-                            if newline_pos == -1:
-                                break
-                else:
-                    f.seek(0)
-                    for line in f:
-                        decoded_line = line.rstrip("\r\n")
-                        if not skip_empty or decoded_line.strip():
-                            yield decoded_line
-        except Exception:
-            raise OSError(msg)
 
     def read_lines_regular(
         self, file_path: Path, encoding: str = "utf-8", skip_empty: bool = False
@@ -85,14 +46,6 @@ class MmapReader(LineProcessor):
                         yield decoded_line
         except Exception:
             raise OSError(msg)
-
-    def read_lines(
-        self, file_path: Path, encoding: str = "utf-8", skip_empty: bool = False, use_mmap: bool = True
-    ) -> Generator[str, None, None]:
-        if use_mmap:
-            yield from self.read_lines_mmap(file_path, encoding, skip_empty)
-        else:
-            yield from self.read_lines_regular(file_path, encoding, skip_empty)
 
 
 class LineSorter(LineProcessor):

@@ -5,35 +5,12 @@ from __future__ import annotations
 import sys
 from collections import deque
 from pathlib import Path
+
 from dh import cprint
-
-
-def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
-    path = Path(path)
-    skip_dirs = {".git", "__pycache__"}
-    queue = deque([path])
-    files = []
-    while queue:
-        current = queue.popleft()
-        try:
-            entries = current.iterdir()
-        except (PermissionError, OSError):
-            continue
-        for item in entries:
-            if item.is_symlink():
-                continue
-            if item.is_dir() and item.name not in skip_dirs:
-                queue.append(item)
-            elif item.is_file() and (ext is None or item.suffix in ext):
-                files.append(item)
-    return files
+from dh.fileutils import get_files
 
 
 TIMEOUT = 0
-
-
-def get_files(folder: Path) -> list[Path]:
-    return [p for p in folder.rglob("*") if p.is_file() and not p.is_symlink() and ".git" not in p.parts]
 
 
 def wait_for_keypress(timeout: int) -> bool:

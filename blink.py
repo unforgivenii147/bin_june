@@ -4,22 +4,9 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+from dh.fileutils import get_fast
 
 RM = "-r" in sys.argv
-
-
-def get_fast(dirpath):
-    dirpath = Path(dirpath)
-    if not dirpath.is_dir():
-        return
-    from fastwalk import walk_parallel
-
-    for path in walk_parallel(dirpath):
-        fullpath = Path(path)
-        if ".git" in fullpath.parts:
-            continue
-        if fullpath.is_symlink() and not fullpath.exists():
-            yield fullpath
 
 
 if __name__ == "__main__":

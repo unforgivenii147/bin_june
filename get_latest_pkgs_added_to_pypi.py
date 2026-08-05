@@ -3,13 +3,16 @@
 Fetch latest package updates from PyPI RSS feed and save to a file.
 """
 
+from __future__ import annotations
+
+import csv
+import json
+import sys
 import xml.etree.ElementTree as ET
 from datetime import datetime
+from typing import Dict, List
+
 import requests
-import json
-import csv
-import sys
-from typing import List, Dict
 
 
 def fetch_pypi_updates() -> List[Dict[str, str]]:

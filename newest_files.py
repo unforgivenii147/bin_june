@@ -5,13 +5,10 @@ from __future__ import annotations
 import sys
 from datetime import datetime
 from pathlib import Path
+from dh.fileutils import format_time
 
 EXCLUDED_DIRS = {".git", "__pycache__"}
 N = 10
-
-
-def format_time(ts) -> str:
-    return datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
 
 
 def main() -> None:

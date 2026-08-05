@@ -1,11 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Extract embedded subtitles from MKV files using py-subtitle-extractor."""
 
+from __future__ import annotations
+
 import sys
 from pathlib import Path
 
 from py_subtitle_extractor import extract_subtitle_tracks, extract_subtitles_as_srt
-
 
 SUB_EXTS = {
     "S_TEXT/UTF8": ".srt",

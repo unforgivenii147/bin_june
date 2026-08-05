@@ -20,6 +20,7 @@ import tarfile
 import zipfile
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
+from dh.fileutils import is_python_file
 
 
 class PIPPackageCache:
@@ -296,19 +297,6 @@ def read_python_file(file_path: str) -> str:
     except Exception as e:
         print(f"⚠️  Error reading {file_path}: {e}")
         return ""
-
-
-def is_python_file(file_path: str) -> bool:
-    if file_path.endswith(".py"):
-        return True
-    if "." not in Path(file_path).name:
-        try:
-            with open(file_path, "rb") as f:
-                first_line = f.readline()
-                return first_line.startswith(b"#!") and b"python" in first_line
-        except:
-            return False
-    return False
 
 
 def extract_from_zip(zip_path: str) -> set[str]:

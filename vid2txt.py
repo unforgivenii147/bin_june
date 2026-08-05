@@ -8,8 +8,8 @@ from pathlib import Path
 
 import cv2
 import pytesseract
-from PIL import Image
 from dh import cprint
+from PIL import Image
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

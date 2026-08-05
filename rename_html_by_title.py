@@ -8,34 +8,9 @@ from collections import deque
 from collections.abc import Callable
 from html.parser import HTMLParser
 from pathlib import Path
-
-
-def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
-    path = Path(path)
-    skip_dirs = {".git", "__pycache__"}
-    queue = deque([path])
-    files = []
-    while queue:
-        current = queue.popleft()
-        try:
-            entries = current.iterdir()
-        except (PermissionError, OSError):
-            continue
-        for item in entries:
-            if item.is_symlink():
-                continue
-            if item.is_dir() and item.name not in skip_dirs:
-                queue.append(item)
-            elif item.is_file() and (ext is None or item.suffix in ext):
-                files.append(item)
-    return files
-
-
-def mpf3(process_function: Callable, files: list[Path], **kwargs):
-    from joblib import Parallel, delayed
-
-    file_strings = [str(f) for f in files]
-    return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
+from dh import get_files
+from dh.jobutils import mpf3
+from dh.fileutils import unique_path
 
 
 def finglish(text: str) -> str:
@@ -140,15 +115,6 @@ def slugify(text: str) -> str:
     if len(text) < 2:
         return temp.replace(":", "").replace("?", "").replace("=", "")
     return text
-
-
-def unique_path(path: Path) -> Path:
-    counter = 1
-    new_path = path
-    while new_path.exists():
-        new_path = path.with_stem(f"{path.stem}-{counter}")
-        counter += 1
-    return new_path
 
 
 def process_file(path: str | Path) -> None:

@@ -35,10 +35,10 @@ def read_file_contents(filepath: Path) -> str:
     return "[Binary file content not stored]"
 
 
-def get_files_in_current_dir() -> list[dict]:
-    current_dir = Path.cwd()
+def get_files_in_cwd() -> list[dict]:
+    cwd = Path.cwd()
     files = []
-    for item in current_dir.iterdir():
+    for item in cwd.iterdir():
         if item.is_file():
             print(f"  Reading: {item.name}")
             files.append({"filename": item.name, "contents": read_file_contents(item)})
@@ -60,7 +60,7 @@ def main() -> None:
         if folder_exists_in_db(cursor, folder_name):
             folder_name = folder_name + "_new"
         create_folder_table(cursor, folder_name)
-        files = get_files_in_current_dir()
+        files = get_files_in_cwd()
         if not files:
             print("No files found in current directory!")
         else:

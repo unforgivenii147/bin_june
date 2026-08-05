@@ -6,6 +6,8 @@ Results saved as JSON files with fa:en mappings.
 Uses pathlib and parallel processing.
 """
 
+from __future__ import annotations
+
 import json
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -46,10 +48,10 @@ def translate_file(file_path: Path) -> tuple[Path, dict]:
                         translated = GoogleTranslator(source="fa", target="en").translate(line)
                         translations[line] = translated
                     except Exception as e:
-                        translations[line] = f"TRANSLATION_ERROR: {str(e)}"
+                        translations[line] = f"TRANSLATION_ERROR: {e!s}"
                         print(f"  ⚠️  Error translating line {i + 1} in {file_path.name}: {e}")
         else:
-            translations = dict(zip(original_lines, translated_lines))
+            translations = dict(zip(original_lines, translated_lines, strict=False))
 
         print(f"✅ Translated: {file_path.name} ({len(translations)} words)")
         return file_path, translations
@@ -59,7 +61,7 @@ def translate_file(file_path: Path) -> tuple[Path, dict]:
         return file_path, {}
 
 
-def save_translation(input_path: Path, translations: dict, output_dir: Path = None):
+def save_translation(input_path: Path, translations: dict, output_dir: Path | None = None):
     """
     Save translations to a JSON file.
 
@@ -86,11 +88,11 @@ def save_translation(input_path: Path, translations: dict, output_dir: Path = No
 def main():
     """Main function to orchestrate the translation process."""
 
-    current_dir = Path(".")
+    cwd = Path(".")
     max_workers = 4
     output_dir = Path("./translations")
 
-    text_files = list(current_dir.glob("*.txt"))
+    text_files = list(cwd.glob("*.txt"))
 
     if not text_files:
         print("❌ No .txt files found in the current directory")

@@ -4,6 +4,8 @@ Check .whl wheel files in current directory and remove ones
 that don't contain entry_points.txt using parallel processing.
 """
 
+from __future__ import annotations
+
 import argparse
 import zipfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -46,7 +48,7 @@ def find_wheel_files(directory: Path = Path.cwd()) -> List[Path]:
 
 
 def remove_wheels_without_entry_points(
-    directory: Path = Path.cwd(), max_workers: int = None, dry_run: bool = False
+    directory: Path = Path.cwd(), max_workers: int | None = None, dry_run: bool = False
 ) -> None:
     """
     Find and remove wheel files without entry_points.txt using parallel processing.

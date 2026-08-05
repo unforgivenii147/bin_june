@@ -9,6 +9,7 @@ from functools import partial
 import cv2
 import numpy as np
 import pytesseract
+from dh.fileutils import format_time
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -104,14 +105,6 @@ def extract_burned_subs_ocr(
             f.write(f"{format_time(sub['start'])} --> {format_time(sub['end'])}\n")
             f.write(f"{sub['text']}\n\n")
     print("Done.")
-
-
-def format_time(seconds: float) -> str:
-    h = int(seconds // 3600)
-    m = int(seconds % 3600 // 60)
-    s = seconds % 60
-    ms = int((s - int(s)) * 1000)
-    return f"{h:02d}:{m:02d}:{int(s):02d},{ms:03d}"
 
 
 if __name__ == "__main__":

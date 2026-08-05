@@ -8,6 +8,7 @@ import sys
 import time
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
+from dh.fileutils import is_binary
 
 DIR_PERM = 0o755
 FILE_PERM = 0o664
@@ -19,15 +20,6 @@ EXECUTABLE_DIRS = {"bin", "sbin", ".bin", "libexec", "scripts", "tools"}
 
 def is_executable(mode: int) -> bool:
     return bool(mode & (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH))
-
-
-def is_binary(file_path: Path) -> bool:
-    try:
-        with file_path.open("rb") as f:
-            chunk = f.read(1024)
-        return b"\x00" in chunk
-    except OSError:
-        return False
 
 
 def has_shebang(file_path: Path) -> bool:
@@ -149,9 +141,9 @@ def collect_paths(cwd: str) -> list[Path]:
 
     paths: list[Path] = []
     try:
-        for current_dir, dirnames, filenames in os.walk(str(root), topdown=True, followlinks=False):
+        for cwd, dirnames, filenames in os.walk(str(root), topdown=True, followlinks=False):
             dirnames[:] = [d for d in dirnames if d not in SKIP_NAMES]
-            cd = Path(current_dir)
+            cd = Path(cwd)
             paths.append(cd)
             for name in filenames:
                 paths.append(cd / name)

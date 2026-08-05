@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pillow_heif as ph
 from fastwalk import walk_files
+from dh.fileutils import gsz
 
 
 def process_file(path) -> bool:
@@ -38,10 +39,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     sys.exit(main())
-
-
-def gsz(path):
-    try:
-        return Path(path).stat().st_size
-    except Exception:
-        return 0

@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 import sys
 from pathlib import Path
+from dh.fileutils import fsz
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -79,13 +80,6 @@ if __name__ == "__main__":
     errors = [r for r in results if r[0] == "error"]
     nochg = sum(1 for r in results if r[0] == "nochange")
     total_comments = sum(r[2] for r in results if r[0] == "changed")
-
-    def fsz(size: int) -> str:
-        for unit in ["B", "KB", "MB", "GB"]:
-            if size < 1024.0:
-                return f"{size:.2f} {unit}"
-            size /= 1024.0
-        return f"{size:.2f} TB"
 
     print(f"\n{'=' * 42}")
     print(f"Files: {len(files)} | Changed: {changed} | Unchanged: {nochg} | Errors: {len(errors)}")

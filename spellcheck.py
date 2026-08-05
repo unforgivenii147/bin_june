@@ -4,6 +4,8 @@ Spell check all text files in current directory recursively using pyspellchecker
 Supports parallel processing and optional auto-fix mode.
 """
 
+from __future__ import annotations
+
 import argparse
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -47,7 +49,7 @@ TEXT_EXTENSIONS = {
 }
 
 
-def find_text_files(root_dir: Path, extensions: set = None) -> List[Path]:
+def find_text_files(root_dir: Path, extensions: set | None = None) -> List[Path]:
     """Find all text files recursively in the given directory."""
     if extensions is None:
         extensions = TEXT_EXTENSIONS
@@ -130,7 +132,7 @@ def fix_file(file_path: Path, corrections: Dict[str, str]) -> bool:
         return False
 
 
-def process_files_parallel(files: List[Path], max_workers: int = None) -> Dict:
+def process_files_parallel(files: List[Path], max_workers: int | None = None) -> Dict:
     """
     Process multiple files in parallel using ProcessPoolExecutor.
     Returns combined results.
@@ -326,10 +328,9 @@ Examples:
 
                     corrections[ms["word"].lower()] = ms["correction"]
 
-                if corrections:
-                    if fix_file(Path(file_path), corrections):
-                        fixed_count += len(corrections)
-                        print(f"✅ Fixed {file_path}")
+                if corrections and fix_file(Path(file_path), corrections):
+                    fixed_count += len(corrections)
+                    print(f"✅ Fixed {file_path}")
 
             print(f"\n✅ Fixed {fixed_count} misspellings across multiple files")
         else:

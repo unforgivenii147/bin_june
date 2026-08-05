@@ -75,6 +75,6 @@ def refactor_directory(directory):
 
 
 if __name__ == "__main__":
-    current_dir = Path.cwd()
-    print(f"Refactoring Python files in: {current_dir}")
-    refactor_directory(current_dir)
+    cwd = Path.cwd()
+    print(f"Refactoring Python files in: {cwd}")
+    refactor_directory(cwd)

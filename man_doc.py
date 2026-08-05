@@ -8,100 +8,11 @@ from collections import deque
 from collections.abc import Callable
 from pathlib import Path
 from tempfile import NamedTemporaryFile
+
 from dh import cprint
-
-
-def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
-    path = Path(path)
-    skip_dirs = {".git", "__pycache__"}
-    queue = deque([path])
-    files = []
-    while queue:
-        current = queue.popleft()
-        try:
-            entries = current.iterdir()
-        except (PermissionError, OSError):
-            continue
-        for item in entries:
-            if item.is_symlink():
-                continue
-            if item.is_dir() and item.name not in skip_dirs:
-                queue.append(item)
-            elif item.is_file() and (
-                ext is None
-                or item.suffix in ext
-                or (
-                    item.suffixes[-2:] == [".1", ".gz"]
-                    or item.suffixes[-2:] == [".3", ".gz"]
-                    or item.suffixes[-2:] == [".4", ".gz"]
-                    or (item.suffixes[-2:] == [".5", ".gz"])
-                    or (item.suffixes[-2:] == [".7", ".gz"])
-                    or (item.suffixes[-2:] == [".8", ".gz"])
-                    or (item.suffixes[-2:] == [".3am", ".gz"])
-                    or (item.suffixes[-2:] == [".3form", ".gz"])
-                    or (item.suffixes[-2:] == [".3menu", ".gz"])
-                    or (item.suffixes[-2:] == [".3ncurses", ".gz"])
-                    or (item.suffixes[-2:] == [".3readline", ".gz"])
-                    or (item.suffixes[-2:] == [".3t", ".gz"])
-                )
-            ):
-                files.append(item)
-    return files
-
-
-def runcmd(
-    cmd: list[str], run_silently: bool = False, show_output: bool = True, timeout: float | None = None
-) -> tuple[int, str, str]:
-    from subprocess import DEVNULL as _DEVNULL
-    from subprocess import TimeoutExpired as subprocess_TimeoutExpired
-    from subprocess import run as subprocess_run
-    from sys import stderr as sys_stderr
-    from sys import stdout as sys_stdout
-
-    if not cmd:
-        msg = "cmd must be a non-empty list (e.g., ['ls', '-l'])"
-        raise ValueError(msg)
-    try:
-        if run_silently:
-            result = subprocess_run(cmd, stdout=_DEVNULL, stderr=_DEVNULL, timeout=timeout)
-            return (result.returncode, "", "")
-        result = subprocess_run(cmd, capture_output=True, text=True, timeout=timeout)
-        stdout, stderr = (result.stdout, result.stderr)
-        if show_output:
-            if stdout:
-                sys_stdout.write(stdout)
-                sys_stdout.flush()
-            if stderr:
-                sys_stderr.write(stderr)
-                sys_stderr.flush()
-        return (result.returncode, stdout, stderr)
-    except FileNotFoundError:
-        msg = f"Command not found: '{cmd[0]}'"
-        if show_output and (not run_silently):
-            print(msg, file=sys_stderr)
-        return (127, "", msg)
-    except PermissionError:
-        msg = f"Permission denied: '{cmd[0]}'"
-        if show_output and (not run_silently):
-            print(msg, file=sys_stderr)
-        return (126, "", msg)
-    except subprocess_TimeoutExpired:
-        msg = f"Command timed out after {timeout}s: {' '.join(cmd)}"
-        if show_output and (not run_silently):
-            print(msg, file=sys_stderr)
-        return (124, "", msg)
-    except Exception as e:
-        msg = f"Unexpected error running '{cmd[0]}': {e}"
-        if show_output and (not run_silently):
-            print(msg, file=sys_stderr)
-        return (1, "", msg)
-
-
-def mpf3(process_function: Callable, files: list[Path], **kwargs):
-    from joblib import Parallel, delayed
-
-    file_strings = [str(f) for f in files]
-    return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
+from dh.fileutils import get_files
+from dh.fileutils import runcmd
+from dh.jobutils import mpf3
 
 
 def safe_run(path) -> bool:

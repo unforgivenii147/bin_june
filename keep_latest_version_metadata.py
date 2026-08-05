@@ -4,14 +4,17 @@ Remove old versions of Python package metadata files, keeping only the latest ve
 Uses pathlib and parallel processing for efficiency.
 """
 
+from __future__ import annotations
+
+import argparse
 import re
 import shutil
-from pathlib import Path
-from concurrent.futures import ProcessPoolExecutor, as_completed
 from collections import defaultdict
-from packaging.version import Version, InvalidVersion
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
 from typing import Dict, List, Tuple
-import argparse
+
+from packaging.version import InvalidVersion, Version
 
 
 def parse_filename(filepath: Path) -> Tuple[str, Version, Path]:
@@ -146,7 +149,7 @@ def merge_results(results: List[Dict[str, List[Tuple[Version, Path]]]]) -> Dict[
     return merged
 
 
-def delete_files(paths: List[Path], dry_run: bool = True, backup_dir: Path = None):
+def delete_files(paths: List[Path], dry_run: bool = True, backup_dir: Path | None = None):
     """
     Delete or move files.
 

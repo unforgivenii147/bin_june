@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Final
 
 from deep_translator import GoogleTranslator
+from dh.fileutils import is_binary
 
 CHUNK_SIZE = 1024 * 1024
 
@@ -30,21 +31,6 @@ try:
 except ImportError:
     HAS_FASTWALK = False
 NON_ENGLISH_PATTERN: Final[re.Pattern] = re.compile(r"[^\x00-\x7F]")
-
-
-def is_binary(path: Path) -> bool:
-    try:
-        with path.open("rb") as f:
-            chunk = f.read(CHUNK_SIZE)
-        if not chunk:
-            return False
-        if b"\x00" in chunk:
-            return True
-        text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
-        non_text_count = sum(1 for b in chunk if b not in text_chars)
-        return non_text_count / len(chunk) > 0.3
-    except Exception:
-        return True
 
 
 def split_into_chunks(text: str, size: int) -> list[str]:

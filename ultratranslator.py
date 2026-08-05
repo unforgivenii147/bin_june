@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+from dh import get_files
 
 """
 Optimized version of ultratranslator.py for Python 3.12.
@@ -20,6 +21,7 @@ from typing import Final
 
 from binaryornot import is_binary
 from deep_translator import GoogleTranslator
+from dh.fileutils import get_nobinary
 
 MAX_WORKERS: Final[int] = 4
 MAX_RETRIES: Final[int] = 2
@@ -29,33 +31,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
-    path = Path(path)
-    skip_dirs = {".git", "__pycache__"}
-    queue = deque([path])
-    files = []
-    while queue:
-        current = queue.popleft()
-        try:
-            entries = current.iterdir()
-        except (PermissionError, OSError):
-            continue
-        for item in entries:
-            if item.is_symlink():
-                continue
-            if item.is_dir() and item.name not in skip_dirs:
-                queue.append(item)
-            elif item.is_file() and (ext is None or item.suffix in ext):
-                files.append(item)
-    return files
-
-
 def is_english(text: str) -> bool:
     return not NON_ENGLISH_PATTERN.search(text)
-
-
-def get_nobinary(path: Path) -> list[Path]:
-    return [f for f in get_files(path) if not is_binary(str(f))]
 
 
 def translate_file_content(path: Path, retries: int = MAX_RETRIES) -> str:

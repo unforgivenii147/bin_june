@@ -15,9 +15,9 @@ from pathlib import Path
 from tarfile import TarFile
 from urllib.parse import urlparse
 from zipfile import ZipFile
-from dh import is_valid_url, append_text, is_binary
-import zstandard as zstd
 
+import zstandard as zstd
+from dh import append_text, is_binary, is_valid_url
 
 DEFAULT_MAX_MB = 15
 EXCLUDE_DIRS = {".git", "__pycache__"}
@@ -303,11 +303,11 @@ def extract_and_save_gitlinks(urllist) -> None:
 
 def iter_files(root: Path):
     root = root.resolve()
-    for current_dir, dirnames, filenames in os.walk(str(root), topdown=True, followlinks=False):
+    for cwd, dirnames, filenames in os.walk(str(root), topdown=True, followlinks=False):
         dirnames[:] = [d for d in dirnames if d not in EXCLUDE_DIRS]
-        if should_skip_dir(current_dir):
+        if should_skip_dir(cwd):
             continue
-        cd = Path(current_dir)
+        cd = Path(cwd)
         for fname in filenames:
             yield (cd / fname)
 

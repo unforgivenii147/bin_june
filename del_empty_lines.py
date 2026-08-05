@@ -7,14 +7,9 @@ from pathlib import Path
 
 from binaryornot import is_binary
 from dh import cprint
+from dh.fileutils import get_filez
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
-def get_filez(cwd: Path):
-    for f in cwd.rglob("*"):
-        if f.is_file() and not f.is_symlink():
-            yield f
 
 
 def process_file(path: Path) -> None:

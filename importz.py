@@ -5,19 +5,7 @@ from __future__ import annotations
 import ast
 import sys
 from pathlib import Path
-
-
-def is_python_file(path: Path) -> bool:
-    if path.suffix == ".py":
-        return True
-    if path.is_file() and not path.suffix:
-        try:
-            with Path(path).open(encoding="utf-8") as f:
-                first_line = f.readline()
-                return "python" in first_line
-        except Exception:
-            return False
-    return False
+from dh.fileutils import is_python_file
 
 
 def get_imports_from_file(file_path: Path):

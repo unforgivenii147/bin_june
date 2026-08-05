@@ -5,6 +5,8 @@ Strips metadata headers and converts code/markdown sections to notebook cells.
 Output filename is based on the package name found in the header.
 """
 
+from __future__ import annotations
+
 import json
 import re
 import sys
@@ -21,16 +23,20 @@ def parse_metadata_section(lines):
         line_stripped = line.strip()
 
         if line.startswith(" ") or line.startswith("\t"):
-            if current_key and current_key not in [
-                "Requires-Dist",
-                "Provides-Extra",
-                "Dynamic",
-                "Classifier",
-                "Keywords",
-                "Project-URL",
-            ]:
-                if current_key in metadata:
-                    metadata[current_key] += " " + line_stripped
+            if (
+                current_key
+                and current_key
+                not in [
+                    "Requires-Dist",
+                    "Provides-Extra",
+                    "Dynamic",
+                    "Classifier",
+                    "Keywords",
+                    "Project-URL",
+                ]
+                and current_key in metadata
+            ):
+                metadata[current_key] += " " + line_stripped
             continue
 
         if not line_stripped or ":" not in line_stripped:

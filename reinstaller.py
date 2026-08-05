@@ -4,6 +4,8 @@ Reinstall all packages with entry points using pip's internal API.
 Compatible with Python 3.12+ and pip 26.1.2+
 """
 
+from __future__ import annotations
+
 import argparse
 import importlib.metadata
 import logging
@@ -134,19 +136,18 @@ def get_package_size(dist: importlib.metadata.Distribution) -> str:
             from pathlib import Path
 
             dist_path = Path(dist._path)
-            if dist_path.exists():
-                if dist_path.is_dir():
-                    # Calculate directory size
-                    total_size = 0
-                    for item in dist_path.rglob("*"):
-                        if item.is_file():
-                            total_size += item.stat().st_size
-                    if total_size > 1024 * 1024:
-                        return f"{total_size / (1024 * 1024):.1f} MB"
-                    elif total_size > 1024:
-                        return f"{total_size / 1024:.1f} KB"
-                    else:
-                        return f"{total_size} B"
+            if dist_path.exists() and dist_path.is_dir():
+                # Calculate directory size
+                total_size = 0
+                for item in dist_path.rglob("*"):
+                    if item.is_file():
+                        total_size += item.stat().st_size
+                if total_size > 1024 * 1024:
+                    return f"{total_size / (1024 * 1024):.1f} MB"
+                elif total_size > 1024:
+                    return f"{total_size / 1024:.1f} KB"
+                else:
+                    return f"{total_size} B"
         return "Unknown"
     except Exception:
         return "Unknown"
@@ -239,8 +240,8 @@ def reinstall_package_with_pip(package_name: str, include_deps: bool = False) ->
 
 def reinstall_entrypoint_packages(
     max_workers: int = 4,
-    exclude_packages: Set[str] = None,
-    only_packages: Set[str] = None,
+    exclude_packages: Set[str] | None = None,
+    only_packages: Set[str] | None = None,
     include_deps: bool = False,
     dry_run: bool = False,
     skip_confirmation: bool = False,

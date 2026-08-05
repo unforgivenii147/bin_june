@@ -9,27 +9,8 @@ from pathlib import Path
 
 import tree_sitter_cpp as tscpp
 from tree_sitter import Language, Parser, Query, QueryCursor
-
-
-def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
-    path = Path(path)
-    skip_dirs = {".git", "__pycache__"}
-    queue = deque([path])
-    files = []
-    while queue:
-        current = queue.popleft()
-        try:
-            entries = current.iterdir()
-        except (PermissionError, OSError):
-            continue
-        for item in entries:
-            if item.is_symlink():
-                continue
-            if item.is_dir() and item.name not in skip_dirs:
-                queue.append(item)
-            elif item.is_file() and (ext is None or item.suffix in ext):
-                files.append(item)
-    return files
+from dh import get_files
+from dh.fileutils import gsz
 
 
 def remove_blank_lines(text: str | Path) -> str:
@@ -138,10 +119,3 @@ if __name__ == "__main__":
         for _, fn, *_ in errors:
             print(f"  - {fn}")
     print(f"Size reduced: {fsz(diffsize)}")
-
-
-def gsz(path):
-    try:
-        return Path(path).stat().st_size
-    except Exception:
-        return 0

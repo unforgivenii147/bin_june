@@ -16,6 +16,8 @@ Usage:
   python strip_comments.py [dirs...] [--rs] [--toml] [--js] [--py] [--sh] [--lua]
 """
 
+from __future__ import annotations
+
 import argparse
 import io
 import re
@@ -424,7 +426,7 @@ _STRIPPER_MAP: dict[str, Callable[[str], str]] = {
 
 
 def process_file(args: tuple[Path, Path, set[str]]) -> FileResult:
-    file_path, cwd, active_exts = args
+    file_path, cwd, _active_exts = args
     rel = str(file_path.relative_to(cwd))
     ext = file_path.suffix.lower()
     try:

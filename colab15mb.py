@@ -7,14 +7,7 @@ import tarfile
 from pathlib import Path
 
 from google.colab import files
-
-
-def gsz(path: Path) -> int:
-    total = 0
-    for item in path.rglob("*"):
-        if item.is_file():
-            total += item.stat().st_size
-    return total
+from dh.fileutils import gsz
 
 
 def compress_small_site_packages(max_size_mb: int = 15) -> None:

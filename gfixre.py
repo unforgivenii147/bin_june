@@ -1,7 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-import sys
+from __future__ import annotations
+
 import ast
 import re
+import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 

@@ -6,15 +6,7 @@ import glob
 import os
 import re
 from pathlib import Path
-
-
-def should_skip(so_path):
-    if so_path.is_symlink():
-        return True
-    name = so_path.name
-    if name.endswith((".0", ".1")):
-        return True
-    return bool(re.search(r"\.so\.\d+(\.\d+)+$", name))
+from dh.fileutils import should_skip
 
 
 def get_base_name(so_path):

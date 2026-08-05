@@ -14,6 +14,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
 import pkg_resources
+from dh.fileutils import get_installed_packages
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -35,16 +36,6 @@ def get_site_packages_paths() -> list[Path]:
         if user_path.exists():
             paths.append(user_path)
     return paths
-
-
-def get_installed_packages() -> list[tuple[str, str]]:
-    packages = []
-    for dist in pkg_resources.working_set:
-        try:
-            packages.append((dist.project_name, dist.version))
-        except Exception as e:
-            logger.warning(f"Error getting info for {dist.project_name}: {e}")
-    return packages
 
 
 def find_package_path(package_name: str, site_paths: list[Path]) -> Path | None:
