@@ -56,7 +56,7 @@ def analyze_files():
 
     repeated = []
     for key, paths in definitions.items():
-        if len(set(paths)) > 5:
+        if len(set(paths)) > 2:
             repeated.append(
                 {
                     "type": key[0],

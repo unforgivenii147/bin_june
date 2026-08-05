@@ -64,7 +64,7 @@ def analyze_files(target_dirs: list[Path] | None = None) -> list[dict[str, Any]]
     repeated = []
     for key, paths in definitions.items():
         unique_paths = list(set(paths))
-        if len(unique_paths) >= 5:
+        if len(unique_paths) >= 2:
             repeated.append(
                 {
                     "name": key[0],
@@ -78,7 +78,7 @@ def analyze_files(target_dirs: list[Path] | None = None) -> list[dict[str, Any]]
     return repeated
 
 
-def save_dh_module(repeated: list[dict[str, Any]], output_path: Path = Path("dh.py")) -> None:
+def save_dh_module(repeated: list[dict[str, Any]], output_path: Path = Path("repeated_functions.py")) -> None:
     lines = []
     for item in repeated:
         lines.append(item["source"])
@@ -95,7 +95,7 @@ def apply_refactoring(repeated: list[dict[str, Any]], target_dirs: list[Path] | 
     for target_dir in target_dirs:
         py_files.extend(target_dir.rglob("*.py"))
 
-    py_files = [f for f in py_files if ".git" not in f.parts and f.name != "dh.py"]
+    py_files = [f for f in py_files if ".git" not in f.parts and f.name != "repeated_functions.py"]
 
     with ProcessPoolExecutor() as executor:
         executor.map(lambda f: refactor_file(f, repeated), py_files)
@@ -170,9 +170,9 @@ def main() -> None:
 
     if args.apply:
         apply_refactoring(repeated, target_dirs)
-        print(f"Refactoring complete. Saved {len(repeated)} functions to dh.py")
+        print(f"Saved {len(repeated)} functions to repeated_functions.py")
     else:
-        print(f"Found {len(repeated)} repeated functions. Saved to dh.py")
+        print(f"Found {len(repeated)} repeated functions. Saved")
 
 
 if __name__ == "__main__":
