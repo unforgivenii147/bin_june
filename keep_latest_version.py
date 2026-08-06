@@ -1,22 +1,13 @@
-#!/data/data/com.termux/files/home/.local/bin/python
-from dh import get_files
-
-"""
-Script to detect and keep only the
- latest version of wheel, deb, or
- tar.gz files in current directory
-  recursively.
-"""
+"\nScript to detect and keep only the\n latest version of wheel, deb, or\n tar.gz files in current directory\n  recursively.\n"
 
 from __future__ import annotations
-
 import argparse
 import re
 from collections import defaultdict, deque
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
 from packaging import version as pkg_version
+from dh import get_files
 
 
 def parse_wheel_version(filename: str) -> tuple[str, str] | None:
@@ -31,7 +22,7 @@ def parse_wheel_version(filename: str) -> tuple[str, str] | None:
     version_parts = []
     found_version = False
     for i, part in enumerate(parts):
-        if not found_version and (re.match(r"^\d", part) or part.lower() in ["v", "ver", "version"]):
+        if not found_version and (re.match("^\\d", part) or part.lower() in ["v", "ver", "version"]):
             found_version = True
             version_parts.append(part)
         elif not found_version:
@@ -58,10 +49,10 @@ def parse_targz_version(filename: str) -> tuple[str, str] | None:
         return None
     parts = name.split("-")
     for i, part in enumerate(parts):
-        if re.match(r"^\d", part):
+        if re.match("^\\d", part):
             pkg_name = "-".join(parts[:i])
             version = "-".join(parts[i:])
-            version = re.sub(r"\.(tar|tgz)$", "", version)
+            version = re.sub("\\.(tar|tgz)$", "", version)
             if pkg_name and version:
                 return (pkg_name, version)
     return None
@@ -103,7 +94,7 @@ def process_file(file_path: Path, file_type: str) -> tuple[str, str, Path] | Non
             if parsed:
                 pkg_name, version = parsed
                 return (pkg_name, version, file_path)
-        elif file_type == "targz" and (filename.endswith((".tar.gz", ".tgz"))):
+        elif file_type == "targz" and filename.endswith((".tar.gz", ".tgz")):
             parsed = parse_targz_version(filename)
             if parsed:
                 pkg_name, version = parsed
@@ -200,12 +191,7 @@ def main() -> int:
     group.add_argument("-d", "--deb", action="store_true", help="Check .deb files")
     group.add_argument("-w", "--wheel", action="store_true", help="Check .whl files")
     group.add_argument("-t", "--targz", action="store_true", help="Check .tar.gz and .tgz files")
-    group.add_argument(
-        "-a",
-        "--all",
-        action="store_true",
-        help="Check all package types (.whl, .deb, .tar.gz, .tgz)",
-    )
+    group.add_argument("-a", "--all", action="store_true", help="Check all package types (.whl, .deb, .tar.gz, .tgz)")
     parser.add_argument("--dry-run", action="store_true", help="Simulate deletion without actually removing files")
     parser.add_argument("--dir", type=str, default=".", help="Directory to scan (default: current directory)")
     parser.add_argument("--verbose", action="store_true", help="Show detailed information about each file")
@@ -235,7 +221,7 @@ def main() -> int:
     if not packages:
         print("No matching package files found.")
         return 0
-    total_versions = sum(len(versions) for versions in packages.values())
+    total_versions = sum((len(versions) for versions in packages.values()))
     print(f"\nFound {len(packages)} package(s) with {total_versions} total version(s):")
     if args.verbose:
         for pkg_name, versions in packages.items():

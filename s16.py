@@ -1,16 +1,17 @@
-#!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import sys
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
 
-from dh import get_files
-from dh.jobutils import mpf3
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
+def mpf3(process_function: Callable, files: list[Path], **kwargs):
+    from joblib import Parallel, delayed
+
+    file_strings = [str(f) for f in files]
+    return Parallel(n_jobs=-1)((delayed(process_function)(file_str, **kwargs) for file_str in file_strings))
 
 
 CHUNKSIZE = 15850
@@ -31,6 +32,8 @@ def process_file(path):
     except Exception as e:
         print(f"An error occurred during file splitting: {e}")
 
+
+from dh import get_files
 
 CHUNKSIZE = 15850
 

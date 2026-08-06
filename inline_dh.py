@@ -1,15 +1,12 @@
-#!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import ast
 import sys
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-from dh import get_files
-
 DH_SRC_DIR = Path("~/isaac/pkgs/dh/src/dh").expanduser()
+from dh import get_files
 
 
 def build_dh_mapping(dh_path: Path) -> dict:
@@ -81,7 +78,7 @@ def get_all_dependencies(path: Path, target_symbol: str) -> tuple[set[str], list
                     to_resolve.append(ref)
     needed_imports = set()
     all_code_text = "\n".join(
-        "\n".join(lines[nodes_by_name[sym].lineno - 1 : nodes_by_name[sym].end_lineno]) for sym in needed_symbols
+        ("\n".join(lines[nodes_by_name[sym].lineno - 1 : nodes_by_name[sym].end_lineno]) for sym in needed_symbols)
     )
     for imp in global_imports:
         imp_text = ast.unparse(imp)

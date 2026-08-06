@@ -1,14 +1,45 @@
-#!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import sys
 from pathlib import Path
 
-from dh import fsz, get_filez, should_skip
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
+
+def fsz(sz: float) -> str:
+    sz = abs(int(sz))
+    units = ("B", "KB", "MB", "GB", "TB")
+    if sz == 0:
+        return "0 B"
+    i = min((int(sz).bit_length() - 1) // 10, len(units) - 1)
+    value = sz / 1024**i
+    if i == 0:
+        return f"{int(value)} {units[i]}"
+    return f"{value:.1f} {units[i]}"
+
+
+def get_filez(root_dir: str | Path):
+    from os import walk as os_walk
+
+    visited_dirs: set[Path] = set()
+    root_dir = Path(root_dir)
+    if root_dir.is_dir():
+        for dirpath, dirnames, filenames in os_walk(root_dir, topdown=True):
+            base_path = Path(dirpath)
+            for dirname in list(dirnames):
+                full_path = base_path / dirname
+                resolved_path = full_path.resolve()
+                if should_skip(full_path) or resolved_path in visited_dirs:
+                    dirnames.remove(dirname)
+                visited_dirs.add(resolved_path)
+            for filename in filenames:
+                filepath = Path(dirpath) / filename
+                if not should_skip(filepath):
+                    yield filepath
+    else:
+        yield root_dir
+
+
+from dh import should_skip
 
 THRESHOLD = 1024 * 1024
 cwd = Path.cwd()

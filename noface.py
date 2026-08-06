@@ -84,7 +84,7 @@ def create_face_detector(cascade_path):
 
 
 def process_image_batch(args):
-    image_path, cwd, noface_dir, cascade_path = args
+    image_path, current_dir, noface_dir, cascade_path = args
     detect_face = create_face_detector(cascade_path)
     if detect_face is None:
         return image_path, None, False, True
@@ -94,7 +94,7 @@ def process_image_batch(args):
         has_face = detect_face(image_path)
         if not has_face:
             try:
-                relative_path = image_path.relative_to(cwd)
+                relative_path = image_path.relative_to(current_dir)
             except ValueError:
                 relative_path = image_path.name
             destination = noface_dir / relative_path
@@ -122,7 +122,7 @@ def collect_images(directory: Path, exclude_dir: Path) -> list:
 
 
 def process_images(num_workers: int | None = None):
-    cwd = Path.cwd()
+    current_dir = Path.cwd()
     noface_dir = Path("/sdcard/DCIM/noface")
     try:
         noface_dir.mkdir(exist_ok=True)
@@ -130,7 +130,7 @@ def process_images(num_workers: int | None = None):
         print(f"❌ ERROR: Cannot create directory {noface_dir}: {e}")
         return False
     print("\n🔍 Scanning for images...")
-    images = collect_images(cwd, noface_dir)
+    images = collect_images(current_dir, noface_dir)
     if not images:
         print("⚠️ No images found!")
         return False
@@ -139,7 +139,7 @@ def process_images(num_workers: int | None = None):
         num_workers = min(cpu_count(), len(images), 4)
     num_workers = max(1, min(num_workers, 4))
     print(f"⚙️ Using {num_workers} worker processes\n")
-    args_list = [(img, cwd, noface_dir, cascade_path) for img in images]
+    args_list = [(img, current_dir, noface_dir, cascade_path) for img in images]
     results = []
     start_time = time.time()
     if num_workers > 1:

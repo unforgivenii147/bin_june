@@ -19,8 +19,6 @@ import tempfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
-from dh import get_installed_packages
-
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
@@ -40,6 +38,24 @@ def get_site_packages_paths() -> list[Path]:
         if user_path.exists():
             paths.append(user_path)
     return paths
+
+
+def get_installed_packages() -> list[tuple[str, str]]:
+    """Get all installed packages using importlib.metadata."""
+    packages = []
+
+    all_dists = list(importlib.metadata.distributions())
+
+    for dist in all_dists:
+        try:
+            name = dist.metadata.get("Name")
+            version = dist.version
+            if name and version:
+                packages.append((name, version))
+        except Exception as e:
+            logger.warning(f"Error getting info for package: {e}")
+
+    return packages
 
 
 def is_pure_python(package_name: str, site_path: Path) -> bool:
@@ -68,7 +84,11 @@ def is_pure_python(package_name: str, site_path: Path) -> bool:
             return True
 
     extensions = [".so", ".pyd", ".dll", ".dylib"]
-    return all(not any(package_dir.rglob(f"*{ext}")) for ext in extensions)
+    for ext in extensions:
+        if any(package_dir.rglob(f"*{ext}")):
+            return False
+
+    return True
 
 
 def get_package_path(package_name: str, site_paths: list[Path]) -> Path | None:

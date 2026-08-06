@@ -16,7 +16,6 @@ from pathlib import Path
 from typing import Final
 
 from deep_translator import GoogleTranslator
-from dh import get_files
 
 CHUNK_SIZE = 1024 * 1024
 
@@ -97,6 +96,16 @@ def translate_file(path: Path) -> None:
     except Exception as e:
         logger.error("Error writing to %s: %s", path, e)
     time.sleep(FILE_DELAY)
+
+
+def get_files(path: Path) -> list[Path]:
+    files: list[Path] = []
+    for p in path.rglob("*"):
+        if any(part.startswith(".") or part in SKIP_DIRS for part in p.parts):
+            continue
+        if p.is_file() and p.suffix.lower() in {".txt", ".md", ".py", ".json", ".csv"}:
+            files.append(p)
+    return sorted(files)
 
 
 def main() -> None:

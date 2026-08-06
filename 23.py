@@ -7,12 +7,25 @@ import sys
 from multiprocessing import Lock, Pool
 from pathlib import Path
 
-from dh import is_python_file
 from fastwalk import walk_files
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 print_lock = Lock()
+
+
+def is_python_file(path: Path) -> bool:
+    if path.suffix == ".py":
+        return True
+    if path.suffix == "":
+        try:
+            with Path(path).open("rb") as f:
+                head = f.read(64)
+                if b"python" in head and b"#!" in head:
+                    return True
+        except Exception:
+            return False
+    return False
 
 
 def run_command(cmd: list[str]) -> tuple[int, str, str]:

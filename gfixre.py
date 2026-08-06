@@ -1,9 +1,7 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-from __future__ import annotations
 
 import ast
 import re
-import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -43,8 +41,8 @@ def fix_file_regex_styles(file_path: Path):
 
 
 def main():
-    cwd = Path(".")
-    py_files = [f for f in cwd.rglob("*.py") if f.is_file() and f.name != Path(__file__).name]
+    current_dir = Path(".")
+    py_files = [f for f in current_dir.rglob("*.py") if f.is_file() and f.name != Path(__file__).name]
     if not py_files:
         print("No Python files found in the current directory.")
         return

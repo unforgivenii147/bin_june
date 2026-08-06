@@ -9,7 +9,6 @@ from pathlib import Path
 
 import numpy as np
 import pytesseract
-from dh import should_skip
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 SUPPORTED_EXT = {".jpg", ".jpeg", ".png", ".tiff", ".bmp", ".webp"}
@@ -75,6 +74,10 @@ def preprocess_image(img_path: Path):
         return preprocess_image_cv2(img_path)
     else:
         return preprocess_image_pillow(img_path)
+
+
+def should_skip(path: Path) -> bool:
+    return path.suffix.lower() not in SUPPORTED_EXT
 
 
 def save_processed_image(img, img_path: Path):

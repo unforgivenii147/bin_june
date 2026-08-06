@@ -7,8 +7,7 @@ import sys
 import zipfile
 from collections import deque
 from pathlib import Path
-
-from dh import get_files, get_installed_packages
+from dh import get_files
 
 
 def parse_version_tuple(version_str: str) -> tuple:
@@ -16,6 +15,14 @@ def parse_version_tuple(version_str: str) -> tuple:
         return tuple(int(x) for x in version_str.split(".") if x.isdigit())
     except Exception:
         return (version_str,)
+
+
+def get_files(directory: Path, ext: list[str]) -> list[Path]:
+    return [p for p in directory.iterdir() if p.is_file() and p.suffix.lower() in ext]
+
+
+def get_installed_packages() -> dict[str, str]:
+    return {dist.metadata["Name"].lower(): dist.version for dist in importlib.metadata.distributions()}
 
 
 def get_wheel_package_info(path: Path) -> tuple[str, str] | tuple[None, None]:

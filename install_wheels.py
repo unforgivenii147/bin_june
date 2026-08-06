@@ -88,15 +88,15 @@ def get_wheel_type(wheel_path: Path) -> str:
 
 def main():
 
-    cwd = Path.cwd()
+    current_dir = Path.cwd()
 
-    wheel_files = list(cwd.glob("*.whl"))
+    wheel_files = list(current_dir.glob("*.whl"))
 
     if not wheel_files:
         print("No .whl files found in current directory.")
         return
 
-    print(f"Found {len(wheel_files)} wheel(s) in {cwd}")
+    print(f"Found {len(wheel_files)} wheel(s) in {current_dir}")
     print(f"Python version: {sys.version}")
     print(f"Platform: {platform.platform()}")
     print("=" * 42)

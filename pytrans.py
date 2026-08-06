@@ -19,7 +19,7 @@ from typing import Final
 
 import pycld2
 from deep_translator import GoogleTranslator
-from dh import DOC_TH1, DOC_TH2, should_skip
+from dh import DOC_TH1, DOC_TH2
 
 SKIP_DIRS: Final[frozenset[str]] = frozenset(
     {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
@@ -47,6 +47,18 @@ KNOWN_ENGLISH_TOKENS: Final[frozenset[str]] = frozenset(
 )
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
+
+
+def should_skip(text: str) -> bool:
+    clean = text.strip()
+    if not clean or clean.startswith(SHEBANG_PREFIX):
+        return True
+    if clean.isascii():
+        if any(token in clean.upper() for token in KNOWN_ENGLISH_TOKENS):
+            return True
+        if len(clean.split()) <= 2 and len(clean) < 30:
+            return True
+    return bool(not any(c.isalpha() for c in clean))
 
 
 def is_non_english(text: str) -> bool:

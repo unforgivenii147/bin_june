@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import csv
 import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -11,10 +12,7 @@ from bs4 import BeautifulSoup
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
-LANGUAGES = {
-    "python": "https://github.com/trending/python",
-    "jupyter": "https://github.com/trending/jupyter-notebook",
-}
+BASE_URL = "https://github.com/trending/python"
 TIMEFRAMES = ["daily", "weekly", "monthly"]
 OUTPUT_DIR = Path("trending_repos")
 
@@ -29,8 +27,8 @@ class Repo:
     timeframe: str
 
 
-def fetch_trending(base_url: str, timeframe: str) -> list[Repo]:
-    url = f"{base_url}?since={timeframe}"
+def fetch_trending(timeframe: str) -> list[Repo]:
+    url = f"{BASE_URL}?since={timeframe}"
     response = requests.get(url, timeout=10)
     response.raise_for_status()
     soup = BeautifulSoup(response.text, "html.parser")
@@ -57,19 +55,27 @@ def fetch_trending(base_url: str, timeframe: str) -> list[Repo]:
     return repos
 
 
+def save_csv(repos: list[Repo], path: Path) -> None:
+    with path.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=Repo.__annotations__.keys())
+        writer.writeheader()
+        for repo in repos:
+            writer.writerow(asdict(repo))
+
+
 def save_json(repos: list[Repo], path: Path) -> None:
     path.write_text(json.dumps([asdict(r) for r in repos], indent=2), encoding="utf-8")
 
 
 def main() -> None:
     OUTPUT_DIR.mkdir(exist_ok=True)
-    total_repos = 0
-    for lang_name, base_url in LANGUAGES.items():
-        for timeframe in TIMEFRAMES:
-            repos = fetch_trending(base_url, timeframe)
-            total_repos += len(repos)
-            save_json(repos, OUTPUT_DIR / f"{lang_name}_trending_{timeframe}.json")
-    print(f"Saved {total_repos} repos to {OUTPUT_DIR.resolve()}")
+    all_repos: list[Repo] = []
+    for timeframe in TIMEFRAMES:
+        repos = fetch_trending(timeframe)
+        all_repos.extend(repos)
+        save_csv(repos, OUTPUT_DIR / f"python_trending_{timeframe}.csv")
+        save_json(repos, OUTPUT_DIR / f"python_trending_{timeframe}.json")
+    print(f"Saved {len(all_repos)} repos to {OUTPUT_DIR.resolve()}")
 
 
 if __name__ == "__main__":

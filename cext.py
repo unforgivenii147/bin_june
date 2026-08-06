@@ -20,8 +20,6 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import NamedTuple
 
-from dh import _looks_like_python
-
 try:
     import tree_sitter
     import tree_sitter_python as tspython
@@ -311,6 +309,13 @@ ARCHIVE_EXTENSIONS = {".zip", ".whl", ".tar", ".gz", ".tgz", ".zst", ".xz"}
 SKIP_DIRS = {".git", "__pycache__"}
 
 
+def _looks_like_python(data: bytes) -> bool:
+    head = data[:512]
+    if b"#!/usr/bin/env python" in head or b"#!/usr/bin/python" in head:
+        return True
+    return any((kw in head for kw in (b"import ", b"def ", b"class ", b"if __name__")))
+
+
 def read_py_file(path: Path) -> str | None:
     try:
         return path.read_text(encoding="utf-8", errors="replace")
@@ -458,7 +463,7 @@ TYPE_SUBDIR = {"function": "function", "class": "class", "const": "const"}
 
 
 def _safe_filename(base: str) -> str:
-    return re.sub(r"[^\w\-.]", "_", base)
+    return re.sub("[^\\w\\-.]", "_", base)
 
 
 def _unique_path(directory: Path, stem: str, suffix: str = ".py") -> Path:

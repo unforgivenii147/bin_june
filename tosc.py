@@ -6,11 +6,31 @@ import shutil
 import sys
 from pathlib import Path
 
-from dh import unique_path
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 dest = Path.home() / "isaac" / "may" / "scripts"
+
+
+def unique_path(path: Path | str) -> Path:
+    path = Path(path)
+    if not path.exists():
+        return path
+    parent = path.parent
+    suffixes = path.suffixes
+    if suffixes:
+        first_suffix_index = path.name.find(suffixes[0])
+        stem = path.name[:first_suffix_index]
+        full_suffix = "".join(suffixes)
+    else:
+        stem = path.name
+        full_suffix = ""
+    counter = 1
+    while True:
+        new_name = f"{stem}_{counter}{full_suffix}"
+        new_path = parent / new_name
+        if not new_path.exists():
+            return new_path
+        counter += 1
 
 
 def main() -> None:

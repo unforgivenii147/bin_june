@@ -6,7 +6,9 @@ import concurrent.futures
 import re
 from pathlib import Path
 
-COMMENT_RE = re.compile(r"(?://[^\n]*|/\*.*?\*/)|(?:\"(?:\\[\s\S]|[^\"\\])*\"|\'(?:\\[\s\S]|[^\'\\])*\')", re.DOTALL)
+COMMENT_RE = re.compile(
+    "(?://[^\\n]*|/\\*.*?\\*/)|(?:\"(?:\\\\[\\s\\S]|[^\"\\\\])*\"|\\'(?:\\\\[\\s\\S]|[^\\'\\\\])*\\')", re.DOTALL
+)
 
 
 def strip_comments_from_text(text: str) -> str:
@@ -34,8 +36,8 @@ def process_file(file_path: Path) -> str:
 
 def main():
     extensions = {".h", ".c", ".cpp", ".hpp"}
-    cwd = Path(".")
-    files_to_process = [p for p in cwd.rglob("*") if p.suffix.lower() in extensions]
+    current_dir = Path(".")
+    files_to_process = [p for p in current_dir.rglob("*") if p.suffix.lower() in extensions]
     if not files_to_process:
         print("No matching C/C++ files found.")
         return

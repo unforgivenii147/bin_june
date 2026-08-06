@@ -4,8 +4,6 @@ Extract text from PPTX using python-pptx only
 Usage: python extract_text.py input.pptx
 """
 
-from __future__ import annotations
-
 import sys
 from pathlib import Path
 

@@ -16,7 +16,7 @@ from collections.abc import Iterator
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 
-from dh import TXT_EXT, is_text_file
+from dh import TXT_EXT
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -87,6 +87,29 @@ def memory_efficient_file_finder(
         raise
     except Exception as e:
         logger.error(f"Unexpected error during traversal: {e}")
+
+
+def is_text_file(file_path: Path) -> bool:
+    try:
+        with open(file_path, "rb") as f:
+            chunk = f.read(8192)
+        if not chunk:
+            return True
+        if b"\x00" in chunk:
+            return False
+        try:
+            chunk.decode("utf-8")
+            return True
+        except UnicodeDecodeError:
+            for encoding in ["latin-1", "iso-8859-1", "cp1252"]:
+                try:
+                    chunk.decode(encoding)
+                    return True
+                except (UnicodeDecodeError, LookupError):
+                    continue
+            return False
+    except (OSError, PermissionError):
+        return None
 
 
 def check_file(file_path: Path) -> tuple[Path, str, bool, str]:

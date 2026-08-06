@@ -109,7 +109,7 @@ def decode_file(file_path: str, output_path: str | None = None, show_chunk: int 
             print(f"✓ {encoding:15} - Successfully decoded!")
             if show_chunk > 0:
                 chunk = get_first_chunk(decoded_text, show_chunk)
-                preview = chunk.replace("\n", "\n  ").replace("\r", r"\r")
+                preview = chunk.replace("\n", "\n  ").replace("\r", "\\r")
                 print(f"  Preview:\n  {preview}\n")
     print("-" * 42)
     if not successful_encodings:

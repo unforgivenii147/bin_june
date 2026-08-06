@@ -22,7 +22,7 @@ import sys
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 
-from dh import BIN_EXT, TXT_EXT, is_text_file
+from dh import BIN_EXT, TXT_EXT
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -34,6 +34,27 @@ TEXT_EXTENSIONS = TXT_EXT
 
 def should_skip_dir(directory: Path) -> bool:
     return directory.name in SKIP_DIRS
+
+
+def is_text_file(file_path: Path) -> bool:
+    if file_path.suffix.lower() in BINARY_EXTENSIONS:
+        return False
+    if file_path.suffix.lower() in TEXT_EXTENSIONS:
+        return True
+    name_lower = file_path.name.lower()
+    if name_lower in {"makefile", "dockerfile", "dockerfile.prod", "dockerfile.dev", "gemfile", "rakefile"}:
+        return True
+    try:
+        with open(file_path, "rb") as f:
+            chunk = f.read(8192)
+            if not chunk:
+                return True
+            if b"\x00" in chunk:
+                return False
+            text_characters = bytearray({7, 8, 9, 10, 12, 13, 27} | set(range(32, 256)))
+            return all(byte in text_characters for byte in chunk)
+    except OSError:
+        return False
 
 
 def convert_dos_to_unix_chunk(chunk: bytes) -> bytes:

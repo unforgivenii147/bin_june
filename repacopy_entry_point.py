@@ -4,10 +4,8 @@ Copy installed packages that have entry points to ~/tmp/packages/<pkgname>
 Uses parallel processing for efficient file copying.
 """
 
-from __future__ import annotations
-
-import contextlib
 import csv
+import json
 import logging
 import os
 import shutil
@@ -16,7 +14,7 @@ import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from functools import lru_cache
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional, Set, Tuple
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(processName)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -74,7 +72,10 @@ def has_entry_points(dist_info_dir: Path) -> bool:
         except Exception as e:
             logger.debug(f"Error reading {metadata_file}: {e}")
 
-    return bool((dist_info_dir / "top_level.txt").exists() and any(dist_info_dir.glob("scripts*")))
+    if (dist_info_dir / "top_level.txt").exists() and any(dist_info_dir.glob("scripts*")):
+        return True
+
+    return False
 
 
 def parse_record_file(dist_info_dir: Path) -> List[Tuple[Path, str]]:
@@ -127,7 +128,7 @@ def find_file_in_paths(relative_path: str, search_paths: Tuple[Path, ...]) -> Op
             "data/": lambda p: p,
         }
 
-        for prefix, _transform in data_mappings.items():
+        for prefix, transform in data_mappings.items():
             if data_subpath.startswith(prefix):
                 subpath = data_subpath[len(prefix) :]
                 for base_path in search_paths:
@@ -206,15 +207,17 @@ def copy_package_files(package_info: Tuple[str, Path, List[str]]) -> Tuple[str, 
 
         dist_info_dest = dest_base / dist_info_dir.name
         if dist_info_dir.exists() and not dist_info_dest.exists():
-            with contextlib.suppress(Exception):
+            try:
                 shutil.copytree(dist_info_dir, dist_info_dest, dirs_exist_ok=True)
+            except Exception:
+                pass
 
         success_msg = f"Copied {files_copied} files"
         logger.info(f"{package_name}: {success_msg}")
         return (package_name, True, success_msg)
 
     except Exception as e:
-        error_msg = f"Error: {e!s}"
+        error_msg = f"Error: {str(e)}"
         logger.error(f"{package_name}: {error_msg}")
         return (package_name, False, error_msg)
 

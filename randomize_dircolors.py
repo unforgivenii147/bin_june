@@ -1,7 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-from __future__ import annotations
-
 from pathlib import Path
 from random import choice as random_choice
 

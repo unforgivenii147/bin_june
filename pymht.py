@@ -1,7 +1,4 @@
-#!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import base64
 import os
 import re
@@ -11,28 +8,51 @@ from email.message import EmailMessage
 from email.parser import BytesParser
 from pathlib import Path
 
-from dh import _clean_fname, unique_path
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
+def unique_path(path: Path | str) -> Path:
+    path = _clean_fname(Path(path))
+    if not path.exists():
+        return path
+    parent = path.parent
+    suffixes = path.suffixes
+    if suffixes:
+        first_suffix_index = path.name.find(suffixes[0])
+        stem = path.name[:first_suffix_index]
+        full_suffix = "".join(suffixes)
+    else:
+        stem = path.name
+        full_suffix = ""
+    counter = 1
+    while True:
+        new_name = f"{stem}_{counter}{full_suffix}"
+        new_path = parent / new_name
+        if not new_path.exists():
+            return new_path
+        counter += 1
+
+
+from dh import _clean_fname
 
 
 def sanitize_filename(name: str) -> str:
     name = name.strip().strip('"').strip("'")
     name = name.replace("\\\\", "/").split("/")[-1]
-    return re.sub(r"[^A-Za-z0-9._-]+", "_", name) or "resource"
+    return re.sub("[^A-Za-z0-9._-]+", "_", name) or "resource"
 
 
 def split_data_url(src: str):
     if not src or not src.startswith("data:"):
         return None
-    m = re.match(r"data:([^;]+);base64,(.*)$", src, flags=re.IGNORECASE | re.DOTALL)
+    m = re.match("data:([^;]+);base64,(.*)$", src, flags=re.IGNORECASE | re.DOTALL)
     if not m:
         return None
     mime = m.group(1)
     b64 = m.group(2)
     try:
         raw = base64.b64decode(b64)
-        return mime, raw
+        return (mime, raw)
     except Exception:
         return None
 
@@ -91,7 +111,7 @@ def main() -> None:
         if filename:
             return sanitize_filename(filename)
         cd = part.get("Content-Disposition") or ""
-        m = re.search(r"filename-\*?=(?:UTF-8'')?[\"']?([^\"';]+)", cd, flags=re.IGNORECASE)
+        m = re.search("filename-\\*?=(?:UTF-8'')?[\\\"']?([^\\\"';]+)", cd, flags=re.IGNORECASE)
         if m:
             return sanitize_filename(m.group(1))
         return None
@@ -102,7 +122,7 @@ def main() -> None:
         if ctype == "text/html":
             continue
         ext = None
-        m = re.match(r"^[^/]+/([^;\s]+)", ctype)
+        m = re.match("^[^/]+/([^;\\s]+)", ctype)
         if m:
             ext = m.group(1)
         if ext == "svg+xml":
@@ -139,7 +159,7 @@ def main() -> None:
         return match.group(0)
 
     html_text = re.sub(
-        r"(src|href)=[\"']cid:([^\"']+)[\"']",
+        "(src|href)=[\\\"']cid:([^\\\"']+)[\\\"']",
         lambda m: (
             f'{m.group(1)}="{os.path.basename(out_dir)}/{cid_to_file.get(m.group(2), m.group(2))}"'
             if m.group(2) in cid_to_file
@@ -157,7 +177,7 @@ def main() -> None:
             return match.group(0)
         mime, raw = parsed
         ext = None
-        m = re.match(r"^[^/]+/([^;\s]+)", mime)
+        m = re.match("^[^/]+/([^;\\s]+)", mime)
         if m:
             ext = m.group(1)
         if ext == "svg+xml":
@@ -170,7 +190,7 @@ def main() -> None:
 
     if out_html.exists():
         out_html = unique_path(out_html)
-    html_text = re.sub(r"(src|href)=[\"'](data:[^\"']+)[\"']", data_uri_replacer, html_text, flags=re.IGNORECASE)
+    html_text = re.sub("(src|href)=[\\\"'](data:[^\\\"']+)[\\\"']", data_uri_replacer, html_text, flags=re.IGNORECASE)
     with open(out_html, "w", encoding="utf-8") as f:
         f.write(html_text)
     print("Done.")

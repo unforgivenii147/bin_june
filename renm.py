@@ -1,22 +1,41 @@
-#!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import os
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
 from deep_translator import GoogleTranslator
-from dh import _clean_fname, unique_path
 from fastwalk import walk_files
 from tqdm import tqdm
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
+def unique_path(path: Path | str) -> Path:
+    path = _clean_fname(Path(path))
+    if not path.exists():
+        return path
+    parent = path.parent
+    suffixes = path.suffixes
+    if suffixes:
+        first_suffix_index = path.name.find(suffixes[0])
+        stem = path.name[:first_suffix_index]
+        full_suffix = "".join(suffixes)
+    else:
+        stem = path.name
+        full_suffix = ""
+    counter = 1
+    while True:
+        new_name = f"{stem}_{counter}{full_suffix}"
+        new_path = parent / new_name
+        if not new_path.exists():
+            return new_path
+        counter += 1
+
+
+from dh import _clean_fname
+
 DIRECTORY = "."
-non_english_pattern = re.compile(r"[^\x00-\x7F]")
+non_english_pattern = re.compile("[^\\x00-\\x7F]")
 
 
 def is_english(text: str) -> bool:
@@ -29,15 +48,15 @@ translation_cache = {}
 def translate_name(name):
     base, ext = os.path.splitext(name)
     if is_english(base):
-        return name, name
+        return (name, name)
     if base in translation_cache:
-        return name, translation_cache[base] + ext
+        return (name, translation_cache[base] + ext)
     try:
         translated = GoogleTranslator(source="auto", target="en").translate(base)
         translation_cache[base] = translated
-        return name, translated + ext
+        return (name, translated + ext)
     except Exception:
-        return name, name
+        return (name, name)
 
 
 def rename_files(directory: str) -> None:
@@ -46,11 +65,7 @@ def rename_files(directory: str) -> None:
     translation_map = {}
     with ThreadPoolExecutor(8) as executor:
         futures = [executor.submit(translate_name, name) for name in unique_names_to_translate]
-        for future in tqdm(
-            as_completed(futures),
-            total=len(unique_names_to_translate),
-            desc="Translating filenames",
-        ):
+        for future in tqdm(as_completed(futures), total=len(unique_names_to_translate), desc="Translating filenames"):
             original, translated = future.result()
             translation_map[original] = translated
     for path in sorted(paths, key=lambda x: len(x.parts), reverse=True):

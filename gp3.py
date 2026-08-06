@@ -56,8 +56,8 @@ def get_repo_info_from_url(url: str) -> tuple[str, str] | None:
 
 
 def create_new_remote_repo(repo: Repo, github_token: str) -> bool:
-    cwd = Path.cwd()
-    repo_name = cwd.name
+    current_dir = Path.cwd()
+    repo_name = current_dir.name
     try:
         github = Github(github_token)
         user = github.get_user()

@@ -163,13 +163,13 @@ class CodeBlockExtractor:
         content_lower = content.lower()
         keyword_count = sum(1 for keyword in python_keywords if keyword.lower() in content_lower)
         python_patterns = [
-            r"\bdef\s+\w+\s*\(",
-            r"\bclass\s+\w+",
-            r"\bif\s+.*:",
-            r"\bfor\s+.*\s+in\s+",
-            r"\bimport\s+",
-            r"\breturn\s+",
-            r"\b(True|False|None)\b",
+            "\\bdef\\s+\\w+\\s*\\(",
+            "\\bclass\\s+\\w+",
+            "\\bif\\s+.*:",
+            "\\bfor\\s+.*\\s+in\\s+",
+            "\\bimport\\s+",
+            "\\breturn\\s+",
+            "\\b(True|False|None)\\b",
         ]
         pattern_matches = sum(1 for pattern in python_patterns if re.search(pattern, content))
         return keyword_count >= 2 or pattern_matches >= 2

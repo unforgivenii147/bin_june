@@ -1,14 +1,49 @@
-#!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 from pathlib import Path
 
-from dh import get_filez, is_binary, should_skip
-
 CHUNK_SIZE = 1024 * 1024
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
+def is_binary(path: Path | str) -> bool:
+    path = Path(path)
+    try:
+        with path.open("rb") as f:
+            chunk = f.read(CHUNK_SIZE)
+        if not chunk:
+            return False
+        if b"\x00" in chunk:
+            return True
+        text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
+        nontext = sum((1 for b in chunk if b not in text_chars))
+        return nontext / len(chunk) > 0.3
+    except Exception:
+        return True
+
+
+def get_filez(root_dir: str | Path):
+    from os import walk as os_walk
+
+    visited_dirs: set[Path] = set()
+    root_dir = Path(root_dir)
+    if root_dir.is_dir():
+        for dirpath, dirnames, filenames in os_walk(root_dir, topdown=True):
+            base_path = Path(dirpath)
+            for dirname in list(dirnames):
+                full_path = base_path / dirname
+                resolved_path = full_path.resolve()
+                if should_skip(full_path) or resolved_path in visited_dirs:
+                    dirnames.remove(dirname)
+                visited_dirs.add(resolved_path)
+            for filename in filenames:
+                filepath = Path(dirpath) / filename
+                if not should_skip(filepath):
+                    yield filepath
+    else:
+        yield root_dir
+
+
+from dh import should_skip
 
 
 def find_scripts_without_extension(directory: Path):
@@ -18,7 +53,7 @@ def find_scripts_without_extension(directory: Path):
             continue
         if ".git" in item.parts:
             continue
-        if item.is_file() and not item.suffix:
+        if item.is_file() and (not item.suffix):
             if is_binary(item):
                 continue
             try:

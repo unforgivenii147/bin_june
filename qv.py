@@ -15,11 +15,11 @@ def view_file(file_path):
 
 def main():
     recursive = "-r" in sys.argv
-    cwd = pathlib.Path(".")
+    current_dir = pathlib.Path(".")
     if recursive:
-        files = cwd.rglob("*")
+        files = current_dir.rglob("*")
     else:
-        files = cwd.glob("*")
+        files = current_dir.glob("*")
     files = [f for f in files if f.is_file()]
     for file_path in files:
         print(f"Viewing: {file_path}")

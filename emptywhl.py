@@ -38,8 +38,8 @@ def is_empty_wheel(wheel_path: str) -> bool:
 
 
 def main() -> None:
-    cwd = Path(".")
-    wheel_files = list(cwd.glob("*.whl"))
+    current_dir = Path(".")
+    wheel_files = list(current_dir.glob("*.whl"))
     if not wheel_files:
         return
     empty_wheels = [str(w) for w in wheel_files if is_empty_wheel(str(w))]

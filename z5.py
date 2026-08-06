@@ -15,7 +15,6 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import zstandard as zstd
-from dh import fsz, get_files
 
 EXCLUDED_EXTENSIONS = {
     ".xz",
@@ -129,6 +128,15 @@ class OperationResult:
         return (self.processed_size / self.original_size - 1) * 100
 
 
+def format_size(size_bytes: float) -> str:
+    val = float(size_bytes)
+    for unit in ["B", "KB", "MB", "GB", "TB"]:
+        if val < 1024.0:
+            return f"{val:.2f} {unit}"
+        val /= 1024.0
+    return f"{val:.2f} PB"
+
+
 def compress_file(
     input_path: Path,
     output_path: Path,
@@ -214,6 +222,36 @@ def decompress_file(
         return OperationResult(input_path, 0, 0, False, str(e), operation="decompress")
 
 
+def get_files(
+    root: Path,
+    mode: str,
+    exclude_ext: set[str],
+    exclude_patterns: list[str],
+    ext_filter: list[str] | None = None,
+    recursive: bool = True,
+) -> list[Path]:
+    found = []
+    walker = root.rglob("*") if recursive else root.iterdir()
+    for p in walker:
+        if not p.is_file() or p.is_symlink():
+            continue
+        if any(part in SKIP_DIRS for part in p.parts):
+            continue
+        if exclude_patterns and any(pat in str(p) for pat in exclude_patterns):
+            continue
+        if mode == "compress":
+            if p.suffix.lower() in exclude_ext:
+                continue
+            if ext_filter:
+                normalized_filter = [f if f.startswith(".") else f".{f}" for f in ext_filter]
+                if p.suffix.lower() not in normalized_filter:
+                    continue
+            found.append(p)
+        elif p.suffix.lower() == ".zst":
+            found.append(p)
+    return sorted(found)
+
+
 def print_summary(results: list[OperationResult], root: Path, operation: str):
     successes = [r for r in results if r.success]
     failures = [r for r in results if not r.success]
@@ -235,8 +273,8 @@ def print_summary(results: list[OperationResult], root: Path, operation: str):
                 rel_path = r.path.name
             table.add_row(
                 str(rel_path),
-                fsz(r.original_size),
-                fsz(r.processed_size),
+                format_size(r.original_size),
+                format_size(r.processed_size),
                 f"{r.ratio:.1f}%",
                 "✅" + ("🗑️" if r.original_deleted else ""),
             )
@@ -246,8 +284,8 @@ def print_summary(results: list[OperationResult], root: Path, operation: str):
             f"Total files: {len(results)}\n",
             (f"Success: {len(successes)}", "green"),
             (f" | Failed: {len(failures)}\n", "red"),
-            f"Original Size: {fsz(total_orig)}\n",
-            f"Processed Size: {fsz(total_proc)}\n",
+            f"Original Size: {format_size(total_orig)}\n",
+            f"Processed Size: {format_size(total_proc)}\n",
             ("Ratio: ", "dim"),
             (f"{((1 - total_proc / total_orig) * 100 if total_orig > 0 else 0):.1f}%\n", "bold green"),
             (f"Time: {total_time:.2f}s", "dim"),
@@ -256,8 +294,8 @@ def print_summary(results: list[OperationResult], root: Path, operation: str):
     else:
         print(f"\n--- {operation.capitalize()} Summary ---")
         print(f"Processed {len(results)} files ({len(successes)} success, {len(failures)} failure)")
-        print(f"Original size: {fsz(total_orig)}")
-        print(f"Processed size: {fsz(total_proc)}")
+        print(f"Original size: {format_size(total_orig)}")
+        print(f"Processed size: {format_size(total_proc)}")
         print(f"Total time: {total_time:.2f}s")
 
 

@@ -1,26 +1,35 @@
-#!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 from pathlib import Path
+from dh import FONT_EXT, _clean_fname
 
-from dh import FONT_EXT, _clean_fname, unique_path
 from fontTools.ttLib import TTFont
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
-"""
-Recursively rename font files based on their internal metadata (name and style).
-Uses fontTools to extract font family name and style (Regular, Bold, Italic, etc.).
-Usage:
-    python rename_fonts.py
-Examples:
-    asrds.ttf -> Fontello-Regular.ttf
-    13543.woff2 -> FontAwesome-Regular.woff2
-If the target filename already exists, appends _1, _2, etc. to avoid overwriting.
-"""
+def unique_path(path: Path | str) -> Path:
+    path = _clean_fname(Path(path))
+    if not path.exists():
+        return path
+    parent = path.parent
+    suffixes = path.suffixes
+    if suffixes:
+        first_suffix_index = path.name.find(suffixes[0])
+        stem = path.name[:first_suffix_index]
+        full_suffix = "".join(suffixes)
+    else:
+        stem = path.name
+        full_suffix = ""
+    counter = 1
+    while True:
+        new_name = f"{stem}_{counter}{full_suffix}"
+        new_path = parent / new_name
+        if not new_path.exists():
+            return new_path
+        counter += 1
 
+
+"\nRecursively rename font files based on their internal metadata (name and style).\nUses fontTools to extract font family name and style (Regular, Bold, Italic, etc.).\nUsage:\n    python rename_fonts.py\nExamples:\n    asrds.ttf -> Fontello-Regular.ttf\n    13543.woff2 -> FontAwesome-Regular.woff2\nIf the target filename already exists, appends _1, _2, etc. to avoid overwriting.\n"
 STYLE_MAPPING = {
     "normal": "Regular",
     "regular": "Regular",
@@ -47,7 +56,7 @@ def get_font_name_and_style(font_path):
         font = TTFont(font_path)
         name_table = font.get("name")
         if not name_table:
-            return None, None
+            return (None, None)
         family_name = subfamily_name = None
         for record in name_table.names:
             name_str = record.string.decode("utf-16-be", errors="ignore").strip()
@@ -67,16 +76,16 @@ def get_font_name_and_style(font_path):
                     break
             if style == "Regular" and subfamily_name.lower() != "regular":
                 style = subfamily_name
-        return family_name, style
+        return (family_name, style)
     except Exception as e:
         print(f"  Warning: Could not read {font_path.name}: {e}")
-        return None, None
+        return (None, None)
 
 
 def sanitize_filename(name) -> str:
     if not name:
         return "Unknown"
-    sanitized = "".join(c if c.isalnum() or c in ("-", "_", " ") else "_" for c in name)
+    sanitized = "".join((c if c.isalnum() or c in ("-", "_", " ") else "_" for c in name))
     sanitized = sanitized.replace(" ", "_").strip("_")
     while "__" in sanitized:
         sanitized = sanitized.replace("__", "_")

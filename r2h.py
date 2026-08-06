@@ -1,18 +1,27 @@
-#!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import sys
 from collections import deque
 from collections.abc import Callable, Iterable
 from multiprocessing import get_context
 from pathlib import Path
 from typing import Any
-
-from dh import get_files, mpf_async
 from docutils.core import publish_parts
 
 MAX_WORKERS = 4
+from dh import get_files
+
+
+def mpf_async(func: Callable[[Any], Any], items: Iterable[Any]):
+    with get_context("spawn").Pool(MAX_WORKERS) as p:
+        async_results = [p.apply_async(func, (item,)) for item in items]
+        results = []
+        for i, async_result in enumerate(async_results):
+            try:
+                results.append(async_result.get(timeout=30))
+            except Exception as e:
+                print(f"Item {i} failed: {e}")
+                results.append(None)
+        return results
 
 
 def rst_to_html(content: str) -> str:
@@ -20,11 +29,7 @@ def rst_to_html(content: str) -> str:
         parts = publish_parts(
             source=content,
             writer_name="html",
-            settings_overrides={
-                "initial_header_level": 2,
-                "warning_stream": None,
-                "report_level": 5,
-            },
+            settings_overrides={"initial_header_level": 2, "warning_stream": None, "report_level": 5},
         )
         html_content = parts["html_body"]
         return html_content

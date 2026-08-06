@@ -20,8 +20,6 @@ from pathlib import Path
 from subprocess import CalledProcessError, run
 from typing import Any
 
-from dh import get_installed_packages
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
@@ -93,6 +91,17 @@ class PackageStateManager:
 
     def get_upgradable_packages(self) -> list[PackageInfo]:
         return [pkg for pkg in self.state.values() if pkg.upgradable]
+
+
+def get_installed_packages() -> list[tuple[str, str]]:
+    try:
+        result = run(["pip", "list", "--format=json"], capture_output=True, text=True, check=True, timeout=30)
+        packages = json.loads(result.stdout)
+        logger.info(f"✓ Found {len(packages)} installed packages")
+        return [(p["name"], p["version"]) for p in packages]
+    except (CalledProcessError, json.JSONDecodeError, TimeoutError) as e:
+        logger.error(f"✗ Failed to get installed packages: {e}")
+        sys.exit(1)
 
 
 def query_pypi(package_name: str, installed_version: str, retries: int = 2) -> PackageInfo:

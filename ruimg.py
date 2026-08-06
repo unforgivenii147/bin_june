@@ -25,6 +25,7 @@ except ImportError:
 @dataclass
 class ExtractionResult:
     """Result of text extraction from a single image."""
+
     file_path: Path
     success: bool
     text: str = ""
@@ -37,7 +38,7 @@ class TextExtractor:
     """Extract text from images using Tesseract OCR."""
 
     # Supported image extensions
-    IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.webp', '.gif'}
+    IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp", ".gif"}
 
     @staticmethod
     def extract_from_image(image_path: Path) -> ExtractionResult:
@@ -52,43 +53,25 @@ class TextExtractor:
         """
         try:
             if not image_path.exists():
-                return ExtractionResult(
-                    file_path=image_path,
-                    success=False,
-                    error=f"File not found"
-                )
+                return ExtractionResult(file_path=image_path, success=False, error=f"File not found")
 
             # Open and extract text using Tesseract
             # Language config: 'rus' for Russian, 'eng' for English
             image = Image.open(image_path)
-            text = pytesseract.image_to_string(image, lang='rus+eng')
+            text = pytesseract.image_to_string(image, lang="rus+eng")
 
             if not text.strip():
-                return ExtractionResult(
-                    file_path=image_path,
-                    success=True,
-                    text="",
-                    char_count=0,
-                    line_count=0
-                )
+                return ExtractionResult(file_path=image_path, success=True, text="", char_count=0, line_count=0)
 
             char_count = len(text)
-            line_count = len(text.strip().split('\n'))
+            line_count = len(text.strip().split("\n"))
 
             return ExtractionResult(
-                file_path=image_path,
-                success=True,
-                text=text,
-                char_count=char_count,
-                line_count=line_count
+                file_path=image_path, success=True, text=text, char_count=char_count, line_count=line_count
             )
 
         except Exception as e:
-            return ExtractionResult(
-                file_path=image_path,
-                success=False,
-                error=str(e)
-            )
+            return ExtractionResult(file_path=image_path, success=False, error=str(e))
 
     @staticmethod
     def find_images(directories: list[Path]) -> list[Path]:
@@ -108,8 +91,8 @@ class TextExtractor:
                 continue
 
             for ext in TextExtractor.IMAGE_EXTENSIONS:
-                images.extend(directory.rglob(f'*{ext}'))
-                images.extend(directory.rglob(f'*{ext.upper()}'))
+                images.extend(directory.rglob(f"*{ext}"))
+                images.extend(directory.rglob(f"*{ext.upper()}"))
 
         return sorted(set(images))  # Remove duplicates and sort
 
@@ -172,10 +155,10 @@ class TextExtractionReport:
                     "char_count": r.char_count,
                     "line_count": r.line_count,
                     "error": r.error if not r.success else None,
-                    "preview": r.text[:200] if r.text else ""
+                    "preview": r.text[:200] if r.text else "",
                 }
                 for r in results
-            ]
+            ],
         }
 
         output_path.write_text(json.dumps(data, indent=2, ensure_ascii=False))
@@ -197,7 +180,7 @@ Examples:
   %(prog)s /path/to/dir1 /path/to/dir2  # Process multiple directories
   %(prog)s . --workers 4            # Use 4 parallel workers
   %(prog)s . --json report.json     # Save detailed report to JSON
-        """
+        """,
     )
 
     parser.add_argument(
@@ -205,27 +188,16 @@ Examples:
         nargs="*",
         type=Path,
         default=[Path.cwd()],
-        help="Directories to process (default: current directory)"
+        help="Directories to process (default: current directory)",
     )
 
     parser.add_argument(
-        "-w", "--workers",
-        type=int,
-        default=cpu_count(),
-        help=f"Number of parallel workers (default: {cpu_count()})"
+        "-w", "--workers", type=int, default=cpu_count(), help=f"Number of parallel workers (default: {cpu_count()})"
     )
 
-    parser.add_argument(
-        "-j", "--json",
-        type=Path,
-        help="Save detailed report to JSON file"
-    )
+    parser.add_argument("-j", "--json", type=Path, help="Save detailed report to JSON file")
 
-    parser.add_argument(
-        "-s", "--silent",
-        action="store_true",
-        help="Suppress file-by-file output (summary only)"
-    )
+    parser.add_argument("-s", "--silent", action="store_true", help="Suppress file-by-file output (summary only)")
 
     args = parser.parse_args()
 

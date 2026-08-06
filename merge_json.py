@@ -62,7 +62,7 @@ def main():
     parser.add_argument(
         "--output",
         "-o",
-        default="merged.json",
+        default="mergedf.json",
         help="Имя выходного файла. По умолчанию 'mergedf.json'.",
     )
     args = parser.parse_args()

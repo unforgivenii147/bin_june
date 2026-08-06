@@ -1,8 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-from __future__ import annotations
-
 import argparse
 import io
+import os
+import sys
 import tarfile
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -117,11 +117,13 @@ def main():
 
     mode = "decompress" if args.decompress else "compress"
 
-    cwd = Path(".")
+    current_dir = Path(".")
 
     if mode == "compress":
-        subdirs = [d for d in cwd.iterdir() if d.is_dir() and not d.name.startswith(".")]
-        files = [f for f in cwd.iterdir() if f.is_file() and f.suffix != ".br" and f.name != Path(__file__).name]
+        subdirs = [d for d in current_dir.iterdir() if d.is_dir() and not d.name.startswith(".")]
+        files = [
+            f for f in current_dir.iterdir() if f.is_file() and f.suffix != ".br" and f.name != Path(__file__).name
+        ]
 
         if not subdirs and not files:
             print("No files or subdirectories found to compress.")
@@ -137,7 +139,7 @@ def main():
                 executor.submit(process_file, f)
 
     else:  # decompress
-        archives = [f for f in cwd.iterdir() if f.is_file() and f.suffix == ".br"]
+        archives = [f for f in current_dir.iterdir() if f.is_file() and f.suffix == ".br"]
 
         if not archives:
             print("No .br or .tar.br files found to decompress.")

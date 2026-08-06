@@ -1,18 +1,30 @@
-#!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import json
 import sys
 from collections import deque
 from multiprocessing import get_context
 from pathlib import Path
-
-from dh import get_files, get_nobinary, is_binary
 from toolz import compose, frequencies
 from toolz.curried import map as _map
 
 CHUNK_SIZE = 1024 * 1024
+from dh import get_files, get_nobinary
+
+
+def is_binary(path: Path | str) -> bool:
+    path = Path(path)
+    try:
+        with path.open("rb") as f:
+            chunk = f.read(CHUNK_SIZE)
+        if not chunk:
+            return False
+        if b"\x00" in chunk:
+            return True
+        text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
+        nontext = sum((1 for b in chunk if b not in text_chars))
+        return nontext / len(chunk) > 0.3
+    except Exception:
+        return True
 
 
 MAX_QUEUE = 8

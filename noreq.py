@@ -264,8 +264,8 @@ def dispatch_archive(path: Path) -> None:
 
 def find_files_to_process() -> list[Path]:
     files_to_process = []
-    cwd = Path.cwd()
-    for file_path in cwd.rglob("*"):
+    current_dir = Path.cwd()
+    for file_path in current_dir.rglob("*"):
         if not file_path.is_file():
             continue
         file_name = file_path.name

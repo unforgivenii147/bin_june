@@ -9,8 +9,6 @@ from collections import defaultdict
 from functools import partial
 from pathlib import Path
 
-from dh import is_text_file
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 TEXT_EXTENSIONS = {
@@ -95,6 +93,24 @@ EXCLUDED_EXTENSIONS = {
     ".ppt",
     ".pptx",
 }
+
+
+def is_text_file(filepath: Path) -> bool:
+    if filepath.suffix in EXCLUDED_EXTENSIONS:
+        return False
+    if filepath.suffix in TEXT_EXTENSIONS:
+        return True
+    if "." not in filepath.name:
+        try:
+            with open(filepath, "rb") as f:
+                sample = f.read(1024)
+                if not sample:
+                    return True
+                text_chars = sum(1 for b in sample if 32 <= b <= 126 or b in (9, 10, 13))
+                return text_chars / len(sample) > 0.8
+        except OSError:
+            return False
+    return False
 
 
 def read_file_content(filepath: Path) -> tuple[Path, list[str], str]:

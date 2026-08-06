@@ -1,16 +1,18 @@
-#!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import re
 import subprocess
 import sys
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
-
 from dh import get_files
-from dh.jobutils import mpf3
+
+
+def mpf3(process_function: Callable, files: list[Path], **kwargs):
+    from joblib import Parallel, delayed
+
+    file_strings = [str(f) for f in files]
+    return Parallel(n_jobs=-1)((delayed(process_function)(file_str, **kwargs) for file_str in file_strings))
 
 
 def fix_print_statements_manually(content):
@@ -21,11 +23,11 @@ def fix_print_statements_manually(content):
         if not stripped or stripped.startswith("#"):
             new_lines.append(line)
             continue
-        if re.search(r"\bprint\s+", line) and (not is_in_string(line, "print")):
+        if re.search("\\bprint\\s+", line) and (not is_in_string(line, "print")):
             if ">>" in line:
-                line = re.sub(r"print\s+>>\s*(\w+)\s*,\s*(.+?)(?:\s*#.*)?$", "print(\\2, file=\\1)", line)
+                line = re.sub("print\\s+>>\\s*(\\w+)\\s*,\\s*(.+?)(?:\\s*#.*)?$", "print(\\2, file=\\1)", line)
             else:
-                line = re.sub(r"print\s+(.+?)(?:\s*#.*)?$", "print(\\1)", line)
+                line = re.sub("print\\s+(.+?)(?:\\s*#.*)?$", "print(\\1)", line)
             new_lines.append(line)
         else:
             new_lines.append(line)
@@ -59,9 +61,7 @@ def process_file(path):
                 f.write(fixed_content)
             print("  ✅ Manual conversion applied")
             result = subprocess.run(
-                ["ruff", "check", "--fix", "--select", "UP010", path],
-                capture_output=True,
-                text=True,
+                ["ruff", "check", "--fix", "--select", "UP010", path], capture_output=True, text=True
             )
             if not result.returncode:
                 print("  ✅ Ruff applied additional fixes")

@@ -140,15 +140,15 @@ def main():
     group.add_argument("-c", "--compress", action="store_true", help="Compress subfolders")
     group.add_argument("-d", "--decompress", action="store_true", help="Decompress .tar.lz4 files")
     args = parser.parse_args()
-    cwd = Path.cwd()
+    current_dir = Path.cwd()
     if not args.compress and (not args.decompress):
         args.compress = True
     if args.compress:
-        items = [d for d in cwd.iterdir() if d.is_dir()]
+        items = [d for d in current_dir.iterdir() if d.is_dir()]
         process_func = compress_folder
         action = "Compressing"
     else:
-        items = [f for f in cwd.iterdir() if f.is_file() and f.suffix == ".lz4" and f.stem.endswith(".tar")]
+        items = [f for f in current_dir.iterdir() if f.is_file() and f.suffix == ".lz4" and f.stem.endswith(".tar")]
         process_func = decompress_file
         action = "Decompressing"
     if not items:

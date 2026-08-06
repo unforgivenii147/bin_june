@@ -1,208 +1,140 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
-"""
-Create and push a git repository to GitHub from the current directory.
-If the repo already exists on GitHub, it will commit and push changes.
-"""
-
 from __future__ import annotations
 
-import subprocess
+import os
+import shutil
 import sys
 from pathlib import Path
 
-# Built-in Python .gitignore template
-PYTHON_GITIGNORE_TEMPLATE = """\
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+from dotenv import load_dotenv
+from git import InvalidGitRepositoryError, NoSuchPathError, Repo
+from github import Github
+from github.Auth import Token
 
-# C extensions
-*.so
-
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# Pytest / coverage
-.pytest_cache/
-.coverage
-.coverage.*
-htmlcov/
-.noserc
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-
-# Environments
-.venv/
-venv/
-ENV/
-env/
-env.bak/
-venv.bak/
-
-# Jupyter / IPython
-.ipynb_checkpoints
-
-# IDEs & Editors
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# Environment variables & local databases
-.env
-.env.local
-*.sqlite3
-*.db
-"""
+REPO_ROOT = Path.cwd()
+DOTENV_PATH = Path.home() / ".env"
 
 
-def run_command(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess[str]:
-    """Helper to execute external commands safely without shell invocation."""
-    print(f"Running: {' '.join(cmd)}")
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    if check and result.returncode != 0:
-        print(f"Error: {result.stderr.strip() or result.stdout.strip()}")
-        sys.exit(1)
-    return result
+def get_dir_name() -> str:
+    return os.path.basename(os.getcwd())
 
 
-def is_git_repo(repo_path: Path = Path(".")) -> bool:
-    """Pure Python check for .git directory existence."""
-    git_dir = repo_path / ".git"
-    return git_dir.is_dir() or git_dir.is_file()
+def copy_gitignore() -> None:
+    src = Path.home() / ".gitignore"
+    dst = REPO_ROOT / ".gitignore"
 
-
-def ensure_gitignore(repo_path: Path = Path(".")) -> None:
-    """Creates a default .gitignore if one does not exist, or appends missing essentials."""
-    local_gitignore = repo_path / ".gitignore"
-
-    if not local_gitignore.exists():
-        print("Creating default Python .gitignore...")
-        local_gitignore.write_text(PYTHON_GITIGNORE_TEMPLATE, encoding="utf-8")
+    if src.exists() and not dst.exists():
+        shutil.copy2(src, dst)
+        print(f"Copied {src} -> {dst}")
+    elif dst.exists():
+        print(".gitignore already exists in current directory.")
     else:
-        print("Local .gitignore already exists. Skipping creation.")
+        print(f"No global .gitignore found at {src}")
 
 
-def get_current_branch(repo_path: Path = Path(".")) -> str:
-    """Reads current branch directly from .git/HEAD with CLI fallback."""
-    head_file = repo_path / ".git" / "HEAD"
-    if head_file.is_file():
-        try:
-            content = head_file.read_text().strip()
-            if content.startswith("ref: refs/heads/"):
-                return content.replace("ref: refs/heads/", "")
-        except OSError:
-            pass
-
-    res = run_command(["git", "branch", "--show-current"], check=False)
-    branch = res.stdout.strip()
-    return branch if branch else "main"
+def open_repo():
+    try:
+        return Repo(REPO_ROOT)
+    except (InvalidGitRepositoryError, NoSuchPathError):
+        return None
 
 
-def get_remote_url() -> str | None:
-    """Retrieves origin remote URL."""
-    res = run_command(["git", "remote", "get-url", "origin"], check=False)
-    if res.returncode == 0 and res.stdout.strip():
-        return res.stdout.strip()
-    return None
-
-
-def main() -> None:
-    cwd = Path.cwd()
-    repo_name = cwd.name
-    print(f"Repository name: {repo_name}")
-
-    # 1. Ensure .gitignore exists
-    ensure_gitignore(cwd)
-
-    # 2. Check or Init Git Repository
-    if not is_git_repo(cwd):
+def ensure_local_repo() -> Repo:
+    repo = open_repo()
+    if repo is None:
         print("Initializing git repository...")
-        run_command(["git", "init"])
+        repo = Repo.init(REPO_ROOT)
     else:
         print("Git repository already initialized.")
+    return repo
 
-    # 3. Handle GitHub Remote / Creation
-    remote_url = get_remote_url()
-    if not remote_url:
-        print(f"Creating GitHub repository '{repo_name}'...")
-        run_command(["gh", "repo", "create", repo_name, "--public", "--source=.", "--push"], check=False)
-        remote_url = get_remote_url()
-    else:
-        print("Remote 'origin' exists. Fetching...")
-        fetch_res = run_command(["git", "fetch", "origin"], check=False)
-        if fetch_res.returncode != 0:
-            print("Warning: Fetch failed. Check authentication or internet connectivity.")
 
-    # 4. Stage and Commit
-    print("Adding all files...")
-    run_command(["git", "add", "-A"])
+def github_client() -> Github:
+    load_dotenv(DOTENV_PATH)
+    token = os.getenv("GITHUB_TOKEN")
+    if not token:
+        raise SystemExit(f"GITHUB_TOKEN not found in {DOTENV_PATH}")
+    return Github(auth=Token(token))
 
-    status = run_command(["git", "status", "--porcelain"], check=False)
-    if status.stdout.strip():
+
+def github_repo_exists(repo_name: str) -> bool:
+    g = github_client()
+    try:
+        user = g.get_user()
+        user.get_repo(repo_name)
+        return True
+    except Exception:
+        return False
+    finally:
+        g.close()
+
+
+def ensure_origin(repo: Repo, repo_name: str) -> None:
+    if "origin" in [r.name for r in repo.remotes]:
+        print("Remote 'origin' already exists.")
+        return
+
+    if github_repo_exists(repo_name):
+        print(f"GitHub repo '{repo_name}' already exists on your account.")
+        origin_url = f"git@github.com:{repo_name}.git"
+        repo.create_remote("origin", origin_url)
+        print(f"Added remote origin: {origin_url}")
+        return
+
+    print(f"GitHub repo '{repo_name}' does not exist yet.")
+    import subprocess
+
+    cmd = ["gh", "repo", "create", repo_name, "--public", "--source=."]
+    print(f"Running: {' '.join(cmd)}")
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode != 0:
+        print(f"Error: {result.stderr}")
+        sys.exit(1)
+
+    origin_url = f"git@github.com:{repo_name}.git"
+    repo.create_remote("origin", origin_url)
+    print(f"Added remote origin: {origin_url}")
+
+
+def commit_if_needed(repo: Repo) -> None:
+    repo.git.add(all=True)
+    if repo.is_dirty(untracked_files=True):
         print("Committing changes...")
-        run_command(["git", "commit", "-m", "Auto-commit: sync changes"])
+        repo.index.commit("initial")
     else:
         print("No changes to commit.")
 
-    # 5. Push Changes
-    current_branch = get_current_branch(cwd)
-    print(f"Pushing branch '{current_branch}' to GitHub...")
 
-    push_result = run_command(["git", "push", "--set-upstream", "origin", current_branch], check=False)
-
-    if push_result.returncode != 0:
-        if "remote contains work" in push_result.stderr or "behind" in push_result.stderr:
-            print("Remote has newer commits. Pulling changes (rebase)...")
-            run_command(["git", "pull", "origin", current_branch, "--rebase"])
+def push_changes(repo: Repo) -> None:
+    branch = repo.active_branch.name if not repo.head.is_detached else "main"
+    origin = repo.remote("origin")
+    print(f"Pushing branch '{branch}'...")
+    try:
+        origin.push(refspec=f"{branch}:{branch}")
+    except Exception as e:
+        msg = str(e)
+        if "non-fast-forward" in msg or "fetch first" in msg:
+            print("Remote has changes. Pulling first...")
+            origin.pull(branch, rebase=True)
             print("Pushing again...")
-            run_command(["git", "push", "--set-upstream", "origin", current_branch])
+            origin.push(refspec=f"{branch}:{branch}")
         else:
-            print(f"Push failed:\n{push_result.stderr}")
-            sys.exit(1)
+            raise
 
-    # 6. Format Clean Success URL
-    clean_url = remote_url
-    if clean_url:
-        if clean_url.endswith(".git"):
-            clean_url = clean_url[:-4]
-        if clean_url.startswith("git@github.com:"):
-            clean_url = clean_url.replace("git@github.com:", "https://github.com/")
 
-    print(f"\n✅ Success! Repository '{repo_name}' is synced on GitHub.")
-    if clean_url:
-        print(f"View it at: {clean_url}")
+def main() -> None:
+    repo_name = get_dir_name()
+    print(f"Repository name: {repo_name}")
+
+    copy_gitignore()
+    repo = ensure_local_repo()
+    ensure_origin(repo, repo_name)
+    commit_if_needed(repo)
+    push_changes(repo)
+
+    print(f"\n✅ Success! Repository '{repo_name}' is now on GitHub or updated there.")
+    print(f"View it at: https://github.com/{repo_name}")
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        print("\nOperation cancelled by user.")
-        sys.exit(1)
-    except Exception as e:
-        print(f"\nAn error occurred: {e}")
-        sys.exit(1)
+    main()

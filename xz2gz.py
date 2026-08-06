@@ -1,21 +1,20 @@
-#!/data/data/com.termux/files/home/.local/bin/python
-from dh import get_files
-
-"""
-Convert man pages from .gz to .xz format with maximum compression.
-Skips symlinks and processes files recursively in the current directory.
-"""
+"\nConvert man pages from .gz to .xz format with maximum compression.\nSkips symlinks and processes files recursively in the current directory.\n"
 
 from __future__ import annotations
-
 import sys
 from collections import deque
 from collections.abc import Callable
 from gzip import compress as gzip_compress
 from pathlib import Path
-
-from dh.jobutils import mpf3
 from lzma_mt import decompress
+from dh import get_files
+
+
+def mpf3(process_function: Callable, files: list[Path], **kwargs):
+    from joblib import Parallel, delayed
+
+    file_strings = [str(f) for f in files]
+    return Parallel(n_jobs=-1)((delayed(process_function)(file_str, **kwargs) for file_str in file_strings))
 
 
 def process_file(path: Path) -> tuple[str, bool, str]:
@@ -34,11 +33,7 @@ def process_file(path: Path) -> tuple[str, bool, str]:
             original_size = path.stat().st_size if path.exists() else 0
             new_size = gz_path.stat().st_size
             ratio = new_size / original_size * 100 if original_size > 0 else 0
-            return (
-                str(path),
-                True,
-                f"Converted to {gz_path.name} ({original_size} -> {new_size} bytes, {ratio:.1f}%)",
-            )
+            return (str(path), True, f"Converted to {gz_path.name} ({original_size} -> {new_size} bytes, {ratio:.1f}%)")
         return (str(path), False, "Output file is empty or missing")
     except Exception as e:
         if gz_path.exists():

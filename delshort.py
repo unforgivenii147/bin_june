@@ -1,15 +1,18 @@
-#!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import sys
 from collections import deque
 from pathlib import Path
 
-from dh import get_files, is_binary
 
-SIZE_THRESHOLD = 50
-LINE_THRESHOLD = 2
+def is_binary(path):
+    if path.suffix == ".py":
+        return False
+
+
+from dh import get_files
+
+SIZE_THRESHOLD = 100
+LINE_THRESHOLD = 3
 
 
 def process_file(path: Path) -> None:

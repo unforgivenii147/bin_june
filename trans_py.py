@@ -16,7 +16,6 @@ from pathlib import Path
 from typing import Any, Final
 
 from deep_translator import GoogleTranslator
-from dh import get_pyfiles, is_binary
 
 CHUNK_SIZE = 1024 * 1024
 
@@ -24,10 +23,29 @@ SKIP_DIRS: Final[frozenset[str]] = frozenset(
     {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
 )
 CHUNK_SIZE: Final[int] = 5000
-NON_ASCII_PATTERN: Final[re.Pattern] = re.compile(r"[^\x00-\x7F]")
+NON_ASCII_PATTERN: Final[re.Pattern] = re.compile("[^\\x00-\\x7F]")
 MAX_WORKERS: Final[int] = 8
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
+
+
+def is_binary(path: Path) -> bool:
+    try:
+        with path.open("rb") as f:
+            chunk = f.read(1024)
+        return b"\x00" in chunk
+    except Exception:
+        return True
+
+
+def get_pyfiles(directory: Path) -> list[Path]:
+    pyfiles: list[Path] = []
+    for p in directory.rglob("*.py"):
+        if any(part.startswith(".") or part in SKIP_DIRS for part in p.parts):
+            continue
+        if p.is_file() and (not is_binary(p)):
+            pyfiles.append(p)
+    return sorted(pyfiles)
 
 
 def translate_text(text: str) -> str:

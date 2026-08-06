@@ -6,10 +6,14 @@ import shutil
 import time
 from pathlib import Path
 
-from dh import get_file_age
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 TIME_THRESHOLD = 8 * 42
+
+
+def get_file_age(filepath: Path) -> float:
+    current_time = time.time()
+    file_creation_time = filepath.stat().st_ctime
+    return current_time - file_creation_time
 
 
 def get_unique_filename(dest_dir: Path, filename: str) -> Path:

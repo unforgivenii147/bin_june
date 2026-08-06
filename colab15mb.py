@@ -6,8 +6,15 @@ import site
 import tarfile
 from pathlib import Path
 
-from dh import gsz
 from google.colab import files
+
+
+def gsz(path: Path) -> int:
+    total = 0
+    for item in path.rglob("*"):
+        if item.is_file():
+            total += item.stat().st_size
+    return total
 
 
 def compress_small_site_packages(max_size_mb: int = 15) -> None:

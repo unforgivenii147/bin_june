@@ -6,6 +6,8 @@ import sys
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from dh import get_pyfiles
+
 
 CODE_BLOCK = r"""
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
@@ -40,12 +42,12 @@ def find_block_range(lines: list[str]) -> tuple[int, int] | None:
     return None
 
 
-def already_imports_cprint(tree: ast.Module) -> bool:
+def already_imports_get_files(tree: ast.Module) -> bool:
     for node in tree.body:
         if isinstance(node, ast.ImportFrom) and node.module == "dh":
-            if any(alias.name == "cprint" for alias in node.names):
+            if any(alias.name == "get_files" for alias in node.names):
                 return True
-        if isinstance(node, ast.Import) and any(alias.name == "cprint" for alias in node.names):
+        if isinstance(node, ast.Import) and any(alias.name == "get_files" for alias in node.names):
             return True
     return False
 
@@ -92,10 +94,10 @@ def process_file(path: Path):
         print(f"Skipping write for {path} (would break syntax): {e}")
         return
 
-    if already_imports_cprint(tree):
+    if already_imports_get_files(tree):
         if new_content != content:
             path.write_text(new_content, encoding="utf-8")
-            print(f"Removed block: {path} (cprint already imported)")
+            print(f"Removed block: {path} (get_files already imported)")
         return
 
     import_line = "from dh import get_files\n"
@@ -115,8 +117,8 @@ def process_file(path: Path):
 def main():
     cwd = Path.cwd()
     args = sys.argv[1:]
-    py_files = [Path(p) for p in args] if args else get_files(cwd, ext=[".py"])
-    with ThreadPoolExecutor() as executor:
+    py_files = [Path(p) for p in args] if args else get_pyfiles(cwd)
+    with ThreadPoolExecutor(8) as executor:
         executor.map(process_file, py_files)
 
 

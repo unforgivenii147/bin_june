@@ -37,8 +37,8 @@ def main():
         "-s", "--size", type=float, help="Maximum directory size in KB (e.g., -s 100 for 100KB)", default=None
     )
     args = parser.parse_args()
-    cwd = pathlib.Path(".")
-    dirs = [item for item in cwd.iterdir() if item.is_dir()]
+    current_dir = pathlib.Path(".")
+    dirs = [item for item in current_dir.iterdir() if item.is_dir()]
     if not dirs:
         print("No directories found in current directory.")
         return

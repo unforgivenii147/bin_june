@@ -40,13 +40,13 @@ def get_system_bin_hashes():
 
 
 def check_and_move_files(system_hashes):
-    cwd = Path.cwd()
-    matches_dir = cwd / "matched_system_files"
+    current_dir = Path.cwd()
+    matches_dir = current_dir / "matched_system_files"
     matches_dir.mkdir(exist_ok=True)
     matches = []
     moved = []
     print("🔍 Scanning current directory...")
-    for filepath in cwd.iterdir():
+    for filepath in current_dir.iterdir():
         try:
             if filepath.is_file() and (not filepath.name.startswith(".")):
                 if filepath.resolve() == matches_dir.resolve():

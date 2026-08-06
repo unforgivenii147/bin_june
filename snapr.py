@@ -4,14 +4,14 @@ Snappy Compression/Decompression Tool
 Recursively compresses/decompresses files using Snappy algorithm via cramjam
 """
 
-from __future__ import annotations
-
 import argparse
 import logging
 import multiprocessing
+import os
 import shutil
 import sys
 import tarfile
+import tempfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import List, Optional, Tuple
@@ -70,7 +70,7 @@ def compress_file(file_path: Path, remove_original: bool = True) -> Tuple[bool, 
         return True, f"Compressed {file_path.name}"
 
     except Exception as e:
-        logger.error(f"Error compressing {file_path}: {e!s}")
+        logger.error(f"Error compressing {file_path}: {str(e)}")
         return False, str(e)
 
 
@@ -116,7 +116,7 @@ def decompress_file(file_path: Path, remove_original: bool = True) -> Tuple[bool
         return True, f"Decompressed {file_path.name}"
 
     except Exception as e:
-        logger.error(f"Error decompressing {file_path}: {e!s}")
+        logger.error(f"Error decompressing {file_path}: {str(e)}")
         return False, str(e)
 
 
@@ -150,7 +150,7 @@ def find_files(directory: Path, operation: str, recursive: bool = True) -> List[
 
     if operation == "compress":
         # Compress: find all files except those with .snappy extension
-        for _ext in ["*"]:  # All files
+        for ext in ["*"]:  # All files
             if recursive:
                 pattern = "**/*"
             else:
@@ -201,7 +201,7 @@ def create_tar_archive(directory: Path, remove_original: bool = True) -> Optiona
         return tar_path
 
     except Exception as e:
-        logger.error(f"Error creating tar archive for {directory}: {e!s}")
+        logger.error(f"Error creating tar archive for {directory}: {str(e)}")
         return None
 
 
@@ -273,7 +273,7 @@ def process_files(
                     logger.error(f"Failed to process {file_path}: {message}")
             except Exception as e:
                 failure_count += 1
-                logger.error(f"Error processing {file_path}: {e!s}")
+                logger.error(f"Error processing {file_path}: {str(e)}")
 
     return success_count, failure_count
 
@@ -286,13 +286,13 @@ def main():
 Examples:
   # Compress all files in current directory recursively
   python snappy_tool.py -c .
-
+  
   # Decompress all .snappy files in specific directory
   python snappy_tool.py -d /path/to/directory
-
+  
   # Compress with tar of subdirectories first
   python snappy_tool.py -c -t .
-
+  
   # Keep original files (don't remove)
   python snappy_tool.py -c --keep-original .
         """,

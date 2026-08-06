@@ -50,7 +50,10 @@ def should_rename(filepath, target_ext):
     """Check if file needs renaming based on target extension."""
     current_ext = os.path.splitext(filepath)[1].lower()
 
-    return current_ext != target_ext
+    if current_ext == target_ext:
+        return False
+
+    return True
 
 
 def rename_file(filepath, target_ext):
@@ -90,12 +93,12 @@ def main():
     if dry_run:
         print("*** DRY RUN MODE - No files will be renamed ***\n")
 
-    cwd = os.getcwd()
+    current_dir = os.getcwd()
     renamed_count = 0
     skipped_count = 0
 
-    for item in os.listdir(cwd):
-        filepath = os.path.join(cwd, item)
+    for item in os.listdir(current_dir):
+        filepath = os.path.join(current_dir, item)
 
         if not os.path.isfile(filepath):
             continue

@@ -13,7 +13,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 import py7zr
-from dh import fsz, get_dirs, get_files
+from dh import get_files
+
 
 MAX_WORKERS = 2
 CHUNK_SIZE = 524288
@@ -136,6 +137,14 @@ def compress_chunked(in_path: Path, out_path: Path, file_size: int) -> bool:
             shutil.rmtree(temp_dir, ignore_errors=True)
 
 
+def fsz(size: float) -> str:
+    for unit in ["B", "KiB", "MiB", "GiB", "TiB"]:
+        if abs(size) < 1024.0:
+            return f"{size:3.1f} {unit}"
+        size /= 1024.0
+    return f"{size:.1f} PiB"
+
+
 async def compress_folder_async(folder_path: Path, output_path: Path) -> bool:
     loop = asyncio.get_running_loop()
     try:
@@ -206,6 +215,17 @@ def compress_file(path: Path) -> tuple[bool, int, int]:
     except (OSError, PermissionError, py7zr.Bad7zFile) as e:
         print(f"  ✗ Failed to compress {path.name}: {e}")
         return False, 0, 0
+
+
+def get_files(directory: Path, mode: str = "compress") -> list[Path]:
+    if mode == "compress":
+        return [p for p in directory.glob("*") if p.is_file() and not p.is_symlink() and should_compress(p)]
+    else:
+        return [p for p in directory.glob("*.7z") if p.is_file() and not p.is_symlink()]
+
+
+def get_dirs(directory: Path) -> list[Path]:
+    return [p for p in directory.glob("*") if not p.is_symlink() and p.is_dir()]
 
 
 def should_compress(path: Path) -> bool:

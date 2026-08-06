@@ -7,8 +7,6 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-from dh import fsz
-
 
 def fetch_content_length(url: str) -> int | None:
     request = urllib.request.Request(url, method="HEAD")
@@ -25,6 +23,16 @@ def fetch_content_length(url: str) -> int | None:
     with urllib.request.urlopen(request, timeout=10) as response:
         length = response.headers.get("Content-Length")
         return int(length) if length else None
+
+
+def fsz(size_bytes: int) -> str:
+    units = ["B", "KB", "MB", "GB", "TB"]
+    size = float(size_bytes)
+    for unit in units:
+        if size < 1024:
+            return f"{size:.2f} {unit}"
+        size /= 1024
+    return f"{size:.2f} PB"
 
 
 def process_url(url: str) -> str:

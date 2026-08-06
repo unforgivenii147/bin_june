@@ -18,6 +18,8 @@ from __future__ import annotations
 import argparse
 import csv
 import os
+import pathlib
+import sys
 from typing import Iterable, List, Tuple
 
 from cld import (
@@ -27,7 +29,6 @@ from cld import (
     read_file_bytes,
     safe_text_from_bytes,
 )
-from dh import is_text_file
 
 DEFAULT_MAX_PROBE = 4096  # bytes to probe for binary/text detection
 DEFAULT_READ_BYTES = 2 * 1024 * 1024  # up to 2MB per-file read
@@ -45,11 +46,20 @@ def find_files(
             if skip_hidden and fn.startswith("."):
                 continue
             full = os.path.join(dirpath, fn)
-            if exts_set and os.path.splitext(fn)[1].lstrip(".").lower() not in exts_set:
-                continue
+            if exts_set:
+                if os.path.splitext(fn)[1].lstrip(".").lower() not in exts_set:
+                    continue
             yield full
         if not recursive:
             break
+
+
+def is_text_file(path: str, max_probe: int = DEFAULT_MAX_PROBE) -> bool:
+    try:
+        sample = read_file_bytes(path, max_bytes=max_probe)
+        return is_probably_text_bytes(sample)
+    except Exception:
+        return False
 
 
 def scan_file_lines(path: str, min_confidence: float = 0.6) -> List[Tuple[str, int, str, float, str]]:

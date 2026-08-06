@@ -1,7 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-from __future__ import annotations
-
 import io
+import os
 import tarfile
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -55,10 +54,10 @@ def process_file(file_path: Path):
 
 
 def main():
-    cwd = Path(".")
+    current_dir = Path(".")
 
-    subdirs = [d for d in cwd.iterdir() if d.is_dir() and not d.name.startswith(".")]
-    files = [f for f in cwd.iterdir() if f.is_file() and f.suffix != ".br" and f.name != Path(__file__).name]
+    subdirs = [d for d in current_dir.iterdir() if d.is_dir() and not d.name.startswith(".")]
+    files = [f for f in current_dir.iterdir() if f.is_file() and f.suffix != ".br" and f.name != Path(__file__).name]
 
     if not subdirs and not files:
         print("No files or subdirectories found to compress.")

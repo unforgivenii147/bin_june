@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-from __future__ import annotations
-
 import argparse
 import concurrent.futures
 import os
@@ -71,8 +69,8 @@ def main():
     )
     args = parser.parse_args()
 
-    cwd = Path(".")
-    py_files = list(cwd.rglob("*.py"))
+    current_dir = Path(".")
+    py_files = list(current_dir.rglob("*.py"))
 
     script_path = Path(__file__).resolve()
     py_files = [f for f in py_files if f.resolve() != script_path]

@@ -4,8 +4,6 @@ Remove image references (including shields.io badges) from .rst and .md files.
 Processes files in parallel and reports statistics.
 """
 
-from __future__ import annotations
-
 import re
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -77,7 +75,10 @@ BADGE_DOMAINS = [
 
 def has_badge_domain(line: str) -> bool:
     """Check if line contains any known badge domain."""
-    return any(re.search(domain, line, re.IGNORECASE) for domain in BADGE_DOMAINS)
+    for domain in BADGE_DOMAINS:
+        if re.search(domain, line, re.IGNORECASE):
+            return True
+    return False
 
 
 def is_image_extension_url(line: str) -> bool:
@@ -102,12 +103,11 @@ def remove_image_lines_rst(content: str) -> tuple[str, int]:
                 should_remove = True
                 break
 
-        if (
-            not should_remove
-            and ("image::" in line or "figure::" in line or "replace::" in line)
-            and (has_badge_domain(line) or is_image_extension_url(line))
-        ):
-            should_remove = True
+        if not should_remove:
+            if ("image::" in line or "figure::" in line or "replace::" in line) and (
+                has_badge_domain(line) or is_image_extension_url(line)
+            ):
+                should_remove = True
 
         if should_remove:
             removed_count += 1
@@ -151,7 +151,7 @@ def remove_image_lines_md(content: str) -> tuple[str, int]:
         if not should_remove:
             md_link_pattern = re.compile(r"\[([^\]]*)\]\(([^\)]+)\)")
             matches = md_link_pattern.findall(line)
-            for _text, url in matches:
+            for text, url in matches:
                 if has_badge_domain(url) or is_image_extension_url(url):
                     if "!" in line or "badge" in url.lower() or "shield" in url.lower():
                         should_remove = True

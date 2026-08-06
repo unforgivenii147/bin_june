@@ -15,12 +15,12 @@ except ImportError:
     print("Install termcolor: pip install termcolor")
     sys.exit(1)
 REGEX_RULES = [
-    r"\bOutcast\b",
-    r"\bS\d{2}\b",
-    r"\b720p\b",
-    r"\b1080p\b",
-    r"\bBluRay\b",
-    r"\bx264\b",
+    "\\bOutcast\\b",
+    "\\bS\\d{2}\\b",
+    "\\b720p\\b",
+    "\\b1080p\\b",
+    "\\bBluRay\\b",
+    "\\bx264\\b",
     "-REWARD_HI",
 ]
 EXTENSIONS = {".srt", ".mkv", ".mp4", ".avi"}

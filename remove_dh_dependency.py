@@ -174,9 +174,9 @@ class ProjectCleaner:
         return stats
 
     def print_summary(self, stats: dict[str, int], dry_run: bool = False):
-        print(f"\n{'=' * 70}")
+        print(f"\n{'=' * 42}")
         print("Processing Complete!")
-        print(f"{'=' * 70}")
+        print(f"{'=' * 42}")
         print(f"Total files processed:  {stats['total']}")
         print(f"Files modified:         {stats['modified']}")
         print(f"Errors:                 {stats['errors']}")

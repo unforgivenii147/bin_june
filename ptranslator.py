@@ -18,7 +18,6 @@ from pathlib import Path
 from typing import Final
 
 from deep_translator import GoogleTranslator
-from dh import is_text_file
 
 SKIP_DIRS: Final[frozenset[str]] = frozenset(
     {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
@@ -26,6 +25,17 @@ SKIP_DIRS: Final[frozenset[str]] = frozenset(
 MAX_CHUNK_LEN: Final[int] = 5000
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
+
+
+def is_text_file(path: Path) -> bool:
+    try:
+        with path.open("rb") as f:
+            chunk = f.read(512)
+            if not chunk:
+                return False
+            return b"\x00" not in chunk
+    except OSError:
+        return False
 
 
 def get_chunks(text: str, max_len: int = MAX_CHUNK_LEN) -> Generator[str, None, None]:

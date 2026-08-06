@@ -23,7 +23,7 @@ async def main():
     client = TelegramClient("session_name", api_id, api_hash)
     await client.start(phone=phone_number)
     entity = await client.get_entity(channel_handle)
-    url_pattern = r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
+    url_pattern = "http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\\\(\\\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
     print(f"Searching for '{search_query}' in {channel_handle}...")
     async for message in client.iter_messages(entity, search=search_query):
         if message.text:

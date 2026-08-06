@@ -1,16 +1,18 @@
-#!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 from collections import deque
 from collections.abc import Callable
 from io import BytesIO
 from pathlib import Path
-
 import cairosvg
-from dh import get_files
-from dh.jobutils import mpf3
 from PIL import Image
+from dh import get_files
+
+
+def mpf3(process_function: Callable, files: list[Path], **kwargs):
+    from joblib import Parallel, delayed
+
+    file_strings = [str(f) for f in files]
+    return Parallel(n_jobs=-1)((delayed(process_function)(file_str, **kwargs) for file_str in file_strings))
 
 
 def process_file(path) -> None:

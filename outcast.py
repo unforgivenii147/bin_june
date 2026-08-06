@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from dh import get_random_filename
-
 
 def copy_largest_file(source_dir, dest):
     largest = None
@@ -19,6 +17,14 @@ def copy_largest_file(source_dir, dest):
     if largest:
         dest.write_bytes(largest.read_bytes())
         print(f"{dest.name} ({max / (1024 * 1024)} MB)")
+
+
+def get_random_filename(length: int = 6) -> str:
+    from random import choice
+    from string import ascii_lowercase
+
+    letters: str = ascii_lowercase
+    return "".join(choice(letters) for _ in range(length))
 
 
 if __name__ == "__main__":

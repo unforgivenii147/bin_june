@@ -21,8 +21,6 @@ import zipfile
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 
-from dh import is_python_file
-
 
 class PIPPackageCache:
     def __init__(self, pip_list_path: str = "/sdcard/data/pip.txt"):
@@ -268,8 +266,8 @@ def get_stdlib_modules() -> set[str]:
 
 def extract_imports_from_code(code: str, file_path: str = "") -> set[str]:
     imports = set()
-    import_pattern = r"^\s*import\s+([a-zA-Z0-9_\.\*\s,]+)"
-    from_pattern = r"^\s*from\s+([a-zA-Z0-9_\.]+)\s+import"
+    import_pattern = "^\\s*import\\s+([a-zA-Z0-9_\\.\\*\\s,]+)"
+    from_pattern = "^\\s*from\\s+([a-zA-Z0-9_\\.]+)\\s+import"
     for line in code.split("\n"):
         line = line.split("#")[0].strip()
         import_match = re.match(import_pattern, line)
@@ -298,6 +296,19 @@ def read_python_file(file_path: str) -> str:
     except Exception as e:
         print(f"⚠️  Error reading {file_path}: {e}")
         return ""
+
+
+def is_python_file(file_path: str) -> bool:
+    if file_path.endswith(".py"):
+        return True
+    if "." not in Path(file_path).name:
+        try:
+            with open(file_path, "rb") as f:
+                first_line = f.readline()
+                return first_line.startswith(b"#!") and b"python" in first_line
+        except:
+            return False
+    return False
 
 
 def extract_from_zip(zip_path: str) -> set[str]:

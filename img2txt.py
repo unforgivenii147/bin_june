@@ -7,10 +7,37 @@ from collections import deque
 from collections.abc import Callable
 from pathlib import Path
 
-from dh import get_files
-from dh.jobutils import mpf3
 from PIL import Image
 from pytesseract import image_to_string
+
+
+def mpf3(process_function: Callable, files: list[Path], **kwargs):
+    from joblib import Parallel, delayed
+
+    file_strings = [str(f) for f in files]
+    return Parallel(n_jobs=2)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
+
+
+def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
+    """Memory-efficient directory walker."""
+    path = Path(path)
+    skip_dirs = {".git", "__pycache__", "node_modules"}
+    queue = deque([path])
+    files = []
+
+    while queue:
+        current = queue.popleft()
+        try:
+            for item in current.iterdir():
+                if item.is_symlink():
+                    continue
+                if item.is_dir() and item.name not in skip_dirs:
+                    queue.append(item)
+                elif item.is_file() and (ext is None or item.suffix.lower() in ext):
+                    files.append(item)
+        except (PermissionError, OSError, FileNotFoundError):
+            continue
+    return files
 
 
 def extract_text(image_path: Path) -> str:

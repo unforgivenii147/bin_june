@@ -12,8 +12,8 @@ import tarfile
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+from dh import get_files
 
-from dh import fsz, get_dirs, get_files
 
 MAX_WORKERS = 4
 CHUNK_SIZE = 524288
@@ -83,6 +83,14 @@ def compress_chunked(in_path: Path, out_path: Path, file_size: int) -> bool:
     except (OSError, MemoryError) as e:
         print(f"Chunked compression failed for {in_path.name}: {e}")
         return False
+
+
+def fsz(size: float) -> str:
+    for unit in ["B", "KiB", "MiB", "GiB", "TiB"]:
+        if abs(size) < 1024.0:
+            return f"{size:3.1f} {unit}"
+        size /= 1024.0
+    return f"{size:.1f} PiB"
 
 
 def create_tar_archive(source_dir: Path, output_path: Path) -> bool:
@@ -186,6 +194,17 @@ def compress_file(path: Path) -> tuple[bool, int, int]:
         return False, 0, 0
 
 
+def get_files(directory: Path, mode: str = "compress") -> list[Path]:
+    if mode == "compress":
+        return [p for p in directory.glob("*") if p.is_file() and not p.is_symlink() and should_compress(p)]
+    else:
+        return [p for p in directory.glob("*.gz") if p.is_file() and not p.is_symlink()]
+
+
+def get_dirs(directory: Path) -> list[Path]:
+    return [p for p in directory.glob("*") if not p.is_symlink() and p.is_dir()]
+
+
 def should_compress(path: Path) -> bool:
     try:
         if not path.is_file() or path.is_symlink():
@@ -209,14 +228,10 @@ def extract_tar_archive(tar_path: Path, extract_dir: Path) -> bool:
         return False
 
 
-async def process_compress() -> None:
+async def process_compress(files: list[Path] | None = None) -> None:
+
     cwd = Path.cwd()
-    print("\n🔧 Gzip Compression Settings:")
-    print(f"   Level: {GZIP_COMPRESS_LEVEL}/9 (maximum)")
-    print("   Algorithm: DEFLATE (LZ77 + Huffman coding)")
-    print(f"   Parallel workers: {MAX_WORKERS}")
-    print(f"   Chunk size: {fsz(CHUNK_SIZE)}")
-    print("   Dictionary: 32KB sliding window")
+
     dirs_to_compress = get_dirs(cwd)
     if dirs_to_compress:
         print(f"\n📁 Compressing {len(dirs_to_compress)} directories...")
@@ -228,10 +243,8 @@ async def process_compress() -> None:
                 print(f"  ✓ Successfully compressed {relative_path} to {dir_path.name}.tar.gz")
             else:
                 print(f"  ✗ Failed to compress {relative_path}")
-    files_to_compress = get_files(cwd, mode="compress")
-    if not files_to_compress:
-        print("\n📄 No files to compress")
-        return
+
+    files_to_compress = [p for p in files] if files else get_files(cwd, mode="compress")
     print(f"\n📄 Compressing {len(files_to_compress)} files with gzip max compression...")
     total_original = 0
     total_compressed = 0
@@ -246,19 +259,20 @@ async def process_compress() -> None:
     if successful > 0:
         savings = total_original - total_compressed
         savings_percent = savings / total_original * 100
-        print(f"\n{'=' * 50}")
+        print(f"\n{'=' * 42}")
         print(f"✅ Compressed {successful}/{len(files_to_compress)} files")
         print(f"📊 Original size:  {fsz(total_original)}")
         print(f"📦 Compressed size: {fsz(total_compressed)}")
         print(f"💾 Space saved:    {fsz(savings)} ({savings_percent:.1f}%)")
-        print(f"{'=' * 50}")
+        print(f"{'=' * 42}")
     elif files_to_compress:
         print("\n❌ No files were successfully compressed")
 
 
-async def process_decompress() -> None:
+async def process_decompress(files: list[Path] | None = None) -> None:
+
     cwd = Path.cwd()
-    archives = [p for p in cwd.glob("*.tar.gz") if p.is_file()]
+    archives = [p for p in files] if files else [p for p in cwd.glob("*.tar.gz") if p.is_file()]
     if archives:
         print(f"\n📦 Decompressing {len(archives)} archives...")
         for archive in sorted(archives):
@@ -305,57 +319,50 @@ async def process_decompress() -> None:
             if out_path.exists():
                 total_decompressed += out_path.stat().st_size
     if successful > 0:
-        print(f"\n{'=' * 50}")
+        print(f"\n{'=' * 42}")
         print(f"✅ Decompressed {successful}/{len(files_to_decompress)} files")
         print(f"📦 Compressed size:   {fsz(total_original)}")
         print(f"📊 Decompressed size: {fsz(total_decompressed)}")
-        print(f"{'=' * 50}")
+        print(f"{'=' * 42}")
     elif files_to_decompress:
         print("\n❌ No files were successfully decompressed")
 
 
-async def main_async(mode: str = "compress") -> None:
+async def main_async(files, mode: str = "compress") -> None:
     if mode == "compress":
-        await process_compress()
+        await process_compress(files)
     elif mode == "decompress":
-        await process_decompress()
+        await process_decompress(files)
     else:
         print(f"Unknown mode: {mode}")
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Multi-threaded Gzip compression/decompression tool (max compression)",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  %(prog)s -c          # Compress files and folders in current directory
-  %(prog)s -d          # Decompress .gz and .tar.gz files in current directory
-  %(prog)s             # Default: compress
-
-Gzip Settings:
-  - Level: 9 (maximum compression)
-  - Algorithm: DEFLATE (LZ77 + Huffman coding)
-  - Window size: 32KB
-  - Good for: Web content, text files, backups
-  - Note: Gzip is widely supported and fast for decompression
-        """,
-    )
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument(
-        "-c",
-        "--compress",
-        action="store_true",
-        help="Compress files and folders with gzip (default)",
-    )
-    group.add_argument("-d", "--decompress", action="store_true", help="Decompress .gz and .tar.gz files")
-    args = parser.parse_args()
-    if args.decompress:
-        mode = "decompress"
+    cwd = Path.cwd()
+    args = sys.argv[1:]
+    files = []
+    if args:
+        for arg in args:
+            if arg == "-c":
+                mode = "compress"
+                continue
+            elif arg == "-d":
+                mode = "decompress"
+                continue
+            else:
+                p = Path(arg)
+                if p.is_file():
+                    files.append(p)
+                if p.is_dir():
+                    files.extend(get_files(p))
     else:
-        mode = "compress"
+        files = get_files(cwd)
+    if not files:
+        print("no files found")
+        sys.exit(0)
+
     try:
-        asyncio.run(main_async(mode))
+        asyncio.run(main_async(mode, files))
     except KeyboardInterrupt:
         print("\n\n⚠️  Interrupted by user")
         sys.exit(1)

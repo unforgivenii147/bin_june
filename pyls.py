@@ -11,8 +11,6 @@ import sys
 from argparse import Namespace
 from pathlib import Path
 
-from dh import format_time
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 COLORS = {"dir": "\x1b[34m", "link": "\x1b[36m", "exec": "\x1b[32m", "reset": "\x1b[0m"}
@@ -54,6 +52,11 @@ def indicator(path, st):
     if st.st_mode & stat.S_IXUSR:
         return "*"
     return ""
+
+
+def format_time(ts, full) -> str:
+    dt = datetime.datetime.fromtimestamp(ts)
+    return dt.strftime("%Y-%m-%d %H:%M:%S" if full else "%b %d %H:%M")
 
 
 def format_entry(entry, args: Namespace, color_enabled: bool) -> str:

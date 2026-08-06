@@ -15,6 +15,7 @@ import multiprocessing as mp
 import shutil
 import sys
 import tarfile
+import tempfile
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
@@ -250,7 +251,7 @@ def process_subdirs_with_tar(
         print(f"  📦 [{i}/{len(subdirs)}] Tarring {subdir.name}...")
 
         dir_size = sum(f.stat().st_size for f in subdir.rglob("*") if f.is_file())
-        _tar_size, success = tar_directory(subdir, tar_path, delete_original=not keep_original)
+        tar_size, success = tar_directory(subdir, tar_path, delete_original=not keep_original)
 
         if not success:
             continue
@@ -274,7 +275,9 @@ def should_compress_file(file_path: Path, exclude_extensions: set[str], exclude_
         return False
     if file_path.suffix.lower() in exclude_extensions:
         return False
-    return not (exclude_patterns and any(pat in str(file_path) for pat in exclude_patterns))
+    if exclude_patterns and any(pat in str(file_path) for pat in exclude_patterns):
+        return False
+    return True
 
 
 def find_files_to_compress(
@@ -884,4 +887,4 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()

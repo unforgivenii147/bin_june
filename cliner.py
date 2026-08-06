@@ -7,24 +7,30 @@ import re
 from collections.abc import Callable
 from pathlib import Path
 
-from dh.jobutils import mpf3
+
+def mpf3(process_function: Callable, files: list[Path], **kwargs):
+    from joblib import Parallel, delayed
+
+    file_strings = [str(f) for f in files]
+    return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
+
 
 LOG_EXT = ".log"
 MMAP_THRESHOLD = 1 * 1024 * 1024
 NUM_WORKERS = 4
 PATTERNS = [
-    r"\^\[",
-    r"\[[\dA-Z;]+m",
-    r"\[\d+[A-Z]",
-    r"\[[\dA-Z;]+",
-    r"\^M",
-    r"\(B",
-    r"\(0",
-    r"\x1b\[[0-9;]*[A-Za-z]",
-    r"\x1b\([0-9AB]",
-    r"\r",
-    r"\x0f",
-    r"\x0e",
+    "\\^\\[",
+    "\\[[\\dA-Z;]+m",
+    "\\[\\d+[A-Z]",
+    "\\[[\\dA-Z;]+",
+    "\\^M",
+    "\\(B",
+    "\\(0",
+    "\\x1b\\[[0-9;]*[A-Za-z]",
+    "\\x1b\\([0-9AB]",
+    "\\r",
+    "\\x0f",
+    "\\x0e",
 ]
 COMPILED_PATTERNS = [re.compile(pattern) for pattern in PATTERNS]
 

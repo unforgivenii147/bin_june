@@ -8,7 +8,8 @@ from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
 import trafilatura
-from dh import get_files, mpf3
+from dh import get_files
+
 
 try:
     import markdownify
@@ -46,8 +47,6 @@ def process_file(path: str | Path) -> tuple[Path, bool]:
         if markdown and markdown.strip():
             md_file.write_text(markdown, encoding="utf-8")
             print(f"✓ Converted: {path.name} -> {md_file.name}")
-            if remove_orig:
-                path.unlink()
 
             return md_file, True
 
@@ -57,6 +56,17 @@ def process_file(path: str | Path) -> tuple[Path, bool]:
     except Exception as e:
         print(f"✗ Error processing {path.name}: {e}")
         return path, False
+
+
+def get_files(directory: Path, ext: list[str]) -> list[Path]:
+    return [f for f in directory.rglob("*") if f.suffix in ext]
+
+
+def mpf3(func, items: list[Path]) -> None:
+    with ProcessPoolExecutor() as executor:
+        results = list(executor.map(func, items))
+        successful = sum(1 for _, success in results if success)
+        print(f"\n✓ Successfully converted: {successful}/{len(items)}")
 
 
 if __name__ == "__main__":

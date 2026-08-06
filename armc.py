@@ -28,8 +28,6 @@ from collections.abc import Generator
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
-from dh import is_python_file
-
 
 class CommentRemover:
     def __init__(self, validate: bool = True):
@@ -40,6 +38,18 @@ class CommentRemover:
         self.processed_whl_files = []
 
     @staticmethod
+    def is_python_file(path: Path) -> bool:
+        if path.suffix == ".py":
+            return True
+        if path.suffix == "" and path.is_file():
+            try:
+                with open(path, "rb") as f:
+                    first_line = f.readline().decode("utf-8", errors="ignore")
+                    return first_line.startswith("#!") and "python" in first_line
+            except (OSError, UnicodeDecodeError):
+                return False
+        return False
+
     @staticmethod
     def validate_syntax(code: str) -> tuple[bool, str]:
         try:

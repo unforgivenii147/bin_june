@@ -4,17 +4,43 @@ Check installed packages for available updates using parallel processing.
 Saves upgradable packages to upgradable.txt
 """
 
-from __future__ import annotations
-
-import json
 import subprocess
 import sys
-import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
+import json
 from pathlib import Path
-from typing import Dict, List, Tuple
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import List, Dict, Tuple
+import time
 
-from dh import get_installed_packages
+
+def get_installed_packages(site_dir: Path) -> List[Dict[str, str]]:
+    """
+    Get list of all installed packages from site-packages directory.
+
+    Args:
+        site_dir: Path to site-packages directory
+
+    Returns:
+        List of dictionaries containing package name and version
+    """
+    packages = []
+
+    try:
+        # Use pip to list installed packages in the specified site directory
+        result = subprocess.run(
+            [sys.executable, "-m", "pip", "list", "--format=json", "--path", str(site_dir)],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+
+        packages = json.loads(result.stdout)
+    except subprocess.CalledProcessError as e:
+        print(f"Error listing packages: {e.stderr}")
+    except json.JSONDecodeError as e:
+        print(f"Error parsing package list: {e}")
+
+    return packages
 
 
 def check_package_update(package_info: Dict[str, str]) -> Tuple[str, str, str, bool]:

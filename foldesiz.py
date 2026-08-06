@@ -1,16 +1,36 @@
-#!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import operator
 import os
 import shutil
 import sys
 from pathlib import Path
 
-from dh import fsz, should_skip, unique_path
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
+def unique_path(path: Path | str) -> Path:
+    path = _clean_fname(Path(path))
+    if not path.exists():
+        return path
+    parent = path.parent
+    suffixes = path.suffixes
+    if suffixes:
+        first_suffix_index = path.name.find(suffixes[0])
+        stem = path.name[:first_suffix_index]
+        full_suffix = "".join(suffixes)
+    else:
+        stem = path.name
+        full_suffix = ""
+    counter = 1
+    while True:
+        new_name = f"{stem}_{counter}{full_suffix}"
+        new_path = parent / new_name
+        if not new_path.exists():
+            return new_path
+        counter += 1
+
+
+from dh import _clean_fname, should_skip
 
 
 def get_all_files(cwd: Path):
@@ -28,7 +48,7 @@ def get_num_folders(files) -> int:
     if len(files) < 2:
         return 1
     sizes = [size for _, size in files]
-    max_size, min_size = max(sizes), min(sizes)
+    max_size, min_size = (max(sizes), min(sizes))
     range_size = max_size - min_size
     target_range_per_folder = range_size / 100
     num_folders = max(1, int(range_size / target_range_per_folder))
@@ -45,7 +65,16 @@ def create_range_folders(cwd: Path, files, num_folders: int):
         end_idx = start_idx + files_per_folder + (1 if i < remainder else 0)
         folder_files = sizes[start_idx:end_idx]
         if folder_files:
-            min_size, max_size = min(folder_files), max(folder_files)
+            min_size, max_size = (min(folder_files), max(folder_files))
+
+            def fsz(size) -> str:
+                if size < 1000:
+                    return f"{size}B"
+                if size < 1000000:
+                    return f"{size // 1000}k"
+                if size < 1000000000:
+                    return f"{size // 1000000}M"
+                return f"{size // 1000000000}G"
 
             folder_name = f"{fsz(min_size)}-{fsz(max_size)}"
             folder_ranges.append((min_size, max_size, folder_name))

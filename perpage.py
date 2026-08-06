@@ -1,15 +1,10 @@
-#!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import sys
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
-
-from dh import get_files
-from dh.jobutils import mpf3
 from PyPDF2 import PdfReader
+from dh import get_files, mpf_async
 
 
 def process_file(path) -> None:
@@ -71,5 +66,5 @@ if __name__ == "__main__":
     files = [Path(p) for p in args] if args else get_files(cwd, ext=[".pdf", ".PDF"])
     if len(files) == 1:
         process_file(files[0])
-        sys.exit(1)
-    mpf3(process_file, files)
+        sys.exit(0)
+    mpf_async(process_file, files)

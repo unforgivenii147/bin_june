@@ -166,9 +166,9 @@ def main():
         threshold_str = f"{threshold} bytes"
     print(f"{BLUE}Compressing files larger than {threshold_str}{RESET}")
     print(f"{YELLOW}Scanning current directory...{RESET}")
-    cwd = Path.cwd()
+    current_dir = Path.cwd()
     files_to_compress = []
-    for file_path in cwd.rglob("*"):
+    for file_path in current_dir.rglob("*"):
         if file_path.is_file() and should_compress_file(file_path, threshold):
             files_to_compress.append(file_path)
     if not files_to_compress:

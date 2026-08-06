@@ -1,7 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-from __future__ import annotations
-
 import ast
 import os
 import re
@@ -76,10 +74,11 @@ class EntityExtractor(ast.NodeVisitor):
 
     def visit_Assign(self, node: ast.Assign):
 
-        if self.scope_depth == 0 and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
-            target_name = node.targets[0].id
-            if re.match("^[A-Z_][A-Z0-9_]*$", target_name):
-                self._extract_and_save(node, "constant", target_name)
+        if self.scope_depth == 0:
+            if len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+                target_name = node.targets[0].id
+                if re.match("^[A-Z_][A-Z0-9_]*$", target_name):
+                    self._extract_and_save(node, "constant", target_name)
 
     def generic_visit(self, node: ast.AST):
         super().generic_visit(node)
@@ -131,7 +130,7 @@ def is_python_file_no_extension(path: Path) -> bool:
     try:
         with open(path, "r", encoding="utf-8", errors="ignore") as f:
             first_lines = "".join(f.readlines(1024))
-            if re.match(r"#!\s*/.*python", first_lines):
+            if re.match("#!\\s*/.*python", first_lines):
                 return True
             if "def " in first_lines or "class " in first_lines or "import " in first_lines:
                 return True
@@ -200,8 +199,8 @@ def main():
     OUTPUT_DIR.mkdir(exist_ok=True)
 
     files_to_process = []
-    cwd = Path(".")
-    for root, _, filenames in os.walk(cwd):
+    current_dir = Path(".")
+    for root, _, filenames in os.walk(current_dir):
         for name in filenames:
             path = Path(root) / name
             if path.is_relative_to(OUTPUT_DIR):

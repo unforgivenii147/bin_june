@@ -1,16 +1,18 @@
-#!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import re
 import unicodedata
 from collections import deque
 from collections.abc import Callable
 from html.parser import HTMLParser
 from pathlib import Path
+from dh import get_files
 
-from dh import get_files, unique_path
-from dh.jobutils import mpf3
+
+def mpf3(process_function: Callable, files: list[Path], **kwargs):
+    from joblib import Parallel, delayed
+
+    file_strings = [str(f) for f in files]
+    return Parallel(n_jobs=-1)((delayed(process_function)(file_str, **kwargs) for file_str in file_strings))
 
 
 def finglish(text: str) -> str:
@@ -105,9 +107,7 @@ def slugify(text: str) -> str:
     temp = text
     text = text.lower()
     text = re.sub(
-        "(\\?|\\|\\||\\`|\\<|\\>|\\~|\\:|\\;|\\\"|'|\\@|\\$|\\#|\\%|\\&|\\^|\\(|\\)|\\{|\\}|\\[|\\])",
-        "",
-        text,
+        "(\\?|\\|\\||\\`|\\<|\\>|\\~|\\:|\\;|\\\"|'|\\@|\\$|\\#|\\%|\\&|\\^|\\(|\\)|\\{|\\}|\\[|\\])", "", text
     )
     text = re.sub("( )+", "_", text)
     text = re.sub("(/)+", "_", text)
@@ -115,6 +115,15 @@ def slugify(text: str) -> str:
     if len(text) < 2:
         return temp.replace(":", "").replace("?", "").replace("=", "")
     return text
+
+
+def unique_path(path: Path) -> Path:
+    counter = 1
+    new_path = path
+    while new_path.exists():
+        new_path = path.with_stem(f"{path.stem}-{counter}")
+        counter += 1
+    return new_path
 
 
 def process_file(path: str | Path) -> None:

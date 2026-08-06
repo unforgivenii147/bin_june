@@ -1,15 +1,26 @@
-#!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import stat
 from pathlib import Path
 
-from dh import is_binary, should_skip
-
 CHUNK_SIZE = 1024 * 1024
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+from dh import should_skip
+
+
+def is_binary(path: Path | str) -> bool:
+    path = Path(path)
+    try:
+        with path.open("rb") as f:
+            chunk = f.read(CHUNK_SIZE)
+        if not chunk:
+            return False
+        if b"\x00" in chunk:
+            return True
+        text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
+        nontext = sum((1 for b in chunk if b not in text_chars))
+        return nontext / len(chunk) > 0.3
+    except Exception:
+        return True
 
 
 def has_shebang(path: Path) -> bool:
@@ -44,7 +55,7 @@ def process_directory(cwd: Path) -> None:
         if should_skip(path):
             continue
         pardir = path.parent.name
-        if pardir in {"sbin", "bin"} and not is_exec(path):
+        if pardir in {"sbin", "bin"} and (not is_exec(path)):
             make_exec(path)
             print(f"[+] Made executable: {path.relative_to(cwd)}")
             continue
@@ -52,9 +63,10 @@ def process_directory(cwd: Path) -> None:
             if path.name == "control" or "share" in path.parts:
                 continue
             if not is_exec(path):
-                make_exec(path)
-                print(f"[+] Made executable: {path.relative_to(cwd)}")
-                continue
+                if is_binary(path) or has_shebang(path):
+                    make_exec(path)
+                    print(f"[+] Made executable: {path.relative_to(cwd)}")
+                    continue
         if has_shebang(path):
             if not is_exec(path):
                 make_exec(path)

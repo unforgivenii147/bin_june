@@ -10,8 +10,6 @@ import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
-from dh import get_installed_packages
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 DEB_DIR = Path.home() / "debs"
@@ -47,6 +45,21 @@ def should_exclude(pkg_name: str) -> bool:
     if any(exclude in pkg_lower for exclude in ["llvm", "clang"]):
         return True
     return bool(any(exclude in pkg_lower for exclude in ["rust", "cargo"]))
+
+
+def get_installed_packages() -> list[str]:
+    try:
+        result = subprocess.run(["apt", "list", "--installed"], capture_output=True, text=True, check=True)
+        packages = []
+        for line in result.stdout.split("\n"):
+            if "/" in line and "installed" in line:
+                pkg_name = line.split("/")[0].strip()
+                if not should_exclude(pkg_name):
+                    packages.append(pkg_name)
+        return sorted(packages)
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Failed to get installed packages: {e}")
+        return []
 
 
 def create_deb_for_package(pkg_name: str) -> bool:

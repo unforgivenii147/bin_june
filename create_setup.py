@@ -4,8 +4,6 @@ Script to generate a setup.py for a Python project.
 Automatically detects __main__.py or cli.py and adds console_scripts entry points.
 """
 
-from __future__ import annotations
-
 import os
 import re
 import sys

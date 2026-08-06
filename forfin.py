@@ -42,12 +42,12 @@ def main():
     if not extension.startswith("."):
         print(f"Error: Extension must start with '.', got '{extension}'")
         sys.exit(1)
-    cwd = Path.cwd()
-    files = list(cwd.glob(f"*{extension}"))
+    current_dir = Path.cwd()
+    files = list(current_dir.glob(f"*{extension}"))
     if not files:
-        print(f"No *{extension} files found in {cwd}")
+        print(f"No *{extension} files found in {current_dir}")
         sys.exit(0)
-    print(f"Found {len(files)} *{extension} files in {cwd}")
+    print(f"Found {len(files)} *{extension} files in {current_dir}")
     print(f"Processing with: {cli_app} {' '.join(cli_args)}")
     print("-" * 50)
     num_processes = max(1, int(cpu_count() * 0.75))

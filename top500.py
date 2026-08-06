@@ -6,9 +6,11 @@ import os
 from collections import Counter
 from pathlib import Path
 
-from dh import is_text_file
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
+def is_text_file(file_path, text_extensions):
+    return file_path.suffix.lower() in text_extensions
 
 
 def collect_top_lines(directory: str, text_extensions: set[str], top_n=500) -> None:

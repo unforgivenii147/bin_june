@@ -17,12 +17,11 @@ from pathlib import Path
 from typing import Final
 
 from deep_translator import GoogleTranslator
-from dh import get_files
 
 SKIP_DIRS: Final[frozenset[str]] = frozenset(
     {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
 )
-NON_ENGLISH_PATTERN: Final[re.Pattern] = re.compile(r"[^\x00-\x7F]")
+NON_ENGLISH_PATTERN: Final[re.Pattern] = re.compile("[^\\x00-\\x7F]")
 MAX_WORKERS: Final[int] = 4
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler(sys.stdout)]
@@ -32,6 +31,33 @@ logger = logging.getLogger(__name__)
 
 def is_english(text: str) -> bool:
     return not NON_ENGLISH_PATTERN.search(text)
+
+
+def get_files(path: Path, include_hidden: bool = True, extensions: tuple[str, ...] | None = None) -> list[Path]:
+    if not path.exists():
+        raise FileNotFoundError(f"Path does not exist: {path}")
+    if not path.is_dir():
+        raise NotADirectoryError(f"Path is not a directory: {path}")
+    files: list[Path] = []
+    stack = [path]
+    while stack:
+        current = stack.pop()
+        try:
+            for entry in current.iterdir():
+                if entry.is_symlink():
+                    continue
+                if entry.is_dir():
+                    if entry.name not in SKIP_DIRS:
+                        stack.append(entry)
+                elif entry.is_file():
+                    if not include_hidden and entry.name.startswith("."):
+                        continue
+                    if extensions is None or entry.suffix.lower() in extensions:
+                        files.append(entry)
+        except PermissionError:
+            logger.warning("Permission denied: %s", current)
+            continue
+    return sorted(files)
 
 
 def translate_text(text: str) -> str:

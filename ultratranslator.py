@@ -1,13 +1,6 @@
-#!/data/data/com.termux/files/home/.local/bin/python
-from dh import get_files
-
-"""
-Optimized version of ultratranslator.py for Python 3.12.
-Translates Python files and other text files while preserving structure.
-"""
+"\nOptimized version of ultratranslator.py for Python 3.12.\nTranslates Python files and other text files while preserving structure.\n"
 
 from __future__ import annotations
-
 import logging
 import re
 import shutil
@@ -18,21 +11,24 @@ from collections import deque
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Final
-
 from binaryornot import is_binary
 from deep_translator import GoogleTranslator
-from dh import get_nobinary
 
 MAX_WORKERS: Final[int] = 4
 MAX_RETRIES: Final[int] = 2
 RETRY_DELAY: Final[float] = 3.0
-NON_ENGLISH_PATTERN: Final[re.Pattern] = re.compile(r"[^\x00-\x7F]")
+NON_ENGLISH_PATTERN: Final[re.Pattern] = re.compile("[^\\x00-\\x7F]")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+from dh import get_files
 
 
 def is_english(text: str) -> bool:
     return not NON_ENGLISH_PATTERN.search(text)
+
+
+def get_nobinary(path: Path) -> list[Path]:
+    return [f for f in get_files(path) if not is_binary(str(f))]
 
 
 def translate_file_content(path: Path, retries: int = MAX_RETRIES) -> str:
@@ -78,7 +74,6 @@ def process_files_with_retry(files: list[Path]) -> None:
     """Process files with retry logic for failed files."""
     files_to_process = files.copy()
     retry_count = 0
-
     while files_to_process and retry_count < MAX_RETRIES:
         if retry_count > 0:
             logger.info(f"\n{'=' * 50}")
@@ -86,9 +81,7 @@ def process_files_with_retry(files: list[Path]) -> None:
             logger.info(f"Retrying {len(files_to_process)} failed files...")
             logger.info(f"{'=' * 50}\n")
             time.sleep(RETRY_DELAY)
-
         failed_files = []
-
         with ProcessPoolExecutor(max_workers=MAX_WORKERS) as executor:
             futures = {executor.submit(process_file, f): f for f in files_to_process}
             for future in as_completed(futures):
@@ -100,13 +93,10 @@ def process_files_with_retry(files: list[Path]) -> None:
                 except Exception as e:
                     logger.error(f"File {f} generated an exception: {e}")
                     failed_files.append(f)
-
         files_to_process = failed_files
         retry_count += 1
-
         if failed_files:
             logger.warning(f"{len(failed_files)} files failed and will be retried.")
-
     if files_to_process:
         logger.error(f"\nFailed to process {len(files_to_process)} files after {MAX_RETRIES} retries:")
         for f in files_to_process:

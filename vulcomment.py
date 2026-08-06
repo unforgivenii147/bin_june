@@ -28,7 +28,7 @@ import re
 import sys
 from collections import defaultdict
 
-VULTURE_RE = re.compile(r"^(?P<path>.*?):(?P<lineno>\d+):\s*unused variable '(?P<var>[^']+)'", re.IGNORECASE)
+VULTURE_RE = re.compile("^(?P<path>.*?):(?P<lineno>\\d+):\\s*unused variable '(?P<var>[^']+)'", re.IGNORECASE)
 
 
 def parse_vulture_output(lines: list[str]) -> dict[str, set[int]]:

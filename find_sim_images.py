@@ -4,11 +4,14 @@ from __future__ import annotations
 from pathlib import Path
 
 import imagehash
-from dh import is_image
 from PIL import Image
 
 
 def find_similar_images(userpaths, hashfunc=imagehash.average_hash) -> None:
+
+    def is_image(filename):
+        f = filename.lower()
+        return f.endswith((".png", ".jpg", ".jpeg", ".bmp", ".gif", ".svg")) or ".jpg" in f
 
     image_filenames = []
     for userpath in userpaths:

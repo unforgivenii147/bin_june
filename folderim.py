@@ -6,13 +6,16 @@ import shutil
 from pathlib import Path
 
 import dh
-from dh import is_image
 from PIL import Image
 
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 HASH_FUNC = dh.phash
 MAX_DISTANCE = 10
 OUT_PREFIX = "group_"
+
+
+def is_image(path: Path) -> bool:
+    return path.suffix.lower() in IMAGE_EXTS and path.is_file()
 
 
 def compute_hash(path: Path):

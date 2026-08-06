@@ -11,7 +11,556 @@ import time
 from collections import defaultdict
 from pathlib import Path
 
-from dh import PKG_MAPPING, STDLIB, get_file_age, get_installed_pkgs
+STDLIB: frozenset = frozenset(
+    {
+        "AL",
+        "BaseHTTPServer",
+        "Bastion",
+        "CGIHTTPServer",
+        "Canvas",
+        "ColorPicker",
+        "ConfigParser",
+        "Cookie",
+        "DEVICE",
+        "Dialog",
+        "DocXMLRPCServer",
+        "EasyDialogs",
+        "FL",
+        "FileDialog",
+        "FixTk",
+        "FrameWork",
+        "GL",
+        "HTMLParser",
+        "MacOS",
+        "MimeWriter",
+        "MiniAEFrame",
+        "Nav",
+        "PixMapWrapper",
+        "Queue",
+        "SUNAUDIODEV",
+        "ScrolledText",
+        "SimpleDialog",
+        "SimpleHTTPServer",
+        "SimpleXMLRPCServer",
+        "SocketServer",
+        "StringIO",
+        "Tix",
+        "Tkconstants",
+        "Tkdnd",
+        "Tkinter",
+        "UserDict",
+        "UserList",
+        "UserString",
+        "W",
+        "_LWPCookieJar",
+        "_MozillaCookieJar",
+        "__builtin__",
+        "__future__",
+        "__main__",
+        "_abc",
+        "_abcoll",
+        "_aix_support",
+        "_android_support",
+        "_apple_support",
+        "_ast",
+        "_ast_unparse",
+        "_asyncio",
+        "_bisect",
+        "_blake2",
+        "_bootlocale",
+        "_bootsubprocess",
+        "_bsddb",
+        "_bz2",
+        "_codecs",
+        "_codecs_cn",
+        "_codecs_hk",
+        "_codecs_iso2022",
+        "_codecs_jp",
+        "_codecs_kr",
+        "_codecs_tw",
+        "_collections",
+        "_collections_abc",
+        "_colorize",
+        "_compat_pickle",
+        "_compression",
+        "_contextvars",
+        "_crypt",
+        "_csv",
+        "_ctypes",
+        "_ctypes_test",
+        "_curses",
+        "_curses_panel",
+        "_datetime",
+        "_dbm",
+        "_decimal",
+        "_dummy_thread",
+        "_elementtree",
+        "_frozen_importlib",
+        "_frozen_importlib_external",
+        "_functools",
+        "_gdbm",
+        "_hashlib",
+        "_heapq",
+        "_hmac",
+        "_hotshot",
+        "_imp",
+        "_interpchannels",
+        "_interpqueues",
+        "_interpreters",
+        "_io",
+        "_ios_support",
+        "_json",
+        "_locale",
+        "_lsprof",
+        "_lzma",
+        "_markupbase",
+        "_md5",
+        "_msi",
+        "_multibytecodec",
+        "_multiprocessing",
+        "_opcode",
+        "_opcode_metadata",
+        "_operator",
+        "_osx_support",
+        "_overlapped",
+        "_peg_parser",
+        "_pickle",
+        "_posixshmem",
+        "_posixsubprocess",
+        "_py_abc",
+        "_py_warnings",
+        "_pydatetime",
+        "_pydecimal",
+        "_pyio",
+        "_pylong",
+        "_pyrepl",
+        "_queue",
+        "_random",
+        "_remote_debugging",
+        "_scproxy",
+        "_sha",
+        "_sha1",
+        "_sha2",
+        "_sha256",
+        "_sha3",
+        "_sha512",
+        "_signal",
+        "_sitebuiltins",
+        "_socket",
+        "_sqlite3",
+        "_sre",
+        "_ssl",
+        "_stat",
+        "_statistics",
+        "_string",
+        "_strptime",
+        "_struct",
+        "_suggestions",
+        "_symtable",
+        "_sysconfig",
+        "_sysconfigdata",
+        "_sysconfigdata_x86_64_conda_cos6_linux_gnu",
+        "_sysconfigdata_x86_64_conda_linux_gnu",
+        "_testbuffer",
+        "_testcapi",
+        "_testimportmultiple",
+        "_testinternalcapi",
+        "_testmultiphase",
+        "_thread",
+        "_threading_local",
+        "_tkinter",
+        "_tokenize",
+        "_tracemalloc",
+        "_types",
+        "_typing",
+        "_uuid",
+        "_warnings",
+        "_weakref",
+        "_weakrefset",
+        "_winapi",
+        "_winreg",
+        "_wmi",
+        "_xxsubinterpreters",
+        "_xxtestfuzz",
+        "_zoneinfo",
+        "_zstd",
+        "abc",
+        "aepack",
+        "aetools",
+        "aetypes",
+        "aifc",
+        "al",
+        "annotationlib",
+        "antigravity",
+        "anydbm",
+        "applesingle",
+        "argparse",
+        "array",
+        "ast",
+        "asynchat",
+        "asyncio",
+        "asyncore",
+        "atexit",
+        "audiodev",
+        "audioop",
+        "autoGIL",
+        "base64",
+        "bdb",
+        "binascii",
+        "binhex",
+        "bisect",
+        "bsddb",
+        "buildtools",
+        "builtins",
+        "bz2",
+        "cPickle",
+        "cProfile",
+        "cStringIO",
+        "calendar",
+        "cd",
+        "cfmfile",
+        "cgi",
+        "cgitb",
+        "chunk",
+        "cmath",
+        "cmd",
+        "code",
+        "codecs",
+        "codeop",
+        "collections",
+        "colorsys",
+        "commands",
+        "compileall",
+        "compiler",
+        "compression",
+        "concurrent",
+        "configparser",
+        "contextlib",
+        "contextvars",
+        "cookielib",
+        "copy",
+        "copy_reg",
+        "copyreg",
+        "crypt",
+        "csv",
+        "ctypes",
+        "curses",
+        "dataclasses",
+        "datetime",
+        "dbhash",
+        "dbm",
+        "decimal",
+        "difflib",
+        "dircache",
+        "dis",
+        "distutils",
+        "dl",
+        "doctest",
+        "dumbdbm",
+        "dummy_thread",
+        "dummy_threading",
+        "email",
+        "encodings",
+        "ensurepip",
+        "enum",
+        "errno",
+        "exceptions",
+        "faulthandler",
+        "fcntl",
+        "filecmp",
+        "fileinput",
+        "findertools",
+        "fl",
+        "flp",
+        "fm",
+        "fnmatch",
+        "formatter",
+        "fpectl",
+        "fpformat",
+        "fractions",
+        "ftplib",
+        "functools",
+        "future_builtins",
+        "gc",
+        "gdbm",
+        "genericpath",
+        "gensuitemodule",
+        "getopt",
+        "getpass",
+        "gettext",
+        "gl",
+        "glob",
+        "graphlib",
+        "grp",
+        "gzip",
+        "hashlib",
+        "heapq",
+        "hmac",
+        "hotshot",
+        "html",
+        "htmlentitydefs",
+        "htmllib",
+        "http",
+        "httplib",
+        "ic",
+        "icopen",
+        "idlelib",
+        "ihooks",
+        "imageop",
+        "imaplib",
+        "imgfile",
+        "imghdr",
+        "imp",
+        "importlib",
+        "imputil",
+        "inspect",
+        "io",
+        "ipaddress",
+        "itertools",
+        "jpeg",
+        "json",
+        "keyword",
+        "lib2to3",
+        "linecache",
+        "linuxaudiodev",
+        "locale",
+        "logging",
+        "lzma",
+        "macerrors",
+        "macostools",
+        "macpath",
+        "macresource",
+        "macurl2path",
+        "mailbox",
+        "mailcap",
+        "markupbase",
+        "marshal",
+        "math",
+        "md5",
+        "mhlib",
+        "mimetools",
+        "mimetypes",
+        "mimify",
+        "mmap",
+        "modulefinder",
+        "msilib",
+        "msvcrt",
+        "multifile",
+        "multiprocessing",
+        "mutex",
+        "netrc",
+        "new",
+        "nis",
+        "nntplib",
+        "nt",
+        "ntpath",
+        "nturl2path",
+        "numbers",
+        "opcode",
+        "operator",
+        "optparse",
+        "os",
+        "os2emxpath",
+        "ossaudiodev",
+        "parser",
+        "pathlib",
+        "pdb",
+        "pickle",
+        "pickletools",
+        "pipes",
+        "pkgutil",
+        "platform",
+        "plistlib",
+        "popen2",
+        "poplib",
+        "posix",
+        "posixfile",
+        "posixpath",
+        "pprint",
+        "profile",
+        "pstats",
+        "pty",
+        "pwd",
+        "py_compile",
+        "pyclbr",
+        "pydoc",
+        "pydoc_data",
+        "pyexpat",
+        "queue",
+        "quopri",
+        "random",
+        "re",
+        "readline",
+        "repr",
+        "reprlib",
+        "resource",
+        "rexec",
+        "rfc822",
+        "rlcompleter",
+        "robotparser",
+        "runpy",
+        "sched",
+        "secrets",
+        "select",
+        "selectors",
+        "sets",
+        "sgmllib",
+        "sha",
+        "shelve",
+        "shlex",
+        "shutil",
+        "signal",
+        "site",
+        "smtpd",
+        "smtplib",
+        "sndhdr",
+        "socket",
+        "socketserver",
+        "spwd",
+        "sqlite3",
+        "sre",
+        "sre_compile",
+        "sre_constants",
+        "sre_parse",
+        "ssl",
+        "stat",
+        "statistics",
+        "statvfs",
+        "string",
+        "stringold",
+        "stringprep",
+        "strop",
+        "struct",
+        "subprocess",
+        "sunau",
+        "sunaudio",
+        "sunaudiodev",
+        "symbol",
+        "symtable",
+        "sys",
+        "sysconfig",
+        "syslog",
+        "tabnanny",
+        "tarfile",
+        "telnetlib",
+        "tempfile",
+        "termios",
+        "textwrap",
+        "this",
+        "thread",
+        "threading",
+        "time",
+        "timeit",
+        "tkColorChooser",
+        "tkCommonDialog",
+        "tkFileDialog",
+        "tkFont",
+        "tkMessageBox",
+        "tkSimpleDialog",
+        "tkinter",
+        "toaiff",
+        "token",
+        "tokenize",
+        "tomllib",
+        "trace",
+        "traceback",
+        "tracemalloc",
+        "ttk",
+        "tty",
+        "turtle",
+        "turtledemo",
+        "types",
+        "typing",
+        "unicodedata",
+        "unittest",
+        "urllib",
+        "urllib2",
+        "urlparse",
+        "user",
+        "uu",
+        "uuid",
+        "venv",
+        "videoreader",
+        "warnings",
+        "wave",
+        "weakref",
+        "webbrowser",
+        "whichdb",
+        "winreg",
+        "winsound",
+        "wsgiref",
+        "xdrlib",
+        "xml",
+        "xmllib",
+        "xmlrpc",
+        "xmlrpclib",
+        "xxlimited",
+        "xxsubtype",
+        "zipapp",
+        "zipfile",
+        "zipimport",
+        "zlib",
+        "zoneinfo",
+    }
+)
+
+
+def get_file_age(path: str | Path, str_mode: bool = False) -> float | str:
+    from os import stat as os_stat
+    from time import time as time_time
+
+    path = Path(path)
+    current_time = time_time()
+    file_stat = os_stat(path)
+    file_creation_time = file_stat.st_ctime
+    age = current_time - file_creation_time
+    int_age = int(age)
+    if not str_mode:
+        if not path.exists():
+            return 0.0
+        if not path.is_file():
+            return -1.0
+        return age
+    if int_age < 0:
+        return "0 sec"
+    units = [
+        ("y", 365 * 24 * 42 * 42),
+        ("m", 30 * 24 * 42 * 42),
+        ("d", 24 * 42 * 42),
+        ("h", 60 * 42),
+        ("min", 60),
+        ("sec", 1),
+    ]
+    parts = []
+    for name, seconds_per_unit in units:
+        value, int_age = divmod(int_age, seconds_per_unit)
+        if value:
+            parts.append(f"{value} {name}")
+    return ", ".join(parts) if parts else "0 sec"
+
+
+def get_installed_pkgs():
+    packages = []
+    pip_freeze_path = Path("/sdcard/data/pip.freeze")
+    file_age = get_file_age(pip_freeze_path)
+    if file_age < 60 * 42 * 24:
+        lines = pip_freeze_path.read_text(encoding="utf8").splitlines(keepends=False)
+        for line in lines:
+            if not line.startswith("#") and "==" in line:
+                name, _ = line.split("==", 1)
+                packages.append(name)
+        return packages
+    from importlib.metadata import distributions
+
+    for dist in distributions():
+        meta = dist.metadata
+        name = meta.get("Name") or meta.get("name")
+        if not name:
+            continue
+        name = name.strip()
+        packages.append(name)
+    return packages
+
 
 try:
     from joblib import Parallel, delayed
@@ -90,20 +639,6 @@ def has_python_files(dir_path: Path) -> bool:
     return False
 
 
-def map_import_to_package(import_name: str) -> str:
-    """Map an import name to its actual package name using PKG_MAPPING."""
-    # Check if the import name has a mapping
-    if import_name in PKG_MAPPING:
-        return PKG_MAPPING[import_name]
-
-    # Check for partial matches (e.g., import_name might be a prefix)
-    for key, value in PKG_MAPPING.items():
-        if import_name.startswith(key) or key.startswith(import_name):
-            return value
-
-    return import_name
-
-
 def find_imports_for_directory(dir_path: Path, start_path: Path, std_libs: set, all_local_packages: set) -> list:
     files = []
     for py_file in dir_path.rglob("*.py"):
@@ -127,13 +662,14 @@ def find_imports_for_directory(dir_path: Path, start_path: Path, std_libs: set, 
     local_modules = {p.stem for p in dir_path.glob("*.py") if not any(part in SKIP_DIRS for part in p.parts)}
     local_packages = get_local_packages(dir_path)
     local_names = local_modules | local_packages | all_local_packages
-    result = []
-    for imp in all_imports:
-        if imp not in std_libs and imp not in local_names and not imp.startswith(".") and imp != "__future__":
-            # Map import name to package name
-            mapped_pkg = map_import_to_package(imp)
-            result.append(mapped_pkg)
-    return sorted(set(result))
+    result = sorted(
+        [
+            imp
+            for imp in all_imports
+            if imp not in std_libs and imp not in local_names and not imp.startswith(".") and imp != "__future__"
+        ]
+    )
+    return result
 
 
 def save_requirements_file(modules: list, output_path: Path, pkgz: set) -> bool:
@@ -224,7 +760,6 @@ def main() -> None:
     pkgz = get_installed_pkgs()
     all_local_packages = get_local_packages(cwd)
     subdirs = get_valid_subdirs(cwd)
-
     if args.save_separate and subdirs:
         total_imports = set()
         created_count = 0
@@ -317,14 +852,13 @@ def main() -> None:
             print("=" * 42)
         local_modules = {p.stem for p in cwd.glob("*.py") if not any(part in SKIP_DIRS for part in p.parts)}
         local_names = local_modules | all_local_packages
-        # Map imports to package names
-        mapped_imports = set()
-        for imp in all_imports:
-            if imp not in std_libs and imp not in local_names and not imp.startswith(".") and imp != "__future__":
-                mapped_pkg = map_import_to_package(imp)
-                mapped_imports.add(mapped_pkg)
-
-        modules = sorted(mapped_imports)
+        modules = sorted(
+            {
+                imp
+                for imp in all_imports
+                if imp not in std_libs and imp not in local_names and not imp.startswith(".") and imp != "__future__"
+            }
+        )
         if modules:
             print(f"\n{'Module':<20} | {'Version':<15}")
             print("-" * 40)

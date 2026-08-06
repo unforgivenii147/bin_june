@@ -1,14 +1,33 @@
-#!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import shutil
 import subprocess
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+from dh import _clean_fname, get_files
 
-from dh import _clean_fname, get_files, unique_path
+
+def unique_path(path: Path | str) -> Path:
+    path = _clean_fname(Path(path))
+    if not path.exists():
+        return path
+    parent = path.parent
+    suffixes = path.suffixes
+    if suffixes:
+        first_suffix_index = path.name.find(suffixes[0])
+        stem = path.name[:first_suffix_index]
+        full_suffix = "".join(suffixes)
+    else:
+        stem = path.name
+        full_suffix = ""
+    counter = 1
+    while True:
+        new_name = f"{stem}_{counter}{full_suffix}"
+        new_path = parent / new_name
+        if not new_path.exists():
+            return new_path
+        counter += 1
+
 
 EXT = [".js", ".css", ".html", ".json", ".mjs", ".cjs", ".ts", ".jsx", ".tsx", ".tsm", ".jsm"]
 EXCLUDE_PATTERNS = {}
@@ -17,7 +36,7 @@ EXCLUDE_PATTERNS = {}
 def should_format(path: Path) -> bool:
     if path.suffix not in EXTENSIONS:
         return False
-    return all(not path.name.endswith(p) for p in EXCLUDE_PATTERNS)
+    return all((not path.name.endswith(p) for p in EXCLUDE_PATTERNS))
 
 
 def get_files_to_format(cwd: str = ".") -> list[Path]:

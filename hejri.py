@@ -1,7 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-from __future__ import annotations
-
 import datetime
 
 from dh import georgian_to_hijri

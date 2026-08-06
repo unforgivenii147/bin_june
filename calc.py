@@ -126,7 +126,7 @@ class Calculator(Static):
 
 def parse_expression(expr):
     expr = expr.replace(" ", "")
-    pattern = r"^([\d.]+)\s*([+\-*/×÷])\s*([\d.]+)$"
+    pattern = "^([\\d.]+)\\s*([+\\-*/×÷])\\s*([\\d.]+)$"
     match = re.match(pattern, expr)
     if match:
         return (match.group(1), match.group(2), match.group(3))

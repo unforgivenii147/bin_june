@@ -1,258 +1,150 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""Count lines of code, comments, and blanks across multiple languages."""
+
+from __future__ import annotations
 
 import re
-import sys
-from collections import defaultdict
-from dataclasses import dataclass
-from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import Dict, Set, Tuple
 
-LANGUAGE_PATTERNS: Dict[str, Dict[str, object]] = {
-    "python": {
-        "extensions": {".py"},
-        "comment_single": "#",
-        "comment_start": '"""',
-        "comment_end": '"""',
-    },
-    "rust": {
-        "extensions": {".rs"},
-        "comment_single": "//",
-        "comment_start": "/*",
-        "comment_end": "*/",
-    },
-    "c": {
-        "extensions": {".c", ".h"},
-        "comment_single": "//",
-        "comment_start": "/*",
-        "comment_end": "*/",
-    },
-    "cpp": {
-        "extensions": {".cpp", ".cc", ".cxx", ".hpp", ".h++"},
-        "comment_single": "//",
-        "comment_start": "/*",
-        "comment_end": "*/",
-    },
-    "javascript": {
-        "extensions": {".js", ".jsx"},
-        "comment_single": "//",
-        "comment_start": "/*",
-        "comment_end": "*/",
-    },
-    "typescript": {
-        "extensions": {".ts", ".tsx"},
-        "comment_single": "//",
-        "comment_start": "/*",
-        "comment_end": "*/",
-    },
-    "java": {
-        "extensions": {".java"},
-        "comment_single": "//",
-        "comment_start": "/*",
-        "comment_end": "*/",
-    },
-    "go": {
-        "extensions": {".go"},
-        "comment_single": "//",
-        "comment_start": "/*",
-        "comment_end": "*/",
-    },
-    "ruby": {
-        "extensions": {".rb"},
-        "comment_single": "#",
-        "comment_start": "=begin",
-        "comment_end": "=end",
-    },
-    "shell": {
-        "extensions": {".sh", ".bash"},
-        "comment_single": "#",
-        "comment_start": None,
-        "comment_end": None,
-    },
-    "sql": {
-        "extensions": {".sql"},
-        "comment_single": "--",
-        "comment_start": "/*",
-        "comment_end": "*/",
-    },
-    "html": {
-        "extensions": {".html", ".htm"},
-        "comment_single": None,
-        "comment_start": "<!--",
-        "comment_end": "-->",
-    },
-    "xml": {
-        "extensions": {".xml"},
-        "comment_single": None,
-        "comment_start": "<!--",
-        "comment_end": "-->",
-    },
-    "css": {
-        "extensions": {".css"},
-        "comment_single": None,
-        "comment_start": "/*",
-        "comment_end": "*/",
-    },
-    "json": {
-        "extensions": {".json"},
-        "comment_single": None,
-        "comment_start": None,
-        "comment_end": None,
-    },
-    "yaml": {
-        "extensions": {".yaml", ".yml"},
-        "comment_single": "#",
-        "comment_start": None,
-        "comment_end": None,
-    },
-    "markdown": {
-        "extensions": {".md", ".markdown"},
-        "comment_single": None,
-        "comment_start": None,
-        "comment_end": None,
-    },
+CHUNK_SIZE = 1024 * 1024
+
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
+def is_binary(path: Path | str) -> bool:
+    path = Path(path)
+    try:
+        with path.open("rb") as f:
+            chunk = f.read(CHUNK_SIZE)
+        if not chunk:
+            return False
+        if b"\x00" in chunk:
+            return True
+        text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
+        nontext = sum(1 for b in chunk if b not in text_chars)
+        return nontext / len(chunk) > 0.3
+    except Exception:
+        return True
+
+
+LANG_EXTENSIONS = {
+    "python": [".py", ".pyi"],
+    "javascript": [".js"],
+    "java": [".java"],
+    "c": [".c"],
+    "cpp": [".cpp", ".h"],
+    "html": [".html"],
+    "css": [".css"],
+    "ruby": [".rb"],
+    "php": [".php"],
+    "bash": [".sh", ".bash"],
+}
+COMMENT_PATTERNS = {
+    "python": "^\\s*#",
+    "javascript": "^\\s*//",
+    "java": "^\\s*//",
+    "c": "^\\s*//",
+    "cpp": "^\\s*//",
+    "html": "^\\s*<!--",
+    "css": "^\\s*/\\*",
+    "ruby": "^\\s*#",
+    "php": "^\\s*//",
+}
+SHEBANG_LANGUAGES = {
+    "python": ["#!/usr/bin/env python", "#!/usr/bin/python3", "#!/bin/python3"],
+    "bash": ["#!/bin/bash"],
+    "ruby": ["#!/usr/bin/ruby", "#!/bin/ruby"],
+    "perl": ["#!/usr/bin/perl"],
+    "node": ["#!/usr/bin/node", "#!/bin/node"],
+    "sh": ["#!/bin/sh"],
 }
 
 
-@dataclass
-class FileStats:
-    language: str
-    file: str
-    lines: int
-    code: int
-    comments: int
-    blanks: int
-
-
-def detect_language(ext: str) -> str | None:
-    for lang, config in LANGUAGE_PATTERNS.items():
-        if ext in config["extensions"]:
-            return lang
+def get_language_from_shebang(file_path: str) -> str | None:
+    if is_binary(file_path):
+        print(f"{file_path} is binary")
+        return None
+    if ".git" in str(file_path):
+        return None
+    try:
+        with Path(file_path).open(encoding="utf-8") as file:
+            first_line = file.readline().strip()
+            for lang, shebangs in SHEBANG_LANGUAGES.items():
+                for shebang in shebangs:
+                    if first_line.startswith(shebang):
+                        return lang
+    except Exception as e:
+        print(f"Error reading file {file_path}: {e}")
     return None
 
 
-def count_lines(file_path: str) -> FileStats | None:
-    path = Path(file_path)
-    ext = path.suffix.lower()
-    lang = detect_language(ext)
+def count_lines_of_code(file_path: str, lang: str) -> tuple[int, int, int]:
+    if ".git" in str(file_path):
+        return 0, 0, 0
+    if is_binary(file_path):
+        print(f"{file_path} is binary")
+        return 0, 0, 0
+    with Path(file_path).open(encoding="utf-8") as file:
+        code_lines = 0
+        comment_lines = 0
+        blank_lines = 0
+        for line in file:
+            if not line.strip():
+                blank_lines += 1
+            elif re.match(COMMENT_PATTERNS.get(lang, ""), line):
+                comment_lines += 1
+            else:
+                code_lines += 1
+    return code_lines, comment_lines, blank_lines
 
-    if not lang:
-        return None
 
-    try:
-        content = path.read_text(encoding="utf-8", errors="ignore")
-    except Exception:
-        return None
-
-    lines = content.split("\n")
-    config = LANGUAGE_PATTERNS[lang]
-
-    code_count = 0
-    comment_count = 0
-    blank_count = 0
-    in_block_comment = False
-
-    comment_start = config["comment_start"]
-    comment_end = config["comment_end"]
-    comment_single = config["comment_single"]
-
-    for line in lines:
-        stripped = line.strip()
-
-        if not stripped:
-            blank_count += 1
+def scan_directory(directory: str = ".") -> dict[str, dict[str, dict[str, int]] | dict[str, int]]:
+    stats = {
+        "total": {"code": 0, "comments": 0, "blank": 0},
+        "languages": {lang: {"code": 0, "comments": 0, "blank": 0} for lang in LANG_EXTENSIONS},
+    }
+    base_path = Path(directory)
+    for file_path in base_path.rglob("*"):
+        if not file_path.is_file():
             continue
 
-        if comment_start and comment_end:
-            if in_block_comment:
-                comment_count += 1
-                if comment_end in line:
-                    in_block_comment = False
+        file_extension = file_path.suffix.lower()
+        if not file_extension:
+            lang = get_language_from_shebang(str(file_path))
+            if lang:
+                code, comments, blanks = count_lines_of_code(str(file_path), lang)
+                stats["languages"][lang]["code"] += code
+                stats["languages"][lang]["comments"] += comments
+                stats["languages"][lang]["blank"] += blanks
+                stats["total"]["code"] += code
+                stats["total"]["comments"] += comments
+                stats["total"]["blank"] += blanks
                 continue
-
-            if comment_start in line:
-                comment_count += 1
-                in_block_comment = True
-                if comment_end in line:
-                    in_block_comment = False
-                continue
-
-        if comment_single and stripped.startswith(comment_single):
-            comment_count += 1
-            continue
-
-        code_count += 1
-
-    return FileStats(
-        language=lang,
-        file=str(path),
-        lines=len(lines),
-        code=code_count,
-        comments=comment_count,
-        blanks=blank_count,
-    )
+        for lang, extensions in LANG_EXTENSIONS.items():
+            if file_extension in extensions:
+                code, comments, blanks = count_lines_of_code(str(file_path), lang)
+                stats["languages"][lang]["code"] += code
+                stats["languages"][lang]["comments"] += comments
+                stats["languages"][lang]["blank"] += blanks
+                stats["total"]["code"] += code
+                stats["total"]["comments"] += comments
+                stats["total"]["blank"] += blanks
+                break
+    return stats
 
 
-def get_files(targets: list[str]) -> list[str]:
-    files = []
-
-    if not targets:
-        targets = ["."]
-
-    for target in targets:
-        path = Path(target)
-        if path.is_file():
-            files.append(str(path))
-        elif path.is_dir():
-            files.extend(str(f) for f in path.rglob("*") if f.is_file())
-
-    return files
-
-
-def main():
-    targets = sys.argv[1:] if len(sys.argv) > 1 else []
-    files = get_files(targets)
-
-    if not files:
-        print("No files found")
-        return
-
-    with Pool(cpu_count()) as pool:
-        results = [r for r in pool.imap_unordered(count_lines, files) if r]
-
-    if not results:
-        print("No supported files found")
-        return
-
-    by_language = defaultdict(lambda: {"files": 0, "lines": 0, "code": 0, "comments": 0, "blanks": 0})
-
-    for stat in results:
-        lang = stat.language
-        by_language[lang]["files"] += 1
-        by_language[lang]["lines"] += stat.lines
-        by_language[lang]["code"] += stat.code
-        by_language[lang]["comments"] += stat.comments
-        by_language[lang]["blanks"] += stat.blanks
-
-    print(f"{'Language':<15} {'Files':>8} {'Lines':>10} {'Code':>10} {'Comments':>10} {'Blanks':>10}")
-    print("-" * 63)
-
-    total_stats = {"files": 0, "lines": 0, "code": 0, "comments": 0, "blanks": 0}
-
-    for lang in sorted(by_language.keys()):
-        stats = by_language[lang]
-        print(
-            f"{lang:<15} {stats['files']:>8} {stats['lines']:>10} {stats['code']:>10} {stats['comments']:>10} {stats['blanks']:>10}"
-        )
-        for key in total_stats:
-            total_stats[key] += stats[key]
-
-    print("-" * 63)
-    print(
-        f"{'Total':<15} {total_stats['files']:>8} {total_stats['lines']:>10} {total_stats['code']:>10} {total_stats['comments']:>10} {total_stats['blanks']:>10}"
-    )
+def display_stats(stats: dict[str, dict[str, dict[str, int]] | dict[str, int]]) -> None:
+    print(f"Total lines of code: {stats['total']['code']}")
+    print(f"Total comment lines: {stats['total']['comments']}")
+    print(f"Total blank lines: {stats['total']['blank']}\n")
+    print("Language-based statistics:")
+    for lang, lang_stats in stats["languages"].items():
+        if lang_stats["code"] > 0:
+            print(f"\n{lang.capitalize()}:")
+            print(f"  Code lines: {lang_stats['code']}")
+            print(f"  Comment lines: {lang_stats['comments']}")
+            print(f"  Blank lines: {lang_stats['blank']}")
 
 
 if __name__ == "__main__":
-    main()
+    stats = scan_directory()
+    display_stats(stats)

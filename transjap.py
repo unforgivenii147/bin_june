@@ -20,7 +20,7 @@ from deep_translator import GoogleTranslator
 SKIP_DIRS: Final[frozenset[str]] = frozenset(
     {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
 )
-JAPANESE_PATTERN: Final[re.Pattern] = re.compile(r"[\u3040-\u30ff\u4e00-\u9fff]")
+JAPANESE_PATTERN: Final[re.Pattern] = re.compile("[\\u3040-\\u30ff\\u4e00-\\u9fff]")
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 

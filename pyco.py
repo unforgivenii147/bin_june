@@ -5,9 +5,21 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 
-from dh import fsz, gsz
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
+def fsz(sz: int) -> str:
+    sz = abs(int(sz))
+    units = "", "K", "M", "G", "T"
+    if sz == 0:
+        return "0 B"
+    i = min(int(int(sz).bit_length() - 1) // 10, len(units) - 1)
+    sz /= 1024**i
+    return f"{sz:.2f} {units[i]}B"
+
+
+def gsz(path: Path) -> int:
+    return sum(p.stat().st_size for p in path.rglob("*") if p.is_file())
 
 
 def clean_pycache(start_dir: Path = Path.cwd()) -> None:

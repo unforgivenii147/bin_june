@@ -1,7 +1,4 @@
-#!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import re
 import sys
 from collections import deque
@@ -9,22 +6,56 @@ from collections.abc import Callable, Iterable
 from multiprocessing import get_context
 from pathlib import Path
 from typing import Any
-
-from dh import _clean_fname, get_files, unique_path
-from dh.jobutils import mpf_async
 from fontTools.ttLib import TTFont
 from fontTools.ttLib.ttFont import TTFont
 from termcolor import cprint
+from dh import _clean_fname, get_files
+
+
+def unique_path(path: Path | str) -> Path:
+    path = _clean_fname(Path(path))
+    if not path.exists():
+        return path
+    parent = path.parent
+    suffixes = path.suffixes
+    if suffixes:
+        first_suffix_index = path.name.find(suffixes[0])
+        stem = path.name[:first_suffix_index]
+        full_suffix = "".join(suffixes)
+    else:
+        stem = path.name
+        full_suffix = ""
+    counter = 1
+    while True:
+        new_name = f"{stem}_{counter}{full_suffix}"
+        new_path = parent / new_name
+        if not new_path.exists():
+            return new_path
+        counter += 1
+
+
+def mpf_async(func: Callable[[Any], Any], items: Iterable[Any]):
+    with get_context("spawn").Pool(MAX_WORKERS) as p:
+        async_results = [p.apply_async(func, (item,)) for item in items]
+        results = []
+        for i, async_result in enumerate(async_results):
+            try:
+                results.append(async_result.get(timeout=30))
+            except Exception as e:
+                print(f"Item {i} failed: {e}")
+                results.append(None)
+        return results
+
 
 mpf = mpf_async
 
 
 def is_ascii_printable(s: str) -> bool:
-    return all(32 <= ord(c) <= 126 for c in s)
+    return all((32 <= ord(c) <= 126 for c in s))
 
 
 def clean_filename(s: str) -> str:
-    s = re.sub(r"[^\w\\-\.]", "", s)
+    s = re.sub("[^\\w\\\\-\\.]", "", s)
     return s.strip("_-.")
 
 

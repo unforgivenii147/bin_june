@@ -19,10 +19,18 @@ import time
 from collections import defaultdict
 from pathlib import Path
 
-from dh import is_text_file
 from joblib import Parallel, delayed
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
+def is_text_file(filepath: Path) -> bool:
+    try:
+        with open(filepath, "rb") as f:
+            chunk = f.read(1024)
+            return b"\x00" not in chunk
+    except OSError:
+        return False
 
 
 def extract_blocks_from_file(filepath: Path, min_lines: int = 2) -> list[tuple[str, int, list[str]]]:

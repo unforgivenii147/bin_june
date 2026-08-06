@@ -10,7 +10,6 @@ from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
 from bs4.element import AttributeValuelist
-from dh import get_mime_type
 
 
 class HTMLStandaloneMaker:
@@ -42,6 +41,10 @@ class HTMLStandaloneMaker:
     def log(self, message: str, level: str = "INFO") -> None:
         if self.verbose or level == "ERROR":
             print(f"[{level}] {message}")
+
+    def get_mime_type(self, file_path: Path) -> str:
+        ext = file_path.suffix.lower()
+        return self.MIME_MAP.get(ext, "application/octet-stream")
 
     def encode_local_file_to_base64(self, file_path: Path) -> str | None:
         try:

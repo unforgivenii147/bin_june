@@ -1,16 +1,34 @@
-#!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import sys
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
 
-from dh import get_files, is_binary
-from dh.jobutils import mpf3
-
 CHUNK_SIZE = 1024 * 1024
+from dh import get_files
+
+
+def mpf3(process_function: Callable, files: list[Path], **kwargs):
+    from joblib import Parallel, delayed
+
+    file_strings = [str(f) for f in files]
+    return Parallel(n_jobs=-1)((delayed(process_function)(file_str, **kwargs) for file_str in file_strings))
+
+
+def is_binary(path: Path | str) -> bool:
+    path = Path(path)
+    try:
+        with path.open("rb") as f:
+            chunk = f.read(CHUNK_SIZE)
+        if not chunk:
+            return False
+        if b"\x00" in chunk:
+            return True
+        text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
+        nontext = sum((1 for b in chunk if b not in text_chars))
+        return nontext / len(chunk) > 0.3
+    except Exception:
+        return True
 
 
 cwd = Path.cwd()

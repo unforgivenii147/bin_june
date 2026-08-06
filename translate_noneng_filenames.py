@@ -30,8 +30,7 @@ def translate_filename(filename: str):
 
 
 def rename_files(directory: str) -> None:
-    for pth in walk_files(directory):
-        path = Path(pth)
+    for path in walk_files(directory):
         if is_english(path.stem):
             continue
         if path.is_file():

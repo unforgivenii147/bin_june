@@ -7,12 +7,20 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 from deep_translator import GoogleTranslator
-from dh import is_text_file
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 DIRECTORY = "."
 CHUNK_SIZE = 2000
-non_english_pattern = re.compile(r"[^\x00-\x7F]")
+non_english_pattern = re.compile("[^\\x00-\\x7F]")
+
+
+def is_text_file(path: Path) -> bool:
+    try:
+        with Path(path).open("rb") as f:
+            chunk = f.read(2048)
+        return b"\x00" not in chunk
+    except:
+        return False
 
 
 def split_into_chunks(text: str, size: int) -> list[str]:

@@ -4,8 +4,6 @@ Comment out SKIP_DIRS lines from vulture output.
 Usage: python comment_skip_dirs.py <vulture_output_file>
 """
 
-from __future__ import annotations
-
 import os
 import re
 import sys

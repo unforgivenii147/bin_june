@@ -1,8 +1,7 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-from __future__ import annotations
-
 import argparse
 import io
+import os
 import tarfile
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -36,13 +35,14 @@ def decompress_stream(input_path: Path, output_path: Path) -> bool:
     """Decompress Zstandard file"""
     try:
         dctx = zstd.ZstdDecompressor()
-        with open(input_path, "rb") as f_in, open(output_path, "wb") as f_out:
-            decompressor = dctx.stream_reader(f_in)
-            while True:
-                chunk = decompressor.read(CHUNK_SIZE)
-                if not chunk:
-                    break
-                f_out.write(chunk)
+        with open(input_path, "rb") as f_in:
+            with open(output_path, "wb") as f_out:
+                decompressor = dctx.stream_reader(f_in)
+                while True:
+                    chunk = decompressor.read(CHUNK_SIZE)
+                    if not chunk:
+                        break
+                    f_out.write(chunk)
         print(f"✅ Decompressed: {output_path.name}")
         return True
     except Exception as e:
@@ -117,11 +117,13 @@ def main():
 
     mode = "decompress" if args.decompress else "compress"
 
-    cwd = Path(".")
+    current_dir = Path(".")
 
     if mode == "compress":
-        subdirs = [d for d in cwd.iterdir() if d.is_dir() and not d.name.startswith(".")]
-        files = [f for f in cwd.iterdir() if f.is_file() and f.suffix != ".zst" and f.name != Path(__file__).name]
+        subdirs = [d for d in current_dir.iterdir() if d.is_dir() and not d.name.startswith(".")]
+        files = [
+            f for f in current_dir.iterdir() if f.is_file() and f.suffix != ".zst" and f.name != Path(__file__).name
+        ]
 
         if not subdirs and not files:
             print("No files or subdirectories found to compress.")
@@ -137,7 +139,7 @@ def main():
                 executor.submit(process_file, f)
 
     else:  # decompress
-        archives = [f for f in cwd.iterdir() if f.is_file() and f.suffix == ".zst"]
+        archives = [f for f in current_dir.iterdir() if f.is_file() and f.suffix == ".zst"]
 
         if not archives:
             print("No .zst or .tar.zst files found to decompress.")

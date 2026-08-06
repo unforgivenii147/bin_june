@@ -9,7 +9,7 @@ from pathlib import Path
 def process_file(path) -> None:
     path = Path(path)
     content = path.read_text(encoding="utf-8")
-    content = content.replace(r"\n", "\n")
+    content = content.replace("\\n", "\n")
     path.write_text(content, encoding="utf-8")
     print(f"{path.name} updated.")
 

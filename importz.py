@@ -6,7 +6,18 @@ import ast
 import sys
 from pathlib import Path
 
-from dh import is_python_file
+
+def is_python_file(path: Path) -> bool:
+    if path.suffix == ".py":
+        return True
+    if path.is_file() and not path.suffix:
+        try:
+            with Path(path).open(encoding="utf-8") as f:
+                first_line = f.readline()
+                return "python" in first_line
+        except Exception:
+            return False
+    return False
 
 
 def get_imports_from_file(file_path: Path):

@@ -1,203 +1,249 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Compress/decompress files recursively using pylzma with parallel processing.
-"""
+"""Compress/decompress files using pylzma with parallel processing."""
 
 from __future__ import annotations
-
 import argparse
 import io
+import shutil
 import tarfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-
 import pylzma
+from dh import fsz, gsz
+
+# Max available pylzma compression settings
+_COMPRESS_OPTS = {
+    "dictionary": 27,  # 256 MB
+    "fastBytes": 273,  # Maximum
+    "algorithm": 2,  # Maximum compression mode
+}
 
 
-def create_tar_for_directory(dir_path):
-    tar_buffer = io.BytesIO()
-    with tarfile.open(fileobj=tar_buffer, mode="w") as tar:
-        tar.add(dir_path, arcname=dir_path.name)
-    return tar_buffer.getvalue()
-
-
-def compress_file(file_path, output_dir, tar_subdirs_first=False):
+def _compress(src: Path, keep: bool) -> str:
+    src = Path(src)
     try:
-        file_path = Path(file_path)
-
-        if file_path.is_dir():
-            if tar_subdirs_first:
-                # Create tar archive first
-                tar_data = create_tar_for_directory(file_path)
-                compressed_data = pylzma.compress(tar_data)
-                output_file = output_dir / f"{file_path.name}.tar.7z"
-            else:
-                # Compress each file in directory individually (this approach is simplified)
-                # For directories without tar, we'll just skip them in this mode
-                return None
+        original_size = gsz(src)
+        if src.is_dir():
+            buf = io.BytesIO()
+            with tarfile.open(fileobj=buf, mode="w") as tar:
+                tar.add(src, arcname=src.name)
+            compressed = pylzma.compress(buf.getvalue(), **_COMPRESS_OPTS)
+            dst = src.parent / f"{src.name}.tar.7z"
+            dst.write_bytes(compressed)
+            compressed_size = dst.stat().st_size
+            if not keep:
+                shutil.rmtree(src)
+            ratio = (1 - compressed_size / original_size) * 100 if original_size > 0 else 0
+            space_freed = original_size - compressed_size
+            return (
+                f"Compressed {src} -> {dst}\n"
+                f"  Original: {fsz(original_size)} -> "
+                f"Compressed: {fsz(compressed_size)}\n"
+                f"  Ratio: {ratio:.1f}% | "
+                f"Space freed: {fsz(max(0, space_freed))}"
+            )
+        elif src.is_file():
+            data = src.read_bytes()
+            compressed = pylzma.compress(data, **_COMPRESS_OPTS)
+            dst = src.parent / f"{src.name}.7z"
+            dst.write_bytes(compressed)
+            compressed_size = dst.stat().st_size
+            if not keep:
+                src.unlink()
+            ratio = (1 - compressed_size / original_size) * 100 if original_size > 0 else 0
+            space_freed = original_size - compressed_size
+            return (
+                f"Compressed {src} -> {dst}\n"
+                f"  Original: {fsz(original_size)} -> "
+                f"Compressed: {fsz(compressed_size)}\n"
+                f"  Ratio: {ratio:.1f}% | "
+                f"Space freed: {fsz(max(0, space_freed))}"
+            )
         else:
-            with open(file_path, "rb") as f:
-                data = f.read()
-            compressed_data = pylzma.compress(data)
-            output_file = output_dir / f"{file_path.name}.7z"
-
-        with open(output_file, "wb") as f:
-            f.write(compressed_data)
-
-        return f"Compressed: {file_path} -> {output_file}"
-
+            return f"Skipped {src} (not a file or directory)"
     except Exception as e:
-        return f"Error compressing {file_path}: {e!s}"
+        return f"Error compressing {src}: {e}"
 
 
-def decompress_file(file_path, output_dir):
-    """Decompress a single file using pylzma."""
+def _decompress(src: Path, keep: bool) -> str:
+    src = Path(src)
     try:
-        file_path = Path(file_path)
-
-        with open(file_path, "rb") as f:
-            compressed_data = f.read()
-
-        decompressed_data = pylzma.decompress(compressed_data)
-
-        # Handle .tar.7z files
-        if file_path.suffixes == [".tar", ".7z"]:
-            # Extract tar archive
-            output_name = file_path.name.replace(".tar.7z", "")
-            tar_buffer = io.BytesIO(decompressed_data)
-            with tarfile.open(fileobj=tar_buffer, mode="r") as tar:
-                tar.extractall(path=output_dir)
-            return f"Decompressed: {file_path} -> {output_dir}/{output_name}"
-
-        # Handle regular .7z files
-        elif file_path.suffix == ".7z":
-            output_name = file_path.name.replace(".7z", "")
-            output_file = output_dir / output_name
-            with open(output_file, "wb") as f:
-                f.write(decompressed_data)
-            return f"Decompressed: {file_path} -> {output_file}"
+        if not src.is_file():
+            return f"Skipped {src} (not a file)"
+        compressed_size = src.stat().st_size
+        data = src.read_bytes()
+        decompressed = pylzma.decompress(data)
+        if src.name.endswith(".tar.7z"):
+            dst = src.parent / src.name[: -len(".tar.7z")]
+            dst.mkdir(parents=True, exist_ok=True)
+            buf = io.BytesIO(decompressed)
+            with tarfile.open(fileobj=buf, mode="r") as tar:
+                tar.extractall(path=dst)
+            if not keep:
+                src.unlink()
+            decompressed_size = gsz(dst)
+            return (
+                f"Decompressed {src} -> {dst}\n"
+                f"  Compressed: {fsz(compressed_size)} -> "
+                f"Decompressed: {fsz(decompressed_size)}\n"
+                f"  Space used: {fsz(decompressed_size - compressed_size)}"
+            )
+        elif src.name.endswith(".7z"):
+            dst = src.parent / src.name[: -len(".7z")]
+            dst.write_bytes(decompressed)
+            if not keep:
+                src.unlink()
+            decompressed_size = dst.stat().st_size
+            return (
+                f"Decompressed {src} -> {dst}\n"
+                f"  Compressed: {fsz(compressed_size)} -> "
+                f"Decompressed: {fsz(decompressed_size)}\n"
+                f"  Space used: {fsz(decompressed_size - compressed_size)}"
+            )
         else:
-            return f"Skipped (not a .7z or .tar.7z file): {file_path}"
-
+            return f"Skipped {src} (not a .7z file)"
     except Exception as e:
-        return f"Error decompressing {file_path}: {e!s}"
+        return f"Error decompressing {src}: {e}"
 
 
-def process_files_parallel(files, output_dir, mode, tar_subdirs_first=False, max_workers=None):
-    """Process files in parallel using ProcessPoolExecutor."""
-    results = []
+def _collect_targets(paths: list[str], mode: str) -> list[Path]:
+    targets: list[Path] = []
+    cwd = Path(".").resolve()
 
-    with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        if mode == "compress":
-            futures = {executor.submit(compress_file, file, output_dir, tar_subdirs_first): file for file in files}
-        else:  # decompress
-            futures = {executor.submit(decompress_file, file, output_dir): file for file in files}
+    if mode == "compress":
+        # No args → recursive file scan in cwd
+        if not paths:
+            for p in Path(".").rglob("*"):
+                if p.is_file() and not p.name.endswith(".7z"):
+                    targets.append(p.resolve())
+        else:
+            for s in paths:
+                p = Path(s)
+                if not p.exists():
+                    print(f"Warning: {p} does not exist, skipping")
+                    continue
+                p_resolved = p.resolve()
+                # Safety: refuse to compress cwd as a single archive
+                if p_resolved == cwd and p.is_dir():
+                    print(
+                        "Warning: processing contents of '.' recursively instead of compressing it as a single archive"
+                    )
+                    for child in p.rglob("*"):
+                        if child.is_file() and not child.name.endswith(".7z"):
+                            targets.append(child.resolve())
+                else:
+                    targets.append(p_resolved)
+    else:  # decompress
+        if not paths:
+            for p in Path(".").rglob("*"):
+                if p.is_file() and p.name.endswith(".7z"):
+                    targets.append(p.resolve())
+        else:
+            for s in paths:
+                p = Path(s)
+                if not p.exists():
+                    print(f"Warning: {p} does not exist, skipping")
+                    continue
+                if p.is_file() and p.name.endswith(".7z"):
+                    targets.append(p.resolve())
+                elif p.is_dir():
+                    for child in p.rglob("*"):
+                        if child.is_file() and child.name.endswith(".7z"):
+                            targets.append(child.resolve())
 
-        for future in as_completed(futures):
-            result = future.result()
-            if result:
-                results.append(result)
-                print(result)
+    # Deduplicate while preserving order
+    seen: set[Path] = set()
+    out: list[Path] = []
+    for t in targets:
+        if t not in seen:
+            seen.add(t)
+            out.append(t)
+    return out
 
-    return results
 
-
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Compress/decompress files recursively using pylzma with parallel processing"
+        description="Compress/decompress files and directories using pylzma with parallel processing"
     )
     parser.add_argument(
-        "-c",
-        "--compress",
-        action="store_const",
-        const="compress",
-        dest="mode",
-        default="compress",
-        help="Compress files (default mode)",
+        "paths",
+        nargs="*",
+        help="Files or directories to process (default: current directory recursively)",
     )
     parser.add_argument(
-        "-d", "--decompress", action="store_const", const="decompress", dest="mode", help="Decompress files"
-    )
-    parser.add_argument(
-        "-t",
-        "--tar-subdirs-first",
+        "-d",
+        "--decompress",
         action="store_true",
-        default=False,
-        help="Tar subdirectories first before compression",
+        help="Decompress mode (default: compress)",
     )
     parser.add_argument(
-        "-w", "--workers", type=int, default=None, help="Number of worker processes (default: CPU count)"
+        "-w",
+        "--workers",
+        type=int,
+        default=None,
+        help="Number of worker processes (default: CPU count)",
     )
     parser.add_argument(
-        "-o",
-        "--output",
-        type=str,
-        default="./compressed" if parser.parse_known_args()[0].mode != "decompress" else "./decompressed",
-        help="Output directory (default: ./compressed for compress, ./decompressed for decompress)",
+        "-k",
+        "--keep",
+        action="store_true",
+        help="Keep original files after processing",
     )
-
     args = parser.parse_args()
 
-    cwd = Path(".")
+    mode = "decompress" if args.decompress else "compress"
+    targets = _collect_targets(args.paths, mode)
 
-    if args.mode == "compress":
-        output_dir = Path(args.output or "./compressed")
-        output_dir.mkdir(exist_ok=True)
+    if not targets:
+        print(f"No items found to {mode}")
+        return
 
-        # Collect all files recursively (skip the output directory if it's inside current dir)
-        all_files = []
-        for item in cwd.rglob("*"):
-            if item.is_file() or (item.is_dir() and not args.tar_subdirs_first):
-                # Skip files in output directory
-                try:
-                    if output_dir in item.parents or item == output_dir:
-                        continue
-                except (ValueError, AttributeError):
-                    pass
+    print(f"{mode.capitalize()}ing {len(targets)} item(s)...")
 
-                if item.is_file():
-                    # Skip already compressed files
-                    if item.suffix == ".7z":
-                        continue
-                    all_files.append(item)
-                elif item.is_dir() and args.tar_subdirs_first:
-                    # Add directories for tar+compress mode
-                    if item != cwd:  # Skip root directory
-                        try:
-                            if output_dir not in item.parents and item != output_dir:
-                                all_files.append(item)
-                        except (ValueError, AttributeError):
-                            all_files.append(item)
+    # Calculate total original size before processing
+    total_original = sum(gsz(t) for t in targets)
 
-        if not all_files:
-            print("No files found to compress in current directory")
-            return
+    worker = _decompress if mode == "decompress" else _compress
+    with ProcessPoolExecutor(max_workers=args.workers) as executor:
+        futures = {executor.submit(worker, t, args.keep): t for t in targets}
+        for future in as_completed(futures):
+            print(future.result())
 
-        print(f"Found {len(all_files)} items to compress")
-        print(f"Compressing to: {output_dir}")
-        process_files_parallel(all_files, output_dir, "compress", args.tar_subdirs_first, args.workers)
+    # Calculate total compressed/decompressed size after processing
+    if mode == "compress":
+        total_compressed = 0
+        for t in targets:
+            if t.is_dir():
+                dst = t.parent / f"{t.name}.tar.7z"
+            else:
+                dst = t.parent / f"{t.name}.7z"
+            if dst.exists():
+                total_compressed += dst.stat().st_size
 
-    else:  # decompress
-        output_dir = Path(args.output or "./decompressed")
-        output_dir.mkdir(exist_ok=True)
+        if total_original > 0:
+            total_ratio = (1 - total_compressed / total_original) * 100
+            total_freed = total_original - total_compressed
+            print(f"\n{'=' * 50}")
+            print(f"SUMMARY:")
+            print(f"  Total original size: {fsz(total_original)}")
+            print(f"  Total compressed size: {fsz(total_compressed)}")
+            print(f"  Overall compression ratio: {total_ratio:.1f}%")
+            print(f"  Total space freed: {fsz(max(0, total_freed))}")
+    else:
+        total_decompressed = 0
+        for t in targets:
+            if t.name.endswith(".tar.7z"):
+                dst = t.parent / t.name[: -len(".tar.7z")]
+            else:
+                dst = t.parent / t.name[: -len(".7z")]
+            total_decompressed += gsz(dst)
 
-        # Find all .7z and .tar.7z files
-        compressed_files = []
-        for item in cwd.rglob("*"):
-            if item.is_file() and (item.suffix == ".7z" or item.name.endswith(".tar.7z")):
-                try:
-                    if output_dir not in item.parents and item != output_dir:
-                        compressed_files.append(item)
-                except (ValueError, AttributeError):
-                    compressed_files.append(item)
-
-        if not compressed_files:
-            print("No .7z or .tar.7z files found in current directory")
-            return
-
-        print(f"Found {len(compressed_files)} files to decompress")
-        print(f"Decompressing to: {output_dir}")
-        process_files_parallel(compressed_files, output_dir, "decompress", False, args.workers)
+        total_space_used = total_decompressed - total_original
+        print(f"\n{'=' * 50}")
+        print(f"SUMMARY:")
+        print(f"  Total compressed size: {fsz(total_original)}")
+        print(f"  Total decompressed size: {fsz(total_decompressed)}")
+        print(f"  Total space used: {fsz(total_space_used)}")
 
 
 if __name__ == "__main__":

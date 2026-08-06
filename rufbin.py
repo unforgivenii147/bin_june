@@ -5,7 +5,33 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
-from dh import is_python_file
+
+def is_python_file(file_path: Path):
+    try:
+        with Path(file_path).open("r", encoding="utf-8", errors="ignore") as f:
+            content = f.read(1024)
+        if content.startswith("#!") and "python" in content.lower():
+            return True
+        python_indicators = [
+            "def ",
+            "class ",
+            "import ",
+            "from ",
+            "async def",
+            "if __name__ ==",
+            "print(",
+            "raise ",
+            "try:",
+            "except ",
+            "__init__",
+        ]
+        content_lower = content.lower()
+        for indicator in python_indicators:
+            if indicator in content_lower:
+                return True
+        return file_path.suffix.lower() == ".py"
+    except:
+        return False
 
 
 def format_with_ruff(file_path: Path):

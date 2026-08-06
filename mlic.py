@@ -13,8 +13,7 @@ import concurrent.futures
 import sys
 from collections import defaultdict
 from pathlib import Path
-
-from dh import TXT_EXT
+from typing import dict, list, set, tuple
 
 MIN_LINES = 3
 MIN_CHARS = 100
@@ -61,11 +60,39 @@ def validate_python_syntax(code: str) -> tuple[bool, str]:
         return (False, f"Syntax error at line {e.lineno}, column {e.offset}: {e.msg}")
 
 
-def find_files(directory: Path) -> list[Path]:
+def find_files(directory: Path, extensions: set[str] | None = None) -> list[Path]:
+    if extensions is None:
+        extensions = {
+            ".txt",
+            ".md",
+            ".py",
+            ".js",
+            ".html",
+            ".css",
+            ".xml",
+            ".json",
+            ".yaml",
+            ".yml",
+            ".csv",
+            ".log",
+            ".ini",
+            ".cfg",
+            ".conf",
+            ".sh",
+            ".bat",
+            ".ps1",
+            ".java",
+            ".cpp",
+            ".c",
+            ".h",
+            ".rb",
+            ".php",
+            ".sql",
+        }
     files = []
     try:
         for item in directory.rglob("*"):
-            if item.is_file() and item.suffix.lower() in TXT_EXT:
+            if item.is_file() and item.suffix.lower() in extensions:
                 files.append(item)
     except PermissionError:
         print(f"Permission denied accessing {directory}", file=sys.stderr)
@@ -80,9 +107,9 @@ def process_file(args: tuple[Path, int, int]) -> tuple[Path, dict[str, list[tupl
 
 def find_repeated_strings(
     directory: Path,
-    min_lines: int = 3,
-    min_chars: int = 100,
-    max_workers: int = 6,
+    min_lines: int = 2,
+    min_chars: int = 10,
+    max_workers: int | None = None,
     half: bool = False,
 ) -> dict[str, list[tuple[Path, list[tuple[int, int]]]]]:
     files = find_files(directory)

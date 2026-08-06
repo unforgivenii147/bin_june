@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-from __future__ import annotations
-
 import ast
 import collections
 import json
@@ -109,10 +107,10 @@ def main():
 
     # Create mapping of file names to their duplicated components
     refactor_map = load_refactoring_maps()
-    cwd = Path(".")
+    current_dir = Path(".")
 
     # Gather target executable files present in local execution space
-    local_files = {f.name: f for f in cwd.glob("*.py")}
+    local_files = {f.name: f for f in current_dir.glob("*.py")}
 
     tasks = []
     for filename, objects in refactor_map.items():

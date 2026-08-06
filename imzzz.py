@@ -9,7 +9,7 @@ import tarfile
 import zipfile
 from pathlib import Path
 
-from dh import PKG_MAPPING, STDLIB, is_python_file
+from dh import PKG_MAPPING, STDLIB
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -20,6 +20,16 @@ try:
         PIP_PACKAGES = {line.strip().split("==")[0].split("[")[0] for line in f if line.strip()}
 except FileNotFoundError:
     PIP_PACKAGES = set()
+
+
+def is_python_file(file_path):
+    return file_path.suffix == ".py" or (
+        not file_path.suffix
+        and any(
+            line.startswith(("import ", "from ", "#!/usr/bin/env python"))
+            for line in Path(file_path).open(encoding="utf-8", errors="ignore")
+        )
+    )
 
 
 def extract_compressed(file_path, extract_to) -> None:

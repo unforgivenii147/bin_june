@@ -135,19 +135,19 @@ def findup(roots: list[Path]) -> int:
     if total == 0:
         ok("No duplicate files found.")
     else:
-        print(f"\n  {_c(RED, f'{total} redundant copy/copies found.r')}")
+        print(f"\n  {_c(RED, f'{total} redundant copy/copies found.')}")
     return total
 
 
 _NL_RULES: list[tuple[str, re.Pattern[str]]] = [
-    ("leading whitespace", re.compile(r"^\s")),
-    ("trailing whitespace", re.compile(r"\s$")),
+    ("leading whitespace", re.compile("^\\s")),
+    ("trailing whitespace", re.compile("\\s$")),
     ("consecutive spaces", re.compile("  ")),
-    ("control character", re.compile(r"[\x00-\x1f\x7f]")),
-    ("shell-special character", re.compile(r"[;`$!&|<>\\]")),
-    ("mixed case (CamelCase)", re.compile(r"(?<=[a-z])(?=[A-Z])")),
+    ("control character", re.compile("[\\x00-\\x1f\\x7f]")),
+    ("shell-special character", re.compile("[;`$!&|<>\\\\]")),
+    ("mixed case (CamelCase)", re.compile("(?<=[a-z])(?=[A-Z])")),
     ("starts with hyphen", re.compile("^-")),
-    ("trailing dot", re.compile(r"\.$")),
+    ("trailing dot", re.compile("\\.$")),
 ]
 
 
@@ -352,28 +352,28 @@ def findsn(_roots: list[Path] | None = None) -> int:
 
 _TF_PATTERNS: list[re.Pattern[str]] = [
     re.compile("~$"),
-    re.compile(r"^#.*#$"),
-    re.compile(r"\.bak$", re.I),
-    re.compile(r"\.tmp$", re.I),
-    re.compile(r"\.temp$", re.I),
-    re.compile(r"\.swp$", re.I),
-    re.compile(r"\.swo$", re.I),
-    re.compile(r"^\.DS_Store$"),
-    re.compile(r"^Thumbs\.db$", re.I),
-    re.compile(r"^desktop\.ini$", re.I),
-    re.compile(r"\.orig$", re.I),
-    re.compile(r"\.rej$", re.I),
-    re.compile(r"core\.\d+$"),
-    re.compile(r"^core$"),
-    re.compile(r"\.log$", re.I),
-    re.compile(r"\.pid$", re.I),
+    re.compile("^#.*#$"),
+    re.compile("\\.bak$", re.I),
+    re.compile("\\.tmp$", re.I),
+    re.compile("\\.temp$", re.I),
+    re.compile("\\.swp$", re.I),
+    re.compile("\\.swo$", re.I),
+    re.compile("^\\.DS_Store$"),
+    re.compile("^Thumbs\\.db$", re.I),
+    re.compile("^desktop\\.ini$", re.I),
+    re.compile("\\.orig$", re.I),
+    re.compile("\\.rej$", re.I),
+    re.compile("core\\.\\d+$"),
+    re.compile("^core$"),
+    re.compile("\\.log$", re.I),
+    re.compile("\\.pid$", re.I),
     re.compile("__pycache__"),
-    re.compile(r"\.pyc$"),
-    re.compile(r"\.pyo$"),
+    re.compile("\\.pyc$"),
+    re.compile("\\.pyo$"),
     re.compile("node_modules"),
-    re.compile(r"\.class$"),
-    re.compile(r"\.o$"),
-    re.compile(r"\.a$"),
+    re.compile("\\.class$"),
+    re.compile("\\.o$"),
+    re.compile("\\.a$"),
 ]
 
 
@@ -410,7 +410,7 @@ def findwd(roots: list[Path]) -> int:
     return total
 
 
-_RS_RE = re.compile(r"  |^\s|\s$|\t")
+_RS_RE = re.compile("  |^\\s|\\s$|\\t")
 
 
 def findrs(roots: list[Path]) -> int:

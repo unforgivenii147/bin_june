@@ -10,8 +10,6 @@ import re
 import sys
 from pathlib import Path
 
-from dh import is_python_file
-
 INFO_BLOCK_PATTERN = re.compile(
     r"^# Author\s*:\s*isaac\s*\n"
     r"# Email\s*:\s*mkalafsaz@gmail\.com\s*\n"
@@ -23,6 +21,25 @@ PYTHON_SHEBANG_PATTERNS = [
     re.compile(r"^#!.*python", re.IGNORECASE),
     re.compile(r"^#!.*python3", re.IGNORECASE),
 ]
+
+
+def is_python_file(file_path):
+    """Check if a file is a Python file (by extension or shebang)."""
+
+    if file_path.suffix == ".py":
+        return True
+
+    if not file_path.suffix:
+        try:
+            with open(file_path, encoding="utf-8", errors="ignore") as f:
+                first_line = f.readline()
+                for pattern in PYTHON_SHEBANG_PATTERNS:
+                    if pattern.match(first_line):
+                        return True
+        except Exception:
+            pass
+
+    return False
 
 
 def remove_info_block(file_path):

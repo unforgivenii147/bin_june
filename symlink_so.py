@@ -7,7 +7,14 @@ import os
 import re
 from pathlib import Path
 
-from dh import should_skip
+
+def should_skip(so_path):
+    if so_path.is_symlink():
+        return True
+    name = so_path.name
+    if name.endswith((".0", ".1")):
+        return True
+    return bool(re.search(r"\.so\.\d+(\.\d+)+$", name))
 
 
 def get_base_name(so_path):

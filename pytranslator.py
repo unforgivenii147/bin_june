@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Final
 
 from deep_translator import GoogleTranslator
-from dh import DOC_TH1, DOC_TH2, should_skip
+from dh import DOC_TH1, DOC_TH2
 from langdetect import DetectorFactory, detect
 
 SKIP_DIRS: Final[frozenset[str]] = frozenset(
@@ -80,6 +80,17 @@ def is_english_alphabet(text: str) -> bool:
 
 def has_non_latin_alphabet(text: str) -> bool:
     return any(char.isalpha() and (not is_latin_char(char)) for char in text)
+
+
+def should_skip(text: str) -> bool:
+    clean = text.strip()
+    if not clean or clean.startswith(SHEBANG_PREFIX):
+        return True
+    if is_english_alphabet(clean):
+        return True
+    if any(token in clean.upper() for token in KNOWN_ENGLISH_TOKENS):
+        return True
+    return bool(not any(c.isalpha() for c in clean))
 
 
 def is_non_english(text: str) -> bool:

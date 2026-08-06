@@ -1,14 +1,14 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
-from __future__ import annotations
-
 import argparse
 import concurrent.futures
 import csv
 import fnmatch
 import importlib.metadata
+import os
 import shutil
 import site
+import sys
 from pathlib import Path
 
 

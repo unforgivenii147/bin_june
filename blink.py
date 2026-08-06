@@ -3,22 +3,29 @@
 from __future__ import annotations
 
 import sys
+from collections import deque
 from pathlib import Path
+from dh import get_files
 
-from fastwalk import walk_parallel
 
 RM = "-r" in sys.argv
+
+
+def get_files(directory: Path):
+    for path in directory.rglob("*"):
+        if ".git" in path.parts:
+            continue
+        if path.is_symlink():
+            yield path
 
 
 if __name__ == "__main__":
     cwd = Path.cwd()
     bcount = 0
     broken_links = []
-    for path in walk_parallel(cwd):
-    
-        if not path.is_symlink():
-            continue
+    for path in get_files(cwd):
         if not path.exists():
+            print(path.name)
             bcount += 1
             broken_links.append(str(path.relative_to(cwd)))
             if RM:
@@ -29,8 +36,7 @@ if __name__ == "__main__":
                     print(f"Error deleting {path}: {e}")
     if broken_links:
         for link in broken_links:
-            print(f"- {link}\n")
-
+            print(f"{link}\n")
     if not bcount:
         print("no broken link found.")
         sys.exit(0)

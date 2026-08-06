@@ -1,19 +1,31 @@
-#!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import re
 import sys
 from collections import deque
 from pathlib import Path
 
-from dh import get_files, get_nobinary, is_binary
-
 CHUNK_SIZE = 1024 * 1024
+from dh import get_files, get_nobinary
+
+
+def is_binary(path: Path | str) -> bool:
+    path = Path(path)
+    try:
+        with path.open("rb") as f:
+            chunk = f.read(CHUNK_SIZE)
+        if not chunk:
+            return False
+        if b"\x00" in chunk:
+            return True
+        text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
+        nontext = sum((1 for b in chunk if b not in text_chars))
+        return nontext / len(chunk) > 0.3
+    except Exception:
+        return True
 
 
 IF_BLOCK_REGEX = re.compile(
-    r"^if\s+\[\s*\$\((\S+)\)\s*\{\-ne\s+0\s*\}\]\s*;\s*then\s*\n((?:.|\n)*?)^\s*exit\s+1\s*$(.*?)^\s*fi",
+    "^if\\s+\\[\\s*\\$\\((\\S+)\\)\\s*\\{\\-ne\\s+0\\s*\\}\\]\\s*;\\s*then\\s*\\n((?:.|\\n)*?)^\\s*exit\\s+1\\s*$(.*?)^\\s*fi",
     re.MULTILINE | re.IGNORECASE,
 )
 
@@ -44,18 +56,7 @@ def main() -> None:
                 is_likely_bash = False
                 if content.startswith(("#!/bin/bash", "#!/usr/bin/env bash")) or oct(item_path.stat().st_mode)[
                     -3:
-                ] not in (
-                    "000",
-                    "001",
-                    "010",
-                    "011",
-                    "002",
-                    "012",
-                    "100",
-                    "110",
-                    "111",
-                    "101",
-                ):
+                ] not in ("000", "001", "010", "011", "002", "012", "100", "110", "111", "101"):
                     is_likely_bash = True
                 if is_likely_bash:
                     remove_conditional_exit_blocks(item_path)

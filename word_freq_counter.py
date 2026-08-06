@@ -4,15 +4,13 @@ Word frequency counter for text files in current directory.
 Uses parallel processing for efficiency.
 """
 
-from __future__ import annotations
-
 import json
 import logging
 import re
 from collections import Counter
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import List
+from typing import Dict, List, Tuple
 
 from dh import get_nobinary
 
@@ -43,7 +41,7 @@ def process_file(file_path: Path) -> Counter:
     return word_counter
 
 
-def collect_text_files(directory: Path | None = None) -> List[Path]:
+def collect_text_files(directory: Path = None) -> List[Path]:
     """
     Collect all text files from the specified directory.
     """
@@ -56,7 +54,7 @@ def collect_text_files(directory: Path | None = None) -> List[Path]:
     return text_files
 
 
-def process_files_parallel(file_paths: List[Path], max_workers: int | None = None) -> Counter:
+def process_files_parallel(file_paths: List[Path], max_workers: int = None) -> Counter:
     """
     Process multiple files in parallel and merge word counts.
     """
@@ -146,12 +144,12 @@ def main():
     logger.info(f"Unique words found: {unique_words}")
 
     # Show top 10 most common words
-    print("\n" + "=" * 50)
+    print("\n" + "=" * 42)
     print("Top 10 Most Common Words:")
     print("-" * 30)
     for word, count in total_counter.most_common(10):
         print(f"{word:<20} {count:>8}")
-    print("=" * 50)
+    print("=" * 42)
     print(f"\nFull results saved to: {output_file.absolute()}")
 
 

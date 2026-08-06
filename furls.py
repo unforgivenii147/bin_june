@@ -1,7 +1,4 @@
-#!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import argparse
 import contextlib
 import io
@@ -11,21 +8,86 @@ import sys
 import tarfile
 import tempfile
 import zipfile
+from collections.abc import Callable
+from functools import wraps
+from inspect import getfullargspec
+from itertools import chain
 from pathlib import Path
 from tarfile import TarFile
+from typing import Any
 from urllib.parse import urlparse
 from zipfile import ZipFile
+import zstd
 
-import zstandard as zstd
-from dh import append_text, is_binary, is_valid_url
+
+class ValidationFailure(Exception):
+    def __init__(self, function: Callable[..., Any], arg_dict: dict[str, Any]):
+        self.func = function
+        self.__dict__.update(arg_dict)
+
+    def __repr__(self):
+        return f"ValidationFailure(func={self.func.__name__}, args={{k: v for k, v in self.__dict__.items() if k != 'func'}})"
+
+    def __str__(self):
+        return repr(self)
+
+    def __bool__(self):
+        return False
+
+
+def _func_args_as_dict(func: Callable[..., Any], *args: Any, **kwargs: Any):
+    return dict(
+        list(zip(dict.fromkeys(chain(getfullargspec(func)[0], kwargs.keys())), args, strict=False))
+        + list(kwargs.items())
+    )
+
+
+def validator(func: Callable[..., Any]):
+
+    @wraps(func)
+    def wrapper(*args: Any, **kwargs: Any):
+        return True if func(*args, **kwargs) else ValidationFailure(func, _func_args_as_dict(func, *args, **kwargs))
+
+    return wrapper
+
+
+ip_middle_octet = "(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5]))"
+ip_last_octet = "(?:\\.(?:0|[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-5]))"
+url_regex = re.compile(
+    "^(?:(?:https?|ftp)://)(?:[-a-z\\u00a1-\\uffff0-9._~%!$&'()*+,;=:]+(?::[-a-z0-9._~%!$&'()*+,;=:]*)?@)?(?:(?P<private_ip>(?:(?:10|127)"
+    + ip_middle_octet
+    + "{2}"
+    + ip_last_octet
+    + ")|(?:(?:169\\.254|192\\.168)"
+    + ip_middle_octet
+    + ip_last_octet
+    + ")|(?:172\\.(?:1[6-9]|2\\d|3[0-1])"
+    + ip_middle_octet
+    + ip_last_octet
+    + "))|(?P<private_host>(?:localhost))|(?P<public_ip>(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])"
+    + ip_middle_octet
+    + "{2}"
+    + ip_last_octet
+    + ")|\\[(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))\\]|(?:(?:(?:xn--[-]{0,2})|[a-z\\u00a1-\\uffff\\U00010000-\\U0010ffff0-9]-?)*[a-z\\u00a1-\\uffff\\U00010000-\\U0010ffff0-9]+)(?:\\.(?:(?:xn--[-]{0,2})|[a-z\\u00a1-\\uffff\\U00010000-\\U0010ffff0-9]-?)*[a-z\\u00a1-\\uffff\\U00010000-\\U0010ffff0-9]+)*(?:\\.(?:(?:xn--[-]{0,2}[a-z\\u00a1-\\uffff\\U00010000-\\U0010ffff0-9]{2,})|[a-z\\u00a1-\\uffff\\U00010000-\\U0010ffff]{2,})))(?::\\d{2,5})?(?:/[-a-z\\u00a1-\\uffff\\U00010000-\\U0010ffff0-9._~%!$&'()*+,;=:@/]*)?(?:\\?\\S*)?(?:#\\S*)?$",
+    re.UNICODE | re.IGNORECASE,
+)
+URL_RE = re.compile(url_regex)
+
+
+def is_valid_url(value, public=False):
+    result = URL_RE.match(value)
+    if not public:
+        return result
+    return result and (not any((result.groupdict().get(key) for key in ("private_ip", "private_host"))))
+
+
+from dh import append_text
 
 DEFAULT_MAX_MB = 15
 EXCLUDE_DIRS = {".git", "__pycache__"}
-
-URL_RE = re.compile(r"(https?://[^\sr'\"<>\()]+)", flags=re.IGNORECASE)
-
-GIT_FILE = Path("/sdcard/data/urls/gitlinks.txt")
-REPO_FILE = Path("/sdcard/data/urls/repos.txt")
+URL_RE = re.compile("(https?://[^\\s\\'\\\"<>\\\\)\\\\(]+)", flags=re.IGNORECASE)
+GIT_FILE = Path("gitlinks.txt")
+REPO_FILE = Path("repos.txt")
 ARCHIVE_SUFFIXES = (
     ".tar.gz",
     ".tgz",
@@ -80,11 +142,6 @@ def scan_bytes_for_urls(b: bytes, max_bytes, exts, name_hint=None):
             return set()
     if len(b) > max_bytes:
         return set()
-
-    # Skip binary content
-    if b"\x00" in b[:1024]:  # Check first 1KB for null bytes
-        return set()
-
     text = decode_bytes_to_text(b)
     return find_urls_in_text(text)
 
@@ -208,11 +265,6 @@ def process_path(path: str, max_bytes: int, exts, found, recursion_limit=999) ->
         size = p.stat().st_size
     except Exception:
         return
-
-    # Skip binary files (but still process archives)
-    if not is_archive_name(path) and is_binary(p):
-        return
-
     if size > max_bytes and (not is_archive_name(path)):
         return
     lname = path.lower()
@@ -272,7 +324,7 @@ def is_github_url(url):
 
 def extract_git_repos(urls):
     repo_urls = []
-    github_regex = re.compile(r"https?://github\.com/([^/]+)/([^/]+?)(?:/|$|\.git|\?|#)")
+    github_regex = re.compile("https?://github\\.com/([^/]+)/([^/]+?)(?:/|$|\\.git|\\?|#)")
     for url in urls:
         matchz = github_regex.search(url)
         if matchz:
@@ -302,11 +354,11 @@ def extract_and_save_gitlinks(urllist) -> None:
 
 def iter_files(root: Path):
     root = root.resolve()
-    for cwd, dirnames, filenames in os.walk(str(root), topdown=True, followlinks=False):
+    for current_dir, dirnames, filenames in os.walk(str(root), topdown=True, followlinks=False):
         dirnames[:] = [d for d in dirnames if d not in EXCLUDE_DIRS]
-        if should_skip_dir(cwd):
+        if should_skip_dir(current_dir):
             continue
-        cd = Path(cwd)
+        cd = Path(current_dir)
         for fname in filenames:
             yield (cd / fname)
 
@@ -315,7 +367,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Find URLs in files and supported archives recursively and save them to a file."
     )
-    parser.add_argument("-o", "--output", default="/sdcard/data/urls/urls.txt", help="Output file (one URL per line).")
+    parser.add_argument("-o", "--output", default="urls.txt", help="Output file (one URL per line).")
     parser.add_argument(
         "-m",
         "--max-mb",
@@ -355,7 +407,6 @@ def main() -> None:
                         out.write(u + "\n")
         else:
             with out_path.open("w", encoding="utf-8") as out:
-                out.write("\n\n")
                 for u in sorted_urls:
                     if is_valid_url(u):
                         out.write(u + "\n")
