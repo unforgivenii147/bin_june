@@ -3,6 +3,7 @@
 Clone GitHub repositories using pure Python (dulwich).
 Skips repos >5MB and removes successfully cloned repos from repos.txt.
 """
+
 from __future__ import annotations
 import argparse
 import sys
@@ -12,8 +13,11 @@ import requests
 from dulwich import porcelain
 from dulwich.errors import NotGitRepository
 from dulwich.repo import Repo
+
 MAX_SIZE_MB = 5
 MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024
+
+
 def read_repos(file_path: Path) -> list[str]:
     """Read repository names from file."""
     if not file_path.exists():
@@ -25,10 +29,14 @@ def read_repos(file_path: Path) -> list[str]:
         print(f"Error: No repositories found in {file_path}")
         sys.exit(1)
     return repos
+
+
 def validate_repo_format(repo: str) -> bool:
     """Validate that repo is in user/repo format."""
     parts = repo.split("/")
     return len(parts) == 2 and all(parts)
+
+
 def check_repo_size(repo: str) -> tuple[bool, int]:
     """Check repository size using GitHub API. Returns (is_small_enough, size_bytes)."""
     api_url = f"https://api.github.com/repos/{repo}"
@@ -43,6 +51,8 @@ def check_repo_size(repo: str) -> tuple[bool, int]:
             return True, 0
     except Exception:
         return True, 0
+
+
 def format_size(size_bytes: int) -> str:
     """Format bytes to human readable size."""
     if size_bytes == 0:
@@ -52,6 +62,8 @@ def format_size(size_bytes: int) -> str:
         return f"{mb:.1f}MB"
     kb = size_bytes / 1024
     return f"{kb:.1f}KB"
+
+
 def clone_repo(repo: str, base_dir: Path) -> tuple[str, bool, str]:
     """
     Clone a single repository with --depth 1 using dulwich.
@@ -78,8 +90,11 @@ def clone_repo(repo: str, base_dir: Path) -> tuple[str, bool, str]:
     except Exception as e:
         if target_dir.exists():
             import shutil
+
             shutil.rmtree(target_dir, ignore_errors=True)
         return repo, False, f"Clone failed: {e!s}"
+
+
 def remove_from_repos_file(file_path: Path, repos_to_remove: set[str]):
     """Remove specified repos from the repos.txt file."""
     if not repos_to_remove:
@@ -89,6 +104,8 @@ def remove_from_repos_file(file_path: Path, repos_to_remove: set[str]):
     with open(file_path, "w") as f:
         f.write("\n".join(updated_repos) + "\n" if updated_repos else "")
     print(f"\nRemoved {len(repos_to_remove)} repos from {file_path}")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Clone GitHub repositories using pure Python (dulwich)")
     parser.add_argument(
@@ -164,5 +181,7 @@ def main():
     if not args.no_cleanup and successfully_cloned:
         remaining = len(read_repos(repos_file))
         print(f"  📝 Remaining in {repos_file}: {remaining}")
+
+
 if __name__ == "__main__":
     main()

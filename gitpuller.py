@@ -3,10 +3,14 @@
 Script to run git pull on all git repositories in current directory and subdirectories.
 Requires gitpython library: pip install gitpython
 """
+
 from __future__ import annotations
 from pathlib import Path
 from git import GitCommandError, Repo
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 def find_git_repos(root_path: Path) -> list[Path]:
     git_repos = []
     for item in root_path.iterdir():
@@ -17,6 +21,8 @@ def find_git_repos(root_path: Path) -> list[Path]:
         else:
             git_repos.extend(find_git_repos(item))
     return git_repos
+
+
 def git_pull_all() -> None:
     cwd = Path.cwd()
     print(f"🔍 Scanning for git repositories in: {cwd}")
@@ -73,6 +79,8 @@ def git_pull_all() -> None:
         print(f"\n❌ Failed ({len(failed_repos)} repos):")
         for repo_path, error in failed_repos:
             print(f"   - {repo_path.relative_to(cwd)}: {error}")
+
+
 if __name__ == "__main__":
     try:
         git_pull_all()

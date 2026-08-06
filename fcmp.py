@@ -4,6 +4,7 @@ import sys
 from filecmp import dircmp
 from pathlib import Path
 from pprint import pprint
+
 if __name__ == "__main__":
     dir1 = Path.cwd()
     dir2 = Path(sys.argv[1])

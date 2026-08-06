@@ -3,7 +3,10 @@ import concurrent.futures
 import os
 import stat
 from pathlib import Path
+
 TEXT_SUFFIXES = {".py", ".sh", ".bash", ".pl", ".rb", ".pyw", ".txt"}
+
+
 def check_and_make_executable(file_path: Path) -> dict:
     """
     Checks if a file is a text file containing a shebang,
@@ -28,6 +31,8 @@ def check_and_make_executable(file_path: Path) -> dict:
     except Exception as e:
         result["error"] = f"Failed to process: {e}"
     return result
+
+
 def main():
     current_dir = Path(".")
     print("🔍 Gathering directory contents recursively...")
@@ -63,5 +68,7 @@ def main():
     if os.name != "posix":
         print("\n⚠️ Note: You are running on a non-POSIX system (e.g. Windows).")
         print("   Shebang files were detected but executable bits cannot be applied here.")
+
+
 if __name__ == "__main__":
     main()

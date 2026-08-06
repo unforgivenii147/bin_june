@@ -6,13 +6,18 @@ import sys
 import time
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
+
 DIR_PERM = 0o755
 FILE_PERM = 0o664
 EXEC_PERM = 0o755
 SKIP_NAMES = {".git", "__pycache__", ".idea", "node_modules", ".venv", "venv"}
 EXECUTABLE_DIRS = {"bin", "sbin", ".bin", "libexec", "scripts", "tools"}
+
+
 def is_executable(mode: int) -> bool:
     return bool(mode & (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH))
+
+
 def is_binary(file_path: Path) -> bool:
     try:
         with file_path.open("rb") as f:
@@ -20,6 +25,8 @@ def is_binary(file_path: Path) -> bool:
         return b"\x00" in chunk
     except OSError:
         return False
+
+
 def has_shebang(file_path: Path) -> bool:
     try:
         with file_path.open("rb") as f:
@@ -27,21 +34,31 @@ def has_shebang(file_path: Path) -> bool:
         return first_line.startswith(b"#!")
     except OSError:
         return False
+
+
 def is_symlink(path: Path) -> bool:
     try:
         return path.is_symlink()
     except OSError:
         return False
+
+
 def should_skip_path(path: Path) -> bool:
     return any(part in SKIP_NAMES for part in path.parts)
+
+
 def is_in_executable_dir(path: Path) -> bool:
     return any(part in EXECUTABLE_DIRS for part in path.parts)
+
+
 def can_write(path: Path) -> bool:
     try:
         parent = path.parent
         return parent.exists() and os.access(str(parent), os.W_OK)
     except (OSError, PermissionError):
         return False
+
+
 def get_target_permission(path: Path, current_mode: int) -> tuple[int | None, str]:
     if is_symlink(path):
         return (None, "symbolic link")
@@ -54,6 +71,8 @@ def get_target_permission(path: Path, current_mode: int) -> tuple[int | None, st
     if is_in_executable_dir(path):
         return (EXEC_PERM, "file in executable directory")
     return (FILE_PERM, "regular file")
+
+
 def process_path(path: Path) -> dict:
     result = {
         "dirs_changed": 0,
@@ -111,6 +130,8 @@ def process_path(path: Path) -> dict:
         result["errors"] += 1
         result["messages"].append(f"[ERR]  {str(path)[:60]}: {type(e).__name__}: {e}")
     return result
+
+
 def collect_paths(cwd: str) -> list[Path]:
     root = Path(cwd).resolve()
     if not root.exists():
@@ -127,6 +148,8 @@ def collect_paths(cwd: str) -> list[Path]:
     except PermissionError as e:
         print(f"⚠️  Warning: Permission denied during traversal: {e}", file=sys.stderr)
     return paths
+
+
 def merge_results(all_results: list[dict]) -> dict:
     merged = {
         "dirs_changed": 0,
@@ -148,6 +171,8 @@ def merge_results(all_results: list[dict]) -> dict:
         merged["other_errors"] += result.get("other_errors", 0)
         merged["messages"].extend(result["messages"])
     return merged
+
+
 def print_summary(results: dict, total_items: int, elapsed_time: float) -> None:
     print("\n" + "=" * 80)
     print("📊 PERMISSION NORMALIZATION SUMMARY")
@@ -170,6 +195,8 @@ def print_summary(results: dict, total_items: int, elapsed_time: float) -> None:
         print("   - Running with appropriate privileges (sudo/root)")
         print("   - Changing ownership of files")
         print("   - Running chmod on problematic directories first")
+
+
 def print_details(results: dict, verbose: bool = False) -> None:
     if not verbose or not results["messages"]:
         return
@@ -196,6 +223,8 @@ def print_details(results: dict, verbose: bool = False) -> None:
             print(f"  {msg}")
         if len(err_msgs) > 20:
             print(f"  ... and {len(err_msgs) - 20} more")
+
+
 def normalize_permissions(cwd: str = ".", verbose: bool = False) -> None:
     start_time = time.time()
     print(f"🔍 Scanning: {Path(cwd).resolve()}")
@@ -229,8 +258,11 @@ def normalize_permissions(cwd: str = ".", verbose: bool = False) -> None:
     print_summary(final_results, total, elapsed)
     print_details(final_results, verbose=verbose)
     print("\n✅ Done!")
+
+
 def main():
     import argparse
+
     parser = argparse.ArgumentParser(
         description="Normalize file and directory permissions.",
         epilog="Example: python3 normalize_perms.py . -v",
@@ -252,5 +284,7 @@ def main():
     except Exception as e:
         print(f"\n❌ Fatal error: {e}", file=sys.stderr)
         sys.exit(1)
+
+
 if __name__ == "__main__":
     main()

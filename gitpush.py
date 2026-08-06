@@ -5,15 +5,22 @@ import shutil
 import subprocess
 from datetime import datetime
 from pathlib import Path
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 def run(cmd: str) -> bool | None:
     try:
         subprocess.check_call(cmd, shell=True)
         return True
     except subprocess.CalledProcessError:
         return False
+
+
 def in_git_repo() -> bool | None:
     return run("git rev-parse --is-inside-work-tree > /dev/null 2>&1")
+
+
 def ensure_gitignore() -> None:
     repo_gitignore = Path(".gitignore")
     global_gitignore = Path.home() / ".gitignore_global"
@@ -25,6 +32,8 @@ def ensure_gitignore() -> None:
         shutil.copy(global_gitignore, repo_gitignore)
     else:
         print("No local .gitignore and no ~/.gitignore_global found. Skipping.")
+
+
 def find_python_scripts_without_extension():
     py_files = []
     for root, _, files in os.walk("."):
@@ -40,6 +49,8 @@ def find_python_scripts_without_extension():
             except (OSError, UnicodeDecodeError):
                 continue
     return py_files
+
+
 def main() -> None:
     if not in_git_repo():
         print("Not inside a Git repository. Doing nothing.")
@@ -73,5 +84,7 @@ def main() -> None:
         print("git push failed.")
         return
     print("Done!")
+
+
 if __name__ == "__main__":
     main()

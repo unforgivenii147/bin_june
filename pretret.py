@@ -4,6 +4,8 @@ import sys
 from collections.abc import Callable
 from pathlib import Path
 from dh import mpf3, runcmd
+
+
 def process_file(path):
     path = Path(path)
     if not path.exists():
@@ -12,6 +14,8 @@ def process_file(path):
     if not ret:
         return (True, path)
     return (False, path)
+
+
 def main() -> None:
     cwd = str(Path.cwd())
     args = sys.argv[1:]
@@ -21,5 +25,7 @@ def main() -> None:
         else get_files(cwd, extensions=[".html", ".htm", ".js", ".jsx", ".ts", ".tsx", ".css", ".md", ".jsm", ".scss"])
     )
     mpf3(process_file, files)
+
+
 if __name__ == "__main__":
     sys.exit(main())

@@ -7,16 +7,21 @@ from pathlib import Path
 import tree_sitter_python as tsp
 from tree_sitter import Language, Parser
 from dh import _clean_fname, get_files, mpf3, unique_path
+
 OUTPUT_DIR = Path.home() / "tmp" / "output"
 parser = Parser()
 parser.language = Language(tsp.language())
 VALID = {"import_statement", "import_from_statement"}
+
+
 def process_file(path):
     path = Path(path)
     src = path.read_bytes()
     tree = parser.parse(src)
     root = tree.root_node
     return [src[node.start_byte : node.end_byte].decode() for node in root.children if node.type in VALID]
+
+
 def main() -> None:
     cwd = Path.cwd()
     outfile = OUTPUT_DIR / f"{cwd.name}_importz.py"
@@ -33,5 +38,7 @@ def main() -> None:
     all_imports = sorted(set(all_imports))
     outfile.write_text("\n".join(all_imports), encoding="utf-8")
     print("done.")
+
+
 if __name__ == "__main__":
     sys.exit(main())

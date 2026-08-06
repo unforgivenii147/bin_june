@@ -5,9 +5,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from tree_sitter import Node, Parser
 from tree_sitter_languages import get_language
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 OUTPUT_FILE = "utils.py"
 SKIP_FILES = {OUTPUT_FILE, Path(__file__).name}
+
+
 @dataclass(frozen=True)
 class Item:
     kind: str
@@ -15,17 +18,27 @@ class Item:
     source: str
     file_path: str
     hash: str
+
+
 def sha256_text(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
 def get_python_parser() -> Parser:
     parser = Parser()
     lang = get_language("python")
     parser.language = lang
     return parser
+
+
 def node_text(source_bytes: bytes, node: Node) -> str:
     return source_bytes[node.start_byte : node.end_byte].decode("utf-8", errors="replace")
+
+
 def is_const_name(name: str) -> bool:
     return name.isupper()
+
+
 def extract_items_from_file(path: Path, parser: Parser) -> list[Item]:
     try:
         source = path.read_text(encoding="utf-8")
@@ -112,6 +125,8 @@ def extract_items_from_file(path: Path, parser: Parser) -> list[Item]:
                 )
             )
     return items
+
+
 def write_utils_file(duplicates: dict[str, Item], output_path: Path) -> None:
     blocks = []
     seen_hashes = set()
@@ -127,6 +142,8 @@ def write_utils_file(duplicates: dict[str, Item], output_path: Path) -> None:
 # Contains duplicate constants / functions / classes found in the project.
 """ + "\n".join(blocks)
     output_path.write_text(content, encoding="utf-8")
+
+
 def main() -> None:
     parser = get_python_parser()
     all_items: dict[str, Item] = {}
@@ -148,5 +165,7 @@ def main() -> None:
         print(f"Wrote representative copies to: {output_path}")
     else:
         print("No duplicates found.")
+
+
 if __name__ == "__main__":
     main()

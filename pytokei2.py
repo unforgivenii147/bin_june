@@ -2,12 +2,16 @@
 from __future__ import annotations
 import re
 from pathlib import Path
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 try:
     from dh import is_binary
 except ImportError:
+
     def is_binary(path):
         return False
+
+
 def count_lines_of_code(file_path: Path, lang) -> tuple[int, int, int]:
     if ".git" in str(file_path):
         return (0, 0, 0)
@@ -26,6 +30,8 @@ def count_lines_of_code(file_path: Path, lang) -> tuple[int, int, int]:
             else:
                 code_lines += 1
     return (code_lines, comment_lines, blank_lines)
+
+
 def scan_directory(directory: str = "."):
     stats = {
         "total": {"code": 0, "comments": 0, "blank": 0},
@@ -58,9 +64,13 @@ def scan_directory(directory: str = "."):
                 stats["total"]["blank"] += blanks
                 break
     return stats
+
+
 def display_stats(stats) -> None:
     for lang_stats in stats["languages"].values():
         lang_stats["code"] > 0
+
+
 if __name__ == "__main__":
     stats = scan_directory()
     display_stats(stats)

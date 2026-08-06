@@ -4,8 +4,11 @@ import datetime
 import sys
 from os import scandir as _scandir
 from pathlib import Path
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 REVERSE = "-r" in sys.argv
+
+
 def fsz(sz: float) -> str:
     sz = abs(int(sz))
     units = ("", "K", "M", "G", "T")
@@ -14,6 +17,8 @@ def fsz(sz: float) -> str:
     i = min(int(int(sz).bit_length() - 1) // 10, len(units) - 1)
     sz /= 1024**i
     return f"{int(sz)} {units[i]}B"
+
+
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total_size = 0
@@ -36,6 +41,8 @@ def gsz(path: str | Path) -> int:
             except OSError:
                 continue
     return total_size
+
+
 if __name__ == "__main__":
     cwd = Path.cwd()
     dirz = []

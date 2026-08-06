@@ -3,7 +3,10 @@ from __future__ import annotations
 from pathlib import Path
 from rcssmin import cssmin
 from rjsmin import jsmin
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 def minify_assets_in_directory(cwd: Path | str = ".") -> None:
     root_dir = Path(cwd)
     if not root_dir.is_dir():
@@ -37,6 +40,8 @@ def minify_assets_in_directory(cwd: Path | str = ".") -> None:
     print(f"Errors: {errors_count}")
     print(f"Total processed: {minified_count + errors_count}")
     print(f"{'=' * 50}")
+
+
 def minify_assets_with_extensions(cwd: Path | str = ".", extensions: list[str] | None = None) -> None:
     if extensions is None:
         extensions = [".js", ".css"]
@@ -72,6 +77,8 @@ def minify_assets_with_extensions(cwd: Path | str = ".", extensions: list[str] |
     print(f"Files minified: {minified_count}")
     print(f"Errors: {errors_count}")
     print(f"{'=' * 50}")
+
+
 def minify_asset(file_path: Path, dry_run: bool = False, backup: bool = False) -> bool:
     if not file_path.is_file():
         print(f"File not found: {file_path}")
@@ -102,8 +109,11 @@ def minify_asset(file_path: Path, dry_run: bool = False, backup: bool = False) -
     except Exception as e:
         print(f"Error processing {file_path.name}: {e}")
         return False
+
+
 def minify_assets_parallel(cwd: Path | str = ".", max_workers: int = 4) -> None:
     from concurrent.futures import ThreadPoolExecutor, as_completed
+
     root_dir = Path(cwd)
     if not root_dir.is_dir():
         raise ValueError(f"Directory not found: {root_dir}")
@@ -117,6 +127,7 @@ def minify_assets_parallel(cwd: Path | str = ".", max_workers: int = 4) -> None:
     print(f"Processing {len(files_to_process)} files with {max_workers} workers...")
     minified_count = 0
     errors_count = 0
+
     def process_file(file_path: Path) -> tuple[Path, bool, str]:
         try:
             original_content = file_path.read_text(encoding="utf-8")
@@ -126,6 +137,7 @@ def minify_assets_parallel(cwd: Path | str = ".", max_workers: int = 4) -> None:
             return (file_path, True, "")
         except Exception as e:
             return (file_path, False, str(e))
+
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = {executor.submit(process_file, file_path): file_path for file_path in files_to_process}
         for future in as_completed(futures):
@@ -142,8 +154,11 @@ def minify_assets_parallel(cwd: Path | str = ".", max_workers: int = 4) -> None:
     print(f"Files minified: {minified_count}")
     print(f"Errors: {errors_count}")
     print(f"{'=' * 50}")
+
+
 if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser(
         description="Minify JavaScript and CSS files in a directory",
         formatter_class=argparse.RawDescriptionHelpFormatter,

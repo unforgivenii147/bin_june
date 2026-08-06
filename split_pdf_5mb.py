@@ -5,6 +5,8 @@ import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from pypdf import PdfReader, PdfWriter
+
+
 def split_pdf_by_size(pdf_path: Path, output_dir: Path, max_size_mb: int = 5) -> None:
     max_size_bytes = max_size_mb * 1024 * 1024
     reader = PdfReader(pdf_path)
@@ -38,6 +40,8 @@ def split_pdf_by_size(pdf_path: Path, output_dir: Path, max_size_mb: int = 5) ->
         current_writer.write(current_buffer)
         with open(output_path, "wb") as f:
             f.write(current_buffer.getvalue())
+
+
 def process_pdfs(input_paths=None, output_dir: Path | None = None) -> None:
     if output_dir is None:
         output_dir = Path.cwd() / "output"
@@ -59,6 +63,8 @@ def process_pdfs(input_paths=None, output_dir: Path | None = None) -> None:
         for pdf_file in pdf_files:
             executor.submit(split_pdf_by_size, pdf_file, output_dir)
     print(f"Processing complete. Output files in: {output_dir}")
+
+
 if __name__ == "__main__":
     args = sys.argv[1:] if len(sys.argv) > 1 else None
     process_pdfs(input_paths=args)

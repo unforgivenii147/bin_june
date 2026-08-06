@@ -5,11 +5,16 @@ import shutil
 import sys
 import tempfile
 from pathlib import Path
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 COMMENT_PREFIXES = "#", "//", "--"
+
+
 def is_comment(line: str) -> bool:
     stripped = line.lstrip()
     return any(stripped.startswith(prefix) for prefix in COMMENT_PREFIXES)
+
+
 def process_lines(lines: list[str], start_idx, end_idx, unique=False, sort_comments=False):
     target_slice = lines[start_idx:end_idx]
     if sort_comments:
@@ -55,6 +60,8 @@ def process_lines(lines: list[str], start_idx, end_idx, unique=False, sort_comme
             rebuilt.append(sortable_lines[sort_idx])
             sort_idx += 1
     return rebuilt, removed_lines
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Sort lines in a file within a given line range.")
     parser.add_argument("filename", help="Path to file")
@@ -99,5 +106,7 @@ def main() -> None:
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
+
+
 if __name__ == "__main__":
     main()

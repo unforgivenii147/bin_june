@@ -7,11 +7,14 @@ Usage:
     N: Number of parts to create
 Each created part will be a valid .tar.zst file that can be independently extracted.
 """
+
 import os
 import sys
 import tarfile
 from pathlib import Path
 import zstandard as zstd
+
+
 def split_tar_zst(input_file, num_parts):
     """
     Split a tar.zst file into N valid tar.zst files.
@@ -37,6 +40,7 @@ def split_tar_zst(input_file, num_parts):
         tar_data = dctx.stream_reader(f).read()
     # Extract all members from the tar
     import io
+
     tar_buffer = io.BytesIO(tar_data)
     tar = tarfile.open(fileobj=tar_buffer, mode="r|")
     members = []
@@ -95,6 +99,8 @@ def split_tar_zst(input_file, num_parts):
     with open(output_file, "wb") as f:
         f.write(cctx.compress(part_buffer.read()))
     print(f"\nSuccessfully split into {part_num} parts!")
+
+
 if __name__ == "__main__":
     if len(sys.argv) != 3:
         print("Usage: python split_tar_zst.py <input_file> <N>")

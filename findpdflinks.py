@@ -7,12 +7,17 @@ from urllib.parse import urljoin, urlparse
 from urllib.robotparser import RobotFileParser
 import requests
 from bs4 import BeautifulSoup
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 def can_fetch(rp: RobotFileParser, url):
     try:
         return rp.can_fetch("*", url)
     except Exception:
         return True
+
+
 def crawl_for_pdfs(start_url: str, max_pages: int = 100, delay: float = 1.0):
     parsed = urlparse(start_url)
     if not parsed.scheme:
@@ -73,10 +78,14 @@ def crawl_for_pdfs(start_url: str, max_pages: int = 100, delay: float = 1.0):
             print(f"  ⚠️  Unexpected error: {e}")
         time.sleep(delay)
     return sorted(pdf_urls)
+
+
 def save_urls(urls, filename="urls.txt") -> None:
     with open(filename, "w", encoding="utf-8") as f:
         f.writelines(url + "\n" for url in urls)
     print(f"\n✅ Saved {len(urls)} PDF URLs to '{filename}'")
+
+
 def main() -> None:
     if len(sys.argv) < 2:
         print(__doc__)
@@ -91,5 +100,7 @@ def main() -> None:
     print(f"   Max pages: {max_pages}, Delay: {delay}s\n")
     pdf_urls = crawl_for_pdfs(start_url, max_pages, delay)
     save_urls(pdf_urls)
+
+
 if __name__ == "__main__":
     main()

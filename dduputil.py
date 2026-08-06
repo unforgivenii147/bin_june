@@ -4,6 +4,7 @@ Usage:
   python dedup_utils.py --copy
   python dedup_utils.py --move
   python dedup_utils.py --help"""
+
 from __future__ import annotations
 import argparse
 import ast
@@ -16,6 +17,7 @@ from dataclasses import dataclass
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 from loguru import logger
+
 try:
     import bz2
     import gzip
@@ -50,12 +52,16 @@ UTILS_DIR = Path("utils")
 FUNC_FILE = UTILS_DIR / "funcs.py"
 CLASS_FILE = UTILS_DIR / "classes.py"
 CONST_FILE = UTILS_DIR / "const.py"
+
+
 @dataclass
 class SourceFile:
     path: Path
     relpath: Path
     text: str
     origin: str
+
+
 @dataclass
 class Extracted:
     kind: str
@@ -64,17 +70,26 @@ class Extracted:
     src_text: str
     file: SourceFile
     imports: list[ast.stmt]
+
+
 def sha256_text(s: str) -> str:
     return hashlib.sha256(s.encode("utf-8")).hexdigest()
+
+
 def node_to_code(node: ast.AST) -> str:
     return ast.unparse(node) + "\n"
+
+
 def is_constant_assign(node: ast.Assign) -> bool:
     if not isinstance(node, ast.Assign):
         return False
+
     def target_ok(t: Name | tuple) -> bool:
         return isinstance(t, ast.Name)
+
     if any(not target_ok(t) for t in node.targets if isinstance(t, (ast.Name, ast.Tuple))):
         return False
+
     def lit_ok(n: expr | None) -> bool:
         if isinstance(n, ast.Constant):
             return True
@@ -83,11 +98,18 @@ def is_constant_assign(node: ast.Assign) -> bool:
         if isinstance(n, ast.Dict):
             return all(lit_ok(k) and lit_ok(v) for k, v in zip(n.keys, n.values, strict=False))
         return False
+
     return lit_ok(node.value)
+
+
 def extract_top_level_imports(tree: ast.Module) -> list[ast.stmt]:
     return [n for n in tree.body if isinstance(n, (ast.Import, ast.ImportFrom))]
+
+
 def read_file_bytes(path: Path) -> bytes:
     return path.read_bytes()
+
+
 def try_decompress_single(data: bytes, ext: str) -> tuple[bytes, str] | None:
     try:
         if ext == ".gz":
@@ -108,6 +130,8 @@ def try_decompress_single(data: bytes, ext: str) -> tuple[bytes, str] | None:
     except Exception as e:
         logger.debug("decompression failed for ext {}: {}", ext, e)
     return None
+
+
 def iter_python_sources(root: Path) -> Iterable[SourceFile]:
     root = root.resolve()
     for p in root.rglob("*"):
@@ -183,6 +207,8 @@ def iter_python_sources(root: Path) -> Iterable[SourceFile]:
                     break
         except Exception as exc:
             logger.exception("error iterating {}: {}", p, exc)
+
+
 def extract_defs_from_source(srcfile: tuple[str, str, str, str]) -> tuple[str, list[dict]]:
     path_str, _relpath_str, text, origin = srcfile
     results = []
@@ -228,12 +254,18 @@ def extract_defs_from_source(srcfile: tuple[str, str, str, str]) -> tuple[str, l
         except Exception as exc:
             logger.exception("error extracting node in {}: {}", origin, exc)
     return path_str, results
+
+
 def partition_by_hash(
     extracted_map: dict[str, list[tuple[SourceFile, dict]]],
 ) -> dict[str, list[tuple[SourceFile, dict]]]:
     return extracted_map
+
+
 def ensure_utils_dir() -> None:
     UTILS_DIR.mkdir(exist_ok=True)
+
+
 def append_unique_to_file(target: Path, items: list[dict], seen_hashes: set) -> None:
     if not items:
         return
@@ -251,8 +283,12 @@ def append_unique_to_file(target: Path, items: list[dict], seen_hashes: set) -> 
         return
     new_text = base.rstrip() + "\n\n" + "\n".join(lines) + "\n"
     target.write_text(new_text, encoding="utf-8")
+
+
 def safe_write_file(path: Path, content: str) -> None:
     path.write_text(content, encoding="utf-8")
+
+
 def remove_nodes_from_source(original_src: str, nodes_to_remove: list[str]) -> str:
     out = original_src
     for snippet in nodes_to_remove:
@@ -282,6 +318,8 @@ def remove_nodes_from_source(original_src: str, nodes_to_remove: list[str]) -> s
             else:
                 logger.debug("could not find snippet to remove: {}", first_line[:60])
     return out
+
+
 def add_imports_to_source(original_src: str, import_lines: list[str]) -> str:
     try:
         tree = ast.parse(original_src)
@@ -302,6 +340,8 @@ def add_imports_to_source(original_src: str, import_lines: list[str]) -> str:
     lines = original_src.splitlines()
     new_lines = lines[:insert_at] + import_lines + [""] + lines[insert_at:]
     return "\n".join(new_lines) + "\n"
+
+
 def validate_python_source(text: str) -> bool:
     try:
         ast.parse(text)
@@ -309,6 +349,8 @@ def validate_python_source(text: str) -> bool:
     except SyntaxError as e:
         logger.error("validation failed: {}:{}", e.lineno, e.msg)
         return False
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Deduplicate top-level funcs/classes/constants into utils/*")
     group = parser.add_mutually_exclusive_group(required=True)
@@ -438,5 +480,7 @@ def main() -> None:
             except Exception as exc:
                 logger.exception("failed to modify {}: {}", src_path, exc)
     logger.info("done")
+
+
 if __name__ == "__main__":
     main()

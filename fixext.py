@@ -6,6 +6,7 @@ import argparse
 from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor
 from typing import NamedTuple, Optional
+
 # =============================================================================
 # MIME TYPE DATABASE
 # =============================================================================
@@ -108,12 +109,16 @@ MIME_MAP = {
 SKIP_DIRS = frozenset({".git", "__pycache__"})
 # Extensions to skip due to high false-positive rates in MIME detection
 SKIP_EXTS = frozenset({".css", ".js"})
+
+
 class Mismatch(NamedTuple):
     path: Path
     current_ext: str
     detected_mime: str
     expected_ext: str
     new_path: Path
+
+
 # =============================================================================
 # TERMINAL COLOR SYSTEM
 # =============================================================================
@@ -138,18 +143,26 @@ class Colors:
     BG_RED = "\033[41m"
     BG_GREEN = "\033[42m"
     BG_BLUE = "\033[44m"
+
+
 def can_colorize() -> bool:
     if "NO_COLOR" in os.environ or "ANSI_COLORS_DISABLED" in os.environ:
         return False
     if "FORCE_COLOR" in os.environ:
         return True
     return sys.stdout.isatty()
+
+
 def colored(text: str, color: str = "", on_color: str = "", attrs: str = "") -> str:
     if not can_colorize():
         return text
     return f"{attrs}{on_color}{color}{text}{Colors.RESET}"
+
+
 def cprint(text: str, color: str = "", on_color: str = "", attrs: str = "") -> None:
     print(colored(text, color, on_color, attrs))
+
+
 # =============================================================================
 # CORE UTILITIES
 # =============================================================================
@@ -163,6 +176,8 @@ def runcmd(cmd: list[str], silent: bool = True, timeout: int = 5) -> tuple[int, 
         return -1, "", "Command 'file' not found. Please install it."
     except Exception as e:
         return -1, "", str(e)
+
+
 def is_binary(path: Path) -> bool:
     """Heuristic binary detection based on null bytes and non-text ratios."""
     try:
@@ -176,6 +191,8 @@ def is_binary(path: Path) -> bool:
             return (text_chars / len(chunk)) < 0.7
     except Exception:
         return True
+
+
 def unique_path(path: Path) -> Path:
     """Generates a unique path by appending _1, _2 etc to the stem."""
     if not path.exists():
@@ -191,9 +208,13 @@ def unique_path(path: Path) -> Path:
         if not candidate.exists():
             return candidate
         counter += 1
+
+
 def get_file_mime(path: Path) -> str:
     code, stdout, _ = runcmd(["file", "--brief", "--mime-type", str(path)])
     return stdout if code == 0 else "unknown/unknown"
+
+
 def analyze_file(path: Path) -> Optional[Mismatch]:
     """
     The worker function for parallel processing.
@@ -246,6 +267,8 @@ def analyze_file(path: Path) -> Optional[Mismatch]:
     except Exception:
         return None
     return None
+
+
 # =============================================================================
 # MAIN ENGINE
 # =============================================================================
@@ -303,6 +326,8 @@ def main():
     cprint(f"Successfully Fixed: {fixed_count}", Colors.GREEN, attrs=Colors.BOLD)
     cprint(f"Remaining: {len(mismatches) - fixed_count}", Colors.YELLOW)
     cprint("=" * 40, Colors.WHITE)
+
+
 if __name__ == "__main__":
     try:
         main()

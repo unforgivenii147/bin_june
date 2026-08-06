@@ -4,8 +4,11 @@ import sys
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
+
 CHUNK_SIZE = 1024 * 1024
 from dh import get_files, mpf3
+
+
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -20,16 +23,24 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
+
+
 cwd = Path.cwd()
 bin_dir = Path(f"{cwd}/binary")
 bin_dir.mkdir(exist_ok=True)
+
+
 def process_file(path) -> None:
     path = Path(path)
     if is_binary(path):
         newpath = bin_dir / path.name
         path.rename(newpath)
+
+
 def main() -> None:
     files = get_files(cwd)
     mpf3(process_file, files)
+
+
 if __name__ == "__main__":
     sys.exit(main())

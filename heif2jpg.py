@@ -4,6 +4,8 @@ import sys
 from pathlib import Path
 import pillow_heif as ph
 from fastwalk import walk_files
+
+
 def process_file(path) -> bool:
     path = Path(path)
     if not path.exists():
@@ -13,6 +15,8 @@ def process_file(path) -> bool:
     outfile = path.with_suffix(".jpg")
     img.save(outfile)
     return True
+
+
 def main() -> None:
     cwd = Path().cwd()
     start_size = gsz(cwd)
@@ -27,8 +31,12 @@ def main() -> None:
     pool.join()
     after = gsz(cwd)
     print(f"{fornat_size(after - start_size)}")
+
+
 if __name__ == "__main__":
     sys.exit(main())
+
+
 def gsz(path):
     try:
         return Path(path).stat().st_size

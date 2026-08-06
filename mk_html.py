@@ -9,11 +9,14 @@ import subprocess
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+
 RST2HTML_OPTIONS = " ".join(["--no-toc-backlinks", "--strip-comments", "--language en", "--date"])
 VALID_EXTENSIONS = {".rst", ".txt", ".md"}
 MD_LINK_PATTERN = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
 MD_HEADING_PATTERN = re.compile(r"^(#{1,6})\s+(.+)$", re.MULTILINE)
 MD_CODE_BLOCK_PATTERN = re.compile(r"```(\w+)?\n(.*?)```", re.DOTALL)
+
+
 def find_rst2html_script():
     """Find the rest2html.py script in common locations."""
     possible_paths = [
@@ -25,8 +28,11 @@ def find_rst2html_script():
         if path.exists():
             return path
     return None
+
+
 def convert_md_to_rst(content: str) -> str:
     """Convert Markdown content to reStructuredText."""
+
     def replace_heading(match):
         level = len(match.group(1))
         text = match.group(2).strip()
@@ -37,8 +43,10 @@ def convert_md_to_rst(content: str) -> str:
         else:
             char = "~^+"[min(level - 3, 2)]
             return f"{text}\n{char * len(text)}"
+
     content = MD_HEADING_PATTERN.sub(replace_heading, content)
     content = MD_LINK_PATTERN.sub(r"`\1 <\2>`_", content)
+
     def replace_code_block(match):
         language = match.group(1)
         code = match.group(2).strip()
@@ -46,6 +54,7 @@ def convert_md_to_rst(content: str) -> str:
             return f".. code-block:: {language}\n\n    {chr(10).join('    ' + line for line in code.split(chr(10)))}\n"
         else:
             return f"::\n\n    {chr(10).join('    ' + line for line in code.split(chr(10)))}\n"
+
     content = MD_CODE_BLOCK_PATTERN.sub(replace_code_block, content)
     content = re.sub(r"\*\*(.+?)\*\*", r"**\1**", content)
     content = re.sub(r"\*(.+?)\*", r"*\1*", content)
@@ -53,6 +62,8 @@ def convert_md_to_rst(content: str) -> str:
     content = re.sub(r"^---$", "-------", content, flags=re.MULTILINE)
     content = re.sub(r"^\* ", r"- ", content, flags=re.MULTILINE)
     return content
+
+
 def convert_file_to_html(file_path: Path, stylesheet_url: str | None = None) -> Path:
     """Convert a single file to HTML using appropriate converter."""
     try:
@@ -98,6 +109,8 @@ def convert_file_to_html(file_path: Path, stylesheet_url: str | None = None) -> 
     except Exception as e:
         print(f"Error converting {file_path}: {e}", file=sys.stderr)
         return None
+
+
 def generate_stylesheet_hash(stylesheet_path: Path) -> str:
     """Generate a unique stylesheet filename based on its content."""
     if not stylesheet_path or not stylesheet_path.exists():
@@ -106,10 +119,14 @@ def generate_stylesheet_hash(stylesheet_path: Path) -> str:
         css = f.read()
     checksum = hashlib.sha256(css).hexdigest()[:32]
     return f"style_{checksum}.css"
+
+
 def process_file(file_path: Path, stylesheet_url: str | None = None) -> tuple:
     """Process a single file and return (original_path, html_path)."""
     html_path = convert_file_to_html(file_path, stylesheet_url)
     return (file_path, html_path)
+
+
 def find_all_source_files(root_dir: Path | None = None) -> list:
     """Find all source files recursively in the directory."""
     if root_dir is None:
@@ -118,6 +135,8 @@ def find_all_source_files(root_dir: Path | None = None) -> list:
     for ext in VALID_EXTENSIONS:
         source_files.extend(root_dir.rglob(f"*{ext}"))
     return source_files
+
+
 def publish_parallel(root_dir: Path | None = None, max_workers: int | None = None):
     """Convert all source files to HTML in parallel."""
     if root_dir is None:
@@ -156,6 +175,8 @@ def publish_parallel(root_dir: Path | None = None, max_workers: int | None = Non
                 errors += 1
                 print(f"Error processing {file_path.relative_to(root_dir)}: {e}", file=sys.stderr)
     print(f"\nConversion complete: {converted} converted, {errors} errors")
+
+
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(description="Convert all .rst, .txt, and .md files to HTML recursively")
@@ -172,5 +193,7 @@ def main():
         print(f"Error: Directory '{root_dir}' does not exist", file=sys.stderr)
         sys.exit(1)
     publish_parallel(root_dir, args.workers)
+
+
 if __name__ == "__main__":
     main()

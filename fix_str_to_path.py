@@ -2,7 +2,10 @@
 from __future__ import annotations
 import os
 import re
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 def add_path_statement(file_path: str) -> bool:
     with open(file_path, encoding="utf-8") as file:
         lines = file.readlines()
@@ -44,6 +47,8 @@ def add_path_statement(file_path: str) -> bool:
     else:
         print(f"Skipping {file_path}: No process_file function found or already has the line")
         return False
+
+
 def add_path_statement_simple(file_path: str) -> bool:
     with open(file_path, encoding="utf-8") as file:
         content = file.read()
@@ -53,17 +58,21 @@ def add_path_statement_simple(file_path: str) -> bool:
     pattern = (
         "(def process_file\\([^:]*:)\\s*\\n\\s*(?:\"\"\"[\\s\\S]*?\"\"\"|\\'\\'\\'[\\s\\S]*?\\'\\'\\')\\s*\\n?\\s*"
     )
+
     def replacement(match):
         full_match = match.group(0)
         func_line = match.group(1)
         indent = re.match(r"^(\s*)", func_line).group(1) + "    "
         return f"{func_line}\n{indent}path = Path(path)\n" + full_match[len(func_line) :]
+
     new_content = re.sub(pattern, replacement, content, count=1)
     if new_content == content:
         pattern = "(def process_file\\([^:]*:)\\s*\\n\\s*"
+
         def replacement2(match) -> str:
             indent = re.match(r"^(\s*)", match.group(1)).group(1) + "    "
             return f"{match.group(1)}\n{indent}path = Path(path)\n"
+
         new_content = re.sub(pattern, replacement2, content, count=1)
     if new_content != content:
         with open(file_path, "w", encoding="utf-8") as file:
@@ -71,6 +80,8 @@ def add_path_statement_simple(file_path: str) -> bool:
         print(f"Added 'path = Path(path)' to {file_path}")
         return True
     return False
+
+
 def process_directory() -> None:
     cwd = os.getcwd()
     python_files = [f for f in os.listdir(cwd) if f.endswith(".py") and os.path.isfile(f)]
@@ -88,5 +99,7 @@ def process_directory() -> None:
             modified_count += 1
     print("-" * 50)
     print(f"Modified {modified_count} file(s)")
+
+
 if __name__ == "__main__":
     process_directory()

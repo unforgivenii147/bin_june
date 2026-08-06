@@ -3,11 +3,14 @@
 QR Code Extractor using zbar (Lightweight)
 Install: pip install pyzbar pillow
 """
+
 from __future__ import annotations
 import os
 import sys
 import pyzbar.pyzbar as pyzbar
 from PIL import Image
+
+
 def extract_qr_data_zbar(image_path):
     try:
         with Image.open(image_path) as img:
@@ -22,6 +25,8 @@ def extract_qr_data_zbar(image_path):
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         return []
+
+
 def main():
     if len(sys.argv) != 2:
         print("Usage: python qr_extractor.py <path_to_qrcode_image>")
@@ -39,5 +44,7 @@ def main():
         print("-" * 50)
     else:
         print("No QR codes found in the image.")
+
+
 if __name__ == "__main__":
     main()

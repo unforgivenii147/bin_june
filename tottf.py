@@ -4,6 +4,8 @@ import sys
 from collections import deque
 from pathlib import Path
 from dh import get_files, runcmd
+
+
 def process_file(path: Path) -> bool:
     path = Path(path)
     try:
@@ -18,6 +20,8 @@ def process_file(path: Path) -> bool:
     except:
         print(f"error processing {path.name}")
         return False
+
+
 def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -33,5 +37,7 @@ def main() -> None:
     for f in files:
         if f.suffix != ".ttf":
             process_file(f)
+
+
 if __name__ == "__main__":
     sys.exit(main())

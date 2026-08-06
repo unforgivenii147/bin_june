@@ -5,6 +5,8 @@ from collections import deque
 from collections.abc import Callable
 from pathlib import Path
 from dh import get_files, mpf3, runcmd
+
+
 def process_file(path: str | Path) -> tuple[bool, Path]:
     path = Path(path)
     if not path.exists() or not path.stat().st_size:
@@ -13,6 +15,8 @@ def process_file(path: str | Path) -> tuple[bool, Path]:
     if not ret:
         return (True, path)
     return (False, path)
+
+
 def main() -> None:
     cwd = str(Path.cwd())
     args = sys.argv[1:]
@@ -27,5 +31,7 @@ def main() -> None:
         process_file(files[0])
         sys.exit(1)
     mpf3(process_file, files)
+
+
 if __name__ == "__main__":
     sys.exit(main())

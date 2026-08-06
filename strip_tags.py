@@ -4,6 +4,7 @@ import re
 import sys
 from pathlib import Path
 from dh import get_removed_lines, read_lines, read_lines_mmap
+
 INPLACE = "-w" in sys.argv
 if __name__ == "__main__":
     fn = Path(sys.argv[1])

@@ -5,6 +5,7 @@ import contextlib
 import sys
 from html.parser import HTMLParser
 from pathlib import Path
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 VOID_ELEMENTS = frozenset(
     {
@@ -24,6 +25,8 @@ VOID_ELEMENTS = frozenset(
         "wbr",
     }
 )
+
+
 class TagBalanceChecker(HTMLParser):
     def __init__(self) -> None:
         super().__init__()
@@ -31,12 +34,15 @@ class TagBalanceChecker(HTMLParser):
         self.errors = []
         self.raw_source = ""
         self.fix_needed = False
+
     def set_source(self, source: str) -> None:
         self.raw_source = source
+
     def handle_starttag(self, tag, attrs) -> None:
         if tag.lower() in VOID_ELEMENTS:
             return
         self.stack.append((tag.lower(), self.getpos()))
+
     def handle_endtag(self, tag) -> None:
         tag = tag.lower()
         if not self.stack or self.stack[-1][0] != tag:
@@ -54,8 +60,11 @@ class TagBalanceChecker(HTMLParser):
                 self.fix_needed = True
         else:
             self.stack.pop()
+
     def handle_startendtag(self, tag, attrs) -> None:
         pass
+
+
 def check_html_file(path: Path) -> tuple[bool, list[str]]:
     try:
         source = path.read_text(encoding="utf-8", errors="replace")
@@ -72,6 +81,8 @@ def check_html_file(path: Path) -> tuple[bool, list[str]]:
     issues = missing_closings + unexpected_closings
     is_balanced = len(issues) == 0
     return is_balanced, issues
+
+
 def fix_html_file(path: Path) -> bool:
     try:
         source = path.read_text(encoding="utf-8", errors="replace")
@@ -87,12 +98,14 @@ def fix_html_file(path: Path) -> bool:
         return False
     for _, tag, pos in parser.errors:
         line, col = pos
+
     class TagScanner(HTMLParser):
         def __init__(self, source) -> None:
             super().__init__()
             self.source = source
             self.chars = list(source)
             self.tokens = []
+
         def get_char_pos(self, line, col):
             lines = self.source.splitlines(keepends=True)
             idx = 0
@@ -100,6 +113,7 @@ def fix_html_file(path: Path) -> bool:
                 if i < len(lines):
                     idx += len(lines[i])
             return idx + col
+
         def handle_starttag(self, tag, attrs) -> None:
             if tag.lower() not in VOID_ELEMENTS:
                 pos = self.getpos()
@@ -109,23 +123,27 @@ def fix_html_file(path: Path) -> bool:
                     self.tokens.append(("start", tag, start, end + 1))
                 else:
                     self.tokens.append(("start", tag, start, start + len(f"<{tag}")))
+
         def handle_endtag(self, tag) -> None:
             pos = self.getpos()
             tag_str = f"</{tag}>"
             start = self.source.find(tag_str, self.get_char_pos(*pos))
             if start == -1:
                 import re
+
                 m = re.search(f"</\\s*{tag}\\s*>", self.source, re.IGNORECASE)
                 if m:
                     start = m.start()
             if start != -1:
                 self.tokens.append(("end", tag, start, start + len(tag_str)))
+
         def handle_startendtag(self, tag, attrs) -> None:
             pos = self.getpos()
             start = self.get_char_pos(*pos)
             end = self.source.find(">", start)
             if end != -1:
                 self.tokens.append(("startend", tag, start, end + 1))
+
     scanner = TagScanner(source)
     with contextlib.suppress(Exception):
         scanner.feed(source)
@@ -177,6 +195,8 @@ def fix_html_file(path: Path) -> bool:
     except Exception as e:
         print(f"❌ Cannot write '{path}': {e}", file=sys.stderr)
         return False
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Check and optionally fix HTML tag balance in files recursively.",
@@ -217,5 +237,7 @@ def main() -> None:
     print(f"Summary: {len(html_files) - problem_count} OK, {problem_count} with issues")
     if args.autofix:
         print(f"   → Fixed {fixed_count} file(s) in-place.")
+
+
 if __name__ == "__main__":
     main()

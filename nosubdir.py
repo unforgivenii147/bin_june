@@ -4,7 +4,10 @@ import argparse
 import pathlib
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from functools import partial
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 def check_directory(dir_path, max_size_kb=None):
     try:
         contents = list(dir_path.iterdir())
@@ -24,6 +27,8 @@ def check_directory(dir_path, max_size_kb=None):
         return dir_path.name
     except (PermissionError, OSError):
         return None
+
+
 def main():
     parser = argparse.ArgumentParser(description="Find top-level directories without subdirs that contain .py files")
     parser.add_argument(
@@ -52,5 +57,7 @@ def main():
     else:
         size_info = f" under {args.size}KB" if args.size else ""
         print(f"No matching directories found{size_info}.")
+
+
 if __name__ == "__main__":
     main()

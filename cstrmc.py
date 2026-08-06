@@ -7,12 +7,17 @@ from pathlib import Path
 import libcst as cst
 from libcst import EmptyLine, Pass, SimpleStatementLine
 from libcst.metadata import MetadataWrapper, PositionProvider
+
 ROOT = Path(".").resolve()
+
+
 class StripTransformer(cst.CSTTransformer):
     METADATA_DEPENDENCIES = (PositionProvider,)
+
     def __init__(self) -> None:
         self.comments_removed = 0
         self.docstrings_removed = 0
+
     @staticmethod
     def _is_docstring_statement(stmt: cst.BaseStatement) -> bool:
         if not isinstance(stmt, cst.SimpleStatementLine):
@@ -23,10 +28,12 @@ class StripTransformer(cst.CSTTransformer):
         if not isinstance(expr, cst.Expr):
             return False
         return isinstance(expr.value, cst.SimpleString)
+
     @staticmethod
     def _is_preserved_comment(value: str) -> bool:
         stripped = value.lstrip()
         return stripped.startswith(("#!", "# fmt", "# type"))
+
     def leave_Comment(
         self,
         original_node: cst.Comment,
@@ -36,6 +43,7 @@ class StripTransformer(cst.CSTTransformer):
             return updated_node
         self.comments_removed += 1
         return cst.RemoveFromParent()
+
     def leave_EmptyLine(
         self,
         original_node: EmptyLine,
@@ -48,6 +56,7 @@ class StripTransformer(cst.CSTTransformer):
             return updated_node
         self.comments_removed += 1
         return updated_node.with_changes(comment=None)
+
     def leave_Module(
         self,
         original_node: cst.Module,
@@ -62,6 +71,7 @@ class StripTransformer(cst.CSTTransformer):
             else:
                 new_body.append(stmt)
         return updated_node.with_changes(body=new_body)
+
     def _strip_suite(
         self,
         body: tuple[cst.BaseStatement, ...],
@@ -73,6 +83,7 @@ class StripTransformer(cst.CSTTransformer):
         if not statements:
             statements = [SimpleStatementLine(body=[Pass()])]
         return tuple(statements)
+
     def leave_FunctionDef(
         self,
         original_node: cst.FunctionDef,
@@ -86,6 +97,7 @@ class StripTransformer(cst.CSTTransformer):
                 )
             )
         return updated_node
+
     def leave_ClassDef(
         self,
         original_node: cst.ClassDef,
@@ -95,6 +107,8 @@ class StripTransformer(cst.CSTTransformer):
         if isinstance(body, cst.IndentedBlock):
             return updated_node.with_changes(body=body.with_changes(body=self._strip_suite(body.body)))
         return updated_node
+
+
 def process_file(path: Path) -> None:
     path = path.resolve()
     source = path.read_text(encoding="utf-8")
@@ -120,10 +134,14 @@ def process_file(path: Path) -> None:
         path.write_text(code, encoding="utf-8")
     rel = os.path.relpath(path, ROOT)
     print(f"{rel}: comments={transformer.comments_removed}, docstrings={transformer.docstrings_removed}")
+
+
 def main() -> None:
     paths = sorted(ROOT.rglob("*.py"))
     workers = os.cpu_count() or 1
     with ProcessPoolExecutor(max_workers=workers) as executor:
         list(executor.map(process_file, paths))
+
+
 if __name__ == "__main__":
     main()

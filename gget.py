@@ -11,11 +11,14 @@ from urllib.parse import unquote
 import requests
 from rich.console import Console
 from rich.progress import BarColumn, DownloadColumn, Progress, TextColumn, TimeRemainingColumn, TransferSpeedColumn
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 console = Console()
 CHUNK_SIZE = 1024 * 1024 * 5
 MAX_WORKERS = 4
 STATE_SUFFIX = ".progress"
+
+
 class Downloader:
     def __init__(self, url, output_path=None, expected_hash=None) -> None:
         self.url = url
@@ -26,6 +29,7 @@ class Downloader:
         self.state_file = None
         self.progress_data = {"downloaded_chunks": [], "total_chunks": 0}
         self.lock = threading.Lock()
+
     def _get_info(self) -> None:
         resp = requests.head(self.url, allow_redirects=True, timeout=10)
         resp.raise_for_status()
@@ -37,6 +41,7 @@ class Downloader:
             else:
                 self.filename = unquote(self.url.split("/")[-1]) or "downloaded_file"
         self.state_file = Path(f"{self.filename}{STATE_SUFFIX}")
+
     def _verify_integrity(self) -> None:
         sha256_hash = hashlib.sha256()
         console.print("\n[bold cyan]Verifying file integrity...[/]")
@@ -54,6 +59,7 @@ class Downloader:
         else:
             console.print(f"[bold yellow]SHA-256 Checksum:[/] {calculated_hash}")
             console.print("[italic]Provide this hash next time to verify automatically.[/]")
+
     def _load_state(self) -> None:
         if self.state_file.exists():
             try:
@@ -61,9 +67,11 @@ class Downloader:
                     self.progress_data = json.load(f)
             except Exception:
                 pass
+
     def _save_state(self) -> None:
         with self.lock, Path(self.state_file).open("w", encoding="utf-8") as f:
             json.dump(self.progress_data, f)
+
     def _download_chunk(self, chunk_id, start, end, progress, task_id) -> None:
         if self.stop_event.is_set():
             return
@@ -83,6 +91,7 @@ class Downloader:
             self._save_state()
         except Exception:
             pass
+
     def start(self) -> None:
         self._get_info()
         self._load_state()
@@ -130,6 +139,8 @@ class Downloader:
         else:
             console.print("\n[bold yellow]Download Paused. Run again to resume.[/]")
             sys.exit(0)
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         console.print("[bold red]Usage:[/] python downloader.py <URL> [output_name] [expected_sha256]")

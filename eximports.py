@@ -7,10 +7,15 @@ from os import scandir as os_scandir
 from pathlib import Path
 import tree_sitter_python as tsp
 from tree_sitter import Language, Parser
+from dh import cprint
+
 CHUNK_SIZE = 1024 * 1024
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
+
     path = Path(path)
     if is_binary(path):
         return False
@@ -30,6 +35,8 @@ def is_python_file(path: str | Path) -> bool:
         except:
             return False
     return False
+
+
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -44,6 +51,8 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
+
+
 def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
     if path.is_file():
@@ -75,101 +84,12 @@ def get_pyfiles(path: str | Path) -> list[Path]:
         except (PermissionError, OSError):
             continue
     return sorted(pyfiles)
-ATTRIBUTES = {
-    "bold": 1,
-    "dark": 2,
-    "italic": 3,
-    "underline": 4,
-    "blink": 5,
-    "reverse": 7,
-    "concealed": 8,
-    "strike": 9,
-}
-HIGHLIGHTS = {
-    "on_black": 40,
-    "on_grey": 40,
-    "on_red": 41,
-    "on_green": 42,
-    "on_yellow": 43,
-    "on_blue": 44,
-    "on_magenta": 45,
-    "on_cyan": 46,
-    "on_light_grey": 47,
-    "on_dark_grey": 100,
-    "on_light_red": 101,
-    "on_light_green": 102,
-    "on_light_yellow": 103,
-    "on_light_blue": 104,
-    "on_light_magenta": 105,
-    "on_light_cyan": 106,
-    "on_white": 107,
-}
-COLORS = {
-    "black": 30,
-    "grey": 30,
-    "red": 31,
-    "green": 32,
-    "yellow": 33,
-    "blue": 34,
-    "magenta": 35,
-    "cyan": 36,
-    "light_grey": 37,
-    "dark_grey": 90,
-    "light_red": 91,
-    "light_green": 92,
-    "light_yellow": 93,
-    "light_blue": 94,
-    "light_magenta": 95,
-    "light_cyan": 96,
-    "white": 97,
-}
-RESET = "\x1b[0m"
-def can_colorize(*, no_color=None, force_color=None):
-    if no_color is not None and no_color:
-        return False
-    if force_color is not None and force_color:
-        return True
-    if os.environ.get("ANSI_COLORS_DISABLED"):
-        return False
-    if os.environ.get("NO_COLOR"):
-        return False
-    if os.environ.get("FORCE_COLOR"):
-        return True
-    if os.environ.get("TERM") == "dumb":
-        return False
-    if not hasattr(sys.stdout, "fileno"):
-        return False
-    try:
-        return os.isatty(sys.stdout.fileno())
-    except OSError:
-        return sys.stdout.isatty()
-def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
-    result = str(text)
-    if not can_colorize(no_color=no_color, force_color=force_color):
-        return result
-    fmt_str = "\x1b[%dm%s"
-    rgb_fore_fmt_str = "\x1b[38;2;%d;%d;%dm%s"
-    rgb_back_fmt_str = "\x1b[48;2;%d;%d;%dm%s"
-    if color is not None:
-        if isinstance(color, str):
-            result = fmt_str % (COLORS[color], result)
-        elif isinstance(color, tuple):
-            result = rgb_fore_fmt_str % (color[0], color[1], color[2], result)
-    if on_color is not None:
-        if isinstance(on_color, str):
-            result = fmt_str % (HIGHLIGHTS[on_color], result)
-        elif isinstance(on_color, tuple):
-            result = rgb_back_fmt_str % (on_color[0], on_color[1], on_color[2], result)
-    if attrs is not None:
-        for attr in attrs:
-            result = fmt_str % (ATTRIBUTES[attr], result)
-    result += RESET
-    return result
-def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
-    print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
+
+
 def get_file_age(path: str | Path, str_mode: bool = False) -> float | str:
     from os import stat as os_stat
     from time import time as time_time
+
     path = Path(path)
     current_time = time_time()
     file_stat = os_stat(path)
@@ -198,6 +118,8 @@ def get_file_age(path: str | Path, str_mode: bool = False) -> float | str:
         if value:
             parts.append(f"{value} {name}")
     return ", ".join(parts) if parts else "0 sec"
+
+
 def get_installed_pkgs():
     packages = []
     pip_freeze_path = Path("/sdcard/data/pip.freeze")
@@ -210,6 +132,7 @@ def get_installed_pkgs():
                 packages.append(name)
         return packages
     from importlib.metadata import distributions
+
     for dist in distributions():
         meta = dist.metadata
         name = meta.get("Name") or meta.get("name")
@@ -218,15 +141,21 @@ def get_installed_pkgs():
         name = name.strip()
         packages.append(name)
     return packages
+
+
 parser = Parser()
 parser.language = Language(tsp.language())
 VALID = {"import_statement", "import_from_statement"}
+
+
 def process_file(path: Path) -> list[str]:
     path = Path(path)
     src = path.read_bytes()
     tree = parser.parse(src)
     root = tree.root_node
     return [src[node.start_byte : node.end_byte].decode() for node in root.children if node.type in VALID]
+
+
 def normalize_import(import_line: str) -> str | None:
     line = import_line.lower().strip()
     if line.startswith("import "):
@@ -248,6 +177,8 @@ def normalize_import(import_line: str) -> str | None:
             module = module[: module.index(".")]
         return module if module and not module.startswith("_") else None
     return None
+
+
 def process_files_parallel(files: list[Path]) -> set[str]:
     all_imports = set()
     with ProcessPoolExecutor() as executor:
@@ -260,6 +191,8 @@ def process_files_parallel(files: list[Path]) -> set[str]:
                 path = future_to_file[future]
                 cprint(f"Error processing {path}: {e}", "yellow")
     return all_imports
+
+
 def filter_imports(imports: set[str]) -> list[str]:
     stdlib_set = set(STDLIB)
     installed_pkgs = {pkg.replace("-", "_").lower() for pkg in get_installed_pkgs()}
@@ -270,6 +203,8 @@ def filter_imports(imports: set[str]) -> list[str]:
         if normalized and normalized not in excluded:
             filtered.append(normalized + "\n")
     return sorted(set(filtered))
+
+
 def main() -> None:
     outfile = Path("importz.txt")
     cwd = Path.cwd()
@@ -280,5 +215,7 @@ def main() -> None:
     outfile.write_text("".join(filtered_imports), encoding="utf-8")
     for imp in filtered_imports:
         print(imp.strip())
+
+
 if __name__ == "__main__":
     sys.exit(main())

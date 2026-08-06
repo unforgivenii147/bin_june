@@ -5,7 +5,10 @@ from multiprocessing import Pool, cpu_count
 from pathlib import Path
 import cv2
 from tqdm import tqdm
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 class ImageDimensionRenamer:
     def __init__(self, root_dir: str = ".", separator: str = "_"):
         self.root_dir = Path(root_dir)
@@ -17,6 +20,7 @@ class ImageDimensionRenamer:
         print(f"[INIT] Root directory: {self.root_dir.resolve()}")
         print(f"[INIT] Separator: '{separator}'")
         print(f"[INIT] CPU cores available: {cpu_count()}")
+
     def get_all_images(self) -> list:
         print("\n[SCAN] Scanning for image files...")
         image_files = []
@@ -33,11 +37,14 @@ class ImageDimensionRenamer:
             if len(image_files) > 3:
                 print(f"       ... and {len(image_files) - 3} more")
         return image_files
+
     @staticmethod
     def has_dimensions_in_name(filename: str) -> bool:
         import re
+
         pattern = "\\d+[xX]\\d+"
         return bool(re.search(pattern, filename))
+
     def rename_image(self, args: tuple[Path, str, str]) -> tuple[Path, bool, str]:
         image_path, separator, root_dir_str = args
         root_dir = Path(root_dir_str)
@@ -63,6 +70,7 @@ class ImageDimensionRenamer:
             return new_path, True, message
         except Exception as e:
             return image_path, False, f"Error: {e!s}"
+
     def process_images(self, image_paths: list) -> None:
         if not image_paths:
             print("[WARN] No images to process!")
@@ -105,6 +113,7 @@ class ImageDimensionRenamer:
         print(
             f"[SUMMARY] Renamed: {successful} | Skipped: {already_processed} | Failed: {failed} | Total: {len(image_paths)}"
         )
+
     def run(self) -> None:
         image_paths = self.get_all_images()
         if not image_paths:
@@ -114,6 +123,8 @@ class ImageDimensionRenamer:
         print("\n" + "=" * 70)
         print("PROCESS COMPLETE - Images renamed with dimensions")
         print("=" * 70)
+
+
 def main():
     separator = "_"
     if len(sys.argv) > 1:
@@ -123,5 +134,7 @@ def main():
             separator = separator[0]
     renamer = ImageDimensionRenamer(root_dir=".", separator=separator)
     renamer.run()
+
+
 if __name__ == "__main__":
     main()

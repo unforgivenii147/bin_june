@@ -2,7 +2,10 @@
 from __future__ import annotations
 from pathlib import Path
 import jsbeautifier
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 def beautify_file(file_path: Path) -> None:
     content = file_path.read_text(encoding="utf-8")
     if file_path.suffix == ".js":
@@ -14,11 +17,15 @@ def beautify_file(file_path: Path) -> None:
     else:
         return
     file_path.write_text(beautified_content, encoding="utf-8")
+
+
 def beautify_directory(directory: str) -> None:
     base_path = Path(directory)
     for file_path in base_path.rglob("*"):
         if file_path.is_file() and file_path.suffix in (".js", ".css", ".html"):
             print(f"Beautifying: {file_path}")
             beautify_file(file_path)
+
+
 if __name__ == "__main__":
     beautify_directory(".")

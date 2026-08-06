@@ -4,11 +4,15 @@ import argparse
 import json
 import subprocess
 from pathlib import Path
+
+
 def run(cmd) -> str:
     result = subprocess.run(cmd, check=False, capture_output=True, text=True)
     if result.returncode != 0:
         raise RuntimeError(result.stderr.strip())
     return result.stdout
+
+
 def probe_subtitles(video_path):
     cmd = [
         "ffprobe",
@@ -23,6 +27,8 @@ def probe_subtitles(video_path):
         video_path,
     ]
     return json.loads(run(cmd)).get("streams", [])
+
+
 def extract_subtitles(video_path: Path, output_dir: Path) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     subs = probe_subtitles(video_path)
@@ -45,6 +51,8 @@ def extract_subtitles(video_path: Path, output_dir: Path) -> None:
             print(f"Extracted: {out_file}")
         except RuntimeError as e:
             print(f"Failed to extract subtitle stream {idx}: {e}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Extract embedded subtitles from a movie file")
     parser.add_argument("movie", help="Path to movie file")
@@ -55,5 +63,7 @@ def main() -> None:
     if not video_path.exists():
         raise FileNotFoundError(video_path)
     extract_subtitles(video_path, output_dir)
+
+
 if __name__ == "__main__":
     main()

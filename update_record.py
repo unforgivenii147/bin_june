@@ -4,6 +4,7 @@ Rewrite of the RECORD updater with multiprocessing support.
 Recalculates file hashes and sizes for installed packages,
 skipping .pyc files and certain metadata files.
 """
+
 from __future__ import annotations
 import base64
 import hashlib
@@ -12,9 +13,12 @@ import multiprocessing
 import site
 import sys
 from pathlib import Path
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s", stream=sys.stderr)
 logger = logging.getLogger(__name__)
+
+
 def find_site_packages() -> Path | None:
     try:
         dirs = site.getsitepackages()
@@ -27,6 +31,8 @@ def find_site_packages() -> Path | None:
     path = Path(dirs[0])
     logger.info("Found site-packages: %s", path)
     return path
+
+
 def calculate_file_hash(filepath: Path) -> str:
     sha256_hash = hashlib.sha256()
     try:
@@ -39,12 +45,16 @@ def calculate_file_hash(filepath: Path) -> str:
     except Exception:
         logger.exception("Error hashing %s", filepath)
         return ""
+
+
 def get_file_size(filepath: Path) -> int:
     try:
         return filepath.stat().st_size
     except Exception:
         logger.exception("Error getting size for %s", filepath)
         return 0
+
+
 def parse_record_line(line: str) -> tuple[str, str, str]:
     parts = line.strip().split(",")
     if len(parts) == 3:
@@ -52,11 +62,15 @@ def parse_record_line(line: str) -> tuple[str, str, str]:
     if len(parts) == 2:
         return parts[0], parts[1], ""
     return parts[0], "", ""
+
+
 def should_include_file(filepath: Path) -> bool:
     name = filepath.name
     return not (
         filepath.suffix == ".pyc" or name.endswith(".pyc") or name in ("direct_url.json", "INSTALLER", "RECORD")
     )
+
+
 def process_dist_info(dist_info_dir: Path) -> bool:
     record_path = dist_info_dir / "RECORD"
     logger.info("Processing %s", record_path)
@@ -122,6 +136,8 @@ def process_dist_info(dist_info_dir: Path) -> bool:
     except Exception:
         logger.exception("Failed to update self-hash for %s", record_path)
     return True
+
+
 def main() -> None:
     logger.info("Starting multiprocess RECORD updater")
     site_packages = find_site_packages()
@@ -143,6 +159,8 @@ def main() -> None:
             else:
                 failed += 1
     logger.info("Summary: %d updated, %d failed", updated, failed)
+
+
 if __name__ == "__main__":
     multiprocessing.freeze_support()
     main()

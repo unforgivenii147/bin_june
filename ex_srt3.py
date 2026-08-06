@@ -1,7 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Extract subtitles using pure Python libraries (limited functionality)."""
+
 import sys
 from pathlib import Path
+
+
 def extract_with_pymkv(input_file):
     """Extract subtitles from MKV files only using pymkv."""
     try:
@@ -21,6 +24,8 @@ def extract_with_pymkv(input_file):
     except Exception as e:
         print(f"Error with pymkv: {e}")
         return None
+
+
 def extract_with_pymp4(input_file):
     """Extract subtitles from MP4 files only using pymp4."""
     try:
@@ -32,6 +37,8 @@ def extract_with_pymp4(input_file):
     # requires implementing the codec yourself
     print("MP4 subtitle extraction requires codec implementation")
     return None
+
+
 def extract_with_enzyme(input_file):
     """Parse MKV structure with enzyme (pure Python MKV parser)."""
     try:
@@ -48,6 +55,8 @@ def extract_with_enzyme(input_file):
     except Exception as e:
         print(f"Error with enzyme: {e}")
         return None
+
+
 def main():
     if len(sys.argv) != 2:
         print(f"Usage: {sys.argv[0]} <video.mkv|video.mp4>")
@@ -74,5 +83,7 @@ def main():
     print("3. MP4Box (for MP4 files)")
     print("\nPure Python cannot replace these tools.")
     print("=" * 50)
+
+
 if __name__ == "__main__":
     main()

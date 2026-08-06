@@ -7,6 +7,8 @@ from collections import deque
 from collections.abc import Callable
 from pathlib import Path
 from dh import _clean_fname, get_files, mpf3, unique_path
+
+
 def process_file(path: str | Path) -> None:
     path = Path(path)
     new_name = ""
@@ -32,6 +34,8 @@ def process_file(path: str | Path) -> None:
         print(f"[OK] {target.name}")
     except Exception as e:
         print(f"[ERROR] {path.name}: {e}")
+
+
 def main() -> None:
     args = sys.argv[1:]
     cwd = Path().cwd()
@@ -40,5 +44,7 @@ def main() -> None:
         process_file(files[0])
         sys.exit(1)
     mpf3(process_file, files)
+
+
 if __name__ == "__main__":
     sys.exit(main())

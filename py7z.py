@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Compress/decompress files using pylzma with parallel processing."""
+
 from __future__ import annotations
 import argparse
 import io
@@ -9,12 +10,15 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 import pylzma
 from dh import fsz, gsz
+
 # Max available pylzma compression settings
 _COMPRESS_OPTS = {
     "dictionary": 27,  # 256 MB
     "fastBytes": 273,  # Maximum
     "algorithm": 2,  # Maximum compression mode
 }
+
+
 def _compress(src: Path, keep: bool) -> str:
     src = Path(src)
     try:
@@ -59,6 +63,8 @@ def _compress(src: Path, keep: bool) -> str:
             return f"Skipped {src} (not a file or directory)"
     except Exception as e:
         return f"Error compressing {src}: {e}"
+
+
 def _decompress(src: Path, keep: bool) -> str:
     src = Path(src)
     try:
@@ -98,6 +104,8 @@ def _decompress(src: Path, keep: bool) -> str:
             return f"Skipped {src} (not a .7z file)"
     except Exception as e:
         return f"Error decompressing {src}: {e}"
+
+
 def _collect_targets(paths: list[str], mode: str) -> list[Path]:
     targets: list[Path] = []
     cwd = Path(".").resolve()
@@ -149,6 +157,8 @@ def _collect_targets(paths: list[str], mode: str) -> list[Path]:
             seen.add(t)
             out.append(t)
     return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Compress/decompress files and directories using pylzma with parallel processing"
@@ -224,5 +234,7 @@ def main() -> None:
         print(f"  Total compressed size: {fsz(total_original)}")
         print(f"  Total decompressed size: {fsz(total_decompressed)}")
         print(f"  Total space used: {fsz(total_space_used)}")
+
+
 if __name__ == "__main__":
     main()

@@ -2,6 +2,7 @@
 """
 Zstandard Recursive File Compressor/Decompressor
 """
+
 from __future__ import annotations
 import argparse
 import sys
@@ -11,6 +12,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
 import zstandard as zstd
+
 EXCLUDED_EXTENSIONS = {
     ".xz",
     ".zst",
@@ -96,9 +98,12 @@ try:
     from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
     from rich.table import Table
     from rich.text import Text
+
     RICH_AVAILABLE = True
 except ImportError:
     RICH_AVAILABLE = False
+
+
 @dataclass(slots=True)
 class OperationResult:
     path: Path
@@ -110,6 +115,7 @@ class OperationResult:
     operation: str = "compress"
     was_tarred: bool = False
     was_untarred: bool = False
+
     @property
     def ratio(self) -> float:
         if self.original_size == 0:
@@ -117,6 +123,8 @@ class OperationResult:
         if self.operation == "compress":
             return (1 - self.processed_size / self.original_size) * 100
         return (self.processed_size / self.original_size - 1) * 100
+
+
 def format_size(size_bytes: float) -> str:
     val = float(size_bytes)
     for unit in ["B", "KB", "MB", "GB", "TB"]:
@@ -124,6 +132,8 @@ def format_size(size_bytes: float) -> str:
             return f"{val:.2f} {unit}"
         val /= 1024.0
     return f"{val:.2f} PB"
+
+
 def compress_file(
     input_path: Path,
     output_path: Path,
@@ -162,6 +172,8 @@ def compress_file(
         if output_path.exists():
             output_path.unlink()
         return OperationResult(input_path, 0, 0, False, str(e))
+
+
 def decompress_file(
     input_path: Path,
     output_path: Path,
@@ -205,6 +217,8 @@ def decompress_file(
         if output_path.exists():
             output_path.unlink()
         return OperationResult(input_path, 0, 0, False, str(e), operation="decompress")
+
+
 def get_files(
     root: Path,
     mode: str,
@@ -233,6 +247,8 @@ def get_files(
         elif p.suffix.lower() == ".zst":
             found.append(p)
     return sorted(found)
+
+
 def print_summary(results: list[OperationResult], root: Path, operation: str):
     successes = [r for r in results if r.success]
     failures = [r for r in results if not r.success]
@@ -278,6 +294,8 @@ def print_summary(results: list[OperationResult], root: Path, operation: str):
         print(f"Original size: {format_size(total_orig)}")
         print(f"Processed size: {format_size(total_proc)}")
         print(f"Total time: {total_time:.2f}s")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Optimized Zstd Compressor/Decompressor")
     parser.add_argument("directory", nargs="?", default=".", help="Directory to process")
@@ -326,5 +344,7 @@ def main():
                 results.append(res)
                 print(f"[{i}/{len(files)}] {res.path.name} - {('OK' if res.success else 'FAIL')}")
     print_summary(results, root, mode)
+
+
 if __name__ == "__main__":
     main()

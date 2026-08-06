@@ -2,10 +2,15 @@
 from __future__ import annotations
 import sys
 from pathlib import Path
+
 THRESHOLD = 1024 * 1024
 from dh import read_lines, read_lines_mmap
+
+
 def sort_by_length(lines: list[str]) -> list[str]:
     return sorted(lines, key=len)
+
+
 if __name__ == "__main__":
     path = Path(sys.argv[1].strip())
     lines = read_lines(path, ke=True)

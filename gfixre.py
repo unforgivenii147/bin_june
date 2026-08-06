@@ -3,6 +3,8 @@ import ast
 import re
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+
+
 def process_string_match(match: re.Match) -> str:
     raw_str = match.group(0)
     if "\\\\" in raw_str:
@@ -13,6 +15,8 @@ def process_string_match(match: re.Match) -> str:
             body = raw_str[1:-1]
             return "r'" + body.replace("\\\\", "\\") + "'"
     return raw_str
+
+
 def fix_file_regex_styles(file_path: Path):
     try:
         original_content = file_path.read_text(encoding="utf-8")
@@ -33,6 +37,8 @@ def fix_file_regex_styles(file_path: Path):
         print(f"✅ Successfully restored raw regex format in: {file_path.name}")
     except Exception as e:
         print(f"❌ Error writing update to {file_path.name}: {e}")
+
+
 def main():
     current_dir = Path(".")
     py_files = [f for f in current_dir.rglob("*.py") if f.is_file() and f.name != Path(__file__).name]
@@ -43,5 +49,7 @@ def main():
     with ThreadPoolExecutor() as executor:
         executor.map(fix_file_regex_styles, py_files)
     print("🎉 Regex raw style transformation complete!")
+
+
 if __name__ == "__main__":
     main()

@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 "\nScript to detect and keep only the\n latest version of wheel, deb, or\n tar.gz files in current directory\n  recursively.\n"
+
 from __future__ import annotations
 import argparse
 import re
@@ -8,6 +9,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from packaging import version as pkg_version
 from dh import get_files
+
+
 def parse_wheel_version(filename: str) -> tuple[str, str] | None:
     if filename.endswith(".whl"):
         name = filename[:-4]
@@ -35,6 +38,8 @@ def parse_wheel_version(filename: str) -> tuple[str, str] | None:
         version = "-".join(version_parts)
         return (pkg_name, version)
     return None
+
+
 def parse_targz_version(filename: str) -> tuple[str, str] | None:
     name = filename
     if filename.endswith(".tar.gz"):
@@ -52,6 +57,8 @@ def parse_targz_version(filename: str) -> tuple[str, str] | None:
             if pkg_name and version:
                 return (pkg_name, version)
     return None
+
+
 def parse_deb_version(filename: str) -> tuple[str, str] | None:
     parts = filename.split("_")
     if len(parts) >= 2:
@@ -59,6 +66,8 @@ def parse_deb_version(filename: str) -> tuple[str, str] | None:
         version = parts[1]
         return (pkg_name, version)
     return None
+
+
 def compare_versions(ver1: str, ver2: str) -> int:
     try:
         v1 = pkg_version.parse(ver1)
@@ -76,6 +85,8 @@ def compare_versions(ver1: str, ver2: str) -> int:
             return 1
         else:
             return 0
+
+
 def process_file(file_path: Path, file_type: str) -> tuple[str, str, Path] | None:
     try:
         filename = file_path.name
@@ -97,6 +108,8 @@ def process_file(file_path: Path, file_type: str) -> tuple[str, str, Path] | Non
     except Exception as e:
         print(f"Error processing {file_path}: {e}")
     return None
+
+
 def scan_directory(directory: Path, file_type: str, check_all: bool = False) -> dict[str, list[tuple[str, Path]]]:
     packages = defaultdict(list)
     extensions = (".whl", ".deb", ".tar.gz", ".tgz", ".metadata")
@@ -130,6 +143,8 @@ def scan_directory(directory: Path, file_type: str, check_all: bool = False) -> 
                 pkg_name, version, file_path = result
                 packages[pkg_name].append((version, file_path))
     return packages
+
+
 def get_latest_version(versions: list[tuple[str, Path]]) -> tuple[str, Path]:
     if not versions:
         return None
@@ -138,6 +153,8 @@ def get_latest_version(versions: list[tuple[str, Path]]) -> tuple[str, Path]:
         if compare_versions(version, latest[0]) > 0:
             latest = (version, path)
     return latest
+
+
 def keep_latest_versions(packages: dict[str, list[tuple[str, Path]]], dry_run: bool = False) -> tuple[int, int]:
     total_deleted = 0
     total_files_kept = 0
@@ -163,6 +180,8 @@ def keep_latest_versions(packages: dict[str, list[tuple[str, Path]]], dry_run: b
                     print(f"  Error deleting {file_path.name}: {e}")
         total_files_kept += 1
     return (total_deleted, total_files_kept)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Detect and keep only the latest version of package files.",
@@ -223,5 +242,7 @@ def main() -> int:
     else:
         print(f"Cleanup complete. Deleted {total_deleted} file(s), kept {total_kept} file(s).")
     return 0
+
+
 if __name__ == "__main__":
     exit(main())

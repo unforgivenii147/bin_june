@@ -2,7 +2,10 @@
 from __future__ import annotations
 import shutil
 from pathlib import Path
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 def fsz(sz: int) -> str:
     sz = abs(int(sz))
     units = "", "K", "M", "G", "T"
@@ -11,8 +14,12 @@ def fsz(sz: int) -> str:
     i = min(int(int(sz).bit_length() - 1) // 10, len(units) - 1)
     sz /= 1024**i
     return f"{sz:.2f} {units[i]}B"
+
+
 def gsz(path: Path) -> int:
     return sum(p.stat().st_size for p in path.rglob("*") if p.is_file())
+
+
 def clean_pycache(start_dir: Path = Path.cwd()) -> None:
     removed = 0
     sz = 0
@@ -26,6 +33,8 @@ def clean_pycache(start_dir: Path = Path.cwd()) -> None:
         print(f"   • dirs removed: {removed}")
     else:
         print("nothing found.")
+
+
 if __name__ == "__main__":
     cwd = Path.cwd()
     clean_pycache(cwd)

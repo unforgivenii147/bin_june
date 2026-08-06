@@ -4,7 +4,10 @@ import argparse
 import json
 from pathlib import Path
 import nbformat as nbf
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 def py_to_ipynb(input_file, output_file=None) -> bool:
     if not Path(input_file).exists():
         print(f"Error: File '{input_file}' not found.")
@@ -50,6 +53,8 @@ def py_to_ipynb(input_file, output_file=None) -> bool:
     print(f"Successfully converted '{input_file}' to '{output_file}'")
     print(f"Created {len(cells)} cell(s)")
     return True
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Convert a Python script to a Jupyter notebook")
     parser.add_argument("input", help="Input Python file (.py)")
@@ -70,5 +75,7 @@ def main() -> None:
         print(f"Successfully converted '{args.input}' to '{output_file}' (single cell)")
     else:
         py_to_ipynb(args.input, args.output)
+
+
 if __name__ == "__main__":
     main()

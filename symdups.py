@@ -6,9 +6,12 @@ from collections import defaultdict
 from datetime import UTC, datetime
 from pathlib import Path
 from xxhash import xxh64
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 BACKUP_FILE = ".symlink_backup.json"
 MIN_FILE_SIZE = 1024
+
+
 def calculate_file_hash(filepath, chunk_size=32768) -> str | None:
     if not filepath.is_file():
         return None
@@ -21,6 +24,8 @@ def calculate_file_hash(filepath, chunk_size=32768) -> str | None:
     except OSError as e:
         print(f"[ERROR] Reading {filepath}: {e}")
         return None
+
+
 def find_duplicates(directory: str = "."):
     print(f"[INFO] Scanning directory: {Path(directory).resolve()}")
     size_map = defaultdict(list)
@@ -46,8 +51,12 @@ def find_duplicates(directory: str = "."):
             if file_hash:
                 hash_map[file_hash].append(path)
     return {h: paths for h, paths in hash_map.items() if len(paths) > 1}
+
+
 def choose_keeper(files):
     return min(files, key=lambda f: (len(str(f)), f))
+
+
 def create_symlinks(duplicates, dry_run=False) -> int:
     backup_data = {"timestamp": datetime.now(tz=UTC).isoformat(), "operations": []}
     total_saved = 0
@@ -89,6 +98,8 @@ def create_symlinks(duplicates, dry_run=False) -> int:
     if dry_run:
         print("[DRY RUN] No changes were made")
     return symlink_count
+
+
 def reverse_symlinks(backup_file: str = BACKUP_FILE) -> bool:
     if not Path(backup_file).exists():
         print(f"[ERROR] Backup file {backup_file} not found!")
@@ -106,6 +117,7 @@ def reverse_symlinks(backup_file: str = BACKUP_FILE) -> bool:
         try:
             Path(symlink_path).unlink()
             import shutil
+
             shutil.copy2(target_path, symlink_path)
             restored_count += 1
         except OSError as e:
@@ -114,6 +126,8 @@ def reverse_symlinks(backup_file: str = BACKUP_FILE) -> bool:
     Path(backup_file).rename(backup_renamed)
     print(f"[INFO] Backup file renamed to: {backup_renamed}")
     return True
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Find duplicate files and replace with symlinks (reversible)")
     parser.add_argument("directory", nargs="?", default=".", help="Directory to scan (default: current directory)")
@@ -133,5 +147,7 @@ def main() -> None:
         if args.dry_run:
             print("\n[INFO] [DRY RUN MODE - No changes will be made]")
         create_symlinks(duplicates, dry_run=args.dry_run)
+
+
 if __name__ == "__main__":
     main()

@@ -3,6 +3,7 @@
 Reinstall all packages with entry points using pip's internal API.
 Compatible with Python 3.12+ and pip 26.1.2+
 """
+
 import argparse
 import importlib.metadata
 import logging
@@ -12,9 +13,11 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
+
 # pip imports
 from pip._internal.commands.install import InstallCommand
 from pip._internal.exceptions import InstallationError
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
@@ -24,6 +27,8 @@ logging.basicConfig(
     ],
 )
 logger = logging.getLogger(__name__)
+
+
 def get_site_packages_dirs() -> List[Path]:
     """Get all site-packages directories."""
     site_dirs = []
@@ -40,6 +45,8 @@ def get_site_packages_dirs() -> List[Path]:
             seen.add(str(d))
             unique_dirs.append(d)
     return unique_dirs
+
+
 def get_packages_with_entry_points() -> Dict[str, Dict[str, any]]:
     """
     Get all packages that have entry points using importlib.metadata only.
@@ -102,6 +109,8 @@ def get_packages_with_entry_points() -> Dict[str, Dict[str, any]]:
         logger.error(f"Error using importlib.metadata: {e}")
         return {}
     return packages_with_eps
+
+
 def get_package_size(dist: importlib.metadata.Distribution) -> str:
     """Estimate package size from distribution files."""
     try:
@@ -109,6 +118,7 @@ def get_package_size(dist: importlib.metadata.Distribution) -> str:
             # For packages installed as directories
             import os
             from pathlib import Path
+
             dist_path = Path(dist._path)
             if dist_path.exists():
                 if dist_path.is_dir():
@@ -126,6 +136,8 @@ def get_package_size(dist: importlib.metadata.Distribution) -> str:
         return "Unknown"
     except Exception:
         return "Unknown"
+
+
 def get_user_confirmation(package_name: str, package_data: Dict, include_deps: bool = False) -> str:
     """Get user confirmation for reinstalling a package.
     Returns: 'yes', 'no', or 'all'
@@ -161,6 +173,8 @@ def get_user_confirmation(package_name: str, package_data: Dict, include_deps: b
         else:
             print("Invalid response. Please enter 'y', 'n', 'a', or '?'")
             continue
+
+
 def reinstall_package_with_pip(package_name: str, include_deps: bool = False) -> Tuple[str, bool, str]:
     """
     Reinstall a single package using pip's internal API.
@@ -183,6 +197,7 @@ def reinstall_package_with_pip(package_name: str, include_deps: bool = False) ->
         options, _ = install_cmd.parse_args(args)
         # Run the installation
         from pip._internal.utils.temp_dir import global_tempdir_manager
+
         with global_tempdir_manager():
             try:
                 # Execute the install command
@@ -197,6 +212,8 @@ def reinstall_package_with_pip(package_name: str, include_deps: bool = False) ->
         error_msg = str(e)
         logger.error(f"✗ Error reinstalling {package_name}: {error_msg}")
         return (package_name, False, error_msg)
+
+
 def reinstall_entrypoint_packages(
     max_workers: int = 4,
     exclude_packages: Set[str] = None,
@@ -292,6 +309,8 @@ def reinstall_entrypoint_packages(
         logger.info("\nFailed packages:")
         for name, error in failed:
             logger.info(f"  ✗ {name}: {error[:100]}...")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Reinstall all Python packages with entry points using pip API",
@@ -337,5 +356,7 @@ def main():
         dry_run=args.dry_run,
         skip_confirmation=args.yes,
     )
+
+
 if __name__ == "__main__":
     main()

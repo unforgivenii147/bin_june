@@ -2,7 +2,10 @@
 from __future__ import annotations
 import sys
 import zlib
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 def main():
     if len(sys.argv) < 2:
         print("Usage: python decompress_zlib.py <input.zlib> [output.file]")
@@ -27,5 +30,7 @@ def main():
     except FileNotFoundError:
         print(f"File not found: {in_fname}")
         sys.exit(3)
+
+
 if __name__ == "__main__":
     main()

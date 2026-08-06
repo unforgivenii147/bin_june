@@ -4,18 +4,24 @@ import argparse
 import re
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 try:
     import pytesseract
     from PIL import Image
+
     PHOTO_SUPPORT = True
 except ImportError:
     PHOTO_SUPPORT = False
+
+
 class DirectoryBuilder:
     TREE_CHARS = {"├──": "├", "└──": "└", "│": "│", " ": " "}
+
     def __init__(self, use_multiprocessing: bool = True):
         self.use_multiprocessing = use_multiprocessing
         self.items_to_create: list[tuple[Path, bool]] = []
+
     def read_tree_file(self, filepath: str) -> list[str]:
         tree_file = Path(filepath)
         if not tree_file.exists():
@@ -27,6 +33,7 @@ class DirectoryBuilder:
                 if line.strip():
                     lines.append(line)
         return lines
+
     def read_from_photo(self, image_path: str) -> list[str]:
         if not PHOTO_SUPPORT:
             raise ImportError("""Photo support requires: pip install Pillow pytesseract
@@ -37,6 +44,7 @@ Also install tesseract: https://github.com/UB-Mannheim/tesseract/wiki""")
             return text.split("\n")
         except Exception as e:
             raise ValueError(f"Failed to extract text from photo: {e}")
+
     def parse_tree_lines(self, lines: list[str]) -> list[tuple[Path, bool]]:
         items = []
         stack = [Path(".")]
@@ -54,6 +62,7 @@ Also install tesseract: https://github.com/UB-Mannheim/tesseract/wiki""")
                 stack.append(current_path)
         self.items_to_create = items
         return items
+
     def _calculate_depth(self, line: str) -> int:
         depth = 0
         i = 0
@@ -66,13 +75,16 @@ Also install tesseract: https://github.com/UB-Mannheim/tesseract/wiki""")
             else:
                 i += 1
         return int(depth)
+
     def _extract_name(self, line: str) -> str:
         cleaned = re.sub(r"[├└│─\s]+", "", line)
         return cleaned.strip()
+
     def _is_file(self, name: str) -> bool:
         if "/" in name:
             return True
         return "." in name.split("/")[-1]
+
     @staticmethod
     def _create_item(item_data: tuple[Path, bool]) -> tuple[Path, bool, str]:
         path, is_file = item_data
@@ -93,6 +105,7 @@ Also install tesseract: https://github.com/UB-Mannheim/tesseract/wiki""")
                 return path, is_file, "created"
         except Exception as e:
             return path, is_file, f"error: {e}"
+
     def create_structure(self, base_dir: str = ".", num_workers: int | None = None) -> None:
         if not self.items_to_create:
             print("No items to create. Parse tree first.")
@@ -115,12 +128,15 @@ Also install tesseract: https://github.com/UB-Mannheim/tesseract/wiki""")
             print(f"✗ Errors: {len(errors)}")
             for path, _, status in errors:
                 print(f"  - {path}: {status}")
+
     def print_structure(self) -> None:
         for path, is_file in self.items_to_create:
             marker = "📄" if is_file else "📁"
             depth = len(path.parts) - 1
             indent = "  " * depth
             print(f"{indent}{marker} {path.name}")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Build directory structure from tree.txt or photo")
     parser.add_argument(
@@ -157,5 +173,7 @@ def main():
     else:
         builder.create_structure(args.output, args.workers)
         print(f"\n✓ Directory structure created in: {args.output}")
+
+
 if __name__ == "__main__":
     main()

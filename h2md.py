@@ -6,12 +6,16 @@ from collections.abc import Callable
 from pathlib import Path
 from markdownify import markdownify
 from dh import get_files, mpf3
+
+
 def process_file(path) -> None:
     path = Path(path)
     md_path = path.with_suffix(".md")
     content = path.read_text(encoding="utf8")
     markdownify(content)
     md_path.write_text(md_content, encoding="utf-8")
+
+
 if __name__ == "__main__":
     cwd = Path.cwd()
     args = sys.argv[1:]

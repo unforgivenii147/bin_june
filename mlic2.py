@@ -6,6 +6,7 @@ import sys
 from collections import defaultdict
 from functools import partial
 from pathlib import Path
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 TEXT_EXTENSIONS = {
     ".py",
@@ -89,6 +90,8 @@ EXCLUDED_EXTENSIONS = {
     ".ppt",
     ".pptx",
 }
+
+
 def is_text_file(filepath: Path) -> bool:
     if filepath.suffix in EXCLUDED_EXTENSIONS:
         return False
@@ -105,6 +108,8 @@ def is_text_file(filepath: Path) -> bool:
         except OSError:
             return False
     return False
+
+
 def read_file_content(filepath: Path) -> tuple[Path, list[str], str]:
     try:
         with open(filepath, encoding="utf-8") as f:
@@ -121,6 +126,8 @@ def read_file_content(filepath: Path) -> tuple[Path, list[str], str]:
     except OSError as e:
         print(f"Warning: cannot read {filepath}: {e}", file=sys.stderr)
         return filepath, [], ""
+
+
 def find_multiline_blocks(text: str, min_lines: int = 3) -> dict[str, list[tuple[int, str]]]:
     lines = text.splitlines()
     if len(lines) < min_lines:
@@ -156,6 +163,8 @@ def find_multiline_blocks(text: str, min_lines: int = 3) -> dict[str, list[tuple
             if len(block_key) > 5000:
                 break
     return dict(blocks)
+
+
 def scan_file(filepath: Path, min_lines: int = 3) -> dict[str, list[tuple[Path, int, str]]]:
     if not is_text_file(filepath):
         return {}
@@ -167,6 +176,8 @@ def scan_file(filepath: Path, min_lines: int = 3) -> dict[str, list[tuple[Path, 
     for block, occurrences in blocks.items():
         result[block] = [(filepath, line_no, context) for line_no, context in occurrences]
     return result
+
+
 def collect_multiline_repeats(
     root: Path, min_lines: int = 3, num_workers: int | None = None
 ) -> dict[str, list[tuple[Path, int, str]]]:
@@ -194,6 +205,8 @@ def collect_multiline_repeats(
         if len(file_occurrences) >= 2 or any(len(occ) >= 2 for occ in file_occurrences.values()):
             filtered[block] = occurrences
     return filtered
+
+
 def report(repeated: dict[str, list[tuple[Path, int, str]]]) -> None:
     if not repeated:
         print("No repeated multiline blocks found.")
@@ -206,6 +219,8 @@ def report(repeated: dict[str, list[tuple[Path, int, str]]]) -> None:
         for filepath, lineno, context in occurrences:
             print(f"  {filepath}:{lineno} -> {context[:100]}...")
         print("-" * 40)
+
+
 def save_to_file(repeated: dict[str, list[tuple[Path, int, str]]], output_file: Path) -> None:
     if not repeated:
         return
@@ -225,6 +240,8 @@ def save_to_file(repeated: dict[str, list[tuple[Path, int, str]]], output_file: 
         print(f"Results saved to {output_file}")
     except OSError as e:
         print(f"Error writing to {output_file}: {e}", file=sys.stderr)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Find repeated multiline blocks in text files",
@@ -271,5 +288,7 @@ def main() -> None:
     output_path = Path(args.output)
     save_to_file(repeated, output_path)
     report(repeated)
+
+
 if __name__ == "__main__":
     main()

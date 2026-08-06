@@ -1,16 +1,20 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Recursively replace or remove text in files with Python 3.12+ optimizations."""
+
 from __future__ import annotations
 import argparse
 import os
 import re
 import sys
 from pathlib import Path
+
 SKIP_DIRS = frozenset(
     {".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache", "node_modules", "build", "dist"}
 )
 CHUNK_SIZE = 8192
 MAX_CONTEXT_DISPLAY = 3
+
+
 def is_binary(path: Path) -> bool:
     """Check if a file is binary by sampling its content."""
     try:
@@ -25,6 +29,8 @@ def is_binary(path: Path) -> bool:
         return (nontext / len(chunk)) > 0.3
     except (OSError, PermissionError):
         return True
+
+
 def process_file(path: Path, search_text: str, replace_text: str | None = None, dry_run: bool = False) -> bool:
     """Process a single file for text replacement.
     Returns True if matches were found, False otherwise.
@@ -58,6 +64,8 @@ def process_file(path: Path, search_text: str, replace_text: str | None = None, 
     except OSError as e:
         print(f"Error processing {path}: {e}", file=sys.stderr)
         return False
+
+
 def replace_in_files(
     search_text: str, replace_text: str | None = None, target_file: str | None = None, dry_run: bool = False
 ) -> tuple[int, int]:
@@ -87,6 +95,8 @@ def replace_in_files(
             if files_processed % 100 == 0:
                 print(f"Processed {files_processed} files...", end="\r")
     return files_processed, files_changed
+
+
 def parse_search_replace(strings: list[str]) -> tuple[str, str | None]:
     """Parse search and optional replacement strings from arguments."""
     if len(strings) == 2:
@@ -101,6 +111,8 @@ def parse_search_replace(strings: list[str]) -> tuple[str, str | None]:
     if search_text.startswith(("'", '"')) and search_text.endswith(("'", '"')):
         search_text = search_text[1:-1]
     return search_text, replace_text, action
+
+
 def main() -> None:
     """Main entry point for the script."""
     parser = argparse.ArgumentParser(
@@ -131,5 +143,7 @@ def main() -> None:
         search_text, replace_text, target_file=args.file, dry_run=args.dry_run
     )
     print(f"\n--- Complete: Processed {files_processed} files, modified {files_changed} files ---")
+
+
 if __name__ == "__main__":
     main()

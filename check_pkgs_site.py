@@ -2,12 +2,16 @@
 """
 Simple package duplicate checker for Termux (Python 3.12+)
 """
+
 from __future__ import annotations
 import site
 import sys
 from importlib.metadata import distributions
 from pathlib import Path
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 def get_packages_in_dir(dir_path):
     packages = {}
     dir_str = str(dir_path)
@@ -35,6 +39,8 @@ def get_packages_in_dir(dir_path):
     except Exception as e:
         print(f"Error scanning {dir_path}: {e}")
     return packages
+
+
 def main():
     user_dir = Path(site.getusersitepackages())
     system_dirs = []
@@ -62,5 +68,7 @@ def main():
             print(f"  {pkg}: system={system_pkgs.get(pkg, '?')}, user={user_pkgs.get(pkg, '?')}")
     else:
         print("\n✅ No duplicate packages found!")
+
+
 if __name__ == "__main__":
     main()

@@ -12,8 +12,11 @@ import brotli
 import lz4.frame
 import py7zr
 import zstandard as zstd
+
 CHUNK = 1024 * 1024
 XZ_PRESET_9 = 9
+
+
 def human_bytes(n: int) -> str:
     sign = "-" if n < 0 else ""
     n = abs(n)
@@ -23,12 +26,16 @@ def human_bytes(n: int) -> str:
         n /= 1024.0
         i += 1
     return f"{sign}{n:.2f} {units[i]}" if units[i] != "B" else f"{sign}{int(n)} B"
+
+
 def dir_files_total_bytes_recursive(root: Path) -> int:
     total = 0
     for p in root.rglob("*"):
         if p.is_file():
             total += p.stat().st_size
     return total
+
+
 def parse_tar_codec(p: Path) -> tuple[str, str] | None:
     parts = p.name.split(".")
     if len(parts) < 3 or parts[-2] != "tar":
@@ -38,9 +45,13 @@ def parse_tar_codec(p: Path) -> tuple[str, str] | None:
     if not stem:
         stem = "archive"
     return (stem, codec)
+
+
 def dst_path_for(src_path: Path, dst_codec: str) -> Path:
     stem, _ = parse_tar_codec(src_path)
     return src_path.with_name(f"{stem}.tar.{dst_codec}")
+
+
 def write_tar_bytes_with_decoder_to_file(src: Path, dst: Path, codec: str) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
     if codec == "gz":
@@ -94,6 +105,8 @@ def write_tar_bytes_with_decoder_to_file(src: Path, dst: Path, codec: str) -> No
                 f_out.write(chunk)
     else:
         raise ValueError(f"Unsupported src codec: {codec}")
+
+
 def write_compressed_tar_bytes_from_tar(src_tar: Path, dst: Path, codec: str) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
     if codec == "gz":
@@ -167,12 +180,16 @@ def write_compressed_tar_bytes_from_tar(src_tar: Path, dst: Path, codec: str) ->
         raise RuntimeError("Use py7zr path for dst codec 7z")
     else:
         raise ValueError(f"Unsupported dst codec: {codec}")
+
+
 def safe_unlink(p: Path) -> None:
     try:
         if p.exists():
             p.unlink()
     except Exception:
         pass
+
+
 def convert_one(src_str: str, dst_codec: str) -> tuple[str, bool, str]:
     src = Path(src_str)
     parse = parse_tar_codec(src)
@@ -188,6 +205,7 @@ def convert_one(src_str: str, dst_codec: str) -> tuple[str, bool, str]:
     try:
         if src_codec == "7z":
             import tempfile
+
             tmpdir = Path(tempfile.mkdtemp(prefix="tar7z_dec_"))
             try:
                 with py7zr.SevenZipFile(src, mode="r") as z:
@@ -222,6 +240,8 @@ def convert_one(src_str: str, dst_codec: str) -> tuple[str, bool, str]:
         return (src.name, False, f"error: {e}")
     finally:
         safe_unlink(tmp_tar)
+
+
 def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: python3 convert.py <target_codec>   (example: xz)")
@@ -269,5 +289,7 @@ def main() -> None:
         print(f"Extra used: {human_bytes(delta)}")
     else:
         print("No disk usage change (by summed file sizes).")
+
+
 if __name__ == "__main__":
     main()

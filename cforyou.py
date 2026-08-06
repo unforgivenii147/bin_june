@@ -9,10 +9,15 @@ import time
 from pathlib import Path
 import requests
 from packaging.version import Version
+from dh import cprint
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 def get_file_age(path: str | Path, str_mode: bool = False) -> float | str:
     from os import stat as os_stat
     from time import time as time_time
+
     path = Path(path)
     current_time = time_time()
     file_stat = os_stat(path)
@@ -41,8 +46,11 @@ def get_file_age(path: str | Path, str_mode: bool = False) -> float | str:
         if value:
             parts.append(f"{value} {name}")
     return ", ".join(parts) if parts else "0 sec"
+
+
 def get_installed_packages() -> dict[str, str]:
     from operator import itemgetter
+
     packages = {}
     pip_freeze_path = Path("/sdcard/data/pip.freeze")
     file_age = get_file_age(pip_freeze_path)
@@ -54,6 +62,7 @@ def get_installed_packages() -> dict[str, str]:
                 packages[name] = version
         return packages
     from importlib.metadata import distributions as _distributions
+
     for dist in _distributions():
         meta = dist.metadata
         name = meta.get("Name") or meta.get("name")
@@ -63,103 +72,17 @@ def get_installed_packages() -> dict[str, str]:
         name = name.strip()
         packages[name] = version
     return dict(sorted(packages.items(), key=itemgetter(0)))
-ATTRIBUTES = {
-    "bold": 1,
-    "dark": 2,
-    "italic": 3,
-    "underline": 4,
-    "blink": 5,
-    "reverse": 7,
-    "concealed": 8,
-    "strike": 9,
-}
-HIGHLIGHTS = {
-    "on_black": 40,
-    "on_grey": 40,
-    "on_red": 41,
-    "on_green": 42,
-    "on_yellow": 43,
-    "on_blue": 44,
-    "on_magenta": 45,
-    "on_cyan": 46,
-    "on_light_grey": 47,
-    "on_dark_grey": 100,
-    "on_light_red": 101,
-    "on_light_green": 102,
-    "on_light_yellow": 103,
-    "on_light_blue": 104,
-    "on_light_magenta": 105,
-    "on_light_cyan": 106,
-    "on_white": 107,
-}
-COLORS = {
-    "black": 30,
-    "grey": 30,
-    "red": 31,
-    "green": 32,
-    "yellow": 33,
-    "blue": 34,
-    "magenta": 35,
-    "cyan": 36,
-    "light_grey": 37,
-    "dark_grey": 90,
-    "light_red": 91,
-    "light_green": 92,
-    "light_yellow": 93,
-    "light_blue": 94,
-    "light_magenta": 95,
-    "light_cyan": 96,
-    "white": 97,
-}
-RESET = "\x1b[0m"
-def can_colorize(*, no_color=None, force_color=None):
-    if no_color is not None and no_color:
-        return False
-    if force_color is not None and force_color:
-        return True
-    if os.environ.get("ANSI_COLORS_DISABLED"):
-        return False
-    if os.environ.get("NO_COLOR"):
-        return False
-    if os.environ.get("FORCE_COLOR"):
-        return True
-    if os.environ.get("TERM") == "dumb":
-        return False
-    if not hasattr(sys.stdout, "fileno"):
-        return False
-    try:
-        return os.isatty(sys.stdout.fileno())
-    except OSError:
-        return sys.stdout.isatty()
-def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
-    result = str(text)
-    if not can_colorize(no_color=no_color, force_color=force_color):
-        return result
-    fmt_str = "\x1b[%dm%s"
-    rgb_fore_fmt_str = "\x1b[38;2;%d;%d;%dm%s"
-    rgb_back_fmt_str = "\x1b[48;2;%d;%d;%dm%s"
-    if color is not None:
-        if isinstance(color, str):
-            result = fmt_str % (COLORS[color], result)
-        elif isinstance(color, tuple):
-            result = rgb_fore_fmt_str % (color[0], color[1], color[2], result)
-    if on_color is not None:
-        if isinstance(on_color, str):
-            result = fmt_str % (HIGHLIGHTS[on_color], result)
-        elif isinstance(on_color, tuple):
-            result = rgb_back_fmt_str % (on_color[0], on_color[1], on_color[2], result)
-    if attrs is not None:
-        for attr in attrs:
-            result = fmt_str % (ATTRIBUTES[attr], result)
-    result += RESET
-    return result
-def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
-    print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
+
+
 MAX_WORKERS = 8
 TIMEOUT = 15
 RESULTS_FILE = "/sdcard/c4u.json"
+
+
 def save_output(text: str, pkg: str) -> None:
     Path(f"/sdcard/whl/json/{pkg}.html").write_text(text, encoding="utf-8")
+
+
 def get_latest_version(pkg_name: str) -> str | None:
     url = f"https://mirror-pypi.runflare.com/{pkg_name}/json"
     try:
@@ -183,6 +106,8 @@ def get_latest_version(pkg_name: str) -> str | None:
     if max_ver is not None:
         print(f"{pkg_name}:{max_ver}")
     return max_ver
+
+
 def load_previous_results() -> dict[str, dict]:
     if Path(RESULTS_FILE).exists():
         try:
@@ -192,9 +117,13 @@ def load_previous_results() -> dict[str, dict]:
             cprint(f"Warning: Corrupted results file '{RESULTS_FILE}'. Starting fresh.", "red")
             return {}
     return {}
+
+
 def save_results(results: dict[str, dict]) -> None:
     with Path(RESULTS_FILE).open("w", encoding="utf-8") as f:
         json.dump(results, f, indent=4)
+
+
 if __name__ == "__main__":
     start_time = time.time()
     installed_packages = get_installed_packages()

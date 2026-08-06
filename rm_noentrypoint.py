@@ -3,11 +3,14 @@
 Check .whl wheel files in current directory and remove ones
 that don't contain entry_points.txt using parallel processing.
 """
+
 import argparse
 import zipfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import List, Tuple
+
+
 def check_wheel_for_entry_points(wheel_path: Path) -> Tuple[Path, bool]:
     """
     Check if a wheel file contains entry_points.txt.
@@ -25,6 +28,8 @@ def check_wheel_for_entry_points(wheel_path: Path) -> Tuple[Path, bool]:
     except (zipfile.BadZipFile, OSError) as e:
         print(f"Error reading {wheel_path.name}: {e}")
         return wheel_path, False
+
+
 def find_wheel_files(directory: Path = Path.cwd()) -> List[Path]:
     """
     Find all .whl files in the specified directory.
@@ -34,6 +39,8 @@ def find_wheel_files(directory: Path = Path.cwd()) -> List[Path]:
         List of Path objects for .whl files
     """
     return list(directory.glob("*.whl"))
+
+
 def remove_wheels_without_entry_points(
     directory: Path = Path.cwd(), max_workers: int = None, dry_run: bool = False
 ) -> None:
@@ -78,6 +85,8 @@ def remove_wheels_without_entry_points(
                     print(f"  Error removing {wheel.name}: {e}")
     else:
         print("\nNo files to remove.")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Remove .whl wheel files without entry_points.txt")
     parser.add_argument(
@@ -98,5 +107,7 @@ def main():
         print(f"Error: Directory '{args.directory}' does not exist.")
         return
     remove_wheels_without_entry_points(directory=args.directory, max_workers=args.workers, dry_run=args.dry_run)
+
+
 if __name__ == "__main__":
     main()

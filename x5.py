@@ -5,6 +5,7 @@ Compresses and decompresses files using LZMA with parallel processing and stream
 Removes original files after successful compression by default.
 Can optionally tar subdirectories before LZMA compression for better ratio
 """
+
 from __future__ import annotations
 import argparse
 import lzma
@@ -17,6 +18,7 @@ import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
+
 try:
     from rich import box
     from rich.console import Console
@@ -24,6 +26,7 @@ try:
     from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
     from rich.table import Table
     from rich.text import Text
+
     RICH_AVAILABLE = True
 except ImportError:
     RICH_AVAILABLE = False
@@ -52,12 +55,16 @@ class CompressionResult:
     original_deleted: bool = False
     operation: str = "compress"
     was_tarred: bool = False
+
+
 def format_size(size_bytes: float) -> str:
     for unit in ["B", "KB", "MB", "GB", "TB"]:
         if size_bytes < 1024.0:
             return f"{size_bytes:.2f} {unit}"
         size_bytes /= 1024.0
     return f"{size_bytes:.2f} PB"
+
+
 def tar_directory(directory: Path, output_path: Path, delete_original: bool = False) -> tuple[int, bool]:
     try:
         dir_size = sum(f.stat().st_size for f in directory.rglob("*") if f.is_file())
@@ -72,6 +79,8 @@ def tar_directory(directory: Path, output_path: Path, delete_original: bool = Fa
             output_path.unlink(missing_ok=True)
         print(f"❌ Error tarring {directory.name}: {e}")
         return 0, False
+
+
 def untar_file(tar_path: Path, extract_dir: Path, delete_tar: bool = False) -> bool:
     """Extract tar and optionally delete it."""
     try:
@@ -83,6 +92,8 @@ def untar_file(tar_path: Path, extract_dir: Path, delete_tar: bool = False) -> b
     except Exception as e:
         print(f"❌ Error extracting {tar_path.name}: {e}")
         return False
+
+
 def compress_file_streaming(
     input_path: Path,
     output_path: Path,
@@ -145,6 +156,8 @@ def compress_file_streaming(
             operation="compress",
             was_tarred=was_tarred,
         )
+
+
 def decompress_file_streaming(
     input_path: Path,
     output_path: Path,
@@ -190,6 +203,8 @@ def decompress_file_streaming(
             duration=time.time() - start,
             operation="decompress",
         )
+
+
 def process_subdirs_with_tar(
     directory: Path,
     preset: int = 7,
@@ -232,6 +247,8 @@ def process_subdirs_with_tar(
         else:
             print(f"    ❌ Failed compressing {tar_path.name}: {result.error}")
     return results
+
+
 def should_compress_file(file_path: Path, exclude_extensions: set[str], exclude_patterns: list[str]) -> bool:
     if file_path.is_symlink() or not file_path.is_file():
         return False
@@ -240,6 +257,8 @@ def should_compress_file(file_path: Path, exclude_extensions: set[str], exclude_
     if exclude_patterns and any(pat in str(file_path) for pat in exclude_patterns):
         return False
     return True
+
+
 def find_files_to_compress(
     directory: Path,
     exclude_extensions: set[str] | None = None,
@@ -265,6 +284,8 @@ def find_files_to_compress(
                 if not skip_subdirs or p.parent == directory:
                     files.append(p)
     return sorted(set(files))
+
+
 def find_files_to_decompress(directory: Path, exclude_patterns: list[str] | None = None) -> list[Path]:
     if exclude_patterns is None:
         exclude_patterns = []
@@ -272,12 +293,16 @@ def find_files_to_decompress(directory: Path, exclude_patterns: list[str] | None
     if exclude_patterns:
         files = [p for p in files if not any(pat in str(p) for pat in exclude_patterns)]
     return sorted(set(files))
+
+
 def get_file_type_stats(files: list[Path]) -> dict:
     type_stats = {}
     for file_path in files:
         ext = file_path.suffix.lower() or "[no extension]"
         type_stats[ext] = type_stats.get(ext, 0) + 1
     return dict(sorted(type_stats.items(), key=lambda x: x[1], reverse=True))
+
+
 def print_results_rich(results: list[CompressionResult], directory: Path, operation: str):
     console = Console()
     successful = [r for r in results if r.success]
@@ -395,6 +420,8 @@ def print_results_rich(results: list[CompressionResult], directory: Path, operat
     if results:
         summary_text.append(f"(avg {total_duration / len(results):.2f}s per file)", style="dim")
     console.print(Panel(summary_text, border_style="cyan"))
+
+
 def print_results_basic(results: list[CompressionResult], directory: Path, operation: str):
     successful = [r for r in results if r.success]
     failed = [r for r in results if not r.success]
@@ -470,6 +497,8 @@ def print_results_basic(results: list[CompressionResult], directory: Path, opera
         f"⏱️  Total time: {total_duration:.2f}s (avg {total_duration / len(results):.2f}s per file)" if results else ""
     )
     print("=" * 80 + "\n")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="🗜️  Recursively compress/decompress files using LZMA with parallel processing (deletes originals by default)",
@@ -827,5 +856,7 @@ def main():
             print_results_rich(results, directory, operation)
         else:
             print_results_basic(results, directory, operation)
+
+
 if __name__ == "__main__":
     main()

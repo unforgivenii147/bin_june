@@ -8,6 +8,7 @@ from pathlib import Path
 from urllib.parse import unquote, urlparse
 import requests
 from tqdm import tqdm
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 MAX_WORKERS = 4
 MAX_RETRIES = 3
@@ -31,10 +32,14 @@ SAFE_EXTENSIONS = [
     "\\.zip$",
 ]
 EXT_PATTERN = re.compile(r"|".join(SAFE_EXTENSIONS), re.IGNORECASE)
+
+
 def sanitize_filename(name) -> str:
     name = unquote(name)
     name = re.sub(r'[<>:"|?*]', "_", name)
     return name[:255].strip() or "downloaded_file"
+
+
 def extract_filename(url) -> str:
     parsed = urlparse(url)
     path = parsed.path
@@ -45,12 +50,16 @@ def extract_filename(url) -> str:
     if not re.search(r"\.[a-zA-Z0-9]+$", filename):
         filename += ".dat"
     return filename
+
+
 def is_safe_extension(url) -> bool:
     parsed = urlparse(url)
     path = parsed.path
     filename = path.split("/")[-1]
     base_name = filename.split("?")[0].split("#")[0]
     return bool(EXT_PATTERN.search(base_name))
+
+
 def get_filesize(url, session) -> int | None:
     try:
         r = session.head(url, timeout=TIMEOUT, allow_redirects=True)
@@ -59,6 +68,8 @@ def get_filesize(url, session) -> int | None:
         return int(size) if size else None
     except Exception:
         return None
+
+
 def download_one(url, session, output_dir, resume_from=None):
     filename = extract_filename(url)
     filepath = os.path.join(output_dir, filename)
@@ -86,6 +97,8 @@ def download_one(url, session, output_dir, resume_from=None):
         if MAX_RETRIES > 0:
             return url, False, f"Retry needed: {e}"
         return url, False, str(e)
+
+
 def download_urls(urls: list[str], output_dir=OUTPUT_DIR) -> None:
     Path(output_dir).mkdir(exist_ok=True, parents=True)
     safe_urls = [url for url in urls if is_safe_extension(url)]
@@ -113,6 +126,8 @@ def download_urls(urls: list[str], output_dir=OUTPUT_DIR) -> None:
                     pbar.write(f"⚠️  Unexpected error for {url}: {e}")
                 pbar.update(1)
     session.close()
+
+
 if __name__ == "__main__":
     urls = []
     try:

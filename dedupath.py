@@ -2,13 +2,19 @@
 """
 Remove duplicate entries from $PATH and update ~/.bashrc
 """
+
 from __future__ import annotations
 import os
 from pathlib import Path
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 def get_path_entries():
     path_str = os.environ.get("PATH", "")
     return path_str.split(":") if path_str else []
+
+
 def remove_duplicates_preserve_order(entries):
     seen = set()
     unique_entries = []
@@ -18,10 +24,14 @@ def remove_duplicates_preserve_order(entries):
             print(entry)
             unique_entries.append(entry)
     return unique_entries
+
+
 def read_bashrc(bashrc_path):
     if bashrc_path.exists():
         return bashrc_path.read_text()
     return ""
+
+
 def update_bashrc_with_path(bashrc_content, new_path_entries):
     new_path_str = ":".join(new_path_entries)
     path_export = f'export PATH="{new_path_str}"\n'
@@ -33,6 +43,8 @@ def update_bashrc_with_path(bashrc_content, new_path_entries):
     else:
         updated_content = bashrc_content.rstrip() + "\n" + path_export
     return updated_content
+
+
 def main():
     bashrc_path = Path.home() / ".bashrc"
     path_entries = get_path_entries()
@@ -57,5 +69,7 @@ def main():
     bashrc_path.write_text(updated_content)
     print(f"✓ Updated {bashrc_path}")
     print("\nNote: Run 'source ~/.bashrc' to apply changes to current shell")
+
+
 if __name__ == "__main__":
     main()

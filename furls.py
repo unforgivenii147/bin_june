@@ -19,26 +19,38 @@ from typing import Any
 from urllib.parse import urlparse
 from zipfile import ZipFile
 import zstd
+
+
 class ValidationFailure(Exception):
     def __init__(self, function: Callable[..., Any], arg_dict: dict[str, Any]):
         self.func = function
         self.__dict__.update(arg_dict)
+
     def __repr__(self):
         return f"ValidationFailure(func={self.func.__name__}, args={{k: v for k, v in self.__dict__.items() if k != 'func'}})"
+
     def __str__(self):
         return repr(self)
+
     def __bool__(self):
         return False
+
+
 def _func_args_as_dict(func: Callable[..., Any], *args: Any, **kwargs: Any):
     return dict(
         list(zip(dict.fromkeys(chain(getfullargspec(func)[0], kwargs.keys())), args, strict=False))
         + list(kwargs.items())
     )
+
+
 def validator(func: Callable[..., Any]):
     @wraps(func)
     def wrapper(*args: Any, **kwargs: Any):
         return True if func(*args, **kwargs) else ValidationFailure(func, _func_args_as_dict(func, *args, **kwargs))
+
     return wrapper
+
+
 ip_middle_octet = "(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5]))"
 ip_last_octet = "(?:\\.(?:0|[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-5]))"
 url_regex = re.compile(
@@ -60,12 +72,17 @@ url_regex = re.compile(
     re.UNICODE | re.IGNORECASE,
 )
 URL_RE = re.compile(url_regex)
+
+
 def is_valid_url(value, public=False):
     result = URL_RE.match(value)
     if not public:
         return result
     return result and (not any((result.groupdict().get(key) for key in ("private_ip", "private_host"))))
+
+
 from dh import append_text
+
 DEFAULT_MAX_MB = 15
 EXCLUDE_DIRS = {".git", "__pycache__"}
 URL_RE = re.compile("(https?://[^\\s\\'\\\"<>\\\\)\\\\(]+)", flags=re.IGNORECASE)
@@ -94,8 +111,12 @@ ARCHIVE_SUFFIXES = (
     ".tbz",
     "tzz",
 )
+
+
 def should_skip_dir(dirname: str) -> bool:
     return any((part in EXCLUDE_DIRS for part in dirname.split(os.sep)))
+
+
 def find_urls_in_text(text):
     found = set()
     for m in URL_RE.findall(text):
@@ -103,6 +124,8 @@ def find_urls_in_text(text):
         if url:
             found.add(url)
     return found
+
+
 def decode_bytes_to_text(b):
     for enc in ("utf-8", "latin-1", "utf-16"):
         try:
@@ -110,6 +133,8 @@ def decode_bytes_to_text(b):
         except Exception:
             continue
     return b.decode("utf-8", errors="ignore")
+
+
 def scan_bytes_for_urls(b: bytes, max_bytes, exts, name_hint=None):
     if exts is not None and name_hint:
         _, ext = os.path.splitext(name_hint)
@@ -119,9 +144,13 @@ def scan_bytes_for_urls(b: bytes, max_bytes, exts, name_hint=None):
         return set()
     text = decode_bytes_to_text(b)
     return find_urls_in_text(text)
+
+
 def is_archive_name(name) -> bool:
     nl = name.lower()
     return any((nl.endswith(suf) for suf in ARCHIVE_SUFFIXES))
+
+
 def open_tar_from_zst_path(path):
     temp = tempfile.TemporaryFile()
     with Path(path).open("rb") as fh:
@@ -144,6 +173,8 @@ def open_tar_from_zst_path(path):
         with contextlib.suppress(Exception):
             temp.close()
         return (None, None)
+
+
 def process_zipfile_zipped(zipf: ZipFile, max_bytes, exts, found, recursion_depth, max_recursion) -> None:
     for zi in zipf.infolist():
         if zi.is_dir():
@@ -160,6 +191,8 @@ def process_zipfile_zipped(zipf: ZipFile, max_bytes, exts, found, recursion_dept
             process_bytes_as_archive(b, name, max_bytes, exts, found, recursion_depth + 1, max_recursion)
         else:
             found.update(scan_bytes_for_urls(b, max_bytes, exts, name_hint=name))
+
+
 def process_tarfile_obj(tarf: TarFile, max_bytes, exts, found, recursion_depth, max_recursion) -> None:
     for member in tarf.getmembers():
         if not member.isfile():
@@ -178,6 +211,8 @@ def process_tarfile_obj(tarf: TarFile, max_bytes, exts, found, recursion_depth, 
             process_bytes_as_archive(b, name, max_bytes, exts, found, recursion_depth + 1, max_recursion)
         else:
             found.update(scan_bytes_for_urls(b, max_bytes, exts, name_hint=name))
+
+
 def process_bytes_as_archive(b, name, max_bytes, exts, found, recursion_depth: int = 0, max_recursion: int = 3) -> None:
     lname = name.lower()
     bio = io.BytesIO(b)
@@ -222,6 +257,8 @@ def process_bytes_as_archive(b, name, max_bytes, exts, found, recursion_depth: i
         found.update(scan_bytes_for_urls(b, max_bytes, exts, name_hint=name))
     except Exception:
         found.update(scan_bytes_for_urls(b, max_bytes, exts, name_hint=name))
+
+
 def process_path(path: str, max_bytes: int, exts, found, recursion_limit=999) -> None:
     p = Path(path)
     try:
@@ -275,12 +312,16 @@ def process_path(path: str, max_bytes: int, exts, found, recursion_limit=999) ->
             return
     except Exception:
         return
+
+
 def is_github_url(url):
     try:
         result = urlparse(url)
         return "github.com" in result.netloc
     except:
         return False
+
+
 def extract_git_repos(urls):
     repo_urls = []
     github_regex = re.compile("https?://github\\.com/([^/]+)/([^/]+?)(?:/|$|\\.git|\\?|#)")
@@ -292,6 +333,8 @@ def extract_git_repos(urls):
             if "/" not in repo and "." not in repo.split("/")[0]:
                 repo_urls.append(f"{user}/{repo}")
     return repo_urls
+
+
 def extract_and_save_gitlinks(urllist) -> None:
     glinks = []
     for url in urllist:
@@ -307,6 +350,8 @@ def extract_and_save_gitlinks(urllist) -> None:
         print(f"{len(glinks)} links found.")
     else:
         print("no git link")
+
+
 def iter_files(root: Path):
     root = root.resolve()
     for current_dir, dirnames, filenames in os.walk(str(root), topdown=True, followlinks=False):
@@ -316,6 +361,8 @@ def iter_files(root: Path):
         cd = Path(current_dir)
         for fname in filenames:
             yield (cd / fname)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Find URLs in files and supported archives recursively and save them to a file."
@@ -367,5 +414,7 @@ def main() -> None:
         any((p.endswith(".tar.zst") for p in sorted_urls))
     except OSError as e:
         print(f"Error writing output file: {e}", file=sys.stderr)
+
+
 if __name__ == "__main__":
     main()

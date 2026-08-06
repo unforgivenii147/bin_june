@@ -3,6 +3,7 @@
 ziprepo_optimized_by_gemini.py — Download a GitHub repository as ZIP.
 Optimized for Python 3.12 with modern syntax, type hints, and performance improvements.
 """
+
 from __future__ import annotations
 import argparse
 import logging
@@ -11,11 +12,14 @@ import sys
 from pathlib import Path
 from dotenv import load_dotenv
 from github import Github, GithubException
+
 logging.basicConfig(level=logging.INFO, format="%(message)s", handlers=[logging.StreamHandler(sys.stdout)])
 logger = logging.getLogger(__name__)
 env_path = Path.home() / ".env"
 if env_path.exists():
     load_dotenv(env_path)
+
+
 def download_repo_zip(username: str, repo: str, branch: str = "main", output_name: str | None = None) -> Path | None:
     token = os.getenv("GITHUB_TOKEN")
     if not token:
@@ -41,6 +45,8 @@ def download_repo_zip(username: str, repo: str, branch: str = "main", output_nam
     except Exception as e:
         logger.error(f"❌ Error: {e}")
     return None
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Download a GitHub repository as ZIP archive")
     parser.add_argument("repo", help='Repository in format "username/repo"')
@@ -54,5 +60,7 @@ def main() -> None:
     result = download_repo_zip(username, repo, args.branch, args.output)
     if not result:
         sys.exit(1)
+
+
 if __name__ == "__main__":
     main()

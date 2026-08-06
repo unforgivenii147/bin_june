@@ -2,11 +2,15 @@
 """
 Check for bash functions that also exist as aliases and remove the aliases.
 """
+
 from __future__ import annotations
 import re
 import sys
 from pathlib import Path
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 def extract_function_names(filepath: Path):
     functions = set()
     function_pattern = re.compile(r"^\s*([a-zA-Z_][a-zA-Z0-9_-]*)\s*\(\s*\)\s*\{", re.MULTILINE)
@@ -22,6 +26,8 @@ def extract_function_names(filepath: Path):
         print(f"Error reading functions file: {e}")
         sys.exit(1)
     return functions
+
+
 def extract_alias_names(filepath: Path):
     aliases = {}
     alias_pattern = re.compile(r"^\s*alias\s+([a-zA-Z_][a-zA-Z0-9_-]*)=", re.MULTILINE)
@@ -44,6 +50,8 @@ def extract_alias_names(filepath: Path):
         print(f"Error reading aliases file: {e}")
         sys.exit(1)
     return aliases
+
+
 def remove_aliases(aliases_to_remove, aliases_file: Path) -> int:
     if not aliases_to_remove:
         return 0
@@ -78,16 +86,21 @@ def remove_aliases(aliases_to_remove, aliases_file: Path) -> int:
     except Exception as e:
         print(f"Error modifying aliases file: {e}")
         return 0
+
+
 def create_backup(filepath: Path) -> str | None:
     backup_path = f"{filepath}.backup"
     try:
         import shutil
+
         shutil.copy2(filepath, backup_path)
         print(f"Backup created: {backup_path}")
         return backup_path
     except Exception as e:
         print(f"Warning: Could not create backup: {e}")
         return None
+
+
 def main() -> None:
     bashd = Path.home() / ".config/bash.d"
     functions_file = bashd / "bash_functions"
@@ -128,5 +141,7 @@ def main() -> None:
     else:
         print("\nNo aliases were removed")
         sys.exit(1)
+
+
 if __name__ == "__main__":
     main()

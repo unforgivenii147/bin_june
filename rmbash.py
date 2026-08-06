@@ -5,6 +5,8 @@ from collections import deque
 from pathlib import Path
 from loguru import logger
 from dh import get_files
+
+
 def strip_bash_comments(line):
     if line.startswith("#!"):
         return (line, 0)
@@ -18,6 +20,8 @@ def strip_bash_comments(line):
         elif char == "#" and (not in_single_quote) and (not in_double_quote):
             return (line[:i].rstrip() + "\n", 1)
     return (line, 0)
+
+
 def process_file(args):
     path, root = args
     path = Path(path)
@@ -38,6 +42,8 @@ def process_file(args):
     except Exception as e:
         logger.error(f"Failed {path}: {e}")
         return 0
+
+
 def main():
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -59,5 +65,7 @@ def main():
     for res in results:
         total += res
     print(f"{total} comments removed")
+
+
 if __name__ == "__main__":
     sys.exit(main())

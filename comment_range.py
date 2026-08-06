@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 import os
 import sys
+
 # Dictionary mapping file extensions to their respective comment characters
 EXTENSION_COMMENTS = {
     ".py": "#",
@@ -17,6 +18,8 @@ EXTENSION_COMMENTS = {
     ".html": "<!--",  # Note: HTML requires closing, but using standard prefix placement here
     ".css": "/*",
 }
+
+
 def main():
     # 1. Validate that enough arguments were passed
     if len(sys.argv) < 4:
@@ -62,5 +65,7 @@ def main():
     with open(filepath, "w", encoding="utf-8") as f:
         f.writelines(lines)
     print(f"Success: Commented out lines {start_line} to {actual_end} in '{filepath}' using '{comment_char}'.")
+
+
 if __name__ == "__main__":
     main()

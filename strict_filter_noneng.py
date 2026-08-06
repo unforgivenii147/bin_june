@@ -5,11 +5,14 @@ import sys
 from pathlib import Path
 import gcld3
 import nltk
+
 try:
     nltk.data.find("corpora/words")
 except LookupError:
     nltk.download("words", quiet=True)
 from nltk.corpus import words
+
+
 def is_english_strict(line: str, detector, english_vocab: set, min_ratio: float = 0.5) -> tuple[bool, str]:
     """
     Stricter verification: Combines gcld3 predictions with NLTK dictionary lookups.
@@ -31,6 +34,8 @@ def is_english_strict(line: str, detector, english_vocab: set, min_ratio: float 
     if result.language != "en":
         reason += f" | CLD3: {result.language.upper()}"
     return False, reason
+
+
 def process_file_lines(input_path: Path, move_mode: bool, strict_ratio: float):
     if not input_path.is_file():
         print(f"❌ Error: The file '{input_path}' does not exist.")
@@ -68,6 +73,8 @@ def process_file_lines(input_path: Path, move_mode: bool, strict_ratio: float):
             print(f"🔄 In-place clean file written back to original location.")
         except Exception as e:
             print(f"❌ Storage error: {e}")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Filter non-English lines strictly using a hybrid GCLD3 and NLTK dictionary method."
@@ -88,5 +95,7 @@ def main():
     )
     args = parser.parse_args()
     process_file_lines(Path(args.file), args.move, args.threshold)
+
+
 if __name__ == "__main__":
     main()

@@ -6,19 +6,24 @@ from pathlib import Path
 from dh import fsz, get_files, mpf3
 from PIL import Image
 from PIL.Image import Image
+
 try:
     import cv2
+
     HAS_CV2 = True
 except ImportError:
     HAS_CV2 = False
     try:
         from skimage import color, filters, io
         from skimage.util import img_as_ubyte
+
         HAS_SKIMAGE = True
     except ImportError:
         print("Error: Neither OpenCV nor scikit-image is available.")
         print("Install one of them: pip install opencv-python or pip install scikit-image")
         sys.exit(1)
+
+
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -28,7 +33,11 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
+
+
 MAX_QUEUE = 16
+
+
 def process_image_cv2(image_path: Path) -> Image:
     """Process image using OpenCV"""
     img = cv2.imread(str(image_path))
@@ -44,6 +53,8 @@ def process_image_cv2(image_path: Path) -> Image:
     enhanced = image_path.with_stem(image_path.stem + "_enhanced_pil")
     cv2.imwrite(str(enhanced), binary)
     return enhanced_img_pil
+
+
 def process_image_skimage(image_path: Path) -> Image:
     """Process image using scikit-image"""
     try:
@@ -60,18 +71,23 @@ def process_image_skimage(image_path: Path) -> Image:
     sharpened = 1.5 * blurred - 0.5 * gaussian_blur
     sharpened = np.clip(sharpened, 0, 1)
     from skimage.filters import threshold_local
+
     binary = sharpened > threshold_local(sharpened, 11, "gaussian")
     binary_uint8 = img_as_ubyte(binary)
     enhanced_img_pil = Image.fromarray(binary_uint8)
     enhanced = image_path.with_stem(image_path.stem + "_enhanced_pil")
     io.imsave(str(enhanced), binary_uint8)
     return enhanced_img_pil
+
+
 def process_file(image_path: Path) -> Image:
     """Main processing function that selects the appropriate backend"""
     if HAS_CV2:
         return process_image_cv2(image_path)
     else:
         return process_image_skimage(image_path)
+
+
 def process_file2(image_path):
     """Alternative processing with slightly different parameters"""
     if HAS_CV2:
@@ -89,6 +105,7 @@ def process_file2(image_path):
         return binary
     else:
         import numpy as np
+
         try:
             img = io.imread(str(image_path))
         except Exception as e:
@@ -103,11 +120,14 @@ def process_file2(image_path):
         sharpened = 1.5 * blurred - 0.5 * gaussian_blur
         sharpened = np.clip(sharpened, 0, 1)
         from skimage.filters import threshold_local
+
         binary = sharpened > threshold_local(sharpened, 11, "gaussian")
         binary_uint8 = img_as_ubyte(binary)
         enhanced = image_path.with_stem(image_path.stem + "_enhanced_cv")
         io.imsave(str(enhanced), binary_uint8)
         return binary_uint8
+
+
 def main() -> None:
     print(f"Using {('OpenCV' if HAS_CV2 else 'scikit-image')} for image processing")
     cwd = Path.cwd()
@@ -124,5 +144,7 @@ def main() -> None:
     mpf3(process_file2, files)
     diff_size = before - gsz(cwd)
     print(f"space saved : {fsz(diff_size)}")
+
+
 if __name__ == "__main__":
     main()

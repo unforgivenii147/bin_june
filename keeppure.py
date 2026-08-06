@@ -5,7 +5,10 @@ import os
 import site
 from multiprocessing import cpu_count
 from pathlib import Path
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 def get_all_dist_info_dirs():
     dist_info_dirs = []
     for site_dir in [*site.getsitepackages(), site.getusersitepackages()]:
@@ -14,6 +17,8 @@ def get_all_dist_info_dirs():
                 os.path.join(site_dir, item) for item in os.listdir(site_dir) if item.endswith(".dist-info")
             )
     return dist_info_dirs
+
+
 def check_package_binary(dist_info_path) -> str | None:
     record_file = os.path.join(dist_info_path, "RECORD")
     pkg_name = Path(dist_info_path).name.replace(".dist-info", "").split("-")[0].lower()
@@ -27,11 +32,15 @@ def check_package_binary(dist_info_path) -> str | None:
         except:
             pass
     return None
+
+
 def get_binary_packages_parallel():
     dist_info_dirs = get_all_dist_info_dirs()
     with Pool(processes=cpu_count()) as pool:
         results = pool.map(check_package_binary, dist_info_dirs)
     return {pkg for pkg in results if pkg}
+
+
 def clean_requirements_txt(requirements_file: str = "requirements.txt") -> None:
     if not Path(requirements_file).exists():
         print(f"Error: {requirements_file} not found")
@@ -61,7 +70,10 @@ def clean_requirements_txt(requirements_file: str = "requirements.txt") -> None:
             print(f"   - {pkg}")
     else:
         print("✅ No binary packages found in requirements.txt")
+
+
 if __name__ == "__main__":
     import sys
+
     req_file = sys.argv[1] if len(sys.argv) > 1 else "requirements.txt"
     clean_requirements_txt(req_file)

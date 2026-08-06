@@ -2,6 +2,8 @@
 from __future__ import annotations
 import sys
 import requests
+
+
 def check_package(pkg_name):
     url = f"https://pypi.org/pypi/{pkg_name}/json"
     response = requests.get(url)
@@ -14,6 +16,8 @@ def check_package(pkg_name):
                 print(f"  Has wheels: {'wheel' in release.get('packagetype', '')}")
                 return
     print(f"{pkg_name}: Not found or no pure info")
+
+
 if __name__ == "__main__":
     pkgs = sys.argv[1:]
     for pkg in pkgs:

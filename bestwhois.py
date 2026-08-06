@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from pathlib import Path
+
 """A command-line utility for WhoisXML API services
 (c) WhoisXML API Inc. 2019.
 """
@@ -13,6 +14,7 @@ import requests
 from pygments import highlight
 from pygments.formatters import TerminalFormatter
 from pygments.lexers import JsonLexer
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 IDN = True
 try:
@@ -26,6 +28,8 @@ RC_FILE_LOCS = [
     Path("~/.bestwhoisrc").expanduser(),
     "data/data/com.termux/files/usr/etc/bestwhois/bestwhoisrc",
 ]
+
+
 def valid_date(s):
     try:
         _ = datetime.datetime.strptime(s, "%Y-%m-%d")
@@ -33,6 +37,8 @@ def valid_date(s):
     except ValueError:
         msg = f"Not a valid date: '{s}'."
         raise argparse.ArgumentTypeError(msg)
+
+
 def dictstr(structure, ntabs: int) -> None:
     global raw_str
     for field in structure:
@@ -51,8 +57,12 @@ def dictstr(structure, ntabs: int) -> None:
             dictstr(structure[field], ntabs + 1)
         else:
             raw_str += f"{tabs}{field}: {structure[field]}\n"
+
+
 def is_empty_field(field):
     return field is None or field == "" or field == {} or field == []
+
+
 def purge_empty_fields(structure):
     for field in structure.copy():
         if isinstance(structure[field], dict):
@@ -60,6 +70,8 @@ def purge_empty_fields(structure):
         if is_empty_field(structure[field]):
             structure.pop(field)
     return structure
+
+
 ARGS_PARSER = ArgumentParser(
     description="Command-line utility to query domains in the WhoisXML API WHOIS service similarly to the whois command.",
     prog=MYNAME,

@@ -9,6 +9,7 @@ Supported compression: gzip, bz2, lzma, zstandard (.zst), brotli (.br).
 Multiprocessing is used for fast AST analysis. Logging is handled by loguru.
 Requires Python 3.9+ (for ast.unparse).
 """
+
 from __future__ import annotations
 import argparse
 import ast
@@ -18,10 +19,12 @@ import hashlib
 import lzma
 from dataclasses import dataclass
 from pathlib import Path
+
 try:
     from loguru import logger
 except ImportError:
     import logging
+
     logger = logging.getLogger(__name__)
     logging.basicConfig(level=logging.INFO)
 _COMPRESSED_EXT: dict[str, object] = {
@@ -32,6 +35,8 @@ _COMPRESSED_EXT: dict[str, object] = {
     ".zst": None,
     ".br": None,
 }
+
+
 def _decompress_file(path: Path) -> str | None:
     suffix = path.suffix.lower()
     if suffix not in _COMPRESSED_EXT:
@@ -42,12 +47,14 @@ def _decompress_file(path: Path) -> str | None:
     try:
         if suffix == ".zst":
             import zstandard as zstd
+
             with open(path, "rb") as fh:
                 dctx = zstd.ZstdDecompressor()
                 data = dctx.decompress(fh.read())
             return data.decode("utf-8", errors="replace")
         if suffix == ".br":
             import brotli
+
             with open(path, "rb") as fh:
                 data = brotli.decompress(fh.read())
             return data.decode("utf-8", errors="replace")
@@ -63,6 +70,8 @@ def _decompress_file(path: Path) -> str | None:
     except Exception as exc:
         logger.error("Failed to decompress {}: {}", path, exc)
         return None
+
+
 def _find_files(root: str = ".") -> list[tuple[str, str | None]]:
     results: list[tuple[str, str | None]] = []
     root_path = Path(root).resolve()
@@ -79,8 +88,12 @@ def _find_files(root: str = ".") -> list[tuple[str, str | None]]:
                 if source is not None:
                     results.append((full, source))
     return results
+
+
 def _hash(source: str) -> str:
     return hashlib.sha256(source.encode("utf-8")).hexdigest()
+
+
 @dataclass
 class _Def:
     type: str
@@ -88,6 +101,8 @@ class _Def:
     source_code: str
     content_hash: str
     filepath: str
+
+
 def _extract_definitions(path: str, source: str) -> list[_Def]:
     try:
         tree = ast.parse(source, filename=path)
@@ -117,6 +132,8 @@ def _extract_definitions(path: str, source: str) -> list[_Def]:
         segment = segment.strip("\n")
         defs.append(_Def(type=typ, name=name, source_code=segment, content_hash=_hash(segment), filepath=path))
     return defs
+
+
 def _new_utils_entries(groups: dict[str, list[_Def]], existing: dict[str, dict[str, _Def]]) -> dict[str, list[_Def]]:
     new: dict[str, list[_Def]] = {"func": [], "class": [], "const": []}
     for _hash_key, defs in groups.items():
@@ -134,6 +151,8 @@ def _new_utils_entries(groups: dict[str, list[_Def]], existing: dict[str, dict[s
             continue
         new[typ].append(rep)
     return new
+
+
 def _read_existing_utils(utils_dir: Path) -> dict[str, dict[str, _Def]]:
     existing: dict[str, dict[str, _Def]] = {"func": {}, "class": {}, "const": {}}
     for typ, fname in [("func", "func.py"), ("class", "class.py"), ("const", "const.py")]:
@@ -146,6 +165,8 @@ def _read_existing_utils(utils_dir: Path) -> dict[str, dict[str, _Def]]:
             except Exception as exc:
                 logger.error("Error parsing existing {}: {}", path, exc)
     return existing
+
+
 def _write_utils_files(utils_dir: Path, new: dict[str, list[_Def]]) -> None:
     utils_dir.mkdir(exist_ok=True)
     for typ, fname in [("func", "func.py"), ("class", "class.py"), ("const", "const.py")]:
@@ -159,6 +180,8 @@ def _write_utils_files(utils_dir: Path, new: dict[str, list[_Def]]) -> None:
             for d in new[typ]:
                 fh.write(d.source_code + "\n\n")
         logger.info("Added {} definition(s) to {}", len(new[typ]), fname)
+
+
 def _move_definitions(groups: dict[str, list[_Def]]) -> None:
     to_remove: dict[str, set[str]] = {}
     for hash_key, defs in groups.items():
@@ -197,6 +220,8 @@ def _move_definitions(groups: dict[str, list[_Def]]) -> None:
             logger.info("Removed {} duplicate definition(s) from {}", len(hashes), path)
         except Exception as exc:
             logger.error("Failed to process {} for moving: {}", path, exc)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Copy/move repeated Python definitions to utils/")
     group = parser.add_mutually_exclusive_group(required=True)
@@ -250,5 +275,7 @@ def main() -> None:
     _write_utils_files(utils_dir, new_entries)
     if action == "move":
         _move_definitions(duplicate_groups)
+
+
 if __name__ == "__main__":
     main()

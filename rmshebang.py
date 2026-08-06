@@ -5,6 +5,8 @@ from collections import deque
 from multiprocessing import get_context
 from pathlib import Path
 from dh import fsz, get_files
+
+
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -14,7 +16,11 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
+
+
 MAX_QUEUE = 16
+
+
 def process_file(path) -> None:
     path = Path(path)
     try:
@@ -30,6 +36,8 @@ def process_file(path) -> None:
         return
     except Exception:
         pass
+
+
 def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
@@ -45,5 +53,7 @@ def main() -> None:
             pending.popleft().get()
     diffsize = before - gsz(cwd)
     print(f"space saved: {fsz(diffsize)}")
+
+
 if __name__ == "__main__":
     main()

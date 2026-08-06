@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from typing import Tuple
+
 """
 Parallel GZIP Compression Script
 Compresses files recursively using maximum compression with gzip module.
@@ -14,22 +15,29 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import timedelta
 from pathlib import Path
 from typing import List
+
+
 class CompressionStats:
     """Track compression statistics."""
+
     def __init__(self):
         self.total_files = 0
         self.successful = 0
         self.failed = 0
         self.total_original_size = 0
         self.total_compressed_size = 0
+
     def add_success(self, original_size: int, compressed_size: int):
         self.total_files += 1
         self.successful += 1
         self.total_original_size += original_size
         self.total_compressed_size += compressed_size
+
     def add_failure(self):
         self.total_files += 1
         self.failed += 1
+
+
 def compress_file(file_path: Path) -> tuple[Path, bool, int, int, str]:
     """
     Compress a single file using gzip with maximum compression.
@@ -50,6 +58,8 @@ def compress_file(file_path: Path) -> tuple[Path, bool, int, int, str]:
         if gz_path.exists():
             gz_path.unlink()
         return (file_path, False, 0, 0, str(e))
+
+
 def find_files_to_compress(directories: list[Path], skip_extensions: set | None = None) -> list[Path]:
     """
     Find all files recursively in given directories that should be compressed.
@@ -71,6 +81,8 @@ def find_files_to_compress(directories: list[Path], skip_extensions: set | None 
                 if not file_path.suffix.endswith(".gz"):
                     files_to_compress.append(file_path)
     return files_to_compress
+
+
 def format_size(size_bytes: int) -> str:
     """Format bytes to human readable string."""
     for unit in ["B", "KB", "MB", "GB", "TB"]:
@@ -78,12 +90,16 @@ def format_size(size_bytes: int) -> str:
             return f"{size_bytes:.2f} {unit}"
         size_bytes /= 1024.0
     return f"{size_bytes:.2f} PB"
+
+
 def format_ratio(original: int, compressed: int) -> str:
     """Format compression ratio."""
     if original == 0:
         return "N/A"
     ratio = (1 - compressed / original) * 100
     return f"{ratio:.1f}%"
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Compress files recursively with gzip (maximum compression)",
@@ -171,5 +187,7 @@ Examples:
         print(f"  Space saved:               {format_size(space_saved)}")
     print(f"  Time elapsed:               {timedelta(seconds=int(elapsed_time))}")
     print("=" * 70 + "\n")
+
+
 if __name__ == "__main__":
     main()

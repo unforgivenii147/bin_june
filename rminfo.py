@@ -3,10 +3,12 @@
 Script to remove author/email/time info block from Python files recursively.
 Handles both .py files and Python files without extension (detected via shebang).
 """
+
 from __future__ import annotations
 import re
 import sys
 from pathlib import Path
+
 INFO_BLOCK_PATTERN = re.compile(
     r"^# Author\s*:\s*isaac\s*\n"
     r"# Email\s*:\s*mkalafsaz@gmail\.com\s*\n"
@@ -17,6 +19,8 @@ PYTHON_SHEBANG_PATTERNS = [
     re.compile(r"^#!.*python", re.IGNORECASE),
     re.compile(r"^#!.*python3", re.IGNORECASE),
 ]
+
+
 def is_python_file(file_path):
     """Check if a file is a Python file (by extension or shebang)."""
     if file_path.suffix == ".py":
@@ -31,6 +35,8 @@ def is_python_file(file_path):
         except Exception:
             pass
     return False
+
+
 def remove_info_block(file_path):
     """Remove the info block from a Python file."""
     try:
@@ -47,6 +53,8 @@ def remove_info_block(file_path):
     except Exception as e:
         print(f"Error processing {file_path}: {e}", file=sys.stderr)
         return False
+
+
 def main():
     """Main function to process all Python files recursively."""
     start_dir = Path(".")
@@ -67,5 +75,7 @@ def main():
     print("\nSummary:")
     print(f"  Python files checked: {files_checked}")
     print(f"  Info blocks removed: {removed_count}")
+
+
 if __name__ == "__main__":
     main()

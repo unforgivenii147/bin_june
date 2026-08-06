@@ -18,12 +18,14 @@ Notes:
     it will skip the file unless you set --force-text to treat plain text as .txt (not included by default).
   - Always run with --dry-run first.
 """
+
 from __future__ import annotations
 import argparse
 import shutil
 import sys
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
+
 READ_BYTES = 8192
 SIGNATURES = [
     (lambda b: b.startswith(b"\x89PNG\r\n\x1a\n"), ".png", "PNG image"),
@@ -74,6 +76,8 @@ SIGNATURES = [
 ]
 PREFERRED_EXT = {".jpeg": ".jpg", ".tiff": ".tif", ".htm": ".html"}
 SKIP_EXTS = {".py", ".pyc", ".pyo", ".so", ".dll"}
+
+
 def detect_by_signature(path: Path, nbytes: int = READ_BYTES) -> tuple[str, str] | None:
     try:
         with path.open("rb") as f:
@@ -91,6 +95,7 @@ def detect_by_signature(path: Path, nbytes: int = READ_BYTES) -> tuple[str, str]
             continue
     try:
         import zipfile
+
         if zipfile.is_zipfile(path):
             with zipfile.ZipFile(path, "r") as z:
                 for nm in z.namelist():
@@ -103,6 +108,7 @@ def detect_by_signature(path: Path, nbytes: int = READ_BYTES) -> tuple[str, str]
         pass
     try:
         import tarfile
+
         if tarfile.is_tarfile(path):
             return ".tar", "TAR archive"
     except Exception:
@@ -118,6 +124,8 @@ def detect_by_signature(path: Path, nbytes: int = READ_BYTES) -> tuple[str, str]
     except Exception:
         pass
     return None
+
+
 def safe_rename(src: Path, dst: Path) -> tuple[bool, str | None]:
     if src.samefile(dst) if dst.exists() and src.exists() else False:
         return False, "source and destination are identical"
@@ -147,6 +155,8 @@ def safe_rename(src: Path, dst: Path) -> tuple[bool, str | None]:
                 except Exception as e:
                     return False, f"rename/move failed for candidate: {e}"
     return False, "failed to find non-conflicting name"
+
+
 def process_file(args) -> dict:
     path_str, commit, _verbose = args
     path = Path(path_str)
@@ -200,6 +210,8 @@ def process_file(args) -> dict:
         result["action"] = "error"
         result["reason"] = info
     return result
+
+
 def gather_files(root: Path, follow_symlinks: bool = False, skip_hidden: bool = True) -> list[Path]:
     files: list[Path] = []
     for p in root.rglob("*"):
@@ -211,6 +223,8 @@ def gather_files(root: Path, follow_symlinks: bool = False, skip_hidden: bool = 
         except Exception:
             continue
     return files
+
+
 def print_summary(results: list[dict], verbose: bool = False) -> None:
     renamed = [r for r in results if r["action"] == "renamed"]
     would = [r for r in results if r["action"] == "would-rename"]
@@ -236,6 +250,8 @@ def print_summary(results: list[dict], verbose: bool = False) -> None:
             print("\nErrors:")
             for r in errors[:10]:
                 print(f"  {r['path']}: {r.get('reason')}")
+
+
 def main():
     ap = argparse.ArgumentParser(
         prog="fix_extension_mismatch.py",
@@ -290,5 +306,7 @@ def main():
         print("Interrupted by user.", file=sys.stderr)
         sys.exit(1)
     print_summary(results, verbose=args.verbose)
+
+
 if __name__ == "__main__":
     main()

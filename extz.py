@@ -3,12 +3,16 @@
 Script to show various extensions in current directory with total size for each extension.
 Uses pathlib and parallel processing for speedup.
 """
+
 from __future__ import annotations
 import sys
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 def get_file_info(file_path: Path) -> tuple[str, int]:
     try:
         ext = file_path.suffix.lower() if file_path.suffix else "NO_EXTENSION"
@@ -16,6 +20,8 @@ def get_file_info(file_path: Path) -> tuple[str, int]:
         return ext, size
     except (OSError, PermissionError):
         return None, 0
+
+
 def process_files_batch(file_paths: list[Path]) -> dict[str, int]:
     ext_sizes = defaultdict(int)
     for file_path in file_paths:
@@ -24,6 +30,8 @@ def process_files_batch(file_paths: list[Path]) -> dict[str, int]:
             if ext is not None:
                 ext_sizes[ext] += size
     return dict(ext_sizes)
+
+
 def get_files_in_directory(directory: str = ".") -> list[Path]:
     path = Path(directory)
     files = []
@@ -33,12 +41,16 @@ def get_files_in_directory(directory: str = ".") -> list[Path]:
         if file_path.is_file():
             files.append(file_path)
     return files
+
+
 def format_size(size_bytes: int) -> str:
     for unit in ["B", "KB", "MB", "GB", "TB"]:
         if size_bytes < 1024.0:
             return f"{size_bytes:.2f} {unit}"
         size_bytes /= 1024.0
     return f"{size_bytes:.2f} PB"
+
+
 def main():
     current_dir = "."
     print("-" * 35)
@@ -87,6 +99,8 @@ def main():
     print("-" * 35)
     print(f"{'TOTAL':<20} {format_size(total_size):<15} {len(files):<10} 100.0%")
     print("-" * 35)
+
+
 if __name__ == "__main__":
     try:
         main()

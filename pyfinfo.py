@@ -2,7 +2,10 @@
 from __future__ import annotations
 import os
 from collections import Counter, defaultdict
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 def walk_file_stems(root: str = "."):
     stack = [root]
     while stack:
@@ -18,6 +21,8 @@ def walk_file_stems(root: str = "."):
                         yield stem
         except (PermissionError, OSError):
             pass
+
+
 def levenshtein_bounded(a: str, b: str, max_dist: int) -> int:
     n, m = (len(a), len(b))
     if abs(n - m) > max_dist:
@@ -47,6 +52,8 @@ def levenshtein_bounded(a: str, b: str, max_dist: int) -> int:
             return max_dist + 1
         previous_row = current_row
     return previous_row[m] if previous_row[m] <= max_dist else max_dist + 1
+
+
 def group_similar(names: list[str], threshold: float = 0.8):
     n = len(names)
     used = [False] * n
@@ -76,6 +83,8 @@ def group_similar(names: list[str], threshold: float = 0.8):
         if len(group) > 1:
             groups.append(group)
     return groups
+
+
 def main() -> None:
     cwd = os.getcwd()
     counter = Counter(walk_file_stems(cwd))
@@ -89,5 +98,7 @@ def main() -> None:
     else:
         for i, group in enumerate(groups, 1):
             print(f"Group {i}: {', '.join(group)}")
+
+
 if __name__ == "__main__":
     main()

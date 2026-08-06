@@ -3,7 +3,10 @@ from __future__ import annotations
 import heapq
 import os
 from pathlib import Path
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 def get_top_10_largest_files_optimized(directory: str = "."):
     top_10 = []
     for root, _dirs, files in os.walk(directory):
@@ -19,6 +22,8 @@ def get_top_10_largest_files_optimized(directory: str = "."):
                 except OSError:
                     pass
     return sorted(top_10, reverse=True)
+
+
 if __name__ == "__main__":
     top_10 = get_top_10_largest_files_optimized()
     for size, file_path in top_10:

@@ -5,8 +5,11 @@ import json
 import multiprocessing
 import os
 from pathlib import Path
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 python
+
+
 def load_json_file(file_path):
     try:
         with open(file_path, encoding="utf-8") as f:
@@ -21,6 +24,8 @@ def load_json_file(file_path):
     except Exception as e:
         print(f"Произошла ошибка при чтении файла {file_path}: {e}")
         return []
+
+
 def merge_json_files(input_paths):
     json_files = []
     for path_str in input_paths:
@@ -42,6 +47,8 @@ def merge_json_files(input_paths):
     for data_list in list_of_data_lists:
         merged_data.extend(data_list)
     return merged_data
+
+
 def main():
     parser = argparse.ArgumentParser(description="Объединение JSON-файлов.")
     parser.add_argument(
@@ -73,5 +80,7 @@ def main():
             print(f"Ошибка при записи объединенных данных в файл '{output_file_path}': {e}")
     else:
         print("There is no data to write to the output file.")
+
+
 if __name__ == "__main__":
     main()

@@ -5,10 +5,14 @@ from os import scandir as os_scandir
 from pathlib import Path
 import tree_sitter_python as tsp
 from tree_sitter import Language, Parser
+
 CHUNK_SIZE = 1024 * 1024
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
+
     path = Path(path)
     if is_binary(path):
         return False
@@ -28,6 +32,8 @@ def is_python_file(path: str | Path) -> bool:
         except:
             return False
     return False
+
+
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -42,6 +48,8 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
+
+
 def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
     if path.is_file():
@@ -73,8 +81,12 @@ def get_pyfiles(path: str | Path) -> list[Path]:
         except (PermissionError, OSError):
             continue
     return sorted(pyfiles)
+
+
 PY_LANGUAGE = Language(tsp.language())
 parser = Parser(PY_LANGUAGE)
+
+
 def extract_python_code_elements(filepath: Path):
     try:
         with Path(filepath).open("rb") as f:
@@ -128,6 +140,8 @@ def extract_python_code_elements(filepath: Path):
             if child.children:
                 nodes_to_visit.append(child)
     return functions, classes, constants, imports
+
+
 def process_directory(start_dir: str, output_dir: str) -> None:
     all_functions = {}
     all_classes = {}
@@ -169,6 +183,8 @@ def process_directory(start_dir: str, output_dir: str) -> None:
             f.write("# No imports found.\n")
     print(f"\nExtraction complete. Results saved to '{output_dir}'.")
     print(f"Imports saved to '{imports_output_path}'.")
+
+
 if __name__ == "__main__":
     cwdectory = "."
     output_directory = "output"

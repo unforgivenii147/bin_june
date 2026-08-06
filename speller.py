@@ -2,6 +2,8 @@
 import argparse
 import re
 from spellchecker import SpellChecker
+
+
 def process_file(filepath, autofix=False):
     spell = SpellChecker()
     try:
@@ -14,6 +16,7 @@ def process_file(filepath, autofix=False):
         print(f"Error reading file: {e}")
         return
     misspelled_count = 0
+
     # Function to process each word found by the regex
     def check_and_replace(match):
         nonlocal misspelled_count
@@ -44,6 +47,7 @@ def process_file(filepath, autofix=False):
                 print(f"Misspelled: '{word}' | Suggestions: {suggestions}")
                 return word
         return word
+
     # Regex to find words (including those with apostrophes like "don't")
     # \b matches word boundaries, [\w']+ matches word characters and apostrophes
     updated_text = re.sub(r"[\w']+", check_and_replace, text)
@@ -61,6 +65,8 @@ def process_file(filepath, autofix=False):
             print("No misspelled words found.")
         else:
             print(f"\nFound {misspelled_count} misspelled word(s). Run with -a to autofix.")
+
+
 if __name__ == "__main__":
     # Set up the command line argument parser
     parser = argparse.ArgumentParser(description="Detect and optionally autofix misspelled words in a file.")

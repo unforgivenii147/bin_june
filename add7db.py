@@ -8,18 +8,27 @@ import sys
 from pathlib import Path
 from sqlite3 import Cursor
 import py7zr
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 def get_current_folder_name() -> str:
     return Path(Path.cwd()).name
+
+
 def get_user_folder_name(default_name: str):
     while True:
         user_input = input(f"Enter folder name (default: {default_name}): ").strip()
         if not user_input:
             return default_name
         return user_input
+
+
 def folder_exists_in_db(cursor: Cursor, folder_name):
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (folder_name,))
     return cursor.fetchone() is not None
+
+
 def create_folder_table(cursor: Cursor, folder_name) -> None:
     cursor.execute(f"""
         CREATE TABLE IF NOT EXISTS "{folder_name}" (
@@ -31,6 +40,8 @@ def create_folder_table(cursor: Cursor, folder_name) -> None:
             compressed_size INTEGER DEFAULT 0
         )
     """)
+
+
 def compress_data(data_bytes) -> str | None:
     if not data_bytes:
         return None
@@ -43,6 +54,8 @@ def compress_data(data_bytes) -> str | None:
     except Exception as e:
         print(f"    Compression error: {e!s}")
         return None
+
+
 def read_file_contents(filepath: str):
     try:
         encodings = ["utf-8", "latin-1", "cp1252", "iso-8859-1"]
@@ -67,6 +80,8 @@ def read_file_contents(filepath: str):
         return {"content": error_msg, "is_binary": False, "original_size": len(error_msg)}
     except Exception:
         return {"content": error_msg, "is_binary": False, "original_size": len(error_msg)}
+
+
 def get_files_in_cwd():
     cwd = Path.cwd()
     files = []
@@ -116,6 +131,8 @@ def get_files_in_cwd():
     except PermissionError:
         print("Warning: Permission denied accessing some files")
     return files
+
+
 def insert_files(cursor: Cursor, folder_name, files) -> None:
     for file_info in files:
         cursor.execute(
@@ -131,6 +148,8 @@ def insert_files(cursor: Cursor, folder_name, files) -> None:
                 file_info.get("compressed_size", 0),
             ),
         )
+
+
 def main() -> None:
     try:
         pass
@@ -176,5 +195,7 @@ def main() -> None:
         else:
             print(f"   Total size: {total_original / 1024 / 1024:.2f}MB")
     conn.close()
+
+
 if __name__ == "__main__":
     main()

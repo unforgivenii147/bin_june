@@ -2,6 +2,7 @@
 from __future__ import annotations
 import re
 from pathlib import Path
+
 OS_PATH_TO_PATHLIB = {
     "os\\.path\\.join\\(": "Path(",
     "os\\.path\\.dirname\\(": ".parent",
@@ -25,6 +26,8 @@ OS_PATH_IMPORT_PATTERNS = [
     "from os import path",
     "import os",
 ]
+
+
 def refactor_file(file_path):
     content = file_path.read_text(encoding="utf-8")
     original_content = content
@@ -57,6 +60,8 @@ def refactor_file(file_path):
         file_path.write_text(content, encoding="utf-8")
         return True
     return False
+
+
 def refactor_directory(directory):
     python_files = directory.rglob("*.py")
     refactored_count = 0
@@ -65,6 +70,8 @@ def refactor_directory(directory):
             print(f"Refactored: {file_path.relative_to(Path.cwd())}")
             refactored_count += 1
     print(f"\nRefactored {refactored_count} files.")
+
+
 if __name__ == "__main__":
     current_dir = Path.cwd()
     print(f"Refactoring Python files in: {current_dir}")

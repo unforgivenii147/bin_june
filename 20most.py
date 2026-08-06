@@ -5,8 +5,11 @@ import sys
 from collections import Counter, deque
 from multiprocessing import Pool
 from pathlib import Path
+
 CHUNK_SIZE = 1024 * 1024
 from dh import get_files, get_nobinary
+
+
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -21,9 +24,13 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
+
+
 def extract_words(text: str):
     splt = text.strip().lower().replace("/", " ")
     return re.findall("[a-z]{3,}", splt)
+
+
 def process_file(path: Path) -> None:
     path = Path(path)
     text = path.read_text(encoding="utf-8")
@@ -31,6 +38,8 @@ def process_file(path: Path) -> None:
     filtered = list(words)
     for word, _count in Counter(filtered).most_common(30):
         print(f"{word}", end=" ")
+
+
 def main() -> None:
     args = sys.argv[1:]
     cwd = Path.cwd()
@@ -43,5 +52,7 @@ def main() -> None:
                 pending.popleft().get()
         while pending:
             pending.popleft().get()
+
+
 if __name__ == "__main__":
     main()

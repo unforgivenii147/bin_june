@@ -4,9 +4,13 @@ import sys
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 from dh import mpf3
+
 CHUNKSIZE = 15850
+
+
 def process_file(path):
     path = Path(path)
     try:
@@ -21,7 +25,11 @@ def process_file(path):
                 part_num += 1
     except Exception as e:
         print(f"An error occurred during file splitting: {e}")
+
+
 CHUNKSIZE = 15850
+
+
 def process_file(path):
     path = Path(path)
     try:
@@ -36,6 +44,8 @@ def process_file(path):
                 part_num += 1
     except Exception as e:
         print(f"An error occurred during file splitting: {e}")
+
+
 def main():
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -53,5 +63,7 @@ def main():
         process_file(files[0])
         sys.exit(1)
     mpf3(process_file, files)
+
+
 if __name__ == "__main__":
     sys.exit(main())

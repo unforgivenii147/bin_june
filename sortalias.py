@@ -2,8 +2,12 @@
 from __future__ import annotations
 import sys
 from pathlib import Path
+
+
 def alias_name(line: str) -> str:
     return line.split("=", 1)[0].replace("alias ", "").strip()
+
+
 def main() -> None:
     if len(sys.argv) != 2:
         print(f"Usage: {sys.argv[0]} <file>")
@@ -16,5 +20,7 @@ def main() -> None:
     alias_lines.sort(key=alias_name)
     with Path(fname).open("w", encoding="utf-8") as f:
         f.writelines(alias_lines + other_lines)
+
+
 if __name__ == "__main__":
     main()

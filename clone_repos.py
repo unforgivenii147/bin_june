@@ -4,6 +4,7 @@ Clone GitHub repositories from a repos.txt file using GitPython.
 Format: user/repo (one per line)
 Uses --depth 1 for shallow clones.
 """
+
 from __future__ import annotations
 import argparse
 import sys
@@ -11,6 +12,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from git import GitCommandError, Repo
 from git.exc import InvalidGitRepositoryError
+
+
 def read_repos(file_path: Path) -> list[str]:
     """Read repository names from file, stripping whitespace and empty lines."""
     if not file_path.exists():
@@ -22,10 +25,14 @@ def read_repos(file_path: Path) -> list[str]:
         print(f"Error: No repositories found in {file_path}")
         sys.exit(1)
     return repos
+
+
 def validate_repo_format(repo: str) -> bool:
     """Validate that repo is in user/repo format."""
     parts = repo.split("/")
     return len(parts) == 2 and all(parts)
+
+
 def clone_repo(repo: str, base_dir: Path) -> tuple[str, bool, str]:
     """
     Clone a single repository with --depth 1 using GitPython.
@@ -50,13 +57,17 @@ def clone_repo(repo: str, base_dir: Path) -> tuple[str, bool, str]:
         error_msg = str(e).strip()
         if target_dir.exists():
             import shutil
+
             shutil.rmtree(target_dir, ignore_errors=True)
         return repo, False, f"Clone failed: {error_msg}"
     except Exception as e:
         if target_dir.exists():
             import shutil
+
             shutil.rmtree(target_dir, ignore_errors=True)
         return repo, False, f"Error: {e!s}"
+
+
 def main():
     parser = argparse.ArgumentParser(description="Clone GitHub repositories in parallel from a text file")
     parser.add_argument(
@@ -113,5 +124,7 @@ def main():
     print(f"  ⏭️  Already existed: {skipped}")
     print(f"  ❌ Failed: {failed}")
     print(f"  📊 Total: {len(repos)}")
+
+
 if __name__ == "__main__":
     main()

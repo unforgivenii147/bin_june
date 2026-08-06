@@ -4,7 +4,10 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 def safe_mkdir(base: Path) -> Path:
     if not base.exists():
         base.mkdir()
@@ -16,6 +19,8 @@ def safe_mkdir(base: Path) -> Path:
             candidate.mkdir()
             return candidate
         i += 1
+
+
 def unzip_file(archive: Path, target_dir: Path) -> bool:
     try:
         result = subprocess.run(
@@ -28,6 +33,8 @@ def unzip_file(archive: Path, target_dir: Path) -> bool:
         return result.returncode == 0
     except (subprocess.CalledProcessError, FileNotFoundError):
         return False
+
+
 def main() -> None:
     cwd = Path.cwd()
     for item in cwd.iterdir():
@@ -43,5 +50,7 @@ def main() -> None:
             print(f"[OK] Unzipped and removed: {item.name}")
         else:
             print(f"[SKIP] Not a zip or unzip failed: {item.name}")
+
+
 if __name__ == "__main__":
     sys.exit(main())

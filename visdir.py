@@ -3,6 +3,7 @@ from __future__ import annotations
 import contextlib
 import os
 import matplotlib.pyplot as plt
+
 cwd = os.getcwd()
 subdir_sizes = {}
 total_size = 0

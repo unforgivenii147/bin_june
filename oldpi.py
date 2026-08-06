@@ -7,6 +7,8 @@ from collections import deque
 from collections.abc import Callable
 from mmap import mmap
 from pathlib import Path
+
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache", "lazy"}
@@ -26,23 +28,34 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
             elif item.is_file() and (ext is None or item.suffix in ext):
                 files.append(item)
     return files
+
+
 from dh import mpf3
+
 SIZE_THRESHOLD = 1 * 1024 * 1024
 OLD_PRINT_RE = re.compile("(?m)^[ \\t]*print[ \\t]+[^(\\n]")
+
+
 def _open_source(filepath: str):
     size = Path(filepath).stat().st_size
     f = Path(filepath).open("rb")
     if size > SIZE_THRESHOLD:
         return mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
     return f
+
+
 def _read_text(filepath: str) -> str | None:
     try:
         with Path(filepath).open(encoding="utf-8", errors="ignore") as f:
             return f.read()
     except Exception:
         return None
+
+
 def _has_rich_print_import(text: str) -> bool:
     return "from rich import print" in text
+
+
 def _is_in_commented_code(text: str, line_start: int) -> bool:
     """Check if the line is inside a multi-line comment or docstring."""
     lines = text.splitlines(True)
@@ -67,6 +80,8 @@ def _is_in_commented_code(text: str, line_start: int) -> bool:
                     multiline_delimiter = quote
                 break
     return in_multiline
+
+
 def regex_flag(filepath: str) -> bool:
     text = _read_text(filepath)
     if not text:
@@ -74,6 +89,8 @@ def regex_flag(filepath: str) -> bool:
     if _has_rich_print_import(text):
         return False
     return bool(OLD_PRINT_RE.search(text))
+
+
 def tokenizer_confirm(filepath: str) -> tuple[str, int] | None:
     """Return (line_content, line_number) if print without parentheses found."""
     try:
@@ -105,6 +122,8 @@ def tokenizer_confirm(filepath: str) -> tuple[str, int] | None:
                     continue
                 return (line, line_num)
     return None
+
+
 def autofix_file(filepath: str) -> bool:
     """Fix Python 2 print statements by adding parentheses."""
     try:
@@ -132,6 +151,8 @@ def autofix_file(filepath: str) -> bool:
         return changed
     except Exception:
         return False
+
+
 def process_file(filepath: str, autofix: bool = False) -> str | None:
     """Process a single file: detect and optionally fix print statements."""
     if not regex_flag(filepath):
@@ -147,8 +168,11 @@ def process_file(filepath: str, autofix: bool = False) -> str | None:
             return f"{filepath} (could not fix)\n  Line {line_num}: {line}"
     else:
         return f"{filepath}\n  Line {line_num}: {line}"
+
+
 def main() -> None:
     import argparse
+
     parser = argparse.ArgumentParser(description="Detect and fix Python 2 print statements")
     parser.add_argument("path", nargs="?", default=".", help="Path to file or directory to scan")
     parser.add_argument("-a", "--autofix", action="store_true", help="Automatically fix print statements")
@@ -173,5 +197,7 @@ def main() -> None:
         print("\n✓ Files with issues have been automatically fixed.")
     else:
         print("\nRun with --autofix to automatically fix these issues.")
+
+
 if __name__ == "__main__":
     main()

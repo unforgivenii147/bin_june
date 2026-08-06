@@ -4,6 +4,7 @@ Translate non-English comments, docstrings, and print() strings in Python files.
 Uses pycld2 for fast language detection.
 Optimized for Python 3.12.
 """
+
 from __future__ import annotations
 import ast
 import io
@@ -16,6 +17,7 @@ from typing import Final
 import pycld2
 from deep_translator import GoogleTranslator
 from dh import DOC_TH1, DOC_TH2
+
 SKIP_DIRS: Final[frozenset[str]] = frozenset(
     {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
 )
@@ -42,6 +44,8 @@ KNOWN_ENGLISH_TOKENS: Final[frozenset[str]] = frozenset(
 )
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
+
+
 def should_skip(text: str) -> bool:
     clean = text.strip()
     if not clean or clean.startswith(SHEBANG_PREFIX):
@@ -52,6 +56,8 @@ def should_skip(text: str) -> bool:
         if len(clean.split()) <= 2 and len(clean) < 30:
             return True
     return bool(not any(c.isalpha() for c in clean))
+
+
 def is_non_english(text: str) -> bool:
     clean = text.strip()
     if len(clean) < 4 or should_skip(clean):
@@ -62,6 +68,8 @@ def is_non_english(text: str) -> bool:
         return lang_code not in ("en", "un")
     except Exception:
         return False
+
+
 def translate_text(text: str) -> str:
     if not text.strip():
         return text
@@ -72,6 +80,8 @@ def translate_text(text: str) -> str:
     except Exception as exc:
         logger.warning("  [warn] translation failed: %s", exc)
         return text
+
+
 def get_node_positions(tree: ast.AST) -> tuple[set[tuple[int, int]], set[tuple[int, int]]]:
     print_positions = set()
     docstring_positions = set()
@@ -89,6 +99,8 @@ def get_node_positions(tree: ast.AST) -> tuple[set[tuple[int, int]], set[tuple[i
             ds = node.body[0].value
             docstring_positions.add((ds.lineno, ds.col_offset))
     return (print_positions, docstring_positions)
+
+
 def process_file(path: Path) -> bool:
     try:
         source = path.read_text(encoding="utf-8")
@@ -102,8 +114,10 @@ def process_file(path: Path) -> bool:
         logger.warning("[skip] %s: Parse error - %s", path, e)
         return False
     lines = source.splitlines(keepends=True)
+
     def get_offset(lineno: int, col: int) -> int:
         return sum(len(lines[i]) for i in range(lineno - 1)) + col
+
     print_pos, doc_pos = get_node_positions(tree)
     replacements: list[tuple[int, int, str]] = []
     for tok in tokens:
@@ -150,6 +164,8 @@ def process_file(path: Path) -> bool:
     except SyntaxError as e:
         logger.error("[error] %s: Generated invalid syntax, skipping: %s", path, e)
         return False
+
+
 def worker(path_str: str) -> None:
     path = Path(path_str)
     try:
@@ -157,6 +173,8 @@ def worker(path_str: str) -> None:
             logger.info("[updated] %s", path)
     except Exception as e:
         logger.error("[failed] %s: %s", path, e)
+
+
 def main() -> None:
     files = [str(p) for p in Path(".").rglob("*.py") if not any(part in SKIP_DIRS for part in p.parts)]
     if not files:
@@ -166,5 +184,7 @@ def main() -> None:
     with multiprocessing.Pool(processes=MAX_WORKERS) as pool:
         pool.map(worker, files)
     logger.info("Done.")
+
+
 if __name__ == "__main__":
     main()

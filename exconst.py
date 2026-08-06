@@ -1,18 +1,24 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Extract constant definitions from Python files using libcst."""
+
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import NamedTuple
 import libcst as cst
+
+
 class Constant(NamedTuple):
     name: str
     value: str
     file: Path
+
+
 class ConstantExtractor(cst.CSTVisitor):
     def __init__(self, file_path: Path):
         self.file_path = file_path
         self.constants: list[Constant] = []
+
     def visit_Assign(self, node: cst.Assign) -> None:
         for target in node.targets:
             if isinstance(target.target, cst.Name):
@@ -20,12 +26,15 @@ class ConstantExtractor(cst.CSTVisitor):
                 if name.isupper() and not name.startswith("_"):
                     value = self._extract_value(node.value)
                     self.constants.append(Constant(name, value, self.file_path))
+
     def _extract_value(self, node: cst.BaseExpression) -> str:
         return (
             node.deep_clone().deep_replace(lambda n: n).deep_equals(node)
             and node.visit(cst.CSTCodeGenerator())
             or cst.Module([cst.SimpleStatementLine([cst.Expr(node)])]).code.strip()
         )
+
+
 def extract_from_file(file_path: Path) -> list[Constant]:
     try:
         source = file_path.read_text(encoding="utf-8")
@@ -35,6 +44,8 @@ def extract_from_file(file_path: Path) -> list[Constant]:
         return extractor.constants
     except (SyntaxError, UnicodeDecodeError):
         return []
+
+
 def get_python_files(paths: list[Path]) -> list[Path]:
     python_files = []
     for path in paths:
@@ -43,6 +54,8 @@ def get_python_files(paths: list[Path]) -> list[Path]:
         elif path.is_dir():
             python_files.extend(path.glob("**/*.py"))
     return python_files
+
+
 def main():
     input_paths = [Path(arg) for arg in sys.argv[1:]] if len(sys.argv) > 1 else [Path.cwd()]
     python_files = get_python_files(input_paths)
@@ -59,5 +72,7 @@ def main():
             print(f"  {const.name} = {const.value}")
     total = sum(len(consts) for consts in constants.values())
     print(f"\nTotal constants found: {total}")
+
+
 if __name__ == "__main__":
     main()

@@ -2,10 +2,15 @@
 from __future__ import annotations
 import curses
 from pathlib import Path
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 LINES_PER_FILE = 20
+
+
 def list_files() -> list[Path]:
     return sorted([p for p in Path().iterdir() if p.is_file()], key=lambda p: p.name.lower())
+
+
 def head_lines(path, n: int):
     lines = []
     try:
@@ -18,6 +23,8 @@ def head_lines(path, n: int):
     except Exception as e:
         lines = [f"[Error reading file: {e}]"]
     return lines
+
+
 def init_colors() -> None:
     curses.start_color()
     curses.use_default_colors()
@@ -25,6 +32,8 @@ def init_colors() -> None:
     curses.init_pair(2, curses.COLOR_GREEN, -1)
     curses.init_pair(3, curses.COLOR_YELLOW, -1)
     curses.init_pair(4, curses.COLOR_RED, -1)
+
+
 def draw(stdscr, files: list[Path], idx: int) -> None:
     stdscr.clear()
     h, w = stdscr.getmaxyx()
@@ -49,6 +58,8 @@ def draw(stdscr, files: list[Path], idx: int) -> None:
     stdscr.addnstr(h - 1, 0, footer, w - 1)
     stdscr.attroff(curses.color_pair(3))
     stdscr.refresh()
+
+
 def main(stdscr) -> None:
     curses.curs_set(0)
     stdscr.keypad(True)
@@ -71,5 +82,7 @@ def main(stdscr) -> None:
         elif key == curses.KEY_PPAGE and idx > 0:
             idx -= 1
             draw(stdscr, files, idx)
+
+
 if __name__ == "__main__":
     curses.wrapper(main)

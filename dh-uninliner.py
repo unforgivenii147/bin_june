@@ -8,9 +8,14 @@ import re
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+
 DH_DIR = Path.home() / "isaac/pkgs/dh/src/dh"
+
+
 def hash_string(s: str) -> str:
     return hashlib.sha256(s.encode("utf-8")).hexdigest()
+
+
 def extract_function_index(dh_dir: Path) -> dict[str, str]:
     index: dict[str, str] = {}
     if not dh_dir.exists():
@@ -34,11 +39,15 @@ def extract_function_index(dh_dir: Path) -> dict[str, str]:
                     continue
                 index[h] = node.name
     return index
+
+
 def get_source_segment(source: str, node) -> str:
     lines = source.splitlines(keepends=True)
     start = node.lineno - 1
     end = node.end_lineno
     return "".join(lines[start:end])
+
+
 def find_import_insert_position(lines: list[str]) -> int:
     pos = 0
     if lines and lines[0].startswith("#!"):
@@ -52,6 +61,8 @@ def find_import_insert_position(lines: list[str]) -> int:
     while pos < len(lines) and lines[pos].strip().startswith("#"):
         pos += 1
     return pos
+
+
 def process_file(py_file: Path, dh_index: dict[str, str]) -> tuple[Path, list[str], list[str], list[str]] | None:
     try:
         source = py_file.read_text(encoding="utf-8")
@@ -97,6 +108,8 @@ def process_file(py_file: Path, dh_index: dict[str, str]) -> tuple[Path, list[st
         import_line = "from dh import " + ", ".join(names_to_add) + "\n\n"
         new_lines.insert(insert_pos, import_line)
     return (py_file, lines, new_lines, import_names)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Replace inlined dh functions with imports.")
     parser.add_argument("-a", "--apply", action="store_true", help="write changes in place")
@@ -130,5 +143,7 @@ def main():
         if args.apply:
             path.write_text("".join(new_lines), encoding="utf-8")
             print(f"  Written.")
+
+
 if __name__ == "__main__":
     main()

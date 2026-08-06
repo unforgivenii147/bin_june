@@ -7,6 +7,8 @@ from pathlib import Path
 import tree_sitter_cpp as tscpp
 from tree_sitter import Language, Parser, Query, QueryCursor
 from dh import get_files
+
+
 def remove_blank_lines(text: str | Path) -> str:
     content = text
     if isinstance(text, Path):
@@ -25,12 +27,17 @@ def remove_blank_lines(text: str | Path) -> str:
         result_lines.append(line)
         prev_blank = is_blank
     return "".join(result_lines)
+
+
 ts_remover = None
+
+
 class TSCppRemover:
     def __init__(self) -> None:
         self.language = Language(tscpp.language())
         self.parser = Parser(self.language)
         self.query = Query(self.language, "\n            (comment) @comment\n        ")
+
     def remove_comments(self, source: str) -> tuple[str, int]:
         source_bytes = source.encode("utf-8")
         tree = self.parser.parse(source_bytes)
@@ -63,9 +70,13 @@ class TSCppRemover:
         cleaned = new_source.decode("utf-8")
         cleaned = remove_blank_lines(cleaned)
         return (cleaned, comment_count)
+
+
 def ts_remover_initializer() -> None:
     global ts_remover
     ts_remover = TSCppRemover()
+
+
 def process_file(path):
     path = Path(path)
     global ts_remover
@@ -81,6 +92,8 @@ def process_file(path):
         return ("changed", path, comments)
     print(f"[NO CHANGE] {path.name}")
     return ("nochange", path, 0)
+
+
 if __name__ == "__main__":
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -102,6 +115,8 @@ if __name__ == "__main__":
         for _, fn, *_ in errors:
             print(f"  - {fn}")
     print(f"Size reduced: {fsz(diffsize)}")
+
+
 def gsz(path):
     try:
         return Path(path).stat().st_size

@@ -3,22 +3,29 @@
 Remove comments and docstrings from Python files using libcst.
 Preserves shebangs, # fmt, # type, and module docstrings.
 """
+
 from __future__ import annotations
 import argparse
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 import libcst as cst
+
+
 class CleanTransformer(cst.CSTTransformer):
     def __init__(self):
         super().__init__()
         self.comments_removed = 0
         self.docstrings_removed = 0
+
     def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
         return updated_node
+
     def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef) -> cst.FunctionDef:
         return self._strip_docstring(updated_node)
+
     def leave_ClassDef(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.ClassDef:
         return self._strip_docstring(updated_node)
+
     def _strip_docstring(self, node):
         if not node.body.body:
             return node
@@ -38,6 +45,7 @@ class CleanTransformer(cst.CSTTransformer):
                     new_body = node.body.with_changes(body=remaining)
                 return node.with_changes(body=new_body)
         return node
+
     def leave_Comment(self, original_node: cst.Comment, updated_node: cst.Comment) -> cst.RemovalSentinel | cst.Comment:
         comment_text = original_node.value.strip()
         if (
@@ -48,6 +56,8 @@ class CleanTransformer(cst.CSTTransformer):
             return updated_node
         self.comments_removed += 1
         return cst.RemoveFromParent()
+
+
 def process_file(file_path: Path) -> tuple[Path, int, int, bool]:
     """Process a single file and return (path, comments_removed, docstrings_removed, success)"""
     try:
@@ -68,6 +78,8 @@ def process_file(file_path: Path) -> tuple[Path, int, int, bool]:
     except Exception as e:
         print(f"❌ Error processing {file_path}: {e}")
         return file_path, 0, 0, False
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Remove comments & docstrings from Python files (preserves shebangs, # fmt, # type, module docstrings)"
@@ -121,5 +133,7 @@ def main():
     print(f"   Comments removed: {total_comments}")
     print(f"   Docstrings removed: {total_docstrings}")
     print("=" * 42)
+
+
 if __name__ == "__main__":
     main()

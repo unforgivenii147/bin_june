@@ -6,6 +6,7 @@ Example: python script.py octocat/Hello-World
 Install dependencies:
 pip install PyGithub GitPython python-dotenv
 """
+
 from __future__ import annotations
 import os
 import sys
@@ -14,7 +15,10 @@ from dotenv import load_dotenv
 from git import Repo
 from github import Github
 from github.GithubException import GithubException, UnknownObjectException
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 def load_env_token():
     env_path = Path.home() / ".env"
     if env_path.exists():
@@ -28,6 +32,8 @@ def load_env_token():
     else:
         print("⚠️  ~/.env file not found")
     return None
+
+
 def get_github_client():
     token = load_env_token()
     if not token:
@@ -47,6 +53,8 @@ def get_github_client():
     except GithubException as e:
         print(f"Authentication failed: {e}")
         sys.exit(1)
+
+
 def fork_repository(g, user, repo_full):
     try:
         original_repo = g.get_repo(repo_full)
@@ -63,6 +71,8 @@ def fork_repository(g, user, repo_full):
     except GithubException as e:
         print(f"Error forking repository: {e}")
         sys.exit(1)
+
+
 def clone_and_setup(forked_repo, original_full_name):
     repo_name = forked_repo.name
     clone_url = forked_repo.clone_url
@@ -81,6 +91,8 @@ def clone_and_setup(forked_repo, original_full_name):
     upstream.fetch()
     local_repo.git.branch(f"--set-upstream-to=upstream/{default_branch}", default_branch)
     return local_repo, default_branch
+
+
 def create_env_template():
     env_path = Path.home() / ".env"
     if not env_path.exists():
@@ -94,6 +106,8 @@ def create_env_template():
         print("⚠️  Please edit the file and add your actual token")
         return False
     return True
+
+
 def main():
     if len(sys.argv) < 2:
         print("Usage: python script.py user/repo")
@@ -125,5 +139,7 @@ def main():
     print(f"  Original: {repo_full}")
     print(f"  Your fork: {forked_repo.full_name}")
     print(f"  Default branch: {default_branch}")
+
+
 if __name__ == "__main__":
     main()

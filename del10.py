@@ -2,6 +2,7 @@
 from __future__ import annotations
 import sys
 from pathlib import Path
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python script.py <filename>")

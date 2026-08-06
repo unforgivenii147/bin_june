@@ -6,6 +6,7 @@ import site
 import sys
 import zipfile
 from pathlib import Path
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 logging.basicConfig(
     level=logging.INFO,
@@ -15,6 +16,8 @@ logging.basicConfig(
         logging.FileHandler("wheel_repack.log", mode="w", encoding="utf-8"),
     ],
 )
+
+
 def verify_and_get_files(dist_info_dir):
     record_path = dist_info_dir / "RECORD"
     if not record_path.exists():
@@ -37,6 +40,8 @@ def verify_and_get_files(dist_info_dir):
                 return None
             files_to_pack.append((abs_path, rel_path))
     return files_to_pack
+
+
 def build_wheel_worker(args):
     dist_info_dir_str, output_dir_str = args
     dist_info_dir = Path(dist_info_dir_str)
@@ -63,6 +68,8 @@ def build_wheel_worker(args):
         if target_wheel_path.exists():
             target_wheel_path.unlink()
         return False
+
+
 def main():
     user_site = site.getusersitepackages()
     user_site_path = Path(user_site).resolve()
@@ -88,5 +95,7 @@ def main():
     logging.info(f"Successfully compiled:    {successful_builds}")
     logging.info(f"Skipped / Failed:         {len(dist_info_dirs) - successful_builds}")
     logging.info("Check 'wheel_repack.log' for detailed warnings or error reports.")
+
+
 if __name__ == "__main__":
     main()

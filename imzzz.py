@@ -7,6 +7,7 @@ import tarfile
 import zipfile
 from pathlib import Path
 from dh import PKG_MAPPING, STDLIB
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 STD_LIB = STDLIB
 MAPPING = PKG_MAPPING
@@ -15,6 +16,8 @@ try:
         PIP_PACKAGES = {line.strip().split("==")[0].split("[")[0] for line in f if line.strip()}
 except FileNotFoundError:
     PIP_PACKAGES = set()
+
+
 def is_python_file(file_path):
     return file_path.suffix == ".py" or (
         not file_path.suffix
@@ -23,6 +26,8 @@ def is_python_file(file_path):
             for line in Path(file_path).open(encoding="utf-8", errors="ignore")
         )
     )
+
+
 def extract_compressed(file_path, extract_to) -> None:
     if file_path.suffix == ".zip":
         with zipfile.ZipFile(file_path, "r") as z:
@@ -33,6 +38,8 @@ def extract_compressed(file_path, extract_to) -> None:
     elif file_path.suffix == ".whl":
         with zipfile.ZipFile(file_path, "r") as z:
             z.extractall(extract_to)
+
+
 def get_imports(file_path):
     imports = set()
     try:
@@ -56,6 +63,8 @@ def get_imports(file_path):
             ):
                 imports.add(MAPPING.get(module, module))
     return imports
+
+
 def process_file(file_path):
     Path(path)
     if file_path.is_dir():
@@ -73,6 +82,8 @@ def process_file(file_path):
     if is_python_file(file_path):
         return get_imports(file_path)
     return set()
+
+
 def main() -> None:
     root = Path()
     python_files = []
@@ -84,5 +95,7 @@ def main() -> None:
     requirements = sorted(all_imports & PIP_PACKAGES)
     with Path("requirements.txt").open("w", encoding="utf-8") as f:
         f.writelines(f"{req}\n" for req in requirements)
+
+
 if __name__ == "__main__":
     main()

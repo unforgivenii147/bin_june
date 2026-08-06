@@ -3,9 +3,11 @@
 Convert OTF to TTF recursively using FontForge Python bindings.
 Usage: fontforge -script otf2ttf_fontforge.py [directory]
 """
+
 from __future__ import annotations
 import sys
 from pathlib import Path
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 try:
     import fontforge
@@ -13,6 +15,8 @@ except ImportError:
     print("This script must be run with FontForge's Python interpreter:")
     print("  fontforge -script otf2ttf_fontforge.py")
     sys.exit(1)
+
+
 def convert_otf_to_ttf(otf_path):
     ttf_path = otf_path.with_suffix(".ttf")
     if ttf_path.exists():
@@ -25,6 +29,8 @@ def convert_otf_to_ttf(otf_path):
         return "success", str(ttf_path)
     except Exception as e:
         return "error", str(e)
+
+
 def main():
     root_dir = Path(sys.argv[1]) if len(sys.argv) > 1 else Path.cwd()
     print(f"Searching for OTF files in: {root_dir}")
@@ -48,5 +54,7 @@ def main():
             stats["error"] += 1
     print(f"\n{'=' * 50}")
     print(f"Summary: {stats['success']} converted, {stats['skipped']} skipped, {stats['error']} failed")
+
+
 if __name__ == "__main__":
     main()

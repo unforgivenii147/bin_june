@@ -7,9 +7,12 @@ import zipfile
 from pathlib import Path
 from wheel.archive import wheel_load
 from wheel.wheelfile import WheelFile
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 UNPACKED_WHEELS_SOURCE_DIR = Path.cwd()
 WHEELS_OUTPUT_DIR = None
+
+
 def find_dist_info_dir(pkg_dir: Path) -> Path | None:
     candidates = [p for p in pkg_dir.iterdir() if p.is_dir() and p.name.endswith(".dist-info")]
     if not candidates:
@@ -20,6 +23,8 @@ def find_dist_info_dir(pkg_dir: Path) -> Path | None:
             file=sys.stderr,
         )
     return candidates[0]
+
+
 def create_wheel_for_dir_sync(pkg_dir: Path, dest_dir: Path | None = None) -> tuple[str, bool]:
     dist_info = find_dist_info_dir(pkg_dir)
     if dist_info is None:
@@ -46,10 +51,14 @@ def create_wheel_for_dir_sync(pkg_dir: Path, dest_dir: Path | None = None) -> tu
         if output_path.exists():
             output_path.unlink()
         return wheel_filename, False
+
+
 async def process_package_async(pkg_dir: Path, dest_dir: Path | None, task_queue: asyncio.Queue):
     loop = asyncio.get_running_loop()
     wheel_filename, success = await loop.run_in_executor(None, create_wheel_for_dir_sync, pkg_dir, dest_dir)
     await task_queue.put_nowait((wheel_filename, success))
+
+
 async def main_async():
     if WHEELS_OUTPUT_DIR:
         WHEELS_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -86,6 +95,8 @@ async def main_async():
         print(f"Failed to create wheels: {len(failed_wheels)}")
         print("  - " + "\n  - ".join(failed_wheels))
     print("\nDone.")
+
+
 def main_multiprocessing() -> None:
     if WHEELS_OUTPUT_DIR:
         WHEELS_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -119,6 +130,8 @@ def main_multiprocessing() -> None:
         print(f"Failed to create wheels: {len(failed_wheels)}")
         print("  - " + "\n  - ".join(failed_wheels))
     print("\nDone.")
+
+
 if __name__ == "__main__":
     try:
         pass

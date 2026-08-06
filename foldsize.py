@@ -4,9 +4,14 @@ import operator
 import shutil
 from pathlib import Path
 from loguru import logger
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 def get_all_files(root: Path) -> list[Path]:
     return [p for p in root.rglob("*") if p.is_file() and not p.name.startswith(".") and p.name != "folderize.py"]
+
+
 def safe_rename(src: Path, dest_dir: Path) -> Path:
     dest = dest_dir / src.name
     if not dest.exists():
@@ -19,6 +24,8 @@ def safe_rename(src: Path, dest_dir: Path) -> Path:
         if not dest.exists():
             return dest
         i += 1
+
+
 def format_size_range(min_s: int, max_s: int) -> str:
     def fmt(n: int) -> str:
         if n < 1000:
@@ -26,7 +33,10 @@ def format_size_range(min_s: int, max_s: int) -> str:
         if n < 1000000:
             return f"{n // 1000}k"
         return f"{n // 1000000}M"
+
     return f"{fmt(min_s)}-{fmt(max_s)}"
+
+
 def main() -> None:
     root = Path()
     files = get_all_files(root)
@@ -81,5 +91,7 @@ def main() -> None:
     for name, cnt, sz in sorted(created_dirs, key=operator.itemgetter(2)):
         print(f"{name:<20} {cnt:>8} {sz:>14,}")
     print(f"\nTotal directories: {len(created_dirs)}")
+
+
 if __name__ == "__main__":
     main()

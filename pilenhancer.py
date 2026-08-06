@@ -6,6 +6,8 @@ from collections.abc import Callable
 from pathlib import Path
 from PIL import Image, ImageEnhance
 from dh import get_files, mpf3
+
+
 def process_file(path):
     path = Path(path)
     try:
@@ -22,6 +24,8 @@ def process_file(path):
             print(f"Enhanced: {path.name}")
     except Exception as e:
         print(f"Error enhancing {path.name}: {e}")
+
+
 def main():
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -36,5 +40,7 @@ def main():
     else:
         files = get_files(cwd, ext=[".jpg", ".png", ".webp"])
     mpf3(process_file, files)
+
+
 if __name__ == "__main__":
     sys.exit(main())

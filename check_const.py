@@ -3,6 +3,8 @@ from __future__ import annotations
 import re
 import sys
 from pathlib import Path
+
+
 def main() -> None:
     if len(sys.argv) != 2:
         print("Usage: python check_dups.py <const_file.py>")
@@ -36,5 +38,7 @@ def main() -> None:
     print("Kept the first declaration of each constant.")
     print(f"Moved {len(duplicates)} duplicate declarations to {dup_path}")
     print(f"Updated {src_path} in place.")
+
+
 if __name__ == "__main__":
     main()

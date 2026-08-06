@@ -6,19 +6,24 @@ functions, classes, and methods while keeping module-level docstrings intact.
 It uses parallel processing for performance and validates output with ast.parse.
 Optimized for Python 3.12+ on Linux.
 """
+
 from __future__ import annotations
 import ast
 import logging
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+
+
 class DocstringRemover(ast.NodeTransformer):
     def __init__(self):
         self.is_module = True
         self.preserve_module_docstring = True
+
     def visit_Module(self, node: ast.Module) -> ast.Module:
         self.is_module = True
         if (
@@ -34,6 +39,7 @@ class DocstringRemover(ast.NodeTransformer):
             node.body = self.generic_visit_body(node.body)
         self.is_module = False
         return node
+
     def generic_visit_body(self, body: list) -> list:
         new_body = []
         for node in body:
@@ -42,20 +48,25 @@ class DocstringRemover(ast.NodeTransformer):
             else:
                 new_body.append(self.visit(node))
         return new_body
+
     def visit_FunctionDef(self, node: ast.FunctionDef) -> ast.FunctionDef:
         return self._process_function_like(node)
+
     def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> ast.AsyncFunctionDef:
         return self._process_function_like(node)
+
     def visit_ClassDef(self, node: ast.ClassDef) -> ast.ClassDef:
         new_body = self._remove_docstring_from_body(node.body)
         node.body = new_body
         node.decorator_list = [self.visit(dec) for dec in node.decorator_list]
         return node
+
     def _process_function_like(self, node):
         new_body = self._remove_docstring_from_body(node.body)
         node.body = new_body
         node.decorator_list = [self.visit(dec) for dec in node.decorator_list]
         return node
+
     def _remove_docstring_from_body(self, body: list) -> list:
         if not body:
             return body
@@ -71,6 +82,8 @@ class DocstringRemover(ast.NodeTransformer):
         if not new_body:
             new_body = [ast.Pass()]
         return new_body
+
+
 def remove_docstrings_from_code(source_code: str) -> str | None:
     try:
         tree = ast.parse(source_code)
@@ -85,6 +98,8 @@ def remove_docstrings_from_code(source_code: str) -> str | None:
     except Exception as e:
         logger.error(f"Error processing code: {e}")
         return None
+
+
 def validate_python_code(code: str) -> bool:
     try:
         ast.parse(code)
@@ -93,6 +108,8 @@ def validate_python_code(code: str) -> bool:
     except (SyntaxError, ValueError) as e:
         logger.error(f"Code validation failed: {e}")
         return False
+
+
 def process_file(file_path: Path) -> tuple[Path, bool, str | None]:
     try:
         original_code = file_path.read_text(encoding="utf-8")
@@ -107,6 +124,8 @@ def process_file(file_path: Path) -> tuple[Path, bool, str | None]:
         return (file_path, True, None)
     except Exception as e:
         return (file_path, False, str(e))
+
+
 def find_python_files(paths: list[Path]) -> list[Path]:
     python_files = []
     for path in paths:
@@ -115,6 +134,8 @@ def find_python_files(paths: list[Path]) -> list[Path]:
         elif path.is_dir():
             python_files.extend(path.rglob("*.py"))
     return sorted(set(python_files))
+
+
 def main():
     if len(sys.argv) > 1:
         input_paths = [Path(arg) for arg in sys.argv[1:]]
@@ -149,5 +170,7 @@ def main():
     logger.info(f"  Total:      {len(python_files)}")
     logger.info(f"{'=' * 42}")
     sys.exit(0 if failed == 0 else 1)
+
+
 if __name__ == "__main__":
     main()

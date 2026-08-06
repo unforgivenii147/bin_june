@@ -6,6 +6,8 @@ from collections.abc import Callable
 from pathlib import Path
 import htmlmin
 from dh import get_files, mpf3
+
+
 def process_file(path: str | Path) -> None:
     path = Path(path)
     try:
@@ -18,6 +20,8 @@ def process_file(path: str | Path) -> None:
     except Exception:
         print(f"[ERR] {path.name}")
         return
+
+
 def main() -> None:
     cwd = Path.cwd()
     files = get_files(cwd, ext=[".html", ".htm", ".xhtml", ".mhtml"])
@@ -25,5 +29,7 @@ def main() -> None:
         process_file(files[0])
         sys.exit(1)
     mpf3(process_file, files)
+
+
 if __name__ == "__main__":
     main()

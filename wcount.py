@@ -7,8 +7,11 @@ from multiprocessing import get_context
 from pathlib import Path
 from toolz import compose, frequencies
 from toolz.curried import map as _map
+
 CHUNK_SIZE = 1024 * 1024
 from dh import get_files, get_nobinary
+
+
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -23,9 +26,15 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
+
+
 MAX_QUEUE = 8
+
+
 def stem(word):
     return word.lower().rstrip(",.|;:'\"").lstrip("'\"")
+
+
 def process_file(path):
     path = Path(path)
     if path.is_symlink():
@@ -34,6 +43,8 @@ def process_file(path):
     word_count = compose(frequencies, _map(stem), str.split)
     content = path.read_text(encoding="utf-8")
     return word_count(content)
+
+
 def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -65,5 +76,7 @@ def main() -> None:
         word_sorted[item] = results.get(item)
     with Path(outfile).open("w", encoding="utf-8") as fo:
         json.dump(word_sorted, fo, ensure_ascii=False, indent=2)
+
+
 if __name__ == "__main__":
     main()

@@ -1,14 +1,18 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Merge non-binary files from current directory into a single text file."""
+
 from __future__ import annotations
 from pathlib import Path
 from random import choice
 from string import ascii_lowercase
 from typing import Optional
+
 CHUNK_SIZE: int = 8192
 BINARY_THRESHOLD: float = 0.3
 DEFAULT_OUTPUT_LEN: int = 10
 TEXT_CHARS: bytearray = bytearray(list(range(32, 127)) + list(range(0x80, 0x100)) + [ord(c) for c in "\n\r\t\b"])
+
+
 def get_files(path: Path, ext: Optional[list[str]] = None) -> list[Path]:
     files: list[Path] = []
     for root, dirs, filenames in path.walk(top_down=False):
@@ -26,8 +30,12 @@ def get_files(path: Path, ext: Optional[list[str]] = None) -> list[Path]:
             else:
                 files.append(file_path)
     return files
+
+
 def get_random_filename(length: int = DEFAULT_OUTPUT_LEN) -> str:
     return "".join(choice(ascii_lowercase) for _ in range(length))
+
+
 def is_binary(path: Path) -> bool:
     """Check if a file is binary by reading a chunk and analyzing byte content."""
     try:
@@ -46,14 +54,20 @@ def is_binary(path: Path) -> bool:
         return (nontext / len(chunk)) > BINARY_THRESHOLD
     except (OSError, PermissionError):
         return True
+
+
 def get_nobinary(path: Path) -> list[Path]:
     """Get all non-binary files. Note: is_binary check is now in get_files."""
     return get_files(path)
+
+
 def read_file(path: Path) -> Optional[str]:
     try:
         return path.read_text(encoding="utf-8", errors="ignore")
     except (OSError, UnicodeDecodeError):
         return None
+
+
 def should_skip_file(file_path: Path, cwd: Path) -> bool:
     """Skip hidden files and directories."""
     try:
@@ -63,6 +77,8 @@ def should_skip_file(file_path: Path, cwd: Path) -> bool:
     if any(part.startswith(".") for part in relative_parts):
         return True
     return bool(file_path.name.startswith("."))
+
+
 def merge_files() -> Optional[Path]:
     cwd = Path.cwd()
     output_file = cwd / f"{get_random_filename()}.txt"
@@ -98,5 +114,7 @@ def merge_files() -> Optional[Path]:
         if output_file.exists():
             output_file.unlink()
         return None
+
+
 if __name__ == "__main__":
     merge_files()

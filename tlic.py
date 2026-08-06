@@ -8,6 +8,7 @@ Uses multiprocessing with joblib for speedup.
 Excluded lines:
   - Shebang lines (e.g., #!)
 """
+
 from __future__ import annotations
 import argparse
 import ast
@@ -16,7 +17,10 @@ import time
 from collections import defaultdict
 from pathlib import Path
 from joblib import Parallel, delayed
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 def is_text_file(filepath: Path) -> bool:
     try:
         with open(filepath, "rb") as f:
@@ -24,6 +28,8 @@ def is_text_file(filepath: Path) -> bool:
             return b"\x00" not in chunk
     except OSError:
         return False
+
+
 def extract_blocks_from_file(filepath: Path, min_lines: int = 2) -> list[tuple[str, int, list[str]]]:
     try:
         with open(filepath, encoding="utf-8", errors="replace") as f:
@@ -52,6 +58,8 @@ def extract_blocks_from_file(filepath: Path, min_lines: int = 2) -> list[tuple[s
             block_text = "\n".join(block_stripped)
             blocks.append((block_text, block_start + 1, block_lines))
     return blocks
+
+
 def collect_blocks_parallel(
     root: Path, min_lines: int = 2, n_jobs: int = 8
 ) -> dict[str, list[tuple[Path, int, list[str]]]]:
@@ -72,10 +80,14 @@ def collect_blocks_parallel(
             for block_text, start_lineno, original_lines in blocks:
                 blocks_dict[block_text].append((filepath, start_lineno, original_lines))
     return blocks_dict
+
+
 def find_repeated_blocks(
     blocks: dict[str, list[tuple[Path, int, list[str]]]],
 ) -> dict[str, list[tuple[Path, int, list[str]]]]:
     return {block: occ for block, occ in blocks.items() if len(occ) >= 2}
+
+
 def report(repeated: dict[str, list[tuple[Path, int, list[str]]]], root: Path) -> None:
     if not repeated:
         print("No repeated multi-line blocks found.")
@@ -95,6 +107,8 @@ def report(repeated: dict[str, list[tuple[Path, int, list[str]]]], root: Path) -
             except ValueError:
                 rel_path = filepath
             print(f"    {rel_path}:{lineno}")
+
+
 def process_file_removal(filepath: Path, removals: list[tuple[int, list[str]]], root: Path) -> tuple[Path, int, bool]:
     try:
         with open(filepath, encoding="utf-8", errors="replace") as f:
@@ -133,6 +147,8 @@ def process_file_removal(filepath: Path, removals: list[tuple[int, list[str]]], 
     except OSError as e:
         print(f"Error: cannot write {filepath}: {e}", file=sys.stderr)
         return filepath, 0, False
+
+
 def remove_repeated_blocks(repeated: dict[str, list[tuple[Path, int, list[str]]]], root: Path, n_jobs: int = 8) -> None:
     file_removals: dict[Path, list[tuple[int, list[str]]]] = defaultdict(list)
     for _block_text, occurrences in repeated.items():
@@ -160,6 +176,8 @@ def remove_repeated_blocks(repeated: dict[str, list[tuple[Path, int, list[str]]]
         print(f"\nDone. Removed {removed_total} repeated line(s) from {files_changed} file(s).")
     else:
         print("No files were modified.")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -190,5 +208,7 @@ def main() -> None:
             remove_repeated_blocks(repeated, root, args.jobs)
     else:
         report(repeated, root)
+
+
 if __name__ == "__main__":
     main()

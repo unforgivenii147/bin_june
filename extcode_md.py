@@ -2,6 +2,7 @@
 from __future__ import annotations
 import re
 from pathlib import Path
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 LANG_EXT = {
     "python": ".py",
@@ -50,6 +51,8 @@ LANG_EXT = {
     "markdown": ".md",
 }
 FENCE_RE = re.compile(r"```(?P<lang>[A-Za-z0-9_+\-\.]*)[ \t]*\n(?P<code>.*?)(?<=\n)```", re.DOTALL)
+
+
 def ext_for_lang(lang: str) -> str:
     lang = (lang or "").strip().lower()
     if not lang:
@@ -59,9 +62,13 @@ def ext_for_lang(lang: str) -> str:
     if "." in lang:
         return lang if lang.startswith(".") else "." + lang.split(".")[-1]
     return "." + lang
+
+
 def safe_stem(s: str, max_len: int = 120) -> str:
     s = re.sub(r"[^\w\-\.]+", "_", s)
     return s[:max_len].rstrip("_") or "file"
+
+
 def extract_code_blocks(input_md: Path, output_dir: Path) -> int:
     text = input_md.read_text(encoding="utf-8", errors="replace")
     matches = list(FENCE_RE.finditer(text))
@@ -80,6 +87,8 @@ def extract_code_blocks(input_md: Path, output_dir: Path) -> int:
         out_path = output_dir / filename
         out_path.write_text(code.rstrip("\n") + "\n", encoding="utf-8")
     return len(matches)
+
+
 def main() -> None:
     cwd = Path.cwd().resolve()
     out_dir = cwd / "output"
@@ -88,5 +97,7 @@ def main() -> None:
     total_blocks = 0
     for md in md_files:
         total_blocks += extract_code_blocks(md, out_dir)
+
+
 if __name__ == "__main__":
     main()

@@ -3,6 +3,7 @@
 Clone GitHub repositories by downloading ZIP archives.
 No git binary needed. Uses requests for HTTP.
 """
+
 from __future__ import annotations
 import argparse
 import io
@@ -11,6 +12,8 @@ import zipfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 import requests
+
+
 def read_repos(file_path: Path) -> list[str]:
     """Read repository names from file."""
     if not file_path.exists():
@@ -22,10 +25,14 @@ def read_repos(file_path: Path) -> list[str]:
         print(f"Error: No repositories found in {file_path}")
         sys.exit(1)
     return repos
+
+
 def validate_repo_format(repo: str) -> bool:
     """Validate that repo is in user/repo format."""
     parts = repo.split("/")
     return len(parts) == 2 and all(parts)
+
+
 def download_repo_zip(repo: str, base_dir: Path) -> tuple[str, bool, str]:
     """
     Download repository as ZIP from GitHub.
@@ -49,11 +56,13 @@ def download_repo_zip(repo: str, base_dir: Path) -> tuple[str, bool, str]:
             extracted_root = temp_dir / root_dir
             if extracted_root.exists():
                 import shutil
+
                 for item in extracted_root.iterdir():
                     shutil.move(str(item), str(target_dir / item.name))
                 shutil.rmtree(temp_dir)
             else:
                 import shutil
+
                 shutil.move(str(temp_dir), str(target_dir))
         return repo, True, f"Successfully downloaded to {target_dir}"
     except requests.RequestException as e:
@@ -63,8 +72,11 @@ def download_repo_zip(repo: str, base_dir: Path) -> tuple[str, bool, str]:
     except Exception as e:
         if target_dir.exists():
             import shutil
+
             shutil.rmtree(target_dir, ignore_errors=True)
         return repo, False, f"Error: {e!s}"
+
+
 def main():
     parser = argparse.ArgumentParser(description="Download GitHub repositories as ZIP archives")
     parser.add_argument(
@@ -119,5 +131,7 @@ def main():
     print(f"  ⏭️  Already existed: {skipped}")
     print(f"  ❌ Failed: {failed}")
     print(f"  📊 Total: {len(repos)}")
+
+
 if __name__ == "__main__":
     main()

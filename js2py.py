@@ -5,13 +5,17 @@ import os
 import re
 import sys
 from pathlib import Path
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 def install_js2py() -> bool:
     try:
         return True
     except ImportError:
         print("📦 Installing js2py library...")
         import subprocess
+
         try:
             subprocess.check_call([sys.executable, "-m", "pip", "install", "js2py"])
             print("✅ js2py installed successfully")
@@ -19,13 +23,18 @@ def install_js2py() -> bool:
         except subprocess.CalledProcessError:
             print("❌ Failed to install js2py")
             return False
+
+
 def convert_with_js2py(js_file: Path, outfile: Path) -> bool:
     try:
         import js2py
+
         js2py.translate_file(js_file, out_file)
         return True
     except Exception as e:
         return False, f"js2py conversion error: {e!s}"
+
+
 def convert_with_openai(js_code: str, api_key: str | None = None) -> tuple[bool, str]:
     try:
         import openai
@@ -70,6 +79,8 @@ python code:"""
         return True, python_code.strip()
     except Exception as e:
         return False, f"OpenAI API error: {e!s}"
+
+
 def simple_js_to_python(js_code: str) -> str:
     python_code = js_code
     python_code = re.sub(r"\b(let|const|var)\s+", "", python_code)
@@ -93,6 +104,8 @@ def simple_js_to_python(js_code: str) -> str:
         "for \\1 in range(\\2, \\3):",
         python_code,
     )
+
+
 def convert_file(
     input_file: Path,
     output_file: Path | None = None,
@@ -131,6 +144,8 @@ def convert_file(
     except Exception as e:
         print(f"❌ Error writing file: {e}")
         return False
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Convert JavaScript code to Python",
@@ -163,6 +178,8 @@ def main():
     outputfile = str(args.input).replace(".js", ".py")
     success = convert_file(args.input, outputfile, args.method, args.api_key)
     sys.exit(0 if success else 1)
+
+
 if __name__ == "__main__":
     main()
 """

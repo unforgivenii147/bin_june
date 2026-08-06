@@ -3,6 +3,8 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+
+
 def deep_merge(dict1, dict2):
     """
     Recursively merges two dictionaries.
@@ -19,6 +21,8 @@ def deep_merge(dict1, dict2):
         else:
             merged[key] = value
     return merged
+
+
 def merge_json_files(input_files, output_file):
     merged_data = None
     for file_path in input_files:
@@ -58,6 +62,8 @@ def merge_json_files(input_files, output_file):
     except IOError as e:
         print(f"Error writing to output file: {e}")
         sys.exit(1)
+
+
 if __name__ == "__main__":
     # Set up command line argument parsing
     parser = argparse.ArgumentParser(description="Merge two or more JSON files into one.")

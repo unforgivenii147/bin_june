@@ -8,13 +8,17 @@ import zipfile
 from collections import defaultdict
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
+
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
+
+
 class PythonImportExtractor:
     def __init__(self, pip_packages_file: str = "/sdcard/data/pip.txt"):
         self.pip_packages = self._load_pip_packages(pip_packages_file)
         self.stdlib_modules = self._get_stdlib_modules()
         self.local_modules = set()
+
     @staticmethod
     def _get_stdlib_modules() -> set[str]:
         stdlib = set(sys.builtin_module_names)
@@ -238,6 +242,7 @@ class PythonImportExtractor:
             }
         )
         return stdlib
+
     @staticmethod
     def _load_pip_packages(pip_file: str) -> set[str]:
         try:
@@ -266,6 +271,7 @@ class PythonImportExtractor:
         except Exception as e:
             logger.error(f"Error loading pip packages: {e}")
             return set()
+
     @staticmethod
     def _extract_imports_from_ast(code: str, filename: str = "<string>") -> set[str]:
         imports = set()
@@ -284,6 +290,7 @@ class PythonImportExtractor:
         except Exception as e:
             logger.debug(f"Error parsing {filename}: {e}")
         return imports
+
     def _identify_local_modules(self, directory: str = ".") -> None:
         exclude_dirs = {".git", "__pycache__", ".pytest_cache", "dist", "build"}
         dir_path = Path(directory)
@@ -307,6 +314,7 @@ class PythonImportExtractor:
                                 self.local_modules.add(item.name)
                     except:
                         pass
+
     def extract_from_file(self, filepath: Path) -> set[str]:
         try:
             code = filepath.read_text(encoding="utf-8", errors="ignore")
@@ -314,6 +322,7 @@ class PythonImportExtractor:
         except Exception as e:
             logger.debug(f"Error reading {filepath}: {e}")
             return set()
+
     def extract_from_zip(self, zippath: Path) -> set[str]:
         imports = set()
         try:
@@ -328,6 +337,7 @@ class PythonImportExtractor:
         except Exception as e:
             logger.debug(f"Error processing zip {zippath}: {e}")
         return imports
+
     def extract_from_tar(self, tarpath: Path) -> set[str]:
         imports = set()
         try:
@@ -343,8 +353,10 @@ class PythonImportExtractor:
         except Exception as e:
             logger.debug(f"Error processing tar {tarpath}: {e}")
         return imports
+
     def extract_from_whl(self, whlpath: Path) -> set[str]:
         return self.extract_from_zip(whlpath)
+
     def process_file(self, filepath: Path) -> set[str]:
         if filepath.suffix == ".zip" or filepath.suffix == ".whl":
             return self.extract_from_zip(filepath)
@@ -353,6 +365,7 @@ class PythonImportExtractor:
         elif filepath.suffix in {".py", ".pyw"} or (filepath.is_file() and filepath.suffix == ""):
             return self.extract_from_file(filepath)
         return set()
+
     def filter_packages(self, imports: set[str]) -> set[str]:
         pip_packages = set()
         for imp in imports:
@@ -364,6 +377,8 @@ class PythonImportExtractor:
             if imp_lower in self.pip_packages or imp.replace("_", "-") in self.pip_packages:
                 pip_packages.add(imp_lower)
         return pip_packages
+
+
 def find_python_files(directory: str = ".") -> list[Path]:
     exclude_dirs = {".git", "__pycache__", ".pytest_cache", "dist", "build", ".mypy_cache", ".ruff_cache"}
     python_files = []
@@ -387,13 +402,18 @@ def find_python_files(directory: str = ".") -> list[Path]:
             elif item.name.endswith((".zip", ".whl")) or item.name.endswith((".tar.gz", ".tar.xz", ".tar.zst")):
                 python_files.append(item)
     return python_files
+
+
 def process_single_file(args: tuple[Path, PythonImportExtractor]) -> tuple[Path, set[str]]:
     filepath, extractor = args
     imports = extractor.process_file(filepath)
     filtered = extractor.filter_packages(imports)
     return (filepath, filtered)
+
+
 def main():
     import argparse
+
     parser = argparse.ArgumentParser(description="Create requirements.txt by inspecting Python files")
     parser.add_argument("-d", "--directory", default=".", help="Directory to scan (default: current directory)")
     parser.add_argument(
@@ -443,5 +463,7 @@ def main():
         for package in sorted_packages:
             sources = all_packages[package]
             logger.info(f"  {package} (found in {len(sources)} file(s))")
+
+
 if __name__ == "__main__":
     main()

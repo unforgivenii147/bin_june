@@ -6,17 +6,21 @@ import shutil
 import sys
 from pathlib import Path
 from loguru import logger
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger(__name__)
+
+
 class PackageRepacker:
     def __init__(self, output_base: str = "~/tmp/repack") -> None:
         self.output_base = Path(output_base).expanduser()
         self.output_base.mkdir(parents=True, exist_ok=True)
         self.found_site_packages: list[Path] = []
+
     def find_site_packages_dirs(self) -> list[Path]:
         site_packages_dirs = []
         search_paths = [Path.cwd()]
@@ -53,6 +57,7 @@ class PackageRepacker:
         unique_dirs.sort()
         self.found_site_packages = unique_dirs
         return unique_dirs
+
     def get_package_info_from_dist_info(self, dist_info_dir: Path) -> dict:
         metadata = {
             "name": dist_info_dir.name.split("-")[0],
@@ -79,6 +84,7 @@ class PackageRepacker:
             except Exception as e:
                 logger.warning("Could not read metadata from %s: %s", metadata_file, e)
         return metadata
+
     def create_wheel_structure(
         self,
         package_name: str,
@@ -100,6 +106,7 @@ class PackageRepacker:
             root_is_purelib = "false"
             try:
                 from packaging.tags import sys_tags
+
                 best_tag = next(sys_tags())
                 python_tag = best_tag.interpreter
                 abi_tag = best_tag.abi
@@ -109,6 +116,7 @@ class PackageRepacker:
                 logger.warning("`packaging` library not found. (Install with: pip install packaging)")
                 logger.warning("Falling back to best-guess tags based on current system.")
                 import platform
+
                 python_ver = sys.version_info
                 python_tag = f"cp{python_ver.major}{python_ver.minor}"
                 abi_tag = python_tag
@@ -153,6 +161,7 @@ class PackageRepacker:
         else:
             logger.warning("Could not find original RECORD file at %s", original_record)
         return wheel_dir
+
     def copy_package_files(self, dist_info_dir: Path, site_packages_path: Path, output_dir: Path) -> bool:
         try:
             record_file = dist_info_dir / "RECORD"
@@ -194,6 +203,7 @@ class PackageRepacker:
         except Exception as e:
             logger.exception(f"Error copying files for {dist_info_dir.name}: {e}")
             return False
+
     def copy_all_packages(self) -> None:
         total_copied = 0
         for site_packages_dir in self.found_site_packages:
@@ -219,6 +229,8 @@ class PackageRepacker:
             print("Copied %s packages from %s", package_count, site_packages_dir)
         print("Total packages copied: %s", total_copied)
         print(f"Package files saved to: {self.output_base}")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Automatically find and copy Python packages to a wheel structure")
     parser.add_argument("--output", "-o", default="~/tmp/repack", help="Output directory (default: ~/tmp/repack)")
@@ -235,6 +247,7 @@ def main() -> int:
         repacker = PackageRepacker(output_base=args.output)
         if args.skip_scan:
             import site
+
             current_site_packages = site.getsitepackages()
             user_site = site.getusersitepackages()
             if user_site:
@@ -253,5 +266,7 @@ def main() -> int:
         logger.exception("Fatal error: %s", e)
         return 1
     return 0
+
+
 if __name__ == "__main__":
     sys.exit(main())

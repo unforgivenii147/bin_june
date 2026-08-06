@@ -3,6 +3,7 @@
 Recursively translate text files using Google Translate.
 Optimized for Python 3.12 with modern syntax and performance improvements.
 """
+
 from __future__ import annotations
 import argparse
 import ast
@@ -14,12 +15,15 @@ from collections.abc import Generator
 from pathlib import Path
 from typing import Final
 from deep_translator import GoogleTranslator
+
 SKIP_DIRS: Final[frozenset[str]] = frozenset(
     {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
 )
 MAX_CHUNK_LEN: Final[int] = 5000
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
+
+
 def is_text_file(path: Path) -> bool:
     try:
         with path.open("rb") as f:
@@ -29,6 +33,8 @@ def is_text_file(path: Path) -> bool:
             return b"\x00" not in chunk
     except OSError:
         return False
+
+
 def get_chunks(text: str, max_len: int = MAX_CHUNK_LEN) -> Generator[str, None, None]:
     lines = text.splitlines(keepends=True)
     current_chunk: list[str] = []
@@ -44,6 +50,8 @@ def get_chunks(text: str, max_len: int = MAX_CHUNK_LEN) -> Generator[str, None, 
             current_len += line_len
     if current_chunk:
         yield "".join(current_chunk)
+
+
 def translate_file_task(task: tuple[Path, str, float, Path | None]) -> None:
     file_path, target_lang, delay, output_dir = task
     logger.info("[%d] Processing: %s", os.getpid(), file_path)
@@ -94,6 +102,8 @@ def translate_file_task(task: tuple[Path, str, float, Path | None]) -> None:
         logger.info("  → Written: %s\n", out_path)
     except Exception as e:
         logger.error("  ✗ Cannot write output: %s (%s)\n", out_path, e)
+
+
 def collect_files(paths: list[str]) -> list[Path]:
     files: set[Path] = set()
     for p in paths:
@@ -106,6 +116,8 @@ def collect_files(paths: list[str]) -> list[Path]:
                 if entry.is_file() and (not any(part in SKIP_DIRS for part in entry.parts)) and is_text_file(entry):
                     files.add(entry)
     return sorted(files)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Recursive text file translator.")
     parser.add_argument("paths", nargs="*", default=["."], help="Files/directories to process")
@@ -124,5 +136,7 @@ def main() -> None:
     with multiprocessing.Pool(processes=workers) as pool:
         pool.map(translate_file_task, tasks)
     logger.info("\n✓ All files processed.")
+
+
 if __name__ == "__main__":
     main()

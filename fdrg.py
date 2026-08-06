@@ -9,6 +9,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from queue import Queue
 from fastwalk import walk_files
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 pause_event = threading.Event()
 pause_event.set()
@@ -16,9 +17,12 @@ results_queue = Queue()
 DEFAULT_EXCLUDED_DIRS = {".git"}
 DEFAULT_SKIPPED_EXTS = {".pyc", ".bak"}
 ARCHIVE_EXTENSIONS = (".tar.gz", ".tar", ".tar.xz", ".tar.zst", ".tar.bz2", ".zip", ".whl", ".apk")
+
+
 def setup_keyboard_listener() -> bool:
     try:
         import keyboard
+
         def on_key_press(event) -> None:
             if event.name in {"space", "p"} and pause_event.is_set():
                 pause_event.clear()
@@ -26,24 +30,33 @@ def setup_keyboard_listener() -> bool:
             elif event.name == "c" and not pause_event.is_set():
                 pause_event.set()
                 print("\n[RESUMED] Searching...")
+
         keyboard.on_press(on_key_press)
         return True
     except ImportError:
         print("Warning: 'keyboard' not installed. Pause disabled.")
         return False
+
+
 def is_excluded(path: Path, excluded_dirs, excluded_patterns) -> bool:
     for part in path.parts:
         if part in excluded_dirs:
             return True
     return any(fnmatch.fnmatch(path.name, pattern) for pattern in excluded_patterns)
+
+
 def should_skip_file(path: Path) -> bool:
     return path.suffix in DEFAULT_SKIPPED_EXTS
+
+
 def report_result(file_path, line_num=None) -> None:
     if line_num:
         print(f"[FOUND] {file_path} (Line: {line_num})")
     else:
         print(f"[FOUND] {file_path}")
     results_queue.put((file_path, line_num))
+
+
 def search_in_file(file_path: Path, search_string, search_content):
     pause_event.wait()
     results = []
@@ -60,6 +73,8 @@ def search_in_file(file_path: Path, search_string, search_content):
     except Exception:
         pass
     return results
+
+
 def extract_and_search_archive(archive_path: Path, search_string, search_content):
     results = []
     try:
@@ -102,6 +117,8 @@ def extract_and_search_archive(archive_path: Path, search_string, search_content
     except Exception:
         pass
     return results
+
+
 def process_file(path: Path, search_string, search_content) -> None:
     path = Path(path)
     if path.name.endswith(ARCHIVE_EXTENSIONS):
@@ -110,6 +127,8 @@ def process_file(path: Path, search_string, search_content) -> None:
         results = search_in_file(path, search_string, search_content)
     for r in results:
         report_result(*r)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Fast recursive string search")
     parser.add_argument("search_string")
@@ -143,5 +162,7 @@ def main() -> None:
         for _f in as_completed(futures):
             pass
     print(f"[INFO] Total results: {results_queue.qsize()}")
+
+
 if __name__ == "__main__":
     main()

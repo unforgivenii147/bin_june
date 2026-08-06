@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from concurrent.futures import ProcessPoolExecutor
+
 # Mapping of extensions to their comment characters
 COMMENT_MAP = {
     ".lua": "--",
@@ -20,6 +21,8 @@ COMMENT_MAP = {
     ".sql": "--",
     ".rb": "#",
 }
+
+
 def process_chunk(lines, comment_char):
     """
     Worker function to process a block of lines.
@@ -32,6 +35,8 @@ def process_chunk(lines, comment_char):
         else:
             processed.append(f"{comment_char}{line}")
     return processed
+
+
 def main():
     # 1. Argument Validation
     if len(sys.argv) < 3 or len(sys.argv) > 4:
@@ -99,5 +104,7 @@ def main():
     # Replace the original file with the temporary one
     os.replace(temp_path, file_path)
     print(f"Successfully processed {file_path} using '{comment_char}'")
+
+
 if __name__ == "__main__":
     main()

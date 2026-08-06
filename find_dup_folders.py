@@ -5,9 +5,12 @@ from collections import defaultdict
 from os import scandir as os_scandir
 from pathlib import Path
 from xxhash import xxh64
+
 CHUNK_SIZE = 1024 * 1024
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 from dh import get_dirs
+
+
 def is_nested(path1: Path, path2: Path) -> bool:
     try:
         path1.resolve().relative_to(path2.resolve())
@@ -20,6 +23,8 @@ def is_nested(path1: Path, path2: Path) -> bool:
     except ValueError:
         pass
     return False
+
+
 def hash_folder(folder_path: Path) -> str:
     hasher = xxh64()
     files = []
@@ -40,6 +45,8 @@ def hash_folder(folder_path: Path) -> str:
         except OSError:
             continue
     return hasher.hexdigest()
+
+
 def find_duplicate_folders(cwd: Path):
     folder_hashes = defaultdict(list)
     for path in get_dirs(cwd):
@@ -47,6 +54,8 @@ def find_duplicate_folders(cwd: Path):
         if folder_hash:
             folder_hashes.setdefault(folder_hash, []).append(path)
     return {h: paths for h, paths in folder_hashes.items() if len(paths) > 1}
+
+
 if __name__ == "__main__":
     cwd = Path.cwd()
     duplicates = find_duplicate_folders(cwd)

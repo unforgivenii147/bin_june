@@ -1,11 +1,15 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Merge split part files into a single file."""
+
 from __future__ import annotations
 import argparse
 import re
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+
 PART_RE = re.compile(r"^(?P<prefix>.+)\.part(?P<num>\d+)$")
+
+
 def collect_paths(inputs: list[str]) -> list[Path]:
     if not inputs:
         return [p for p in Path(".").rglob("*") if p.is_file() and PART_RE.match(p.name)]
@@ -17,6 +21,8 @@ def collect_paths(inputs: list[str]) -> list[Path]:
         elif p.is_file():
             out.append(p)
     return out
+
+
 def group_parts(paths: list[Path]) -> dict[tuple[Path, str], list[tuple[int, Path]]]:
     groups: dict[tuple[Path, str], list[tuple[int, Path]]] = {}
     for p in paths:
@@ -26,6 +32,8 @@ def group_parts(paths: list[Path]) -> dict[tuple[Path, str], list[tuple[int, Pat
         key = (p.parent.resolve(), m.group("prefix"))
         groups.setdefault(key, []).append((int(m.group("num")), p))
     return groups
+
+
 def merge_group(items: tuple[tuple[Path, str], list[tuple[int, Path]]]) -> Path:
     (parent, prefix), parts = items
     parts.sort(key=lambda x: x[0])
@@ -36,6 +44,8 @@ def merge_group(items: tuple[tuple[Path, str], list[tuple[int, Path]]]) -> Path:
                 for chunk in iter(lambda: src.read(1024 * 1024), b""):
                     dst.write(chunk)
     return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("paths", nargs="*")
@@ -48,5 +58,7 @@ def main() -> None:
         outputs = list(ex.map(merge_group, groups.items()))
     for out in outputs:
         print(out)
+
+
 if __name__ == "__main__":
     main()

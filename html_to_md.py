@@ -7,7 +7,10 @@ from pathlib import Path
 import html2text
 from readability import Document
 from dh import get_files, mpf3
+
 remove_orig = True
+
+
 def process_file(path: str | Path) -> tuple[Path, bool]:
     path = Path(path)
     md_file = path.with_suffix(".md")
@@ -34,6 +37,8 @@ def process_file(path: str | Path) -> tuple[Path, bool]:
     except Exception as e:
         print(f"✗ Error: {e}")
         return (path, False)
+
+
 if __name__ == "__main__":
     cwd = Path.cwd()
     args = sys.argv[1:]

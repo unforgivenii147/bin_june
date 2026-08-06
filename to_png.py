@@ -2,8 +2,11 @@
 from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 from dh import fsz, is_image
+
+
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -13,14 +16,20 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
+
+
 try:
     import cv2
     import numpy as np
+
     USE_CV2 = True
 except ImportError:
     from PIL import Image
+
     USE_CV2 = False
 IGNORED_DIRS = {".git", "dist", "build", "__pycache__", ".venv", "node_modules"}
+
+
 def convert_file(file_path: str) -> bool:
     path = Path(file_path)
     if not path.is_file() or path.suffix.lower() not in IMG_EXT:
@@ -69,6 +78,8 @@ def convert_file(file_path: str) -> bool:
     except Exception as e:
         print(f"Error converting '{path.name}': {e}")
         return False
+
+
 def main() -> None:
     start_size = gsz(".")
     files = [
@@ -89,5 +100,7 @@ def main() -> None:
         print(f"size reduced: - {fsz(result)} ")
     else:
         print(f"size increased: + {fsz(result)} ")
+
+
 if __name__ == "__main__":
     main()

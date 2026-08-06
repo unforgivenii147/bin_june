@@ -4,7 +4,10 @@ import mmap
 import sys
 from collections import defaultdict
 from pathlib import Path
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 def get_lines(file_path: Path) -> list[str]:
     file_size = file_path.stat().st_size
     if file_size > 5 * 1024 * 1024:
@@ -16,6 +19,8 @@ def get_lines(file_path: Path) -> list[str]:
         print("[Info] Small file detected. Using standard read...")
         with file_path.open("r", encoding="utf-8") as f:
             return [line.strip() for line in f if line.strip()]
+
+
 def process_wordlist(file_path_str: str) -> None:
     file_path = Path(file_path_str)
     if not file_path.exists():
@@ -45,6 +50,8 @@ def process_wordlist(file_path_str: str) -> None:
             f.write(line + "\n")
     print(f"[Success] Moved {len(similar_lines)} lines to {similar_file}")
     print(f"[Success] Updated {file_path_str} in-place ({len(remaining_lines)} lines remaining).")
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python filter_passwords.py <filename>")

@@ -17,6 +17,9 @@ import brotlicffi as brotli
 import py7zr
 import zstandard as zstd
 from loguru import logger
+from dh import cprint
+
+
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -26,90 +29,10 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
+
+
 from dh import fsz, mpf3
-ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
-HIGHLIGHTS = {
-    "on_black": 40,
-    "on_grey": 40,
-    "on_red": 41,
-    "on_green": 42,
-    "on_yellow": 43,
-    "on_blue": 44,
-    "on_magenta": 45,
-    "on_cyan": 46,
-    "on_light_grey": 47,
-    "on_dark_grey": 100,
-    "on_light_red": 101,
-    "on_light_green": 102,
-    "on_light_yellow": 103,
-    "on_light_blue": 104,
-    "on_light_magenta": 105,
-    "on_light_cyan": 106,
-    "on_white": 107,
-}
-COLORS = {
-    "black": 30,
-    "grey": 30,
-    "red": 31,
-    "green": 32,
-    "yellow": 33,
-    "blue": 34,
-    "magenta": 35,
-    "cyan": 36,
-    "light_grey": 37,
-    "dark_grey": 90,
-    "light_red": 91,
-    "light_green": 92,
-    "light_yellow": 93,
-    "light_blue": 94,
-    "light_magenta": 95,
-    "light_cyan": 96,
-    "white": 97,
-}
-RESET = "\x1b[0m"
-def can_colorize(*, no_color=None, force_color=None):
-    if no_color is not None and no_color:
-        return False
-    if force_color is not None and force_color:
-        return True
-    if os.environ.get("ANSI_COLORS_DISABLED"):
-        return False
-    if os.environ.get("NO_COLOR"):
-        return False
-    if os.environ.get("FORCE_COLOR"):
-        return True
-    if os.environ.get("TERM") == "dumb":
-        return False
-    if not hasattr(sys.stdout, "fileno"):
-        return False
-    try:
-        return os.isatty(sys.stdout.fileno())
-    except OSError:
-        return sys.stdout.isatty()
-def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
-    result = str(text)
-    if not can_colorize(no_color=no_color, force_color=force_color):
-        return result
-    fmt_str = "\x1b[%dm%s"
-    rgb_fore_fmt_str = "\x1b[38;2;%d;%d;%dm%s"
-    rgb_back_fmt_str = "\x1b[48;2;%d;%d;%dm%s"
-    if color is not None:
-        if isinstance(color, str):
-            result = fmt_str % (COLORS[color], result)
-        elif isinstance(color, tuple):
-            result = rgb_fore_fmt_str % (color[0], color[1], color[2], result)
-    if on_color is not None:
-        if isinstance(on_color, str):
-            result = fmt_str % (HIGHLIGHTS[on_color], result)
-        elif isinstance(on_color, tuple):
-            result = rgb_back_fmt_str % (on_color[0], on_color[1], on_color[2], result)
-    if attrs is not None:
-        for attr in attrs:
-            result = fmt_str % (ATTRIBUTES[attr], result)
-    result += RESET
-    return result
-def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
-    print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
+
 SUPPORTED_EXTS = {
     ".tar",
     ".tar.xz",
@@ -129,6 +52,8 @@ SUPPORTED_EXTS = {
 }
 COMPRESS_MODE = "zstd"
 CHUNK_SIZE = 1024 * 1024
+
+
 @dataclass
 class Result:
     ok: bool
@@ -137,6 +62,8 @@ class Result:
     error: str | None = None
     original_size: int = 0
     new_size: int = 0
+
+
 def get_size(path: Path) -> int:
     if path.is_file():
         return path.stat().st_size
@@ -150,6 +77,8 @@ def get_size(path: Path) -> int:
                     continue
         return total
     return 0
+
+
 def format_size(size_bytes: int) -> str:
     if not size_bytes:
         return "0 B"
@@ -160,14 +89,20 @@ def format_size(size_bytes: int) -> str:
     if size_bytes < 1024**3:
         return f"{size_bytes / 1024**2:.2f} MB"
     return f"{size_bytes / 1024**3:.2f} GB"
+
+
 def has_compressed_suffix(path: Path) -> bool:
     name = path.name.lower()
     return any((name.endswith(ext) for ext in SUPPORTED_EXTS))
+
+
 def output_name_for_file(path: Path, mode: str) -> Path:
     ext_map = {"xz": ".xz", "gz": ".gz", "brotli": ".br", "zstd": ".zst", "7z": ".7z", "zip": ".zip"}
     if mode not in ext_map:
         raise ValueError(f"Unsupported mode: {mode}")
     return path.with_name(path.name + ext_map[mode])
+
+
 def output_name_for_dir(dir_path: Path, mode: str) -> Path:
     ext_map = {
         "xz": ".tar.xz",
@@ -180,9 +115,13 @@ def output_name_for_dir(dir_path: Path, mode: str) -> Path:
     if mode not in ext_map:
         raise ValueError(f"Unsupported mode: {mode}")
     return dir_path.parent / f"{dir_path.name}{ext_map[mode]}"
+
+
 def copy_chunks(src_fd, dst_fd, chunk_size: int = 32768) -> None:
     while chunk := src_fd.read(chunk_size):
         dst_fd.write(chunk)
+
+
 def compress_streaming(src: Path, dst: Path, compress_func: Callable, is_dir: bool = False) -> None:
     temp_path = dst.with_suffix(".tmp")
     try:
@@ -200,15 +139,23 @@ def compress_streaming(src: Path, dst: Path, compress_func: Callable, is_dir: bo
         if temp_path.exists():
             temp_path.unlink()
         raise e
+
+
 def compress_file_xz(src: Path, dst: Path) -> None:
     with src.open("rb") as fin, lzma.open(dst, "wb", preset=9 | lzma.PRESET_EXTREME) as fout:
         copy_chunks(fin, fout)
+
+
 def compress_file_gz(src: Path, dst: Path) -> None:
     with src.open("rb") as fin, gzip.open(dst, "wb", compresslevel=9) as fout:
         copy_chunks(fin, fout)
+
+
 def compress_file_bz2(src: Path, dst: Path) -> None:
     with src.open("rb") as fin, bz2.open(dst, "wb", compresslevel=9) as fout:
         copy_chunks(fin, fout)
+
+
 def compress_file_brotli(src: Path, dst: Path) -> None:
     if brotli is None:
         raise RuntimeError("brotlicffi is not installed")
@@ -219,20 +166,28 @@ def compress_file_brotli(src: Path, dst: Path) -> None:
             if compressed:
                 fout.write(compressed)
         fout.write(compressor.finish())
+
+
 def compress_file_zstd(src: Path, dst: Path) -> None:
     if zstd is None:
         raise RuntimeError("zstandard is not installed")
     cctx = zstd.ZstdCompressor(level=22)
     with src.open("rb") as fin, dst.open("wb") as fout, cctx.stream_writer(fout) as compressor:
         copy_chunks(fin, compressor)
+
+
 def compress_file_zip(src: Path, dst: Path) -> None:
     with zipfile.ZipFile(dst, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
         zf.write(src, arcname=src.name)
+
+
 def compress_file_7z(src: Path, dst: Path) -> None:
     if py7zr is None:
         raise RuntimeError("py7zr is not installed")
     with py7zr.SevenZipFile(dst, "w", filters=[{"id": py7zr.FILTER_LZMA2, "preset": 9}]) as zf:
         zf.write(src, arcname=src.name)
+
+
 def compress_one(path_str: str, mode: str, is_dir: bool) -> Result:
     src = Path(path_str)
     original_size = get_size(src)
@@ -265,6 +220,8 @@ def compress_one(path_str: str, mode: str, is_dir: bool) -> Result:
         logger.exception(f"Failed to compress {src}")
         result.error = str(e)
         return result
+
+
 def decompress_stream_tar(src: Path, decompress_func: Callable, dst_dir: Path, extension: str) -> Path:
     extracted_path = dst_dir / src.name[: -len(extension)]
     with tempfile.NamedTemporaryFile(delete=False, suffix=".tar") as tf:
@@ -277,6 +234,8 @@ def decompress_stream_tar(src: Path, decompress_func: Callable, dst_dir: Path, e
     finally:
         tar_temp.unlink()
     return extracted_path
+
+
 def decompress_one(path_str: str) -> Result:
     src = Path(path_str)
     original_size = get_size(src)
@@ -285,24 +244,30 @@ def decompress_one(path_str: str) -> Result:
     dst_dir = src.parent
     try:
         if name.endswith((".tar.xz", ".tar.gz", ".tar.bz2", ".tar.br", ".tar.zst")):
+
             def copy_via_lzma(fin, fout):
                 with lzma.open(fin, "rb") as lzma_fin:
                     copy_chunks(lzma_fin, fout)
+
             def copy_via_gzip(fin, fout):
                 with gzip.open(fin, "rb") as gz_fin:
                     copy_chunks(gz_fin, fout)
+
             def copy_via_bz2(fin, fout):
                 with bz2.open(fin, "rb") as bz2_fin:
                     copy_chunks(bz2_fin, fout)
+
             def copy_via_brotli(fin, fout):
                 decompressor = brotli.Decompressor()
                 while chunk := fin.read(CHUNK_SIZE):
                     fout.write(decompressor.process(chunk))
                 fout.write(decompressor.finish())
+
             def copy_via_zstd(fin, fout):
                 dctx = zstd.ZstdDecompressor()
                 with dctx.stream_reader(fin) as reader:
                     copy_chunks(reader, fout)
+
             ext_map = {
                 ".tar.xz": (7, copy_via_lzma),
                 ".tar.gz": (6, copy_via_gzip),
@@ -356,6 +321,8 @@ def decompress_one(path_str: str) -> Result:
         logger.exception(f"Failed to decompress {src}")
         result.error = str(e)
         return result
+
+
 def decompress_brotli_file(src: Path) -> Path:
     dst = src.with_suffix("")
     decompressor = brotli.Decompressor()
@@ -364,6 +331,8 @@ def decompress_brotli_file(src: Path) -> Path:
             fout.write(decompressor.process(chunk))
         fout.write(decompressor.finish())
     return dst
+
+
 def decompress_zstd_file(src: Path) -> Path:
     dst = src.with_suffix("")
     with src.open("rb") as fin, dst.open("wb") as fout:
@@ -371,6 +340,8 @@ def decompress_zstd_file(src: Path) -> Path:
         with dctx.stream_reader(fin) as reader:
             copy_chunks(reader, fout)
     return dst
+
+
 def collect_top_level_items(base: Path) -> list[tuple[Path, bool]]:
     items = []
     for p in base.iterdir():
@@ -381,9 +352,13 @@ def collect_top_level_items(base: Path) -> list[tuple[Path, bool]]:
         elif p.is_dir() and ".git" not in p.parts and (not has_compressed_suffix(p)):
             items.append((p, True))
     return items
+
+
 def worker_func(item_tuple: tuple[Path, bool]) -> Result:
     path, is_dir = item_tuple
     return compress_one(str(path), COMPRESS_MODE, is_dir)
+
+
 def main() -> None:
     global COMPRESS_MODE
     cwd = Path.cwd()
@@ -437,5 +412,7 @@ def main() -> None:
     ratio = space_freed / before * 100 if before > 0 else 0
     print("Space freed:", end=" ")
     cprint(f"{fsz(space_freed)} | {ratio:.1f}% reduction", "cyan")
+
+
 if __name__ == "__main__":
     main()

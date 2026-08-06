@@ -3,10 +3,13 @@
 Script to generate a setup.py for a Python project.
 Automatically detects __main__.py or cli.py and adds console_scripts entry points.
 """
+
 import os
 import re
 import sys
 from pathlib import Path
+
+
 def detect_entry_point(project_dir, package_name):
     """Detect if there's a __main__.py or cli.py and return entry point info."""
     project_path = Path(project_dir).resolve()
@@ -37,6 +40,8 @@ def detect_entry_point(project_dir, package_name):
         function_name = detect_main_function(root_cli)
         entry_points.append({"module": "cli", "function": function_name, "script_name": package_name})
     return entry_points
+
+
 def detect_main_function(file_path):
     """Detect if the file has a main function or click command."""
     try:
@@ -54,6 +59,8 @@ def detect_main_function(file_path):
         return "main"  # Default fallback
     except Exception:
         return "main"
+
+
 def find_requirements(project_dir):
     """Find requirements from requirements.txt or similar files."""
     project_path = Path(project_dir).resolve()
@@ -79,6 +86,8 @@ def find_requirements(project_dir):
                 pass
             break
     return requirements
+
+
 def generate_setup_py(project_dir, package_name, entry_points, requirements):
     """Generate the content for setup.py."""
     # Build entry points string
@@ -131,6 +140,8 @@ setup(
 )
 """
     return setup_content
+
+
 def main():
     if len(sys.argv) != 2:
         print("Usage: python create_setup.py <project_directory>")
@@ -168,5 +179,7 @@ def main():
     print("\nGenerated setup.py content preview:")
     print("-" * 42)
     print(setup_content)
+
+
 if __name__ == "__main__":
     main()

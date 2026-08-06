@@ -7,8 +7,11 @@ import tarfile
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 import brotli
+
 BROTLI_QUALITY = 11
 CHUNK_SIZE = 1024 * 64
+
+
 def decompress_stream(input_path: Path, output_path: Path) -> bool:
     """Decompress a .br file to output_path."""
     try:
@@ -26,6 +29,8 @@ def decompress_stream(input_path: Path, output_path: Path) -> bool:
     except Exception as e:
         print(f"❌ Error decompressing {input_path.name}: {e}")
         return False
+
+
 def compress_stream(input_stream, output_file_path: Path) -> bool:
     """Compress from stream to .br file."""
     compressor = brotli.Compressor(quality=BROTLI_QUALITY)
@@ -42,6 +47,8 @@ def compress_stream(input_stream, output_file_path: Path) -> bool:
     except Exception as e:
         print(f"❌ Error compressing to {output_file_path.name}: {e}")
         return False
+
+
 def process_directory(dir_path: Path):
     """Compress directory → .tar.br"""
     output_br = dir_path.with_name(f"{dir_path.name}.tar.br")
@@ -52,10 +59,13 @@ def process_directory(dir_path: Path):
         tar_buffer.seek(0)
         if compress_stream(tar_buffer, output_br):
             import shutil
+
             shutil.rmtree(dir_path)
             print(f"🗑️  Removed original directory: {dir_path.name}")
     except Exception as e:
         print(f"❌ Failed to archive directory {dir_path.name}: {e}")
+
+
 def process_file(file_path: Path):
     """Compress single file → .br"""
     output_br = file_path.with_name(f"{file_path.name}.br")
@@ -66,6 +76,8 @@ def process_file(file_path: Path):
                 print(f"🗑️  Removed original file: {file_path.name}")
     except Exception as e:
         print(f"❌ Failed to compress file {file_path.name}: {e}")
+
+
 def decompress_file(br_path: Path):
     """Decompress .br or .tar.br file."""
     if br_path.name.endswith(".tar.br"):
@@ -89,6 +101,8 @@ def decompress_file(br_path: Path):
             print(f"🗑️  Removed archive: {br_path.name}")
     else:
         print(f"⚠️  Skipping non-br file: {br_path.name}")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Compress/Decompress with Brotli")
     parser.add_argument("-c", "--compress", action="store_true", help="Compress mode (default)")
@@ -122,5 +136,7 @@ def main():
             for archive in archives:
                 executor.submit(decompress_file, archive)
     print("🎉 All operations completed successfully!")
+
+
 if __name__ == "__main__":
     main()

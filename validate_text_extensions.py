@@ -5,6 +5,7 @@ Traverses the filesystem to find files with extensions in TXT_EXT,
 verifies they are actually text-based files, and reports mismatches.
 Uses memory-efficient os.walk traversal with progress reporting.
 """
+
 from __future__ import annotations
 import logging
 import mimetypes
@@ -13,14 +14,18 @@ from collections.abc import Iterator
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 from dh import TXT_EXT
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+
+
 class SpinnerProgressReporter:
     def __init__(self, verbose: bool = True):
         self.verbose = verbose
         self.last_count = 0
         self.spinner = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
         self.spinner_index = 0
+
     def __call__(self, current_path: str, file_count: int):
         if not self.verbose:
             return
@@ -30,6 +35,8 @@ class SpinnerProgressReporter:
             path_display = current_path[:60] + "..." if len(current_path) > 60 else current_path
             msg = f"\r{self.spinner[self.spinner_index]} Files: {file_count:8d} | {path_display}"
             print(msg, end="", flush=True)
+
+
 def memory_efficient_file_finder(
     root_dir: str,
     extensions: set[str],
@@ -77,6 +84,8 @@ def memory_efficient_file_finder(
         raise
     except Exception as e:
         logger.error(f"Unexpected error during traversal: {e}")
+
+
 def is_text_file(file_path: Path) -> bool:
     try:
         with open(file_path, "rb") as f:
@@ -98,6 +107,8 @@ def is_text_file(file_path: Path) -> bool:
             return False
     except (OSError, PermissionError):
         return None
+
+
 def check_file(file_path: Path) -> tuple[Path, str, bool, str]:
     try:
         extension = file_path.suffix.lower()
@@ -108,6 +119,8 @@ def check_file(file_path: Path) -> tuple[Path, str, bool, str]:
     except Exception as e:
         logger.error(f"Error processing {file_path}: {e}")
         return (file_path, file_path.suffix.lower(), None, "error")
+
+
 def validate_extensions(root_dir: str = "/", num_workers: int | None = None, verbose: bool = True) -> dict:
     if num_workers is None:
         num_workers = max(1, cpu_count() - 1)
@@ -167,6 +180,8 @@ def validate_extensions(root_dir: str = "/", num_workers: int | None = None, ver
         "mismatches": mismatches,
         "by_extension": by_extension,
     }
+
+
 def print_report(results: dict):
     print("\n" + "=" * 80)
     print("TEXT EXTENSION VALIDATION REPORT")
@@ -191,8 +206,11 @@ def print_report(results: dict):
     for ext, stats in sorted(results["by_extension"].items()):
         print(f"  {ext:12} - Text: {stats['text']:6}  Binary: {stats['binary']:6}  Errors: {stats['error']:6}")
     print("\n" + "=" * 80)
+
+
 if __name__ == "__main__":
     import sys
+
     root_dir = sys.argv[1] if len(sys.argv) > 1 else "/data/data/com.termux"
     try:
         results = validate_extensions(root_dir, verbose=True)

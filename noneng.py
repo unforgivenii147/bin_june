@@ -5,8 +5,11 @@ from collections.abc import Callable
 from pathlib import Path
 from langdetect import DetectorFactory, detect
 from langdetect.lang_detect_exception import LangDetectException
+
 CHUNK_SIZE = 1024 * 1024
 from dh import get_files, get_nobinary, mpf3
+
+
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -21,8 +24,12 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
+
+
 DetectorFactory.seed = 0
 MAX_CHARS = 5000
+
+
 def process_file(path) -> bool | None:
     path = Path(path)
     try:
@@ -35,9 +42,13 @@ def process_file(path) -> bool | None:
                 return True
     except (LangDetectException, OSError):
         return False
+
+
 def main() -> None:
     cwd = Path.cwd()
     files = get_nobinary(cwd)
     mpf3(process_file, files)
+
+
 if __name__ == "__main__":
     main()

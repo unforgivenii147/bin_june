@@ -5,6 +5,8 @@ from collections import deque
 from collections.abc import Callable
 from pathlib import Path
 from dh import get_files, mpf3, runcmd
+
+
 def process_file(path) -> tuple[Path, bool]:
     path = Path(path)
     if path.suffix.lower() in {".html", ".htm"}:
@@ -19,6 +21,8 @@ def process_file(path) -> tuple[Path, bool]:
     except Exception as e:
         print(f"✗ Unexpected error converting {path}: {e}", file=sys.stderr)
         return (path, False)
+
+
 def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -33,5 +37,7 @@ def main() -> None:
     else:
         files = get_files(cwd)
     mpf3(process_file, files)
+
+
 if __name__ == "__main__":
     sys.exit(main())

@@ -15,12 +15,17 @@ from pathlib import Path
 from typing import Any
 import py7zr
 from dh import get_nobinary, is_binary, is_valid_url, cprint
+
 CHUNK_SIZE = 1024 * 1024
 url_pattern = re.compile("https?://[^\\s\\\"\\']+")
+
+
 def extract_urls_from_text(content: str):
     result = set(url_pattern.findall(content))
     cprint(result)
     return result
+
+
 def extract_urls_from_file(filepath):
     urls = set()
     try:
@@ -29,6 +34,8 @@ def extract_urls_from_file(filepath):
     except Exception as e:
         print(f"Failed to read {filepath}: {e}")
     return urls
+
+
 def extract_urls_from_tar(filepath):
     urls = set()
     try:
@@ -43,6 +50,8 @@ def extract_urls_from_tar(filepath):
     except Exception as e:
         print(f"Failed to read tar {filepath}: {e}")
     return urls
+
+
 def extract_urls_from_zip(filepath):
     urls = set()
     try:
@@ -57,6 +66,8 @@ def extract_urls_from_zip(filepath):
     except Exception as e:
         print(f"Failed to read zip {filepath}: {e}")
     return urls
+
+
 def extract_urls_from_7z(filepath):
     urls = set()
     try:
@@ -71,6 +82,8 @@ def extract_urls_from_7z(filepath):
     except Exception as e:
         print(f"Failed to read 7z {filepath}: {e}")
     return urls
+
+
 def extract_urls(filepath):
     path = Path(filepath)
     if path.suffix in {".zip", ".whl"}:
@@ -87,6 +100,8 @@ def extract_urls(filepath):
     else:
         return extract_urls_from_file(filepath)
     return set()
+
+
 if __name__ == "__main__":
     cwd = Path.cwd()
     args = sys.argv[1:]

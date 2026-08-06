@@ -6,8 +6,11 @@ import sys
 from collections import Counter
 from pathlib import Path
 import pycld2
+
 CHUNK_SIZE = 1024 * 1024
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -22,6 +25,8 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
+
+
 class LanguageDetector:
     def __init__(self, min_bytes: int = 100, max_bytes: int = 10000) -> None:
         self.min_bytes = min_bytes
@@ -34,8 +39,10 @@ class LanguageDetector:
             "non_english": [],
             "languages": Counter(),
         }
+
     def is_text_file(self, filepath: Path) -> bool:
         return not is_binary(filepath)
+
     def detect_language(self, filepath: Path):
         try:
             with Path(filepath).open(encoding="utf-8", errors="ignore") as f:
@@ -51,6 +58,7 @@ class LanguageDetector:
             return False, f"CLD2_ERROR: {e}", None, None
         except Exception as e:
             return False, f"ERROR: {e}", None, None
+
     def scan_directory(self, directory, show_progress=True, only_report_non_english=True) -> None:
         directory = Path(directory)
         if not directory.exists():
@@ -89,6 +97,7 @@ class LanguageDetector:
                         )
         print("\n" + "=" * 42)
         self.report_results(only_report_non_english)
+
     def report_results(self, only_report_non_english=True) -> None:
         print("\n📊 SCAN RESULTS")
         print("=" * 42)
@@ -124,6 +133,8 @@ class LanguageDetector:
                     print(f"    ... and {len(files) - 10} more")
         else:
             print("\n✅ No non-English files found!")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Recursively find non-English files using pycld2")
     parser.add_argument("directory", nargs="?", default=".", help="Directory to scan (default: current directory)")
@@ -147,9 +158,12 @@ def main() -> None:
     detector.scan_directory(args.directory, show_progress=not args.no_progress, only_report_non_english=not args.all)
     if args.output:
         from contextlib import redirect_stdout
+
         with Path(args.output).open("w", encoding="utf-8") as f, redirect_stdout(f):
             detector.report_results(only_report_non_english=not args.all)
         print(f"\n✅ Results saved to: {args.output}")
+
+
 if __name__ == "__main__":
     try:
         import pycld2

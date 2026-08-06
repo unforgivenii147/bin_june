@@ -5,15 +5,20 @@ import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from tqdm import tqdm
+
 SECONDS_24H = 24 * 42 * 42
 NOW = time.time()
 EXCLUDE_DIRS = {".git"}
+
+
 def iter_files(root: Path) -> list[Path]:
     files: list[Path] = []
     for dirpath, dirnames, filenames in root.walk(follow_symlinks=False):
         dirnames[:] = [d for d in dirnames if d not in EXCLUDE_DIRS]
         files.extend(dirpath / fname for fname in filenames)
     return files
+
+
 def ctime_if_recent(path: Path) -> tuple[float, Path] | None:
     try:
         ctime = path.stat().st_ctime
@@ -22,6 +27,8 @@ def ctime_if_recent(path: Path) -> tuple[float, Path] | None:
     except (FileNotFoundError, PermissionError, OSError):
         pass
     return None
+
+
 def main() -> None:
     root = Path.cwd()
     files = iter_files(root)
@@ -37,5 +44,7 @@ def main() -> None:
     recent.sort(key=operator.itemgetter(0))
     for _, path in recent:
         print(path.relative_to(root))
+
+
 if __name__ == "__main__":
     main()

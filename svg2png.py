@@ -7,6 +7,8 @@ from pathlib import Path
 import cairosvg
 from PIL import Image
 from dh import get_files, mpf3
+
+
 def process_file(path) -> None:
     path = Path(path)
     png_file = path.with_suffix(".png")
@@ -20,9 +22,13 @@ def process_file(path) -> None:
             img.save(png_file)
     except:
         pass
+
+
 def main() -> None:
     cwd = Path.cwd()
     files = get_files(cwd, ext=[".svg"])
     mpf3(process_file, files)
+
+
 if __name__ == "__main__":
     main()

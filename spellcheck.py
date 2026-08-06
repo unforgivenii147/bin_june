@@ -3,12 +3,14 @@
 Spell check all text files in current directory recursively using pyspellchecker.
 Supports parallel processing and optional auto-fix mode.
 """
+
 import argparse
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Dict, List, Tuple
 from spellchecker import SpellChecker
+
 # Common text file extensions to check
 TEXT_EXTENSIONS = {
     ".txt",
@@ -42,6 +44,8 @@ TEXT_EXTENSIONS = {
     ".php",
     ".sql",
 }
+
+
 def find_text_files(root_dir: Path, extensions: set = None) -> List[Path]:
     """Find all text files recursively in the given directory."""
     if extensions is None:
@@ -51,16 +55,21 @@ def find_text_files(root_dir: Path, extensions: set = None) -> List[Path]:
         if path.is_file() and path.suffix.lower() in extensions:
             text_files.append(path)
     return text_files
+
+
 def extract_words(text: str) -> List[Tuple[str, int, int]]:
     """
     Extract words from text along with their positions.
     Returns list of (word, start_pos, end_pos) tuples.
     """
     import re
+
     words = []
     for match in re.finditer(r"\b[a-zA-Z]+\b", text):
         words.append((match.group(), match.start(), match.end()))
     return words
+
+
 def check_file(file_path: Path) -> Dict:
     """
     Check a single file for misspelled words.
@@ -86,6 +95,8 @@ def check_file(file_path: Path) -> Dict:
         return {"file": str(file_path), "misspellings": misspellings, "content": content}
     except Exception as e:
         return {"file": str(file_path), "error": str(e), "misspellings": [], "content": None}
+
+
 def fix_file(file_path: Path, corrections: Dict[str, str]) -> bool:
     """
     Apply corrections to a file in-place.
@@ -109,6 +120,8 @@ def fix_file(file_path: Path, corrections: Dict[str, str]) -> bool:
     except Exception as e:
         print(f"Error fixing {file_path}: {e}", file=sys.stderr)
         return False
+
+
 def process_files_parallel(files: List[Path], max_workers: int = None) -> Dict:
     """
     Process multiple files in parallel using ProcessPoolExecutor.
@@ -131,6 +144,8 @@ def process_files_parallel(files: List[Path], max_workers: int = None) -> Dict:
                 results[str(file_path)] = {"file": str(file_path), "error": str(e), "misspellings": [], "content": None}
     print()  # New line after progress
     return results
+
+
 def display_results(results: Dict, show_candidates: bool = False):
     """Display spell checking results in a readable format."""
     total_misspellings = 0
@@ -159,6 +174,8 @@ def display_results(results: Dict, show_candidates: bool = False):
     print("\n" + "=" * 42)
     print(f"📊 Summary: {files_with_errors} files with {total_misspellings} total misspellings")
     print("=" * 42)
+
+
 def get_context(content: str, position: Tuple[int, int], window: int = 40) -> Dict:
     """Get the line number and surrounding context for a word position."""
     if not content:
@@ -176,6 +193,8 @@ def get_context(content: str, position: Tuple[int, int], window: int = 40) -> Di
     if after:
         after = after + "..." if after_end < len(content) else after
     return {"line": line_num, "text": f"{before} [{content[start:end]}] {after}".strip()}
+
+
 def confirm_action(prompt: str) -> bool:
     """Ask user for confirmation."""
     while True:
@@ -185,6 +204,8 @@ def confirm_action(prompt: str) -> bool:
         elif response in ["n", "no"]:
             return False
         print("Please answer 'y' or 'n'")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Find and optionally fix misspelled words in text files",
@@ -273,5 +294,7 @@ Examples:
             print(f"\n✅ Fixed {fixed_count} misspellings across multiple files")
         else:
             print("❌ Fix cancelled")
+
+
 if __name__ == "__main__":
     main()

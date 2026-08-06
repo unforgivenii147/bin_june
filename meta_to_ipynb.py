@@ -4,10 +4,13 @@ Convert Python package METADATA file to Jupyter notebook.
 Strips metadata headers and converts code/markdown sections to notebook cells.
 Output filename is based on the package name found in the header.
 """
+
 import json
 import re
 import sys
 from pathlib import Path
+
+
 def parse_metadata_section(lines):
     """Parse the initial metadata section and extract package name and version."""
     metadata = {}
@@ -58,6 +61,8 @@ def parse_metadata_section(lines):
             current_key = None
         end_line = i + 1
     return metadata, end_line
+
+
 def find_section_boundaries(content, start_pos=0):
     """Find code blocks and markdown sections."""
     sections = []
@@ -79,6 +84,8 @@ def find_section_boundaries(content, start_pos=0):
                 sections.append(("markdown", remaining))
             break
     return sections
+
+
 def convert_metadata_to_notebook(metadata_file_path):
     """Convert METADATA file to Jupyter notebook."""
     with open(metadata_file_path, "r", encoding="utf-8") as f:
@@ -123,6 +130,8 @@ def convert_metadata_to_notebook(metadata_file_path):
     print(f"Notebook created: {output_path}")
     print(f"Total cells: {len(notebook['cells'])}")
     return output_path
+
+
 def main():
     if len(sys.argv) < 2:
         print("Usage: python metadata_to_notebook.py <METADATA_file>")
@@ -133,5 +142,7 @@ def main():
         print(f"Error: File '{input_file}' not found")
         sys.exit(1)
     convert_metadata_to_notebook(input_file)
+
+
 if __name__ == "__main__":
     main()

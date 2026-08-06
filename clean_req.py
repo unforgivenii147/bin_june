@@ -3,7 +3,10 @@ from __future__ import annotations
 import re
 import sys
 from pathlib import Path
+
 _VERSION_OP_RE = re.compile(r"\s*(?:===|==|!=|>=|<=|~=|>|<)\s*")
+
+
 def clean_requirement(line: str) -> str:
     line = line.split("#", 1)[0].strip()
     if not line:
@@ -16,6 +19,8 @@ def clean_requirement(line: str) -> str:
         return ""
     parts = _VERSION_OP_RE.split(line, maxsplit=1)
     return parts[0].strip()
+
+
 def group_key(name: str) -> tuple[int, str]:
     first = name[0]
     if first.isupper():
@@ -23,6 +28,8 @@ def group_key(name: str) -> tuple[int, str]:
     if first.islower():
         return 1, name
     return 2, name
+
+
 def main() -> None:
     if len(sys.argv) != 2:
         print(f"Usage: {sys.argv[0]} requirements.txt", file=sys.stderr)
@@ -47,5 +54,7 @@ def main() -> None:
     print("\n=== Cleaned Requirements ===")
     for item in cleaned:
         print(item)
+
+
 if __name__ == "__main__":
     main()

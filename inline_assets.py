@@ -8,11 +8,13 @@ Make HTML files standalone by inlining referenced CSS and JS files.
 - Silently ignores missing local or remote resources.
 - Uses pathlib and parallel (threaded) processing.
 """
+
 import argparse
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
+
 try:
     import requests
 except ImportError:
@@ -21,8 +23,12 @@ try:
     from bs4 import BeautifulSoup
 except ImportError:
     sys.exit("Please install 'beautifulsoup4': pip install beautifulsoup4")
+
+
 def is_remote(url: str) -> bool:
     return urlparse(url).scheme in ("http", "https")
+
+
 def fetch_remote(url: str):
     """Download a remote resource. Returns text or None on failure."""
     try:
@@ -34,6 +40,8 @@ def fetch_remote(url: str):
         return resp.text
     except Exception:
         return None
+
+
 def fetch_local(ref: str, base_dir: Path):
     """Read a local file referenced from an HTML file. Returns text or None."""
     try:
@@ -48,11 +56,15 @@ def fetch_local(ref: str, base_dir: Path):
     except Exception:
         pass
     return None
+
+
 def fetch_resource(ref: str, base_dir: Path):
     """Fetch a CSS/JS resource, whether remote or local. Returns text or None."""
     if is_remote(ref):
         return fetch_remote(ref)
     return fetch_local(ref, base_dir)
+
+
 def process_html_file(html_path: Path):
     """Inline CSS/JS into a single HTML file in place."""
     try:
@@ -105,6 +117,8 @@ def process_html_file(html_path: Path):
         return html_path, "updated"
     except Exception as e:
         return html_path, f"write error: {e}"
+
+
 def gather_html_files(dirs):
     """Collect all *.html / *.htm files from the given paths (files or dirs)."""
     files = []
@@ -124,6 +138,8 @@ def gather_html_files(dirs):
         else:
             print(f"Warning: skipping {p} (not a file or directory)", file=sys.stderr)
     return files
+
+
 def main():
     parser = argparse.ArgumentParser(description="Make HTML files standalone by inlining CSS/JS resources.")
     parser.add_argument(
@@ -162,5 +178,7 @@ def main():
                 errors += 1
                 print(f"[error]      {path} -> {status}", file=sys.stderr)
     print(f"\nDone. Updated: {updated}, Unchanged: {skipped}, Errors: {errors}")
+
+
 if __name__ == "__main__":
     main()

@@ -3,9 +3,12 @@
 Extract text from PPTX using python-pptx only
 Usage: python extract_text.py input.pptx
 """
+
 import sys
 from pathlib import Path
 from pptx import Presentation
+
+
 def extract_text_from_pptx(pptx_path):
     """Extract all text from a PPTX file"""
     try:
@@ -32,6 +35,8 @@ def extract_text_from_pptx(pptx_path):
                             f.write(" | ".join(row_text) + "\n")
                     f.write("\n")
     print(f"Text extracted to: {output_file}")
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python extract_text.py <input.pptx>")

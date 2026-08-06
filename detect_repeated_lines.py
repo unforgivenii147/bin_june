@@ -4,10 +4,14 @@ import argparse
 import sys
 from os import scandir as os_scandir
 from pathlib import Path
+
 CHUNK_SIZE = 1024 * 1024
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
+
     path = Path(path)
     if is_binary(path):
         return False
@@ -27,6 +31,8 @@ def is_python_file(path: str | Path) -> bool:
         except:
             return False
     return False
+
+
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -41,6 +47,8 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
+
+
 def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
     if path.is_file():
@@ -72,11 +80,17 @@ def get_pyfiles(path: str | Path) -> list[Path]:
         except (PermissionError, OSError):
             continue
     return sorted(pyfiles)
+
+
 """
 Skip blank lines option with dry run and auto-fix modes.
 """
+
+
 def is_blank_line(line: str):
     return line.strip() == ""
+
+
 def find_duplicates(file_path: Path, skip_blanks: bool = True):
     try:
         with open(file_path, encoding="utf-8") as f:
@@ -97,6 +111,8 @@ def find_duplicates(file_path: Path, skip_blanks: bool = True):
     except Exception as e:
         print(f"  Error: {e}", file=sys.stderr)
         return []
+
+
 def remove_duplicates(lines: list[str], duplicates):
     lines_copy = lines.copy()
     removed = 0
@@ -106,6 +122,8 @@ def remove_duplicates(lines: list[str], duplicates):
             del lines_copy[idx]
             removed += 1
     return lines_copy
+
+
 def process_file(file_path, duplicates, dry_run: bool = False, auto_yes=False, skip_blanks: bool = True):
     if not duplicates:
         return False, auto_yes
@@ -141,6 +159,8 @@ def process_file(file_path, duplicates, dry_run: bool = False, auto_yes=False, s
         return True, auto_yes
     print("  ⏭️  Skipped")
     return False, auto_yes
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Find and remove sequential duplicate lines in Python files",
@@ -184,6 +204,8 @@ def main() -> None:
     else:
         print(f"✅ Fixed {fixed_count} file(s)")
         print("💡 Backups saved with .bak extension")
+
+
 if __name__ == "__main__":
     try:
         main()

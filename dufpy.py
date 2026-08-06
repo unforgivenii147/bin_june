@@ -7,94 +7,16 @@ from collections.abc import Callable
 from os import scandir as os_scandir
 from pathlib import Path
 from xxhash import xxh64_hexdigest
+from dh import cprint
+
 CHUNK_SIZE = 1024 * 1024
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 from dh import mpf3
-ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
-HIGHLIGHTS = {
-    "on_black": 40,
-    "on_grey": 40,
-    "on_red": 41,
-    "on_green": 42,
-    "on_yellow": 43,
-    "on_blue": 44,
-    "on_magenta": 45,
-    "on_cyan": 46,
-    "on_light_grey": 47,
-    "on_dark_grey": 100,
-    "on_light_red": 101,
-    "on_light_green": 102,
-    "on_light_yellow": 103,
-    "on_light_blue": 104,
-    "on_light_magenta": 105,
-    "on_light_cyan": 106,
-    "on_white": 107,
-}
-COLORS = {
-    "black": 30,
-    "grey": 30,
-    "red": 31,
-    "green": 32,
-    "yellow": 33,
-    "blue": 34,
-    "magenta": 35,
-    "cyan": 36,
-    "light_grey": 37,
-    "dark_grey": 90,
-    "light_red": 91,
-    "light_green": 92,
-    "light_yellow": 93,
-    "light_blue": 94,
-    "light_magenta": 95,
-    "light_cyan": 96,
-    "white": 97,
-}
-RESET = "\x1b[0m"
-def can_colorize(*, no_color=None, force_color=None):
-    if no_color is not None and no_color:
-        return False
-    if force_color is not None and force_color:
-        return True
-    if os.environ.get("ANSI_COLORS_DISABLED"):
-        return False
-    if os.environ.get("NO_COLOR"):
-        return False
-    if os.environ.get("FORCE_COLOR"):
-        return True
-    if os.environ.get("TERM") == "dumb":
-        return False
-    if not hasattr(sys.stdout, "fileno"):
-        return False
-    try:
-        return os.isatty(sys.stdout.fileno())
-    except OSError:
-        return sys.stdout.isatty()
-def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
-    result = str(text)
-    if not can_colorize(no_color=no_color, force_color=force_color):
-        return result
-    fmt_str = "\x1b[%dm%s"
-    rgb_fore_fmt_str = "\x1b[38;2;%d;%d;%dm%s"
-    rgb_back_fmt_str = "\x1b[48;2;%d;%d;%dm%s"
-    if color is not None:
-        if isinstance(color, str):
-            result = fmt_str % (COLORS[color], result)
-        elif isinstance(color, tuple):
-            result = rgb_fore_fmt_str % (color[0], color[1], color[2], result)
-    if on_color is not None:
-        if isinstance(on_color, str):
-            result = fmt_str % (HIGHLIGHTS[on_color], result)
-        elif isinstance(on_color, tuple):
-            result = rgb_back_fmt_str % (on_color[0], on_color[1], on_color[2], result)
-    if attrs is not None:
-        for attr in attrs:
-            result = fmt_str % (ATTRIBUTES[attr], result)
-    result += RESET
-    return result
-def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
-    print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
+
+
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
+
     path = Path(path)
     if is_binary(path):
         return False
@@ -114,6 +36,8 @@ def is_python_file(path: str | Path) -> bool:
         except:
             return False
     return False
+
+
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -128,6 +52,8 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
+
+
 def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
     if path.is_file():
@@ -159,9 +85,13 @@ def get_pyfiles(path: str | Path) -> list[Path]:
         except (PermissionError, OSError):
             continue
     return sorted(pyfiles)
+
+
 def process_file(path) -> tuple[str, Path]:
     path = Path(path)
     return (xxh64_hexdigest(ast.unparse(ast.parse(path.read_text(encoding="utf-8")))), path)
+
+
 def main() -> None:
     cwd = Path.cwd()
     files = get_pyfiles(cwd)
@@ -185,5 +115,7 @@ def main() -> None:
                     path.unlink()
     if deleted:
         cprint(f"{deleted} files removed.", "cyan")
+
+
 if __name__ == "__main__":
     main()

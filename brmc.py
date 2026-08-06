@@ -7,11 +7,15 @@ preserving the module docstring (topmost docstring in the module).
 - Uses parallel processing
 - Prints only the relative paths of files that were modified
 """
+
 from __future__ import annotations
 import ast
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 def _first_statement_is_docstring(tree: ast.Module) -> bool:
     if not tree.body:
         return False
@@ -21,6 +25,8 @@ def _first_statement_is_docstring(tree: ast.Module) -> bool:
         and isinstance(getattr(node, "value", None), ast.Constant)
         and isinstance(node.value.value, str)
     )
+
+
 def _remove_docstrings_from_source(source: str) -> str:
     try:
         tree = ast.parse(source)
@@ -60,6 +66,8 @@ def _remove_docstrings_from_source(source: str) -> str:
                 lines[mid] = ""
     new_source = "".join(lines)
     return new_source
+
+
 def process_file(path: Path, cwd: Path) -> str | None:
     rel = str(path.relative_to(cwd))
     try:
@@ -71,6 +79,8 @@ def process_file(path: Path, cwd: Path) -> str | None:
         path.write_text(new_source, encoding="utf-8")
         return rel
     return None
+
+
 def main() -> None:
     cwd = Path(".").resolve()
     py_files = sorted(p for p in cwd.iterdir() if p.is_file() and p.suffix == ".py" and (not p.name.startswith(".")))
@@ -85,5 +95,7 @@ def main() -> None:
                 changed.append(rel)
     for rel in sorted(changed):
         print(rel)
+
+
 if __name__ == "__main__":
     main()

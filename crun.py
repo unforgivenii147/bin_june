@@ -3,9 +3,13 @@ from __future__ import annotations
 import sys
 from collections.abc import Callable
 from pathlib import Path
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 def get_filez(root_dir: str | Path):
     from os import walk as os_walk
+
     visited_dirs: set[Path] = set()
     root_dir = Path(root_dir)
     if root_dir.is_dir():
@@ -23,7 +27,11 @@ def get_filez(root_dir: str | Path):
                     yield filepath
     else:
         yield root_dir
+
+
 from dh import fsz, mpf3, should_skip
+
+
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -33,6 +41,8 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
+
+
 def process_file(path):
     path = Path(path)
     if not path.exists():
@@ -44,6 +54,8 @@ def process_file(path):
     ret, txt, _err = run_command(cmd)
     print(txt)
     return ret
+
+
 def main() -> None:
     cwd = Path().cwd()
     start_size = gsz(cwd)
@@ -53,5 +65,7 @@ def main() -> None:
             files.append(path)
     mpf3(process_file, files)
     print(f"{fsz(start_size - gsz(cwd))}")
+
+
 if __name__ == "__main__":
     sys.exit(main())

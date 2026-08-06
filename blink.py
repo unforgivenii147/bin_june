@@ -4,13 +4,18 @@ import sys
 from collections import deque
 from pathlib import Path
 from dh import get_files
+
 RM = "-r" in sys.argv
+
+
 def get_files(directory: Path):
     for path in directory.rglob("*"):
         if ".git" in path.parts:
             continue
         if path.is_symlink():
             yield path
+
+
 if __name__ == "__main__":
     cwd = Path.cwd()
     bcount = 0

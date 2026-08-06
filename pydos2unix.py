@@ -11,6 +11,7 @@ Features:
 - Memory-optimized chunk-based reading/writing
 - Automatically skips binary files and common directories
 """
+
 from __future__ import annotations
 import argparse
 import logging
@@ -18,14 +19,19 @@ import sys
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 from dh import BIN_EXT, TXT_EXT
+
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 CHUNK_SIZE = 8192
 BINARY_EXTENSIONS = BIN_EXT
 SKIP_DIRS = {".git", "__pycache__", ".pytest_cache", ".mypy_cache", ".coverage", ".egg-info", ".idea"}
 TEXT_EXTENSIONS = TXT_EXT
+
+
 def should_skip_dir(directory: Path) -> bool:
     return directory.name in SKIP_DIRS
+
+
 def is_text_file(file_path: Path) -> bool:
     if file_path.suffix.lower() in BINARY_EXTENSIONS:
         return False
@@ -45,8 +51,12 @@ def is_text_file(file_path: Path) -> bool:
             return all(byte in text_characters for byte in chunk)
     except OSError:
         return False
+
+
 def convert_dos_to_unix_chunk(chunk: bytes) -> bytes:
     return chunk.replace(b"\r\n", b"\n")
+
+
 def convert_file(file_path: Path) -> tuple[str, bool, str]:
     try:
         if not file_path.is_file():
@@ -75,6 +85,8 @@ def convert_file(file_path: Path) -> tuple[str, bool, str]:
             return (str(file_path), False, f"Read/Write error: {e}")
     except Exception as e:
         return (str(file_path), False, f"Error: {e}")
+
+
 def find_text_files(paths: list[Path]) -> list[Path]:
     files = []
     for path in paths:
@@ -88,6 +100,8 @@ def find_text_files(paths: list[Path]) -> list[Path]:
                 if text_file.is_file() and is_text_file(text_file):
                     files.append(text_file)
     return files
+
+
 def get_input_paths(input_args: list[str] | None) -> list[Path]:
     if not input_args:
         return [Path.cwd()]
@@ -99,6 +113,8 @@ def get_input_paths(input_args: list[str] | None) -> list[Path]:
         else:
             logger.warning(f"Path does not exist: {arg}")
     return paths
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Convert DOS/Windows line endings (CRLF) to Unix (LF)",
@@ -153,5 +169,7 @@ def main():
     except Exception as e:
         logger.error(f"Fatal error: {e}")
         return 1
+
+
 if __name__ == "__main__":
     sys.exit(main())

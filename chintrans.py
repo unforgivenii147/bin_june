@@ -6,14 +6,19 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Final
 from deep_translator import GoogleTranslator
+
 MAX_WORKERS: Final[int] = 16
 RETRY_ATTEMPTS: Final[int] = 3
 RETRY_DELAY: Final[float] = 0.5
 MAX_CHUNK_SIZE: Final[int] = 5000
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s", datefmt="%H:%M:%S")
 logger = logging.getLogger(__name__)
+
+
 def contains_chinese(text: str) -> bool:
     return bool(re.search(r"[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]", text))
+
+
 def create_chunks(lines: list[str]) -> list[list[str]]:
     """Group lines into chunks where each chunk's total character count is <= MAX_CHUNK_SIZE."""
     chunks = []
@@ -40,6 +45,8 @@ def create_chunks(lines: list[str]) -> list[list[str]]:
     if current_chunk:
         chunks.append(current_chunk)
     return chunks
+
+
 def translate_chunk(chunk: list[str]) -> tuple[list[str], str | None]:
     """Translate a chunk of lines joined by newlines. Returns (original_lines, translation) or (original_lines, None)."""
     # Join lines with newline for translation
@@ -57,8 +64,11 @@ def translate_chunk(chunk: list[str]) -> tuple[list[str], str | None]:
             if attempt < RETRY_ATTEMPTS - 1:
                 time.sleep(RETRY_DELAY)
     return (chunk, None)
+
+
 def main() -> None:
     import sys
+
     input_path = Path(sys.argv[1].strip())
     if not input_path.exists():
         logger.error("Input file not found: %s", input_path.name)
@@ -130,5 +140,7 @@ def main() -> None:
         )
     except Exception as e:
         logger.error("Error updating input file: %s", e)
+
+
 if __name__ == "__main__":
     main()

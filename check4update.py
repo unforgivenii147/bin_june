@@ -3,6 +3,7 @@
 Check installed packages for available updates using parallel processing.
 Saves upgradable packages to upgradable.txt
 """
+
 import subprocess
 import sys
 import json
@@ -10,6 +11,8 @@ from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Dict, Tuple
 import time
+
+
 def get_installed_packages(site_dir: Path) -> List[Dict[str, str]]:
     """
     Get list of all installed packages from site-packages directory.
@@ -33,6 +36,8 @@ def get_installed_packages(site_dir: Path) -> List[Dict[str, str]]:
     except json.JSONDecodeError as e:
         print(f"Error parsing package list: {e}")
     return packages
+
+
 def check_package_update(package_info: Dict[str, str]) -> Tuple[str, str, str, bool]:
     """
     Check if a single package has an update available.
@@ -73,6 +78,8 @@ def check_package_update(package_info: Dict[str, str]) -> Tuple[str, str, str, b
     except Exception as e:
         print(f"Error checking {package_name}: {e}")
     return (package_name, current_version, current_version, False)
+
+
 def check_updates_parallel(packages: List[Dict[str, str]], max_workers: int = 8) -> List[Tuple[str, str, str]]:
     """
     Check for updates using parallel processing.
@@ -103,6 +110,8 @@ def check_updates_parallel(packages: List[Dict[str, str]], max_workers: int = 8)
             except Exception as e:
                 print(f"[{completed}/{len(packages)}] Error processing {package_name}: {e}")
     return upgradable
+
+
 def save_upgradable_packages(upgradable: List[Tuple[str, str, str]], output_file: Path):
     """
     Save upgradable packages to a file.
@@ -121,6 +130,8 @@ def save_upgradable_packages(upgradable: List[Tuple[str, str, str]], output_file
         print(f"Found {len(upgradable)} packages with available updates")
     except IOError as e:
         print(f"Error saving results to {output_file}: {e}")
+
+
 def find_site_packages() -> List[Path]:
     """
     Find all site-packages directories in the current Python environment.
@@ -150,6 +161,8 @@ def find_site_packages() -> List[Path]:
     if user_site.exists() and user_site not in site_dirs:
         site_dirs.append(user_site)
     return site_dirs
+
+
 def main():
     """Main function to orchestrate the update checking process."""
     print("Python Package Update Checker")
@@ -195,5 +208,7 @@ def main():
         print("\nPackages with available updates:")
         for name, current_ver, latest_ver in upgradable:
             print(f"  {name}: {current_ver} -> {latest_ver}")
+
+
 if __name__ == "__main__":
     main()

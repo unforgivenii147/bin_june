@@ -2,6 +2,7 @@
 from __future__ import annotations
 import sys
 from pathlib import Path
+
 if __name__ == "__main__":
     path = Path(sys.argv[1].strip())
     text = path.read_bytes()

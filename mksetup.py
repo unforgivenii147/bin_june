@@ -6,8 +6,11 @@ import tempfile
 import zipfile
 from email.parser import Parser
 from pathlib import Path
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 EXT_SUFFIXES = (".so", ".pyd", ".dll")
+
+
 def read_entry_points(root: Path) -> dict[str, list[str]]:
     dist_info = next(root.glob("*.dist-info"), None)
     if not dist_info:
@@ -28,9 +31,13 @@ def read_entry_points(root: Path) -> dict[str, list[str]]:
         if current_section:
             sections[current_section].append(line)
     return sections
+
+
 def extract_wheel(whl: Path, dst: Path) -> None:
     with zipfile.ZipFile(whl) as zf:
         zf.extractall(dst)
+
+
 def load_root(input_path: Path) -> Path:
     if input_path.is_dir():
         return input_path.resolve()
@@ -40,6 +47,8 @@ def load_root(input_path: Path) -> Path:
         return tmp
     msg = "Input must be a .whl file or an unzipped wheel directory"
     raise SystemExit(msg)
+
+
 def read_metadata(root: Path) -> dict:
     dist_info = next(root.glob("*.dist-info"), None)
     if not dist_info:
@@ -53,8 +62,12 @@ def read_metadata(root: Path) -> dict:
         "summary": meta.get("Summary", ""),
         "install_requires": meta.get_all("Requires-Dist") or [],
     }
+
+
 def find_extensions(root: Path) -> list[str]:
     return [".".join(f.relative_to(root).with_suffix("").parts) for f in root.rglob("*") if f.suffix in EXT_SUFFIXES]
+
+
 def generate_setup_py(meta: dict, extensions: list[str], entry_points: dict[str, list[str]]) -> str:
     ext_block = (
         "from setuptools import Extension\n\next_modules = [\n"
@@ -74,8 +87,12 @@ def generate_setup_py(meta: dict, extensions: list[str], entry_points: dict[str,
         formatted += "    }"
         ep_block = f"    entry_points={formatted},\n"
     return f"""from setuptools import setup, find_packages\n{ext_block}\nsetup(\n    name="{meta["name"]}",\n    version="{meta["version"]}",\n    description="{meta["summary"]}",\n    packages=find_packages() or ["."],\n    install_requires={meta["install_requires"]},\n    ext_modules=ext_modules,\n{ep_block})\n"""
+
+
 def generate_pyproject_toml() -> str:
     return '[build-system]\nrequires = ["setuptools>=61", "wheel"]\nbuild-backend = "setuptools.build_meta"\n'
+
+
 def main() -> None:
     if len(sys.argv) != 2:
         msg = "Usage: python mk_setuppy.py <wheel.whl | unzipped-dir>"
@@ -92,5 +109,7 @@ def main() -> None:
     (out_dir / "pyproject.toml").write_text(generate_pyproject_toml())
     print(f"✔ setup.py generated for {meta['name']}")
     print("✔ binary extensions detected" if extensions else "✔ pure Python package")
+
+
 if __name__ == "__main__":
     main()

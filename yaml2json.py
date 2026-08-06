@@ -11,18 +11,22 @@ Examples:
   %(prog)s config.yaml --compact --no-ensure-ascii
   echo 'key: value' | %(prog)s --strict
 """
+
 from __future__ import annotations
 import argparse
 import json
 import sys
 from dataclasses import dataclass
 from typing import TextIO
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 try:
     import yaml
 except ImportError:
     print("Error: PyYAML is required. Install with: pip install PyYAML", file=sys.stderr)
     sys.exit(1)
+
+
 @dataclass
 class ConversionArgs:
     input: TextIO
@@ -33,6 +37,7 @@ class ConversionArgs:
     ensure_ascii: bool
     strict: bool
     allow_unicode: bool
+
     @classmethod
     def from_namespace(cls, ns: argparse.Namespace) -> ConversionArgs:
         return cls(
@@ -45,6 +50,8 @@ class ConversionArgs:
             strict=ns.strict,
             allow_unicode=ns.allow_unicode,
         )
+
+
 def convert_yaml_to_json(
     yaml_input: str | TextIO,
     indent: int | None = None,
@@ -79,6 +86,8 @@ def convert_yaml_to_json(
         )
     except (TypeError, ValueError) as e:
         raise ValueError(f"JSON serialization error: {e}") from e
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Convert YAML to JSON",
@@ -182,5 +191,7 @@ def main() -> int:
     else:
         print("✓ YAML is valid", file=sys.stderr)
     return 0
+
+
 if __name__ == "__main__":
     sys.exit(main())

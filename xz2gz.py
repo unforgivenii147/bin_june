@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 "\nConvert man pages from .gz to .xz format with maximum compression.\nSkips symlinks and processes files recursively in the current directory.\n"
+
 from __future__ import annotations
 import sys
 from collections import deque
@@ -8,6 +9,8 @@ from gzip import compress as gzip_compress
 from pathlib import Path
 from lzma_mt import decompress
 from dh import get_files, mpf3
+
+
 def process_file(path: Path) -> tuple[str, bool, str]:
     path = Path(path)
     if path.is_symlink():
@@ -30,6 +33,8 @@ def process_file(path: Path) -> tuple[str, bool, str]:
         if gz_path.exists():
             gz_path.unlink()
         return (str(path), False, f"Error: {e!s}")
+
+
 def main() -> None:
     cwd = Path.cwd()
     files = get_files(cwd, ext=[".xz"])
@@ -69,5 +74,7 @@ def main() -> None:
         print(f"New total: {total_new:,} bytes")
     if success_count > 0:
         print("\nNote: Original .xz files have been removed.")
+
+
 if __name__ == "__main__":
     main()

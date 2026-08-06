@@ -5,6 +5,8 @@ from collections import deque
 from collections.abc import Callable
 from pathlib import Path
 from dh import _clean_fname, get_files, mpf3, unique_path
+
+
 def process_file(file_path):
     Path(path)
     imports = set()
@@ -19,6 +21,8 @@ def process_file(file_path):
     except (SyntaxError, UnicodeDecodeError):
         pass
     return imports
+
+
 if __name__ == "__main__":
     cwd = Path.cwd()
     files = get_files(cwd, ext=[".py"])

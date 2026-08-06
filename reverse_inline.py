@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Reverse inline functions by extracting them back to dh package imports."""
+
 import argparse
 import ast
 import hashlib
@@ -7,6 +8,8 @@ import sys
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+
+
 def get_function_source_hash(source: str, func_name: str) -> str | None:
     """Get SHA-256 hash of a function's source code."""
     try:
@@ -22,6 +25,8 @@ def get_function_source_hash(source: str, func_name: str) -> str | None:
             # Create a hash of the function source
             return hashlib.sha256(func_source.encode()).hexdigest()
     return None
+
+
 def extract_functions_from_module(module_path: Path) -> dict[str, tuple[str, str]]:
     """Extract functions from a module with their source hashes.
     Returns dict mapping function_name -> (module_name, source_hash)
@@ -43,6 +48,8 @@ def extract_functions_from_module(module_path: Path) -> dict[str, tuple[str, str
             if func_hash:
                 functions[node.name] = (module_name, func_hash)
     return functions
+
+
 def build_dh_function_map(dh_src_path: Path) -> dict[str, tuple[str, str]]:
     """Build a map of dh functions with their source hashes.
     Returns dict mapping function_name -> (module_name, source_hash)
@@ -54,6 +61,8 @@ def build_dh_function_map(dh_src_path: Path) -> dict[str, tuple[str, str]]:
         functions = extract_functions_from_module(module_file)
         func_map.update(functions)
     return func_map
+
+
 def find_matching_inlined_functions(source: str, dh_func_map: dict[str, tuple[str, str]]) -> list[tuple[str, int, int]]:
     """Find inlined functions that match dh functions by source hash.
     Returns list of (function_name, start_line, end_line)
@@ -71,6 +80,8 @@ def find_matching_inlined_functions(source: str, dh_func_map: dict[str, tuple[st
             if func_hash and func_hash == dh_hash:
                 matches.append((node.name, node.lineno - 1, node.end_lineno))
     return matches
+
+
 def has_import(source: str, func_name: str) -> bool:
     """Check if the function is already imported from dh package."""
     return (
@@ -79,6 +90,8 @@ def has_import(source: str, func_name: str) -> bool:
         or f"from dh import" in source
         and f"{func_name}" in source
     )
+
+
 def add_imports(lines: list[str], imports: set[tuple[str, str]]) -> list[str]:
     """Add import statements for dh functions."""
     if not imports:
@@ -92,6 +105,8 @@ def add_imports(lines: list[str], imports: set[tuple[str, str]]) -> list[str]:
         return import_lines + [""] + lines
     else:
         return lines[: last_import_idx + 1] + import_lines + lines[last_import_idx + 1 :]
+
+
 def process_file(
     file_path: Path, dh_func_map: dict[str, tuple[str, str]], dry_run: bool = True
 ) -> tuple[Path, int, set[tuple[str, str]]]:
@@ -122,6 +137,8 @@ def process_file(
         with open(file_path, "w", encoding="utf-8") as f:
             f.write("\n".join(lines))
     return (file_path, len(imports_needed), imports_needed)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Reverse inline functions from dh package")
     parser.add_argument("-n", "--no-dry-run", action="store_true", help="Actually modify files (dry-run by default)")
@@ -168,5 +185,7 @@ def main():
         print("\n✓ DRY RUN complete. Run with -n/--no-dry-run to apply changes.")
     else:
         print("\n✓ Changes applied successfully.")
+
+
 if __name__ == "__main__":
     main()

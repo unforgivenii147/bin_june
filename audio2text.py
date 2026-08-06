@@ -6,13 +6,18 @@ import tempfile
 import time
 import speech_recognition as sr
 from pydub import AudioSegment
+
 interrupted = False
 output_file_global = "out.txt"
+
+
 def signal_handler(sig, frame):
     """Handle Ctrl+C gracefully"""
     global interrupted
     print("\n\n⚠️  Interrupt received. Saving progress and exiting...")
     interrupted = True
+
+
 def wav_to_text_chunked(input_file, output_file="out.txt", chunk_duration_ms=30000):
     """
     Convert WAV audio file to text in chunks and save progress
@@ -95,6 +100,8 @@ def wav_to_text_chunked(input_file, output_file="out.txt", chunk_duration_ms=300
     except Exception as e:
         print(f"\nError: {e}")
         sys.exit(1)
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 2 or len(sys.argv) > 4:
         print("Usage: python wav_to_text.py <input_file.wav> [output_file.txt] [chunk_duration_seconds]")

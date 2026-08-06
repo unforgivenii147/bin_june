@@ -2,6 +2,8 @@
 import re
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+
+
 def clean_single_file(file_path: Path):
     """Checks only the first 5 lines of a file to remove the Gemini docstring in-place."""
     try:
@@ -27,6 +29,8 @@ def clean_single_file(file_path: Path):
             print(f"❌ Error writing {file_path.name}: {e}")
     else:
         print(f"➖ No automated docstring in top 5 lines of: {file_path.name}")
+
+
 def main():
     current_dir = Path(".")
     py_files = [f for f in current_dir.glob("*.py") if f.name != Path(__file__).name]
@@ -37,5 +41,7 @@ def main():
     with ThreadPoolExecutor() as executor:
         executor.map(clean_single_file, py_files)
     print("🎉 Fast cleanup complete!")
+
+
 if __name__ == "__main__":
     main()

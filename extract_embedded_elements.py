@@ -7,8 +7,11 @@ import sys
 from collections import deque
 from collections.abc import Iterable
 from pathlib import Path
+
 CHUNK_SIZE = 1024 * 1024
 from dh import get_files, get_nobinary
+
+
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -23,6 +26,8 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
+
+
 OUTPUT_DIR = Path("extracted_base64")
 DATA_URL_RE = re.compile("data:(?P<mime>[-\\w.+/]+);base64,(?P<data>[A-Za-z0-9+/=\\s]+)", re.IGNORECASE)
 MIME_EXTENSION_MAP: dict[str, str] = {
@@ -45,13 +50,21 @@ MIME_EXTENSION_MAP: dict[str, str] = {
     "font/svg": "svg",
     "application/javascript": "js",
 }
+
+
 def infer_extension(mime: str) -> str:
     return MIME_EXTENSION_MAP.get(mime.lower(), mime.rsplit("/", maxsplit=1)[-1])
+
+
 def decode_base64(data: str) -> bytes:
     cleaned = "".join(data.split())
     return base64.b64decode(cleaned, validate=False)
+
+
 def content_hash(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()[:15]
+
+
 def extract_from_html(html: str) -> Iterable[tuple[str, bytes]]:
     for matchz in DATA_URL_RE.finditer(html):
         mime = matchz.group("mime")
@@ -61,6 +74,8 @@ def extract_from_html(html: str) -> Iterable[tuple[str, bytes]]:
         except Exception:
             continue
         yield (mime, decoded)
+
+
 def save_asset(mime: str, data: bytes) -> Path:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     ext = infer_extension(mime)
@@ -70,6 +85,8 @@ def save_asset(mime: str, data: bytes) -> Path:
     if not path.exists():
         path.write_bytes(data)
     return path
+
+
 def main() -> None:
     cwd = Path.cwd()
     seen_hashes = set()
@@ -89,5 +106,7 @@ def main() -> None:
             save_asset(mime, data)
             extracted_count += 1
     print(f"{extracted_count} elements extracted.")
+
+
 if __name__ == "__main__":
     main()

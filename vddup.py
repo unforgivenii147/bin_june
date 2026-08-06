@@ -15,17 +15,24 @@ from pathlib import Path
 import brotli
 import zstandard as zstd
 from loguru import logger
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 logger.add("error.log", level="ERROR")
 COMPRESSED_EXTENSIONS = [".zip", ".tar", ".gz", ".bz2", ".xz", ".zst", ".br"]
+
+
 def copy_chunks(src, dst, chunk_size: int = 1024 * 1024) -> None:
     while True:
         chunk = src.read(chunk_size)
         if not chunk:
             break
         dst.write(chunk)
+
+
 def hash_content(content: str) -> str:
     return hashlib.sha256(content.encode("utf-8")).hexdigest()
+
+
 def extract_archive(file_path, extract_to) -> None:
     try:
         if file_path.suffix == ".zip":
@@ -55,6 +62,8 @@ def extract_archive(file_path, extract_to) -> None:
                     f.write(decompressed_data)
     except Exception as e:
         logger.error(f"Error extracting {file_path}: {e}")
+
+
 def parse_python_file(file_path) -> Module | None:
     try:
         with open(file_path, encoding="utf-8") as f:
@@ -62,6 +71,8 @@ def parse_python_file(file_path) -> Module | None:
     except Exception as e:
         logger.error(f"Error parsing {file_path}: {e}")
         return None
+
+
 def find_repeated_definitions(ast_tree: Module):
     definitions = {"functions": {}, "classes": {}, "constants": {}}
     for node in ast.walk(ast_tree):
@@ -82,6 +93,8 @@ def find_repeated_definitions(ast_tree: Module):
     for key in definitions:
         definitions[key] = {k: v for k, v in definitions[key].items() if len(v) > 1}
     return definitions
+
+
 def process_file(file_path):
     Path(path)
     """Process a single file to find repeated definitions."""
@@ -89,6 +102,8 @@ def process_file(file_path):
     if ast_tree:
         return find_repeated_definitions(ast_tree)
     return None
+
+
 def process_directory(directory):
     repeated_definitions = {"functions": {}, "classes": {}, "constants": {}}
     for root, _, files in os.walk(directory):
@@ -102,6 +117,8 @@ def process_directory(directory):
                         for content_hash, nodes in result[key].items():
                             repeated_definitions[key].setdefault(content_hash, []).extend(nodes)
     return repeated_definitions
+
+
 def write_definitions_to_file(definitions, output_dir: Path, move=False) -> None:
     for def_type, items in definitions.items():
         file_name = f"{def_type[:-1]}.py"
@@ -117,6 +134,8 @@ def write_definitions_to_file(definitions, output_dir: Path, move=False) -> None
                             pass
                     except SyntaxError as e:
                         logger.error(f"Syntax error in {content}: {e}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Inspect Python files for repeated definitions.")
     parser.add_argument("-m", "--move", action="store_true", help="Move repeated definitions to utils directory.")
@@ -135,5 +154,7 @@ def main() -> None:
                 combined_results[key].setdefault(content_hash, []).extend(nodes)
     if args.move or args.copy:
         write_definitions_to_file(combined_results, utils_dir, move=args.move)
+
+
 if __name__ == "__main__":
     main()

@@ -3,8 +3,12 @@ from __future__ import annotations
 import sys
 from markdown2 import markdown, markdown_path
 from weasyprint import CSS, HTML
+
+
 class ValidationError(Exception):
     pass
+
+
 def md2pdf(
     pdf_file_path,
     md_content=None,
@@ -26,6 +30,8 @@ def md2pdf(
     if css_file_path:
         css.append(CSS(filename=css_file_path))
     html.write_pdf(pdf_file_path, stylesheets=css)
+
+
 if __name__ == "__main__":
     md_file = sys.argv[1]
     pdf_file = md_file.replace(".md", ".pdf")

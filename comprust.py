@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 from compression_prompt import Compressor
+
 if __name__ == "__main__":
     fn = Path(sys.argv[1])
     text = fn.read_text()

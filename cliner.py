@@ -5,6 +5,7 @@ import re
 from collections.abc import Callable
 from pathlib import Path
 from dh import mpf3
+
 LOG_EXT = ".log"
 MMAP_THRESHOLD = 1 * 1024 * 1024
 NUM_WORKERS = 4
@@ -23,11 +24,15 @@ PATTERNS = [
     "\\x0e",
 ]
 COMPILED_PATTERNS = [re.compile(pattern) for pattern in PATTERNS]
+
+
 def clean_line(line: str) -> str:
     cleaned = line
     for pattern in COMPILED_PATTERNS:
         cleaned = pattern.sub("", cleaned)
     return re.sub(" {2,}", " ", cleaned)
+
+
 def clean_file_small(path: Path) -> tuple:
     try:
         with path.open(encoding="utf-8", errors="ignore") as f:
@@ -38,6 +43,8 @@ def clean_file_small(path: Path) -> tuple:
         return (path, True, "small file")
     except Exception as e:
         return (path, False, str(e))
+
+
 def clean_file_large(path: Path) -> tuple:
     try:
         with path.open("r+b") as f:
@@ -54,6 +61,8 @@ def clean_file_large(path: Path) -> tuple:
         return (path, True, "large file (mmap)")
     except Exception as e:
         return (path, False, str(e))
+
+
 def clean_file_worker(path: Path) -> tuple:
     try:
         get_size = path.stat().st_size
@@ -62,6 +71,8 @@ def clean_file_worker(path: Path) -> tuple:
         return clean_file_small(path)
     except Exception as e:
         return (path, False, str(e))
+
+
 def main() -> None:
     cwd = Path.cwd()
     log_files = list(cwd.rglob(f"*{LOG_EXT}"))
@@ -82,5 +93,7 @@ def main() -> None:
     print(f"\nDone. Successfully processed {success_count}/{len(log_files)} file(s).")
     if error_count > 0:
         print(f"Failed: {error_count} file(s).")
+
+
 if __name__ == "__main__":
     main()

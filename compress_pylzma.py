@@ -2,6 +2,7 @@
 """
 Compress/decompress files recursively using pylzma with parallel processing.
 """
+
 import argparse
 import tarfile
 import tempfile
@@ -11,12 +12,16 @@ from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import pylzma
 import io
+
+
 def create_tar_for_directory(dir_path):
     """Create a tar archive for a directory."""
     tar_buffer = io.BytesIO()
     with tarfile.open(fileobj=tar_buffer, mode="w") as tar:
         tar.add(dir_path, arcname=dir_path.name)
     return tar_buffer.getvalue()
+
+
 def compress_file(file_path, output_dir, tar_subdirs_first=False):
     """Compress a single file or directory using pylzma."""
     try:
@@ -41,6 +46,8 @@ def compress_file(file_path, output_dir, tar_subdirs_first=False):
         return f"Compressed: {file_path} -> {output_file}"
     except Exception as e:
         return f"Error compressing {file_path}: {str(e)}"
+
+
 def decompress_file(file_path, output_dir):
     """Decompress a single file using pylzma."""
     try:
@@ -67,6 +74,8 @@ def decompress_file(file_path, output_dir):
             return f"Skipped (not a .7z or .tar.7z file): {file_path}"
     except Exception as e:
         return f"Error decompressing {file_path}: {str(e)}"
+
+
 def process_files_parallel(files, output_dir, mode, tar_subdirs_first=False, max_workers=None):
     """Process files in parallel using ProcessPoolExecutor."""
     results = []
@@ -81,6 +90,8 @@ def process_files_parallel(files, output_dir, mode, tar_subdirs_first=False, max
                 results.append(result)
                 print(result)
     return results
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Compress/decompress files recursively using pylzma with parallel processing"
@@ -166,5 +177,7 @@ def main():
         print(f"Found {len(compressed_files)} files to decompress")
         print(f"Decompressing to: {output_dir}")
         process_files_parallel(compressed_files, output_dir, "decompress", False, args.workers)
+
+
 if __name__ == "__main__":
     main()

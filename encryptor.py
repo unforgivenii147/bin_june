@@ -8,12 +8,18 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from fastwalk import walk_files
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 AES_BLOCK_SIZE = 128
+
+
 def random_key(length: int = 32) -> str:
     return "".join(random.choice(string.ascii_letters + string.digits) for _ in range(length))
+
+
 def encrypt_file(file_path: Path, key: str) -> None:
     from os import urandom
+
     backend = default_backend()
     iv = urandom(16)
     cipher = Cipher(algorithms.AES(key.encode()), modes.CBC(iv), backend=backend)
@@ -23,6 +29,8 @@ def encrypt_file(file_path: Path, key: str) -> None:
     padded_data = padder.update(data) + padder.finalize()
     encrypted_data = encryptor.update(padded_data) + encryptor.finalize()
     file_path.write_bytes(iv + encrypted_data)
+
+
 def decrypt_file(file_path: Path, key: str) -> None:
     backend = default_backend()
     raw = file_path.read_bytes()
@@ -34,6 +42,8 @@ def decrypt_file(file_path: Path, key: str) -> None:
     unpadder = padding.PKCS7(128).unpadder()
     data = unpadder.update(padded_data) + unpadder.finalize()
     file_path.write_bytes(data)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--encrypt", action="store_true")
@@ -59,5 +69,7 @@ def main() -> None:
         path = Path(file_path_str)
         if path.is_file() and path.name != "key":
             action(path, key)
+
+
 if __name__ == "__main__":
     main()
