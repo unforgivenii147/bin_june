@@ -6,6 +6,7 @@ import argparse
 from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor
 from typing import NamedTuple, Optional
+from dh import cprint, is_binary, runcmd
 
 # =============================================================================
 # MIME TYPE DATABASE
@@ -119,97 +120,6 @@ class Mismatch(NamedTuple):
     new_path: Path
 
 
-# =============================================================================
-# TERMINAL COLOR SYSTEM
-# =============================================================================
-class Colors:
-    # Standard ANSI
-    RESET = "\033[0m"
-    BOLD = "\033[1m"
-    DIM = "\033[2m"
-    ITALIC = "\033[3m"
-    UNDERLINE = "\033[4m"
-    BLINK = "\033[5m"
-    REVERSE = "\033[7m"
-    # Foreground
-    RED = "\033[31m"
-    GREEN = "\033[32m"
-    YELLOW = "\033[33m"
-    BLUE = "\033[34m"
-    MAGENTA = "\033[35m"
-    CYAN = "\033[36m"
-    WHITE = "\033[37m"
-    # Backgrounds
-    BG_RED = "\033[41m"
-    BG_GREEN = "\033[42m"
-    BG_BLUE = "\033[44m"
-
-
-def can_colorize() -> bool:
-    if "NO_COLOR" in os.environ or "ANSI_COLORS_DISABLED" in os.environ:
-        return False
-    if "FORCE_COLOR" in os.environ:
-        return True
-    return sys.stdout.isatty()
-
-
-def colored(text: str, color: str = "", on_color: str = "", attrs: str = "") -> str:
-    if not can_colorize():
-        return text
-    return f"{attrs}{on_color}{color}{text}{Colors.RESET}"
-
-
-def cprint(text: str, color: str = "", on_color: str = "", attrs: str = "") -> None:
-    print(colored(text, color, on_color, attrs))
-
-
-# =============================================================================
-# CORE UTILITIES
-# =============================================================================
-def runcmd(cmd: list[str], silent: bool = True, timeout: int = 5) -> tuple[int, str, str]:
-    try:
-        res = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, check=False)
-        return res.returncode, res.stdout.strip(), res.stderr.strip()
-    except subprocess.TimeoutExpired:
-        return -1, "", "Timeout occurred"
-    except FileNotFoundError:
-        return -1, "", "Command 'file' not found. Please install it."
-    except Exception as e:
-        return -1, "", str(e)
-
-
-def is_binary(path: Path) -> bool:
-    """Heuristic binary detection based on null bytes and non-text ratios."""
-    try:
-        with open(path, "rb") as f:
-            chunk = f.read(8192)
-            if not chunk:
-                return False
-            if b"\x00" in chunk:
-                return True
-            text_chars = sum(1 for b in chunk if 32 <= b <= 126 or b in b"\n\r\t")
-            return (text_chars / len(chunk)) < 0.7
-    except Exception:
-        return True
-
-
-def unique_path(path: Path) -> Path:
-    """Generates a unique path by appending _1, _2 etc to the stem."""
-    if not path.exists():
-        return path
-    # Handle compound extensions (.tar.gz)
-    suffixes = "".join(path.suffixes)
-    stem = path.name.replace(suffixes, "")
-    parent = path.parent
-    counter = 1
-    while True:
-        new_name = f"{stem}_{counter}{suffixes}"
-        candidate = parent / new_name
-        if not candidate.exists():
-            return candidate
-        counter += 1
-
-
 def get_file_mime(path: Path) -> str:
     code, stdout, _ = runcmd(["file", "--brief", "--mime-type", str(path)])
     return stdout if code == 0 else "unknown/unknown"
@@ -279,7 +189,7 @@ def main():
     args = parser.parse_args()
     root_path = Path(args.directory)
     if not root_path.is_dir():
-        cprint(f"Error: {args.directory} is not a valid directory.", Colors.RED)
+        cprint(f"Error: {args.directory} is not a valid directory.", "red")
         sys.exit(1)
     # Collect all files first for parallel mapping
     all_files = []
@@ -288,7 +198,7 @@ def main():
         dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
         for f in files:
             all_files.append(Path(root) / f)
-    cprint(f"Scanning {len(all_files)} files... ", Colors.CYAN)
+    cprint(f"Scanning {len(all_files)} files... ")
     mismatches: list[Mismatch] = []
     # PARALLEL ANALYSIS PHASE
     # We use ProcessPoolExecutor because 'file' is a subprocess call and is CPU/IO bound
@@ -296,15 +206,15 @@ def main():
         results = list(executor.map(analyze_file, all_files))
         mismatches = [r for r in results if r is not None]
     if not mismatches:
-        cprint("✨ No mismatches found. Your filesystem is clean!", Colors.GREEN, attrs=Colors.BOLD)
+        cprint("✨ No mismatches found. Your filesystem is clean!", "red")
         return
     # RENAMING PHASE (Sequential)
     fixed_count = 0
     for m in mismatches:
-        cprint(f"\n{Colors.YELLOW}Mismatch found:{Colors.RESET}", attrs=Colors.BOLD)
-        cprint(f"  File: {m.path.name} {Colors.DIM}({m.current_ext}){Colors.RESET}")
-        cprint(f"  MIME: {m.detected_mime} → Expected: {m.expected_ext}", Colors.CYAN)
-        cprint(f"  Proposed: {m.new_path.name}", Colors.GREEN)
+        cprint(f"\nMismatch found:", "yellow")
+        cprint(f"  File: {m.path.name} ({m.current_ext})", "grey")
+        cprint(f"  MIME: {m.detected_mime} → Expected: {m.expected_ext}")
+        cprint(f"  Proposed: {m.new_path.name}", "green")
         do_rename = False
         if args.yes:
             do_rename = True
@@ -315,17 +225,16 @@ def main():
         if do_rename:
             try:
                 m.path.rename(m.new_path)
-                cprint("  ✅ Renamed successfully.", Colors.GREEN)
+                cprint("  ✅ Renamed successfully.", "green")
                 fixed_count += 1
             except Exception as e:
-                cprint(f"  ❌ Failed to rename: {e}", Colors.RED)
+                cprint(f"  ❌ Failed to rename: {e}", "red")
     # FINAL REPORT
-    cprint("\n" + "=" * 40, Colors.WHITE)
-    cprint(f"SUMMARY REPORT", Colors.MAGENTA, attrs=Colors.BOLD + Colors.UNDERLINE)
-    cprint(f"Total Mismatches: {len(mismatches)}", Colors.WHITE)
-    cprint(f"Successfully Fixed: {fixed_count}", Colors.GREEN, attrs=Colors.BOLD)
-    cprint(f"Remaining: {len(mismatches) - fixed_count}", Colors.YELLOW)
-    cprint("=" * 40, Colors.WHITE)
+    cprint("\n" + "=" * 42, "white")
+    cprint(f"SUMMARY REPORT")
+    cprint(f"Total Mismatches: {len(mismatches)}")
+    cprint(f"Remaining: {len(mismatches) - fixed_count}", "yellow")
+    cprint("=" * 42, "white")
 
 
 if __name__ == "__main__":

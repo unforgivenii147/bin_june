@@ -64,5 +64,5 @@ def process_file(path: Path) -> None:
 if __name__ == "__main__":
     cwd = Path.cwd()
     args = sys.argv[1:]
-    files = [Path(p) for p in args] if args else getfiles(cwd)
+    files = [Path(p) for p in args] if args else getfiles(cwd,ext=['.c','.cc','.cpp','.cxx','.h','.hpp','.hh','.hxx'])
     mpf3(process_file, files)
