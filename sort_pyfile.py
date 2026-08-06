@@ -1,14 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import ast
 import sys
 from pathlib import Path
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def sort_python_script(file_path: Path) -> None:
     try:
         source_code = file_path.read_text(encoding="utf-8")
@@ -51,7 +46,6 @@ def sort_python_script(file_path: Path) -> None:
     new_tree = ast.Module(body=new_body, type_ignores=[])
     try:
         import astunparse
-
         sorted_code = astunparse.unparse(new_tree)
     except ImportError:
         print("Warning: 'astunparse' library not found. Trying built-in 'ast.unparse' (Python 3.9+).")
@@ -70,8 +64,6 @@ def sort_python_script(file_path: Path) -> None:
         print(f"Successfully sorted and saved: {file_path}")
     except Exception as e:
         print(f"Error writing sorted code back to {file_path}: {e}")
-
-
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python sort_script.py <path_to_python_script>")

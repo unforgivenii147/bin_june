@@ -1,60 +1,11 @@
+#!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 import os
 import sys
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
-from dh import get_files
-
-
-def runcmd(
-    cmd: list[str], run_silently: bool = False, show_output: bool = True, timeout: float | None = None
-) -> tuple[int, str, str]:
-    from subprocess import DEVNULL as _DEVNULL
-    from subprocess import TimeoutExpired as subprocess_TimeoutExpired
-    from subprocess import run as subprocess_run
-    from sys import stderr as sys_stderr
-    from sys import stdout as sys_stdout
-
-    if not cmd:
-        msg = "cmd must be a non-empty list (e.g., ['ls', '-l'])"
-        raise ValueError(msg)
-    try:
-        if run_silently:
-            result = subprocess_run(cmd, stdout=_DEVNULL, stderr=_DEVNULL, timeout=timeout)
-            return (result.returncode, "", "")
-        result = subprocess_run(cmd, capture_output=True, text=True, timeout=timeout)
-        stdout, stderr = (result.stdout, result.stderr)
-        if show_output:
-            if stdout:
-                sys_stdout.write(stdout)
-                sys_stdout.flush()
-            if stderr:
-                sys_stderr.write(stderr)
-                sys_stderr.flush()
-        return (result.returncode, stdout, stderr)
-    except FileNotFoundError:
-        msg = f"Command not found: '{cmd[0]}'"
-        if show_output and (not run_silently):
-            print(msg, file=sys_stderr)
-        return (127, "", msg)
-    except PermissionError:
-        msg = f"Permission denied: '{cmd[0]}'"
-        if show_output and (not run_silently):
-            print(msg, file=sys_stderr)
-        return (126, "", msg)
-    except subprocess_TimeoutExpired:
-        msg = f"Command timed out after {timeout}s: {' '.join(cmd)}"
-        if show_output and (not run_silently):
-            print(msg, file=sys_stderr)
-        return (124, "", msg)
-    except Exception as e:
-        msg = f"Unexpected error running '{cmd[0]}': {e}"
-        if show_output and (not run_silently):
-            print(msg, file=sys_stderr)
-        return (1, "", msg)
-
-
+from dh import get_files, mpf3, runcmd
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -64,15 +15,6 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
-
-
-def mpf3(process_function: Callable, files: list[Path], **kwargs):
-    from joblib import Parallel, delayed
-
-    file_strings = [str(f) for f in files]
-    return Parallel(n_jobs=-1)((delayed(process_function)(file_str, **kwargs) for file_str in file_strings))
-
-
 ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
 HIGHLIGHTS = {
     "on_black": 40,
@@ -113,8 +55,6 @@ COLORS = {
     "white": 97,
 }
 RESET = "\x1b[0m"
-
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -134,8 +74,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
-
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
     if not can_colorize(no_color=no_color, force_color=force_color):
@@ -158,16 +96,10 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
             result = fmt_str % (ATTRIBUTES[attr], result)
     result += RESET
     return result
-
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
-
-
 START_DIR = Path.cwd()
 NUM_PROCESSES = 4
-
-
 def process_file(path: str | Path) -> None:
     path = Path(path)
     before = gsz(path)
@@ -193,8 +125,6 @@ def process_file(path: str | Path) -> None:
     except Exception as e:
         print(f"❌ Error compressing {path}: {e}")
     return
-
-
 def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -209,7 +139,5 @@ def main() -> None:
     else:
         files = get_files(cwd, ext=[".png", ".PNG"])
     _ = mpf3(process_file, files)
-
-
 if __name__ == "__main__":
     sys.exit(main())

@@ -1,16 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 from pathlib import Path
-
 import cssbeautifier
 import yapf
 from bs4 import BeautifulSoup
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def beautify_html(file_path) -> bool:
     try:
         content = Path(file_path).read_text(encoding="utf-8")
@@ -21,8 +15,6 @@ def beautify_html(file_path) -> bool:
         print(f"Error beautifying HTML file {file_path}: {e}")
         return False
     return True
-
-
 def beautify_css(file_path) -> bool:
     try:
         content = Path(file_path).read_text(encoding="utf-8")
@@ -32,8 +24,6 @@ def beautify_css(file_path) -> bool:
         print(f"Error beautifying CSS file {file_path}: {e}")
         return False
     return True
-
-
 def beautify_js(file_path) -> bool:
     try:
         content = Path(file_path).read_text(encoding="utf-8")
@@ -43,15 +33,12 @@ def beautify_js(file_path) -> bool:
         print(f"Error beautifying JS file {file_path}: {e}")
         return False
     return True
-
-
 def beautify_directory(directory: str) -> None:
     failed_files = []
     base_path = Path(directory)
     for file_path in base_path.rglob("*"):
         if not file_path.is_file():
             continue
-
         file = file_path.name
         success = False
         if file.endswith(".html"):
@@ -65,7 +52,6 @@ def beautify_directory(directory: str) -> None:
             success = beautify_js(file_path)
         else:
             continue
-
         if not success:
             failed_files.append(str(file_path))
     if failed_files:
@@ -74,7 +60,5 @@ def beautify_directory(directory: str) -> None:
             print(failed_file)
     else:
         print("\nAll files beautified successfully.")
-
-
 if __name__ == "__main__":
     beautify_directory(".")

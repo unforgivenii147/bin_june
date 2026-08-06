@@ -1,15 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 from collections import defaultdict
 from pathlib import Path
-
 import tree_sitter_python as tsp
 from tree_sitter import Language, Parser, Tree
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 parser = Parser()
 parser.language = Language(tsp.language())
 OUT_DIR = Path("output")
@@ -23,16 +18,11 @@ VALID = {
   (
 )"""
 }
-
-
 def get_node_text(src: bytes, node) -> str:
     return src[node.start_byte : node.end_byte].decode()
-
-
 def extract_functions_and_classes(src: bytes, tree: Tree):
     root = tree.root_node
     definitions = []
-
     def traverse(node) -> None:
         if node.type in VALID:
             node_text = get_node_text(src, node)
@@ -46,32 +36,23 @@ def extract_functions_and_classes(src: bytes, tree: Tree):
             definitions.append(node_text)
         for child in node.children:
             traverse(child)
-
     traverse(root)
     return definitions
-
-
 def get_relative_path(file_path: Path, base_path: Path) -> Path:
     try:
         return file_path.relative_to(base_path)
     except ValueError:
         return file_path
-
-
 def extract_docstring(src: bytes, node) -> str | None:
     if node.children and node.children[0].type == "string":
         return get_node_text(src, node.children[0])
     return None
-
-
 def format_definition_with_metadata(def_text: str, file_name: str, line_num: int, docstring: str | None = None) -> str:
     lines = [f"# From: {file_name}:{line_num}"]
     if docstring:
         lines.append(f"# Docstring: {docstring[:50]}{'...' if len(docstring) > 50 else ''}")
     lines.append(def_text)
     return "\n".join(lines)
-
-
 folder_definitions = defaultdict(list)
 processed_files_count = 0
 folders_found = set()

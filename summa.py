@@ -1,31 +1,22 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import re
 import sys
 from collections import defaultdict
 from pathlib import Path
-
 from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize, word_tokenize
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 class TextSummarizer:
     def __init__(self, language: str = "english") -> None:
         self.language = language
         self.stop_words = set(stopwords.words(language))
-
     def _preprocess_text(self, text: str) -> str:
         text = re.sub(r"\s+", " ", text).strip()
         return text
-
     def _tokenize_sentences(self, text: str) -> list[str]:
         sentences = sent_tokenize(text)
         return [s.strip() for s in sentences if len(s.split()) > 2]
-
     def _calculate_word_frequencies(self, sentences: list[str]) -> dict[str, float]:
         word_freq = defaultdict(int)
         total_words = 0
@@ -39,7 +30,6 @@ class TextSummarizer:
             for word in word_freq:
                 word_freq[word] /= total_words
         return dict(word_freq)
-
     def _score_sentences(self, sentences: list[str], word_freq: dict[str, float]) -> dict[int, float]:
         sentence_scores = {}
         for idx, sentence in enumerate(sentences):
@@ -55,11 +45,9 @@ class TextSummarizer:
             else:
                 sentence_scores[idx] = 0
         return sentence_scores
-
     def _select_top_sentences(self, sentence_scores: dict[int, float], num_sentences: int) -> list[int]:
         top_indices = sorted(sentence_scores.keys(), key=lambda x: sentence_scores[x], reverse=True)[:num_sentences]
         return sorted(top_indices)
-
     def summarize(self, text: str, ratio: float = 0.3) -> str:
         if not text or not isinstance(text, str):
             return ""
@@ -75,7 +63,6 @@ class TextSummarizer:
         selected_indices = self._select_top_sentences(sentence_scores, num_sentences)
         summary = " ".join([sentences[i] for i in selected_indices])
         return summary
-
     def summarize_by_count(self, text: str, num_sentences: int = 3) -> str:
         if not text or not isinstance(text, str):
             return ""
@@ -90,15 +77,12 @@ class TextSummarizer:
         selected_indices = self._select_top_sentences(sentence_scores, num_sentences)
         summary = " ".join([sentences[i] for i in selected_indices])
         return summary
-
     def get_scores(self, text: str) -> dict[str, float]:
         text = self._preprocess_text(text)
         sentences = self._tokenize_sentences(text)
         word_freq = self._calculate_word_frequencies(sentences)
         scores = self._score_sentences(sentences, word_freq)
         return {sentences[idx]: score for idx, score in scores.items()}
-
-
 if __name__ == "__main__":
     fn = Path(sys.argv[1])
     data = fn.read_text(encoding="utf8")

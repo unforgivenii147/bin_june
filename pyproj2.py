@@ -1,13 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import argparse
 from pathlib import Path
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def load_user_info() -> dict[str, str]:
     info_path = Path.home() / ".myinfo"
     info = {}
@@ -20,13 +15,9 @@ def load_user_info() -> dict[str, str]:
         key, val = line.split("=", 1)
         info[key.strip()] = val.strip()
     return info
-
-
 def write_file_if_missing(path: Path, content: str = "") -> None:
     if not path.exists():
         path.write_text(content)
-
-
 def create_project_structure(pkg: str, author: str, email: str, url: str, simple_cli: bool = False) -> None:
     cwd = Path.cwd()
     version = "1.4.7"
@@ -63,8 +54,6 @@ build-backend = "setuptools.build_meta\"
 {pkg} = "{pkg}:main"
 """)
     print(f"Project '{pkg}' initialized in {cwd}")
-
-
 def main() -> None:
     user_info = load_user_info()
     parser = argparse.ArgumentParser(description="Initialize a Python project structure")
@@ -77,7 +66,5 @@ def main() -> None:
     github_user = user_info.get("github_username", "")
     url = f"https://github.com/{github_user}/{args.name}" if github_user else ""
     create_project_structure(args.name, author, email, url, args.simple_cli)
-
-
 if __name__ == "__main__":
     main()

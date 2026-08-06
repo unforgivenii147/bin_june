@@ -1,7 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import argparse
 import asyncio
 import mmap
@@ -11,15 +9,10 @@ import tarfile
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
 from lzma_mt import compress, decompress
-from dh import get_files,fsz
-
-
+from dh import get_files, fsz
 MAX_WORKERS = 4
 CHUNK_SIZE = 1048576
-
-
 def decompress_file(path: Path) -> bool:
     if not path.suffix == ".xz":
         return False
@@ -38,8 +31,6 @@ def decompress_file(path: Path) -> bool:
     except Exception as e:
         print(f"  ✗ Failed to decompress {path.name}: {e}")
         return False
-
-
 def compress_in_memory(infile: Path, outfile: Path) -> bool:
     try:
         data = infile.read_bytes()
@@ -51,12 +42,8 @@ def compress_in_memory(infile: Path, outfile: Path) -> bool:
     except (OSError, MemoryError) as e:
         print(f"Memory compression failed for {infile.name}: {e}")
         return False
-
-
 def compress_chunk(data: bytes) -> bytes:
     return compress(data, preset=9, threads=6)
-
-
 def compress_chunked(in_path: Path, out_path: Path, file_size: int) -> bool:
     try:
         chunk_count = (file_size + 32768 - 1) // 32768
@@ -85,10 +72,6 @@ def compress_chunked(in_path: Path, out_path: Path, file_size: int) -> bool:
     except (OSError, MemoryError) as e:
         print(f"Chunked compression failed for {in_path.name}: {e}")
         return False
-
-
-
-
 def create_tar_archive(source_dir: Path, output_path: Path) -> bool:
     try:
         with tarfile.open(output_path, "w") as tar:
@@ -100,8 +83,6 @@ def create_tar_archive(source_dir: Path, output_path: Path) -> bool:
     except Exception as e:
         print(f"  Failed to create tar archive: {e}")
         return False
-
-
 def compress_tar_to_xz(tar_path: Path, xz_path: Path) -> bool:
     try:
         tar_size = tar_path.stat().st_size
@@ -128,8 +109,6 @@ def compress_tar_to_xz(tar_path: Path, xz_path: Path) -> bool:
     except Exception as e:
         print(f"  ✗ Failed to compress tar archive: {e}")
         return False
-
-
 async def compress_folder_async(folder_path: Path, output_base_name: str) -> bool:
     loop = asyncio.get_running_loop()
     tar_path = Path(output_base_name + ".tar")
@@ -153,8 +132,6 @@ async def compress_folder_async(folder_path: Path, output_base_name: str) -> boo
         if xz_path.exists():
             xz_path.unlink()
         return False
-
-
 def compress_file(path: Path) -> tuple[bool, int, int]:
     out_path = path.with_name(path.name + ".xz")
     if out_path.exists():
@@ -188,19 +165,13 @@ def compress_file(path: Path) -> tuple[bool, int, int]:
     except (OSError, PermissionError) as e:
         print(f"  ✗ Failed to compress {path.name}: {e}")
         return False, 0, 0
-
-
 def get_files(directory: Path, mode: str = "compress") -> list[Path]:
     if mode == "compress":
         return [p for p in directory.glob("*") if p.is_file() and not p.is_symlink() and should_compress(p)]
     else:
         return [p for p in directory.glob("*.xz") if p.is_file() and not p.is_symlink()]
-
-
 def get_dirs(directory: Path) -> list[Path]:
     return [p for p in directory.glob("*") if not p.is_symlink() and p.is_dir()]
-
-
 def should_compress(path: Path) -> bool:
     try:
         if not path.is_file() or path.is_symlink():
@@ -212,8 +183,6 @@ def should_compress(path: Path) -> bool:
         return size >= 1024
     except (OSError, PermissionError):
         return False
-
-
 def extract_tar_archive(tar_path: Path, extract_dir: Path) -> bool:
     try:
         with tarfile.open(tar_path, "r") as tar:
@@ -222,8 +191,6 @@ def extract_tar_archive(tar_path: Path, extract_dir: Path) -> bool:
     except Exception as e:
         print(f"  Failed to extract tar archive: {e}")
         return False
-
-
 async def process_compress() -> None:
     cwd = Path.cwd()
     dirs_to_compress = get_dirs(cwd)
@@ -263,8 +230,6 @@ async def process_compress() -> None:
         print(f"{'=' * 50}")
     elif files_to_compress:
         print("\n❌ No files were successfully compressed")
-
-
 async def process_decompress() -> None:
     cwd = Path.cwd()
     archives = [p for p in cwd.glob("*.tar.xz") if p.is_file()]
@@ -321,8 +286,6 @@ async def process_decompress() -> None:
         print(f"{'=' * 50}")
     elif files_to_decompress:
         print("\n❌ No files were successfully decompressed")
-
-
 async def main_async(mode: str = "compress") -> None:
     if mode == "compress":
         await process_compress()
@@ -330,8 +293,6 @@ async def main_async(mode: str = "compress") -> None:
         await process_decompress()
     else:
         print(f"Unknown mode: {mode}")
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Multi-threaded compression/decompression tool",
@@ -359,7 +320,5 @@ Examples:
     except Exception as e:
         print(f"\n❌ Unexpected error: {e}")
         sys.exit(1)
-
-
 if __name__ == "__main__":
     sys.exit(main())

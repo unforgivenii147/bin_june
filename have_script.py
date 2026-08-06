@@ -1,15 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import argparse
 import os
 import sys
 import zipfile
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def find_whl_files(directory):
     whl_files = []
     for root, _dirs, files in os.walk(directory):
@@ -17,8 +12,6 @@ def find_whl_files(directory):
             if file.endswith(".whl"):
                 whl_files.append(os.path.join(root, file))
     return whl_files
-
-
 def check_entry_points(whl_path):
     try:
         with zipfile.ZipFile(whl_path, "r") as whl:
@@ -32,8 +25,6 @@ def check_entry_points(whl_path):
     except Exception as e:
         print(f"Error reading {whl_path}: {e}", file=sys.stderr)
         return False, None
-
-
 def get_whl_info(whl_path):
     basename = os.path.basename(whl_path)
     parts = basename.split("-")
@@ -42,8 +33,6 @@ def get_whl_info(whl_path):
         version = parts[1]
         return name, version
     return basename, "unknown"
-
-
 def main():
     parser = argparse.ArgumentParser(description="Find .whl files that contain entry_points.txt")
     parser.add_argument(
@@ -112,7 +101,5 @@ def main():
     print(f"Without:               {len(no_entry_points)}")
     if errors:
         print(f"Errors:                {len(errors)}")
-
-
 if __name__ == "__main__":
     main()

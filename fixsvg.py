@@ -1,12 +1,7 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 from pathlib import Path
-
 from fastwalk import walk_files
-
-
 def process_file(path: Path) -> bool:
     path = Path(path)
     if not path.exists():
@@ -31,8 +26,6 @@ def process_file(path: Path) -> bool:
     trimmed = "".join(content)[:last_tag_pos]
     path.write_text(trimmed, encoding="utf-8")
     return True
-
-
 if __name__ == "__main__":
     cwd = Path().cwd().resolve()
     for pth in walk_files(cwd):

@@ -1,7 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import bz2
 import gzip
 import lzma
@@ -11,26 +9,20 @@ import tarfile
 import zipfile
 import zlib
 from pathlib import Path
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 try:
     import brotli
 except ImportError:
     brotli = None
 try:
     import zstandard
-
     zstd_available = True
 except ImportError:
     zstd_available = False
 try:
     import py7zr
-
 except ImportError:
     py7zr = None
-
-
 def try_decompress(filename: str) -> None:
     print(f"Attempting to decompress: {filename}\n")
     compression_methods = {
@@ -43,14 +35,12 @@ def try_decompress(filename: str) -> None:
     if brotli:
         compression_methods["brotli"] = brotli.decompress
     if zstd_available:
-
         def zstd_decompress_all(data) -> bytes:
             try:
                 dctx = zstandard.ZstdDecompressor()
                 return dctx.decompress(data)
             except zstandard.ZstdError as e:
                 raise ValueError(msg) from e
-
         compression_methods["zstandard"] = zstd_decompress_all
     if py7zr:
         pass
@@ -119,8 +109,6 @@ def try_decompress(filename: str) -> None:
             print(f"  FAILED: py7zr opened with exception: {type(e).__name__}: {e}\n")
     if not success:
         print("No compression or archive format was successfully identified and decompressed.\n")
-
-
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python your_script_name.py <filename>\n")

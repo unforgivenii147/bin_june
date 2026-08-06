@@ -1,3 +1,4 @@
+#!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 import ast
 import sys
@@ -5,11 +6,8 @@ import unicodedata
 from collections import deque
 from pathlib import Path
 import astor
-
 CHUNK_SIZE = 1024 * 1024
 from dh import get_files
-
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -24,11 +22,7 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
-
 BACKUP = False
-
-
 def process_file(path) -> None:
     path = Path(path)
     if is_binary(path):
@@ -54,8 +48,6 @@ def process_file(path) -> None:
             path.write_text(new_content, encoding="utf-8")
     except:
         return
-
-
 def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -63,7 +55,5 @@ def main() -> None:
     files = [Path(arg) for arg in args] if args else get_files(cwd)
     for path in files:
         process_file(path)
-
-
 if __name__ == "__main__":
     raise SystemExit(main())

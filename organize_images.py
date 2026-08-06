@@ -1,18 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/python
-
 from __future__ import annotations
-
 import os
 import shutil
 from pathlib import Path
-
 import cv2
 import numpy as np
 from numpy import ndarray
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def get_image_features_cv2(image_path, size=(64, 64)):
     try:
         img = cv2.imread(image_path)
@@ -44,8 +38,6 @@ def get_image_features_cv2(image_path, size=(64, 64)):
     except Exception as e:
         print(f"Error processing {image_path}: {e!s}")
         return None
-
-
 def get_all_images(directory):
     image_extensions = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webp"}
     image_files = []
@@ -57,8 +49,6 @@ def get_all_images(directory):
                 if Path(full_path).is_file() and os.access(full_path, os.R_OK):
                     image_files.append(full_path)
     return image_files
-
-
 def compute_similarity(feat1, feat2):
     if feat1 is None or feat2 is None:
         return 0.0
@@ -67,8 +57,6 @@ def compute_similarity(feat1, feat2):
     if norm1 == 0 or norm2 == 0:
         return 0.0
     return np.dot(feat1, feat2) / (norm1 * norm2)
-
-
 def simple_clustering(features: ndarray, paths, n_clusters=10, threshold=0.7) -> ndarray[tuple[int]] | ndarray:
     n_samples = len(features)
     if n_samples == 0:
@@ -103,8 +91,6 @@ def simple_clustering(features: ndarray, paths, n_clusters=10, threshold=0.7) ->
         for idx in indices:
             labels[idx] = cluster_id
     return labels
-
-
 def organize_photos(source_dir: str = ".", n_clusters: int = 10, move: bool = False, threshold: float = 0.7) -> None:
     print(f"Scanning directory: {source_dir}")
     image_paths = get_all_images(source_dir)
@@ -154,11 +140,8 @@ def organize_photos(source_dir: str = ".", n_clusters: int = 10, move: bool = Fa
             print(f"Error copying {path}: {e}")
     print(f"\nDone! Photos organized in: {output_base}")
     print(f"Organized {len(valid_paths)} images into {n_clusters} groups")
-
-
 if __name__ == "__main__":
     import argparse
-
     parser = argparse.ArgumentParser(description="Organize photos by similarity")
     parser.add_argument("-d", "--directory", default=".", help="Source directory (default: current)")
     parser.add_argument("-k", "--clusters", type=int, default=10, help="Number of groups (default: 10)")

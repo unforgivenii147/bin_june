@@ -1,18 +1,13 @@
 #!/data/data/com.termux/files/usr/bin/python
-
 from __future__ import annotations
-
 import os
 import sys
 from multiprocessing import Process, Queue, cpu_count
 from pathlib import Path
-
 import cv2
 import pytesseract
 from PIL import Image
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 ATTRIBUTES = {
     "bold": 1,
     "dark": 2,
@@ -23,7 +18,6 @@ ATTRIBUTES = {
     "concealed": 8,
     "strike": 9,
 }
-
 HIGHLIGHTS = {
     "on_black": 40,
     "on_grey": 40,
@@ -43,7 +37,6 @@ HIGHLIGHTS = {
     "on_light_cyan": 106,
     "on_white": 107,
 }
-
 COLORS = {
     "black": 30,
     "grey": 30,
@@ -63,10 +56,7 @@ COLORS = {
     "light_cyan": 96,
     "white": 97,
 }
-
 RESET = "\x1b[0m"
-
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -86,8 +76,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
-
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
     if not can_colorize(no_color=no_color, force_color=force_color):
@@ -110,16 +98,10 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
             result = fmt_str % (ATTRIBUTES[attr], result)
     result += RESET
     return result
-
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
-
-
 video = sys.argv[1]
 txtfile = Path(video).with_suffix(".txt")
-
-
 def ocr_worker(q_in: Queue, q_out: Queue) -> None:
     while True:
         item = q_in.get()
@@ -136,8 +118,6 @@ def ocr_worker(q_in: Queue, q_out: Queue) -> None:
         else:
             cprint(f"frame {frame_id} --> no text", "blue")
         q_out.put((frame_id, text))
-
-
 def main() -> None:
     cap = cv2.VideoCapture(video)
     q_in = Queue(maxsize=cpu_count())
@@ -163,7 +143,5 @@ def main() -> None:
     cap.release()
     for w in workers:
         w.join()
-
-
 if __name__ == "__main__":
     main()

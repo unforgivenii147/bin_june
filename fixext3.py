@@ -1,12 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import subprocess
 from pathlib import Path
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 FILE_TYPE_MAP = {
     "xz compressed data": ".xz",
     "jpeg image data": ".jpg",
@@ -88,8 +84,6 @@ EXTENSION_TO_TYPE_HINT = {
     ".mov": ["quicktime movie"],
     ".avi": ["avi video"],
 }
-
-
 def run_file_command(filepath: Path) -> str | None:
     try:
         result = subprocess.run(
@@ -110,8 +104,6 @@ def run_file_command(filepath: Path) -> str | None:
     except Exception as e:
         print(f"An unexpected error occurred while running 'file' command on {filepath}: {e}")
         return None
-
-
 def get_file_extension_from_type(file_type_description: str) -> str | None:
     normalized_description = file_type_description.lower().strip()
     if normalized_description.endswith(","):
@@ -119,12 +111,8 @@ def get_file_extension_from_type(file_type_description: str) -> str | None:
     if normalized_description.endswith("."):
         normalized_description = normalized_description[:-1].strip()
     return FILE_TYPE_MAP.get(normalized_description)
-
-
 def get_current_extension(filepath: Path) -> str | None:
     return filepath.suffix.lower()
-
-
 def find_files_recursively(directory: Path, ignored_dirs: list[str] | None = None, follow_symlinks: bool = False):
     if ignored_dirs is None:
         ignored_dirs = [".git", "__pycache__", "node_modules", ".venv", "venv"]
@@ -135,8 +123,6 @@ def find_files_recursively(directory: Path, ignored_dirs: list[str] | None = Non
             continue
         if item.is_file():
             yield item
-
-
 def detect_and_fix_mismatches(
     start_directory: Path = Path(), similarity_threshold: int = 70, dry_run: bool = True
 ) -> None:
@@ -231,8 +217,6 @@ Successfully renamed {renamed_count} out of {len(rename_operations)} planned ope
         else:
             print("Rename operation cancelled by user.")
     print("\n--- Script Finished ---")
-
-
 if __name__ == "__main__":
     TARGET_DIR = Path()
     DRY_RUN_MODE = False

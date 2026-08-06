@@ -1,14 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
-
 """
 Extract functions from shell scripts (.sh files and extensionless bash scripts) recursively.
 Uses generator-style filesystem walking for memory-efficient processing.
 Optimized for Termux environment.
 """
-
 from __future__ import annotations
-
 import argparse
 import contextlib
 import os
@@ -16,7 +12,6 @@ import re
 import sys
 from pathlib import Path
 from typing import Generator, List, Optional, Tuple
-
 IS_TERMUX = os.environ.get("TERMUX_VERSION") is not None or "com.termux" in os.environ.get("PREFIX", "")
 EXCLUDED = {
     ".py",
@@ -37,14 +32,11 @@ EXCLUDED = {
     ".rmeta",
     ".syntax",
 }
-
-
 class ShellScriptFinder:
     def __init__(self, include_extensionless: bool = True, skip_hidden: bool = False):
         self.include_extensionless = include_extensionless
         self.skip_hidden = skip_hidden
         self.script_count = 0
-
     def is_bash_script(self, file_path: Path) -> bool:
         if not file_path.is_file():
             return False
@@ -101,7 +93,6 @@ class ShellScriptFinder:
         except (IOError, OSError):
             return False
         return False
-
     def walk_directory(self, directory: Path) -> Generator[Path, None, None]:
         try:
             with os.scandir(directory) as entries:
@@ -121,7 +112,6 @@ class ShellScriptFinder:
             print(f"Warning: Permission denied accessing {directory}", file=sys.stderr)
         except OSError as e:
             print(f"Warning: OS error accessing {directory}: {e}", file=sys.stderr)
-
     def find_scripts(self, paths: List[Path]) -> Generator[Path, None, None]:
         for path in paths:
             if not path.exists():
@@ -135,12 +125,9 @@ class ShellScriptFinder:
                 yield from self.walk_directory(path)
             else:
                 print(f"Warning: {path} is not a file or directory, skipping...", file=sys.stderr)
-
-
 class FunctionExtractor:
     def __init__(self):
         self.function_count = 0
-
     def extract_functions(self, sh_file: Path) -> Generator[Tuple[str, str], None, None]:
         try:
             with open(sh_file, "r", encoding="utf-8", errors="ignore") as f:
@@ -176,14 +163,11 @@ class FunctionExtractor:
                 i = j
             else:
                 i += 1
-
-
 class FunctionWriter:
     def __init__(self, output_dir: Path, use_extension: bool = True):
         self.output_dir = output_dir
         self.use_extension = use_extension
         self.written_count = 0
-
     def write_function(self, func_name: str, func_content: str, source_file: Path) -> Optional[Path]:
         safe_func_name = re.sub("[^\\w\\-]", "_", func_name)
         try:
@@ -209,8 +193,6 @@ class FunctionWriter:
         except Exception as e:
             print(f"Error writing function '{func_name}' to {output_file}: {e}", file=sys.stderr)
             return None
-
-
 def process_paths(
     input_paths: List[Path],
     output_dir: Path,
@@ -238,8 +220,6 @@ def process_paths(
             if output_path and verbose:
                 print(f"    -> Extracted: {func_name} -> {output_path.name}")
     return (files_processed, extractor.function_count)
-
-
 def main():
     parser = argparse.ArgumentParser(
         description="Extract functions from shell scripts using generator-style filesystem walker",
@@ -304,8 +284,6 @@ def main():
         with contextlib.suppress(BaseException):
             args.output.chmod(args.output.stat().st_mode | 493)
     return 0
-
-
 if __name__ == "__main__":
     try:
         sys.exit(main())

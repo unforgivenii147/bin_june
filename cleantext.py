@@ -1,14 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import sys
 import unicodedata
 from pathlib import Path
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def clean_file(filename: str) -> None:
     try:
         with Path(filename).open(encoding="utf-8") as f:
@@ -24,8 +19,6 @@ def clean_file(filename: str) -> None:
         print(f"Error: The file '{filename}' was not found.")
     except Exception as e:
         print(f"An error occurred: {e}")
-
-
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python clean_text.py <filename>")

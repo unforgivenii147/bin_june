@@ -1,36 +1,10 @@
+#!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
-def unique_path(path: Path | str) -> Path:
-    path = _clean_fname(Path(path))
-    if not path.exists():
-        return path
-    parent = path.parent
-    suffixes = path.suffixes
-    if suffixes:
-        first_suffix_index = path.name.find(suffixes[0])
-        stem = path.name[:first_suffix_index]
-        full_suffix = "".join(suffixes)
-    else:
-        stem = path.name
-        full_suffix = ""
-    counter = 1
-    while True:
-        new_name = f"{stem}_{counter}{full_suffix}"
-        new_path = parent / new_name
-        if not new_path.exists():
-            return new_path
-        counter += 1
-
-
-from dh import _clean_fname
-
-
+from dh import unique_path
 def remove_string_from_names(
     string_to_remove: str, dry_run: bool = False, recursive: bool = False, current_path: Path = Path.cwd()
 ) -> int:
@@ -64,8 +38,6 @@ def remove_string_from_names(
         if recursive and item.is_dir():
             renamed_count += remove_string_from_names(string_to_remove, dry_run, recursive, item)
     return renamed_count
-
-
 def replace_string_in_names(
     str1: str, str2: str, dry_run: bool = False, recursive: bool = False, current_path: Path = Path.cwd()
 ) -> int:
@@ -99,8 +71,6 @@ def replace_string_in_names(
         if recursive and item.is_dir():
             renamed_count += replace_string_in_names(str1, str2, dry_run, recursive, item)
     return renamed_count
-
-
 def should_skip(path):
     path = Path(path)
     if path.is_symlink():
@@ -109,8 +79,6 @@ def should_skip(path):
         if part in SKIP_DIRS:
             return True
     return False
-
-
 def rename_by_template(
     template: str, dry_run: bool = False, recursive: bool = False, current_path: Path = Path.cwd()
 ) -> int:
@@ -158,8 +126,6 @@ def rename_by_template(
         except PermissionError:
             print(f"Permission denied accessing subdirectory in {current_path}")
     return renamed_count
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Rename files and directories using pathlib",
@@ -201,7 +167,5 @@ def main() -> None:
     except Exception as e:
         print(f"An error occurred: {e}")
         sys.exit(1)
-
-
 if __name__ == "__main__":
     main()

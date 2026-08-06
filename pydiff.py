@@ -1,24 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import os
 import sys
 from pathlib import Path
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-ATTRIBUTES = {
-    "bold": 1,
-    "dark": 2,
-    "italic": 3,
-    "underline": 4,
-    "blink": 5,
-    "reverse": 7,
-    "concealed": 8,
-    "strike": 9,
-}
-
+ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
 HIGHLIGHTS = {
     "on_black": 40,
     "on_grey": 40,
@@ -38,7 +24,6 @@ HIGHLIGHTS = {
     "on_light_cyan": 106,
     "on_white": 107,
 }
-
 COLORS = {
     "black": 30,
     "grey": 30,
@@ -58,10 +43,7 @@ COLORS = {
     "light_cyan": 96,
     "white": 97,
 }
-
 RESET = "\x1b[0m"
-
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -81,8 +63,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
-
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
     if not can_colorize(no_color=no_color, force_color=force_color):
@@ -105,12 +85,8 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
             result = fmt_str % (ATTRIBUTES[attr], result)
     result += RESET
     return result
-
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
-
-
 def read_lines(path: str | Path, ke: bool = True) -> list[str]:
     path = Path(path)
     if path.stat().st_size > 1024 * 1024:
@@ -121,20 +97,7 @@ def read_lines(path: str | Path, ke: bool = True) -> list[str]:
     if not lines[-1].endswith(("\n", "\r\n", "\r")) and data.endswith(b"\n"):
         lines.append("")
     return lines
-
-
-def read_lines_mmap(path: Path, keep_ends: bool = True) -> list[str]:
-    import mmap
-
-    size = Path(path).stat().st_size
-    with Path(path).open("rb") as f, mmap.mmap(f.fileno(), size, access=mmap.ACCESS_READ) as mm:
-        text = mm[:].decode("utf-8", errors="replace")
-    lines = text.splitlines(keepends=keep_ends)
-    if not lines[-1].endswith(("\n", "\r\n", "\r")) and size > 0 and text.endswith("\n"):
-        lines.append("")
-    return lines
-
-
+from dh import read_lines_mmap
 def process_files(path1: Path, path2: Path) -> None:
     lines1 = read_lines(path1)
     lines2 = read_lines(path2)
@@ -150,13 +113,9 @@ def process_files(path1: Path, path2: Path) -> None:
         for line in only_in_second:
             cprint(f"  - {line}", "yellow")
     cprint(
-        f"""common lines: {len(common_lines)}
-only in {path1.name}: {len(only_in_first)}
-only in {path2.name}: {len(only_in_second)}""",
+        f"common lines: {len(common_lines)}\nonly in {path1.name}: {len(only_in_first)}\nonly in {path2.name}: {len(only_in_second)}",
         "blue",
     )
-
-
 if __name__ == "__main__":
     f1 = Path(sys.argv[1])
     f2 = Path(sys.argv[2])

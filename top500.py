@@ -1,18 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import os
 from collections import Counter
 from pathlib import Path
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def is_text_file(file_path, text_extensions):
     return file_path.suffix.lower() in text_extensions
-
-
 def collect_top_lines(directory: str, text_extensions: set[str], top_n=500) -> None:
     for ext in text_extensions:
         lines_counter = Counter()
@@ -29,12 +22,8 @@ def collect_top_lines(directory: str, text_extensions: set[str], top_n=500) -> N
         with Path(output_file).open("w", encoding="utf-8") as f:
             f.write(f"Top {top_n} most frequent lines for {ext} files:\n\n")
             f.writelines(f"{count}: {line} \n" for line, count in lines_counter.most_common(top_n))
-
-
 def main() -> None:
     text_extensions = {".h", ".hpp"}
     collect_top_lines(".", text_extensions, top_n=500)
-
-
 if __name__ == "__main__":
     main()

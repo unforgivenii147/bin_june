@@ -1,16 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import os
 import shlex
 import stat
 import sys
 from hashlib import sha256
 from pathlib import Path
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 ATTRIBUTES = {
     "bold": 1,
     "dark": 2,
@@ -21,7 +17,6 @@ ATTRIBUTES = {
     "concealed": 8,
     "strike": 9,
 }
-
 HIGHLIGHTS = {
     "on_black": 40,
     "on_grey": 40,
@@ -41,7 +36,6 @@ HIGHLIGHTS = {
     "on_light_cyan": 106,
     "on_white": 107,
 }
-
 COLORS = {
     "black": 30,
     "grey": 30,
@@ -61,10 +55,7 @@ COLORS = {
     "light_cyan": 96,
     "white": 97,
 }
-
 RESET = "\x1b[0m"
-
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -84,8 +75,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
-
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
     if not can_colorize(no_color=no_color, force_color=force_color):
@@ -108,15 +97,9 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
             result = fmt_str % (ATTRIBUTES[attr], result)
     result += RESET
     return result
-
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
-
-
 CHUNK_SIZE = 32768
-
-
 def get_sha256(path: str | Path) -> str:
     path = Path(path)
     h = sha256()
@@ -124,8 +107,6 @@ def get_sha256(path: str | Path) -> str:
         for chunk in iter(lambda: f.read(CHUNK_SIZE), b""):
             h.update(chunk)
     return h.hexdigest()
-
-
 def write_shell_copy(script_path: Path, src_root: Path, dst_root: Path, only_dirs, only_files) -> None:
     with script_path.open("w", encoding="utf-8") as sh:
         sh.write("#!/bin/sh\n")
@@ -142,8 +123,6 @@ def write_shell_copy(script_path: Path, src_root: Path, dst_root: Path, only_dir
             )
     st = script_path.stat()
     script_path.chmod(st.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-
-
 def main() -> None:
     cwd = Path.cwd()
     dir1 = sys.argv[1].strip()
@@ -177,7 +156,5 @@ def main() -> None:
     cprint("only in first")
     for p in only_files_first:
         print(p)
-
-
 if __name__ == "__main__":
     main()

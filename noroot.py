@@ -1,13 +1,11 @@
+#!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 import re
 import sys
 from collections import deque
 from pathlib import Path
-
 CHUNK_SIZE = 1024 * 1024
 from dh import get_files, get_nobinary
-
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -22,14 +20,10 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
-
 IF_BLOCK_REGEX = re.compile(
     "^if\\s+\\[\\s*\\$\\((\\S+)\\)\\s*\\{\\-ne\\s+0\\s*\\}\\]\\s*;\\s*then\\s*\\n((?:.|\\n)*?)^\\s*exit\\s+1\\s*$(.*?)^\\s*fi",
     re.MULTILINE | re.IGNORECASE,
 )
-
-
 def remove_conditional_exit_blocks(file_path: Path) -> None:
     try:
         original_content = file_path.read_text(encoding="utf-8")
@@ -44,8 +38,6 @@ def remove_conditional_exit_blocks(file_path: Path) -> None:
             print(f"Cleaned: {file_path}")
     except Exception as e:
         print(f"Error processing {file_path}: {e}", file=sys.stderr)
-
-
 def main() -> None:
     cwd = Path.cwd()
     files_to_process = get_nobinary(cwd)
@@ -62,7 +54,5 @@ def main() -> None:
                     remove_conditional_exit_blocks(item_path)
             except Exception as e:
                 print(f"Could not read or process {item_path}: {e}", file=sys.stderr)
-
-
 if __name__ == "__main__":
     main()

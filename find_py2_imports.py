@@ -1,3 +1,4 @@
+#!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 import os
 import sys
@@ -5,7 +6,6 @@ from pathlib import Path
 import tree_sitter_python as tsp
 from rapidfuzz import fuzz
 from tree_sitter import Language, Parser
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
 HIGHLIGHTS = {
@@ -47,8 +47,6 @@ COLORS = {
     "white": 97,
 }
 RESET = "\x1b[0m"
-
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -68,8 +66,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
-
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
     if not can_colorize(no_color=no_color, force_color=force_color):
@@ -92,15 +88,10 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
             result = fmt_str % (ATTRIBUTES[attr], result)
     result += RESET
     return result
-
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
-
-
 def get_filez(root_dir: str | Path):
     from os import walk as os_walk
-
     visited_dirs: set[Path] = set()
     root_dir = Path(root_dir)
     if root_dir.is_dir():
@@ -118,16 +109,11 @@ def get_filez(root_dir: str | Path):
                     yield filepath
     else:
         yield root_dir
-
-
 from dh import should_skip
-
 cwd = Path.cwd()
 parser = Parser()
 parser.language = Language(tsp.language())
 VALID = {"import_statement", "import_from_statement"}
-
-
 def process_file(path: Path) -> None:
     path = Path(path)
     src = path.read_bytes()
@@ -197,15 +183,11 @@ def process_file(path: Path) -> None:
                 cprint(f"{path.relative_to(cwd)}", "yellow")
                 cprint(f"{x} / {v} / {ratio}", "green")
                 continue
-
-
 def main() -> None:
     for path in get_filez(cwd):
         if path.is_symlink():
             continue
         if path.suffix == ".py":
             process_file(path)
-
-
 if __name__ == "__main__":
     sys.exit(main())

@@ -1,14 +1,12 @@
+#!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 import os
 import re
 import sys
 from collections import deque
 from pathlib import Path
-
 CHUNK_SIZE = 1024 * 1024
-from dh import get_files, get_nobinary
-
-
+from dh import fsz, get_files, get_nobinary
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -18,20 +16,6 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
-
-
-def fsz(sz: float) -> str:
-    sz = abs(int(sz))
-    units = ("B", "KB", "MB", "GB", "TB")
-    if sz == 0:
-        return "0 B"
-    i = min((int(sz).bit_length() - 1) // 10, len(units) - 1)
-    value = sz / 1024**i
-    if i == 0:
-        return f"{int(value)} {units[i]}"
-    return f"{value:.1f} {units[i]}"
-
-
 ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
 HIGHLIGHTS = {
     "on_black": 40,
@@ -72,8 +56,6 @@ COLORS = {
     "white": 97,
 }
 RESET = "\x1b[0m"
-
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -93,8 +75,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
-
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
     if not can_colorize(no_color=no_color, force_color=force_color):
@@ -117,12 +97,8 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
             result = fmt_str % (ATTRIBUTES[attr], result)
     result += RESET
     return result
-
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
-
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -137,13 +113,9 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
-
 LIC_FILE = Path("/sdcard/lic")
 MIN_BLANK_LINES = 3
 NUM_WORKERS = 8
-
-
 def load_patterns(lic_path: Path) -> list[str]:
     try:
         content = Path(lic_path).read_text(encoding="utf-8", errors="ignore")
@@ -156,21 +128,15 @@ def load_patterns(lic_path: Path) -> list[str]:
     except Exception as e:
         print(f"Error loading patterns from {lic_path}: {e}")
         return []
-
-
 def escape_for_regex(text: str) -> str:
     escaped = re.escape(text)
     return escaped.replace("\\n", "\\s*\\n\\s*")
-
-
 def remove_patterns_from_content(content: str, patterns: list[str]) -> str:
     cleaned = content
     for pattern in patterns:
         regex_pattern = escape_for_regex(pattern)
         cleaned = re.sub(regex_pattern, "", cleaned, flags=re.IGNORECASE | re.MULTILINE)
     return cleaned
-
-
 def process_file(file_path: Path, patterns: list[str]) -> tuple:
     path = Path(file_path)
     path = Path(path)
@@ -183,8 +149,6 @@ def process_file(file_path: Path, patterns: list[str]) -> tuple:
         ds = before - gsz(path)
         cprint(f"{fsz(ds)}")
         del before, ds, cleaned_content, original_content, path
-
-
 def main() -> None:
     if not LIC_FILE.exists():
         print(f"Error: License file not found: {LIC_FILE}")
@@ -201,7 +165,5 @@ def main() -> None:
         return
     for f in all_files:
         process_file(f, patterns)
-
-
 if __name__ == "__main__":
     main()

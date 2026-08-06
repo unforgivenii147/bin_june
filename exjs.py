@@ -1,3 +1,4 @@
+#!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 import os
 import sys
@@ -6,24 +7,7 @@ from collections.abc import Callable
 from pathlib import Path
 from bs4 import BeautifulSoup
 from bs4.element import PageElement
-from dh import get_files
-
-
-def get_random_filename(length: int = 10) -> str:
-    from random import choice
-    from string import ascii_lowercase
-
-    letters: str = ascii_lowercase
-    return "".join((choice(letters) for _ in range(length)))
-
-
-def mpf3(process_function: Callable, files: list[Path], **kwargs):
-    from joblib import Parallel, delayed
-
-    file_strings = [str(f) for f in files]
-    return Parallel(n_jobs=-1)((delayed(process_function)(file_str, **kwargs) for file_str in file_strings))
-
-
+from dh import get_files, get_random_filename, mpf3
 ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
 HIGHLIGHTS = {
     "on_black": 40,
@@ -64,8 +48,6 @@ COLORS = {
     "white": 97,
 }
 RESET = "\x1b[0m"
-
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -85,8 +67,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
-
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
     if not can_colorize(no_color=no_color, force_color=force_color):
@@ -109,15 +89,9 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
             result = fmt_str % (ATTRIBUTES[attr], result)
     result += RESET
     return result
-
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
-
-
 MAX_QUEUE = 16
-
-
 def save_script(str1: list[PageElement]) -> bool:
     fn = "js/"
     fn += get_random_filename(10)
@@ -130,8 +104,6 @@ def save_script(str1: list[PageElement]) -> bool:
         fn.write_text("\n".join(list(str1)), encoding="utf-8")
         cprint(f"{[fn]} created.", "cyan")
     return True
-
-
 def process_file(path) -> bool:
     path = Path(path)
     html_content = path.read_text(encoding="utf-8")
@@ -143,8 +115,6 @@ def process_file(path) -> bool:
         for script in scripts:
             save_script(script.contents)
     return True
-
-
 def main() -> None:
     if not Path("js").exists():
         Path("js").mkdir()
@@ -152,7 +122,5 @@ def main() -> None:
     args = sys.argv[1:]
     files = [Path(f) for f in args] if args else get_files(cwd, ext=[".html", "htm"])
     mpf3(process_file, files)
-
-
 if __name__ == "__main__":
     main()

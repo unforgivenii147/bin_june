@@ -1,20 +1,15 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 """
 Parallel Archive Extractor
 Extracts archives recursively in current directory using joblib parallelism.
 Supported: .gz, .xz, .zip, .whl, .br, .zst, .7z, and tarballs (.tar.gz, .tar.xz, etc.)
 """
-
 from __future__ import annotations
-
 import sys
 from pathlib import Path
-
 import py7zr
 from joblib import Parallel, delayed
 from tqdm import tqdm
-
 try:
     import zstandard as zstd
 except ImportError:
@@ -23,16 +18,12 @@ try:
     from brotli import decompress as brotli_decompress
 except ImportError:
     brotli_decompress = None
-
-
 def copy_chunks(src, dst, chunk_size: int = 1024 * 1024) -> None:
     while True:
         chunk = src.read(chunk_size)
         if not chunk:
             break
         dst.write(chunk)
-
-
 class ArchiveExtractor:
     SUPPORTED_EXTENSIONS = {
         ".gz": "gzip",
@@ -49,17 +40,14 @@ class ArchiveExtractor:
         ".tgz": "tar_gz",
         ".txz": "tar_xz",
     }
-
     def __init__(self, remove_after: bool = True, verbose: bool = True):
         self.remove_after = remove_after
         self.verbose = verbose
         self.stats = {"processed": 0, "success": 0, "failed": 0, "skipped": 0}
-
     def _print_header(self, message: str, char: str = "=", width: int = 80):
         print(f"\n{char * width}")
         print(f" {message} ".center(width, char))
         print(f"{char * width}\n")
-
     def _print_status(self, archive: Path, status: str, details: str = ""):
         colors = {
             "SUCCESS": "\x1b[92m",
@@ -74,7 +62,6 @@ class ArchiveExtractor:
         if details:
             msg += f" {details}"
         print(f"{color}{msg}{colors['RESET']}")
-
     def _detect_format(self, archive: Path) -> str | None:
         for ext in [".tar.gz", ".tar.xz", ".tar.bz2", ".tgz", ".txz"]:
             if str(archive).endswith(ext):
@@ -84,10 +71,8 @@ class ArchiveExtractor:
                 return "zstandard"
             return self.SUPPORTED_EXTENSIONS.get(archive.suffix)
         return None
-
     def _extract_tar(self, archive: Path, output_dir: Path) -> bool:
         import tarfile
-
         try:
             with tarfile.open(archive, "r:*") as tar:
                 tar.extractall(path=output_dir)
@@ -96,11 +81,9 @@ class ArchiveExtractor:
             if self.verbose:
                 self._print_status(archive, "FAILED", f"Tar extraction error: {e}")
             return False
-
     def _extract_gz(self, archive: Path, output_dir: Path) -> bool:
         try:
             import gzip
-
             output_file = output_dir / archive.stem
             with gzip.open(archive, "rb") as f_in, open(output_file, "wb") as f_out:
                 copy_chunks(f_in, f_out)
@@ -109,11 +92,9 @@ class ArchiveExtractor:
             if self.verbose:
                 self._print_status(archive, "FAILED", f"Gzip error: {e}")
             return False
-
     def _extract_xz(self, archive: Path, output_dir: Path) -> bool:
         try:
             import lzma
-
             output_file = output_dir / archive.stem
             with lzma.open(archive, "rb") as f_in, open(output_file, "wb") as f_out:
                 copy_chunks(f_in, f_out)
@@ -122,11 +103,9 @@ class ArchiveExtractor:
             if self.verbose:
                 self._print_status(archive, "FAILED", f"XZ error: {e}")
             return False
-
     def _extract_zip(self, archive: Path, output_dir: Path) -> bool:
         try:
             import zipfile
-
             with zipfile.ZipFile(archive, "r") as zip_ref:
                 zip_ref.extractall(path=output_dir)
             return True
@@ -134,7 +113,6 @@ class ArchiveExtractor:
             if self.verbose:
                 self._print_status(archive, "FAILED", f"ZIP error: {e}")
             return False
-
     def _extract_brotli(self, archive: Path, output_dir: Path) -> bool:
         if brotli_decompress is None:
             if self.verbose:
@@ -151,7 +129,6 @@ class ArchiveExtractor:
             if self.verbose:
                 self._print_status(archive, "FAILED", f"Brotli error: {e}")
             return False
-
     def _extract_zstandard(self, archive: Path, output_dir: Path) -> bool:
         if zstd is None:
             if self.verbose:
@@ -164,7 +141,6 @@ class ArchiveExtractor:
                 output_file = output_dir / output_name
                 import tarfile
                 import tempfile
-
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".tar") as tmp:
                     temp_path = Path(tmp.name)
                     with open(archive, "rb") as f_in:
@@ -193,7 +169,6 @@ class ArchiveExtractor:
             if self.verbose:
                 self._print_status(archive, "FAILED", f"Zstandard error: {e}")
             return False
-
     def _extract_7z(self, archive: Path, output_dir: Path) -> bool:
         try:
             with py7zr.SevenZipFile(archive, mode="r") as sz:
@@ -203,7 +178,6 @@ class ArchiveExtractor:
             if self.verbose:
                 self._print_status(archive, "FAILED", f"7z error: {e}")
             return False
-
     def extract_single(self, archive_path: Path) -> tuple[Path, bool, str | None]:
         archive = Path(archive_path)
         if not archive.exists() or not archive.is_file():
@@ -248,7 +222,6 @@ class ArchiveExtractor:
             return archive, success, None if success else "Extraction failed"
         except Exception as e:
             return archive, False, str(e)
-
     def extract_recursive(self, root_dir: Path = Path.cwd(), n_jobs: int = -1) -> dict:
         self._print_header(f"ARCHIVE EXTRACTOR - {root_dir}", "=")
         archives = []
@@ -287,7 +260,6 @@ class ArchiveExtractor:
                     self._print_status(archive, "FAILED", f"Error: {error}")
         self._print_summary()
         return self.stats
-
     def _print_summary(self):
         self._print_header("EXTRACTION SUMMARY", "-")
         total = self.stats["total"]
@@ -305,11 +277,8 @@ class ArchiveExtractor:
         if failed > 0:
             print("\n⚠️  Some archives failed to extract. Check errors above.")
         self._print_header("FINISHED", "-")
-
-
 def main():
     import argparse
-
     parser = argparse.ArgumentParser(description="Extract archive files recursively with parallel processing")
     parser.add_argument("-d", "--dir", default=".", help="Root directory to search (default: current)")
     parser.add_argument("-k", "--keep", action="store_true", help="Keep original archive files after extraction")
@@ -329,7 +298,5 @@ def main():
     except Exception as e:
         print(f"\n❌ Fatal error: {e}")
         sys.exit(1)
-
-
 if __name__ == "__main__":
     main()

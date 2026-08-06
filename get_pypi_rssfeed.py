@@ -1,28 +1,20 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from typing import Optional
-
 """
 PyPI RSS Feed Parser
 Fetches and extracts newly added packages from the PyPI RSS feed.
 """
-
 import sys
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from typing import List
-
 import requests
-
 PYPI_RSS_URL = "https://pypi.org/rss/packages.xml"
-
-
 def fetch_rss_feed(url: str) -> Optional[str]:
     """
     Fetch the RSS feed from the given URL.
-
     Args:
         url: The RSS feed URL
-
     Returns:
         RSS feed content as string, or None if failed
     """
@@ -33,30 +25,22 @@ def fetch_rss_feed(url: str) -> Optional[str]:
     except requests.exceptions.RequestException as e:
         print(f"Error fetching RSS feed: {e}", file=sys.stderr)
         return None
-
-
 def parse_rss_feed(xml_content: str) -> list[dict[str, str]]:
     """
     Parse the RSS feed XML and extract package information.
-
     Args:
         xml_content: XML content of the RSS feed
-
     Returns:
         List of dictionaries containing package information
     """
     packages = []
-
     try:
         root = ET.fromstring(xml_content)
-
         channel = root.find("channel")
         if channel is None:
             print("Error: Invalid RSS format - no channel found", file=sys.stderr)
             return packages
-
         items = channel.findall("item")
-
         for item in items:
             package_info = {
                 "title": item.findtext("title", "Unknown"),
@@ -65,26 +49,18 @@ def parse_rss_feed(xml_content: str) -> list[dict[str, str]]:
                 "pub_date": item.findtext("pubDate", "Unknown"),
                 "guid": item.findtext("guid", "Unknown"),
             }
-
             title = package_info["title"]
-
             package_name = title.split()[0] if title else "Unknown"
             package_info["package_name"] = package_name
-
             packages.append(package_info)
-
     except ET.ParseError as e:
         print(f"Error parsing XML: {e}", file=sys.stderr)
     except Exception as e:
         print(f"Unexpected error during parsing: {e}", file=sys.stderr)
-
     return packages
-
-
 def display_packages(packages: list[dict[str, str]], limit: Optional[int] = None):
     """
     Display package information in a formatted way.
-
     Args:
         packages: List of package information dictionaries
         limit: Maximum number of packages to display (None for all)
@@ -92,14 +68,11 @@ def display_packages(packages: list[dict[str, str]], limit: Optional[int] = None
     if not packages:
         print("No packages found in the RSS feed.")
         return
-
     display_packages = packages[:limit] if limit else packages
-
     print(f"\n{'=' * 80}")
     print(f"PyPI Latest Packages (Total: {len(packages)}, Showing: {len(display_packages)})")
     print(f"Fetched at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"{'=' * 80}\n")
-
     for i, pkg in enumerate(display_packages, 1):
         print(f"Package #{i}:")
         print(f"  Name:        {pkg['package_name']}")
@@ -113,12 +86,9 @@ def display_packages(packages: list[dict[str, str]], limit: Optional[int] = None
         )
         print(f"  GUID:        {pkg['guid']}")
         print("-" * 80)
-
-
 def save_to_file(packages: list[dict[str, str]], filename: str = "pypi_packages.txt"):
     """
     Save extracted packages to a text file.
-
     Args:
         packages: List of package information dictionaries
         filename: Output filename
@@ -127,7 +97,6 @@ def save_to_file(packages: list[dict[str, str]], filename: str = "pypi_packages.
         with open(filename, "w", encoding="utf-8") as f:
             f.write(f"PyPI Latest Packages - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
             f.write("=" * 80 + "\n\n")
-
             for i, pkg in enumerate(packages, 1):
                 f.write(f"Package #{i}:\n")
                 f.write(f"  Name:        {pkg['package_name']}\n")
@@ -137,18 +106,13 @@ def save_to_file(packages: list[dict[str, str]], filename: str = "pypi_packages.
                 f.write(f"  Description: {pkg['description']}\n")
                 f.write(f"  GUID:        {pkg['guid']}\n")
                 f.write("-" * 80 + "\n")
-
         print(f"\nPackages saved to '{filename}'")
     except IOError as e:
         print(f"Error saving to file: {e}", file=sys.stderr)
-
-
 def main():
     """Main function to orchestrate the RSS feed parsing."""
-
     limit = None
     save_output = False
-
     if len(sys.argv) > 1:
         try:
             limit = int(sys.argv[1])
@@ -163,25 +127,16 @@ def main():
                 print("  limit: Number of packages to display (optional)")
                 print("  --save or -s: Save output to file")
                 sys.exit(1)
-
     if "--save" in sys.argv or "-s" in sys.argv:
         save_output = True
-
     print("Fetching PyPI RSS feed...")
-
     xml_content = fetch_rss_feed(PYPI_RSS_URL)
     if xml_content is None:
         sys.exit(1)
-
     packages = parse_rss_feed(xml_content)
-
     display_packages(packages, limit)
-
     if save_output:
         save_to_file(packages)
-
     print(f"\nSuccessfully extracted {len(packages)} packages from PyPI RSS feed.")
-
-
 if __name__ == "__main__":
     main()

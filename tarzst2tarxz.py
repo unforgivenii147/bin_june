@@ -1,17 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import lzma
 import os
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-
 import zstandard as zstd
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def human_bytes(n: int) -> str:
     sign = "-" if n < 0 else ""
     n = abs(n)
@@ -21,16 +15,12 @@ def human_bytes(n: int) -> str:
         n /= 1024.0
         i += 1
     return f"{sign}{n:.2f} {units[i]}" if units[i] != "B" else f"{sign}{int(n)} B"
-
-
 def dir_files_total_bytes(p: Path) -> int:
     total = 0
     for x in p.iterdir():
         if x.is_file():
             total += x.stat().st_size
     return total
-
-
 def convert_one(src: str) -> tuple[str, int, bool, str]:
     src_path = Path(src)
     dst_xz = src_path.with_suffix("")
@@ -63,8 +53,6 @@ def convert_one(src: str) -> tuple[str, int, bool, str]:
         except Exception:
             pass
         return (src, 0, False, f"error: {e}")
-
-
 def main() -> None:
     cwd = Path(".").resolve()
     tar_zst_files = sorted(cwd.glob("*.tar.zst"))
@@ -94,7 +82,5 @@ def main() -> None:
         print(f"Extra used: {human_bytes(delta)}")
     else:
         print("No disk usage change (by summed file sizes in cwd).")
-
-
 if __name__ == "__main__":
     main()

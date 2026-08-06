@@ -1,15 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import sys
 from pathlib import Path
-
 from fastwalk import walk_files
-
 shebang = "#!/data/data/com.termux/files/usr/bin/python\n"
-
-
 def process_file(fp, module_name):
     if not fp.exists() or fp.is_symlink():
         return
@@ -29,8 +23,6 @@ def process_file(fp, module_name):
     with Path(fp).open("w", encoding="utf-8") as fo:
         fo.writelines(newdata)
     return
-
-
 def main():
     cwd = Path.cwd()
     files = []
@@ -42,7 +34,5 @@ def main():
             files.append(path)
     for f in files:
         process_file(f, modname)
-
-
 if __name__ == "__main__":
     sys.exit(main())

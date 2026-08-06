@@ -1,24 +1,16 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import ast
 import logging
 import operator
 from os import scandir as os_scandir
 from pathlib import Path
-
 from joblib import Parallel, delayed
 from xxhash import xxh64
-
 CHUNK_SIZE = 1024 * 1024
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
-
     path = Path(path)
     if is_binary(path):
         return False
@@ -38,8 +30,6 @@ def is_python_file(path: str | Path) -> bool:
         except:
             return False
     return False
-
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -54,8 +44,6 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
-
 def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
     if path.is_file():
@@ -64,13 +52,10 @@ def get_pyfiles(path: str | Path) -> list[Path]:
         if not path.suffix and not path.name.startswith(".") and is_python_file(path):
             return [path]
         return []
-
     if not path.is_dir():
         return []
-
     pyfiles = []
     stack = [path]
-
     while stack:
         current = stack.pop()
         try:
@@ -89,25 +74,18 @@ def get_pyfiles(path: str | Path) -> list[Path]:
                             pyfiles.append(p)
         except (PermissionError, OSError):
             continue
-
     return sorted(pyfiles)
-
-
 OUTPUT_DIR = Path("output")
 OUTPUT_FILE = OUTPUT_DIR / "const.py"
 LOG_FILE = OUTPUT_DIR / "error.log"
 OUTPUT_DIR.mkdir(exist_ok=True)
 logging.basicConfig(filename=LOG_FILE, level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s")
-
-
 def get_file_hash(filepath: Path) -> str:
     hasher = xxh64()
     with Path(filepath).open("rb") as f:
         while chunk := f.read(CHUNK_SIZE):
             hasher.update(chunk)
     return hasher.hexdigest()
-
-
 def extract_constants(filepath: Path) -> list[tuple[str, str, str]]:
     constants = []
     try:
@@ -137,15 +115,11 @@ def extract_constants(filepath: Path) -> list[tuple[str, str, str]]:
     except Exception as e:
         logging.error(f"Error processing {filepath}: {e}")
     return constants
-
-
 def process_file(filepath: Path) -> tuple[str, list[tuple[str, str, str]] | None]:
     file_hash = get_file_hash(filepath)
     Path(path)
     constants = extract_constants(filepath)
     return file_hash, constants
-
-
 def main() -> None:
     cwd = Path.cwd()
     python_files = list(get_pyfiles(cwd))
@@ -189,7 +163,5 @@ def main() -> None:
     print(f"Successfully extracted {len(written_consts)} unique constants to {OUTPUT_FILE}")
     if LOG_FILE.exists():
         print(f"Errors logged to {LOG_FILE}")
-
-
 if __name__ == "__main__":
     main()

@@ -1,12 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import sys
 from pathlib import Path
-
 import nbformat
-
 if __name__ == "__main__":
     fn = Path(sys.argv[1])
     with Path(fn).open(encoding="utf-8") as f:

@@ -1,12 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 """
 Spell checker script that reports and optionally fixes spelling errors in files.
 Supports multiple files, directories, multiprocessing, and personal dictionaries.
 """
-
 from __future__ import annotations
-
 import argparse
 import json
 import re
@@ -14,22 +11,17 @@ import sys
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 from typing import dict, list, set, tuple
-
 try:
     from spellchecker import SpellChecker
-
 except ImportError:
     print("Error: spellchecker package not installed.")
     print("Install it with: pip install pyspellchecker")
     sys.exit(1)
-
-
 class Personaldictionary:
     def __init__(self, dict_path: Path | None = None):
         self.dict_path = dict_path or Path.home() / ".spell_checker_dict.json"
         self.words: set[str] = set()
         self.load()
-
     def load(self) -> None:
         if self.dict_path.exists():
             try:
@@ -41,7 +33,6 @@ class Personaldictionary:
                 self.words = set()
         else:
             self.words = set()
-
     def save(self) -> None:
         try:
             with open(self.dict_path, "w", encoding="utf-8") as f:
@@ -49,41 +40,32 @@ class Personaldictionary:
             print(f"✓ dictionary saved to {self.dict_path}")
         except OSError as e:
             print(f"Error: Could not save dictionary: {e}", file=sys.stderr)
-
     def add_word(self, word: str) -> bool:
         word_lower = word.lower()
         if word_lower not in self.words:
             self.words.add(word_lower)
             return True
         return False
-
     def add_words(self, words: list[str]) -> int:
         count = sum(1 for word in words if self.add_word(word))
         return count
-
     def remove_word(self, word: str) -> bool:
         word_lower = word.lower()
         if word_lower in self.words:
             self.words.remove(word_lower)
             return True
         return False
-
     def contains(self, word: str) -> bool:
         return word.lower() in self.words
-
     def __len__(self) -> int:
         return len(self.words)
-
     def list_words(self) -> list[str]:
         return sorted(self.words)
-
-
 class SpellCheckProcessor:
     def __init__(self, autofix: bool = False, personal_dict: Personaldictionary = None):
         self.autofix = autofix
         self.spell_checker = SpellChecker()
         self.personal_dict = personal_dict or Personaldictionary()
-
     def check_file(self, file_path: Path) -> dict:
         result = {"file": str(file_path), "errors": [], "total_errors": 0, "fixed": False}
         try:
@@ -113,7 +95,6 @@ class SpellCheckProcessor:
         if self.autofix and result["errors"]:
             result["fixed"] = self._fix_file(file_path, content)
         return result
-
     def _fix_file(self, file_path: Path, content: str) -> bool:
         fixed_content = content
         lines = content.split("\n")
@@ -129,7 +110,6 @@ class SpellCheckProcessor:
         except OSError as e:
             print(f"Error writing to {file_path}: {e}", file=sys.stderr)
             return False
-
     def _collect_errors(self, lines: list[str]) -> list[dict]:
         errors = {}
         for line in lines:
@@ -140,8 +120,6 @@ class SpellCheckProcessor:
                 if word not in errors:
                     errors[word] = {"word": word}
         return list(errors.values())
-
-
 def get_input_files(inputs: list[str]) -> list[Path]:
     files = []
     if not inputs:
@@ -157,14 +135,10 @@ def get_input_files(inputs: list[str]) -> list[Path]:
         else:
             print(f"Warning: {input_path} not found", file=sys.stderr)
     return files
-
-
 def process_file_wrapper(args: tuple[Path, bool, Personaldictionary]) -> dict:
     file_path, autofix, personal_dict = args
     processor = SpellCheckProcessor(autofix=autofix, personal_dict=personal_dict)
     return processor.check_file(file_path)
-
-
 def print_results(results: list[dict]) -> None:
     total_files = len(results)
     total_errors = sum(r.get("total_errors", 0) for r in results)
@@ -191,8 +165,6 @@ def print_results(results: list[dict]) -> None:
     print("\n" + "=" * 70)
     print(f"Summary: {total_errors} total error(s) in {files_with_errors} file(s)")
     print("=" * 70 + "\n")
-
-
 def handle_dictionary_operations(args) -> None:
     personal_dict = Personaldictionary(Path(args.dict_file) if args.dict_file else None)
     if args.add_words:
@@ -232,8 +204,6 @@ def handle_dictionary_operations(args) -> None:
             print("Cancelled.")
     if any([args.add_words, args.add_from_file, args.remove_words, args.list_dict, args.clear_dict]):
         sys.exit(0)
-
-
 def main():
     parser = argparse.ArgumentParser(
         description="Check and optionally fix spelling errors in text files with personal dictionary support.",
@@ -242,32 +212,23 @@ def main():
 Examples:
   # Check files in current directory recursively
   python spell_checker.py
-
   # Check specific file
   python spell_checker.py document.txt
-
   # Check and fix errors
   python spell_checker.py -a document.txt
-
   # Check with personal dictionary
   python spell_checker.py -d ~/.my_words.json document.txt
-
 Personal dictionary Management:
   # Add words to dictionary
   python spell_checker.py --add-words myword1 myword2 myword3
-
   # Add words from file (one per line)
   python spell_checker.py --add-from-file custom_words.txt
-
   # Remove words from dictionary
   python spell_checker.py --remove-words word1 word2
-
   # list all words in dictionary
   python spell_checker.py --list-dict
-
   # Clear entire dictionary
   python spell_checker.py --clear-dict
-
   # Use custom dictionary file
   python spell_checker.py -d /path/to/dict.json -a document.txt
         """,
@@ -324,7 +285,5 @@ Personal dictionary Management:
         file_args = [(f, args.autofix, personal_dict) for f in files]
         results = pool.map(process_file_wrapper, file_args)
     print_results(results)
-
-
 if __name__ == "__main__":
     main()

@@ -1,3 +1,4 @@
+#!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 import sys
 from collections import deque
@@ -6,24 +7,8 @@ from multiprocessing import get_context
 from pathlib import Path
 from typing import Any
 from docutils.core import publish_parts
-
 MAX_WORKERS = 4
-from dh import get_files
-
-
-def mpf_async(func: Callable[[Any], Any], items: Iterable[Any]):
-    with get_context("spawn").Pool(MAX_WORKERS) as p:
-        async_results = [p.apply_async(func, (item,)) for item in items]
-        results = []
-        for i, async_result in enumerate(async_results):
-            try:
-                results.append(async_result.get(timeout=30))
-            except Exception as e:
-                print(f"Item {i} failed: {e}")
-                results.append(None)
-        return results
-
-
+from dh import get_files, mpf_async
 def rst_to_html(content: str) -> str:
     try:
         parts = publish_parts(
@@ -36,8 +21,6 @@ def rst_to_html(content: str) -> str:
     except Exception as e:
         print(f"Conversion error details: {e}")
         raise
-
-
 def process_file(path):
     path = Path(path)
     content = path.read_text(encoding="utf-8")
@@ -45,8 +28,6 @@ def process_file(path):
     html_path = path.with_suffix(".html")
     html_path.write_text(html_content, encoding="utf-8")
     path.unlink()
-
-
 def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -55,7 +36,5 @@ def main() -> None:
         process_file(files[0])
         sys.exit(1)
     mpf_async(process_file, files)
-
-
 if __name__ == "__main__":
     main()

@@ -1,25 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/python
-
 from __future__ import annotations
-
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
-def fsz(sz: float) -> str:
-    sz = abs(int(sz))
-    units = "B", "KB", "MB", "GB", "TB"
-    if sz == 0:
-        return "0 B"
-    i = min((int(sz).bit_length() - 1) // 10, len(units) - 1)
-    value = sz / 1024**i
-    if i == 0:
-        return f"{int(value)} {units[i]}"
-    return f"{value:.1f} {units[i]}"
-
-
+from dh import fsz, is_image
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -29,31 +13,14 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
-
-
-def is_image(path: str | Path) -> bool:
-    path = Path(path)
-    try:
-        if not path.is_file():
-            return False
-        return path.suffix in IMG_EXT
-    except Exception:
-        return False
-
-
 try:
     import cv2
     import numpy as np
-
     USE_CV2 = True
 except ImportError:
     from PIL import Image
-
     USE_CV2 = False
-
 IGNORED_DIRS = {".git", "dist", "build", "__pycache__", ".venv", "node_modules"}
-
-
 def convert_file(file_path: str) -> bool:
     path = Path(file_path)
     if not path.is_file() or path.suffix.lower() not in IMG_EXT:
@@ -102,14 +69,12 @@ def convert_file(file_path: str) -> bool:
     except Exception as e:
         print(f"Error converting '{path.name}': {e}")
         return False
-
-
 def main() -> None:
     start_size = gsz(".")
     files = [
         f
         for f in Path().rglob("*")
-        if f.is_file() and not any(part in IGNORED_DIRS for part in f.parts) and is_image(f)
+        if f.is_file() and (not any((part in IGNORED_DIRS for part in f.parts))) and is_image(f)
     ]
     if not files:
         print("No image files detected.")
@@ -117,14 +82,12 @@ def main() -> None:
     print(f"converting {len(files)} files...")
     with ThreadPoolExecutor(max_workers=8) as executor:
         results = list(executor.map(convert_file, files))
-    changed_count = sum(1 for r in results if r)
+    changed_count = sum((1 for r in results if r))
     print(f"Done. {changed_count} files modified.")
     result = gsz(".") - start_size
     if result < 0:
         print(f"size reduced: - {fsz(result)} ")
     else:
         print(f"size increased: + {fsz(result)} ")
-
-
 if __name__ == "__main__":
     main()

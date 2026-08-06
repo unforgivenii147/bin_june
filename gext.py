@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 import ast
 import os
 import re
@@ -9,19 +8,15 @@ import zipfile
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 from typing import Any
-
 OUTPUT_DIR = Path("output")
 ARCHIVE_EXTENSIONS = (".whl", ".zip", ".tar.gz", ".tgz", ".tar.zst", ".tar.xz", ".tar", ".zst")
 ALLOWED_PYTHON_EXTENSIONS = (".py", "")
-
-
 class EntityExtractor(ast.NodeVisitor):
     def __init__(self, source_content: str, original_path: Path):
         self.entities = []
         self.source_lines = source_content.splitlines(keepends=True)
         self.original_path = original_path
         self.scope_depth = 0
-
     def _get_source_slice(self, node: ast.AST) -> str:
         start_line = node.lineno - 1
         end_line = node.end_lineno or node.lineno
@@ -32,7 +27,6 @@ class EntityExtractor(ast.NodeVisitor):
             last_line = code_slice[-1]
             code_slice[-1] = last_line[: node.end_col_offset]
         return "".join(code_slice)
-
     def _extract_and_save(self, node: ast.AST, entity_type: str, name: str):
         entity_code = self._get_source_slice(node)
         self.entities.append(
@@ -47,43 +41,32 @@ class EntityExtractor(ast.NodeVisitor):
                 "is_function": entity_type == "function",
             }
         )
-
     def visit_FunctionDef(self, node: ast.FunctionDef):
-
         if self.scope_depth == 0:
             self._extract_and_save(node, "function", node.name)
         self.scope_depth += 1
         self.generic_visit(node)
         self.scope_depth -= 1
-
     def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef):
-
         if self.scope_depth == 0:
             self._extract_and_save(node, "function", node.name)
         self.scope_depth += 1
         self.generic_visit(node)
         self.scope_depth -= 1
-
     def visit_ClassDef(self, node: ast.ClassDef):
-
         if self.scope_depth == 0:
             self._extract_and_save(node, "class", node.name)
         self.scope_depth += 1
         self.generic_visit(node)
         self.scope_depth -= 1
-
     def visit_Assign(self, node: ast.Assign):
-
         if self.scope_depth == 0:
             if len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
                 target_name = node.targets[0].id
                 if re.match("^[A-Z_][A-Z0-9_]*$", target_name):
                     self._extract_and_save(node, "constant", target_name)
-
     def generic_visit(self, node: ast.AST):
         super().generic_visit(node)
-
-
 def get_unique_filepath(base_path: Path) -> Path:
     if not base_path.exists():
         return base_path
@@ -95,8 +78,6 @@ def get_unique_filepath(base_path: Path) -> Path:
         if not new_path.exists():
             return new_path
         i += 1
-
-
 def save_entity(entity: dict[str, Any]):
     filename_base = f"{entity['full_name']}.py"
     output_path_base = OUTPUT_DIR / entity["type"] / filename_base
@@ -109,8 +90,6 @@ def save_entity(entity: dict[str, Any]):
             f.write(content)
     except Exception as e:
         print(f"Error saving {final_py_path}: {e}")
-
-
 def extract_entities_from_content(content: str, path: Path) -> list[dict[str, Any]]:
     try:
         tree = ast.parse(content)
@@ -122,8 +101,6 @@ def extract_entities_from_content(content: str, path: Path) -> list[dict[str, An
     except Exception as e:
         print(f"Error parsing AST for {path}: {e}")
         return []
-
-
 def is_python_file_no_extension(path: Path) -> bool:
     if path.suffix:
         return False
@@ -137,8 +114,6 @@ def is_python_file_no_extension(path: Path) -> bool:
     except:
         pass
     return False
-
-
 def process_single_file(path: Path) -> list[dict[str, Any]]:
     try:
         if path.suffix == ".py" or is_python_file_no_extension(path):
@@ -148,8 +123,6 @@ def process_single_file(path: Path) -> list[dict[str, Any]]:
     except Exception as e:
         print(f"Error reading file {path}: {e}")
         return []
-
-
 def process_archive(path: Path) -> list[dict[str, Any]]:
     entities = []
     if path.suffix in (".zip", ".whl"):
@@ -182,22 +155,17 @@ def process_archive(path: Path) -> list[dict[str, Any]]:
         except Exception as e:
             print(f"Error processing TAR archive {path}: {e}")
     return entities
-
-
 def worker_process(path_str: str) -> list[dict[str, Any]]:
     path = Path(path_str)
     if path.name.endswith(ARCHIVE_EXTENSIONS):
         return process_archive(path)
     return process_single_file(path)
-
-
 def main():
     print(f"Starting analysis in {Path.cwd()}...")
     if OUTPUT_DIR.exists():
         shutil.rmtree(OUTPUT_DIR)
         print(f"Cleaned previous output directory: {OUTPUT_DIR}")
     OUTPUT_DIR.mkdir(exist_ok=True)
-
     files_to_process = []
     current_dir = Path(".")
     for root, _, filenames in os.walk(current_dir):
@@ -211,29 +179,21 @@ def main():
             is_py = path.suffix in ALLOWED_PYTHON_EXTENSIONS or is_python_file_no_extension(path)
             if is_archive or is_py:
                 files_to_process.append(str(path))
-
     if not files_to_process:
         print("No Python files or archives found to process.")
         return
-
     print(f"Found {len(files_to_process)} relevant files/archives. Starting multiprocessing pool...")
     num_cpus = cpu_count()
     all_entities = []
-
     with Pool(processes=num_cpus) as pool:
         results_list = pool.map(worker_process, files_to_process)
         for result in results_list:
             all_entities.extend(result)
-
     print(f"Processing complete. Extracted {len(all_entities)} entities.")
     print(f"Saving entities to {OUTPUT_DIR}...")
-
     for entity in all_entities:
         save_entity(entity)
-
     print("\n\nAll tasks finished successfully!")
     print(f"Results are saved in the '{OUTPUT_DIR}' folder, organized by entity type (class, function, constant).")
-
-
 if __name__ == "__main__":
     main()

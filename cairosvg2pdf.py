@@ -1,12 +1,11 @@
+#!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 import os
 import sys
 from collections import deque
 from pathlib import Path
 import cairosvg
-from dh import get_files
-
-
+from dh import fsz, get_files
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -16,20 +15,6 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
-
-
-def fsz(sz: float) -> str:
-    sz = abs(int(sz))
-    units = ("B", "KB", "MB", "GB", "TB")
-    if sz == 0:
-        return "0 B"
-    i = min((int(sz).bit_length() - 1) // 10, len(units) - 1)
-    value = sz / 1024**i
-    if i == 0:
-        return f"{int(value)} {units[i]}"
-    return f"{value:.1f} {units[i]}"
-
-
 ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
 HIGHLIGHTS = {
     "on_black": 40,
@@ -70,8 +55,6 @@ COLORS = {
     "white": 97,
 }
 RESET = "\x1b[0m"
-
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -91,8 +74,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
-
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
     if not can_colorize(no_color=no_color, force_color=force_color):
@@ -115,12 +96,8 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
             result = fmt_str % (ATTRIBUTES[attr], result)
     result += RESET
     return result
-
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
-
-
 def process_file(path: Path) -> None:
     path = Path(path)
     try:
@@ -128,8 +105,6 @@ def process_file(path: Path) -> None:
         cairosvg.svg2pdf(url=str(path), write_to=str(outfile))
     except:
         return
-
-
 def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
@@ -139,7 +114,5 @@ def main() -> None:
         process_file(f)
     diff_size = before - gsz(cwd)
     cprint(f"space saved : {fsz(diff_size)}", "cyan")
-
-
 if __name__ == "__main__":
     main()

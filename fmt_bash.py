@@ -1,23 +1,16 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import sys
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 from subprocess import DEVNULL, TimeoutExpired, run
-
 CHUNK_SIZE = 1024
 SKIP_DIRS = {".git", "__pycache__"}
-
-
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     """Traverses directories using Python 3.12 Path.walk."""
     files = []
-
     for root, dirs, filenames in Path(path).walk(top_down=True, on_error=None):
         dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
-
         for name in filenames:
             item = root / name
             if item.is_symlink():
@@ -25,8 +18,6 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
             if ext is None or item.suffix in ext:
                 files.append(item)
     return files
-
-
 def runcmd(
     cmd: list[str],
     run_silently: bool = False,
@@ -35,12 +26,10 @@ def runcmd(
 ) -> tuple[int, str, str]:
     if not cmd:
         raise ValueError("cmd must be a non-empty list (e.g., ['ls', '-l'])")
-
     try:
         if run_silently:
             result = run(cmd, stdout=DEVNULL, stderr=DEVNULL, timeout=timeout)
             return (result.returncode, "", "")
-
         result = run(cmd, capture_output=True, text=True, timeout=timeout)
         if show_output:
             if result.stdout:
@@ -48,7 +37,6 @@ def runcmd(
             if result.stderr:
                 sys.stderr.write(result.stderr)
         return (result.returncode, result.stdout, result.stderr)
-
     except FileNotFoundError:
         msg = f"Command not found: '{cmd[0]}'"
         if show_output and not run_silently:
@@ -69,8 +57,6 @@ def runcmd(
         if show_output and not run_silently:
             print(msg, file=sys.stderr)
         return (1, "", msg)
-
-
 def is_binary(path: Path) -> bool:
     try:
         with path.open("rb") as f:
@@ -84,8 +70,6 @@ def is_binary(path: Path) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
-
 def has_shell_shebang(path: Path) -> bool:
     try:
         with path.open("rb") as f:
@@ -93,8 +77,6 @@ def has_shell_shebang(path: Path) -> bool:
         return first.startswith("#!") and ("bash" in first or "sh" in first)
     except Exception:
         return False
-
-
 def process_file(path_str: str) -> tuple[bool, str]:
     path = Path(path_str)
     print(f"Formatting:  {path.name}")
@@ -103,31 +85,21 @@ def process_file(path_str: str) -> tuple[bool, str]:
         print(f"  shfmt failed on {path.name}: {stderr.strip()}", file=sys.stderr)
         return (False, path_str)
     return (True, path_str)
-
-
 def main() -> None:
     cwd = Path.cwd()
-
     files = [p for p in get_files(cwd) if (not p.suffix and has_shell_shebang(p)) or p.suffix == ".sh"]
-
     non_binary_files = [p for p in files if not is_binary(p)]
-
     if not non_binary_files:
         print("No shell files found to format.")
         return
-
     file_strings = [str(f) for f in non_binary_files]
-
     print(f"Processing {len(file_strings)} files...")
     with ProcessPoolExecutor() as executor:
         results = list(executor.map(process_file, file_strings))
-
     failed = [Path(p_str).relative_to(cwd) for success, p_str in results if not success]
     if failed:
         print("\nFailed files:")
         for f in failed:
             print(f"  - {f}")
-
-
 if __name__ == "__main__":
     main()

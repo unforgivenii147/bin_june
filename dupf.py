@@ -1,18 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import os
 import sys
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
 from xxhash import xxh64
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -22,31 +16,8 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
-
-
-def fsz(sz: float) -> str:
-    sz = abs(int(sz))
-    units = "B", "KB", "MB", "GB", "TB"
-    if sz == 0:
-        return "0 B"
-    i = min((int(sz).bit_length() - 1) // 10, len(units) - 1)
-    value = sz / 1024**i
-    if i == 0:
-        return f"{int(value)} {units[i]}"
-    return f"{value:.1f} {units[i]}"
-
-
-ATTRIBUTES = {
-    "bold": 1,
-    "dark": 2,
-    "italic": 3,
-    "underline": 4,
-    "blink": 5,
-    "reverse": 7,
-    "concealed": 8,
-    "strike": 9,
-}
-
+from dh import fsz
+ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
 HIGHLIGHTS = {
     "on_black": 40,
     "on_grey": 40,
@@ -66,7 +37,6 @@ HIGHLIGHTS = {
     "on_light_cyan": 106,
     "on_white": 107,
 }
-
 COLORS = {
     "black": 30,
     "grey": 30,
@@ -86,10 +56,7 @@ COLORS = {
     "light_cyan": 96,
     "white": 97,
 }
-
 RESET = "\x1b[0m"
-
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -109,8 +76,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
-
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
     if not can_colorize(no_color=no_color, force_color=force_color):
@@ -133,42 +98,32 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
             result = fmt_str % (ATTRIBUTES[attr], result)
     result += RESET
     return result
-
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
-
-
 CHUNKSIZE = 32768
-
-
 def should_skip(path: Path) -> bool:
     path = Path(path)
     return bool(
         path.is_symlink()
         or not path.stat().st_size
-        or any(pat in path.parts for pat in (".git", "__pycache__", ".mypy_cache", ".ruff_cache"))
+        or any((pat in path.parts for pat in (".git", "__pycache__", ".mypy_cache", ".ruff_cache")))
     )
-
-
 def get_hash_file(path):
     if not path.exists() or not path.stat().st_size:
-        return "", path
+        return ("", path)
     h = xxh64()
     try:
         with path.open("rb") as f:
             while chunk := f.read(CHUNKSIZE):
                 h.update(chunk)
-        return h.hexdigest(), path
+        return (h.hexdigest(), path)
     except OSError:
-        return "", path
-
-
+        return ("", path)
 def find_duplicates() -> None:
     cwd = Path.cwd()
     files_by_hash = defaultdict(list)
     duplicate_count = 0
-    ptp = [path for path in cwd.rglob("*") if path.is_file() and not should_skip(path)]
+    ptp = [path for path in cwd.rglob("*") if path.is_file() and (not should_skip(path))]
     files_by_size = {}
     for p in ptp:
         try:
@@ -200,7 +155,5 @@ def find_duplicates() -> None:
         cprint(f"total : {fsz(total)}")
     else:
         cprint(f"NO DUPS")
-
-
 if __name__ == "__main__":
     find_duplicates()

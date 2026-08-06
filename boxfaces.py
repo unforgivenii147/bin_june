@@ -1,15 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/python
-
 from __future__ import annotations
-
 import sys
 from pathlib import Path
-
 import cv2
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def detect_and_save_faces(input_video_path: str, output_video_path: str = "out.mp4") -> None:
     if not Path(input_video_path).exists():
         print(f"Error: Input video file not found at '{input_video_path}'")
@@ -51,8 +45,6 @@ def detect_and_save_faces(input_video_path: str, output_video_path: str = "out.m
     print(f"Finished processing. Total frames processed: {frame_count}")
     cap.release()
     out.release()
-
-
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python detect_faces.py <input_video_path> [output_video_path]")

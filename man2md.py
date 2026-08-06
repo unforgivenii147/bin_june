@@ -1,23 +1,16 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import os
 import re
 import sys
 from pathlib import Path
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def read_man_file(filename: str) -> str:
     try:
         with Path(filename).open(encoding="utf-8", errors="ignore") as f:
             return f.read()
     except FileNotFoundError:
         sys.exit(f"Error: file {filename} not found")
-
-
 def man_to_markdown(content: str) -> str:
     lines = content.splitlines()
     md_lines = []
@@ -113,8 +106,6 @@ def man_to_markdown(content: str) -> str:
     if in_code_block:
         md_lines.append("```")
     return "\n".join(md_lines)
-
-
 def main() -> None:
     if len(sys.argv) != 2:
         print("Usage: python man2md.py <manfile>")
@@ -126,7 +117,5 @@ def main() -> None:
     outname = base + ".md"
     Path(outname).write_text(markdown, encoding="utf-8")
     print(f"Converted {filename} → {outname}")
-
-
 if __name__ == "__main__":
     main()

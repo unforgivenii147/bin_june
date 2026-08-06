@@ -1,12 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 """
 zstder_optimized_by_gemini.py — Recursive Zstandard compression/decompression tool.
 Optimized for Python 3.12 with modern syntax, type hints, and performance improvements.
 """
-
 from __future__ import annotations
-
 import argparse
 import logging
 import multiprocessing
@@ -17,9 +14,7 @@ import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Final
-
 import zstandard as zstd
-
 SKIP_DIRS: Final[frozenset[str]] = frozenset(
     {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
 )
@@ -31,34 +26,24 @@ DEFAULT_THREADS: Final[int] = 4
 WORKERS: Final[int] = max(1, multiprocessing.cpu_count())
 logging.basicConfig(level=logging.INFO, format="%(message)s", handlers=[logging.StreamHandler(sys.stdout)])
 logger = logging.getLogger(__name__)
-
-
 def choose_level(path: Path) -> int:
     try:
         return LEVEL_LARGE if path.stat().st_size > LARGE_FILE_THRESHOLD else LEVEL_DEFAULT
     except OSError:
         return LEVEL_DEFAULT
-
-
 def human_size(n: float) -> str:
     for unit in ("B", "KB", "MB", "GB", "TB"):
         if n < 1024:
             return f"{n:.1f} {unit}"
         n /= 1024
     return f"{n:.1f} PB"
-
-
 def ratio_str(before: int, after: int) -> str:
     if before == 0:
         return "0%"
     return f"{after / before * 100:.1f}%"
-
-
 def status_line(ok: bool, name: str, elapsed_ms: float, before: int, after: int) -> str:
     icon = "✔" if ok else "✘"
     return f"[{icon}] {name} ({elapsed_ms:.0f}ms) {ratio_str(before, after)}"
-
-
 def compress_file(
     src: Path, dry_run: bool, verbose: bool, level: int | None = None, threads: int = DEFAULT_THREADS
 ) -> dict:
@@ -93,8 +78,6 @@ def compress_file(
         result["line"] = status_line(False, src.name, elapsed_ms, 0, 0)
         result["msg"] = f"  ERROR: {exc}"
     return result
-
-
 def decompress_file(src: Path, dry_run: bool, verbose: bool) -> dict:
     result = {"src": src, "ok": False, "line": "", "msg": ""}
     if src.suffix != ZSTD_EXT:
@@ -127,8 +110,6 @@ def decompress_file(src: Path, dry_run: bool, verbose: bool) -> dict:
         result["line"] = status_line(False, src.name, elapsed_ms, 0, 0)
         result["msg"] = f"  ERROR: {exc}"
     return result
-
-
 def tar_subdir(subdir: Path, dry_run: bool, verbose: bool) -> Path | None:
     tar_path = subdir.parent / f"{subdir.name}.tar"
     if dry_run:
@@ -144,8 +125,6 @@ def tar_subdir(subdir: Path, dry_run: bool, verbose: bool) -> Path | None:
     except Exception as exc:
         logger.error(f"  ERROR tarring {subdir}: {exc}")
         return None
-
-
 def remove_subdir(subdir: Path, dry_run: bool, verbose: bool) -> None:
     if dry_run:
         if verbose:
@@ -157,8 +136,6 @@ def remove_subdir(subdir: Path, dry_run: bool, verbose: bool) -> None:
             logger.info(f"  removed original dir: {subdir.name}/")
     except Exception as exc:
         logger.warning(f"  WARNING — could not remove {subdir}: {exc}")
-
-
 def run_parallel(tasks: list[Path], worker_fn, extra_kwargs: dict) -> tuple[int, int]:
     ok = err = 0
     with ProcessPoolExecutor(max_workers=WORKERS) as pool:
@@ -176,8 +153,6 @@ def run_parallel(tasks: list[Path], worker_fn, extra_kwargs: dict) -> tuple[int,
             else:
                 err += 1
     return (ok, err)
-
-
 def do_compress(root: Path, tar_subdirs: bool, dry_run: bool, verbose: bool, threads: int) -> None:
     start = time.perf_counter()
     if tar_subdirs:
@@ -224,8 +199,6 @@ def do_compress(root: Path, tar_subdirs: bool, dry_run: bool, verbose: bool, thr
         return
     elapsed = time.perf_counter() - start
     logger.info(f"\nDone [{elapsed:.2f}s]")
-
-
 def do_decompress(root: Path, dry_run: bool, verbose: bool) -> None:
     start = time.perf_counter()
     files = [p for p in root.rglob(f"*{ZSTD_EXT}") if p.is_file()]
@@ -237,8 +210,6 @@ def do_decompress(root: Path, dry_run: bool, verbose: bool) -> None:
     ok, err = run_parallel(files, decompress_file, {"dry_run": dry_run, "verbose": verbose})
     elapsed = time.perf_counter() - start
     logger.info(f"\nDone — {ok} decompressed, {err} error(s) [{elapsed:.2f}s]")
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(
         prog="zstder",
@@ -276,7 +247,5 @@ def main() -> None:
         if args.tar_subdirs_first:
             logger.warning("Note: --tar-subdirs-first ignored during decompression.")
         do_decompress(root, args.dry_run, args.verbose)
-
-
 if __name__ == "__main__":
     main()

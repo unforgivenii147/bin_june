@@ -1,3 +1,4 @@
+#!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 import sys
 from collections import deque
@@ -5,19 +6,8 @@ from collections.abc import Callable
 from pathlib import Path
 import html2text
 from readability import Document
-from dh import get_files
-
-
-def mpf3(process_function: Callable, files: list[Path], **kwargs):
-    from joblib import Parallel, delayed
-
-    file_strings = [str(f) for f in files]
-    return Parallel(n_jobs=-1)((delayed(process_function)(file_str, **kwargs) for file_str in file_strings))
-
-
+from dh import get_files, mpf3
 remove_orig = True
-
-
 def process_file(path: str | Path) -> tuple[Path, bool]:
     path = Path(path)
     md_file = path.with_suffix(".md")
@@ -44,8 +34,6 @@ def process_file(path: str | Path) -> tuple[Path, bool]:
     except Exception as e:
         print(f"✗ Error: {e}")
         return (path, False)
-
-
 if __name__ == "__main__":
     cwd = Path.cwd()
     args = sys.argv[1:]

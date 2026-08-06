@@ -1,21 +1,15 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import argparse
 import os
 import sys
 from pathlib import Path
-
 import requests
 from dotenv import load_dotenv
 from github import Github
 from tqdm import tqdm
-
 env_path = Path.home() / ".env"
 load_dotenv(env_path)
-
-
 def download_repo_zip(username, repo, branch="main", output_name=None):
     g = Github(os.getenv("GITHUB_TOKEN"))
     repo_obj = g.get_repo(f"{username}/{repo}")
@@ -38,8 +32,6 @@ def download_repo_zip(username, repo, branch="main", output_name=None):
                     pbar.update(len(chunk))
     print(f"✅ Downloaded: {output_name}")
     return output_name
-
-
 def main():
     parser = argparse.ArgumentParser(description="Download a GitHub repository as ZIP")
     parser.add_argument("repo", help='Repository in format "username/repo"')
@@ -52,7 +44,5 @@ def main():
         print("❌ Error: Repository must be in format 'username/repo'")
         sys.exit(1)
     download_repo_zip(username, repo, args.branch, args.output)
-
-
 if __name__ == "__main__":
     main()

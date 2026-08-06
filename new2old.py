@@ -1,30 +1,21 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 """
 Convert pyproject.toml → setup.py, preserving setup.cfg & MANIFEST.in.
 Handles C-extensions: setuptools, scikit-build-core, meson-python.
 Usage:
     python convert_pyproject_to_setup.py [--force] [pyproject.toml path]
 """
-
 from __future__ import annotations
-
 import configparser
 import sys
 import tomllib
 from pathlib import Path
 from typing import Any
-
-
 def load_toml(path: Path) -> dict:
     with open(path, "rb") as f:
         return tomllib.load(f)
-
-
 def safe_read_file(path: Path) -> str | None:
     return path.read_text(encoding="utf-8") if path.exists() else None
-
-
 def extract_metadata(toml_data: dict) -> dict[str, Any]:
     project = toml_data.get("project", {})
     build_system = toml_data.get("build-system", {})
@@ -52,8 +43,6 @@ def extract_metadata(toml_data: dict) -> dict[str, Any]:
     if isinstance(metadata["license"], dict):
         metadata["license"] = metadata["license"].get("text", "")
     return metadata
-
-
 def parse_setup_cfg(setup_cfg_text: str) -> dict[str, list[str]]:
     if not setup_cfg_text:
         return {}
@@ -78,8 +67,6 @@ def parse_setup_cfg(setup_cfg_text: str) -> dict[str, list[str]]:
     if "options" in cp:
         result["options"] = dict(cp.items("options"))
     return result
-
-
 def has_c_extension(tool: dict[str, Any]) -> tuple[bool, str]:
     setuptools_tool = tool.get("setuptools", {})
     if setuptools_tool.get("ext-modules"):
@@ -93,8 +80,6 @@ def has_c_extension(tool: dict[str, Any]) -> tuple[bool, str]:
     if "cmake" in str(tool).lower():
         return (True, "cmake")
     return (False, "")
-
-
 def generate_setup_py(
     metadata: dict[str, Any],
     setup_cfg_text: str | None,
@@ -138,10 +123,8 @@ def generate_setup_py(
     class_str = ",\n        ".join(f'"{c}"' for c in classifiers) if classifiers else ""
     classifiers_str = f"[\n        {class_str}\n    ]" if class_str else "[]"
     keywords_str = ", ".join(f'"{k}"' for k in keywords) if keywords else "[]"
-
     def format_authors(auths) -> str:
         return ", ".join(f"'{a.get('name', '')} <{a.get('email', '')}>'" for a in auths if a.get("name"))
-
     author_str = format_authors(authors)
     maintainer_str = format_authors(maintainers)
     long_desc = ""
@@ -212,11 +195,8 @@ def generate_setup_py(
             cext_build = "    # meson-python backend handles C/C++ build\n"
     setup_py = f'''#!/usr/bin/env python3\n"""\nAuto-generated setup.py from pyproject.toml.\nPreserves setup.cfg and MANIFEST.in.\nC-extension support: {cext_method or "none"}\n"""\nimport os\n{cext_imports}from setuptools import setup, find_packages\nlong_description = """{long_desc}"""\nlong_description_content_type = "{long_desc_type}"\nif os.path.exists("MANIFEST.in"):\n    with open("MANIFEST.in", "r") as f:\n        manifest_content = f.read()\nelse:\n    manifest_content = ""\nsetup(\n    name="{name}",\n    version="{version}",\n    description="{desc}",\n    long_description=long_description,\n    long_description_content_type=long_description_content_type,\n    author="{author_str}",\n    author_email="",\n    maintainer="{maintainer_str}",\n    maintainer_email="",\n    license="{license_}",\n    url="{(list(urls.values())[0] if urls else "")}",\n    keywords={keywords_str},\n    packages={packages_section},\n    include_package_data={include_package_data},\n    python_requires="{requires_python}",\n    install_requires={install_requires_str},\n    extras_require={extras_str},\n    entry_points={entry_str},\n    scripts={scripts_str},\n    classifiers={classifiers_str},\n{package_data_str}{data_files_str}{cext_build}\n)\n'''
     return setup_py
-
-
 def main() -> None:
     import argparse
-
     parser = argparse.ArgumentParser(
         description="Convert pyproject.toml → setup.py (preserving setup.cfg & MANIFEST.in)"
     )
@@ -254,7 +234,5 @@ def main() -> None:
         print("✅ Preserved: setup.cfg")
     if manifest_text:
         print("✅ Preserved: MANIFEST.in")
-
-
 if __name__ == "__main__":
     main()

@@ -1,3 +1,4 @@
+#!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 import os
 import re
@@ -5,21 +6,7 @@ import sys
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
-from dh import get_files
-
-
-def fsz(sz: float) -> str:
-    sz = abs(int(sz))
-    units = ("B", "KB", "MB", "GB", "TB")
-    if sz == 0:
-        return "0 B"
-    i = min((int(sz).bit_length() - 1) // 10, len(units) - 1)
-    value = sz / 1024**i
-    if i == 0:
-        return f"{int(value)} {units[i]}"
-    return f"{value:.1f} {units[i]}"
-
-
+from dh import fsz, get_files, mpf3
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -29,15 +16,6 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
-
-
-def mpf3(process_function: Callable, files: list[Path], **kwargs):
-    from joblib import Parallel, delayed
-
-    file_strings = [str(f) for f in files]
-    return Parallel(n_jobs=-1)((delayed(process_function)(file_str, **kwargs) for file_str in file_strings))
-
-
 ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
 HIGHLIGHTS = {
     "on_black": 40,
@@ -78,8 +56,6 @@ COLORS = {
     "white": 97,
 }
 RESET = "\x1b[0m"
-
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -99,8 +75,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
-
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
     if not can_colorize(no_color=no_color, force_color=force_color):
@@ -123,15 +97,9 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
             result = fmt_str % (ATTRIBUTES[attr], result)
     result += RESET
     return result
-
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
-
-
 MAX_QUEUE = 8
-
-
 def process_file(path) -> None:
     path = Path(path)
     before = gsz(path)
@@ -145,8 +113,6 @@ def process_file(path) -> None:
     print(f"[OK] {path.name} ", end="")
     diffsize = before - after
     cprint(f"{fsz(diffsize)}", "cyan")
-
-
 def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
@@ -155,7 +121,5 @@ def main() -> None:
     mpf3(process_file, files)
     diff_size = before - gsz(cwd)
     print(f"space saved : {fsz(diff_size)}")
-
-
 if __name__ == "__main__":
     main()

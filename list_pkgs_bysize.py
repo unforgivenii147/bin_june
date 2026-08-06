@@ -1,11 +1,7 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import re
 import subprocess
-
-
 def get_packages_with_size():
     try:
         result = subprocess.run(["apt", "list", "--installed"], capture_output=True, text=True)
@@ -31,16 +27,12 @@ def get_packages_with_size():
     except Exception as e:
         print(f"Error: {e}")
         return []
-
-
 def format_size(bytes_size):
     for unit in ["B", "KB", "MB", "GB"]:
         if bytes_size < 1024.0:
             return f"{bytes_size:.1f} {unit}"
         bytes_size /= 1024.0
     return f"{bytes_size:.1f} TB"
-
-
 def main():
     print("Fetching package sizes...")
     packages = get_packages_with_size()
@@ -56,7 +48,5 @@ def main():
         total += size
     print("=" * 42)
     print(f"{'TOTAL':<30} {format_size(total):>20}")
-
-
 if __name__ == "__main__":
     main()

@@ -1,12 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 """
 Compress or decompress folders using zstandard compression.
 Optimized for Python 3.12 with streaming and parallel processing.
 """
-
 from __future__ import annotations
-
 import argparse
 import multiprocessing as mp
 import shutil
@@ -16,9 +13,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Final
-
 import zstandard as zstd
-
 DEFAULT_SKIP_DIRS: Final[set[str]] = {
     "zstandard",
     "0",
@@ -41,12 +36,9 @@ DEFAULT_SKIP_DIRS: Final[set[str]] = {
 try:
     from rich.console import Console
     from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
-
     RICH_AVAILABLE: Final[bool] = True
 except ImportError:
     RICH_AVAILABLE: Final[bool] = False
-
-
 @dataclass(slots=True)
 class FolderResult:
     name: str
@@ -55,12 +47,9 @@ class FolderResult:
     success: bool = False
     error: str | None = None
     duration: float = 0.0
-
     @property
     def saved_bytes(self) -> int:
         return max(0, self.original_size - self.compressed_size)
-
-
 def format_size(size_bytes: int) -> str:
     val = float(size_bytes)
     for unit in ["B", "KB", "MB", "GB", "TB"]:
@@ -68,12 +57,8 @@ def format_size(size_bytes: int) -> str:
             return f"{val:.2f} {unit}"
         val /= 1024.0
     return f"{val:.2f} PB"
-
-
 def get_folder_size(path: Path) -> int:
     return sum(f.stat().st_size for f in path.rglob("*") if f.is_file())
-
-
 def compress_folder_task(folder_path: Path, output_dir: Path, level: int = 3, threads: int = 0) -> FolderResult:
     start_time = time.perf_counter()
     folder_name = folder_path.name
@@ -102,8 +87,6 @@ def compress_folder_task(folder_path: Path, output_dir: Path, level: int = 3, th
         if zst_path.exists():
             zst_path.unlink()
         return FolderResult(name=folder_name, success=False, error=str(e))
-
-
 def decompress_folder_task(zst_path: Path, output_dir: Path) -> FolderResult:
     start_time = time.perf_counter()
     folder_name = zst_path.name.removesuffix(".tar.zst")
@@ -130,8 +113,6 @@ def decompress_folder_task(zst_path: Path, output_dir: Path) -> FolderResult:
         if temp_tar.exists():
             temp_tar.unlink()
         return FolderResult(name=folder_name, success=False, error=str(e))
-
-
 def main():
     parser = argparse.ArgumentParser(description="Optimized Folder Zstd Archiver")
     parser.add_argument("-c", "--compress", action="store_true", help="Compress folders")
@@ -207,7 +188,5 @@ def main():
                 f"Space saved: {format_size(total_orig - total_proc if 'total_proc' in locals() else total_orig - total_comp)}"
             )
     print(f"{'=' * 40}")
-
-
 if __name__ == "__main__":
     main()

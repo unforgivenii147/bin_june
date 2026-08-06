@@ -1,13 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import os
 from pathlib import Path
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def keep_one_image_per_folder(base_dir):
     base_path = Path(base_dir)
     image_extensions = {
@@ -56,8 +51,6 @@ def keep_one_image_per_folder(base_dir):
                 print(f"  Error deleting {file.name}: {e}")
         print(f"  Done! {len(os.listdir(folder))} files remaining in folder")
     print(f"\n✅ Completed! Processed {len(group_folders)} folders.")
-
-
 if __name__ == "__main__":
     base_directory = Path.cwd()
     if not os.path.exists(base_directory):

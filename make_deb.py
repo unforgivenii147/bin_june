@@ -1,17 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 """Create .deb files from installed Termux packages."""
-
 from __future__ import annotations
-
 import logging
 import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 DEB_DIR = Path.home() / "debs"
 EXCLUDED_PKGS = {
     "llvm",
@@ -36,8 +31,6 @@ logging.basicConfig(
     handlers=[logging.FileHandler(LOG_FILE), logging.StreamHandler()],
 )
 logger = logging.getLogger(__name__)
-
-
 def should_exclude(pkg_name: str) -> bool:
     pkg_lower = pkg_name.lower()
     if pkg_lower in EXCLUDED_PKGS:
@@ -45,8 +38,6 @@ def should_exclude(pkg_name: str) -> bool:
     if any(exclude in pkg_lower for exclude in ["llvm", "clang"]):
         return True
     return bool(any(exclude in pkg_lower for exclude in ["rust", "cargo"]))
-
-
 def get_installed_packages() -> list[str]:
     try:
         result = subprocess.run(["apt", "list", "--installed"], capture_output=True, text=True, check=True)
@@ -60,8 +51,6 @@ def get_installed_packages() -> list[str]:
     except subprocess.CalledProcessError as e:
         logger.error(f"Failed to get installed packages: {e}")
         return []
-
-
 def create_deb_for_package(pkg_name: str) -> bool:
     try:
         DEB_DIR.mkdir(parents=True, exist_ok=True)
@@ -83,8 +72,6 @@ def create_deb_for_package(pkg_name: str) -> bool:
     except Exception as e:
         logger.error(f"✗ Error creating {pkg_name}.deb: {e}")
         return False
-
-
 def process_packages(packages: list[str], max_workers: int = 4) -> tuple[int, int]:
     successful = 0
     failed = 0
@@ -106,8 +93,6 @@ def process_packages(packages: list[str], max_workers: int = 4) -> tuple[int, in
                 logger.error(f"✗ Unexpected error for {pkg}: {e}")
                 failed += 1
     return successful, failed
-
-
 def main():
     if len(sys.argv) > 1:
         packages = sys.argv[1:]
@@ -128,7 +113,5 @@ def main():
     if failed > 0:
         logger.warning(f"Some packages failed. Check {LOG_FILE} for details.")
     sys.exit(0 if failed == 0 else 1)
-
-
 if __name__ == "__main__":
     main()

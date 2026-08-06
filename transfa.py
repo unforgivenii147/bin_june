@@ -1,24 +1,17 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 """
 Translates Persian (Farsi) text in a file to English.
 """
-
 from __future__ import annotations
-
 import logging
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Final
-
 from deep_translator import GoogleTranslator
-
 MAX_WORKERS: Final[int] = 4
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
-
-
 def translate_line(line: str) -> tuple[str, str] | None:
     if not (stripped := line.strip()):
         return None
@@ -32,8 +25,6 @@ def translate_line(line: str) -> tuple[str, str] | None:
     except Exception as e:
         logger.debug("Translation error for '%s': %s", stripped[:20], e)
         return None
-
-
 def translate_file(file_input: str) -> None:
     path = Path(file_input)
     if not path.exists():
@@ -61,8 +52,6 @@ def translate_file(file_input: str) -> None:
         logger.info("✓ Translated output saved to %s", out_path)
     except Exception as e:
         logger.error("Error writing output file: %s", e)
-
-
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python transfa.py <file_path>")

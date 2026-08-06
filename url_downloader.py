@@ -3,29 +3,23 @@ import os
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
 # ========================== HTTP LIBRARY SETUP ==========================
 try:
     import pycurl
-
     HAS_PYCURL = True
     print("Using pycurl backend")
 except ImportError:
     HAS_PYCURL = False
     try:
         import requests
-
         print("pycurl not available → falling back to requests")
     except ImportError:
         print("Error: Neither pycurl nor requests is installed!")
         print("Run: pip install pycurl requests")
         sys.exit(1)
-
-
 def download_file(url: str, filepath: Path, timeout: int = 120) -> bool:
     """Download a single file. Returns True if successful."""
     filepath.parent.mkdir(parents=True, exist_ok=True)
-
     if HAS_PYCURL:
         try:
             with open(filepath, "wb") as f:
@@ -42,7 +36,6 @@ def download_file(url: str, filepath: Path, timeout: int = 120) -> bool:
             return True
         except Exception as e:
             print(f"⚠️  pycurl failed for {filepath.name}: {e}. Trying requests...")
-
     # Fallback to requests
     try:
         with requests.Session() as session:
@@ -50,33 +43,24 @@ def download_file(url: str, filepath: Path, timeout: int = 120) -> bool:
                 url, headers={"User-Agent": "Mozilla/5.0"}, timeout=timeout, stream=True, allow_redirects=True
             )
             response.raise_for_status()
-
             with open(filepath, "wb") as f:
                 for chunk in response.iter_content(chunk_size=8192):
                     f.write(chunk)
-
         print(f"✅ Downloaded (requests): {filepath.name}")
         return True
-
     except Exception as e:
         print(f"❌ Failed {filepath.name}: {e}")
         return False
-
-
 def main():
     urls_file = Path("urls.txt")
-
     if not urls_file.exists():
         print(f"Error: {urls_file} not found!")
         sys.exit(1)
-
     # Read original lines to preserve comments and formatting
     original_lines = urls_file.read_text(encoding="utf-8").splitlines()
-
     # Parse valid URLs
     download_tasks = []
     url_to_line = {}  # url -> original line (for removal)
-
     for line in original_lines:
         stripped = line.strip()
         if stripped and not stripped.startswith("#"):
@@ -84,23 +68,17 @@ def main():
             url = stripped.split()[0]
             filename = url.split("/")[-1].split("?")[0] or f"download_{len(download_tasks) + 1}"
             filepath = Path("downloads") / filename
-
             download_tasks.append((url, filepath))
             url_to_line[url] = line  # keep original line for later
-
     if not download_tasks:
         print("No valid URLs found in urls.txt")
         sys.exit(0)
-
     print(f"Found {len(download_tasks)} files to download.\n")
-
     # ====================== PARALLEL DOWNLOAD ======================
     successful_urls = set()
     max_workers = min(12, len(download_tasks))  # You can adjust this
-
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         future_to_url = {executor.submit(download_file, url, path): url for url, path in download_tasks}
-
         for future in as_completed(future_to_url):
             url = future_to_url[future]
             try:
@@ -108,11 +86,9 @@ def main():
                     successful_urls.add(url)
             except Exception as exc:
                 print(f"Unexpected error with {url}: {exc}")
-
     # ====================== UPDATE urls.txt ======================
     remaining_lines = []
     removed_count = 0
-
     for line in original_lines:
         stripped = line.strip()
         if stripped and not stripped.startswith("#"):
@@ -121,16 +97,12 @@ def main():
                 removed_count += 1
                 continue  # skip successfully downloaded URLs
         remaining_lines.append(line)
-
     # Write back the updated file
     urls_file.write_text("\n".join(remaining_lines) + "\n", encoding="utf-8")
-
     print("\n" + "=" * 50)
     print(f"Download session completed!")
     print(f"✅ Successfully downloaded : {removed_count} files")
     print(f"❌ Remaining in urls.txt   : {len(download_tasks) - removed_count} files")
     print("=" * 50)
-
-
 if __name__ == "__main__":
     main()

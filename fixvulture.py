@@ -3,39 +3,29 @@
 Fix unused code based on Vulture output.
 Reads Vulture findings from stdin or a file and fixes the issues in-place.
 """
-
 from __future__ import annotations
-
 import os
 import re
 import sys
 from collections import defaultdict
 from typing import dict, list, set, tuple
-
 VULTURE_LINE_PATTERN = re.compile(
     r"^(.+?):(\d+):\s+(unused\s+(function|variable|class|attribute|method|import)\s+'([^']+)'|unreachable code after '(\w+)'|redundant if-condition|unreachable 'else' block|unused import '([^']+)'\s+\(\d+% confidence\))$"
 )
-
-
 def parse_vulture_output(lines: list[str]) -> dict[str, list[tuple[int, str, str]]]:
     results = defaultdict(list)
-
     for line in lines:
         line = line.strip()
         if not line:
             continue
-
         match = VULTURE_LINE_PATTERN.match(line)
         if not match:
             continue
-
         filepath = match.group(1)
         line_num = int(match.group(2))
         full_message = match.group(3)
-
         issue_type = None
         name = None
-
         if match.group(4):
             issue_type = "unused_" + match.group(4)
             name = match.group(5)
@@ -54,74 +44,55 @@ def parse_vulture_output(lines: list[str]) -> dict[str, list[tuple[int, str, str
         else:
             issue_type = "other"
             name = ""
-
         results[filepath].append((line_num, issue_type, name))
-
     return dict(results)
-
-
 def fix_file(filepath: str, issues: list[tuple[int, str, str]]) -> bool:
     """Fix issues in a single file."""
     if not os.path.exists(filepath):
         print(f"Warning: File not found: {filepath}")
         return False
-
     try:
         with open(filepath, encoding="utf-8") as f:
             lines = f.readlines()
     except Exception as e:
         print(f"Error reading {filepath}: {e}")
         return False
-
     original_lines = lines.copy()
     modified = False
-
     issues_sorted = sorted(issues, key=lambda x: x[0], reverse=True)
-
     lines_to_remove: set[int] = set()
-
     for line_num, issue_type, name in issues_sorted:
         idx = line_num - 1
-
         if idx < 0 or idx >= len(lines):
             continue
-
         if idx in lines_to_remove:
             continue
-
         line = lines[idx]
-
         try:
             if issue_type == "unused_variable":
                 lines[idx] = _comment_out_variable(line, name)
                 modified = True
-
             elif issue_type == "unused_function":
                 func_lines = _get_function_lines(lines, idx)
                 for i in range(func_lines[0], func_lines[1] + 1):
                     lines_to_remove.add(i)
                 modified = True
-
             elif issue_type == "unused_method":
                 func_lines = _get_function_lines(lines, idx)
                 for i in range(func_lines[0], func_lines[1] + 1):
                     lines_to_remove.add(i)
                 modified = True
-
             elif issue_type == "unused_class":
                 class_lines = _get_class_lines(lines, idx)
                 for i in range(class_lines[0], class_lines[1] + 1):
                     lines_to_remove.add(i)
                 modified = True
-
             elif issue_type == "unused_attribute":
                 lines[idx] = _comment_out_line(line)
                 modified = True
-
             elif issue_type == "unused_import":
                 lines[idx] = _comment_out_line(line)
                 modified = True
-
             elif issue_type in ("unreachable_after", "unreachable_else"):
                 _get_indent(line)
                 end_idx = _find_block_end(lines, idx)
@@ -129,21 +100,16 @@ def fix_file(filepath: str, issues: list[tuple[int, str, str]]) -> bool:
                     if i not in lines_to_remove:
                         lines_to_remove.add(i)
                 modified = True
-
             elif issue_type == "redundant_if":
                 lines[idx] = _comment_out_line(line)
                 modified = True
-
         except Exception as e:
             print(f"Error processing {filepath}:{line_num} - {e}")
             continue
-
     if lines_to_remove:
         lines = [line for i, line in enumerate(lines) if i not in lines_to_remove]
-
         lines = _cleanup_blank_lines(lines)
         modified = True
-
     if modified:
         try:
             with open(filepath, "w", encoding="utf-8") as f:
@@ -152,34 +118,23 @@ def fix_file(filepath: str, issues: list[tuple[int, str, str]]) -> bool:
             return True
         except Exception as e:
             print(f"Error writing {filepath}: {e}")
-
             with open(filepath, "w", encoding="utf-8") as f:
                 f.writelines(original_lines)
             return False
-
     return False
-
-
 def _comment_out_variable(line: str, name: str) -> str:
     """Comment out a variable assignment."""
     indent = _get_indent(line)
     return f"{indent}# REMOVED: {line.strip()}\n"
-
-
 def _comment_out_line(line: str) -> str:
     """Comment out a line."""
     indent = _get_indent(line)
     return f"{indent}# REMOVED: {line.strip()}\n"
-
-
 def _get_indent(line: str) -> str:
     """Get the indentation of a line."""
     return line[: len(line) - len(line.lstrip())]
-
-
 def _get_function_lines(lines: list[str], start_idx: int) -> tuple[int, int]:
     """Get the start and end line indices of a function/method definition."""
-
     func_start = start_idx
     while func_start > 0:
         prev_line = lines[func_start - 1].strip()
@@ -187,10 +142,8 @@ def _get_function_lines(lines: list[str], start_idx: int) -> tuple[int, int]:
             func_start -= 1
         else:
             break
-
     start_line = lines[start_idx]
     indent = len(start_line) - len(start_line.lstrip())
-
     end_idx = start_idx + 1
     while end_idx < len(lines):
         line = lines[end_idx]
@@ -199,13 +152,9 @@ def _get_function_lines(lines: list[str], start_idx: int) -> tuple[int, int]:
             if current_indent <= indent:
                 break
         end_idx += 1
-
     return func_start, end_idx - 1
-
-
 def _get_class_lines(lines: list[str], start_idx: int) -> tuple[int, int]:
     """Get the start and end line indices of a class definition."""
-
     class_start = start_idx
     while class_start > 0:
         prev_line = lines[class_start - 1].strip()
@@ -213,10 +162,8 @@ def _get_class_lines(lines: list[str], start_idx: int) -> tuple[int, int]:
             class_start -= 1
         else:
             break
-
     start_line = lines[start_idx]
     indent = len(start_line) - len(start_line.lstrip())
-
     end_idx = start_idx + 1
     while end_idx < len(lines):
         line = lines[end_idx]
@@ -225,10 +172,7 @@ def _get_class_lines(lines: list[str], start_idx: int) -> tuple[int, int]:
             if current_indent <= indent:
                 break
         end_idx += 1
-
     return class_start, end_idx - 1
-
-
 def _find_block_end(lines: list[str], start_idx: int) -> int:
     """Find the end of a code block."""
     indent = _get_indent(lines[start_idx])
@@ -241,8 +185,6 @@ def _find_block_end(lines: list[str], start_idx: int) -> int:
                 break
         end_idx += 1
     return end_idx
-
-
 def _cleanup_blank_lines(lines: list[str]) -> list[str]:
     """Remove excessive blank lines (keep max 2 consecutive)."""
     cleaned = []
@@ -256,8 +198,6 @@ def _cleanup_blank_lines(lines: list[str]) -> list[str]:
             blank_count = 0
             cleaned.append(line)
     return cleaned
-
-
 def main():
     """Main entry point."""
     if len(sys.argv) > 1:
@@ -271,35 +211,25 @@ def main():
     else:
         print("Reading Vulture output from stdin...")
         vulture_output = sys.stdin.readlines()
-
     if not vulture_output:
         print("No input provided.")
         sys.exit(0)
-
     issues_by_file = parse_vulture_output(vulture_output)
-
     if not issues_by_file:
         print("No issues found to fix.")
         sys.exit(0)
-
     print(f"Found issues in {len(issues_by_file)} files.")
-
     print("\nThe following files will be modified:")
     for filepath in issues_by_file:
         print(f"  {filepath}: {len(issues_by_file[filepath])} issues")
-
     response = input("\nProceed with fixes? (y/N): ").strip().lower()
     if response not in ("y", "yes"):
         print("Aborted.")
         sys.exit(0)
-
     fixed_count = 0
     for filepath, issues in issues_by_file.items():
         if fix_file(filepath, issues):
             fixed_count += 1
-
     print(f"\nDone! Fixed {fixed_count} files.")
-
-
 if __name__ == "__main__":
     main()

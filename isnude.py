@@ -1,3 +1,4 @@
+#!/data/data/com.termux/files/usr/bin/python
 from __future__ import annotations
 import os
 import sys
@@ -6,16 +7,7 @@ from collections.abc import Callable
 from pathlib import Path
 import cv2
 import nude
-from dh import get_files
-
-
-def mpf3(process_function: Callable, files: list[Path], **kwargs):
-    from joblib import Parallel, delayed
-
-    file_strings = [str(f) for f in files]
-    return Parallel(n_jobs=-1)((delayed(process_function)(file_str, **kwargs) for file_str in file_strings))
-
-
+from dh import get_files, mpf3
 ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
 HIGHLIGHTS = {
     "on_black": 40,
@@ -56,8 +48,6 @@ COLORS = {
     "white": 97,
 }
 RESET = "\x1b[0m"
-
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -77,8 +67,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
-
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
     if not can_colorize(no_color=no_color, force_color=force_color):
@@ -101,17 +89,11 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
             result = fmt_str % (ATTRIBUTES[attr], result)
     result += RESET
     return result
-
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
-
-
 nude_path = Path("nude")
 nude_path.mkdir(exist_ok=True)
 RESIZE = "-r" in sys.argv
-
-
 def check_nude(path: str) -> bool:
     img = cv2.imread(path)
     h, w = img.shape[:2]
@@ -122,8 +104,6 @@ def check_nude(path: str) -> bool:
     del img, h, w
     print(n)
     return bool(n.result)
-
-
 def process_file(path) -> None:
     path = Path(path)
     if "nude" in path.parts:
@@ -133,8 +113,6 @@ def process_file(path) -> None:
         cprint(f"{path.name} is nude", "cyan")
         new_path = nude_path / path.name
         path.rename(new_path)
-
-
 if __name__ == "__main__":
     cwd = Path.cwd()
     files = get_files(cwd, ext=[".jpg", ".jpeg", ".png", ".webp"])

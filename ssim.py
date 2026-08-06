@@ -1,29 +1,21 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import argparse
 import os
 import shutil
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
 import ssdeep
 import xxhash
 from tqdm import tqdm
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 EXCLUDE_DIRS = {".git", "__pycache__", "node_modules"}
-
-
 class FileSimilarityDetector:
     def __init__(self, cwd: str = ".") -> None:
         self.cwd = Path(cwd)
         self.file_hashes = {}
         self.duplicates = defaultdict(list)
-
     def scan_files(self):
         for root, dirs, files in os.walk(self.cwd):
             dirs[:] = [d for d in dirs if d not in EXCLUDE_DIRS]
@@ -31,7 +23,6 @@ class FileSimilarityDetector:
                 path = Path(root) / name
                 if not path.is_symlink():
                     yield path
-
     @staticmethod
     def hash_file(path: Path):
         try:
@@ -39,7 +30,6 @@ class FileSimilarityDetector:
             return str(path), xxhash.xxh64(data).hexdigest(), ssdeep.hash(data)
         except Exception:
             return str(path), None, None
-
     def process_files(self, files: list[Path]) -> None:
         files = list(files)
         print(f"Processing {len(files)} files...")
@@ -52,7 +42,6 @@ class FileSimilarityDetector:
                 self.file_hashes[path] = {"xxhash": xh, "ssdeep": sh}
                 self.duplicates[xh].append(path)
         self.duplicates = {h: paths for h, paths in self.duplicates.items() if len(paths) > 1}
-
     def find_similarity_groups(self, threshold: int):
         excluded = {p for group in self.duplicates.values() for p in group}
         candidates = [p for p in self.file_hashes if p not in excluded]
@@ -73,7 +62,6 @@ class FileSimilarityDetector:
             if len(group) > 1:
                 groups.append(group)
         return groups
-
     def handle_groups(self, groups, *, move: bool, output_dir: str) -> None:
         out = Path(output_dir)
         out.mkdir(exist_ok=True)
@@ -93,7 +81,6 @@ class FileSimilarityDetector:
                         shutil.copy2(p, grp_dir / Path(p).name)
                     except Exception as e:
                         print(f"Failed to copy {p}: {e}")
-
     def print_duplicates(self) -> None:
         if not self.duplicates:
             return
@@ -104,8 +91,6 @@ class FileSimilarityDetector:
             for p in paths:
                 print(f"  - {p}")
         print("=" * 40)
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="Detect duplicate and similar files")
     parser.add_argument("threshold", type=int, default=70, help="Similarity threshold (0-100)")
@@ -130,7 +115,5 @@ def main() -> None:
     else:
         print("No similar (non-identical) files found.")
     detector.print_duplicates()
-
-
 if __name__ == "__main__":
     main()

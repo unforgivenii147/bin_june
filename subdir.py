@@ -1,18 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import shutil
 import sys
 import tarfile
 import zipfile
 from pathlib import Path
-
 import py7zr
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def safe_mkdir(base: Path) -> Path:
     if not base.exists():
         base.mkdir()
@@ -24,8 +18,6 @@ def safe_mkdir(base: Path) -> Path:
             candidate.mkdir()
             return candidate
         i += 1
-
-
 def unzip_file(archive: Path, target_dir: Path) -> bool:
     archive_lower = archive.name.lower()
     try:
@@ -58,8 +50,6 @@ def unzip_file(archive: Path, target_dir: Path) -> bool:
         FileNotFoundError,
     ):
         return False
-
-
 def main() -> None:
     cwd = Path.cwd()
     for item in cwd.iterdir():
@@ -79,7 +69,5 @@ def main() -> None:
             print(f"[OK] Unzipped and removed: {item.name}")
         else:
             print(f"[SKIP] Not a zip or unzip failed: {item.name}")
-
-
 if __name__ == "__main__":
     sys.exit(main())

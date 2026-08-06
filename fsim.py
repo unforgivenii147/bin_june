@@ -1,17 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import os
 import shutil
 import sys
 from pathlib import Path
-
 import ssdeep
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def get_all_files(root: str = "."):
     file_paths = []
     for dirpath, _, filenames in os.walk(root):
@@ -19,8 +13,6 @@ def get_all_files(root: str = "."):
             full_path = os.path.join(dirpath, f)
             file_paths.append(full_path)
     return file_paths
-
-
 def compute_hashes(files):
     hashes = {}
     for f in files:
@@ -31,8 +23,6 @@ def compute_hashes(files):
         except Exception as e:
             print(f"Skipping {f}: {e}")
     return hashes
-
-
 def group_similar_files(hashes, threshold: int):
     visited = set()
     groups = []
@@ -52,8 +42,6 @@ def group_similar_files(hashes, threshold: int):
         if len(group) > 1:
             groups.append(group)
     return groups
-
-
 def copy_groups(groups, output_dir="output") -> None:
     Path(output_dir).mkdir(exist_ok=True, parents=True)
     for idx, group in enumerate(groups, start=1):
@@ -64,8 +52,6 @@ def copy_groups(groups, output_dir="output") -> None:
                 shutil.move(f, group_dir)
             except Exception as e:
                 print(f"Failed to copy {f}: {e}")
-
-
 def main() -> None:
     if len(sys.argv) != 2:
         print(f"Usage: {sys.argv[0]} <threshold>")
@@ -86,7 +72,5 @@ def main() -> None:
         print(f"Found {len(groups)} groups of similar files.")
         copy_groups(groups)
         print("Copied groups to 'output' directory.")
-
-
 if __name__ == "__main__":
     main()

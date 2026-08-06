@@ -1,7 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import os
 import re
 import sys
@@ -10,11 +8,8 @@ from dataclasses import dataclass
 from enum import Enum
 from os import scandir as os_scandir
 from pathlib import Path
-
 CHUNK_SIZE = 1024 * 1024
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 ATTRIBUTES = {
     "bold": 1,
     "dark": 2,
@@ -25,7 +20,6 @@ ATTRIBUTES = {
     "concealed": 8,
     "strike": 9,
 }
-
 HIGHLIGHTS = {
     "on_black": 40,
     "on_grey": 40,
@@ -45,7 +39,6 @@ HIGHLIGHTS = {
     "on_light_cyan": 106,
     "on_white": 107,
 }
-
 COLORS = {
     "black": 30,
     "grey": 30,
@@ -65,10 +58,7 @@ COLORS = {
     "light_cyan": 96,
     "white": 97,
 }
-
 RESET = "\x1b[0m"
-
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -88,8 +78,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
-
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
     if not can_colorize(no_color=no_color, force_color=force_color):
@@ -112,15 +100,10 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
             result = fmt_str % (ATTRIBUTES[attr], result)
     result += RESET
     return result
-
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
-
-
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
-
     path = Path(path)
     if is_binary(path):
         return False
@@ -140,8 +123,6 @@ def is_python_file(path: str | Path) -> bool:
         except:
             return False
     return False
-
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -156,8 +137,6 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
-
 def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
     if path.is_file():
@@ -166,13 +145,10 @@ def get_pyfiles(path: str | Path) -> list[Path]:
         if not path.suffix and not path.name.startswith(".") and is_python_file(path):
             return [path]
         return []
-
     if not path.is_dir():
         return []
-
     pyfiles = []
     stack = [path]
-
     while stack:
         current = stack.pop()
         try:
@@ -191,23 +167,16 @@ def get_pyfiles(path: str | Path) -> list[Path]:
                             pyfiles.append(p)
         except (PermissionError, OSError):
             continue
-
     return sorted(pyfiles)
-
-
 """
 Refactor Python files from os.path to pathlib using regex transformations.
 Warning: This approach is simpler but less safe than AST-based refactoring.
 """
-
-
 class TransformationType(Enum):
     SIMPLE_REPLACE = "simple"
     FUNCTION_CALL = "function"
     JOIN_OPERATOR = "join"
     CONTEXT_DEPENDENT = "context"
-
-
 @dataclass
 class Transformation:
     pattern: str
@@ -215,14 +184,11 @@ class Transformation:
     type: TransformationType
     requires_import: bool = True
     description: str = ""
-
-
 class PathlibRefactorer:
     def __init__(self) -> None:
         self.transformations: list[Transformation] = []
         self._setup_transformations()
         self.used_transformations: set[str] = set()
-
     def _setup_transformations(self) -> None:
         simple_replacements = {
             "\\bos\\.getcwd\\s*\\(\\s*\\)": "Path.cwd()",
@@ -329,7 +295,6 @@ class PathlibRefactorer:
                 description="Convert os.walk to Path.rglob (limited support)",
             )
         )
-
     def _transform_join(self, match: re.Match) -> str:
         args = [arg.strip() for arg in match.group(1).split(",") if arg.strip()]
         if not args:
@@ -337,7 +302,6 @@ class PathlibRefactorer:
         if len(args) == 1:
             return f"Path({args[0]})"
         return " / ".join([f"Path({args[0]})", *args[1:]])
-
     def _transform_makedirs(self, match: re.Match) -> str:
         path_arg = match.group(1)
         rest_args = match.group(2) if match.group(2) else ""
@@ -345,11 +309,9 @@ class PathlibRefactorer:
             return f"Path({path_arg}).mkdir(parents=True, {rest_args})"
         else:
             return f"Path({path_arg}).mkdir(parents=True, exist_ok=True)"
-
     def _transform_walk(self, match: re.Match) -> str:
         path_arg = match.group(1)
         return f"((str(p), [d.name for d in p.iterdir() if d.is_dir()], [f.name for f in p.iterdir() if f.is_file()]) for p in Path({path_arg}).rglob('*') if p.is_dir())"
-
     def apply_transformations(self, source: str) -> tuple[str, set[str]]:
         result = source
         applied = set()
@@ -362,7 +324,6 @@ class PathlibRefactorer:
             except Exception as e:
                 cprint(f"  ⚠️ Transformation failed: {trans.description} - {e}", "yellow")
         return result, applied
-
     def add_pathlib_import(self, source: str) -> str:
         if "from pathlib import Path" in source or "import pathlib" in source:
             return source
@@ -376,7 +337,6 @@ class PathlibRefactorer:
                 break
         lines.insert(insert_idx, "from pathlib import Path\n")
         return "".join(lines)
-
     def refactor_file(self, file_path: Path, dry_run: bool = False, create_backup: bool = True) -> dict:
         result = {
             "path": file_path,
@@ -412,11 +372,8 @@ class PathlibRefactorer:
             result["error"] = str(e)
             result["success"] = False
         return result
-
-
 def main() -> int:
     import argparse
-
     parser = argparse.ArgumentParser(description="Refactor Python files from os/path to pathlib")
     parser.add_argument("paths", nargs="*", help="Files or directories to process")
     parser.add_argument("--dry-run", "-n", action="store_true", help="Preview changes without writing")
@@ -467,7 +424,5 @@ def main() -> int:
     if args.dry_run and changed:
         cprint("\n⚠️  This was a dry run. Run without --dry-run to apply changes.", "yellow")
     return 0
-
-
 if __name__ == "__main__":
     sys.exit(main())

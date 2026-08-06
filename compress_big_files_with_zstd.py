@@ -1,30 +1,22 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 """
 Compress files larger than a threshold in current directory recursively.
 Usage: python compress_large_files.py <threshold_in_bytes>
 Example: python compress_large_files.py 1048576  # Compress files > 1MB
 """
-
 from __future__ import annotations
-
 import sys
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
 import zstandard as zstd
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 GREEN = "\x1b[92m"
 YELLOW = "\x1b[93m"
 BLUE = "\x1b[94m"
 RED = "\x1b[91m"
 RESET = "\x1b[0m"
-
-
 class ProgressDisplay:
     def __init__(self):
         self.lock = threading.Lock()
@@ -33,7 +25,6 @@ class ProgressDisplay:
         self.total_size = 0
         self.compressed_size = 0
         self.start_time = time.time()
-
     def update(self, file_path, original_size, compressed_size, status="compressed"):
         with self.lock:
             self.processed_files += 1
@@ -66,10 +57,8 @@ class ProgressDisplay:
                 end="",
                 flush=True,
             )
-
     def set_total_files(self, count):
         self.total_files = count
-
     def finish(self):
         elapsed = time.time() - self.start_time
         print()
@@ -84,8 +73,6 @@ class ProgressDisplay:
             print(f"  Savings: {savings:.1f}%")
             print(f"  Time: {elapsed:.1f} seconds")
             print(f"  Average speed: {self.total_size / (1024 * 1024) / elapsed:.1f} MB/s")
-
-
 def should_compress_file(file_path, threshold):
     compressed_extensions = {
         ".zst",
@@ -113,8 +100,6 @@ def should_compress_file(file_path, threshold):
         return size > threshold
     except OSError:
         return False
-
-
 def compress_file(file_path, progress, level=3):
     original_size = file_path.stat().st_size
     compressed_path = file_path.with_suffix(file_path.suffix + ".zst")
@@ -140,8 +125,6 @@ def compress_file(file_path, progress, level=3):
             temp_path.unlink()
         progress.update(file_path, original_size, original_size, f"error: {str(e)[:20]}")
         return False, file_path, None, original_size
-
-
 def main():
     if len(sys.argv) != 2:
         print(f"{RED}Usage: python {sys.argv[0]} <threshold_in_bytes>{RESET}")
@@ -185,7 +168,5 @@ def main():
             except Exception as e:
                 print(f"\n{RED}Error processing file: {e}{RESET}")
     progress.finish()
-
-
 if __name__ == "__main__":
     main()

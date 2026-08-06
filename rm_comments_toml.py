@@ -1,25 +1,15 @@
+#!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 import sys
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
-from dh import get_files
-
-
-def mpf3(process_function: Callable, files: list[Path], **kwargs):
-    from joblib import Parallel, delayed
-
-    file_strings = [str(f) for f in files]
-    return Parallel(n_jobs=-1)((delayed(process_function)(file_str, **kwargs) for file_str in file_strings))
-
-
+from dh import get_files, mpf3
 class Result:
     def __init__(self, text: str, comments_found: int, comments_removed_chars: int) -> None:
         self.text = text
         self.comments = comments_found
         self.removed = comments_removed_chars
-
-
 def strip_comments(src: str, allow_semicolon: bool = True) -> Result:
     comments = 0
     removed = 0
@@ -69,8 +59,6 @@ def strip_comments(src: str, allow_semicolon: bool = True) -> Result:
         else:
             out_lines.append(line)
     return Result("".join(out_lines), comments, removed)
-
-
 def process_file(path: str | Path) -> None:
     path = Path(path)
     code = path.read_text(encoding="utf-8")
@@ -81,8 +69,6 @@ def process_file(path: str | Path) -> None:
     else:
         print(f"{path.name} : (no change)")
     return
-
-
 def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -97,7 +83,5 @@ def main() -> None:
     else:
         files = get_files(cwd)
     mpf3(process_file, files)
-
-
 if __name__ == "__main__":
     sys.exit(main())

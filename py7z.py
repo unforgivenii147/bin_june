@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Compress/decompress files using pylzma with parallel processing."""
-
 from __future__ import annotations
 import argparse
 import io
@@ -10,15 +9,12 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 import pylzma
 from dh import fsz, gsz
-
 # Max available pylzma compression settings
 _COMPRESS_OPTS = {
     "dictionary": 27,  # 256 MB
     "fastBytes": 273,  # Maximum
     "algorithm": 2,  # Maximum compression mode
 }
-
-
 def _compress(src: Path, keep: bool) -> str:
     src = Path(src)
     try:
@@ -63,8 +59,6 @@ def _compress(src: Path, keep: bool) -> str:
             return f"Skipped {src} (not a file or directory)"
     except Exception as e:
         return f"Error compressing {src}: {e}"
-
-
 def _decompress(src: Path, keep: bool) -> str:
     src = Path(src)
     try:
@@ -104,12 +98,9 @@ def _decompress(src: Path, keep: bool) -> str:
             return f"Skipped {src} (not a .7z file)"
     except Exception as e:
         return f"Error decompressing {src}: {e}"
-
-
 def _collect_targets(paths: list[str], mode: str) -> list[Path]:
     targets: list[Path] = []
     cwd = Path(".").resolve()
-
     if mode == "compress":
         # No args → recursive file scan in cwd
         if not paths:
@@ -150,7 +141,6 @@ def _collect_targets(paths: list[str], mode: str) -> list[Path]:
                     for child in p.rglob("*"):
                         if child.is_file() and child.name.endswith(".7z"):
                             targets.append(child.resolve())
-
     # Deduplicate while preserving order
     seen: set[Path] = set()
     out: list[Path] = []
@@ -159,8 +149,6 @@ def _collect_targets(paths: list[str], mode: str) -> list[Path]:
             seen.add(t)
             out.append(t)
     return out
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Compress/decompress files and directories using pylzma with parallel processing"
@@ -190,25 +178,19 @@ def main() -> None:
         help="Keep original files after processing",
     )
     args = parser.parse_args()
-
     mode = "decompress" if args.decompress else "compress"
     targets = _collect_targets(args.paths, mode)
-
     if not targets:
         print(f"No items found to {mode}")
         return
-
     print(f"{mode.capitalize()}ing {len(targets)} item(s)...")
-
     # Calculate total original size before processing
     total_original = sum(gsz(t) for t in targets)
-
     worker = _decompress if mode == "decompress" else _compress
     with ProcessPoolExecutor(max_workers=args.workers) as executor:
         futures = {executor.submit(worker, t, args.keep): t for t in targets}
         for future in as_completed(futures):
             print(future.result())
-
     # Calculate total compressed/decompressed size after processing
     if mode == "compress":
         total_compressed = 0
@@ -219,7 +201,6 @@ def main() -> None:
                 dst = t.parent / f"{t.name}.7z"
             if dst.exists():
                 total_compressed += dst.stat().st_size
-
         if total_original > 0:
             total_ratio = (1 - total_compressed / total_original) * 100
             total_freed = total_original - total_compressed
@@ -237,14 +218,11 @@ def main() -> None:
             else:
                 dst = t.parent / t.name[: -len(".7z")]
             total_decompressed += gsz(dst)
-
         total_space_used = total_decompressed - total_original
         print(f"\n{'=' * 50}")
         print(f"SUMMARY:")
         print(f"  Total compressed size: {fsz(total_original)}")
         print(f"  Total decompressed size: {fsz(total_decompressed)}")
         print(f"  Total space used: {fsz(total_space_used)}")
-
-
 if __name__ == "__main__":
     main()

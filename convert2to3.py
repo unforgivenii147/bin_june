@@ -1,13 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 """
 Apply all available 2to3 fixes to Python files using multiprocessing.
 Uses lib2to3 module directly without subprocess.
 Requires Python 3.12+
 """
-
 from __future__ import annotations
-
 import argparse
 import logging
 import sys
@@ -15,25 +12,18 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from lib2to3.refactor import RefactoringTool, get_fixers_from_package
 from pathlib import Path
 from typing import list, tuple
-
 logging.getLogger("lib2to3").setLevel(logging.WARNING)
-
-
 class CustomRefactoringTool(RefactoringTool):
     def __init__(self, fixers, explicit=None, append=None) -> None:
         self.output_lines = []
         self.errors = []
         super().__init__(fixers, explicit, append)
-
     def log_error(self, msg, *args, **kwargs) -> None:
         self.errors.append(msg % args)
-
     def write(self, msg, *args, **kwargs) -> None:
         if args:
             msg = msg % args
         self.output_lines.append(msg)
-
-
 def get_all_fixers() -> list[str]:
     try:
         fixers = get_fixers_from_package("lib2to3.fixes")
@@ -92,8 +82,6 @@ def get_all_fixers() -> list[str]:
             "lib2to3.fixes.fix_xreadlines",
             "lib2to3.fixes.fix_zip",
         ]
-
-
 def apply_2to3_fixes(file_path: str) -> tuple[str, bool, str]:
     try:
         with open(file_path, encoding="utf-8") as f:
@@ -131,8 +119,6 @@ def apply_2to3_fixes(file_path: str) -> tuple[str, bool, str]:
         return file_path, False, "Permission denied"
     except Exception as e:
         return file_path, False, f"Unexpected error: {e!s}"
-
-
 def find_python_files(paths: list[str], extensions: list[str] | None = None) -> list[str]:
     if extensions is None:
         extensions = [".py"]
@@ -149,8 +135,6 @@ def find_python_files(paths: list[str], extensions: list[str] | None = None) -> 
             for ext in extensions:
                 python_files.extend(str(p) for p in path_obj.rglob(f"*{ext}"))
     return python_files
-
-
 def process_files_parallel(file_paths: list[str]) -> tuple[list[str], list[str]]:
     successful = []
     failed = []
@@ -176,8 +160,6 @@ def process_files_parallel(file_paths: list[str]) -> tuple[list[str], list[str]]
                 print(f"[{i}/{len(file_paths)}] ✗ {Path(file_path).name}")
                 print(f"    Unexpected error: {e!s}")
     return successful, failed
-
-
 def dry_run_file(file_path: str) -> tuple[str, str, bool]:
     try:
         with open(file_path, encoding="utf-8") as f:
@@ -205,8 +187,6 @@ def dry_run_file(file_path: str) -> tuple[str, str, bool]:
             return file_path, f"Error: {e!s}", False
     except Exception as e:
         return file_path, f"Error reading file: {e!s}", False
-
-
 def perform_dry_run(file_paths: list[str]) -> None:
     print(f"\nDRY RUN - Preview of changes using {4} workers:")
     print("=" * 42)
@@ -225,8 +205,6 @@ def perform_dry_run(file_paths: list[str]) -> None:
                 print(f"✓ {Path(file_path).name}: {output}")
     print(f"\n{'=' * 42}")
     print(f"Dry run complete: {files_with_changes} of {len(file_paths)} files would be changed")
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Apply all available 2to3 fixes to Python files using lib2to3 and multiprocessing"
@@ -262,7 +240,5 @@ def main() -> int:
         for f in failed:
             print(f"  - {Path(f).name}")
     return 0 if not failed else 1
-
-
 if __name__ == "__main__":
     sys.exit(main())

@@ -3,21 +3,16 @@
 Check .whl wheel files in current directory and remove ones
 that don't contain entry_points.txt using parallel processing.
 """
-
 import argparse
 import zipfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import List, Tuple
-
-
 def check_wheel_for_entry_points(wheel_path: Path) -> Tuple[Path, bool]:
     """
     Check if a wheel file contains entry_points.txt.
-
     Args:
         wheel_path: Path to the .whl file
-
     Returns:
         Tuple of (wheel_path, has_entry_points)
     """
@@ -30,59 +25,44 @@ def check_wheel_for_entry_points(wheel_path: Path) -> Tuple[Path, bool]:
     except (zipfile.BadZipFile, OSError) as e:
         print(f"Error reading {wheel_path.name}: {e}")
         return wheel_path, False
-
-
 def find_wheel_files(directory: Path = Path.cwd()) -> List[Path]:
     """
     Find all .whl files in the specified directory.
-
     Args:
         directory: Directory to search (default: current directory)
-
     Returns:
         List of Path objects for .whl files
     """
     return list(directory.glob("*.whl"))
-
-
 def remove_wheels_without_entry_points(
     directory: Path = Path.cwd(), max_workers: int = None, dry_run: bool = False
 ) -> None:
     """
     Find and remove wheel files without entry_points.txt using parallel processing.
-
     Args:
         directory: Directory containing wheel files
         max_workers: Maximum number of parallel workers
         dry_run: If True, only report what would be removed without actually removing
     """
     wheel_files = find_wheel_files(directory)
-
     if not wheel_files:
         print("No .whl files found in the current directory.")
         return
-
     print(f"Found {len(wheel_files)} wheel file(s) to check...")
-
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         future_to_wheel = {executor.submit(check_wheel_for_entry_points, wheel): wheel for wheel in wheel_files}
-
         wheels_to_remove = []
         wheels_to_keep = []
-
         for future in as_completed(future_to_wheel):
             wheel_path, has_entry_points = future.result()
-
             if has_entry_points:
                 wheels_to_keep.append(wheel_path)
                 print(f"✓ {wheel_path.name} - has entry_points.txt (keeping)")
             else:
                 wheels_to_remove.append(wheel_path)
                 print(f"✗ {wheel_path.name} - no entry_points.txt (removing)")
-
     print(f"\n{'=' * 50}")
     print(f"Results: {len(wheels_to_keep)} to keep, {len(wheels_to_remove)} to remove")
-
     if wheels_to_remove:
         if dry_run:
             print("\n[DRY RUN] Would remove the following files:")
@@ -98,8 +78,6 @@ def remove_wheels_without_entry_points(
                     print(f"  Error removing {wheel.name}: {e}")
     else:
         print("\nNo files to remove.")
-
-
 def main():
     parser = argparse.ArgumentParser(description="Remove .whl wheel files without entry_points.txt")
     parser.add_argument(
@@ -115,15 +93,10 @@ def main():
     parser.add_argument(
         "--dry-run", action="store_true", help="Show what would be removed without actually removing files"
     )
-
     args = parser.parse_args()
-
     if not args.directory.exists():
         print(f"Error: Directory '{args.directory}' does not exist.")
         return
-
     remove_wheels_without_entry_points(directory=args.directory, max_workers=args.workers, dry_run=args.dry_run)
-
-
 if __name__ == "__main__":
     main()

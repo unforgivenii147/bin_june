@@ -1,27 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import os
 import sys
 from collections.abc import Callable
 from pathlib import Path
-
 from xorhash import get_xorhash
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-ATTRIBUTES = {
-    "bold": 1,
-    "dark": 2,
-    "italic": 3,
-    "underline": 4,
-    "blink": 5,
-    "reverse": 7,
-    "concealed": 8,
-    "strike": 9,
-}
-
+ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
 HIGHLIGHTS = {
     "on_black": 40,
     "on_grey": 40,
@@ -41,7 +26,6 @@ HIGHLIGHTS = {
     "on_light_cyan": 106,
     "on_white": 107,
 }
-
 COLORS = {
     "black": 30,
     "grey": 30,
@@ -61,10 +45,7 @@ COLORS = {
     "light_cyan": 96,
     "white": 97,
 }
-
 RESET = "\x1b[0m"
-
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -84,8 +65,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
-
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
     if not can_colorize(no_color=no_color, force_color=force_color):
@@ -108,25 +87,12 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
             result = fmt_str % (ATTRIBUTES[attr], result)
     result += RESET
     return result
-
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
-
-
-def mpf3(process_function: Callable, files: list[Path], **kwargs):
-    from joblib import Parallel, delayed
-
-    file_strings = [str(f) for f in files]
-    return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
-
-
+from dh import mpf3
 REMOVE = "-y" in sys.argv
-
-
 def find_dups_optimized(root: Path):
     from os import walk as os_walk
-
     file_hashes = {}
     paths_to_process = []
     for r, _, files in os_walk(root):
@@ -144,8 +110,6 @@ def find_dups_optimized(root: Path):
         if hash_result is not None:
             file_hashes.setdefault(hash_result, []).append(path)
     return {h: paths for h, paths in file_hashes.items() if len(paths) > 1}
-
-
 if __name__ == "__main__":
     cwd = Path.cwd()
     dupes = find_dups_optimized(cwd)

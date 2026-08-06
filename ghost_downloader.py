@@ -1,19 +1,14 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
-
 import argparse
 import os
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import requests
 from tqdm import tqdm
-
 DEFAULT_CHUNKS = 8
 DEFAULT_USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 )
-
-
 def parse_args():
     parser = argparse.ArgumentParser(description="Ghost-CLI: A lightweight multi-threaded concurrent download manager.")
     parser.add_argument("url", help="The direct file HTTP/HTTPS URL to download")
@@ -32,8 +27,6 @@ def parse_args():
         help="Custom User-Agent to emulate browser fingerprints and bypass restrictions",
     )
     return parser.parse_args()
-
-
 def download_chunk(url, start_byte, end_byte, chunk_id, headers, filename):
     chunk_headers = headers.copy()
     chunk_headers["Range"] = f"bytes={start_byte}-{end_byte}"
@@ -45,8 +38,6 @@ def download_chunk(url, start_byte, end_byte, chunk_id, headers, filename):
                 if data:
                     f.write(data)
     return (part_filename, start_byte)
-
-
 def main():
     args = parse_args()
     url = args.url
@@ -114,7 +105,5 @@ def main():
                     final_file.write(pf.read())
                 os.remove(part_file)
     print(f"[+] Download complete and assembled successfully: {filename}")
-
-
 if __name__ == "__main__":
     main()

@@ -1,7 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import argparse
 import ast
 import shutil
@@ -9,34 +7,25 @@ import tempfile
 import zipfile
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 class CommentAndDocstringStripper(ast.NodeTransformer):
     def __init__(self, is_module=True):
         self.is_module = is_module
         self.docstring_removed = False
-
     def visit_FunctionDef(self, node):
         self.remove_docstring(node)
         return self.generic_visit(node)
-
     def visit_AsyncFunctionDef(self, node):
         self.remove_docstring(node)
         return self.generic_visit(node)
-
     def visit_ClassDef(self, node):
         self.remove_docstring(node)
         return self.generic_visit(node)
-
     def remove_docstring(self, node):
         if node.body and isinstance(node.body[0], ast.Expr) and isinstance(node.body[0].value, (ast.Str, ast.Constant)):
             val = node.body[0].value
             if isinstance(val, ast.Str) or (isinstance(val, ast.Constant) and isinstance(val.value, str)):
                 node.body.pop(0)
-
-
 def process_content(content: bytes) -> bytes:
     try:
         decoded = content.decode("utf-8")
@@ -68,8 +57,6 @@ def process_content(content: bytes) -> bytes:
     if final_code.encode("utf-8") == content:
         return content
     return final_code.encode("utf-8")
-
-
 def process_single_file(file_path: Path, base_dir: Path) -> str:
     try:
         original_content = file_path.read_bytes()
@@ -80,8 +67,6 @@ def process_single_file(file_path: Path, base_dir: Path) -> str:
     except Exception as e:
         return f"Error processing {file_path}: {e}"
     return ""
-
-
 def process_wheel(wheel_path: Path, base_dir: Path) -> list[str]:
     changed_files = []
     temp_dir = Path(tempfile.mkdtemp())
@@ -107,8 +92,6 @@ def process_wheel(wheel_path: Path, base_dir: Path) -> list[str]:
     finally:
         shutil.rmtree(temp_dir)
     return changed_files
-
-
 def main():
     parser = argparse.ArgumentParser(description="Strip docstrings and comments from Python files.")
     parser.add_argument("inputs", nargs="*", help="Files or directories to process")
@@ -142,7 +125,5 @@ def main():
             whl_changes = process_wheel(whl, base_path)
             for change in whl_changes:
                 print(change)
-
-
 if __name__ == "__main__":
     main()

@@ -1,9 +1,9 @@
+#!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 import os
 import re
 import sys
 from pathlib import Path
-
 CHUNK_SIZE = 1024 * 1024
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
@@ -46,8 +46,6 @@ COLORS = {
     "white": 97,
 }
 RESET = "\x1b[0m"
-
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -67,8 +65,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
-
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
     if not can_colorize(no_color=no_color, force_color=force_color):
@@ -91,12 +87,8 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
             result = fmt_str % (ATTRIBUTES[attr], result)
     result += RESET
     return result
-
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
-
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -111,11 +103,8 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
-
 def get_filez(root_dir: str | Path):
     from os import walk as os_walk
-
     visited_dirs: set[Path] = set()
     root_dir = Path(root_dir)
     if root_dir.is_dir():
@@ -133,13 +122,8 @@ def get_filez(root_dir: str | Path):
                     yield filepath
     else:
         yield root_dir
-
-
 from dh import should_skip
-
 COLOR_RE = re.compile("#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})\\b")
-
-
 def pf(path: Path):
     content = path.read_text(encoding="utf-8", errors="ignore")
     found = []
@@ -150,8 +134,6 @@ def pf(path: Path):
         cprint(f"{len(found)}", "cyan")
         return found
     return []
-
-
 def main() -> None:
     cwd = Path.cwd()
     outfile = cwd / "colors"
@@ -175,7 +157,5 @@ def main() -> None:
     finals = sorted(set(finals))
     outfile.write_text("\n".join(finals), encoding="utf-8")
     cprint(f"{fc} colors found", "green")
-
-
 if __name__ == "__main__":
     main()

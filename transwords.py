@@ -1,39 +1,29 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 """
 Optimized version of transwords.py for Python 3.12.
 Translates chunks of words.txt from Persian to English in parallel.
 """
-
 from __future__ import annotations
-
 import json
 import logging
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Final, TypedDict
-
 from deep_translator import GoogleTranslator
-
 CHUNK_SIZE = 1024 * 1024
-
 CHUNK_SIZE: Final[int] = 4500
 MAX_WORKERS: Final[int] = 1
 INPUT_FILE: Final[Path] = Path("words.txt")
 OUTPUT_FILE: Final[Path] = Path("fa_en.json")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-
 class TranslationResult(TypedDict):
     chunk_id: str
     start_line: int
     end_line: int
     original: str
     translated: str
-
-
 def chunk_file(file_path: Path, chunk_size: int = 32768) -> list[tuple[int, int, str]]:
     chunks = []
     current_chunk = []
@@ -55,8 +45,6 @@ def chunk_file(file_path: Path, chunk_size: int = 32768) -> list[tuple[int, int,
     except Exception as e:
         logger.error(f"Error reading file {file_path}: {e}")
     return chunks
-
-
 def translate_chunk(chunk_data: tuple[int, int, str], chunk_index: int, total_chunks: int) -> TranslationResult | None:
     start_line, end_line, text = chunk_data
     if chunk_index > 0:
@@ -76,8 +64,6 @@ def translate_chunk(chunk_data: tuple[int, int, str], chunk_index: int, total_ch
     except Exception as e:
         logger.error(f"Error translating chunk {start_line}_{end_line}: {e}")
         return None
-
-
 def main() -> None:
     if not INPUT_FILE.exists():
         logger.error(f"Input file {INPUT_FILE} not found.")
@@ -107,7 +93,5 @@ def main() -> None:
         logger.info("Done!")
     except Exception as e:
         logger.error(f"Error writing output file: {e}")
-
-
 if __name__ == "__main__":
     main()

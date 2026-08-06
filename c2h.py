@@ -1,10 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 from pathlib import Path
-
-
 def main() -> None:
     with Path("/sdcard/colors").open(encoding="utf-8") as file:
         colors = file.readlines()
@@ -20,7 +16,5 @@ def main() -> None:
         html_content += "</body>\n</html>"
     Path("/sdcard/colors.html").write_text(html_content, encoding="utf-8")
     print("/sdcard/colors.html created")
-
-
 if __name__ == "__main__":
     main()

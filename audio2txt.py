@@ -1,15 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import os
 import sys
 import tempfile
-
 import speech_recognition as sr
 from pydub import AudioSegment
-
-
 def m4a_to_text(input_file, output_file="out.txt"):
     if not os.path.exists(input_file):
         print(f"Error: Input file '{input_file}' not found.")
@@ -45,8 +40,6 @@ def m4a_to_text(input_file, output_file="out.txt"):
     finally:
         if os.path.exists(temp_wav_path):
             os.unlink(temp_wav_path)
-
-
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python m4a_to_text.py <input_file.m4a>")

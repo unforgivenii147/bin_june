@@ -1,14 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import json
 import sys
 from pathlib import Path
-
 import toml
-
-
 def toml_to_json(fname: str) -> None:
     try:
         with open(fname, encoding="utf-8") as f:
@@ -21,8 +16,6 @@ def toml_to_json(fname: str) -> None:
         print(f"Error: The file '{fname}' was not found.")
     except Exception as e:
         print(f"An error occurred: {e}")
-
-
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python toml_to_json_converter.py <path_to_toml_file>")

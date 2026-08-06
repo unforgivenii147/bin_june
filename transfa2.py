@@ -1,12 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 """
 Optimized version of transchin.py for Python 3.12.
 Translates Persian text in files in-place using parallel processing.
 """
-
 from __future__ import annotations
-
 import logging
 import re
 import sys
@@ -14,11 +11,8 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Final
-
 from deep_translator import GoogleTranslator
-
 CHUNK_SIZE = 1024 * 1024
-
 CHUNK_SIZE: Final[int] = 4500
 MAX_WORKERS: Final[int] = 16
 CHUNK_DELAY: Final[float] = 1.5
@@ -30,37 +24,26 @@ PERSIAN_PATTERN: Final[re.Pattern] = re.compile("[\u0600-\u06ff\u0750-\u077f\u08
 BOUNDARY_PATTERN: Final[re.Pattern] = re.compile(r"[\s\n\.\!\?\;]+")
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
-
-
 def split_into_chunks(text: str, size: int = 4900) -> list[str]:
     if len(text) <= size:
         return [text]
-
     chunks = []
     pos = 0
-
     while pos < len(text):
         end = min(pos + size, len(text))
-
         if end == len(text):
             chunks.append(text[pos:])
             break
-
         boundary_match = None
         for match in BOUNDARY_PATTERN.finditer(text, pos, end):
             boundary_match = match
-
         if boundary_match and boundary_match.end() > pos:
             split_pos = boundary_match.end()
         else:
             split_pos = end
-
         chunks.append(text[pos:split_pos])
         pos = split_pos
-
     return chunks
-
-
 def translate_chunk(chunk: str) -> str:
     if not PERSIAN_PATTERN.search(chunk):
         return chunk
@@ -75,8 +58,6 @@ def translate_chunk(chunk: str) -> str:
     except Exception as e:
         logger.error("Chunk translation error: %s", e)
         return chunk
-
-
 def translate_file(path: Path) -> None:
     try:
         content = path.read_text(encoding="utf-8")
@@ -96,8 +77,6 @@ def translate_file(path: Path) -> None:
     except Exception as e:
         logger.error("Error writing to %s: %s", path, e)
     time.sleep(FILE_DELAY)
-
-
 def get_files(path: Path) -> list[Path]:
     files: list[Path] = []
     for p in path.rglob("*"):
@@ -106,8 +85,6 @@ def get_files(path: Path) -> list[Path]:
         if p.is_file() and p.suffix.lower() in {".txt", ".md", ".py", ".json", ".csv"}:
             files.append(p)
     return sorted(files)
-
-
 def main() -> None:
     directory = sys.argv[1] if len(sys.argv) > 1 else "."
     start_path = Path(directory)
@@ -121,7 +98,5 @@ def main() -> None:
     logger.info("Processing %d files...", len(files))
     for f in files:
         translate_file(f)
-
-
 if __name__ == "__main__":
     main()

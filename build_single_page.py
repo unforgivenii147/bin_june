@@ -1,19 +1,14 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import base64
 import hashlib
 import mimetypes
 import re
 from pathlib import Path
-
 import requests
 from bs4 import BeautifulSoup
 from bs4.element import AttributeValueList
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 cwd = Path.cwd()
 OUTPUT_DIR = cwd / "output"
 ASSETS_DIR = cwd / "output" / "assets"
@@ -24,12 +19,8 @@ if not OUTPUT_DIR.exists():
 if not ASSETS_DIR.exists():
     ASSETS_DIR.mkdir(parents=True, exist_ok=True)
 HASH_MAP = {}
-
-
 def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
-
-
 def save_hashed_asset(content: bytes, mime_type: str):
     digest = sha256(content)
     if digest in HASH_MAP:
@@ -40,8 +31,6 @@ def save_hashed_asset(content: bytes, mime_type: str):
     path.write_bytes(content)
     HASH_MAP[digest] = path
     return path
-
-
 def extract_base64(data_url: AttributeValueList | str | None):
     m = re.match(r"data:(.*?);base64,(.*)", data_url, re.DOTALL)
     if not m:
@@ -49,8 +38,6 @@ def extract_base64(data_url: AttributeValueList | str | None):
     mime_type, encoded = m.groups()
     content = base64.b64decode(encoded)
     return save_hashed_asset(content, mime_type)
-
-
 def download_external(url: AttributeValueList | str):
     try:
         r = requests.get(url, timeout=TIMEOUT)
@@ -60,11 +47,7 @@ def download_external(url: AttributeValueList | str):
         return save_hashed_asset(r.content, mime.split(";")[0])
     except Exception:
         return None
-
-
 processed_html_files = []
-
-
 def process_html(path: Path) -> None:
     html = path.read_text(encoding="utf-8", errors="ignore")
     soup = BeautifulSoup(html, "html.parser")
@@ -114,8 +97,6 @@ def process_html(path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(str(soup), encoding="utf-8")
     print("Processed:", path)
-
-
 def build_single_page() -> None:
     merged = BeautifulSoup("<html><head></head><body></body></html>", "html.parser")
     body = merged.body
@@ -150,8 +131,6 @@ def build_single_page() -> None:
     out_file = OUTPUT_DIR / "single_page_local.html"
     out_file.write_text(str(merged), encoding="utf-8")
     print("\nCreated:", out_file)
-
-
 if __name__ == "__main__":
     for path in cwd.rglob("*"):
         if path.suffix.lower() in {".html", ".htm"} and "output" not in path.parts:

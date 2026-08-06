@@ -1,30 +1,22 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 """
 Report the overall unpacked size of .whl files in the current directory.
 Uses pathlib for path handling and multiprocessing for parallel processing.
 """
-
 from __future__ import annotations
-
 import argparse
 import json
 import sys
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 from zipfile import ZipFile
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def format_size(size_bytes: int) -> str:
     for unit in ["B", "KB", "MB", "GB", "TB"]:
         if size_bytes < 1024.0:
             return f"{size_bytes:.2f} {unit}"
         size_bytes /= 1024.0
     return f"{size_bytes:.2f} PB"
-
-
 def get_wheel_unpacked_size(wheel_path: Path) -> tuple[Path, int, str | None]:
     try:
         if not wheel_path.exists():
@@ -41,15 +33,11 @@ def get_wheel_unpacked_size(wheel_path: Path) -> tuple[Path, int, str | None]:
         return wheel_path, total_size, None
     except Exception as e:
         return wheel_path, 0, f"Unexpected error: {e!s}"
-
-
 def find_wheel_files(directory: Path, recursive: bool = False) -> list[Path]:
     if recursive:
         return list(directory.rglob("*.whl"))
     else:
         return list(directory.glob("*.whl"))
-
-
 def main():
     parser = argparse.ArgumentParser(description="Report the overall unpacked size of .whl files")
     parser.add_argument(
@@ -157,7 +145,5 @@ def main():
             for wheel_path, error in errors:
                 print(f"   • {wheel_path.name}: {error}")
     print()
-
-
 if __name__ == "__main__":
     main()

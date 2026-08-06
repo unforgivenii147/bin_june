@@ -1,37 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import sys
 from pathlib import Path
-
-THRESHOLD = 1_048_576
-
-
-def read_lines(path: str | Path, ke: bool = True) -> list[str]:
-    path = Path(path)
-    if path.stat().st_size > THRESHOLD:
-        return read_lines_mmap(path, ke)
-    data = Path(path).read_bytes()
-    text = data.decode("utf-8", errors="replace")
-    lines = text.splitlines(keepends=ke)
-    if not lines[-1].endswith(("\n", "\r\n", "\r")) and data.endswith(b"\n"):
-        lines.append("")
-    return lines
-
-
-def read_lines_mmap(path: Path, keep_ends: bool = True) -> list[str]:
-    import mmap
-
-    size = Path(path).stat().st_size
-    with Path(path).open("rb") as f, mmap.mmap(f.fileno(), size, access=mmap.ACCESS_READ) as mm:
-        text = mm[:].decode("utf-8", errors="replace")
-    lines = text.splitlines(keepends=keep_ends)
-    if not lines[-1].endswith(("\n", "\r\n", "\r")) and size > 0 and text.endswith("\n"):
-        lines.append("")
-    return lines
-
-
+THRESHOLD = 1048576
+from dh import read_lines, read_lines_mmap
 if __name__ == "__main__":
     file_name = Path(sys.argv[1])
     nl = []

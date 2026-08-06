@@ -1,19 +1,13 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import sys
 import threading
 import time
 from os import getenv
 from pathlib import Path
-
 from dotenv import load_dotenv
 from github import Auth, Github, GithubException
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def countdown(timeout: int) -> None:
     for remaining in range(timeout, 0, -1):
         sys.stdout.write(f"\rTimeout in {remaining:2d} seconds... ")
@@ -21,8 +15,6 @@ def countdown(timeout: int) -> None:
         time.sleep(1)
     sys.stdout.write("\r" + " " * 30 + "\r")
     sys.stdout.flush()
-
-
 def get_repos(username: str, token: str | None = None, timeout: int = 60) -> list:
     countdown_thread = threading.Thread(target=countdown, args=(timeout,), daemon=True)
     countdown_thread.start()
@@ -54,8 +46,6 @@ def get_repos(username: str, token: str | None = None, timeout: int = 60) -> lis
     except Exception as e:
         print(f"\nError: {e}")
         sys.exit(1)
-
-
 def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: script.py <username>")
@@ -87,7 +77,5 @@ def main() -> None:
             f.write(f"  Stars: {stars} | Language: {language}\n")
             f.write(f"  {description}\n")
             f.write(f"  {repo.html_url}\n\n")
-
-
 if __name__ == "__main__":
     main()

@@ -1,14 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 """
 Universal compression utility with automatic best-compressor selection.
-
 Compresses files/directories using multiple algorithms and retains
 only the best result based on compression ratio.
 """
-
 from __future__ import annotations
-
 import bz2
 import contextlib
 import gzip
@@ -22,15 +18,12 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Final
-
 import blosc2
 import brotli
 import lz4.frame
 import py7zr
 import zstandard as zstd
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 CompressorFunc = Callable[[bytes], bytes]
 COMPRESSION_LEVEL_MAX: Final[int] = 9
 ZSTD_LEVEL_MAX: Final[int] = 21
@@ -54,8 +47,6 @@ COMPRESSORS: Final[dict[str, tuple[CompressorFunc, str]]] = {
         ".blosc2",
     ),
 }
-
-
 @dataclass(slots=True, frozen=True)
 class CompressionResult:
     name: str
@@ -64,28 +55,21 @@ class CompressionResult:
     time: float
     path: Path
     original_size: int = field(repr=False)
-
     @property
     def saved_bytes(self) -> int:
         return self.original_size - self.size
-
     @property
     def savings_percent(self) -> float:
         return self.saved_bytes / self.original_size * 100
-
-
 class CompressionManager:
     __slots__ = "output_dir", "temp_dir"
-
     def __init__(self, output_dir: str | Path = ".", *, keep_temp: bool = False) -> None:
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.temp_dir = tempfile.mkdtemp(prefix="compress_")
-
     def __del__(self) -> None:
         with contextlib.suppress(Exception):
             shutil.rmtree(self.temp_dir, ignore_errors=True)
-
     @staticmethod
     def prepare_input(target_path: str | Path) -> tuple[bytes, str]:
         target = Path(target_path)
@@ -106,7 +90,6 @@ class CompressionManager:
                 with contextlib.suppress(Exception):
                     tar_path.unlink(missing_ok=True)
         raise ValueError(f"Target is neither file nor directory: {target_path}")
-
     def compress_single(
         self, name: str, compress_func: CompressorFunc, extension: str, data: bytes, base_name: str
     ) -> CompressionResult | None:
@@ -131,7 +114,6 @@ class CompressionManager:
             with contextlib.suppress(Exception):
                 output_path.unlink(missing_ok=True)
             return None
-
     def compress_7z(self, data: bytes, base_name: str) -> CompressionResult | None:
         output_path = self.output_dir / f"{base_name}.7z"
         try:
@@ -159,7 +141,6 @@ class CompressionManager:
         finally:
             with contextlib.suppress(Exception):
                 temp_file.unlink(missing_ok=True)
-
     def compress_all(self, data: bytes, base_name: str) -> list[CompressionResult]:
         results: list[CompressionResult] = []
         original_size = len(data)
@@ -180,7 +161,6 @@ class CompressionManager:
                 f"✓ {result_7z.name:10} | Size: {result_7z.size:12,} | Ratio: {result_7z.ratio:.4f} | Time: {result_7z.time:.3f}s"
             )
         return sorted(results, key=lambda x: x.ratio)
-
     @staticmethod
     def cleanup_results(results: list[CompressionResult], keep_best: bool = True) -> CompressionResult | None:
         if not results:
@@ -195,8 +175,6 @@ class CompressionManager:
                 except Exception as e:
                     print(f"⚠ Failed to delete {result.name}: {e}")
         return best
-
-
 def print_report(results: list[CompressionResult], original_size: int) -> None:
     print("\n" + "=" * REPORT_WIDTH)
     print("COMPRESSION RESULTS")
@@ -218,8 +196,6 @@ def print_report(results: list[CompressionResult], original_size: int) -> None:
         print(
             f"{result.name:<10} {result.size:>12,} {result.ratio:>8.4f} {result.saved_bytes:>12,} {result.time:>7.3f}s"
         )
-
-
 def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: python script.py <file_or_directory> [output_directory]")
@@ -241,7 +217,5 @@ def main() -> None:
     except Exception as e:
         print(f"\n❌ Error: {e}")
         sys.exit(1)
-
-
 if __name__ == "__main__":
     main()

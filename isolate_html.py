@@ -1,17 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import base64
 import re
 import sys
 from pathlib import Path
 from urllib.parse import urlparse
-
 from bs4 import BeautifulSoup
-from bs4.element import AttributeValuelist
-
-
+from bs4.element import AttributeValueList
 class HTMLStandaloneMaker:
     MIME_MAP = {
         ".png": "image/png",
@@ -32,20 +27,16 @@ class HTMLStandaloneMaker:
         ".xml": "application/xml",
         ".txt": "text/plain",
     }
-
     def __init__(self, verbose: bool = False):
         self.verbose = verbose
         self.embedded_count = 0
         self.warning_count = 0
-
     def log(self, message: str, level: str = "INFO") -> None:
         if self.verbose or level == "ERROR":
             print(f"[{level}] {message}")
-
     def get_mime_type(self, file_path: Path) -> str:
         ext = file_path.suffix.lower()
         return self.MIME_MAP.get(ext, "application/octet-stream")
-
     def encode_local_file_to_base64(self, file_path: Path) -> str | None:
         try:
             if not file_path.exists():
@@ -56,8 +47,7 @@ class HTMLStandaloneMaker:
         except Exception as e:
             self.log(f"Error encoding file {file_path}: {e}", "ERROR")
             return None
-
-    def find_local_resource(self, resource_name: str | AttributeValuelist, base_dir: Path) -> Path | None:
+    def find_local_resource(self, resource_name: str | AttributeValueList, base_dir: Path) -> Path | None:
         resource_str = str(resource_name)
         parsed = urlparse(resource_str)
         path_part = parsed.path.lstrip("/")
@@ -80,7 +70,6 @@ class HTMLStandaloneMaker:
         self.log(f"Resource '{resource_str}' not found in search locations", "WARNING")
         self.warning_count += 1
         return None
-
     def process_css_content(self, css_content: str, css_dir: Path) -> str:
         if not css_content:
             return css_content
@@ -104,7 +93,6 @@ class HTMLStandaloneMaker:
             else:
                 self.log(f"Font file '{font_url}' not found, leaving reference", "WARNING")
         return css_content
-
     def process_image_tag(self, img_tag, base_dir: Path) -> None:
         src = img_tag.get("src")
         if not src or src.startswith(("http://", "https://", "data:")):
@@ -120,7 +108,6 @@ class HTMLStandaloneMaker:
         else:
             self.log(f"Image '{src}' not found, removing tag", "WARNING")
             img_tag.decompose()
-
     def process_link_tag(self, link_tag, base_dir: Path) -> None:
         if link_tag.get("rel") != ["stylesheet"]:
             return
@@ -142,7 +129,6 @@ class HTMLStandaloneMaker:
         else:
             self.log(f"CSS '{href}' not found, removing link", "WARNING")
             link_tag.decompose()
-
     def process_script_tag(self, script_tag, base_dir: Path) -> None:
         src = script_tag.get("src")
         if not src:
@@ -164,13 +150,11 @@ class HTMLStandaloneMaker:
         else:
             self.log(f"Script '{src}' not found, removing tag", "WARNING")
             script_tag.decompose()
-
     def process_inline_styles(self, style_tag, base_dir: Path) -> None:
         style_content = style_tag.string
         if style_content:
             processed_content = self.process_css_content(style_content, base_dir)
             style_tag.string = processed_content
-
     def make_html_standalone(self, html_path: Path) -> str | None:
         try:
             html_content = html_path.read_text(encoding="utf-8")
@@ -192,7 +176,6 @@ class HTMLStandaloneMaker:
         self.log(f"Embedded {self.embedded_count} resources")
         self.log(f"Warnings: {self.warning_count}")
         return soup.prettify()
-
     def save_standalone(self, html_path: Path, output_path: Path | None = None) -> bool:
         standalone_html = self.make_html_standalone(html_path)
         if not standalone_html:
@@ -206,11 +189,8 @@ class HTMLStandaloneMaker:
         except Exception as e:
             self.log(f"Error writing to output file {output_path}: {e}", "ERROR")
             return False
-
-
 def main() -> None:
     import argparse
-
     parser = argparse.ArgumentParser(
         description="Convert HTML to standalone by embedding all resources",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -238,7 +218,5 @@ def main() -> None:
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)
-
-
 if __name__ == "__main__":
     main()

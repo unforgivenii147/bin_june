@@ -1,15 +1,12 @@
+#!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 import concurrent.futures
 import subprocess
 from pathlib import Path
 from binaryornot import is_binary
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def get_filez(root_dir: str | Path):
     from os import walk as os_walk
-
     visited_dirs: set[Path] = set()
     root_dir = Path(root_dir)
     if root_dir.is_dir():
@@ -27,17 +24,10 @@ def get_filez(root_dir: str | Path):
                     yield filepath
     else:
         yield root_dir
-
-
 from dh import should_skip
-
 "\nBinary File Analyzer - Finds executables in current directory that fail to run\nUses concurrent.futures for parallel processing\nOutputs results to ~/tmp/err\n"
-
-
 def is_executable(filepath: Path) -> bool:
     return filepath.is_file() and filepath.stat().st_mode & 73 != 0
-
-
 def is_elf(filepath: Path) -> bool:
     if not is_binary(str(filepath)):
         return False
@@ -50,8 +40,6 @@ def is_elf(filepath: Path) -> bool:
     except OSError:
         pass
     return False
-
-
 def get_binary_files(directory: Path) -> list[Path]:
     binaries = []
     try:
@@ -63,8 +51,6 @@ def get_binary_files(directory: Path) -> list[Path]:
     except PermissionError:
         pass
     return binaries
-
-
 def test_executable(filepath: Path) -> tuple[Path, str | None]:
     test_args = ["--help", "-h", "--version", "-v", "--info"]
     for test_arg in test_args:
@@ -117,8 +103,6 @@ def test_executable(filepath: Path) -> tuple[Path, str | None]:
         return (filepath, None)
     except Exception as e:
         return (filepath, str(e)[:200])
-
-
 def main() -> None:
     output_dir = Path.home() / "tmp"
     output_dir.mkdir(exist_ok=True)
@@ -172,8 +156,6 @@ def main() -> None:
         print("\n✅ All binaries are working correctly!")
         print(f"Report written to: {output_file}")
     print("=" * 70)
-
-
 if __name__ == "__main__":
     try:
         main()

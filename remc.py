@@ -1,3 +1,4 @@
+#!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 import ast
 import os
@@ -6,9 +7,7 @@ import sys
 from ast import Module
 from collections import deque
 from pathlib import Path
-from dh import get_files
-
-
+from dh import fsz, get_files
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -18,20 +17,6 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
-
-
-def fsz(sz: float) -> str:
-    sz = abs(int(sz))
-    units = ("B", "KB", "MB", "GB", "TB")
-    if sz == 0:
-        return "0 B"
-    i = min((int(sz).bit_length() - 1) // 10, len(units) - 1)
-    value = sz / 1024**i
-    if i == 0:
-        return f"{int(value)} {units[i]}"
-    return f"{value:.1f} {units[i]}"
-
-
 ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
 HIGHLIGHTS = {
     "on_black": 40,
@@ -72,8 +57,6 @@ COLORS = {
     "white": 97,
 }
 RESET = "\x1b[0m"
-
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -93,8 +76,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
-
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
     if not can_colorize(no_color=no_color, force_color=force_color):
@@ -117,12 +98,8 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
             result = fmt_str % (ATTRIBUTES[attr], result)
     result += RESET
     return result
-
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
-
-
 def rm_doc(content: str) -> tuple[str, int]:
     removed_count = 0
     lines = content.split("\n")
@@ -165,8 +142,6 @@ def rm_doc(content: str) -> tuple[str, int]:
             result_lines.append(line)
             i += 1
     return ("\n".join(result_lines), removed_count)
-
-
 def rm_ast(content: str) -> tuple[str, int]:
     try:
         tree = ast.parse(content)
@@ -177,8 +152,6 @@ def rm_ast(content: str) -> tuple[str, int]:
     for start, end in sorted(ranges, reverse=True):
         del lines[start - 1 : end]
     return ("\n".join(lines), len(ranges))
-
-
 def find_docstring_ranges(node: Module) -> list[tuple[int, int]]:
     ranges: list[tuple[int, int]] = []
     for child in ast.walk(node):
@@ -196,13 +169,9 @@ def find_docstring_ranges(node: Module) -> list[tuple[int, int]]:
             ):
                 ranges.append((child.body[0].lineno, child.body[0].end_lineno))
     return ranges
-
-
 def remove_blank_lines(content: str) -> str:
     content = re.sub("\\n\\n+", "\n", content)
     return "\n".join((line.rstrip() for line in content.split("\n")))
-
-
 def process_file(file_path: Path) -> None:
     Path(path)
     try:
@@ -226,8 +195,6 @@ def process_file(file_path: Path) -> None:
     except Exception as exc:
         print(f"✗ Error processing {file_path}: {exc}")
         return
-
-
 def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
@@ -243,8 +210,6 @@ def main() -> None:
             pending.popleft().get()
     diff_size = before - gsz(cwd)
     print(f"space saved : {fsz(diff_size)}")
-
-
 if __name__ == "__main__":
     main()
 DOC_TH1 = '"""'

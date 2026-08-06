@@ -1,7 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """
 Make HTML files standalone by inlining referenced CSS and JS files.
-
 - Processes one or more directories recursively (defaults to CWD if none given).
 - Downloads remote CSS/JS via HTTP(S) and reads local CSS/JS from disk.
 - Inlines them into <style> and <script> blocks, replacing the original tags.
@@ -9,28 +8,21 @@ Make HTML files standalone by inlining referenced CSS and JS files.
 - Silently ignores missing local or remote resources.
 - Uses pathlib and parallel (threaded) processing.
 """
-
 import argparse
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
-
 try:
     import requests
 except ImportError:
     sys.exit("Please install 'requests': pip install requests")
-
 try:
     from bs4 import BeautifulSoup
 except ImportError:
     sys.exit("Please install 'beautifulsoup4': pip install beautifulsoup4")
-
-
 def is_remote(url: str) -> bool:
     return urlparse(url).scheme in ("http", "https")
-
-
 def fetch_remote(url: str):
     """Download a remote resource. Returns text or None on failure."""
     try:
@@ -42,8 +34,6 @@ def fetch_remote(url: str):
         return resp.text
     except Exception:
         return None
-
-
 def fetch_local(ref: str, base_dir: Path):
     """Read a local file referenced from an HTML file. Returns text or None."""
     try:
@@ -58,30 +48,23 @@ def fetch_local(ref: str, base_dir: Path):
     except Exception:
         pass
     return None
-
-
 def fetch_resource(ref: str, base_dir: Path):
     """Fetch a CSS/JS resource, whether remote or local. Returns text or None."""
     if is_remote(ref):
         return fetch_remote(ref)
     return fetch_local(ref, base_dir)
-
-
 def process_html_file(html_path: Path):
     """Inline CSS/JS into a single HTML file in place."""
     try:
         content = html_path.read_text(encoding="utf-8", errors="ignore")
     except Exception as e:
         return html_path, f"read error: {e}"
-
     try:
         soup = BeautifulSoup(content, "html.parser")
     except Exception as e:
         return html_path, f"parse error: {e}"
-
     base_dir = html_path.parent
     modified = False
-
     # --- Inline <link rel="stylesheet" href="..."> ---
     for link in soup.find_all("link", rel="stylesheet"):
         href = link.get("href")
@@ -99,7 +82,6 @@ def process_html_file(html_path: Path):
             style[key] = val
         link.replace_with(style)
         modified = True
-
     # --- Inline <script src="..."></script> ---
     for script in soup.find_all("script", src=True):
         src = script.get("src")
@@ -116,17 +98,13 @@ def process_html_file(html_path: Path):
             new_script[key] = val
         script.replace_with(new_script)
         modified = True
-
     if not modified:
         return html_path, "no changes"
-
     try:
         html_path.write_text(str(soup), encoding="utf-8")
         return html_path, "updated"
     except Exception as e:
         return html_path, f"write error: {e}"
-
-
 def gather_html_files(dirs):
     """Collect all *.html / *.htm files from the given paths (files or dirs)."""
     files = []
@@ -146,8 +124,6 @@ def gather_html_files(dirs):
         else:
             print(f"Warning: skipping {p} (not a file or directory)", file=sys.stderr)
     return files
-
-
 def main():
     parser = argparse.ArgumentParser(description="Make HTML files standalone by inlining CSS/JS resources.")
     parser.add_argument(
@@ -163,20 +139,15 @@ def main():
         help="Number of parallel worker threads (default: 8).",
     )
     args = parser.parse_args()
-
     targets = [Path(d) for d in args.dirs] if args.dirs else [Path.cwd()]
     html_files = gather_html_files(targets)
-
     if not html_files:
         print("No HTML files found.", file=sys.stderr)
         return
-
     print(f"Found {len(html_files)} HTML file(s); processing with {args.workers} worker(s)...")
-
     updated = 0
     skipped = 0
     errors = 0
-
     with ThreadPoolExecutor(max_workers=args.workers) as ex:
         futures = {ex.submit(process_html_file, f): f for f in html_files}
         for fut in as_completed(futures):
@@ -190,9 +161,6 @@ def main():
             else:
                 errors += 1
                 print(f"[error]      {path} -> {status}", file=sys.stderr)
-
     print(f"\nDone. Updated: {updated}, Unchanged: {skipped}, Errors: {errors}")
-
-
 if __name__ == "__main__":
     main()

@@ -1,30 +1,22 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import re
 import tarfile
 import zipfile
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-
 import chardet
 from loguru import logger
-
 TARGET_EXTENSIONS = {".tar.gz", ".pdf", ".zip", ".css", ".js", ".tar.xz", ".7z", ".whl", ".html"}
 COMPRESSED_ARCHIVES = {".tar.xz", ".tar.gz", ".tar.zst", ".7z", ".br", ".zip", ".whl"}
 GITHUB_REPO_REGEX = re.compile(r"https?://(?:www\.)?github\.com/[a-zA-Z0-9\-]+/[a-zA-Z0-9\-]+")
 URL_REGEX = re.compile(r"(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?")
 MAX_WORKERS = 4
 BINARY_CHECK_THRESHOLD = 0.7
-
-
 def extract_links_from_text(text: str, file_path: Path | str):
     urls = URL_REGEX.findall(text)
     github_urls = GITHUB_REPO_REGEX.findall(text)
     return urls, github_urls
-
-
 def is_likely_binary(file_path: Path, chunk_size=1024) -> bool:
     try:
         with file_path.open("rb") as f:
@@ -42,8 +34,6 @@ def is_likely_binary(file_path: Path, chunk_size=1024) -> bool:
     except Exception as e:
         logger.warning(f"Could not reliably determine if {file_path} is binary: {e}")
         return True
-
-
 def read_file_with_encodings(
     file_path: Path,
 ) -> tuple[str, str] | tuple[str, None] | tuple[None, None]:
@@ -72,8 +62,6 @@ def read_file_with_encodings(
     except Exception as e:
         logger.error(f"Failed to read or detect encoding for {file_path}: {e}")
     return None, None
-
-
 def process_file(file_path_str: str):
     file_path = Path(file_path_str)
     local_urls = []
@@ -105,7 +93,6 @@ def process_file(file_path_str: str):
                                             result = chardet.detect(member_content_bytes)
                                             enc = result["encoding"] or "utf-8"
                                             member_content_str = member_content_bytes.decode(enc, errors="ignore")
-
                                             if member_content_str:
                                                 urls, gh_urls = extract_links_from_text(
                                                     member_content_str, f"{file_path}/{member.name}"
@@ -178,14 +165,10 @@ def process_file(file_path_str: str):
     except Exception as e:
         logger.error(f"Failed to process {file_path}: {e}")
     return list(set(local_urls)), list(set(github_urls))
-
-
 def find_files_recursively(directory: Path):
     for path in directory.rglob("*"):
         if path.is_file():
             yield str(path)
-
-
 if __name__ == "__main__":
     base_dir = Path(".")
     all_extracted_urls = []

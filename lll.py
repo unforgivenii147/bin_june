@@ -1,23 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import datetime
 from pathlib import Path
-
-
-def fsz(sz: float) -> str:
-    sz = abs(int(sz))
-    units = "B", "KB", "MB", "GB", "TB"
-    if sz == 0:
-        return "0 B"
-    i = min((int(sz).bit_length() - 1) // 10, len(units) - 1)
-    value = sz / 1024**i
-    if i == 0:
-        return f"{int(value)} {units[i]}"
-    return f"{value:.1f} {units[i]}"
-
-
+from dh import fsz
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -27,13 +12,11 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
-
-
 EXCLUDED = {".mypy_cache", ".ruff_cache", ".git", "__pycache__"}
 if __name__ == "__main__":
     cwd = Path.cwd()
     for path in sorted(cwd.rglob("*"), key=lambda e: e.stat().st_mtime, reverse=True):
-        if any(pat in path.parts for pat in EXCLUDED):
+        if any((pat in path.parts for pat in EXCLUDED)):
             continue
         mtime = datetime.datetime.fromtimestamp(path.stat().st_mtime).strftime("%H:%M")
         if path.is_dir():

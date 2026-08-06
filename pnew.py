@@ -1,13 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import sys
 from pathlib import Path
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def main() -> None:
     path = Path(sys.argv[1])
     template = """#!/data/data/com.termux/files/usr/bin/python
@@ -17,7 +12,6 @@ from dh import get_files
 from pbar import Pbar
 def process_file(path) -> None:
     pass
-
 def main():
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -38,7 +32,5 @@ if __name__ == "__main__":
 """
     path.write_text(template, encoding="utf-8")
     print(f"{path.name} created.")
-
-
 if __name__ == "__main__":
     sys.exit(main())

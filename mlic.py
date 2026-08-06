@@ -1,12 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 """
 Find repeated multiline strings in text files recursively.
 Supports parallel processing, removal, and saving of found strings.
 """
-
 from __future__ import annotations
-
 import argparse
 import ast
 import concurrent.futures
@@ -14,11 +11,8 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 from typing import dict, list, set, tuple
-
 MIN_LINES = 3
 MIN_CHARS = 100
-
-
 def find_multiline_strings(
     file_path: Path, min_lines: int = 2, min_chars: int = 10
 ) -> dict[str, list[tuple[int, int]]]:
@@ -46,20 +40,14 @@ def find_multiline_strings(
         else:
             i += 1
     return strings
-
-
 def normalize_string(text: str) -> str:
     return "\n".join(line.rstrip() for line in text.splitlines())
-
-
 def validate_python_syntax(code: str) -> tuple[bool, str]:
     try:
         ast.parse(code)
         return True, ""
     except SyntaxError as e:
         return (False, f"Syntax error at line {e.lineno}, column {e.offset}: {e.msg}")
-
-
 def find_files(directory: Path, extensions: set[str] | None = None) -> list[Path]:
     if extensions is None:
         extensions = {
@@ -97,14 +85,10 @@ def find_files(directory: Path, extensions: set[str] | None = None) -> list[Path
     except PermissionError:
         print(f"Permission denied accessing {directory}", file=sys.stderr)
     return files
-
-
 def process_file(args: tuple[Path, int, int]) -> tuple[Path, dict[str, list[tuple[int, int]]]]:
     file_path, min_lines, min_chars = args
     strings = find_multiline_strings(file_path, min_lines, min_chars)
     return file_path, strings
-
-
 def find_repeated_strings(
     directory: Path,
     min_lines: int = 2,
@@ -129,9 +113,7 @@ def find_repeated_strings(
                     all_strings[norm_str].append((file_path, positions))
             except Exception as e:
                 print(f"Error processing {file_path}: {e}", file=sys.stderr)
-
     repeated = {k: v for k, v in all_strings.items() if len(v) > 1}
-
     if half:
         total_files = len(files)
         half_threshold = total_files / 2
@@ -140,10 +122,7 @@ def find_repeated_strings(
             print(f"Filtered to strings appearing in at least 50% of files ({int(half_threshold)} files)")
         else:
             print("No strings found that appear in at least 50% of files")
-
     return repeated
-
-
 def remove_strings_from_files(
     repeated_strings: dict[str, list[tuple[Path, list[tuple[int, int]]]]],
     string_numbers: list[int] | None = None,
@@ -192,8 +171,6 @@ def remove_strings_from_files(
         for file_path, error in skipped_files:
             print(f"  - {file_path}: {error}")
     return modified_files, skipped_files
-
-
 def save_strings_to_file(repeated_strings: dict[str, list[tuple[Path, list[tuple[int, int]]]]], output_file: Path):
     try:
         with open(output_file, "w", encoding="utf-8") as f:
@@ -207,8 +184,6 @@ def save_strings_to_file(repeated_strings: dict[str, list[tuple[Path, list[tuple
         print(f"Report saved to {output_file}")
     except Exception as e:
         print(f"Error saving report: {e}", file=sys.stderr)
-
-
 def main():
     parser = argparse.ArgumentParser(description="Find repeated multiline strings in text files recursively")
     parser.add_argument("directory", nargs="?", default=".", help="Directory to search (default: current directory)")
@@ -254,15 +229,11 @@ def main():
         extensions = set(args.extensions)
         global find_files
         original_find_files = find_files
-
         def find_files_with_ext(directory, _=None):
             return original_find_files(directory, extensions)
-
         find_files = find_files_with_ext
-
     if args.half:
         print("Filtering: Only strings appearing in at least 50% of files will be shown")
-
     repeated = find_repeated_strings(
         directory,
         min_lines=args.min_lines,
@@ -270,10 +241,8 @@ def main():
         max_workers=args.workers,
         half=args.half,
     )
-
     output_file = Path.cwd() / "lic.txt"
     save_strings_to_file(repeated, output_file)
-
     if not repeated:
         print("No repeated multiline strings found.")
         return
@@ -310,7 +279,5 @@ def main():
         if skipped_files:
             print(f"Skipped {len(skipped_files)} file(s) due to syntax errors.")
             print("These files were NOT modified. Review the strings manually or use --no-validate.")
-
-
 if __name__ == "__main__":
     main()

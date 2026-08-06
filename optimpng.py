@@ -1,30 +1,21 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import os
 import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
 from tqdm import tqdm
-
-
 def find_png_files(directory: Path):
     png_files = []
     for root, _, files in os.walk(directory):
         png_files.extend(os.path.join(root, file) for file in files if file.lower().endswith(".png"))
     return png_files
-
-
 def optimize_png(file_path):
     try:
         subprocess.run(["optipng", "-o7", str(file_path)], check=True)
         return True, file_path
     except subprocess.CalledProcessError as e:
         return False, file_path, str(e)
-
-
 def main() -> None:
     cwd = Path.cwd()
     png_files = find_png_files(cwd)
@@ -41,7 +32,5 @@ def main() -> None:
                 pbar.update(1)
     success = sum(1 for r in results if r[0])
     print(f"\nOptimization complete. Success: {success}/{len(png_files)} files.")
-
-
 if __name__ == "__main__":
     main()

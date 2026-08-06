@@ -1,20 +1,13 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import subprocess
 import sys
 from pathlib import Path
 from urllib.parse import urlparse
-
 import requests
 from bs4 import BeautifulSoup
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 LOCAL_MIRROR_URL = "https://mirror-pypi.runflare.com"
-
-
 def download_file(url: str, dest_folder: str = ".") -> Path | None:
     try:
         response = requests.get(url, stream=True)
@@ -29,8 +22,6 @@ def download_file(url: str, dest_folder: str = ".") -> Path | None:
     except requests.exceptions.RequestException as e:
         print(f"Error downloading {url}: {e}")
         return None
-
-
 def get_package_info_from_mirror(package_name):
     mirror_package_url = f"{LOCAL_MIRROR_URL}/{package_name}"
     print(f"Fetching package info from mirror: {mirror_package_url}")
@@ -55,8 +46,6 @@ def get_package_info_from_mirror(package_name):
     except Exception as e:
         print(f"An unexpected error occurred while parsing mirror response: {e}")
         return None
-
-
 def install_or_download(package_name: str) -> None:
     print(f"Checking for package: {package_name}")
     wheel_url = get_package_info_from_mirror(package_name)
@@ -75,8 +64,6 @@ def install_or_download(package_name: str) -> None:
         print(
             "If a source archive (.tar.gz or .zip) were available and desired, additional parsing logic would be needed."
         )
-
-
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python pip_wrapper.py <package_name1> [package_name2 ...]")
@@ -84,7 +71,6 @@ if __name__ == "__main__":
     packages_to_process = sys.argv[1:]
     try:
         from bs4 import BeautifulSoup
-
     except ImportError:
         print("The 'beautifulsoup4' library is required. Please install it: pip install beautifulsoup4")
         sys.exit(1)

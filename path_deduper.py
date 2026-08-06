@@ -1,30 +1,20 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 """
 PATH Deduplicator and Formatter Script
 Extracts unique PATH values, assigns them to variables (P1, P2, etc.),
 and saves the configuration to ~/.bashrc
 """
-
 from __future__ import annotations
-
 import os
 from collections import OrderedDict
 from pathlib import Path
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def get_current_path():
     return os.environ.get("PATH", "")
-
-
 def parse_path_values(path_string):
     if not path_string:
         return []
     return path_string.split(":")
-
-
 def deduplicate_paths(path_list):
     seen = set()
     deduplicated = OrderedDict()
@@ -33,8 +23,6 @@ def deduplicate_paths(path_list):
             seen.add(path)
             deduplicated[path] = True
     return list(deduplicated.keys())
-
-
 def generate_bash_config(paths):
     if not paths:
         return ("", "")
@@ -44,15 +32,11 @@ def generate_bash_config(paths):
     path_vars = ":".join([f"$P{i}" for i in range(1, len(paths) + 1)])
     export_statement = f"export PATH={path_vars}:$PATH"
     return (assignments, export_statement)
-
-
 def read_bashrc(bashrc_path):
     if bashrc_path.exists():
         with open(bashrc_path, encoding="utf-8") as f:
             return f.read()
     return ""
-
-
 def find_and_remove_old_config(content):
     marker_start = "# === PATH DEDUPLICATION (AUTO-GENERATED) ===\n"
     marker_end = "# === END PATH DEDUPLICATION ===\n"
@@ -63,8 +47,6 @@ def find_and_remove_old_config(content):
             end_idx += len(marker_end)
             content = content[:start_idx] + content[end_idx:]
     return content.rstrip() + "\n"
-
-
 def append_to_bashrc(bashrc_path, assignments, export_statement):
     content = read_bashrc(bashrc_path)
     content = find_and_remove_old_config(content)
@@ -77,8 +59,6 @@ def append_to_bashrc(bashrc_path, assignments, export_statement):
     new_config += "# === END PATH DEDUPLICATION ===\n"
     with open(bashrc_path, "a", encoding="utf-8") as f:
         f.write(new_config)
-
-
 def display_results(original_paths, deduplicated_paths, assignments, export_statement):
     print("=" * 70)
     print("PATH DEDUPLICATION RESULTS")
@@ -106,20 +86,15 @@ def display_results(original_paths, deduplicated_paths, assignments, export_stat
                     print(f"   {path} (appeared {count} times)")
                     seen.add(path)
     print("\n" + "=" * 70)
-
-
 def backup_bashrc(bashrc_path):
     if bashrc_path.exists():
         backup_path = bashrc_path.with_suffix(".bashrc.backup")
         if not backup_path.exists():
             import shutil
-
             shutil.copy2(bashrc_path, backup_path)
             print(f"✓ Backup created: {backup_path}")
             return True
     return False
-
-
 def main():
     print("\n🚀 Clash of Clans TH18 BASE deduplicator...")
     home_dir = Path.home()
@@ -163,8 +138,6 @@ def main():
     print("\n💡 Then verify with:")
     print("   echo $PATH")
     print("\n✨ Done!")
-
-
 if __name__ == "__main__":
     try:
         main()

@@ -1,11 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 """
 Recursive Python file runner with parallel processing and timeout handling.
 Runs all .py files in a directory tree, continuing even if some fail.
 """
-
 import argparse
 import multiprocessing
 import subprocess
@@ -13,10 +11,7 @@ import sys
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def run_python_file(file_path: Path, timeout: int = 10) -> tuple[Path, bool, str | None, str | None]:
     try:
         result = subprocess.run(
@@ -51,15 +46,11 @@ def run_python_file(file_path: Path, timeout: int = 10) -> tuple[Path, bool, str
         return (file_path, False, "SubprocessError", str(e))
     except Exception as e:
         return (file_path, False, "UnexpectedError", f"{type(e).__name__}: {e!s}")
-
-
 def find_python_files(root_dir: Path, recursive: bool = True) -> list[Path]:
     if recursive:
         return sorted(root_dir.rglob("*.py"))
     else:
         return sorted(root_dir.glob("*.py"))
-
-
 def run_files_parallel(
     files: list[Path], max_workers: int | None = None, timeout: int = 10, verbose: bool = False
 ) -> dict[str, list[tuple[Path, str]]]:
@@ -87,8 +78,6 @@ def run_files_parallel(
                 if verbose:
                     print(f"❌ {file_path}: FutureError - {e}")
     return results
-
-
 def main():
     parser = argparse.ArgumentParser(description="Recursively run Python files with timeout and parallel processing")
     parser.add_argument(
@@ -146,7 +135,5 @@ def main():
                 print(f"   Message: {error_msg}")
     if results["failed"]:
         sys.exit(1)
-
-
 if __name__ == "__main__":
     main()

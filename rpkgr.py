@@ -1,7 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import argparse
 import os
 import re
@@ -9,16 +7,10 @@ import shutil
 import sysconfig
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
 from wheel.wheelfile import WheelFile
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def find_site_packages() -> Path:
     return Path(sysconfig.get_paths()["purelib"])
-
-
 def list_installed_packages(site: Path):
     pkgs = {}
     for item in site.iterdir():
@@ -30,8 +22,6 @@ def list_installed_packages(site: Path):
             pkg, version = m.group(1), m.group(2)
             pkgs[pkg.lower()] = pkg, version
     return pkgs
-
-
 def get_wheel_tags(dist_info: Path) -> list[str]:
     wheel_file = dist_info / "WHEEL"
     if not wheel_file.exists():
@@ -39,8 +29,6 @@ def get_wheel_tags(dist_info: Path) -> list[str]:
     content = wheel_file.read_text()
     tags = [line.split(":", 1)[1].strip() for line in content.splitlines() if line.startswith("Tag:")]
     return tags or ["py3-none-any"]
-
-
 def copy_package_files(pkg: str, site: Path, dst: Path) -> None:
     candidates = [
         site / pkg,
@@ -55,15 +43,11 @@ def copy_package_files(pkg: str, site: Path, dst: Path) -> None:
             else:
                 shutil.copy2(c, dst / c.name)
             break
-
-
 def copy_dist_info(pkg: str, version: str, site: Path, dst: Path) -> Path:
     dist_dir = site / f"{pkg}-{version}.dist-info"
     out = dst / dist_dir.name
     shutil.copytree(dist_dir, out)
     return out
-
-
 def copy_scripts(pkg: str, dst: Path) -> None:
     scripts_dir = Path(sysconfig.get_paths()["scripts"])
     if not scripts_dir.exists():
@@ -72,8 +56,6 @@ def copy_scripts(pkg: str, dst: Path) -> None:
     for script in scripts_dir.iterdir():
         if script.is_file() and pattern.match(script.name):
             shutil.copy2(script, dst / script.name)
-
-
 def build_wheel(pkg: str, version: str, tag: str, src_dir: Path, out_dir: Path) -> Path:
     wheel_name = f"{pkg}-{version}-{tag}.whl"
     wheel_path = out_dir / wheel_name
@@ -84,8 +66,6 @@ def build_wheel(pkg: str, version: str, tag: str, src_dir: Path, out_dir: Path) 
                 arcname = full.relative_to(src_dir)
                 wf.write(str(full), str(arcname))
     return wheel_path
-
-
 def repack(pkg: str, site: Path, out_repack: Path, out_whl: Path) -> None:
     pkg_lower = pkg.lower()
     installed = list_installed_packages(site)
@@ -102,8 +82,6 @@ def repack(pkg: str, site: Path, out_repack: Path, out_whl: Path) -> None:
     tag = tags[0]
     wheel = build_wheel(real_pkg, version, tag, target_dir, out_whl)
     print(f"Repacked: {real_pkg} → {wheel}")
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="Repack installed Python packages")
     parser.add_argument("packages", nargs="*", help="Package names")
@@ -130,7 +108,5 @@ def main() -> None:
                 future.result()
             except Exception as e:
                 print(f"Error repacking {pkg}: {e}")
-
-
 if __name__ == "__main__":
     main()

@@ -1,17 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import argparse
 import json
 import sys
 from pathlib import Path
 from pprint import pformat
-
 import jmespath
 from jmespath import exceptions
-
-
 def main() -> int | None:
     parser = argparse.ArgumentParser()
     parser.add_argument("expression")
@@ -49,7 +44,5 @@ def main() -> int | None:
     except exceptions.ParseError as e:
         sys.stderr.write(f"syntax-error: {e}\n")
         return 1
-
-
 if __name__ == "__main__":
     sys.exit(main())

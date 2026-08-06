@@ -1,12 +1,10 @@
+#!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 import stat
 from pathlib import Path
-
 CHUNK_SIZE = 1024 * 1024
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 from dh import should_skip
-
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -21,8 +19,6 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
-
 def has_shebang(path: Path) -> bool:
     try:
         with path.open("rb") as f:
@@ -30,8 +26,6 @@ def has_shebang(path: Path) -> bool:
             return first_three == b"#!/"
     except (OSError, PermissionError):
         return False
-
-
 def make_exec(filename: Path) -> None:
     original_mode = filename.stat().st_mode
     levels = [stat.S_IXUSR, stat.S_IXGRP, stat.S_IXOTH]
@@ -44,12 +38,8 @@ def make_exec(filename: Path) -> None:
             break
         except OSError:
             continue
-
-
 def is_exec(path: Path) -> bool:
     return bool(path.stat().st_mode & stat.S_IXUSR)
-
-
 def process_directory(cwd: Path) -> None:
     for path in cwd.rglob("*"):
         if should_skip(path):
@@ -73,7 +63,5 @@ def process_directory(cwd: Path) -> None:
                 print(f"[+] Made executable: {path.relative_to(cwd)}")
             else:
                 print(f"[=] Already executable: {path}")
-
-
 if __name__ == "__main__":
     process_directory(Path.cwd())

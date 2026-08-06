@@ -1,13 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 """
 Recursive file compression/decompression tool using Zstandard.
 Compresses files in current directory recursively, skipping certain extensions and .git folders.
 Uses Path.walk() for memory-efficient traversal.
 """
-
 from __future__ import annotations
-
 import argparse
 import fnmatch
 import json
@@ -15,9 +12,7 @@ import sys
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
 import zstandard as zstd
-
 SKIP_EXTENSIONS_COMPRESS = {
     ".xz",
     ".gz",
@@ -113,19 +108,15 @@ SKIP_DIRS = {
     "zstandard",
 }
 SKIP_DIR_PATTERNS = ["*.egg-info", "*.dist-info"]
-
-
 class SpaceStats:
     def __init__(self):
         self.original_size = 0
         self.compressed_size = 0
         self.lock = threading.Lock()
-
     def add(self, original: int, compressed: int):
         with self.lock:
             self.original_size += original
             self.compressed_size += compressed
-
     def get_savings(self):
         if self.original_size == 0:
             return 0, 0, 0
@@ -133,14 +124,10 @@ class SpaceStats:
         ratio = self.compressed_size / self.original_size * 100
         percent_saved = saved / self.original_size * 100
         return saved, ratio, percent_saved
-
-
 def should_skip_directory(dir_name: str) -> bool:
     if dir_name in SKIP_DIRS:
         return True
     return any(fnmatch.fnmatch(dir_name, pattern) for pattern in SKIP_DIR_PATTERNS)
-
-
 def is_editable_package_dir(root_path: Path) -> bool:
     try:
         for item in root_path.iterdir():
@@ -160,8 +147,6 @@ def is_editable_package_dir(root_path: Path) -> bool:
         return False
     except (PermissionError, OSError):
         return False
-
-
 def iter_files(base_dir: Path, compress: bool):
     skipped_symlinks = 0
     skipped_extensions = 0
@@ -170,13 +155,11 @@ def iter_files(base_dir: Path, compress: bool):
     skipped_media = 0
     total_dirs = 0
     total_files = 0
-
     def accept_file(file_path: Path) -> bool:
         nonlocal skipped_extensions, skipped_media
         if ".egg-info" in str(file_path) or ".dist-info" in str(file_path):
             skipped_extensions += 1
             return False
-
         if compress:
             suf = file_path.suffix.lower()
             if suf in SKIP_EXTENSIONS_COMPRESS:
@@ -243,13 +226,10 @@ def iter_files(base_dir: Path, compress: bool):
                 skipped_extensions += 1
                 return False
             return True
-
     for root, dirs, file_names in base_dir.walk():
         root_path = Path(root)
-
         if ".git" in root_path.parts:
             continue
-
         dirs_to_remove = []
         for dir_name in dirs:
             if should_skip_directory(dir_name):
@@ -257,14 +237,11 @@ def iter_files(base_dir: Path, compress: bool):
                 skipped_dirs += 1
         for dir_name in dirs_to_remove:
             dirs.remove(dir_name)
-
         if is_editable_package_dir(root_path):
             dirs.clear()
             skipped_editable += 1
             continue
-
         total_dirs += 1
-
         for file_name in file_names:
             file_path = root_path / file_name
             if file_path.is_symlink():
@@ -273,7 +250,6 @@ def iter_files(base_dir: Path, compress: bool):
             if accept_file(file_path):
                 total_files += 1
                 yield file_path
-
     if skipped_symlinks > 0:
         print(f"⚠️  Skipped {skipped_symlinks} symlinks")
     if skipped_media > 0:
@@ -284,10 +260,7 @@ def iter_files(base_dir: Path, compress: bool):
         print(f"ℹ️  Skipped {skipped_editable} editable package directories")
     if skipped_dirs > 0:
         print(f"ℹ️  Skipped {skipped_dirs} excluded directories")
-
     return total_dirs, total_files
-
-
 def compress_file(
     input_path: Path,
     output_path: Path,
@@ -306,7 +279,6 @@ def compress_file(
                 if not chunk:
                     break
                 outfile.write(chunk)
-
         compressed_size = output_path.stat().st_size
         if stats:
             stats.add(original_size, compressed_size)
@@ -320,8 +292,6 @@ def compress_file(
         except Exception:
             pass
         return False, input_path, str(e), 0, 0
-
-
 def decompress_file(
     input_path: Path,
     output_path: Path,
@@ -339,7 +309,6 @@ def decompress_file(
                 if not chunk:
                     break
                 outfile.write(chunk)
-
         decompressed_size = output_path.stat().st_size
         if stats:
             stats.add(decompressed_size, compressed_size)
@@ -353,37 +322,28 @@ def decompress_file(
         except Exception:
             pass
         return False, input_path, str(e), 0, 0
-
-
 def format_size(bytes_size: float) -> str:
     for unit in ["B", "KB", "MB", "GB", "TB"]:
         if bytes_size < 1024.0:
             return f"{bytes_size:.2f} {unit}"
         bytes_size /= 1024.0
     return f"{bytes_size:.2f} PB"
-
-
 def process_stream(base_dir: Path, compress: bool, level: int, threads: int, remove_original: bool):
     print(f"\n{'Compressing' if compress else 'Decompressing'} files (streaming)...")
     print(f"Remove original files: {'Yes' if remove_original else 'No'}")
     print("-" * 42)
-
     stats = SpaceStats()
     total_submitted = 0
     completed = 0
     skipped = 0
     failed = []
-
     compressor_threads = max(1, min(threads, 4)) if compress else 1
     decompressor_threads = max(1, threads)
-
     max_in_flight = max(threads * 4, 8)
-
     def output_path_for(p: Path) -> Path:
         if compress:
             return p.with_suffix(p.suffix + ".zst")
         return p.with_suffix("")
-
     futures = {}
     with ThreadPoolExecutor(max_workers=threads) as executor:
         for file_path in iter_files(base_dir, compress):
@@ -392,7 +352,6 @@ def process_stream(base_dir: Path, compress: bool, level: int, threads: int, rem
                 skipped += 1
                 completed += 1
                 continue
-
             if compress:
                 fut = executor.submit(
                     compress_file,
@@ -412,10 +371,8 @@ def process_stream(base_dir: Path, compress: bool, level: int, threads: int, rem
                     remove_original,
                     stats,
                 )
-
             futures[fut] = file_path, op_out
             total_submitted += 1
-
             if len(futures) >= max_in_flight:
                 for done in as_completed(list(futures.keys()), timeout=None):
                     result = done.result()
@@ -428,7 +385,6 @@ def process_stream(base_dir: Path, compress: bool, level: int, threads: int, rem
                     if not result[0]:
                         failed.append((result[1], result[2]))
                     break
-
         for future in as_completed(futures):
             result = future.result()
             completed += 1
@@ -438,7 +394,6 @@ def process_stream(base_dir: Path, compress: bool, level: int, threads: int, rem
             if not result[0]:
                 failed.append((result[1], result[2]))
         print()
-
     print("-" * 42)
     if compress and (stats.original_size > 0 or stats.compressed_size > 0):
         saved, ratio, percent_saved = stats.get_savings()
@@ -447,10 +402,8 @@ def process_stream(base_dir: Path, compress: bool, level: int, threads: int, rem
         print(f"   Compressed size: {format_size(stats.compressed_size)}")
         print(f"   Space saved:    {format_size(saved)} ({percent_saved:.1f}%)")
         print(f"   Compression ratio: {ratio:.1f}%")
-
     if skipped > 0:
         print(f"\n⚠️  Skipped {skipped} files (already exist or invalid format)")
-
     if failed:
         print(f"\n❌ Failed to process {len(failed)} files:")
         for path, error in failed[:200]:
@@ -465,8 +418,6 @@ def process_stream(base_dir: Path, compress: bool, level: int, threads: int, rem
                 print("   Original files have been removed.")
         else:
             print("\n⚠️  No files were processed.")
-
-
 def main():
     parser = argparse.ArgumentParser(description="Recursively compress or decompress files using Zstandard")
     group = parser.add_mutually_exclusive_group(required=False)
@@ -481,11 +432,9 @@ def main():
         "--keep", default=False, action="store_true", help="Keep original files (default: remove on success)"
     )
     args = parser.parse_args()
-
     if not args.compress and not args.decompress:
         args.compress = True
         print("No action specified, defaulting to compression mode")
-
     base_dir = Path(args.dir).resolve()
     if not base_dir.exists():
         print(f"Error: Directory '{base_dir}' does not exist")
@@ -493,19 +442,14 @@ def main():
     if not base_dir.is_dir():
         print(f"Error: '{base_dir}' is not a directory")
         sys.exit(1)
-
     remove_original = not args.keep
-
     print(f"Working directory: {base_dir}")
     print(f"Mode: {'Compression' if args.compress else 'Decompression'}")
     print(f"Threads: {args.threads}")
     if args.compress:
         print(f"Compression level: {args.level}")
     print(f"Keep original files: {'Yes' if args.keep else 'No'}")
-
     print("\nScanning directory tree...")
     process_stream(base_dir, args.compress, args.level, args.threads, remove_original)
-
-
 if __name__ == "__main__":
     main()

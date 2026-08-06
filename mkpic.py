@@ -1,29 +1,16 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import compileall
 import os
 import sys
 from collections.abc import Callable
 from os import scandir as os_scandir
 from pathlib import Path
-
 CHUNK_SIZE = 1024 * 1024
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
-def mpf3(process_function: Callable, files: list[Path], **kwargs):
-    from joblib import Parallel, delayed
-
-    file_strings = [str(f) for f in files]
-    return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
-
-
+from dh import mpf3
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
-
     path = Path(path)
     if is_binary(path):
         return False
@@ -43,8 +30,6 @@ def is_python_file(path: str | Path) -> bool:
         except:
             return False
     return False
-
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -55,27 +40,22 @@ def is_binary(path: Path | str) -> bool:
         if b"\x00" in chunk:
             return True
         text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
-        nontext = sum(1 for b in chunk if b not in text_chars)
+        nontext = sum((1 for b in chunk if b not in text_chars))
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
-
 def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
     if path.is_file():
         if path.suffix == ".py":
             return [path]
-        if not path.suffix and not path.name.startswith(".") and is_python_file(path):
+        if not path.suffix and (not path.name.startswith(".")) and is_python_file(path):
             return [path]
         return []
-
     if not path.is_dir():
         return []
-
     pyfiles = []
     stack = [path]
-
     while stack:
         current = stack.pop()
         try:
@@ -90,19 +70,14 @@ def get_pyfiles(path: str | Path) -> list[Path]:
                         p = Path(entry.path)
                         if p.suffix == ".py":
                             pyfiles.append(p)
-                        elif not p.suffix and not p.name.startswith(".") and is_python_file(p):
+                        elif not p.suffix and (not p.name.startswith(".")) and is_python_file(p):
                             pyfiles.append(p)
         except (PermissionError, OSError):
             continue
-
     return sorted(pyfiles)
-
-
 REMOVE_ORIG = False
 LEGACY_MODE = False
 OPTIMIZE_LEVEL = 2
-
-
 def process_file(path) -> bool | None:
     path = Path(path)
     if not path.exists():
@@ -121,8 +96,6 @@ def process_file(path) -> bool | None:
             path.unlink()
         return True
     return False
-
-
 def main():
     global REMOVE_ORIG, LEGACY_MODE, OPTIMIZE_LEVEL
     os.environ["PYTHONPYCACHEPREFIX"] = "__pycache__"
@@ -177,7 +150,5 @@ def main():
         return 0
     mpf3(process_file, files)
     return 0
-
-
 if __name__ == "__main__":
     sys.exit(main())

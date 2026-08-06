@@ -1,21 +1,15 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import argparse
 import difflib
 import sys
 from pathlib import Path
 from typing import ClassVar
-
 from textual.app import App, ComposeResult
 from textual.color import Color
 from textual.containers import Horizontal, ScrollableContainer
 from textual.widgets import Footer, Header, Label, Static
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 class DiffLine(Static):
     def __init__(self, text: str, line_type: str, line_num: int | None = None) -> None:
         self.raw_text = text
@@ -24,7 +18,6 @@ class DiffLine(Static):
         display_text = self._create_display_text()
         super().__init__(display_text)
         self._apply_styling()
-
     def _create_display_text(self) -> str:
         prefix = f"{self.line_num:4d}" if self.line_num is not None else "    "
         safe_text = self.raw_text.replace("[", "[]")
@@ -37,7 +30,6 @@ class DiffLine(Static):
         if self.line_type == "?":
             return f"{prefix} ? {safe_text}"
         return f"{prefix}   {safe_text}"
-
     def _apply_styling(self) -> None:
         if self.line_type == " ":
             self.styles.background = Color(30, 30, 30)
@@ -51,24 +43,18 @@ class DiffLine(Static):
         elif self.line_type == "?":
             self.styles.background = Color(60, 60, 30)
             self.styles.color = Color(255, 255, 150)
-
-
 class DiffPanel(ScrollableContainer):
     def __init__(self, title: str, lines: list[tuple[str, str, int]]) -> None:
         super().__init__()
         self.panel_title = title
         self.lines = lines
-
     def compose(self) -> ComposeResult:
         yield Label(f"[bold]{self.panel_title}[/bold]", classes="panel-title")
         for text, line_type, line_num in self.lines:
             yield DiffLine(text, line_type, line_num)
-
     def on_mount(self) -> None:
         self.can_focus = True
         self.can_focus_children = True
-
-
 class DiffViewerApp(App):
     CSS = """
     Screen {
@@ -113,7 +99,6 @@ class DiffViewerApp(App):
         ("/", "search", "Search"),
         ("n", "next_search", "Next Result"),
     ]
-
     def __init__(self, file1: str, file2: str) -> None:
         super().__init__()
         self.file1 = Path(file1)
@@ -122,7 +107,6 @@ class DiffViewerApp(App):
         self.right_lines = []
         self.search_term = ""
         self.search_results = []
-
     def read_file(self, filepath: Path) -> list[str]:
         try:
             with Path(filepath).open(encoding="utf-8") as f:
@@ -137,7 +121,6 @@ class DiffViewerApp(App):
         except Exception as e:
             self.notify(f"Error reading {filepath}: {e}", severity="error")
             return []
-
     def compute_diff(self) -> None:
         lines1 = self.read_file(self.file1)
         lines2 = self.read_file(self.file2)
@@ -166,7 +149,6 @@ class DiffViewerApp(App):
             elif line_type == "?":
                 self.left_lines.append((content, line_type, None))
                 self.right_lines.append((content, line_type, None))
-
     def compose(self) -> ComposeResult:
         yield Header()
         self.compute_diff()
@@ -176,12 +158,10 @@ class DiffViewerApp(App):
             yield left_panel
             yield right_panel
         yield Footer()
-
     def on_mount(self) -> None:
         panels = self.query(DiffPanel)
         if panels:
             panels.first().focus()
-
     def action_toggle_panel(self) -> None:
         current = self.focused
         if current and isinstance(current, DiffPanel):
@@ -195,16 +175,12 @@ class DiffViewerApp(App):
             panels = self.query(DiffPanel)
             if panels:
                 panels.first().focus()
-
     def action_search(self) -> None:
-
         def on_input(submitted_text: str) -> None:
             if submitted_text:
                 self.search_term = submitted_text
                 self.highlight_search_results()
-
         self.push_screen("input", on_input, title="Search", instructions="Enter text to search for:")
-
     def highlight_search_results(self) -> None:
         if not self.search_term:
             return
@@ -213,11 +189,8 @@ class DiffViewerApp(App):
         for line in self.query(DiffLine):
             if self.search_term.lower() in line.raw_text.lower():
                 line.styles.background = Color(70, 70, 150)
-
     def action_next_search(self) -> None:
         self.notify("Next search result (feature not fully implemented)")
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Compare two files and show their differences",
@@ -242,7 +215,5 @@ Examples:
     app = DiffViewerApp(str(file1), str(file2))
     app.run()
     return 0
-
-
 if __name__ == "__main__":
     sys.exit(main())

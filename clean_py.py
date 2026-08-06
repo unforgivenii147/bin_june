@@ -1,17 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import argparse
 import ast
 import multiprocessing as mp
 import shutil
 import traceback
 from pathlib import Path
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 class UsageAnalyzer(ast.NodeVisitor):
     def __init__(self) -> None:
         self.func_defs = set()
@@ -22,22 +17,18 @@ class UsageAnalyzer(ast.NodeVisitor):
         self.class_uses = set()
         self.imports = {}
         self.import_uses = set()
-
     def visit_FunctionDef(self, node) -> None:
         self.func_defs.add(node.name)
         self.generic_visit(node)
-
     def visit_ClassDef(self, node) -> None:
         self.class_defs.add(node.name)
         self.generic_visit(node)
-
     def visit_Assign(self, node) -> None:
         if isinstance(node.parent, ast.Module):
             for target in node.targets:
                 if isinstance(target, ast.Name):
                     self.var_defs.add(target.id)
         self.generic_visit(node)
-
     def visit_Name(self, node) -> None:
         if isinstance(node.ctx, ast.Load):
             self.var_uses.add(node.id)
@@ -45,22 +36,16 @@ class UsageAnalyzer(ast.NodeVisitor):
             self.class_uses.add(node.id)
             self.import_uses.add(node.id)
         self.generic_visit(node)
-
     def visit_Import(self, node) -> None:
         for alias in node.names:
             self.imports[alias.asname or alias.name] = node
-
     def visit_ImportFrom(self, node) -> None:
         for alias in node.names:
             self.imports[alias.asname or alias.name] = node
-
-
 def annotate_parents(tree) -> None:
     for node in ast.walk(tree):
         for child in ast.iter_child_nodes(node):
             child.parent = node
-
-
 def find_unused_symbols(source: str):
     try:
         tree = ast.parse(source)
@@ -79,8 +64,6 @@ def find_unused_symbols(source: str):
     unused["variables"] = sorted(unused_vars)
     unused["imports"] = unused_imports
     return unused, []
-
-
 def remove_unused(source: str, unused) -> str:
     tree = ast.parse(source)
     annotate_parents(tree)
@@ -101,8 +84,6 @@ def remove_unused(source: str, unused) -> str:
         new_body.append(node)
     tree.body = new_body
     return ast.unparse(tree)
-
-
 def process_file(filepath, dry_run: bool = False):
     Path(path)
     errors = []
@@ -128,16 +109,10 @@ def process_file(filepath, dry_run: bool = False):
         shutil.copy2(filepath, backup_path)
         filepath.write_text(new_source, encoding="utf-8")
     return filepath, unused, errors
-
-
 def gather_python_files(root: Path) -> list[Path]:
     return [p for p in root.rglob("*.py") if p.is_file()]
-
-
 def worker(args):
     return process_file(*args)
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="Remove unused functions, classes, variables, and imports.")
     parser.add_argument("--dry-run", action="store_true", help="Show what would change without modifying files.")
@@ -165,7 +140,5 @@ def main() -> None:
                 print("  Unused imports:", list(unused["imports"].keys()))
         for err in errors:
             print(f"[ERROR] {filepath}: {err}")
-
-
 if __name__ == "__main__":
     main()

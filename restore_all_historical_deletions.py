@@ -2,8 +2,6 @@
 import subprocess
 import sys
 from pathlib import Path
-
-
 def run_git_command(args: list[str]) -> str:
     """Executes a git command and returns the standard output string."""
     try:
@@ -12,56 +10,41 @@ def run_git_command(args: list[str]) -> str:
     except subprocess.CalledProcessError as e:
         print(f"❌ Git error executing {' '.join(e.cmd)}:\n{e.stderr.strip()}")
         sys.exit(1)
-
-
 def main():
-
     repo_root = Path(".")
     if not (repo_root / ".git").exists() and not run_git_command(["rev-parse", "--is-inside-work-tree"]) == "true":
         print("❌ Error: Current directory is not a Git repository root.")
         sys.exit(1)
-
     print("🔍 Analyzing repository history for all historical file deletions...")
-
     log_output = run_git_command(["log", "--diff-filter=D", "--pretty=format:%H", "--name-only"])
-
     if not log_output:
         print("🎉 No deleted files were found in this repository's entire history.")
         return
-
     deleted_files_map = {}
     current_commit_hash = None
-
     for line in log_output.splitlines():
         line = line.strip()
         if not line:
             continue
-
         if len(line) == 40 and " " not in line:
             current_commit_hash = line
         else:
             file_path = line
-
             if file_path not in deleted_files_map:
                 deleted_files_map[file_path] = current_commit_hash
-
     files_to_restore = []
     for path_str, deletion_commit in deleted_files_map.items():
         if not Path(path_str).exists():
             files_to_restore.append((path_str, deletion_commit))
-
     if not files_to_restore:
         print("ℹ️  All historically deleted files are already active or restored in your workspace.")
         return
-
     print(f"⚠️  Found {len(files_to_restore)} historically deleted file(s) missing from your workspace.\n")
-
     restored_count = 0
     for path_str, deletion_commit in files_to_restore:
         print(f"🔄 Restoring: {path_str} (From commit prior to {deletion_commit[:8]})")
         try:
             run_git_command(["checkout", f"{deletion_commit}^", "--", path_str])
-
             run_git_command(["add", path_str])
             restored_count += 1
         except Exception:
@@ -71,7 +54,6 @@ def main():
                 restored_count += 1
             except Exception as fallback_err:
                 print(f"   ❌ Could not restore {path_str}: {fallback_err}")
-
     if restored_count > 0:
         print("\n💾 Committing restored files into the repository repository...")
         commit_output = run_git_command(["commit", "-m", "removed files"])
@@ -79,7 +61,5 @@ def main():
         print(commit_output)
     else:
         print("\n❌ No files were successfully restored.")
-
-
 if __name__ == "__main__":
     main()

@@ -1,28 +1,20 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 """
 Scan ~/bin for Python scripts and count imports from:
   - Standard library modules
   - Third-party packages (installed via pip)
   - Custom 'dh' package
-
 Save a comprehensive report to ~/dh_usage.txt and generate PNG charts.
 """
-
 from __future__ import annotations
-
 import ast
 import pkgutil
 from collections import Counter, defaultdict
 from pathlib import Path
-
 import matplotlib.pyplot as plt
-
 BIN_DIR = Path.home() / "bin"
 REPORT = Path.home() / "dh_usage.txt"
 PACKAGE = "dh"
-
-
 def get_stdlib_modules() -> set[str]:
     stdlib = set()
     for module_info in pkgutil.iter_modules():
@@ -101,13 +93,9 @@ def get_stdlib_modules() -> set[str]:
     }
     stdlib.update(extra)
     return stdlib
-
-
 def is_stdlib(module_name: str, stdlib_set: set[str]) -> bool:
     top_level = module_name.split(".")[0]
     return top_level in stdlib_set
-
-
 def is_third_party(module_name: str, stdlib_set: set[str]) -> bool:
     top_level = module_name.split(".")[0]
     if top_level == PACKAGE:
@@ -115,17 +103,13 @@ def is_third_party(module_name: str, stdlib_set: set[str]) -> bool:
     if top_level in stdlib_set:
         return False
     return not top_level.startswith("__")
-
-
 def extract_imports(filepath: Path) -> dict[str, list[str]]:
     try:
         tree = ast.parse(filepath.read_text(encoding="utf-8"))
     except (SyntaxError, UnicodeDecodeError) as e:
         print(f"   ⚠️  Skipping {filepath.name}: {e}")
         return {}
-
     imports: dict[str, list[str]] = defaultdict(list)
-
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
@@ -135,13 +119,11 @@ def extract_imports(filepath: Path) -> dict[str, list[str]]:
                     imports[mod] = []
                 if asname:
                     imports[mod].append(asname)
-
         if isinstance(node, ast.ImportFrom) and node.module:
             mod = node.module
             for alias in node.names:
                 name = alias.name if alias.asname is None else alias.asname
                 imports[mod].append(name)
-
     dh_names: set[str] = set()
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
@@ -149,7 +131,6 @@ def extract_imports(filepath: Path) -> dict[str, list[str]]:
                 if alias.name == PACKAGE or alias.name.startswith(PACKAGE + "."):
                     name = alias.asname if alias.asname else alias.name
                     dh_names.add(name)
-
     for node in ast.walk(tree):
         if isinstance(node, ast.Call):
             func = node.func
@@ -162,23 +143,17 @@ def extract_imports(filepath: Path) -> dict[str, list[str]]:
                     root = root.value
                 if isinstance(root, ast.Name) and root.id in dh_names:
                     imports[PACKAGE].append(func.attr)
-
     return dict(imports)
-
-
 def count_calls(filepath: Path, imports: dict[str, list[str]]) -> dict[str, dict[str, int]]:
     try:
         tree = ast.parse(filepath.read_text(encoding="utf-8"))
     except (SyntaxError, UnicodeDecodeError):
         return {}
-
     local_to_import: dict[str, tuple[str, str]] = {}
     for mod, names in imports.items():
         for name in names:
             local_to_import[name] = (mod, name)
-
     call_counts: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
-
     for node in ast.walk(tree):
         if isinstance(node, ast.Call):
             func = node.func
@@ -190,30 +165,23 @@ def count_calls(filepath: Path, imports: dict[str, list[str]]) -> dict[str, dict
                 for mod, names in imports.items():
                     if mod == obj_name or mod.endswith("." + obj_name):
                         call_counts[mod][func.attr] += 1
-
     return dict(call_counts)
-
-
 def generate_report(
     per_file_data: list[tuple[str, dict[str, dict[str, int]]]],
     stdlib_set: set[str],
 ) -> tuple[str, Counter, Counter, Counter]:
     lines: list[str] = []
     now = __import__("datetime").datetime.now()
-
     stdlib_counts: Counter = Counter()
     thirdparty_counts: Counter = Counter()
     dh_counts: Counter = Counter()
-
     stdlib_files: dict[str, set[str]] = defaultdict(set)
     thirdparty_files: dict[str, set[str]] = defaultdict(set)
     dh_files: dict[str, set[str]] = defaultdict(set)
-
     for fname, module_calls in per_file_data:
         for mod, func_calls in module_calls.items():
             total = sum(func_calls.values())
             top_level = mod.split(".")[0]
-
             if top_level == PACKAGE:
                 dh_counts[mod] += total
                 for func in func_calls:
@@ -226,14 +194,12 @@ def generate_report(
                 thirdparty_counts[mod] += total
                 for func in func_calls:
                     thirdparty_files[func].add(fname)
-
     lines.append(f"{'=' * 80}")
     lines.append(f"  IMPORT USAGE REPORT — {now:%Y-%m-%d %H:%M}")
     lines.append(f"{'=' * 80}")
     lines.append(f"  Scanned directory: {BIN_DIR}")
     lines.append(f"  Files scanned: {len(per_file_data)}")
     lines.append("")
-
     lines.append(f"{'─' * 80}")
     lines.append("  SECTION 1: STANDARD LIBRARY MODULES")
     lines.append(f"{'─' * 80}")
@@ -246,7 +212,6 @@ def generate_report(
         lines.append(f"\n  Total stdlib modules used: {len(stdlib_counts)}")
     else:
         lines.append("  (none)")
-
     lines.append(f"\n{'─' * 80}")
     lines.append("  SECTION 2: THIRD-PARTY PACKAGES")
     lines.append(f"{'─' * 80}")
@@ -259,7 +224,6 @@ def generate_report(
         lines.append(f"\n  Total third-party packages used: {len(thirdparty_counts)}")
     else:
         lines.append("  (none)")
-
     lines.append(f"\n{'─' * 80}")
     lines.append(f"  SECTION 3: CUSTOM '{PACKAGE}' PACKAGE")
     lines.append(f"{'─' * 80}")
@@ -272,19 +236,15 @@ def generate_report(
         lines.append(f"\n  Total dh functions used: {len(dh_counts)}")
     else:
         lines.append("  (none)")
-
     lines.append(f"\n{'─' * 80}")
     lines.append("  SECTION 4: PER-FILE BREAKDOWN")
     lines.append(f"{'─' * 80}")
-
     for fname, module_calls in sorted(per_file_data, key=lambda x: -sum(sum(c.values()) for c in x[1].values())):
         total_calls = sum(sum(c.values()) for c in module_calls.values())
         lines.append(f"\n  📄 {fname}  ({total_calls} total calls)")
-
         stdlib_in_file = {}
         thirdparty_in_file = {}
         dh_in_file = {}
-
         for mod, func_calls in module_calls.items():
             top_level = mod.split(".")[0]
             if top_level == PACKAGE:
@@ -293,7 +253,6 @@ def generate_report(
                 stdlib_in_file[mod] = func_calls
             else:
                 thirdparty_in_file[mod] = func_calls
-
         if stdlib_in_file:
             lines.append("    [stdlib]")
             for mod in sorted(stdlib_in_file):
@@ -303,7 +262,6 @@ def generate_report(
                 for func, count in sorted(funcs.items(), key=lambda x: -x[1]):
                     if count > 0:
                         lines.append(f"        {func:<28} {count} time(s)")
-
         if thirdparty_in_file:
             lines.append("    [third-party]")
             for mod in sorted(thirdparty_in_file):
@@ -313,7 +271,6 @@ def generate_report(
                 for func, count in sorted(funcs.items(), key=lambda x: -x[1]):
                     if count > 0:
                         lines.append(f"        {func:<28} {count} time(s)")
-
         if dh_in_file:
             lines.append(f"    [{PACKAGE}]")
             for mod in sorted(dh_in_file):
@@ -323,15 +280,11 @@ def generate_report(
                 for func, count in sorted(funcs.items(), key=lambda x: -x[1]):
                     if count > 0:
                         lines.append(f"        {func:<28} {count} time(s)")
-
     lines.append("")
     lines.append(f"{'=' * 80}")
     lines.append("  END OF REPORT")
     lines.append(f"{'=' * 80}")
-
     return "\n".join(lines), stdlib_counts, thirdparty_counts, dh_counts
-
-
 def save_charts(
     stdlib_counts: Counter,
     thirdparty_counts: Counter,
@@ -340,15 +293,11 @@ def save_charts(
     stdlib_set: set[str],
 ) -> None:
     output_dir = Path.home()
-
     plt.style.use("seaborn-v0_8-darkgrid")
-
     if not stdlib_counts and not thirdparty_counts and not dh_counts:
         print("⚠️  No data to chart.")
         return
-
     print("\n📊 Generating matplotlib charts...")
-
     fig, ax = plt.subplots(figsize=(12, 6))
     top_stdlib = dict(sorted(stdlib_counts.items(), key=lambda x: -x[1])[:10])
     if top_stdlib:
@@ -360,7 +309,6 @@ def save_charts(
         plt.savefig(output_dir / "01_stdlib_top10.png", dpi=100, bbox_inches="tight")
         plt.close()
         print("   ✅ Saved: 01_stdlib_top10.png")
-
     fig, ax = plt.subplots(figsize=(10, 8))
     category_counts = {
         "Standard Library": sum(stdlib_counts.values()),
@@ -385,7 +333,6 @@ def save_charts(
         plt.savefig(output_dir / "02_category_distribution.png", dpi=100, bbox_inches="tight")
         plt.close()
         print("   ✅ Saved: 02_category_distribution.png")
-
     fig, ax = plt.subplots(figsize=(12, 6))
     top_thirdparty = dict(sorted(thirdparty_counts.items(), key=lambda x: -x[1])[:10])
     if top_thirdparty:
@@ -397,7 +344,6 @@ def save_charts(
         plt.savefig(output_dir / "03_thirdparty_top10.png", dpi=100, bbox_inches="tight")
         plt.close()
         print("   ✅ Saved: 03_thirdparty_top10.png")
-
     _fig, ax = plt.subplots(figsize=(12, 6))
     if dh_counts:
         ax.bar(list(dh_counts.keys()), list(dh_counts.values()), color="#2ecc71")

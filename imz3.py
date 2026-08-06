@@ -1,10 +1,9 @@
+#!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 import ast
 from collections import deque
 from pathlib import Path
 from dh import get_files
-
-
 def extract_imports_from_py(code: str, base_path: Path | None = None) -> set[str]:
     results = set()
     try:
@@ -33,8 +32,6 @@ def extract_imports_from_py(code: str, base_path: Path | None = None) -> set[str
                 if mod not in STDLIB:
                     results.add(mod)
     return results
-
-
 def is_local_module(base_path: Path, module: str) -> bool:
     dots = len(module) - len(module.lstrip("."))
     mod = module.lstrip(".")
@@ -46,8 +43,6 @@ def is_local_module(base_path: Path, module: str) -> bool:
         return True
     py_file = pkg_dir.with_suffix(".py")
     return bool(py_file.exists())
-
-
 def main() -> None:
     cwd = Path.cwd()
     importz = []
@@ -58,7 +53,5 @@ def main() -> None:
     with Path("importz.txt").open("w", encoding="utf-8") as fo:
         for im in importz:
             fo.writelines((str(k) + "\n" for k in im))
-
-
 if __name__ == "__main__":
     main()

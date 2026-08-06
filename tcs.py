@@ -1,14 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import subprocess
 import sys
 from pathlib import Path
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def send_to_process(txt: str) -> None:
     try:
         process = subprocess.Popen(["termux-clipboard-set"], stdin=subprocess.PIPE, text=True, stderr=subprocess.PIPE)
@@ -25,8 +20,6 @@ def send_to_process(txt: str) -> None:
     except Exception as e:
         print(f"An unexpected error occurred while copying to clipboard: {e}", file=sys.stderr)
         sys.exit(1)
-
-
 def selective_copy(path: Path, lines: list[str]) -> None:
     cl = [p for p in lines if p != "-s"]
     selected = []
@@ -37,8 +30,6 @@ def selective_copy(path: Path, lines: list[str]) -> None:
             selected.append(nl[k])
     content = "".join(selected)
     send_to_process(content)
-
-
 def copy_lines_to_clipboard(path: str | Path, start_line: int | None = None, end_line: int | None = None) -> None:
     content = ""
     path = Path(path)
@@ -71,8 +62,6 @@ def copy_lines_to_clipboard(path: str | Path, start_line: int | None = None, end
         print("No content selected to copy.", file=sys.stderr)
         sys.exit(1)
     send_to_process(content)
-
-
 def main() -> None:
     if len(sys.argv) < 2 or len(sys.argv) > 5:
         print(f"Usage: {sys.argv[0]} <path> [start_line] [end_line]", file=sys.stderr)
@@ -122,7 +111,5 @@ def main() -> None:
         copy_lines_to_clipboard(path, start_line, end_line)
     else:
         selective_copy(path, sys.argv[2:])
-
-
 if __name__ == "__main__":
     main()

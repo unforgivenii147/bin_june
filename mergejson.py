@@ -1,11 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import argparse
 import json
 import sys
-
-
 def deep_merge(dict1, dict2):
     """
     Recursively merges two dictionaries.
@@ -15,7 +12,6 @@ def deep_merge(dict1, dict2):
         return dict2
     if dict2 is None:
         return dict1
-
     merged = dict1.copy()
     for key, value in dict2.items():
         if key in merged and isinstance(merged[key], dict) and isinstance(value, dict):
@@ -23,11 +19,8 @@ def deep_merge(dict1, dict2):
         else:
             merged[key] = value
     return merged
-
-
 def merge_json_files(input_files, output_file):
     merged_data = None
-
     for file_path in input_files:
         try:
             with open(file_path, "r", encoding="utf-8") as f:
@@ -38,12 +31,10 @@ def merge_json_files(input_files, output_file):
         except json.JSONDecodeError:
             print(f"Error: File '{file_path}' contains invalid JSON.")
             sys.exit(1)
-
         # Initialize merged_data with the first file's content
         if merged_data is None:
             merged_data = data
             continue
-
         # Ensure all files have the same top-level structure (List or Dict)
         if type(merged_data) != type(data):
             print(
@@ -51,7 +42,6 @@ def merge_json_files(input_files, output_file):
                 f"but '{file_path}' is a {type(data).__name__}. Cannot merge."
             )
             sys.exit(1)
-
         # Perform the merge based on data type
         if isinstance(merged_data, list):
             merged_data.extend(data)
@@ -60,7 +50,6 @@ def merge_json_files(input_files, output_file):
         else:
             print(f"Error: Unsupported top-level JSON type: {type(data).__name__}")
             sys.exit(1)
-
     # Write the merged data to the output file
     try:
         with open(output_file, "w", encoding="utf-8") as f:
@@ -69,18 +58,13 @@ def merge_json_files(input_files, output_file):
     except IOError as e:
         print(f"Error writing to output file: {e}")
         sys.exit(1)
-
-
 if __name__ == "__main__":
     # Set up command line argument parsing
     parser = argparse.ArgumentParser(description="Merge two or more JSON files into one.")
     parser.add_argument("inputs", nargs="+", help="Paths to the input JSON files (minimum 2)")
     parser.add_argument("-o", "--output", required=True, help="Path for the merged output JSON file")
-
     args = parser.parse_args()
-
     if len(args.inputs) < 2:
         print("Error: Please provide at least two input files to merge.")
         sys.exit(1)
-
     merge_json_files(args.inputs, args.output)

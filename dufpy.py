@@ -1,39 +1,16 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import ast
 import os
 import sys
 from collections.abc import Callable
 from os import scandir as os_scandir
 from pathlib import Path
-
 from xxhash import xxh64_hexdigest
-
 CHUNK_SIZE = 1024 * 1024
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
-def mpf3(process_function: Callable, files: list[Path], **kwargs):
-    from joblib import Parallel, delayed
-
-    file_strings = [str(f) for f in files]
-    return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
-
-
-ATTRIBUTES = {
-    "bold": 1,
-    "dark": 2,
-    "italic": 3,
-    "underline": 4,
-    "blink": 5,
-    "reverse": 7,
-    "concealed": 8,
-    "strike": 9,
-}
-
+from dh import mpf3
+ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
 HIGHLIGHTS = {
     "on_black": 40,
     "on_grey": 40,
@@ -53,7 +30,6 @@ HIGHLIGHTS = {
     "on_light_cyan": 106,
     "on_white": 107,
 }
-
 COLORS = {
     "black": 30,
     "grey": 30,
@@ -73,10 +49,7 @@ COLORS = {
     "light_cyan": 96,
     "white": 97,
 }
-
 RESET = "\x1b[0m"
-
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -96,8 +69,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
-
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
     if not can_colorize(no_color=no_color, force_color=force_color):
@@ -120,15 +91,10 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
             result = fmt_str % (ATTRIBUTES[attr], result)
     result += RESET
     return result
-
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
-
-
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
-
     path = Path(path)
     if is_binary(path):
         return False
@@ -148,8 +114,6 @@ def is_python_file(path: str | Path) -> bool:
         except:
             return False
     return False
-
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -160,27 +124,22 @@ def is_binary(path: Path | str) -> bool:
         if b"\x00" in chunk:
             return True
         text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
-        nontext = sum(1 for b in chunk if b not in text_chars)
+        nontext = sum((1 for b in chunk if b not in text_chars))
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
-
 def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
     if path.is_file():
         if path.suffix == ".py":
             return [path]
-        if not path.suffix and not path.name.startswith(".") and is_python_file(path):
+        if not path.suffix and (not path.name.startswith(".")) and is_python_file(path):
             return [path]
         return []
-
     if not path.is_dir():
         return []
-
     pyfiles = []
     stack = [path]
-
     while stack:
         current = stack.pop()
         try:
@@ -195,19 +154,14 @@ def get_pyfiles(path: str | Path) -> list[Path]:
                         p = Path(entry.path)
                         if p.suffix == ".py":
                             pyfiles.append(p)
-                        elif not p.suffix and not p.name.startswith(".") and is_python_file(p):
+                        elif not p.suffix and (not p.name.startswith(".")) and is_python_file(p):
                             pyfiles.append(p)
         except (PermissionError, OSError):
             continue
-
     return sorted(pyfiles)
-
-
 def process_file(path) -> tuple[str, Path]:
     path = Path(path)
-    return xxh64_hexdigest(ast.unparse(ast.parse(path.read_text(encoding="utf-8")))), path
-
-
+    return (xxh64_hexdigest(ast.unparse(ast.parse(path.read_text(encoding="utf-8")))), path)
 def main() -> None:
     cwd = Path.cwd()
     files = get_pyfiles(cwd)
@@ -231,7 +185,5 @@ def main() -> None:
                     path.unlink()
     if deleted:
         cprint(f"{deleted} files removed.", "cyan")
-
-
 if __name__ == "__main__":
     main()

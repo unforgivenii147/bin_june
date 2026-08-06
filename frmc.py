@@ -1,3 +1,4 @@
+#!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 import ast
 import os
@@ -5,11 +6,8 @@ import sys
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
-from dh import SOURCE_CODE_EXT, get_files, get_nobinary
-
+from dh import SOURCE_CODE_EXT, fsz, get_files, get_nobinary, mpf3
 CHUNK_SIZE = 1024 * 1024
-
-
 def remove_blank_lines(text) -> str:
     lines = text.splitlines(keepends=True)
     result_lines = []
@@ -21,8 +19,6 @@ def remove_blank_lines(text) -> str:
         result_lines.append(line)
         prev_blank = is_blank
     return "".join(result_lines)
-
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -37,20 +33,6 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
-
-def fsz(sz: float) -> str:
-    sz = abs(int(sz))
-    units = ("B", "KB", "MB", "GB", "TB")
-    if sz == 0:
-        return "0 B"
-    i = min((int(sz).bit_length() - 1) // 10, len(units) - 1)
-    value = sz / 1024**i
-    if i == 0:
-        return f"{int(value)} {units[i]}"
-    return f"{value:.1f} {units[i]}"
-
-
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -60,15 +42,6 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
-
-
-def mpf3(process_function: Callable, files: list[Path], **kwargs):
-    from joblib import Parallel, delayed
-
-    file_strings = [str(f) for f in files]
-    return Parallel(n_jobs=-1)((delayed(process_function)(file_str, **kwargs) for file_str in file_strings))
-
-
 ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
 HIGHLIGHTS = {
     "on_black": 40,
@@ -109,8 +82,6 @@ COLORS = {
     "white": 97,
 }
 RESET = "\x1b[0m"
-
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -130,8 +101,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
-
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
     if not can_colorize(no_color=no_color, force_color=force_color):
@@ -154,12 +123,8 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
             result = fmt_str % (ATTRIBUTES[attr], result)
     result += RESET
     return result
-
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
-
-
 def process_file(path: Path) -> None:
     path = Path(path)
     if path.suffix == ".md":
@@ -204,8 +169,6 @@ def process_file(path: Path) -> None:
         path.write_text(code, encoding="utf-8")
         diffsize = before - gsz(path)
         cprint(f"{fsz(diffsize)}|removed :{removed}|inline :{inline}", "yellow")
-
-
 def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -220,7 +183,5 @@ def main() -> None:
     _ = mpf3(process_file, files)
     diffsize = before - gsz(cwd)
     cprint(f"{fsz(diffsize)}", "cyan")
-
-
 if __name__ == "__main__":
     main()

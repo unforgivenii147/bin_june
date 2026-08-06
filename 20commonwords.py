@@ -1,38 +1,12 @@
+#!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 import re
 import sys
 from collections import Counter
 from pathlib import Path
 import regex as re
-
-
-def unique_path(path: Path | str) -> Path:
-    path = _clean_fname(Path(path))
-    if not path.exists():
-        return path
-    parent = path.parent
-    suffixes = path.suffixes
-    if suffixes:
-        first_suffix_index = path.name.find(suffixes[0])
-        stem = path.name[:first_suffix_index]
-        full_suffix = "".join(suffixes)
-    else:
-        stem = path.name
-        full_suffix = ""
-    counter = 1
-    while True:
-        new_name = f"{stem}_{counter}{full_suffix}"
-        new_path = parent / new_name
-        if not new_path.exists():
-            return new_path
-        counter += 1
-
-
-from dh import _clean_fname
-
+from dh import unique_path
 USER_STOPWORDS_FILE = Path("/sdcard/stopwords")
-
-
 def load_user_stopwords(path: Path):
     if not path.is_file():
         return set()
@@ -44,15 +18,9 @@ def load_user_stopwords(path: Path):
                 continue
             stopwords.add(line)
     return stopwords
-
-
 EXCLUDE = load_user_stopwords(USER_STOPWORDS_FILE)
-
-
 def extract_words(text: str):
     return re.findall("[a-z]{3,}", text.lower())
-
-
 def main() -> None:
     if len(sys.argv) != 2:
         print(f"Usage: {sys.argv[0]} <file>")
@@ -72,7 +40,5 @@ def main() -> None:
     p = Path(src)
     dst = Path(str(dst)[:25] + p.suffix)
     dst = unique_path(dst)
-
-
 if __name__ == "__main__":
     main()

@@ -1,14 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import argparse
 import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-
-
 class GitHubRepoManager:
     def __init__(self, repo_name: str | None = None) -> None:
         self.cwd = Path.cwd()
@@ -17,7 +13,6 @@ class GitHubRepoManager:
         self.git_email = "adnanonagh@gmail.com"
         self.git_user = "unforgivenii147"
         self.repo_url = f"https://github.com/{self.github_username}/{self.repo_name}.git"
-
     def _run_command(
         self, command: list, cwd: Path | None = None, capture_output: bool = False
     ) -> tuple[int, str, str]:
@@ -30,29 +25,23 @@ class GitHubRepoManager:
             print(f"Error executing command: {' '.join(command)}")
             print(f"Exception: {e}")
             return 1, "", str(e)
-
     def _check_gh_cli_installed(self) -> bool:
         returncode, _, _ = self._run_command(["gh", "--version"], capture_output=True)
         return returncode == 0
-
     def _check_gh_authenticated(self) -> bool:
         returncode, _, _ = self._run_command(["gh", "auth", "status"], capture_output=True)
         return returncode == 0
-
     def _repo_exists_locally(self) -> bool:
         git_dir = self.cwd / ".git"
         return git_dir.exists()
-
     def _repo_exists_on_github(self) -> bool:
         returncode, _, _ = self._run_command(
             ["gh", "repo", "view", f"{self.github_username}/{self.repo_name}"], capture_output=True
         )
         return returncode == 0
-
     def _get_remote_url(self) -> str | None:
         returncode, stdout, _ = self._run_command(["git", "config", "--get", "remote.origin.url"], capture_output=True)
         return stdout if returncode == 0 and stdout else None
-
     def _init_local_repo(self) -> None:
         print(f"\n📦 Initializing local git repository in {self.cwd}...")
         returncode, _stdout, stderr = self._run_command(["git", "init"], capture_output=True)
@@ -62,7 +51,6 @@ class GitHubRepoManager:
         self._run_command(["git", "config", "user.name", self.git_user], capture_output=True)
         self._run_command(["git", "config", "user.email", self.git_email], capture_output=True)
         print("✓ Local repository initialized")
-
     def _create_github_repo(self) -> bool:
         print(f"\n🌐 Creating repository on GitHub:  {self.repo_name}...")
         if self._repo_exists_on_github():
@@ -79,7 +67,6 @@ class GitHubRepoManager:
             return False
         print("✓ Repository created on GitHub")
         return True
-
     def _stage_all_changes(self) -> None:
         print("\n📝 Staging all changes...")
         returncode, _, stderr = self._run_command(["git", "add", "."], capture_output=True)
@@ -87,7 +74,6 @@ class GitHubRepoManager:
             print(f"Error staging changes:  {stderr}")
             sys.exit(1)
         print("✓ Changes staged")
-
     def _ensure_content(self) -> bool:
         files = list(self.cwd.glob("*"))
         hidden_files = list(self.cwd.glob(".*"))
@@ -99,13 +85,11 @@ class GitHubRepoManager:
             readme = self.cwd / "README.md"
             if not readme.exists():
                 readme.write_text(f"""# {self.repo_name}
-
 Repository initialized on {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 """)
                 print("✓ Created README.md")
                 return True
         return has_content
-
     def _commit_changes(self, message: str | None = None) -> bool:
         if not message:
             message = self._generate_commit_message()
@@ -119,11 +103,9 @@ Repository initialized on {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
             return False
         print("✓ Changes committed")
         return True
-
     def _generate_commit_message(self) -> str:
         now = datetime.now()
         return now.strftime("Auto-commit: %Y-%m-%d %H:%M:%S")
-
     def _add_remote(self) -> None:
         print(f"\n🔗 Adding remote:  {self.repo_url}")
         returncode, current_url, _ = self._run_command(["git", "remote", "get-url", "origin"], capture_output=True)
@@ -141,7 +123,6 @@ Repository initialized on {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
             print(f"Error adding remote: {stderr}")
             sys.exit(1)
         print("✓ Remote added")
-
     def _push_to_github(self, branch: str = "main") -> None:
         print(f"\n🚀 Pushing to GitHub ({branch} branch)...")
         returncode, stdout, stderr = self._run_command(["git", "push", "-u", "origin", branch], capture_output=True)
@@ -156,7 +137,6 @@ Repository initialized on {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
             else:
                 print(f"Warning: Push encountered an issue: {stderr}")
         print("✓ Successfully pushed to GitHub")
-
     def _rename_branch_to_main(self) -> None:
         returncode, current_branch, _ = self._run_command(
             ["git", "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True
@@ -166,7 +146,6 @@ Repository initialized on {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
             returncode, _, stderr = self._run_command(["git", "branch", "-M", "main"], capture_output=True)
             if returncode != 0:
                 print(f"Warning: Could not rename branch: {stderr}")
-
     def handle_existing_repo(self) -> bool:
         print(f"\n⚠️  Git repository already exists in {self.cwd}")
         current_remote = self._get_remote_url()
@@ -193,7 +172,6 @@ Repository initialized on {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
                 sys.exit(0)
             else:
                 print("Invalid choice. Please select 1, 2, or 3.")
-
     def run(self) -> None:
         print("=" * 42)
         print("GitHub Repository Manager (with gh CLI)")
@@ -235,8 +213,6 @@ Repository initialized on {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
         else:
             print("\n⚠️  Could not commit changes.")
             sys.exit(1)
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Create a GitHub repository using gh CLI and auto-commit with current date/time"
@@ -258,10 +234,7 @@ def main() -> None:
     except Exception as e:
         print(f"\nUnexpected error: {e}")
         import traceback
-
         traceback.print_exc()
         sys.exit(1)
-
-
 if __name__ == "__main__":
     main()

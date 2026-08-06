@@ -1,11 +1,7 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import json
 import sys
-
-
 def jsonl_to_dict_list(filepath):
     data = []
     with open(filepath, encoding="utf-8") as f:
@@ -15,8 +11,6 @@ def jsonl_to_dict_list(filepath):
             except json.JSONDecodeError as e:
                 print(f"Skipping line due to JSON decode error: {e}")
     return data
-
-
 def with_key(filepath, key_field):
     data = {}
     with open(filepath, encoding="utf-8") as f:
@@ -30,8 +24,6 @@ def with_key(filepath, key_field):
             except json.JSONDecodeError as e:
                 print(f"Skipping line due to JSON decode error: {e}")
     return data
-
-
 if __name__I == "__main__":
     fn = sys.argv[1]
     data = jsonl_to_dict_list(fn)

@@ -1,15 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import shutil
 import subprocess
 import sys
 from subprocess import CompletedProcess
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def run_git_command(cmd: str, check=True, capture_output=True) -> CompletedProcess[str] | None:
     try:
         return subprocess.run(cmd, shell=True, check=check, capture_output=capture_output, text=True)
@@ -19,19 +14,13 @@ def run_git_command(cmd: str, check=True, capture_output=True) -> CompletedProce
         if e.stderr:
             print(f"Stderr: {e.stderr}")
         return None
-
-
 def is_git_repository() -> bool:
     return run_git_command("git rev-parse --git-dir", check=False) is not None
-
-
 def get_current_branch() -> str | None:
     result = run_git_command("git branch --show-current")
     if result and result.stdout:
         return result.stdout.strip()
     return None
-
-
 def get_main_branch_name() -> str:
     result = run_git_command("git remote show origin", check=False)
     if result and "HEAD branch" in result.stdout:
@@ -45,8 +34,6 @@ def get_main_branch_name() -> str:
             if branch in {"main", "master"}:
                 return branch
     return "main"
-
-
 def get_all_branches():
     result = run_git_command("git branch -l")
     if not result:
@@ -57,8 +44,6 @@ def get_all_branches():
             branch = line.strip().replace("* ", "")
             branches.append(branch)
     return branches
-
-
 def delete_branches_except_main():
     main_branch = get_main_branch_name()
     branches = get_all_branches()
@@ -75,8 +60,6 @@ def delete_branches_except_main():
             else:
                 print(f"✗ Failed to delete branch: {branch}")
     return deleted_branches
-
-
 def reset_to_last_commit() -> bool:
     print("Resetting to last commit...")
     result = run_git_command("git rev-parse HEAD")
@@ -100,8 +83,6 @@ def reset_to_last_commit() -> bool:
             return False
     print("✓ Successfully reset to last commit")
     return True
-
-
 def alternative_reset_method() -> None:
     print("Using alternative reset method...")
     commands = [
@@ -116,8 +97,6 @@ def alternative_reset_method() -> None:
         if not result or result.returncode != 0:
             print(f"Warning: Command failed: {cmd}")
     print("✓ Alternative reset completed")
-
-
 def create_backup() -> bool | None:
     backup_dir = f"git_backup_{subprocess.getoutput('date +%Y%m%d_%H%M%S')}"
     print(f"Creating backup in: {backup_dir}")
@@ -128,8 +107,6 @@ def create_backup() -> bool | None:
     except Exception as e:
         print(f"✗ Failed to create backup: {e}")
         return False
-
-
 def main() -> None:
     print("=" * 42)
     print("GIT REPOSITORY CLEANER")
@@ -183,8 +160,6 @@ def main() -> None:
     print("\n✓ Cleanup completed!")
     print("⚠️  Remember: You may need to force push to remote:")
     print(f"   git push --force origin {main_branch}")
-
-
 if __name__ == "__main__":
     try:
         main()

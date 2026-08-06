@@ -1,16 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import sys
 from datetime import datetime
 from pathlib import Path
-
-
 def get_file_age(path: str | Path, str_mode: bool = False) -> float | str:
     from os import stat as os_stat
     from time import time as time_time
-
     path = Path(path)
     current_time = time_time()
     file_stat = os_stat(path)
@@ -39,15 +34,9 @@ def get_file_age(path: str | Path, str_mode: bool = False) -> float | str:
         if value:
             parts.append(f"{value} {name}")
     return ", ".join(parts) if parts else "0 sec"
-
-
 EXCLUDED_DIRS = {".git", "__pycache__"}
-
-
 def format_time(ts: float | str) -> str:
     return datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
-
-
 def main() -> None:
     cwd = Path.cwd()
     files = []
@@ -70,7 +59,5 @@ def main() -> None:
     for f in files[:N]:
         mtime = get_file_age(f)
         print(f"{format_time(mtime)}  -  {f.relative_to(cwd)}")
-
-
 if __name__ == "__main__":
     main()

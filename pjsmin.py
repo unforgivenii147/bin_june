@@ -1,3 +1,4 @@
+#!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 import os
 import sys
@@ -7,37 +8,8 @@ from multiprocessing import get_context
 from pathlib import Path
 from typing import Any
 from rjsmin import jsmin
-from dh import get_files
-
-
-def mpf_async(func: Callable[[Any], Any], items: Iterable[Any]):
-    with get_context("spawn").Pool(MAX_WORKERS) as p:
-        async_results = [p.apply_async(func, (item,)) for item in items]
-        results = []
-        for i, async_result in enumerate(async_results):
-            try:
-                results.append(async_result.get(timeout=30))
-            except Exception as e:
-                print(f"Item {i} failed: {e}")
-                results.append(None)
-        return results
-
-
+from dh import fsz, get_files, gext, mpf_async
 mpf = mpf_async
-
-
-def fsz(sz: float) -> str:
-    sz = abs(int(sz))
-    units = ("B", "KB", "MB", "GB", "TB")
-    if sz == 0:
-        return "0 B"
-    i = min((int(sz).bit_length() - 1) // 10, len(units) - 1)
-    value = sz / 1024**i
-    if i == 0:
-        return f"{int(value)} {units[i]}"
-    return f"{value:.1f} {units[i]}"
-
-
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -47,8 +19,6 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
-
-
 ATTRIBUTES = {"bold": 1, "dark": 2, "italic": 3, "underline": 4, "blink": 5, "reverse": 7, "concealed": 8, "strike": 9}
 HIGHLIGHTS = {
     "on_black": 40,
@@ -89,8 +59,6 @@ COLORS = {
     "white": 97,
 }
 RESET = "\x1b[0m"
-
-
 def can_colorize(*, no_color=None, force_color=None):
     if no_color is not None and no_color:
         return False
@@ -110,8 +78,6 @@ def can_colorize(*, no_color=None, force_color=None):
         return os.isatty(sys.stdout.fileno())
     except OSError:
         return sys.stdout.isatty()
-
-
 def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None):
     result = str(text)
     if not can_colorize(no_color=no_color, force_color=force_color):
@@ -134,27 +100,8 @@ def colored(text, color=None, on_color=None, attrs=None, *, no_color=None, force
             result = fmt_str % (ATTRIBUTES[attr], result)
     result += RESET
     return result
-
-
 def cprint(text, color=None, on_color=None, attrs=None, *, no_color=None, force_color=None, **kwargs):
     print(colored(text, color, on_color, attrs, no_color=no_color, force_color=force_color), **kwargs)
-
-
-def gext(path: str | Path) -> str:
-    path = Path(path)
-    suffs = path.suffixes
-    if not suffs:
-        return ""
-    multipart_prefixes = {".tar", ".min", ".bundle", ".log", ".spec", ".test", ".d", ".module"}
-    if len(suffs) > 1:
-        if suffs[0] in multipart_prefixes:
-            return "".join(suffs)
-        if suffs[-1] in {".gz", ".xz", ".bz2", ".zst", ".lz"} and suffs[-2] == ".tar":
-            return f".tar{suffs[-1]}"
-        return suffs[-1]
-    return suffs[0]
-
-
 def process_file(path: Path) -> str:
     before = gsz(path)
     path = Path(path)
@@ -183,8 +130,6 @@ def process_file(path: Path) -> str:
             return None
     except Exception as e:
         return f"{path}: {e}"
-
-
 def main() -> None:
     cwd = Path.cwd()
     files = get_files(cwd, ext=[".js", ".min.js"])
@@ -193,7 +138,5 @@ def main() -> None:
         sys.exit(0)
     print(f"Found {len(files)} files. Starting multiprocessing...")
     mpf(process_file, files)
-
-
 if __name__ == "__main__":
     main()

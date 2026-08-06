@@ -1,17 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 from pathlib import Path
-
 from PIL import Image
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 input_dir = Path("avif_images")
 output_dir = Path("jpg_images")
 output_dir.mkdir(exist_ok=True, parents=True)
-
 if input_dir.exists() and input_dir.is_dir():
     for file in input_dir.iterdir():
         if file.is_file() and file.suffix.lower() in (".avif", ".aviff"):

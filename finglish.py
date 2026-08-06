@@ -1,13 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import unicodedata
 from pathlib import Path
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def custom_persian_to_finglish(text: str) -> str:
     persian_map = {
         "ا": "a",
@@ -65,8 +60,6 @@ def custom_persian_to_finglish(text: str) -> str:
                 processed_word += persian_map.get(char, char)
         processed_words.append(processed_word)
     return "_".join(processed_words)
-
-
 def convert_filenames_with_pathlib(directory: str = ".") -> None:
     start_path = Path(directory)
     for filepath in start_path.rglob("*"):
@@ -83,7 +76,5 @@ def convert_filenames_with_pathlib(directory: str = ".") -> None:
                 print(f"Renamed: {filepath} -> {new_filepath}")
             except OSError as e:
                 print(f"Error renaming {filepath}: {e}")
-
-
 if __name__ == "__main__":
     convert_filenames_with_pathlib()

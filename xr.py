@@ -1,7 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import argparse
 import asyncio
 import bz2
@@ -9,17 +7,13 @@ import gzip
 import sys
 from collections import deque
 from pathlib import Path
-
 import brotlicffi as brotli
 import lz4.frame
 import py7zr
 import zstandard as zstd
-
 MAX_WORKERS = 4
 CHUNK_SIZE = 10 * 1024 * 1024
 COMPRESSORS = {}
-
-
 def fsz(size: int) -> str:
     """Format size in bytes to human-readable format."""
     for unit in ("B", "KB", "MB", "GB", "TB"):
@@ -27,8 +21,6 @@ def fsz(size: int) -> str:
             return f"{size:.1f}{unit}"
         size /= 1024
     return f"{size:.1f}PB"
-
-
 def setup_compressors() -> None:
     """Initialize compressor configurations."""
     global COMPRESSORS
@@ -76,8 +68,6 @@ def setup_compressors() -> None:
             "available": True,
         },
     }
-
-
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     """Recursively get all files in a directory, optionally filtered by extension."""
     path = Path(path)
@@ -98,13 +88,9 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
             elif item.is_file() and (ext is None or item.suffix in ext):
                 files.append(item)
     return files
-
-
 def get_dirs(directory: Path) -> list[Path]:
     """Get immediate subdirectories (non-symlink)."""
     return [p for p in directory.glob("*") if not p.is_symlink() and p.is_dir()]
-
-
 def should_compress(path: Path, compressor: str) -> bool:
     """Determine if a file should be compressed based on size and type."""
     try:
@@ -127,14 +113,11 @@ def should_compress(path: Path, compressor: str) -> bool:
         return size >= 1024
     except (OSError, PermissionError):
         return False
-
-
 def compress_in_memory(path: Path, out_path: Path, compressor: str) -> bool:
     """Compress a file that fits in memory."""
     try:
         with open(path, "rb") as f:
             data = f.read()
-
         with open(out_path, "wb") as f:
             if compressor == "zstd":
                 cctx = zstd.ZstdCompressor(level=COMPRESSORS["zstd"]["settings"]["level"])
@@ -170,7 +153,6 @@ def compress_in_memory(path: Path, out_path: Path, compressor: str) -> bool:
                 )
             elif compressor == "xz":
                 import lzma
-
                 cctx = lzma.LZMACompressor(preset=COMPRESSORS["xz"]["settings"]["preset"])
                 f.write(cctx.compress(data))
                 f.write(cctx.flush())
@@ -182,8 +164,6 @@ def compress_in_memory(path: Path, out_path: Path, compressor: str) -> bool:
     except Exception as e:
         print(f"    Error compressing: {e}")
         return False
-
-
 def compress_chunked(path: Path, out_path: Path, original_size: int, compressor: str) -> bool:
     """Compress a large file in chunks."""
     try:
@@ -251,7 +231,6 @@ def compress_chunked(path: Path, out_path: Path, original_size: int, compressor:
                     outf.write(compressed)
         elif compressor == "xz":
             import lzma
-
             with (
                 open(path, "rb") as inf,
                 lzma.open(out_path, "wb", preset=COMPRESSORS["xz"]["settings"]["preset"]) as outf,
@@ -268,13 +247,10 @@ def compress_chunked(path: Path, out_path: Path, original_size: int, compressor:
     except Exception as e:
         print(f"    Error compressing: {e}")
         return False
-
-
 def decompress_file(path: Path, compressor: str) -> bool:
     """Decompress a single file."""
     try:
         out_path = path.with_suffix("")
-
         if compressor == "zstd":
             dctx = zstd.ZstdDecompressor()
             with open(path, "rb") as inf, open(out_path, "wb") as outf:
@@ -313,7 +289,6 @@ def decompress_file(path: Path, compressor: str) -> bool:
                 outf.write(decompressed)
         elif compressor == "xz":
             import lzma
-
             with lzma.open(path, "rb") as inf, open(out_path, "wb") as outf:
                 while True:
                     chunk = inf.read(CHUNK_SIZE)
@@ -329,8 +304,6 @@ def decompress_file(path: Path, compressor: str) -> bool:
     except Exception as e:
         print(f"  ✗ Error decompressing {path.name}: {e}")
         return False
-
-
 def decompress_archive(archive_path: Path, compressor: str) -> bool:
     """Decompress an archive file."""
     try:
@@ -346,8 +319,6 @@ def decompress_archive(archive_path: Path, compressor: str) -> bool:
     except Exception as e:
         print(f"  ✗ Error decompressing archive: {e}")
         return False
-
-
 async def compress_folder_async(dir_path: Path, archive_path: str, compressor: str) -> bool:
     """Compress an entire folder into an archive."""
     try:
@@ -361,8 +332,6 @@ async def compress_folder_async(dir_path: Path, archive_path: str, compressor: s
     except Exception as e:
         print(f"  ✗ Error compressing folder: {e}")
         return False
-
-
 async def process_compress(compressor: str) -> None:
     """Main compression process."""
     cwd = Path.cwd()
@@ -371,7 +340,6 @@ async def process_compress(compressor: str) -> None:
         print(f"   {key}: {value}")
     print(f"   Parallel workers: {MAX_WORKERS}")
     print(f"   Chunk size: {fsz(CHUNK_SIZE)}")
-
     dirs_to_compress = get_dirs(cwd)
     if dirs_to_compress:
         print(f"\n📁 Compressing {len(dirs_to_compress)} directories...")
@@ -383,32 +351,26 @@ async def process_compress(compressor: str) -> None:
                 print(f"  ✓ Successfully compressed {relative_path}")
             else:
                 print(f"  ✗ Failed to compress {relative_path}")
-
     files_to_compress = [p for p in get_files(cwd) if should_compress(p, compressor)]
     if not files_to_compress:
         print("\n📄 No files to compress")
         return
-
     print(f"\n📄 Compressing {len(files_to_compress)} files with {compressor.upper()}...")
     total_original = 0
     total_compressed = 0
     successful = 0
-
     for i, path in enumerate(sorted(files_to_compress), 1):
         print(f"\n[{i}/{len(files_to_compress)}] {path.name}")
         original_size = path.stat().st_size
         total_original += original_size
         out_path = path.with_suffix(path.suffix + COMPRESSORS[compressor]["ext"])
-
         if out_path.exists():
             print(f"Skipping {path.name} - output already exists")
             continue
-
         if original_size < CHUNK_SIZE:
             success = compress_in_memory(path, out_path, compressor)
         else:
             success = compress_chunked(path, out_path, original_size, compressor)
-
         if success and out_path.exists():
             compressed_size = out_path.stat().st_size
             if compressed_size > 0 and compressed_size < original_size:
@@ -422,7 +384,6 @@ async def process_compress(compressor: str) -> None:
                 out_path.unlink()
         else:
             print(f"  ✗ Failed to compress {path.name}")
-
     if successful > 0:
         savings = total_original - total_compressed
         savings_percent = savings / total_original * 100
@@ -434,34 +395,27 @@ async def process_compress(compressor: str) -> None:
         print(f"{'=' * 50}")
     elif files_to_compress:
         print("\n❌ No files were successfully compressed")
-
-
 async def process_decompress(compressor: str) -> None:
     """Main decompression process."""
     cwd = Path.cwd()
     archive_ext = COMPRESSORS[compressor]["tar_ext"]
     archives = [p for p in cwd.glob(f"*{archive_ext}") if p.is_file()]
-
     if archives:
         print(f"\n📦 Decompressing {len(archives)} archives...")
         for archive in sorted(archives):
             print(f"\n  Decompressing {archive.name}...")
             decompress_archive(archive, compressor)
-
     files_to_decompress = [p for p in get_files(cwd) if p.suffix == COMPRESSORS[compressor]["ext"]]
     if not files_to_decompress:
         print("\n📄 No files to decompress")
         return
-
     files_to_decompress = [p for p in files_to_decompress if not p.name.endswith(COMPRESSORS[compressor]["tar_ext"])]
     if not files_to_decompress:
         return
-
     print(f"\n📄 Decompressing {len(files_to_decompress)} {compressor.upper()} files...")
     total_original = 0
     total_decompressed = 0
     successful = 0
-
     for i, path in enumerate(sorted(files_to_decompress), 1):
         print(f"\n[{i}/{len(files_to_decompress)}] {path.name}")
         original_size = path.stat().st_size
@@ -471,7 +425,6 @@ async def process_decompress(compressor: str) -> None:
             out_path = path.with_suffix("")
             if out_path.exists():
                 total_decompressed += out_path.stat().st_size
-
     if successful > 0:
         print(f"\n{'=' * 50}")
         print(f"✅ Decompressed {successful}/{len(files_to_decompress)} files")
@@ -480,8 +433,6 @@ async def process_decompress(compressor: str) -> None:
         print(f"{'=' * 50}")
     elif files_to_decompress:
         print("\n❌ No files were successfully decompressed")
-
-
 async def main_async(compressor: str, mode: str = "compress") -> None:
     """Main async entry point."""
     if mode == "compress":
@@ -490,8 +441,6 @@ async def main_async(compressor: str, mode: str = "compress") -> None:
         await process_decompress(compressor)
     else:
         print(f"Unknown mode: {mode}")
-
-
 def check_compressor_availability(compressor: str) -> bool:
     """Check if required libraries are available."""
     if not COMPRESSORS[compressor]["available"]:
@@ -511,8 +460,6 @@ def check_compressor_availability(compressor: str) -> bool:
             print("  or for Termux: pkg install python-lz4")
         return False
     return True
-
-
 def main() -> None:
     """Main entry point."""
     setup_compressors()
@@ -528,7 +475,6 @@ Compression Methods:
   -b, --bz2      Bzip2 compression (level 9)
   -r, --brotli   Brotli compression (quality 11)
   -l, --lz4      LZ4 compression (HC mode max)
-
 Examples:
   %(prog)s -z              # Compress with Zstandard (default)
   %(prog)s -x -d           # Decompress XZ files
@@ -549,7 +495,6 @@ Examples:
     method_group.add_argument("-l", "--lz4", action="store_true", help="Use LZ4 compression")
     parser.add_argument("-d", "--decompress", action="store_true", help="Decompress files")
     args = parser.parse_args()
-
     compressor = "zstd"
     if args.xz:
         compressor = "xz"
@@ -565,10 +510,8 @@ Examples:
         compressor = "lz4"
     elif args.__dict__.get("7z"):
         compressor = "py7zr"
-
     if not check_compressor_availability(compressor):
         sys.exit(1)
-
     mode = "decompress" if args.decompress else "compress"
     try:
         asyncio.run(main_async(compressor, mode))
@@ -578,7 +521,5 @@ Examples:
     except Exception as e:
         print(f"\n❌ Unexpected error: {e}")
         sys.exit(1)
-
-
 if __name__ == "__main__":
     sys.exit(main())

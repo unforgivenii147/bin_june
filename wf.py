@@ -1,12 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import os
 import sys
 import time
-
-
 def tail_file(fname: str, n=10):
     try:
         with open(fname) as f:
@@ -15,8 +11,6 @@ def tail_file(fname: str, n=10):
     except OSError as e:
         print(f"Error reading file: {e}", file=sys.stderr)
         return []
-
-
 def main():
     if len(sys.argv) < 2:
         print("Usage: python script.py <filename>", file=sys.stderr)
@@ -44,7 +38,5 @@ def main():
     except KeyboardInterrupt:
         print("\n\nWatcher stopped.")
         sys.exit(0)
-
-
 if __name__ == "__main__":
     main()

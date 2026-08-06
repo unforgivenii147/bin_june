@@ -1,9 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 from pathlib import Path
-
 if __name__ == "__main__":
     input_file = Path("/data/data/com.termux/files/home/.local/share/mc/history")
     output_file = Path("/data/data/com.termux/files/home/.bash_history")

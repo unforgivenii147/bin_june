@@ -1,3 +1,4 @@
+#!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 import sys
 import tarfile
@@ -5,10 +6,7 @@ from collections import deque
 from pathlib import Path
 from lzma_mt import LZMADecompressor
 from dh import get_files
-
 MEM_LIMIT = 104857600
-
-
 def decompress_file(path: Path) -> bool:
     fname = path.name
     if fname.endswith(".tar.xz"):
@@ -25,8 +23,6 @@ def decompress_file(path: Path) -> bool:
             f.write(decompressed_data)
         return True
     return False
-
-
 def main() -> None:
     sys.argv[1:]
     successful = 0
@@ -48,7 +44,5 @@ def main() -> None:
         else:
             errors += 1
     print(f"successfull: {successful}\nerrors: {errors}")
-
-
 if __name__ == "__main__":
     main()

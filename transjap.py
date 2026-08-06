@@ -1,12 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 """
 Optimized version of transjap.py for Python 3.12.
 Translates Japanese comments and docstrings in Python files to English.
 """
-
 from __future__ import annotations
-
 import ast
 import logging
 import re
@@ -14,17 +11,13 @@ import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Final
-
 from deep_translator import GoogleTranslator
-
 SKIP_DIRS: Final[frozenset[str]] = frozenset(
     {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
 )
 JAPANESE_PATTERN: Final[re.Pattern] = re.compile("[\\u3040-\\u30ff\\u4e00-\\u9fff]")
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
-
-
 def translate_text(text: str) -> str:
     if not text or not text.strip() or (not JAPANESE_PATTERN.search(text)):
         return text
@@ -35,12 +28,9 @@ def translate_text(text: str) -> str:
     except Exception as e:
         logger.error("Translation error: %s for text snippet: %s", e, text[:50])
         return text
-
-
 class CommentDocstringTransformer(ast.NodeTransformer):
     def __init__(self):
         self.modified = False
-
     def _process_docstring(self, node: Any) -> None:
         docstring = ast.get_docstring(node)
         if docstring and JAPANESE_PATTERN.search(docstring):
@@ -54,20 +44,15 @@ class CommentDocstringTransformer(ast.NodeTransformer):
                     and isinstance(node.body[0].value.value, str)
                 ):
                     node.body[0].value.value = translated
-
     def visit_FunctionDef(self, node: ast.FunctionDef) -> ast.FunctionDef:
         self._process_docstring(node)
         return self.generic_visit(node)
-
     def visit_ClassDef(self, node: ast.ClassDef) -> ast.ClassDef:
         self._process_docstring(node)
         return self.generic_visit(node)
-
     def visit_Module(self, node: ast.Module) -> ast.Module:
         self._process_docstring(node)
         return self.generic_visit(node)
-
-
 def translate_comments_in_content(content: str) -> tuple[str, bool]:
     lines = content.splitlines(keepends=True)
     modified = False
@@ -84,8 +69,6 @@ def translate_comments_in_content(content: str) -> tuple[str, bool]:
                     continue
         new_lines.append(line)
     return ("".join(new_lines), modified)
-
-
 def translate_file(file_path: Path) -> bool:
     try:
         content = file_path.read_text(encoding="utf-8")
@@ -111,8 +94,6 @@ def translate_file(file_path: Path) -> bool:
         logger.error("Error processing %s: %s", file_path, e)
         return False
     return False
-
-
 def main() -> None:
     start_dir = sys.argv[1] if len(sys.argv) > 1 else "."
     start_path = Path(start_dir).resolve()
@@ -134,7 +115,5 @@ def main() -> None:
                 logger.info("✓ Updated: %s", future_to_file[future])
     logger.info("\n" + "=" * 50)
     logger.info("Completed! Modified %d out of %d files", modified_count, len(py_files))
-
-
 if __name__ == "__main__":
     main()

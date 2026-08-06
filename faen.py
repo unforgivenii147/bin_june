@@ -1,20 +1,15 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import json
 import os
 import sys
 from pathlib import Path
-
-
 class Bidirectionaldictionary:
     def __init__(self, json_file: str = "/sdcard/dic/dic.json"):
         self.json_file = Path(json_file)
         self.persian_to_english: dict[str, str] = {}
         self.english_to_persian: dict[str, str] = {}
         self.load_dictionary()
-
     def load_dictionary(self) -> None:
         try:
             if not self.json_file.exists():
@@ -35,7 +30,6 @@ class Bidirectionaldictionary:
         except Exception as e:
             print(f"❌ Error loading dictionary: {e}")
             sys.exit(1)
-
     def save_dictionary(self) -> None:
         try:
             with open(self.json_file, "w", encoding="utf-8") as file:
@@ -43,7 +37,6 @@ class Bidirectionaldictionary:
             print(f"💾 dictionary saved to {self.json_file}")
         except Exception as e:
             print(f"❌ Error saving dictionary: {e}")
-
     def search(self, query: str) -> str | None:
         query = query.strip()
         if not query:
@@ -65,7 +58,6 @@ class Bidirectionaldictionary:
                         result += f"  • {persian} → {match}\n"
             return result.strip()
         return None
-
     def get_suggestions(self, query: str) -> list[str]:
         query_lower = query.lower()
         suggestions = []
@@ -76,7 +68,6 @@ class Bidirectionaldictionary:
             if query_lower in english:
                 suggestions.append(english)
         return suggestions
-
     def add_word(self, persian: str, english: str) -> None:
         persian = persian.strip()
         english = english.strip()
@@ -89,7 +80,6 @@ class Bidirectionaldictionary:
         self.english_to_persian[english.lower()] = persian
         self.save_dictionary()
         print(f"✅ Added: '{persian}' ↔ '{english}'")
-
     def delete_word(self, word: str) -> None:
         word = word.strip()
         if word in self.persian_to_english:
@@ -106,7 +96,6 @@ class Bidirectionaldictionary:
             print(f"✅ Deleted: '{persian}' ↔ '{word}'")
         else:
             print(f"❌ Error: '{word}' not found in dictionary")
-
     def list_all(self, page: int = 1, per_page: int = 10) -> None:
         if not self.persian_to_english:
             print("📭 dictionary is empty")
@@ -125,7 +114,6 @@ class Bidirectionaldictionary:
             print(f"{i:3}. {persian:15} → {english}")
         print("-" * 50)
         print(f"Showing {start + 1}-{end} of {total} entries")
-
     def list_all_full(self) -> None:
         if not self.persian_to_english:
             print("📭 dictionary is empty")
@@ -136,14 +124,12 @@ class Bidirectionaldictionary:
         for i, (persian, english) in enumerate(sorted_items, 1):
             print(f"{i:3}. {persian:15} → {english}")
         print("-" * 50)
-
     def stats(self) -> dict[str, int]:
         return {
             "total": len(self.persian_to_english),
             "persian": len(self.persian_to_english),
             "english": len(self.english_to_persian),
         }
-
     def export_csv(self, filename: str = "dictionary_export.csv") -> None:
         try:
             with open(filename, "w", encoding="utf-8") as file:
@@ -153,18 +139,14 @@ class Bidirectionaldictionary:
             print(f"✅ Exported to {filename}")
         except Exception as e:
             print(f"❌ Error exporting to CSV: {e}")
-
     def random_word(self) -> None:
         import random
-
         if not self.persian_to_english:
             print("📭 dictionary is empty")
             return
         persian = random.choice(list(self.persian_to_english.keys()))
         english = self.persian_to_english[persian]
         print(f"🎲 Random: {persian} → {english}")
-
-
 def main():
     dict_app = Bidirectionaldictionary("dic.json")
     search_history = []
@@ -275,7 +257,5 @@ def main():
             print(f"❌ Invalid input: {e}")
         except Exception as e:
             print(f"❌ Error: {e}")
-
-
 if __name__ == "__main__":
     main()

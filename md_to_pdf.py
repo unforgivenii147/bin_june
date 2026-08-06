@@ -1,10 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 import sys
 from pathlib import Path
-
 import markdown
 import weasyprint
-
 CSS_TEMPLATE = """
 /* ==========================================================================
    1. PAGE SETUP & PAGED MEDIA
@@ -19,12 +17,10 @@ CSS_TEMPLATE = """
         color: #888888;
     }
 }
-
 h1, h2, h3, h4, h5, h6 { page-break-after: avoid; break-after: avoid; }
 blockquote, pre, table, figure { page-break-inside: avoid; break-inside: avoid; }
 ul, ol { page-break-inside: auto; }
 li { page-break-inside: avoid; break-inside: avoid; }
-
 /* ==========================================================================
    2. TYPOGRAPHY & BASE STYLES
    ========================================================================== */
@@ -34,13 +30,11 @@ html, body {
     line-height: 1.6;
     color: #333333;
 }
-
 p {
     margin-top: 0;
     margin-bottom: 1.2em;
     text-align: justify;
 }
-
 h1 {
     font-size: 24pt;
     margin-top: 0;
@@ -49,7 +43,6 @@ h1 {
     border-bottom: 2px solid #eeeeee;
     padding-bottom: 5pt;
 }
-
 h2 {
     font-size: 18pt;
     margin-top: 24pt;
@@ -58,14 +51,12 @@ h2 {
     border-bottom: 1px solid #eeeeee;
     padding-bottom: 3pt;
 }
-
 h3 {
     font-size: 14pt;
     margin-top: 18pt;
     margin-bottom: 8pt;
     color: #444444;
 }
-
 /* ==========================================================================
    3. INLINE ELEMENTS & DECORATIONS
    ========================================================================== */
@@ -75,9 +66,7 @@ a[href^="http"]:after {
     font-size: 9pt;
     color: #666666;
 }
-
 strong { color: #111111; }
-
 code {
     font-family: "Courier New", Courier, monospace;
     font-size: 10pt;
@@ -86,7 +75,6 @@ code {
     border-radius: 3px;
     color: #d14;
 }
-
 blockquote {
     margin: 1.5em 0;
     padding: 0.5em 15px;
@@ -95,7 +83,6 @@ blockquote {
     background-color: #fafafa;
     font-style: italic;
 }
-
 /* ==========================================================================
    4. CODE BLOCKS (Markdown ``` )
    ========================================================================== */
@@ -107,7 +94,6 @@ pre {
     margin: 1.5em 0;
     overflow: hidden;
 }
-
 pre code {
     background-color: transparent;
     padding: 0;
@@ -116,7 +102,6 @@ pre code {
     font-size: 9.5pt;
     white-space: pre-wrap;
 }
-
 /* ==========================================================================
    5. TABLES & LISTS
    ========================================================================== */
@@ -126,23 +111,19 @@ table {
     margin: 20px 0;
     font-size: 10.5pt;
 }
-
 th, td {
     border: 1px solid #dddddd;
     padding: 8px 12px;
     text-align: left;
 }
-
 th {
     background-color: #f5f5f5;
     font-weight: bold;
     color: #222222;
 }
-
 tr:nth-child(even) { background-color: #fafafa; }
 ul, ol { margin-top: 0; margin-bottom: 1.5em; padding-left: 24px; }
 li { margin-bottom: 0.4em; }
-
 /* ==========================================================================
    6. IMAGES / FIGURES
    ========================================================================== */
@@ -154,31 +135,22 @@ img {
     border-radius: 4px;
 }
 """
-
-
 def convert_md_to_pdf(input_path_str: str):
-
     input_file = Path(input_path_str)
     if not input_file.exists():
         print(f"❌ Error: The file '{input_path_str}' does not exist.")
         sys.exit(1)
-
     if input_file.suffix.lower() not in (".md", ".markdown"):
         print(f"⚠️  Warning: '{input_path_str}' does not have a standard Markdown extension.")
-
     output_pdf = input_file.with_suffix(".pdf")
-
     print(f"📖 Reading: {input_file.name}")
     try:
         md_content = input_file.read_text(encoding="utf-8")
     except Exception as e:
         print(f"❌ Error reading file: {e}")
         sys.exit(1)
-
     print("🛠️  Converting Markdown to HTML...")
-
     html_body = markdown.markdown(md_content, extensions=["extra", "codehilite"])
-
     full_html = f"""<!DOCTYPE html>
 <html>
 <head>
@@ -189,23 +161,18 @@ def convert_md_to_pdf(input_path_str: str):
     {html_body}
 </body>
 </html>"""
-
     print("🚀 Compiling PDF with WeasyPrint...")
     try:
         html_doc = weasyprint.HTML(string=full_html, base_url=str(input_file.parent))
         css_doc = weasyprint.CSS(string=CSS_TEMPLATE)
-
         html_doc.write_pdf(target=output_pdf, stylesheets=[css_doc])
         print(f"✅ Success! PDF saved beside markdown file at:\n   👉 {output_pdf.resolve()}")
     except Exception as e:
         print(f"❌ WeasyPrint Compilation Error: {e}")
         sys.exit(1)
-
-
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("❌ Usage Error: Please provide an input Markdown file path.")
         print("   Example: python md_to_pdf.py instructions.md")
         sys.exit(1)
-
     convert_md_to_pdf(sys.argv[1])

@@ -1,33 +1,23 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import re
 import sys
 from pathlib import Path
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 class RegexCommentRemover:
     def __init__(self) -> None:
         self.pattern = re.compile(r"//.*?$|/\*.*?\*/|'(?:\.|[^'])*'|\"(?:\.|[^\"])*\"", re.DOTALL | re.MULTILINE)
-
     def remove_comments(self, source: str) -> tuple[str, int]:
-
         def replacer(match):
             s = match.group(0)
             if s.startswith("/"):
                 return " " if "\n" not in s else "\n" * s.count("\n")
             return s
-
         result = re.sub(self.pattern, replacer, source)
         comment_count = source.count("//") + source.count("/*")
         result_count = result.count("//") + result.count("/*")
         removed = comment_count - result_count
         return result, removed
-
-
 def process_file(file_path: Path, remover: RegexCommentRemover):
     Path(path)
     try:
@@ -40,7 +30,6 @@ def process_file(file_path: Path, remover: RegexCommentRemover):
     except Exception as e:
         print(f"[ERROR] {file_path.name} processing: {e}")
         import traceback
-
         traceback.print_exc()
         return "error", file_path, 0
     if result != code:
@@ -54,8 +43,6 @@ def process_file(file_path: Path, remover: RegexCommentRemover):
     else:
         print(f"[NO CHANGE] {file_path.name}")
         return "nochange", file_path, 0
-
-
 if __name__ == "__main__":
     dir_path = Path.cwd()
     files = [
@@ -79,14 +66,12 @@ if __name__ == "__main__":
     errors = [r for r in results if r[0] == "error"]
     nochg = sum(1 for r in results if r[0] == "nochange")
     total_comments = sum(r[2] for r in results if r[0] == "changed")
-
     def fsz(size: int) -> str:
         for unit in ["B", "KB", "MB", "GB"]:
             if size < 1024.0:
                 return f"{size:.2f} {unit}"
             size /= 1024.0
         return f"{size:.2f} TB"
-
     print(f"\n{'=' * 42}")
     print(f"Files: {len(files)} | Changed: {changed} | Unchanged: {nochg} | Errors: {len(errors)}")
     print(f"Total comment markers removed: ~{total_comments}")

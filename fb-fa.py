@@ -1,15 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import ast
 import hashlib
 import sys
 from pathlib import Path
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def get_function_content_hash(function_node):
     func_copy = ast.FunctionDef(
         name="_temp",
@@ -21,7 +16,6 @@ def get_function_content_hash(function_node):
     )
     try:
         import astunparse
-
         source = astunparse.unparse(func_copy)
     except ImportError:
         try:
@@ -29,8 +23,6 @@ def get_function_content_hash(function_node):
         except:
             source = str(ast.dump(func_copy))
     return hashlib.md5(source.encode("utf-8")).hexdigest()
-
-
 def get_function_content_hash_manual(filename, function_node):
     try:
         with open(filename) as f:
@@ -57,8 +49,6 @@ def get_function_content_hash_manual(filename, function_node):
     except Exception as e:
         print(f"⚠️  Warning: Could not extract content for {function_node.name}: {e}")
         return None
-
-
 def extract_functions_with_hash(filename):
     try:
         with open(filename) as file:
@@ -81,8 +71,6 @@ def extract_functions_with_hash(filename):
     except Exception as e:
         print(f"❌ Error reading '{filename}': {e}")
         return None
-
-
 def remove_functions_from_file(file1, file2):
     print(f"📖 Reading functions from {file1}...")
     functions1 = extract_functions_with_hash(file1)
@@ -123,8 +111,6 @@ def remove_functions_from_file(file1, file2):
     except Exception as e:
         print(f"❌ Error updating {file2}: {e}")
         return False
-
-
 if __name__ == "__main__":
     if len(sys.argv) < 3:
         print("Usage: python remove_duplicate_functions.py <file1.py> <file2.py>")

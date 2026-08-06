@@ -1,3 +1,4 @@
+#!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 import ast
 import re
@@ -5,11 +6,8 @@ import sys
 from collections import deque
 from multiprocessing import get_context
 from pathlib import Path
-
 CHUNK_SIZE = 1024 * 1024
-from dh import get_files, get_nobinary
-
-
+from dh import fsz, get_files, get_nobinary
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -19,20 +17,6 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
-
-
-def fsz(sz: float) -> str:
-    sz = abs(int(sz))
-    units = ("B", "KB", "MB", "GB", "TB")
-    if sz == 0:
-        return "0 B"
-    i = min((int(sz).bit_length() - 1) // 10, len(units) - 1)
-    value = sz / 1024**i
-    if i == 0:
-        return f"{int(value)} {units[i]}"
-    return f"{value:.1f} {units[i]}"
-
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -47,8 +31,6 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
-
 def process_file(file_path: Path) -> None:
     Path(path)
     if is_binary(file_path):
@@ -71,8 +53,6 @@ def process_file(file_path: Path) -> None:
         after = gsz(file_path)
         print(f"{file_path.name} ", end=" ")
         print(fsz(before - after))
-
-
 def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
@@ -85,7 +65,5 @@ def main() -> None:
     p.join()
     diff_size = before - gsz(cwd)
     print(f"space change: {fsz(diff_size)}")
-
-
 if __name__ == "__main__":
     main()

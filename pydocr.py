@@ -1,3 +1,4 @@
+#!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 import ast
 import importlib
@@ -7,36 +8,10 @@ from collections import deque
 from multiprocessing import get_context
 from pathlib import Path
 from textwrap import dedent
-from dh import _clean_fname, get_files
-
-
-def unique_path(path: Path | str) -> Path:
-    path = _clean_fname(Path(path))
-    if not path.exists():
-        return path
-    parent = path.parent
-    suffixes = path.suffixes
-    if suffixes:
-        first_suffix_index = path.name.find(suffixes[0])
-        stem = path.name[:first_suffix_index]
-        full_suffix = "".join(suffixes)
-    else:
-        stem = path.name
-        full_suffix = ""
-    counter = 1
-    while True:
-        new_name = f"{stem}_{counter}{full_suffix}"
-        new_path = parent / new_name
-        if not new_path.exists():
-            return new_path
-        counter += 1
-
-
+from dh import _clean_fname, get_files, unique_path
 cwd = Path.cwd()
 cwdname = cwd.name
 BASE_DIR = Path(f"{cwdname}_doc")
-
-
 def format_markdown(module_name: str, module_doc: str, functions, classes) -> str:
     parts = [f"# Module `{module_name}`\n"]
     if module_doc:
@@ -50,8 +25,6 @@ def format_markdown(module_name: str, module_doc: str, functions, classes) -> st
         for name, doc in classes:
             parts.extend((f"### `{name}`\n", doc + "\n"))
     return "\n".join(parts).strip() + "\n"
-
-
 def extract_ast_docs(src: str) -> tuple[str, list, list]:
     try:
         tree = ast.parse(src)
@@ -72,8 +45,6 @@ def extract_ast_docs(src: str) -> tuple[str, list, list]:
             if doc:
                 classes.append((node.name, doc))
     return (module_doc, functions, classes)
-
-
 def extract_from_file(py_path: str) -> tuple[str, str, str, list, list]:
     try:
         src = Path(py_path).read_text(encoding="utf-8")
@@ -83,8 +54,6 @@ def extract_from_file(py_path: str) -> tuple[str, str, str, list, list]:
     if not module_doc and (not functions) and (not classes):
         return None
     return (module_doc, functions, classes)
-
-
 def extract_from_importable(name: str):
     try:
         module = importlib.import_module(name)
@@ -98,23 +67,17 @@ def extract_from_importable(name: str):
         if not doc:
             return None
         return (doc, [], [])
-
-
 def module_to_md_paths(name: str) -> tuple[str, str]:
     parts = name.split(".")
     folder = BASE_DIR.joinpath(*parts[:-1])
     filename = f"{parts[-1]}.md"
     return (str(folder), str(folder / filename))
-
-
 def file_to_md_paths(py_file: str, root: str) -> tuple[str, str]:
     rel = Path(py_file).relative_to(root)
     parts = list(rel.parts)
     parts[-1] = parts[-1].replace(".py", ".md")
     outfile = BASE_DIR.joinpath(*parts)
     return (str(outfile.parent), str(outfile))
-
-
 def save_markdown(folder: str, path: str, content: str) -> None:
     folderpath = Path(folder)
     if not folderpath.exists():
@@ -123,8 +86,6 @@ def save_markdown(folder: str, path: str, content: str) -> None:
     if outpath.exists():
         outpath = unique_path(outpath)
     outpath.write_text(content, encoding="utf-8")
-
-
 def process_importable_task(name: str) -> None:
     print(f"processing module {name}")
     result = extract_from_importable(name)
@@ -134,8 +95,6 @@ def process_importable_task(name: str) -> None:
     folder, out_path = module_to_md_paths(name)
     md = format_markdown(name, module_doc, functions, classes)
     save_markdown(folder, out_path, md)
-
-
 def process_file_task(py_file) -> None:
     filepath = Path(py_file)
     root = str(filepath.parent)
@@ -149,8 +108,6 @@ def process_file_task(py_file) -> None:
     folder, out_path = file_to_md_paths(py_file, root)
     md = format_markdown(module_name, module_doc, functions, classes)
     save_markdown(folder, out_path, md)
-
-
 def main() -> None:
     if not BASE_DIR.exists():
         BASE_DIR.mkdir(exist_ok=True)
@@ -166,8 +123,6 @@ def main() -> None:
                 pending.popleft().get()
         while pending:
             pending.popleft().get()
-
-
 "\n    print(f\"processing {len(importable)} importable\")\n    with get_context('spawn').Pool(8) as pool:\n        pending=deque()\n        for x in importables:\n            pending.append(pool.apply_async(process_importable_task, (x,)))\n            if len(pending)>16:\n                pending.popleft().get()\n        while pending:\n            pending.popleft().get()\n"
 if __name__ == "__main__":
     main()

@@ -1,7 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import ast
 import copy
 import hashlib
@@ -11,19 +9,9 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from os import scandir as os_scandir
 from pathlib import Path
-
 CHUNK_SIZE = 1024 * 1024
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
-def mpf3(process_function: Callable, files: list[Path], **kwargs):
-    from joblib import Parallel, delayed
-
-    file_strings = [str(f) for f in files]
-    return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
-
-
+from dh import mpf3
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -33,11 +21,8 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
-
-
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
-
     path = Path(path)
     if is_binary(path):
         return False
@@ -57,8 +42,6 @@ def is_python_file(path: str | Path) -> bool:
         except:
             return False
     return False
-
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -69,27 +52,22 @@ def is_binary(path: Path | str) -> bool:
         if b"\x00" in chunk:
             return True
         text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
-        nontext = sum(1 for b in chunk if b not in text_chars)
+        nontext = sum((1 for b in chunk if b not in text_chars))
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
-
 def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
     if path.is_file():
         if path.suffix == ".py":
             return [path]
-        if not path.suffix and not path.name.startswith(".") and is_python_file(path):
+        if not path.suffix and (not path.name.startswith(".")) and is_python_file(path):
             return [path]
         return []
-
     if not path.is_dir():
         return []
-
     pyfiles = []
     stack = [path]
-
     while stack:
         current = stack.pop()
         try:
@@ -104,14 +82,11 @@ def get_pyfiles(path: str | Path) -> list[Path]:
                         p = Path(entry.path)
                         if p.suffix == ".py":
                             pyfiles.append(p)
-                        elif not p.suffix and not p.name.startswith(".") and is_python_file(p):
+                        elif not p.suffix and (not p.name.startswith(".")) and is_python_file(p):
                             pyfiles.append(p)
         except (PermissionError, OSError):
             continue
-
     return sorted(pyfiles)
-
-
 @dataclass
 class Decl:
     kind: str
@@ -120,45 +95,34 @@ class Decl:
     end_lineno: int
     source: str
     content_hash: str
-
-
 class Normalizer(ast.NodeTransformer):
     def visit_FunctionDef(self, node):
         node = copy.deepcopy(node)
         node.name = "__NAME__"
         self.generic_visit(node)
         return node
-
     def visit_AsyncFunctionDef(self, node):
         node = copy.deepcopy(node)
         node.name = "__NAME__"
         self.generic_visit(node)
         return node
-
     def visit_ClassDef(self, node):
         node = copy.deepcopy(node)
         node.name = "__NAME__"
         self.generic_visit(node)
         return node
-
     def visit_Name(self, node):
         node = copy.deepcopy(node)
         if isinstance(node.ctx, ast.Store):
             return node
-
-
 def stable_hash(node: ast.AST) -> str:
     node = copy.deepcopy(node)
     node = Normalizer().visit(node)
     ast.fix_missing_locations(node)
     dumped = ast.dump(node, annotate_fields=True, include_attributes=False)
     return hashlib.sha256(dumped.encode("utf-8")).hexdigest()
-
-
 def get_source_segment(lines, lineno, end_lineno) -> str:
     return "".join(lines[lineno - 1 : end_lineno])
-
-
 def is_simple_top_level_assign(node) -> bool:
     if not isinstance(node, ast.Assign):
         return False
@@ -169,16 +133,12 @@ def is_simple_top_level_assign(node) -> bool:
             return False
         return False
     return True
-
-
 def extract_assign_names(node):
     names = []
     for target in node.targets:
         if isinstance(target, ast.Name):
             names.append(target.id)
     return names
-
-
 def build_decl_for_assign(node, lines):
     names = extract_assign_names(node)
     source = get_source_segment(lines, node.lineno, node.end_lineno)
@@ -187,17 +147,10 @@ def build_decl_for_assign(node, lines):
     for name in names:
         decls.append(
             Decl(
-                kind="assign",
-                name=name,
-                lineno=node.lineno,
-                end_lineno=node.end_lineno,
-                source=source,
-                content_hash=h,
+                kind="assign", name=name, lineno=node.lineno, end_lineno=node.end_lineno, source=source, content_hash=h
             )
         )
     return decls
-
-
 def build_decl(node: AsyncFunctionDef | ClassDef | FunctionDef, kind: str, name: str, lines) -> Decl:
     return Decl(
         kind=kind,
@@ -207,8 +160,6 @@ def build_decl(node: AsyncFunctionDef | ClassDef | FunctionDef, kind: str, name:
         source=get_source_segment(lines, node.lineno, node.end_lineno),
         content_hash=stable_hash(node),
     )
-
-
 def process_file(src_path) -> None:
     Path(path)
     dup_path = src_path.parent / f"{src_path.stem}_dups.py"
@@ -237,9 +188,9 @@ def process_file(src_path) -> None:
     duplicate_reasons = []
     already_marked_ranges = set()
     for decl in decls:
-        key_name = decl.kind, decl.name
-        key_hash = decl.kind, decl.content_hash
-        rng = decl.lineno, decl.end_lineno
+        key_name = (decl.kind, decl.name)
+        key_hash = (decl.kind, decl.content_hash)
+        rng = (decl.lineno, decl.end_lineno)
         is_dup = False
         reason = None
         if key_name in seen_name:
@@ -274,8 +225,6 @@ def process_file(src_path) -> None:
         f.write("".join(out))
     print(f"Updated {src_path} in place")
     print(f"Moved {len(duplicate_ranges)} duplicate declaration block(s) to {dup_path}")
-
-
 def main() -> None:
     cwd = Path.cwd()
     gsz(cwd)
@@ -294,7 +243,5 @@ def main() -> None:
     for result in results:
         if result:
             pass
-
-
 if __name__ == "__main__":
     sys.exit(main())

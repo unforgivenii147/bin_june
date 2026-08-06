@@ -1,17 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import ast
 import multiprocessing as mp
 from ast import AST
 from pathlib import Path
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 OUTPUT_DIR = Path("output")
 EXCLUDE_DIRS = {"test", "tests", "examples", "output"}
-
-
 def is_python_script(path: Path) -> bool:
     if path.suffix == ".py":
         return True
@@ -21,8 +16,6 @@ def is_python_script(path: Path) -> bool:
         return line.startswith("#!") and "python" in line.lower()
     except Exception:
         return False
-
-
 def discover_python_files() -> list[Path]:
     files = []
     base_path = Path(".")
@@ -32,18 +25,12 @@ def discover_python_files() -> list[Path]:
         if path.is_file() and is_python_script(path):
             files.append(path)
     return files
-
-
 def mark_parents(node: ast.AST, parent: AST | None = None) -> None:
     for child in ast.iter_child_nodes(node):
         child._parent = node
         mark_parents(child, node)
-
-
 def is_constant_name(name: str) -> bool:
     return name.isupper()
-
-
 def extract_from_file(
     path: Path,
 ) -> tuple[Path, dict[str, str], dict[str, str], dict[str, str], dict[str, str], dict[str, str]]:
@@ -89,13 +76,9 @@ def extract_from_file(
             if src:
                 consts[name] = src
     return (path, tl_classes, tl_funcs, nested_classes, nested_funcs, consts)
-
-
 def write_output(path: Path, data: dict[str, str]) -> None:
     with path.open("w", encoding="utf-8") as f:
         f.writelines((src.rstrip() + "\n\n" for _name, src in sorted(data.items())))
-
-
 def main() -> None:
     OUTPUT_DIR.mkdir(exist_ok=True, parents=True)
     files = discover_python_files()
@@ -134,7 +117,5 @@ def main() -> None:
     for n in sorted(const_map):
         print(" -", n)
     print("\nOutputs saved to:", OUTPUT_DIR)
-
-
 if __name__ == "__main__":
     main()

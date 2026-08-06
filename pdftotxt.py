@@ -1,15 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import sys
 from pathlib import Path
-
 import pdfplumber
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def process_file(path: str) -> None:
     path = Path(path)
     i = 1
@@ -28,11 +22,7 @@ def process_file(path: str) -> None:
             Path(txtfile).write_text(text, encoding="utf-8")
             print(f"{txtfile} created")
             i += 1
-
-
 def main() -> None:
     process_file(sys.argv[1])
-
-
 if __name__ == "__main__":
     main()

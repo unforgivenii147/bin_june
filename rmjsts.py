@@ -1,18 +1,14 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Remove comments from JavaScript and TypeScript files."""
-
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Optional
-
-
 def remove_js_comments(content: str) -> str:
     result = []
     i = 0
     in_string = False
     string_char = None
-
     while i < len(content):
         if content[i] in ('"', "'", "`") and (i == 0 or content[i - 1] != "\\"):
             if not in_string:
@@ -49,10 +45,7 @@ def remove_js_comments(content: str) -> str:
         else:
             result.append(content[i])
             i += 1
-
     return "".join(result)
-
-
 def process_file(file_path: Path) -> Optional[str]:
     try:
         content = file_path.read_text(encoding="utf-8")
@@ -61,14 +54,11 @@ def process_file(file_path: Path) -> Optional[str]:
         return None
     except Exception as e:
         return f"Error processing {file_path}: {e}"
-
-
 def main():
     if len(sys.argv) > 1:
         paths = [Path(arg) for arg in sys.argv[1:]]
     else:
         paths = [Path.cwd()]
-
     files_to_process = []
     for path in paths:
         if path.is_file():
@@ -77,18 +67,13 @@ def main():
         elif path.is_dir():
             for ext in ("*.js", "*.ts", "*.jsx", "*.tsx"):
                 files_to_process.extend(path.rglob(ext))
-
     with ThreadPoolExecutor() as executor:
         results = executor.map(process_file, files_to_process)
-
     errors = [e for e in results if e]
     if errors:
         for error in errors:
             print(error, file=sys.stderr)
         sys.exit(1)
-
     print(f"Processed {len(files_to_process)} file(s)")
-
-
 if __name__ == "__main__":
     main()

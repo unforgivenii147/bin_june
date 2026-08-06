@@ -6,13 +6,9 @@ import sys
 import tarfile
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-
 import brotli
-
 BROTLI_QUALITY = 11
 CHUNK_SIZE = 1024 * 64
-
-
 def decompress_stream(input_path: Path, output_path: Path) -> bool:
     """Decompress a .br file to output_path."""
     try:
@@ -30,8 +26,6 @@ def decompress_stream(input_path: Path, output_path: Path) -> bool:
     except Exception as e:
         print(f"❌ Error decompressing {input_path.name}: {e}")
         return False
-
-
 def compress_stream(input_stream, output_file_path: Path) -> bool:
     """Compress from stream to .br file."""
     compressor = brotli.Compressor(quality=BROTLI_QUALITY)
@@ -48,27 +42,20 @@ def compress_stream(input_stream, output_file_path: Path) -> bool:
     except Exception as e:
         print(f"❌ Error compressing to {output_file_path.name}: {e}")
         return False
-
-
 def process_directory(dir_path: Path):
     """Compress directory → .tar.br"""
     output_br = dir_path.with_name(f"{dir_path.name}.tar.br")
     tar_buffer = io.BytesIO()
-
     try:
         with tarfile.open(fileobj=tar_buffer, mode="w") as tar:
             tar.add(dir_path, arcname=dir_path.name)
-
         tar_buffer.seek(0)
         if compress_stream(tar_buffer, output_br):
             import shutil
-
             shutil.rmtree(dir_path)
             print(f"🗑️  Removed original directory: {dir_path.name}")
     except Exception as e:
         print(f"❌ Failed to archive directory {dir_path.name}: {e}")
-
-
 def process_file(file_path: Path):
     """Compress single file → .br"""
     output_br = file_path.with_name(f"{file_path.name}.br")
@@ -79,15 +66,12 @@ def process_file(file_path: Path):
                 print(f"🗑️  Removed original file: {file_path.name}")
     except Exception as e:
         print(f"❌ Failed to compress file {file_path.name}: {e}")
-
-
 def decompress_file(br_path: Path):
     """Decompress .br or .tar.br file."""
     if br_path.name.endswith(".tar.br"):
         # .tar.br → directory
         output_dir = br_path.with_name(br_path.name[:-7])  # remove .tar.br
         tar_buffer = io.BytesIO()
-
         try:
             if decompress_stream(br_path, tar_buffer):
                 tar_buffer.seek(0)
@@ -97,7 +81,6 @@ def decompress_file(br_path: Path):
                 print(f"🗑️  Removed archive: {br_path.name}")
         except Exception as e:
             print(f"❌ Failed to decompress tar archive {br_path.name}: {e}")
-
     elif br_path.suffix == ".br":
         # Regular .br → original file
         output_file = br_path.with_suffix("")
@@ -106,54 +89,38 @@ def decompress_file(br_path: Path):
             print(f"🗑️  Removed archive: {br_path.name}")
     else:
         print(f"⚠️  Skipping non-br file: {br_path.name}")
-
-
 def main():
     parser = argparse.ArgumentParser(description="Compress/Decompress with Brotli")
     parser.add_argument("-c", "--compress", action="store_true", help="Compress mode (default)")
     parser.add_argument("-d", "--decompress", action="store_true", help="Decompress mode")
-
     args = parser.parse_args()
-
     mode = "decompress" if args.decompress else "compress"
-
     current_dir = Path(".")
-
     if mode == "compress":
         subdirs = [d for d in current_dir.iterdir() if d.is_dir() and not d.name.startswith(".")]
         files = [
             f for f in current_dir.iterdir() if f.is_file() and f.suffix != ".br" and f.name != Path(__file__).name
         ]
-
         if not subdirs and not files:
             print("No files or subdirectories found to compress.")
             return
-
         print(f"🚀 Found {len(subdirs)} subdirs and {len(files)} files to compress.")
         print(f"⚡ Starting parallel compression (Quality: {BROTLI_QUALITY})...")
-
         with ThreadPoolExecutor() as executor:
             for d in subdirs:
                 executor.submit(process_directory, d)
             for f in files:
                 executor.submit(process_file, f)
-
     else:  # decompress
         archives = [f for f in current_dir.iterdir() if f.is_file() and f.suffix == ".br"]
-
         if not archives:
             print("No .br or .tar.br files found to decompress.")
             return
-
         print(f"🚀 Found {len(archives)} archives to decompress.")
         print("⚡ Starting parallel decompression...")
-
         with ThreadPoolExecutor() as executor:
             for archive in archives:
                 executor.submit(decompress_file, archive)
-
     print("🎉 All operations completed successfully!")
-
-
 if __name__ == "__main__":
     main()

@@ -1,21 +1,14 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import compileall
 import csv
 import os
 import shutil
 import sys
 from pathlib import Path
-
-
 def get_user_site_packages():
     import site
-
     return Path(site.getusersitepackages())
-
-
 def check_dist_info_safely(dist_info_path):
     top_level_path = dist_info_path / "top_level.txt"
     if top_level_path.exists():
@@ -41,8 +34,6 @@ def check_dist_info_safely(dist_info_path):
         except Exception as e:
             print(f"  Warning: Could not read RECORD for {dist_info_path.name}: {e}")
     return (False, "")
-
-
 def create_loader_stub(pkg_name, site_packages):
     stub_path = site_packages / f"{pkg_name}.py"
     pkg_dir = site_packages / pkg_name
@@ -51,8 +42,6 @@ def create_loader_stub(pkg_name, site_packages):
     with open(stub_path, "w", encoding="utf-8") as f:
         f.write(stub_content)
     print(f"  Created loader stub: {pkg_name}.py (with __main__ execution hook: {has_main})")
-
-
 def process_package(pkg_name, site_packages):
     pkg_dir = site_packages / pkg_name
     if not pkg_dir.is_dir() or pkg_name.endswith((".dist-info", ".egg-info", "__pycache__")):
@@ -78,20 +67,15 @@ def process_package(pkg_name, site_packages):
         print(f"  Warning: No .dist-info found for {pkg_name}. Proceeding cautiously...")
     print(f"  Processing: {pkg_name}...")
     compileall.compile_dir(pkg_dir, quiet=1, legacy=True)
-
     import zipfile
-
     zip_filename = f"{pkg_name}.zip"
     zip_path = site_packages / zip_filename
-
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
         for root, _dirs, files in os.walk(pkg_dir):
             for file in files:
                 file_path = Path(root) / file
-
                 arcname = str(file_path.relative_to(pkg_dir))
                 zipf.write(file_path, arcname)
-
     create_loader_stub(pkg_name, site_packages)
     try:
         shutil.rmtree(pkg_dir)
@@ -100,8 +84,6 @@ def process_package(pkg_name, site_packages):
     except Exception as e:
         print(f"  Error deleting original directory for {pkg_name}: {e}")
         return False
-
-
 def main():
     site_packages = get_user_site_packages()
     if not site_packages.exists():
@@ -120,7 +102,5 @@ def main():
             if process_package(path.name, site_packages):
                 converted += 1
     print(f"\nFinished! Successfully converted {converted} package(s) to zip format.")
-
-
 if __name__ == "__main__":
     main()

@@ -1,7 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import argparse
 import ast
 import sys
@@ -10,22 +8,11 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from multiprocessing import Pool, cpu_count
 from os import scandir as os_scandir
 from pathlib import Path
-
 CHUNK_SIZE = 1024 * 1024
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
-def mpf3(process_function: Callable, files: list[Path], **kwargs):
-    from joblib import Parallel, delayed
-
-    file_strings = [str(f) for f in files]
-    return Parallel(n_jobs=-1)(delayed(process_function)(file_str, **kwargs) for file_str in file_strings)
-
-
+from dh import mpf3
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
-
     path = Path(path)
     if is_binary(path):
         return False
@@ -45,8 +32,6 @@ def is_python_file(path: str | Path) -> bool:
         except:
             return False
     return False
-
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -57,27 +42,22 @@ def is_binary(path: Path | str) -> bool:
         if b"\x00" in chunk:
             return True
         text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
-        nontext = sum(1 for b in chunk if b not in text_chars)
+        nontext = sum((1 for b in chunk if b not in text_chars))
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
-
 def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
     if path.is_file():
         if path.suffix == ".py":
             return [path]
-        if not path.suffix and not path.name.startswith(".") and is_python_file(path):
+        if not path.suffix and (not path.name.startswith(".")) and is_python_file(path):
             return [path]
         return []
-
     if not path.is_dir():
         return []
-
     pyfiles = []
     stack = [path]
-
     while stack:
         current = stack.pop()
         try:
@@ -92,14 +72,11 @@ def get_pyfiles(path: str | Path) -> list[Path]:
                         p = Path(entry.path)
                         if p.suffix == ".py":
                             pyfiles.append(p)
-                        elif not p.suffix and not p.name.startswith(".") and is_python_file(p):
+                        elif not p.suffix and (not p.name.startswith(".")) and is_python_file(p):
                             pyfiles.append(p)
         except (PermissionError, OSError):
             continue
-
     return sorted(pyfiles)
-
-
 def process_file(args: tuple) -> None:
     path, counter, total, dry_run = args
     path = Path(path)
@@ -131,8 +108,6 @@ def process_file(args: tuple) -> None:
             print(f"  ⚠️  copied to: {new_path} | Error: {e}")
         except OSError as move_error:
             print(f"  ❌ Failed to move {path}: {move_error}")
-
-
 def get_files_to_process(paths: list[str]) -> list[Path]:
     files = []
     if paths:
@@ -154,30 +129,22 @@ def get_files_to_process(paths: list[str]) -> list[Path]:
             seen.add(resolved)
             unique_files.append(f)
     return unique_files
-
-
 def process_files_mpf3(files: list[Path], dry_run: bool = False) -> None:
     total = len(files)
-
     def wrapper(path):
         if not hasattr(wrapper, "counter"):
             wrapper.counter = 0
         wrapper.counter += 1
         process_file((path, wrapper.counter, total, dry_run))
-
     try:
         mpf3(wrapper, files)
     except Exception as e:
         print(f"⚠️  mpf3 failed: {e}")
         raise
-
-
 def process_files_threadpool(files: list[Path], dry_run: bool = False) -> None:
     total = len(files)
-
     def worker(path, idx):
         process_file((path, idx, total, dry_run))
-
     with ThreadPoolExecutor(max_workers=min(cpu_count() * 2, len(files))) as executor:
         futures = {executor.submit(worker, path, idx): path for idx, path in enumerate(files, 1)}
         for future in as_completed(futures):
@@ -186,21 +153,15 @@ def process_files_threadpool(files: list[Path], dry_run: bool = False) -> None:
             except Exception as e:
                 path = futures[future]
                 print(f"  ❌ Unexpected error processing {path}: {e}")
-
-
 def process_files_multiprocessing(files: list[Path], dry_run: bool = False) -> None:
     total = len(files)
     args_list = [(path, idx, total, dry_run) for idx, path in enumerate(files, 1)]
     with Pool(processes=min(cpu_count(), len(files))) as pool:
         pool.map(process_file, args_list)
-
-
 def process_files_sequential(files: list[Path], dry_run: bool = False) -> None:
     total = len(files)
     for idx, path in enumerate(files, 1):
         process_file((path, idx, total, dry_run))
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Check Python files for syntax errors and move invalid ones to 'error' directories",
@@ -208,10 +169,7 @@ def main() -> int:
     )
     parser.add_argument("paths", nargs="*", help="Files or directories to process (default: current directory)")
     parser.add_argument(
-        "--dry-run",
-        "-n",
-        action="store_true",
-        help="Show what would be done without actually moving files",
+        "--dry-run", "-n", action="store_true", help="Show what would be done without actually moving files"
     )
     parser.add_argument(
         "--parallel",
@@ -256,7 +214,5 @@ def main() -> int:
         print("-" * 50)
         print("🔍 DRY RUN COMPLETE - No files were moved")
     return 0
-
-
 if __name__ == "__main__":
     sys.exit(main())

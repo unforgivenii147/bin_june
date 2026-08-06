@@ -1,19 +1,13 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
 from deep_translator import GoogleTranslator
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 DIRECTORY = "."
 CHUNK_SIZE = 2000
 non_english_pattern = re.compile("[^\\x00-\\x7F]")
-
-
 def is_text_file(path: Path) -> bool:
     try:
         with Path(path).open("rb") as f:
@@ -21,20 +15,14 @@ def is_text_file(path: Path) -> bool:
         return b"\x00" not in chunk
     except:
         return False
-
-
 def split_into_chunks(text: str, size: int) -> list[str]:
     return [text[i : i + size] for i in range(0, len(text), size)]
-
-
 def translate_chunk(chunk: str) -> str:
     try:
         return GoogleTranslator(source="auto", target="en").translate(chunk)
     except Exception as e:
         print(f"Chunk translation error: {e}")
         return chunk
-
-
 def translate_file(path: Path) -> None:
     try:
         content = Path(path).read_text(encoding="utf-8")
@@ -54,8 +42,6 @@ def translate_file(path: Path) -> None:
         print(f"Translated → {new_path.name}")
     except Exception as e:
         print(f"Error writing {new_path}: {e}")
-
-
 def process_directory(directory: str) -> None:
     files = []
     for path in walker(directory):
@@ -70,7 +56,5 @@ def process_directory(directory: str) -> None:
                 future.result()
             except Exception as e:
                 print(f"Error processing {f}: {e}")
-
-
 if __name__ == "__main__":
     process_directory(DIRECTORY)

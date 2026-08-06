@@ -1,13 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import builtins
 import re
 from pathlib import Path
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 env_vars = set()
 env_var_pattern = re.compile(r"^([A-Z_0-9]+)=")
 for filepath in Path().rglob("*"):

@@ -1,10 +1,8 @@
+#!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 from pathlib import Path
-
 CHUNK_SIZE = 1024 * 1024
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -19,11 +17,8 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
-
 def get_filez(root_dir: str | Path):
     from os import walk as os_walk
-
     visited_dirs: set[Path] = set()
     root_dir = Path(root_dir)
     if root_dir.is_dir():
@@ -41,11 +36,7 @@ def get_filez(root_dir: str | Path):
                     yield filepath
     else:
         yield root_dir
-
-
 from dh import should_skip
-
-
 def find_scripts_without_extension(directory: Path):
     scripts_without_extension = []
     for item in get_filez(directory):
@@ -64,8 +55,6 @@ def find_scripts_without_extension(directory: Path):
             except Exception as e:
                 print(f"Could not read {item}: {e}")
     return scripts_without_extension
-
-
 if __name__ == "__main__":
     cwd = Path.cwd()
     found_scripts = find_scripts_without_extension(cwd)

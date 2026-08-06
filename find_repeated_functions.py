@@ -5,24 +5,17 @@ import json
 import os
 from collections import defaultdict
 from pathlib import Path
-
-
 def get_source(node, content):
     return ast.get_source_segment(content, node)
-
-
 def normalize_source(source):
     if not source:
         return ""
     return "\n".join(line.rstrip() for line in source.strip().splitlines())
-
-
 def analyze_files():
     cwd = Path.cwd()
     target_dirs = [cwd]
     definitions = defaultdict(list)  # (type, name, normalized_source) -> list of file paths
     source_map = {}  # (type, name, normalized_source) -> actual_source
-
     for target_dir in target_dirs:
         for root, dirs, files in os.walk(target_dir):
             if ".git" in dirs:
@@ -53,7 +46,6 @@ def analyze_files():
                                             source_map[key] = source
                     except Exception:
                         continue
-
     repeated = []
     for key, paths in definitions.items():
         if len(set(paths)) > 2:
@@ -66,13 +58,9 @@ def analyze_files():
                     "files": list(set(paths)),
                 }
             )
-
     return repeated
-
-
 if __name__ == "__main__":
     repeated = analyze_files()
     repeated.sort(key=lambda x: x["count"], reverse=True)
-
     with open("repeated.json", "w") as f:
         json.dump(repeated, f, indent=2, ensure_ascii=False)

@@ -1,19 +1,13 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import argparse
 import sys
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
-
 import requests
 from bs4 import BeautifulSoup
 from requests.sessions import Session
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def create_session() -> Session:
     session = requests.Session()
     session.headers.update(
@@ -28,8 +22,6 @@ def create_session() -> Session:
         }
     )
     return session
-
-
 def extract_links(url: str, session: requests.Session):
     resp = session.get(url, timeout=30, allow_redirects=True)
     resp.raise_for_status()
@@ -51,8 +43,6 @@ def extract_links(url: str, session: requests.Session):
             if parsed.scheme in {"http", "https"}:
                 links.add(abs_url)
     return sorted(links)
-
-
 def split_internal_external(base_url, links):
     base_domain = urlparse(base_url).netloc
     internal = []
@@ -63,15 +53,11 @@ def split_internal_external(base_url, links):
         else:
             external.append(link)
     return internal, external
-
-
 def save_links(name: str, links) -> None:
     path = Path(name)
     content = "\n".join(links)
     path.write_text(content, encoding="utf-8")
     print(f"Saved {len(links)} links to {name}")
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="Extract and save all URLs from a webpage")
     parser.add_argument("url", nargs="?", help="Target URL")
@@ -102,7 +88,5 @@ def main() -> None:
     if external:
         save_links("external.txt", external)
     print(f"Total links: {len(links)} (Internal: {len(internal)}, External: {len(external)})")
-
-
 if __name__ == "__main__":
     main()

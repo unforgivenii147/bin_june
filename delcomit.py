@@ -1,15 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import sys
 from datetime import datetime, timedelta
-
 from git import Repo
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def delete_commits_older_than_week(repo_path: str = ".", branch: str = "master") -> bool:
     try:
         repo = Repo(repo_path)
@@ -64,8 +58,6 @@ def delete_commits_older_than_week(repo_path: str = ".", branch: str = "master")
     except Exception as e:
         print(f"Error: {e}")
         return False
-
-
 def delete_commits_interactive(repo_path: str = ".", branch: str = "master", days_old: int = 7) -> bool:
     try:
         repo = Repo(repo_path)
@@ -122,8 +114,6 @@ def delete_commits_interactive(repo_path: str = ".", branch: str = "master", day
     except Exception as e:
         print(f"Error: {e}")
         return False
-
-
 def delete_commits_with_rebase(repo_path: str = ".", branch: str = "master", days_old: int = 7) -> bool | None:
     try:
         repo = Repo(repo_path)
@@ -161,11 +151,8 @@ def delete_commits_with_rebase(repo_path: str = ".", branch: str = "master", day
     except Exception as e:
         print(f"Error: {e}")
         return False
-
-
 if __name__ == "__main__":
     import argparse
-
     parser = argparse.ArgumentParser(description="Delete git commits older than one week")
     parser.add_argument("--path", default=".", help="Repository path")
     parser.add_argument("--branch", default="master", help="Branch to clean")

@@ -1,22 +1,14 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 from pathlib import Path
-
 from bs4 import BeautifulSoup
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def find_html_files(cwd: str = ".") -> list[Path]:
     root_path = Path(cwd).resolve()
     html_files = [file_path for file_path in root_path.rglob("*.html") if file_path.name != "template.html"]
     for file_path in root_path.rglob("*.htm"):
         html_files.append(file_path)
     return sorted(html_files)
-
-
 def extract_common_structure(html_files: list[Path]) -> dict:
     body_classes = []
     meta_tags = []
@@ -44,8 +36,6 @@ def extract_common_structure(html_files: list[Path]) -> dict:
         "script_tags": common_scripts,
         "body_class": common_body_class,
     }
-
-
 def merge_html_content(html_files: list[Path]) -> str:
     merged_sections = []
     for file_path in html_files:
@@ -63,8 +53,6 @@ def merge_html_content(html_files: list[Path]) -> str:
         except Exception as e:
             print(f"Error merging {file_path}: {e}")
     return "".join(merged_sections)
-
-
 def create_template_html(
     html_files: list[Path], output_file: str = "template.html", title: str = "Merged HTML Template"
 ) -> bool:
@@ -179,14 +167,10 @@ def create_template_html(
     except Exception as e:
         print(f"Error writing template: {e}")
         return False
-
-
 def main() -> None:
     html_files = find_html_files()
     success = create_template_html(html_files, output_file="template.html", title="Merged HTML Template")
     if success:
         print("Output file: template.html")
-
-
 if __name__ == "__main__":
     main()

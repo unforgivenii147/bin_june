@@ -1,23 +1,18 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 """
 lzma_compress.py — Recursive LZMA multithreaded compression/decompression.
-
 Uses lzma with FORMAT_XZ and preset 9 (LZMA_PRESET_EXTREME equivalent).
 Multithreading via LZMACompressor filters with bcj+lzma2 or via
 pylzma / lzmamt if available. We use the stdlib lzma with threads
 emulated through a ThreadPoolExecutor per-file (lzma2 in xz format
 supports parallel blocks via liblzma's mt encoder, exposed through
 the `filters` interface with `threads` in the check dict).
-
 NOTE: CPython's stdlib `lzma` module wraps liblzma but does NOT expose
 the mt (multithreaded) lzma_stream_encoder_mt API. To get real LZMA MT
 we use the `lzmamt` package (pip install lzmamt) which binds that API
 directly. Falls back gracefully to stdlib lzma if lzmamt is unavailable.
 """
-
 from __future__ import annotations
-
 import argparse
 import lzma
 import multiprocessing
@@ -27,10 +22,8 @@ import tarfile
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-
 try:
     import lzmamt
-
     HAS_LZMAMT = True
 except ImportError:
     HAS_LZMAMT = False
@@ -40,43 +33,29 @@ LEVEL_LARGE = 6
 LZMA_EXT = ".xz"
 DEFAULT_THREADS = 4
 WORKERS = max(1, multiprocessing.cpu_count())
-
-
 def choose_level(path: Path) -> int:
     try:
         return LEVEL_LARGE if path.stat().st_size > LARGE_FILE_THRESHOLD else LEVEL_DEFAULT
     except OSError:
         return LEVEL_DEFAULT
-
-
 def human(n: int) -> str:
     for unit in ("B", "KB", "MB", "GB"):
         if n < 1024:
             return f"{n:.1f} {unit}"
         n /= 1024
     return f"{n:.1f} TB"
-
-
 def ratio_str(before: int, after: int) -> str:
     if before == 0:
         return "0%"
     return f"{after / before * 100:.0f}%"
-
-
 def status_line(ok: bool, name: str, elapsed_ms: float, before: int, after: int) -> str:
     icon = "✔" if ok else "✘"
     return f"[{icon}] {name} ({elapsed_ms:.0f}ms) {ratio_str(before, after)}"
-
-
 def _compress_bytes_lzmamt(data: bytes, level: int, threads: int) -> bytes:
     return lzmamt.compress(data, preset=level, threads=threads)
-
-
 def _compress_bytes_stdlib(data: bytes, level: int) -> bytes:
     preset = level | lzma.PRESET_EXTREME if level == 9 else level
     return lzma.compress(data, format=lzma.FORMAT_XZ, preset=preset)
-
-
 def compress_file(
     src: Path,
     dry_run: bool,
@@ -116,8 +95,6 @@ def compress_file(
         result["line"] = status_line(False, src.name, elapsed_ms, 0, 0)
         result["msg"] = f"  ERROR: {exc}"
     return result
-
-
 def decompress_file(src: Path, dry_run: bool, verbose: bool, threads: int = DEFAULT_THREADS) -> dict:
     result = {"src": src, "ok": False, "line": "", "msg": ""}
     if src.suffix != LZMA_EXT:
@@ -148,8 +125,6 @@ def decompress_file(src: Path, dry_run: bool, verbose: bool, threads: int = DEFA
         result["line"] = status_line(False, src.name, elapsed_ms, 0, 0)
         result["msg"] = f"  ERROR: {exc}"
     return result
-
-
 def tar_subdir(subdir: Path, dry_run: bool, verbose: bool) -> Path | None:
     tar_path = subdir.parent / (subdir.name + ".tar")
     if dry_run:
@@ -165,8 +140,6 @@ def tar_subdir(subdir: Path, dry_run: bool, verbose: bool) -> Path | None:
     except Exception as exc:
         print(f"  ERROR tarring {subdir}: {exc}", file=sys.stderr)
         return None
-
-
 def remove_subdir(subdir: Path, dry_run: bool, verbose: bool) -> None:
     if dry_run:
         if verbose:
@@ -178,8 +151,6 @@ def remove_subdir(subdir: Path, dry_run: bool, verbose: bool) -> None:
             print(f"  removed original dir: {subdir.name}/")
     except Exception as exc:
         print(f"  WARNING — could not remove {subdir}: {exc}", file=sys.stderr)
-
-
 def run_parallel(tasks: list, worker_fn, extra_kwargs: dict) -> tuple[int, int]:
     ok = err = 0
     with ProcessPoolExecutor(max_workers=WORKERS) as pool:
@@ -194,8 +165,6 @@ def run_parallel(tasks: list, worker_fn, extra_kwargs: dict) -> tuple[int, int]:
             else:
                 err += 1
     return ok, err
-
-
 def do_compress(root: Path, tar_subdirs: bool, dry_run: bool, verbose: bool, threads: int) -> None:
     start = time.perf_counter()
     if not HAS_LZMAMT and verbose:
@@ -241,8 +210,6 @@ def do_compress(root: Path, tar_subdirs: bool, dry_run: bool, verbose: bool, thr
         return
     elapsed = time.perf_counter() - start
     print(f"\nDone [{elapsed:.2f}s]")
-
-
 def do_decompress(root: Path, dry_run: bool, verbose: bool, threads: int) -> None:
     start = time.perf_counter()
     files = [p for p in root.rglob("*") if p.is_file() and p.suffix == LZMA_EXT]
@@ -254,8 +221,6 @@ def do_decompress(root: Path, dry_run: bool, verbose: bool, threads: int) -> Non
     ok, err = run_parallel(files, decompress_file, {"dry_run": dry_run, "verbose": verbose, "threads": threads})
     elapsed = time.perf_counter() - start
     print(f"\nDone — {ok} decompressed, {err} error(s) [{elapsed:.2f}s]")
-
-
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="lzma_compress",
@@ -277,8 +242,6 @@ Uses lzmamt for real MT encoding if installed, otherwise stdlib lzma (still para
     p.add_argument("--dry-run", action="store_true")
     p.add_argument("directory", nargs="?", default=".")
     return p
-
-
 def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
@@ -301,7 +264,5 @@ def main() -> None:
         if args.tar_subdirs_first:
             print("Note: --tar-subdirs-first", file=sys.stderr)
         do_decompress(root, args.dry_run, args.verbose, args.threads)
-
-
 if __name__ == "__main__":
     sys.exit(main())

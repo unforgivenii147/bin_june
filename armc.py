@@ -1,8 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 """
 Python Comment Remover with AST Validation
-
 Removes comments from Python files recursively with parallel processing.
 Features:
 - Removes line comments (# ...) and inline comments
@@ -15,9 +13,7 @@ Features:
 - Parallel processing for performance
 - Detailed reporting
 """
-
 from __future__ import annotations
-
 import argparse
 import ast
 import shutil
@@ -27,8 +23,6 @@ import zipfile
 from collections.abc import Generator
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
-
 class CommentRemover:
     def __init__(self, validate: bool = True):
         self.validate = validate
@@ -36,7 +30,6 @@ class CommentRemover:
         self.total_comments_removed = 0
         self.failed_files = []
         self.processed_whl_files = []
-
     @staticmethod
     def is_python_file(path: Path) -> bool:
         if path.suffix == ".py":
@@ -49,7 +42,6 @@ class CommentRemover:
             except (OSError, UnicodeDecodeError):
                 return False
         return False
-
     @staticmethod
     def validate_syntax(code: str) -> tuple[bool, str]:
         try:
@@ -57,7 +49,6 @@ class CommentRemover:
             return (True, "")
         except SyntaxError as e:
             return (False, f"Syntax Error at line {e.lineno}: {e.msg}")
-
     @staticmethod
     def should_preserve_comment(line: str, comment_start: int) -> bool:
         comment_text = line[comment_start + 1 :].strip()
@@ -66,7 +57,6 @@ class CommentRemover:
         if comment_text.startswith("type:"):
             return True
         return bool(comment_text.startswith("fmt:"))
-
     @staticmethod
     def remove_comments(source_code: str) -> tuple[str, int]:
         lines = source_code.split("\n")
@@ -130,7 +120,6 @@ class CommentRemover:
         if result and (not result.endswith("\n")):
             result += "\n"
         return (result, comment_count)
-
     def process_file(self, file_path: Path) -> tuple[Path, int, bool, str]:
         try:
             with open(file_path, encoding="utf-8") as f:
@@ -145,7 +134,6 @@ class CommentRemover:
             return (file_path, comment_count, True, "OK")
         except Exception as e:
             return (file_path, 0, False, f"Error: {e!s}")
-
     def find_python_files(self, paths: list[Path]) -> Generator[Path, None, None]:
         for path in paths:
             if not path.exists():
@@ -161,7 +149,6 @@ class CommentRemover:
                 for file_path in path.rglob("*"):
                     if file_path.is_file() and file_path.suffix == "" and self.is_python_file(file_path):
                         yield file_path
-
     def process_whl_file(self, whl_path: Path, dry_run: bool = False) -> tuple[int, list[tuple[str, int]], bool]:
         file_results = []
         total_removed = 0
@@ -197,7 +184,6 @@ class CommentRemover:
         except Exception as e:
             print(f"⚠ Error processing wheel {whl_path.name}: {e!s}")
             return (0, [], False)
-
     def process_files(
         self,
         paths: list[Path],
@@ -268,7 +254,6 @@ class CommentRemover:
                     print(f"  ⚠ Some files in {whl_path.name} had processing errors")
         if not python_files and (not wheel_files):
             print("⚠ No Python files or wheel files found")
-
     def print_summary(self) -> None:
         print("\n" + "=" * 80)
         print("📊 SUMMARY")
@@ -286,8 +271,6 @@ class CommentRemover:
             for file_path, error in self.failed_files:
                 print(f"  • {file_path}: {error}")
         print("=" * 80)
-
-
 def main():
     parser = argparse.ArgumentParser(
         description="Remove comments from Python files with AST validation",
@@ -331,7 +314,5 @@ def main():
     except Exception as e:
         print(f"\n❌ Fatal error: {e!s}", file=sys.stderr)
         sys.exit(1)
-
-
 if __name__ == "__main__":
     main()

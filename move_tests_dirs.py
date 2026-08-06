@@ -1,12 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import shutil
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-
-
 def move_tests_folder(tests_path: Path, base_src: Path, base_dst: Path) -> tuple[bool, str]:
     try:
         relative_path = tests_path.relative_to(base_src)
@@ -17,8 +13,6 @@ def move_tests_folder(tests_path: Path, base_src: Path, base_dst: Path) -> tuple
         return True, f"Moved: {tests_path} -> {dst_path}"
     except Exception as e:
         return False, f"Error moving {tests_path}: {e}"
-
-
 def move_tests_recursive(source_dir: str = ".", max_workers: int = 4) -> int:
     source = Path(source_dir).resolve()
     destination = Path.home() / "tmp" / "test"
@@ -46,7 +40,5 @@ def move_tests_recursive(source_dir: str = ".", max_workers: int = 4) -> int:
     print()
     print(f"✓ Successfully moved {moved_count}/{len(tests_folders)} directories")
     return moved_count
-
-
 if __name__ == "__main__":
     move_tests_recursive()

@@ -1,24 +1,18 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 """
 Scan ~/bin for Python scripts that import from the custom 'dh' package.
 Count how many times each function from 'dh' is imported and used,
 then save a report to ~/dh_usage.txt.
 """
-
 from __future__ import annotations
-
 import ast
 import sys
 from collections import Counter
 from pathlib import Path
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 BIN_DIR = Path.home() / "bin"
 REPORT = Path.home() / "dh_usage.txt"
 PACKAGE = "dh"
-
-
 def extract_dh_imports(filepath: Path) -> list[str]:
     try:
         tree = ast.parse(filepath.read_text(encoding="utf-8"))
@@ -51,8 +45,6 @@ def extract_dh_imports(filepath: Path) -> list[str]:
                 if isinstance(root, ast.Name) and root.id in dh_names:
                     imported.append(func.attr)
     return imported
-
-
 def count_calls(filepath: Path, func_names: list[str]) -> dict[str, int]:
     try:
         tree = ast.parse(filepath.read_text(encoding="utf-8"))
@@ -66,8 +58,6 @@ def count_calls(filepath: Path, func_names: list[str]) -> dict[str, int]:
             if isinstance(func, ast.Name) and func.id in name_set:
                 counter[func.id] += 1
     return counter
-
-
 def main():
     if not BIN_DIR.is_dir():
         print(f"❌ {BIN_DIR} does not exist or is not a directory.")
@@ -125,7 +115,5 @@ def main():
     REPORT.write_text(report_text, encoding="utf-8")
     print(report_text)
     print(f"\n✅ Report saved to {REPORT}")
-
-
 if __name__ == "__main__":
     main()

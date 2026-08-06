@@ -1,40 +1,32 @@
 #!/data/data/com.termux/files/usr/bin/python
-
 """
 Image Preprocessing for Tesseract OCR
 Processes images in-place to optimize them for Tesseract OCR.
 Supports multiple files/folders with parallel processing.
 """
-
 from __future__ import annotations
-
 import argparse
 import logging
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import cpu_count
 from pathlib import Path
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 try:
     import cv2
-
     USE_CV2 = True
     logger.info("Using OpenCV for image processing")
 except ImportError:
     try:
         from PIL import Image, ImageEnhance, ImageFilter
-
         USE_CV2 = False
         logger.info("OpenCV not found, using Pillow for image processing")
     except ImportError:
         logger.error("Neither OpenCV nor Pillow found. Please install at least one.")
         sys.exit(1)
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".tiff", ".tif", ".bmp", ".gif"}
-
-
 def process_image_cv2(image_path: Path) -> bool:
     try:
         img = cv2.imread(str(image_path))
@@ -50,8 +42,6 @@ def process_image_cv2(image_path: Path) -> bool:
     except Exception as e:
         logger.error(f"Error processing {image_path}: {e}")
         return False
-
-
 def process_image_pil(image_path: Path) -> bool:
     try:
         with Image.open(image_path) as img:
@@ -69,8 +59,6 @@ def process_image_pil(image_path: Path) -> bool:
     except Exception as e:
         logger.error(f"Error processing {image_path}: {e}")
         return False
-
-
 def process_image(image_path: Path) -> tuple[Path, bool]:
     logger.debug(f"Processing: {image_path}")
     if USE_CV2:
@@ -78,8 +66,6 @@ def process_image(image_path: Path) -> tuple[Path, bool]:
     else:
         success = process_image_pil(image_path)
     return (image_path, success)
-
-
 def find_images(paths: list[Path], recursive: bool = False) -> list[Path]:
     image_files = []
     for path in paths:
@@ -101,8 +87,6 @@ def find_images(paths: list[Path], recursive: bool = False) -> list[Path]:
             seen.add(f)
             unique_files.append(f)
     return unique_files
-
-
 def process_images_parallel(image_files: list[Path], max_workers: int | None = None) -> dict:
     if not image_files:
         logger.warning("No image files found to process")
@@ -127,8 +111,6 @@ def process_images_parallel(image_files: list[Path], max_workers: int | None = N
                 results["failed"] += 1
                 logger.error(f"✗ Error processing {path}: {e}")
     return results
-
-
 def main():
     parser = argparse.ArgumentParser(
         description="Prepare images for Tesseract OCR (in-place processing)",
@@ -162,7 +144,5 @@ def main():
     logger.info(f"  ✗ Failed:  {results['failed']}")
     logger.info(f"  Total:     {len(image_files)}")
     return 0 if results["failed"] == 0 else 1
-
-
 if __name__ == "__main__":
     sys.exit(main())

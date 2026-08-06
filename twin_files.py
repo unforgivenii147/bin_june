@@ -1,13 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import argparse
 from pathlib import Path
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def remove_ipynb_if_md_exists(root: Path, dry_run: bool = True) -> None:
     removed = 0
     checked = 0
@@ -28,8 +23,6 @@ def remove_ipynb_if_md_exists(root: Path, dry_run: bool = True) -> None:
     print("\n--- Summary ---")
     print(f"Checked: {checked}")
     print(f"Removed: {removed}" if not dry_run else "Dry run only. No files removed.")
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Remove .ipynb files if a .md file with the same name exists.")
     parser.add_argument("--apply", action="store_true", help="Actually delete files (default is dry run).")

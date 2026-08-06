@@ -1,12 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 """
 Optimized version of trans_words.py for Python 3.12.
 Chunks text files, detects language, and translates to English, saving in JSON.
 """
-
 from __future__ import annotations
-
 import json
 import logging
 import sys
@@ -14,12 +11,9 @@ import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Final
-
 import langdetect
 from deep_translator import GoogleTranslator
-
 CHUNK_SIZE = 1024 * 1024
-
 SKIP_DIRS: Final[frozenset[str]] = frozenset(
     {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
 )
@@ -27,8 +21,6 @@ CHUNK_SIZE: Final[int] = 4500
 MAX_WORKERS: Final[int] = 3
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
-
-
 def chunk_file(file_path: Path, size: int = 32768) -> list[tuple[int, int, str]]:
     chunks: list[tuple[int, int, str]] = []
     current_chunk: list[str] = []
@@ -51,15 +43,11 @@ def chunk_file(file_path: Path, size: int = 32768) -> list[tuple[int, int, str]]
     except Exception as e:
         logger.error("Error chunking %s: %s", file_path, e)
     return chunks
-
-
 def detect_language(text: str) -> str | None:
     try:
         return langdetect.detect(text[:500])
     except Exception:
         return None
-
-
 def translate_chunk(chunk_data: tuple[int, int, str], index: int) -> dict[str, Any] | None:
     start_line, end_line, text = chunk_data
     if index > 0:
@@ -86,8 +74,6 @@ def translate_chunk(chunk_data: tuple[int, int, str], index: int) -> dict[str, A
     except Exception as e:
         logger.error("Error translating chunk %d-%d: %s", start_line, end_line, e)
         return None
-
-
 def process_file(file_path: Path) -> None:
     logger.info("Processing: %s", file_path.name)
     chunks = chunk_file(file_path)
@@ -108,8 +94,6 @@ def process_file(file_path: Path) -> None:
         logger.info("✓ JSON output saved to: %s", output_file.name)
     except Exception as e:
         logger.error("Error saving JSON output for %s: %s", file_path, e)
-
-
 def get_input_files(paths: list[str]) -> list[Path]:
     files: list[Path] = []
     search_paths = [Path(p) for p in paths] if paths else [Path.cwd()]
@@ -119,8 +103,6 @@ def get_input_files(paths: list[str]) -> list[Path]:
         elif path.is_dir():
             files.extend(path.rglob("*.txt"))
     return [f for f in files if not any(part in SKIP_DIRS for part in f.parts)]
-
-
 def main() -> None:
     input_paths = sys.argv[1:]
     files = get_input_files(input_paths)
@@ -132,7 +114,5 @@ def main() -> None:
             process_file(file_path)
         except Exception as e:
             logger.error("Unexpected error processing %s: %s", file_path, e)
-
-
 if __name__ == "__main__":
     main()

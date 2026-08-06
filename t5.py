@@ -1,7 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import ast
 import sys
 from collections.abc import Callable, Iterable
@@ -9,23 +7,16 @@ from multiprocessing import get_context
 from os import scandir as os_scandir
 from pathlib import Path
 from typing import Any
-
 import tree_sitter_python as tspython
 from tree_sitter import Language, Parser, Query, QueryCursor
-
 CHUNK_SIZE = 1024 * 1024
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
 def remove_blank_lines(text: str | Path) -> str:
     content = text
     if isinstance(text, Path):
         content = text.read_text(encoding="utf-8")
-
     if not isinstance(text, (str, Path)):
         return str(text)
-
     if isinstance(text, str) and Path(text).exists():
         content = Path(text).read_text(encoding="utf-8")
     lines = content.splitlines(keepends=True)
@@ -38,11 +29,8 @@ def remove_blank_lines(text: str | Path) -> str:
         result_lines.append(line)
         prev_blank = is_blank
     return "".join(result_lines)
-
-
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
-
     path = Path(path)
     if is_binary(path):
         return False
@@ -62,8 +50,6 @@ def is_python_file(path: str | Path) -> bool:
         except:
             return False
     return False
-
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -74,27 +60,22 @@ def is_binary(path: Path | str) -> bool:
         if b"\x00" in chunk:
             return True
         text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
-        nontext = sum(1 for b in chunk if b not in text_chars)
+        nontext = sum((1 for b in chunk if b not in text_chars))
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
-
 def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
     if path.is_file():
         if path.suffix == ".py":
             return [path]
-        if not path.suffix and not path.name.startswith(".") and is_python_file(path):
+        if not path.suffix and (not path.name.startswith(".")) and is_python_file(path):
             return [path]
         return []
-
     if not path.is_dir():
         return []
-
     pyfiles = []
     stack = [path]
-
     while stack:
         current = stack.pop()
         try:
@@ -109,46 +90,19 @@ def get_pyfiles(path: str | Path) -> list[Path]:
                         p = Path(entry.path)
                         if p.suffix == ".py":
                             pyfiles.append(p)
-                        elif not p.suffix and not p.name.startswith(".") and is_python_file(p):
+                        elif not p.suffix and (not p.name.startswith(".")) and is_python_file(p):
                             pyfiles.append(p)
         except (PermissionError, OSError):
             continue
-
     return sorted(pyfiles)
-
-
-def mpf_async(func: Callable[[Any], Any], items: Iterable[Any]):
-    with get_context("spawn").Pool(MAX_WORKERS) as p:
-        async_results = [p.apply_async(func, (item,)) for item in items]
-        results = []
-        for i, async_result in enumerate(async_results):
-            try:
-                results.append(async_result.get(timeout=30))
-            except Exception as e:
-                print(f"Item {i} failed: {e}")
-                results.append(None)
-        return results
-
-
+from dh import mpf_async
 mpf = mpf_async
-
-QUERY_STRING = """
-(comment) @comment
-(block
-  . (expression_statement
-    (string)) @docstring)
-(module
-  . (expression_statement
-    (string)) @docstring)
-"""
-
-
+QUERY_STRING = "\n(comment) @comment\n(block\n  . (expression_statement\n    (string)) @docstring)\n(module\n  . (expression_statement\n    (string)) @docstring)\n"
 class TSRemover:
     def __init__(self) -> None:
         self.language = Language(tspython.language())
         self.parser = Parser(self.language)
         self.query = Query(self.language, QUERY_STRING)
-
     def remove_comments(self, source: str) -> tuple[str, int, int]:
         source_bytes = source.encode("utf-8")
         tree = self.parser.parse(source_bytes)
@@ -179,9 +133,7 @@ class TSRemover:
             new_source = new_source[:start] + new_source[end:]
         cleaned = new_source.decode("utf-8")
         cleaned = remove_blank_lines(cleaned)
-        return cleaned, comment_count, docstring_count
-
-
+        return (cleaned, comment_count, docstring_count)
 def process_file(path) -> None:
     path = Path(path)
     ts_rmc = TSRemover()
@@ -197,8 +149,6 @@ def process_file(path) -> None:
         path.write_text(result, encoding="utf-8")
     except:
         print(f"{path.name} : invalid code")
-
-
 def main() -> None:
     cwd = Path.cwd()
     before = gsz(".")
@@ -209,12 +159,8 @@ def main() -> None:
     diff_size = before - gsz(".")
     if diff_size != 0:
         print(fsz(diff_size))
-
-
 if __name__ == "__main__":
     main()
-
-
 def gsz(path):
     try:
         return Path(path).stat().st_size

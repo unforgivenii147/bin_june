@@ -1,22 +1,15 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 from __future__ import annotations
-
 import csv
 import os
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
 from tqdm import tqdm
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 binf = Path("/sdcard/bin").open(encoding="utf-8")
 EXCLUDED_EXTENSIONS = [line.strip() for line in binf]
 binf.close()
-
-
 def process_file(filepath):
     Path(path)
     counter = Counter()
@@ -29,8 +22,6 @@ def process_file(filepath):
     except Exception as e:
         print(f"Error reading {filepath}: {e}")
     return counter
-
-
 def collect_files_by_extension():
     ext_map = {}
     for root, _, filenames in os.walk(Path.cwd()):
@@ -44,8 +35,6 @@ def collect_files_by_extension():
             if not ext:
                 ext_map.setdefault(ext, []).append(full_path)
     return ext_map
-
-
 def collect_lines_for_extension(ext, files) -> None:
     if not files:
         return
@@ -62,8 +51,6 @@ def collect_lines_for_extension(ext, files) -> None:
             if count >= 2:
                 writer.writerow([count, line])
     print(f"Saved results to {output_file}")
-
-
 def main() -> None:
     ext_map = collect_files_by_extension()
     if not ext_map:
@@ -71,7 +58,5 @@ def main() -> None:
         return
     for ext, files in ext_map.items():
         collect_lines_for_extension(ext, files)
-
-
 if __name__ == "__main__":
     main()

@@ -1,3 +1,4 @@
+#!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 import gzip
 import sys
@@ -5,23 +6,10 @@ from collections import deque
 from collections.abc import Callable
 from pathlib import Path
 from lzma_mt import compress
-
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
-def mpf3(process_function: Callable, files: list[Path], **kwargs):
-    from joblib import Parallel, delayed
-
-    file_strings = [str(f) for f in files]
-    return Parallel(n_jobs=-1)((delayed(process_function)(file_str, **kwargs) for file_str in file_strings))
-
-
+from dh import mpf3
 "\nConvert man pages from .gz to .xz format with maximum compression.\nSkips symlinks and processes files recursively in the current directory.\n"
-from dh import get_files
-
 "\nConvert man pages from .gz to .xz format with maximum compression.\nSkips symlinks and processes files recursively in the current directory.\n"
-
-
 def process_file(path: Path) -> tuple[str, bool, str]:
     path = Path(path)
     xz_path = path.with_suffix(".xz")
@@ -42,8 +30,6 @@ def process_file(path: Path) -> tuple[str, bool, str]:
         if xz_path.exists():
             xz_path.unlink()
         return (str(path), False, f"Error: {e!s}")
-
-
 def main() -> None:
     cwd = Path.cwd()
     files = get_files(cwd, ext=[".gz"])
@@ -83,7 +69,5 @@ def main() -> None:
         print(f"New total: {total_new:,} bytes")
     if success_count > 0:
         print("\nNote: Original .gz files have been removed.")
-
-
 if __name__ == "__main__":
     main()
