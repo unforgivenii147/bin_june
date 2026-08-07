@@ -31,7 +31,7 @@ def get_packages_with_size():
         return []
 
 
-def format_size(bytes_size):
+def fsz(bytes_size):
     for unit in ["B", "KB", "MB", "GB"]:
         if bytes_size < 1024.0:
             return f"{bytes_size:.1f} {unit}"
@@ -50,10 +50,10 @@ def main():
     print("=" * 42)
     total = 0
     for pkg, size in packages:
-        print(f"{pkg:<30} {format_size(size):>20}")
+        print(f"{pkg:<30} {fsz(size):>20}")
         total += size
     print("=" * 42)
-    print(f"{'TOTAL':<30} {format_size(total):>20}")
+    print(f"{'TOTAL':<30} {fsz(total):>20}")
 
 
 if __name__ == "__main__":

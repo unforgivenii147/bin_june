@@ -33,7 +33,7 @@ def scan_directory(path: str = "."):
     return total_size, file_count, folder_count, extensions, size_by_ext
 
 
-def format_size(size_in_bytes: int) -> str:
+def fsz(size_in_bytes: int) -> str:
     if size_in_bytes < 1024:
         return f"{size_in_bytes} bytes"
     if size_in_bytes < 1024**2:
@@ -46,7 +46,7 @@ def format_size(size_in_bytes: int) -> str:
 def write_summary(filename: Path | None = None) -> None:
     total_size, file_count, folder_count, extensions, size_by_ext = scan_directory()
     summary_lines = []
-    summary_lines.append(f"Total size: {format_size(total_size)}\n")
+    summary_lines.append(f"Total size: {fsz(total_size)}\n")
     summary_lines.append("File extensions:\n")
     sorted_extensions = sorted(extensions)
     for ext in sorted_extensions:
@@ -56,9 +56,9 @@ def write_summary(filename: Path | None = None) -> None:
     summary_lines.append("Size by extension:\n")
     sorted_size_by_ext = sorted(size_by_ext.items(), key=operator.itemgetter(1), reverse=True)
     for ext, size in sorted_size_by_ext:
-        summary_lines.append(f"  {ext}: {format_size(size)}\n")
+        summary_lines.append(f"  {ext}: {fsz(size)}\n")
         if filename is None or filename == sys.stderr:
-            print(f"  {ext}: {format_size(size)}\n", file=sys.stderr)
+            print(f"  {ext}: {fsz(size)}\n", file=sys.stderr)
     summary_string = "".join(summary_lines)
     if filename.exists():
         print(f"{filename} exists")

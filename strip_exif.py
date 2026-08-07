@@ -12,22 +12,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import cpu_count
 from pathlib import Path
 from PIL import Image
-
-
-def get_folder_size(folder_path):
-    total = 0
-    for item in folder_path.rglob("*"):
-        if item.is_file():
-            total += item.stat().st_size
-    return total
-
-
-def format_size(size_bytes):
-    for unit in ["B", "KB", "MB", "GB"]:
-        if size_bytes < 1024.0:
-            return f"{size_bytes:.2f} {unit}"
-        size_bytes /= 1024.0
-    return f"{size_bytes:.2f} TB"
+from dh import fsz, gsz
 
 
 def strip_exif_single(image_path, backup=False, verbose=False):
@@ -75,7 +60,7 @@ def strip_exif_single(image_path, backup=False, verbose=False):
                 percent_change = size_change / original_size * 100
                 if verbose:
                     print(f"  ✅ {image_path.name}")
-                    print(f"     {format_size(original_size)} → {format_size(new_size)} ({percent_change:+.1f}%)")
+                    print(f"     {fsz(original_size)} → {fsz(new_size)} ({percent_change:+.1f}%)")
                 result["message"] = f"Stripped EXIF: {size_change:+.0f}B ({percent_change:+.1f}%)"
     except Exception as e:
         result["success"] = False
@@ -177,7 +162,7 @@ Examples:
             dirs.add(img.parent)
         initial_sizes = {}
         for dir_path in dirs:
-            initial_sizes[dir_path] = get_folder_size(dir_path)
+            initial_sizes[dir_path] = gsz(dir_path)
     print(f"📸 Found {len(image_files)} image file(s)")
     print(f"🔧 Using {max_workers} parallel worker(s)")
     print(f"💾 Backup: {'Yes' if args.backup else 'No'}")
@@ -223,21 +208,21 @@ Examples:
     print(f"   Total files: {len(results)}")
     print(f"   ✅ Successful: {successful}")
     print(f"   ❌ Failed: {failed}")
-    print(f"   📦 Original size: {format_size(total_original)}")
-    print(f"   📦 New size: {format_size(total_new)}")
+    print(f"   📦 Original size: {fsz(total_original)}")
+    print(f"   📦 New size: {fsz(total_new)}")
     print(
-        f"   💰 Change: {format_size(total_change)} ({total_change / total_original * 100:+.1f}% if total_original > 0 else 'N/A')"
+        f"   💰 Change: {fsz(total_change)} ({total_change / total_original * 100:+.1f}% if total_original > 0 else 'N/A')"
     )
     if not args.no_size_report and len(dirs) > 0:
         print("\n📁 Folder size changes:")
         for dir_path in sorted(dirs):
-            final_size = get_folder_size(dir_path)
+            final_size = gsz(dir_path)
             initial_size = initial_sizes.get(dir_path, 0)
             change = final_size - initial_size
             if change != 0:
                 percent = change / initial_size * 100 if initial_size > 0 else 0
                 print(f"   {dir_path}:")
-                print(f"      {format_size(initial_size)} → {format_size(final_size)} ({percent:+.1f}%)")
+                print(f"      {fsz(initial_size)} → {fsz(final_size)} ({percent:+.1f}%)")
     backups = [r for r in results if r.get("backup_created", False)]
     if backups:
         print(f"\n💾 Backups created for {len(backups)} file(s)")

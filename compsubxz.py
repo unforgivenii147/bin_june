@@ -168,7 +168,7 @@ def decompress_archive(archive_path):
         return {"success": False, "name": archive_path.name, "error": str(e)}
 
 
-def format_size(size_bytes):
+def fsz(size_bytes):
     size_bytes = float(size_bytes)
     for unit in ["B", "KB", "MB", "GB", "TB"]:
         if size_bytes < 1024.0:
@@ -222,8 +222,8 @@ def main():
                     total_original += int(result["original_size"])
                     total_compressed += int(result["compressed_size"])
                     print(
-                        f"✓ {result['name']}: {format_size(result['original_size'])} -> {format_size(result['compressed_size'])} "
-                        f"(freed {format_size(result['space_freed'])})"
+                        f"✓ {result['name']}: {fsz(result['original_size'])} -> {fsz(result['compressed_size'])} "
+                        f"(freed {fsz(result['space_freed'])})"
                     )
                 else:
                     failed += 1
@@ -233,9 +233,9 @@ def main():
         if successful > 0:
             total_freed = total_original - total_compressed
             compression_ratio = (1 - total_compressed / total_original) * 100 if total_original else 0.0
-            print(f"Total original size:   {format_size(total_original)}")
-            print(f"Total compressed size: {format_size(total_compressed)}")
-            print(f"Total space freed:     {format_size(total_freed)}")
+            print(f"Total original size:   {fsz(total_original)}")
+            print(f"Total compressed size: {fsz(total_compressed)}")
+            print(f"Total space freed:     {fsz(total_freed)}")
             print(f"Compression ratio:     {compression_ratio:.1f}%")
     elif args.decompress:
         worker_count = args.workers if args.workers and args.workers > 0 else (os.cpu_count() or 1)
@@ -266,11 +266,11 @@ def main():
                     total_extracted += int(result["extracted_size"])
                     space_change = int(result["space_used"])
                     if space_change >= 0:
-                        change_str = f"(space used: +{format_size(space_change)})"
+                        change_str = f"(space used: +{fsz(space_change)})"
                     else:
-                        change_str = f"(space freed: {format_size(-space_change)})"
+                        change_str = f"(space freed: {fsz(-space_change)})"
                     print(
-                        f"✓ {result['name']}: {format_size(result['archive_size'])} -> {format_size(result['extracted_size'])} {change_str}"
+                        f"✓ {result['name']}: {fsz(result['archive_size'])} -> {fsz(result['extracted_size'])} {change_str}"
                     )
                 else:
                     failed += 1
@@ -279,9 +279,9 @@ def main():
         print(f"Decompression complete: {successful} successful, {failed} failed")
         if successful > 0:
             total_change = total_extracted - total_archive
-            print(f"Total archive size:     {format_size(total_archive)}")
-            print(f"Total extracted size:   {format_size(total_extracted)}")
-            print(f"Net space change:       {format_size(total_change)}")
+            print(f"Total archive size:     {fsz(total_archive)}")
+            print(f"Total extracted size:   {fsz(total_extracted)}")
+            print(f"Net space change:       {fsz(total_change)}")
 
 
 if __name__ == "__main__":

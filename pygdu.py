@@ -65,7 +65,7 @@ class DiskAnalyzer:
         return dir_item
 
 
-def format_size(num_bytes: int) -> str:
+def fsz(num_bytes: int) -> str:
     for unit in ["B", "KiB", "MiB", "GiB", "TiB"]:
         if num_bytes < 1024.0:
             return f"{num_bytes:5.1f} {unit}"
@@ -111,7 +111,7 @@ def draw_interface(current_node: FSItem, selected_idx: int):
     lines.append(f"{BOLD}Directory: {current_node.path}{RESET}\n")
     max_size = max([c.size for c in current_node.children], default=1)
     for idx, item in enumerate(current_node.children):
-        size_str = format_size(item.size)
+        size_str = fsz(item.size)
         bar_str = get_progress_bar(item.size, max_size)
         flag_str = f"[{item.flag}]" if item.flag != " " else "   "
         name_str = f"{item.name}/" if item.is_dir else item.name

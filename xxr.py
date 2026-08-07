@@ -18,20 +18,7 @@ import py7zr
 import zstandard as zstd
 from loguru import logger
 from dh import cprint
-
-
-def gsz(path: str | Path) -> int:
-    path = Path(path)
-    total = 0
-    if path.is_file():
-        return path.stat().st_size
-    for file in path.rglob("*"):
-        if file.is_file():
-            total += file.stat().st_size
-    return total
-
-
-from dh import fsz, mpf3
+from dh import fsz, mpf3, gsz
 
 SUPPORTED_EXTS = {
     ".tar",
@@ -62,33 +49,6 @@ class Result:
     error: str | None = None
     original_size: int = 0
     new_size: int = 0
-
-
-def get_size(path: Path) -> int:
-    if path.is_file():
-        return path.stat().st_size
-    if path.is_dir():
-        total = 0
-        for dirpath, _, filenames in os.walk(path):
-            for f in filenames:
-                try:
-                    total += (Path(dirpath) / f).stat().st_size
-                except OSError:
-                    continue
-        return total
-    return 0
-
-
-def format_size(size_bytes: int) -> str:
-    if not size_bytes:
-        return "0 B"
-    if size_bytes < 1024:
-        return f"{size_bytes} B"
-    if size_bytes < 1024**2:
-        return f"{size_bytes / 1024:.2f} KB"
-    if size_bytes < 1024**3:
-        return f"{size_bytes / 1024**2:.2f} MB"
-    return f"{size_bytes / 1024**3:.2f} GB"
 
 
 def has_compressed_suffix(path: Path) -> bool:
@@ -190,7 +150,7 @@ def compress_file_7z(src: Path, dst: Path) -> None:
 
 def compress_one(path_str: str, mode: str, is_dir: bool) -> Result:
     src = Path(path_str)
-    original_size = get_size(src)
+    original_size = gsz(src)
     result = Result(ok=False, src=str(src), original_size=original_size)
     compress_funcs = {
         "xz": compress_file_xz,
@@ -213,7 +173,7 @@ def compress_one(path_str: str, mode: str, is_dir: bool) -> Result:
             compress_streaming(src, dst, compress_funcs[mode], is_dir=False)
             src.unlink()
         result.dst = str(dst)
-        result.new_size = get_size(dst)
+        result.new_size = gsz(dst)
         result.ok = True
         return result
     except Exception as e:
@@ -238,7 +198,7 @@ def decompress_stream_tar(src: Path, decompress_func: Callable, dst_dir: Path, e
 
 def decompress_one(path_str: str) -> Result:
     src = Path(path_str)
-    original_size = get_size(src)
+    original_size = gsz(src)
     result = Result(ok=False, src=str(src), original_size=original_size)
     name = src.name.lower()
     dst_dir = src.parent
@@ -314,7 +274,7 @@ def decompress_one(path_str: str) -> Result:
             raise ValueError(f"Unsupported archive type: {src}")
         src.unlink()
         if result.dst:
-            result.new_size = get_size(Path(result.dst))
+            result.new_size = gsz(Path(result.dst))
         result.ok = True
         return result
     except Exception as e:

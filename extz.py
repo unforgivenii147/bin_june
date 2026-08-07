@@ -43,7 +43,7 @@ def get_files_in_directory(directory: str = ".") -> list[Path]:
     return files
 
 
-def format_size(size_bytes: int) -> str:
+def fsz(size_bytes: int) -> str:
     for unit in ["B", "KB", "MB", "GB", "TB"]:
         if size_bytes < 1024.0:
             return f"{size_bytes:.2f} {unit}"
@@ -95,9 +95,9 @@ def main():
         ext_files = sum(1 for f in files if f.suffix.lower() == ext or (ext == "NO_EXTENSION" and f.suffix == ""))
         percentage = size / total_size * 100 if total_size > 0 else 0
         display_ext = ext if ext != "NO_EXTENSION" else "(no extension)"
-        print(f"{display_ext:<20} {format_size(size):<15} {ext_files:<10} {percentage:.1f}%")
+        print(f"{display_ext:<20} {fsz(size):<15} {ext_files:<10} {percentage:.1f}%")
     print("-" * 35)
-    print(f"{'TOTAL':<20} {format_size(total_size):<15} {len(files):<10} 100.0%")
+    print(f"{'TOTAL':<20} {fsz(total_size):<15} {len(files):<10} 100.0%")
     print("-" * 35)
 
 

@@ -16,6 +16,8 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Final
 import zstandard as zstd
+from dh import fsz
+
 
 SKIP_DIRS: Final[frozenset[str]] = frozenset(
     {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
@@ -35,14 +37,6 @@ def choose_level(path: Path) -> int:
         return LEVEL_LARGE if path.stat().st_size > LARGE_FILE_THRESHOLD else LEVEL_DEFAULT
     except OSError:
         return LEVEL_DEFAULT
-
-
-def human_size(n: float) -> str:
-    for unit in ("B", "KB", "MB", "GB", "TB"):
-        if n < 1024:
-            return f"{n:.1f} {unit}"
-        n /= 1024
-    return f"{n:.1f} PB"
 
 
 def ratio_str(before: int, after: int) -> str:
@@ -82,9 +76,7 @@ def compress_file(
         result["ok"] = True
         result["line"] = status_line(True, src.name, elapsed_ms, before, after)
         if verbose:
-            result["msg"] = (
-                f"  → {dst.name} ({human_size(before)} → {human_size(after)}, level {effective_level}, {threads} threads)"
-            )
+            result["msg"] = f"  → {dst.name} ({fsz(before)} → {fsz(after)}, level {effective_level}, {threads} threads)"
     except Exception as exc:
         elapsed_ms = (time.perf_counter() - t0) * 1000
         result["line"] = status_line(False, src.name, elapsed_ms, 0, 0)
@@ -118,7 +110,7 @@ def decompress_file(src: Path, dry_run: bool, verbose: bool) -> dict:
         result["ok"] = True
         result["line"] = status_line(True, src.name, elapsed_ms, before, after)
         if verbose:
-            result["msg"] = f"  → {dst.name} ({human_size(before)} → {human_size(after)})"
+            result["msg"] = f"  → {dst.name} ({fsz(before)} → {fsz(after)})"
     except Exception as exc:
         elapsed_ms = (time.perf_counter() - t0) * 1000
         result["line"] = status_line(False, src.name, elapsed_ms, 0, 0)
@@ -136,7 +128,7 @@ def tar_subdir(subdir: Path, dry_run: bool, verbose: bool) -> Path | None:
         with tarfile.open(tar_path, "w") as tf:
             tf.add(subdir, arcname=subdir.name)
         if verbose:
-            logger.info(f"  tarred {subdir.name}/ → {tar_path.name} ({human_size(tar_path.stat().st_size)})")
+            logger.info(f"  tarred {subdir.name}/ → {tar_path.name} ({fsz(tar_path.stat().st_size)})")
         return tar_path
     except Exception as exc:
         logger.error(f"  ERROR tarring {subdir}: {exc}")

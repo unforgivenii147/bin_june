@@ -83,7 +83,7 @@ def is_transliteration(persian_word, english_word):
     if is_finglish(persian_word, english_word):
         return True
     return False
-    """
+
     if not re.match(r"^[A-Za-z\-\']+$", english_word):
         return False
     if not english_word[0].isupper():
@@ -141,7 +141,6 @@ def is_transliteration(persian_word, english_word):
         if english_word not in potential_translations:
             return True
     return False
-    """
 
 
 def find_transliterations(words_dict):

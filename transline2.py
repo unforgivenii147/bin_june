@@ -14,10 +14,9 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Final
 from deep_translator import GoogleTranslator
+from dh import get_files
 
-SKIP_DIRS: Final[frozenset[str]] = frozenset(
-    {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
-)
+
 NON_ENGLISH_PATTERN: Final[re.Pattern] = re.compile("[^\\x00-\\x7F]")
 MAX_WORKERS: Final[int] = 4
 logging.basicConfig(

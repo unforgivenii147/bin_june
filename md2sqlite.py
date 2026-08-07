@@ -45,7 +45,7 @@ def parse_and_insert():
             return match.group(1).strip() if match else None
 
         what_it_does = extract_section("What it does")
-        why_it_bad = extract_section("Why is this bad\??")
+        why_it_bad = extract_section(r"Why is this bad\??")
         example = extract_section("Example")
         fix_safety = extract_section("Fix safety")
         options = extract_section("Options")

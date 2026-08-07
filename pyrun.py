@@ -12,13 +12,12 @@ import sys
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+import runpy
 
 
 def run_python_file(file_path: Path, timeout: int = 10) -> tuple[Path, bool, str | None, str | None]:
     try:
-        result = subprocess.run(
+        result = runpy(
             [sys.executable, str(file_path)], capture_output=True, text=True, timeout=timeout, cwd=file_path.parent
         )
         if result.returncode == 0:

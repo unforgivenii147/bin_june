@@ -145,7 +145,7 @@ def find_lua_files(directories: list[Path]) -> list[Path]:
     return sorted(set(lua_files))
 
 
-def format_size(size_bytes: int) -> str:
+def fsz(size_bytes: int) -> str:
     for unit in ["B", "kB", "MB", "GB"]:
         if size_bytes < 1024.0:
             return f"{size_bytes:.2f} {unit}"
@@ -204,8 +204,8 @@ def main():
         print(f"   Errors:           {errors}")
     print(f"   Comments removed: {total_comments}")
     print(f"   Lines removed:    {total_lines}")
-    print(f"   Size reduction:   {format_size(total_saved)} ({total_reduction:.1f}%)")
-    print(f"   Total size:       {format_size(total_original)} → {format_size(total_new)}")
+    print(f"   Size reduction:   {fsz(total_saved)} ({total_reduction:.1f}%)")
+    print(f"   Total size:       {fsz(total_original)} → {fsz(total_new)}")
     if errors:
         print(f"\n⚠️  Completed with {errors} error(s)")
         sys.exit(1)

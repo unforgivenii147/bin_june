@@ -16,8 +16,8 @@ import tempfile
 import traceback
 from io import BytesIO
 from pathlib import Path
+from dh import fsz
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 try:
     import zstandard as zstd
 except ImportError:
@@ -34,6 +34,10 @@ try:
     import py7zr
 except ImportError:
     py7zr = None
+
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -44,14 +48,6 @@ log = logging.getLogger(__name__)
 
 def read_file(path: Path) -> bytes:
     return path.read_bytes()
-
-
-def human(n: int) -> str:
-    for unit in ("B", "KB", "MB", "GB"):
-        if n < 1024:
-            return f"{n:.1f} {unit}"
-        n /= 1024
-    return f"{n:.1f} TB"
 
 
 def compress_zstd(data: bytes, level: int) -> bytes:
@@ -160,7 +156,7 @@ def best_for_algo(
 
 
 def process_file(src: Path, out_dir: Path | None = None) -> Path | None:
-    log.info("Processing: %s (%s)", src, human(src.stat().st_size))
+    log.info("Processing: %s (%s)", src, fsz(src.stat().st_size))
     try:
         data = read_file(src)
     except Exception as exc:
@@ -176,8 +172,8 @@ def process_file(src: Path, out_dir: Path | None = None) -> Path | None:
                 "  %-8s best level=%2d  %s → %s  (%.1f%%)",
                 r_name,
                 r_level,
-                human(original_size),
-                human(len(r_bytes)),
+                fsz(original_size),
+                fsz(len(r_bytes)),
                 100 * len(r_bytes) / original_size,
             )
             results.append(result)
@@ -193,7 +189,7 @@ def process_file(src: Path, out_dir: Path | None = None) -> Path | None:
     except Exception as exc:
         log.error("Cannot write %s: %s", dest, exc)
         return None
-    log.info("  Winner → %s (algo=%s level=%d size=%s)", dest.name, w_name, w_level, human(len(w_bytes)))
+    log.info("  Winner → %s (algo=%s level=%d size=%s)", dest.name, w_name, w_level, fsz(len(w_bytes)))
     return dest
 
 

@@ -133,7 +133,7 @@ def process_file(file_path: Path) -> tuple[Path, float, tuple[int, int, float] |
         return (file_path, elapsed_time, None)
 
 
-def format_size(size: int) -> str:
+def fsz(size: int) -> str:
     for unit in ["B", "KB", "MB", "GB"]:
         if size < 1024:
             return f"{size:.1f}{unit}"
@@ -191,7 +191,7 @@ def main():
                 original_size, new_size, ratio = sizes
                 display_path = file_path.relative_to(Path.cwd()) if file_path.is_relative_to(Path.cwd()) else file_path
                 print(
-                    f"{display_path} ({elapsed_time:.2f}ms) {format_size(original_size)} - {format_size(new_size)} (ratio: {ratio:.1f}%)"
+                    f"{display_path} ({elapsed_time:.2f}ms) {fsz(original_size)} - {fsz(new_size)} (ratio: {ratio:.1f}%)"
                 )
     else:
         total_original_size = 0
@@ -214,7 +214,7 @@ def main():
                             else result_file
                         )
                         print(
-                            f"{display_path} ({elapsed_time:.2f}ms) {format_size(original_size)} - {format_size(new_size)} (ratio: {ratio:.1f}%)"
+                            f"{display_path} ({elapsed_time:.2f}ms) {fsz(original_size)} - {fsz(new_size)} (ratio: {ratio:.1f}%)"
                         )
                     else:
                         display_path = (
@@ -231,9 +231,7 @@ def main():
         print(f"  Files modified: {files_modified}")
         if files_modified > 0:
             total_ratio = total_new_size / total_original_size * 100 if total_original_size > 0 else 100
-            print(
-                f"  Total size change: {format_size(total_original_size)} -> {format_size(total_new_size)} ({total_ratio:.1f}%)"
-            )
+            print(f"  Total size change: {fsz(total_original_size)} -> {fsz(total_new_size)} ({total_ratio:.1f}%)")
 
 
 if __name__ == "__main__":

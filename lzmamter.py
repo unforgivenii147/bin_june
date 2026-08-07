@@ -24,6 +24,8 @@ import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
+from dh import fsz
+
 try:
     import lzmamt
 
@@ -32,10 +34,10 @@ except ImportError:
     HAS_LZMAMT = False
 LARGE_FILE_THRESHOLD = 5 * 1024 * 1024
 LEVEL_DEFAULT = 9
-LEVEL_LARGE = 6
+LEVEL_LARGE = 9
 LZMA_EXT = ".xz"
 DEFAULT_THREADS = 4
-WORKERS = max(1, multiprocessing.cpu_count())
+WORKERS = 6
 
 
 def choose_level(path: Path) -> int:
@@ -43,14 +45,6 @@ def choose_level(path: Path) -> int:
         return LEVEL_LARGE if path.stat().st_size > LARGE_FILE_THRESHOLD else LEVEL_DEFAULT
     except OSError:
         return LEVEL_DEFAULT
-
-
-def human(n: int) -> str:
-    for unit in ("B", "KB", "MB", "GB"):
-        if n < 1024:
-            return f"{n:.1f} {unit}"
-        n /= 1024
-    return f"{n:.1f} TB"
 
 
 def ratio_str(before: int, after: int) -> str:
@@ -106,7 +100,7 @@ def compress_file(
         result["line"] = status_line(True, src.name, elapsed_ms, before, after)
         if verbose:
             backend = "lzmamt" if HAS_LZMAMT else "stdlib (single-thread)"
-            result["msg"] = f"  → {dst.name} ({human(before)} → {human(after)}, level {effective_level}, {backend})"
+            result["msg"] = f"  → {dst.name} ({fsz(before)} → {fsz(after)}, level {effective_level}, {backend})"
     except Exception as exc:
         elapsed_ms = (time.perf_counter() - t0) * 1000
         result["line"] = status_line(False, src.name, elapsed_ms, 0, 0)
@@ -138,7 +132,7 @@ def decompress_file(src: Path, dry_run: bool, verbose: bool, threads: int = DEFA
         result["ok"] = True
         result["line"] = status_line(True, src.name, elapsed_ms, before, after)
         if verbose:
-            result["msg"] = f"  → {dst.name} ({human(before)} → {human(after)})"
+            result["msg"] = f"  → {dst.name} ({fsz(before)} → {fsz(after)})"
     except Exception as exc:
         elapsed_ms = (time.perf_counter() - t0) * 1000
         result["line"] = status_line(False, src.name, elapsed_ms, 0, 0)
@@ -156,7 +150,7 @@ def tar_subdir(subdir: Path, dry_run: bool, verbose: bool) -> Path | None:
         with tarfile.open(tar_path, "w") as tf:
             tf.add(subdir, arcname=subdir.name)
         if verbose:
-            print(f"  tarred {subdir.name}/ → {tar_path.name} ({human(tar_path.stat().st_size)})")
+            print(f"  tarred {subdir.name}/ → {tar_path.name} ({fsz(tar_path.stat().st_size)})")
         return tar_path
     except Exception as exc:
         print(f"  ERROR tarring {subdir}: {exc}", file=sys.stderr)

@@ -5,27 +5,7 @@ import os
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 import zstandard as zstd
-
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
-def human_bytes(n: int) -> str:
-    sign = "-" if n < 0 else ""
-    n = abs(n)
-    units = ["B", "KiB", "MiB", "GiB", "TiB", "PiB"]
-    i = 0
-    while n >= 1024 and i < len(units) - 1:
-        n /= 1024.0
-        i += 1
-    return f"{sign}{n:.2f} {units[i]}" if units[i] != "B" else f"{sign}{int(n)} B"
-
-
-def dir_files_total_bytes(p: Path) -> int:
-    total = 0
-    for x in p.iterdir():
-        if x.is_file():
-            total += x.stat().st_size
-    return total
+from dh import fsz, gsz
 
 
 def convert_one(src: str) -> tuple[str, int, bool, str]:
@@ -68,27 +48,27 @@ def main() -> None:
     if not tar_zst_files:
         print("No .tar.zst files found in current directory.")
         return
-    initial_bytes = dir_files_total_bytes(cwd)
+    before = gsz(cwd)
     max_workers = max(1, min(os.cpu_count() or 1, len(tar_zst_files)))
-    results: list[tuple[str, int, bool, str]] = []
+    results = []
     with ProcessPoolExecutor(max_workers=max_workers) as ex:
         futures = [ex.submit(convert_one, str(p)) for p in tar_zst_files]
         for f in as_completed(futures):
             results.append(f.result())
-    final_bytes = dir_files_total_bytes(cwd)
-    delta = final_bytes - initial_bytes
+    after = gsz(cwd)
+    delta = after - before
     ok_count = sum((1 for _, _, ok, _ in results if ok))
     fail_count = len(results) - ok_count
     print(f"Found: {len(tar_zst_files)}; Converted OK: {ok_count}; Failed/Skipped: {fail_count}")
     for src, _, ok, msg in sorted(results, key=lambda x: x[0]):
         status = "OK" if ok else "FAIL"
         print(f"[{status}] {Path(src).name}: {msg}")
-    print(f"Disk usage (files in cwd) initial: {human_bytes(initial_bytes)}")
-    print(f"Disk usage (files in cwd) final:   {human_bytes(final_bytes)}")
+    print(f"Disk usage (files in cwd) initial: {fsz(before)}")
+    print(f"Disk usage (files in cwd) final:   {fsz(after)}")
     if delta < 0:
-        print(f"Saved: {human_bytes(-delta)}")
+        print(f"Saved: {fsz(-delta)}")
     elif delta > 0:
-        print(f"Extra used: {human_bytes(delta)}")
+        print(f"Extra used: {fsz(delta)}")
     else:
         print("No disk usage change (by summed file sizes in cwd).")
 

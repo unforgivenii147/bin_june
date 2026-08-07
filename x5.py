@@ -57,7 +57,7 @@ class CompressionResult:
     was_tarred: bool = False
 
 
-def format_size(size_bytes: float) -> str:
+def fsz(size_bytes: float) -> str:
     for unit in ["B", "KB", "MB", "GB", "TB"]:
         if size_bytes < 1024.0:
             return f"{size_bytes:.2f} {unit}"
@@ -243,7 +243,7 @@ def process_subdirs_with_tar(
         results.append(result)
         if result.success:
             ratio = (1 - result.processed_size / result.original_size) * 100 if result.original_size else 0
-            print(f"    ✅ {format_size(dir_size)} → {format_size(result.processed_size)} ({ratio:.1f}%)")
+            print(f"    ✅ {fsz(dir_size)} → {fsz(result.processed_size)} ({ratio:.1f}%)")
         else:
             print(f"    ❌ Failed compressing {tar_path.name}: {result.error}")
     return results
@@ -358,8 +358,8 @@ def print_results_rich(results: list[CompressionResult], directory: Path, operat
             file_display = str(result.file_path)
         table.add_row(
             file_display,
-            format_size(result.original_size),
-            format_size(result.processed_size),
+            fsz(result.original_size),
+            fsz(result.processed_size),
             f"{ratio:.1f}%",
             f"{result.duration:.2f}s",
             file_type,
@@ -397,22 +397,22 @@ def print_results_rich(results: list[CompressionResult], directory: Path, operat
     summary_text.append("🗑️  Originals deleted: ", style="dim")
     summary_text.append(f"{deleted_count}\n", style="bold yellow")
     summary_text.append("\n💾 Total original size: ", style="dim")
-    summary_text.append(f"{format_size(total_original)}\n", style="bold yellow")
+    summary_text.append(f"{fsz(total_original)}\n", style="bold yellow")
     summary_text.append(
         f"{('🗜️' if operation == 'compress' else '📂')} Total {size_label.lower()} size: ",
         style="dim",
     )
-    summary_text.append(f"{format_size(total_processed)}\n", style="bold green")
+    summary_text.append(f"{fsz(total_processed)}\n", style="bold green")
     if operation == "compress":
         summary_text.append("📈 Average compression: ", style="dim")
         summary_text.append(f"{avg_ratio:.1f}%\n", style="bold magenta")
         summary_text.append("🎉 Disk space freed: ", style="dim")
-        summary_text.append(f"{format_size(space_saved)} ", style="bold cyan")
+        summary_text.append(f"{fsz(space_saved)} ", style="bold cyan")
     else:
         summary_text.append("📈 Average expansion: ", style="dim")
         summary_text.append(f"{avg_ratio:.1f}%\n", style="bold magenta")
         summary_text.append("💾 Disk space used: ", style="dim")
-        summary_text.append(f"{format_size(space_saved)} ", style="bold cyan")
+        summary_text.append(f"{fsz(space_saved)} ", style="bold cyan")
     if total_original > 0 and operation == "compress":
         summary_text.append(f"({space_saved / total_original * 100:.1f}%)\n", style="bold cyan")
     summary_text.append("⏱️  Total time: ", style="dim")
@@ -462,7 +462,7 @@ def print_results_basic(results: list[CompressionResult], directory: Path, opera
         file_name = result.file_path.name[:37] + "..." if len(result.file_path.name) > 40 else result.file_path.name
         type_indicator = "[tar]" if result.was_tarred else ""
         print(
-            f"{file_name:<40} {format_size(result.original_size):>12} {format_size(result.processed_size):>12} {ratio:>7.1f}% {result.duration:>7.2f}s {type_indicator}"
+            f"{file_name:<40} {fsz(result.original_size):>12} {fsz(result.processed_size):>12} {ratio:>7.1f}% {result.duration:>7.2f}s {type_indicator}"
         )
     if len(successful) > 20:
         print(f"... and {len(successful) - 20} more files")
@@ -481,18 +481,16 @@ def print_results_basic(results: list[CompressionResult], directory: Path, opera
     if tarred_count > 0:
         print(f"📦 From tarred directories: {tarred_count}")
     print(f"🗑️  Originals deleted: {deleted_count}")
-    print(f"\n💾 Total original size: {format_size(total_original)}")
-    print(
-        f"{('🗜️' if operation == 'compress' else '📂')} Total {size_label.lower()} size: {format_size(total_processed)}"
-    )
+    print(f"\n💾 Total original size: {fsz(total_original)}")
+    print(f"{('🗜️' if operation == 'compress' else '📂')} Total {size_label.lower()} size: {fsz(total_processed)}")
     if operation == "compress":
         print(f"📈 Average compression: {avg_ratio:.1f}%")
         print(
-            f"🎉 Disk space freed: {format_size(space_saved)} ({(space_saved / total_original * 100 if total_original > 0 else 0):.1f}%)"
+            f"🎉 Disk space freed: {fsz(space_saved)} ({(space_saved / total_original * 100 if total_original > 0 else 0):.1f}%)"
         )
     else:
         print(f"📈 Average expansion: {avg_ratio:.1f}%")
-        print(f"💾 Disk space used: {format_size(space_saved)}")
+        print(f"💾 Disk space used: {fsz(space_saved)}")
     print(
         f"⏱️  Total time: {total_duration:.2f}s (avg {total_duration / len(results):.2f}s per file)" if results else ""
     )
@@ -645,7 +643,7 @@ def main():
                 if len(type_stats) > 10:
                     print(f"  • ... and {len(type_stats) - 10} more types")
             total_size = sum(f.stat().st_size for f in files)
-            print(f"💾 Total size: {format_size(total_size)}")
+            print(f"💾 Total size: {fsz(total_size)}")
     else:
         print("📁 Mode: Decompressing .xz files")
         if args.exclude:
@@ -656,12 +654,12 @@ def main():
             sys.exit(0)
         print(f"📁 Found {len(files)} .xz file(s) to decompress")
         total_size = sum(f.stat().st_size for f in files)
-        print(f"💾 Total compressed size: {format_size(total_size)}")
+        print(f"💾 Total compressed size: {fsz(total_size)}")
     if args.dry_run:
         if args.tar_subdirs_first:
             print("\n🔍 DRY RUN - Would tar subdirectories and compress them with LZMA")
         else:
-            print(f"\n🔍 DRY RUN - Would {operation} {len(files)} files ({format_size(total_size)})")
+            print(f"\n🔍 DRY RUN - Would {operation} {len(files)} files ({fsz(total_size)})")
         print("No files were modified.")
         return
     if not args.keep_originals:

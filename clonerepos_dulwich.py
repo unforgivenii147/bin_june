@@ -13,6 +13,8 @@ import requests
 from dulwich import porcelain
 from dulwich.errors import NotGitRepository
 from dulwich.repo import Repo
+from dh import fsz
+
 
 MAX_SIZE_MB = 5
 MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024
@@ -53,17 +55,6 @@ def check_repo_size(repo: str) -> tuple[bool, int]:
         return True, 0
 
 
-def format_size(size_bytes: int) -> str:
-    """Format bytes to human readable size."""
-    if size_bytes == 0:
-        return "unknown"
-    mb = size_bytes / (1024 * 1024)
-    if mb >= 1:
-        return f"{mb:.1f}MB"
-    kb = size_bytes / 1024
-    return f"{kb:.1f}KB"
-
-
 def clone_repo(repo: str, base_dir: Path) -> tuple[str, bool, str]:
     """
     Clone a single repository with --depth 1 using dulwich.
@@ -81,12 +72,12 @@ def clone_repo(repo: str, base_dir: Path) -> tuple[str, bool, str]:
             return repo, False, f"Directory exists but is not a git repo: {target_dir}"
     is_small, size_bytes = check_repo_size(repo)
     if not is_small:
-        return repo, False, f"Too large ({format_size(size_bytes)} > {MAX_SIZE_MB}MB)"
+        return repo, False, f"Too large ({fsz(size_bytes)} > {MAX_SIZE_MB}MB)"
     target_dir.parent.mkdir(parents=True, exist_ok=True)
     clone_url = f"https://github.com/{repo}.git"
     try:
         porcelain.clone(clone_url, str(target_dir), depth=1, bare=False)
-        return repo, True, f"Successfully cloned to {target_dir} ({format_size(size_bytes)})"
+        return repo, True, f"Successfully cloned to {target_dir} ({fsz(size_bytes)})"
     except Exception as e:
         if target_dir.exists():
             import shutil
@@ -137,9 +128,9 @@ def main():
                 if target.exists():
                     print(f"  [EXISTS] {repo} -> {target}")
                 elif not is_small:
-                    print(f"  [TOO LARGE] {repo} ({format_size(size)})")
+                    print(f"  [TOO LARGE] {repo} ({fsz(size)})")
                 else:
-                    print(f"  [OK] {repo} -> {target} ({format_size(size)})")
+                    print(f"  [OK] {repo} -> {target} ({fsz(size)})")
             else:
                 print(f"  [INVALID] {repo}")
         return

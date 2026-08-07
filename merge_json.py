@@ -5,9 +5,7 @@ import json
 import multiprocessing
 import os
 from pathlib import Path
-
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-python
+from dh import unique_path
 
 
 def load_json_file(file_path):
@@ -19,10 +17,8 @@ def load_json_file(file_path):
             else:
                 return [data]
     except json.JSONDecodeError as e:
-        print(f"Ошибка декодирования JSON в файле {file_path}: {e}")
         return []
     except Exception as e:
-        print(f"Произошла ошибка при чтении файла {file_path}: {e}")
         return []
 
 
@@ -36,12 +32,10 @@ def merge_json_files(input_paths):
             for file in path.rglob("*.json"):
                 json_files.append(file)
         else:
-            print(f"Предупреждение: Путь '{path_str}' не является файлом .json или директорией. Пропускается.")
+            print(f"no json file")
     if not json_files:
-        print("Не найдено JSON-файлов для объединения.")
         return []
-    print(f"Найдено {len(json_files)} JSON-файлов для обработки.")
-    with multiprocessing.Pool(os.cpu_count()) as pool:
+    with multiprocessing.Pool(8) as pool:
         list_of_data_lists = pool.map(load_json_file, json_files)
     merged_data = []
     for data_list in list_of_data_lists:
@@ -59,25 +53,24 @@ def main():
     parser.add_argument(
         "--output",
         "-o",
-        default="mergedf.json",
-        help="Имя выходного файла. По умолчанию 'mergedf.json'.",
+        default="merged.json",
+        help="output file name",
     )
     args = parser.parse_args()
     if not args.input_paths:
-        input_paths_to_process = ["."]
+        input_paths = ["."]
     else:
-        input_paths_to_process = args.input_paths
-    merged_result = merge_json_files(input_paths_to_process)
+        input_paths = args.input_paths
+    merged_result = merge_json_files(input_paths)
     if merged_result:
-        output_file_path = Path(args.output)
-        if output_file_path.exists():
-            print(f"Предупреждение: Выходной файл '{output_file_path}' уже существует. Перезаписываю.")
+        out_path = Path(args.output)
+        if out_path.exists():
+            out_path = unique_path(out_path)
         try:
-            with open(output_file_path, "w", encoding="utf-8") as f:
+            with open(out_path, "w", encoding="utf-8") as f:
                 json.dump(merged_result, f, ensure_ascii=False, indent=4)
-            print(f"Все JSON-файлы успешно объединены в '{output_file_path}'.")
         except Exception as e:
-            print(f"Ошибка при записи объединенных данных в файл '{output_file_path}': {e}")
+            print("error")
     else:
         print("There is no data to write to the output file.")
 

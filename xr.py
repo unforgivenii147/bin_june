@@ -11,19 +11,12 @@ import brotlicffi as brotli
 import lz4.frame
 import py7zr
 import zstandard as zstd
+from dh import fsz, get_files, get_dirs
+
 
 MAX_WORKERS = 4
-CHUNK_SIZE = 10 * 1024 * 1024
+CHUNK_SIZE = 1024 * 1024
 COMPRESSORS = {}
-
-
-def fsz(size: int) -> str:
-    """Format size in bytes to human-readable format."""
-    for unit in ("B", "KB", "MB", "GB", "TB"):
-        if size < 1024:
-            return f"{size:.1f}{unit}"
-        size /= 1024
-    return f"{size:.1f}PB"
 
 
 def setup_compressors() -> None:
@@ -73,33 +66,6 @@ def setup_compressors() -> None:
             "available": True,
         },
     }
-
-
-def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
-    """Recursively get all files in a directory, optionally filtered by extension."""
-    path = Path(path)
-    skip_dirs = {".git", "__pycache__", "node_modules", ".venv", "venv"}
-    queue = deque([path])
-    files = []
-    while queue:
-        current = queue.popleft()
-        try:
-            entries = current.iterdir()
-        except (PermissionError, OSError):
-            continue
-        for item in entries:
-            if item.is_symlink():
-                continue
-            if item.is_dir() and item.name not in skip_dirs:
-                queue.append(item)
-            elif item.is_file() and (ext is None or item.suffix in ext):
-                files.append(item)
-    return files
-
-
-def get_dirs(directory: Path) -> list[Path]:
-    """Get immediate subdirectories (non-symlink)."""
-    return [p for p in directory.glob("*") if not p.is_symlink() and p.is_dir()]
 
 
 def should_compress(path: Path, compressor: str) -> bool:

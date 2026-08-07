@@ -12,7 +12,7 @@ OUTPUT_FILENAME = "dirinfo.png"
 CHART_TYPE = "bar"
 
 
-def format_size(size_bytes) -> str:
+def fsz(size_bytes) -> str:
     if size_bytes < 1024:
         return f"{size_bytes} B"
     size_kb = size_bytes / 1024

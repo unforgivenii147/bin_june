@@ -8,6 +8,7 @@ import stat
 import sys
 from argparse import Namespace
 from pathlib import Path
+from dh import fsz
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 COLORS = {"dir": "\x1b[34m", "link": "\x1b[36m", "exec": "\x1b[32m", "reset": "\x1b[0m"}
@@ -31,14 +32,6 @@ def colorize(name, st, enabled):
     if st.st_mode & stat.S_IXUSR:
         return f"{COLORS['exec']}{name}{COLORS['reset']}"
     return name
-
-
-def human_size(size) -> str:
-    for unit in ("B", "K", "M", "G", "T"):
-        if size < 1024:
-            return f"{size}{unit}"
-        size //= 1024
-    return f"{size}P"
 
 
 def indicator(path, st):
@@ -75,7 +68,7 @@ def format_entry(entry, args: Namespace, color_enabled: bool) -> str:
     nlink = st.st_nlink
     uid = st.st_uid if args.n else pwd.getpwuid(st.st_uid).pw_name
     gid = st.st_gid if args.n else grp.getgrgid(st.st_gid).gr_name
-    size = human_size(st.st_size) if args.h else st.st_size
+    size = fsz(st.st_size) if args.h else st.st_size
     ts = st.st_ctime if args.lc else st.st_atime if args.lu else st.st_mtime
     time_str = format_time(ts, args.full_time)
     return f"{inode} {blocks} {perms}  {nlink}  {uid}  {gid}  {size: >6}  {time_str}  {name} "

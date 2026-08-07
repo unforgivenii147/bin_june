@@ -9,6 +9,8 @@ import traceback
 from pathlib import Path
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
+from dh import fsz
+
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -37,18 +39,6 @@ def file_matches_exclude(file_path: Path, excluded_exts: set[str] | None) -> boo
     if excluded_exts is None:
         return False
     return file_path.suffix.lower() in excluded_exts
-
-
-def human_size(nbytes: int) -> str:
-    units = ["B", "KB", "MB", "GB", "TB"]
-    size = float(nbytes)
-    for u in units:
-        if size < 1024.0 or u == units[-1]:
-            if u == "B":
-                return f"{int(size)} {u}"
-            return f"{size:.2f} {u}"
-        size /= 1024.0
-    return f"{nbytes} B"
 
 
 def safe_copy_file(src: Path, dst_root: Path, rel_path: Path, errors: list[str]) -> None:
@@ -123,7 +113,7 @@ class ChangeHandler(FileSystemEventHandler):
                 if src_path.exists() and src_path.is_file():
                     try:
                         sz = src_path.stat().st_size
-                        size_str = human_size(sz)
+                        size_str = fsz(sz)
                     except Exception:
                         size_str = "unknown-size"
                     print(f"-  /{rel_path.as_posix()} | {reason} | {size_str}")

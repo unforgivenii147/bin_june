@@ -26,7 +26,7 @@ def safe_rename(src: Path, dest_dir: Path) -> Path:
         i += 1
 
 
-def format_size_range(min_s: int, max_s: int) -> str:
+def fsz_range(min_s: int, max_s: int) -> str:
     def fmt(n: int) -> str:
         if n < 1000:
             return f"{n}B"
@@ -67,7 +67,7 @@ def main() -> None:
             continue
         sizes = [f.stat().st_size for f in d["files"]]
         min_s, max_s = min(sizes), max(sizes)
-        dir_name = format_size_range(min_s, max_s)
+        dir_name = fsz_range(min_s, max_s)
         base_name = dir_name
         counter = 1
         while dir_name in existing_dir_names:

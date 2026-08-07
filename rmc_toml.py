@@ -105,7 +105,7 @@ def collect_toml_files(paths: list[Path]) -> list[Path]:
     return toml_files
 
 
-def format_size(size_bytes: int) -> str:
+def fsz(size_bytes: int) -> str:
     if size_bytes < 1024:
         return f"{size_bytes} B"
     elif size_bytes < 1024 * 1024:
@@ -137,16 +137,14 @@ def main():
             filename, time_taken, before_size, after_size = result
             ratio = after_size / before_size * 100 if before_size > 0 else 0
             display_name = filename if len(filename) <= 48 else "..." + filename[-45:]
-            print(
-                f"{display_name:<50} {time_taken:>8.2f}  {format_size(before_size):<12} {format_size(after_size):<12} {ratio:>6.1f}%"
-            )
+            print(f"{display_name:<50} {time_taken:>8.2f}  {fsz(before_size):<12} {fsz(after_size):<12} {ratio:>6.1f}%")
     print("-" * 80)
     total_before = sum(r[2] for r in results)
     total_after = sum(r[3] for r in results)
     total_ratio = total_after / total_before * 100 if total_before > 0 else 0
     total_time = sum(r[1] for r in results)
     print(f"Total: {len(results)} file(s) processed in {total_time:.2f} ms")
-    print(f"Size reduction: {format_size(total_before)} -> {format_size(total_after)} ({total_ratio:.1f}% of original)")
+    print(f"Size reduction: {fsz(total_before)} -> {fsz(total_after)} ({total_ratio:.1f}% of original)")
 
 
 if __name__ == "__main__":

@@ -11,16 +11,9 @@ import sys
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 from zipfile import ZipFile
+from dh import fsz
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
-def format_size(size_bytes: int) -> str:
-    for unit in ["B", "KB", "MB", "GB", "TB"]:
-        if size_bytes < 1024.0:
-            return f"{size_bytes:.2f} {unit}"
-        size_bytes /= 1024.0
-    return f"{size_bytes:.2f} PB"
 
 
 def get_wheel_unpacked_size(wheel_path: Path) -> tuple[Path, int, str | None]:
@@ -112,7 +105,7 @@ def main():
                 "processed": len(results),
                 "errors": len(errors),
                 "total_unpacked_size_bytes": total_unpacked_size,
-                "total_unpacked_size_formatted": format_size(total_unpacked_size),
+                "total_unpacked_size_formatted": fsz(total_unpacked_size),
             },
             "wheels": [],
         }
@@ -122,7 +115,7 @@ def main():
                     "name": wheel_path.name,
                     "path": str(wheel_path),
                     "size_bytes": size,
-                    "size_formatted": format_size(size),
+                    "size_formatted": fsz(size),
                 }
             )
         if errors:
@@ -138,18 +131,16 @@ def main():
             name = wheel_path.name
             if len(name) > 45:
                 name = "..." + name[-42:]
-            print(f"{name:<50} {format_size(size):>20}")
+            print(f"{name:<50} {fsz(size):>20}")
         print("=" * 80)
-        print(f"{'TOTAL':<50} {format_size(total_unpacked_size):>20}")
+        print(f"{'TOTAL':<50} {fsz(total_unpacked_size):>20}")
         print("=" * 80)
         if args.verbose:
             print("\n📊 Summary:")
             print(f"   Total wheels found:      {len(wheels)}")
             print(f"   Successfully processed:  {len(results)}")
             print(f"   Errors:                  {len(errors)}")
-            print(
-                f"   Average size per wheel:  {format_size(total_unpacked_size // len(results)) if results else 'N/A'}"
-            )
+            print(f"   Average size per wheel:  {fsz(total_unpacked_size // len(results)) if results else 'N/A'}")
         if errors:
             print(f"\n⚠️  Errors ({len(errors)}):")
             for wheel_path, error in errors:

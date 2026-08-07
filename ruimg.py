@@ -56,6 +56,10 @@ class TextExtractor:
             # Language config: 'rus' for Russian, 'eng' for English
             image = Image.open(image_path)
             text = pytesseract.image_to_string(image, lang="rus+eng")
+            print(text)
+            txt_path = image_path.with_suffix(".txt")
+            txt_path.write_text(text, encoding="utf-8")
+
             if not text.strip():
                 return ExtractionResult(file_path=image_path, success=True, text="", char_count=0, line_count=0)
             char_count = len(text)
@@ -113,7 +117,8 @@ class TextExtractionReport:
 
     @staticmethod
     def print_summary(results: list[ExtractionResult], base_paths: list[Path]) -> None:
-        """Print extraction summary statistics."""
+        for r in results:
+            print(r)
         successful = sum(1 for r in results if r.success)
         failed = sum(1 for r in results if not r.success)
         total_chars = sum(r.char_count for r in results if r.success)

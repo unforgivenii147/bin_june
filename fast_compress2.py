@@ -339,7 +339,7 @@ def decompress_file(
         return False, input_path, str(e), 0, 0
 
 
-def format_size(bytes_size: int) -> str:
+def fsz(bytes_size: int) -> str:
     for unit in ["B", "KB", "MB", "GB", "TB"]:
         if bytes_size < 1024.0:
             return f"{bytes_size:.2f} {unit}"
@@ -398,9 +398,9 @@ def process_files(file_generator, compress: bool, level: int = 3, threads: int =
     if compress and total_files > 0:
         saved, ratio, percent_saved = stats.get_savings()
         print("\n📊 Compression Statistics:")
-        print(f"   Original size:  {format_size(stats.original_size)}")
-        print(f"   Compressed size: {format_size(stats.compressed_size)}")
-        print(f"   Space saved:    {format_size(saved)} ({percent_saved:.1f}%)")
+        print(f"   Original size:  {fsz(stats.original_size)}")
+        print(f"   Compressed size: {fsz(stats.compressed_size)}")
+        print(f"   Space saved:    {fsz(saved)} ({percent_saved:.1f}%)")
         print(f"   Compression ratio: {ratio:.1f}%")
     if skipped > 0:
         print(f"\n⚠️  Skipped {skipped} files (already exist or invalid format)")

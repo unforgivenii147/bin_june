@@ -1,23 +1,11 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 import os
 import sys
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
-from dh import _clean_fname, fsz, get_files, mpf3, rrs, unique_path
-from dh import cprint
-
-
-def gsz(path: str | Path) -> int:
-    path = Path(path)
-    total = 0
-    if path.is_file():
-        return path.stat().st_size
-    for file in path.rglob("*"):
-        if file.is_file():
-            total += file.stat().st_size
-    return total
+from dh import fsz, get_files, mpf3, rrs, unique_path, cprint, gsz
 
 
 try:

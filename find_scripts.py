@@ -1,34 +1,17 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 from pathlib import Path
+from dh import should_skip, is_binary, getfiles, is_python_file
 
 CHUNK_SIZE = 1024 * 1024
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
-def is_binary(path: Path | str) -> bool:
-    path = Path(path)
-    try:
-        with path.open("rb") as f:
-            chunk = f.read(CHUNK_SIZE)
-        if not chunk:
-            return False
-        if b"\x00" in chunk:
-            return True
-        text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
-        nontext = sum((1 for b in chunk if b not in text_chars))
-        return nontext / len(chunk) > 0.3
-    except Exception:
-        return True
 
 
 def get_filez(root_dir: str | Path):
-    from os import walk as os_walk
 
     visited_dirs: set[Path] = set()
     root_dir = Path(root_dir)
     if root_dir.is_dir():
-        for dirpath, dirnames, filenames in os_walk(root_dir, topdown=True):
+        for dirpath, dirnames, filenames in root_dir.walk():
             base_path = Path(dirpath)
             for dirname in list(dirnames):
                 full_path = base_path / dirname
@@ -37,34 +20,24 @@ def get_filez(root_dir: str | Path):
                     dirnames.remove(dirname)
                 visited_dirs.add(resolved_path)
             for filename in filenames:
-                filepath = Path(dirpath) / filename
+                filepath = base_path / filename
                 if not should_skip(filepath):
                     yield filepath
     else:
         yield root_dir
 
 
-from dh import should_skip
-
-
 def find_scripts_without_extension(directory: Path):
-    scripts_without_extension = []
+    swe = []
     for item in get_filez(directory):
-        if item.is_symlink():
-            continue
-        if ".git" in item.parts:
+        if should_skip(item):
             continue
         if item.is_file() and (not item.suffix):
             if is_binary(item):
                 continue
-            try:
-                with item.open("r", encoding="utf-8") as f:
-                    first_line = f.readline()
-                    if first_line.strip().startswith("#!"):
-                        scripts_without_extension.append(item)
-            except Exception as e:
-                print(f"Could not read {item}: {e}")
-    return scripts_without_extension
+            if is_python_file(item):
+                swe.append(item)
+    return swe
 
 
 if __name__ == "__main__":

@@ -210,7 +210,7 @@ def collect_files(directories: list[Path]) -> list[Path]:
     return sorted(set(files))
 
 
-def format_size(size_bytes: int) -> str:
+def fsz(size_bytes: int) -> str:
     """Format file size in human-readable format."""
     for unit in ["B", "KB", "MB", "GB"]:
         if size_bytes < 1024.0:
@@ -240,8 +240,7 @@ def print_stats(all_stats: list[FileStats], base_path: Path):
         print(f"   ├─ Image references removed: {stats.removed_refs}")
         print(f"   ├─ Lines: {stats.lines_before} → {stats.lines_after} ({stats.removed_lines:+d})")
         print(
-            f"   ├─ Size: {format_size(stats.size_before)} → {format_size(stats.size_after)} "
-            f"({change_symbol} {format_size(abs(size_change))})"
+            f"   ├─ Size: {fsz(stats.size_before)} → {fsz(stats.size_after)} ({change_symbol} {fsz(abs(size_change))})"
         )
         if stats.size_before > 0:
             print(f"   └─ Reduction: {(size_change / stats.size_before * 100):.1f}%")
@@ -257,8 +256,8 @@ def print_stats(all_stats: list[FileStats], base_path: Path):
     print(f"Total image references removed: {total_removed_refs}")
     print(f"Total lines: {total_lines_before} → {total_lines_after} ({total_lines_before - total_lines_after:+d})")
     print(
-        f"Total size: {format_size(total_size_before)} → {format_size(total_size_after)} "
-        f"({format_size(total_size_before - total_size_after)} saved)"
+        f"Total size: {fsz(total_size_before)} → {fsz(total_size_after)} "
+        f"({fsz(total_size_before - total_size_after)} saved)"
     )
     if total_size_before > 0:
         print(f"Overall reduction: {((total_size_before - total_size_after) / total_size_before * 100):.1f}%")

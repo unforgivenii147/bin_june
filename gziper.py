@@ -1,11 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-from typing import Tuple
 
 """
 Parallel GZIP Compression Script
 Compresses files recursively using maximum compression with gzip module.
 Uses pathlib and parallel processing for efficiency.
 """
+
 from __future__ import annotations
 import argparse
 import gzip
@@ -14,7 +14,7 @@ import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import timedelta
 from pathlib import Path
-from typing import List
+from dh import fsz
 
 
 class CompressionStats:
@@ -44,7 +44,7 @@ def compress_file(file_path: Path) -> tuple[Path, bool, int, int, str]:
     Args:
         file_path: Path to the file to compress
     Returns:
-        Tuple of (file_path, success, original_size, compressed_size, error_message)
+        tuple of (file_path, success, original_size, compressed_size, error_message)
     """
     gz_path = file_path.with_suffix(file_path.suffix + ".gz")
     try:
@@ -64,10 +64,10 @@ def find_files_to_compress(directories: list[Path], skip_extensions: set | None 
     """
     Find all files recursively in given directories that should be compressed.
     Args:
-        directories: List of directories to search
+        directories:list of directories to search
         skip_extensions: Set of extensions to skip (e.g., {'.gz', '.zip'})
     Returns:
-        List of file paths to compress
+       list of file paths to compress
     """
     if skip_extensions is None:
         skip_extensions = {".gz", ".zip", ".bz2", ".xz", ".7z", ".rar", ".tar"}
@@ -81,15 +81,6 @@ def find_files_to_compress(directories: list[Path], skip_extensions: set | None 
                 if not file_path.suffix.endswith(".gz"):
                     files_to_compress.append(file_path)
     return files_to_compress
-
-
-def format_size(size_bytes: int) -> str:
-    """Format bytes to human readable string."""
-    for unit in ["B", "KB", "MB", "GB", "TB"]:
-        if size_bytes < 1024.0:
-            return f"{size_bytes:.2f} {unit}"
-        size_bytes /= 1024.0
-    return f"{size_bytes:.2f} PB"
 
 
 def format_ratio(original: int, compressed: int) -> str:
@@ -163,7 +154,7 @@ Examples:
                 stats.add_success(orig_size, comp_size)
                 status_symbol = "✅"
                 print(
-                    f"{display_path:<50} {format_size(orig_size):>10} {format_size(comp_size):>10} {format_ratio(orig_size, comp_size):>8} {status_symbol:>10}"
+                    f"{display_path:<50} {fsz(orig_size):>10} {fsz(comp_size):>10} {format_ratio(orig_size, comp_size):>8} {status_symbol:>10}"
                 )
             else:
                 stats.add_failure()
@@ -178,13 +169,13 @@ Examples:
     print(f"  Total files processed:     {stats.total_files}")
     print(f"  Successfully compressed:   {stats.successful} ✅")
     print(f"  Failed compressions:       {stats.failed} ❌")
-    print(f"  Original total size:       {format_size(stats.total_original_size)}")
-    print(f"  Compressed total size:     {format_size(stats.total_compressed_size)}")
+    print(f"  Original total size:       {fsz(stats.total_original_size)}")
+    print(f"  Compressed total size:     {fsz(stats.total_compressed_size)}")
     if stats.total_original_size > 0:
         overall_ratio = (1 - stats.total_compressed_size / stats.total_original_size) * 100
         space_saved = stats.total_original_size - stats.total_compressed_size
         print(f"  Overall compression ratio: {overall_ratio:.1f}%")
-        print(f"  Space saved:               {format_size(space_saved)}")
+        print(f"  Space saved:               {fsz(space_saved)}")
     print(f"  Time elapsed:               {timedelta(seconds=int(elapsed_time))}")
     print("=" * 70 + "\n")
 

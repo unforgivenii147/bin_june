@@ -24,7 +24,7 @@ def get_all_files_in_root_only(root_path: Path):
     return files_info
 
 
-def format_size1(size_bytes) -> str:
+def fsz1(size_bytes) -> str:
     if size_bytes == 0:
         return "0B"
     units = ["B", "KB", "MB", "GB", "TB"]

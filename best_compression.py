@@ -16,6 +16,13 @@ import brotli
 import py7zr
 import zstandard as zstd
 from loguru import logger
+from dh import fsz
+
+try:
+    import huffman as huffman_lib
+except Exception:
+    huffman_lib = None
+
 
 _HASH_TABLE_SIZE = 1 << 14
 _MAX_OFFSET_1 = 2047
@@ -127,12 +134,6 @@ def compress(data: bytes) -> bytes:
     return bytes(output)
 
 
-try:
-    import huffman as huffman_lib
-except Exception:
-    huffman_lib = None
-
-
 def copy_chunks(src, dst, chunk_size: int = 1024 * 1024) -> None:
     while True:
         chunk = src.read(chunk_size)
@@ -150,16 +151,6 @@ class Result:
     elapsed_s: float
     ok: bool
     error: str | None = None
-
-
-def human(n: int) -> str:
-    units = ["B", "KiB", "MiB", "GiB", "TiB"]
-    x = float(n)
-    for u in units:
-        if x < 1024.0:
-            return f"{x:.2f} {u}"
-        x /= 1024.0
-    return f"{x:.2f} PiB"
 
 
 def file_sha256(path: Path, chunk_size: int = 1024 * 1024) -> str:
@@ -398,7 +389,7 @@ def main() -> None:
     if not in_path.exists() or not in_path.is_file():
         print(f"Error: file not found: {in_path}", file=sys.stderr)
         sys.exit(1)
-    logger.info(f"Input: {in_path} ({human(in_path.stat().st_size)})")
+    logger.info(f"Input: {in_path} ({fsz(in_path.stat().st_size)})")
     try:
         logger.info(f"SHA256(input)={file_sha256(in_path)}")
     except Exception:
@@ -413,7 +404,7 @@ def main() -> None:
             r = run_single(algo, in_path, tmpdir)
             results_single.append(r)
             if r.ok:
-                logger.info(f"[{algo}] OK size={human(r.out_size)} time={r.elapsed_s:.4f}s out={Path(r.out_path).name}")
+                logger.info(f"[{algo}] OK size={fsz(r.out_size)} time={r.elapsed_s:.4f}s out={Path(r.out_path).name}")
             else:
                 logger.error(f"[{algo}] FAIL {r.error}")
         mp_algos = ["gz", "bz2", "lzma", "zstd", "brotli", "snappy"]
@@ -422,12 +413,12 @@ def main() -> None:
         logger.info("=== Multiprocessing chunk benchmark (reporting only) ===")
         mp_results: list[Result] = []
         for algo in mp_algos:
-            logger.info(f"MP chunk compress {algo} (chunk_size={human(chunk_size)}) ...")
+            logger.info(f"MP chunk compress {algo} (chunk_size={fsz(chunk_size)}) ...")
             r = mp_compress_chunks(algo, in_path, tmpdir, chunk_size=chunk_size, processes=processes)
             mp_results.append(r)
             if r.ok:
                 logger.info(
-                    f"[mp_{algo}] OK size={human(r.out_size)} time={r.elapsed_s:.4f}s out={Path(r.out_path).name}"
+                    f"[mp_{algo}] OK size={fsz(r.out_size)} time={r.elapsed_s:.4f}s out={Path(r.out_path).name}"
                 )
             else:
                 logger.error(f"[mp_{algo}] FAIL {r.error}")
@@ -441,9 +432,9 @@ def main() -> None:
         print(f"{'Algo':<10} {'Size':>15} {'Time(s)':>12}")
         print("-" * 40)
         for r in ok_single:
-            print(f"{r.algo:<10} {human(r.out_size):>15} {r.elapsed_s:>12.4f}")
+            print(f"{r.algo:<10} {fsz(r.out_size):>15} {r.elapsed_s:>12.4f}")
         print(
-            f"\nBest overall: {best_overall.algo} size={human(best_overall.out_size)} time={best_overall.elapsed_s:.4f}s"
+            f"\nBest overall: {best_overall.algo} size={fsz(best_overall.out_size)} time={best_overall.elapsed_s:.4f}s"
         )
         if best_overall.algo.startswith("mp_"):
             base_algo = best_overall.algo[len("mp_") :]

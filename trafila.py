@@ -6,7 +6,6 @@ from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 import trafilatura
 from dh import get_files, mpf3
-import markdownify
 
 remove_orig = "-r" in sys.argv
 
@@ -48,7 +47,11 @@ def process_file(path: str | Path) -> tuple[Path, bool]:
 if __name__ == "__main__":
     cwd = Path.cwd()
     args = sys.argv[1:]
-    files = [Path(p) for p in args] if args else get_files(cwd, [".html", ".htm", ".xhtml", ".xhtm"])
+    files = (
+        [Path(p) for p in args if p.strip() != "-r"]
+        if args and len(args) > 1
+        else get_files(cwd, [".html", ".htm", ".xhtml", ".xhtm"])
+    )
     numf = len(files)
     if numf == 1:
         process_file(files[0])

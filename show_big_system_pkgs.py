@@ -11,7 +11,7 @@ from multiprocessing import Pool, cpu_count
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
-def format_size(bytes_size) -> str:
+def fsz(bytes_size) -> str:
     if bytes_size == 0:
         return "N/A"
     for unit in ["B", "KB", "MB", "GB"]:
@@ -158,14 +158,14 @@ def main() -> None:
         print("-" * 35)
         display_count = min(len(sorted_packages), 50)
         for _i, (pkg, size) in enumerate(sorted_packages[:display_count]):
-            print(f"{pkg:<40} {format_size(size):>15}")
+            print(f"{pkg:<40} {fsz(size):>15}")
             total_size += size
         if len(sorted_packages) > 50:
             print(f"\n... and {len(sorted_packages) - 50} more packages")
             for _, size in sorted_packages[50:]:
                 total_size += size
         print("-" * 35)
-        print(f"{'TOTAL SIZE:':<40} {format_size(total_size):>15}")
+        print(f"{'TOTAL SIZE:':<40} {fsz(total_size):>15}")
         print(f"{'TOTAL PACKAGES:':<40} {len(large_packages):>15}")
     else:
         print("✅ No packages found exceeding the threshold.")

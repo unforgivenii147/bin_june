@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+
+
 from __future__ import annotations
 import argparse
 import mmap
@@ -12,6 +14,7 @@ from collections import Counter
 from collections.abc import Generator
 from datetime import UTC, datetime
 from pathlib import Path
+from dh import fsz
 
 
 class LineProcessor:
@@ -24,13 +27,6 @@ class LineProcessor:
 
     def get_file_size(self, file_path: Path) -> int:
         return file_path.stat().st_size
-
-    def fsz(self, size_bytes: int) -> str:
-        for unit in ["B", "KB", "MB", "GB", "TB"]:
-            if size_bytes < 1024.0:
-                return f"{size_bytes:.2f} {unit}"
-            size_bytes /= 1024.0
-        return f"{size_bytes:.2f} PB"
 
 
 class MmapReader(LineProcessor):

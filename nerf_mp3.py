@@ -51,7 +51,7 @@ def check_ffmpeg():
         sys.exit(1)
 
 
-def format_size(size_bytes: int) -> str:
+def fsz(size_bytes: int) -> str:
     """Format file size in human-readable format."""
     for unit in ["B", "KB", "MB", "GB"]:
         if size_bytes < 1024:
@@ -196,7 +196,7 @@ def print_file_result(stat: ConversionStats, index: int, total: int):
         size_percent = (size_saved / stat.original_size * 100) if stat.original_size > 0 else 0
         print(f"{Colors.CLEAR_LINE}{status_icon} [{index}/{total}] {Colors.CYAN}{stat.file_path}{Colors.END}")
         print(
-            f"  {Colors.DIM}{format_size(stat.original_size)} → {format_size(stat.new_size)} "
+            f"  {Colors.DIM}{fsz(stat.original_size)} → {fsz(stat.new_size)} "
             f"({Colors.GREEN}-{size_percent:.1f}%{Colors.END}) | "
             f"{stat.original_bitrate} kbps → {Colors.YELLOW}{stat.new_bitrate} kbps{Colors.END} | "
             f"{format_duration(stat.duration)}{Colors.END}"
@@ -221,12 +221,9 @@ def print_final_summary(stats: list[ConversionStats], total_duration: float):
     print(f"{Colors.RED}Failed:{Colors.END} {len(failed)}")
     if successful:
         print(f"\n{Colors.BOLD}Space saved:{Colors.END}")
-        print(f"  Before: {format_size(total_original)}")
-        print(f"  After:  {format_size(total_new)}")
-        print(
-            f"  Saved:  {Colors.GREEN}{format_size(total_saved)} "
-            f"({total_saved / total_original * 100:.1f}%){Colors.END}"
-        )
+        print(f"  Before: {fsz(total_original)}")
+        print(f"  After:  {fsz(total_new)}")
+        print(f"  Saved:  {Colors.GREEN}{fsz(total_saved)} ({total_saved / total_original * 100:.1f}%){Colors.END}")
     print(f"\n{Colors.BOLD}Total time:{Colors.END} {format_duration(total_duration)}")
     print(f"{'─' * 42}")
 

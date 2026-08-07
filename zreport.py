@@ -36,7 +36,7 @@ brotli = _try_import("brotli")
 py7zr = _try_import("py7zr")
 
 
-def format_size(size_bytes: int | None) -> str:
+def fsz(size_bytes: int | None) -> str:
     if size_bytes is None:
         return "Unknown"
     size = float(size_bytes)
@@ -169,19 +169,19 @@ def main() -> None:
             col_fmt.format(
                 name_trunc,
                 label,
-                format_size(comp_size),
-                format_size(uncomp_size) if uncomp_size else "Error",
+                fsz(comp_size),
+                fsz(uncomp_size) if uncomp_size else "Error",
                 ratio_str,
             )
         )
     print("-" * 85)
     print(f"Total files: {total_files}")
-    print(f"Total compressed:   {format_size(grand_comp)}")
-    print(f"Total uncompressed: {format_size(grand_uncomp)}")
+    print(f"Total compressed:   {fsz(grand_comp)}")
+    print(f"Total uncompressed: {fsz(grand_uncomp)}")
     _, _, free = shutil.disk_usage(root)
-    print(f"Free disk space:    {format_size(free)}")
+    print(f"Free disk space:    {fsz(free)}")
     if grand_uncomp > free:
-        print(f"\n⚠️  WARNING: Not enough space to extract all files! (Shortfall: {format_size(grand_uncomp - free)})")
+        print(f"\n⚠️  WARNING: Not enough space to extract all files! (Shortfall: {fsz(grand_uncomp - free)})")
 
 
 if __name__ == "__main__":

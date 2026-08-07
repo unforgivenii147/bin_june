@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """
-Optimized version of transline.py for Python 3.12.
 In-place translation of Chinese characters in text files with progress persistence.
 """
 
@@ -16,6 +15,8 @@ from pathlib import Path
 from typing import Any, Final
 from deep_translator import GoogleTranslator
 from tenacity import before_sleep_log, retry, retry_if_exception_type, stop_after_attempt, wait_exponential_jitter
+from dh import get_nobinary
+
 
 CHUNK_SIZE = 1024 * 1024
 CHUNK_SIZE: Final[int] = 32768
@@ -38,44 +39,6 @@ def _sigint_handler(sig: Any, frame: Any) -> None:
 
 
 signal.signal(signal.SIGINT, _sigint_handler)
-
-
-def is_binary(path: Path) -> bool:
-    try:
-        with path.open("rb") as f:
-            chunk = f.read(CHUNK_SIZE)
-        if not chunk:
-            return False
-        if b"\x00" in chunk:
-            return True
-        text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
-        nontext = sum(1 for b in chunk if b not in text_chars)
-        return nontext / len(chunk) > 0.3
-    except Exception:
-        return True
-
-
-def get_files(path: Path, include_hidden: bool = True, extensions: tuple[str, ...] | None = None) -> list[Path]:
-    files: list[Path] = []
-    stack = [path]
-    while stack:
-        current = stack.pop()
-        try:
-            for entry in current.iterdir():
-                if entry.is_symlink():
-                    continue
-                if entry.is_dir():
-                    if entry.name not in SKIP_DIRS:
-                        stack.append(entry)
-                elif entry.is_file():
-                    if not include_hidden and entry.name.startswith("."):
-                        continue
-                    if extensions is None or entry.suffix.lower() in extensions:
-                        if not is_binary(entry):
-                            files.append(entry)
-        except (PermissionError, OSError):
-            continue
-    return sorted(files)
 
 
 def find_chinese_segments(text: str) -> list[tuple[int, int, str]]:
@@ -244,7 +207,7 @@ def process_file(path: Path) -> bool:
 
 def main() -> None:
     args = sys.argv[1:]
-    files = [Path(p) for p in args if Path(p).is_file()] if args else get_files(Path.cwd())
+    files = [Path(p) for p in args if Path(p).is_file()] if args else get_nobinary(Path.cwd())
     for f in files:
         if _interrupted:
             break

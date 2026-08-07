@@ -58,7 +58,7 @@ class FolderResult:
         return max(0, self.original_size - self.compressed_size)
 
 
-def format_size(size_bytes: int) -> str:
+def fsz(size_bytes: int) -> str:
     val = float(size_bytes)
     for unit in ["B", "KB", "MB", "GB", "TB"]:
         if val < 1024.0:
@@ -198,10 +198,10 @@ def main():
         total_orig = sum(r.original_size for r in successes)
         total_comp = sum(r.compressed_size for r in successes)
         if args.decompress:
-            print(f"Extracted size: {format_size(total_orig)}")
+            print(f"Extracted size: {fsz(total_orig)}")
         else:
             print(
-                f"Space saved: {format_size(total_orig - total_proc if 'total_proc' in locals() else total_orig - total_comp)}"
+                f"Space saved: {fsz(total_orig - total_proc if 'total_proc' in locals() else total_orig - total_comp)}"
             )
     print(f"{'=' * 40}")
 

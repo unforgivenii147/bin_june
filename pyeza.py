@@ -11,6 +11,7 @@ import subprocess
 from argparse import Namespace
 from os import getenv
 from pathlib import Path
+from dh import fsz
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -95,14 +96,6 @@ def mode_to_string(mode: int) -> str:
     return "".join(chars)
 
 
-def human_size(n: int) -> str:
-    for unit in ["B", "K", "M", "G", "T"]:
-        if n < 1024:
-            return f"{n}{unit}"
-        n /= 1024
-    return f"{n:.1f}P"
-
-
 def output_long(entries: list[Entry], icons=False, colors=True, human=True) -> None:
     for e in entries:
         st = e.stat
@@ -110,7 +103,7 @@ def output_long(entries: list[Entry], icons=False, colors=True, human=True) -> N
         nlink = st.st_nlink
         user = pwd.getpwuid(st.st_uid).pw_name
         group = grp.getgrgid(st.st_gid).gr_name
-        size = human_size(st.st_size) if human else str(st.st_size)
+        size = fsz(st.st_size) if human else str(st.st_size)
         mtime = datetime.datetime.fromtimestamp(st.st_mtime)
         tstr = mtime.strftime("%Y-%m-%d %H:%M")
         name = e.name
