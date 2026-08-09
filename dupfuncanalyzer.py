@@ -1,6 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Duplicate function analyzer and refactorer."""
 
+from __future__ import annotations
+
 import argparse
 import ast
 from collections import defaultdict
@@ -111,10 +113,9 @@ def refactor_file(file_path: Path, repeated: list[dict[str, Any]]) -> None:
     for i, line in enumerate(lines):
         skip = False
         for node in nodes_to_remove:
-            if node.lineno and node.end_lineno:
-                if node.lineno - 1 <= i < node.end_lineno:
-                    skip = True
-                    break
+            if node.lineno and node.end_lineno and node.lineno - 1 <= i < node.end_lineno:
+                skip = True
+                break
         if not skip:
             lines_to_keep.append(line)
     import_stmt = "from dh import " + ", ".join(sorted(imports_to_add)) + "\n"

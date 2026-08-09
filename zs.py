@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+from __future__ import annotations
+
 import argparse
 import io
 import tarfile
@@ -22,7 +24,7 @@ def compress_stream(input_stream, output_file_path: Path) -> bool:
                 if not chunk:
                     break
                 compressor.write(chunk)
-            compressor.close()  # Important for Zstd
+            compressor.close()
         print(f"✅ Compressed: {output_file_path.name}")
         return True
     except Exception as e:
@@ -34,14 +36,13 @@ def decompress_stream(input_path: Path, output_path: Path) -> bool:
     """Decompress Zstandard file"""
     try:
         dctx = zstd.ZstdDecompressor()
-        with open(input_path, "rb") as f_in:
-            with open(output_path, "wb") as f_out:
-                decompressor = dctx.stream_reader(f_in)
-                while True:
-                    chunk = decompressor.read(CHUNK_SIZE)
-                    if not chunk:
-                        break
-                    f_out.write(chunk)
+        with open(input_path, "rb") as f_in, open(output_path, "wb") as f_out:
+            decompressor = dctx.stream_reader(f_in)
+            while True:
+                chunk = decompressor.read(CHUNK_SIZE)
+                if not chunk:
+                    break
+                f_out.write(chunk)
         print(f"✅ Decompressed: {output_path.name}")
         return True
     except Exception as e:
@@ -81,8 +82,7 @@ def process_file(file_path: Path):
 def decompress_file(zst_path: Path):
     """Decompress .zst or .tar.zst file"""
     if zst_path.name.endswith(".tar.zst"):
-        # .tar.zst → directory
-        output_dir = zst_path.with_name(zst_path.name[:-8])  # remove .tar.zst
+        output_dir = zst_path.with_name(zst_path.name[:-8])
         tar_buffer = io.BytesIO()
         try:
             if decompress_stream(zst_path, tar_buffer):
@@ -94,7 +94,6 @@ def decompress_file(zst_path: Path):
         except Exception as e:
             print(f"❌ Failed to decompress tar archive {zst_path.name}: {e}")
     elif zst_path.suffix == ".zst":
-        # Regular .zst → original file
         output_file = zst_path.with_suffix("")
         if decompress_stream(zst_path, output_file):
             zst_path.unlink()
@@ -125,7 +124,7 @@ def main():
                 executor.submit(process_directory, d)
             for f in files:
                 executor.submit(process_file, f)
-    else:  # decompress
+    else:
         archives = [f for f in current_dir.iterdir() if f.is_file() and f.suffix == ".zst"]
         if not archives:
             print("No .zst or .tar.zst files found to decompress.")

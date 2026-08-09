@@ -25,9 +25,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Generator, Iterable
 
-from tree_sitter import Language, Parser
 import tree_sitter_python as tspython
-
+from tree_sitter import Language, Parser
 
 SKIP_DIRS = {".git", "__pycache__"}
 PRESERVED_COMMENT_MARKERS = ("# fmt", "# type")
@@ -98,7 +97,6 @@ def iter_python_files(paths: Iterable[Path]) -> Generator[Path, None, None]:
             ):
                 root = Path(root_str)
 
-                # Prune ignored and symlink directories before descent.
                 dirnames[:] = [
                     dirname for dirname in dirnames if dirname not in SKIP_DIRS and not (root / dirname).is_symlink()
                 ]
@@ -382,7 +380,6 @@ def process_file(path_str: str, remove_module_docstring: bool) -> FileResult:
 
         updated = apply_edits(source_bytes, edits)
 
-        # Validate before changing the actual file.
         updated_text = updated.decode("utf-8")
         ast.parse(updated_text, filename=str(path))
 

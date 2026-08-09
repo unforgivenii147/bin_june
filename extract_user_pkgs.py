@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+from __future__ import annotations
+
 import argparse
 import concurrent.futures
 import csv
@@ -56,15 +58,13 @@ def resolve_package_list(patterns: list[str], entry_points_only: bool = False) -
                     unmatched_patterns.append(pattern)
         return matched_packages, unmatched_patterns
     else:
-        # When not using --entry-points, still only return packages with entry points
         packages_with_eps = get_packages_with_entry_points()
         matched_packages = []
         unmatched_patterns = []
         for pattern in patterns:
             if any(c in pattern for c in "*?[]"):
-                # Get all matching packages first
                 all_matches = get_matching_packages(pattern)
-                # Then filter to only those with entry points
+
                 matches = [pkg for pkg in all_matches if pkg in packages_with_eps]
                 if matches:
                     matched_packages.extend(matches)
@@ -130,7 +130,7 @@ def process_package(pkg_name: str, user_site: Path, base_target_dir: Path) -> st
         files = dist.files
         if files is None:
             return f"❌ Package '{pkg_name}' has no file information available."
-        # Find the RECORD file
+
         record_file = None
         for file in files:
             if file.name == "RECORD":
@@ -145,7 +145,7 @@ def process_package(pkg_name: str, user_site: Path, base_target_dir: Path) -> st
         return f"❌ Failed to locate RECORD file for '{pkg_name}': {e}"
     pkg_target_dir = base_target_dir / pkg_name
     pkg_target_dir.mkdir(parents=True, exist_ok=True)
-    # ... rest of the function remains the same
+
     try:
         with record_path.open("r", encoding="utf-8", newline="") as f:
             reader = csv.reader(f)
@@ -234,7 +234,7 @@ def main():
     print("-" * 42)
     if args.list_only:
         return
-    # Additional verification: filter out any packages that somehow don't have entry points
+
     packages_to_extract = []
     for pkg in matched_packages:
         try:

@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+from __future__ import annotations
+
 import ast
 import json
 import os
@@ -19,8 +21,8 @@ def normalize_source(source):
 def analyze_files():
     cwd = Path.cwd()
     target_dirs = [cwd]
-    definitions = defaultdict(list)  # (type, name, normalized_source) -> list of file paths
-    source_map = {}  # (type, name, normalized_source) -> actual_source
+    definitions = defaultdict(list)
+    source_map = {}
     for target_dir in target_dirs:
         for root, dirs, files in os.walk(target_dir):
             if ".git" in dirs:
@@ -40,7 +42,6 @@ def analyze_files():
                                 if key not in source_map:
                                     source_map[key] = source
                             elif isinstance(node, ast.Assign):
-                                # Top-level constant assignments
                                 for target in node.targets:
                                     if isinstance(target, ast.Name):
                                         source = get_source(node, content)

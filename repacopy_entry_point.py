@@ -4,6 +4,9 @@ Copy installed packages that have entry points to ~/tmp/packages/<pkgname>
 Uses parallel processing for efficient file copying.
 """
 
+from __future__ import annotations
+
+import contextlib
 import csv
 import logging
 import os
@@ -61,9 +64,7 @@ def has_entry_points(dist_info_dir: Path) -> bool:
                     return True
         except Exception as e:
             logger.debug(f"Error reading {metadata_file}: {e}")
-    if (dist_info_dir / "top_level.txt").exists() and any(dist_info_dir.glob("scripts*")):
-        return True
-    return False
+    return bool((dist_info_dir / "top_level.txt").exists() and any(dist_info_dir.glob("scripts*")))
 
 
 def parse_record_file(dist_info_dir: Path) -> List[Tuple[Path, str]]:
@@ -109,7 +110,7 @@ def find_file_in_paths(relative_path: str, search_paths: Tuple[Path, ...]) -> Op
             "scripts/": lambda p: p,
             "data/": lambda p: p,
         }
-        for prefix, transform in data_mappings.items():
+        for prefix, _transform in data_mappings.items():
             if data_subpath.startswith(prefix):
                 subpath = data_subpath[len(prefix) :]
                 for base_path in search_paths:
@@ -172,15 +173,13 @@ def copy_package_files(package_info: Tuple[str, Path, List[str]]) -> Tuple[str, 
                 logger.debug(f"Error copying {source_path}: {e}")
         dist_info_dest = dest_base / dist_info_dir.name
         if dist_info_dir.exists() and not dist_info_dest.exists():
-            try:
+            with contextlib.suppress(Exception):
                 shutil.copytree(dist_info_dir, dist_info_dest, dirs_exist_ok=True)
-            except Exception:
-                pass
         success_msg = f"Copied {files_copied} files"
         logger.info(f"{package_name}: {success_msg}")
         return (package_name, True, success_msg)
     except Exception as e:
-        error_msg = f"Error: {str(e)}"
+        error_msg = f"Error: {e!s}"
         logger.error(f"{package_name}: {error_msg}")
         return (package_name, False, error_msg)
 

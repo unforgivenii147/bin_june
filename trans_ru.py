@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+from __future__ import annotations
+
 import json
 import logging
 import random
@@ -13,7 +15,7 @@ from deep_translator import GoogleTranslator
 MAX_WORKERS: Final[int] = 16
 RETRY_ATTEMPTS: Final[int] = 4
 RETRY_DELAY: Final[float] = 0.6
-MAX_CHUNK_SIZE: Final[int] = 2000  # characters per chunk
+MAX_CHUNK_SIZE: Final[int] = 2000
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s", datefmt="%H:%M:%S")
 logger = logging.getLogger(__name__)
 
@@ -34,8 +36,8 @@ def create_chunks(lines: list[str]) -> list[list[str]]:
     current_chunk: list[str] = []
     current_size = 0
     for line in lines:
-        line_size = len(line) + 1  # +1 for newline
-        # If single line exceeds MAX_CHUNK_SIZE, force it into its own chunk
+        line_size = len(line) + 1
+
         if line_size > MAX_CHUNK_SIZE:
             if current_chunk:
                 chunks.append(current_chunk)
@@ -43,7 +45,7 @@ def create_chunks(lines: list[str]) -> list[list[str]]:
                 current_size = 0
             chunks.append([line])
             continue
-        # If adding this line would exceed the limit, push current and start new
+
         if current_size + line_size > MAX_CHUNK_SIZE and current_chunk:
             chunks.append(current_chunk)
             current_chunk = []
@@ -68,7 +70,6 @@ def translate_chunk(chunk: list[str]) -> tuple[list[str], str | None]:
             if translated is not None:
                 return (chunk, translated)
         except Exception as e:
-            # exponential backoff with jitter
             delay = RETRY_DELAY * (2 ** (attempt - 1))
             jitter = random.uniform(0, delay * 0.25)
             sleep_time = delay + jitter
@@ -97,7 +98,6 @@ def main() -> None:
         return
     try:
         with input_path.open(encoding="utf-8") as f:
-            # Preserve original order but strip blank lines
             all_lines = [w.rstrip("\n") for w in f if w.strip() != ""]
     except Exception as e:
         logger.error("Error reading input file: %s", e)
@@ -105,7 +105,7 @@ def main() -> None:
     if not all_lines:
         logger.info("No non-empty lines found in %s", input_path.name)
         return
-    # Identify Russian (Cyrillic) and non-Russian lines
+
     russian_lines_raw = [line for line in all_lines if contains_cyrillic(line)]
     non_russian_lines = [line for line in all_lines if not contains_cyrillic(line)]
     logger.info(
@@ -117,7 +117,7 @@ def main() -> None:
     if not russian_lines_raw:
         logger.info("No Russian/Cyrillic lines to translate in %s", input_path.name)
         return
-    # Deduplicate while preserving order to avoid repeated translations
+
     seen: set[str] = set()
     russian_lines: list[str] = []
     for l in russian_lines_raw:
@@ -129,7 +129,7 @@ def main() -> None:
         len(russian_lines),
         len(russian_lines_raw),
     )
-    # Create chunks of unique Russian lines
+
     chunks = create_chunks(russian_lines)
     num_workers = min(MAX_WORKERS, len(chunks)) if chunks else 1
     logger.info(
@@ -139,7 +139,7 @@ def main() -> None:
         MAX_CHUNK_SIZE,
         num_workers,
     )
-    # Translate chunks in parallel
+
     results: dict[str, str] = {}
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
         future_to_chunk = {executor.submit(translate_chunk, chunk): chunk for chunk in chunks}
@@ -151,15 +151,12 @@ def main() -> None:
             try:
                 original_lines, translated_text = future.result()
                 if translated_text:
-                    # Split translated text into lines robustly
                     translated_lines = translated_text.splitlines()
-                    # If counts mismatch, attempt a best-effort mapping:
+
                     if len(translated_lines) == len(original_lines):
                         for i, original_line in enumerate(original_lines):
                             results[original_line] = translated_lines[i]
                     else:
-                        # If translator merged/split lines unexpectedly, try mapping line-by-line
-                        # by translating individual lines as fallback
                         logger.warning(
                             "Line-count mismatch in chunk (%d original vs %d translated). Falling back to per-line translation for this chunk.",
                             len(original_lines),
@@ -189,7 +186,7 @@ def main() -> None:
                     (chunk[0][:60] + "...") if chunk else "",
                     e,
                 )
-    # Save results as JSON file
+
     output_path = input_path.with_suffix(".json")
     try:
         with output_path.open("w", encoding="utf-8") as f:
@@ -197,7 +194,7 @@ def main() -> None:
         logger.info("Saved %d translations to %s", len(results), output_path.name)
     except Exception as e:
         logger.error("Error saving JSON file: %s", e)
-    # Update the original text file: replace any original Russian lines (including duplicates) with translations
+
     try:
         with input_path.open("w", encoding="utf-8") as f:
             translated_count = 0

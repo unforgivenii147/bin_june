@@ -6,6 +6,8 @@ Supports both line comments (// ...) and block comments (/* ... */),
 including inline comments.
 """
 
+from __future__ import annotations
+
 import argparse
 import os
 import sys
@@ -16,12 +18,12 @@ import tree_sitter_c
 import tree_sitter_cpp
 from tree_sitter import Language, Parser
 
-# Define extensions for C and C++
+
 C_EXTS = {".c", ".h"}
 CPP_EXTS = {".cpp", ".hpp"}
 ALL_EXTS = C_EXTS | CPP_EXTS
 
-# Per-worker parser cache (each process has its own).
+
 _PARSERS: dict[str, Parser] = {}
 
 
@@ -34,7 +36,7 @@ def get_parser(ext: str) -> Parser:
             lang = Language(tree_sitter_cpp.language())
         else:
             raise ValueError(f"Unsupported extension: {ext}")
-        
+
         parser = Parser()
         parser.language = lang
         _PARSERS[ext] = parser
@@ -49,7 +51,7 @@ def collect_comment_ranges(root) -> list[tuple[int, int]]:
         node = stack.pop()
         if node.type == "comment":
             ranges.append((node.start_byte, node.end_byte))
-            continue  # comments have no useful children to recurse into
+            continue
         for child in reversed(node.children):
             stack.append(child)
     return ranges
@@ -86,7 +88,7 @@ def process_file(path: Path, base: Path) -> tuple[str, int, str]:
         except ValueError:
             rel = str(path)
         return rel, count, ""
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return str(path), 0, str(exc)
 
 
@@ -109,9 +111,7 @@ def iter_cc_files(paths: list[Path]):
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(
-        description="Remove comments from C/C++ files in place (tree-sitter powered)."
-    )
+    ap = argparse.ArgumentParser(description="Remove comments from C/C++ files in place (tree-sitter powered).")
     ap.add_argument(
         "paths",
         nargs="*",
@@ -119,7 +119,8 @@ def main() -> int:
         help="Files or directories. Defaults to current directory recursively.",
     )
     ap.add_argument(
-        "-j", "--jobs",
+        "-j",
+        "--jobs",
         type=int,
         default=max(1, (os.cpu_count() or 2)),
         help="Number of parallel workers (default: CPU count).",

@@ -25,12 +25,12 @@ def fetch_pypi_updates() -> List[Dict[str, str]]:
     try:
         response = requests.get(url, timeout=30)
         response.raise_for_status()
-        # Parse XML
+
         root = ET.fromstring(response.content)
-        # Define namespaces (RSS feeds often use namespaces)
+
         namespaces = {"atom": "http://www.w3.org/2005/Atom", "dc": "http://purl.org/dc/elements/1.1/"}
         packages = []
-        # Find all items in the RSS feed
+
         for item in root.findall(".//item"):
             package_info = {
                 "title": item.find("title").text if item.find("title") is not None else "",
@@ -39,7 +39,7 @@ def fetch_pypi_updates() -> List[Dict[str, str]]:
                 "pub_date": item.find("pubDate").text if item.find("pubDate") is not None else "",
                 "guid": item.find("guid").text if item.find("guid") is not None else "",
             }
-            # Extract package name from title (format: "package-name version")
+
             if package_info["title"]:
                 parts = package_info["title"].split()
                 if parts:
@@ -109,14 +109,14 @@ def main():
     packages = fetch_pypi_updates()
     if args.num_packages:
         packages = packages[: args.num_packages]
-    # Determine output filename with correct extension
+
     base_name = args.output.rsplit(".", 1)[0]
     extension_map = {"json": ".json", "csv": ".csv", "txt": ".txt"}
     filename = base_name + extension_map.get(args.format, ".json")
-    # Save in the requested format
+
     save_functions = {"json": save_to_json, "csv": save_to_csv, "txt": save_to_text}
     save_functions[args.format](packages, filename)
-    # Print summary
+
     print(f"\nSummary:")
     print(f"  Total packages fetched: {len(packages)}")
     if packages:

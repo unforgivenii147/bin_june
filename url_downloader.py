@@ -1,9 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+from __future__ import annotations
+
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
-# ========================== HTTP LIBRARY SETUP ==========================
+
 try:
     import pycurl
 
@@ -40,7 +42,7 @@ def download_file(url: str, filepath: Path, timeout: int = 120) -> bool:
             return True
         except Exception as e:
             print(f"⚠️  pycurl failed for {filepath.name}: {e}. Trying requests...")
-    # Fallback to requests
+
     try:
         with requests.Session() as session:
             response = session.get(
@@ -62,37 +64,36 @@ def main():
     if not urls_file.exists():
         print(f"Error: {urls_file} not found!")
         sys.exit(1)
-    # Read original lines to preserve comments and formatting
+
     original_lines = urls_file.read_text(encoding="utf-8").splitlines()
-    # Parse valid URLs
+
     download_tasks = []
-    url_to_line = {}  # url -> original line (for removal)
+    url_to_line = {}
     for line in original_lines:
         stripped = line.strip()
         if stripped and not stripped.startswith("#"):
-            # Take first non-empty token as URL
             url = stripped.split()[0]
             filename = url.split("/")[-1].split("?")[0] or f"download_{len(download_tasks) + 1}"
             filepath = Path("downloads") / filename
             download_tasks.append((url, filepath))
-            url_to_line[url] = line  # keep original line for later
+            url_to_line[url] = line
     if not download_tasks:
         print("No valid URLs found in urls.txt")
         sys.exit(0)
     print(f"Found {len(download_tasks)} files to download.\n")
-    # ====================== PARALLEL DOWNLOAD ======================
+
     successful_urls = set()
-    max_workers = min(12, len(download_tasks))  # You can adjust this
+    max_workers = min(12, len(download_tasks))
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         future_to_url = {executor.submit(download_file, url, path): url for url, path in download_tasks}
         for future in as_completed(future_to_url):
             url = future_to_url[future]
             try:
-                if future.result():  # Success
+                if future.result():
                     successful_urls.add(url)
             except Exception as exc:
                 print(f"Unexpected error with {url}: {exc}")
-    # ====================== UPDATE urls.txt ======================
+
     remaining_lines = []
     removed_count = 0
     for line in original_lines:
@@ -101,9 +102,9 @@ def main():
             url = stripped.split()[0]
             if url in successful_urls:
                 removed_count += 1
-                continue  # skip successfully downloaded URLs
+                continue
         remaining_lines.append(line)
-    # Write back the updated file
+
     urls_file.write_text("\n".join(remaining_lines) + "\n", encoding="utf-8")
     print("\n" + "=" * 50)
     print(f"Download session completed!")

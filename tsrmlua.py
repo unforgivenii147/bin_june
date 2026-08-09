@@ -5,6 +5,8 @@ Processes files in place using parallel workers.
 Supports both line comments (-- ...) and block comments (--[[ ... ]]).
 """
 
+from __future__ import annotations
+
 import argparse
 import os
 import sys
@@ -17,7 +19,7 @@ from tree_sitter import Language, Parser
 LUA_LANGUAGE = Language(tree_sitter_lua.language())
 LUA_EXTS = {".lua"}
 
-# Per-worker parser cache (each process has its own).
+
 _PARSER: Parser | None = None
 
 
@@ -36,7 +38,7 @@ def collect_comment_ranges(root) -> list[tuple[int, int]]:
         node = stack.pop()
         if node.type == "comment":
             ranges.append((node.start_byte, node.end_byte))
-            continue  # comments have no useful children to recurse into
+            continue
         for child in reversed(node.children):
             stack.append(child)
     return ranges
@@ -71,7 +73,7 @@ def process_file(path: Path, base: Path) -> tuple[str, int, str]:
         except ValueError:
             rel = str(path)
         return rel, count, ""
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return str(path), 0, str(exc)
 
 
@@ -93,9 +95,7 @@ def iter_lua_files(paths: list[Path]):
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(
-        description="Remove comments from Lua files in place (tree-sitter powered)."
-    )
+    ap = argparse.ArgumentParser(description="Remove comments from Lua files in place (tree-sitter powered).")
     ap.add_argument(
         "paths",
         nargs="*",
@@ -103,7 +103,8 @@ def main() -> int:
         help="Files or directories. Defaults to current directory recursively.",
     )
     ap.add_argument(
-        "-j", "--jobs",
+        "-j",
+        "--jobs",
         type=int,
         default=max(1, (os.cpu_count() or 2)),
         help="Number of parallel workers (default: CPU count).",

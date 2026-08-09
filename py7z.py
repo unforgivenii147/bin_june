@@ -13,11 +13,11 @@ from pathlib import Path
 import pylzma
 from dh import fsz, gsz
 
-# Max available pylzma compression settings
+
 _COMPRESS_OPTS = {
-    "dictionary": 27,  # 256 MB
-    "fastBytes": 273,  # Maximum
-    "algorithm": 2,  # Maximum compression mode
+    "dictionary": 27,
+    "fastBytes": 273,
+    "algorithm": 2,
 }
 
 
@@ -112,7 +112,6 @@ def _collect_targets(paths: list[str], mode: str) -> list[Path]:
     targets: list[Path] = []
     cwd = Path(".").resolve()
     if mode == "compress":
-        # No args → recursive file scan in cwd
         if not paths:
             for p in Path(".").rglob("*"):
                 if p.is_file() and not p.name.endswith(".7z"):
@@ -124,7 +123,7 @@ def _collect_targets(paths: list[str], mode: str) -> list[Path]:
                     print(f"Warning: {p} does not exist, skipping")
                     continue
                 p_resolved = p.resolve()
-                # Safety: refuse to compress cwd as a single archive
+
                 if p_resolved == cwd and p.is_dir():
                     print(
                         "Warning: processing contents of '.' recursively instead of compressing it as a single archive"
@@ -134,7 +133,7 @@ def _collect_targets(paths: list[str], mode: str) -> list[Path]:
                             targets.append(child.resolve())
                 else:
                     targets.append(p_resolved)
-    else:  # decompress
+    else:
         if not paths:
             for p in Path(".").rglob("*"):
                 if p.is_file() and p.name.endswith(".7z"):
@@ -151,7 +150,7 @@ def _collect_targets(paths: list[str], mode: str) -> list[Path]:
                     for child in p.rglob("*"):
                         if child.is_file() and child.name.endswith(".7z"):
                             targets.append(child.resolve())
-    # Deduplicate while preserving order
+
     seen: set[Path] = set()
     out: list[Path] = []
     for t in targets:
@@ -196,14 +195,14 @@ def main() -> None:
         print(f"No items found to {mode}")
         return
     print(f"{mode.capitalize()}ing {len(targets)} item(s)...")
-    # Calculate total original size before processing
+
     total_original = sum(gsz(t) for t in targets)
     worker = _decompress if mode == "decompress" else _compress
     with ProcessPoolExecutor(max_workers=args.workers) as executor:
         futures = {executor.submit(worker, t, args.keep): t for t in targets}
         for future in as_completed(futures):
             print(future.result())
-    # Calculate total compressed/decompressed size after processing
+
     if mode == "compress":
         total_compressed = 0
         for t in targets:

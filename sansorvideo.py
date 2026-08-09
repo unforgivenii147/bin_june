@@ -7,19 +7,22 @@ Usage:
     python video_filter.py <input_video> [-a] [--threshold 0.5] [--resume]
 """
 
-import sys
-import os
+from __future__ import annotations
+
 import argparse
-import signal
 import json
+import os
 import pickle
+import signal
+import sys
+from collections import deque
+from datetime import datetime
 from pathlib import Path
+
 import cv2
 import numpy as np
-from datetime import datetime
-from collections import deque
 
-# Try importing optional dependencies
+
 try:
     from ultralytics import YOLO
 
@@ -36,7 +39,7 @@ try:
 except ImportError:
     TF_AVAILABLE = False
 
-# Global flag for interrupt handling
+
 interrupted = False
 checkpoint_data = None
 
@@ -61,17 +64,14 @@ class ContentFilter:
         """Initialize detection models"""
         if YOLO_AVAILABLE:
             try:
-                # Load YOLO model for person/body part detection
                 self.model = YOLO("yolov8n.pt")
                 print("✓ YOLO model loaded")
             except Exception as e:
                 print(f"⚠️  Could not load YOLO: {e}")
                 self.model = None
 
-        # Try to load NSFW detection model
         if self.use_nsfw_model:
             try:
-                # Using a simple CNN-based approach
                 self._init_nsfw_detector()
             except Exception as e:
                 print(f"⚠️  Could not initialize NSFW detector: {e}")
@@ -79,7 +79,7 @@ class ContentFilter:
 
     def _init_nsfw_detector(self):
         """Initialize simple NSFW detection using OpenCV"""
-        # Simple skin color detection parameters
+
         self.skin_lower = np.array([0, 48, 80], dtype=np.uint8)
         self.skin_upper = np.array([20, 255, 255], dtype=np.uint8)
 
@@ -91,20 +91,16 @@ class ContentFilter:
         """
         scores = []
 
-        # Method 1: YOLO-based body part detection
         if self.model is not None:
             yolo_score = self._yolo_detection(frame)
             scores.append(yolo_score)
 
-        # Method 2: Skin color ratio detection
         skin_score = self._skin_detection(frame)
         scores.append(skin_score)
 
-        # Method 3: Texture/edge analysis for suggestive content
         texture_score = self._texture_analysis(frame)
         scores.append(texture_score)
 
-        # Combine scores
         if scores:
             final_score = np.mean(scores)
             return final_score > self.threshold, final_score
@@ -121,14 +117,13 @@ class ContentFilter:
                 if boxes is not None:
                     for box in boxes:
                         cls = int(box.cls[0])
-                        # Check for persons and specific body-related classes
-                        if cls == 0:  # person class
+
+                        if cls == 0:
                             confidence = float(box.conf[0])
-                            # High confidence person detection might indicate nudity
+
                             if confidence > 0.7:
                                 inappropriate_count += 1
 
-            # Normalize score
             frame_area = frame.shape[0] * frame.shape[1]
             score = min(inappropriate_count / 10, 1.0)
             return score
@@ -138,24 +133,19 @@ class ContentFilter:
     def _skin_detection(self, frame):
         """Detect skin color ratio in frame"""
         try:
-            # Convert to HSV for better skin detection
             hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-            # Create skin mask
             skin_mask = cv2.inRange(hsv, self.skin_lower, self.skin_upper)
 
-            # Apply morphological operations to clean mask
             kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
             skin_mask = cv2.morphologyEx(skin_mask, cv2.MORPH_OPEN, kernel)
             skin_mask = cv2.morphologyEx(skin_mask, cv2.MORPH_CLOSE, kernel)
 
-            # Calculate skin ratio
             total_pixels = skin_mask.shape[0] * skin_mask.shape[1]
             skin_pixels = cv2.countNonZero(skin_mask)
             skin_ratio = skin_pixels / total_pixels
 
-            # High skin ratio might indicate nudity
-            score = min(skin_ratio * 3, 1.0)  # Adjust multiplier as needed
+            score = min(skin_ratio * 3, 1.0)
             return score
         except Exception as e:
             return 0.0
@@ -165,13 +155,10 @@ class ContentFilter:
         try:
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-            # Edge detection
             edges = cv2.Canny(gray, 50, 150)
 
-            # Calculate edge density
             edge_density = np.mean(edges) / 255
 
-            # Low edge density combined with other factors might indicate skin
             score = max(0, 1 - edge_density * 2)
             return score
         except:
@@ -186,7 +173,6 @@ class VideoProcessor:
         self.threshold = threshold
         self.filter = ContentFilter(threshold=threshold)
 
-        # Processing state
         self.cap = None
         self.writer_clean = None
         self.writer_flagged = None
@@ -197,7 +183,6 @@ class VideoProcessor:
         self.frame_width = 0
         self.frame_height = 0
 
-        # Checkpoint file
         self.checkpoint_file = f"{Path(input_path).stem}_checkpoint.json"
 
     def save_checkpoint(self, frame_number):
@@ -239,7 +224,6 @@ class VideoProcessor:
         if not self.cap.isOpened():
             raise ValueError(f"Cannot open video: {self.input_path}")
 
-        # Get video properties
         self.fps = int(self.cap.get(cv2.CAP_PROP_FPS))
         self.frame_width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.frame_height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -254,11 +238,9 @@ class VideoProcessor:
         """Initialize video writers"""
         fourcc = cv2.VideoWriter_fourcc(*"mp4v")
 
-        # For clean output
         mode = "a" if append else "w"
         self.writer_clean = cv2.VideoWriter(self.output_clean, fourcc, self.fps, (self.frame_width, self.frame_height))
 
-        # For flagged frames
         self.writer_flagged = cv2.VideoWriter(
             self.output_flagged, fourcc, self.fps, (self.frame_width, self.frame_height)
         )
@@ -274,16 +256,13 @@ class VideoProcessor:
                 start_frame = checkpoint["processed_frames"]
                 self.flagged_frames = checkpoint.get("flagged_frames", 0)
 
-        # Initialize video capture
         self.initialize_video()
         self.initialize_writers(append=(start_frame > 0))
 
-        # Seek to checkpoint position if resuming
         if start_frame > 0:
             self.cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
             print(f"⏩ Resuming from frame {start_frame}")
 
-        # Signal handler for graceful shutdown
         signal.signal(signal.SIGINT, signal_handler)
 
         print(f"\n🎬 Processing video...")
@@ -292,8 +271,7 @@ class VideoProcessor:
         print(f"   Threshold: {self.threshold}")
         print("\n⏸️  Press Ctrl+C to pause and save progress\n")
 
-        # Process frames
-        frame_buffer = deque(maxlen=5)  # Buffer for context-aware processing
+        frame_buffer = deque(maxlen=5)
         frame_number = start_frame
 
         try:
@@ -307,30 +285,21 @@ class VideoProcessor:
                     self.save_checkpoint(frame_number)
                     break
 
-                # Add frame to buffer
                 frame_buffer.append(frame)
 
-                # Detect inappropriate content
                 is_inappropriate, confidence = self.filter.detect_inappropriate_content(frame)
 
                 if is_inappropriate:
-                    # Frame contains +16 content, skip it from clean output
                     self.writer_flagged.write(frame)
                     self.flagged_frames += 1
 
-                    # Optional: Apply blur to frame before writing to clean
-                    # This is an alternative to completely removing the frame
-                    # blurred = cv2.GaussianBlur(frame, (99, 99), 30)
-                    # self.writer_clean.write(blurred)
                 else:
-                    # Frame is clean
                     self.writer_clean.write(frame)
 
                 self.processed_frames += 1
                 frame_number += 1
 
-                # Progress update
-                if frame_number % 30 == 0:  # Update every 30 frames
+                if frame_number % 30 == 0:
                     progress = (frame_number / self.total_frames) * 100
                     flagged_pct = (self.flagged_frames / frame_number) * 100 if frame_number > 0 else 0
 
@@ -341,8 +310,7 @@ class VideoProcessor:
                         end="",
                     )
 
-                    # Auto-save checkpoint periodically
-                    if frame_number % 300 == 0:  # Every 300 frames
+                    if frame_number % 300 == 0:
                         self.save_checkpoint(frame_number)
 
         except Exception as e:
@@ -354,11 +322,9 @@ class VideoProcessor:
             self.cleanup()
 
             if not interrupted:
-                # Remove checkpoint on successful completion
                 if os.path.exists(self.checkpoint_file):
                     os.remove(self.checkpoint_file)
 
-        # Final summary
         print(f"\n\n✅ Processing complete!")
         print(f"   Total frames processed: {self.processed_frames}")
         print(
@@ -388,13 +354,13 @@ def main():
 Examples:
   # Basic usage
   python video_filter.py input.mp4
-  
+
   # Save flagged frames to separate video
   python video_filter.py input.mp4 -a
-  
+
   # Resume from checkpoint
   python video_filter.py input.mp4 -a --resume
-  
+
   # Adjust detection threshold (0.0-1.0)
   python video_filter.py input.mp4 -a --threshold 0.7
         """,
@@ -413,18 +379,15 @@ Examples:
 
     args = parser.parse_args()
 
-    # Check if input file exists
     if not os.path.exists(args.input):
         print(f"❌ Error: Input file not found: {args.input}")
         sys.exit(1)
 
-    # Validate threshold
     if not 0 <= args.threshold <= 1:
         print("❌ Error: Threshold must be between 0.0 and 1.0")
         sys.exit(1)
 
     try:
-        # Initialize processor
         processor = VideoProcessor(
             input_path=args.input,
             output_clean=args.output_clean,
@@ -432,7 +395,6 @@ Examples:
             threshold=args.threshold,
         )
 
-        # Process video
         processor.process_video(resume=args.resume)
 
     except KeyboardInterrupt:

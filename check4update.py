@@ -4,6 +4,8 @@ Check installed packages for available updates using parallel processing.
 Saves upgradable packages to upgradable.txt
 """
 
+from __future__ import annotations
+
 import json
 import subprocess
 import sys
@@ -23,7 +25,6 @@ def get_installed_packages(site_dir: Path) -> List[Dict[str, str]]:
     """
     packages = []
     try:
-        # Use pip to list installed packages in the specified site directory
         result = subprocess.run(
             [sys.executable, "-m", "pip", "list", "--format=json", "--path", str(site_dir)],
             capture_output=True,
@@ -49,19 +50,17 @@ def check_package_update(package_info: Dict[str, str]) -> Tuple[str, str, str, b
     package_name = package_info["name"]
     current_version = package_info["version"]
     try:
-        # Check for available updates using pip
         result = subprocess.run(
             [sys.executable, "-m", "pip", "install", "--dry-run", "--quiet", f"{package_name}==latest"],
             capture_output=True,
             text=True,
             timeout=30,
         )
-        # Try to get latest version using pip index
+
         result = subprocess.run(
             [sys.executable, "-m", "pip", "index", "versions", package_name], capture_output=True, text=True, timeout=30
         )
         if result.returncode == 0:
-            # Parse the output to get latest version
             lines = result.stdout.strip().split("\n")
             for line in lines:
                 if "Available versions:" in line:
@@ -69,7 +68,7 @@ def check_package_update(package_info: Dict[str, str]) -> Tuple[str, str, str, b
                     versions = [v.strip() for v in versions_str.split(",")]
                     if versions:
                         latest_version = versions[0]
-                        # Compare versions (simple string comparison might not work for all version formats)
+
                         if current_version != latest_version:
                             return (package_name, current_version, latest_version, True)
                         break
@@ -92,9 +91,8 @@ def check_updates_parallel(packages: List[Dict[str, str]], max_workers: int = 8)
     upgradable = []
     print(f"Checking {len(packages)} packages for updates using {max_workers} workers...")
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        # Submit all tasks
         future_to_package = {executor.submit(check_package_update, pkg): pkg["name"] for pkg in packages}
-        # Process completed tasks
+
         completed = 0
         for future in as_completed(future_to_package):
             package_name = future_to_package[future]
@@ -139,7 +137,7 @@ def find_site_packages() -> List[Path]:
         List of Path objects to site-packages directories
     """
     site_dirs = []
-    # Get site-packages directories using Python's site module
+
     result = subprocess.run(
         [sys.executable, "-c", 'import site; print("\\n".join(site.getsitepackages()))'],
         capture_output=True,
@@ -150,7 +148,7 @@ def find_site_packages() -> List[Path]:
         path = Path(line.strip())
         if path.exists():
             site_dirs.append(path)
-    # Also check user site-packages
+
     result = subprocess.run(
         [sys.executable, "-c", "import site; print(site.getusersitepackages())"],
         capture_output=True,
@@ -167,7 +165,7 @@ def main():
     """Main function to orchestrate the update checking process."""
     print("Python Package Update Checker")
     print("=" * 50)
-    # Find site-packages directories
+
     site_dirs = find_site_packages()
     if not site_dirs:
         print("No site-packages directories found!")
@@ -175,7 +173,7 @@ def main():
     print(f"Found {len(site_dirs)} site-packages directories:")
     for site_dir in site_dirs:
         print(f"  - {site_dir}")
-    # Collect packages from all site directories
+
     all_packages = []
     for site_dir in site_dirs:
         print(f"\nScanning {site_dir}...")
@@ -185,7 +183,7 @@ def main():
     if not all_packages:
         print("No packages found!")
         sys.exit(1)
-    # Remove duplicates (packages might appear in multiple site directories)
+
     seen = set()
     unique_packages = []
     for pkg in all_packages:
@@ -193,12 +191,12 @@ def main():
             seen.add(pkg["name"])
             unique_packages.append(pkg)
     print(f"\nTotal unique packages to check: {len(unique_packages)}")
-    # Check for updates in parallel
+
     upgradable = check_updates_parallel(unique_packages, max_workers=20)
-    # Save results
+
     output_file = Path.cwd() / "upgradable.txt"
     save_upgradable_packages(upgradable, output_file)
-    # Print summary
+
     print("\n" + "=" * 50)
     print("Summary:")
     print(f"  Total packages checked: {len(unique_packages)}")

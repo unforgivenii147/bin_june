@@ -36,18 +36,18 @@ def merge_json_files(input_files, output_file):
         except json.JSONDecodeError:
             print(f"Error: File '{file_path}' contains invalid JSON.")
             sys.exit(1)
-        # Initialize merged_data with the first file's content
+
         if merged_data is None:
             merged_data = data
             continue
-        # Ensure all files have the same top-level structure (List or Dict)
+
         if type(merged_data) != type(data):
             print(
                 f"Error: Type mismatch. '{input_files[0]}' is a {type(merged_data).__name__}, "
                 f"but '{file_path}' is a {type(data).__name__}. Cannot merge."
             )
             sys.exit(1)
-        # Perform the merge based on data type
+
         if isinstance(merged_data, list):
             merged_data.extend(data)
         elif isinstance(merged_data, dict):
@@ -55,7 +55,7 @@ def merge_json_files(input_files, output_file):
         else:
             print(f"Error: Unsupported top-level JSON type: {type(data).__name__}")
             sys.exit(1)
-    # Write the merged data to the output file
+
     try:
         with open(output_file, "w", encoding="utf-8") as f:
             json.dump(merged_data, f, indent=4, ensure_ascii=False)
@@ -66,7 +66,6 @@ def merge_json_files(input_files, output_file):
 
 
 if __name__ == "__main__":
-    # Set up command line argument parsing
     parser = argparse.ArgumentParser(description="Merge two or more JSON files into one.")
     parser.add_argument("inputs", nargs="+", help="Paths to the input JSON files (minimum 2)")
     parser.add_argument("-o", "--output", required=True, help="Path for the merged output JSON file")

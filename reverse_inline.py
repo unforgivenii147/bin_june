@@ -1,6 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Reverse inline functions by extracting them back to dh package imports."""
 
+from __future__ import annotations
+
 import argparse
 import ast
 import hashlib
@@ -17,11 +19,10 @@ def get_function_source_hash(source: str, func_name: str) -> str | None:
         return None
     for node in ast.walk(tree):
         if isinstance(node, ast.FunctionDef) and node.name == func_name:
-            # Extract the function source text
             lines = source.split("\n")
             func_lines = lines[node.lineno - 1 : node.end_lineno]
             func_source = "\n".join(func_lines)
-            # Create a hash of the function source
+
             return hashlib.sha256(func_source.encode()).hexdigest()
     return None
 
@@ -42,7 +43,6 @@ def extract_functions_from_module(module_path: Path) -> dict[str, tuple[str, str
     module_name = module_path.stem
     for node in ast.walk(tree):
         if isinstance(node, ast.FunctionDef):
-            # Get hash of the function source
             func_hash = get_function_source_hash(source, node.name)
             if func_hash:
                 functions[node.name] = (module_name, func_hash)
@@ -73,9 +73,8 @@ def find_matching_inlined_functions(source: str, dh_func_map: dict[str, tuple[st
     matches = []
     for node in ast.walk(tree):
         if isinstance(node, ast.FunctionDef) and node.name in dh_func_map:
-            # Check if the function source hash matches
             func_hash = get_function_source_hash(source, node.name)
-            dh_module_name, dh_hash = dh_func_map[node.name]
+            _dh_module_name, dh_hash = dh_func_map[node.name]
             if func_hash and func_hash == dh_hash:
                 matches.append((node.name, node.lineno - 1, node.end_lineno))
     return matches
@@ -86,8 +85,7 @@ def has_import(source: str, func_name: str) -> bool:
     return (
         f"from dh.{func_name} import" in source
         or f"from dh import {func_name}" in source
-        or f"from dh import" in source
-        and f"{func_name}" in source
+        or (f"from dh import" in source and f"{func_name}" in source)
     )
 
 

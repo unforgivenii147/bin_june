@@ -9,6 +9,8 @@ Make HTML files standalone by inlining referenced CSS and JS files.
 - Uses pathlib and parallel (threaded) processing.
 """
 
+from __future__ import annotations
+
 import argparse
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -34,7 +36,7 @@ def fetch_remote(url: str):
     try:
         resp = requests.get(url, timeout=30)
         resp.raise_for_status()
-        # requests auto-decodes based on headers; fall back to apparent encoding
+
         if resp.encoding is None or resp.encoding.lower() == "iso-8859-1":
             resp.encoding = resp.apparent_encoding
         return resp.text
@@ -45,12 +47,11 @@ def fetch_remote(url: str):
 def fetch_local(ref: str, base_dir: Path):
     """Read a local file referenced from an HTML file. Returns text or None."""
     try:
-        # Strip query string / fragment that some build tools append
         ref = ref.split("?", 1)[0].split("#", 1)[0]
         if not ref:
             return None
         candidate = (base_dir / ref).resolve()
-        # Stay reasonably safe: only read files, skip anything weird
+
         if candidate.is_file():
             return candidate.read_text(encoding="utf-8", errors="ignore")
     except Exception:
@@ -77,7 +78,7 @@ def process_html_file(html_path: Path):
         return html_path, f"parse error: {e}"
     base_dir = html_path.parent
     modified = False
-    # --- Inline <link rel="stylesheet" href="..."> ---
+
     for link in soup.find_all("link", rel="stylesheet"):
         href = link.get("href")
         if not href:
@@ -87,14 +88,14 @@ def process_html_file(html_path: Path):
             continue
         style = soup.new_tag("style")
         style.string = css
-        # Preserve non-href attributes (e.g., media) on the new style tag
+
         for key, val in link.attrs.items():
             if key in ("href", "rel"):
                 continue
             style[key] = val
         link.replace_with(style)
         modified = True
-    # --- Inline <script src="..."></script> ---
+
     for script in soup.find_all("script", src=True):
         src = script.get("src")
         if not src:

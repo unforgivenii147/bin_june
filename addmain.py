@@ -29,9 +29,7 @@ def has_main_guard(tree: ast.AST) -> bool:
 def is_docstring_expr(node: ast.AST) -> bool:
     if not isinstance(node, ast.Expr):
         return False
-    if isinstance(node.value, ast.Constant) and isinstance(node.value.value, str):
-        return True
-    return False
+    return bool(isinstance(node.value, ast.Constant) and isinstance(node.value.value, str))
 
 
 def should_wrap_node(node: ast.stmt) -> bool:
@@ -43,14 +41,12 @@ def should_wrap_node(node: ast.stmt) -> bool:
         return False
     if isinstance(node, ast.If):
         test = node.test
-        if isinstance(test, ast.Compare):
-            if len(test.ops) == 1 and isinstance(test.ops[0], ast.Eq):
-                left = test.left
-                if isinstance(left, ast.Name) and left.id == "__name__":
-                    if len(test.comparators) == 1:
-                        comp = test.comparators[0]
-                        if isinstance(comp, ast.Constant) and comp.value == "__main__":
-                            return False
+        if isinstance(test, ast.Compare) and len(test.ops) == 1 and isinstance(test.ops[0], ast.Eq):
+            left = test.left
+            if isinstance(left, ast.Name) and left.id == "__name__" and len(test.comparators) == 1:
+                comp = test.comparators[0]
+                if isinstance(comp, ast.Constant) and comp.value == "__main__":
+                    return False
     return True
 
 

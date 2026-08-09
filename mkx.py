@@ -64,11 +64,10 @@ def process_directory(cwd: Path) -> None:
         if not path.suffix or is_binary(path):
             if path.name == "control" or "share" in path.parts:
                 continue
-            if not is_exec(path):
-                if is_binary(path) or has_shebang(path):
-                    make_exec(path)
-                    print(f"[+] Made executable: {path.relative_to(cwd)}")
-                    continue
+            if not is_exec(path) and (is_binary(path) or has_shebang(path)):
+                make_exec(path)
+                print(f"[+] Made executable: {path.relative_to(cwd)}")
+                continue
         if has_shebang(path):
             if not is_exec(path):
                 make_exec(path)

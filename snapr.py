@@ -4,6 +4,8 @@ Snappy Compression/Decompression Tool
 Recursively compresses/decompresses files using Snappy algorithm via cramjam
 """
 
+from __future__ import annotations
+
 import argparse
 import logging
 import multiprocessing
@@ -19,10 +21,10 @@ try:
 except ImportError:
     print("Error: cramjam library required. Install with: pip install cramjam")
     sys.exit(1)
-# Setup logging
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
-# File extensions
+
 COMPRESSED_EXT = ".snappy"
 
 
@@ -37,15 +39,15 @@ def compress_file(file_path: Path, remove_original: bool = True) -> Tuple[bool, 
     """
     try:
         compressed_path = file_path.with_suffix(file_path.suffix + COMPRESSED_EXT)
-        # Read original file
+
         with open(file_path, "rb") as f:
             data = f.read()
-        # Compress using cramjam (snappy)
+
         compressed_data = cramjam.snappy.compress(data)
-        # Write compressed file
+
         with open(compressed_path, "wb") as f:
             f.write(compressed_data)
-        # Remove original if requested
+
         if remove_original:
             file_path.unlink()
         original_size = len(data)
@@ -56,7 +58,7 @@ def compress_file(file_path: Path, remove_original: bool = True) -> Tuple[bool, 
         )
         return True, f"Compressed {file_path.name}"
     except Exception as e:
-        logger.error(f"Error compressing {file_path}: {str(e)}")
+        logger.error(f"Error compressing {file_path}: {e!s}")
         return False, str(e)
 
 
@@ -70,21 +72,20 @@ def decompress_file(file_path: Path, remove_original: bool = True) -> Tuple[bool
         Tuple of (success, message)
     """
     try:
-        # Check if file has .snappy extension
         if not file_path.suffix == COMPRESSED_EXT:
             return False, f"File {file_path} doesn't have {COMPRESSED_EXT} extension"
-        # Determine output path (remove .snappy extension)
+
         original_suffix = file_path.suffixes[-2] if len(file_path.suffixes) > 1 else ""
         output_path = file_path.with_suffix("")
-        # Read compressed file
+
         with open(file_path, "rb") as f:
             compressed_data = f.read()
-        # Decompress using cramjam
+
         decompressed_data = cramjam.snappy.decompress(compressed_data)
-        # Write decompressed file
+
         with open(output_path, "wb") as f:
             f.write(decompressed_data)
-        # Remove original if requested
+
         if remove_original:
             file_path.unlink()
         logger.info(
@@ -92,7 +93,7 @@ def decompress_file(file_path: Path, remove_original: bool = True) -> Tuple[bool
         )
         return True, f"Decompressed {file_path.name}"
     except Exception as e:
-        logger.error(f"Error decompressing {file_path}: {str(e)}")
+        logger.error(f"Error decompressing {file_path}: {e!s}")
         return False, str(e)
 
 
@@ -121,8 +122,7 @@ def find_files(directory: Path, operation: str, recursive: bool = True) -> List[
     """
     files = []
     if operation == "compress":
-        # Compress: find all files except those with .snappy extension
-        for ext in ["*"]:  # All files
+        for _ext in ["*"]:
             if recursive:
                 pattern = "**/*"
             else:
@@ -130,8 +130,7 @@ def find_files(directory: Path, operation: str, recursive: bool = True) -> List[
             for file_path in directory.glob(pattern):
                 if file_path.is_file() and not file_path.suffix == COMPRESSED_EXT:
                     files.append(file_path)
-    else:  # decompress
-        # Decompress: find all .snappy files
+    else:
         if recursive:
             pattern = f"**/*{COMPRESSED_EXT}"
         else:
@@ -162,7 +161,7 @@ def create_tar_archive(directory: Path, remove_original: bool = True) -> Optiona
         logger.info(f"Created tar archive: {tar_path}")
         return tar_path
     except Exception as e:
-        logger.error(f"Error creating tar archive for {directory}: {str(e)}")
+        logger.error(f"Error creating tar archive for {directory}: {e!s}")
         return None
 
 
@@ -205,12 +204,11 @@ def process_files(
     logger.info(f"Processing {len(file_paths)} files with {max_workers} workers")
     success_count = 0
     failure_count = 0
-    # Prepare arguments for workers
+
     args_list = [(fp, operation, remove_original) for fp in file_paths]
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        # Submit all tasks
         future_to_file = {executor.submit(process_file_worker, args): args[0] for args in args_list}
-        # Process results as they complete
+
         for future in as_completed(future_to_file):
             file_path = future_to_file[future]
             try:
@@ -222,7 +220,7 @@ def process_files(
                     logger.error(f"Failed to process {file_path}: {message}")
             except Exception as e:
                 failure_count += 1
-                logger.error(f"Error processing {file_path}: {str(e)}")
+                logger.error(f"Error processing {file_path}: {e!s}")
     return success_count, failure_count
 
 
@@ -252,10 +250,10 @@ Examples:
     parser.add_argument("--workers", type=int, default=None, help="Number of worker processes (default: CPU count)")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose logging")
     args = parser.parse_args()
-    # Setup logging level
+
     if args.verbose:
         logger.setLevel(logging.DEBUG)
-    # Validate directory
+
     base_dir = Path(args.directory)
     if not base_dir.exists() or not base_dir.is_dir():
         logger.error(f"Directory not found: {base_dir}")
@@ -265,23 +263,20 @@ Examples:
     recursive = not args.no_recursive
     logger.info(f"Starting {operation} operation on {base_dir}")
     logger.info(f"Remove original: {remove_original}, Recursive: {recursive}")
-    # Handle tar option for compression
+
     if args.tar and args.compress:
         logger.info("Tarring subdirectories...")
         tar_files = tar_subdirectories(base_dir, remove_original)
         logger.info(f"Created {len(tar_files)} tar archives")
-        # Update base_dir to process tar files
-        # The tar files are created in the same directory as the subdirectories
-        # We'll continue with the base_dir for processing
-    # Find files to process
+
     files_to_process = find_files(base_dir, operation, recursive)
     if not files_to_process:
         logger.warning(f"No files found to {operation}")
         sys.exit(0)
     logger.info(f"Found {len(files_to_process)} files to {operation}")
-    # Process files
+
     success_count, failure_count = process_files(files_to_process, operation, remove_original, args.workers)
-    # Summary
+
     logger.info(f"Completed {operation} operation")
     logger.info(f"Success: {success_count}, Failed: {failure_count}")
     if failure_count > 0:

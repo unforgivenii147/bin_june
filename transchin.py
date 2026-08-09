@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+from __future__ import annotations
+
 import logging
 import re
 import time
@@ -50,7 +52,7 @@ def main() -> None:
     if not all_lines:
         logger.info("No lines found in %s", input_path.name)
         return
-    # Separate Chinese and non-Chinese lines
+
     chinese_lines = [line for line in all_lines if contains_chinese(line)]
     non_chinese_lines = [line for line in all_lines if not contains_chinese(line)]
     logger.info(

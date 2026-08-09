@@ -1,6 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Extract subtitles using ffmpeg-python."""
 
+from __future__ import annotations
+
 import sys
 from pathlib import Path
 
@@ -10,20 +12,18 @@ import ffmpeg
 def extract_subtitles(input_file):
     """Extract all subtitle streams from video file."""
     try:
-        # Probe the video file
         probe = ffmpeg.probe(input_file)
-        # Find all subtitle streams
+
         subtitle_streams = [stream for stream in probe["streams"] if stream["codec_type"] == "subtitle"]
         if not subtitle_streams:
             print("No subtitle streams found.")
             return
         basename = Path(input_file).stem
         for i, stream in enumerate(subtitle_streams):
-            # Get language tag
             lang = stream.get("tags", {}).get("language", "und")
             output_file = f"{basename}.sub{i}.{lang}.srt"
             print(f"Extracting subtitle stream {i} -> {output_file}")
-            # Extract using ffmpeg-python's fluent interface
+
             (ffmpeg.input(input_file).output(output_file, map=f"0:s:{i}").overwrite_output().run(quiet=True))
         print("Done.")
     except ffmpeg.Error as e:

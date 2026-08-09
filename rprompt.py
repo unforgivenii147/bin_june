@@ -8,7 +8,6 @@ import tokenize
 from os import scandir as os_scandir
 from pathlib import Path
 
-
 CHUNK_SIZE = 1024 * 1024
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 from dh import mpf3

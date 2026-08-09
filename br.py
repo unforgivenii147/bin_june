@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+from __future__ import annotations
+
 import argparse
 import io
 import tarfile
@@ -21,7 +23,7 @@ def decompress_stream(input_path: Path, output_path: Path) -> bool:
                     chunk = f_in.read(CHUNK_SIZE)
                     if not chunk:
                         break
-                    # Decompressor does NOT need .finish()
+
                     f_out.write(decompressor.process(chunk))
         print(f"✅ Decompressed: {output_path.name}")
         return True
@@ -80,8 +82,7 @@ def process_file(file_path: Path):
 def decompress_file(br_path: Path):
     """Decompress .br or .tar.br file."""
     if br_path.name.endswith(".tar.br"):
-        # .tar.br → directory
-        output_dir = br_path.with_name(br_path.name[:-7])  # remove .tar.br
+        output_dir = br_path.with_name(br_path.name[:-7])
         tar_buffer = io.BytesIO()
         try:
             if decompress_stream(br_path, tar_buffer):
@@ -93,7 +94,6 @@ def decompress_file(br_path: Path):
         except Exception as e:
             print(f"❌ Failed to decompress tar archive {br_path.name}: {e}")
     elif br_path.suffix == ".br":
-        # Regular .br → original file
         output_file = br_path.with_suffix("")
         if decompress_stream(br_path, output_file):
             br_path.unlink()
@@ -124,7 +124,7 @@ def main():
                 executor.submit(process_directory, d)
             for f in files:
                 executor.submit(process_file, f)
-    else:  # decompress
+    else:
         archives = [f for f in current_dir.iterdir() if f.is_file() and f.suffix == ".br"]
         if not archives:
             print("No .br or .tar.br files found to decompress.")

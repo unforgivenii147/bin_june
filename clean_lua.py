@@ -107,7 +107,7 @@ def process_file(path: Path, base: Path) -> dict:
             "after": len(result),
             "error": None,
         }
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         try:
             rel = path.relative_to(base)
         except ValueError:
@@ -136,12 +136,10 @@ def collect_files(paths: list[Path]) -> list[tuple[Path, Path]]:
 
         if item.is_file():
             if item.suffix == ".lua":
-                # For individual files, use their parent directory as base
                 files.append((item, item.parent))
             else:
                 print(f"warning: {item} is not a .lua file, skipping", file=sys.stderr)
         elif item.is_dir():
-            # Recursively find all .lua files in directory
             base = item
             files.extend((p, base) for p in sorted(base.rglob("*.lua")))
         else:

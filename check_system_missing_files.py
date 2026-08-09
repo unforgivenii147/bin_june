@@ -1,12 +1,14 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Find missing files for installed Termux packages."""
 
-import os
-import sys
+from __future__ import annotations
+
 import json
-from pathlib import Path
-from concurrent.futures import ProcessPoolExecutor, as_completed
+import os
 import subprocess
+import sys
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
 
 
 def get_prefix():

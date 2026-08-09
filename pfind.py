@@ -1,6 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Search for filenames recursively with archive support and parallel processing."""
 
+from __future__ import annotations
+
 import sys
 import tarfile
 import tempfile

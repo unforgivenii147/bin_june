@@ -154,8 +154,7 @@ def process_file(path: Path):
     if match is None:
         return
     start, end = match
-    # trim a single blank line immediately before/after the block, if present,
-    # so we don't leave double blank lines behind
+
     if start > 0 and lines[start - 1].strip() == "":
         start -= 1
     if end < len(lines) and lines[end].strip() == "":

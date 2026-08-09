@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+from __future__ import annotations
+
 import json
 import logging
 import re
@@ -27,13 +29,13 @@ def create_chunks(lines: list[str]) -> list[list[str]]:
     current_chunk = []
     current_size = 0
     for line in lines:
-        line_size = len(line) + 1  # +1 for newline character
-        # If adding this line would exceed the limit, start a new chunk
+        line_size = len(line) + 1
+
         if current_size + line_size > MAX_CHUNK_SIZE and current_chunk:
             chunks.append(current_chunk)
             current_chunk = []
             current_size = 0
-        # If a single line is longer than MAX_CHUNK_SIZE, it gets its own chunk
+
         if line_size > MAX_CHUNK_SIZE:
             if current_chunk:
                 chunks.append(current_chunk)
@@ -43,7 +45,7 @@ def create_chunks(lines: list[str]) -> list[list[str]]:
         else:
             current_chunk.append(line)
             current_size += line_size
-    # Don't forget the last chunk
+
     if current_chunk:
         chunks.append(current_chunk)
     return chunks
@@ -82,7 +84,7 @@ def main() -> None:
     if not all_lines:
         logger.info("No lines found in %s", input_path.name)
         return
-    # Separate persian and non-persian lines
+
     persian_lines = [line for line in all_lines if contains_persian(line)]
     non_persian_lines = [line for line in all_lines if not contains_persian(line)]
     logger.info(
@@ -94,7 +96,7 @@ def main() -> None:
     if not persian_lines:
         logger.info("No persian lines to translate in %s", input_path.name)
         return
-    # Create chunks of persian lines
+
     chunks = create_chunks(persian_lines)
     logger.info(
         "Created %d chunks from %d persian lines (max %d chars per chunk)",
@@ -102,7 +104,7 @@ def main() -> None:
         len(persian_lines),
         MAX_CHUNK_SIZE,
     )
-    # Translate chunks in parallel
+
     results: dict[str, str] = {}
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         future_to_chunk = {executor.submit(translate_chunk, chunk): chunk for chunk in chunks}
@@ -111,9 +113,8 @@ def main() -> None:
             try:
                 original_lines, translated_text = future.result()
                 if translated_text:
-                    # Split the translated text back into lines
                     translated_lines = translated_text.split("\n")
-                    # Map each original line to its translation
+
                     for i, original_line in enumerate(original_lines):
                         if i < len(translated_lines):
                             results[original_line] = translated_lines[i]
@@ -124,7 +125,7 @@ def main() -> None:
                     logger.error("Failed to translate chunk starting with: %s", chunk[0][:50])
             except Exception as e:
                 logger.error("Unexpected error for chunk starting with '%s': %s", chunk[0][:50], e)
-    # Save results as JSON file
+
     output_path = input_path.with_suffix(".json")
     try:
         with output_path.open("w", encoding="utf-8") as f:
@@ -132,7 +133,7 @@ def main() -> None:
         logger.info("Saved %d translations to %s", len(results), output_path.name)
     except Exception as e:
         logger.error("Error saving JSON file: %s", e)
-    # Also update the original text file with translations
+
     try:
         with input_path.open("w", encoding="utf-8") as f:
             for line in all_lines:

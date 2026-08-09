@@ -16,7 +16,7 @@ TEXT_CHARS: bytearray = bytearray(list(range(32, 127)) + list(range(0x80, 0x100)
 
 def get_files(path: Path, ext: Optional[list[str]] = None) -> list[Path]:
     files: list[Path] = []
-    for root, dirs, filenames in path.walk(top_down=False):
+    for root, _dirs, filenames in path.walk(top_down=False):
         for filename in filenames:
             file_path = Path(root) / filename
             if file_path.is_symlink() or not file_path.is_file():

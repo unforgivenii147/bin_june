@@ -3,43 +3,98 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+from concurrent.futures import ProcessPoolExecutor, as_completed
 
-from dh import cprint
+from dh import cprint, read_lines_mmap
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
-def read_lines(path: str | Path, ke: bool = True) -> list[str]:
-    path = Path(path)
-    if path.stat().st_size > 1024 * 1024:
+def count_lines(path: Path) -> int:
+    """Fast line count using binary read."""
+    return path.read_bytes().count(b"\n") + 1
+
+
+def read_lines(path: Path, use_mmap: bool = False, ke: bool = True) -> list[str]:
+    """Read lines with conditional mmap based on line count."""
+    if use_mmap:
         return read_lines_mmap(path, ke)
-    data = Path(path).read_bytes()
+
+    data = path.read_bytes()
     text = data.decode("utf-8", errors="replace")
     lines = text.splitlines(keepends=ke)
-    if not lines[-1].endswith(("\n", "\r\n", "\r")) and data.endswith(b"\n"):
+
+    if lines and not lines[-1].endswith(("\n", "\r\n", "\r")) and data.endswith(b"\n"):
         lines.append("")
     return lines
 
 
-from dh import read_lines_mmap
+def read_file_task(path: Path, use_mmap: bool) -> tuple[Path, list[str]]:
+    """Task for parallel file reading. Returns (path, lines) tuple."""
+    lines = read_lines(path, use_mmap=use_mmap)
+    return path, lines
 
 
-def process_files(path1: Path, path2: Path) -> None:
-    lines1 = read_lines(path1)
-    lines2 = read_lines(path2)
-    only_in_first = [p for p in lines1 if p not in lines2]
-    only_in_second = [p for p in lines2 if p not in lines1]
-    common_lines = [p for p in lines1 if p in lines2]
+def filter_diff_chunk(chunk: list[str], exclude_set: frozenset[str], mode: str) -> list[str]:
+    """Worker task for parallel diff filtering. Mode: 'only_in_first' or 'only_in_second'."""
+    if mode == "only_in_first":
+        return [p for p in chunk if p not in exclude_set]
+    else:
+        return [p for p in chunk if p in exclude_set]
+
+
+def process_files_parallel(path1: Path, path2: Path, num_workers: int = 2) -> None:
+    """Compare files with parallel reading and optional parallel filtering."""
+
+    # Count lines to decide strategy
+    lines1_count = count_lines(path1)
+    lines2_count = count_lines(path2)
+
+    use_mmap1 = lines1_count > 5000
+    use_mmap2 = lines2_count > 5000
+
+    # Parallel file reading
+    with ProcessPoolExecutor(max_workers=num_workers) as executor:
+        future1 = executor.submit(read_file_task, path1, use_mmap1)
+        future2 = executor.submit(read_file_task, path2, use_mmap2)
+
+        _, lines1 = future1.result()
+        _, lines2 = future2.result()
+
+    # Build sets for O(n) lookups
+    set1 = set(lines1)
+    set2 = set(lines2)
+
+    # Parallel filtering only if both files are large (>10k lines)
+    if lines1_count > 10000 and lines2_count > 10000:
+        chunk_size = max(1000, len(lines1) // num_workers)
+        chunks = [lines1[i : i + chunk_size] for i in range(0, len(lines1), chunk_size)]
+
+        with ProcessPoolExecutor(max_workers=num_workers) as executor:
+            futures = [executor.submit(filter_diff_chunk, chunk, frozenset(set2), "only_in_first") for chunk in chunks]
+            only_in_first = []
+            for future in as_completed(futures):
+                only_in_first.extend(future.result())
+    else:
+        only_in_first = [p for p in lines1 if p not in set2]
+
+    # Always serial for smaller diff (usually much faster than reading)
+    only_in_second = [p for p in lines2 if p not in set1]
+    common_count = len(set1 & set2)
+
+    # Output
     if only_in_first:
-        cprint(f"only in {path1.name} :", "cyan")
+        cprint(f"only in {path1.name}:", "cyan")
         for line in only_in_first:
             cprint(f"  - {line}", "green")
+
     if only_in_second:
-        cprint(f"only in {path2.name} :", "cyan")
+        cprint(f"only in {path2.name}:", "cyan")
         for line in only_in_second:
             cprint(f"  - {line}", "yellow")
+
     cprint(
-        f"common lines: {len(common_lines)}\nonly in {path1.name}: {len(only_in_first)}\nonly in {path2.name}: {len(only_in_second)}",
+        f"common lines: {common_count}\nonly in {path1.name}: {len(only_in_first)}\nonly in {path2.name}: {len(only_in_second)}",
         "blue",
     )
 
@@ -47,4 +102,4 @@ def process_files(path1: Path, path2: Path) -> None:
 if __name__ == "__main__":
     f1 = Path(sys.argv[1])
     f2 = Path(sys.argv[2])
-    process_files(f1, f2)
+    process_files_parallel(f1, f2)

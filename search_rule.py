@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+from __future__ import annotations
+
 import sqlite3
 import sys
 
@@ -7,7 +9,7 @@ DB_NAME = "/sdcard/data/ruff.db"
 
 def search_rule(code):
     conn = sqlite3.connect(DB_NAME)
-    conn.row_factory = sqlite3.Row  # Allows accessing columns by name
+    conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM ruff_rules WHERE code = ?", (code.strip().upper(),))
     row = cursor.fetchone()
@@ -15,7 +17,7 @@ def search_rule(code):
     if not row:
         print(f"❌ No rule found matching code: {code}")
         return
-    # Print out values cleanly
+
     print("=" * 42)
     print(f"📜 RULE: {row['name']} ({row['code']})")
     print("=" * 42)
@@ -35,6 +37,5 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         search_rule(sys.argv[1])
     else:
-        # Prompt if running interactively without arguments
         user_code = input("Enter Ruff rule code to look up (e.g., TRY400): ")
         search_rule(user_code)

@@ -19,7 +19,6 @@ from typing import Final
 import zstandard as zstd
 from dh import fsz, gsz
 
-
 DEFAULT_SKIP_DIRS: Final[set[str]] = {
     "zstandard",
     "0",

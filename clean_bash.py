@@ -30,8 +30,7 @@ from pathlib import Path
 import tree_sitter_bash
 from tree_sitter import Language, Node, Parser
 
-# tree-sitter 0.26.0 API: Language wraps the C pointer exposed by the grammar,
-# and Parser takes the Language directly.
+
 BASH_LANGUAGE: Language = Language(tree_sitter_bash.language())
 PARSER: Parser = Parser(BASH_LANGUAGE)
 
@@ -56,7 +55,7 @@ def is_bash_file(path: Path) -> bool:
     """
     if path.suffix.lower() in (".sh", ".bash"):
         return True
-    # Extensionless / unknown-extension file: sniff the shebang.
+
     try:
         with path.open("rb") as fh:
             first_line = fh.readline()
@@ -78,7 +77,7 @@ def find_comment_ranges(source: bytes) -> list[tuple[int, int, bool]]:
     def walk(node: Node) -> None:
         if node.type == "comment":
             start, end = node.start_byte, node.end_byte
-            # Preserve shebang at the very start of the file.
+
             if not (start == 0 and source.startswith(b"#!")):
                 line_start = source.rfind(b"\n", 0, start) + 1
                 prefix = source[line_start:start]

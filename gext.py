@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+from __future__ import annotations
+
 import ast
 import os
 import re
@@ -69,11 +71,10 @@ class EntityExtractor(ast.NodeVisitor):
         self.scope_depth -= 1
 
     def visit_Assign(self, node: ast.Assign):
-        if self.scope_depth == 0:
-            if len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
-                target_name = node.targets[0].id
-                if re.match("^[A-Z_][A-Z0-9_]*$", target_name):
-                    self._extract_and_save(node, "constant", target_name)
+        if self.scope_depth == 0 and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+            target_name = node.targets[0].id
+            if re.match("^[A-Z_][A-Z0-9_]*$", target_name):
+                self._extract_and_save(node, "constant", target_name)
 
     def generic_visit(self, node: ast.AST):
         super().generic_visit(node)

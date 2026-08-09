@@ -151,13 +151,12 @@ def compress_chunked(path: Path, out_path: Path, original_size: int, compressor:
     try:
         if compressor == "zstd":
             cctx = zstd.ZstdCompressor(level=COMPRESSORS["zstd"]["settings"]["level"])
-            with open(path, "rb") as inf, open(out_path, "wb") as outf:
-                with cctx.stream_writer(outf) as writer:
-                    while True:
-                        chunk = inf.read(CHUNK_SIZE)
-                        if not chunk:
-                            break
-                        writer.write(chunk)
+            with open(path, "rb") as inf, open(out_path, "wb") as outf, cctx.stream_writer(outf) as writer:
+                while True:
+                    chunk = inf.read(CHUNK_SIZE)
+                    if not chunk:
+                        break
+                    writer.write(chunk)
         elif compressor == "gzip":
             with (
                 open(path, "rb") as inf,
@@ -238,13 +237,12 @@ def decompress_file(path: Path, compressor: str) -> bool:
         out_path = path.with_suffix("")
         if compressor == "zstd":
             dctx = zstd.ZstdDecompressor()
-            with open(path, "rb") as inf, open(out_path, "wb") as outf:
-                with dctx.stream_reader(inf) as reader:
-                    while True:
-                        chunk = reader.read(CHUNK_SIZE)
-                        if not chunk:
-                            break
-                        outf.write(chunk)
+            with open(path, "rb") as inf, open(out_path, "wb") as outf, dctx.stream_reader(inf) as reader:
+                while True:
+                    chunk = reader.read(CHUNK_SIZE)
+                    if not chunk:
+                        break
+                    outf.write(chunk)
         elif compressor == "gzip":
             with gzip.open(path, "rb") as inf, open(out_path, "wb") as outf:
                 while True:

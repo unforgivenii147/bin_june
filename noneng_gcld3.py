@@ -4,6 +4,8 @@ Find non-English lines in text files recursively using Google's Compact Language
 Uses parallel processing for faster execution.
 """
 
+from __future__ import annotations
+
 import argparse
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import datetime
@@ -12,9 +14,9 @@ from pathlib import Path
 
 import gcld3
 
-# Initialize the detector once (it's thread-safe)
+
 detector = gcld3.NNetLanguageIdentifier(min_num_bytes=0, max_num_bytes=1000)
-# Common text file extensions
+
 TEXT_EXTENSIONS = {
     ".txt",
     ".csv",
@@ -68,9 +70,9 @@ def is_likely_text_file(file_path):
 def detect_language(text):
     """Detect language of a text string using gcld3."""
     if not text.strip():
-        return None, None, True  # Empty line, consider as English
+        return None, None, True
     result = detector.FindLanguage(text=text)
-    if result.language == "und":  # Undetermined
+    if result.language == "und":
         return "und", result.probability, result.is_reliable
     return result.language, result.probability, result.is_reliable
 
@@ -81,14 +83,13 @@ def process_file(file_path):
     Returns: (file_path, list of (line_number, line_text, language, probability))
     """
     non_english_lines = []
-    # Skip binary or very large files (>10MB)
+
     try:
         if file_path.stat().st_size > 10 * 1024 * 1024:
             return file_path, None, "File too large (>10MB)"
     except (OSError, PermissionError) as e:
         return file_path, None, f"Cannot access file: {e}"
     try:
-        # Try multiple encodings
         content = None
         for encoding in ["utf-8", "latin-1", "cp1252"]:
             try:
@@ -103,9 +104,7 @@ def process_file(file_path):
             if not line.strip():
                 continue
             lang, prob, reliable = detect_language(line.strip())
-            # Consider non-English if:
-            # - Language is detected and not English ('en')
-            # - Or language is undetermined with low reliability
+
             if lang and lang != "en" and reliable:
                 non_english_lines.append((line_num, line.strip(), lang, prob))
             elif lang == "und" and not reliable:
@@ -121,9 +120,9 @@ def find_text_files(root_dir=".", extensions=TEXT_EXTENSIONS):
     text_files = []
     for ext in extensions:
         text_files.extend(root_path.rglob(f"*{ext}"))
-    # Remove duplicates (in case of case-insensitive filesystem)
+
     text_files = list(set(text_files))
-    # Filter out binary files and sort
+
     text_files = [f for f in text_files if is_likely_text_file(f)]
     text_files.sort()
     return text_files
@@ -138,24 +137,23 @@ def main():
     )
     parser.add_argument("--extensions", nargs="+", help="Additional file extensions to scan")
     args = parser.parse_args()
-    # Update extensions if provided
+
     extensions = TEXT_EXTENSIONS
     if args.extensions:
         extensions.update(args.extensions)
-    # Find all text files
+
     print(f"Scanning directory: {args.directory}")
     text_files = find_text_files(args.directory, extensions)
     print(f"Found {len(text_files)} text files to process")
-    # Process files in parallel
+
     non_english_results = []
     errors = []
     files_with_findings = 0
     total_non_eng_lines = 0
     print(f"Processing files using {args.workers} workers...")
     with ProcessPoolExecutor(max_workers=args.workers) as executor:
-        # Submit all tasks
         future_to_file = {executor.submit(process_file, file): file for file in text_files}
-        # Process completed tasks with progress indication
+
         completed = 0
         for future in as_completed(future_to_file):
             completed += 1
@@ -168,11 +166,10 @@ def main():
                 files_with_findings += 1
                 total_non_eng_lines += len(results)
                 non_english_results.append((file_path, results))
-    # Generate report
+
     output_path = Path(args.output)
     print(f"\nGenerating report: {output_path}")
     with open(output_path, "w", encoding="utf-8") as f:
-        # Header
         f.write("=" * 80 + "\n")
         f.write("Non-English Lines Detection Report\n")
         f.write(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
@@ -192,14 +189,14 @@ def main():
                     f.write(f"  Content: {line_text}\n\n")
         else:
             f.write("No non-English lines found.\n")
-        # Error summary
+
         if errors:
             f.write(f"\n{'=' * 80}\n")
             f.write(f"Errors encountered: {len(errors)}\n")
             f.write(f"{'=' * 80}\n\n")
             for file_path, error in errors:
                 f.write(f"  {file_path}: {error}\n")
-    # Print summary
+
     print(f"\n{'=' * 80}")
     print(f"Scan complete!")
     print(f"Files scanned: {len(text_files)}")

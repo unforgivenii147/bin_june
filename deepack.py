@@ -76,10 +76,7 @@ def is_pure_python(package_name: str, site_path: Path) -> bool:
             logger.warning(f"Cannot find package directory for {package_name}")
             return True
     extensions = [".so", ".pyd", ".dll", ".dylib"]
-    for ext in extensions:
-        if any(package_dir.rglob(f"*{ext}")):
-            return False
-    return True
+    return all(not any(package_dir.rglob(f"*{ext}")) for ext in extensions)
 
 
 def get_package_path(package_name: str, site_paths: list[Path]) -> Path | None:

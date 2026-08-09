@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+from __future__ import annotations
+
 import ast
 import collections
 import json
@@ -92,10 +94,10 @@ def main():
     if not REPEATED_JSON_PATH.exists():
         print(f"Error: {REPEATED_JSON_PATH.name} not found in the current directory.")
         return
-    # Create mapping of file names to their duplicated components
+
     refactor_map = load_refactoring_maps()
     current_dir = Path(".")
-    # Gather target executable files present in local execution space
+
     local_files = {f.name: f for f in current_dir.glob("*.py")}
     tasks = []
     for filename, objects in refactor_map.items():
@@ -105,7 +107,7 @@ def main():
         print("No matching files found in the current directory to refactor.")
         return
     print(f"🚀 Found {len(tasks)} files to clean structural code from. Starting parallel processing...")
-    # Safe Multi-Threaded IO Processing
+
     with ThreadPoolExecutor() as executor:
         for file_path, objects in tasks:
             executor.submit(refactor_single_file, file_path, objects)

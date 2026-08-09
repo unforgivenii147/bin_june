@@ -45,9 +45,7 @@ def detect_shebang(filepath):
 def should_rename(filepath, target_ext):
     """Check if file needs renaming based on target extension."""
     current_ext = os.path.splitext(filepath)[1].lower()
-    if current_ext == target_ext:
-        return False
-    return True
+    return current_ext != target_ext
 
 
 def rename_file(filepath, target_ext):

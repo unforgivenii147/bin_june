@@ -8,6 +8,8 @@ Usage:
 Each created part will be a valid .tar.zst file that can be independently extracted.
 """
 
+from __future__ import annotations
+
 import os
 import sys
 import tarfile
@@ -29,17 +31,17 @@ def split_tar_zst(input_file, num_parts):
     if num_parts < 1:
         print("Error: N must be at least 1.", file=sys.stderr)
         sys.exit(1)
-    # Get the base name without extension
+
     base_name = Path(input_file).stem
     if base_name.endswith(".tar"):
         base_name = base_name[:-4]
     output_dir = Path(input_file).parent
     print(f"Reading tar.zst file: {input_file}")
-    # Decompress and read the tar file to get all members
+
     dctx = zstd.ZstdDecompressor()
     with open(input_file, "rb") as f:
         tar_data = dctx.stream_reader(f).read()
-    # Extract all members from the tar
+
     import io
 
     tar_buffer = io.BytesIO(tar_data)
@@ -54,10 +56,10 @@ def split_tar_zst(input_file, num_parts):
         print(f"Warning: N ({num_parts}) is greater than number of items ({total_members}).")
         print("Some parts may be empty.")
         num_parts = total_members
-    # Calculate items per part
+
     items_per_part = total_members // num_parts
     remainder = total_members % num_parts
-    # Split and create individual tar.zst files
+
     tar_buffer.seek(0)
     tar = tarfile.open(fileobj=tar_buffer, mode="r|")
     part_num = 1
@@ -65,33 +67,31 @@ def split_tar_zst(input_file, num_parts):
     part_buffer = io.BytesIO()
     part_tar = tarfile.open(fileobj=part_buffer, mode="w|")
     items_for_this_part = items_per_part + (1 if part_num <= remainder else 0)
-    for idx, member in enumerate(tar):
-        # Add member to current part
+    for _idx, member in enumerate(tar):
         if member.isfile():
             f = tar.extractfile(member)
             part_tar.addfile(member, f)
         else:
             part_tar.addfile(member)
         current_part_members += 1
-        # Check if we need to move to the next part
+
         if current_part_members >= items_for_this_part and part_num < num_parts:
-            # Finalize current part
             part_tar.close()
-            # Write the part as compressed tar.zst
+
             part_buffer.seek(0)
             output_file = output_dir / f"{base_name}.part{part_num:02d}.tar.zst"
             print(f"Writing part {part_num}: {output_file}")
             cctx = zstd.ZstdCompressor()
             with open(output_file, "wb") as f:
                 f.write(cctx.compress(part_buffer.read()))
-            # Start a new part
+
             part_num += 1
             current_part_members = 0
             part_buffer = io.BytesIO()
             part_tar = tarfile.open(fileobj=part_buffer, mode="w|")
             items_for_this_part = items_per_part + (1 if part_num <= remainder else 0)
     tar.close()
-    # Write the final part
+
     part_tar.close()
     part_buffer.seek(0)
     output_file = output_dir / f"{base_name}.part{part_num:02d}.tar.zst"

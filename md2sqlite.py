@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+from __future__ import annotations
+
 import re
 import sqlite3
 
@@ -9,7 +11,7 @@ MD_FILE = "ruff.md"
 def create_database():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    # Create the table matching your document schema
+
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS ruff_rules (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,16 +32,15 @@ def create_database():
 def parse_and_insert():
     with open(MD_FILE, "r", encoding="utf-8") as f:
         content = f.read()
-    # Regex splits rules by lines starting with # name (CODE)
-    # Group 1 = Name, Group 2 = Code, Group 3 = Rest of the rule body
+
     rule_blocks = re.findall(r"^#\s+(.*?)\s+\((.*?)\)\s*\n(.*?)(?=\n#\s+|\Z)", content, re.DOTALL | re.MULTILINE)
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     inserted_count = 0
     for name, code, body in rule_blocks:
-        # Helper function to extract content underneath markdown headers safely
+
         def extract_section(header_title):
-            # Matches from ## header_title down to the next ## header or end of string
+
             pattern = rf"##\s+{header_title}\s*\n(.*?)(?=\n##\s+|\Z)"
             match = re.search(pattern, body, re.DOTALL | re.IGNORECASE)
             return match.group(1).strip() if match else None
@@ -53,7 +54,7 @@ def parse_and_insert():
         try:
             cursor.execute(
                 """
-                INSERT OR REPLACE INTO ruff_rules 
+                INSERT OR REPLACE INTO ruff_rules
                 (code, name, what_it_does, why_it_bad, example, fix_safety, options, references_list)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,

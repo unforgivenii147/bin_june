@@ -1,6 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Reverse inlined functions by replacing with dh package imports."""
 
+from __future__ import annotations
+
 import argparse
 import ast
 import hashlib
@@ -10,7 +12,7 @@ from pathlib import Path
 
 def normalize_function_source(node: ast.FunctionDef) -> str:
     """Normalize function source for comparison (removes docstring, comments)."""
-    # Remove docstring
+
     func_copy = ast.FunctionDef(
         name=node.name,
         args=node.args,
@@ -25,9 +27,9 @@ def normalize_function_source(node: ast.FunctionDef) -> str:
         lineno=node.lineno,
         col_offset=node.col_offset,
     )
-    # Unparse and normalize whitespace
+
     source = ast.unparse(func_copy)
-    # Normalize multi-line spacing
+
     lines = [l.strip() for l in source.split("\n") if l.strip()]
     return "\n".join(lines)
 
@@ -87,9 +89,9 @@ def transform_file(
     file_functions = extract_functions(filepath)
     to_import = set()
     debug_info = []
-    for fname, (file_hash, node, file_normalized) in file_functions.items():
+    for fname, (file_hash, node, _file_normalized) in file_functions.items():
         if fname in dh_functions:
-            dh_hash, dh_normalized = dh_functions[fname]
+            dh_hash, _dh_normalized = dh_functions[fname]
             if file_hash == dh_hash:
                 to_import.add(fname)
                 if debug:
@@ -97,7 +99,7 @@ def transform_file(
             else:
                 if debug:
                     debug_info.append(f"  ✗ {fname}: hash mismatch")
-                    if False:  # set to True to see diffs
+                    if False:
                         print(f"    File hash: {file_hash}")
                         print(f"    Dh hash:   {dh_hash}")
         else:
@@ -184,7 +186,7 @@ def main():
     with ProcessPoolExecutor() as executor:
         futures = {executor.submit(transform_file, f, dh_functions, args.apply, args.debug): f for f in target_files}
         for future in as_completed(futures):
-            filepath, updated, message = future.result()
+            _filepath, updated, message = future.result()
             if message:
                 print(message)
             if updated:

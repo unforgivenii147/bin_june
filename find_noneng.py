@@ -26,8 +26,8 @@ from cld import (
     safe_text_from_bytes,
 )
 
-DEFAULT_MAX_PROBE = 4096  # bytes to probe for binary/text detection
-DEFAULT_READ_BYTES = 2 * 1024 * 1024  # up to 2MB per-file read
+DEFAULT_MAX_PROBE = 4096
+DEFAULT_READ_BYTES = 2 * 1024 * 1024
 
 
 def find_files(
@@ -36,15 +36,13 @@ def find_files(
     exts_set = {e.lower().lstrip(".") for e in exts} if exts else None
     for dirpath, dirnames, filenames in os.walk(root):
         if skip_hidden:
-            # remove hidden directories from walk
             dirnames[:] = [d for d in dirnames if not d.startswith(".")]
         for fn in filenames:
             if skip_hidden and fn.startswith("."):
                 continue
             full = os.path.join(dirpath, fn)
-            if exts_set:
-                if os.path.splitext(fn)[1].lstrip(".").lower() not in exts_set:
-                    continue
+            if exts_set and os.path.splitext(fn)[1].lstrip(".").lower() not in exts_set:
+                continue
             yield full
         if not recursive:
             break
@@ -71,18 +69,18 @@ def scan_file_lines(path: str, min_confidence: float = 0.6) -> List[Tuple[str, i
     if not is_probably_text_bytes(raw):
         return results
     text = safe_text_from_bytes(raw)
-    # splitlines preserves no trailing newline; line numbers start at 1
+
     for i, raw_line in enumerate(text.splitlines(), start=1):
         line = raw_line.strip()
         if not line:
             continue
-        # optional: skip extremely short lines that are unlikely natural language
+
         if len(line) < 3:
             continue
         res = detect_language(line, filename=os.path.basename(path))
         lang = (res.get("language_code") or "und").lower()
         conf = float(res.get("confidence") or 0.0)
-        # treat "und" as unknown; we only record explicit non-English detections
+
         if lang != "en" and lang != "und" and conf >= min_confidence:
             results.append((path, i, lang, conf, raw_line))
     return results
@@ -108,14 +106,13 @@ def main(argv=None) -> int:
     args = parser.parse_args(argv)
     exts = [e.strip().lower() for e in args.ext.split(",") if e.strip()] if args.ext else None
     out_path = args.out
-    # Prepare output file and write header
+
     with open(out_path, "w", encoding="utf-8", newline="") as out_f:
         writer = csv.writer(out_f, delimiter="\t", quoting=csv.QUOTE_MINIMAL)
         writer.writerow(["file", "line_no", "lang", "confidence", "text"])
         total_found = 0
         files_scanned = 0
         for fp in find_files(root=args.root, recursive=not args.no_recursive, exts=exts, skip_hidden=args.skip_hidden):
-            # quick text probe to skip binary files
             try:
                 if not is_text_file(fp):
                     continue
@@ -124,7 +121,6 @@ def main(argv=None) -> int:
             files_scanned += 1
             matches = scan_file_lines(fp, min_confidence=args.min)
             for path, line_no, lang, conf, raw_line in matches:
-                # replace newlines/tabs in the stored line
                 safe_line = raw_line.replace("\r", " ").replace("\n", " ").replace("\t", " ")
                 writer.writerow([path, str(line_no), lang, f"{conf:.3f}", safe_line])
                 total_found += 1

@@ -1,6 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+from __future__ import annotations
+
 import argparse
 import concurrent.futures
+import contextlib
 import os
 import tokenize
 import warnings
@@ -49,10 +52,8 @@ def check_and_fix_file(file_path: Path, auto_fix: bool) -> dict:
                     if "\\" in actual_str and "r" not in prefix.lower():
                         with warnings.catch_warnings(record=True) as token_warnings:
                             warnings.simplefilter("always", SyntaxWarning)
-                            try:
+                            with contextlib.suppress(SyntaxError, SyntaxWarning):
                                 compile(f"_{prefix}{actual_str}", "<string>", "exec")
-                            except (SyntaxError, SyntaxWarning):
-                                pass
                             if any("invalid escape sequence" in str(tw.message) for tw in token_warnings):
                                 new_prefix = "r" + prefix
                                 tok = tok._replace(string=f"{new_prefix}{actual_str}")

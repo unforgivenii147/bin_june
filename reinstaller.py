@@ -4,6 +4,8 @@ Reinstall all packages with entry points using pip's internal API.
 Compatible with Python 3.12+ and pip 26.1.2+
 """
 
+from __future__ import annotations
+
 import argparse
 import importlib.metadata
 import logging
@@ -14,7 +16,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
 
-# pip imports
+
 from pip._internal.commands.install import InstallCommand
 from pip._internal.exceptions import InstallationError
 
@@ -54,44 +56,36 @@ def get_packages_with_entry_points() -> Dict[str, Dict[str, any]]:
     """
     packages_with_eps = {}
     try:
-        # Using importlib.metadata (Python 3.8+)
         for dist in importlib.metadata.distributions():
             try:
-                # Get entry points for this distribution
                 entry_points = dist.entry_points
                 if not entry_points:
                     continue
-                # Collect entry point groups
+
                 groups = set()
-                # Python 3.12+ entry_points API
-                # entry_points is a collection of EntryPoint objects
+
                 if hasattr(entry_points, "select"):
-                    # Newer API (Python 3.10+)
                     for group in ["console_scripts", "gui_scripts"]:
                         eps = entry_points.select(group=group)
                         if eps:
                             groups.add(group)
-                    # Check if there are any other entry points
-                    # Get all groups from entry_points
+
                     all_groups = set()
                     if hasattr(entry_points, "groups"):
                         all_groups = set(entry_points.groups)
                     else:
-                        # Fallback: iterate to find all groups
                         for ep in entry_points:
                             if hasattr(ep, "group"):
                                 all_groups.add(ep.group)
-                    # Add any groups that aren't console_scripts or gui_scripts
+
                     for group in all_groups:
                         if group not in ["console_scripts", "gui_scripts"]:
                             groups.add(group)
                 else:
-                    # Older API fallback
                     for ep in entry_points:
                         if hasattr(ep, "group"):
                             groups.add(ep.group)
                 if groups:
-                    # Get package metadata
                     metadata = dist.metadata
                     summary = metadata.get("Summary", "No summary") if metadata else "No summary"
                     packages_with_eps[dist.name] = {
@@ -99,7 +93,7 @@ def get_packages_with_entry_points() -> Dict[str, Dict[str, any]]:
                         "info": {
                             "version": dist.version,
                             "summary": summary,
-                            "size": get_package_size(dist),  # Estimate package size
+                            "size": get_package_size(dist),
                         },
                     }
                     logger.debug(f"Found entry points in {dist.name}: {groups}")
@@ -115,23 +109,20 @@ def get_package_size(dist: importlib.metadata.Distribution) -> str:
     """Estimate package size from distribution files."""
     try:
         if hasattr(dist, "_path"):
-            # For packages installed as directories
             from pathlib import Path
 
             dist_path = Path(dist._path)
-            if dist_path.exists():
-                if dist_path.is_dir():
-                    # Calculate directory size
-                    total_size = 0
-                    for item in dist_path.rglob("*"):
-                        if item.is_file():
-                            total_size += item.stat().st_size
-                    if total_size > 1024 * 1024:
-                        return f"{total_size / (1024 * 1024):.1f} MB"
-                    elif total_size > 1024:
-                        return f"{total_size / 1024:.1f} KB"
-                    else:
-                        return f"{total_size} B"
+            if dist_path.exists() and dist_path.is_dir():
+                total_size = 0
+                for item in dist_path.rglob("*"):
+                    if item.is_file():
+                        total_size += item.stat().st_size
+                if total_size > 1024 * 1024:
+                    return f"{total_size / (1024 * 1024):.1f} MB"
+                elif total_size > 1024:
+                    return f"{total_size / 1024:.1f} KB"
+                else:
+                    return f"{total_size} B"
         return "Unknown"
     except Exception:
         return "Unknown"
@@ -180,9 +171,8 @@ def reinstall_package_with_pip(package_name: str, include_deps: bool = False) ->
     Returns: (package_name, success, message)
     """
     try:
-        # Create a pip install command
         install_cmd = InstallCommand()
-        # Build command arguments
+
         args = [
             "install",
             "--force-reinstall",
@@ -190,16 +180,15 @@ def reinstall_package_with_pip(package_name: str, include_deps: bool = False) ->
         ]
         if not include_deps:
             args.append("--no-deps")
-        # Add package name
+
         args.append(package_name)
-        # Parse arguments
+
         options, _ = install_cmd.parse_args(args)
-        # Run the installation
+
         from pip._internal.utils.temp_dir import global_tempdir_manager
 
         with global_tempdir_manager():
             try:
-                # Execute the install command
                 install_cmd.run(options, args)
                 logger.info(f"✓ Successfully reinstalled: {package_name}")
                 return (package_name, True, "Successfully reinstalled")
@@ -215,8 +204,8 @@ def reinstall_package_with_pip(package_name: str, include_deps: bool = False) ->
 
 def reinstall_entrypoint_packages(
     max_workers: int = 4,
-    exclude_packages: Set[str] = None,
-    only_packages: Set[str] = None,
+    exclude_packages: Set[str] | None = None,
+    only_packages: Set[str] | None = None,
     include_deps: bool = False,
     dry_run: bool = False,
     skip_confirmation: bool = False,
@@ -224,21 +213,21 @@ def reinstall_entrypoint_packages(
     """Reinstall all packages with entry points."""
     if exclude_packages is None:
         exclude_packages = {"pip", "setuptools", "wheel"}
-    # Get all packages with entry points
+
     entry_point_packages = get_packages_with_entry_points()
     if not entry_point_packages:
         logger.warning("No packages with entry points found!")
         return
-    # Filter packages
+
     packages_to_reinstall = set(entry_point_packages.keys())
-    # Apply excludes
+
     packages_to_reinstall = packages_to_reinstall - exclude_packages
-    # Apply only filter
+
     if only_packages:
         packages_to_reinstall = packages_to_reinstall & only_packages
     logger.info(f"Found {len(entry_point_packages)} packages with entry points")
     logger.info(f"Will reinstall {len(packages_to_reinstall)} packages after filtering")
-    # Show the list of packages
+
     if packages_to_reinstall:
         logger.info("\nPackages with entry points:")
         for i, pkg in enumerate(sorted(packages_to_reinstall), 1):
@@ -252,11 +241,11 @@ def reinstall_entrypoint_packages(
     if not packages_to_reinstall:
         logger.warning("No packages to reinstall after filtering!")
         return
-    # Get user confirmation for each package
+
     if not skip_confirmation:
         selected_packages = set()
         all_selected = False
-        # Sort packages for consistent ordering
+
         for pkg in sorted(packages_to_reinstall):
             if all_selected:
                 selected_packages.add(pkg)
@@ -268,7 +257,7 @@ def reinstall_entrypoint_packages(
                 selected_packages.add(pkg)
             elif result == "yes":
                 selected_packages.add(pkg)
-            # else skip (result == 'no')
+
         packages_to_reinstall = selected_packages
         if not packages_to_reinstall:
             logger.warning("No packages selected for reinstallation!")
@@ -278,7 +267,7 @@ def reinstall_entrypoint_packages(
     logger.info(f"\nStarting reinstallation of {len(packages_to_reinstall)} selected packages...")
     successful = []
     failed = []
-    # Use ThreadPoolExecutor for pip operations (I/O bound)
+
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         future_to_package = {
             executor.submit(reinstall_package_with_pip, pkg, include_deps): pkg for pkg in packages_to_reinstall
@@ -294,7 +283,7 @@ def reinstall_entrypoint_packages(
             except Exception as e:
                 logger.error(f"Unexpected error for {package_name}: {e}")
                 failed.append((package_name, str(e)))
-    # Summary
+
     logger.info("\n" + "=" * 42)
     logger.info("REINSTALLATION SUMMARY")
     logger.info("=" * 42)
@@ -340,7 +329,7 @@ def main():
         sys.exit(1)
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
-    # Check Python version
+
     if sys.version_info < (3, 12):
         logger.warning(f"Running on Python {sys.version_info.major}.{sys.version_info.minor}. Recommended Python 3.12+")
     logger.info(f"Starting package reinstallation with {args.workers} workers")

@@ -4,6 +4,8 @@ Word frequency counter for text files in current directory.
 Uses parallel processing for efficiency.
 """
 
+from __future__ import annotations
+
 import json
 import logging
 import re
@@ -14,7 +16,7 @@ from typing import List
 
 from dh import get_nobinary
 
-# Configure logging
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
@@ -27,7 +29,7 @@ def process_file(file_path: Path) -> Counter:
     try:
         with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
             content = f.read()
-        # Extract words: lowercase, remove punctuation, split on whitespace
+
         words = re.findall(r"\b[a-z]+\b", content.lower())
         word_counter.update(words)
         logger.debug(f"Processed {file_path.name}: {len(words)} words found")
@@ -36,7 +38,7 @@ def process_file(file_path: Path) -> Counter:
     return word_counter
 
 
-def collect_text_files(directory: Path = None) -> List[Path]:
+def collect_text_files(directory: Path | None = None) -> List[Path]:
     """
     Collect all text files from the specified directory.
     """
@@ -47,15 +49,14 @@ def collect_text_files(directory: Path = None) -> List[Path]:
     return text_files
 
 
-def process_files_parallel(file_paths: List[Path], max_workers: int = None) -> Counter:
+def process_files_parallel(file_paths: List[Path], max_workers: int | None = None) -> Counter:
     """
     Process multiple files in parallel and merge word counts.
     """
     total_counter = Counter()
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        # Submit all tasks
         future_to_file = {executor.submit(process_file, file_path): file_path for file_path in file_paths}
-        # Collect results as they complete
+
         for future in as_completed(future_to_file):
             file_path = future_to_file[future]
             try:
@@ -71,9 +72,9 @@ def save_results_json(counter: Counter, output_file: Path):
     """
     Save word count results to JSON file.
     """
-    # Convert Counter to sorted dictionary by frequency (descending)
+
     sorted_words = dict(sorted(counter.items(), key=lambda x: (-x[1], x[0])))
-    # Prepare the output structure
+
     results = {
         "metadata": {
             "total_words": sum(counter.values()),
@@ -98,31 +99,31 @@ def main():
     """
     Main execution function.
     """
-    # Configuration
-    directory = Path.cwd()  # Current directory
+
+    directory = Path.cwd()
     output_file = Path("counter.json")
-    max_workers = None  # None means use all available CPU cores
+    max_workers = None
     logger.info(f"Starting word frequency analysis in {directory}")
-    # Collect text files
+
     text_files = collect_text_files(directory)
     if not text_files:
         logger.warning("No text files found in the current directory!")
-        # Create empty results file
+
         save_results_json(Counter(), output_file)
         return
-    # Process files in parallel
+
     logger.info(f"Processing {len(text_files)} files using parallel processing...")
     total_counter = process_files_parallel(text_files, max_workers)
-    # Calculate statistics
+
     unique_words = len(total_counter)
     total_words = sum(total_counter.values())
-    # Save results as JSON
+
     save_results_json(total_counter, output_file)
-    # Print summary
+
     logger.info(f"Analysis complete!")
     logger.info(f"Total words found: {total_words}")
     logger.info(f"Unique words found: {unique_words}")
-    # Show top 10 most common words
+
     print("\n" + "=" * 42)
     print("Top 10 Most Common Words:")
     print("-" * 30)

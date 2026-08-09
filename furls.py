@@ -21,8 +21,7 @@ from urllib.parse import urlparse
 from zipfile import ZipFile
 
 import zstd
-from dh import append_text,is_valid_url
-
+from dh import append_text, is_valid_url
 
 DEFAULT_MAX_MB = 15
 EXCLUDE_DIRS = {".git", "__pycache__"}

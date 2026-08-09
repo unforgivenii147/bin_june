@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+from __future__ import annotations
+
 import argparse
 import re
 
@@ -18,23 +20,21 @@ def process_file(filepath, autofix=False):
         return
     misspelled_count = 0
 
-    # Function to process each word found by the regex
     def check_and_replace(match):
         nonlocal misspelled_count
         word = match.group(0)
-        # Skip acronyms or words without letters (e.g., numbers, punctuation-only)
+
         if not word.isalpha():
             return word
-        # Check if the lowercase version of the word is misspelled
+
         if word.lower() not in spell:
             misspelled_count += 1
             if autofix:
-                # Get the one most likely correction
                 correction = spell.correction(word.lower())
-                # If no correction is found, keep the original word
+
                 if not correction:
                     return word
-                # Preserve original capitalization
+
                 if word.istitle():
                     return correction.capitalize()
                 elif word.isupper():
@@ -42,15 +42,12 @@ def process_file(filepath, autofix=False):
                 else:
                     return correction
             else:
-                # If not autofixing, just print the misspelled word and suggestions
                 candidates = spell.candidates(word.lower())
                 suggestions = ", ".join(candidates) if candidates else "No suggestions"
                 print(f"Misspelled: '{word}' | Suggestions: {suggestions}")
                 return word
         return word
 
-    # Regex to find words (including those with apostrophes like "don't")
-    # \b matches word boundaries, [\w']+ matches word characters and apostrophes
     updated_text = re.sub(r"[\w']+", check_and_replace, text)
     if autofix and misspelled_count > 0:
         try:
@@ -69,7 +66,6 @@ def process_file(filepath, autofix=False):
 
 
 if __name__ == "__main__":
-    # Set up the command line argument parser
     parser = argparse.ArgumentParser(description="Detect and optionally autofix misspelled words in a file.")
     parser.add_argument("file", help="Path to the text file to check")
     parser.add_argument(

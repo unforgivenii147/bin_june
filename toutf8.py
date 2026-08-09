@@ -4,11 +4,14 @@ Convert files with non-UTF8 encoding to UTF8.
 Uses parallel processing to handle multiple files efficiently.
 """
 
-import sys
+from __future__ import annotations
+
 import argparse
-from pathlib import Path
+import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
 from typing import Generator, Tuple
+
 import chardet
 from dh import is_binary
 
@@ -17,7 +20,7 @@ def detect_encoding(file_path: Path) -> str:
     """Detect file encoding using chardet."""
     try:
         with open(file_path, "rb") as f:
-            raw_data = f.read(100000)  # Sample first 100KB
+            raw_data = f.read(100000)
             result = chardet.detect(raw_data)
             return result.get("encoding", "utf-8") or "utf-8"
     except Exception:
@@ -37,18 +40,16 @@ def convert_file(file_path: Path) -> Tuple[Path, bool, str]:
         if encoding and encoding.lower() == "utf-8":
             return file_path, True, "Already UTF8"
 
-        # Read with detected encoding
         with open(file_path, "r", encoding=encoding, errors="replace") as f:
             content = f.read()
 
-        # Write as UTF8
         with open(file_path, "w", encoding="utf-8") as f:
             f.write(content)
 
         return file_path, True, f"Converted from {encoding}"
 
     except Exception as e:
-        return file_path, False, f"Error: {str(e)}"
+        return file_path, False, f"Error: {e!s}"
 
 
 def collect_files(paths: list[str | Path]) -> Generator[Path, None, None]:
@@ -79,12 +80,10 @@ def main():
 
     args = parser.parse_args()
 
-    # Use current directory if no paths provided
     input_paths = args.paths if args.paths else ["."]
 
-    # Collect all files
     files = list(collect_files(input_paths))
-    files = [f for f in files if f.is_file()]  # Filter to files only
+    files = [f for f in files if f.is_file()]
 
     if not files:
         print("No files found to process.", file=sys.stderr)
@@ -96,7 +95,6 @@ def main():
     skipped = 0
     errors = 0
 
-    # Process files in parallel
     with ThreadPoolExecutor(max_workers=args.workers) as executor:
         futures = {executor.submit(convert_file, f): f for f in files}
 
@@ -117,7 +115,6 @@ def main():
             else:
                 errors += 1
 
-    # Summary
     print(f"\n{'=' * 60}")
     print(f"Summary:")
     print(f"  Converted: {converted}")

@@ -4,6 +4,8 @@ Extract Russian and English text from images using OCR.
 Supports parallel processing of multiple directories.
 """
 
+from __future__ import annotations
+
 import argparse
 import json
 import sys
@@ -36,7 +38,6 @@ class ExtractionResult:
 class TextExtractor:
     """Extract text from images using Tesseract OCR."""
 
-    # Supported image extensions
     IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp", ".gif"}
 
     @staticmethod
@@ -51,8 +52,7 @@ class TextExtractor:
         try:
             if not image_path.exists():
                 return ExtractionResult(file_path=image_path, success=False, error=f"File not found")
-            # Open and extract text using Tesseract
-            # Language config: 'rus' for Russian, 'eng' for English
+
             image = Image.open(image_path)
             text = pytesseract.image_to_string(image, lang="rus+eng")
             print(text)
@@ -86,7 +86,7 @@ class TextExtractor:
             for ext in TextExtractor.IMAGE_EXTENSIONS:
                 images.extend(directory.rglob(f"*{ext}"))
                 images.extend(directory.rglob(f"*{ext.upper()}"))
-        return sorted(set(images))  # Remove duplicates and sort
+        return sorted(set(images))
 
 
 class TextExtractionReport:
@@ -185,33 +185,32 @@ Examples:
     parser.add_argument("-j", "--json", type=Path, help="Save detailed report to JSON file")
     parser.add_argument("-s", "--silent", action="store_true", help="Suppress file-by-file output (summary only)")
     args = parser.parse_args()
-    # Convert to absolute paths
+
     directories = [d.resolve() for d in args.directories]
-    # Find all images
+
     print("🔍 Scanning for images...")
     images = TextExtractor.find_images(directories)
     if not images:
         print("❌ No images found in the specified directories.")
         return 1
     print(f"✓ Found {len(images)} image(s)\n")
-    # Process images in parallel
+
     print(f"⚙️  Processing with {args.workers} worker(s)...\n")
     if not args.silent:
         TextExtractionReport.print_header(len(images))
     with Pool(processes=args.workers) as pool:
         results = pool.map(process_image_worker, images)
-    # Print individual results
+
     if not args.silent:
-        for result, img_path in zip(results, images):
-            # Calculate relative path from base directory
+        for result, img_path in zip(results, images, strict=False):
             try:
                 rel_path = img_path.relative_to(Path.cwd())
             except ValueError:
                 rel_path = img_path
             TextExtractionReport.print_file_result(result, rel_path)
-    # Print summary
+
     TextExtractionReport.print_summary(results, directories)
-    # Save JSON report if requested
+
     if args.json:
         TextExtractionReport.save_json_report(results, args.json)
     return 0

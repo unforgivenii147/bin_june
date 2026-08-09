@@ -1,6 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Extract subtitles using ffmpy."""
 
+from __future__ import annotations
+
 import json
 import sys
 from pathlib import Path
@@ -24,7 +26,7 @@ def get_subtitle_streams(input_file):
         ],
     )
     try:
-        stdout, stderr = ff.run(stdout=True, stderr=True)
+        stdout, _stderr = ff.run(stdout=True, stderr=True)
         data = json.loads(stdout.decode())
         return data.get("streams", [])
     except ffmpy.FFExecutableNotFoundError:
@@ -56,13 +58,13 @@ def main():
     if not Path(input_file).exists():
         print(f"File not found: {input_file}")
         sys.exit(1)
-    # Get subtitle streams
+
     streams = get_subtitle_streams(input_file)
     if not streams:
         print("No subtitle streams found.")
         sys.exit(0)
     basename = Path(input_file).stem
-    # Extract each stream
+
     for i, stream in enumerate(streams):
         lang = stream.get("tags", {}).get("language", "und")
         output_file = f"{basename}.sub{i}.{lang}.srt"

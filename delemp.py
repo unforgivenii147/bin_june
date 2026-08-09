@@ -80,7 +80,7 @@ def preserve_single_blank_lines(text: str) -> str:
             continue
         result_lines.append(line)
         prev_blank = is_blank
-    # Remove trailing blank lines
+
     while len(result_lines) > 1 and result_lines[-1].strip() == "":
         result_lines.pop()
     return "".join(result_lines)
@@ -105,7 +105,6 @@ def process_large_file_mmap(file_path: Path, preserve_single: bool, remove_space
     """Process files larger than MMAP_THRESHOLD using mmap for better performance."""
     try:
         with open(file_path, "r+b") as f:
-            # Memory-map the file
             with mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm:
                 content = mm.read().decode("utf-8", errors="ignore")
             total_lines = len(content.splitlines())
@@ -116,7 +115,6 @@ def process_large_file_mmap(file_path: Path, preserve_single: bool, remove_space
             result_lines = len(result.splitlines()) if result else 0
             removed_lines = total_lines - result_lines
             if removed_lines > 0:
-                # Seek to beginning and write new content
                 f.seek(0)
                 f.write(result.encode("utf-8"))
                 f.truncate()

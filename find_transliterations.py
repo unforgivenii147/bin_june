@@ -5,6 +5,8 @@ Detects entries where the "translation" is just the English phonetic spelling
 of the Persian word rather than an actual translation.
 """
 
+from __future__ import annotations
+
 import argparse
 import json
 import re
@@ -72,17 +74,13 @@ def is_finglish(text: str, finglish: str) -> int:
     result = "".join(processed_words)
     ratio = fuzz.partial_ratio(result, finglish)
     print(f"partial_ratio({result}, {finglish} = {ratio}")
-    if ratio >= 60:
-        return True
-    return False
+    return ratio >= 60
 
 
 def is_transliteration(persian_word, english_word):
     if not english_word or not persian_word:
         return False
-    if is_finglish(persian_word, english_word):
-        return True
-    return False
+    return bool(is_finglish(persian_word, english_word))
 
     if not re.match(r"^[A-Za-z\-\']+$", english_word):
         return False
@@ -98,20 +96,19 @@ def is_transliteration(persian_word, english_word):
     if len(english_word) <= 2:
         return False
     transliteration_patterns = [
-        r"[A-Z][a-z]*[aeiou][a-z]*[aeiou][a-z]*$",  # Multiple vowels
-        r"^[A-Z][a-z]*kh[a-z]*$",  # 'kh' sound common in Persian
-        r"^[A-Z][a-z]*gh[a-z]*$",  # 'gh' sound common in Persian
-        r"^[A-Z][a-z]*sh[a-z]*$",  # 'sh' sound
-        r"^[A-Z][a-z]*eh[a-z]*$",  # 'eh' ending
-        r"^[A-Z][a-z]*an$",  # 'an' ending
-        r"^[A-Z][a-z]*ar$",  # 'ar' ending
-        r"^[A-Z][a-z]*ad$",  # 'ad' ending
+        r"[A-Z][a-z]*[aeiou][a-z]*[aeiou][a-z]*$",
+        r"^[A-Z][a-z]*kh[a-z]*$",
+        r"^[A-Z][a-z]*gh[a-z]*$",
+        r"^[A-Z][a-z]*sh[a-z]*$",
+        r"^[A-Z][a-z]*eh[a-z]*$",
+        r"^[A-Z][a-z]*an$",
+        r"^[A-Z][a-z]*ar$",
+        r"^[A-Z][a-z]*ad$",
     ]
     pattern_matches = sum(1 for pattern in transliteration_patterns if re.match(pattern, english_word, re.IGNORECASE))
     if pattern_matches >= 1:
         return True
-    # Additional heuristic: if the word looks like a proper noun (capitalized)
-    # and doesn't appear to be a common English word, it might be transliteration
+
     if english_word[0].isupper() and english_word[1:].islower():
         potential_translations = {
             "Morning",

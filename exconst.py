@@ -1,6 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Extract constant definitions from Python files using libcst."""
 
+from __future__ import annotations
+
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
@@ -30,10 +32,8 @@ class ConstantExtractor(cst.CSTVisitor):
 
     def _extract_value(self, node: cst.BaseExpression) -> str:
         return (
-            node.deep_clone().deep_replace(lambda n: n).deep_equals(node)
-            and node.visit(cst.CSTCodeGenerator())
-            or cst.Module([cst.SimpleStatementLine([cst.Expr(node)])]).code.strip()
-        )
+            node.deep_clone().deep_replace(lambda n: n).deep_equals(node) and node.visit(cst.CSTCodeGenerator())
+        ) or cst.Module([cst.SimpleStatementLine([cst.Expr(node)])]).code.strip()
 
 
 def extract_from_file(file_path: Path) -> list[Constant]:

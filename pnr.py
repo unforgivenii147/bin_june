@@ -21,24 +21,23 @@ def remove_string_from_names(
     for item in items:
         if should_skip(item):
             continue
-        if item.is_file() or item.is_dir():
-            if string_to_remove in item.name:
-                new_name = item.name.replace(string_to_remove, "")
-                if not new_name.strip():
-                    print(f"Warning: Removing '{string_to_remove}' would make name empty for '{item.name}'")
-                    continue
-                new_path = current_path / new_name
-                if new_path.exists():
-                    new_path = unique_path(new_path)
-                if dry_run:
-                    print(f"[DRY RUN] Would rename: {item} -> {new_name}")
-                else:
-                    try:
-                        item.rename(new_path)
-                        print(f"{item} -> {new_name}")
-                        renamed_count += 1
-                    except OSError as e:
-                        print(f"Error renaming '{item.name}': {e}")
+        if (item.is_file() or item.is_dir()) and string_to_remove in item.name:
+            new_name = item.name.replace(string_to_remove, "")
+            if not new_name.strip():
+                print(f"Warning: Removing '{string_to_remove}' would make name empty for '{item.name}'")
+                continue
+            new_path = current_path / new_name
+            if new_path.exists():
+                new_path = unique_path(new_path)
+            if dry_run:
+                print(f"[DRY RUN] Would rename: {item} -> {new_name}")
+            else:
+                try:
+                    item.rename(new_path)
+                    print(f"{item} -> {new_name}")
+                    renamed_count += 1
+                except OSError as e:
+                    print(f"Error renaming '{item.name}': {e}")
         if recursive and item.is_dir():
             renamed_count += remove_string_from_names(string_to_remove, dry_run, recursive, item)
     return renamed_count
@@ -56,24 +55,23 @@ def replace_string_in_names(
     for item in items:
         if should_skip(item):
             continue
-        if item.is_file() or item.is_dir():
-            if str1 in item.name:
-                new_name = item.name.replace(str1, str2)
-                if not new_name.strip():
-                    print(f"Warning: Replacing '{str1}' with '{str2}' would make name empty for '{item.name}'")
-                    continue
-                new_path = current_path / new_name
-                if new_path.exists():
-                    new_path = unique_path(new_path)
-                if dry_run:
-                    print(f"[DRY RUN] Would rename: {item} -> {new_name}")
-                else:
-                    try:
-                        item.rename(new_path)
-                        print(f"{item} -> {new_name}")
-                        renamed_count += 1
-                    except OSError as e:
-                        print(f"Error renaming '{item.name}': {e}")
+        if (item.is_file() or item.is_dir()) and str1 in item.name:
+            new_name = item.name.replace(str1, str2)
+            if not new_name.strip():
+                print(f"Warning: Replacing '{str1}' with '{str2}' would make name empty for '{item.name}'")
+                continue
+            new_path = current_path / new_name
+            if new_path.exists():
+                new_path = unique_path(new_path)
+            if dry_run:
+                print(f"[DRY RUN] Would rename: {item} -> {new_name}")
+            else:
+                try:
+                    item.rename(new_path)
+                    print(f"{item} -> {new_name}")
+                    renamed_count += 1
+                except OSError as e:
+                    print(f"Error renaming '{item.name}': {e}")
         if recursive and item.is_dir():
             renamed_count += replace_string_in_names(str1, str2, dry_run, recursive, item)
     return renamed_count
@@ -83,10 +81,7 @@ def should_skip(path):
     path = Path(path)
     if path.is_symlink():
         return True
-    for part in path.parts:
-        if part in SKIP_DIRS:
-            return True
-    return False
+    return any(part in SKIP_DIRS for part in path.parts)
 
 
 def rename_by_template(

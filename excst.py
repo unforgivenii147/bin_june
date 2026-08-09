@@ -71,8 +71,6 @@ class TopLevelExtractor(cst.CSTVisitor):
         if not self._is_top_level(node):
             return
         try:
-            # Using cst.Module([node]).code is the safest way to get the block
-            # without triggering the 'default_indicator' error
             code = cst.Module([node]).code.strip()
             self.functions[node.name.value] = code
             self.save_to_file(FUNCTIONS_DIR, node.name.value, code, f"function_{node.name.value}")
@@ -106,7 +104,7 @@ class TopLevelExtractor(cst.CSTVisitor):
             print(f"Error extracting constant: {e}")
 
     def _is_top_level(self, node) -> bool:
-        # We use the parent attribute provided by the MetadataWrapper
+
         current = node
         while hasattr(current, "parent") and current.parent:
             if isinstance(current.parent, (cst.FunctionDef, cst.ClassDef, cst.If, cst.For, cst.While, cst.With)):
@@ -119,11 +117,11 @@ def process_file(filepath: Path) -> dict:
     try:
         code = filepath.read_text(encoding="utf-8")
         module = cst.parse_module(code)
-        # Use MetadataWrapper to ensure nodes have .parent attributes
+
         wrapper = cst.metadata.MetadataWrapper(module)
-        # Pass the module to the extractor
+
         extractor = TopLevelExtractor(filepath, module)
-        # Visit the wrapped module so that the visitor can access parents
+
         wrapper.visit(extractor)
         return {
             "filepath": str(filepath),
@@ -147,7 +145,7 @@ def collect_python_files(root_dir: Path = Path(".")) -> list[Path]:
 
 def write_imports_file(all_imports: set[str]) -> None:
     imports_file = OUTPUT_DIR / "imports.py"
-    # Simple sort to group imports
+
     sorted_imports = sorted(all_imports)
     content = "#!/usr/bin/env python3\n# -*- coding: utf-8 -*-\n"
     content += "# Combined imports from all processed files\n\n"

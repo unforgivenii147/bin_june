@@ -4,6 +4,8 @@ Extract all .tar.xz files in current directory using parallel processing,
 then remove the original archive files.
 """
 
+from __future__ import annotations
+
 import sys
 import tarfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -32,7 +34,7 @@ def extract_and_remove(tar_path: Path) -> tuple[Path, bool, str]:
     except PermissionError:
         return (tar_path, False, f"❌ Permission denied: {tar_path.name}")
     except Exception as e:
-        return (tar_path, False, f"❌ Error processing {tar_path.name}: {str(e)}")
+        return (tar_path, False, f"❌ Error processing {tar_path.name}: {e!s}")
 
 
 def main():
@@ -48,7 +50,7 @@ def main():
         success_count = 0
         failure_count = 0
         for future in as_completed(future_to_file):
-            file_path, success, message = future.result()
+            _file_path, success, message = future.result()
             if success:
                 success_count += 1
             else:
@@ -68,5 +70,5 @@ if __name__ == "__main__":
         print("\n\n⚠️  Operation interrupted by user.")
         sys.exit(1)
     except Exception as e:
-        print(f"\n❌ Unexpected error: {str(e)}")
+        print(f"\n❌ Unexpected error: {e!s}")
         sys.exit(1)

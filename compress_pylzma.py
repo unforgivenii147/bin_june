@@ -3,6 +3,8 @@
 Compress/decompress files recursively using pylzma with parallel processing.
 """
 
+from __future__ import annotations
+
 import argparse
 import io
 import tarfile
@@ -26,13 +28,10 @@ def compress_file(file_path, output_dir, tar_subdirs_first=False):
         file_path = Path(file_path)
         if file_path.is_dir():
             if tar_subdirs_first:
-                # Create tar archive first
                 tar_data = create_tar_for_directory(file_path)
                 compressed_data = pylzma.compress(tar_data)
                 output_file = output_dir / f"{file_path.name}.tar.7z"
             else:
-                # Compress each file in directory individually (this approach is simplified)
-                # For directories without tar, we'll just skip them in this mode
                 return None
         else:
             with open(file_path, "rb") as f:
@@ -43,7 +42,7 @@ def compress_file(file_path, output_dir, tar_subdirs_first=False):
             f.write(compressed_data)
         return f"Compressed: {file_path} -> {output_file}"
     except Exception as e:
-        return f"Error compressing {file_path}: {str(e)}"
+        return f"Error compressing {file_path}: {e!s}"
 
 
 def decompress_file(file_path, output_dir):
@@ -53,15 +52,14 @@ def decompress_file(file_path, output_dir):
         with open(file_path, "rb") as f:
             compressed_data = f.read()
         decompressed_data = pylzma.decompress(compressed_data)
-        # Handle .tar.7z files
+
         if file_path.suffixes == [".tar", ".7z"]:
-            # Extract tar archive
             output_name = file_path.name.replace(".tar.7z", "")
             tar_buffer = io.BytesIO(decompressed_data)
             with tarfile.open(fileobj=tar_buffer, mode="r") as tar:
                 tar.extractall(path=output_dir)
             return f"Decompressed: {file_path} -> {output_dir}/{output_name}"
-        # Handle regular .7z files
+
         elif file_path.suffix == ".7z":
             output_name = file_path.name.replace(".7z", "")
             output_file = output_dir / output_name
@@ -71,7 +69,7 @@ def decompress_file(file_path, output_dir):
         else:
             return f"Skipped (not a .7z or .tar.7z file): {file_path}"
     except Exception as e:
-        return f"Error decompressing {file_path}: {str(e)}"
+        return f"Error decompressing {file_path}: {e!s}"
 
 
 def process_files_parallel(files, output_dir, mode, tar_subdirs_first=False, max_workers=None):
@@ -80,7 +78,7 @@ def process_files_parallel(files, output_dir, mode, tar_subdirs_first=False, max
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         if mode == "compress":
             futures = {executor.submit(compress_file, file, output_dir, tar_subdirs_first): file for file in files}
-        else:  # decompress
+        else:
             futures = {executor.submit(decompress_file, file, output_dir): file for file in files}
         for future in as_completed(futures):
             result = future.result()
@@ -128,24 +126,21 @@ def main():
     if args.mode == "compress":
         output_dir = Path(args.output or "./compressed")
         output_dir.mkdir(exist_ok=True)
-        # Collect all files recursively (skip the output directory if it's inside current dir)
+
         all_files = []
         for item in current_dir.rglob("*"):
             if item.is_file() or (item.is_dir() and not args.tar_subdirs_first):
-                # Skip files in output directory
                 try:
                     if output_dir in item.parents or item == output_dir:
                         continue
                 except (ValueError, AttributeError):
                     pass
                 if item.is_file():
-                    # Skip already compressed files
                     if item.suffix == ".7z":
                         continue
                     all_files.append(item)
                 elif item.is_dir() and args.tar_subdirs_first:
-                    # Add directories for tar+compress mode
-                    if item != current_dir:  # Skip root directory
+                    if item != current_dir:
                         try:
                             if output_dir not in item.parents and item != output_dir:
                                 all_files.append(item)
@@ -157,10 +152,10 @@ def main():
         print(f"Found {len(all_files)} items to compress")
         print(f"Compressing to: {output_dir}")
         process_files_parallel(all_files, output_dir, "compress", args.tar_subdirs_first, args.workers)
-    else:  # decompress
+    else:
         output_dir = Path(args.output or "./decompressed")
         output_dir.mkdir(exist_ok=True)
-        # Find all .7z and .tar.7z files
+
         compressed_files = []
         for item in current_dir.rglob("*"):
             if item.is_file() and (item.suffix == ".7z" or item.name.endswith(".tar.7z")):

@@ -87,7 +87,7 @@ def process_file(path: Path, public_map: dict[str, Path], symbol_index: dict[str
             continue
         node_src = "\n".join(lines[node.lineno - 1 : node.end_lineno]).strip()
         if node_src not in symbol_index[name]:
-            continue  # same name, different body -> not an inlined dh symbol
+            continue
         to_remove_ranges.append((node.lineno - 1, node.end_lineno))
         if name in public_map:
             to_import.add(name)
