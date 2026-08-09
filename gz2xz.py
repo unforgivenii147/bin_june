@@ -1,10 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import gzip
 import sys
-from collections import deque
-from collections.abc import Callable
 from pathlib import Path
+
 from lzma_mt import compress
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})

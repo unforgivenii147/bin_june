@@ -1,11 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import sys
-from collections import deque
-from collections.abc import Callable
 from pathlib import Path
-from markdownify import markdownify
+
 from dh import get_files, mpf3
+from markdownify import markdownify
 
 
 def process_file(path) -> None:

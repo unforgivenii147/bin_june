@@ -1,7 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import os
 from pathlib import Path
+
 import git
 from dotenv import load_dotenv
 from github import Github, GithubException

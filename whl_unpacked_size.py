@@ -5,12 +5,14 @@ Uses pathlib for path handling and multiprocessing for parallel processing.
 """
 
 from __future__ import annotations
+
 import argparse
 import json
 import sys
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 from zipfile import ZipFile
+
 from dh import fsz
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})

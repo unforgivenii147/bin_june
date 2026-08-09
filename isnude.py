@@ -1,14 +1,12 @@
 #!/data/data/com.termux/files/usr/bin/python
 from __future__ import annotations
-import os
+
 import sys
-from collections import deque
-from collections.abc import Callable
 from pathlib import Path
+
 import cv2
 import nude
-from dh import get_files, mpf3
-from dh import cprint
+from dh import cprint, get_files, mpf3
 
 nude_path = Path("nude")
 nude_path.mkdir(exist_ok=True)

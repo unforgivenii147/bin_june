@@ -14,11 +14,13 @@ Features:
 """
 
 from __future__ import annotations
+
 import re
 import sys
 from dataclasses import dataclass
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
+
 from loguru import logger
 from tqdm import tqdm
 

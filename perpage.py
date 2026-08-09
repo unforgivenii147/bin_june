@@ -1,11 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import sys
-from collections import deque
-from collections.abc import Callable
 from pathlib import Path
-from PyPDF2 import PdfReader
+
 from dh import get_files, mpf_async
+from PyPDF2 import PdfReader
 
 
 def process_file(path) -> None:

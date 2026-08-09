@@ -14,9 +14,9 @@ directly. Falls back gracefully to stdlib lzma if lzmamt is unavailable.
 """
 
 from __future__ import annotations
+
 import argparse
 import lzma
-import multiprocessing
 import shutil
 import sys
 import tarfile

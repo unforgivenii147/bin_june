@@ -1,14 +1,13 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import ctypes
-import os
 import subprocess
 import sys
-from collections import deque
 from pathlib import Path
+
+from dh import cprint, get_files
 from loguru import logger
-from dh import get_files
-from dh import cprint
 
 logger.remove()
 logger.add(

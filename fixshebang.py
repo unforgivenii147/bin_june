@@ -6,6 +6,7 @@ Usage: python change_shebang.py
 """
 
 from __future__ import annotations
+
 import re
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed

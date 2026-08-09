@@ -5,6 +5,7 @@ Recursively scans directories and reports stdlib names that are used but not imp
 """
 
 from __future__ import annotations
+
 import ast
 import keyword
 import os

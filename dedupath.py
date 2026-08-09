@@ -4,6 +4,7 @@ Remove duplicate entries from $PATH and update ~/.bashrc
 """
 
 from __future__ import annotations
+
 import os
 from pathlib import Path
 

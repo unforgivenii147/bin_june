@@ -1,12 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-import os
+
 import sys
 from collections import deque
 from multiprocessing import get_context
 from pathlib import Path
-from dh import get_files
-from dh import cprint
+
+from dh import cprint, get_files
 
 c_files = {".c", ".h", ".inc"}
 cpp_files = {".cpp", ".cc", ".cxx", ".hpp", ".hpp11", ".hh", ".hxx"}

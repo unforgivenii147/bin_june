@@ -4,6 +4,7 @@ import signal
 import sys
 import tempfile
 import time
+
 import speech_recognition as sr
 from pydub import AudioSegment
 

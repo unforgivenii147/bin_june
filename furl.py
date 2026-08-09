@@ -6,9 +6,11 @@ Uses pathlib and parallel processing for efficiency.
 """
 
 from __future__ import annotations
+
 import re
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+
 from tqdm import tqdm
 
 URL_PATTERN = re.compile(r'https?://[^\s<>"{}|\\^`\[\]]*', re.IGNORECASE)

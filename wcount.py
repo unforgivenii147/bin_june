@@ -1,15 +1,17 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import json
 import sys
 from collections import deque
 from multiprocessing import get_context
 from pathlib import Path
+
 from toolz import compose, frequencies
 from toolz.curried import map as _map
 
 CHUNK_SIZE = 1024 * 1024
-from dh import get_files, get_nobinary
+from dh import get_nobinary
 
 
 def is_binary(path: Path | str) -> bool:

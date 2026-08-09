@@ -1,16 +1,14 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import re
 import sys
-from collections import deque
-from collections.abc import Callable, Iterable
-from multiprocessing import get_context
 from pathlib import Path
-from typing import Any
+
+from dh import get_files, mpf_async, unique_path
 from fontTools.ttLib import TTFont
 from fontTools.ttLib.ttFont import TTFont
 from termcolor import cprint
-from dh import _clean_fname, get_files, mpf_async, unique_path
 
 mpf = mpf_async
 

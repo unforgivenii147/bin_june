@@ -5,7 +5,6 @@ import argparse
 import ast
 import hashlib
 import sys
-from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 

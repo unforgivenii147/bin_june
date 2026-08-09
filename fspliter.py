@@ -6,6 +6,7 @@ Split text files into parts with character count between 4900-4990,
 respecting word and sentence boundaries.
 """
 from __future__ import annotations
+
 import argparse
 import logging
 import os

@@ -5,16 +5,17 @@ Skips repos >5MB and removes successfully cloned repos from repos.txt.
 """
 
 from __future__ import annotations
+
 import argparse
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+
 import requests
+from dh import fsz
 from dulwich import porcelain
 from dulwich.errors import NotGitRepository
 from dulwich.repo import Repo
-from dh import fsz
-
 
 MAX_SIZE_MB = 5
 MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024

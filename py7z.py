@@ -2,12 +2,14 @@
 """Compress/decompress files using pylzma with parallel processing."""
 
 from __future__ import annotations
+
 import argparse
 import io
 import shutil
 import tarfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+
 import pylzma
 from dh import fsz, gsz
 

@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import base64
 import io
 import os
@@ -7,6 +8,7 @@ import sqlite3
 import sys
 from pathlib import Path
 from sqlite3 import Cursor
+
 import py7zr
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})

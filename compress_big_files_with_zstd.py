@@ -6,11 +6,13 @@ Example: python compress_large_files.py 1048576  # Compress files > 1MB
 """
 
 from __future__ import annotations
+
 import sys
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+
 import zstandard as zstd
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})

@@ -1,8 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/python
 from __future__ import annotations
+
 import sys
-from collections import deque
 from pathlib import Path
+
 from dh import fsz, get_files, mpf3
 from PIL import Image
 from PIL.Image import Image

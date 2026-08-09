@@ -1,9 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import json
 import operator
-from collections import deque
 from pathlib import Path
+
 import ssdeep
 from dh import get_files
 

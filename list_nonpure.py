@@ -2,6 +2,7 @@
 """List only non-pure package names from user site-packages."""
 
 from __future__ import annotations
+
 import os
 import site
 from pathlib import Path

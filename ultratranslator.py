@@ -2,16 +2,17 @@
 "\nOptimized version of ultratranslator.py for Python 3.12.\nTranslates Python files and other text files while preserving structure.\n"
 
 from __future__ import annotations
+
 import logging
 import re
 import shutil
 import sys
 import tempfile
 import time
-from collections import deque
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Final
+
 from binaryornot import is_binary
 from deep_translator import GoogleTranslator
 

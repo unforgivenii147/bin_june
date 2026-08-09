@@ -1,13 +1,13 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-from collections import deque
-from collections.abc import Callable
+
 from pathlib import Path
+
 from langdetect import DetectorFactory, detect
 from langdetect.lang_detect_exception import LangDetectException
 
 CHUNK_SIZE = 1024 * 1024
-from dh import get_files, get_nobinary, mpf3
+from dh import get_nobinary, mpf3
 
 
 def is_binary(path: Path | str) -> bool:

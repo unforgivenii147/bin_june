@@ -1,11 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-import os
+
 import sys
-from collections.abc import Callable
 from pathlib import Path
-from xorhash import get_xorhash
+
 from dh import cprint
+from xorhash import get_xorhash
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import argparse
 import re
 import sys
@@ -7,6 +8,7 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 from shutil import get_terminal_size
+
 from tqdm import tqdm
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})

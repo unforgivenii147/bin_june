@@ -5,6 +5,7 @@ Supports parallel processing, removal, and saving of found strings.
 """
 
 from __future__ import annotations
+
 import argparse
 import ast
 import concurrent.futures

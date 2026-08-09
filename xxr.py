@@ -1,24 +1,24 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import argparse
 import bz2
 import gzip
 import lzma
 import os
 import shutil
-import sys
 import tarfile
 import tempfile
 import zipfile
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
+
 import brotlicffi as brotli
 import py7zr
 import zstandard as zstd
+from dh import cprint, fsz, gsz, mpf3
 from loguru import logger
-from dh import cprint
-from dh import fsz, mpf3, gsz
 
 SUPPORTED_EXTS = {
     ".tar",

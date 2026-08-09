@@ -1,15 +1,15 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import contextlib
 import json
-import os
 import re
-import sys
 import time
 from pathlib import Path
+
 import requests
-from packaging.version import Version
 from dh import cprint
+from packaging.version import Version
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

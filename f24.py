@@ -1,9 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import operator
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+
 from tqdm import tqdm
 
 SECONDS_24H = 24 * 42 * 42

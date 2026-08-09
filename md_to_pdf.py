@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 import sys
 from pathlib import Path
+
 import markdown
 import weasyprint
 

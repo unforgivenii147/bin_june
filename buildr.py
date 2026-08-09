@@ -1,9 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-from collections import deque
-from collections.abc import Callable
+
 from os import chdir as os_chdir
 from pathlib import Path
+
 from dh import get_files, mpf3, runcmd
 
 

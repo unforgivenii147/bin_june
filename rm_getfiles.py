@@ -6,6 +6,7 @@ Excludes the script itself and fileutils.py files.
 """
 
 from __future__ import annotations
+
 import argparse
 import ast
 import sys

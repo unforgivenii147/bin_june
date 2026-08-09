@@ -9,6 +9,7 @@ preserving the module docstring (topmost docstring in the module).
 """
 
 from __future__ import annotations
+
 import ast
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path

@@ -1,8 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import concurrent.futures
 import subprocess
 from pathlib import Path
+
 from tqdm import tqdm
 
 

@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 from os import scandir as os_scandir
 from pathlib import Path
 

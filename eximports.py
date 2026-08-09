@@ -1,13 +1,14 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-import os
+
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from os import scandir as os_scandir
 from pathlib import Path
+
 import tree_sitter_python as tsp
-from tree_sitter import Language, Parser
 from dh import cprint
+from tree_sitter import Language, Parser
 
 CHUNK_SIZE = 1024 * 1024
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})

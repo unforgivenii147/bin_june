@@ -1,8 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import argparse
 import sys
 from pathlib import Path
+
 from deep_translator import GoogleTranslator
 
 CHUNK_SIZE = 2000

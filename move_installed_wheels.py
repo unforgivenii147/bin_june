@@ -1,13 +1,14 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-import os
+
 import shutil
 import sys
 from importlib import metadata
 from pathlib import Path
+
+from dh import cprint
 from packaging.utils import parse_wheel_filename
 from packaging.version import Version
-from dh import cprint
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

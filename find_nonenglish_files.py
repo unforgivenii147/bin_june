@@ -1,9 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import os
 import sys
 from collections import Counter, defaultdict
 from pathlib import Path
+
 import pycld2
 from dh import TXT_EXT
 

@@ -1,8 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/python
 from __future__ import annotations
+
 import sys
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
+
 import cv2
 from tqdm import tqdm
 

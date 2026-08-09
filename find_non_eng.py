@@ -1,10 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import argparse
 import os
 import sys
 from collections import Counter
 from pathlib import Path
+
 import pycld2
 
 CHUNK_SIZE = 1024 * 1024

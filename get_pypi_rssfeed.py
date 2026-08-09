@@ -9,6 +9,7 @@ import sys
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from typing import List
+
 import requests
 
 PYPI_RSS_URL = "https://pypi.org/rss/packages.xml"

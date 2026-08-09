@@ -5,11 +5,13 @@ from pathlib import Path
 (c) WhoisXML API Inc. 2019.
 """
 from __future__ import annotations
+
 import contextlib
 import datetime
 import json
 import sys
 from argparse import ArgumentParser
+
 import requests
 from pygments import highlight
 from pygments.formatters import TerminalFormatter

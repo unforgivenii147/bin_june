@@ -5,13 +5,12 @@ Supports parallel processing of multiple directories.
 """
 
 import argparse
-import sys
-from pathlib import Path
-from multiprocessing import Pool, cpu_count
-from dataclasses import dataclass
-from typing import Optional
 import json
+import sys
+from dataclasses import dataclass
 from datetime import datetime
+from multiprocessing import Pool, cpu_count
+from pathlib import Path
 
 try:
     import pytesseract

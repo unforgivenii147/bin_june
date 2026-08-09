@@ -1,12 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-import os
-import sys
-from collections import deque
-from collections.abc import Callable
-from pathlib import Path
-from dh import fsz, get_files, mpf3, rrs, unique_path, cprint, gsz
 
+import sys
+from pathlib import Path
+
+from dh import cprint, fsz, get_files, gsz, mpf3, rrs, unique_path
 
 try:
     import cv2

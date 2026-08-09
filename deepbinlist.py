@@ -4,12 +4,14 @@ Find non-pure Python packages in system site-packages and save list to file.
 """
 
 from __future__ import annotations
+
 import argparse
 import logging
 import site
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+
 import pkg_resources
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})

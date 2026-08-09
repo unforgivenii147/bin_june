@@ -6,6 +6,7 @@ if they contain appropriate shebangs but have wrong or missing extensions.
 """
 
 from __future__ import annotations
+
 import os
 import sys
 

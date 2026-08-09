@@ -5,6 +5,7 @@ Translates docstrings and comments in Python files using AST and parallel thread
 """
 
 from __future__ import annotations
+
 import ast
 import logging
 import re
@@ -12,6 +13,7 @@ import shutil
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Final
+
 from deep_translator import GoogleTranslator
 
 CHUNK_SIZE = 1024 * 1024

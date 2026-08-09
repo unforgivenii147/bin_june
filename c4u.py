@@ -8,6 +8,7 @@ PyPI Package Update Checker with Multiprocessing & Resume Capability
 """
 
 from __future__ import annotations
+
 import json
 import logging
 import sys

@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import bz2
 import gzip
 import lzma
@@ -9,6 +10,7 @@ import tempfile
 import time
 from collections import namedtuple
 from pathlib import Path
+
 import blosc
 import brotli
 import lz4.frame

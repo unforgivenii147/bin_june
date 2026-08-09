@@ -2,6 +2,7 @@
 """Merge split part files into a single file."""
 
 from __future__ import annotations
+
 import argparse
 import re
 from concurrent.futures import ThreadPoolExecutor

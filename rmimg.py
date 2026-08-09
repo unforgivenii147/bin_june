@@ -1,13 +1,13 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-import os
+
 import sys
 from collections import deque
 from multiprocessing import get_context
 from pathlib import Path
+
 from bs4 import BeautifulSoup
-from dh import fsz, get_files
-from dh import cprint
+from dh import cprint, fsz, get_files
 
 
 def gsz(path: str | Path) -> int:

@@ -1,9 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import multiprocessing as mp
 import re
 import sys
-from collections import deque
 from pathlib import Path
 
 CHUNK_SIZE = 1024 * 1024
@@ -26,7 +26,7 @@ def is_binary(path: Path | str) -> bool:
         return True
 
 
-from dh import get_files, get_nobinary
+from dh import get_nobinary
 
 "\nConvert HTML entities in HTML files recursively.\nConverts &lt; to <, &gt; to >, and other common entities.\n"
 "\nConvert HTML entities in HTML files recursively.\nConverts &lt; to <, &gt; to >, and other common entities.\n"

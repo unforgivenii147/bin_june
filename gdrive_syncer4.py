@@ -1,9 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import os
 import pickle
 from datetime import datetime
 from pathlib import Path
+
 import requests
 from dotenv import load_dotenv
 from requests.models import Response

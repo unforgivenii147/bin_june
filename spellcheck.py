@@ -9,6 +9,7 @@ import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Dict, List, Tuple
+
 from spellchecker import SpellChecker
 
 # Common text file extensions to check

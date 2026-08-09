@@ -1,12 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-from collections import deque
-from collections.abc import Callable
+
 from io import BytesIO
 from pathlib import Path
+
 import cairosvg
-from PIL import Image
 from dh import get_files, mpf3
+from PIL import Image
 
 
 def process_file(path) -> None:

@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import shutil
 import subprocess
 from concurrent.futures import ProcessPoolExecutor, as_completed

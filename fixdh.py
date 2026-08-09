@@ -1,11 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import ast
 import re
 import sys
-from collections import deque
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+
 from dh import get_files
 
 DH_SRC_DIR = Path("~/isaac/pkgs/dh/src/dh").expanduser()

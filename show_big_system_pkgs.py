@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import contextlib
 import json
 import re
@@ -7,18 +8,9 @@ import subprocess
 import sys
 from datetime import datetime
 from multiprocessing import Pool, cpu_count
+from dh import fsz
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
-def fsz(bytes_size) -> str:
-    if bytes_size == 0:
-        return "N/A"
-    for unit in ["B", "KB", "MB", "GB"]:
-        if bytes_size < 1024.0:
-            return f"{bytes_size:.1f} {unit}"
-        bytes_size /= 1024.0
-    return f"{bytes_size:.1f} TB"
 
 
 def parse_size(size_str: str) -> int:

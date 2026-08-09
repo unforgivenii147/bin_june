@@ -1,10 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import sys
-from collections import deque
 from pathlib import Path
-from loguru import logger
+
 from dh import get_files
+from loguru import logger
 
 
 def strip_bash_comments(line):

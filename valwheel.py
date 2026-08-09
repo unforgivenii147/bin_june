@@ -1,9 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import re
 import shutil
 import sys
 from pathlib import Path
+
 from packaging.tags import parse_tag
 from packaging.utils import canonicalize_name
 from packaging.version import Version

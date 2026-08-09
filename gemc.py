@@ -1,10 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import ast
 import multiprocessing
 import operator
 import os
 from pathlib import Path
+
 import tree_sitter_python as tspython
 from tree_sitter import Language, Parser, Query, QueryCursor
 

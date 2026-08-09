@@ -1,8 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-import os
+
 import sys
 from pathlib import Path
+
 from binaryornot import is_binary
 from dh import cprint
 

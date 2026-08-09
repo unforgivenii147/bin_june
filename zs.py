@@ -1,10 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 import argparse
 import io
-import os
 import tarfile
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+
 import zstandard as zstd
 
 ZSTD_LEVEL = 19

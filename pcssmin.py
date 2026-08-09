@@ -1,15 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-import os
+
 import sys
-from collections import deque
-from collections.abc import Callable, Iterable
-from multiprocessing import get_context
 from pathlib import Path
-from typing import Any
+
+from dh import cprint, fsz, get_files, gext, mpf_async
 from rcssmin import cssmin
-from dh import fsz, get_files, gext, mpf_async
-from dh import cprint
 
 mpf = mpf_async
 

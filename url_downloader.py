@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-import os
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path

@@ -1,7 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-from collections import deque
+
 from pathlib import Path
+
 from dh import get_dirs, get_files, safe_delete
 
 

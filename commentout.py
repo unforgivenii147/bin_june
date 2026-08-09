@@ -1,9 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-import sys
 import os
+import sys
+from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from concurrent.futures import ProcessPoolExecutor
 
 # Mapping of extensions to their comment characters
 COMMENT_MAP = {

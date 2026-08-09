@@ -4,13 +4,13 @@ Check installed packages for available updates using parallel processing.
 Saves upgradable packages to upgradable.txt
 """
 
+import json
 import subprocess
 import sys
-import json
-from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import List, Dict, Tuple
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
+from typing import Dict, List, Tuple
 
 
 def get_installed_packages(site_dir: Path) -> List[Dict[str, str]]:

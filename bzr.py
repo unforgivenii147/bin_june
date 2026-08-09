@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import argparse
 import asyncio
 import bz2
@@ -7,9 +8,9 @@ import mmap
 import shutil
 import sys
 import tarfile
-from collections import deque
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+
 from dh import get_files
 
 MAX_WORKERS = 4

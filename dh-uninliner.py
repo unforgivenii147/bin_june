@@ -3,7 +3,6 @@ import argparse
 import ast
 import difflib
 import hashlib
-import os
 import re
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed

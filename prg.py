@@ -6,6 +6,7 @@ import re
 from collections.abc import Generator
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+
 from fastwalk import walk_files
 
 

@@ -5,6 +5,7 @@ Optionally convert them to lowercase using -a or --autofix flag.
 """
 
 from __future__ import annotations
+
 import argparse
 import sys
 from pathlib import Path

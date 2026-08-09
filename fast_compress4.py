@@ -5,10 +5,12 @@ Compresses files in place with .zst extension and removes originals.
 """
 
 from __future__ import annotations
+
 import argparse
 import sys
 from collections.abc import Iterator
 from pathlib import Path
+
 import zstandard as zstd
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})

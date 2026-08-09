@@ -1,10 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import ast
-from collections import deque
-from collections.abc import Callable
 from pathlib import Path
-from dh import _clean_fname, get_files, mpf3, unique_path
+
+from dh import get_files, mpf3, unique_path
 
 
 def process_file(file_path):

@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import ctypes
 import ctypes.util
 from datetime import UTC, datetime

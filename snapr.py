@@ -7,11 +7,9 @@ Recursively compresses/decompresses files using Snappy algorithm via cramjam
 import argparse
 import logging
 import multiprocessing
-import os
 import shutil
 import sys
 import tarfile
-import tempfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import List, Optional, Tuple

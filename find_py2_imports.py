@@ -1,12 +1,14 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import os
 import sys
 from pathlib import Path
+
 import tree_sitter_python as tsp
+from dh import cprint
 from rapidfuzz import fuzz
 from tree_sitter import Language, Parser
-from dh import cprint
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 

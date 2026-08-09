@@ -1,9 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-import os
+
 import re
-import sys
 from pathlib import Path
+
 from dh import cprint
 
 CHUNK_SIZE = 1024 * 1024

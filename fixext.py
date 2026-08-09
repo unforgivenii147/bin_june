@@ -1,13 +1,13 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 
 
+import argparse
 import os
 import sys
-import subprocess
-import argparse
-from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor
+from pathlib import Path
 from typing import NamedTuple, Optional
+
 from dh import cprint, is_binary, runcmd
 
 MIME_MAP = {

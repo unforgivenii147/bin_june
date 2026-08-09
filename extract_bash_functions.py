@@ -6,6 +6,7 @@ Optimized for Termux environment.
 """
 
 from __future__ import annotations
+
 import argparse
 import contextlib
 import os
@@ -14,6 +15,7 @@ import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import List, Set, Tuple
+
 from fastwalk import walk_files
 
 EXCLUDED = {

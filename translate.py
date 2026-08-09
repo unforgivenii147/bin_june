@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 import argparse
-import json
 import logging
 import os
 import random
@@ -11,6 +10,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Final
+
 from deep_translator import GoogleTranslator
 
 MAX_WORKERS: Final[int] = 16

@@ -1,11 +1,13 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import ast
 import multiprocessing as mp
 import os
 import tarfile
 import zipfile
 from pathlib import Path
+
 from dh import PKG_MAPPING, STDLIB
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})

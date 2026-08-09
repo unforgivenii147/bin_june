@@ -4,11 +4,13 @@ Translates Persian (Farsi) text in a file to English.
 """
 
 from __future__ import annotations
+
 import logging
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Final
+
 from deep_translator import GoogleTranslator
 
 MAX_WORKERS: Final[int] = 4

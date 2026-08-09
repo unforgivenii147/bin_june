@@ -13,11 +13,13 @@ Features:
 """
 
 from __future__ import annotations
+
 import argparse
 import logging
 import sys
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
+
 from dh import BIN_EXT, TXT_EXT
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")

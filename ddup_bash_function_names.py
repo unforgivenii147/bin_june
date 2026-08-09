@@ -4,6 +4,7 @@ Check for duplicate function names in bash functions file.
 """
 
 from __future__ import annotations
+
 import re
 import sys
 from collections import Counter

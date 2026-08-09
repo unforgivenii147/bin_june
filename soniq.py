@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import mmap
 import sys
 from multiprocessing import Pool, cpu_count

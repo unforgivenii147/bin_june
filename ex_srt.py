@@ -1,9 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Extract subtitles using ffmpy."""
 
-import sys
 import json
+import sys
 from pathlib import Path
+
 import ffmpy
 
 

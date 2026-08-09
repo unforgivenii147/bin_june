@@ -5,6 +5,7 @@ Supports parallel processing and optional auto-fix with -a flag.
 """
 
 from __future__ import annotations
+
 import argparse
 import ast
 import sys

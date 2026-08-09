@@ -1,8 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import ast
 import sys
-from collections import deque
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 

@@ -6,6 +6,7 @@ Processes Python files with optimized single-threaded or parallel processing.
 """
 
 from __future__ import annotations
+
 import ast
 import shutil
 import sys

@@ -1,8 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Compile C/C++ source files using clang/clang++."""
 
-import sys
 import subprocess
+import sys
 from pathlib import Path
 
 

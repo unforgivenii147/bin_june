@@ -5,11 +5,13 @@ Translates non-English lines in a file line by line in-place.
 """
 
 from __future__ import annotations
+
 import logging
 import shutil
 import sys
 import tempfile
 from pathlib import Path
+
 from deep_translator import GoogleTranslator
 from langdetect import DetectorFactory, detect
 

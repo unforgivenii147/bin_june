@@ -1,9 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import argparse
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
+
 import imagehash
 from PIL import Image
 

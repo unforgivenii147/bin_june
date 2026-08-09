@@ -4,6 +4,7 @@ import collections
 import json
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+
 import astor
 
 REPEATED_JSON_PATH = Path("repeated.json")

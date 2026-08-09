@@ -6,12 +6,14 @@ Saves repository sizes to repo_sizes.json for caching
 """
 
 from __future__ import annotations
+
 import json
 import os
 import subprocess
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
+
 import requests
 from dotenv import load_dotenv
 

@@ -5,6 +5,7 @@ Optimized for Python 3.12 with modern syntax, type hints, and performance improv
 """
 
 from __future__ import annotations
+
 import argparse
 import asyncio
 import logging
@@ -16,6 +17,7 @@ import tarfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Final
+
 import zstandard as zstd
 
 CHUNK_SIZE = 1024 * 1024

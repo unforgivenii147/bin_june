@@ -1,10 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import sys
 import threading
 import time
 from os import getenv
 from pathlib import Path
+
 from dotenv import load_dotenv
 from github import Auth, Github, GithubException
 

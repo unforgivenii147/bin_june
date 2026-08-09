@@ -1,10 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import ast
 import sys
 import unicodedata
-from collections import deque
 from pathlib import Path
+
 import astor
 
 CHUNK_SIZE = 1024 * 1024

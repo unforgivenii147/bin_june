@@ -1,11 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-import os
+
 import sys
-from collections import deque
 from pathlib import Path
-from dh import _clean_fname, get_files, unique_path
-from dh import cprint
+
+from dh import cprint, get_files, unique_path
 
 OUT_PATH = Path("/data/data/com.termux/files/home/tmp/metadata")
 

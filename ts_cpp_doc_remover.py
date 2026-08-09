@@ -1,12 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-import os
+
 import sys
 from pathlib import Path
+
 import tree_sitter_cpp as tscpp
+from dh import cprint, getfiles, mpf3
 from tree_sitter import Language, Node, Parser
-from fastwalk import walk_files
-from dh import mpf3, getfiles, cprint
 
 
 def remove_blank_lines(text: str) -> str:

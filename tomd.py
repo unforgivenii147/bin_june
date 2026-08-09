@@ -1,12 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import sys
-from collections import deque
-from collections.abc import Callable
 from pathlib import Path
+
+from dh import get_files, mpf3
 from markdownify import markdownify as md
 from readability import Document
-from dh import get_files, mpf3
 
 remove_orig = True
 

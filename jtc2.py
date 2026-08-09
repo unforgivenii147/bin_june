@@ -1,8 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import ast
 from pathlib import Path
 from sys import argv
+
 from dh import runcmd
 
 if __name__ == "__main__":

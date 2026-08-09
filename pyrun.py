@@ -7,12 +7,12 @@ Runs all .py files in a directory tree, continuing even if some fail.
 """
 import argparse
 import multiprocessing
+import runpy
 import subprocess
 import sys
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-import runpy
 
 
 def run_python_file(file_path: Path, timeout: int = 10) -> tuple[Path, bool, str | None, str | None]:

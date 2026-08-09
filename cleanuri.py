@@ -8,11 +8,13 @@ Duplicate assets are only saved once.
 """
 
 from __future__ import annotations
+
 import base64
 import hashlib
 import mimetypes
 import re
 from pathlib import Path
+
 from dh import MIME2EXT
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})

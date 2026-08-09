@@ -1,20 +1,15 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-import os
+
 import re
 import sys
 import tarfile
 import zipfile
-from collections import deque
-from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from functools import wraps
-from inspect import getfullargspec
-from itertools import chain
 from pathlib import Path
-from typing import Any
+
 import py7zr
-from dh import get_nobinary, is_binary, is_valid_url, cprint
+from dh import cprint, get_nobinary
 
 CHUNK_SIZE = 1024 * 1024
 url_pattern = re.compile("https?://[^\\s\\\"\\']+")

@@ -4,12 +4,14 @@ Fetch latest package updates from PyPI RSS feed and save to a file.
 """
 
 from __future__ import annotations
+
 import csv
 import json
 import sys
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from typing import Dict, List
+
 import requests
 
 

@@ -5,6 +5,7 @@ Supports multiple files, directories, multiprocessing, and personal dictionaries
 """
 
 from __future__ import annotations
+
 import argparse
 import json
 import re

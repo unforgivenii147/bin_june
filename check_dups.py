@@ -1,11 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import ast
 import copy
 import hashlib
 import sys
 from ast import AsyncFunctionDef, ClassDef, FunctionDef
-from collections.abc import Callable
 from dataclasses import dataclass
 from os import scandir as os_scandir
 from pathlib import Path

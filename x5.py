@@ -7,17 +7,18 @@ Can optionally tar subdirectories before LZMA compression for better ratio
 """
 
 from __future__ import annotations
+
 import argparse
 import lzma
 import multiprocessing as mp
 import shutil
 import sys
 import tarfile
-import tempfile
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
+from dh import fsz
 
 try:
     from rich import box
@@ -55,14 +56,6 @@ class CompressionResult:
     original_deleted: bool = False
     operation: str = "compress"
     was_tarred: bool = False
-
-
-def fsz(size_bytes: float) -> str:
-    for unit in ["B", "KB", "MB", "GB", "TB"]:
-        if size_bytes < 1024.0:
-            return f"{size_bytes:.2f} {unit}"
-        size_bytes /= 1024.0
-    return f"{size_bytes:.2f} PB"
 
 
 def tar_directory(directory: Path, output_path: Path, delete_original: bool = False) -> tuple[int, bool]:

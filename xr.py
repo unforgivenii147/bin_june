@@ -1,18 +1,18 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import argparse
 import asyncio
 import bz2
 import gzip
 import sys
-from collections import deque
 from pathlib import Path
+
 import brotlicffi as brotli
 import lz4.frame
 import py7zr
 import zstandard as zstd
-from dh import fsz, get_files, get_dirs
-
+from dh import fsz, get_dirs, get_files
 
 MAX_WORKERS = 4
 CHUNK_SIZE = 1024 * 1024

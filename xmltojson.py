@@ -1,9 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import json
 import sys
 from pathlib import Path
 from xml.etree.ElementTree import Element
+
 from defusedxml.ElementTree import parse as _parse
 
 

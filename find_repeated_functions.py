@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 import ast
-import hashlib
 import json
 import os
 from collections import defaultdict

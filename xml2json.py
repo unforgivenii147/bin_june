@@ -1,14 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import json
-import os
 import sys
-from collections import deque
-from collections.abc import Callable
 from pathlib import Path
+
 import xmltodict
-from dh import get_files, mpf3
-from dh import cprint
+from dh import cprint, get_files, mpf3
 
 MAX_QUEUE = 16
 REMOVE_ORIG = True

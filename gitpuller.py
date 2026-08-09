@@ -5,7 +5,9 @@ Requires gitpython library: pip install gitpython
 """
 
 from __future__ import annotations
+
 from pathlib import Path
+
 from git import GitCommandError, Repo
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})

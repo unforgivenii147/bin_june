@@ -4,10 +4,8 @@ import concurrent.futures
 import csv
 import fnmatch
 import importlib.metadata
-import os
 import shutil
 import site
-import sys
 from pathlib import Path
 
 

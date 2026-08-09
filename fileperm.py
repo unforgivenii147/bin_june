@@ -1,8 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import argparse
 import os
 import stat
+
 from tqdm import tqdm
 
 SKIP_DIRS = {".git", ".ruff_cache", "__pycache__"}

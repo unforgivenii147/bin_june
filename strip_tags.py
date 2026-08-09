@@ -1,9 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import re
 import sys
 from pathlib import Path
-from dh import get_removed_lines, read_lines, read_lines_mmap
+
+from dh import get_removed_lines, read_lines
 
 INPLACE = "-w" in sys.argv
 if __name__ == "__main__":

@@ -1,9 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import json
 from collections import defaultdict
-from os import scandir as os_scandir
 from pathlib import Path
+
 from xxhash import xxh64
 
 CHUNK_SIZE = 1024 * 1024

@@ -4,6 +4,7 @@ Convert MP3 files to half their original bitrate using ffmpeg with parallel proc
 """
 
 from __future__ import annotations
+
 import argparse
 import json
 import os

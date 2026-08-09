@@ -1,10 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import argparse
 import json
 import sys
 from pathlib import Path
 from pprint import pformat
+
 import jmespath
 from jmespath import exceptions
 

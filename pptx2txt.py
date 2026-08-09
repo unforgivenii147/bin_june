@@ -6,6 +6,7 @@ Usage: python extract_text.py input.pptx
 
 import sys
 from pathlib import Path
+
 from pptx import Presentation
 
 

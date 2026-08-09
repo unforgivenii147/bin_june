@@ -6,12 +6,14 @@ Images with faces stay in their original location.
 """
 
 from __future__ import annotations
+
 import logging
 import shutil
 import sys
 import time
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
+
 from tqdm import tqdm
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})

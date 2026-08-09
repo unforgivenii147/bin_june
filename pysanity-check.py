@@ -1,9 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import importlib
 import re
 import subprocess
 import sys
+
 import pkg_resources
 
 

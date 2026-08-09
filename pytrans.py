@@ -6,6 +6,7 @@ Optimized for Python 3.12.
 """
 
 from __future__ import annotations
+
 import ast
 import io
 import logging
@@ -14,6 +15,7 @@ import time
 import tokenize
 from pathlib import Path
 from typing import Final
+
 import pycld2
 from deep_translator import GoogleTranslator
 from dh import DOC_TH1, DOC_TH2

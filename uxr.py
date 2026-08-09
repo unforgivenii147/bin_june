@@ -6,8 +6,10 @@ Supported: .gz, .xz, .zip, .whl, .br, .zst, .7z, and tarballs (.tar.gz, .tar.xz,
 """
 
 from __future__ import annotations
+
 import sys
 from pathlib import Path
+
 import py7zr
 from joblib import Parallel, delayed
 from tqdm import tqdm

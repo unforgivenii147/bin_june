@@ -1,12 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import ast
 import sys
-from collections.abc import Callable, Iterable
-from multiprocessing import get_context
 from os import scandir as os_scandir
 from pathlib import Path
-from typing import Any
+
 import tree_sitter_python as tspython
 from tree_sitter import Language, Parser, Query, QueryCursor
 

@@ -1,13 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import ast
-import os
 import sys
-from collections import deque
-from collections.abc import Callable
 from pathlib import Path
-from dh import SOURCE_CODE_EXT, fsz, get_files, get_nobinary, mpf3
-from dh import cprint
+
+from dh import SOURCE_CODE_EXT, cprint, fsz, get_nobinary, mpf3
 
 CHUNK_SIZE = 1024 * 1024
 

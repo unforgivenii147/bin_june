@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import ast
 import importlib
 import inspect
@@ -8,7 +9,8 @@ from collections import deque
 from multiprocessing import get_context
 from pathlib import Path
 from textwrap import dedent
-from dh import _clean_fname, get_files, unique_path
+
+from dh import get_files, unique_path
 
 cwd = Path.cwd()
 cwdname = cwd.name

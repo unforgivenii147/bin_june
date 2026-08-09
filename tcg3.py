@@ -4,6 +4,7 @@ Termux script creator - Creates executable scripts from clipboard content.
 """
 
 from __future__ import annotations
+
 import subprocess
 import sys
 from pathlib import Path

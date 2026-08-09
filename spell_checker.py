@@ -3,7 +3,6 @@ import argparse
 import json
 import re
 import subprocess
-import sys
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field

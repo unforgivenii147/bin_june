@@ -1,14 +1,13 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-import os
+
 import re
-import sys
-from collections import deque
 from pathlib import Path
+
 from dh import cprint
 
 CHUNK_SIZE = 1024 * 1024
-from dh import fsz, get_files, get_nobinary
+from dh import fsz, get_nobinary
 
 
 def gsz(path: str | Path) -> int:

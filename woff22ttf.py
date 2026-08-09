@@ -1,13 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-import os
-import sys
-from collections import deque
-from collections.abc import Callable
+
 from pathlib import Path
+
+from dh import cprint, get_files, mpf3
 from fontTools.ttLib import woff2
-from dh import get_files, mpf3
-from dh import cprint
 
 cwd = Path.cwd()
 

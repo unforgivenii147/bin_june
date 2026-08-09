@@ -1,91 +1,18 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import argparse
 import sys
 from collections import deque
-from collections.abc import Callable
 from pathlib import Path
 from time import perf_counter as pff
-from dh import cprint
 
-CHUNK_SIZE = 1024 * 1024
+from dh import cprint, is_binary, get_pyfiles, fsz, mpf3, is_python_file,format_time
 
-
-def is_python_file(path: str | Path) -> bool:
-    from ast import parse as ast_parse
-
-    path = Path(path)
-    if is_binary(path):
-        return False
-    if not path.stat().st_size:
-        return False
-    if path.is_file() and path.suffix == ".py":
-        return True
-    if not path.suffix:
-        content = path.read_text(encoding="utf-8")
-        if not content:
-            return False
-        if content.startswith("#!") and "python" in content[:100]:
-            return True
-        try:
-            _ = ast_parse(content)
-            return True
-        except:
-            return False
-    return False
-
-
-def is_binary(path: Path | str) -> bool:
-    path = Path(path)
-    try:
-        with path.open("rb") as f:
-            chunk = f.read(CHUNK_SIZE)
-        if not chunk:
-            return False
-        if b"\x00" in chunk:
-            return True
-        text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
-        nontext = sum((1 for b in chunk if b not in text_chars))
-        return nontext / len(chunk) > 0.3
-    except Exception:
-        return True
-
-
-def get_pyfiles(path: str | Path) -> list[Path]:
-    path = Path(path)
-    if path.is_file():
-        if path.suffix == ".py":
-            return [path]
-        if not path.suffix and (not path.name.startswith(".")) and is_python_file(path):
-            return [path]
-        return []
-    if not path.is_dir():
-        return []
-    pyfiles = []
-    skip_dirs = {".git", "__pycache__"}
-    queue = deque([path])
-    while queue:
-        current = queue.popleft()
-        try:
-            entries = current.iterdir()
-        except (PermissionError, OSError):
-            continue
-        for item in entries:
-            if item.is_symlink():
-                continue
-            if item.is_dir() and item.name not in skip_dirs:
-                queue.append(item)
-            elif item.is_file():
-                if item.suffix == ".py":
-                    pyfiles.append(item)
-                elif not item.suffix and is_python_file(item):
-                    pyfiles.append(item)
-    return sorted(pyfiles)
-
-
-from dh import fsz, mpf3
 
 MODE = "black"
+
+CHUNK_SIZE = 1024 * 1024
 
 
 def process_file(path: str | Path, mode: str = MODE) -> bool:

@@ -6,8 +6,10 @@ Requires: pip install gitpython requests python-dotenv
 """
 
 from __future__ import annotations
+
 import os
 from pathlib import Path
+
 import requests
 from dotenv import load_dotenv
 from git import GitCommandError, Repo

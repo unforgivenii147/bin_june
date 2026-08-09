@@ -6,6 +6,7 @@ Updated for Python 3.12+ (no pkg_resources dependency).
 """
 
 from __future__ import annotations
+
 import argparse
 import importlib.metadata
 import logging

@@ -1,13 +1,14 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import base64
 import re
 import sys
-from collections import deque
 from email import policy
 from email.message import EmailMessage
 from email.parser import BytesParser
 from pathlib import Path
+
 from dh import get_files
 
 

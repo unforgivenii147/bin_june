@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import re
 import sys
 from collections import Counter, deque
@@ -7,7 +8,7 @@ from multiprocessing import Pool
 from pathlib import Path
 
 CHUNK_SIZE = 1024 * 1024
-from dh import get_files, get_nobinary
+from dh import get_nobinary
 
 
 def is_binary(path: Path | str) -> bool:

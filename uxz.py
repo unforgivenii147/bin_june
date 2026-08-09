@@ -1,11 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import sys
 import tarfile
-from collections import deque
 from pathlib import Path
-from lzma_mt import LZMADecompressor
+
 from dh import get_files
+from lzma_mt import LZMADecompressor
 
 MEM_LIMIT = 104857600
 

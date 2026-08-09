@@ -1,8 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/python
 from __future__ import annotations
+
 import itertools
 import time
 from pathlib import Path
+
 import cv2
 import pytesseract
 from dh import IMG_EXT

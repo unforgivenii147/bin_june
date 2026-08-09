@@ -1,12 +1,13 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import sys
-from collections import deque
 from multiprocessing import get_context
 from pathlib import Path
+
 import tree_sitter_cpp as tscpp
-from tree_sitter import Language, Parser, Query, QueryCursor
 from dh import get_files
+from tree_sitter import Language, Parser, Query, QueryCursor
 
 
 def remove_blank_lines(text: str | Path) -> str:

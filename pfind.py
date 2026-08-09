@@ -3,11 +3,10 @@
 
 import sys
 import tarfile
-import zipfile
 import tempfile
-from pathlib import Path
+import zipfile
 from multiprocessing import Pool, cpu_count
-from functools import partial
+from pathlib import Path
 
 try:
     import py7zr

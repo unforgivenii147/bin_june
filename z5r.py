@@ -5,6 +5,7 @@ Optimized for Python 3.12 with streaming and parallel processing.
 """
 
 from __future__ import annotations
+
 import argparse
 import multiprocessing as mp
 import shutil
@@ -14,7 +15,10 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Final
+
 import zstandard as zstd
+from dh import fsz, gsz
+
 
 DEFAULT_SKIP_DIRS: Final[set[str]] = {
     "zstandard",
@@ -58,26 +62,13 @@ class FolderResult:
         return max(0, self.original_size - self.compressed_size)
 
 
-def fsz(size_bytes: int) -> str:
-    val = float(size_bytes)
-    for unit in ["B", "KB", "MB", "GB", "TB"]:
-        if val < 1024.0:
-            return f"{val:.2f} {unit}"
-        val /= 1024.0
-    return f"{val:.2f} PB"
-
-
-def get_folder_size(path: Path) -> int:
-    return sum(f.stat().st_size for f in path.rglob("*") if f.is_file())
-
-
 def compress_folder_task(folder_path: Path, output_dir: Path, level: int = 3, threads: int = 0) -> FolderResult:
     start_time = time.perf_counter()
     folder_name = folder_path.name
     zst_path = output_dir / f"{folder_name}.tar.zst"
     temp_tar = output_dir / f".tmp_{folder_name}.tar"
     try:
-        orig_size = get_folder_size(folder_path)
+        orig_size = gsz(folder_path)
         with tarfile.open(temp_tar, "w") as tar:
             tar.add(folder_path, arcname=folder_name)
         cctx = zstd.ZstdCompressor(level=level, threads=threads)
@@ -115,7 +106,7 @@ def decompress_folder_task(zst_path: Path, output_dir: Path) -> FolderResult:
             tar.extractall(output_dir, filter="data")
         temp_tar.unlink()
         zst_path.unlink()
-        extracted_size = get_folder_size(output_dir / folder_name)
+        extracted_size = gsz(output_dir / folder_name)
         return FolderResult(
             name=folder_name,
             original_size=extracted_size,
@@ -146,7 +137,7 @@ def main():
         targets = [d for d in root.iterdir() if d.is_dir() and d.name not in DEFAULT_SKIP_DIRS]
         valid_targets = []
         for d in targets:
-            size_mb = get_folder_size(d) / (1024 * 1024)
+            size_mb = gsz(d)
             if size_mb >= args.min_size:
                 valid_targets.append(d)
         targets = valid_targets

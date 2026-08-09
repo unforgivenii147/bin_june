@@ -1,13 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-import os
+
 import re
 import sys
-from collections import deque
 from pathlib import Path
+
+from dh import cprint, fsz, get_files
 from joblib import Parallel, delayed
-from dh import fsz, get_files
-from dh import cprint
 
 
 def gsz(path: str | Path) -> int:

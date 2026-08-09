@@ -5,6 +5,7 @@ Optimized for Python 3.12 with modern syntax, type hints, and performance improv
 """
 
 from __future__ import annotations
+
 import argparse
 import logging
 import multiprocessing
@@ -15,9 +16,9 @@ import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Final
+
 import zstandard as zstd
 from dh import fsz
-
 
 SKIP_DIRS: Final[frozenset[str]] = frozenset(
     {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}

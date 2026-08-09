@@ -1,11 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import subprocess
-from collections import deque
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from rich.progress import Progress
+
 from dh import get_files
+from rich.progress import Progress
 
 
 def optimize_png(path) -> int:

@@ -8,6 +8,7 @@ Optimized for Python 3.12+ on Linux.
 """
 
 from __future__ import annotations
+
 import ast
 import logging
 import sys

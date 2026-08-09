@@ -8,10 +8,12 @@ Save a comprehensive report to ~/dh_usage.txt and generate PNG charts.
 """
 
 from __future__ import annotations
+
 import ast
 import pkgutil
 from collections import Counter, defaultdict
 from pathlib import Path
+
 import matplotlib.pyplot as plt
 
 BIN_DIR = Path.home() / "bin"

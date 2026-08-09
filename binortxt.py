@@ -1,8 +1,7 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import sys
-from collections import deque
-from collections.abc import Callable
 from pathlib import Path
 
 CHUNK_SIZE = 1024 * 1024

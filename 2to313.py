@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import sys
-from collections.abc import Callable
 from lib2to3 import refactor
 from os import scandir as os_scandir
 from pathlib import Path

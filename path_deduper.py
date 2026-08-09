@@ -6,6 +6,7 @@ and saves the configuration to ~/.bashrc
 """
 
 from __future__ import annotations
+
 import os
 from collections import OrderedDict
 from pathlib import Path

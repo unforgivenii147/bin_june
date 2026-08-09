@@ -5,6 +5,7 @@ Archives existing files to ~/isaac/may/scripts/ if -a flag provided.
 """
 
 from __future__ import annotations
+
 import shutil
 import subprocess
 import sys

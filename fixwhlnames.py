@@ -5,6 +5,7 @@ This is the most accurate method as it extracts the real distribution name and v
 """
 
 from __future__ import annotations
+
 import re
 import shutil
 import zipfile

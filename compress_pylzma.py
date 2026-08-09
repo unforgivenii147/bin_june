@@ -4,14 +4,12 @@ Compress/decompress files recursively using pylzma with parallel processing.
 """
 
 import argparse
-import tarfile
-import tempfile
-import shutil
-import os
-from pathlib import Path
-from concurrent.futures import ProcessPoolExecutor, as_completed
-import pylzma
 import io
+import tarfile
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
+
+import pylzma
 
 
 def create_tar_for_directory(dir_path):
