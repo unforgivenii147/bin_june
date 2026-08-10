@@ -46,14 +46,12 @@ def filter_diff_chunk(chunk: list[str], exclude_set: frozenset[str], mode: str) 
 def process_files_parallel(path1: Path, path2: Path, num_workers: int = 2) -> None:
     """Compare files with parallel reading and optional parallel filtering."""
 
-    # Count lines to decide strategy
     lines1_count = count_lines(path1)
     lines2_count = count_lines(path2)
 
     use_mmap1 = lines1_count > 5000
     use_mmap2 = lines2_count > 5000
 
-    # Parallel file reading
     with ProcessPoolExecutor(max_workers=num_workers) as executor:
         future1 = executor.submit(read_file_task, path1, use_mmap1)
         future2 = executor.submit(read_file_task, path2, use_mmap2)
@@ -61,11 +59,9 @@ def process_files_parallel(path1: Path, path2: Path, num_workers: int = 2) -> No
         _, lines1 = future1.result()
         _, lines2 = future2.result()
 
-    # Build sets for O(n) lookups
     set1 = set(lines1)
     set2 = set(lines2)
 
-    # Parallel filtering only if both files are large (>10k lines)
     if lines1_count > 10000 and lines2_count > 10000:
         chunk_size = max(1000, len(lines1) // num_workers)
         chunks = [lines1[i : i + chunk_size] for i in range(0, len(lines1), chunk_size)]
@@ -78,11 +74,9 @@ def process_files_parallel(path1: Path, path2: Path, num_workers: int = 2) -> No
     else:
         only_in_first = [p for p in lines1 if p not in set2]
 
-    # Always serial for smaller diff (usually much faster than reading)
     only_in_second = [p for p in lines2 if p not in set1]
     common_count = len(set1 & set2)
 
-    # Output
     if only_in_first:
         cprint(f"only in {path1.name}:", "cyan")
         for line in only_in_first:

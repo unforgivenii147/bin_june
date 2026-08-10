@@ -1,36 +1,64 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-import sys
 import json
+import os
+from pathlib import Path
 
 
-def main():
-    if len(sys.argv) < 3:
-        print("Usage: python script.py <english_file> <persian_file>")
-        sys.exit(1)
+def merge_translations(src_dir="."):
+    """
+    Merge paired translation files into dic.json, filtering failed translations.
+    Handles both numbered files (01, 02, ...) and named files (iverbs, stopwords, etc.)
+    """
+    translations = {}
+    failed = []
+    processed = set()
 
-    english_file = sys.argv[1]
-    persian_file = sys.argv[2]
+    all_files = sorted([f for f in os.listdir(src_dir) if f.endswith(".txt")])
 
-    # Read both files
-    with open(english_file, "r", encoding="utf-8") as f:
-        english_words = [line.strip() for line in f if line.strip()]
+    for fa_file in all_files:
+        if fa_file in processed or fa_file.endswith("_en.txt"):
+            continue
 
-    with open(persian_file, "r", encoding="utf-8") as f:
-        persian_words = [line.strip() for line in f if line.strip()]
+        base_name = fa_file[:-4]
+        en_file = f"{base_name}_en.txt"
 
-    # Verify matching counts
-    if len(english_words) != len(persian_words):
-        print(f"Warning: word count mismatch ({len(english_words)} vs {len(persian_words)})")
+        fa_path = Path(src_dir) / fa_file
+        en_path = Path(src_dir) / en_file
 
-    # Create list of dictionaries
-    dictionary = [{en: fa} for en, fa in zip(english_words, persian_words)]
+        if not en_path.exists():
+            print(f"⚠️  Skipping {fa_file}: {en_file} not found")
+            continue
 
-    # Save to dic.json
+        try:
+            with open(fa_path, "r", encoding="utf-8") as f_fa, open(en_path, "r", encoding="utf-8") as f_en:
+                fa_lines = [line.strip() for line in f_fa if line.strip()]
+                en_lines = [line.strip() for line in f_en if line.strip()]
+
+            if len(fa_lines) != len(en_lines):
+                print(f"⚠️  Line count mismatch: {fa_file} ({len(fa_lines)}) vs {en_file} ({len(en_lines)})")
+
+            for fa_word, en_word in zip(fa_lines, en_lines):
+                if fa_word == en_word:
+                    failed.append(fa_word)
+                else:
+                    translations[fa_word] = en_word
+
+            print(f"✓ Processed {fa_file} + {en_file}")
+            processed.add(fa_file)
+            processed.add(en_file)
+
+        except Exception as e:
+            print(f"❌ Error processing {fa_file}: {e}")
+
     with open("dic.json", "w", encoding="utf-8") as f:
-        json.dump(dictionary, f, ensure_ascii=False, indent=2)
+        json.dump(translations, f, ensure_ascii=False, indent=2)
 
-    print(f"✓ Dictionary saved: {len(dictionary)} entries")
+    with open("failed_fa.txt", "w", encoding="utf-8") as f:
+        f.write("\n".join(failed))
+
+    print(f"\n✓ {len(translations)} translations → dic.json")
+    print(f"✓ {len(failed)} failed → failed_fa.txt")
 
 
 if __name__ == "__main__":
-    main()
+    merge_translations()

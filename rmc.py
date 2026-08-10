@@ -1,10 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""Remove comments from Python files using tree-sitter.
+"""Remove comments and docstrings from Python files using tree-sitter.
 
 Processes files in place using parallel workers.
 - Preserves shebangs (#!...), module docstrings, and pragmas (# type:, # fmt:).
-- Removes function/class docstrings. If a docstring is the only node in a body,
-  replaces it with 'pass' to prevent syntax errors.
+- Removes function/class docstrings. If a docstring/comment is the only node
+  in a body, replaces it with 'pass' to prevent syntax errors.
 - Validates result code with ast.parse() before writing to disk.
 """
 
@@ -32,13 +32,27 @@ def get_parser() -> Parser:
     return _PARSER
 
 
+def get_first_named_child(node):
+    for child in node.children:
+        if child.is_named:
+            return child
+    return None
+
+
 def is_docstring_node(node) -> bool:
     """Check if a node is an expression_statement containing a string."""
     if node.type != "expression_statement":
         return False
-    if not node.children:
-        return False
-    return node.children[0].type in ("string", "concatenated_string")
+    first = get_first_named_child(node)
+    return first is not None and first.type in ("string", "concatenated_string")
+
+
+def get_first_statement(parent):
+    """Get the first named child of a node that is not a comment."""
+    for child in parent.children:
+        if child.is_named and child.type != "comment":
+            return child
+    return None
 
 
 def should_keep_comment(comment_bytes: bytes) -> bool:
@@ -58,8 +72,35 @@ def should_keep_comment(comment_bytes: bytes) -> bool:
     return False
 
 
+def get_block_indent(block_node, content: bytes) -> bytes:
+    """Determine the correct indentation for a block to safely inject 'pass'."""
+
+    for child in block_node.children:
+        if child.is_named and child.type != "comment":
+            line_start = content.rfind(b"\n", 0, child.start_byte) + 1
+            indent = content[line_start : child.start_byte]
+            if indent and indent.strip() == b"":
+                return indent
+            break
+
+    for child in block_node.children:
+        if child.is_named and child.type == "comment":
+            line_start = content.rfind(b"\n", 0, child.start_byte) + 1
+            indent = content[line_start : child.start_byte]
+            if indent and indent.strip() == b"":
+                return indent
+
+    parent = block_node.parent
+    parent_start = parent.start_byte
+    line_start = content.rfind(b"\n", 0, parent_start) + 1
+    parent_indent = content[line_start:parent_start]
+    if parent_indent.strip() == b"":
+        return parent_indent + b"    "
+    return b"    "
+
+
 def collect_actions(root, content: bytes):
-    """Collect byte ranges to remove or replace. Returns dict {id(node): (start, end, replacement)}."""
+    """Collect byte ranges to remove or replace."""
     actions = {}
     blocks = []
 
@@ -75,24 +116,21 @@ def collect_actions(root, content: bytes):
             else:
                 actions[id(node)] = (node.start_byte, node.end_byte, b"")
 
-        elif node.type == "expression_statement" and is_docstring_node(node):
-            parent = node.parent
-            if parent:
-                is_first = False
-                for child in parent.children:
-                    if child.is_named:
-                        is_first = child.id == node.id
-                        break
+        elif node.type == "expression_statement":
+            if is_docstring_node(node):
+                parent = node.parent
+                if parent:
+                    first_stmt = get_first_statement(parent)
 
-                if is_first:
-                    if parent.type == "module":
-                        pass
-                    elif parent.type == "block":
-                        grandparent = parent.parent
-                        if grandparent and grandparent.type in ("function_definition", "class_definition"):
-                            actions[id(node)] = (node.start_byte, node.end_byte, b"")
+                    if first_stmt and first_stmt.id == node.id:
+                        if parent.type == "module":
+                            pass
+                        elif parent.type == "block":
+                            grandparent = parent.parent
+                            if grandparent and grandparent.type in ("function_definition", "class_definition"):
+                                actions[id(node)] = (node.start_byte, node.end_byte, b"")
 
-        elif node.type == "block":
+        if node.type == "block":
             blocks.append(node)
 
         for child in reversed(node.children):
@@ -104,7 +142,9 @@ def collect_actions(root, content: bytes):
             first = named_children[0]
             s, e, _ = actions[id(first)]
 
-            actions[id(first)] = (s, e, b"pass")
+            line_start = content.rfind(b"\n", 0, s) + 1
+            indent = get_block_indent(block, content)
+            actions[id(first)] = (line_start, e, indent + b"pass")
 
     return actions
 
@@ -172,7 +212,7 @@ def iter_py_files(paths: list[Path]):
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Remove comments from Python files in place (tree-sitter powered).")
+    ap = argparse.ArgumentParser(description="Remove comments and docstrings from Python files in place.")
     ap.add_argument(
         "paths",
         nargs="*",
@@ -195,7 +235,7 @@ def main() -> int:
         return 1
 
     base = Path.cwd()
-    total_comments = 0
+    total_removed = 0
     files_changed = 0
     errors = 0
 
@@ -207,14 +247,14 @@ def main() -> int:
                 errors += 1
                 print(f"{rel}: ERROR: {err}", file=sys.stderr)
                 continue
-            total_comments += count
+            total_removed += count
             if count > 0:
                 files_changed += 1
-            print(f"{rel}: {count} comment(s) removed")
+            print(f"{rel}: {count} comment(s)/docstring(s) removed")
 
     print(
         f"\nSummary: {files_changed}/{len(files)} file(s) changed, "
-        f"{total_comments} comment(s) removed, {errors} error(s)."
+        f"{total_removed} comment(s)/docstring(s) removed, {errors} error(s)."
     )
     return 1 if errors else 0
 
