@@ -6,7 +6,7 @@ from pathlib import Path
 
 import magic
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 MIME_TO_EXT = {
     "text/html": "html",
     "application/json": "json",

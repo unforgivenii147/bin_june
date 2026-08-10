@@ -14,7 +14,7 @@ import requests
 from dotenv import load_dotenv
 from git import GitCommandError, Repo
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 load_dotenv()
 
 

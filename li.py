@@ -9,7 +9,7 @@ from pathlib import Path
 
 from dh import fsz, gsz
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 CYAN = "\x1b[36m"
 BLUE = "\x1b[34m"
 GREEN = "\x1b[32m"

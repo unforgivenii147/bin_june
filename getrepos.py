@@ -10,8 +10,6 @@ from pathlib import Path
 from dotenv import load_dotenv
 from github import Auth, Github, GithubException
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def countdown(timeout: int) -> None:
     for remaining in range(timeout, 0, -1):

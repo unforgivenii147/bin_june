@@ -9,7 +9,6 @@ from urllib.parse import urlparse
 import requests
 from dh import runcmd
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 GITHUB_API_URL = "https://api.github.com/repos"
 remained = []

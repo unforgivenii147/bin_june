@@ -4,8 +4,6 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def html_to_png(html_content, output_path, dpi=150):
     if html_content.startswith(("<", "<!DOCTYPE")):

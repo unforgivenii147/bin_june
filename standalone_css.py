@@ -10,7 +10,7 @@ from pathlib import Path
 import requests
 from loguru import logger
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 STATIC_DIR = "/sdcard/_static"
 
 

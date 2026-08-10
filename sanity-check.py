@@ -5,8 +5,6 @@ import sys
 
 from dh import runcmd
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def get_installed_packages() -> list[str]:
     try:

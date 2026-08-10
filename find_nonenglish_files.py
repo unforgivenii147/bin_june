@@ -9,7 +9,7 @@ from pathlib import Path
 import pycld2
 from dh import TXT_EXT
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 MIN_TEXT_LENGTH = 20
 SUPPORTED_EXTENSIONS = TXT_EXT
 ENGLISH_LANGUAGES = {"en", "en_US", "en_GB"}

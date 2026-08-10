@@ -6,8 +6,6 @@ from datetime import datetime, timedelta
 
 from git import Repo
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def delete_commits_older_than_week(repo_path: str = ".", branch: str = "master") -> bool:
     try:

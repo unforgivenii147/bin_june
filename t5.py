@@ -11,7 +11,6 @@ from dh import mpf_async
 from tree_sitter import Language, Parser, Query, QueryCursor
 
 CHUNK_SIZE = 1024 * 1024
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def remove_blank_lines(text: str | Path) -> str:

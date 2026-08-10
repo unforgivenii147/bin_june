@@ -7,8 +7,6 @@ from pathlib import Path
 
 from dh import unique_path
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def remove_string_from_names(
     string_to_remove: str, dry_run: bool = False, recursive: bool = False, current_path: Path = Path.cwd()

@@ -11,8 +11,6 @@ from sqlite3 import Cursor
 
 import py7zr
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def get_current_folder_name() -> str:
     return Path(Path.cwd()).name

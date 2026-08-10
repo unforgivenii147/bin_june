@@ -12,7 +12,7 @@ import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 SHEBANG_PATTERN = re.compile(r"^#!.*python[23]?(?:\.\d+)?(?:[ \t]+.*)?$", re.MULTILINE)
 NEW_SHEBANG12 = "#!/data/data/com.termux/files/home/.local/bin/python"
 NEW_SHEBANG14 = "#!/data/data/com.termux/files/usr/bin/python"

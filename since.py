@@ -9,8 +9,6 @@ from __future__ import annotations
 import datetime
 import sys
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 class PersianDateConverter:
     PERSIAN_MONTHS = [

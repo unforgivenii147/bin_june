@@ -11,7 +11,7 @@ from pathlib import Path
 
 from dh import STDLIB
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 SHEBANG_PATTERNS = [
     "#!/data/data/com.termux/files/usr/bin/python",
     "#!/usr/bin/env python",

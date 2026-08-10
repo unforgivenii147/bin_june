@@ -6,7 +6,7 @@ from pathlib import Path
 from dh import FONT_EXT, unique_path
 from fontTools.ttLib import TTFont
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 STYLE_MAPPING = {
     "normal": "Regular",
     "regular": "Regular",

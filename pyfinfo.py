@@ -4,8 +4,6 @@ from __future__ import annotations
 import os
 from collections import Counter, defaultdict
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def walk_file_stems(root: str = "."):
     stack = [root]

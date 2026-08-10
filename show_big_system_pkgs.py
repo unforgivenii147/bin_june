@@ -11,8 +11,6 @@ from multiprocessing import Pool, cpu_count
 
 from dh import fsz
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def parse_size(size_str: str) -> int:
     size_str = size_str.strip()

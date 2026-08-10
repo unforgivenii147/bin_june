@@ -7,8 +7,6 @@ from pathlib import Path
 
 from pypdf import PdfReader, PdfWriter
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def extract_index(filename: str) -> tuple:
     match = re.search(r"_(\d+)\.pdf$", filename)

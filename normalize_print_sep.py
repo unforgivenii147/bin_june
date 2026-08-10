@@ -7,6 +7,7 @@ Usage:
     python script.py [paths...]           # Dry-run (shows what would change)
     python script.py -a [paths...]        # Autofix (modifies files)
 """
+
 from __future__ import annotations
 
 import argparse

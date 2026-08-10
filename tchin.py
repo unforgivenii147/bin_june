@@ -7,7 +7,7 @@ from pathlib import Path
 
 from deep_translator import GoogleTranslator, single_detection
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 CHUNK_SIZE = 4500
 ALLOWED_EXT = {".txt", ".md", ".csv", ".json", ".py"}
 

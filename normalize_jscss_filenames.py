@@ -7,8 +7,6 @@ from pathlib import Path
 
 from dh import unique_path
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def normalize_filename(filename) -> str:
     pattern = "(\\.(?:js|css))([?#].*)?$"

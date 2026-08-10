@@ -6,7 +6,7 @@ from pathlib import Path
 
 from dh import get_files, mpf3
 
-skl = """SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})"""
+skl = """"""
 
 
 def process_file(path) -> None:

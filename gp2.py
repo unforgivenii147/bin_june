@@ -9,7 +9,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from git import Repo, exc as GitExc
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 load_dotenv(Path.home() / ".env")
 GITHUB_USERNAME = "unforgivenii147"
 

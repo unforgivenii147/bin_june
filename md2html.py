@@ -10,8 +10,6 @@ from pathlib import Path
 import markdown
 from bs4 import BeautifulSoup
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def modify_classes(html_content: str) -> str:
     soup = BeautifulSoup(html_content, "html.parser")

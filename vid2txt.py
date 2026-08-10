@@ -10,7 +10,7 @@ import pytesseract
 from dh import cprint
 from PIL import Image
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 video = sys.argv[1]
 txtfile = Path(video).with_suffix(".txt")
 

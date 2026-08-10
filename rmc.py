@@ -6,6 +6,7 @@ Processes files in place using parallel workers.
   in a body, replaces it with 'pass' to prevent syntax errors.
 - Validates result code with ast.parse() before writing to disk.
 """
+
 from __future__ import annotations
 
 import argparse

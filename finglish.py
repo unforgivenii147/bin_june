@@ -4,8 +4,6 @@ from __future__ import annotations
 import unicodedata
 from pathlib import Path
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def custom_persian_to_finglish(text: str) -> str:
     persian_map = {

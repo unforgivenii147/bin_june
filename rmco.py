@@ -11,7 +11,7 @@ import tokenize
 from pathlib import Path
 from typing import NamedTuple
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 try:
     import astor
 except Exception:

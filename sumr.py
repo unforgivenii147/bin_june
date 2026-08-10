@@ -4,6 +4,7 @@ Text summarization script using sumy library.
 Usage: python summarize.py <input_file>
 Output: <input_file>_summary.txt
 """
+
 from __future__ import annotations
 
 import os

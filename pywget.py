@@ -11,8 +11,6 @@ from shutil import get_terminal_size
 
 from tqdm import tqdm
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def get_console_width() -> int:
     try:

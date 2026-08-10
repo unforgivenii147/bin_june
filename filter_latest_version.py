@@ -11,8 +11,6 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def parse_wheel_url(url: str) -> tuple[str, str, tuple[int, ...], str] | None:
     android_pattern = "/([^/]+)-(\\d+\\.\\d+\\.\\d+)-py3-none-android_24_([^/]+)\\.whl"

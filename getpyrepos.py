@@ -13,8 +13,6 @@ from datetime import datetime, timedelta
 
 import requests
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def get_user_repos(username: str) -> list[dict]:
     repos = []

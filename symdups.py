@@ -9,7 +9,7 @@ from pathlib import Path
 
 from xxhash import xxh64
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 BACKUP_FILE = ".symlink_backup.json"
 MIN_FILE_SIZE = 1024
 

@@ -11,10 +11,8 @@ import ast
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-INSERT_TEXT = (
-    '\nSKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})\n'
-)
+
+INSERT_TEXT = "\n\n"
 
 
 def get_module_level_imports(tree: ast.AST) -> int:

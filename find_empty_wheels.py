@@ -9,8 +9,6 @@ from __future__ import annotations
 import zipfile
 from pathlib import Path
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def is_empty_wheel(whl_path: Path) -> bool | None:
     try:

@@ -15,8 +15,6 @@ import time
 import urllib.error
 import urllib.request
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def get_public_ip():
     services = [

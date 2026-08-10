@@ -9,35 +9,23 @@ import re
 import sys
 from pathlib import Path
 
-SKIP_DIRS = frozenset(
-    {".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache", "node_modules", "build", "dist"}
-)
-CHUNK_SIZE = 8192
 MAX_CONTEXT_DISPLAY = 3
 
 
-def is_binary(path: Path) -> bool:
-    try:
-        with path.open("rb") as f:
-            chunk = f.read(CHUNK_SIZE)
-        if not chunk:
-            return False
-        if b"\x00" in chunk:
-            return True
-        text_chars = bytearray(range(32, 127)) + b"\n\r\t\b"
-        nontext = sum(1 for byte in chunk if byte not in text_chars)
-        return (nontext / len(chunk)) > 0.3
-    except (OSError, PermissionError):
-        return True
-
-
-def process_file(path: Path, search_text: str, replace_text: str | None = None, dry_run: bool = False) -> bool:
+def process_file(
+    path: Path, search_text: str, replace_text: str = "", remove_mode: bool = False, dry_run: bool = False
+) -> bool:
     try:
         content = path.read_text(encoding="utf-8")
         pattern = re.compile(re.escape(search_text))
         if not pattern.search(content):
             return False
-        replacement = "" if replace_text is None else replace_text
+
+        if remove_mode:
+            replacement = ""
+        else:
+            replacement = replace_text
+
         if dry_run:
             matches = list(pattern.finditer(content))
             print(f"[DRY RUN] Found {len(matches)} match(es) in {path}")
@@ -64,7 +52,11 @@ def process_file(path: Path, search_text: str, replace_text: str | None = None, 
 
 
 def replace_in_files(
-    search_text: str, replace_text: str | None = None, target_file: str | None = None, dry_run: bool = False
+    search_text: str,
+    replace_text: str = "",
+    remove_mode: bool = False,
+    target_file: str | None = None,
+    dry_run: bool = False,
 ) -> tuple[int, int]:
     files_processed = 0
     files_changed = 0
@@ -74,7 +66,7 @@ def replace_in_files(
             print(f"Error: {target_file} is not a valid file", file=sys.stderr)
             return 0, 0
         print(f"Processing file: {target_file}")
-        if process_file(path, search_text, replace_text, dry_run):
+        if process_file(path, search_text, replace_text, remove_mode, dry_run):
             files_changed += 1
         return 1, files_changed
     for root, dirs, files in os.walk("."):
@@ -84,26 +76,11 @@ def replace_in_files(
             if path.is_symlink() or is_binary(path):
                 continue
             files_processed += 1
-            if process_file(path, search_text, replace_text, dry_run):
+            if process_file(path, search_text, replace_text, remove_mode, dry_run):
                 files_changed += 1
             if files_processed % 100 == 0:
                 print(f"Processed {files_processed} files...", end="\r")
     return files_processed, files_changed
-
-
-def parse_search_replace(strings: list[str]) -> tuple[str, str | None]:
-    if len(strings) == 2:
-        search_text, replace_text = strings
-        action = f"REPLACING '{search_text}' WITH '{replace_text}'"
-    elif len(strings) == 1:
-        search_text = strings[0]
-        replace_text = None
-        action = f"REMOVING '{search_text}'"
-    else:
-        raise ValueError("Expected 1 or 2 strings")
-    if search_text.startswith(("'", '"')) and search_text.endswith(("'", '"')):
-        search_text = search_text[1:-1]
-    return search_text, replace_text, action
 
 
 def main() -> None:
@@ -111,28 +88,46 @@ def main() -> None:
         description="Recursively replace or remove text in files.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="Examples:\n"
-        "  %(prog)s 'old_text' 'new_text'  # Replace text\n"
-        "  %(prog)s 'text_to_remove'      # Remove text\n"
-        "  %(prog)s 'text' --dry-run      # Preview changes",
+        "  %(prog)s 'old_text' 'new_text'    # Replace text\n"
+        "  %(prog)s -r 'text_to_remove'      # Remove text\n"
+        "  %(prog)s 'text' -r                # Remove text (alternative syntax)\n"
+        "  %(prog)s 'text' --dry-run         # Preview changes",
     )
     parser.add_argument(
-        "strings",
-        nargs="+",
-        help="Search text and optional replacement text. If only one string is provided, it will be removed.",
+        "search",
+        help="Text to search for",
     )
+    parser.add_argument(
+        "replace",
+        nargs="?",
+        default="",
+        help="Replacement text (optional, defaults to empty string)",
+    )
+    parser.add_argument("-r", "--remove", action="store_true", help="Remove the search text instead of replacing it")
     parser.add_argument("--dry-run", action="store_true", help="Show changes without applying them")
     parser.add_argument("-f", "--file", help="Process only the specified file instead of recursive directory search")
     args = parser.parse_args()
-    try:
-        search_text, replace_text, action = parse_search_replace(args.strings)
-    except ValueError:
-        parser.error("Please provide either one string (to remove) or two strings (search and replace)")
-        return
+
+    # If -r flag is set, force removal mode
+    if args.remove:
+        args.replace = ""
+
+    search_text = args.search
+    replace_text = args.replace
+
+    if args.remove:
+        action = f"REMOVING '{search_text}'"
+    elif replace_text:
+        action = f"REPLACING '{search_text}' WITH '{replace_text}'"
+    else:
+        action = f"REMOVING '{search_text}'"
+
     if args.dry_run:
         print("--- RUNNING IN DRY RUN MODE (No files will be modified) ---")
     print(f"--- {action} ---")
+
     files_processed, files_changed = replace_in_files(
-        search_text, replace_text, target_file=args.file, dry_run=args.dry_run
+        search_text, replace_text, remove_mode=args.remove, target_file=args.file, dry_run=args.dry_run
     )
     print(f"\n--- Complete: Processed {files_processed} files, modified {files_changed} files ---")
 

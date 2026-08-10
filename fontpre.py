@@ -7,7 +7,6 @@ from urllib.parse import quote
 
 from dh import fsz
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 cwd = Path.cwd()
 FONT_EXT = {".ttf", ".otf", ".woff", ".woff2", ".eot", ".svg"}

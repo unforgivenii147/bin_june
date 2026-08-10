@@ -9,8 +9,6 @@ import cv2
 import numpy as np
 from numpy import ndarray
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def get_image_features_cv2(image_path, size=(64, 64)):
     try:

@@ -4,6 +4,7 @@ Generate lazy-lock.json for lazy.nvim plugin manager.
 Scans plugins in ~/.local/share/nvim/lazy and creates a lock file
 with current commit hashes.
 """
+
 from __future__ import annotations
 
 import json

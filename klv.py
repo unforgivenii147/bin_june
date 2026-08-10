@@ -13,8 +13,6 @@ from pathlib import Path
 
 from packaging import version as pkg_version
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def parse_wheel_version(filename: str) -> tuple[str, str] | None:
     name = filename[:-4]

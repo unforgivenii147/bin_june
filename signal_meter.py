@@ -16,7 +16,7 @@ from rich.align import Align
 from rich.console import Console
 from rich.panel import Panel
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 console = Console()
 
 

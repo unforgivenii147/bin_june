@@ -11,9 +11,7 @@ import ast
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
-SKIP_DIRS_DEF = (
-    'SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})\n'
-)
+SKIP_DIRS_DEF = "\n"
 IGNORE_DIRS = frozenset(
     {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache", ".venv", "venv", "node_modules"}
 )

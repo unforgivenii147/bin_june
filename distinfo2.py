@@ -7,7 +7,7 @@ from pathlib import Path
 
 from dh import cprint
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 major, minor, _, _, _ = sys.version_info
 py_version = f"{major}.{minor}"
 ALLOWED = ["METADATA", "RECORD", "WHEEL", "top_level.txt"]

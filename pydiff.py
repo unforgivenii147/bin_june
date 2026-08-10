@@ -7,8 +7,6 @@ from pathlib import Path
 
 from dh import cprint, read_lines_mmap
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def count_lines(path: Path) -> int:
     return path.read_bytes().count(b"\n") + 1

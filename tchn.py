@@ -7,7 +7,7 @@ from pathlib import Path
 
 from deep_translator import GoogleTranslator
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 DIRECTORY = "."
 CHUNK_SIZE = 2000
 non_english_pattern = re.compile("[^\\x00-\\x7F]")

@@ -9,7 +9,6 @@ import tree_sitter_python as tsp
 from tree_sitter import Language, Parser
 
 CHUNK_SIZE = 1024 * 1024
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def is_python_file(path: str | Path) -> bool:

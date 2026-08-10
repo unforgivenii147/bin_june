@@ -9,8 +9,6 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def scan_directory(path: str = "."):
     total_size = 0

@@ -8,7 +8,6 @@ from pathlib import Path
 from dh import runcmd
 
 CHUNK_SIZE = 1024 * 1024
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def is_python_file(path: str | Path) -> bool:

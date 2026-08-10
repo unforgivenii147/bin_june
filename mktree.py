@@ -6,7 +6,7 @@ import re
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+
 try:
     import pytesseract
     from PIL import Image

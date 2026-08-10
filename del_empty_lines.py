@@ -7,8 +7,6 @@ from pathlib import Path
 from binaryornot import is_binary
 from dh import cprint
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def get_filez(cwd: Path):
     for f in cwd.rglob("*"):

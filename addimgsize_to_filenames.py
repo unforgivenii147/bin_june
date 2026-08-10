@@ -8,8 +8,6 @@ from pathlib import Path
 import cv2
 from tqdm import tqdm
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 class ImageDimensionRenamer:
     def __init__(self, root_dir: str = ".", separator: str = "_"):

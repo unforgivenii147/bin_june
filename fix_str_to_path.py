@@ -4,8 +4,6 @@ from __future__ import annotations
 import os
 import re
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def add_path_statement(file_path: str) -> bool:
     with open(file_path, encoding="utf-8") as file:

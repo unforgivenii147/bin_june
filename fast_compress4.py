@@ -13,8 +13,6 @@ from pathlib import Path
 
 import zstandard as zstd
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def walk_files(directory: Path, pattern: str = "*") -> Iterator[tuple[Path, Path]]:
     for file_path in directory.rglob(pattern):

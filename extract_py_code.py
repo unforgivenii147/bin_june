@@ -7,6 +7,7 @@ Usage:
     python excode.py mydir1 mydir2
     python excode.py
 """
+
 from __future__ import annotations
 
 import re

@@ -15,8 +15,6 @@ from zipfile import ZipFile
 
 from dh import fsz
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def get_wheel_unpacked_size(wheel_path: Path) -> tuple[Path, int, str | None]:
     try:

@@ -9,7 +9,6 @@ from dh import get_dirs
 from xxhash import xxh64
 
 CHUNK_SIZE = 1024 * 1024
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def is_nested(path1: Path, path2: Path) -> bool:

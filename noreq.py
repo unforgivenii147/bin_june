@@ -7,8 +7,6 @@ import tempfile
 import zipfile
 from pathlib import Path
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def is_wheel_ok(path: Path) -> bool:
     try:

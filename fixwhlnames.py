@@ -12,8 +12,6 @@ import zipfile
 from email.parser import HeaderParser
 from pathlib import Path
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 
 def extract_metadata_from_wheel(wheel_path: Path) -> dict[str, str] | None:
     try:
