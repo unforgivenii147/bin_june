@@ -11,7 +11,6 @@ import ffmpy
 
 
 def get_subtitle_streams(input_file):
-    """Get subtitle stream info using ffprobe."""
     ff = ffmpy.FFprobe(
         inputs={input_file: None},
         global_options=[
@@ -38,7 +37,6 @@ def get_subtitle_streams(input_file):
 
 
 def extract_subtitle(input_file, stream_index, output_file):
-    """Extract a single subtitle stream."""
     ff = ffmpy.FFmpeg(
         inputs={input_file: None}, outputs={output_file: f"-map 0:s:{stream_index}"}, global_options=["-y"]
     )
@@ -58,13 +56,11 @@ def main():
     if not Path(input_file).exists():
         print(f"File not found: {input_file}")
         sys.exit(1)
-
     streams = get_subtitle_streams(input_file)
     if not streams:
         print("No subtitle streams found.")
         sys.exit(0)
     basename = Path(input_file).stem
-
     for i, stream in enumerate(streams):
         lang = stream.get("tags", {}).get("language", "und")
         output_file = f"{basename}.sub{i}.{lang}.srt"

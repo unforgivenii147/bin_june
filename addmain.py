@@ -68,15 +68,12 @@ def rewrite_file(path: Path) -> tuple[bool, str]:
         tree = ast.parse(src, filename=str(path))
     except SyntaxError as e:
         return False, f"SKIP parse error: {e}"
-
     if has_main_guard(tree):
         return False, "SKIP already has main guard"
-
     nodes = list(tree.body)
     wrap_nodes = [n for n in nodes if should_wrap_node(n)]
     if not wrap_nodes:
         return False, "SKIP nothing to wrap"
-
     lines = src.splitlines(True)
 
     def segment(start: int, end: int) -> str:
@@ -84,7 +81,6 @@ def rewrite_file(path: Path) -> tuple[bool, str]:
 
     main_parts: list[str] = []
     keep_segments: list[tuple[int, int]] = []
-
     for n in nodes:
         start = getattr(n, "lineno", None)
         end = getattr(n, "end_lineno", None)
@@ -94,20 +90,16 @@ def rewrite_file(path: Path) -> tuple[bool, str]:
             main_parts.append(segment(start, end).rstrip() + "\n")
         else:
             keep_segments.append((start, end))
-
     keep_segments.sort()
     new_parts: list[str] = []
     cursor = 1
-
     for start, end in keep_segments:
         if start > cursor:
             new_parts.append("".join(lines[cursor - 1 : start - 1]))
         new_parts.append("".join(lines[start - 1 : end]))
         cursor = end + 1
-
     if cursor <= len(lines):
         new_parts.append("".join(lines[cursor - 1 :]))
-
     main_body = "".join(main_parts).rstrip("\n")
     main_fn = ""
     main_fn += "\n\n"
@@ -119,7 +111,6 @@ def rewrite_file(path: Path) -> tuple[bool, str]:
     main_fn += "\n\n"
     main_fn += 'if __name__ == "__main__":\n'
     main_fn += "    main()\n"
-
     new_src = "".join(new_parts).rstrip() + main_fn
     path.write_text(new_src, encoding="utf-8")
     return True, "OK autofixed"
@@ -145,12 +136,9 @@ def main(argv: list[str]) -> int:
     p.add_argument("paths", nargs="*", help="Files or directories to scan (default: current dir recursively)")
     p.add_argument("-a", "--autofix", action="store_true", help="Wrap top-level code in main() and add main guard")
     args = p.parse_args(argv)
-
     files = iter_py_files(args.paths)
-
     any_changed = False
     any_missing = False
-
     for f in files:
         src = f.read_text(encoding="utf-8")
         try:
@@ -158,12 +146,9 @@ def main(argv: list[str]) -> int:
         except SyntaxError:
             print(f"{f}: SKIP parse error", file=sys.stderr)
             continue
-
         if has_main_guard(tree):
             continue
-
         any_missing = True
-
         if args.autofix:
             changed, msg = rewrite_file(f)
             if changed:
@@ -171,7 +156,6 @@ def main(argv: list[str]) -> int:
             print(f"{f}: {msg}")
         else:
             print(f"{f}: MISSING main guard")
-
     if args.autofix:
         return 0 if any_changed else (0 if not any_missing else 2)
     return 0 if not any_missing else 1

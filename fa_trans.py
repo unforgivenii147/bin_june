@@ -24,18 +24,15 @@ def contains_persian(text: str) -> bool:
 
 
 def create_chunks(lines: list[str]) -> list[list[str]]:
-    """Group lines into chunks where each chunk's total character count is <= MAX_CHUNK_SIZE."""
     chunks = []
     current_chunk = []
     current_size = 0
     for line in lines:
         line_size = len(line) + 1
-
         if current_size + line_size > MAX_CHUNK_SIZE and current_chunk:
             chunks.append(current_chunk)
             current_chunk = []
             current_size = 0
-
         if line_size > MAX_CHUNK_SIZE:
             if current_chunk:
                 chunks.append(current_chunk)
@@ -45,7 +42,6 @@ def create_chunks(lines: list[str]) -> list[list[str]]:
         else:
             current_chunk.append(line)
             current_size += line_size
-
     if current_chunk:
         chunks.append(current_chunk)
     return chunks
@@ -84,7 +80,6 @@ def main() -> None:
     if not all_lines:
         logger.info("No lines found in %s", input_path.name)
         return
-
     persian_lines = [line for line in all_lines if contains_persian(line)]
     non_persian_lines = [line for line in all_lines if not contains_persian(line)]
     logger.info(
@@ -96,7 +91,6 @@ def main() -> None:
     if not persian_lines:
         logger.info("No persian lines to translate in %s", input_path.name)
         return
-
     chunks = create_chunks(persian_lines)
     logger.info(
         "Created %d chunks from %d persian lines (max %d chars per chunk)",
@@ -104,7 +98,6 @@ def main() -> None:
         len(persian_lines),
         MAX_CHUNK_SIZE,
     )
-
     results: dict[str, str] = {}
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         future_to_chunk = {executor.submit(translate_chunk, chunk): chunk for chunk in chunks}
@@ -114,7 +107,6 @@ def main() -> None:
                 original_lines, translated_text = future.result()
                 if translated_text:
                     translated_lines = translated_text.split("\n")
-
                     for i, original_line in enumerate(original_lines):
                         if i < len(translated_lines):
                             results[original_line] = translated_lines[i]
@@ -125,7 +117,6 @@ def main() -> None:
                     logger.error("Failed to translate chunk starting with: %s", chunk[0][:50])
             except Exception as e:
                 logger.error("Unexpected error for chunk starting with '%s': %s", chunk[0][:50], e)
-
     output_path = input_path.with_suffix(".json")
     try:
         with output_path.open("w", encoding="utf-8") as f:
@@ -133,7 +124,6 @@ def main() -> None:
         logger.info("Saved %d translations to %s", len(results), output_path.name)
     except Exception as e:
         logger.error("Error saving JSON file: %s", e)
-
     try:
         with input_path.open("w", encoding="utf-8") as f:
             for line in all_lines:

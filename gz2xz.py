@@ -10,9 +10,6 @@ from lzma_mt import compress
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 from dh import mpf3
 
-"\nConvert man pages from .gz to .xz format with maximum compression.\nSkips symlinks and processes files recursively in the current directory.\n"
-"\nConvert man pages from .gz to .xz format with maximum compression.\nSkips symlinks and processes files recursively in the current directory.\n"
-
 
 def process_file(path: Path) -> tuple[str, bool, str]:
     path = Path(path)

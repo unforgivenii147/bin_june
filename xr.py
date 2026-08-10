@@ -20,7 +20,6 @@ COMPRESSORS = {}
 
 
 def setup_compressors() -> None:
-    """Initialize compressor configurations."""
     global COMPRESSORS
     COMPRESSORS = {
         "zstd": {
@@ -69,7 +68,6 @@ def setup_compressors() -> None:
 
 
 def should_compress(path: Path, compressor: str) -> bool:
-    """Determine if a file should be compressed based on size and type."""
     try:
         if not path.is_file() or path.is_symlink():
             return False
@@ -93,7 +91,6 @@ def should_compress(path: Path, compressor: str) -> bool:
 
 
 def compress_in_memory(path: Path, out_path: Path, compressor: str) -> bool:
-    """Compress a file that fits in memory."""
     try:
         with open(path, "rb") as f:
             data = f.read()
@@ -147,7 +144,6 @@ def compress_in_memory(path: Path, out_path: Path, compressor: str) -> bool:
 
 
 def compress_chunked(path: Path, out_path: Path, original_size: int, compressor: str) -> bool:
-    """Compress a large file in chunks."""
     try:
         if compressor == "zstd":
             cctx = zstd.ZstdCompressor(level=COMPRESSORS["zstd"]["settings"]["level"])
@@ -232,7 +228,6 @@ def compress_chunked(path: Path, out_path: Path, original_size: int, compressor:
 
 
 def decompress_file(path: Path, compressor: str) -> bool:
-    """Decompress a single file."""
     try:
         out_path = path.with_suffix("")
         if compressor == "zstd":
@@ -291,7 +286,6 @@ def decompress_file(path: Path, compressor: str) -> bool:
 
 
 def decompress_archive(archive_path: Path, compressor: str) -> bool:
-    """Decompress an archive file."""
     try:
         if compressor == "py7zr":
             with py7zr.SevenZipFile(archive_path, "r") as archive:
@@ -308,7 +302,6 @@ def decompress_archive(archive_path: Path, compressor: str) -> bool:
 
 
 async def compress_folder_async(dir_path: Path, archive_path: str, compressor: str) -> bool:
-    """Compress an entire folder into an archive."""
     try:
         if compressor == "py7zr":
             with py7zr.SevenZipFile(f"{archive_path}{COMPRESSORS[compressor]['ext']}", "w") as archive:
@@ -323,7 +316,6 @@ async def compress_folder_async(dir_path: Path, archive_path: str, compressor: s
 
 
 async def process_compress(compressor: str) -> None:
-    """Main compression process."""
     cwd = Path.cwd()
     print(f"\n🔧 {compressor.upper()} Compression settings:")
     for key, value in COMPRESSORS[compressor]["settings"].items():
@@ -388,7 +380,6 @@ async def process_compress(compressor: str) -> None:
 
 
 async def process_decompress(compressor: str) -> None:
-    """Main decompression process."""
     cwd = Path.cwd()
     archive_ext = COMPRESSORS[compressor]["tar_ext"]
     archives = [p for p in cwd.glob(f"*{archive_ext}") if p.is_file()]
@@ -428,7 +419,6 @@ async def process_decompress(compressor: str) -> None:
 
 
 async def main_async(compressor: str, mode: str = "compress") -> None:
-    """Main async entry point."""
     if mode == "compress":
         await process_compress(compressor)
     elif mode == "decompress":
@@ -438,7 +428,6 @@ async def main_async(compressor: str, mode: str = "compress") -> None:
 
 
 def check_compressor_availability(compressor: str) -> bool:
-    """Check if required libraries are available."""
     if not COMPRESSORS[compressor]["available"]:
         print(f"\n❌ Error: {compressor.upper()} compression is not available.")
         print("Please install the required library:")
@@ -459,7 +448,6 @@ def check_compressor_availability(compressor: str) -> bool:
 
 
 def main() -> None:
-    """Main entry point."""
     setup_compressors()
     parser = argparse.ArgumentParser(
         description="Multi-format compression/decompression tool",
@@ -474,13 +462,13 @@ Compression Methods:
   -r, --brotli   Brotli compression (quality 11)
   -l, --lz4      LZ4 compression (HC mode max)
 Examples:
-  %(prog)s -z              # Compress with Zstandard (default)
-  %(prog)s -x -d           # Decompress XZ files
-  %(prog)s -7              # Compress with 7-Zip
-  %(prog)s -g              # Compress with Gzip
-  %(prog)s -b -d           # Decompress Bzip2 files
-  %(prog)s -r              # Compress with Brotli
-  %(prog)s -l              # Compress with LZ4
+  %(prog)s -z              
+  %(prog)s -x -d           
+  %(prog)s -7              
+  %(prog)s -g              
+  %(prog)s -b -d           
+  %(prog)s -r              
+  %(prog)s -l              
         """,
     )
     method_group = parser.add_mutually_exclusive_group()

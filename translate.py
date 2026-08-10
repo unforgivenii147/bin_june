@@ -24,18 +24,15 @@ logger = logging.getLogger(__name__)
 
 
 def contains_cyrillic(text: str) -> bool:
-    """Detect Cyrillic characters (covers core Cyrillic and some extensions)."""
     return bool(re.search(r"[\u0400-\u04FF\u0500-\u052F\u2DE0-\u2DFF\uA640-\uA69F\u1C80-\u1C8F]", text))
 
 
 def create_chunks(lines: list[str], max_chunk_size: int) -> list[list[str]]:
-    """Group lines into chunks where each chunk's total character count is <= max_chunk_size."""
     chunks: list[list[str]] = []
     current_chunk: list[str] = []
     current_size = 0
     for line in lines:
         line_size = len(line) + 1
-
         if line_size > max_chunk_size:
             if current_chunk:
                 chunks.append(current_chunk)
@@ -43,7 +40,6 @@ def create_chunks(lines: list[str], max_chunk_size: int) -> list[list[str]]:
                 current_size = 0
             chunks.append([line])
             continue
-
         if current_size + line_size > max_chunk_size and current_chunk:
             chunks.append(current_chunk)
             current_chunk = []
@@ -56,14 +52,10 @@ def create_chunks(lines: list[str], max_chunk_size: int) -> list[list[str]]:
 
 
 class TranslationCache:
-    """SQLite-based persistent cache for translations."""
-
     def __init__(self, db_path: Path):
         self.db_path = db_path.expanduser()
-
         parent = Path(self.db_path).parent
         parent.mkdir(parents=True, exist_ok=True)
-
         self.conn = sqlite3.connect(str(self.db_path), check_same_thread=False)
         self.conn.execute(
             """
@@ -82,7 +74,6 @@ class TranslationCache:
         self.lock = threading.Lock()
 
     def get_many(self, texts: list[str], source_lang: str, target_lang: str) -> dict[str, str]:
-        """Return dict mapping source_text -> translated_text for any matches in cache."""
         if not texts:
             return {}
         with self.lock:
@@ -97,7 +88,6 @@ class TranslationCache:
             return {row[0]: row[1] for row in rows}
 
     def set_many(self, translations: dict[str, str], source_lang: str, target_lang: str) -> None:
-        """Insert or replace multiple translations into the cache."""
         if not translations:
             return
         with self.lock:
@@ -115,7 +105,6 @@ class TranslationCache:
             self.conn.commit()
 
     def stats(self) -> dict:
-        """Return cache stats: total_entries, last_updated, counts per language pair (list)."""
         with self.lock:
             cur = self.conn.execute("SELECT COUNT(*) FROM translations")
             total = cur.fetchone()[0] or 0
@@ -141,13 +130,7 @@ class TranslationCache:
 
 
 def translate_chunk_factory(source_lang: str, target_lang: str):
-    """Return a translate_chunk function bound to specific source/target languages."""
-
     def translate_chunk(chunk: list[str]) -> tuple[list[str], str | None]:
-        """
-        Translate a chunk (list of lines) from source_lang to target_lang.
-        Returns tuple(original_chunk, translated_text or None).
-        """
         chunk_text = "\n".join(chunk)
         translator = GoogleTranslator(source=source_lang, target=target_lang)
         for attempt in range(1, RETRY_ATTEMPTS + 1):
@@ -232,7 +215,6 @@ def main() -> None:
         return
     source_lang = args.source
     target_lang = args.target
-
     if source_lang.lower() == "ru" or source_lang.lower().startswith("ru"):
         to_translate_raw = [line for line in all_lines if contains_cyrillic(line)]
         skipped_lines = [line for line in all_lines if not contains_cyrillic(line)]
@@ -249,7 +231,6 @@ def main() -> None:
         logger.info("No lines to translate for source_lang=%s", source_lang)
         cache.close()
         return
-
     seen: set[str] = set()
     to_translate_unique: list[str] = []
     for l in to_translate_raw:
@@ -261,12 +242,9 @@ def main() -> None:
         len(to_translate_unique),
         len(to_translate_raw),
     )
-
     cached = cache.get_many(to_translate_unique, source_lang, target_lang)
     logger.info("Cache hit: %d/%d", len(cached), len(to_translate_unique))
-
     results: dict[str, str] = dict(cached)
-
     remaining_to_translate = [l for l in to_translate_unique if l not in results]
     if remaining_to_translate:
         chunks = create_chunks(remaining_to_translate, args.max_chunk_size)
@@ -279,7 +257,6 @@ def main() -> None:
             num_workers,
         )
         translate_chunk = translate_chunk_factory(source_lang, target_lang)
-
         with ThreadPoolExecutor(max_workers=num_workers) as executor:
             future_to_chunk = {executor.submit(translate_chunk, chunk): chunk for chunk in chunks}
             completed = 0
@@ -292,7 +269,6 @@ def main() -> None:
                     original_lines, translated_text = future.result()
                     if translated_text:
                         translated_lines = translated_text.splitlines()
-
                         if len(translated_lines) == len(original_lines):
                             for i, original_line in enumerate(original_lines):
                                 tgt = translated_lines[i]
@@ -327,7 +303,6 @@ def main() -> None:
                         logger.error(
                             "Failed to translate chunk starting with: %s", (chunk[0][:60] + "...") if chunk else ""
                         )
-
                         for line in chunk:
                             try:
                                 t = GoogleTranslator(source=source_lang, target=target_lang).translate(line)
@@ -345,13 +320,11 @@ def main() -> None:
                         (chunk[0][:60] + "...") if chunk else "",
                         e,
                     )
-
             if to_cache:
                 cache.set_many(to_cache, source_lang, target_lang)
                 logger.info("Saved %d new translations to cache", len(to_cache))
     else:
         logger.info("Nothing left to translate after cache lookup.")
-
     output_path = input_path.with_name(f"{input_path.stem}_{target_lang}{input_path.suffix}")
     try:
         with output_path.open("w", encoding="utf-8") as f:

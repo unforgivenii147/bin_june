@@ -123,9 +123,3 @@ if __name__ == "__main__":
     args = sys.argv[1:]
     for k in args:
         installwhl(k)
-"""
-    candidates = [p.strip() for p in args if p.strip() != "-w"] if args else None
-    if candidates is not None:
-        for pkg in candidates:
-            install_whl(pkg)
-"""

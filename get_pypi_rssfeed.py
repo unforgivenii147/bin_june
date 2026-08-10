@@ -1,16 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 
-from typing import Optional
-
-"""
-PyPI RSS Feed Parser
-Fetches and extracts newly added packages from the PyPI RSS feed.
-"""
 import sys
 import xml.etree.ElementTree as ET
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 import requests
 
@@ -18,13 +12,6 @@ PYPI_RSS_URL = "https://pypi.org/rss/packages.xml"
 
 
 def fetch_rss_feed(url: str) -> Optional[str]:
-    """
-    Fetch the RSS feed from the given URL.
-    Args:
-        url: The RSS feed URL
-    Returns:
-        RSS feed content as string, or None if failed
-    """
     try:
         response = requests.get(url, timeout=55)
         response.raise_for_status()
@@ -35,13 +22,6 @@ def fetch_rss_feed(url: str) -> Optional[str]:
 
 
 def parse_rss_feed(xml_content: str) -> list[dict[str, str]]:
-    """
-    Parse the RSS feed XML and extract package information.
-    Args:
-        xml_content: XML content of the RSS feed
-    Returns:
-        List of dictionaries containing package information
-    """
     packages = []
     try:
         root = ET.fromstring(xml_content)
@@ -70,12 +50,6 @@ def parse_rss_feed(xml_content: str) -> list[dict[str, str]]:
 
 
 def display_packages(packages: list[dict[str, str]], limit: Optional[int] = None):
-    """
-    Display package information in a formatted way.
-    Args:
-        packages: List of package information dictionaries
-        limit: Maximum number of packages to display (None for all)
-    """
     if not packages:
         print("No packages found in the RSS feed.")
         return
@@ -100,12 +74,6 @@ def display_packages(packages: list[dict[str, str]], limit: Optional[int] = None
 
 
 def save_to_file(packages: list[dict[str, str]], filename: str = "pypi_packages.txt"):
-    """
-    Save extracted packages to a text file.
-    Args:
-        packages: List of package information dictionaries
-        filename: Output filename
-    """
     try:
         with open(filename, "w", encoding="utf-8") as f:
             f.write(f"PyPI Latest Packages - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
@@ -125,7 +93,6 @@ def save_to_file(packages: list[dict[str, str]], filename: str = "pypi_packages.
 
 
 def main():
-    """Main function to orchestrate the RSS feed parsing."""
     limit = None
     save_output = False
     if len(sys.argv) > 1:

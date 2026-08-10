@@ -15,7 +15,6 @@ import pylzma
 
 
 def create_tar_for_directory(dir_path):
-    """Create a tar archive for a directory."""
     tar_buffer = io.BytesIO()
     with tarfile.open(fileobj=tar_buffer, mode="w") as tar:
         tar.add(dir_path, arcname=dir_path.name)
@@ -23,7 +22,6 @@ def create_tar_for_directory(dir_path):
 
 
 def compress_file(file_path, output_dir, tar_subdirs_first=False):
-    """Compress a single file or directory using pylzma."""
     try:
         file_path = Path(file_path)
         if file_path.is_dir():
@@ -46,20 +44,17 @@ def compress_file(file_path, output_dir, tar_subdirs_first=False):
 
 
 def decompress_file(file_path, output_dir):
-    """Decompress a single file using pylzma."""
     try:
         file_path = Path(file_path)
         with open(file_path, "rb") as f:
             compressed_data = f.read()
         decompressed_data = pylzma.decompress(compressed_data)
-
         if file_path.suffixes == [".tar", ".7z"]:
             output_name = file_path.name.replace(".tar.7z", "")
             tar_buffer = io.BytesIO(decompressed_data)
             with tarfile.open(fileobj=tar_buffer, mode="r") as tar:
                 tar.extractall(path=output_dir)
             return f"Decompressed: {file_path} -> {output_dir}/{output_name}"
-
         elif file_path.suffix == ".7z":
             output_name = file_path.name.replace(".7z", "")
             output_file = output_dir / output_name
@@ -73,7 +68,6 @@ def decompress_file(file_path, output_dir):
 
 
 def process_files_parallel(files, output_dir, mode, tar_subdirs_first=False, max_workers=None):
-    """Process files in parallel using ProcessPoolExecutor."""
     results = []
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         if mode == "compress":
@@ -126,7 +120,6 @@ def main():
     if args.mode == "compress":
         output_dir = Path(args.output or "./compressed")
         output_dir.mkdir(exist_ok=True)
-
         all_files = []
         for item in current_dir.rglob("*"):
             if item.is_file() or (item.is_dir() and not args.tar_subdirs_first):
@@ -155,7 +148,6 @@ def main():
     else:
         output_dir = Path(args.output or "./decompressed")
         output_dir.mkdir(exist_ok=True)
-
         compressed_files = []
         for item in current_dir.rglob("*"):
             if item.is_file() and (item.suffix == ".7z" or item.name.endswith(".tar.7z")):

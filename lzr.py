@@ -368,9 +368,9 @@ def main() -> None:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s -c          # Compress files and folders in current directory
-  %(prog)s -d          # Decompress .lz4 and .tar.lz4 files in current directory
-  %(prog)s             # Default: compress
+  %(prog)s -c          
+  %(prog)s -d          
+  %(prog)s             
 LZ4 Settings:
   - Level: 9 (maximum high compression)
   - Mode: High Compression (HC) for better ratios

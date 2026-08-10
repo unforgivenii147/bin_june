@@ -76,7 +76,6 @@ def tar_directory(directory: Path, output_path: Path, delete_original: bool = Fa
 
 
 def untar_file(tar_path: Path, extract_dir: Path, delete_tar: bool = False) -> bool:
-    """Extract tar and optionally delete it."""
     try:
         with tarfile.open(tar_path, "r") as tar:
             tar.extractall(extract_dir, filter="data")

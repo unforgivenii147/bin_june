@@ -17,13 +17,6 @@ from deep_translator import GoogleTranslator
 
 
 def translate_file(file_path: Path) -> tuple[Path, dict]:
-    """
-    Translate a single file's content from Persian to English.
-    Args:
-        file_path: Path to the input file
-    Returns:
-        Tuple of (output_path, translations_dict)
-    """
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read().strip()
@@ -54,13 +47,6 @@ def translate_file(file_path: Path) -> tuple[Path, dict]:
 
 
 def save_translation(input_path: Path, translations: dict, output_dir: Path | None = None):
-    """
-    Save translations to a JSON file.
-    Args:
-        input_path: Original input file path
-        translations: Dictionary of {fa: en} translations
-        output_dir: Directory to save JSON files (default: same as input)
-    """
     if output_dir is None:
         output_dir = input_path.parent
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -73,7 +59,6 @@ def save_translation(input_path: Path, translations: dict, output_dir: Path | No
 
 
 def main():
-    """Main function to orchestrate the translation process."""
     current_dir = Path(".")
     max_workers = 4
     output_dir = Path("./translations")

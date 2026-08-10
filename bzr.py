@@ -348,9 +348,9 @@ def main() -> None:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s -c          # Compress files and folders in current directory
-  %(prog)s -d          # Decompress .bz2 and .tar.bz2 files in current directory
-  %(prog)s             # Default: compress
+  %(prog)s -c          
+  %(prog)s -d          
+  %(prog)s             
 Bzip2 Settings:
   - Level: 9 (maximum compression)
   - Block size: 900KB

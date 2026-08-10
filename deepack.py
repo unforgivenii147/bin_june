@@ -27,7 +27,6 @@ logger = logging.getLogger(__name__)
 
 
 def get_site_packages_paths() -> list[Path]:
-    """Get all site-packages paths including user site."""
     paths = []
     for path in site.getsitepackages():
         paths.append(Path(path))
@@ -40,7 +39,6 @@ def get_site_packages_paths() -> list[Path]:
 
 
 def get_installed_packages() -> list[tuple[str, str]]:
-    """Get all installed packages using importlib.metadata."""
     packages = []
     all_dists = list(importlib.metadata.distributions())
     for dist in all_dists:
@@ -55,14 +53,6 @@ def get_installed_packages() -> list[tuple[str, str]]:
 
 
 def is_pure_python(package_name: str, site_path: Path) -> bool:
-    """
-    Check if a package is pure Python by looking for compiled extensions.
-    Args:
-        package_name: Name of the package
-        site_path: Path to the site-packages directory containing the package
-    Returns:
-        True if package appears to be pure Python, False otherwise
-    """
     package_dir = site_path / package_name
     if not package_dir.exists():
         alt_name = package_name.replace("-", "_")
@@ -80,14 +70,6 @@ def is_pure_python(package_name: str, site_path: Path) -> bool:
 
 
 def get_package_path(package_name: str, site_paths: list[Path]) -> Path | None:
-    """
-    Find the package directory in site-packages.
-    Args:
-        package_name: Name of the package to find
-        site_paths: List of site-packages paths to search
-    Returns:
-        Path to the package directory if found, None otherwise
-    """
     for site_path in site_paths:
         pkg_path = site_path / package_name
         if pkg_path.exists() and pkg_path.is_dir():
@@ -105,13 +87,6 @@ def get_package_path(package_name: str, site_paths: list[Path]) -> Path | None:
 def repack_package(
     args_tuple: tuple[str, str, Path, list[Path]],
 ) -> tuple[str, bool, str]:
-    """
-    Repack a single package into a wheel file.
-    Args:
-        args_tuple: Tuple of (package_name, version, output_dir, site_paths)
-    Returns:
-        Tuple of (package_name, success, message)
-    """
     package_name, version, output_dir, site_paths = args_tuple
     try:
         pkg_path = get_package_path(package_name, site_paths)
@@ -196,13 +171,11 @@ def repack_package(
 
 
 def get_python_tag() -> str:
-    """Get the Python version tag."""
     major, minor = sys.version_info[:2]
     return f"cp{major}{minor}"
 
 
 def get_abi_tag() -> str:
-    """Get the ABI tag."""
     major, minor = sys.version_info[:2]
     debug = "d" if sys.flags.debug else ""
     if hasattr(sys, "pypy_version_info"):
@@ -211,14 +184,12 @@ def get_abi_tag() -> str:
 
 
 def get_platform_tag() -> str:
-    """Get the platform tag."""
     import distutils.util
 
     return distutils.util.get_platform().replace("-", "_").replace(".", "_")
 
 
 def main() -> int:
-    """Main entry point."""
     parser = argparse.ArgumentParser(description="Repack installed Python packages into wheel files")
     parser.add_argument(
         "-o",

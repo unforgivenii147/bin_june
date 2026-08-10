@@ -148,6 +148,5 @@ def main() -> None:
             pending.popleft().get()
 
 
-"\n    print(f\"processing {len(importable)} importable\")\n    with get_context('spawn').Pool(8) as pool:\n        pending=deque()\n        for x in importables:\n            pending.append(pool.apply_async(process_importable_task, (x,)))\n            if len(pending)>16:\n                pending.popleft().get()\n        while pending:\n            pending.popleft().get()\n"
 if __name__ == "__main__":
     main()

@@ -12,10 +12,6 @@ import sys
 
 
 def parse_vulture_output(filepath):
-    """
-    Parse vulture output and extract SKIP_DIRS entries.
-    Returns dict: {filename: [line_numbers]}
-    """
     skip_dirs_fixes = {}
     try:
         with open(filepath, "r") as f:
@@ -39,7 +35,6 @@ def parse_vulture_output(filepath):
 
 
 def find_file(filename, search_root="."):
-    """Find a file by name in directory tree."""
     for root, dirs, files in os.walk(search_root):
         dirs[:] = [d for d in dirs if not d.startswith(".")]
         if filename in files:

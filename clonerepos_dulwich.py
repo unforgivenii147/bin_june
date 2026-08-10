@@ -22,7 +22,6 @@ MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024
 
 
 def read_repos(file_path: Path) -> list[str]:
-    """Read repository names from file."""
     if not file_path.exists():
         print(f"Error: {file_path} does not exist")
         sys.exit(1)
@@ -35,13 +34,11 @@ def read_repos(file_path: Path) -> list[str]:
 
 
 def validate_repo_format(repo: str) -> bool:
-    """Validate that repo is in user/repo format."""
     parts = repo.split("/")
     return len(parts) == 2 and all(parts)
 
 
 def check_repo_size(repo: str) -> tuple[bool, int]:
-    """Check repository size using GitHub API. Returns (is_small_enough, size_bytes)."""
     api_url = f"https://api.github.com/repos/{repo}"
     try:
         response = requests.get(api_url, timeout=10)
@@ -57,10 +54,6 @@ def check_repo_size(repo: str) -> tuple[bool, int]:
 
 
 def clone_repo(repo: str, base_dir: Path) -> tuple[str, bool, str]:
-    """
-    Clone a single repository with --depth 1 using dulwich.
-    Checks size before cloning.
-    """
     if not validate_repo_format(repo):
         return repo, False, f"Invalid format: {repo} (expected user/repo)"
     user, repo_name = repo.split("/")
@@ -88,7 +81,6 @@ def clone_repo(repo: str, base_dir: Path) -> tuple[str, bool, str]:
 
 
 def remove_from_repos_file(file_path: Path, repos_to_remove: set[str]):
-    """Remove specified repos from the repos.txt file."""
     if not repos_to_remove:
         return
     current_repos = read_repos(file_path)

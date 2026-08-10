@@ -21,33 +21,19 @@ try:
 except ImportError:
     print("Error: cramjam library required. Install with: pip install cramjam")
     sys.exit(1)
-
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
-
 COMPRESSED_EXT = ".snappy"
 
 
 def compress_file(file_path: Path, remove_original: bool = True) -> Tuple[bool, str]:
-    """
-    Compress a single file using Snappy
-    Args:
-        file_path: Path to file to compress
-        remove_original: Whether to remove original file after compression
-    Returns:
-        Tuple of (success, message)
-    """
     try:
         compressed_path = file_path.with_suffix(file_path.suffix + COMPRESSED_EXT)
-
         with open(file_path, "rb") as f:
             data = f.read()
-
         compressed_data = cramjam.snappy.compress(data)
-
         with open(compressed_path, "wb") as f:
             f.write(compressed_data)
-
         if remove_original:
             file_path.unlink()
         original_size = len(data)
@@ -63,29 +49,16 @@ def compress_file(file_path: Path, remove_original: bool = True) -> Tuple[bool, 
 
 
 def decompress_file(file_path: Path, remove_original: bool = True) -> Tuple[bool, str]:
-    """
-    Decompress a Snappy compressed file
-    Args:
-        file_path: Path to compressed file
-        remove_original: Whether to remove compressed file after decompression
-    Returns:
-        Tuple of (success, message)
-    """
     try:
         if not file_path.suffix == COMPRESSED_EXT:
             return False, f"File {file_path} doesn't have {COMPRESSED_EXT} extension"
-
         original_suffix = file_path.suffixes[-2] if len(file_path.suffixes) > 1 else ""
         output_path = file_path.with_suffix("")
-
         with open(file_path, "rb") as f:
             compressed_data = f.read()
-
         decompressed_data = cramjam.snappy.decompress(compressed_data)
-
         with open(output_path, "wb") as f:
             f.write(decompressed_data)
-
         if remove_original:
             file_path.unlink()
         logger.info(
@@ -98,9 +71,6 @@ def decompress_file(file_path: Path, remove_original: bool = True) -> Tuple[bool
 
 
 def process_file_worker(args):
-    """
-    Worker function for parallel processing
-    """
     file_path, operation, remove_original = args
     if operation == "compress":
         return compress_file(file_path, remove_original)
@@ -111,15 +81,6 @@ def process_file_worker(args):
 
 
 def find_files(directory: Path, operation: str, recursive: bool = True) -> List[Path]:
-    """
-    Find files to process based on operation
-    Args:
-        directory: Directory to search
-        operation: 'compress' or 'decompress'
-        recursive: Whether to search recursively
-    Returns:
-        List of file paths to process
-    """
     files = []
     if operation == "compress":
         for _ext in ["*"]:
@@ -142,14 +103,6 @@ def find_files(directory: Path, operation: str, recursive: bool = True) -> List[
 
 
 def create_tar_archive(directory: Path, remove_original: bool = True) -> Optional[Path]:
-    """
-    Create a tar archive of a directory
-    Args:
-        directory: Directory to archive
-        remove_original: Whether to remove original directory after archiving
-    Returns:
-        Path to created tar file or None if failed
-    """
     try:
         tar_path = directory.with_suffix(".tar")
         logger.info(f"Creating tar archive: {tar_path}")
@@ -166,14 +119,6 @@ def create_tar_archive(directory: Path, remove_original: bool = True) -> Optiona
 
 
 def tar_subdirectories(base_dir: Path, remove_original: bool = True) -> List[Path]:
-    """
-    Tar all subdirectories in the base directory
-    Args:
-        base_dir: Base directory containing subdirectories to tar
-        remove_original: Whether to remove original directories
-    Returns:
-        List of created tar file paths
-    """
     tar_files = []
     for item in base_dir.iterdir():
         if item.is_dir():
@@ -186,16 +131,6 @@ def tar_subdirectories(base_dir: Path, remove_original: bool = True) -> List[Pat
 def process_files(
     file_paths: List[Path], operation: str, remove_original: bool = True, max_workers: Optional[int] = None
 ) -> Tuple[int, int]:
-    """
-    Process files in parallel
-    Args:
-        file_paths: List of file paths to process
-        operation: 'compress' or 'decompress'
-        remove_original: Whether to remove original files
-        max_workers: Maximum number of worker processes
-    Returns:
-        Tuple of (success_count, failure_count)
-    """
     if not file_paths:
         logger.warning(f"No files found to {operation}")
         return 0, 0
@@ -204,11 +139,9 @@ def process_files(
     logger.info(f"Processing {len(file_paths)} files with {max_workers} workers")
     success_count = 0
     failure_count = 0
-
     args_list = [(fp, operation, remove_original) for fp in file_paths]
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         future_to_file = {executor.submit(process_file_worker, args): args[0] for args in args_list}
-
         for future in as_completed(future_to_file):
             file_path = future_to_file[future]
             try:
@@ -230,13 +163,13 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Compress all files in current directory recursively
+
   python snappy_tool.py -c .
-  # Decompress all .snappy files in specific directory
+
   python snappy_tool.py -d /path/to/directory
-  # Compress with tar of subdirectories first
+
   python snappy_tool.py -c -t .
-  # Keep original files (don't remove)
+
   python snappy_tool.py -c --keep-original .
         """,
     )
@@ -250,10 +183,8 @@ Examples:
     parser.add_argument("--workers", type=int, default=None, help="Number of worker processes (default: CPU count)")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose logging")
     args = parser.parse_args()
-
     if args.verbose:
         logger.setLevel(logging.DEBUG)
-
     base_dir = Path(args.directory)
     if not base_dir.exists() or not base_dir.is_dir():
         logger.error(f"Directory not found: {base_dir}")
@@ -263,20 +194,16 @@ Examples:
     recursive = not args.no_recursive
     logger.info(f"Starting {operation} operation on {base_dir}")
     logger.info(f"Remove original: {remove_original}, Recursive: {recursive}")
-
     if args.tar and args.compress:
         logger.info("Tarring subdirectories...")
         tar_files = tar_subdirectories(base_dir, remove_original)
         logger.info(f"Created {len(tar_files)} tar archives")
-
     files_to_process = find_files(base_dir, operation, recursive)
     if not files_to_process:
         logger.warning(f"No files found to {operation}")
         sys.exit(0)
     logger.info(f"Found {len(files_to_process)} files to {operation}")
-
     success_count, failure_count = process_files(files_to_process, operation, remove_original, args.workers)
-
     logger.info(f"Completed {operation} operation")
     logger.info(f"Success: {success_count}, Failed: {failure_count}")
     if failure_count > 0:

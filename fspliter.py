@@ -1,10 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-from typing import Tuple
-
-"""
-Split text files into parts with character count between 4900-4990,
-respecting word and sentence boundaries.
-"""
 from __future__ import annotations
 
 import argparse
@@ -13,7 +7,7 @@ import os
 import re
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -40,14 +34,6 @@ TEXT_EXTENSIONS = {
 
 
 def find_text_files(input_paths: list[Path], recursive: bool = True) -> list[Path]:
-    """
-    Find all text files from input paths (files or directories).
-    Args:
-        input_paths: List of paths to process
-        recursive: Whether to search directories recursively
-    Returns:
-        List of Path objects for text files
-    """
     text_files = []
     for path in input_paths:
         if not path.exists():
@@ -77,17 +63,6 @@ def find_text_files(input_paths: list[Path], recursive: bool = True) -> list[Pat
 
 
 def find_split_point(text: str, start_pos: int, min_chars: int, max_chars: int) -> int:
-    """
-    Find the best split point in text between min_chars and max_chars from start_pos.
-    Respects sentence boundaries first, then word boundaries.
-    Args:
-        text: The text to split
-        start_pos: Starting position in text
-        min_chars: Minimum characters per part
-        max_chars: Maximum characters per part
-    Returns:
-        Position to split (end of current part)
-    """
     end_pos = start_pos + max_chars
     if end_pos >= len(text):
         return len(text)
@@ -110,15 +85,6 @@ def find_split_point(text: str, start_pos: int, min_chars: int, max_chars: int) 
 
 
 def split_text(text: str, min_chars: int, max_chars: int) -> list[str]:
-    """
-    Split text into parts of min_chars-max_chars characters, respecting boundaries.
-    Args:
-        text: Input text to split
-        min_chars: Minimum characters per part
-        max_chars: Maximum characters per part
-    Returns:
-        List of text parts
-    """
     parts = []
     current_pos = 0
     while current_pos < len(text):
@@ -132,16 +98,6 @@ def split_text(text: str, min_chars: int, max_chars: int) -> list[str]:
 
 
 def process_file(input_file: Path, output_dir: Path, min_chars: int, max_chars: int) -> tuple[Path, int]:
-    """
-    Process a single file: read, split, and write parts.
-    Args:
-        input_file: Path to input file
-        output_dir: Directory to save output parts
-        min_chars: Minimum characters per part
-        max_chars: Maximum characters per part
-    Returns:
-        Tuple of (input_file_path, number_of_parts_created)
-    """
     try:
         try:
             with open(input_file, encoding="utf-8") as f:
@@ -171,7 +127,6 @@ def process_file(input_file: Path, output_dir: Path, min_chars: int, max_chars: 
 
 
 def process_file_wrapper(args):
-    """Wrapper function for multiprocessing to unpack arguments."""
     return process_file(*args)
 
 

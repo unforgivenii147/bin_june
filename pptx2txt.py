@@ -13,7 +13,6 @@ from pptx import Presentation
 
 
 def extract_text_from_pptx(pptx_path):
-    """Extract all text from a PPTX file"""
     try:
         prs = Presentation(pptx_path)
     except Exception as e:
@@ -28,7 +27,6 @@ def extract_text_from_pptx(pptx_path):
             for shape in slide.shapes:
                 if hasattr(shape, "text") and shape.text.strip():
                     f.write(f"{shape.text}\n")
-
                     if shape.has_table:
                         table = shape.table
                         for row in table.rows:

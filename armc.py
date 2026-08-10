@@ -3,7 +3,7 @@
 Python Comment Remover with AST Validation
 Removes comments from Python files recursively with parallel processing.
 Features:
-- Removes line comments (# ...) and inline comments
+- Removes line comments (
 - Preserves docstrings
 - Preserves shebang lines
 - Preserves # type: and # fmt: comments

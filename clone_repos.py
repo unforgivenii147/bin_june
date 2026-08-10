@@ -17,7 +17,6 @@ from git.exc import InvalidGitRepositoryError
 
 
 def read_repos(file_path: Path) -> list[str]:
-    """Read repository names from file, stripping whitespace and empty lines."""
     if not file_path.exists():
         print(f"Error: {file_path} does not exist")
         sys.exit(1)
@@ -30,16 +29,11 @@ def read_repos(file_path: Path) -> list[str]:
 
 
 def validate_repo_format(repo: str) -> bool:
-    """Validate that repo is in user/repo format."""
     parts = repo.split("/")
     return len(parts) == 2 and all(parts)
 
 
 def clone_repo(repo: str, base_dir: Path) -> tuple[str, bool, str]:
-    """
-    Clone a single repository with --depth 1 using GitPython.
-    Returns (repo_name, success, message).
-    """
     if not validate_repo_format(repo):
         return repo, False, f"Invalid format: {repo} (expected user/repo)"
     user, repo_name = repo.split("/")

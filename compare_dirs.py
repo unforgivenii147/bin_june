@@ -10,7 +10,6 @@ from pathlib import Path
 from dh import cprint
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 CHUNK_SIZE = 32768
 
 

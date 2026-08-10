@@ -139,28 +139,5 @@ def main() -> None:
             inspector.print_inspection(p)
 
 
-"""
-        wheels = list(path.glob("*.whl"))
-        if not wheels:
-            print(f"No .whl files found in {path}")
-            return
-        print(f"
-Inspecting {len(wheels)} .whl files...
-")
-        results = inspector.inspect_directory(path)
-        valid_count = sum(1 for r in results if r.get("is_valid", True))
-        invalid_count = len(results) - valid_count
-        for result in results:
-            status = "✓" if result.get("is_valid", True) else "✗"
-            size = result.get("size_mb", 0)
-            files = result.get("file_count", 0)
-            print(f"{status} {result['filename']:<50} {size:>.2f} KB ({files} files)")
-        print(f"
-Valid: {valid_count}/{len(results)}")
-        print(f"Invalid: {invalid_count}/{len(results)}")
-    else:
-        print(f"Invalid path: {path}")
-        sys.exit(1)
-"""
 if __name__ == "__main__":
     main()

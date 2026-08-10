@@ -18,23 +18,13 @@ from packaging.version import InvalidVersion, Version
 
 
 def parse_filename(filepath: Path) -> Tuple[str, Version, Path]:
-    """
-    Parse a metadata filename to extract package name and version.
-    Args:
-        filepath: Path to metadata file
-    Returns:
-        Tuple of (package_name, version_object, filepath)
-    """
-
     name = filepath.stem
-
     match = re.match(r"^(.+?)-(\d[\d._]*[a-zA-Z]*[\d]*)$", name)
     if not match:
         print(f"Warning: Could not parse version from {filepath.name}")
         return (name, Version("0.0.0"), filepath)
     pkg_name = match.group(1)
     version_str = match.group(2)
-
     normalized_version = version_str.replace("_", ".")
     try:
         version = Version(normalized_version)
@@ -45,34 +35,16 @@ def parse_filename(filepath: Path) -> Tuple[str, Version, Path]:
 
 
 def normalize_package_name(name: str) -> str:
-    """
-    Normalize package name for comparison.
-    PEP 503 normalization: lowercase, replace [-_.] with -
-    """
     return re.sub(r"[-_.]+", "-", name).lower()
 
 
 def find_metadata_files(directory: Path) -> List[Path]:
-    """
-    Find all .metadata files in the given directory.
-    Args:
-        directory: Directory to search
-    Returns:
-        List of Path objects for metadata files
-    """
     if not directory.exists():
         raise FileNotFoundError(f"Directory not found: {directory}")
     return list(directory.glob("*.metadata"))
 
 
 def process_file_batch(files: List[Path]) -> Dict[str, List[Tuple[Version, Path]]]:
-    """
-    Process a batch of files and group by package name.
-    Args:
-        files: List of file paths to process
-    Returns:
-        Dictionary mapping package names to list of (version, path) tuples
-    """
     packages = defaultdict(list)
     for filepath in files:
         pkg_name, version, path = parse_filename(filepath)
@@ -82,18 +54,9 @@ def process_file_batch(files: List[Path]) -> Dict[str, List[Tuple[Version, Path]
 
 
 def find_old_versions(package_files: List[Tuple[Version, Path]]) -> List[Path]:
-    """
-    Find old versions of a package, keeping only the latest.
-    Args:
-        package_files: List of (version, path) tuples for a package
-    Returns:
-        List of paths to delete (all except the latest version)
-    """
     if len(package_files) <= 1:
         return []
-
     sorted_files = sorted(package_files, key=lambda x: x[0], reverse=True)
-
     latest = sorted_files[0]
     old_versions = sorted_files[1:]
     print(f"  Keeping: {latest[1].name} (v{latest[0]})")
@@ -103,13 +66,6 @@ def find_old_versions(package_files: List[Tuple[Version, Path]]) -> List[Path]:
 
 
 def merge_results(results: List[Dict[str, List[Tuple[Version, Path]]]]) -> Dict[str, List[Tuple[Version, Path]]]:
-    """
-    Merge results from multiple batches.
-    Args:
-        results: List of dictionaries from batch processing
-    Returns:
-        Merged dictionary of package versions
-    """
     merged = defaultdict(list)
     for result in results:
         for pkg_name, versions in result.items():
@@ -118,13 +74,6 @@ def merge_results(results: List[Dict[str, List[Tuple[Version, Path]]]]) -> Dict[
 
 
 def delete_files(paths: List[Path], dry_run: bool = True, backup_dir: Path | None = None):
-    """
-    Delete or move files.
-    Args:
-        paths: List of paths to delete
-        dry_run: If True, only print what would be deleted
-        backup_dir: If provided, move files here instead of deleting
-    """
     for path in paths:
         if dry_run:
             print(f"  [DRY RUN] Would delete: {path.name}")
@@ -149,7 +98,6 @@ def main():
         "--batch-size", type=int, default=100, help="Number of files to process per batch (default: 100)"
     )
     args = parser.parse_args()
-
     metadata_dir = Path(args.directory)
     if not metadata_dir.exists():
         print(f"Error: Directory '{metadata_dir}' does not exist")
@@ -159,17 +107,14 @@ def main():
         backup_dir = Path(args.backup_dir)
         if not args.dry_run:
             backup_dir.mkdir(parents=True, exist_ok=True)
-
     print(f"Scanning directory: {metadata_dir}")
     all_files = find_metadata_files(metadata_dir)
     print(f"Found {len(all_files)} metadata files")
     if not all_files:
         print("No metadata files found")
         return 0
-
     batch_size = max(1, args.batch_size)
     batches = [all_files[i : i + batch_size] for i in range(0, len(all_files), batch_size)]
-
     print(f"Processing {len(batches)} batches using {args.workers or 'all available'} workers...")
     batch_results = []
     with ProcessPoolExecutor(max_workers=args.workers) as executor:
@@ -182,10 +127,8 @@ def main():
                 print(f"  Batch {batch_idx + 1}/{len(batches)} completed")
             except Exception as e:
                 print(f"  Error processing batch {batch_idx + 1}: {e}")
-
     print("\nMerging results...")
     all_packages = merge_results(batch_results)
-
     print(f"\nProcessing {len(all_packages)} unique packages...")
     files_to_delete = []
     for pkg_name, versions in sorted(all_packages.items()):
@@ -193,7 +136,6 @@ def main():
             print(f"\nPackage: {pkg_name} ({len(versions)} versions)")
             old_files = find_old_versions(versions)
             files_to_delete.extend(old_files)
-
     print(f"\n{'=' * 60}")
     print(f"Summary:")
     print(f"  Total metadata files: {len(all_files)}")

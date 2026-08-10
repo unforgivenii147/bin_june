@@ -11,8 +11,6 @@ from pathlib import Path
 
 
 def normalize_function_source(node: ast.FunctionDef) -> str:
-    """Normalize function source for comparison (removes docstring, comments)."""
-
     func_copy = ast.FunctionDef(
         name=node.name,
         args=node.args,
@@ -27,21 +25,17 @@ def normalize_function_source(node: ast.FunctionDef) -> str:
         lineno=node.lineno,
         col_offset=node.col_offset,
     )
-
     source = ast.unparse(func_copy)
-
     lines = [l.strip() for l in source.split("\n") if l.strip()]
     return "\n".join(lines)
 
 
 def hash_function_body(node: ast.FunctionDef) -> str:
-    """Hash normalized function body."""
     normalized = normalize_function_source(node)
     return hashlib.sha256(normalized.encode()).hexdigest()
 
 
 def extract_functions(filepath: Path) -> dict[str, tuple[str, ast.FunctionDef, str]]:
-    """Extract all functions from a Python file with their hashes and normalized source."""
     try:
         tree = ast.parse(filepath.read_text())
     except (SyntaxError, UnicodeDecodeError):
@@ -56,7 +50,6 @@ def extract_functions(filepath: Path) -> dict[str, tuple[str, ast.FunctionDef, s
 
 
 def load_dh_functions(dh_path: Path) -> dict[str, tuple[str, str]]:
-    """Load all function hashes from dh package source."""
     dh_functions = {}
     py_files = sorted(dh_path.glob("**/*.py"))
     for pyfile in py_files:
@@ -69,7 +62,6 @@ def load_dh_functions(dh_path: Path) -> dict[str, tuple[str, str]]:
 
 
 def get_function_source_lines(filepath: Path, func_name: str) -> int:
-    """Get the line range of a function in source file."""
     tree = ast.parse(filepath.read_text())
     for node in ast.walk(tree):
         if isinstance(node, ast.FunctionDef) and node.name == func_name:
@@ -80,7 +72,6 @@ def get_function_source_lines(filepath: Path, func_name: str) -> int:
 def transform_file(
     filepath: Path, dh_functions: dict[str, tuple[str, str]], apply: bool, debug: bool = False
 ) -> tuple[Path, bool, str]:
-    """Transform a single file, removing inlined functions and adding imports."""
     try:
         content = filepath.read_text()
         tree = ast.parse(content)

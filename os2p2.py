@@ -89,12 +89,6 @@ def get_pyfiles(path: str | Path) -> list[Path]:
     return sorted(pyfiles)
 
 
-"""
-Refactor Python files from os.path to pathlib using regex transformations.
-Warning: This approach is simpler but less safe than AST-based refactoring.
-"""
-
-
 class TransformationType(Enum):
     SIMPLE_REPLACE = "simple"
     FUNCTION_CALL = "function"

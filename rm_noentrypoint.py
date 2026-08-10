@@ -14,13 +14,6 @@ from typing import List, Tuple
 
 
 def check_wheel_for_entry_points(wheel_path: Path) -> Tuple[Path, bool]:
-    """
-    Check if a wheel file contains entry_points.txt.
-    Args:
-        wheel_path: Path to the .whl file
-    Returns:
-        Tuple of (wheel_path, has_entry_points)
-    """
     try:
         with zipfile.ZipFile(wheel_path, "r") as wheel:
             for name in wheel.namelist():
@@ -33,26 +26,12 @@ def check_wheel_for_entry_points(wheel_path: Path) -> Tuple[Path, bool]:
 
 
 def find_wheel_files(directory: Path = Path.cwd()) -> List[Path]:
-    """
-    Find all .whl files in the specified directory.
-    Args:
-        directory: Directory to search (default: current directory)
-    Returns:
-        List of Path objects for .whl files
-    """
     return list(directory.glob("*.whl"))
 
 
 def remove_wheels_without_entry_points(
     directory: Path = Path.cwd(), max_workers: int | None = None, dry_run: bool = False
 ) -> None:
-    """
-    Find and remove wheel files without entry_points.txt using parallel processing.
-    Args:
-        directory: Directory containing wheel files
-        max_workers: Maximum number of parallel workers
-        dry_run: If True, only report what would be removed without actually removing
-    """
     wheel_files = find_wheel_files(directory)
     if not wheel_files:
         print("No .whl files found in the current directory.")

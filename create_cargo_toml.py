@@ -1,27 +1,13 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 
-from typing import Optional
-
-"""
-Generate a Cargo.toml file from a Cargo.lock file.
-Reads package information from Cargo.lock and creates a basic Cargo.toml
-with all dependencies listed.
-"""
 import re
 import sys
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 
 def parse_cargo_lock(filepath: str) -> dict:
-    """
-    Parse a Cargo.lock file and extract package information.
-    Args:
-        filepath: Path to the Cargo.lock file
-    Returns:
-        Dictionary containing parsed data with keys: 'version', 'packages'
-    """
     with open(filepath, "r", encoding="utf-8") as f:
         content = f.read()
     version_match = re.search(r"^version\s*=\s*(\d+)", content, re.MULTILINE)
@@ -43,13 +29,6 @@ def parse_cargo_lock(filepath: str) -> dict:
 
 
 def parse_package_block(block: str) -> Optional[dict]:
-    """
-    Parse a package block from Cargo.lock v2+.
-    Args:
-        block: String containing package information
-    Returns:
-        Dictionary with package details or None if parsing fails
-    """
     pkg = {}
     name_match = re.search(r'^name\s*=\s*"([^"]*)"', block, re.MULTILINE)
     version_match = re.search(r'^version\s*=\s*"([^"]*)"', block, re.MULTILINE)
@@ -80,13 +59,6 @@ def parse_package_block(block: str) -> Optional[dict]:
 
 
 def parse_package_block_v1(block: str) -> Optional[dict]:
-    """
-    Parse a package block from Cargo.lock v1.
-    Args:
-        block: String containing package information
-    Returns:
-        Dictionary with package details or None if parsing fails
-    """
     pkg = {}
     name_match = re.search(r'^name\s*=\s*"([^"]*)"', block, re.MULTILINE)
     version_match = re.search(r'^version\s*=\s*"([^"]*)"', block, re.MULTILINE)
@@ -110,16 +82,6 @@ def generate_cargo_toml(
     root_version: str = "0.1.0",
     include_dev_deps: bool = False,
 ) -> str:
-    """
-    Generate Cargo.toml content from parsed package data.
-    Args:
-        packages: List of parsed package dictionaries
-        root_package_name: Name for the root package (optional)
-        root_version: Version for the root package
-        include_dev_deps: Whether to include dependencies from dev-dependencies
-    Returns:
-        String containing Cargo.toml content
-    """
     lines = []
     lines.append("[package]")
     if root_package_name:
@@ -151,14 +113,6 @@ def generate_cargo_toml(
 
 
 def find_package(packages: list[dict], name: str) -> Optional[dict]:
-    """
-    Find a package by name in the packages list.
-    Args:
-        packages: List of package dictionaries
-        name: Package name to find
-    Returns:
-        Package dictionary or None if not found
-    """
     for pkg in packages:
         if pkg["name"] == name:
             return pkg
@@ -166,7 +120,6 @@ def find_package(packages: list[dict], name: str) -> Optional[dict]:
 
 
 def main():
-    """Main function to run the script."""
     lock_file = "Cargo.lock"
     if len(sys.argv) > 1:
         lock_file = sys.argv[1]

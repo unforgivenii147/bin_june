@@ -5,11 +5,6 @@ import sys
 
 
 def persian_sort_key(word):
-    """
-    Create a sort key for Persian words.
-    Persian alphabet order:
-    ا, ب, پ, ت, ث, ج, چ, ح, خ, د, ذ, ر, ز, ژ, س, ش, ص, ض, ط, ظ, ع, غ, ف, ق, ک, گ, ل, م, ن, و, ه, ی
-    """
     persian_order = {
         "آ": "ا",
         "ا": "ا",
@@ -93,10 +88,6 @@ def persian_sort_key(word):
 
 
 def sort_persian_dict(file_path):
-    """
-    Sort a Persian dictionary file in place.
-    Each line contains one word.
-    """
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             lines = f.readlines()

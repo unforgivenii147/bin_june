@@ -10,10 +10,6 @@ TEXT_SUFFIXES = {".py", ".sh", ".bash", ".pl", ".rb", ".pyw", ".txt"}
 
 
 def check_and_make_executable(file_path: Path) -> dict:
-    """
-    Checks if a file is a text file containing a shebang,
-    and makes it executable if it isn't already.
-    """
     result = {"path": file_path, "is_shebang": False, "permission_changed": False, "error": None}
     try:
         if not file_path.is_file():

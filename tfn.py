@@ -7,7 +7,6 @@ from dh import FONT_EXT, unique_path
 from fontTools.ttLib import TTFont
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-"\nRecursively rename font files based on their internal metadata (name and style).\nUses fontTools to extract font family name and style (Regular, Bold, Italic, etc.).\nUsage:\n    python rename_fonts.py\nExamples:\n    asrds.ttf -> Fontello-Regular.ttf\n    13543.woff2 -> FontAwesome-Regular.woff2\nIf the target filename already exists, appends _1, _2, etc. to avoid overwriting.\n"
 STYLE_MAPPING = {
     "normal": "Regular",
     "regular": "Regular",

@@ -24,7 +24,6 @@ TARGET_EXTENSIONS = {".py", ".sh"}
 
 
 def detect_shebang(filepath):
-    """Read the first line of a file and detect if it contains a shebang."""
     try:
         with open(filepath, encoding="utf-8", errors="ignore") as f:
             first_line = f.readline().strip()
@@ -43,13 +42,11 @@ def detect_shebang(filepath):
 
 
 def should_rename(filepath, target_ext):
-    """Check if file needs renaming based on target extension."""
     current_ext = os.path.splitext(filepath)[1].lower()
     return current_ext != target_ext
 
 
 def rename_file(filepath, target_ext):
-    """Rename file to have the target extension."""
     directory = os.path.dirname(filepath)
     basename = os.path.splitext(os.path.basename(filepath))[0]
     if not os.path.splitext(filepath)[1]:
@@ -72,7 +69,6 @@ def rename_file(filepath, target_ext):
 
 
 def main():
-    """Main function to process all files in current directory."""
     dry_run = "--dry-run" in sys.argv or "-n" in sys.argv
     verbose = "--verbose" in sys.argv or "-v" in sys.argv
     if dry_run:

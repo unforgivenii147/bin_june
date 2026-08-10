@@ -13,11 +13,6 @@ import sys
 
 
 def get_site_directories() -> tuple[list[pathlib.Path], list[pathlib.Path]]:
-    """
-    Get system and user site-packages directories.
-    Returns:
-        tuple of (system_site_dirs, user_site_dirs)
-    """
     site_dirs = [pathlib.Path(p) for p in site.getsitepackages()]
     user_site = pathlib.Path(site.getusersitepackages())
     system_site_dirs = [d for d in site_dirs if d != user_site]
@@ -26,13 +21,6 @@ def get_site_directories() -> tuple[list[pathlib.Path], list[pathlib.Path]]:
 
 
 def scan_directory_for_packages(directory: pathlib.Path) -> dict[str, pathlib.Path]:
-    """
-    Scan a directory for installed packages.
-    Args:
-        directory: Path to scan for packages
-    Returns:
-        dictionary mapping package names to their locations
-    """
     packages = {}
     if not directory.exists():
         return packages
@@ -60,14 +48,6 @@ def scan_directory_for_packages(directory: pathlib.Path) -> dict[str, pathlib.Pa
 def find_duplicate_packages(
     system_packages: dict[str, pathlib.Path], user_packages: dict[str, pathlib.Path]
 ) -> dict[str, tuple[pathlib.Path, pathlib.Path]]:
-    """
-    Find packages that exist in both system and user directories.
-    Args:
-        system_packages: Packages from system directories
-        user_packages: Packages from user directories
-    Returns:
-        dictionary mapping package names to (system_location, user_location) tuples
-    """
     duplicates = {}
     common_packages = set(system_packages.keys()) & set(user_packages.keys())
     for pkg_name in sorted(common_packages):
@@ -76,13 +56,6 @@ def find_duplicate_packages(
 
 
 def process_system_directories(system_dirs: list[pathlib.Path]) -> dict[str, pathlib.Path]:
-    """
-    Process system directories in parallel.
-    Args:
-        system_dirs: list of system site-package directories
-    Returns:
-        Combined dictionary of all system packages
-    """
     system_packages = {}
     with concurrent.futures.ThreadPoolExecutor(max_workers=len(system_dirs) or 1) as executor:
         future_to_dir = {
@@ -99,13 +72,6 @@ def process_system_directories(system_dirs: list[pathlib.Path]) -> dict[str, pat
 
 
 def process_user_directories(user_dirs: list[pathlib.Path]) -> dict[str, pathlib.Path]:
-    """
-    Process user directories in parallel.
-    Args:
-        user_dirs: list of user site-package directories
-    Returns:
-        Combined dictionary of all user packages
-    """
     user_packages = {}
     with concurrent.futures.ThreadPoolExecutor(max_workers=len(user_dirs) or 1) as executor:
         future_to_dir = {executor.submit(scan_directory_for_packages, directory): directory for directory in user_dirs}
@@ -122,15 +88,6 @@ def process_user_directories(user_dirs: list[pathlib.Path]) -> dict[str, pathlib
 def analyze_package_versions(
     package_name: str, system_location: pathlib.Path, user_location: pathlib.Path
 ) -> dict[str, str]:
-    """
-    Try to determine the versions of a package in both locations.
-    Args:
-        package_name: Name of the package
-        system_location: System installation location
-        user_location: User installation location
-    Returns:
-        dictionary with version information
-    """
     versions = {"system_version": "unknown", "user_version": "unknown"}
     for location_type, location in [("system", system_location), ("user", user_location)]:
         try:
@@ -167,7 +124,6 @@ def analyze_package_versions(
 
 
 def main():
-    """Main function to find and report duplicate packages."""
     print("Python Package Duplicate Checker")
     print("=" * 50)
     try:

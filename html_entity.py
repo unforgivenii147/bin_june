@@ -28,8 +28,6 @@ def is_binary(path: Path | str) -> bool:
 
 from dh import get_nobinary
 
-"\nConvert HTML entities in HTML files recursively.\nConverts &lt; to <, &gt; to >, and other common entities.\n"
-"\nConvert HTML entities in HTML files recursively.\nConverts &lt; to <, &gt; to >, and other common entities.\n"
 HTML_ENTITIES = {
     "&lt;": "<",
     "&gt;": ">",

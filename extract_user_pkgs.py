@@ -18,7 +18,6 @@ def get_user_site_path() -> Path:
 
 
 def get_packages_with_entry_points() -> list[str]:
-    """Find all installed packages that have entry points."""
     packages_with_eps = []
     for dist in importlib.metadata.distributions():
         if dist.entry_points:
@@ -27,7 +26,6 @@ def get_packages_with_entry_points() -> list[str]:
 
 
 def get_matching_packages(pattern: str) -> list[str]:
-    """Find all installed packages matching the wildcard pattern."""
     matching = []
     for dist in importlib.metadata.distributions():
         name = dist.metadata["Name"]
@@ -37,7 +35,6 @@ def get_matching_packages(pattern: str) -> list[str]:
 
 
 def resolve_package_list(patterns: list[str], entry_points_only: bool = False) -> tuple[list[str], list[str]]:
-    """Resolve wildcard patterns to package names. Returns (matched, unmatched) lists."""
     if entry_points_only:
         packages_with_eps = get_packages_with_entry_points()
         if not patterns:
@@ -64,7 +61,6 @@ def resolve_package_list(patterns: list[str], entry_points_only: bool = False) -
         for pattern in patterns:
             if any(c in pattern for c in "*?[]"):
                 all_matches = get_matching_packages(pattern)
-
                 matches = [pkg for pkg in all_matches if pkg in packages_with_eps]
                 if matches:
                     matched_packages.extend(matches)
@@ -97,27 +93,6 @@ def copy_single_file(record_row: list[str], dist_location: Path, target_dir: Pat
         return False
 
 
-"""
-def process_package(pkg_name: str, user_site: Path, base_target_dir: Path) -> str:
-    try:
-        dist = importlib.metadata.distribution(pkg_name)
-    except importlib.metadata.PackageNotFoundError:
-        return f"❌ Package '{pkg_name}' is not installed in this environment."
-    # Verify package has entry points
-    if not dist.entry_points:
-        return f"ℹ️  Package '{pkg_name}' has no entry points. Skipping."
-    dist_location = Path(dist.locate_file("")).resolve()
-    if not dist_location.is_relative_to(user_site):
-        return f"ℹ️  Package '{pkg_name}' found, but it is not installed in the user site folder (Location: {dist_location}). Skipping."
-    record_file = dist.locate_file(f"{dist.name}-{dist.version}.dist-info/RECORD")
-    record_path = Path(record_file)
-    if not record_path.is_file():
-        return f"❌ Package '{pkg_name}' found in user-site, but its 'RECORD' file is missing. Cannot map files."
-    pkg_target_dir = base_target_dir / pkg_name
-    pkg_target_dir.mkdir(parents=True, exist_ok=True)
-"""
-
-
 def process_package(pkg_name: str, user_site: Path, base_target_dir: Path) -> str:
     try:
         dist = importlib.metadata.distribution(pkg_name)
@@ -130,7 +105,6 @@ def process_package(pkg_name: str, user_site: Path, base_target_dir: Path) -> st
         files = dist.files
         if files is None:
             return f"❌ Package '{pkg_name}' has no file information available."
-
         record_file = None
         for file in files:
             if file.name == "RECORD":
@@ -145,7 +119,6 @@ def process_package(pkg_name: str, user_site: Path, base_target_dir: Path) -> st
         return f"❌ Failed to locate RECORD file for '{pkg_name}': {e}"
     pkg_target_dir = base_target_dir / pkg_name
     pkg_target_dir.mkdir(parents=True, exist_ok=True)
-
     try:
         with record_path.open("r", encoding="utf-8", newline="") as f:
             reader = csv.reader(f)
@@ -234,7 +207,6 @@ def main():
     print("-" * 42)
     if args.list_only:
         return
-
     packages_to_extract = []
     for pkg in matched_packages:
         try:

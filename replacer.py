@@ -17,7 +17,6 @@ MAX_CONTEXT_DISPLAY = 3
 
 
 def is_binary(path: Path) -> bool:
-    """Check if a file is binary by sampling its content."""
     try:
         with path.open("rb") as f:
             chunk = f.read(CHUNK_SIZE)
@@ -33,9 +32,6 @@ def is_binary(path: Path) -> bool:
 
 
 def process_file(path: Path, search_text: str, replace_text: str | None = None, dry_run: bool = False) -> bool:
-    """Process a single file for text replacement.
-    Returns True if matches were found, False otherwise.
-    """
     try:
         content = path.read_text(encoding="utf-8")
         pattern = re.compile(re.escape(search_text))
@@ -70,9 +66,6 @@ def process_file(path: Path, search_text: str, replace_text: str | None = None, 
 def replace_in_files(
     search_text: str, replace_text: str | None = None, target_file: str | None = None, dry_run: bool = False
 ) -> tuple[int, int]:
-    """Recursively process files for text replacement.
-    Returns tuple of (files_processed, files_changed).
-    """
     files_processed = 0
     files_changed = 0
     if target_file:
@@ -99,7 +92,6 @@ def replace_in_files(
 
 
 def parse_search_replace(strings: list[str]) -> tuple[str, str | None]:
-    """Parse search and optional replacement strings from arguments."""
     if len(strings) == 2:
         search_text, replace_text = strings
         action = f"REPLACING '{search_text}' WITH '{replace_text}'"
@@ -115,7 +107,6 @@ def parse_search_replace(strings: list[str]) -> tuple[str, str | None]:
 
 
 def main() -> None:
-    """Main entry point for the script."""
     parser = argparse.ArgumentParser(
         description="Recursively replace or remove text in files.",
         formatter_class=argparse.RawDescriptionHelpFormatter,

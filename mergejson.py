@@ -7,10 +7,6 @@ import sys
 
 
 def deep_merge(dict1, dict2):
-    """
-    Recursively merges two dictionaries.
-    Values in dict2 take precedence over dict1 for overlapping keys.
-    """
     if dict1 is None:
         return dict2
     if dict2 is None:
@@ -36,18 +32,15 @@ def merge_json_files(input_files, output_file):
         except json.JSONDecodeError:
             print(f"Error: File '{file_path}' contains invalid JSON.")
             sys.exit(1)
-
         if merged_data is None:
             merged_data = data
             continue
-
         if type(merged_data) != type(data):
             print(
                 f"Error: Type mismatch. '{input_files[0]}' is a {type(merged_data).__name__}, "
                 f"but '{file_path}' is a {type(data).__name__}. Cannot merge."
             )
             sys.exit(1)
-
         if isinstance(merged_data, list):
             merged_data.extend(data)
         elif isinstance(merged_data, dict):
@@ -55,7 +48,6 @@ def merge_json_files(input_files, output_file):
         else:
             print(f"Error: Unsupported top-level JSON type: {type(data).__name__}")
             sys.exit(1)
-
     try:
         with open(output_file, "w", encoding="utf-8") as f:
             json.dump(merged_data, f, indent=4, ensure_ascii=False)

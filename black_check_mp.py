@@ -32,14 +32,6 @@ def unique_destination(dest: Path) -> Path:
 
 def black_check(file_path: Path) -> tuple[Path, bool]:
     print(f"[OK] {file_path}")
-    """
-    result = subprocess.run(
-        ["black", "--check", "--quiet", str(file_path)],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-    )
-    return file_path, result.returncode == 0
-    """
     try:
         ast.parse(file_path.read_text(encoding="utf-8"))
         return file_path, True

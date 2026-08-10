@@ -1,10 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 
-"""
-Recursive Python file runner with parallel processing and timeout handling.
-Runs all .py files in a directory tree, continuing even if some fail.
-"""
 import argparse
 import multiprocessing
 import runpy

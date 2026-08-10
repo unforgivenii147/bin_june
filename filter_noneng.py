@@ -9,10 +9,6 @@ import gcld3
 
 
 def process_file_lines(input_path: Path, move_mode: bool):
-    """
-    Reads a file, detects non-English lines via gcld3, reports them,
-    and optionally extracts them into a separate file.
-    """
     if not input_path.is_file():
         print(f"❌ Error: The file '{input_path}' does not exist or is not a file.")
         sys.exit(1)

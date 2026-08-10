@@ -25,8 +25,6 @@ except ImportError:
 
 @dataclass
 class ExtractionResult:
-    """Result of text extraction from a single image."""
-
     file_path: Path
     success: bool
     text: str = ""
@@ -36,29 +34,18 @@ class ExtractionResult:
 
 
 class TextExtractor:
-    """Extract text from images using Tesseract OCR."""
-
     IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp", ".gif"}
 
     @staticmethod
     def extract_from_image(image_path: Path) -> ExtractionResult:
-        """
-        Extract Russian and English text from an image.
-        Args:
-            image_path: Path to the image file
-        Returns:
-            ExtractionResult with extracted text and statistics
-        """
         try:
             if not image_path.exists():
                 return ExtractionResult(file_path=image_path, success=False, error=f"File not found")
-
             image = Image.open(image_path)
             text = pytesseract.image_to_string(image, lang="rus+eng")
             print(text)
             txt_path = image_path.with_suffix(".txt")
             txt_path.write_text(text, encoding="utf-8")
-
             if not text.strip():
                 return ExtractionResult(file_path=image_path, success=True, text="", char_count=0, line_count=0)
             char_count = len(text)
@@ -71,13 +58,6 @@ class TextExtractor:
 
     @staticmethod
     def find_images(directories: list[Path]) -> list[Path]:
-        """
-        Recursively find all image files in given directories.
-        Args:
-            directories: List of directory paths to search
-        Returns:
-            List of image file paths
-        """
         images = []
         for directory in directories:
             if not directory.is_dir():
@@ -90,11 +70,8 @@ class TextExtractor:
 
 
 class TextExtractionReport:
-    """Generate formatted reports for extraction results."""
-
     @staticmethod
     def print_header(total_files: int) -> None:
-        """Print report header."""
         print("\n" + "=" * 80)
         print(f"📄 TEXT EXTRACTION REPORT")
         print(f"⏱  Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
@@ -103,7 +80,6 @@ class TextExtractionReport:
 
     @staticmethod
     def print_file_result(result: ExtractionResult, rel_path: Path) -> None:
-        """Print result for a single file."""
         if result.success:
             status = "✓ SUCCESS"
             stats = f"│ Characters: {result.char_count:,} | Lines: {result.line_count}"
@@ -133,7 +109,6 @@ class TextExtractionReport:
 
     @staticmethod
     def save_json_report(results: list[ExtractionResult], output_path: Path) -> None:
-        """Save detailed results to JSON file."""
         data = {
             "timestamp": datetime.now().isoformat(),
             "total_files": len(results),
@@ -156,7 +131,6 @@ class TextExtractionReport:
 
 
 def process_image_worker(image_path: Path) -> ExtractionResult:
-    """Worker function for multiprocessing."""
     return TextExtractor.extract_from_image(image_path)
 
 
@@ -166,10 +140,10 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s                          # Process current directory recursively
-  %(prog)s /path/to/dir1 /path/to/dir2  # Process multiple directories
-  %(prog)s . --workers 4            # Use 4 parallel workers
-  %(prog)s . --json report.json     # Save detailed report to JSON
+  %(prog)s                          
+  %(prog)s /path/to/dir1 /path/to/dir2  
+  %(prog)s . --workers 4            
+  %(prog)s . --json report.json     
         """,
     )
     parser.add_argument(
@@ -185,22 +159,18 @@ Examples:
     parser.add_argument("-j", "--json", type=Path, help="Save detailed report to JSON file")
     parser.add_argument("-s", "--silent", action="store_true", help="Suppress file-by-file output (summary only)")
     args = parser.parse_args()
-
     directories = [d.resolve() for d in args.directories]
-
     print("🔍 Scanning for images...")
     images = TextExtractor.find_images(directories)
     if not images:
         print("❌ No images found in the specified directories.")
         return 1
     print(f"✓ Found {len(images)} image(s)\n")
-
     print(f"⚙️  Processing with {args.workers} worker(s)...\n")
     if not args.silent:
         TextExtractionReport.print_header(len(images))
     with Pool(processes=args.workers) as pool:
         results = pool.map(process_image_worker, images)
-
     if not args.silent:
         for result, img_path in zip(results, images, strict=False):
             try:
@@ -208,9 +178,7 @@ Examples:
             except ValueError:
                 rel_path = img_path
             TextExtractionReport.print_file_result(result, rel_path)
-
     TextExtractionReport.print_summary(results, directories)
-
     if args.json:
         TextExtractionReport.save_json_report(results, args.json)
     return 0

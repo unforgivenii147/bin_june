@@ -34,8 +34,6 @@ def get_filez(root_dir: str | Path):
 
 from dh import should_skip
 
-"\nBinary File Analyzer - Finds executables in current directory that fail to run\nUses concurrent.futures for parallel processing\nOutputs results to ~/tmp/err\n"
-
 
 def is_executable(filepath: Path) -> bool:
     return filepath.is_file() and filepath.stat().st_mode & 73 != 0

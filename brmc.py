@@ -1,20 +1,31 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """
-Strip docstrings from Python files in the current directory (non-recursive),
-preserving the module docstring (topmost docstring in the module).
-- In-place update
+Strip docstrings from Python files, preserving module docstrings.
+Optionally remove comments too while preserving:
+- shebang (
+- # type: ... (type comments)
+- # fmt: ... (formatter directives)
+- inline pragmas starting with "# noqa" and "# type:" / "# fmt:"
+- standalone "# coding: ..." (encoding cookies)
+- standalone "#!..." (shebang)
+- preserves valid Python syntax by validating with ast.parse before write
+
+- Accepts multiple files/dirs as CLI args (if none: current dir recursively)
 - Uses pathlib
 - Uses parallel processing
-- Prints only the relative paths of files that were modified
+- Prints only relative paths of files that were modified
+- Reports number of docstrings removed for every file (only if removed)
+- If -c is set, also removes comments and reports comment removals count
 """
 
 from __future__ import annotations
 
+import argparse
 import ast
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
+from dh import get_pyfiles
 
 
 def _first_statement_is_docstring(tree: ast.Module) -> bool:
@@ -28,33 +39,41 @@ def _first_statement_is_docstring(tree: ast.Module) -> bool:
     )
 
 
-def _remove_docstrings_from_source(source: str) -> str:
+def _remove_docstrings_from_source(source: str) -> tuple[str, int]:
+
     try:
         tree = ast.parse(source)
     except SyntaxError:
-        return source
-    to_remove = []
+        return source, 0
+
+    to_remove: list[tuple[int, int, int, int]] = []
     preserve_module = _first_statement_is_docstring(tree)
+
     for node in ast.walk(tree):
         if not isinstance(node, ast.Expr):
             continue
         val = getattr(node, "value", None)
         if not isinstance(val, ast.Constant) or not isinstance(val.value, str):
             continue
-        if preserve_module and isinstance(getattr(tree, "body", None), list) and tree.body:
-            if node is tree.body[0]:
-                continue
+
+        if preserve_module and tree.body and node is tree.body[0]:
+            continue
+
         if hasattr(node, "lineno") and hasattr(node, "end_lineno"):
             to_remove.append((node.lineno, node.col_offset, node.end_lineno, node.end_col_offset))
+
     if not to_remove:
-        return source
+        return source, 0
+
     lines = source.splitlines(keepends=True)
     to_remove.sort(key=lambda r: (r[0], r[1]), reverse=True)
+
     for sline, scol, eline, ecol in to_remove:
         sidx = sline - 1
         eidx = eline - 1
         if sidx < 0 or eidx >= len(lines):
             continue
+
         if sidx == eidx:
             line = lines[sidx]
             lines[sidx] = line[:scol] + "" + line[ecol:]
@@ -65,37 +84,211 @@ def _remove_docstrings_from_source(source: str) -> str:
             lines[eidx] = last[ecol:]
             for mid in range(sidx + 1, eidx):
                 lines[mid] = ""
+
     new_source = "".join(lines)
-    return new_source
+    return new_source, len(to_remove)
 
 
-def process_file(path: Path, cwd: Path) -> str | None:
+def _validate_syntax(source: str) -> bool:
+    try:
+        ast.parse(source)
+        return True
+    except SyntaxError:
+        return False
+
+
+def _split_code_and_comment(line: str) -> tuple[str, str | None]:
+
+    in_squote = False
+    in_dquote = False
+    escaped = False
+
+    for i, ch in enumerate(line):
+        if escaped:
+            escaped = False
+            continue
+        if ch == "\\":
+            escaped = True
+            continue
+
+        if in_squote:
+            if ch == "'":
+                in_squote = False
+            continue
+        if in_dquote:
+            if ch == '"':
+                in_dquote = False
+            continue
+
+        if ch == "'":
+            in_squote = True
+            continue
+        if ch == '"':
+            in_dquote = True
+            continue
+
+        if ch == "#":
+            return line[:i], line[i:]
+    return line, None
+
+
+def _should_preserve_comment(comment: str, *, is_line_start: bool) -> bool:
+    s = comment.strip()
+
+    if is_line_start and s.startswith("#!"):
+        return True
+
+    # Encoding cookie: "# coding: xxx" / "# -*- coding: xxx -*-"
+    if is_line_start and ("coding" in s) and s.startswith("#"):
+        lower = s.lower()
+        if lower.startswith("# coding:") or "coding:" in lower:
+            return True
+
+    if s.startswith("# type:"):
+        return True
+
+    if s.startswith("# fmt") or s.startswith("#fmt"):
+        return True
+
+    if s.startswith("# noqa") or s.startswith("# nosec") or s.startswith("# lint"):
+        return True
+
+    return False
+
+
+def _remove_comments_from_source(source: str) -> tuple[str, int]:
+
+    out_lines: list[str] = []
+    removed = 0
+
+    lines = source.splitlines(keepends=True)
+    for idx, line in enumerate(lines):
+        if line.strip() == "":
+            out_lines.append(line)
+            continue
+
+        code, comment = _split_code_and_comment(line)
+        if comment is None:
+            out_lines.append(line)
+            continue
+
+        is_line_start = len(code.strip()) == 0
+
+        if _should_preserve_comment(comment, is_line_start=is_line_start):
+            out_lines.append(line)
+            continue
+
+        newline = ""
+        if line.endswith("\r\n"):
+            newline = "\r\n"
+            code_part = code
+        elif line.endswith("\n"):
+            newline = "\n"
+            code_part = code
+        else:
+            code_part = code
+
+        if code_part.strip() == "":
+            new_line = newline
+        else:
+            new_line = code_part.rstrip("\r\n") + newline
+
+        out_lines.append(new_line)
+        removed += 1
+
+    return "".join(out_lines), removed
+
+
+def _collect_py_files(paths: list[Path], *, recursive: bool = True) -> list[Path]:
+    py_files: list[Path] = []
+    for target in paths:
+        if target.is_file():
+            if target.suffix == ".py":
+                py_files.append(target)
+        elif target.is_dir():
+            pattern = "**/*.py" if recursive else "*.py"
+            py_files.extend(target.glob(pattern))
+
+    return sorted({p.resolve() for p in py_files})
+
+
+def process_file(path: Path, cwd: Path, *, strip_comments: bool) -> tuple[str, int, int] | None:
     rel = str(path.relative_to(cwd))
+
     try:
         source = path.read_text(encoding="utf-8")
     except UnicodeDecodeError:
         source = path.read_text(encoding="latin-1")
-    new_source = _remove_docstrings_from_source(source)
-    if new_source != source:
+    except Exception:
+        return None
+
+    new_source, doc_count = _remove_docstrings_from_source(source)
+
+    comment_count = 0
+    if strip_comments and new_source == source:
+        pass
+    if strip_comments:
+        new_source, comment_count = _remove_comments_from_source(new_source)
+
+    if new_source == source:
+        return None
+
+    if not _validate_syntax(new_source):
+        return None
+
+    try:
         path.write_text(new_source, encoding="utf-8")
-        return rel
-    return None
+    except Exception:
+        return None
+
+    return rel, doc_count, comment_count
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Strip docstrings from Python files (preserves module docstrings). Optionally remove comments."
+    )
+    parser.add_argument(
+        "-c",
+        "--comments",
+        action="store_true",
+        help="Remove comments too (preserve shebangs, # type:, # fmt:, coding cookies).",
+    )
+    parser.add_argument(
+        "targets",
+        nargs="*",
+        help="Files or directories to process (default: current directory, recursive).",
+    )
+    args = parser.parse_args()
+
     cwd = Path(".").resolve()
-    py_files = sorted(p for p in cwd.iterdir() if p.is_file() and p.suffix == ".py" and (not p.name.startswith(".")))
+
+    if args.targets:
+        targets = [Path(t).resolve() for t in args.targets]
+        py_files = _collect_py_files(targets, recursive=True)
+    else:
+        py_files = get_pyfiles(cwd)
+        py_files = sorted(set(py_files))
+
     if not py_files:
         return
-    changed = []
+
+    strip_comments = True
+
+    changed: list[tuple[str, int, int]] = []
     with ProcessPoolExecutor(max_workers=8) as ex:
-        futures = [ex.submit(process_file, p, cwd) for p in py_files]
+        futures = {ex.submit(process_file, p, cwd, strip_comments=strip_comments): p for p in py_files}
         for fut in as_completed(futures):
-            rel = fut.result()
-            if rel is not None:
-                changed.append(rel)
-    for rel in sorted(changed):
+            res = fut.result()
+            if res is not None:
+                changed.append(res)
+
+    for rel, doc_count, comment_count in sorted(changed, key=lambda x: x[0]):
         print(rel)
+        if doc_count > 0:
+            print(f"  docstrings removed: {doc_count}")
+        if strip_comments and comment_count > 0:
+            print(f"  comments removed: {comment_count}")
 
 
 if __name__ == "__main__":

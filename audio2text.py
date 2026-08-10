@@ -15,16 +15,12 @@ output_file_global = "out.txt"
 
 
 def signal_handler(sig, frame):
-    """Handle Ctrl+C gracefully"""
     global interrupted
     print("\n\n⚠️  Interrupt received. Saving progress and exiting...")
     interrupted = True
 
 
 def wav_to_text_chunked(input_file, output_file="out.txt", chunk_duration_ms=30000):
-    """
-    Convert WAV audio file to text in chunks and save progress
-    """
     global output_file_global
     output_file_global = output_file
     signal.signal(signal.SIGINT, signal_handler)

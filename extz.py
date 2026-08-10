@@ -1,6 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """
-Script to show various extensions in current directory with total size for each extension.
+Script to show various extensions in current directory with file count for each extension.
 Uses pathlib and parallel processing for speedup.
 """
 
@@ -11,95 +11,60 @@ from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
-
-def get_file_info(file_path: Path) -> tuple[str, int]:
-    try:
-        ext = file_path.suffix.lower() if file_path.suffix else "NO_EXTENSION"
-        size = file_path.stat().st_size
-        return ext, size
-    except (OSError, PermissionError):
-        return None, 0
+from dh import get_files
 
 
 def process_files_batch(file_paths: list[Path]) -> dict[str, int]:
-    ext_sizes = defaultdict(int)
+    ext_counts = defaultdict(int)
     for file_path in file_paths:
-        if file_path.is_file():
-            ext, size = get_file_info(file_path)
-            if ext is not None:
-                ext_sizes[ext] += size
-    return dict(ext_sizes)
-
-
-def get_files_in_directory(directory: str = ".") -> list[Path]:
-    path = Path(directory)
-    files = []
-    for file_path in path.rglob("*"):
-        if ".git" in file_path.parts or file_path.is_symlink():
-            continue
-        if file_path.is_file():
-            files.append(file_path)
-    return files
-
-
-def fsz(size_bytes: int) -> str:
-    for unit in ["B", "KB", "MB", "GB", "TB"]:
-        if size_bytes < 1024.0:
-            return f"{size_bytes:.2f} {unit}"
-        size_bytes /= 1024.0
-    return f"{size_bytes:.2f} PB"
+        ext = file_path.suffix.lower() if file_path.suffix else "NO_EXTENSION"
+        ext_counts[ext] += 1
+    return dict(ext_counts)
 
 
 def main():
-    current_dir = "."
-    print("-" * 35)
-    print("Collecting files...")
-    files = get_files_in_directory(current_dir)
-    if not files:
-        print("No files found in current directory.")
-        return
-    print(f"Found {len(files)} files")
-    num_workers = 4
-    print(f"Using {num_workers} parallel workers...")
-    print("-" * 35)
+    cwd = Path.cwd()
+
+    files = get_files(cwd)
+
     batch_size = max(1, len(files) // num_workers)
     file_batches = [files[i : i + batch_size] for i in range(0, len(files), batch_size)]
-    ext_sizes_total = defaultdict(int)
+    ext_counts_total = defaultdict(int)
+
     with ProcessPoolExecutor(max_workers=num_workers) as executor:
         future_to_batch = {
             executor.submit(process_files_batch, batch): batch_idx for batch_idx, batch in enumerate(file_batches)
         }
-        completed = 0
+
         for future in as_completed(future_to_batch):
             try:
                 batch_result = future.result()
-                for ext, size in batch_result.items():
-                    ext_sizes_total[ext] += size
-                completed += 1
-                if completed % max(1, len(file_batches) // 10) == 0:
-                    print(f"Progress: {completed}/{len(file_batches)} batches processed")
+                for ext, count in batch_result.items():
+                    ext_counts_total[ext] += count
             except Exception as e:
                 print(f"Error processing batch: {e}")
-    print("-" * 35)
+
+    print("-" * 42)
     print("RESULTS:")
-    print("-" * 35)
-    if not ext_sizes_total:
+    print("-" * 42)
+
+    if not ext_counts_total:
         print("No files with recognized extensions found.")
         return
-    sorted_extensions = sorted(ext_sizes_total.items(), key=lambda x: x[1], reverse=True)
-    total_size = sum(ext_sizes_total.values())
-    print(f"{'Extension':<20} {'Total Size':<15} {'Files':<10} {'Percentage'}")
-    print("-" * 35)
-    for ext, size in sorted_extensions:
-        ext_files = sum(1 for f in files if f.suffix.lower() == ext or (ext == "NO_EXTENSION" and f.suffix == ""))
-        percentage = size / total_size * 100 if total_size > 0 else 0
+
+    # Sort by count (descending) then by extension name
+    sorted_extensions = sorted(ext_counts_total.items(), key=lambda x: (-x[1], x[0]))
+
+    # Find the longest extension name for column formatting
+    max_ext_len = max(len(ext if ext != "NO_EXTENSION" else "(no extension)") for ext in ext_counts_total.keys())
+
+    for ext, count in sorted_extensions:
         display_ext = ext if ext != "NO_EXTENSION" else "(no extension)"
-        print(f"{display_ext:<20} {fsz(size):<15} {ext_files:<10} {percentage:.1f}%")
-    print("-" * 35)
-    print(f"{'TOTAL':<20} {fsz(total_size):<15} {len(files):<10} 100.0%")
-    print("-" * 35)
+        print(f"{display_ext:<{max_ext_len + 2}} {count} file{'s' if count != 1 else ''}")
+
+    print("-" * 42)
+    print(f"{'TOTAL':<{max_ext_len + 2}} {len(files)} files")
+    print("-" * 42)
 
 
 if __name__ == "__main__":

@@ -57,7 +57,6 @@ def _has_rich_print_import(text: str) -> bool:
 
 
 def _is_in_commented_code(text: str, line_start: int) -> bool:
-    """Check if the line is inside a multi-line comment or docstring."""
     lines = text.splitlines(True)
     if line_start >= len(lines):
         return False
@@ -92,7 +91,6 @@ def regex_flag(filepath: str) -> bool:
 
 
 def tokenizer_confirm(filepath: str) -> tuple[str, int] | None:
-    """Return (line_content, line_number) if print without parentheses found."""
     try:
         src = _open_source(filepath)
         tokens = list(tokenize.tokenize(src.readline))
@@ -125,7 +123,6 @@ def tokenizer_confirm(filepath: str) -> tuple[str, int] | None:
 
 
 def autofix_file(filepath: str) -> bool:
-    """Fix Python 2 print statements by adding parentheses."""
     try:
         with Path(filepath).open(encoding="utf-8") as f:
             lines = f.readlines()
@@ -154,7 +151,6 @@ def autofix_file(filepath: str) -> bool:
 
 
 def process_file(filepath: str, autofix: bool = False) -> str | None:
-    """Process a single file: detect and optionally fix print statements."""
     if not regex_flag(filepath):
         return None
     confirmed = tokenizer_confirm(filepath)

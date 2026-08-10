@@ -22,7 +22,6 @@ from dh import DOC_TH1, DOC_TH2, get_files, is_binary
 
 CHUNK_SIZE: Final[int] = 4990
 MAX_WORKERS: Final[int] = 6
-
 SKIP_DIRS: Final[frozenset[str]] = frozenset(
     {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache", ".venv"}
 )

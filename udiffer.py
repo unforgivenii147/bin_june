@@ -1,6 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
-
 from __future__ import annotations
 
 import argparse
@@ -22,10 +20,8 @@ def main():
     parser.add_argument("first", metavar="FILE")
     parser.add_argument("second", metavar="FILE")
     config = parser.parse_args()
-
     first = _read_lines(config.first)
     second = _read_lines(config.second)
-
     diffs = list(difflib.unified_diff(first, second, fromfile=config.first, tofile=config.second))
     if diffs:
         sys.stdout.writelines(diffs)

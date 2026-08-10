@@ -348,9 +348,9 @@ def main() -> None:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s -c          # Compress files and folders in current directory
-  %(prog)s -d          # Decompress .br and .tar.br files in current directory
-  %(prog)s             # Default: compress
+  %(prog)s -c          
+  %(prog)s -d          
+  %(prog)s             
 Brotli Settings:
   - Quality: 11/11 (maximum compression)
   - Window size: 16MB (lgwin=24)

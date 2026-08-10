@@ -39,7 +39,7 @@ CSS_TEMPLATE = """
         content: "Page " counter(page) " of " counter(pages);
         font-family: "LocalInter", sans-serif;
         font-size: 9pt;
-        color: #888888;
+        color: 
     }
 }
 h1, h2, h3, h4, h5, h6 { page-break-after: avoid; break-after: avoid; }
@@ -53,7 +53,7 @@ html, body {
     font-family: "LocalInter", sans-serif;
     font-size: 11pt;
     line-height: 1.6;
-    color: #333333;
+    color: 
 }
 p {
     margin-top: 0;
@@ -64,56 +64,56 @@ h1 {
     font-size: 24pt;
     margin-top: 0;
     margin-bottom: 15pt;
-    color: #111111;
-    border-bottom: 2px solid #eeeeee;
+    color: 
+    border-bottom: 2px solid 
     padding-bottom: 5pt;
 }
 h2 {
     font-size: 18pt;
     margin-top: 24pt;
     margin-bottom: 12pt;
-    color: #222222;
-    border-bottom: 1px solid #eeeeee;
+    color: 
+    border-bottom: 1px solid 
     padding-bottom: 3pt;
 }
 h3 {
     font-size: 14pt;
     margin-top: 18pt;
     margin-bottom: 8pt;
-    color: #444444;
+    color: 
 }
 /* ==========================================================================
    3. INLINE ELEMENTS & DECORATIONS
    ========================================================================== */
-a { color: #0066cc; text-decoration: none; }
+a { color: 
 a[href^="http"]:after {
     content: " (" attr(href) ")";
     font-size: 9pt;
-    color: #666666;
+    color: 
 }
-strong { color: #111111; }
+strong { color: 
 code {
     font-family: "LocalMono", monospace;
     font-size: 9.5pt;
-    background-color: #f5f5f5;
+    background-color: 
     padding: 2px 4px;
     border-radius: 3px;
-    color: #d14;
+    color: 
 }
 blockquote {
     margin: 1.5em 0;
     padding: 0.5em 15px;
-    border-left: 4px solid #dddddd;
-    color: #666666;
-    background-color: #fafafa;
+    border-left: 4px solid 
+    color: 
+    background-color: 
     font-style: italic;
 }
 /* ==========================================================================
    4. CODE BLOCKS (Markdown ``` )
    ========================================================================== */
 pre {
-    background-color: #f8f8f8;
-    border: 1px solid #e1e1e8;
+    background-color: 
+    border: 1px solid 
     border-radius: 4px;
     padding: 12px;
     margin: 1.5em 0;
@@ -123,7 +123,7 @@ pre code {
     background-color: transparent;
     padding: 0;
     border-radius: 0;
-    color: #333333;
+    color: 
     font-family: "LocalMono", monospace;
     font-size: 9pt;
     white-space: pre-wrap;
@@ -138,16 +138,16 @@ table {
     font-size: 10.5pt;
 }
 th, td {
-    border: 1px solid #dddddd;
+    border: 1px solid 
     padding: 8px 12px;
     text-align: left;
 }
 th {
-    background-color: #f5f5f5;
+    background-color: 
     font-weight: bold;
-    color: #222222;
+    color: 
 }
-tr:nth-child(even) { background-color: #fafafa; }
+tr:nth-child(even) { background-color: 
 ul, ol { margin-top: 0; margin-bottom: 1.5em; padding-left: 24px; }
 li { margin-bottom: 0.4em; }
 /* ==========================================================================

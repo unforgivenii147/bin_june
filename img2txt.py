@@ -18,7 +18,6 @@ def mpf3(process_function: Callable, files: list[Path], **kwargs):
 
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
-    """Memory-efficient directory walker."""
     path = Path(path)
     skip_dirs = {".git", "__pycache__", "node_modules"}
     queue = deque([path])
@@ -39,7 +38,6 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
 
 
 def extract_text(image_path: Path) -> str:
-    """Extract text with explicit resource cleanup."""
     try:
         with Image.open(image_path) as img:
             if img.mode not in ("L", "RGB"):
@@ -54,7 +52,6 @@ def extract_text(image_path: Path) -> str:
 
 
 def process_file(path: Path) -> None:
-    """Process single file with minimal memory footprint."""
     path = Path(path)
     txtfile = path.with_suffix(".txt")
     if txtfile.exists():

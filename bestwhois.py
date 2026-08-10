@@ -1,9 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-from pathlib import Path
-
-"""A command-line utility for WhoisXML API services
-(c) WhoisXML API Inc. 2019.
-"""
 from __future__ import annotations
 
 import contextlib
@@ -11,6 +6,7 @@ import datetime
 import json
 import sys
 from argparse import ArgumentParser
+from pathlib import Path
 
 import requests
 from pygments import highlight

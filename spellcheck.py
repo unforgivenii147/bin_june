@@ -14,7 +14,6 @@ from typing import Dict, List, Tuple
 
 from spellchecker import SpellChecker
 
-
 TEXT_EXTENSIONS = {
     ".txt",
     ".md",
@@ -50,7 +49,6 @@ TEXT_EXTENSIONS = {
 
 
 def find_text_files(root_dir: Path, extensions: set | None = None) -> List[Path]:
-    """Find all text files recursively in the given directory."""
     if extensions is None:
         extensions = TEXT_EXTENSIONS
     text_files = []
@@ -61,10 +59,6 @@ def find_text_files(root_dir: Path, extensions: set | None = None) -> List[Path]
 
 
 def extract_words(text: str) -> List[Tuple[str, int, int]]:
-    """
-    Extract words from text along with their positions.
-    Returns list of (word, start_pos, end_pos) tuples.
-    """
     import re
 
     words = []
@@ -74,10 +68,6 @@ def extract_words(text: str) -> List[Tuple[str, int, int]]:
 
 
 def check_file(file_path: Path) -> Dict:
-    """
-    Check a single file for misspelled words.
-    Returns a dictionary with file path and misspelled words info.
-    """
     try:
         spell = SpellChecker()
         content = file_path.read_text(encoding="utf-8", errors="ignore")
@@ -100,21 +90,14 @@ def check_file(file_path: Path) -> Dict:
 
 
 def fix_file(file_path: Path, corrections: Dict[str, str]) -> bool:
-    """
-    Apply corrections to a file in-place.
-    Returns True if successful, False otherwise.
-    """
     try:
         content = file_path.read_text(encoding="utf-8", errors="ignore")
         words = extract_words(content)
-
         corrections_to_apply = []
         for word, start, end in words:
             if word.lower() in corrections:
                 corrections_to_apply.append((start, end, corrections[word.lower()]))
-
         corrections_to_apply.sort(key=lambda x: x[0], reverse=True)
-
         for start, end, correction in corrections_to_apply:
             content = content[:start] + correction + content[end:]
         file_path.write_text(content, encoding="utf-8")
@@ -125,14 +108,9 @@ def fix_file(file_path: Path, corrections: Dict[str, str]) -> bool:
 
 
 def process_files_parallel(files: List[Path], max_workers: int | None = None) -> Dict:
-    """
-    Process multiple files in parallel using ProcessPoolExecutor.
-    Returns combined results.
-    """
     results = {}
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         future_to_file = {executor.submit(check_file, file_path): file_path for file_path in files}
-
         for i, future in enumerate(as_completed(future_to_file), 1):
             file_path = future_to_file[future]
             try:
@@ -148,7 +126,6 @@ def process_files_parallel(files: List[Path], max_workers: int | None = None) ->
 
 
 def display_results(results: Dict, show_candidates: bool = False):
-    """Display spell checking results in a readable format."""
     total_misspellings = 0
     files_with_errors = 0
     for file_path, result in sorted(results.items()):
@@ -178,15 +155,12 @@ def display_results(results: Dict, show_candidates: bool = False):
 
 
 def get_context(content: str, position: Tuple[int, int], window: int = 40) -> Dict:
-    """Get the line number and surrounding context for a word position."""
     if not content:
         return {"line": 0, "text": ""}
     start, end = position
     before_start = max(0, start - window)
     after_end = min(len(content), end + window)
-
     line_num = content[:start].count("\n") + 1
-
     before = content[before_start:start].strip()
     after = content[end:after_end].strip()
     if before:
@@ -197,7 +171,6 @@ def get_context(content: str, position: Tuple[int, int], window: int = 40) -> Di
 
 
 def confirm_action(prompt: str) -> bool:
-    """Ask user for confirmation."""
     while True:
         response = input(f"{prompt} (y/n): ").lower().strip()
         if response in ["y", "yes"]:
@@ -213,11 +186,11 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s                    # Check current directory recursively
-  %(prog)s -a                 # Auto-fix all found misspellings
-  %(prog)s -a --interactive   # Confirm each correction
-  %(prog)s -w 8               # Use 8 worker processes
-  %(prog)s -e .txt .md        # Only check .txt and .md files
+  %(prog)s                    
+  %(prog)s -a                 
+  %(prog)s -a --interactive   
+  %(prog)s -w 8               
+  %(prog)s -e .txt .md        
         """,
     )
     parser.add_argument("directory", nargs="?", default=".", help="Directory to scan (default: current directory)")
@@ -232,12 +205,10 @@ Examples:
     parser.add_argument("-c", "--candidates", action="store_true", help="Show candidate corrections")
     parser.add_argument("--min-length", type=int, default=2, help="Minimum word length to check (default: 2)")
     args = parser.parse_args()
-
     if args.extensions:
         extensions = {ext if ext.startswith(".") else f".{ext}" for ext in args.extensions}
     else:
         extensions = TEXT_EXTENSIONS
-
     root_dir = Path(args.directory).resolve()
     if not root_dir.exists():
         print(f"Error: Directory '{root_dir}' does not exist", file=sys.stderr)
@@ -249,12 +220,9 @@ Examples:
         return
     print(f"📁 Found {len(files)} text files to check")
     print(f"⚡ Using {args.workers or 'default'} worker processes")
-
     print("\n🔄 Checking spelling...")
     results = process_files_parallel(files, args.workers)
-
     display_results(results, args.candidates)
-
     if args.autofix:
         total_misspellings = sum(len(r["misspellings"]) for r in results.values() if not r.get("error"))
         if total_misspellings == 0:
@@ -270,7 +238,6 @@ Examples:
             for file_path, result in sorted(results.items()):
                 if result.get("error") or not result["misspellings"]:
                     continue
-
                 corrections = {}
                 for ms in result["misspellings"]:
                     if args.interactive:

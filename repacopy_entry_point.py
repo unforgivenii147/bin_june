@@ -23,7 +23,6 @@ logger = logging.getLogger(__name__)
 
 
 def get_python_paths() -> List[Path]:
-    """Get all Python package installation paths."""
     paths = []
     paths.extend(site.getsitepackages())
     user_site = site.getusersitepackages()
@@ -36,7 +35,6 @@ def get_python_paths() -> List[Path]:
 
 
 def find_dist_info_dirs(search_paths: List[Path]) -> List[Path]:
-    """Find all .dist-info directories in the given paths."""
     dist_info_dirs = []
     for path in search_paths:
         if not path.exists():
@@ -48,10 +46,6 @@ def find_dist_info_dirs(search_paths: List[Path]) -> List[Path]:
 
 
 def has_entry_points(dist_info_dir: Path) -> bool:
-    """
-    Check if a package has entry points defined.
-    Entry points are typically in entry_points.txt or the newer METADATA format.
-    """
     entry_points_file = dist_info_dir / "entry_points.txt"
     if entry_points_file.exists():
         return True
@@ -68,10 +62,6 @@ def has_entry_points(dist_info_dir: Path) -> bool:
 
 
 def parse_record_file(dist_info_dir: Path) -> List[Tuple[Path, str]]:
-    """
-    Parse the RECORD file to get list of installed files.
-    Returns list of (relative_path, hash_digest) tuples.
-    """
     record_file = dist_info_dir / "RECORD"
     if not record_file.exists():
         logger.warning(f"No RECORD file found in {dist_info_dir}")
@@ -93,10 +83,6 @@ def parse_record_file(dist_info_dir: Path) -> List[Tuple[Path, str]]:
 
 @lru_cache(maxsize=128)
 def find_file_in_paths(relative_path: str, search_paths: Tuple[Path, ...]) -> Optional[Path]:
-    """
-    Find the absolute path of a file from its relative path.
-    Cached for performance since many packages share common paths.
-    """
     if Path(relative_path).is_absolute():
         abs_path = Path(relative_path)
         return abs_path if abs_path.exists() else None
@@ -129,10 +115,6 @@ def find_file_in_paths(relative_path: str, search_paths: Tuple[Path, ...]) -> Op
 
 
 def copy_package_files(package_info: Tuple[str, Path, List[str]]) -> Tuple[str, bool, str]:
-    """
-    Copy all files for a single package.
-    Returns (package_name, success, error_message)
-    """
     package_name, dist_info_dir, search_paths = package_info
     try:
         dest_base = Path.home() / "tmp" / "packages" / package_name
@@ -185,7 +167,6 @@ def copy_package_files(package_info: Tuple[str, Path, List[str]]) -> Tuple[str, 
 
 
 def main():
-    """Main function to coordinate the package copying process."""
     logger.info("Starting package copy process...")
     search_paths = get_python_paths()
     logger.info(f"Search paths: {search_paths}")

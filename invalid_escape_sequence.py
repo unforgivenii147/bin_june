@@ -11,7 +11,6 @@ from pathlib import Path
 
 
 def check_and_fix_file(file_path: Path, auto_fix: bool) -> dict:
-    """Analyzes a single file for invalid escapes and optionally fixes them."""
     result = {"path": file_path, "has_issues": False, "fixed": False, "messages": []}
     try:
         content_bytes = file_path.read_bytes()

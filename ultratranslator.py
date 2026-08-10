@@ -73,7 +73,6 @@ def process_file(path: Path) -> Path | None:
 
 
 def process_files_with_retry(files: list[Path]) -> None:
-    """Process files with retry logic for failed files."""
     files_to_process = files.copy()
     retry_count = 0
     while files_to_process and retry_count < MAX_RETRIES:

@@ -32,7 +32,6 @@ _gcld3_detector = gcld3.NNetLanguageIdentifier(min_num_bytes=0, max_num_bytes=10
 
 
 def iter_files(paths: Iterable[Path]) -> Iterator[Path]:
-    """Generator-style walker: yields regular, non-symlink, non-binary files."""
     for p in paths:
         p = p.expanduser()
         if p.is_symlink():
@@ -150,7 +149,6 @@ def process_file_sequential(file_path: Path, max_len: int) -> List[Dict[str, Any
 
 
 def process_file_per_line_parallel(file_path: Path, max_len: int, workers: int) -> List[Dict[str, Any]]:
-    """Per-line parallelism inside a single file."""
     local: List[Dict[str, Any]] = []
     lines = list(read_text_lines(file_path))
     if not lines:
@@ -189,7 +187,6 @@ def run_per_file(files: List[Path], workers: int, max_len: int):
 
 
 def run_per_line(files: List[Path], workers: int, max_len: int):
-    """Per-line parallelism mode: files in parallel, and lines inside each file in parallel."""
     with ThreadPoolExecutor(max_workers=workers) as ex_files:
         futures = {ex_files.submit(process_file_per_line_parallel, f, max_len, workers): f for f in files}
         for fut in as_completed(futures):

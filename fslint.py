@@ -18,7 +18,7 @@ Usage examples:
   python fslint.py --findem /home/user
   python fslint.py --findup --findtf /tmp
   python fslint.py --all /var/www
-  python fslint.py --findsn          # scans $PATH, no path arg needed
+  python fslint.py --findsn
 """
 
 from __future__ import annotations

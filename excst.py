@@ -17,7 +17,6 @@ for directory in [FUNCTIONS_DIR, CLASSES_DIR, CONSTANTS_DIR]:
 
 
 def validate_python_code(code: str, filename: str) -> bool:
-    """Validate Python code using ast.parse."""
     try:
         ast.parse(code)
         return True
@@ -37,7 +36,6 @@ class TopLevelExtractor(cst.CSTVisitor):
         self.imports: set[str] = set()
 
     def save_to_file(self, directory: Path, filename: str, content: str, node_name: str) -> None:
-        """Save content to file with validation and automatic deduplication."""
         if not content.strip().endswith("\n"):
             content += "\n\n"
         if not content.startswith(("#!", "# -*-", '"""')):
@@ -104,7 +102,6 @@ class TopLevelExtractor(cst.CSTVisitor):
             print(f"Error extracting constant: {e}")
 
     def _is_top_level(self, node) -> bool:
-
         current = node
         while hasattr(current, "parent") and current.parent:
             if isinstance(current.parent, (cst.FunctionDef, cst.ClassDef, cst.If, cst.For, cst.While, cst.With)):
@@ -117,11 +114,8 @@ def process_file(filepath: Path) -> dict:
     try:
         code = filepath.read_text(encoding="utf-8")
         module = cst.parse_module(code)
-
         wrapper = cst.metadata.MetadataWrapper(module)
-
         extractor = TopLevelExtractor(filepath, module)
-
         wrapper.visit(extractor)
         return {
             "filepath": str(filepath),
@@ -145,7 +139,6 @@ def collect_python_files(root_dir: Path = Path(".")) -> list[Path]:
 
 def write_imports_file(all_imports: set[str]) -> None:
     imports_file = OUTPUT_DIR / "imports.py"
-
     sorted_imports = sorted(all_imports)
     content = "#!/usr/bin/env python3\n# -*- coding: utf-8 -*-\n"
     content += "# Combined imports from all processed files\n\n"

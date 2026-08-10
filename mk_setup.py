@@ -13,7 +13,6 @@ from pathlib import Path
 
 
 def detect_entry_point(project_dir, package_name):
-    """Detect if there's a __main__.py or cli.py and return entry point info."""
     project_path = Path(project_dir).resolve()
     main_file = project_path / package_name / "__main__.py"
     cli_file = project_path / package_name / "cli.py"
@@ -40,7 +39,6 @@ def detect_entry_point(project_dir, package_name):
 
 
 def detect_main_function(file_path):
-    """Detect if the file has a main function or click command."""
     try:
         with open(file_path, encoding="utf-8") as f:
             content = f.read()
@@ -58,7 +56,6 @@ def detect_main_function(file_path):
 
 
 def find_requirements(project_dir):
-    """Find requirements from requirements.txt or similar files."""
     project_path = Path(project_dir).resolve()
     requirements = []
     req_files = ["requirements.txt", "requirements.in", "Pipfile"]
@@ -84,7 +81,6 @@ def find_requirements(project_dir):
 
 
 def generate_setup_py(project_dir, package_name, entry_points, requirements):
-    """Generate the content for setup.py."""
     entry_points_str = ""
     if entry_points:
         console_scripts = []

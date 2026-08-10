@@ -104,7 +104,6 @@ def process_repo(url: str) -> None:
     remained.append(url)
 
 
-'\n    if repo_size is not None and repo_size > 2.0:\n        cprint(f"ℹ️ size: {repo_size} MB", "cyan")\n        confirm = input(f"clone \'{user}/{repo}\'? (y/N): ").strip().lower()\n        if confirm == "y" or confirm == "yes":\n            if clone_repo_shallow(user, repo):\n                print("\n🎉 Done!")\n                return\n            else:\n                print("\nScript finished with errors during cloning.")\n                return\n        else:\n            print("Aborted cloning.")\n    else:\n        print("\nCould not proceed with cloning due to previous errors.")\n        return\n    return\n'
 if __name__ == "__main__":
     repo_file = Path("repos.txt")
     content = repo_file.read_text(encoding="utf-8")

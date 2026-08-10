@@ -163,12 +163,12 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s file.mo                    # Convert single file
-  %(prog)s -k file.mo                 # Convert but keep .mo file
-  %(prog)s /path/to/locale/           # Convert all .mo in directory
-  %(prog)s -r /usr/share/locale/      # Recursive conversion
-  %(prog)s -v -r ./locale/            # Verbose recursive conversion
-  %(prog)s --fallback file.mo         # Use pure Python fallback method
+  %(prog)s file.mo                    
+  %(prog)s -k file.mo                 
+  %(prog)s /path/to/locale/           
+  %(prog)s -r /usr/share/locale/      
+  %(prog)s -v -r ./locale/            
+  %(prog)s --fallback file.mo         
         """,
     )
     parser.add_argument("path", help="Path to .mo file or directory containing .mo files")

@@ -18,7 +18,6 @@ logger = logging.getLogger(__name__)
 
 
 def contains_chinese(text: str) -> bool:
-    """Check if text contains Chinese characters."""
     return bool(re.search(r"[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]", text))
 
 
@@ -52,7 +51,6 @@ def main() -> None:
     if not all_lines:
         logger.info("No lines found in %s", input_path.name)
         return
-
     chinese_lines = [line for line in all_lines if contains_chinese(line)]
     non_chinese_lines = [line for line in all_lines if not contains_chinese(line)]
     logger.info(

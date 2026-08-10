@@ -61,7 +61,6 @@ class CleanTransformer(cst.CSTTransformer):
 
 
 def process_file(file_path: Path) -> tuple[Path, int, int, bool]:
-    """Process a single file and return (path, comments_removed, docstrings_removed, success)"""
     try:
         original_source = file_path.read_text(encoding="utf-8")
         module = cst.parse_module(original_source)

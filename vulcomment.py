@@ -2,11 +2,11 @@
 """
 Comment out lines reported by vulture as containing unused variables.
 Usage:
-  # Dry-run (shows diffs, does not change files)
+
   python comment_unused_vars.py vulture_output.txt
-  # Read vulture output from stdin (dry-run)
+
   cat vulture_output.txt | python comment_unused_vars.py
-  # Apply changes and create backups (.bak)
+
   python comment_unused_vars.py vulture_output.txt --apply --backup
 Notes:
 - This comments out the entire reported line by inserting '# ' after any existing indentation.

@@ -13,7 +13,6 @@ DH_SRC_DIR = Path("~/isaac/pkgs/dh/src/dh").expanduser()
 
 
 def build_dh_public_mapping(dh_path: Path) -> dict[str, Path]:
-    """symbol -> module path, for names re-exported in dh/__init__.py"""
     init_file = dh_path / "__init__.py"
     if not init_file.exists():
         raise FileNotFoundError(f"Could not find __init__.py at {init_file}")
@@ -28,12 +27,6 @@ def build_dh_public_mapping(dh_path: Path) -> dict[str, Path]:
 
 
 def build_dh_symbol_index(dh_path: Path) -> dict[str, set[str]]:
-    """
-    name -> set of stripped source texts, for every top-level
-    function/class/assign defined anywhere inside the dh package
-    (public or internal helper). A set is kept per name in case two
-    modules happen to define the same name differently.
-    """
     index: dict[str, set[str]] = {}
     for py_file in get_files(dh_path, ext=[".py"]):
         try:

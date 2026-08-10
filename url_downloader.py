@@ -5,7 +5,6 @@ import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
-
 try:
     import pycurl
 
@@ -24,7 +23,6 @@ except ImportError:
 
 
 def download_file(url: str, filepath: Path, timeout: int = 120) -> bool:
-    """Download a single file. Returns True if successful."""
     filepath.parent.mkdir(parents=True, exist_ok=True)
     if HAS_PYCURL:
         try:
@@ -42,7 +40,6 @@ def download_file(url: str, filepath: Path, timeout: int = 120) -> bool:
             return True
         except Exception as e:
             print(f"⚠️  pycurl failed for {filepath.name}: {e}. Trying requests...")
-
     try:
         with requests.Session() as session:
             response = session.get(
@@ -64,9 +61,7 @@ def main():
     if not urls_file.exists():
         print(f"Error: {urls_file} not found!")
         sys.exit(1)
-
     original_lines = urls_file.read_text(encoding="utf-8").splitlines()
-
     download_tasks = []
     url_to_line = {}
     for line in original_lines:
@@ -81,7 +76,6 @@ def main():
         print("No valid URLs found in urls.txt")
         sys.exit(0)
     print(f"Found {len(download_tasks)} files to download.\n")
-
     successful_urls = set()
     max_workers = min(12, len(download_tasks))
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -93,7 +87,6 @@ def main():
                     successful_urls.add(url)
             except Exception as exc:
                 print(f"Unexpected error with {url}: {exc}")
-
     remaining_lines = []
     removed_count = 0
     for line in original_lines:
@@ -104,7 +97,6 @@ def main():
                 removed_count += 1
                 continue
         remaining_lines.append(line)
-
     urls_file.write_text("\n".join(remaining_lines) + "\n", encoding="utf-8")
     print("\n" + "=" * 50)
     print(f"Download session completed!")

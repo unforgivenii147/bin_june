@@ -81,7 +81,6 @@ def is_transliteration(persian_word, english_word):
     if not english_word or not persian_word:
         return False
     return bool(is_finglish(persian_word, english_word))
-
     if not re.match(r"^[A-Za-z\-\']+$", english_word):
         return False
     if not english_word[0].isupper():
@@ -108,7 +107,6 @@ def is_transliteration(persian_word, english_word):
     pattern_matches = sum(1 for pattern in transliteration_patterns if re.match(pattern, english_word, re.IGNORECASE))
     if pattern_matches >= 1:
         return True
-
     if english_word[0].isupper() and english_word[1:].islower():
         potential_translations = {
             "Morning",

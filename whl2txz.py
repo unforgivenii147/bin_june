@@ -222,13 +222,13 @@ def main() -> int:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s                       # Convert all .whl and .tar.xz in current dir
-  %(prog)s package.whl           # Convert single .whl to .tar.xz
-  %(prog)s package.tar.xz        # Convert single .tar.xz to .whl
-  %(prog)s *.whl                 # Convert all .whl files
-  %(prog)s /path/to/dir          # Convert all files in directory
-  %(prog)s --recursive           # Convert all files recursively
-  %(prog)s --remove-original     # Delete original files after conversion
+  %(prog)s                       
+  %(prog)s package.whl           
+  %(prog)s package.tar.xz        
+  %(prog)s *.whl                 
+  %(prog)s /path/to/dir          
+  %(prog)s --recursive           
+  %(prog)s --remove-original     
         """,
     )
     parser.add_argument(

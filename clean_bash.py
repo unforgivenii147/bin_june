@@ -1,18 +1,15 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """
 Remove comments from bash scripts in place using tree-sitter.
-
 Requirements:
     - Python 3.12+
     - tree-sitter==0.26.0
     - tree-sitter-bash  (the bash grammar; the proper companion for tree-sitter 0.26.0)
-
-
 Features:
     * Detects bash scripts by `.sh`/`.bash` extension OR by shebang
       (so extensionless scripts like `~/bin/mytool` work too).
     * Removes full-line AND inline comments.
-    * Preserves shebang (`#!`) lines.
+    * Preserves shebang (`
     * Uses `pathlib` and `concurrent.futures.ProcessPoolExecutor`.
     * Accepts multiple files/dirs; falls back to recursive current-dir scan.
     * Updates files in place.
@@ -30,10 +27,8 @@ from pathlib import Path
 import tree_sitter_bash
 from tree_sitter import Language, Node, Parser
 
-
 BASH_LANGUAGE: Language = Language(tree_sitter_bash.language())
 PARSER: Parser = Parser(BASH_LANGUAGE)
-
 SHEBANG_PREFIXES: tuple[bytes, ...] = (
     b"#!/bin/bash",
     b"#!/bin/sh",
@@ -47,15 +42,8 @@ SHEBANG_PREFIXES: tuple[bytes, ...] = (
 
 
 def is_bash_file(path: Path) -> bool:
-    """Return True if `path` looks like a bash script.
-
-    Detection order:
-      1. Extension `.sh` / `.bash`.
-      2. Otherwise read the first line and check for a known shebang.
-    """
     if path.suffix.lower() in (".sh", ".bash"):
         return True
-
     try:
         with path.open("rb") as fh:
             first_line = fh.readline()
@@ -65,19 +53,12 @@ def is_bash_file(path: Path) -> bool:
 
 
 def find_comment_ranges(source: bytes) -> list[tuple[int, int, bool]]:
-    """Return [(start_byte, end_byte, is_inline), ...] for every comment node.
-
-    A comment is "inline" when it is preceded by non-whitespace on the same
-    line. The shebang on the first line is treated as a comment by
-    tree-sitter-bash, so we explicitly skip it.
-    """
     tree = PARSER.parse(source)
     out: list[tuple[int, int, bool]] = []
 
     def walk(node: Node) -> None:
         if node.type == "comment":
             start, end = node.start_byte, node.end_byte
-
             if not (start == 0 and source.startswith(b"#!")):
                 line_start = source.rfind(b"\n", 0, start) + 1
                 prefix = source[line_start:start]
@@ -92,15 +73,9 @@ def find_comment_ranges(source: bytes) -> list[tuple[int, int, bool]]:
 
 
 def strip_comments(source: bytes) -> tuple[bytes, int]:
-    """Remove comment ranges from `source`.
-
-    Returns (new_source, num_comments_removed). For inline comments the
-    trailing whitespace on the same line is also trimmed.
-    """
     ranges = find_comment_ranges(source)
     if not ranges:
         return source, 0
-
     out = bytearray()
     last = 0
     for start, end, is_inline in ranges:
@@ -114,21 +89,14 @@ def strip_comments(source: bytes) -> tuple[bytes, int]:
 
 
 def process_file(path: Path) -> tuple[str, int, str]:
-    """Worker entry point: strip comments from a single file in place.
-
-    Returns (relpath, num_removed, error_message). `error_message` is "" on
-    success.
-    """
     rel = os.path.relpath(path)
     try:
         source = path.read_bytes()
     except OSError as e:
         return rel, 0, f"read error: {e}"
-
     new_source, count = strip_comments(source)
     if count == 0:
         return rel, 0, ""
-
     try:
         path.write_bytes(new_source)
     except OSError as e:
@@ -137,7 +105,6 @@ def process_file(path: Path) -> tuple[str, int, str]:
 
 
 def iter_targets(targets: list[Path]):
-    """Yield unique bash-script paths from a mix of files and directories."""
     seen: set[Path] = set()
     for target in targets:
         try:
@@ -175,17 +142,14 @@ def main() -> int:
         help="Number of parallel worker processes (default: CPU count).",
     )
     args = ap.parse_args()
-
     targets: list[Path] = args.paths or [Path.cwd()]
     files = list(iter_targets(targets))
     if not files:
         print("no bash scripts found", file=sys.stderr)
         return 1
-
     total_removed = 0
     files_touched = 0
     errors = 0
-
     with ProcessPoolExecutor(max_workers=max(1, args.jobs)) as ex:
         futures = {ex.submit(process_file, f): f for f in files}
         for fut in as_completed(futures):
@@ -198,7 +162,6 @@ def main() -> int:
                 files_touched += 1
             total_removed += count
             print(f"{rel}: {count} comment(s) removed")
-
     print(
         f"\nDone: {files_touched}/{len(files)} file(s) modified, {total_removed} comment(s) removed, {errors} error(s)."
     )

@@ -19,7 +19,6 @@ MD_CODE_BLOCK_PATTERN = re.compile(r"```(\w+)?\n(.*?)```", re.DOTALL)
 
 
 def find_rst2html_script():
-    """Find the rest2html.py script in common locations."""
     possible_paths = [
         Path.cwd() / "doc" / "rest2html.py",
         Path.cwd() / "rest2html.py",
@@ -32,8 +31,6 @@ def find_rst2html_script():
 
 
 def convert_md_to_rst(content: str) -> str:
-    """Convert Markdown content to reStructuredText."""
-
     def replace_heading(match):
         level = len(match.group(1))
         text = match.group(2).strip()
@@ -66,7 +63,6 @@ def convert_md_to_rst(content: str) -> str:
 
 
 def convert_file_to_html(file_path: Path, stylesheet_url: str | None = None) -> Path:
-    """Convert a single file to HTML using appropriate converter."""
     try:
         html_path = file_path.with_suffix(".html")
         if html_path.exists() and html_path.stat().st_mtime > file_path.stat().st_mtime:
@@ -113,7 +109,6 @@ def convert_file_to_html(file_path: Path, stylesheet_url: str | None = None) -> 
 
 
 def generate_stylesheet_hash(stylesheet_path: Path) -> str:
-    """Generate a unique stylesheet filename based on its content."""
     if not stylesheet_path or not stylesheet_path.exists():
         return "style.css"
     with open(stylesheet_path, "rb") as f:
@@ -123,13 +118,11 @@ def generate_stylesheet_hash(stylesheet_path: Path) -> str:
 
 
 def process_file(file_path: Path, stylesheet_url: str | None = None) -> tuple:
-    """Process a single file and return (original_path, html_path)."""
     html_path = convert_file_to_html(file_path, stylesheet_url)
     return (file_path, html_path)
 
 
 def find_all_source_files(root_dir: Path | None = None) -> list:
-    """Find all source files recursively in the directory."""
     if root_dir is None:
         root_dir = Path.cwd()
     source_files = []
@@ -139,7 +132,6 @@ def find_all_source_files(root_dir: Path | None = None) -> list:
 
 
 def publish_parallel(root_dir: Path | None = None, max_workers: int | None = None):
-    """Convert all source files to HTML in parallel."""
     if root_dir is None:
         root_dir = Path.cwd()
     root_dir = Path(root_dir).resolve()
@@ -179,7 +171,6 @@ def publish_parallel(root_dir: Path | None = None, max_workers: int | None = Non
 
 
 def main():
-    """Main entry point."""
     parser = argparse.ArgumentParser(description="Convert all .rst, .txt, and .md files to HTML recursively")
     parser.add_argument(
         "directory", nargs="?", default=".", help="Root directory to process (default: current directory)"

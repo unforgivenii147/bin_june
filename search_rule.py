@@ -17,7 +17,6 @@ def search_rule(code):
     if not row:
         print(f"❌ No rule found matching code: {code}")
         return
-
     print("=" * 42)
     print(f"📜 RULE: {row['name']} ({row['code']})")
     print("=" * 42)

@@ -434,11 +434,11 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s .                        # Scan current directory recursively
-  %(prog)s src/                     # Scan src directory
-  %(prog)s . --exclude tests        # Exclude tests directory
-  %(prog)s . --exclude tests,docs   # Exclude multiple directories
-  %(prog)s . --show-all             # Show all files including those without issues
+  %(prog)s .                        
+  %(prog)s src/                     
+  %(prog)s . --exclude tests        
+  %(prog)s . --exclude tests,docs   
+  %(prog)s . --show-all             
         """,
     )
     parser.add_argument(

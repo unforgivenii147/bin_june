@@ -38,7 +38,6 @@ def get_random_filename(length: int = DEFAULT_OUTPUT_LEN) -> str:
 
 
 def is_binary(path: Path) -> bool:
-    """Check if a file is binary by reading a chunk and analyzing byte content."""
     try:
         with path.open("rb") as f:
             chunk = f.read(CHUNK_SIZE)
@@ -58,7 +57,6 @@ def is_binary(path: Path) -> bool:
 
 
 def get_nobinary(path: Path) -> list[Path]:
-    """Get all non-binary files. Note: is_binary check is now in get_files."""
     return get_files(path)
 
 
@@ -70,7 +68,6 @@ def read_file(path: Path) -> Optional[str]:
 
 
 def should_skip_file(file_path: Path, cwd: Path) -> bool:
-    """Skip hidden files and directories."""
     try:
         relative_parts = file_path.relative_to(cwd).parts
     except ValueError:

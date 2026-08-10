@@ -11,11 +11,6 @@ from pathlib import Path
 
 
 def parse_file_definitions(file_path: Path) -> dict:
-    """
-    Parses a single file to extract its function, class, and constant definitions.
-    Returns a dictionary mapping a canonical identifier (type, name, structural code)
-    to the source code structure.
-    """
     definitions = {}
     try:
         source = file_path.read_text(encoding="utf-8")
@@ -38,10 +33,6 @@ def parse_file_definitions(file_path: Path) -> dict:
 
 
 def modify_affected_file(file_path_str: str, obj_name: str, obj_type: str, raw_obj_code: str) -> str:
-    """
-    Removes the duplicate definition from an affected file and injects the import statement.
-    Validates with ast.parse before returning the modified code string.
-    """
     file_path = Path(file_path_str)
     source = file_path.read_text(encoding="utf-8")
     tree = ast.parse(source, filename=str(file_path))

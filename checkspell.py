@@ -238,26 +238,26 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Check files in current directory recursively
+
   python spell_checker.py
-  # Check specific file
+
   python spell_checker.py document.txt
-  # Check and fix errors
+
   python spell_checker.py -a document.txt
-  # Check with personal dictionary
+
   python spell_checker.py -d ~/.my_words.json document.txt
 Personal dictionary Management:
-  # Add words to dictionary
+
   python spell_checker.py --add-words myword1 myword2 myword3
-  # Add words from file (one per line)
+
   python spell_checker.py --add-from-file custom_words.txt
-  # Remove words from dictionary
+
   python spell_checker.py --remove-words word1 word2
-  # list all words in dictionary
+
   python spell_checker.py --list-dict
-  # Clear entire dictionary
+
   python spell_checker.py --clear-dict
-  # Use custom dictionary file
+
   python spell_checker.py -d /path/to/dict.json -a document.txt
         """,
     )

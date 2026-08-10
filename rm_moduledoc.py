@@ -7,7 +7,6 @@ from pathlib import Path
 
 
 def clean_single_file(file_path: Path):
-    """Checks only the first 5 lines of a file to remove the Gemini docstring in-place."""
     try:
         lines = file_path.read_text(encoding="utf-8").splitlines(keepends=True)
     except Exception as e:

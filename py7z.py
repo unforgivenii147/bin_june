@@ -13,7 +13,6 @@ from pathlib import Path
 import pylzma
 from dh import fsz, gsz
 
-
 _COMPRESS_OPTS = {
     "dictionary": 27,
     "fastBytes": 273,
@@ -123,7 +122,6 @@ def _collect_targets(paths: list[str], mode: str) -> list[Path]:
                     print(f"Warning: {p} does not exist, skipping")
                     continue
                 p_resolved = p.resolve()
-
                 if p_resolved == cwd and p.is_dir():
                     print(
                         "Warning: processing contents of '.' recursively instead of compressing it as a single archive"
@@ -150,7 +148,6 @@ def _collect_targets(paths: list[str], mode: str) -> list[Path]:
                     for child in p.rglob("*"):
                         if child.is_file() and child.name.endswith(".7z"):
                             targets.append(child.resolve())
-
     seen: set[Path] = set()
     out: list[Path] = []
     for t in targets:
@@ -195,14 +192,12 @@ def main() -> None:
         print(f"No items found to {mode}")
         return
     print(f"{mode.capitalize()}ing {len(targets)} item(s)...")
-
     total_original = sum(gsz(t) for t in targets)
     worker = _decompress if mode == "decompress" else _compress
     with ProcessPoolExecutor(max_workers=args.workers) as executor:
         futures = {executor.submit(worker, t, args.keep): t for t in targets}
         for future in as_completed(futures):
             print(future.result())
-
     if mode == "compress":
         total_compressed = 0
         for t in targets:

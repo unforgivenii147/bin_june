@@ -12,7 +12,6 @@ from pathlib import Path
 
 
 def get_function_source_hash(source: str, func_name: str) -> str | None:
-    """Get SHA-256 hash of a function's source code."""
     try:
         tree = ast.parse(source)
     except SyntaxError:
@@ -22,15 +21,11 @@ def get_function_source_hash(source: str, func_name: str) -> str | None:
             lines = source.split("\n")
             func_lines = lines[node.lineno - 1 : node.end_lineno]
             func_source = "\n".join(func_lines)
-
             return hashlib.sha256(func_source.encode()).hexdigest()
     return None
 
 
 def extract_functions_from_module(module_path: Path) -> dict[str, tuple[str, str]]:
-    """Extract functions from a module with their source hashes.
-    Returns dict mapping function_name -> (module_name, source_hash)
-    """
     if not module_path.is_file():
         return {}
     try:
@@ -50,9 +45,6 @@ def extract_functions_from_module(module_path: Path) -> dict[str, tuple[str, str
 
 
 def build_dh_function_map(dh_src_path: Path) -> dict[str, tuple[str, str]]:
-    """Build a map of dh functions with their source hashes.
-    Returns dict mapping function_name -> (module_name, source_hash)
-    """
     func_map = {}
     for module_file in dh_src_path.glob("*.py"):
         if module_file.name == "__init__.py":
@@ -63,9 +55,6 @@ def build_dh_function_map(dh_src_path: Path) -> dict[str, tuple[str, str]]:
 
 
 def find_matching_inlined_functions(source: str, dh_func_map: dict[str, tuple[str, str]]) -> list[tuple[str, int, int]]:
-    """Find inlined functions that match dh functions by source hash.
-    Returns list of (function_name, start_line, end_line)
-    """
     try:
         tree = ast.parse(source)
     except SyntaxError:
@@ -81,7 +70,6 @@ def find_matching_inlined_functions(source: str, dh_func_map: dict[str, tuple[st
 
 
 def has_import(source: str, func_name: str) -> bool:
-    """Check if the function is already imported from dh package."""
     return (
         f"from dh.{func_name} import" in source
         or f"from dh import {func_name}" in source
@@ -90,7 +78,6 @@ def has_import(source: str, func_name: str) -> bool:
 
 
 def add_imports(lines: list[str], imports: set[tuple[str, str]]) -> list[str]:
-    """Add import statements for dh functions."""
     if not imports:
         return lines
     last_import_idx = -1
@@ -107,9 +94,6 @@ def add_imports(lines: list[str], imports: set[tuple[str, str]]) -> list[str]:
 def process_file(
     file_path: Path, dh_func_map: dict[str, tuple[str, str]], dry_run: bool = True
 ) -> tuple[Path, int, set[tuple[str, str]]]:
-    """Process a single Python file to replace inlined functions with imports.
-    Returns (file_path, number_of_imports_added, set_of_imports)
-    """
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()

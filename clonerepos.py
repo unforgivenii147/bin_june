@@ -17,7 +17,6 @@ import requests
 
 
 def read_repos(file_path: Path) -> list[str]:
-    """Read repository names from file."""
     if not file_path.exists():
         print(f"Error: {file_path} does not exist")
         sys.exit(1)
@@ -30,16 +29,11 @@ def read_repos(file_path: Path) -> list[str]:
 
 
 def validate_repo_format(repo: str) -> bool:
-    """Validate that repo is in user/repo format."""
     parts = repo.split("/")
     return len(parts) == 2 and all(parts)
 
 
 def download_repo_zip(repo: str, base_dir: Path) -> tuple[str, bool, str]:
-    """
-    Download repository as ZIP from GitHub.
-    This gets the default branch similar to --depth 1.
-    """
     if not validate_repo_format(repo):
         return repo, False, f"Invalid format: {repo}"
     user, repo_name = repo.split("/")

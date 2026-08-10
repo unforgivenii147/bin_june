@@ -10,7 +10,6 @@ from pathlib import Path
 
 
 def is_pure_python(dist) -> bool:
-    """Check if distribution is pure Python (no compiled extensions)."""
     try:
         if dist.files is None:
             return False
@@ -20,12 +19,10 @@ def is_pure_python(dist) -> bool:
 
 
 def has_valid_name(name: str) -> bool:
-    """Check if package name has no hyphens or underscores."""
     return "-" not in name and "_" not in name
 
 
 def get_top_level_modules(dist) -> set[str]:
-    """Extract top-level modules/packages from distribution."""
     try:
         if dist.read_text("top_level.txt"):
             return {line.strip() for line in dist.read_text("top_level.txt").splitlines() if line.strip()}
@@ -42,7 +39,6 @@ def get_top_level_modules(dist) -> set[str]:
 
 
 def is_user_site(dist_location: str) -> bool:
-    """Check if package is in user site directory."""
     user_site = Path.home() / ".local" / "lib"
     try:
         return str(user_site) in str(Path(dist_location).resolve())
@@ -51,7 +47,6 @@ def is_user_site(dist_location: str) -> bool:
 
 
 def check_package(dist) -> str | None:
-    """Evaluate package against all criteria."""
     if not is_pure_python(dist):
         return None
     name = dist.name.lower()
@@ -66,7 +61,6 @@ def check_package(dist) -> str | None:
 
 
 def main():
-    """List qualifying packages and save to ~/list.txt."""
     dists = list(distributions())
     with ProcessPoolExecutor() as executor:
         results = [r for r in executor.map(check_package, dists) if r is not None]

@@ -3,9 +3,9 @@
 Scan the current directory recursively for text-based files, detect non-English lines,
 and save results to noneng.txt.
 Usage:
-  python find_noneng.py            # default: recurse from . , min confidence 0.6
-  python find_noneng.py --min 0.0  # include lower-confidence detections
-  python find_noneng.py --ext py,md,txt  # limit to these extensions
+  python find_noneng.py
+  python find_noneng.py --min 0.0
+  python find_noneng.py --ext py,md,txt
 Requirements:
   - detector.py available in the same directory (the module you already have)
   - optional: gcld3 and pycld2 for best accuracy
@@ -57,10 +57,6 @@ def is_text_file(path: str, max_probe: int = DEFAULT_MAX_PROBE) -> bool:
 
 
 def scan_file_lines(path: str, min_confidence: float = 0.6) -> List[Tuple[str, int, str, float, str]]:
-    """
-    Returns list of tuples (path, line_no, lang_code, confidence, line_text)
-    for lines in `path` that are detected as non-English and meet min_confidence.
-    """
     results = []
     try:
         raw = read_file_bytes(path, max_bytes=DEFAULT_READ_BYTES)
@@ -69,18 +65,15 @@ def scan_file_lines(path: str, min_confidence: float = 0.6) -> List[Tuple[str, i
     if not is_probably_text_bytes(raw):
         return results
     text = safe_text_from_bytes(raw)
-
     for i, raw_line in enumerate(text.splitlines(), start=1):
         line = raw_line.strip()
         if not line:
             continue
-
         if len(line) < 3:
             continue
         res = detect_language(line, filename=os.path.basename(path))
         lang = (res.get("language_code") or "und").lower()
         conf = float(res.get("confidence") or 0.0)
-
         if lang != "en" and lang != "und" and conf >= min_confidence:
             results.append((path, i, lang, conf, raw_line))
     return results
@@ -106,7 +99,6 @@ def main(argv=None) -> int:
     args = parser.parse_args(argv)
     exts = [e.strip().lower() for e in args.ext.split(",") if e.strip()] if args.ext else None
     out_path = args.out
-
     with open(out_path, "w", encoding="utf-8", newline="") as out_f:
         writer = csv.writer(out_f, delimiter="\t", quoting=csv.QUOTE_MINIMAL)
         writer.writerow(["file", "line_no", "lang", "confidence", "text"])

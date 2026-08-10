@@ -23,10 +23,6 @@ def gsz(path: str | Path) -> int:
     return total
 
 
-"\nEnhanced AST-based refactoring from os/path to pathlib.\nComprehensive coverage of os and os.path operations.\n"
-"\nEnhanced AST-based refactoring from os/path to pathlib.\nComprehensive coverage of os and os.path operations.\n"
-
-
 class PathlibTransformer(ast.NodeTransformer):
     PATHLIB_MAPPINGS = {
         "exists": ("exists", "bool"),

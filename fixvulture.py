@@ -54,7 +54,6 @@ def parse_vulture_output(lines: list[str]) -> dict[str, list[tuple[int, str, str
 
 
 def fix_file(filepath: str, issues: list[tuple[int, str, str]]) -> bool:
-    """Fix issues in a single file."""
     if not os.path.exists(filepath):
         print(f"Warning: File not found: {filepath}")
         return False
@@ -132,24 +131,20 @@ def fix_file(filepath: str, issues: list[tuple[int, str, str]]) -> bool:
 
 
 def _comment_out_variable(line: str, name: str) -> str:
-    """Comment out a variable assignment."""
     indent = _get_indent(line)
     return f"{indent}# REMOVED: {line.strip()}\n"
 
 
 def _comment_out_line(line: str) -> str:
-    """Comment out a line."""
     indent = _get_indent(line)
     return f"{indent}# REMOVED: {line.strip()}\n"
 
 
 def _get_indent(line: str) -> str:
-    """Get the indentation of a line."""
     return line[: len(line) - len(line.lstrip())]
 
 
 def _get_function_lines(lines: list[str], start_idx: int) -> tuple[int, int]:
-    """Get the start and end line indices of a function/method definition."""
     func_start = start_idx
     while func_start > 0:
         prev_line = lines[func_start - 1].strip()
@@ -171,7 +166,6 @@ def _get_function_lines(lines: list[str], start_idx: int) -> tuple[int, int]:
 
 
 def _get_class_lines(lines: list[str], start_idx: int) -> tuple[int, int]:
-    """Get the start and end line indices of a class definition."""
     class_start = start_idx
     while class_start > 0:
         prev_line = lines[class_start - 1].strip()
@@ -193,7 +187,6 @@ def _get_class_lines(lines: list[str], start_idx: int) -> tuple[int, int]:
 
 
 def _find_block_end(lines: list[str], start_idx: int) -> int:
-    """Find the end of a code block."""
     indent = _get_indent(lines[start_idx])
     end_idx = start_idx
     while end_idx + 1 < len(lines):
@@ -207,7 +200,6 @@ def _find_block_end(lines: list[str], start_idx: int) -> int:
 
 
 def _cleanup_blank_lines(lines: list[str]) -> list[str]:
-    """Remove excessive blank lines (keep max 2 consecutive)."""
     cleaned = []
     blank_count = 0
     for line in lines:
@@ -222,7 +214,6 @@ def _cleanup_blank_lines(lines: list[str]) -> list[str]:
 
 
 def main():
-    """Main entry point."""
     if len(sys.argv) > 1:
         vulture_file = sys.argv[1]
         try:

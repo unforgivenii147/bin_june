@@ -23,18 +23,15 @@ def contains_chinese(text: str) -> bool:
 
 
 def create_chunks(lines: list[str]) -> list[list[str]]:
-    """Group lines into chunks where each chunk's total character count is <= MAX_CHUNK_SIZE."""
     chunks = []
     current_chunk = []
     current_size = 0
     for line in lines:
         line_size = len(line) + 1
-
         if current_size + line_size > MAX_CHUNK_SIZE and current_chunk:
             chunks.append(current_chunk)
             current_chunk = []
             current_size = 0
-
         if line_size > MAX_CHUNK_SIZE:
             if current_chunk:
                 chunks.append(current_chunk)
@@ -44,15 +41,12 @@ def create_chunks(lines: list[str]) -> list[list[str]]:
         else:
             current_chunk.append(line)
             current_size += line_size
-
     if current_chunk:
         chunks.append(current_chunk)
     return chunks
 
 
 def translate_chunk(chunk: list[str]) -> tuple[list[str], str | None]:
-    """Translate a chunk of lines joined by newlines. Returns (original_lines, translation) or (original_lines, None)."""
-
     chunk_text = "\n".join(chunk)
     translator = GoogleTranslator(source="auto", target="en")
     for attempt in range(RETRY_ATTEMPTS):
@@ -85,7 +79,6 @@ def main() -> None:
     if not all_lines:
         logger.info("No lines found in %s", input_path.name)
         return
-
     chinese_lines = [line for line in all_lines if contains_chinese(line)]
     non_chinese_lines = [line for line in all_lines if not contains_chinese(line)]
     logger.info(
@@ -97,7 +90,6 @@ def main() -> None:
     if not chinese_lines:
         logger.info("No Chinese lines to translate in %s", input_path.name)
         return
-
     chunks = create_chunks(chinese_lines)
     logger.info(
         "Created %d chunks from %d Chinese lines (max %d chars per chunk)",
@@ -105,7 +97,6 @@ def main() -> None:
         len(chinese_lines),
         MAX_CHUNK_SIZE,
     )
-
     results: dict[str, str] = {}
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         future_to_chunk = {executor.submit(translate_chunk, chunk): chunk for chunk in chunks}
@@ -115,7 +106,6 @@ def main() -> None:
                 original_lines, translated_text = future.result()
                 if translated_text:
                     translated_lines = translated_text.split("\n")
-
                     for i, original_line in enumerate(original_lines):
                         if i < len(translated_lines):
                             results[original_line] = translated_lines[i]

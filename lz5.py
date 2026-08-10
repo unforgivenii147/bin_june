@@ -2,9 +2,9 @@
 """
 Folder compressor/decompressor using LZ4 with multiprocessing
 Usage:
-    python script.py            # Compress all subfolders (default)
-    python script.py -c         # Compress all subfolders
-    python script.py -d         # Decompress all .tar.lz4 files
+    python script.py
+    python script.py -c
+    python script.py -d
 """
 
 from __future__ import annotations

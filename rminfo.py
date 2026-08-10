@@ -23,7 +23,6 @@ PYTHON_SHEBANG_PATTERNS = [
 
 
 def is_python_file(file_path):
-    """Check if a file is a Python file (by extension or shebang)."""
     if file_path.suffix == ".py":
         return True
     if not file_path.suffix:
@@ -39,7 +38,6 @@ def is_python_file(file_path):
 
 
 def remove_info_block(file_path):
-    """Remove the info block from a Python file."""
     try:
         with open(file_path, encoding="utf-8") as f:
             content = f.read()
@@ -57,7 +55,6 @@ def remove_info_block(file_path):
 
 
 def main():
-    """Main function to process all Python files recursively."""
     start_dir = Path(".")
     removed_count = 0
     files_checked = 0

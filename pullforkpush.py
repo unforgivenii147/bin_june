@@ -102,4 +102,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-'\n\n# Instead of creating a separate \'fork\' remote:\nif "upstream" not in local_repo.remotes:\n    print("[*] Renaming original remote to \'upstream\'...")\n    # Rename current origin to upstream\n    local_repo.remotes.origin.rename("upstream")\n\n# Define your fork as the new origin\nfork_url = f"https://{my_username}:{token}@github.com/{my_username}/{repo_name}.git"\nif "origin" in local_repo.remotes:\n    local_repo.remotes.origin.set_url(fork_url)\nelse:\n    print("[*] Setting your fork as \'origin\'...")\n    origin = local_repo.create_remote("origin", fork_url)\n\n# Explicitly set your local branch to track your fork\'s branch\nprint(f"[*] Setting upstream tracking for \'{active_branch.name}\' to your fork...")\nactive_branch.set_tracking_branch(origin.refs[active_branch.name])\n\n# Now push\norigin.push(refspec=f"{active_branch.name}:{active_branch.name}", set_upstream=True)\n\n'

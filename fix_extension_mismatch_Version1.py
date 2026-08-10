@@ -6,11 +6,11 @@ file extension doesn't match a detected file type signature.
 Usage:
   python fix_extension_mismatch.py [PATH] [--workers N] [--commit] [--dry-run] [--verbose]
 Examples:
-  # Dry run (default) over current directory
+
   python fix_extension_mismatch.py
-  # Dry run for a specific directory
+
   python fix_extension_mismatch.py /path/to/dir
-  # Actually perform renames using 8 worker processes
+
   python fix_extension_mismatch.py /path/to/dir --commit --workers 8
 Notes:
   - The script performs signature-based detection for common formats (images, archives,

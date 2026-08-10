@@ -11,10 +11,6 @@ from pathlib import Path
 
 
 def process_file(file_path: Path, auto_fix: bool = False) -> dict:
-    """
-    Analyzes a single Python file for invalid escape sequences.
-    Optionally auto-fixes them by prefixing string literals with 'r'.
-    """
     result = {"path": file_path, "has_issues": False, "fixed": False, "errors": [], "warnings": []}
     try:
         content_bytes = file_path.read_bytes()

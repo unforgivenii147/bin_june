@@ -6,7 +6,7 @@ Repeated means the exact same consecutive group of lines (2 or more lines)
 appears in at least two places (across files or within the same file).
 Uses multiprocessing with joblib for speedup.
 Excluded lines:
-  - Shebang lines (e.g., #!)
+  - Shebang lines (e.g.,
 """
 
 from __future__ import annotations

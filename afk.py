@@ -477,16 +477,16 @@ def build_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s                          # scan current directory
-  %(prog)s src/                     # scan a specific directory
-  %(prog)s file1.py file2.py        # scan specific files
-  %(prog)s src/ tests/              # scan multiple directories
-  %(prog)s file.py src/             # mix files and directories
-  %(prog)s -a                       # autofix in-place (with .bak)
-  %(prog)s -a --dry-run             # preview fixes without writing
-  %(prog)s -v --workers 4           # verbose output, 4 workers
-  %(prog)s --exclude "test_.*"      # exclude test files
-  %(prog)s --exclude "venv" --exclude ".git"  # exclude multiple patterns
+  %(prog)s                          
+  %(prog)s src/                     
+  %(prog)s file1.py file2.py        
+  %(prog)s src/ tests/              
+  %(prog)s file.py src/             
+  %(prog)s -a                       
+  %(prog)s -a --dry-run             
+  %(prog)s -v --workers 4           
+  %(prog)s --exclude "test_.*"      
+  %(prog)s --exclude "venv" --exclude ".git"  
 """,
     )
     parser.add_argument(

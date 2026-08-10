@@ -21,7 +21,6 @@ logger = logging.getLogger(__name__)
 
 
 def contains_cyrillic(text: str) -> bool:
-    """Detect Cyrillic characters (covers core Cyrillic and some extensions)."""
     return bool(
         re.search(
             r"[\u0400-\u04FF\u0500-\u052F\u2DE0-\u2DFF\uA640-\uA69F\u1C80-\u1C8F]",
@@ -31,13 +30,11 @@ def contains_cyrillic(text: str) -> bool:
 
 
 def create_chunks(lines: list[str]) -> list[list[str]]:
-    """Group lines into chunks where each chunk's total character count is <= MAX_CHUNK_SIZE."""
     chunks: list[list[str]] = []
     current_chunk: list[str] = []
     current_size = 0
     for line in lines:
         line_size = len(line) + 1
-
         if line_size > MAX_CHUNK_SIZE:
             if current_chunk:
                 chunks.append(current_chunk)
@@ -45,7 +42,6 @@ def create_chunks(lines: list[str]) -> list[list[str]]:
                 current_size = 0
             chunks.append([line])
             continue
-
         if current_size + line_size > MAX_CHUNK_SIZE and current_chunk:
             chunks.append(current_chunk)
             current_chunk = []
@@ -58,10 +54,6 @@ def create_chunks(lines: list[str]) -> list[list[str]]:
 
 
 def translate_chunk(chunk: list[str]) -> tuple[list[str], str | None]:
-    """
-    Translate a chunk (list of lines) from Russian to English.
-    Returns tuple(original_chunk, translated_text or None).
-    """
     chunk_text = "\n".join(chunk)
     translator = GoogleTranslator(source="ru", target="en")
     for attempt in range(1, RETRY_ATTEMPTS + 1):
@@ -105,7 +97,6 @@ def main() -> None:
     if not all_lines:
         logger.info("No non-empty lines found in %s", input_path.name)
         return
-
     russian_lines_raw = [line for line in all_lines if contains_cyrillic(line)]
     non_russian_lines = [line for line in all_lines if not contains_cyrillic(line)]
     logger.info(
@@ -117,7 +108,6 @@ def main() -> None:
     if not russian_lines_raw:
         logger.info("No Russian/Cyrillic lines to translate in %s", input_path.name)
         return
-
     seen: set[str] = set()
     russian_lines: list[str] = []
     for l in russian_lines_raw:
@@ -129,7 +119,6 @@ def main() -> None:
         len(russian_lines),
         len(russian_lines_raw),
     )
-
     chunks = create_chunks(russian_lines)
     num_workers = min(MAX_WORKERS, len(chunks)) if chunks else 1
     logger.info(
@@ -139,7 +128,6 @@ def main() -> None:
         MAX_CHUNK_SIZE,
         num_workers,
     )
-
     results: dict[str, str] = {}
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
         future_to_chunk = {executor.submit(translate_chunk, chunk): chunk for chunk in chunks}
@@ -152,7 +140,6 @@ def main() -> None:
                 original_lines, translated_text = future.result()
                 if translated_text:
                     translated_lines = translated_text.splitlines()
-
                     if len(translated_lines) == len(original_lines):
                         for i, original_line in enumerate(original_lines):
                             results[original_line] = translated_lines[i]
@@ -186,7 +173,6 @@ def main() -> None:
                     (chunk[0][:60] + "...") if chunk else "",
                     e,
                 )
-
     output_path = input_path.with_suffix(".json")
     try:
         with output_path.open("w", encoding="utf-8") as f:
@@ -194,7 +180,6 @@ def main() -> None:
         logger.info("Saved %d translations to %s", len(results), output_path.name)
     except Exception as e:
         logger.error("Error saving JSON file: %s", e)
-
     try:
         with input_path.open("w", encoding="utf-8") as f:
             translated_count = 0

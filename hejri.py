@@ -7,9 +7,6 @@ from dh import georgian_to_hijri
 
 
 def get_current_ymd():
-    """
-    Returns the current year, month, and day as a tuple of integers (year, month, day).
-    """
     today = datetime.date.today()
     return (today.year, today.month, today.day)
 

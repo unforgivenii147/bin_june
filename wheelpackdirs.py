@@ -9,7 +9,6 @@ from pathlib import Path
 
 
 def pack_wheel(directory):
-    """Pack a wheel directory using the wheel command."""
     try:
         subprocess.run(["wheel", "pack", str(directory)], capture_output=True, text=True, check=True)
         return True, f"✓ {directory.name}"

@@ -14,7 +14,6 @@ from pathlib import Path
 
 import pycld2 as cld2
 
-
 TEXT_EXTENSIONS = {
     ".txt",
     ".csv",
@@ -58,7 +57,6 @@ TEXT_EXTENSIONS = {
     ".gitignore",
     ".dockerfile",
 }
-
 CLD2_LANG_MAP = {
     "en": "ENGLISH",
     "es": "SPANISH",
@@ -115,24 +113,17 @@ CLD2_LANG_MAP = {
 
 
 def is_likely_text_file(file_path):
-    """Check if file is likely a text file based on extension."""
     return file_path.suffix.lower() in TEXT_EXTENSIONS
 
 
 def detect_language(text):
-    """
-    Detect language of a text string using pycld2.
-    Returns: (language_code, language_name, confidence_percentage, is_reliable)
-    """
     if not text.strip():
         return None, None, 0, True
     try:
         is_reliable, _text_bytes_found, details = cld2.detect(text)
         if not details:
             return "un", "UNKNOWN", 0, False
-
         lang_name, lang_code, percent, _score = details[0]
-
         lang_code = lang_code.lower() if lang_code else "un"
         return lang_code, lang_name, percent, is_reliable
     except Exception as e:
@@ -140,12 +131,7 @@ def detect_language(text):
 
 
 def process_file(file_path):
-    """
-    Process a single file and return non-English lines.
-    Returns: (file_path, list of (line_number, line_text, language_code, language_name, confidence))
-    """
     non_english_lines = []
-
     try:
         if file_path.stat().st_size > 10 * 1024 * 1024:
             return file_path, None, "File too large (>10MB)"
@@ -166,7 +152,6 @@ def process_file(file_path):
             if not line.strip():
                 continue
             lang_code, lang_name, confidence, _is_reliable = detect_language(line.strip())
-
             if lang_code and lang_code != "en" and confidence >= 50:
                 non_english_lines.append((line_num, line.strip(), lang_code, lang_name, confidence))
             elif lang_code == "un" and confidence < 50:
@@ -177,14 +162,11 @@ def process_file(file_path):
 
 
 def find_text_files(root_dir=".", extensions=TEXT_EXTENSIONS):
-    """Recursively find all text files with specified extensions."""
     root_path = Path(root_dir)
     text_files = []
     for ext in extensions:
         text_files.extend(root_path.rglob(f"*{ext}"))
-
     text_files = list(set(text_files))
-
     text_files = [f for f in text_files if is_likely_text_file(f)]
     text_files.sort()
     return text_files
@@ -205,15 +187,12 @@ def main():
         help="Minimum confidence percentage for non-English detection (default: 50)",
     )
     args = parser.parse_args()
-
     extensions = TEXT_EXTENSIONS
     if args.extensions:
         extensions.update(args.extensions)
-
     print(f"Scanning directory: {args.directory}")
     text_files = find_text_files(args.directory, extensions)
     print(f"Found {len(text_files)} text files to process")
-
     non_english_results = []
     errors = []
     files_with_findings = 0
@@ -221,7 +200,6 @@ def main():
     print(f"Processing files using {args.workers} workers...")
     with ProcessPoolExecutor(max_workers=args.workers) as executor:
         future_to_file = {executor.submit(process_file, file): file for file in text_files}
-
         completed = 0
         for future in as_completed(future_to_file):
             completed += 1
@@ -234,7 +212,6 @@ def main():
                 files_with_findings += 1
                 total_non_eng_lines += len(results)
                 non_english_results.append((file_path, results))
-
     output_path = Path(args.output)
     print(f"\nGenerating report: {output_path}")
     with open(output_path, "w", encoding="utf-8") as f:
@@ -259,7 +236,6 @@ def main():
                 for lang, count in sorted(lang_counts.items(), key=lambda x: x[1], reverse=True):
                     f.write(f"  {lang}: {count} lines\n")
                 f.write("\n")
-
             for file_path, lines in non_english_results:
                 f.write(f"\n{'─' * 80}\n")
                 f.write(f"File: {file_path}\n")
@@ -270,14 +246,12 @@ def main():
                     f.write(f"  Content: {line_text}\n\n")
         else:
             f.write("No non-English lines found.\n")
-
         if errors:
             f.write(f"\n{'=' * 80}\n")
             f.write(f"Errors encountered: {len(errors)}\n")
             f.write(f"{'=' * 80}\n\n")
             for file_path, error in errors:
                 f.write(f"  {file_path}: {error}\n")
-
     print(f"\n{'=' * 80}")
     print(f"Scan complete!")
     print(f"Files scanned: {len(text_files)}")

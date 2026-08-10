@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Remove comments from C/C++ files using tree-sitter.
-
 Processes files in place using parallel workers.
 Supports both line comments (// ...) and block comments (/* ... */),
 including inline comments.
@@ -18,17 +17,13 @@ import tree_sitter_c
 import tree_sitter_cpp
 from tree_sitter import Language, Parser
 
-
 C_EXTS = {".c", ".h"}
 CPP_EXTS = {".cpp", ".hpp"}
 ALL_EXTS = C_EXTS | CPP_EXTS
-
-
 _PARSERS: dict[str, Parser] = {}
 
 
 def get_parser(ext: str) -> Parser:
-    """Return a cached parser for the given file extension."""
     if ext not in _PARSERS:
         if ext in C_EXTS:
             lang = Language(tree_sitter_c.language())
@@ -36,7 +31,6 @@ def get_parser(ext: str) -> Parser:
             lang = Language(tree_sitter_cpp.language())
         else:
             raise ValueError(f"Unsupported extension: {ext}")
-
         parser = Parser()
         parser.language = lang
         _PARSERS[ext] = parser
@@ -44,7 +38,6 @@ def get_parser(ext: str) -> Parser:
 
 
 def collect_comment_ranges(root) -> list[tuple[int, int]]:
-    """Return (start_byte, end_byte) of every comment node via iterative DFS."""
     ranges: list[tuple[int, int]] = []
     stack = [root]
     while stack:
@@ -58,14 +51,12 @@ def collect_comment_ranges(root) -> list[tuple[int, int]]:
 
 
 def strip_comments(content: bytes, ext: str) -> tuple[bytes, int]:
-    """Remove every comment from `content`; return (new_bytes, removed_count)."""
     parser = get_parser(ext)
     tree = parser.parse(content)
     ranges = collect_comment_ranges(tree.root_node)
     if not ranges:
         return content, 0
     ranges.sort(key=lambda r: r[0])
-
     out = bytearray()
     last = 0
     for start, end in ranges:
@@ -76,7 +67,6 @@ def strip_comments(content: bytes, ext: str) -> tuple[bytes, int]:
 
 
 def process_file(path: Path, base: Path) -> tuple[str, int, str]:
-    """Process one file in place. Returns (relpath, removed_count, error_str)."""
     try:
         content = path.read_bytes()
         ext = path.suffix.lower()
@@ -93,7 +83,6 @@ def process_file(path: Path, base: Path) -> tuple[str, int, str]:
 
 
 def iter_cc_files(paths: list[Path]):
-    """Yield unique C/C++ files from the given files/dirs (recursively for dirs)."""
     seen: set[Path] = set()
     for p in paths:
         if p.is_file() and p.suffix.lower() in ALL_EXTS:
@@ -126,18 +115,15 @@ def main() -> int:
         help="Number of parallel workers (default: CPU count).",
     )
     args = ap.parse_args()
-
     inputs = list(args.paths) if args.paths else [Path(".")]
     files = list(iter_cc_files(inputs))
     if not files:
         print("No C/C++ files to process.", file=sys.stderr)
         return 1
-
     base = Path.cwd()
     total_comments = 0
     files_changed = 0
     errors = 0
-
     with ProcessPoolExecutor(max_workers=args.jobs) as ex:
         futs = {ex.submit(process_file, p, base): p for p in files}
         for fut in as_completed(futs):
@@ -150,7 +136,6 @@ def main() -> int:
             if count > 0:
                 files_changed += 1
             print(f"{rel}: {count} comment(s) removed")
-
     print(
         f"\nSummary: {files_changed}/{len(files)} file(s) changed, "
         f"{total_comments} comment(s) removed, {errors} error(s)."

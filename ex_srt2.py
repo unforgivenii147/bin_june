@@ -10,10 +10,8 @@ import ffmpeg
 
 
 def extract_subtitles(input_file):
-    """Extract all subtitle streams from video file."""
     try:
         probe = ffmpeg.probe(input_file)
-
         subtitle_streams = [stream for stream in probe["streams"] if stream["codec_type"] == "subtitle"]
         if not subtitle_streams:
             print("No subtitle streams found.")
@@ -23,7 +21,6 @@ def extract_subtitles(input_file):
             lang = stream.get("tags", {}).get("language", "und")
             output_file = f"{basename}.sub{i}.{lang}.srt"
             print(f"Extracting subtitle stream {i} -> {output_file}")
-
             (ffmpeg.input(input_file).output(output_file, map=f"0:s:{i}").overwrite_output().run(quiet=True))
         print("Done.")
     except ffmpeg.Error as e:

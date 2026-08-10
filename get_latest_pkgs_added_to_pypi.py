@@ -16,21 +16,13 @@ import requests
 
 
 def fetch_pypi_updates() -> List[Dict[str, str]]:
-    """
-    Fetch and parse the PyPI updates RSS feed.
-    Returns:
-        List of dictionaries containing package information
-    """
     url = "https://pypi.org/rss/updates.xml"
     try:
         response = requests.get(url, timeout=30)
         response.raise_for_status()
-
         root = ET.fromstring(response.content)
-
         namespaces = {"atom": "http://www.w3.org/2005/Atom", "dc": "http://purl.org/dc/elements/1.1/"}
         packages = []
-
         for item in root.findall(".//item"):
             package_info = {
                 "title": item.find("title").text if item.find("title") is not None else "",
@@ -39,7 +31,6 @@ def fetch_pypi_updates() -> List[Dict[str, str]]:
                 "pub_date": item.find("pubDate").text if item.find("pubDate") is not None else "",
                 "guid": item.find("guid").text if item.find("guid") is not None else "",
             }
-
             if package_info["title"]:
                 parts = package_info["title"].split()
                 if parts:
@@ -56,14 +47,12 @@ def fetch_pypi_updates() -> List[Dict[str, str]]:
 
 
 def save_to_json(packages: List[Dict[str, str]], filename: str) -> None:
-    """Save packages to JSON file."""
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(packages, f, indent=2, ensure_ascii=False)
     print(f"Saved {len(packages)} packages to {filename}")
 
 
 def save_to_csv(packages: List[Dict[str, str]], filename: str) -> None:
-    """Save packages to CSV file."""
     if not packages:
         print("No packages to save", file=sys.stderr)
         return
@@ -75,7 +64,6 @@ def save_to_csv(packages: List[Dict[str, str]], filename: str) -> None:
 
 
 def save_to_text(packages: List[Dict[str, str]], filename: str) -> None:
-    """Save packages in a human-readable text format."""
     with open(filename, "w", encoding="utf-8") as f:
         f.write(f"PyPI Latest Package Updates\n")
         f.write(f"Fetched at: {datetime.now().isoformat()}\n")
@@ -91,7 +79,6 @@ def save_to_text(packages: List[Dict[str, str]], filename: str) -> None:
 
 
 def main():
-    """Main function to fetch and save PyPI updates."""
     import argparse
 
     parser = argparse.ArgumentParser(description="Fetch latest package updates from PyPI RSS feed")
@@ -109,14 +96,11 @@ def main():
     packages = fetch_pypi_updates()
     if args.num_packages:
         packages = packages[: args.num_packages]
-
     base_name = args.output.rsplit(".", 1)[0]
     extension_map = {"json": ".json", "csv": ".csv", "txt": ".txt"}
     filename = base_name + extension_map.get(args.format, ".json")
-
     save_functions = {"json": save_to_json, "csv": save_to_csv, "txt": save_to_text}
     save_functions[args.format](packages, filename)
-
     print(f"\nSummary:")
     print(f"  Total packages fetched: {len(packages)}")
     if packages:

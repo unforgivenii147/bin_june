@@ -14,7 +14,6 @@ CHUNK_SIZE = 1024 * 64
 
 
 def decompress_stream(input_path: Path, output_path: Path) -> bool:
-    """Decompress a .br file to output_path."""
     try:
         with open(input_path, "rb") as f_in:
             decompressor = brotli.Decompressor()
@@ -23,7 +22,6 @@ def decompress_stream(input_path: Path, output_path: Path) -> bool:
                     chunk = f_in.read(CHUNK_SIZE)
                     if not chunk:
                         break
-
                     f_out.write(decompressor.process(chunk))
         print(f"✅ Decompressed: {output_path.name}")
         return True
@@ -33,7 +31,6 @@ def decompress_stream(input_path: Path, output_path: Path) -> bool:
 
 
 def compress_stream(input_stream, output_file_path: Path) -> bool:
-    """Compress from stream to .br file."""
     compressor = brotli.Compressor(quality=BROTLI_QUALITY)
     try:
         with open(output_file_path, "wb") as f_out:
@@ -51,7 +48,6 @@ def compress_stream(input_stream, output_file_path: Path) -> bool:
 
 
 def process_directory(dir_path: Path):
-    """Compress directory → .tar.br"""
     output_br = dir_path.with_name(f"{dir_path.name}.tar.br")
     tar_buffer = io.BytesIO()
     try:
@@ -68,7 +64,6 @@ def process_directory(dir_path: Path):
 
 
 def process_file(file_path: Path):
-    """Compress single file → .br"""
     output_br = file_path.with_name(f"{file_path.name}.br")
     try:
         with open(file_path, "rb") as f_in:
@@ -80,7 +75,6 @@ def process_file(file_path: Path):
 
 
 def decompress_file(br_path: Path):
-    """Decompress .br or .tar.br file."""
     if br_path.name.endswith(".tar.br"):
         output_dir = br_path.with_name(br_path.name[:-7])
         tar_buffer = io.BytesIO()

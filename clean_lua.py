@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Remove comments from Lua files using tree-sitter.
-
 Updates files in-place. Accepts multiple files and directories as input.
 If no input is provided, processes files in the current directory recursively.
 """
@@ -31,7 +30,6 @@ PARSER = _build_parser()
 
 
 def _find_comment_ranges(tree) -> list[tuple[int, int]]:
-    """Return list of (start_byte, end_byte) for every comment node."""
     ranges: list[tuple[int, int]] = []
     stack = [tree.root_node]
     while stack:
@@ -44,15 +42,10 @@ def _find_comment_ranges(tree) -> list[tuple[int, int]]:
 
 
 def remove_comments(source: bytes) -> tuple[bytes, int, int]:
-    """Strip comments from Lua source.
-
-    Returns (result, n_comments, bytes_removed).
-    """
     tree = PARSER.parse(source)
     ranges = _find_comment_ranges(tree)
     if not ranges:
         return source, 0, 0
-
     ranges.sort(key=lambda r: r[0], reverse=True)
     result = source
     bytes_removed = 0
@@ -62,28 +55,23 @@ def remove_comments(source: bytes) -> tuple[bytes, int, int]:
             line_start -= 1
         leading = result[line_start:start]
         only_ws_before = leading.strip() == b""
-
         nl_len = 0
         if result[end : end + 2] == b"\r\n":
             nl_len = 2
         elif result[end : end + 1] in (b"\n", b"\r"):
             nl_len = 1
-
         if only_ws_before and nl_len:
             cut_start = line_start
             cut_end = end + nl_len
         else:
             cut_start = start
             cut_end = end
-
         result = result[:cut_start] + result[cut_end:]
         bytes_removed += cut_end - cut_start
-
     return result, len(ranges), bytes_removed
 
 
 def process_file(path: Path, base: Path) -> dict:
-    """Read, strip comments, write back. Returns a stats dict."""
     try:
         original = path.read_bytes()
         result, n_comments, bytes_removed = remove_comments(original)
@@ -124,16 +112,11 @@ def process_file(path: Path, base: Path) -> dict:
 
 
 def collect_files(paths: list[Path]) -> list[tuple[Path, Path]]:
-    """Collect *.lua files from given paths (files or directories).
-
-    Returns list of (file_path, base_dir).
-    """
     files: list[tuple[Path, Path]] = []
     for item in paths:
         if not item.exists():
             print(f"warning: {item} does not exist, skipping", file=sys.stderr)
             continue
-
         if item.is_file():
             if item.suffix == ".lua":
                 files.append((item, item.parent))
@@ -144,7 +127,6 @@ def collect_files(paths: list[Path]) -> list[tuple[Path, Path]]:
             files.extend((p, base) for p in sorted(base.rglob("*.lua")))
         else:
             print(f"warning: {item} is neither a file nor directory, skipping", file=sys.stderr)
-
     return files
 
 
@@ -172,23 +154,18 @@ def main() -> int:
         help="Number of parallel workers (default: cpu_count).",
     )
     args = ap.parse_args()
-
     paths = args.paths or [Path.cwd()]
     files = collect_files(paths)
-
     if not files:
         print("No .lua files found.")
         return 0
-
     workers = args.jobs
     print(f"Processing {len(files)} Lua file(s) with {workers or 'all'} worker(s)...\n")
-
     t0 = time.monotonic()
     total_files = 0
     total_comments = 0
     total_removed = 0
     errors = 0
-
     with ProcessPoolExecutor(max_workers=workers) as ex:
         futures = [ex.submit(process_file, p, base) for p, base in files]
         for fut in as_completed(futures):
@@ -206,7 +183,6 @@ def main() -> int:
                 saved = s["before"] - s["after"]
                 pct = (saved / s["before"] * 100) if s["before"] else 0.0
                 print(f"  ✓ {rel}  {s['comments']} comment(s) removed · {format_size(saved)} (-{pct:.1f}%)")
-
     elapsed = time.monotonic() - t0
     print("\n" + "─" * 60)
     print(f"  Files processed  : {total_files}")

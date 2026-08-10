@@ -9,7 +9,6 @@ CHUNK_SIZE = 1024 * 1024
 
 
 def get_filez(root_dir: str | Path):
-
     visited_dirs: set[Path] = set()
     root_dir = Path(root_dir)
     if root_dir.is_dir():

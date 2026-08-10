@@ -30,8 +30,6 @@ class Colors:
 
 @dataclass
 class ConversionStats:
-    """Statistics for a single file conversion."""
-
     file_path: Path
     original_bitrate: int
     new_bitrate: int
@@ -43,7 +41,6 @@ class ConversionStats:
 
 
 def check_ffmpeg():
-    """Check if ffmpeg is installed."""
     try:
         subprocess.run(["ffmpeg", "-version"], capture_output=True, check=True)
         subprocess.run(["ffprobe", "-version"], capture_output=True, check=True)
@@ -53,7 +50,6 @@ def check_ffmpeg():
 
 
 def fsz(size_bytes: int) -> str:
-    """Format file size in human-readable format."""
     for unit in ["B", "KB", "MB", "GB"]:
         if size_bytes < 1024:
             return f"{size_bytes:.1f} {unit}"
@@ -62,7 +58,6 @@ def fsz(size_bytes: int) -> str:
 
 
 def format_duration(seconds: float) -> str:
-    """Format duration in human-readable format."""
     if seconds < 1:
         return f"{seconds * 1000:.0f}ms"
     elif seconds < 60:
@@ -74,10 +69,6 @@ def format_duration(seconds: float) -> str:
 
 
 def get_audio_info(mp3_file: Path) -> tuple[int | None, int | None]:
-    """
-    Get audio bitrate and file size using ffprobe.
-    Returns (bitrate_kbps, file_size_bytes) or (None, None) on failure.
-    """
     try:
         result = subprocess.run(
             ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_format", str(mp3_file)],
@@ -102,7 +93,6 @@ def get_audio_info(mp3_file: Path) -> tuple[int | None, int | None]:
 
 
 def convert_single_file(mp3_file: Path, base_dir: Path) -> ConversionStats:
-    """Convert a single MP3 file to half its original bitrate."""
     start_time = time.time()
     rel_path = mp3_file.relative_to(base_dir)
     original_bitrate, original_size = get_audio_info(mp3_file)
@@ -190,7 +180,6 @@ def convert_single_file(mp3_file: Path, base_dir: Path) -> ConversionStats:
 
 
 def print_file_result(stat: ConversionStats, index: int, total: int):
-    """Print formatted result for a single file."""
     status_icon = f"{Colors.GREEN}✓{Colors.END}" if stat.success else f"{Colors.RED}✗{Colors.END}"
     if stat.success:
         size_saved = stat.original_size - stat.new_size
@@ -208,7 +197,6 @@ def print_file_result(stat: ConversionStats, index: int, total: int):
 
 
 def print_final_summary(stats: list[ConversionStats], total_duration: float):
-    """Print final summary of all conversions."""
     successful = [s for s in stats if s.success]
     failed = [s for s in stats if not s.success]
     total_original = sum(s.original_size for s in successful)
@@ -230,7 +218,6 @@ def print_final_summary(stats: list[ConversionStats], total_duration: float):
 
 
 def find_mp3_files(directories: list[Path]) -> list[Path]:
-    """Find all MP3 files in given directories recursively."""
     mp3_files = []
     for directory in directories:
         if not directory.exists():
@@ -252,7 +239,6 @@ def find_mp3_files(directories: list[Path]) -> list[Path]:
 
 
 def process_directory(directory: Path, max_workers: int = 4):
-    """Process all MP3 files in a directory."""
     mp3_files = find_mp3_files([directory])
     if not mp3_files:
         print(f"{Colors.YELLOW}No MP3 files found in {directory}{Colors.END}")
@@ -282,10 +268,10 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s                     # Process current directory recursively
-  %(prog)s ~/music             # Process specific directory
-  %(prog)s dir1 dir2 dir3      # Process multiple directories
-  %(prog)s -w 8 ~/music        # Use 8 parallel workers
+  %(prog)s                     
+  %(prog)s ~/music             
+  %(prog)s dir1 dir2 dir3      
+  %(prog)s -w 8 ~/music        
         """,
     )
     parser.add_argument(

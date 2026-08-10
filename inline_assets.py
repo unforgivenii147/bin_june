@@ -32,11 +32,9 @@ def is_remote(url: str) -> bool:
 
 
 def fetch_remote(url: str):
-    """Download a remote resource. Returns text or None on failure."""
     try:
         resp = requests.get(url, timeout=30)
         resp.raise_for_status()
-
         if resp.encoding is None or resp.encoding.lower() == "iso-8859-1":
             resp.encoding = resp.apparent_encoding
         return resp.text
@@ -45,13 +43,11 @@ def fetch_remote(url: str):
 
 
 def fetch_local(ref: str, base_dir: Path):
-    """Read a local file referenced from an HTML file. Returns text or None."""
     try:
         ref = ref.split("?", 1)[0].split("#", 1)[0]
         if not ref:
             return None
         candidate = (base_dir / ref).resolve()
-
         if candidate.is_file():
             return candidate.read_text(encoding="utf-8", errors="ignore")
     except Exception:
@@ -60,14 +56,12 @@ def fetch_local(ref: str, base_dir: Path):
 
 
 def fetch_resource(ref: str, base_dir: Path):
-    """Fetch a CSS/JS resource, whether remote or local. Returns text or None."""
     if is_remote(ref):
         return fetch_remote(ref)
     return fetch_local(ref, base_dir)
 
 
 def process_html_file(html_path: Path):
-    """Inline CSS/JS into a single HTML file in place."""
     try:
         content = html_path.read_text(encoding="utf-8", errors="ignore")
     except Exception as e:
@@ -78,7 +72,6 @@ def process_html_file(html_path: Path):
         return html_path, f"parse error: {e}"
     base_dir = html_path.parent
     modified = False
-
     for link in soup.find_all("link", rel="stylesheet"):
         href = link.get("href")
         if not href:
@@ -88,14 +81,12 @@ def process_html_file(html_path: Path):
             continue
         style = soup.new_tag("style")
         style.string = css
-
         for key, val in link.attrs.items():
             if key in ("href", "rel"):
                 continue
             style[key] = val
         link.replace_with(style)
         modified = True
-
     for script in soup.find_all("script", src=True):
         src = script.get("src")
         if not src:
@@ -121,7 +112,6 @@ def process_html_file(html_path: Path):
 
 
 def gather_html_files(dirs):
-    """Collect all *.html / *.htm files from the given paths (files or dirs)."""
     files = []
     seen = set()
     for d in dirs:

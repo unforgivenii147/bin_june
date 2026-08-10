@@ -43,7 +43,6 @@ COMMON_PYTHON_NAMES = {
 
 
 def get_shebang(content: str) -> str:
-    """Return the appropriate shebang for a Python file."""
     if re.search(
         r"^\s*(?:import\s+cv2\b|from\s+cv2\b)",
         content,

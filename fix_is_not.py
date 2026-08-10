@@ -9,10 +9,6 @@ from pathlib import Path
 
 
 def process_file(file_path: Path, auto_fix: bool = False) -> dict:
-    """
-    Analyzes a single Python file for 'is not' operators using tokens.
-    Optionally replaces them with '!=' while keeping formatting intact.
-    """
     result = {"path": file_path, "found_count": 0, "fixed": False, "lines": [], "error": None}
     try:
         with file_path.open("rb") as f:

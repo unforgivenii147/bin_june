@@ -71,27 +71,5 @@ def main() -> None:
         print(f"Extracting stream index {index} (Lang: {lang}, Forced: {forced}, Codec: {codec_name}) -> {out_path}")
 
 
-"""
-        try:
-            process = (
-                ffmpeg.input(input_path_str, **{"loglevel": "quiet"})
-                .output(
-                    str(out_path), map=f"0:s:{index}", c="srt", **{"force_key_frames": None}
-                )
-                .overwrite_output()
-            )
-            process.run()
-            print(f"Successfully extracted: {out_path}")
-        except ffmpeg.Error as e:
-            print(f"Error extracting stream index {index}: {e.stderr.decode('utf8')}")
-        except Exception as e:
-            print(f"An unexpected error occurred during extraction of stream index {index}: {e}")
-    if extracted_files:
-        print("
---- Extraction Complete ---")
-        print("Extracted subtitle files:")
-        for f_path in extracted_files:
-            print(f"- {f_path}")
-"""
 if __name__ == "__main__":
     main()

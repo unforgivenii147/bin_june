@@ -83,11 +83,6 @@ def get_pyfiles(path: str | Path) -> list[Path]:
     return sorted(pyfiles)
 
 
-"""
-Skip blank lines option with dry run and auto-fix modes.
-"""
-
-
 def is_blank_line(line: str):
     return line.strip() == ""
 

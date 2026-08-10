@@ -11,7 +11,6 @@ from packaging.utils import parse_wheel_filename
 from packaging.version import Version
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-
 WHL_DIR = Path("/sdcard/whl")
 DEST_DIR = Path("/sdcard/installed")
 DEST_DIR2 = Path("/sdcard/invalid")

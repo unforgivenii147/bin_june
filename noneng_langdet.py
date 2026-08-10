@@ -15,7 +15,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-
 try:
     from langdet import LanguageDetector
 except ImportError:
@@ -25,8 +24,6 @@ except ImportError:
 
 @dataclass
 class DetectionResult:
-    """Store detection results for a file."""
-
     file_path: Path
     non_english_lines: List[Dict] = field(default_factory=list)
     total_lines: int = 0
@@ -35,8 +32,6 @@ class DetectionResult:
 
 @dataclass
 class ScanConfig:
-    """Configuration for the scanning process."""
-
     confidence_threshold: float = 0.85
     min_line_length: int = 10
     max_line_length: int = 1000
@@ -148,18 +143,13 @@ class ScanConfig:
 
 
 class NonEnglishDetector:
-    """Main detector class for finding non-English content in files."""
-
     def __init__(self, config: ScanConfig):
         self.config = config
         self.detector = LanguageDetector(confidence_threshold=config.confidence_threshold)
 
     def is_text_file(self, file_path: Path) -> bool:
-        """Check if file is likely a text file."""
-
         if file_path.suffix.lower() in self.config.text_extensions:
             return True
-
         no_ext_names = {
             "makefile",
             "dockerfile",
@@ -182,16 +172,12 @@ class NonEnglishDetector:
         return file_path.name.lower() in no_ext_names
 
     def should_ignore(self, file_path: Path) -> bool:
-        """Check if file/directory should be ignored."""
         parts = file_path.parts
-
         for part in parts:
             if part in self.config.ignore_dirs or part.startswith("."):
                 return True
-
         if file_path.name in self.config.ignore_files:
             return True
-
         binary_extensions = {
             ".pyc",
             ".pyo",
@@ -240,7 +226,6 @@ class NonEnglishDetector:
         }
         if file_path.suffix.lower() in binary_extensions:
             return True
-
         try:
             if file_path.stat().st_size > 10 * 1024 * 1024:
                 return True
@@ -249,7 +234,6 @@ class NonEnglishDetector:
         return False
 
     def read_file_lines(self, file_path: Path) -> Optional[List[str]]:
-        """Read lines from a file with encoding fallback."""
         encodings = [self.config.encoding, "latin-1", "cp1252", "iso-8859-1", "utf-8-sig"]
         for encoding in encodings:
             try:
@@ -260,30 +244,24 @@ class NonEnglishDetector:
         return None
 
     def filter_lines(self, lines: List[str]) -> List[Tuple[int, str]]:
-        """Filter lines that are candidates for language detection."""
         filtered = []
         for i, line in enumerate(lines, 1):
             stripped = line.strip()
-
             if not stripped:
                 continue
-
             if len(stripped) < self.config.min_line_length:
                 continue
             if len(stripped) > self.config.max_line_length:
                 continue
-
             alpha_ratio = sum(c.isalpha() for c in stripped) / max(len(stripped), 1)
             if alpha_ratio < 0.3:
                 continue
-
             if self._is_code_pattern(stripped):
                 continue
             filtered.append((i, stripped))
         return filtered
 
     def _is_code_pattern(self, line: str) -> bool:
-        """Check if line matches common code patterns."""
         code_indicators = [
             line.startswith(
                 (
@@ -347,7 +325,6 @@ class NonEnglishDetector:
         return any(code_indicators)
 
     def process_file(self, file_path: Path) -> DetectionResult:
-        """Process a single file for non-English content."""
         result = DetectionResult(file_path=file_path)
         try:
             lines = self.read_file_lines(file_path)
@@ -355,18 +332,13 @@ class NonEnglishDetector:
                 result.error = "Could not read file"
                 return result
             result.total_lines = len(lines)
-
             candidates = self.filter_lines(lines)
             if not candidates:
                 return result
-
             for i in range(0, len(candidates), self.config.batch_size):
                 batch = candidates[i : i + self.config.batch_size]
-
                 batch_texts = [text for _, text in batch]
-
                 detections = self.detector.detect_batch(batch_texts, min_confidence=self.config.confidence_threshold)
-
                 for (line_num, text), detection in zip(batch, detections, strict=False):
                     if detection["language"] is None:
                         result.non_english_lines.append(
@@ -391,10 +363,8 @@ class NonEnglishDetector:
         return result
 
     def scan_directory(self, root_dir: Path = Path(".")) -> List[DetectionResult]:
-        """Scan directory recursively for non-English content."""
         results = []
         file_paths = []
-
         print(f"Scanning directory: {root_dir.absolute()}")
         for file_path in root_dir.rglob("*"):
             if file_path.is_file() and self.is_text_file(file_path) and not self.should_ignore(file_path):
@@ -402,11 +372,9 @@ class NonEnglishDetector:
         print(f"Found {len(file_paths)} text files to process")
         if not file_paths:
             return results
-
         num_workers = max(1, mp.cpu_count() - 1)
         with ProcessPoolExecutor(max_workers=num_workers) as executor:
             future_to_path = {executor.submit(self.process_file, path): path for path in file_paths}
-
             completed = 0
             total = len(file_paths)
             for future in as_completed(future_to_path):
@@ -415,7 +383,6 @@ class NonEnglishDetector:
                 try:
                     result = future.result()
                     results.append(result)
-
                     if result.non_english_lines:
                         print(
                             f"[{completed}/{total}] ⚠ {file_path.relative_to(root_dir)}: "
@@ -428,14 +395,12 @@ class NonEnglishDetector:
         return results
 
     def save_results(self, results: List[DetectionResult], output_file: Path):
-        """Save detection results to output file."""
         with open(output_file, "w", encoding="utf-8") as f:
             f.write("Non-English Content Detection Results\n")
             f.write("=" * 42 + "\n")
             f.write(f"Scan completed: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
             f.write(f"Confidence threshold: {self.config.confidence_threshold:.0%}\n")
             f.write(f"Files scanned: {len(results)}\n\n")
-
             total_non_english_lines = 0
             files_with_non_english = 0
             for result in results:
@@ -445,7 +410,6 @@ class NonEnglishDetector:
             f.write(f"Files with non-English content: {files_with_non_english}\n")
             f.write(f"Total non-English lines found: {total_non_english_lines}\n")
             f.write("=" * 42 + "\n\n")
-
             for result in sorted(results, key=lambda r: len(r.non_english_lines), reverse=True):
                 if not result.non_english_lines and not result.error:
                     continue
@@ -473,7 +437,6 @@ class NonEnglishDetector:
 
 
 def main():
-    """Main execution function."""
     import argparse
 
     parser = argparse.ArgumentParser(
@@ -496,19 +459,15 @@ Examples:
     parser.add_argument("--extensions", nargs="+", help="Additional file extensions to scan")
     parser.add_argument("--verbose", "-v", action="store_true", help="Show detailed progress for each file")
     args = parser.parse_args()
-
     config = ScanConfig(confidence_threshold=args.confidence, min_line_length=args.min_length)
     if args.extensions:
         config.text_extensions.update(args.extensions)
-
     start_time = time.time()
     detector = NonEnglishDetector(config)
     try:
         results = detector.scan_directory(Path(args.directory))
-
         output_path = Path(args.output)
         detector.save_results(results, output_path)
-
         elapsed = time.time() - start_time
         files_with_issues = sum(1 for r in results if r.non_english_lines)
         total_non_eng = sum(len(r.non_english_lines) for r in results)

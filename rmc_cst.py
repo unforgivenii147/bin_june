@@ -48,11 +48,6 @@ def find_module_docstring(source: str) -> tuple[int, int] | None:
 
 
 class StripCommentsAndDocstrings(cst.CSTTransformer):
-    """
-    Transformer that strips comments and non-module docstrings,
-    and tracks how many were removed.
-    """
-
     def __init__(self, module_doc_range: tuple[int, int] | None):
         super().__init__()
         self.module_doc_range = module_doc_range
@@ -100,15 +95,6 @@ class StripCommentsAndDocstrings(cst.CSTTransformer):
 
 
 def process_file(path: Path) -> tuple[Path, int, int, bool, str | None]:
-    """
-    Process a single file:
-    - Strip comments and non-module docstrings.
-    - Preserve shebang and module docstring.
-    - Validate resulting code with ast.parse.
-    - Only write back if validation succeeds.
-    Returns:
-        (path, comments_removed, docstrings_removed, written, error_message)
-    """
     text = path.read_text(encoding="utf-8")
     shebang = ""
     remainder = text

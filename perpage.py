@@ -27,23 +27,11 @@ def process_file(path) -> None:
         print(f"Error opening PDF file {path}: {e}")
         return
     num_pages = len(reader.pages)
+    padding = len(str(num_pages))
     print(f"Processing PDF: {path.name} ({num_pages} pages)")
     for page_num in range(num_pages):
-        if 100 <= num_pages < 1000:
-            if 0 <= page_num + 1 < 10:
-                pad = "00"
-            elif 10 <= page_num + 2 < 100:
-                pad = "0"
-            else:
-                pad = ""
-        elif 10 <= num_pages < 100:
-            if 0 <= page_num + 1 < 10:
-                pad = "0"
-            elif 10 <= page_num + 1 < 100:
-                pad = ""
-        elif 0 < num_pages < 10:
-            pad = ""
-        page_filename = f"{filename_base}_{pad}{page_num + 1}.txt"
+        padded = str(page_num + 1).zfill(padding)
+        page_filename = f"{filename_base}_{padded}.txt"
         output_filepath = output_folder / page_filename
         if output_filepath.exists():
             continue

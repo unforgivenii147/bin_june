@@ -16,8 +16,6 @@ from typing import Optional
 
 @dataclass
 class FileStats:
-    """Statistics for processed files."""
-
     path: Path
     lines_before: int
     lines_after: int
@@ -74,18 +72,15 @@ BADGE_DOMAINS = [
 
 
 def has_badge_domain(line: str) -> bool:
-    """Check if line contains any known badge domain."""
     return any(re.search(domain, line, re.IGNORECASE) for domain in BADGE_DOMAINS)
 
 
 def is_image_extension_url(line: str) -> bool:
-    """Check if line contains URL with image extension."""
     image_extensions = r"\.(?:png|jpg|jpeg|gif|svg|ico|webp|bmp)(?:\?|#|$|\))"
     return bool(re.search(image_extensions, line, re.IGNORECASE))
 
 
 def remove_image_lines_rst(content: str) -> tuple[str, int]:
-    """Remove image references from RST content."""
     lines = content.split("\n")
     new_lines = []
     removed_count = 0
@@ -114,7 +109,6 @@ def remove_image_lines_rst(content: str) -> tuple[str, int]:
 
 
 def remove_image_lines_md(content: str) -> tuple[str, int]:
-    """Remove image references from Markdown content."""
     lines = content.split("\n")
     new_lines = []
     removed_count = 0
@@ -161,7 +155,6 @@ def remove_image_lines_md(content: str) -> tuple[str, int]:
 
 
 def process_file(file_path: Path) -> Optional[FileStats]:
-    """Process a single file and return statistics."""
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
@@ -196,7 +189,6 @@ def process_file(file_path: Path) -> Optional[FileStats]:
 
 
 def collect_files(directories: list[Path]) -> list[Path]:
-    """Collect all .rst and .md files from given directories."""
     files = []
     for directory in directories:
         if not directory.exists():
@@ -211,7 +203,6 @@ def collect_files(directories: list[Path]) -> list[Path]:
 
 
 def fsz(size_bytes: int) -> str:
-    """Format file size in human-readable format."""
     for unit in ["B", "KB", "MB", "GB"]:
         if size_bytes < 1024.0:
             return f"{size_bytes:.1f} {unit}"
@@ -220,7 +211,6 @@ def fsz(size_bytes: int) -> str:
 
 
 def print_stats(all_stats: list[FileStats], base_path: Path):
-    """Print formatted statistics."""
     if not all_stats:
         print("\n✨ No image references found to remove!")
         return
@@ -265,7 +255,6 @@ def print_stats(all_stats: list[FileStats], base_path: Path):
 
 
 def main():
-    """Main function to process files."""
     if len(sys.argv) > 1:
         directories = [Path(arg) for arg in sys.argv[1:]]
     else:

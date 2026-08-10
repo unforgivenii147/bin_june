@@ -7,7 +7,6 @@ from pathlib import Path
 
 
 def run_git_command(args: list[str]) -> str:
-    """Executes a git command and returns the standard output string."""
     try:
         result = subprocess.run(["git"] + args, capture_output=True, text=True, check=True)
         return result.stdout.strip()

@@ -253,10 +253,10 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s                          # Process current directory with tree-sitter
-  %(prog)s --method ast             # Process with AST method
-  %(prog)s --compare                # Compare both methods (dry-run)
-  %(prog)s /path/to/dir --workers 8 # Custom directory and workers
+  %(prog)s                          
+  %(prog)s --method ast             
+  %(prog)s --compare                
+  %(prog)s /path/to/dir --workers 8 
         """,
     )
     parser.add_argument(

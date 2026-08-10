@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-
 """
 Parallel GZIP Compression Script
 Compresses files recursively using maximum compression with gzip module.
@@ -20,8 +19,6 @@ from dh import fsz
 
 
 class CompressionStats:
-    """Track compression statistics."""
-
     def __init__(self):
         self.total_files = 0
         self.successful = 0
@@ -41,13 +38,6 @@ class CompressionStats:
 
 
 def compress_file(file_path: Path) -> tuple[Path, bool, int, int, str]:
-    """
-    Compress a single file using gzip with maximum compression.
-    Args:
-        file_path: Path to the file to compress
-    Returns:
-        tuple of (file_path, success, original_size, compressed_size, error_message)
-    """
     gz_path = file_path.with_suffix(file_path.suffix + ".gz")
     try:
         original_size = file_path.stat().st_size
@@ -63,14 +53,6 @@ def compress_file(file_path: Path) -> tuple[Path, bool, int, int, str]:
 
 
 def find_files_to_compress(directories: list[Path], skip_extensions: set | None = None) -> list[Path]:
-    """
-    Find all files recursively in given directories that should be compressed.
-    Args:
-        directories:list of directories to search
-        skip_extensions: Set of extensions to skip (e.g., {'.gz', '.zip'})
-    Returns:
-       list of file paths to compress
-    """
     if skip_extensions is None:
         skip_extensions = {".gz", ".zip", ".bz2", ".xz", ".7z", ".rar", ".tar"}
     files_to_compress = []
@@ -86,7 +68,6 @@ def find_files_to_compress(directories: list[Path], skip_extensions: set | None 
 
 
 def format_ratio(original: int, compressed: int) -> str:
-    """Format compression ratio."""
     if original == 0:
         return "N/A"
     ratio = (1 - compressed / original) * 100
@@ -99,10 +80,10 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s                           # Compress files in current directory
-  %(prog)s dir1 dir2                 # Compress files in dir1 and dir2
-  %(prog)s /path/to/dir1 /path/to/dir2  # Use absolute paths
-  %(prog)s --workers 8 dir1          # Use 8 worker processes
+  %(prog)s                           
+  %(prog)s dir1 dir2                 
+  %(prog)s /path/to/dir1 /path/to/dir2  
+  %(prog)s --workers 8 dir1          
         """,
     )
     parser.add_argument(

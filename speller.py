@@ -23,18 +23,14 @@ def process_file(filepath, autofix=False):
     def check_and_replace(match):
         nonlocal misspelled_count
         word = match.group(0)
-
         if not word.isalpha():
             return word
-
         if word.lower() not in spell:
             misspelled_count += 1
             if autofix:
                 correction = spell.correction(word.lower())
-
                 if not correction:
                     return word
-
                 if word.istitle():
                     return correction.capitalize()
                 elif word.isupper():

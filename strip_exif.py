@@ -112,12 +112,12 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s                         # Process all images in current directory recursively
-  %(prog)s image1.jpg image2.png   # Process specific files
-  %(prog)s /path/to/images         # Process a directory
-  %(prog)s file.jpg -b             # Process with backup
-  %(prog)s . -j 4                  # Process with 4 parallel workers
-  %(prog)s . --no-recursive        # Process current directory only (no subdirs)
+  %(prog)s                         
+  %(prog)s image1.jpg image2.png   
+  %(prog)s /path/to/images         
+  %(prog)s file.jpg -b             
+  %(prog)s . -j 4                  
+  %(prog)s . --no-recursive        
         """,
     )
     parser.add_argument(

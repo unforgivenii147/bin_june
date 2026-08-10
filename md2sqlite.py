@@ -11,7 +11,6 @@ MD_FILE = "ruff.md"
 def create_database():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS ruff_rules (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,7 +31,6 @@ def create_database():
 def parse_and_insert():
     with open(MD_FILE, "r", encoding="utf-8") as f:
         content = f.read()
-
     rule_blocks = re.findall(r"^#\s+(.*?)\s+\((.*?)\)\s*\n(.*?)(?=\n#\s+|\Z)", content, re.DOTALL | re.MULTILINE)
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
@@ -40,7 +38,6 @@ def parse_and_insert():
     for name, code, body in rule_blocks:
 
         def extract_section(header_title):
-
             pattern = rf"##\s+{header_title}\s*\n(.*?)(?=\n##\s+|\Z)"
             match = re.search(pattern, body, re.DOTALL | re.IGNORECASE)
             return match.group(1).strip() if match else None

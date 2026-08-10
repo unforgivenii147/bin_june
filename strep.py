@@ -5,25 +5,7 @@ import sys
 from collections.abc import Callable
 from pathlib import Path
 
-from dh import cprint, fsz, get_files, runcmd
-
-
-def gsz(path: str | Path) -> int:
-    path = Path(path)
-    total = 0
-    if path.is_file():
-        return path.stat().st_size
-    for file in path.rglob("*"):
-        if file.is_file():
-            total += file.stat().st_size
-    return total
-
-
-def mpf3(process_function: Callable, files: list[Path], **kwargs):
-    from joblib import Parallel, delayed
-
-    file_strings = [str(f) for f in files]
-    return Parallel(n_jobs=4)((delayed(process_function)(file_str, **kwargs) for file_str in file_strings))
+from dh import cprint, fsz, get_files, runcmd, gsz, mpf3
 
 
 def process_file(path) -> None:

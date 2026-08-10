@@ -2,9 +2,9 @@
 """
 find_noneng.py - Recursively find non-English files using pycld3
 Usage:
-  python find_noneng.py              # Basic: list non-English files
-  python find_noneng.py -l           # Detailed: report non-English lines per file
-  python find_noneng.py -l -o out.json  # Save to custom JSON file
+  python find_noneng.py
+  python find_noneng.py -l
+  python find_noneng.py -l -o out.json
 """
 
 from __future__ import annotations

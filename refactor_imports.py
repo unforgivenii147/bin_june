@@ -13,7 +13,6 @@ REPEATED_JSON_PATH = Path("repeated.json")
 
 
 def load_refactoring_maps():
-    """Maps filename strings to the specific object names that need removal."""
     with open(REPEATED_JSON_PATH, "r", encoding="utf-8") as f:
         data = json.load(f)
     file_to_objects = collections.defaultdict(list)
@@ -26,8 +25,6 @@ def load_refactoring_maps():
 
 
 class ASTStripper(ast.NodeTransformer):
-    """AST Transformer that removes specific Functions, Classes, and Constants by name."""
-
     def __init__(self, target_names):
         super().__init__()
         self.target_names = set(target_names)
@@ -54,7 +51,6 @@ class ASTStripper(ast.NodeTransformer):
 
 
 def refactor_single_file(file_path: Path, objects_to_remove: list):
-    """Parses, strips objects, inserts the 'dh' package imports, and writes back."""
     try:
         source_code = file_path.read_text(encoding="utf-8")
         tree = ast.parse(source_code)
@@ -94,10 +90,8 @@ def main():
     if not REPEATED_JSON_PATH.exists():
         print(f"Error: {REPEATED_JSON_PATH.name} not found in the current directory.")
         return
-
     refactor_map = load_refactoring_maps()
     current_dir = Path(".")
-
     local_files = {f.name: f for f in current_dir.glob("*.py")}
     tasks = []
     for filename, objects in refactor_map.items():
@@ -107,7 +101,6 @@ def main():
         print("No matching files found in the current directory to refactor.")
         return
     print(f"🚀 Found {len(tasks)} files to clean structural code from. Starting parallel processing...")
-
     with ThreadPoolExecutor() as executor:
         for file_path, objects in tasks:
             executor.submit(refactor_single_file, file_path, objects)

@@ -54,7 +54,6 @@ def collect_lines_for_extension(ext, files) -> None:
                 global_counter.update(result)
             except Exception as e:
                 print(f"Error processing file: {e}")
-
     output_name = ext.lstrip(".")
     if not output_name:
         output_name = "no_extension"

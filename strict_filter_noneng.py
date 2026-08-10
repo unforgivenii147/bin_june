@@ -17,10 +17,6 @@ from nltk.corpus import words
 
 
 def is_english_strict(line: str, detector, english_vocab: set, min_ratio: float = 0.5) -> tuple[bool, str]:
-    """
-    Stricter verification: Combines gcld3 predictions with NLTK dictionary lookups.
-    Returns (is_english, metadata_string).
-    """
     clean_line = line.strip()
     if not clean_line:
         return True, "Empty"

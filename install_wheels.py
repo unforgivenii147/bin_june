@@ -16,7 +16,6 @@ from pathlib import Path
 
 
 def is_pure_python_wheel(wheel_path: Path) -> bool:
-    """Check if a wheel is pure Python by inspecting its filename and metadata."""
     wheel_name = wheel_path.stem
     if "-none-any" in wheel_name:
         return True
@@ -44,7 +43,6 @@ def is_pure_python_wheel(wheel_path: Path) -> bool:
 
 
 def install_wheel(wheel_path: Path, user_install: bool) -> tuple[Path, bool, str]:
-    """Install a single wheel and return status."""
     try:
         cmd = [sys.executable, "-m", "pip", "install", str(wheel_path)]
         if user_install:
@@ -60,7 +58,6 @@ def install_wheel(wheel_path: Path, user_install: bool) -> tuple[Path, bool, str
 
 
 def get_wheel_type(wheel_path: Path) -> str:
-    """Determine wheel type for display purposes."""
     try:
         wheel_name = wheel_path.stem
         parts = wheel_name.split("-")

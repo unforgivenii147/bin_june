@@ -19,29 +19,20 @@ import zstandard as zstd
 
 
 def split_tar_zst(input_file, num_parts):
-    """
-    Split a tar.zst file into N valid tar.zst files.
-    Args:
-        input_file: Path to the input tar.zst file
-        num_parts: Number of parts to create
-    """
     if not os.path.exists(input_file):
         print(f"Error: File '{input_file}' not found.", file=sys.stderr)
         sys.exit(1)
     if num_parts < 1:
         print("Error: N must be at least 1.", file=sys.stderr)
         sys.exit(1)
-
     base_name = Path(input_file).stem
     if base_name.endswith(".tar"):
         base_name = base_name[:-4]
     output_dir = Path(input_file).parent
     print(f"Reading tar.zst file: {input_file}")
-
     dctx = zstd.ZstdDecompressor()
     with open(input_file, "rb") as f:
         tar_data = dctx.stream_reader(f).read()
-
     import io
 
     tar_buffer = io.BytesIO(tar_data)
@@ -56,10 +47,8 @@ def split_tar_zst(input_file, num_parts):
         print(f"Warning: N ({num_parts}) is greater than number of items ({total_members}).")
         print("Some parts may be empty.")
         num_parts = total_members
-
     items_per_part = total_members // num_parts
     remainder = total_members % num_parts
-
     tar_buffer.seek(0)
     tar = tarfile.open(fileobj=tar_buffer, mode="r|")
     part_num = 1
@@ -74,24 +63,20 @@ def split_tar_zst(input_file, num_parts):
         else:
             part_tar.addfile(member)
         current_part_members += 1
-
         if current_part_members >= items_for_this_part and part_num < num_parts:
             part_tar.close()
-
             part_buffer.seek(0)
             output_file = output_dir / f"{base_name}.part{part_num:02d}.tar.zst"
             print(f"Writing part {part_num}: {output_file}")
             cctx = zstd.ZstdCompressor()
             with open(output_file, "wb") as f:
                 f.write(cctx.compress(part_buffer.read()))
-
             part_num += 1
             current_part_members = 0
             part_buffer = io.BytesIO()
             part_tar = tarfile.open(fileobj=part_buffer, mode="w|")
             items_for_this_part = items_per_part + (1 if part_num <= remainder else 0)
     tar.close()
-
     part_tar.close()
     part_buffer.seek(0)
     output_file = output_dir / f"{base_name}.part{part_num:02d}.tar.zst"

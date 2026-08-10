@@ -13,13 +13,6 @@ from pathlib import Path
 
 
 def extract_and_remove(tar_path: Path) -> tuple[Path, bool, str]:
-    """
-    Extract a single .tar.xz file and remove it if successful.
-    Args:
-        tar_path: Path to the .tar.xz file
-    Returns:
-        Tuple of (file_path, success_flag, error_message)
-    """
     try:
         extract_dir = tar_path.parent / tar_path.stem.replace(".tar", "")
         extract_dir.mkdir(parents=True, exist_ok=True)
@@ -38,7 +31,6 @@ def extract_and_remove(tar_path: Path) -> tuple[Path, bool, str]:
 
 
 def main():
-    """Main function to process all .tar.xz files in current directory."""
     current_dir = Path.cwd()
     tar_files = list(current_dir.glob("*.tar.xz"))
     if not tar_files:

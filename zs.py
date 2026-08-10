@@ -14,7 +14,6 @@ CHUNK_SIZE = 1024 * 64
 
 
 def compress_stream(input_stream, output_file_path: Path) -> bool:
-    """Compress using Zstandard (level 19)"""
     try:
         cctx = zstd.ZstdCompressor(level=ZSTD_LEVEL)
         with open(output_file_path, "wb") as f_out:
@@ -33,7 +32,6 @@ def compress_stream(input_stream, output_file_path: Path) -> bool:
 
 
 def decompress_stream(input_path: Path, output_path: Path) -> bool:
-    """Decompress Zstandard file"""
     try:
         dctx = zstd.ZstdDecompressor()
         with open(input_path, "rb") as f_in, open(output_path, "wb") as f_out:
@@ -51,7 +49,6 @@ def decompress_stream(input_path: Path, output_path: Path) -> bool:
 
 
 def process_directory(dir_path: Path):
-    """Compress directory → .tar.zst"""
     output_zst = dir_path.with_name(f"{dir_path.name}.tar.zst")
     tar_buffer = io.BytesIO()
     try:
@@ -68,7 +65,6 @@ def process_directory(dir_path: Path):
 
 
 def process_file(file_path: Path):
-    """Compress single file → .zst"""
     output_zst = file_path.with_name(f"{file_path.name}.zst")
     try:
         with open(file_path, "rb") as f_in:
@@ -80,7 +76,6 @@ def process_file(file_path: Path):
 
 
 def decompress_file(zst_path: Path):
-    """Decompress .zst or .tar.zst file"""
     if zst_path.name.endswith(".tar.zst"):
         output_dir = zst_path.with_name(zst_path.name[:-8])
         tar_buffer = io.BytesIO()

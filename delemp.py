@@ -64,13 +64,11 @@ _BINARY_CHECK_SIZE = 8192
 
 
 def remove_all_blank_lines(text: str) -> str:
-    """Remove all blank lines from text."""
     lines = text.splitlines(keepends=True)
     return "".join(line for line in lines if line.strip() != "")
 
 
 def preserve_single_blank_lines(text: str) -> str:
-    """Preserve single blank lines, remove multiple consecutive blank lines."""
     lines = text.splitlines(keepends=True)
     result_lines = []
     prev_blank = False
@@ -80,14 +78,12 @@ def preserve_single_blank_lines(text: str) -> str:
             continue
         result_lines.append(line)
         prev_blank = is_blank
-
     while len(result_lines) > 1 and result_lines[-1].strip() == "":
         result_lines.pop()
     return "".join(result_lines)
 
 
 def process_small_file(file_path: Path, preserve_single: bool, remove_spaces: bool) -> tuple[str, int, int, str]:
-    """Process files smaller than MMAP_THRESHOLD using standard read/write."""
     content = file_path.read_text(encoding="utf-8")
     total_lines = len(content.splitlines())
     if preserve_single:
@@ -102,7 +98,6 @@ def process_small_file(file_path: Path, preserve_single: bool, remove_spaces: bo
 
 
 def process_large_file_mmap(file_path: Path, preserve_single: bool, remove_spaces: bool) -> tuple[str, int, int, str]:
-    """Process files larger than MMAP_THRESHOLD using mmap for better performance."""
     try:
         with open(file_path, "r+b") as f:
             with mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm:
@@ -137,7 +132,6 @@ def remove_blank_lines(
 
 
 def process_file(args: tuple[Path, Path, bool, bool]) -> tuple[str, int, int, str]:
-    """Process a single file with binary detection."""
     base_dir, file_path, preserve_single, remove_spaces = args
     if is_binary(file_path):
         try:
@@ -157,7 +151,6 @@ def process_file(args: tuple[Path, Path, bool, bool]) -> tuple[str, int, int, st
 
 
 def collect_files(paths: list[Path]) -> list[tuple[Path, Path]]:
-    """Collect all files from given paths (files and/or directories)."""
     files = []
     for path in paths:
         if not path.exists():
@@ -176,7 +169,6 @@ def collect_files(paths: list[Path]) -> list[tuple[Path, Path]]:
 
 
 def print_header(paths: list[Path], preserve_single: bool, remove_spaces: bool, mmap_threshold: int):
-    """Print the program header with processing information."""
     print(f"\n{BOLD}{CYAN}╔══════════════════════════════════════════════╗{RESET}")
     print(f"{BOLD}{CYAN}║{RESET}         {BOLD}Blank Line Remover{RESET}                    {BOLD}{CYAN}║{RESET}")
     print(f"{BOLD}{CYAN}╚══════════════════════════════════════════════╝{RESET}")
@@ -202,7 +194,6 @@ def print_results(
     show_all_binary: bool = False,
     mmap_threshold: int = MMAP_THRESHOLD,
 ):
-    """Print detailed results of the processing."""
     print(f"\n{BOLD}{CYAN}{'─' * 42}{RESET}\n")
     results.sort(key=lambda x: x[0])
     processed = [(p, t, r, s) for p, t, r, s in results if s.startswith("processed")]

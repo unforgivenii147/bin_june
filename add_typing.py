@@ -6,9 +6,7 @@ from typing import Dict, List, Optional, Tuple
 
 class TypingCollector(cst.CSTVisitor):
     def __init__(self):
-
         self.stack: List[Tuple[str, ...]] = []
-
         self.annotations: Dict[
             Tuple[str, ...],
             Tuple[cst.Parameters, Optional[cst.Annotation]],
@@ -31,9 +29,7 @@ class TypingCollector(cst.CSTVisitor):
 
 class TypingTransformer(cst.CSTTransformer):
     def __init__(self, annotations):
-
         self.stack: List[Tuple[str, ...]] = []
-
         self.annotations: Dict[
             Tuple[str, ...],
             Tuple[cst.Parameters, Optional[cst.Annotation]],

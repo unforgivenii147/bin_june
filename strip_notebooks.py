@@ -1,10 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """
 Strip outputs from Jupyter notebook (.ipynb) files.
-
 Usage:
     python strip_notebooks.py [paths...]
-
 If no paths are provided, processes all .ipynb files recursively from current directory.
 """
 
@@ -19,14 +17,11 @@ from typing import List, Set
 
 
 def find_notebook_files(paths: List[Path]) -> Set[Path]:
-    """Find all .ipynb files from given paths, recursively for directories."""
     notebook_files = set()
-
     for path in paths:
         if not path.exists():
             print(f"Warning: {path} does not exist, skipping.", file=sys.stderr)
             continue
-
         if path.is_file():
             if path.suffix == ".ipynb":
                 notebook_files.add(path.resolve())
@@ -36,37 +31,26 @@ def find_notebook_files(paths: List[Path]) -> Set[Path]:
             for nb_file in path.rglob("*.ipynb"):
                 if ".ipynb_checkpoints" not in str(nb_file):
                     notebook_files.add(nb_file.resolve())
-
     return notebook_files
 
 
 def strip_notebook_output(notebook_path: Path) -> tuple:
-    """
-    Strip outputs from a single notebook file.
-    Returns (path, success, message).
-    """
     try:
         with open(notebook_path, "r", encoding="utf-8") as f:
             notebook = json.load(f)
-
         if "cells" not in notebook:
             return (notebook_path, False, "Not a valid notebook (no 'cells' key)")
-
         modified = False
-
         for cell in notebook["cells"]:
             if cell.get("cell_type") == "code":
                 if cell.get("outputs"):
                     cell["outputs"] = []
                     modified = True
-
                 if "execution_count" in cell and cell["execution_count"] is not None:
                     cell["execution_count"] = None
                     modified = True
-
         if "metadata" in notebook and "kernelspec" in notebook["metadata"]:
             pass
-
         if modified:
             with open(notebook_path, "w", encoding="utf-8") as f:
                 json.dump(notebook, f, indent=1, ensure_ascii=False)
@@ -74,7 +58,6 @@ def strip_notebook_output(notebook_path: Path) -> tuple:
             return (notebook_path, True, "Outputs stripped")
         else:
             return (notebook_path, True, "No outputs to strip")
-
     except json.JSONDecodeError as e:
         return (notebook_path, False, f"Invalid JSON: {e}")
     except Exception as e:
@@ -82,31 +65,22 @@ def strip_notebook_output(notebook_path: Path) -> tuple:
 
 
 def process_notebooks(paths: List[Path], max_workers: int | None = None):
-    """Process multiple notebooks in parallel."""
-
     notebook_files = find_notebook_files(paths)
-
     if not notebook_files:
         print("No .ipynb files found to process.")
         return
-
     print(f"Found {len(notebook_files)} notebook(s) to process...")
-
     results = []
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         future_to_path = {executor.submit(strip_notebook_output, path): path for path in notebook_files}
-
         for future in as_completed(future_to_path):
             path, success, message = future.result()
             results.append((path, success, message))
-
             status = "✓" if success else "✗"
             relative_path = path.relative_to(Path.cwd()) if path.is_relative_to(Path.cwd()) else path
             print(f"{status} {relative_path}: {message}")
-
     successful = sum(1 for _, success, _ in results if success)
     failed = len(results) - successful
-
     if failed > 0:
         print(f"\nProcessed: {successful} succeeded, {failed} failed")
     else:
@@ -119,26 +93,21 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s                    # Process all .ipynb files in current directory recursively
-  %(prog)s notebook.ipynb     # Process a single file
-  %(prog)s dir1/ dir2/        # Process all .ipynb files in dir1 and dir2 recursively
-  %(prog)s *.ipynb            # Process multiple notebook files
-  %(prog)s -w 4 .             # Use 4 worker processes
+  %(prog)s                    
+  %(prog)s notebook.ipynb     
+  %(prog)s dir1/ dir2/        
+  %(prog)s *.ipynb            
+  %(prog)s -w 4 .             
         """,
     )
-
     parser.add_argument(
         "paths", nargs="*", default=["."], help="Files or directories to process (default: current directory)"
     )
-
     parser.add_argument(
         "-w", "--workers", type=int, default=None, help="Number of worker processes (default: CPU count)"
     )
-
     args = parser.parse_args()
-
     paths = [Path(p) for p in args.paths]
-
     try:
         process_notebooks(paths, max_workers=args.workers)
     except KeyboardInterrupt:

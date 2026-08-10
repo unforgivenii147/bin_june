@@ -6,7 +6,7 @@ Behavior:
 - Removes function/class docstrings. If a function/class body would be empty after removal,
   inserts `pass` to avoid syntax errors.
 - Removes comments, but preserves:
-    - Shebang (#!) if present on the first line.
+    - Shebang (
     - Top-of-file comments that contain "type:" or "fmt:" (case-insensitive).
     - Top-of-file encoding/coding declarations (PEP 263).
 - Validates the transformed source with `ast.parse()` before writing.

@@ -2,7 +2,7 @@
 """
 Compress files larger than a threshold in current directory recursively.
 Usage: python compress_large_files.py <threshold_in_bytes>
-Example: python compress_large_files.py 1048576  # Compress files > 1MB
+Example: python compress_large_files.py 1048576
 """
 
 from __future__ import annotations

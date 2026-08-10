@@ -16,7 +16,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
 
-
 from pip._internal.commands.install import InstallCommand
 from pip._internal.exceptions import InstallationError
 
@@ -32,7 +31,6 @@ logger = logging.getLogger(__name__)
 
 
 def get_site_packages_dirs() -> List[Path]:
-    """Get all site-packages directories."""
     site_dirs = []
     user_site = site.getusersitepackages()
     if user_site:
@@ -50,10 +48,6 @@ def get_site_packages_dirs() -> List[Path]:
 
 
 def get_packages_with_entry_points() -> Dict[str, Dict[str, any]]:
-    """
-    Get all packages that have entry points using importlib.metadata only.
-    Returns: Dict[package_name, Dict{groups: Set[str], info: Dict[str, str]}]
-    """
     packages_with_eps = {}
     try:
         for dist in importlib.metadata.distributions():
@@ -61,15 +55,12 @@ def get_packages_with_entry_points() -> Dict[str, Dict[str, any]]:
                 entry_points = dist.entry_points
                 if not entry_points:
                     continue
-
                 groups = set()
-
                 if hasattr(entry_points, "select"):
                     for group in ["console_scripts", "gui_scripts"]:
                         eps = entry_points.select(group=group)
                         if eps:
                             groups.add(group)
-
                     all_groups = set()
                     if hasattr(entry_points, "groups"):
                         all_groups = set(entry_points.groups)
@@ -77,7 +68,6 @@ def get_packages_with_entry_points() -> Dict[str, Dict[str, any]]:
                         for ep in entry_points:
                             if hasattr(ep, "group"):
                                 all_groups.add(ep.group)
-
                     for group in all_groups:
                         if group not in ["console_scripts", "gui_scripts"]:
                             groups.add(group)
@@ -106,7 +96,6 @@ def get_packages_with_entry_points() -> Dict[str, Dict[str, any]]:
 
 
 def get_package_size(dist: importlib.metadata.Distribution) -> str:
-    """Estimate package size from distribution files."""
     try:
         if hasattr(dist, "_path"):
             from pathlib import Path
@@ -129,9 +118,6 @@ def get_package_size(dist: importlib.metadata.Distribution) -> str:
 
 
 def get_user_confirmation(package_name: str, package_data: Dict, include_deps: bool = False) -> str:
-    """Get user confirmation for reinstalling a package.
-    Returns: 'yes', 'no', or 'all'
-    """
     groups = package_data.get("groups", set())
     info = package_data.get("info", {})
     print("\n" + "=" * 70)
@@ -166,13 +152,8 @@ def get_user_confirmation(package_name: str, package_data: Dict, include_deps: b
 
 
 def reinstall_package_with_pip(package_name: str, include_deps: bool = False) -> Tuple[str, bool, str]:
-    """
-    Reinstall a single package using pip's internal API.
-    Returns: (package_name, success, message)
-    """
     try:
         install_cmd = InstallCommand()
-
         args = [
             "install",
             "--force-reinstall",
@@ -180,11 +161,8 @@ def reinstall_package_with_pip(package_name: str, include_deps: bool = False) ->
         ]
         if not include_deps:
             args.append("--no-deps")
-
         args.append(package_name)
-
         options, _ = install_cmd.parse_args(args)
-
         from pip._internal.utils.temp_dir import global_tempdir_manager
 
         with global_tempdir_manager():
@@ -210,24 +188,18 @@ def reinstall_entrypoint_packages(
     dry_run: bool = False,
     skip_confirmation: bool = False,
 ) -> None:
-    """Reinstall all packages with entry points."""
     if exclude_packages is None:
         exclude_packages = {"pip", "setuptools", "wheel"}
-
     entry_point_packages = get_packages_with_entry_points()
     if not entry_point_packages:
         logger.warning("No packages with entry points found!")
         return
-
     packages_to_reinstall = set(entry_point_packages.keys())
-
     packages_to_reinstall = packages_to_reinstall - exclude_packages
-
     if only_packages:
         packages_to_reinstall = packages_to_reinstall & only_packages
     logger.info(f"Found {len(entry_point_packages)} packages with entry points")
     logger.info(f"Will reinstall {len(packages_to_reinstall)} packages after filtering")
-
     if packages_to_reinstall:
         logger.info("\nPackages with entry points:")
         for i, pkg in enumerate(sorted(packages_to_reinstall), 1):
@@ -241,11 +213,9 @@ def reinstall_entrypoint_packages(
     if not packages_to_reinstall:
         logger.warning("No packages to reinstall after filtering!")
         return
-
     if not skip_confirmation:
         selected_packages = set()
         all_selected = False
-
         for pkg in sorted(packages_to_reinstall):
             if all_selected:
                 selected_packages.add(pkg)
@@ -257,7 +227,6 @@ def reinstall_entrypoint_packages(
                 selected_packages.add(pkg)
             elif result == "yes":
                 selected_packages.add(pkg)
-
         packages_to_reinstall = selected_packages
         if not packages_to_reinstall:
             logger.warning("No packages selected for reinstallation!")
@@ -267,7 +236,6 @@ def reinstall_entrypoint_packages(
     logger.info(f"\nStarting reinstallation of {len(packages_to_reinstall)} selected packages...")
     successful = []
     failed = []
-
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         future_to_package = {
             executor.submit(reinstall_package_with_pip, pkg, include_deps): pkg for pkg in packages_to_reinstall
@@ -283,7 +251,6 @@ def reinstall_entrypoint_packages(
             except Exception as e:
                 logger.error(f"Unexpected error for {package_name}: {e}")
                 failed.append((package_name, str(e)))
-
     logger.info("\n" + "=" * 42)
     logger.info("REINSTALLATION SUMMARY")
     logger.info("=" * 42)
@@ -329,7 +296,6 @@ def main():
         sys.exit(1)
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
-
     if sys.version_info < (3, 12):
         logger.warning(f"Running on Python {sys.version_info.major}.{sys.version_info.minor}. Recommended Python 3.12+")
     logger.info(f"Starting package reinstallation with {args.workers} workers")

@@ -11,7 +11,6 @@ SKIP_DIRS = {".git", "__pycache__"}
 
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
-    """Traverses directories using Python 3.12 Path.walk."""
     files = []
     for root, dirs, filenames in Path(path).walk(top_down=True, on_error=None):
         dirs[:] = [d for d in dirs if d not in SKIP_DIRS]

@@ -24,8 +24,6 @@ try:
     import huffman as huffman_lib
 except Exception:
     huffman_lib = None
-
-
 _HASH_TABLE_SIZE = 1 << 14
 _MAX_OFFSET_1 = 2047
 _MAX_OFFSET_2 = 65535

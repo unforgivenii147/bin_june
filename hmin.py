@@ -1,12 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 
-from typing import Optional
-
-"""
-HTML Minifier - Python wrapper for html-minifier-terser
-Minifies HTML files recursively with parallel processing.
-"""
 import argparse
 import contextlib
 import json
@@ -17,6 +11,7 @@ import tempfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional
 
 from colorama import Fore, Style, init
 
@@ -25,8 +20,6 @@ init(autoreset=True)
 
 @dataclass
 class MinifyStats:
-    """Statistics for a minified file."""
-
     path: Path
     original_size: int
     minified_size: int
@@ -35,20 +28,16 @@ class MinifyStats:
 
     @property
     def ratio(self) -> float:
-        """Calculate compression ratio."""
         if self.original_size == 0:
             return 0.0
         return (1 - self.minified_size / self.original_size) * 100
 
     @property
     def saved(self) -> int:
-        """Calculate bytes saved."""
         return self.original_size - self.minified_size
 
 
 class HTMLMinifier:
-    """HTML minifier wrapper using html-minifier-terser via npm."""
-
     DEFAULT_CONFIG = {
         "collapseWhitespace": True,
         "collapseInlineTagWhitespace": True,
@@ -113,7 +102,6 @@ class HTMLMinifier:
     }
 
     def __init__(self, config: Optional[dict] = None, aggressive: bool = False):
-        """Initialize minifier with custom or default config."""
         if config:
             self.config = config
         elif aggressive:
@@ -125,7 +113,6 @@ class HTMLMinifier:
 
     @staticmethod
     def _check_dependencies() -> None:
-        """Check if html-minifier-terser is installed."""
         if not shutil.which("html-minifier-terser"):
             print(f"{Fore.RED}Error: html-minifier-terser is not installed.{Style.RESET_ALL}")
             print(f"{Fore.YELLOW}Install it with: npm install -g html-minifier-terser{Style.RESET_ALL}")
@@ -133,7 +120,6 @@ class HTMLMinifier:
 
     @staticmethod
     def _fix_doctype(content: str) -> str:
-        """Fix common doctype issues introduced by minification."""
         import re
 
         content = re.sub(r"<!(doctype)(html)", r"<!\1 \2", content, flags=re.IGNORECASE)
@@ -142,7 +128,6 @@ class HTMLMinifier:
 
     @staticmethod
     def _post_process(content: str, aggressive: bool = False) -> str:
-        """Post-process minified content to fix issues."""
         content = HTMLMinifier._fix_doctype(content)
         if aggressive:
             import re
@@ -156,12 +141,10 @@ class HTMLMinifier:
         return content
 
     def _build_cli_args(self, config_file: Path) -> list[str]:
-        """Build command-line arguments from config."""
         args = ["html-minifier-terser", "--config-file", str(config_file)]
         return args
 
     def minify_file(self, file_path: Path) -> MinifyStats:
-        """Minify a single HTML file."""
         config_file = None
         try:
             original_size = file_path.stat().st_size
@@ -194,7 +177,6 @@ class HTMLMinifier:
 
     @staticmethod
     def find_html_files(directories: list[Path]) -> list[Path]:
-        """Find all HTML files in given directories recursively."""
         html_files = []
         for directory in directories:
             if not directory.exists():
@@ -208,7 +190,6 @@ class HTMLMinifier:
         return sorted(set(html_files))
 
     def minify_directory(self, directories: list[Path], max_workers: int = 4) -> None:
-        """Minify all HTML files in directories using parallel processing."""
         html_files = self.find_html_files(directories)
         if not html_files:
             print(f"{Fore.YELLOW}No HTML files found to minify.{Style.RESET_ALL}")
@@ -239,7 +220,6 @@ class HTMLMinifier:
         self._print_summary(total_files, successful, failed, total_original, total_minified)
 
     def _print_file_stats(self, stats: MinifyStats) -> None:
-        """Print statistics for a single file in prettier-style format."""
         try:
             rel_path = stats.path.relative_to(Path.cwd())
         except ValueError:
@@ -261,7 +241,6 @@ class HTMLMinifier:
         )
 
     def _print_error(self, stats: MinifyStats) -> None:
-        """Print error for a failed file."""
         try:
             rel_path = stats.path.relative_to(Path.cwd())
         except ValueError:
@@ -271,7 +250,6 @@ class HTMLMinifier:
     def _print_summary(
         self, total: int, successful: int, failed: int, total_original: int, total_minified: int
     ) -> None:
-        """Print overall summary statistics."""
         total_saved = total_original - total_minified
         overall_ratio = (total_saved / total_original * 100) if total_original > 0 else 0
         original_mb = total_original / (1024 * 1024)
@@ -291,16 +269,15 @@ class HTMLMinifier:
 
 
 def main():
-    """Main entry point."""
     parser = argparse.ArgumentParser(
         description="Minify HTML files recursively using html-minifier-terser",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s                          # Minify all HTML files in current directory
-  %(prog)s public/ dist/            # Minify HTML files in specific directories
-  %(prog)s --workers 8 src/         # Use 8 parallel workers
-  %(prog)s --aggressive             # Use aggressive minification (review output!)
+  %(prog)s                          
+  %(prog)s public/ dist/            
+  %(prog)s --workers 8 src/         
+  %(prog)s --aggressive             
         """,
     )
     parser.add_argument(

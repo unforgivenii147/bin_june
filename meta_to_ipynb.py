@@ -14,7 +14,6 @@ from pathlib import Path
 
 
 def parse_metadata_section(lines):
-    """Parse the initial metadata section and extract package name and version."""
     metadata = {}
     current_key = None
     end_line = 0
@@ -70,7 +69,6 @@ def parse_metadata_section(lines):
 
 
 def find_section_boundaries(content, start_pos=0):
-    """Find code blocks and markdown sections."""
     sections = []
     pos = start_pos
     code_pattern = re.compile(r"```(python|shell|bash|sh|py)\s*\n(.*?)```", re.DOTALL)
@@ -93,7 +91,6 @@ def find_section_boundaries(content, start_pos=0):
 
 
 def convert_metadata_to_notebook(metadata_file_path):
-    """Convert METADATA file to Jupyter notebook."""
     with open(metadata_file_path, "r", encoding="utf-8") as f:
         content = f.read()
     lines = content.split("\n")

@@ -40,7 +40,6 @@ MAX_QUEUE = 16
 
 
 def process_image_cv2(image_path: Path) -> Image:
-    """Process image using OpenCV"""
     img = cv2.imread(str(image_path))
     if img is None:
         print(f"Error: Could not load image from {image_path}")
@@ -57,7 +56,6 @@ def process_image_cv2(image_path: Path) -> Image:
 
 
 def process_image_skimage(image_path: Path) -> Image:
-    """Process image using scikit-image"""
     try:
         img = io.imread(str(image_path))
     except Exception as e:
@@ -82,7 +80,6 @@ def process_image_skimage(image_path: Path) -> Image:
 
 
 def process_file(image_path: Path) -> Image:
-    """Main processing function that selects the appropriate backend"""
     if HAS_CV2:
         return process_image_cv2(image_path)
     else:
@@ -90,7 +87,6 @@ def process_file(image_path: Path) -> Image:
 
 
 def process_file2(image_path):
-    """Alternative processing with slightly different parameters"""
     if HAS_CV2:
         img = cv2.imread(str(image_path))
         if img is None:
