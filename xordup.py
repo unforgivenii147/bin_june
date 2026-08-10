@@ -7,10 +7,10 @@ from pathlib import Path
 from dh import cprint
 from xorhash import get_xorhash
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 from dh import mpf3
 
 REMOVE = "-y" in sys.argv
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
 def find_dups_optimized(root: Path):

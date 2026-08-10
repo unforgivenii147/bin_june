@@ -1,8 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"\nOptimized version of ultratranslator.py for Python 3.12.\nTranslates Python files and other text files while preserving structure.\n"
 
 from __future__ import annotations
-
 import logging
 import re
 import shutil
@@ -12,9 +10,9 @@ import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Final
-
 from binaryornot import is_binary
 from deep_translator import GoogleTranslator
+from dh import get_nobinary
 
 MAX_WORKERS: Final[int] = 4
 MAX_RETRIES: Final[int] = 2
@@ -22,37 +20,20 @@ RETRY_DELAY: Final[float] = 3.0
 NON_ENGLISH_PATTERN: Final[re.Pattern] = re.compile("[^\\x00-\\x7F]")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-from dh import get_files
 
 
 def is_english(text: str) -> bool:
     return not NON_ENGLISH_PATTERN.search(text)
 
 
-def get_nobinary(path: Path) -> list[Path]:
-    return [f for f in get_files(path) if not is_binary(str(f))]
-
-
-def translate_file_content(path: Path, retries: int = MAX_RETRIES) -> str:
-    for attempt in range(retries):
-        try:
-            return GoogleTranslator(source="auto", target="en").translate_file(str(path))
-        except Exception as e:
-            if attempt < retries - 1:
-                logger.warning(
-                    f"File translation attempt {attempt + 1} failed for {path}: {e}. Retrying in {RETRY_DELAY}s..."
-                )
-                time.sleep(RETRY_DELAY)
-            else:
-                logger.error(f"File translation failed after {retries} attempts for {path}: {e}")
-                return path.read_text(encoding="utf-8", errors="ignore")
-
-
-def safe_overwrite(filepath: Path, content: str) -> None:
-    with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False, dir=filepath.parent) as tmp:
-        tmp.write(content)
-        tmp_path = Path(tmp.name)
-    shutil.move(tmp_path, filepath)
+def main() -> None:
+    args = sys.argv[1:]
+    files = [Path(p) for p in args] if args else get_nobinary(Path.cwd())
+    if not files:
+        logger.info("No files found to process.")
+        return
+    logger.info(f"Found {len(files)} files to process.")
+    process_files_with_retry(files)
 
 
 def process_file(path: Path) -> Path | None:
@@ -75,12 +56,12 @@ def process_file(path: Path) -> Path | None:
 def process_files_with_retry(files: list[Path]) -> None:
     files_to_process = files.copy()
     retry_count = 0
-    while files_to_process and retry_count < MAX_RETRIES:
+    while files_to_process and (retry_count < MAX_RETRIES):
         if retry_count > 0:
-            logger.info(f"\n{'=' * 50}")
+            logger.info(f"""{("=" * 50)}""")
             logger.info(f"Retry attempt {retry_count}/{MAX_RETRIES}")
             logger.info(f"Retrying {len(files_to_process)} failed files...")
-            logger.info(f"{'=' * 50}\n")
+            logger.info(f"""{("=" * 50)}""")
             time.sleep(RETRY_DELAY)
         failed_files = []
         with ProcessPoolExecutor(max_workers=MAX_WORKERS) as executor:
@@ -99,19 +80,31 @@ def process_files_with_retry(files: list[Path]) -> None:
         if failed_files:
             logger.warning(f"{len(failed_files)} files failed and will be retried.")
     if files_to_process:
-        logger.error(f"\nFailed to process {len(files_to_process)} files after {MAX_RETRIES} retries:")
+        logger.error(f"""Failed to process {len(files_to_process)} files after {MAX_RETRIES} retries:""")
         for f in files_to_process:
             logger.error(f"  - {f}")
 
 
-def main() -> None:
-    args = sys.argv[1:]
-    files = [Path(p) for p in args] if args else get_nobinary(Path.cwd())
-    if not files:
-        logger.info("No files found to process.")
-        return
-    logger.info(f"Found {len(files)} files to process.")
-    process_files_with_retry(files)
+def safe_overwrite(filepath: Path, content: str) -> None:
+    with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False, dir=filepath.parent) as tmp:
+        tmp.write(content)
+        tmp_path = Path(tmp.name)
+    shutil.move(tmp_path, filepath)
+
+
+def translate_file_content(path: Path, retries: int = MAX_RETRIES) -> str:
+    for attempt in range(retries):
+        try:
+            return GoogleTranslator(source="auto", target="en").translate_file(str(path))
+        except Exception as e:
+            if attempt < (retries - 1):
+                logger.warning(
+                    f"File translation attempt {(attempt + 1)} failed for {path}: {e}. Retrying in {RETRY_DELAY}s..."
+                )
+                time.sleep(RETRY_DELAY)
+            else:
+                logger.error(f"File translation failed after {retries} attempts for {path}: {e}")
+                return path.read_text(encoding="utf-8", errors="ignore")
 
 
 if __name__ == "__main__":

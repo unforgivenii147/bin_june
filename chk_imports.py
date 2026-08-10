@@ -1,20 +1,54 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-Find .py files with import statements not at the head of the file.
-Ignores imports inside functions.
-Usage:
-    python check_imports.py [directory] [-a] [-o OUTPUT]
-Options:
-    -a         Autofix: move imports to the top of the file
-    -o OUTPUT  Save report to OUTPUT file (default: errors.txt when not using -a)
-"""
-
 import argparse
 import ast
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Set
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+
+class ParentMapper(ast.NodeVisitor):
+    """Build parent-child relationships in the AST."""
+
+    def __init__(self):
+        self.parents = {}
+
+    def visit(self, node):
+        for child in ast.iter_child_nodes(node):
+            self.parents[child] = node
+        self.generic_visit(node)
+
+
+def get_ancestors(node: ast.AST, parent_map: dict) -> List[ast.AST]:
+    """Get all ancestors of a node."""
+    ancestors = []
+    current = node
+    while current in parent_map:
+        current = parent_map[current]
+        ancestors.append(current)
+    return ancestors
+
+
+def is_in_restricted_scope(node: ast.AST, parent_map: dict) -> bool:
+    """Check if import is in try/except/if/with/class/lambda scope."""
+    ancestors = get_ancestors(node, parent_map)
+
+    restricted_types = (
+        ast.Try,  # try-except blocks
+        ast.If,  # conditional imports
+        ast.With,  # context managers
+        ast.AsyncWith,  # async context managers
+        ast.ClassDef,  # class-level imports
+        ast.FunctionDef,  # function scope
+        ast.AsyncFunctionDef,  # async function scope
+        ast.Lambda,  # lambda scope
+        ast.For,  # loop imports
+        ast.AsyncFor,  # async loop imports
+        ast.While,  # while loop imports
+    )
+
+    return any(isinstance(ancestor, restricted_types) for ancestor in ancestors)
 
 
 def find_imports_not_at_head(file_path: Path) -> List[Tuple[int, int, str]]:
@@ -24,38 +58,39 @@ def find_imports_not_at_head(file_path: Path) -> List[Tuple[int, int, str]]:
     except (SyntaxError, UnicodeDecodeError) as e:
         print(f"  [SKIP] {file_path}: Could not parse ({e})")
         return []
+
+    # Build parent map
+    mapper = ParentMapper()
+    mapper.visit(tree)
+    parent_map = mapper.parents
+
+    # Find head end line (module-level imports and docstrings)
     head_end_line = 0
     for node in tree.body:
         if isinstance(node, (ast.Import, ast.ImportFrom)):
             head_end_line = max(head_end_line, node.end_lineno or node.lineno)
-        elif isinstance(node, (ast.Expr, ast.Constant)):
+        elif isinstance(node, ast.Expr):
             if isinstance(node.value, ast.Constant) and isinstance(node.value.value, str):
                 head_end_line = max(head_end_line, node.end_lineno or node.lineno)
             else:
                 break
         else:
             break
+
+    # Find misplaced module-level imports
     misplaced_imports = []
-    for node in ast.walk(tree):
+    for node in tree.body:
         if isinstance(node, (ast.Import, ast.ImportFrom)):
             if node.lineno <= head_end_line:
                 continue
-            if is_inside_function(tree, node):
+            # Skip imports in restricted scopes
+            if is_in_restricted_scope(node, parent_map):
                 continue
             lines = source.split("\n")
             import_text = "\n".join(lines[node.lineno - 1 : node.end_lineno])
             misplaced_imports.append((node.lineno, node.end_lineno or node.lineno, import_text))
+
     return misplaced_imports
-
-
-def is_inside_function(tree: ast.AST, node: ast.AST) -> bool:
-    for parent in ast.walk(tree):
-        if isinstance(parent, (ast.FunctionDef, ast.AsyncFunctionDef)):
-            if parent.lineno <= node.lineno <= (parent.end_lineno or parent.lineno):
-                for child in ast.walk(parent):
-                    if child is node:
-                        return True
-    return False
 
 
 def autofix_imports(file_path: Path, misplaced_imports: List[Tuple[int, int, str]]) -> bool:
@@ -140,7 +175,6 @@ def save_report(report_data: List[Tuple[Path, List[str]]], output_file: str, aut
                 f.write(f"{detail}\n")
             f.write("\n")
 
-        # Summary statistics
         f.write(f"{'=' * 80}\n")
         f.write(f"Summary:\n")
         f.write(f"  Total files with issues: {len(report_data)}\n")
@@ -163,17 +197,12 @@ def main():
         "--output",
         type=str,
         default=None,
-        help="Save report to file (default: errors.txt when not using -a, no file when using -a unless specified)",
+        help="Save report to file",
     )
+    parser.add_argument("-j", "--jobs", type=int, default=4, help="Number of parallel jobs (default: 4)")
     args = parser.parse_args()
 
-    # Determine output file
-    if args.output:
-        output_file = args.output
-    elif not args.autofix:
-        output_file = "errors.txt"
-    else:
-        output_file = None
+    output_file = args.output or (None if args.autofix else "errors.txt")
 
     root = Path(args.directory)
     if not root.exists():
@@ -183,25 +212,28 @@ def main():
     if root.is_file():
         files = [root] if root.suffix == ".py" else []
     else:
-        files = list(root.rglob("*.py"))
+        files = sorted(root.rglob("*.py"))
 
     if not files:
         print(f"No .py files found in '{root}'")
         return
 
-    print(f"Scanning {len(files)} Python file(s)...")
+    print(f"Scanning {len(files)} Python file(s) with {args.jobs} worker(s)...")
 
     files_with_issues = 0
     files_fixed = 0
     report_data = []
 
-    for file_path in files:
-        has_issues, was_fixed, details = process_file(file_path, args.autofix)
-        if has_issues:
-            files_with_issues += 1
-            report_data.append((file_path, details))
-        if was_fixed:
-            files_fixed += 1
+    # Parallel file processing
+    with ThreadPoolExecutor(max_workers=args.jobs) as executor:
+        futures = {executor.submit(process_file, fp, args.autofix): fp for fp in files}
+        for future in as_completed(futures):
+            has_issues, was_fixed, details = future.result()
+            if has_issues:
+                files_with_issues += 1
+                report_data.append((futures[future], details))
+            if was_fixed:
+                files_fixed += 1
 
     print(f"\n{'=' * 50}")
     print(f"Summary:")
@@ -211,7 +243,6 @@ def main():
     else:
         print(f"  Run with -a to autofix")
 
-    # Save report
     if output_file and (files_with_issues > 0 or args.output):
         save_report(report_data, output_file, args.autofix)
         print(f"  Report saved to: {output_file}")
