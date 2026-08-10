@@ -25,7 +25,7 @@ def main() -> None:
     top_files = sizez[:num_files]
     print("\n" + "=" * 35)
     print(f"TOP 10 LARGEST FILES (in {Path.cwd()})")
-    print("=" * 35)
+    print("-" * 42)
     if not top_files:
         print("No files found.")
         return
@@ -55,7 +55,7 @@ def m2() -> None:
     num_files = N or 10
     top_files = sizez[:num_files]
     print("\nTOP 10 LARGEST FILES (Detailed View)")
-    print("=" * 35)
+    print("-" * 42)
     for i, (file_path, size) in enumerate(top_files, 1):
         size_str = fsz(size)
         print(f"{i:2d}. {size_str:>10} - {file_path.relative_to(cwd)}")

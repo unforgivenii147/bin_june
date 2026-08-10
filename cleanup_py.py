@@ -133,7 +133,7 @@ def main():
     print(f"   Files processed : {processed}")
     print(f"   Comments removed: {total_comments}")
     print(f"   Docstrings removed: {total_docstrings}")
-    print("=" * 42)
+    print("-" * 42)
 
 
 if __name__ == "__main__":

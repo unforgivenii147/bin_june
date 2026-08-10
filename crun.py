@@ -4,6 +4,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+from dh import fsz, mpf3, should_skip
+
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 
@@ -27,9 +29,6 @@ def get_filez(root_dir: str | Path):
                     yield filepath
     else:
         yield root_dir
-
-
-from dh import fsz, mpf3, should_skip
 
 
 def gsz(path: str | Path) -> int:

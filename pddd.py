@@ -4,6 +4,8 @@ from __future__ import annotations
 from operator import itemgetter
 from pathlib import Path
 
+from dh import fsz
+
 
 def get_dir_size(path: Path) -> int:
     total = 0
@@ -14,9 +16,6 @@ def get_dir_size(path: Path) -> int:
             except OSError:
                 continue
     return total
-
-
-from dh import fsz
 
 
 def du_sort_python(path: Path) -> None:

@@ -4,8 +4,9 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-THRESHOLD = 1024 * 1024
 from dh import read_lines
+
+THRESHOLD = 1024 * 1024
 
 
 def sort_by_length(lines: list[str]) -> list[str]:

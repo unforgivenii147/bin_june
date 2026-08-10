@@ -64,7 +64,7 @@ class GoogleDriveSync:
     def authenticate_device_flow(self) -> None:
         print("\n" + "=" * 42)
         print("GOOGLE DRIVE AUTHENTICATION (Device Flow)")
-        print("=" * 42)
+        print("-" * 42)
         device_data = {"client_id": self.client_id, "scope": "https://www.googleapis.com/auth/drive.readonly"}
         try:
             response = requests.post("https://oauth2.googleapis.com/device/code", data=device_data, timeout=10)
@@ -120,19 +120,19 @@ class GoogleDriveSync:
     def authenticate_manual_flow(self) -> None:
         print("\n" + "=" * 42)
         print("GOOGLE DRIVE AUTHENTICATION (Manual Flow)")
-        print("=" * 42)
+        print("-" * 42)
         redirect_uri = "http://localhost:8080"
         auth_url = f"https://accounts.google.com/o/oauth2/auth?client_id={self.client_id}&redirect_uri={redirect_uri}&response_type=code&scope=https://www.googleapis.com/auth/drive.readonly&access_type=offline&prompt=consent"
         print("\n" + "=" * 42)
         print("OPTION 1 (Recommended): Localhost Redirect")
-        print("=" * 42)
+        print("-" * 42)
         print("\nOpen this URL in your browser on this device:")
         print(f"\n{auth_url}\n")
         print("After authorization, you'll be redirected to localhost:8080")
         print("Copy the ENTIRE URL from the address bar (it will show an error page)")
         print("\n" + "=" * 42)
         print("OPTION 2: Manual Code Entry")
-        print("=" * 42)
+        print("-" * 42)
         print("If Option 1 doesn't work, try this URL instead:")
         print(f"\n{altauth_url}\n")
         input("\nPress Enter after you have the authorization code or redirect URL...")
@@ -281,14 +281,14 @@ class GoogleDriveSync:
     def sync_all(self, local_base_path: str) -> None:
         print("\n" + "=" * 42)
         print("STARTING GOOGLE DRIVE SYNC")
-        print("=" * 42)
+        print("-" * 42)
         root_metadata = self.get_file_metadata("root")
         if root_metadata:
             print(f"Root folder: {root_metadata.get('name', 'My Drive')}")
         self.sync_folder("root", local_base_path, "My Drive")
         print("\n" + "=" * 42)
         print("✅ SYNC COMPLETED!")
-        print("=" * 42)
+        print("-" * 42)
 
     def sync_folder_by_name(self, folder_name, local_base_path) -> None:
         print(f"\nSearching for folder: {folder_name}")

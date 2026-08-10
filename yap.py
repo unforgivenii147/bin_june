@@ -31,9 +31,7 @@ def process_file(path: str | Path, mode: str = MODE) -> bool:
 
                 code = fix_with_isort(original_code)
             case "black":
-                from black import Mode as _Mode
-                from black import TargetVersion as _tv
-                from black import format_str
+                from black import Mode as _Mode, TargetVersion as _tv, format_str
 
                 code = format_str(original_code, mode=_Mode(target_versions={_tv.PY310, _tv.PY313}, line_length=120))
             case "autopep":
@@ -45,9 +43,7 @@ def process_file(path: str | Path, mode: str = MODE) -> bool:
 
                 code, _ = fix_with_yapf(original_code)
             case _:
-                from black import Mode as _Mode
-                from black import TargetVersion as _tv
-                from black import format_str
+                from black import Mode as _Mode, TargetVersion as _tv, format_str
 
                 code = format_str(original_code, mode=_Mode(target_versions={_tv.PY310, _tv.PY313}, line_length=120))
         after = len(code)

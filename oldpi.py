@@ -8,6 +8,8 @@ from collections import deque
 from mmap import mmap
 from pathlib import Path
 
+from dh import mpf3
+
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
@@ -29,8 +31,6 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
                 files.append(item)
     return files
 
-
-from dh import mpf3
 
 SIZE_THRESHOLD = 1 * 1024 * 1024
 OLD_PRINT_RE = re.compile("(?m)^[ \\t]*print[ \\t]+[^(\\n]")

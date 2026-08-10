@@ -348,9 +348,9 @@ def main() -> None:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s -c          
-  %(prog)s -d          
-  %(prog)s             
+  %(prog)s -c
+  %(prog)s -d
+  %(prog)s
 Bzip2 Settings:
   - Level: 9 (maximum compression)
   - Block size: 900KB

@@ -114,10 +114,10 @@ def write_requirements(packages, output_file: str = "requirements.txt") -> Path:
     print(f"\n✓ Written {len(packages)} packages to {output_path}\n")
     if packages:
         print("Contents of requirements.txt:")
-        print("-" * 40)
+        print("-" * 42)
         for pkg in packages:
             print(f"  {pkg}")
-        print("-" * 40)
+        print("-" * 42)
     else:
         print("(No third-party packages found)")
     return output_path

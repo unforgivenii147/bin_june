@@ -16,9 +16,9 @@ class ImageDownscaler:
         self.root_dir = Path(root_dir)
         self.scale_factor = scale_factor
         self.supported_formats = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".gif", ".webp"}
-        print("=" * 70)
+        print("-" * 42)
         print("IMAGE DOWNSCALER")
-        print("=" * 70)
+        print("-" * 42)
         print(f"[INIT] Root directory: {self.root_dir.resolve()}")
         print(f"[INIT] Scale factor: {scale_factor} (new size = original × {scale_factor})")
         print(f"[INIT] CPU cores available: {cpu_count()}")
@@ -87,7 +87,7 @@ class ImageDownscaler:
                 )
             )
         print("\n[RESULTS]")
-        print("-" * 70)
+        print("-" * 42)
         for image_path, success, message in results:
             if success:
                 successful += 1
@@ -99,7 +99,7 @@ class ImageDownscaler:
                 status = "✗ FAIL"
                 rel_path = image_path.relative_to(self.root_dir)
                 print(f"{status}  {rel_path:<50} {message}")
-        print("-" * 70)
+        print("-" * 42)
         print(f"[SUMMARY] Successful: {successful} | Failed: {failed} | Total: {len(image_paths)}")
 
     def run(self) -> None:
@@ -110,7 +110,7 @@ class ImageDownscaler:
         self.process_images(image_paths)
         print("\n" + "=" * 70)
         print("PROCESS COMPLETE - Images updated in-place")
-        print("=" * 70)
+        print("-" * 42)
 
 
 def main():

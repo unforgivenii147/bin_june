@@ -129,9 +129,9 @@ def main():
         converter = PersianDateConverter()
         gregorian_year, gregorian_month, gregorian_day = converter.persian_to_gregorian(year, month, day)
         days_since, input_date, today = converter.days_since(gregorian_year, gregorian_month, gregorian_day)
-        print("=" * 42)
+        print("-" * 42)
         print("📅 PERSIAN TO GREGORIAN DATE CONVERTER")
-        print("=" * 42)
+        print("-" * 42)
         persian_date_str = converter.format_persian_date(year, month, day)
         print(f"\n🇮🇷 Persian date:  {persian_date_str}")
         gregorian_date_str = f"{gregorian_year}/{gregorian_month:02d}/{gregorian_day:02d}"

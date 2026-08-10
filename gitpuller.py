@@ -72,7 +72,7 @@ def git_pull_all() -> None:
             print(f"   ❌ Error: {e}")
     print("\n" + "=" * 42)
     print("SUMMARY")
-    print("=" * 42)
+    print("-" * 42)
     if pulled_repos:
         print(f"\n✅ Successfully pulled ({len(pulled_repos)} repos):")
         for repo_path in pulled_repos:

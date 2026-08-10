@@ -84,9 +84,9 @@ def check_conflicts(names, path_commands, name_type: str):
 
 
 def display_results(alias_conflicts, func_conflicts, path_duplicates, path_dirs: list[str]) -> None:
-    print("=" * 80)
+    print("-" * 42)
     print("🔍 PATH CONFLICT ANALYSIS")
-    print("=" * 80)
+    print("-" * 42)
     print(f"\n📁 PATH directories scanned ({len(path_dirs)}):")
     for i, dir_path in enumerate(path_dirs[:10], 1):
         print(f"   {i}. {dir_path}")
@@ -128,14 +128,14 @@ def display_results(alias_conflicts, func_conflicts, path_duplicates, path_dirs:
         print("   Bash will use aliases/functions over PATH binaries")
         print("   To use the binary instead, prefix with 'command' or '\\'")
         print("   Example: command ls  or  \\ls")
-    print("=" * 80)
+    print("-" * 42)
 
 
 def suggest_fixes(alias_conflicts, func_conflicts) -> None:
     if not alias_conflicts and not func_conflicts:
         return
     print("\n🔧 SUGGESTED FIXES:")
-    print("-" * 40)
+    print("-" * 42)
     if alias_conflicts:
         print("\nFor alias conflicts:")
         for conflict in sorted(alias_conflicts.keys())[:5]:

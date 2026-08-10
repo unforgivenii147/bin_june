@@ -4,6 +4,7 @@ Text summarization script using sumy library.
 Usage: python summarize.py <input_file>
 Output: <input_file>_summary.txt
 """
+from __future__ import annotations
 
 import os
 import sys
@@ -52,7 +53,7 @@ def main():
             f.write(summary)
         print(f"Summary saved to '{output_file}'")
         print(f"\nSummary preview ({sentences_count} sentences):")
-        print("-" * 50)
+        print("-" * 42)
         print(summary[:500] + "..." if len(summary) > 500 else summary)
     except Exception as e:
         print(f"Error: {e}")

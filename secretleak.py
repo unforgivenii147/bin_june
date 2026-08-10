@@ -110,18 +110,18 @@ def check_secrets(root_dir: Path = Path("."), max_workers: int | None = None) ->
 
 
 def main():
-    print("=" * 70)
+    print("-" * 42)
     print("SECRET LEAK DETECTOR - Pre-GitHub Push Scanner")
-    print("=" * 70)
+    print("-" * 42)
     print()
     try:
         total_files, total_leaks, files_affected = check_secrets()
-        print("=" * 70)
+        print("-" * 42)
         print("Scan Complete!")
         print(f"Files scanned: {total_files}")
         print(f"Leaks found: {total_leaks}")
         print(f"Files with leaks: {files_affected}")
-        print("=" * 70)
+        print("-" * 42)
         if total_leaks > 0:
             print("\n❌ SECRETS DETECTED! DO NOT PUSH TO GITHUB!")
             print("Please review and remove the secrets before committing.\n")

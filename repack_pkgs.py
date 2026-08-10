@@ -315,14 +315,14 @@ class VenvRepacker:
     def print_stats(self) -> None:
         print("\n" + "=" * 42)
         print("STATISTICS")
-        print("=" * 42)
+        print("-" * 42)
         print(f"Total packages: {self.stats['total_packages']}")
         print(f"Successfully repacked: {self.stats['successfully_repacked']}")
         print(f"Failed: {self.stats['failed_packages']}")
         print()
         print(f"Pure Python packages: {self.stats['pure_python_packages']}")
         print(f"Packages with C extensions: {self.stats['packages_with_c_extensions']}")
-        print("=" * 42)
+        print("-" * 42)
 
     def save_report(self, report_file: str = "repack_report.json") -> None:
         report = {

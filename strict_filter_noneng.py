@@ -8,11 +8,6 @@ from pathlib import Path
 
 import gcld3
 import nltk
-
-try:
-    nltk.data.find("corpora/words")
-except LookupError:
-    nltk.download("words", quiet=True)
 from nltk.corpus import words
 
 
@@ -50,7 +45,7 @@ def process_file_lines(input_path: Path, move_mode: bool, strict_ratio: float):
     english_lines = []
     non_english_lines = []
     print(f"🔍 Strictly scanning {len(lines)} lines from '{input_path.name}'...")
-    print("-" * 70)
+    print("-" * 42)
     for i, line in enumerate(lines, start=1):
         is_en, diagnostic = is_english_strict(line, detector, english_vocab, strict_ratio)
         if is_en:
@@ -58,7 +53,7 @@ def process_file_lines(input_path: Path, move_mode: bool, strict_ratio: float):
         else:
             non_english_lines.append(line)
             print(f"Line {i} [{diagnostic}]: {line.strip()}")
-    print("-" * 70)
+    print("-" * 42)
     print(f"📊 Strict Filter Summary: Identified {len(non_english_lines)} non-English lines.")
     if move_mode:
         if not non_english_lines:

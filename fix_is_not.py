@@ -85,7 +85,7 @@ def main():
                 status = "[🔧 FIXED]" if res["fixed"] else "[⚠️  FOUND]"
                 lines_str = ", ".join(map(str, res["lines"]))
                 print(f"{status} {res['path']} -> Found {res['found_count']} time(s) on line(s): {lines_str}")
-    print("=" * 42)
+    print("-" * 42)
     print(f"📊 Summary:")
     print(f"   Files containing 'is not': {total_files_with_issues}")
     print(f"   Total instances found:     {total_replacements}")

@@ -6,6 +6,7 @@ import subprocess
 from pathlib import Path
 
 from binaryornot import is_binary
+from dh import should_skip
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -30,9 +31,6 @@ def get_filez(root_dir: str | Path):
                     yield filepath
     else:
         yield root_dir
-
-
-from dh import should_skip
 
 
 def is_executable(filepath: Path) -> bool:
@@ -172,7 +170,7 @@ def main() -> None:
     else:
         print("\n✅ All binaries are working correctly!")
         print(f"Report written to: {output_file}")
-    print("=" * 70)
+    print("-" * 42)
 
 
 if __name__ == "__main__":

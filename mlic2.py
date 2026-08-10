@@ -219,7 +219,7 @@ def report(repeated: dict[str, list[tuple[Path, int, str]]]) -> None:
         print(f"Found in {len(occurrences)} locations:")
         for filepath, lineno, context in occurrences:
             print(f"  {filepath}:{lineno} -> {context[:100]}...")
-        print("-" * 40)
+        print("-" * 42)
 
 
 def save_to_file(repeated: dict[str, list[tuple[Path, int, str]]], output_file: Path) -> None:

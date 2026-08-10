@@ -4,10 +4,9 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from dh import cprint
+from dh import cprint, fsz, get_nobinary
 
 CHUNK_SIZE = 1024 * 1024
-from dh import fsz, get_nobinary
 
 
 def gsz(path: str | Path) -> int:

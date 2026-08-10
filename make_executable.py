@@ -59,7 +59,7 @@ def main():
                     print(f"🚀 [MADE EXECUTABLE] {res['path']}")
                 else:
                     print(f"✅ [ALREADY EXECUTABLE] {res['path']}")
-    print("=" * 42)
+    print("-" * 42)
     print(f"📊 Summary:")
     print(f"   Total shebang files found: {total_shebangs}")
     print(f"   Files updated with +x bit: {total_updated}")

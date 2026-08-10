@@ -40,10 +40,10 @@ def main():
     results = extract_qr_data_zbar(image_path)
     if results:
         print(f"\nFound {len(results)} QR code(s):")
-        print("-" * 50)
+        print("-" * 42)
         for i, data in enumerate(results, 1):
             print(f"QR #{i}: {data}")
-        print("-" * 50)
+        print("-" * 42)
     else:
         print("No QR codes found in the image.")
 

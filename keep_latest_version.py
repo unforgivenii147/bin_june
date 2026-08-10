@@ -219,7 +219,7 @@ def main() -> int:
     print(f"File type: {file_type}")
     if args.dry_run:
         print("DRY RUN MODE - No files will be deleted")
-    print("-" * 50)
+    print("-" * 42)
     packages = scan_directory(scan_dir, file_type, args.all)
     if not packages:
         print("No matching package files found.")

@@ -145,7 +145,7 @@ class ChangeHandler(FileSystemEventHandler):
             print("\n[errors] copy operation errors:")
             for msg in self._errors:
                 print(msg)
-            print("-" * 80)
+            print("-" * 42)
             self._errors.clear()
 
     def on_created(self, event) -> None:

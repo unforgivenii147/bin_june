@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+from __future__ import annotations
+
 import json
 import os
 from pathlib import Path
@@ -25,7 +27,7 @@ def merge_translations(src_dir="."):
                 en_lines = [line.strip() for line in f_en if line.strip()]
             if len(fa_lines) != len(en_lines):
                 print(f"⚠️  Line count mismatch: {fa_file} ({len(fa_lines)}) vs {en_file} ({len(en_lines)})")
-            for fa_word, en_word in zip(fa_lines, en_lines):
+            for fa_word, en_word in zip(fa_lines, en_lines, strict=False):
                 if fa_word == en_word:
                     failed.append(fa_word)
                 else:

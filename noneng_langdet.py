@@ -477,7 +477,7 @@ Examples:
         print(f"Files with non-English content: {files_with_issues}")
         print(f"Total non-English lines: {total_non_eng}")
         print(f"Results saved to: {output_path.absolute()}")
-        print("=" * 42)
+        print("-" * 42)
         sys.exit(0 if files_with_issues == 0 else 1)
     except KeyboardInterrupt:
         print("\nScan interrupted by user")

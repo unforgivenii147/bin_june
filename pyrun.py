@@ -122,7 +122,7 @@ def main():
     elapsed_time = time.time() - start_time
     print("\n" + "=" * 42)
     print("SUMMARY")
-    print("=" * 42)
+    print("-" * 42)
     print(f"Total files: {len(files)}")
     print(f"✅ Successfully ran: {len(results['success'])}")
     print(f"❌ Failed: {len(results['failed'])}")

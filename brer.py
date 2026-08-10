@@ -348,9 +348,9 @@ def main() -> None:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s -c          
-  %(prog)s -d          
-  %(prog)s             
+  %(prog)s -c
+  %(prog)s -d
+  %(prog)s
 Brotli Settings:
   - Quality: 11/11 (maximum compression)
   - Window size: 16MB (lgwin=24)

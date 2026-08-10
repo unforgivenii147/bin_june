@@ -4,6 +4,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+from dh import fsz, get_files, mpf_async, runcmd
+
 MAX_WORKERS = 4
 
 
@@ -16,9 +18,6 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
-
-
-from dh import fsz, get_files, mpf_async, runcmd
 
 
 def process_file(path: Path) -> None:

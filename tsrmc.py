@@ -253,10 +253,10 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s                          
-  %(prog)s --method ast             
-  %(prog)s --compare                
-  %(prog)s /path/to/dir --workers 8 
+  %(prog)s
+  %(prog)s --method ast
+  %(prog)s --compare
+  %(prog)s /path/to/dir --workers 8
         """,
     )
     parser.add_argument(

@@ -101,7 +101,7 @@ def main():
                 if res["fixed"]:
                     fixed_count += 1
                 print()
-    print("=" * 42)
+    print("-" * 42)
     print(f"📊 Summary:")
     print(f"   Files with invalid escape sequences: {issues_count}")
     if args.auto_fix:

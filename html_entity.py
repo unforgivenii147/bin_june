@@ -6,6 +6,8 @@ import re
 import sys
 from pathlib import Path
 
+from dh import get_nobinary
+
 CHUNK_SIZE = 1024 * 1024
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -25,8 +27,6 @@ def is_binary(path: Path | str) -> bool:
     except Exception:
         return True
 
-
-from dh import get_nobinary
 
 HTML_ENTITIES = {
     "&lt;": "<",
@@ -92,7 +92,7 @@ def main() -> None:
                 changed_files.append(filepath)
     print("\n" + "=" * 42)
     print("SUMMARY")
-    print("=" * 42)
+    print("-" * 42)
     if changed_files:
         print(f"\n✅ Modified {len(changed_files)} file(s):")
         for f in changed_files:

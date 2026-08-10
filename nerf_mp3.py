@@ -268,10 +268,10 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s                     
-  %(prog)s ~/music             
-  %(prog)s dir1 dir2 dir3      
-  %(prog)s -w 8 ~/music        
+  %(prog)s
+  %(prog)s ~/music
+  %(prog)s dir1 dir2 dir3
+  %(prog)s -w 8 ~/music
         """,
     )
     parser.add_argument(

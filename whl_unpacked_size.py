@@ -126,17 +126,17 @@ def main():
                 output["errors"].append({"path": str(wheel_path), "error": error})
         print(json.dumps(output, indent=2))
     else:
-        print("=" * 80)
+        print("-" * 42)
         print(f"{'Wheel File':<50} {'Unpacked Size':>20}")
-        print("=" * 80)
+        print("-" * 42)
         for wheel_path, size in results:
             name = wheel_path.name
             if len(name) > 45:
                 name = "..." + name[-42:]
             print(f"{name:<50} {fsz(size):>20}")
-        print("=" * 80)
+        print("-" * 42)
         print(f"{'TOTAL':<50} {fsz(total_unpacked_size):>20}")
-        print("=" * 80)
+        print("-" * 42)
         if args.verbose:
             print("\n📊 Summary:")
             print(f"   Total wheels found:      {len(wheels)}")

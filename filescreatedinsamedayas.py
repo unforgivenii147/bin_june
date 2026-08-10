@@ -33,7 +33,7 @@ def main() -> None:
     target_date = target_time.date()
     print(f"Input file: {filename}")
     print(f"Created on: {target_date}")
-    print("-" * 50)
+    print("-" * 42)
     found_files = []
     for file in os.listdir(directory):
         filepath = os.path.join(directory, file)

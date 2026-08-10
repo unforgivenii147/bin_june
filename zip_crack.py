@@ -146,7 +146,7 @@ def brute_force_zip(
     print(f"⏱️  Total time: {format_duration(result.elapsed)}")
     print(f"🔢 Total tested: {result.tested_count:,}")
     print(f"⚡ Average speed: {result.pps:.1f} passwords/second")
-    print("=" * 42)
+    print("-" * 42)
     return result
 
 

@@ -159,7 +159,7 @@ def process_images(num_workers: int | None = None):
     has_face_count = total - noface_count
     print("\n" + "=" * 50)
     print("📊 SUMMARY")
-    print("=" * 50)
+    print("-" * 42)
     print(f"Total images:     {total}")
     print(f"With faces:       {has_face_count}")
     print(f"Without faces:    {noface_count}")
@@ -168,7 +168,7 @@ def process_images(num_workers: int | None = None):
     print(f"Speed:            {total / elapsed_time:.1f} images/second")
     if moved > 0:
         print(f"\n📁 Moved to: {noface_dir}")
-    print("=" * 50 + "\n")
+    print("-" * 42)
     return True
 
 
@@ -183,11 +183,11 @@ def main():
         sys.exit(1)
     print("\n" + "=" * 50)
     print("📸 FACE DETECTION IMAGE ORGANIZER")
-    print("=" * 50)
+    print("-" * 42)
     print(f"Working directory: {Path.cwd()}")
     print("Images WITH faces → stay in place")
     print("Images WITHOUT faces → moved to 'noface/'")
-    print("=" * 50)
+    print("-" * 42)
     num_workers = None
     if len(sys.argv) > 1:
         try:

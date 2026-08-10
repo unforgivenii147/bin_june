@@ -169,7 +169,7 @@ def print_results(results: list[dict]) -> None:
     files_with_errors = sum(1 for r in results if r.get("total_errors", 0) > 0)
     print("\n" + "=" * 70)
     print(f"Spell Check Report: {total_files} file(s) checked")
-    print("=" * 70)
+    print("-" * 42)
     for result in results:
         if result.get("error"):
             print(f"\n{result['file']}: ERROR - {result['error']}")
@@ -188,7 +188,7 @@ def print_results(results: list[dict]) -> None:
             print("  ✓ Fixed!")
     print("\n" + "=" * 70)
     print(f"Summary: {total_errors} total error(s) in {files_with_errors} file(s)")
-    print("=" * 70 + "\n")
+    print("-" * 42)
 
 
 def handle_dictionary_operations(args) -> None:
@@ -215,10 +215,10 @@ def handle_dictionary_operations(args) -> None:
         words = personal_dict.list_words()
         if words:
             print(f"\nPersonal dictionary ({len(words)} words):")
-            print("-" * 40)
+            print("-" * 42)
             for word in words:
                 print(f"  {word}")
-            print("-" * 40)
+            print("-" * 42)
         else:
             print("Personal dictionary is empty.")
     if args.clear_dict:

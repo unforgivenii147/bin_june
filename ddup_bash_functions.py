@@ -116,7 +116,7 @@ def main() -> None:
         sys.exit(0)
     print(f"Found {len(functions)} function(s)")
     print(f"Found {len(aliases)} alias(es)")
-    print("-" * 50)
+    print("-" * 42)
     conflicts = functions.intersection(aliases.keys())
     if not conflicts:
         print("No conflicts found - no aliases match function names")
@@ -124,7 +124,7 @@ def main() -> None:
     print(f"Found {len(conflicts)} conflicting alias(es):")
     for conflict in sorted(conflicts):
         print(f"  - {conflict} (alias: {aliases[conflict].strip()})")
-    print("-" * 50)
+    print("-" * 42)
     response = input(f"\nRemove these {len(conflicts)} conflicting aliases? [y/N]: ").strip().lower()
     if response != "y":
         print("Operation cancelled")

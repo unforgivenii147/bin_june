@@ -63,9 +63,9 @@ def analyze_size_distribution(files_info):
 
 
 def organize_files_in_root(root_path: str = ".", target_folders: int = 4, max_get_size_mb=None) -> None:
-    print("=" * 70)
+    print("-" * 42)
     print("File Organization - Direct to Root Path (No Subdirectories)")
-    print("=" * 70)
+    print("-" * 42)
     root_path = Path(root_path).resolve()
     print(f"\nRoot directory: {root_path}")
     print("Mode: Files will be moved into organized folders in root path")
@@ -161,7 +161,7 @@ def organize_files_in_root(root_path: str = ".", target_folders: int = 4, max_ge
     print("\nCreated folders:")
     for folder in created_folders:
         print(f"  - {folder}")
-    print("=" * 70)
+    print("-" * 42)
 
 
 def main() -> None:

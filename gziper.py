@@ -80,10 +80,10 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s                           
-  %(prog)s dir1 dir2                 
-  %(prog)s /path/to/dir1 /path/to/dir2  
-  %(prog)s --workers 8 dir1          
+  %(prog)s
+  %(prog)s dir1 dir2
+  %(prog)s /path/to/dir1 /path/to/dir2
+  %(prog)s --workers 8 dir1
         """,
     )
     parser.add_argument(
@@ -99,7 +99,7 @@ Examples:
     directories = [Path(d).resolve() for d in args.directories]
     print("\n" + "=" * 70)
     print("🔍 GZIP Compression Tool (Maximum Compression - Level 9)".center(70))
-    print("=" * 70)
+    print("-" * 42)
     print("\n📂 Processing directories:")
     for d in directories:
         print(f"   • {d}")
@@ -117,9 +117,9 @@ Examples:
         print("\n✅ No files found to compress!")
         return
     print(f"📊 Found {len(files_to_compress)} file(s) to compress\n")
-    print("=" * 70)
+    print("-" * 42)
     print(f"{'File':<50} {'Original':>10} {'Compressed':>10} {'Ratio':>8} {'Status':>10}")
-    print("-" * 70)
+    print("-" * 42)
     stats = CompressionStats()
     max_workers = args.workers
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
@@ -148,7 +148,7 @@ Examples:
     elapsed_time = time.time() - start_time
     print("\n" + "=" * 70)
     print("📊 COMPRESSION SUMMARY".center(70))
-    print("=" * 70)
+    print("-" * 42)
     print(f"  Total files processed:     {stats.total_files}")
     print(f"  Successfully compressed:   {stats.successful} ✅")
     print(f"  Failed compressions:       {stats.failed} ❌")
@@ -160,7 +160,7 @@ Examples:
         print(f"  Overall compression ratio: {overall_ratio:.1f}%")
         print(f"  Space saved:               {fsz(space_saved)}")
     print(f"  Time elapsed:               {timedelta(seconds=int(elapsed_time))}")
-    print("=" * 70 + "\n")
+    print("-" * 42)
 
 
 if __name__ == "__main__":

@@ -16,9 +16,9 @@ class ImageDimensionRenamer:
         self.root_dir = Path(root_dir)
         self.separator = separator
         self.supported_formats = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".gif", ".webp"}
-        print("=" * 70)
+        print("-" * 42)
         print("IMAGE DIMENSION RENAMER")
-        print("=" * 70)
+        print("-" * 42)
         print(f"[INIT] Root directory: {self.root_dir.resolve()}")
         print(f"[INIT] Separator: '{separator}'")
         print(f"[INIT] CPU cores available: {cpu_count()}")
@@ -94,7 +94,7 @@ class ImageDimensionRenamer:
                 )
             )
         print("\n[RESULTS]")
-        print("-" * 70)
+        print("-" * 42)
         for image_path, success, message in results:
             if success:
                 successful += 1
@@ -111,7 +111,7 @@ class ImageDimensionRenamer:
             except ValueError:
                 path_str = str(image_path)
             print(f"{status}  {path_str:<50} {message}")
-        print("-" * 70)
+        print("-" * 42)
         print(
             f"[SUMMARY] Renamed: {successful} | Skipped: {already_processed} | Failed: {failed} | Total: {len(image_paths)}"
         )
@@ -124,7 +124,7 @@ class ImageDimensionRenamer:
         self.process_images(image_paths)
         print("\n" + "=" * 70)
         print("PROCESS COMPLETE - Images renamed with dimensions")
-        print("=" * 70)
+        print("-" * 42)
 
 
 def main():

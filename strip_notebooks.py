@@ -93,11 +93,11 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s                    
-  %(prog)s notebook.ipynb     
-  %(prog)s dir1/ dir2/        
-  %(prog)s *.ipynb            
-  %(prog)s -w 4 .             
+  %(prog)s
+  %(prog)s notebook.ipynb
+  %(prog)s dir1/ dir2/
+  %(prog)s *.ipynb
+  %(prog)s -w 4 .
         """,
     )
     parser.add_argument(

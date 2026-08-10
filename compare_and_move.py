@@ -18,7 +18,7 @@ def compare_and_move_common(source_dir: str, target_dir: str) -> None:
     target = expand_path(target_dir)
     print(f"Source directory (first): {source}")
     print(f"Target directory (second): {target}")
-    print("-" * 50)
+    print("-" * 42)
     if not source.exists():
         print(f"Error: Source directory '{source_dir}' (expanded to '{source}') does not exist.")
         return

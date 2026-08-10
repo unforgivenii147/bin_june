@@ -125,7 +125,7 @@ def analyze_package_versions(
 
 def main():
     print("Python Package Duplicate Checker")
-    print("=" * 50)
+    print("-" * 42)
     try:
         system_dirs, user_dirs = get_site_directories()
     except Exception as e:
@@ -154,7 +154,7 @@ def main():
     if duplicates:
         print("\n" + "=" * 80)
         print("Packages installed in BOTH system and user directories:")
-        print("=" * 80)
+        print("-" * 42)
         for pkg_name, (system_loc, user_loc) in duplicates.items():
             versions = analyze_package_versions(pkg_name, system_loc, user_loc)
             print(f"\n📦 {pkg_name}")

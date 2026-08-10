@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 import tree_sitter_python as tsp
-from dh import cprint
+from dh import cprint, should_skip
 from rapidfuzz import fuzz
 from tree_sitter import Language, Parser
 
@@ -34,8 +34,6 @@ def get_filez(root_dir: str | Path):
     else:
         yield root_dir
 
-
-from dh import should_skip
 
 cwd = Path.cwd()
 parser = Parser()

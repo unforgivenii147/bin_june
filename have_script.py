@@ -79,9 +79,9 @@ def main():
         else:
             errors.append(whl_path)
     if has_entry_points:
-        print("=" * 80)
+        print("-" * 42)
         print(f"✅ Found {len(has_entry_points)} wheel(s) with entry_points.txt:")
-        print("=" * 80)
+        print("-" * 42)
         for whl_path, name, version, dist_info in has_entry_points:
             print(f"\n📦 {name} ({version})")
             print(f"   File: {whl_path}")
@@ -91,7 +91,7 @@ def main():
     if not args.quiet and no_entry_points:
         print("\n" + "=" * 80)
         print(f"📋 {len(no_entry_points)} wheel(s) WITHOUT entry_points.txt:")
-        print("=" * 80)
+        print("-" * 42)
         if args.verbose:
             for whl_path, name, version in no_entry_points:
                 print(f"   {name} ({version}): {whl_path}")
@@ -100,12 +100,12 @@ def main():
     if errors:
         print("\n" + "=" * 80)
         print(f"⚠️  {len(errors)} wheel(s) could not be read:")
-        print("=" * 80)
+        print("-" * 42)
         for whl_path in errors:
             print(f"   {whl_path}")
     print("\n" + "=" * 80)
     print("SUMMARY")
-    print("=" * 80)
+    print("-" * 42)
     print(f"Total wheels checked:  {len(whl_files)}")
     print(f"With entry_points.txt: {len(has_entry_points)}")
     print(f"Without:               {len(no_entry_points)}")

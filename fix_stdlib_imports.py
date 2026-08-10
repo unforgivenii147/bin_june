@@ -434,11 +434,11 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s .                        
-  %(prog)s src/                     
-  %(prog)s . --exclude tests        
-  %(prog)s . --exclude tests,docs   
-  %(prog)s . --show-all             
+  %(prog)s .
+  %(prog)s src/
+  %(prog)s . --exclude tests
+  %(prog)s . --exclude tests,docs
+  %(prog)s . --show-all
         """,
     )
     parser.add_argument(

@@ -202,7 +202,7 @@ def main():
                 results.append((package_name, False, str(e)))
     print("\n" + "=" * 42)
     print("SUMMARY")
-    print("=" * 42)
+    print("-" * 42)
     successful = [r for r in results if r[1]]
     failed = [r for r in results if not r[1]]
     print(f"\n✅ Successfully processed: {len(successful)} packages")
@@ -213,7 +213,7 @@ def main():
         for pkg_name, _, msg in failed:
             print(f"  - {pkg_name}: {msg}")
     print(f"\n📁 Packages copied to: {Path.home() / 'tmp' / 'packages'}")
-    print("=" * 42)
+    print("-" * 42)
 
 
 if __name__ == "__main__":

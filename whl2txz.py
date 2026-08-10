@@ -222,13 +222,13 @@ def main() -> int:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s                       
-  %(prog)s package.whl           
-  %(prog)s package.tar.xz        
-  %(prog)s *.whl                 
-  %(prog)s /path/to/dir          
-  %(prog)s --recursive           
-  %(prog)s --remove-original     
+  %(prog)s
+  %(prog)s package.whl
+  %(prog)s package.tar.xz
+  %(prog)s *.whl
+  %(prog)s /path/to/dir
+  %(prog)s --recursive
+  %(prog)s --remove-original
         """,
     )
     parser.add_argument(
@@ -297,7 +297,7 @@ Examples:
                     logger.error(f"Failed to process {file_path.name}: {e}")
     print("\n" + "=" * 70)
     print("CONVERSION RESULTS")
-    print("=" * 70)
+    print("-" * 42)
     for file_path, success, message, output_path in results:
         if success:
             file_path.unlink()
@@ -318,7 +318,7 @@ Examples:
             failure_count += 1
             status = "✗ FAIL"
             print(f"{status} {file_path.name}: {message}")
-    print("=" * 70)
+    print("-" * 42)
     print(f"Summary: {success_count} successful, {failure_count} failed")
     if args.remove_original and success_count > 0:
         print("✓ Original files were removed after successful conversion")

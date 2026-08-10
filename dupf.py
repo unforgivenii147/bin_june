@@ -5,7 +5,7 @@ from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
-from dh import cprint
+from dh import cprint, fsz
 from xxhash import xxh64
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
@@ -21,8 +21,6 @@ def gsz(path: str | Path) -> int:
             total += file.stat().st_size
     return total
 
-
-from dh import fsz
 
 CHUNKSIZE = 32768
 

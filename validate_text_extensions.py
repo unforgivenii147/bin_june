@@ -187,7 +187,7 @@ def validate_extensions(root_dir: str = "/", num_workers: int | None = None, ver
 def print_report(results: dict):
     print("\n" + "=" * 80)
     print("TEXT EXTENSION VALIDATION REPORT")
-    print("=" * 80)
+    print("-" * 42)
     print("\nSummary:")
     print(f"  Total files found:    {results['total_files']}")
     print(f"  Actual text files:    {results['text_files']}")
@@ -195,7 +195,7 @@ def print_report(results: dict):
     print(f"  Access errors:        {results['access_errors']}")
     if results["mismatches"]:
         print(f"\n⚠️  MISMATCHES FOUND: {len(results['mismatches'])} files with .txt extension are NOT text files")
-        print("-" * 80)
+        print("-" * 42)
         for i, mismatch in enumerate(results["mismatches"][:20], 1):
             print(f"  {i}. {mismatch['path']}")
             print(f"     └─ Extension: {mismatch['extension']} | MIME: {mismatch['mime_type']}")
@@ -204,7 +204,7 @@ def print_report(results: dict):
     else:
         print("\n✓ No mismatches found! All files match their extensions.")
     print("\nBreakdown by extension:")
-    print("-" * 80)
+    print("-" * 42)
     for ext, stats in sorted(results["by_extension"].items()):
         print(f"  {ext:12} - Text: {stats['text']:6}  Binary: {stats['binary']:6}  Errors: {stats['error']:6}")
     print("\n" + "=" * 80)

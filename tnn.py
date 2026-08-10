@@ -4,10 +4,9 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from dh import cprint
+from dh import cprint, get_nobinary, mpf3
 
 CHUNK_SIZE = 1024 * 1024
-from dh import get_nobinary, mpf3
 
 
 def is_binary(path: Path | str) -> bool:

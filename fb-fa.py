@@ -140,6 +140,6 @@ if __name__ == "__main__":
     print("🔍 Comparing functions between:")
     print(f"   File 1: {file1}")
     print(f"   File 2: {file2}")
-    print("-" * 50)
+    print("-" * 42)
     success = remove_functions_from_file(file1, file2)
     sys.exit(0 if success else 1)

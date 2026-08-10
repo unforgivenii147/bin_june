@@ -61,9 +61,9 @@ def filter_latest_for_armv7(urls_file=None):
                 key = package, py_version
                 if arch not in packages[key] or version > packages[key][arch][0]:
                     packages[key][arch] = version, url
-    print("=" * 80)
+    print("-" * 42)
     print("LATEST ARMv7 (armeabi_v7a/armv7l/linux_arm) WHEELS")
-    print("=" * 80)
+    print("-" * 42)
     results = []
     for (package, py_version), arches in sorted(packages.items()):
         for arch, (version, url) in arches.items():
@@ -83,7 +83,7 @@ def filter_latest_for_armv7(urls_file=None):
             )
     print("\n" + "=" * 80)
     print(f"SUMMARY: Found {len(results)} ARMv7 wheel(s)")
-    print("=" * 80)
+    print("-" * 42)
     for result in results:
         print(f"{result['package']}=={result['version']} (Python {result['python_version']})")
     return results

@@ -216,7 +216,7 @@ def print_stats(all_stats: list[FileStats], base_path: Path):
         return
     print("\n" + "=" * 80)
     print("📊 IMAGE REFERENCE REMOVAL REPORT")
-    print("=" * 80)
+    print("-" * 42)
     total_lines_before = 0
     total_lines_after = 0
     total_size_before = 0
@@ -241,7 +241,7 @@ def print_stats(all_stats: list[FileStats], base_path: Path):
         total_removed_refs += stats.removed_refs
     print("\n" + "=" * 80)
     print("📈 SUMMARY")
-    print("=" * 80)
+    print("-" * 42)
     print(f"Files modified: {len(all_stats)}")
     print(f"Total image references removed: {total_removed_refs}")
     print(f"Total lines: {total_lines_before} → {total_lines_after} ({total_lines_before - total_lines_after:+d})")
@@ -251,7 +251,7 @@ def print_stats(all_stats: list[FileStats], base_path: Path):
     )
     if total_size_before > 0:
         print(f"Overall reduction: {((total_size_before - total_size_after) / total_size_before * 100):.1f}%")
-    print("=" * 80 + "\n")
+    print("-" * 42)
 
 
 def main():

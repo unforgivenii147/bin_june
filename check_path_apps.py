@@ -31,7 +31,7 @@ def find_path_duplicates() -> None:
             for i, loc in enumerate(locations):
                 status = " (ACTIVE)" if i == 0 else " (SHADOWED)"
                 print(f"  - {loc}{status}")
-            print("-" * 30)
+            print("-" * 42)
     if not duplicates_found:
         print("No duplicate executables found.")
 

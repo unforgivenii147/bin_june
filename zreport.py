@@ -147,7 +147,7 @@ def main() -> None:
     grand_comp = grand_uncomp = total_files = 0
     col_fmt = "{:<30} {:<10} {:>15} {:>15} {:>8}"
     print(col_fmt.format("File", "Format", "Compressed", "Uncompressed", "Ratio"))
-    print("-" * 85)
+    print("-" * 42)
     for item in sorted(root.rglob("*")):
         if not item.is_file() or any(part in SKIP_DIRS for part in item.parts):
             continue
@@ -175,7 +175,7 @@ def main() -> None:
                 ratio_str,
             )
         )
-    print("-" * 85)
+    print("-" * 42)
     print(f"Total files: {total_files}")
     print(f"Total compressed:   {fsz(grand_comp)}")
     print(f"Total uncompressed: {fsz(grand_uncomp)}")

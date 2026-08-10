@@ -18,7 +18,7 @@ CSS_TEMPLATE = """
         content: "Page " counter(page) " of " counter(pages);
         font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
         font-size: 9pt;
-        color: 
+        color:
     }
 }
 h1, h2, h3, h4, h5, h6 { page-break-after: avoid; break-after: avoid; }
@@ -32,7 +32,7 @@ html, body {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 11pt;
     line-height: 1.6;
-    color: 
+    color:
 }
 p {
     margin-top: 0;
@@ -43,56 +43,56 @@ h1 {
     font-size: 24pt;
     margin-top: 0;
     margin-bottom: 15pt;
-    color: 
-    border-bottom: 2px solid 
+    color:
+    border-bottom: 2px solid
     padding-bottom: 5pt;
 }
 h2 {
     font-size: 18pt;
     margin-top: 24pt;
     margin-bottom: 12pt;
-    color: 
-    border-bottom: 1px solid 
+    color:
+    border-bottom: 1px solid
     padding-bottom: 3pt;
 }
 h3 {
     font-size: 14pt;
     margin-top: 18pt;
     margin-bottom: 8pt;
-    color: 
+    color:
 }
 /* ==========================================================================
    3. INLINE ELEMENTS & DECORATIONS
    ========================================================================== */
-a { color: 
+a { color:
 a[href^="http"]:after {
     content: " (" attr(href) ")";
     font-size: 9pt;
-    color: 
+    color:
 }
-strong { color: 
+strong { color:
 code {
     font-family: "Courier New", Courier, monospace;
     font-size: 10pt;
-    background-color: 
+    background-color:
     padding: 2px 4px;
     border-radius: 3px;
-    color: 
+    color:
 }
 blockquote {
     margin: 1.5em 0;
     padding: 0.5em 15px;
-    border-left: 4px solid 
-    color: 
-    background-color: 
+    border-left: 4px solid
+    color:
+    background-color:
     font-style: italic;
 }
 /* ==========================================================================
    4. CODE BLOCKS (Markdown ``` )
    ========================================================================== */
 pre {
-    background-color: 
-    border: 1px solid 
+    background-color:
+    border: 1px solid
     border-radius: 4px;
     padding: 12px;
     margin: 1.5em 0;
@@ -102,7 +102,7 @@ pre code {
     background-color: transparent;
     padding: 0;
     border-radius: 0;
-    color: 
+    color:
     font-size: 9.5pt;
     white-space: pre-wrap;
 }
@@ -116,16 +116,16 @@ table {
     font-size: 10.5pt;
 }
 th, td {
-    border: 1px solid 
+    border: 1px solid
     padding: 8px 12px;
     text-align: left;
 }
 th {
-    background-color: 
+    background-color:
     font-weight: bold;
-    color: 
+    color:
 }
-tr:nth-child(even) { background-color: 
+tr:nth-child(even) { background-color:
 ul, ol { margin-top: 0; margin-bottom: 1.5em; padding-left: 24px; }
 li { margin-bottom: 0.4em; }
 /* ==========================================================================

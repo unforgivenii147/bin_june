@@ -7,9 +7,9 @@ import unicodedata
 from pathlib import Path
 
 import astor
+from dh import get_files
 
 CHUNK_SIZE = 1024 * 1024
-from dh import get_files
 
 
 def is_binary(path: Path | str) -> bool:

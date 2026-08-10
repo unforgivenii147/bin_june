@@ -293,10 +293,10 @@ def main() -> None:
         except PermissionError:
             pass
         print("\nRemoved Lines:")
-        print("-" * 20)
+        print("-" * 42)
         for line in removed_lines_accumulator:
             print(line)
-        print("-" * 20)
+        print("-" * 42)
     else:
         print("No matching lines were found or removed.")
 

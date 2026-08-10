@@ -6,6 +6,7 @@ Processes files in place using parallel workers.
   in a body, replaces it with 'pass' to prevent syntax errors.
 - Validates result code with ast.parse() before writing to disk.
 """
+from __future__ import annotations
 
 import argparse
 import ast
@@ -57,9 +58,7 @@ def should_keep_comment(comment_bytes: bytes) -> bool:
     rest = stripped[1:].lstrip()
     if rest.lower().startswith((b"type:", b"fmt:")):
         return True
-    if b"coding" in stripped.lower() and b":" in stripped:
-        return True
-    return False
+    return bool(b"coding" in stripped.lower() and b":" in stripped)
 
 
 def get_block_indent(block_node, content: bytes) -> bytes:
@@ -98,22 +97,21 @@ def collect_actions(root, content: bytes):
                 pass
             else:
                 actions[id(node)] = (node.start_byte, node.end_byte, b"")
-        elif node.type == "expression_statement":
-            if is_docstring_node(node):
-                parent = node.parent
-                if parent:
-                    first_stmt = get_first_statement(parent)
-                    if first_stmt and first_stmt.id == node.id:
-                        if parent.type == "module":
-                            pass
-                        elif parent.type == "block":
-                            grandparent = parent.parent
-                            if grandparent and grandparent.type in ("function_definition", "class_definition"):
-                                named_children = [c for c in parent.children if c.is_named]
-                                if len(named_children) == 1:
-                                    actions[id(node)] = (node.start_byte, node.end_byte, b"")
-                                else:
-                                    actions[id(node)] = (node.start_byte, node.end_byte, b"")
+        elif node.type == "expression_statement" and is_docstring_node(node):
+            parent = node.parent
+            if parent:
+                first_stmt = get_first_statement(parent)
+                if first_stmt and first_stmt.id == node.id:
+                    if parent.type == "module":
+                        pass
+                    elif parent.type == "block":
+                        grandparent = parent.parent
+                        if grandparent and grandparent.type in ("function_definition", "class_definition"):
+                            named_children = [c for c in parent.children if c.is_named]
+                            if len(named_children) == 1:
+                                actions[id(node)] = (node.start_byte, node.end_byte, b"")
+                            else:
+                                actions[id(node)] = (node.start_byte, node.end_byte, b"")
         if node.type == "block":
             blocks.append(node)
         for child in reversed(node.children):

@@ -123,10 +123,10 @@ def find_and_remove_files(root_dir: Path | None = None) -> dict:
 def print_report(stats: dict) -> None:
     print("\n" + "=" * 42)
     print("REMOVAL REPORT")
-    print("=" * 42)
+    print("-" * 42)
     print(f"Files removed: {stats['files_removed']}")
     print(f"Total disk space freed: {stats['total_freed_human']} ({stats['total_freed_bytes']} bytes)")
-    print("=" * 42 + "\n")
+    print("-" * 42)
 
 
 def main():

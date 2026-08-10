@@ -94,14 +94,14 @@ def main() -> int:
         description="Convert YAML to JSON",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""Examples:
-  %(prog)s config.yaml                    
-  %(prog)s config.yaml -o config.json     
-  cat config.yaml | %(prog)s              
-  %(prog)s config.yaml --indent 4         
-  %(prog)s config.yaml --compact          
-  %(prog)s config.yaml --sort-keys        
-  %(prog)s config.yaml --no-ensure-ascii  
-  %(prog)s config.yaml --strict           
+  %(prog)s config.yaml
+  %(prog)s config.yaml -o config.json
+  cat config.yaml | %(prog)s
+  %(prog)s config.yaml --indent 4
+  %(prog)s config.yaml --compact
+  %(prog)s config.yaml --sort-keys
+  %(prog)s config.yaml --no-ensure-ascii
+  %(prog)s config.yaml --strict
         """,
     )
     io_group = parser.add_argument_group("Input/Output")

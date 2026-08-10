@@ -249,7 +249,7 @@ def main():
         except ValueError:
             rel_path = filepath
         print(f"{status} {rel_path}: {message}")
-    print("=" * 70)
+    print("-" * 42)
     print("\nSummary:")
     print(f"  Total files: {len(python_files)}")
     print(f"  Processed successfully: {successful}")

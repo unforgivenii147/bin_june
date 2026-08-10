@@ -62,7 +62,7 @@ def get_file_sample(text: str, max_lines: int = 50, max_chars: int = 5000) -> st
 def analyze_directory(directory: str = ".", show_all: bool = False) -> dict:
     directory = Path(directory).resolve()
     print(f"🔍 Scanning directory: {directory}")
-    print("=" * 70)
+    print("-" * 42)
     results = {
         "total_files": 0,
         "checked_files": 0,
@@ -113,7 +113,7 @@ def analyze_directory(directory: str = ".", show_all: bool = False) -> dict:
 def print_results(results: dict, show_files: bool = False) -> None:
     print("\n" + "=" * 70)
     print("📊 LANGUAGE DETECTION RESULTS")
-    print("=" * 70)
+    print("-" * 42)
     total = results["total_files"]
     checked = results["checked_files"]
     non_english_total = sum(len(files) for files in results["non_english"].values())
@@ -153,7 +153,7 @@ def print_results(results: dict, show_files: bool = False) -> None:
                     print(f"      └─ ... and {len(files) - 20} more")
     print("\n" + "=" * 70)
     print("🎯 RECOMMENDATION")
-    print("=" * 70)
+    print("-" * 42)
     if non_english_total == 0:
         print("✅ All files appear to be in English! No translation needed.")
     else:
@@ -166,7 +166,7 @@ def print_results(results: dict, show_files: bool = False) -> None:
             for dir_path, stats in sorted(dirs_to_translate, key=lambda x: x[1]["non_english"], reverse=True):
                 print(f"   └─ {dir_path if dir_path != '.' else 'current directory'}:")
                 print(f"       {stats['non_english']} non-English files to translate")
-    print("=" * 70)
+    print("-" * 42)
 
 
 def main() -> None:

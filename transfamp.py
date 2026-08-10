@@ -69,7 +69,7 @@ def main():
         return
     print(f"📚 Found {len(text_files)} file(s) to translate")
     print(f"🚀 Starting translation with {max_workers} parallel workers")
-    print("-" * 50)
+    print("-" * 42)
     start_time = time.time()
     successful = 0
     failed = 0

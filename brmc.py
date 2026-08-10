@@ -150,10 +150,7 @@ def _should_preserve_comment(comment: str, *, is_line_start: bool) -> bool:
     if s.startswith("# fmt") or s.startswith("#fmt"):
         return True
 
-    if s.startswith("# noqa") or s.startswith("# nosec") or s.startswith("# lint"):
-        return True
-
-    return False
+    return bool(s.startswith("# noqa") or s.startswith("# nosec") or s.startswith("# lint"))
 
 
 def _remove_comments_from_source(source: str) -> tuple[str, int]:
@@ -162,7 +159,7 @@ def _remove_comments_from_source(source: str) -> tuple[str, int]:
     removed = 0
 
     lines = source.splitlines(keepends=True)
-    for idx, line in enumerate(lines):
+    for _idx, line in enumerate(lines):
         if line.strip() == "":
             out_lines.append(line)
             continue

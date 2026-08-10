@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 
+import difflib
 from typing import Dict, List, Optional, Tuple
 
 
@@ -60,7 +61,6 @@ stub_tree.visit(visitor)
 transformer = TypingTransformer(visitor.annotations)
 modified_tree = source_tree.visit(transformer)
 print(modified_tree.code)
-import difflib
 
 print("".join(difflib.unified_diff(py_source.splitlines(1), modified_tree.code.splitlines(1))))
 if not modified_tree.deep_equals(source_tree):

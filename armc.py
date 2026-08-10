@@ -270,7 +270,7 @@ class CommentRemover:
     def print_summary(self) -> None:
         print("\n" + "=" * 80)
         print("📊 SUMMARY")
-        print("=" * 80)
+        print("-" * 42)
         print(f"Python files processed:     {self.total_files}")
         print(f"Comments removed:           {self.total_comments_removed}")
         print(f"Wheel files processed:      {len(self.processed_whl_files)}")
@@ -283,7 +283,7 @@ class CommentRemover:
             print("\n❌ Failed files:")
             for file_path, error in self.failed_files:
                 print(f"  • {file_path}: {error}")
-        print("=" * 80)
+        print("-" * 42)
 
 
 def main():

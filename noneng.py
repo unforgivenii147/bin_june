@@ -3,11 +3,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from dh import get_nobinary, mpf3
 from langdetect import DetectorFactory, detect
 from langdetect.lang_detect_exception import LangDetectException
 
 CHUNK_SIZE = 1024 * 1024
-from dh import get_nobinary, mpf3
 
 
 def is_binary(path: Path | str) -> bool:

@@ -79,9 +79,9 @@ def append_to_bashrc(bashrc_path, assignments, export_statement):
 
 
 def display_results(original_paths, deduplicated_paths, assignments, export_statement):
-    print("=" * 70)
+    print("-" * 42)
     print("PATH DEDUPLICATION RESULTS")
-    print("=" * 70)
+    print("-" * 42)
     print("\n📊 Summary:")
     print(f"   Original PATH entries:      {len(original_paths)}")
     print(f"   Deduplicated entries:       {len(deduplicated_paths)}")
@@ -154,7 +154,7 @@ def main():
         return
     print("\n" + "=" * 70)
     print("🎉 SUCCESS! Configuration saved to ~/.bashrc")
-    print("=" * 70)
+    print("-" * 42)
     print("\n📋 To activate the new PATH configuration, run one of:")
     print("   source ~/.bashrc")
     print("   # or")

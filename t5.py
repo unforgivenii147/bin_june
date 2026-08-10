@@ -7,6 +7,7 @@ from os import scandir as os_scandir
 from pathlib import Path
 
 import tree_sitter_python as tspython
+from dh import mpf_async
 from tree_sitter import Language, Parser, Query, QueryCursor
 
 CHUNK_SIZE = 1024 * 1024
@@ -105,8 +106,6 @@ def get_pyfiles(path: str | Path) -> list[Path]:
             continue
     return sorted(pyfiles)
 
-
-from dh import mpf_async
 
 mpf = mpf_async
 QUERY_STRING = "\n(comment) @comment\n(block\n  . (expression_statement\n    (string)) @docstring)\n(module\n  . (expression_statement\n    (string)) @docstring)\n"

@@ -46,6 +46,8 @@ EXCLUDED_EXTENSIONS = {
     ".iso", ".img", ".dmg", ".vdi", ".vmdk", ".qcow2",
 }
 # fmt: on
+
+
 @dataclass
 class CompressionResult:
     file_path: Path
@@ -442,9 +444,9 @@ def print_results_basic(results: list[CompressionResult], directory: Path, opera
     print("\n" + "=" * 80)
     print(f"🗜️  LZMA {operation_name} Results")
     print(f"📁 Directory: {directory}")
-    print("=" * 80)
+    print("-" * 42)
     print(f"\n{'File':<40} {'Original':>12} {size_label:>12} {'Ratio':>8} {'Time':>8}")
-    print("-" * 80)
+    print("-" * 42)
     for result in sorted(successful, key=lambda x: x.original_size, reverse=True)[:20]:
         if operation == "compress":
             ratio = (1 - result.processed_size / result.original_size) * 100 if result.original_size > 0 else 0
@@ -465,7 +467,7 @@ def print_results_basic(results: list[CompressionResult], directory: Path, opera
             print(f"  ... and {len(failed) - 10} more failures")
     print("\n" + "=" * 80)
     print(f"📊 {operation_name} Summary")
-    print("=" * 80)
+    print("-" * 42)
     print(f"Total files processed: {len(results)}")
     print(f"✅ Successful: {len(successful)}")
     print(f"❌ Failed: {len(failed)}")
@@ -485,7 +487,7 @@ def print_results_basic(results: list[CompressionResult], directory: Path, opera
     print(
         f"⏱️  Total time: {total_duration:.2f}s (avg {total_duration / len(results):.2f}s per file)" if results else ""
     )
-    print("=" * 80 + "\n")
+    print("-" * 42)
 
 
 def main():

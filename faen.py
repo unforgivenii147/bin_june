@@ -119,10 +119,10 @@ class Bidirectionaldictionary:
         start = (page - 1) * per_page
         end = min(start + per_page, total)
         print(f"\n📚 dictionary (Page {page}/{total_pages}):")
-        print("-" * 50)
+        print("-" * 42)
         for i, (persian, english) in enumerate(sorted_items[start:end], start + 1):
             print(f"{i:3}. {persian:15} → {english}")
-        print("-" * 50)
+        print("-" * 42)
         print(f"Showing {start + 1}-{end} of {total} entries")
 
     def list_all_full(self) -> None:
@@ -131,10 +131,10 @@ class Bidirectionaldictionary:
             return
         sorted_items = sorted(self.persian_to_english.items())
         print(f"\n📚 dictionary ({len(sorted_items)} entries):")
-        print("-" * 50)
+        print("-" * 42)
         for i, (persian, english) in enumerate(sorted_items, 1):
             print(f"{i:3}. {persian:15} → {english}")
-        print("-" * 50)
+        print("-" * 42)
 
     def stats(self) -> dict[str, int]:
         return {
@@ -169,7 +169,7 @@ def main():
     search_history = []
     print("\n" + "=" * 42)
     print("📖 PERSIAN-ENGLISH BIDIRECTIONAL DICTIONARY")
-    print("=" * 42)
+    print("-" * 42)
     print("Commands:")
     print("  :add <fa> <en>    - Add a new word")
     print("  :del <word>       - Delete a word")
@@ -181,9 +181,9 @@ def main():
     print("  :clear            - Clear screen")
     print("  :help             - Show this help")
     print("  :exit/:q          - Exit the application")
-    print("=" * 42)
+    print("-" * 42)
     print("💡 Just type a word to search (supports Persian & English)")
-    print("=" * 42 + "\n")
+    print("-" * 42)
     while True:
         try:
             user_input = input(": ").strip()
@@ -236,11 +236,11 @@ def main():
                 elif command == "stats":
                     stats = dict_app.stats()
                     print("\n📊 dictionary Statistics:")
-                    print("-" * 40)
+                    print("-" * 42)
                     print(f"  Total entries:   {stats['total']}")
                     print(f"  Persian words:   {stats['persian']}")
                     print(f"  English words:   {stats['english']}")
-                    print("-" * 40)
+                    print("-" * 42)
                     continue
                 elif command == "export":
                     dict_app.export_csv()

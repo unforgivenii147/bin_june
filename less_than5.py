@@ -61,12 +61,12 @@ def move_recent_files(start_dir: Path | str = ".") -> None:
             error_count += 1
     print("\n" + "=" * 42)
     print("SUMMARY")
-    print("=" * 42)
+    print("-" * 42)
     print(f"Files moved: {moved_count}")
     print(f"Files skipped: {skipped_count}")
     print(f"Errors: {error_count}")
     print(f"Total processed: {moved_count + skipped_count + error_count}")
-    print("=" * 42)
+    print("-" * 42)
 
 
 def move_recent_files_with_filters(

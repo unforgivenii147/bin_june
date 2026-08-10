@@ -70,7 +70,7 @@ def display_packages(packages: list[dict[str, str]], limit: Optional[int] = None
             else f"  Description: {pkg['description']}"
         )
         print(f"  GUID:        {pkg['guid']}")
-        print("-" * 80)
+        print("-" * 42)
 
 
 def save_to_file(packages: list[dict[str, str]], filename: str = "pypi_packages.txt"):

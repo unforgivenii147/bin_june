@@ -462,13 +462,13 @@ Compression Methods:
   -r, --brotli   Brotli compression (quality 11)
   -l, --lz4      LZ4 compression (HC mode max)
 Examples:
-  %(prog)s -z              
-  %(prog)s -x -d           
-  %(prog)s -7              
-  %(prog)s -g              
-  %(prog)s -b -d           
-  %(prog)s -r              
-  %(prog)s -l              
+  %(prog)s -z
+  %(prog)s -x -d
+  %(prog)s -7
+  %(prog)s -g
+  %(prog)s -b -d
+  %(prog)s -r
+  %(prog)s -l
         """,
     )
     method_group = parser.add_mutually_exclusive_group()

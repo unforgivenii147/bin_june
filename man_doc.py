@@ -7,7 +7,7 @@ from collections import deque
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
-from dh import cprint
+from dh import cprint, mpf3, runcmd
 
 
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
@@ -46,9 +46,6 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
             ):
                 files.append(item)
     return files
-
-
-from dh import mpf3, runcmd
 
 
 def safe_run(path) -> bool:

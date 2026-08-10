@@ -102,7 +102,7 @@ def main():
     print(f"Download session completed!")
     print(f"✅ Successfully downloaded : {removed_count} files")
     print(f"❌ Remaining in urls.txt   : {len(download_tasks) - removed_count} files")
-    print("=" * 50)
+    print("-" * 42)
 
 
 if __name__ == "__main__":

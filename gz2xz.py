@@ -5,10 +5,10 @@ import gzip
 import sys
 from pathlib import Path
 
+from dh import mpf3
 from lzma_mt import compress
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-from dh import mpf3
 
 
 def process_file(path: Path) -> tuple[str, bool, str]:
@@ -46,7 +46,7 @@ def main() -> None:
     total_new = 0
     print("\n" + "=" * 70)
     print("CONVERSION RESULTS")
-    print("=" * 70)
+    print("-" * 42)
     for file_path, success, message in results:
         if success:
             success_count += 1
@@ -62,7 +62,7 @@ def main() -> None:
         else:
             failure_count += 1
             print(f"✗ {file_path}: {message}", file=sys.stderr)
-    print("-" * 70)
+    print("-" * 42)
     print(f"Summary: {success_count} successful, {failure_count} failed")
     print(f"Total files processed: {len(results)}")
     if success_count > 0 and total_original > 0:

@@ -4,7 +4,7 @@ from __future__ import annotations
 import datetime
 from pathlib import Path
 
-from dh import cprint
+from dh import cprint, fsz
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
@@ -19,8 +19,6 @@ def gsz(path: str | Path) -> int:
             total += file.stat().st_size
     return total
 
-
-from dh import fsz
 
 if __name__ == "__main__":
     cwd = Path.cwd()

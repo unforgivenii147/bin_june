@@ -147,13 +147,13 @@ def main() -> None:
             all_stats = pool.map(worker, tasks)
     print("\n" + "=" * 42)
     print("SUMMARY")
-    print("=" * 42)
+    print("-" * 42)
     print(f"Files processed:   {len(all_stats)}")
     print(f"Chinese lines:     {sum(s['chinese_lines'] for s in all_stats):,}")
     if not args.dry_run:
         print(f"Translated lines:  {sum(s['translated_lines'] for s in all_stats):,}")
     print(f"Errors:            {sum(s['errors'] for s in all_stats)}")
-    print("=" * 42)
+    print("-" * 42)
 
 
 if __name__ == "__main__":

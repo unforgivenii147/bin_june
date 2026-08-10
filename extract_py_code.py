@@ -7,12 +7,12 @@ Usage:
     python excode.py mydir1 mydir2
     python excode.py
 """
+from __future__ import annotations
 
 import re
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-
 
 TARGET_NAMES = {"PKGINFO", "METADATA", "PKG-INFO"}
 TARGET_EXTENSIONS = {".md", ".txt", ".html"}

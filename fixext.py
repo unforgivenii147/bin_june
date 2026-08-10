@@ -200,7 +200,7 @@ def main():
     cprint(f"SUMMARY REPORT")
     cprint(f"Total Mismatches: {len(mismatches)}")
     cprint(f"Remaining: {len(mismatches) - fixed_count}", "yellow")
-    cprint("=" * 42, "white")
+    print("-" * 42)
 
 
 if __name__ == "__main__":

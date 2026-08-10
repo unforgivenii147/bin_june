@@ -151,7 +151,7 @@ def display_results(results: Dict, show_candidates: bool = False):
             print(f"  ... and {len(misspellings) - 10} more")
     print("\n" + "=" * 42)
     print(f"📊 Summary: {files_with_errors} files with {total_misspellings} total misspellings")
-    print("=" * 42)
+    print("-" * 42)
 
 
 def get_context(content: str, position: Tuple[int, int], window: int = 40) -> Dict:
@@ -186,11 +186,11 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s                    
-  %(prog)s -a                 
-  %(prog)s -a --interactive   
-  %(prog)s -w 8               
-  %(prog)s -e .txt .md        
+  %(prog)s
+  %(prog)s -a
+  %(prog)s -a --interactive
+  %(prog)s -w 8
+  %(prog)s -e .txt .md
         """,
     )
     parser.add_argument("directory", nargs="?", default=".", help="Directory to scan (default: current directory)")

@@ -112,12 +112,12 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s                         
-  %(prog)s image1.jpg image2.png   
-  %(prog)s /path/to/images         
-  %(prog)s file.jpg -b             
-  %(prog)s . -j 4                  
-  %(prog)s . --no-recursive        
+  %(prog)s
+  %(prog)s image1.jpg image2.png
+  %(prog)s /path/to/images
+  %(prog)s file.jpg -b
+  %(prog)s . -j 4
+  %(prog)s . --no-recursive
         """,
     )
     parser.add_argument(

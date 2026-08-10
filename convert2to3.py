@@ -208,7 +208,7 @@ def dry_run_file(file_path: str) -> tuple[str, str, bool]:
 
 def perform_dry_run(file_paths: list[str]) -> None:
     print(f"\nDRY RUN - Preview of changes using {4} workers:")
-    print("=" * 42)
+    print("-" * 42)
     files_with_changes = 0
     with ProcessPoolExecutor(max_workers=4) as executor:
         future_to_file = {executor.submit(dry_run_file, file_path): file_path for file_path in file_paths}
@@ -252,7 +252,7 @@ def main() -> int:
     successful, failed = process_files_parallel(python_files)
     print("\n" + "=" * 42)
     print("SUMMARY")
-    print("=" * 42)
+    print("-" * 42)
     print(f"Total files processed: {len(python_files)}")
     print(f"✓ Successful: {len(successful)}")
     print(f"✗ Failed: {len(failed)}")

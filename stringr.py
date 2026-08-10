@@ -4,8 +4,9 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-CHUNK_SIZE = 1024 * 1024
 from dh import get_files, mpf3, runcmd
+
+CHUNK_SIZE = 1024 * 1024
 
 
 def is_binary(path: Path | str) -> bool:

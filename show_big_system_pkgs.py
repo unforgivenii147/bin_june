@@ -133,7 +133,7 @@ def main() -> None:
         with contextlib.suppress(ValueError):
             num_processes = int(sys.argv[2])
     print(f"🔍 Scanning ALL available packages larger than {threshold_mb}MB...")
-    print("=" * 35)
+    print("-" * 42)
     packages = get_all_packages()
     if not packages:
         print("❌ No packages found or error retrieving package list.")
@@ -141,14 +141,14 @@ def main() -> None:
         return
     print(f"📦 Found {len(packages)} available packages.")
     large_packages, all_packages, no_size, total = process_packages_parallel(packages, threshold_bytes, num_processes)
-    print("=" * 35)
+    print("-" * 42)
     print(f"\n📊 RESULTS: Found {len(large_packages)} packages larger than {threshold_mb}MB")
-    print("-" * 35)
+    print("-" * 42)
     if large_packages:
         sorted_packages = sorted(large_packages.items(), key=lambda x: x[1], reverse=True)
         total_size = 0
         print(f"{'PACKAGE NAME':<40} {'DOWNLOAD SIZE':>15}")
-        print("-" * 35)
+        print("-" * 42)
         display_count = min(len(sorted_packages), 50)
         for _i, (pkg, size) in enumerate(sorted_packages[:display_count]):
             print(f"{pkg:<40} {fsz(size):>15}")
@@ -157,7 +157,7 @@ def main() -> None:
             print(f"\n... and {len(sorted_packages) - 50} more packages")
             for _, size in sorted_packages[50:]:
                 total_size += size
-        print("-" * 35)
+        print("-" * 42)
         print(f"{'TOTAL SIZE:':<40} {fsz(total_size):>15}")
         print(f"{'TOTAL PACKAGES:':<40} {len(large_packages):>15}")
     else:

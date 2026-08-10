@@ -1,9 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+from __future__ import annotations
+
 import sys
-import nltk
-from nltk.tokenize import sent_tokenize, word_tokenize
-from nltk.corpus import stopwords
 from collections import Counter
+
+import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import sent_tokenize, word_tokenize
 
 nltk.download("punkt", quiet=True)
 nltk.download("stopwords", quiet=True)

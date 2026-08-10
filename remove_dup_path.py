@@ -13,7 +13,7 @@ if __name__ == "__main__":
     print(len(dduped))
     for k in sorted(entries):
         print(k)
-    print("-" * 30)
+    print("-" * 42)
     for k in sorted(dduped):
         print(k)
     bashrc = Path.home() / ".bashrc"

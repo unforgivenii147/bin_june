@@ -76,7 +76,7 @@ class TextExtractionReport:
         print(f"📄 TEXT EXTRACTION REPORT")
         print(f"⏱  Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print(f"📊 Total files to process: {total_files}")
-        print("=" * 80 + "\n")
+        print("-" * 42)
 
     @staticmethod
     def print_file_result(result: ExtractionResult, rel_path: Path) -> None:
@@ -98,14 +98,14 @@ class TextExtractionReport:
         failed = sum(1 for r in results if not r.success)
         total_chars = sum(r.char_count for r in results if r.success)
         total_lines = sum(r.line_count for r in results if r.success)
-        print("=" * 80)
+        print("-" * 42)
         print("📊 SUMMARY")
-        print("=" * 80)
+        print("-" * 42)
         print(f"✓ Successful: {successful}/{len(results)}")
         print(f"✗ Failed:     {failed}/{len(results)}")
         print(f"📝 Total characters extracted: {total_chars:,}")
         print(f"📄 Total lines extracted:      {total_lines:,}")
-        print("=" * 80 + "\n")
+        print("-" * 42)
 
     @staticmethod
     def save_json_report(results: list[ExtractionResult], output_path: Path) -> None:
@@ -140,10 +140,10 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s                          
-  %(prog)s /path/to/dir1 /path/to/dir2  
-  %(prog)s . --workers 4            
-  %(prog)s . --json report.json     
+  %(prog)s
+  %(prog)s /path/to/dir1 /path/to/dir2
+  %(prog)s . --workers 4
+  %(prog)s . --json report.json
         """,
     )
     parser.add_argument(

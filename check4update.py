@@ -125,7 +125,7 @@ def find_site_packages() -> List[Path]:
 
 def main():
     print("Python Package Update Checker")
-    print("=" * 50)
+    print("-" * 42)
     site_dirs = find_site_packages()
     if not site_dirs:
         print("No site-packages directories found!")

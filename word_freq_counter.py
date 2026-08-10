@@ -97,10 +97,10 @@ def main():
     logger.info(f"Unique words found: {unique_words}")
     print("\n" + "=" * 42)
     print("Top 10 Most Common Words:")
-    print("-" * 30)
+    print("-" * 42)
     for word, count in total_counter.most_common(10):
         print(f"{word:<20} {count:>8}")
-    print("=" * 42)
+    print("-" * 42)
     print(f"\nFull results saved to: {output_file.absolute()}")
 
 

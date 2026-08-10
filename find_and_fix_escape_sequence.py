@@ -110,7 +110,7 @@ def main():
                 if res["fixed"]:
                     total_fixed += 1
                 print()
-    print("=" * 42)
+    print("-" * 42)
     print(f"📊 Scan Complete.")
     print(f"   Files with issues: {total_issues}")
     if args.auto_fix:

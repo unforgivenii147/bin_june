@@ -137,13 +137,13 @@ def process_file(path: Path, root_dir: Path) -> tuple[Path, bool, str | None, st
 def main():
     current_dir = Path.cwd()
     print(f"📁 Scanning directory: {current_dir}")
-    print("-" * 50)
+    print("-" * 42)
     python_files = find_python_files(current_dir)
     if not python_files:
         print("No Python files found.")
         return
     print(f"Found {len(python_files)} Python files to check.")
-    print("-" * 50)
+    print("-" * 42)
     updated_files = []
     added_shebang_files = []
     errors = []
@@ -171,7 +171,7 @@ def main():
                 skipped_count += 1
     if updated_files:
         print(f"\n✅ Updated existing shebangs in {len(updated_files)} files:")
-        print("-" * 50)
+        print("-" * 42)
         for path, rel_path in updated_files:
             file_info = rel_path
             if "." not in Path(rel_path).name:
@@ -179,7 +179,7 @@ def main():
             print(f"  ✏️  {file_info}")
     if added_shebang_files:
         print(f"\n➕ Added new shebang to {len(added_shebang_files)} files:")
-        print("-" * 50)
+        print("-" * 42)
         for path, rel_path in added_shebang_files:
             file_info = rel_path
             if "." not in Path(rel_path).name:

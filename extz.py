@@ -56,7 +56,7 @@ def main():
     sorted_extensions = sorted(ext_counts_total.items(), key=lambda x: (-x[1], x[0]))
 
     # Find the longest extension name for column formatting
-    max_ext_len = max(len(ext if ext != "NO_EXTENSION" else "(no extension)") for ext in ext_counts_total.keys())
+    max_ext_len = max(len(ext if ext != "NO_EXTENSION" else "(no extension)") for ext in ext_counts_total)
 
     for ext, count in sorted_extensions:
         display_ext = ext if ext != "NO_EXTENSION" else "(no extension)"

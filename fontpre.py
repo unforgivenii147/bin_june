@@ -5,8 +5,9 @@ import html
 from pathlib import Path
 from urllib.parse import quote
 
-SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 from dh import fsz
+
+SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
 
 cwd = Path.cwd()
 FONT_EXT = {".ttf", ".otf", ".woff", ".woff2", ".eot", ".svg"}

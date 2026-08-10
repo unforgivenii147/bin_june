@@ -124,7 +124,7 @@ def display_duplicates(groups: dict[str, list[FunctionInfo]]) -> bool:
         return False
     print("\n" + "=" * 80)
     print("DUPLICATE FUNCTIONS FOUND")
-    print("=" * 80)
+    print("-" * 42)
     for idx, (body, funcs) in enumerate(groups.items(), 1):
         print(f"\nGroup {idx}:")
         print(f"  Body hash: {hash(body)}")
@@ -133,7 +133,7 @@ def display_duplicates(groups: dict[str, list[FunctionInfo]]) -> bool:
             print(f"    {i}. '{func.name}' (line {func.lineno})")
         body_preview = body[:150] + "..." if len(body) > 150 else body
         print(f"\n  Body preview:\n{body_preview}")
-        print("-" * 40)
+        print("-" * 42)
     return True
 
 
@@ -189,7 +189,7 @@ def main() -> None:
             print(f"\nBackup created at: {backup_path}")
         print("\n" + "=" * 80)
         print("SELECT FUNCTIONS TO KEEP")
-        print("=" * 80)
+        print("-" * 42)
         choices = get_user_choices(duplicates)
         print("\n" + "=" * 80)
         confirm = input("Proceed with removing duplicate functions? (y/N): ")

@@ -130,7 +130,7 @@ def get_user_confirmation(package_name: str, package_data: Dict, include_deps: b
         print(f"   Size: {info.get('size')}")
     if include_deps:
         print(f"   ⚠️  Will reinstall dependencies (may cause conflicts)")
-    print("=" * 70)
+    print("-" * 42)
     while True:
         response = input("Reinstall this package? (y/n/a/?) [y/n/a/?]: ").lower().strip()
         if response in ("y", "yes"):

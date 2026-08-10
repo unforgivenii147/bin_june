@@ -5,11 +5,11 @@ import json
 from collections import defaultdict
 from pathlib import Path
 
+from dh import get_dirs
 from xxhash import xxh64
 
 CHUNK_SIZE = 1024 * 1024
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-from dh import get_dirs
 
 
 def is_nested(path1: Path, path2: Path) -> bool:

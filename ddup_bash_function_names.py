@@ -54,10 +54,10 @@ def display_results(functions, duplicates, filepath: Path) -> bool:
         print(f"✓ Total unique functions: {len({name for name, _, _ in functions})}")
         return True
     print(f"✗ Found {len(duplicates)} function name(s) defined multiple times:")
-    print("=" * 42)
+    print("-" * 42)
     for dup_name, count in sorted(duplicates.items()):
         print(f"\n📌 Duplicate function: '{dup_name}' (defined {count} times)")
-        print("-" * 40)
+        print("-" * 42)
         occurrences = [(line_num, line) for name, line_num, line in functions if name == dup_name]
         for idx, (line_num, line) in enumerate(occurrences, 1):
             print(f"  {idx}. Line {line_num}: {line}")
@@ -137,7 +137,7 @@ def main():
     if len(sys.argv) > 1:
         functions_file = Path(sys.argv[1])
     print(f"🔍 Checking for duplicate function names in: {functions_file}")
-    print("=" * 42)
+    print("-" * 42)
     functions = extract_function_names(functions_file)
     if not functions:
         print("\n⚠ No function definitions found in file.")

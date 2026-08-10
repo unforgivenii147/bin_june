@@ -4,6 +4,7 @@ Reinstall system packages from a text file or command line argument.
 Reads package names (one per line) and runs 'yes | apt install --reinstall'
 for each package.
 """
+from __future__ import annotations
 
 import os
 import subprocess
@@ -64,7 +65,7 @@ def main():
         print("No packages found in file.")
         sys.exit(0)
     print(f"Found {len(packages)} package(s) to reinstall.")
-    print("-" * 40)
+    print("-" * 42)
     successful = 0
     failed = 0
     for pkg in packages:
@@ -73,9 +74,9 @@ def main():
         else:
             failed += 1
         print()
-    print("=" * 40)
+    print("-" * 42)
     print(f"Summary: {successful} successful, {failed} failed")
-    print("=" * 40)
+    print("-" * 42)
     sys.exit(0 if failed == 0 else 1)
 
 

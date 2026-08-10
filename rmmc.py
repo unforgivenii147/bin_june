@@ -7,8 +7,9 @@ import sys
 from multiprocessing import get_context
 from pathlib import Path
 
-CHUNK_SIZE = 1024 * 1024
 from dh import fsz, get_nobinary
+
+CHUNK_SIZE = 1024 * 1024
 
 
 def gsz(path: str | Path) -> int:

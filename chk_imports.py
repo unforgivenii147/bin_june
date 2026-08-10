@@ -1,11 +1,13 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+from __future__ import annotations
+
 import argparse
 import ast
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional, Tuple, Set
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import List, Optional, Set, Tuple
 
 
 class ParentMapper(ast.NodeVisitor):
@@ -133,7 +135,7 @@ def process_file(file_path: Path, autofix: bool) -> Tuple[bool, bool, List[str]]
         return False, False, []
 
     details = []
-    for line_num, end_line, import_text in misplaced:
+    for line_num, _end_line, import_text in misplaced:
         detail = f"  Line {line_num}: {import_text.strip()}"
         print(detail)
         details.append(detail)
@@ -153,20 +155,10 @@ def process_file(file_path: Path, autofix: bool) -> Tuple[bool, bool, List[str]]
 
 
 def save_report(report_data: List[Tuple[Path, List[str]]], output_file: str, autofix: bool):
-    """Save the report to a file."""
     with open(output_file, "w", encoding="utf-8") as f:
-        f.write(f"Import Check Report\n")
-        f.write(f"{'=' * 80}\n")
-        f.write(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-        f.write(f"Mode: {'Autofix' if autofix else 'Check only'}\n")
-        f.write(f"{'=' * 80}\n\n")
-
         if not report_data:
             f.write("No misplaced imports found! All files are clean.\n")
             return
-
-        f.write(f"Files with misplaced imports: {len(report_data)}\n")
-        f.write(f"{'-' * 80}\n\n")
 
         for file_path, details in report_data:
             f.write(f"File: {file_path}\n")
@@ -175,11 +167,6 @@ def save_report(report_data: List[Tuple[Path, List[str]]], output_file: str, aut
                 f.write(f"{detail}\n")
             f.write("\n")
 
-        f.write(f"{'=' * 80}\n")
-        f.write(f"Summary:\n")
-        f.write(f"  Total files with issues: {len(report_data)}\n")
-        total_imports = sum(len([d for d in details if d.startswith("  Line ")]) for _, details in report_data)
-        f.write(f"  Total misplaced imports: {total_imports}\n")
         if autofix:
             fixed = sum(1 for _, details in report_data if any("[FIXED]" in d for d in details))
             f.write(f"  Files fixed: {fixed}\n")
@@ -199,7 +186,7 @@ def main():
         default=None,
         help="Save report to file",
     )
-    parser.add_argument("-j", "--jobs", type=int, default=4, help="Number of parallel jobs (default: 4)")
+    parser.add_argument("-j", "--jobs", type=int, default=8, help="Number of parallel jobs (default: 4)")
     args = parser.parse_args()
 
     output_file = args.output or (None if args.autofix else "errors.txt")
@@ -235,7 +222,7 @@ def main():
             if was_fixed:
                 files_fixed += 1
 
-    print(f"\n{'=' * 50}")
+    print(f"\n{'=' * 40}")
     print(f"Summary:")
     print(f"  Files with misplaced imports: {files_with_issues}")
     if args.autofix:

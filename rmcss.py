@@ -66,7 +66,7 @@ def main():
             return
         print(f"Found {len(files)} files to process")
         print(f"Using {args.workers or os.cpu_count()} workers")
-        print("-" * 50)
+        print("-" * 42)
         updated_count = 0
         error_count = 0
         with ProcessPoolExecutor(max_workers=args.workers) as executor:
@@ -80,7 +80,7 @@ def main():
                 elif was_updated:
                     print(f"✓ UPDATED: {rel_path}")
                     updated_count += 1
-        print("-" * 50)
+        print("-" * 42)
         print("Summary:")
         print(f"  Total files processed: {len(files)}")
         print(f"  Files updated: {updated_count}")

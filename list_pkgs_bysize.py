@@ -48,12 +48,12 @@ def main():
         return
     print("\n" + "=" * 42)
     print(f"{'Package':<30} {'Size':>20}")
-    print("=" * 42)
+    print("-" * 42)
     total = 0
     for pkg, size in packages:
         print(f"{pkg:<30} {fsz(size):>20}")
         total += size
-    print("=" * 42)
+    print("-" * 42)
     print(f"{'TOTAL':<30} {fsz(total):>20}")
 
 

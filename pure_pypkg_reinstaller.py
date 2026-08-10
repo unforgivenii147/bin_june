@@ -4,6 +4,7 @@ Reinstall Python packages with force-reinstall and upgrade flags.
 Reads package names from ~/missing.txt or sys.argv[1] (one per line).
 Uses multiprocessing for parallel installation.
 """
+from __future__ import annotations
 
 import multiprocessing
 import os
@@ -116,7 +117,7 @@ def main():
     print(f"Using {max_workers} parallel workers")
     if dry_run:
         print("DRY RUN MODE - No packages will be installed")
-    print("-" * 50)
+    print("-" * 42)
     pip_cmd = get_pip_command()
     if not pip_cmd:
         print("Error: pip is not installed or not found in PATH")
@@ -127,7 +128,7 @@ def main():
         print("No packages found in file.")
         sys.exit(0)
     print(f"Found {len(packages)} package(s) to reinstall.")
-    print("-" * 50)
+    print("-" * 42)
     if dry_run:
         for pkg in packages:
             install_package(pkg, pip_cmd, dry_run=True)
@@ -139,7 +140,7 @@ def main():
     try:
         with multiprocessing.Pool(processes=max_workers) as pool:
             results = pool.map(worker_func, packages)
-            for pkg_name, success, output in results:
+            for pkg_name, success, _output in results:
                 if success:
                     successful += 1
                 else:
@@ -158,7 +159,7 @@ def main():
         print("\nFailed packages:")
         for pkg in failed_packages:
             print(f"  - {pkg}")
-    print("=" * 50)
+    print("-" * 42)
     sys.exit(0 if failed == 0 else 1)
 
 

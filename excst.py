@@ -191,7 +191,7 @@ def main() -> None:
     print("\n" + "=" * 70)
     print(f"Extraction Complete!\nFiles: {processed_files}/{len(python_files)}")
     print(f"Functions: {total_functions} | Classes: {total_classes} | Constants: {total_constants}")
-    print("=" * 70 + "\n")
+    print("-" * 42)
 
 
 if __name__ == "__main__":

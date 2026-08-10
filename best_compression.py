@@ -430,7 +430,7 @@ def main() -> None:
         ok_single = [r for r in results_single if r.ok]
         ok_single.sort(key=lambda r: (r.out_size, r.elapsed_s))
         print(f"{'Algo':<10} {'Size':>15} {'Time(s)':>12}")
-        print("-" * 40)
+        print("-" * 42)
         for r in ok_single:
             print(f"{r.algo:<10} {fsz(r.out_size):>15} {r.elapsed_s:>12.4f}")
         print(

@@ -4,10 +4,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from dh import cprint
+from dh import cprint, mpf3
 from xorhash import get_xorhash
-
-from dh import mpf3
 
 REMOVE = "-y" in sys.argv
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})

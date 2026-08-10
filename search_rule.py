@@ -17,9 +17,9 @@ def search_rule(code):
     if not row:
         print(f"❌ No rule found matching code: {code}")
         return
-    print("=" * 42)
+    print("-" * 42)
     print(f"📜 RULE: {row['name']} ({row['code']})")
-    print("=" * 42)
+    print("-" * 42)
     print(f"\n💡 WHAT IT DOES:\n{row['what_it_does']}")
     print(f"\n⚠️ WHY IT IS BAD:\n{row['why_it_bad']}")
     print(f"\n💻 EXAMPLE:\n{row['example']}")
@@ -29,7 +29,7 @@ def search_rule(code):
         print(f"\n⚙️ OPTIONS:\n{row['options']}")
     if row["references_list"]:
         print(f"\n🔗 REFERENCES:\n{row['references_list']}")
-    print("=" * 42)
+    print("-" * 42)
 
 
 if __name__ == "__main__":

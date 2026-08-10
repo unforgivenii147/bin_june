@@ -3,24 +3,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-CHUNK_SIZE = 1024 * 1024
 from dh import get_nobinary
 
-
-def is_binary(path: Path | str) -> bool:
-    path = Path(path)
-    try:
-        with path.open("rb") as f:
-            chunk = f.read(CHUNK_SIZE)
-        if not chunk:
-            return False
-        if b"\x00" in chunk:
-            return True
-        text_chars = bytearray(range(32, 127)) + b"\n\r\t\x08"
-        nontext = sum((1 for b in chunk if b not in text_chars))
-        return nontext / len(chunk) > 0.3
-    except Exception:
-        return True
+CHUNK_SIZE = 1024 * 1024
 
 
 def delete_multiline_string_from_files(search_string: str) -> None:

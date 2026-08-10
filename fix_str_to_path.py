@@ -90,7 +90,7 @@ def process_directory() -> None:
         print("No Python files found in current directory")
         return
     print(f"Found {len(python_files)} Python file(s) to process")
-    print("-" * 50)
+    print("-" * 42)
     modified_count = 0
     for file_name in python_files:
         file_path = os.path.join(cwd, file_name)
@@ -98,7 +98,7 @@ def process_directory() -> None:
             modified_count += 1
         elif add_path_statement(file_path):
             modified_count += 1
-    print("-" * 50)
+    print("-" * 42)
     print(f"Modified {modified_count} file(s)")
 
 

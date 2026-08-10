@@ -48,16 +48,16 @@ def main():
         sys.exit(0)
     print(f"Found {len(files)} *{extension} files in {current_dir}")
     print(f"Processing with: {cli_app} {' '.join(cli_args)}")
-    print("-" * 50)
+    print("-" * 42)
     num_processes = max(1, int(cpu_count() * 0.75))
     process_func = partial(process_file, cli_app, cli_args)
     with Pool(processes=num_processes) as pool:
         results = pool.map(process_func, files)
-    print("-" * 50)
+    print("-" * 42)
     print("\n".join(results))
     success_count = sum(1 for r in results if r.startswith("✅"))
     failure_count = len(results) - success_count
-    print("-" * 50)
+    print("-" * 42)
     print(f"Summary: {success_count} successful, {failure_count} failed")
 
 

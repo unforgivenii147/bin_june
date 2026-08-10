@@ -79,7 +79,7 @@ def main() -> None:
     if len(sys.argv) > 1:
         aliases_file = Path(sys.argv[1])
     print(f"Reading aliases from: {aliases_file}")
-    print("-" * 50)
+    print("-" * 42)
     aliases = parse_aliases(aliases_file)
     if not aliases:
         print("No aliases found in file")

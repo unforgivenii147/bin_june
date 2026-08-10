@@ -142,7 +142,7 @@ def main():
         f.write(toml_content)
     print(f"Generated {output_file}")
     print("\nPreview:")
-    print("-" * 50)
+    print("-" * 42)
     print(toml_content)
 
 

@@ -6,8 +6,9 @@ import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-DH_SRC_DIR = Path("~/isaac/pkgs/dh/src/dh").expanduser()
 from dh import get_files
+
+DH_SRC_DIR = Path("~/isaac/pkgs/dh/src/dh").expanduser()
 
 
 def build_dh_mapping(dh_path: Path) -> dict:

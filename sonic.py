@@ -249,7 +249,7 @@ class FileSorter(LineProcessor):
     def print_stats(self, stats: dict) -> None:
         print("\n" + "=" * 42)
         print("STATISTICS")
-        print("=" * 42)
+        print("-" * 42)
         print(f"Original lines: {stats['original_lines']:,}")
         print(f"Final lines: {stats['final_lines']:,}")
         if stats["duplicate_lines"] > 0:
@@ -263,7 +263,7 @@ class FileSorter(LineProcessor):
         print()
         print(f"Processing time: {stats['processing_time']:.2f} seconds")
         print(f"Speed: {stats['lines_per_second']:,.0f} lines/second")
-        print("=" * 42)
+        print("-" * 42)
 
     def save_report(self, stats: dict, report_file: str | None = None) -> None:
         if report_file is None:

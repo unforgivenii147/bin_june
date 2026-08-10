@@ -4,8 +4,9 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-THRESHOLD = 1048576
 from dh import read_lines
+
+THRESHOLD = 1048576
 
 if __name__ == "__main__":
     file_name = Path(sys.argv[1])

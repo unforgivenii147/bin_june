@@ -125,9 +125,9 @@ def main():
         print("No .toml files found to process.")
         return
     print(f"Found {len(toml_files)} TOML file(s) to process...")
-    print("-" * 80)
+    print("-" * 42)
     print(f"{'Filename':<50} {'Time (ms)':<10} {'Before':<12} {'After':<12} {'Ratio':<8}")
-    print("-" * 80)
+    print("-" * 42)
     max_workers = min(len(toml_files), 8)
     results = []
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
@@ -139,7 +139,7 @@ def main():
             ratio = after_size / before_size * 100 if before_size > 0 else 0
             display_name = filename if len(filename) <= 48 else "..." + filename[-45:]
             print(f"{display_name:<50} {time_taken:>8.2f}  {fsz(before_size):<12} {fsz(after_size):<12} {ratio:>6.1f}%")
-    print("-" * 80)
+    print("-" * 42)
     total_before = sum(r[2] for r in results)
     total_after = sum(r[3] for r in results)
     total_ratio = total_after / total_before * 100 if total_before > 0 else 0

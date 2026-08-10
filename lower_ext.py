@@ -41,7 +41,7 @@ def main() -> int:
     args = parser.parse_args()
     search_dir = Path.cwd()
     print(f"Searching for files with uppercase extensions in: {search_dir}")
-    print("=" * 42)
+    print("-" * 42)
     uppercase_files = find_uppercase_extensions(search_dir, args.autofix)
     if uppercase_files:
         if not args.autofix:

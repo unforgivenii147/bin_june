@@ -349,9 +349,9 @@ def main() -> None:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s -c          
-  %(prog)s -d          
-  %(prog)s             
+  %(prog)s -c
+  %(prog)s -d
+  %(prog)s
 7-Zip Settings:
   - Format: 7z with LZMA2
   - Compression level: 9 (maximum)

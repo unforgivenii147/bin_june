@@ -84,9 +84,9 @@ def find_dist_info_dirs(site_packages: Path) -> list[Path]:
 
 
 def main():
-    print("=" * 80)
+    print("-" * 42)
     print("Python Package Script Checker for Termux")
-    print("=" * 80)
+    print("-" * 42)
     print()
     site_packages = find_site_packages()
     if not site_packages:
@@ -112,9 +112,9 @@ def main():
     packages_with_missing = [r for r in results if r["missing_scripts"]]
     total_missing = sum(len(r["missing_scripts"]) for r in packages_with_missing)
     print()
-    print("=" * 80)
+    print("-" * 42)
     print("SCAN RESULTS")
-    print("=" * 80)
+    print("-" * 42)
     print()
     print(f"Total packages scanned: {len(results)}")
     print(f"Packages with console_scripts: {len(packages_with_entry_points)}")

@@ -3,10 +3,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from dh import cprint
+from dh import cprint, runcmd
 
 SKIP_DIRS = frozenset({"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"})
-from dh import runcmd
 
 if __name__ == "__main__":
     cmd = ["apt", "list", "--upgradable"]

@@ -4,13 +4,13 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+from dh import get_files
+
 
 def is_binary(path):
     if path.suffix == ".py":
         return False
 
-
-from dh import get_files
 
 SIZE_THRESHOLD = 100
 LINE_THRESHOLD = 3

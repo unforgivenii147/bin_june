@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+from __future__ import annotations
+
 import json
 import re
 from pathlib import Path
@@ -21,7 +23,7 @@ def merge_translation_files(base_dir=".", output_file="dic.json", failed_file="f
                 print(
                     f"⚠️  Mismatch: {en_file.name} has {len(en_lines)} lines, {fa_file.name} has {len(fa_lines)} lines"
                 )
-            for en_word, fa_word in zip(en_lines, fa_lines):
+            for en_word, fa_word in zip(en_lines, fa_lines, strict=False):
                 if en_word.lower() == fa_word.lower():
                     failed_entries.append(en_word)
                 else:

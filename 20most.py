@@ -7,8 +7,9 @@ from collections import Counter, deque
 from multiprocessing import Pool
 from pathlib import Path
 
-CHUNK_SIZE = 1024 * 1024
 from dh import get_nobinary
+
+CHUNK_SIZE = 1024 * 1024
 
 
 def is_binary(path: Path | str) -> bool:
