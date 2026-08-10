@@ -21,18 +21,16 @@ from pathlib import Path
 
 from dh import fsz
 
-try:
-    from rich import box
-    from rich.console import Console
-    from rich.panel import Panel
-    from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
-    from rich.table import Table
-    from rich.text import Text
+from rich import box
+from rich.console import Console
+from rich.panel import Panel
+from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
+from rich.table import Table
+from rich.text import Text
 
-    RICH_AVAILABLE = True
-except ImportError:
-    RICH_AVAILABLE = False
-    print("💡 Tip: Install 'rich' for prettier output: pip install rich")
+RICH_AVAILABLE = True
+
+
 # fmt: off
 EXCLUDED_EXTENSIONS = {
     ".xz", ".lzma", ".7z", ".gz", ".bz2", ".zip", ".rar", ".tar", ".tgz", ".tbz2", ".txz", ".tlz",

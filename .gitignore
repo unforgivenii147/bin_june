@@ -103,3 +103,6 @@ wheels/
 .env
 *.pyc
 *.toml
+out/
+*.pyi
+.mypy_cache/
