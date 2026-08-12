@@ -14,12 +14,13 @@ if __name__ == "__main__":
             gl.append(line)
         else:
             nl.append(line)
-    with fn.open("w", encoding="utf8") as fo:
+    with fn.open("w", encoding="utf-8") as fo:
         for k in nl:
             fo.write(f"{k}\n")
     if gl:
-        gpath = Path("gitlinks")
+        gpath = Path("gitlinks.txt")
         with gpath.open("a", encoding="utf8") as fg:
+            fg.write("\n")
             for x in gl:
                 fg.write(f"{x}\n")
     else:

@@ -27,7 +27,7 @@ try:
     HAS_FASTWALK = True
 except ImportError:
     HAS_FASTWALK = False
-NON_ENGLISH_PATTERN: Final[re.Pattern] = re.compile("[^\\x00-\\x7F]")
+NON_ENGLISH_PATTERN: Final[re.Pattern] = re.compile(r"[^\x00-\x7F]")
 
 
 def is_binary(path: Path) -> bool:

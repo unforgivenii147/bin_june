@@ -16,7 +16,6 @@ import numpy as np
 from joblib import Parallel, delayed
 from PIL import Image, UnidentifiedImageError
 
-
 SEARCH_ROOT = Path(".")
 JPEG_QUALITY = 90
 SIMILARITY_THRESHOLD = 8.0

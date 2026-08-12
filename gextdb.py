@@ -9,7 +9,6 @@ import sqlite3
 from pathlib import Path
 from typing import Any
 
-
 OUTPUT_DIR = Path("output")
 DB_PATH = Path("/sdcard/ext.db")
 ALLOWED_PYTHON_EXTENSIONS = ".py", ""

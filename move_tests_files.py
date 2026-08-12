@@ -13,7 +13,6 @@ import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
-
 TESTS_DIR = Path.home() / "tmp" / "tests"
 MOVED_FILES_LOG = Path.home() / "tmp" / "moved_files.json"
 

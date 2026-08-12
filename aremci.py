@@ -7,7 +7,8 @@ import shutil
 from concurrent.futures import ProcessPoolExecutor
 from os import scandir as os_scandir
 from pathlib import Path
-from dh import get_files, DOC_TH1, DOC_TH2
+
+from dh import DOC_TH1, DOC_TH2, get_files
 
 
 def is_python_file(path: str | Path) -> bool:

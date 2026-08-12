@@ -9,7 +9,6 @@ from pathlib import Path
 
 import lzma_mt
 
-
 ARCHIVE_EXTENSIONS = {
     ".zip",
     ".br",

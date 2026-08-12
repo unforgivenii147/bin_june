@@ -12,7 +12,6 @@ import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
-
 COMMENT_PATTERN = re.compile("<!--.*?-->", re.DOTALL)
 
 

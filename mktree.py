@@ -6,7 +6,6 @@ import re
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 
-
 try:
     import pytesseract
     from PIL import Image

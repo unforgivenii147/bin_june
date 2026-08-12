@@ -17,7 +17,6 @@ from pathlib import Path
 
 from dh import MIME2EXT
 
-
 DATA_URI_PATTERN = re.compile(
     r"data:(?P<mime>[^;,]*)(?P<params>(?:;[^;,]+=[^;,]+)*?);base64,\s*(?P<data>[A-Za-z0-9+/=]+)"
 )

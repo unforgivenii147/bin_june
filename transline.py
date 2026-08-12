@@ -24,7 +24,7 @@ CHUNK_SIZE: Final[int] = 32768
 SKIP_DIRS: Final[frozenset[str]] = frozenset(
     {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
 )
-CHINESE_PATTERN: Final[re.Pattern] = re.compile("[\\u4e00-\\u9fff\\u3400-\\u4dbf\\uf900-\\ufaff]+")
+CHINESE_PATTERN: Final[re.Pattern] = re.compile(r"[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]+")
 MAX_WORKERS: Final[int] = 10
 MAX_RETRIES: Final[int] = 1
 PROGRESS_SAVE_EVERY: Final[int] = 20

@@ -4,7 +4,6 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-
 OUTPUT_DIR = Path("output")
 if not OUTPUT_DIR.exists():
     OUTPUT_DIR.mkdir(exist_ok=True)

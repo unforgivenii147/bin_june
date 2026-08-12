@@ -14,7 +14,6 @@ from dataclasses import dataclass
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 
-
 RE_FUNCTIONS = {"compile", "search", "match", "fullmatch", "split", "findall", "finditer", "sub", "subn"}
 REGEX_INDICATORS = {
     "\\d",

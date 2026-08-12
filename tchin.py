@@ -7,7 +7,6 @@ from pathlib import Path
 
 from deep_translator import GoogleTranslator, single_detection
 
-
 CHUNK_SIZE = 4500
 ALLOWED_EXT = {".txt", ".md", ".csv", ".json", ".py"}
 

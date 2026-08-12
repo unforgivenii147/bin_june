@@ -144,7 +144,7 @@ class PathlibRefactorer:
         )
         self.transformations.append(
             Transformation(
-                pattern="\\bos\\.path\\.split\\s*\\(\\s*([^)]+)\\s*\\)",
+                pattern=r"\bos\.path\.split\s*\(\s*([^)]+)\s*\)",
                 replacement=lambda m: f"(str(Path({m.group(1)}).parent), Path({m.group(1)}).name)",
                 type=TransformationType.FUNCTION_CALL,
                 description="Convert os.path.split to tuple of parent/name",

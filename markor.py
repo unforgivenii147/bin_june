@@ -120,11 +120,11 @@ class TodoFormat(DocumentFormat):
             "completed": "^\\(x\\) .*$",
             "incomplete": "^\\(\\) .*$",
             "priority_a": "^\\(A\\) .*$",
-            "priority_b": "^\\(B\\) .*$",
-            "priority_c": "^\\(C\\) .*$",
-            "project": "\\+\\w+",
-            "context": "@\\w+",
-            "date": "\\d{4}-\\d{2}-\\d{2}",
+            "priority_b": r"^\(B\) .*$",
+            "priority_c": r"^\(C\) .*$",
+            "project": r"\+\w+",
+            "context": r"@\w+",
+            "date": r"\d{4}-\d{2}-\d{2}",
         }
 
     def get_preview(self, content: str) -> str:

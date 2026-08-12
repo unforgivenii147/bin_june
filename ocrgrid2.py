@@ -9,7 +9,6 @@ import cv2
 import pytesseract
 from dh import IMG_EXT
 
-
 OUTPUT_DIR = Path("ocr_results")
 OUTPUT_DIR.mkdir(exist_ok=True)
 OEM_OPTIONS = [0, 1, 2, 3]

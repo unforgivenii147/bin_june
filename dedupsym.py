@@ -9,7 +9,6 @@ from pathlib import Path
 
 import xxhash
 
-
 CACHE_PATH = Path.home() / ".cache" / "dups_cache.json"
 DUPS_DIR = Path.home() / ".cache" / "dups"
 MANIFEST_PATH = DUPS_DIR / "manifest.json"

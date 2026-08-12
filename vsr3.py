@@ -12,7 +12,6 @@ import tempfile
 import zipfile
 from pathlib import Path
 
-
 try:
     from tqdm import tqdm
 except ImportError:

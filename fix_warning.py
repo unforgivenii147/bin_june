@@ -7,7 +7,6 @@ import sys
 import tokenize
 from pathlib import Path
 
-
 INVALID_ESCAPE_RE = re.compile(r"\\(?![\\\'\"abfnrtv0-7xuUNN])")
 
 

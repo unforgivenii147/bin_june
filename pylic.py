@@ -19,7 +19,6 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-
 EXCLUDED_PREFIXES = ["#!", "# type", "# fmt", "# pylint", "# ruff", "# mypy"]
 
 

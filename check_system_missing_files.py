@@ -1,74 +1,78 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""Find missing files for installed Termux packages."""
+"""System package file integrity checker for Termux/Linux."""
 
 from __future__ import annotations
 
 import json
-import os
 import subprocess
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
 
-def get_prefix():
-    return os.environ.get("PREFIX", "/data/data/com.termux/files/usr")
-
-
 def should_ignore(file_path):
-    exclude = {"share/man", "share/info", "share/doc", "share/LICENSES"}
-    return any(excl in file_path for excl in exclude)
+    parts = Path(file_path).parts
+    return any(
+        len(parts) > i + 1 and parts[i : i + 2][1] in {"man", "info", "doc", "LICENSES"}
+        for i in range(len(parts) - 1)
+        if parts[i] == "share"
+    )
 
 
-def is_file_path(path):
-    p = Path(path)
-    if p.exists():
-        return p.is_file()
-    return "." in p.name
-
-
-def check_package_files(package_name, prefix):
+def check_package_files(pkg_name):
     try:
-        result = subprocess.run(["dpkg", "-L", package_name], capture_output=True, text=True, timeout=5)
+        result = subprocess.run(["dpkg", "-L", pkg_name], capture_output=True, text=True, timeout=5, check=False)
         if result.returncode != 0:
-            return package_name, None
+            return pkg_name, None
+
         missing = []
         for file_path in result.stdout.strip().split("\n"):
-            if not file_path or should_ignore(file_path) or not is_file_path(file_path):
+            if not file_path or should_ignore(file_path):
                 continue
-            full_path = Path(prefix) / file_path.lstrip("/")
-            if not full_path.exists():
+
+            p = Path(file_path)
+            if p.is_dir():
+                continue
+
+            if not p.exists():
                 missing.append(file_path)
-        return package_name, missing if missing else None
-    except Exception:
-        return package_name, None
+
+        return pkg_name, missing if missing else None
+    except (subprocess.TimeoutExpired, Exception):
+        return pkg_name, None
 
 
 def main():
-    prefix = get_prefix()
     output_file = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("missing_files.json")
-    pkg_file = Path("missing.txt")
-    print(f"PREFIX: {prefix}")
-    result = subprocess.run(["dpkg", "-l"], capture_output=True, text=True)
+
+    result = subprocess.run(["dpkg", "-l"], capture_output=True, text=True, check=False)
     packages = [line.split()[1] for line in result.stdout.split("\n") if line.startswith("ii")]
     print(f"Scanning {len(packages)} packages...")
+
     results = {}
     with ProcessPoolExecutor(max_workers=os.cpu_count()) as executor:
-        futures = {executor.submit(check_package_files, pkg, prefix): pkg for pkg in packages}
+        futures = {executor.submit(check_package_files, pkg): pkg for pkg in packages}
         for i, future in enumerate(as_completed(futures), 1):
             pkg, missing = future.result()
             if missing:
                 results[pkg] = missing
             if i % 10 == 0:
                 print(f"  {i}/{len(packages)}")
-    with open(output_file, "w") as f:
-        json.dump(results, f, indent=2)
-    with open(pkg_file, "w") as f:
-        f.write("\n".join(results.keys()))
-    print(f"\n✓ {len(results)} packages with missing files → {output_file}")
-    print(f"  Total missing: {sum(len(f) for f in results.values())}")
-    print(f"✓ Package names → {pkg_file}")
+
+    try:
+        with open(output_file, "w") as f:
+            json.dump(results, f, indent=2)
+        with open("missing.txt", "w") as f:
+            f.write("\n".join(results.keys()))
+
+        print(f"\n✓ {len(results)} packages with missing files → {output_file}")
+        print(f"  Total missing: {sum(len(f) for f in results.values())}")
+    except IOError as e:
+        print(f"Error writing output: {e}", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":
+    import os
+
     main()

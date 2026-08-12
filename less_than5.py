@@ -5,7 +5,6 @@ import shutil
 import time
 from pathlib import Path
 
-
 TIME_THRESHOLD = 8 * 42
 
 

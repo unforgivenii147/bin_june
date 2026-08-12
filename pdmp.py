@@ -5,7 +5,6 @@ import argparse
 import sys
 from pathlib import Path
 
-
 EXCLUDED_NAMES: set[str] = {"tmp", "cache", "bin", ".git", "etc", "config", "var"}
 EXCLUDED_PATH_COMPONENTS: set[str] = {".git", "tmp", "etc", "var", "config"}
 

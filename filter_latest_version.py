@@ -13,8 +13,8 @@ from pathlib import Path
 
 
 def parse_wheel_url(url: str) -> tuple[str, str, tuple[int, ...], str] | None:
-    android_pattern = "/([^/]+)-(\\d+\\.\\d+\\.\\d+)-py3-none-android_24_([^/]+)\\.whl"
-    linux_pattern = "/([^/]+)-(\\d+\\.\\d+\\.\\d+(?:\\.\\d+)?)-cp\\d+-cp\\d+-linux_([^/]+)\\.whl"
+    android_pattern = r"/([^/]+)-(\d+\.\d+\.\d+)-py3-none-android_24_([^/]+)\.whl"
+    linux_pattern = r"/([^/]+)-(\d+\.\d+\.\d+(?:\.\d+)?)-cp\d+-cp\d+-linux_([^/]+)\.whl"
     match = re.search(android_pattern, url)
     if match:
         package = match.group(1)

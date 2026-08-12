@@ -7,7 +7,6 @@ import sys
 from collections import defaultdict
 from urllib.request import urlopen
 
-
 PACKAGE = sys.argv[1]
 
 

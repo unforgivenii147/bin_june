@@ -138,13 +138,11 @@ def tar_subdir(subdir: Path, dry_run: bool, verbose: bool) -> Path | None:
 
 def remove_subdir(subdir: Path, dry_run: bool, verbose: bool) -> None:
     if dry_run:
-        if verbose:
-            logger.info(f"  [dry-run] would remove {subdir}/")
+        logger.info(f"  [dry-run] would remove {subdir}/")
         return
     try:
         shutil.rmtree(subdir)
-        if verbose:
-            logger.info(f"  removed original dir: {subdir.name}/")
+        logger.info(f"  removed original dir: {subdir.name}/")
     except Exception as exc:
         logger.warning(f"  WARNING — could not remove {subdir}: {exc}")
 

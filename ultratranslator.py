@@ -19,7 +19,7 @@ from dh import get_nobinary
 MAX_WORKERS: Final[int] = 4
 MAX_RETRIES: Final[int] = 2
 RETRY_DELAY: Final[float] = 3.0
-NON_ENGLISH_PATTERN: Final[re.Pattern] = re.compile("[^\\x00-\\x7F]")
+NON_ENGLISH_PATTERN: Final[re.Pattern] = re.compile(r"[^\x00-\x7F]")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 

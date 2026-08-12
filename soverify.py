@@ -143,3 +143,4 @@ if __name__ == "__main__":
         sys.exit(1)
     finally:
         ctypes.pythonapi.PyGILState_Release(gil_state)
+    Path("/sdcard/soverify.log").unlink()

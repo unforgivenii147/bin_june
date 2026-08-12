@@ -7,7 +7,6 @@ import sys
 
 import matplotlib.pyplot as plt
 
-
 MAX_DIRS = 25
 MIN_SIZE_KB = 100
 OUTPUT_FILENAME = "dirinfo.png"

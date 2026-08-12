@@ -9,7 +9,6 @@ from pathlib import Path
 
 from xxhash import xxh64
 
-
 BACKUP_FILE = ".symlink_backup.json"
 MIN_FILE_SIZE = 1024
 

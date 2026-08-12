@@ -11,7 +11,6 @@ import zipfile
 import zlib
 from pathlib import Path
 
-
 try:
     import brotli
 except ImportError:

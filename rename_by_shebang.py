@@ -11,7 +11,6 @@ import re
 import shutil
 from pathlib import Path
 
-
 SHEBANG_MAPPING = {
     "#!/data/data/com.termux/files/usr/bin/python3?": ".py",
     "#!/data/data/com.termux/files/usr/bin/env python3?": ".py",

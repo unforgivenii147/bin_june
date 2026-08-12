@@ -11,7 +11,6 @@ from pathlib import Path
 import ssdeep
 from ppdeep import compare, hash_from_file
 
-
 try:
     from tabulate import tabulate
 

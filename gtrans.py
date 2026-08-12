@@ -34,9 +34,9 @@ logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 RETRY_ATTEMPTS: Final[int] = 3
 RETRY_DELAY: Final[float] = 0.5
-TAMIL_PATTERN: Final[re.Pattern] = re.compile("[\\u0B80-\\u0BFF]+")
-CHINESE_PATTERN: Final[re.Pattern] = re.compile("[\\u4E00-\\u9FFF\\u3040-\\u309F\\u30A0-\\u30FF]+")
-ENGLISH_PATTERN: Final[re.Pattern] = re.compile("^[A-Za-z0-9\\s\\.,;:!?\\'\"()\\-—]+$")
+TAMIL_PATTERN: Final[re.Pattern] = re.compile(r"[\u0B80-\u0BFF]+")
+CHINESE_PATTERN: Final[re.Pattern] = re.compile(r"[\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF]+")
+ENGLISH_PATTERN: Final[re.Pattern] = re.compile(r"^[A-Za-z0-9\s\.,;:!?\'\"()\-—]+$")
 
 
 class ResilientTranslator:

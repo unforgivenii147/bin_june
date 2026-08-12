@@ -10,7 +10,6 @@ from pathlib import Path
 
 import ssdeep
 
-
 try:
     from tabulate import tabulate
 

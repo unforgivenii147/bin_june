@@ -9,7 +9,6 @@ from pathlib import Path
 
 from tqdm import tqdm
 
-
 binf = Path("/sdcard/bin").open(encoding="utf-8")
 EXCLUDED_EXTENSIONS = [line.strip() for line in binf]
 binf.close()

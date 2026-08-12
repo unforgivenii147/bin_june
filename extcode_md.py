@@ -4,7 +4,6 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-
 LANG_EXT = {
     "python": ".py",
     "py": ".py",

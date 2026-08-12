@@ -13,7 +13,6 @@ from pygments import highlight
 from pygments.formatters import TerminalFormatter
 from pygments.lexers import JsonLexer
 
-
 IDN = True
 try:
     import idna

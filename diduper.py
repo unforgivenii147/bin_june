@@ -8,7 +8,6 @@ from pathlib import Path
 from tree_sitter import Node, Parser
 from tree_sitter_languages import get_language
 
-
 OUTPUT_FILE = "utils.py"
 SKIP_FILES = {OUTPUT_FILE, Path(__file__).name}
 

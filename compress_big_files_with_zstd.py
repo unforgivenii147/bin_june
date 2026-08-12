@@ -15,7 +15,6 @@ from pathlib import Path
 
 import zstandard as zstd
 
-
 GREEN = "\x1b[92m"
 YELLOW = "\x1b[93m"
 BLUE = "\x1b[94m"

@@ -265,8 +265,8 @@ def get_stdlib_modules() -> set[str]:
 
 def extract_imports_from_code(code: str, file_path: str = "") -> set[str]:
     imports = set()
-    import_pattern = "^\\s*import\\s+([a-zA-Z0-9_\\.\\*\\s,]+)"
-    from_pattern = "^\\s*from\\s+([a-zA-Z0-9_\\.]+)\\s+import"
+    import_pattern = r"^\s*import\s+([a-zA-Z0-9_\.\*\s,]+)"
+    from_pattern = r"^\s*from\s+([a-zA-Z0-9_\.]+)\s+import"
     for line in code.split("\n"):
         line = line.split("#")[0].strip()
         import_match = re.match(import_pattern, line)

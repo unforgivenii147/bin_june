@@ -119,7 +119,7 @@ class SpellCheckProcessor:
             word = error["word"]
             suggestion = self.spell_checker.correction(word)
             if isinstance(suggestion, str):
-                fixed_content = re.sub(r"\b" + re.escape(word) + "\\b", suggestion, fixed_content, flags=re.IGNORECASE)
+                fixed_content = re.sub(r"\b" + re.escape(word) + r"\b", suggestion, fixed_content, flags=re.IGNORECASE)
         try:
             with open(file_path, "w", encoding="utf-8") as f:
                 f.write(fixed_content)

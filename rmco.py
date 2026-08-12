@@ -11,7 +11,6 @@ import tokenize
 from pathlib import Path
 from typing import NamedTuple
 
-
 try:
     import astor
 except Exception:

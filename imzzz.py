@@ -10,7 +10,6 @@ from pathlib import Path
 
 from dh import PKG_MAPPING, STDLIB
 
-
 STD_LIB = STDLIB
 MAPPING = PKG_MAPPING
 try:

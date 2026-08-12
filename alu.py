@@ -5,7 +5,6 @@ from pathlib import Path
 
 from dh import cprint, runcmd
 
-
 if __name__ == "__main__":
     cmd = ["apt", "list", "--upgradable"]
     _, txt, _ = runcmd(cmd, show_output=False)

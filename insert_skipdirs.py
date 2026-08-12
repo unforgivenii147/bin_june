@@ -11,7 +11,6 @@ import ast
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
-
 INSERT_TEXT = "\n\n"
 
 

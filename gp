@@ -1,1 +1,1 @@
-gp.py
+/data/data/com.termux/files/home/bin/gp.py

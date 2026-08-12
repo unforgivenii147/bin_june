@@ -6,7 +6,6 @@ import multiprocessing as mp
 from ast import AST
 from pathlib import Path
 
-
 OUTPUT_DIR = Path("output")
 EXCLUDE_DIRS = {"test", "tests", "examples", "output"}
 

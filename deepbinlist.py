@@ -14,7 +14,6 @@ from pathlib import Path
 
 import pkg_resources
 
-
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",

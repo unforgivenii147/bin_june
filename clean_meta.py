@@ -20,7 +20,7 @@ def gsz(path: str | Path) -> int:
 
 
 blank_line = "\n"
-IMAGE_RE = re.compile("^\\s*(\\.\\.\\s+image::|:target:|:alt:)", re.IGNORECASE)
+IMAGE_RE = re.compile(r"^\s*(\.\.\s+image::|:target:|:alt:)", re.IGNORECASE)
 
 
 def process_file(path: str | Path) -> None:

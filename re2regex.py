@@ -84,7 +84,7 @@ def get_pyfiles(path: str | Path) -> list[Path]:
 
 
 NORMAL_IMPORT = "^import re\\b"
-REGEX_IMPORT = "^import regex as re\\b"
+REGEX_IMPORT = r"^import regex as re\b"
 
 
 def update_file(file_path, reverse: bool = False) -> str | None:

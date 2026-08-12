@@ -11,7 +11,6 @@ from typing import TYPE_CHECKING
 import py7zr
 from dh import fsz, gsz
 
-
 if TYPE_CHECKING:
     from collections.abc import Iterable
 ROOT = Path.cwd()

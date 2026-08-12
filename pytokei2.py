@@ -4,7 +4,6 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-
 try:
     from dh import is_binary
 except ImportError:

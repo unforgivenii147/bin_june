@@ -5,7 +5,6 @@ import os
 import re
 from pathlib import Path
 
-
 static_dir = "/sdcard/_static"
 
 

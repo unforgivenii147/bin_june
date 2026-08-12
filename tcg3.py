@@ -9,7 +9,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 TERMUX_SHEBANGS = {
     "python": "#!/data/data/com.termux/files/usr/bin/python",
     "bash": "#!/data/data/com.termux/files/usr/bin/bash",

@@ -11,7 +11,6 @@ from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from fastwalk import walk_files
 
-
 AES_BLOCK_SIZE = 128
 
 

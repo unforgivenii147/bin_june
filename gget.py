@@ -14,7 +14,6 @@ import requests
 from rich.console import Console
 from rich.progress import BarColumn, DownloadColumn, Progress, TextColumn, TimeRemainingColumn, TransferSpeedColumn
 
-
 console = Console()
 CHUNK_SIZE = 1024 * 1024 * 5
 MAX_WORKERS = 4

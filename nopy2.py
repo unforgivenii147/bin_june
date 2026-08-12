@@ -8,7 +8,6 @@ import tempfile
 import zipfile
 from pathlib import Path
 
-
 TARGET_FILES = {"WHEEL"}
 PREFIX = "Tag: py2-none-any"
 

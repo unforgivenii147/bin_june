@@ -8,7 +8,6 @@ from pathlib import Path
 from deep_translator import GoogleTranslator
 from tqdm import tqdm
 
-
 MAX_CHARS = 5000
 
 

@@ -7,7 +7,6 @@ import sys
 import tempfile
 from pathlib import Path
 
-
 COMMENT_PREFIXES = "#", "//", "--"
 
 

@@ -7,7 +7,6 @@ from pathlib import Path
 
 from dh import cprint
 
-
 major, minor, _, _, _ = sys.version_info
 py_version = f"{major}.{minor}"
 ALLOWED = ["METADATA", "RECORD", "WHEEL", "top_level.txt"]

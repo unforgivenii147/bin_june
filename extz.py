@@ -27,11 +27,11 @@ def main():
 
     files = get_files(cwd)
 
-    batch_size = max(1, len(files) // num_workers)
+    batch_size = max(1, len(files) // 8)
     file_batches = [files[i : i + batch_size] for i in range(0, len(files), batch_size)]
     ext_counts_total = defaultdict(int)
 
-    with ProcessPoolExecutor(max_workers=num_workers) as executor:
+    with ProcessPoolExecutor(max_workers=8) as executor:
         future_to_batch = {
             executor.submit(process_files_batch, batch): batch_idx for batch_idx, batch in enumerate(file_batches)
         }

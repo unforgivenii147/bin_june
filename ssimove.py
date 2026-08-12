@@ -6,7 +6,6 @@ from pathlib import Path
 
 import ssdeep
 
-
 SEARCH_DIR = Path.cwd()
 OUTPUT_DIR = SEARCH_DIR / "output"
 SIMILARITY_THRESHOLD = 60

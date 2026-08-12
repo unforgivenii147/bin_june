@@ -11,7 +11,6 @@ from googleapiclient.discovery import Resource, build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
 
-
 SCOPES = ["https://www.googleapis.com/auth/drive.readonly"]
 
 

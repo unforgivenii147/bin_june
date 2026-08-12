@@ -8,7 +8,6 @@ import zipfile
 from email.parser import Parser
 from pathlib import Path
 
-
 EXT_SUFFIXES = (".so", ".pyd", ".dll")
 
 

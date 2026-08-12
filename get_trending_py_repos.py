@@ -9,7 +9,6 @@ from pathlib import Path
 import requests
 from bs4 import BeautifulSoup
 
-
 BASE_URL = "https://github.com/trending/python"
 TIMEFRAMES = ["daily", "weekly", "monthly"]
 OUTPUT_DIR = Path("trending_repos")

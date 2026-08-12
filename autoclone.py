@@ -17,7 +17,6 @@ from pathlib import Path
 import requests
 from dotenv import load_dotenv
 
-
 env_path = Path.home() / ".env"
 if env_path.exists():
     load_dotenv(env_path)

@@ -17,7 +17,7 @@ def process_file(path: Path) -> None:
     lines = path.read_text(encoding="utf-8").splitlines()
     path = Path(path)
     for line in lines:
-        nl = "\\u" + str(line.strip())
+        nl = r"\u" + str(line.strip())
         decoded = unicode_unescape(nl)
         print(nl)
         print(decoded)

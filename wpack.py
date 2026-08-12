@@ -10,7 +10,6 @@ from pathlib import Path
 from wheel.archive import wheel_load
 from wheel.wheelfile import WheelFile
 
-
 UNPACKED_WHEELS_SOURCE_DIR = Path.cwd()
 WHEELS_OUTPUT_DIR = None
 

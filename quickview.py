@@ -4,7 +4,6 @@ from __future__ import annotations
 import curses
 from pathlib import Path
 
-
 LINES_PER_FILE = 20
 
 

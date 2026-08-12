@@ -8,7 +8,6 @@ from pathlib import Path
 
 from xxhash import xxh64
 
-
 DEFAULT_BLOCK = 32768
 QUICK_READ = 4096
 CHUNK_SIZE = 65536

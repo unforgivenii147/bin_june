@@ -6,7 +6,6 @@ import re
 import shutil
 from pathlib import Path
 
-
 PRINT_PATTERN = re.compile(r"^\s*print\s+(?!\()(.+)$")
 PRINT_BARE_PATTERN = re.compile(r"^\s*print\s*$")
 EXCEPT_PATTERN = re.compile(r"^\s*except\s+(\S+)\s*,\s*(\S+)\s*:")

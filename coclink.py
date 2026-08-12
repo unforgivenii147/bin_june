@@ -9,7 +9,6 @@ from pathlib import Path
 from dotenv import load_dotenv
 from googleapiclient.discovery import Resource, build
 
-
 load_dotenv()
 API_KEY = os.getenv("YOUTUBE_API_KEY")
 CHANNELS = {

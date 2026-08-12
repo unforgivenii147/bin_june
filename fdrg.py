@@ -12,7 +12,6 @@ from queue import Queue
 
 from fastwalk import walk_files
 
-
 pause_event = threading.Event()
 pause_event.set()
 results_queue = Queue()

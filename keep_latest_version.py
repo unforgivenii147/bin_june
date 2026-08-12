@@ -25,7 +25,7 @@ def parse_wheel_version(filename: str) -> tuple[str, str] | None:
     version_parts = []
     found_version = False
     for i, part in enumerate(parts):
-        if not found_version and (re.match("^\\d", part) or part.lower() in ["v", "ver", "version"]):
+        if not found_version and (re.match(r"^\d", part) or part.lower() in ["v", "ver", "version"]):
             found_version = True
             version_parts.append(part)
         elif not found_version:
@@ -52,10 +52,10 @@ def parse_targz_version(filename: str) -> tuple[str, str] | None:
         return None
     parts = name.split("-")
     for i, part in enumerate(parts):
-        if re.match("^\\d", part):
+        if re.match(r"^\d", part):
             pkg_name = "-".join(parts[:i])
             version = "-".join(parts[i:])
-            version = re.sub("\\.(tar|tgz)$", "", version)
+            version = re.sub(r"\.(tar|tgz)$", "", version)
             if pkg_name and version:
                 return (pkg_name, version)
     return None

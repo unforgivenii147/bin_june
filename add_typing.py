@@ -4,6 +4,8 @@ Apply type annotations from .pyi stub files to source .py files using libcst.
 Automatically finds .pyi file in same directory and updates .py in-place.
 """
 
+from __future__ import annotations
+
 import argparse
 import difflib
 import sys

@@ -9,7 +9,6 @@ from urllib.parse import urlparse
 import requests
 from dh import runcmd
 
-
 GITHUB_API_URL = "https://api.github.com/repos"
 remained = []
 GITHUB_TOKEN = None

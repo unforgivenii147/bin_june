@@ -12,7 +12,6 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-
 BIN_DIR = Path.home() / "bin"
 REPORT = Path.home() / "dh_usage.txt"
 PACKAGE = "dh"

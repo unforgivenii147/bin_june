@@ -6,7 +6,6 @@ import shutil
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
-
 ERROR_DIR = Path("error")
 OK_DIR = Path("ok")
 

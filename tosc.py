@@ -5,7 +5,6 @@ import shutil
 import sys
 from pathlib import Path
 
-
 dest = Path.home() / "isaac" / "may" / "scripts"
 
 

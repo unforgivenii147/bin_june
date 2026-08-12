@@ -9,6 +9,8 @@ import re
 import sys
 from pathlib import Path
 
+from dh import is_binary
+
 MAX_CONTEXT_DISPLAY = 3
 
 
@@ -70,7 +72,7 @@ def replace_in_files(
             files_changed += 1
         return 1, files_changed
     for root, dirs, files in os.walk("."):
-        dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
+        dirs[:] = [d for d in dirs if d not in {".git", "__pycache__"}]
         for filename in files:
             path = Path(root) / filename
             if path.is_symlink() or is_binary(path):

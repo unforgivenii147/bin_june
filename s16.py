@@ -6,7 +6,6 @@ from pathlib import Path
 
 from dh import mpf3
 
-
 CHUNKSIZE = 15850
 
 

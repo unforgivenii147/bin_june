@@ -36,15 +36,15 @@ LANG_EXTENSIONS = {
     "bash": [".sh", ".bash"],
 }
 COMMENT_PATTERNS = {
-    "python": "^\\s*#",
-    "javascript": "^\\s*//",
-    "java": "^\\s*//",
-    "c": "^\\s*//",
-    "cpp": "^\\s*//",
-    "html": "^\\s*<!--",
-    "css": "^\\s*/\\*",
-    "ruby": "^\\s*#",
-    "php": "^\\s*//",
+    "python": r"^\s*#",
+    "javascript": r"^\s*//",
+    "java": r"^\s*//",
+    "c": r"^\s*//",
+    "cpp": r"^\s*//",
+    "html": r"^\s*<!--",
+    "css": r"^\s*/\*",
+    "ruby": r"^\s*#",
+    "php": r"^\s*//",
 }
 SHEBANG_LANGUAGES = {
     "python": ["#!/usr/bin/env python", "#!/usr/bin/python3", "#!/bin/python3"],

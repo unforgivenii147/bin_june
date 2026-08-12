@@ -9,7 +9,6 @@ import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
-
 DEB_DIR = Path.home() / "debs"
 EXCLUDED_PKGS = {
     "llvm",

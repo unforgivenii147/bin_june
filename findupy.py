@@ -9,7 +9,6 @@ from pathlib import Path
 
 from tqdm import tqdm
 
-
 SKIPPED_PATHS = []
 
 

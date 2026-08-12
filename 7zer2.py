@@ -9,7 +9,6 @@ from pathlib import Path
 
 import py7zr
 
-
 BASE_DIR = Path.cwd()
 LOG_FILE = BASE_DIR / "compress.log"
 SCRIPT_NAME = Path(__file__).name if "__file__" in globals() else None

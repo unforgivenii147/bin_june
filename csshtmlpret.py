@@ -68,10 +68,10 @@ def _props_grouper(props, pgs):
 
 def sort_properties(css_unsorted_string: str) -> str:
     css_pgs = _compile_props(CSS_PROPS_TEXT, grouped=bool(args.group))
-    pattern = re.compile("(.*?{\\r?\\n?)(.*?)(}.*?)|(.*)", re.DOTALL + re.MULTILINE)
+    pattern = re.compile(r"(.*?{\r?\n?)(.*?)(}.*?)|(.*)", re.DOTALL + re.MULTILINE)
     matched_patterns = pattern.findall(css_unsorted_string)
     sorted_patterns, sorted_buffer = ([], css_unsorted_string)
-    RE_prop = re.compile("((?:.*?)(?:;)(?:.*?\\n)|(?:.*))", re.DOTALL + re.MULTILINE)
+    RE_prop = re.compile(r"((?:.*?)(?:;)(?:.*?\n)|(?:.*))", re.DOTALL + re.MULTILINE)
     if len(matched_patterns) != 0:
         for matched_groups in matched_patterns:
             sorted_patterns += matched_groups[0].splitlines(True)
@@ -86,12 +86,12 @@ def sort_properties(css_unsorted_string: str) -> str:
 
 
 def remove_empty_rules(css: str) -> str:
-    return re.sub("[^\\}\\{]+\\{\\}", "", css)
+    return re.sub(r"[^\}\{]+\{\}", "", css)
 
 
 def condense_zero_units(css: str) -> str:
     return re.sub(
-        "([\\s:])(0)(px|em|%|in|q|ch|cm|mm|pc|pt|ex|rem|s|ms|deg|grad|rad|turn|vw|vh|vmin|vmax|fr)", "\\1\\2", css
+        r"([\s:])(0)(px|em|%|in|q|ch|cm|mm|pc|pt|ex|rem|s|ms|deg|grad|rad|turn|vw|vh|vmin|vmax|fr)", r"\1\2", css
     )
 
 

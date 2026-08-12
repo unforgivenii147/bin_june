@@ -18,7 +18,6 @@ import brotli
 import zstandard as zstd
 from loguru import logger
 
-
 logger.add("error.log", level="ERROR")
 COMPRESSED_EXTENSIONS = [".zip", ".tar", ".gz", ".bz2", ".xz", ".zst", ".br"]
 

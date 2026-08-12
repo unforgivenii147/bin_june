@@ -7,7 +7,6 @@ from pathlib import Path
 import tree_sitter_python as tsp
 from tree_sitter import Language, Parser, Tree
 
-
 parser = Parser()
 parser.language = Language(tsp.language())
 OUT_DIR = Path("output")

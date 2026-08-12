@@ -5,7 +5,6 @@ import re
 from collections import defaultdict
 from pathlib import Path
 
-
 MODEL_MAPPINGS = {
     "COBUDDY_TOKEN": "baidu/cobuddy:free",
     "CLAUDE_TOKEN": "claude-opus-4-7",

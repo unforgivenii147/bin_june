@@ -25,9 +25,9 @@ from dh import append_text, is_valid_url
 
 DEFAULT_MAX_MB = 15
 EXCLUDE_DIRS = {".git", "__pycache__"}
-URL_RE = re.compile("(https?://[^\\s\\'\\\"<>\\\\)\\\\(]+)", flags=re.IGNORECASE)
-GIT_FILE = Path("/sdcard/data/gitlinks.txt")
-REPO_FILE = Path("/sdcard/data/repos.txt")
+URL_RE = re.compile(r"(https?://[^\sr'\"<>\)\(]+)", flags=re.IGNORECASE)
+GIT_FILE = Path("gitlinks.txt")
+REPO_FILE = Path("repos.txt")
 ARCHIVE_SUFFIXES = (
     ".tar.gz",
     ".tgz",
@@ -264,7 +264,7 @@ def is_github_url(url):
 
 def extract_git_repos(urls):
     repo_urls = []
-    github_regex = re.compile("https?://github\\.com/([^/]+)/([^/]+?)(?:/|$|\\.git|\\?|#)")
+    github_regex = re.compile(r"https?://github\.com/([^/]+)/([^/]+?)(?:/|$|\.git|\?|#)")
     for url in urls:
         matchz = github_regex.search(url)
         if matchz:

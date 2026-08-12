@@ -13,7 +13,6 @@ from urllib.parse import urljoin
 import requests
 from bs4 import BeautifulSoup
 
-
 DEFAULT_URL = "https://sr.moviesho.com/Series/"
 STATE_FILE = "crawler_state.json"
 TXT_OUTPUT = "movies.txt"

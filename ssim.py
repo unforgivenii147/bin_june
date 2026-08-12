@@ -12,7 +12,6 @@ import ssdeep
 import xxhash
 from tqdm import tqdm
 
-
 EXCLUDE_DIRS = {".git", "__pycache__", "node_modules"}
 
 

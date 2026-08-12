@@ -9,7 +9,6 @@ import pytesseract
 from dh import cprint
 from PIL import Image
 
-
 video = sys.argv[1]
 txtfile = Path(video).with_suffix(".txt")
 

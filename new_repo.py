@@ -9,7 +9,6 @@ import requests
 from dotenv import load_dotenv
 from git import InvalidGitRepositoryError, Repo
 
-
 load_dotenv(os.path.expanduser("~/.env"))
 GITHUB_USERNAME = "unforgivenii147"
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")

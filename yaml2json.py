@@ -20,7 +20,6 @@ import sys
 from dataclasses import dataclass
 from typing import TextIO
 
-
 try:
     import yaml
 except ImportError:

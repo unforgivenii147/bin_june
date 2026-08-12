@@ -1,1 +1,1 @@
-prg.py
+/data/data/com.termux/files/home/bin/prg.py

@@ -9,7 +9,6 @@ from pathlib import Path
 
 from dh import cprint
 
-
 CHUNK_SIZE = 32768
 
 

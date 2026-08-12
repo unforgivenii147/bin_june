@@ -33,7 +33,7 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
 
 
 SIZE_THRESHOLD = 1 * 1024 * 1024
-OLD_PRINT_RE = re.compile("(?m)^[ \\t]*print[ \\t]+[^(\\n]")
+OLD_PRINT_RE = re.compile(r"(?m)^[ \t]*print[ \t]+[^(\n]")
 
 
 def _open_source(filepath: str):

@@ -11,7 +11,6 @@ from dotenv import load_dotenv
 from git import Repo, exc as GitExc
 from github import Github, GithubException
 
-
 load_dotenv(Path.home() / ".env")
 GITHUB_USERNAME = "unforgivenii147"
 

@@ -1,1 +1,1 @@
-zs.py
+/data/data/com.termux/files/home/bin/zs.py

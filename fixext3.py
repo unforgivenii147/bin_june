@@ -4,7 +4,6 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
-
 FILE_TYPE_MAP = {
     "xz compressed data": ".xz",
     "jpeg image data": ".jpg",

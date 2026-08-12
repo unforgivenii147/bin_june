@@ -22,7 +22,7 @@ def gsz(path: str | Path) -> int:
 
 CHUNK_SIZE = 1024 * 1024
 N_JOBS = -1
-multi_line_comment_re = "/\\*.*?\\*/"
+multi_line_comment_re = r"/\*.*?\*/"
 single_line_comment_re = "//.*"
 
 

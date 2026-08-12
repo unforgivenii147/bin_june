@@ -10,7 +10,6 @@ from dh import cprint
 from packaging.utils import parse_wheel_filename
 from packaging.version import Version
 
-
 WHL_DIR = Path("/sdcard/whl")
 DEST_DIR = Path("/sdcard/installed")
 DEST_DIR2 = Path("/sdcard/invalid")

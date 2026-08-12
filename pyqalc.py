@@ -162,7 +162,7 @@ class Calculator:
 
     def _tokenize(self, expression: str) -> list:
         expression = expression.replace("^", "**")
-        pattern = "\n            (\\d+\\.?\\d*(?:[eE][+-]?\\d+)?)|  # Numbers (including scientific notation)\n            ([a-zA-Z_]\\w*)|                 # Variables/functions/units\n            ([+\\-*/%()])|                   # Operators and parentheses\n            (\\*\\*)|                          # Power operator\n            (\"|\\')|                          # Quote characters (for unit conversion)\n            (\\s+)                            # Whitespace\n        "
+        pattern = r"\n            (\d+\.?\d*(?:[eE][+-]?\d+)?)|  # Numbers (including scientific notation)\n            ([a-zA-Z_]\w*)|                 # Variables/functions/units\n            ([+\-*/%()])|                   # Operators and parentheses\n            (\*\*)|                          # Power operator\n            (\"|\')|                          # Quote characters (for unit conversion)\n            (\s+)                            # Whitespace\n        "
         tokens = []
         for match in re.finditer(pattern, expression, re.VERBOSE):
             token = match.group()

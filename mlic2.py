@@ -8,7 +8,6 @@ from collections import defaultdict
 from functools import partial
 from pathlib import Path
 
-
 TEXT_EXTENSIONS = {
     ".py",
     ".txt",

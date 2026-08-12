@@ -7,7 +7,6 @@ from urllib.parse import quote
 
 from dh import fsz
 
-
 cwd = Path.cwd()
 FONT_EXT = {".ttf", ".otf", ".woff", ".woff2", ".eot", ".svg"}
 SAMPLE_TEXT = "Lorem ipsum dolor sit amet\nهنر برتر از گوهر آمد پدید"

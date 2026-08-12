@@ -6,7 +6,6 @@ import sys
 from os import scandir as _scandir
 from pathlib import Path
 
-
 REVERSE = "-r" in sys.argv
 
 

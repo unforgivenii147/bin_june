@@ -14,7 +14,6 @@ import requests
 from dotenv import load_dotenv
 from git import GitCommandError, Repo
 
-
 load_dotenv()
 
 

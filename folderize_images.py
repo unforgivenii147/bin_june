@@ -9,7 +9,6 @@ from pathlib import Path
 import imagehash
 from PIL import Image
 
-
 SUPPORTED_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tif", ".tiff", ".gif"}
 
 

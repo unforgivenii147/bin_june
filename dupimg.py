@@ -31,7 +31,6 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tif", ".tiff", ".gif"}
 HASH_SIZE = 16
 

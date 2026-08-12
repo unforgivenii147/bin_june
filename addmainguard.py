@@ -10,7 +10,7 @@ from pathlib import Path
 
 
 def has_main_guard(content):
-    pattern = "if\\s+__name__\\s*==\\s*[\"\\']__main__[\"\\']\\s*:"
+    pattern = r"if\s+__name__\s*==\s*[\"\']__main__[\"\']\s*:"
     return bool(re.search(pattern, content))
 
 

@@ -10,7 +10,6 @@ from threading import Lock
 from deep_translator import GoogleTranslator
 from tqdm import tqdm
 
-
 INPUT_FILE = "words.txt"
 OUTPUT_FILE = "dic.json"
 MAX_WORKERS = 12

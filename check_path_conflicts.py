@@ -7,7 +7,6 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-
 prefix = "/data/data/com.termux/files"
 
 
@@ -126,7 +125,7 @@ def display_results(alias_conflicts, func_conflicts, path_duplicates, path_dirs:
     if total_conflicts > 0:
         print("\n⚠️  Conflicts can cause unexpected behavior!")
         print("   Bash will use aliases/functions over PATH binaries")
-        print("   To use the binary instead, prefix with 'command' or '\\'")
+        print("   To use the binary instead, prefix with 'command' or r''")
         print("   Example: command ls  or  \\ls")
     print("-" * 42)
 

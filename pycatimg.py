@@ -14,7 +14,6 @@ from cairosvg import svg2png
 from PIL import Image
 from PIL.ImageFile import ImageFile
 
-
 SVG_SUPPORT = True
 
 

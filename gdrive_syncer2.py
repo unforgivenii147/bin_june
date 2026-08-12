@@ -12,7 +12,6 @@ from googleapiclient.discovery import Resource, build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
 
-
 env_path = Path.home() / ".env"
 load_dotenv(dotenv_path=env_path)
 SCOPES = ["https://www.googleapis.com/auth/drive.readonly"]

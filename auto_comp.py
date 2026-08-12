@@ -27,7 +27,6 @@ import lz4.frame
 import py7zr
 import zstandard as zstd
 
-
 CompressorFunc = Callable[[bytes], bytes]
 COMPRESSION_LEVEL_MAX: Final[int] = 9
 ZSTD_LEVEL_MAX: Final[int] = 21
