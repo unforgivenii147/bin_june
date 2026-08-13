@@ -2,9 +2,9 @@
 from __future__ import annotations
 
 import argparse
+import json
 import mmap
 import os
-import pdb
 import shutil
 import sys
 import tempfile
@@ -13,6 +13,8 @@ from collections import Counter
 from collections.abc import Generator
 from datetime import UTC, datetime
 from pathlib import Path
+
+from dh import fsz
 
 
 class LineProcessor:
@@ -35,7 +37,7 @@ class MmapReader(LineProcessor):
         self, file_path: Path, encoding: str = "utf-8", skip_empty: bool = False
     ) -> Generator[str, None, None]:
         get_size = self.get_file_size(file_path)
-        self.log(f"Reading {file_path} ({self.fsz(get_size)})")
+        self.log(f"Reading {file_path} ({fsz(get_size)})")
         try:
             with Path(file_path).open("rb") as f:
                 if get_size > 1024 * 1024:
@@ -59,10 +61,12 @@ class MmapReader(LineProcessor):
                 else:
                     f.seek(0)
                     for line in f:
-                        decoded_line = line.rstrip("\r\n")
+                        # Fix: line is bytes when opened in binary mode
+                        decoded_line = line.decode(encoding).rstrip("\r\n")
                         if not skip_empty or decoded_line.strip():
                             yield decoded_line
         except Exception:
+            msg = "error"
             raise OSError(msg)
 
     def read_lines_regular(
@@ -70,12 +74,14 @@ class MmapReader(LineProcessor):
     ) -> Generator[str, None, None]:
         self.log(f"Reading {file_path} (regular mode)")
         try:
-            with Path(file_path).open("rb", encoding=encoding) as f:
+            # Fix: Use text mode, not binary mode
+            with Path(file_path).open("r", encoding=encoding) as f:
                 for line in f:
                     decoded_line = line.rstrip("\r\n")
                     if not skip_empty or decoded_line.strip():
                         yield decoded_line
         except Exception:
+            msg = "error"
             raise OSError(msg)
 
     def read_lines(
@@ -187,22 +193,27 @@ class FileSorter(LineProcessor):
     ) -> dict:
         input_path = Path(file_path)
         if not input_path.exists():
+            msg = "error"
             raise FileNotFoundError(msg)
+
+        # Fix: Initialize output_path as Path if None
         if output_path is None:
-            output_path = file_path
-        output_path = Path(output_path)
+            output_path_obj = input_path
+        else:
+            output_path_obj = Path(output_path)
+
         print("\n╔════════════════════════════════════════════════════════════╗")
         print("║              File Line Sorter & Deduplicator               ║")
         print("╚════════════════════════════════════════════════════════════╝\n")
         print(f"Input file: {input_path}")
-        print(f"Output file: {output_path}")
+        print(f"Output file: {output_path_obj}")
         print(f"Mode: {('DRY RUN' if self.dry_run else 'NORMAL')}")
         print("-" * 42)
         start_time = time.time()
         try:
             original_size = self.get_file_size(input_path)
             original_lines = sum((1 for _ in self.reader.read_lines(input_path, encoding, skip_empty)))
-            self.log(f"Original file: {original_lines} lines, {self.fsz(original_size)}")
+            self.log(f"Original file: {original_lines} lines, {fsz(original_size)}")
             lines = list(self.reader.read_lines(input_path, encoding, skip_empty))
             if sort:
                 lines = self.sorter.sort_in_memory(lines, reverse, case_insensitive)
@@ -213,30 +224,30 @@ class FileSorter(LineProcessor):
                 unique_count = original_lines - len(lines)
                 self.log(f"Removed {unique_count} duplicate lines")
             if not self.dry_run:
-                if backup and output_path == input_path:
+                if backup and output_path_obj == input_path:
                     backup_path = input_path.with_suffix(input_path.suffix + ".bak")
                     shutil.copy2(input_path, backup_path)
                     self.log(f"Backup created: {backup_path}")
-                output_path.parent.mkdir(parents=True, exist_ok=True)
-                with Path(output_path).open("w", encoding=encoding) as f:
+                output_path_obj.parent.mkdir(parents=True, exist_ok=True)
+                with output_path_obj.open("w", encoding=encoding) as f:
                     f.writelines((line + "\n" for line in lines))
-                self.log(f"Output written: {output_path}")
+                self.log(f"Output written: {output_path_obj}")
             else:
                 self.log("DRY RUN: File not written")
             if not self.dry_run:
-                after = self.get_file_size(output_path)
+                after = self.get_file_size(output_path_obj)
             else:
                 after = sum((len(line.encode(encoding)) + 1 for line in lines))
             elapsed_time = time.time() - start_time
             return {
                 "input_file": str(input_path),
-                "output_file": str(output_path),
+                "output_file": str(output_path_obj),
                 "original_lines": original_lines,
                 "original_size_bytes": original_size,
-                "original_size": self.fsz(original_size),
+                "original_size": fsz(original_size),
                 "final_lines": len(lines),
                 "after_bytes": after,
-                "after": self.fsz(after),
+                "after": fsz(after),
                 "duplicate_lines": unique_count if unique else 0,
                 "size_reduction": original_size - after if original_size > 0 else 0,
                 "size_reduction_pct": (original_size - after) / original_size * 100 if original_size > 0 else 0,
@@ -244,6 +255,7 @@ class FileSorter(LineProcessor):
                 "lines_per_second": original_lines / elapsed_time if elapsed_time > 0 else 0,
             }
         except Exception:
+            msg = "error"
             raise RuntimeError(msg)
 
     def print_stats(self, stats: dict) -> None:
@@ -259,7 +271,7 @@ class FileSorter(LineProcessor):
         print(f"Original size: {stats['original_size']}")
         print(f"Final size: {stats['after']}")
         if stats["size_reduction"] > 0:
-            print(f"Size reduction: {self.fsz(stats['size_reduction'])} ({stats['size_reduction_pct']:.1f}%)")
+            print(f"Size reduction: {fsz(stats['size_reduction'])} ({stats['size_reduction_pct']:.1f}%)")
         print()
         print(f"Processing time: {stats['processing_time']:.2f} seconds")
         print(f"Speed: {stats['lines_per_second']:,.0f} lines/second")
@@ -267,9 +279,10 @@ class FileSorter(LineProcessor):
 
     def save_report(self, stats: dict, report_file: str | None = None) -> None:
         if report_file is None:
-            import json
+            report_file = "sort_report.json"
         report = {"timestamp": datetime.now(tz=UTC).isoformat(), "statistics": stats}
         try:
+            # Fix: report_file is now guaranteed to be str
             with Path(report_file).open("w", encoding="utf-8") as f:
                 json.dump(report, f, indent=2)
             print(f"\n✓ Report saved: {report_file}")
@@ -293,7 +306,7 @@ class FileAnalyzer(LineProcessor):
         return {
             "file": str(file_path),
             "size_bytes": get_size,
-            "size": self.fsz(get_size),
+            "size": fsz(get_size),
             "total_lines": len(lines),
             "unique_lines": len(line_counts),
             "duplicate_lines": duplicate_count,
@@ -347,7 +360,6 @@ def main() -> None:
     parser.add_argument("--encoding", default="utf-8", help="File encoding (default: utf-8)")
     args = parser.parse_args()
     try:
-        pdb.set_trace()
         input_path = Path(args.filename)
         if not input_path.exists():
             print(f"Error: File not found: {args.filename}")

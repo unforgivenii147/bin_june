@@ -60,7 +60,7 @@ def safe_run(path) -> bool:
         tmp_path = str(path)
     try:
         cmd = ["mandoc", "-T", "html", tmp_path]
-        res, txt, err = runcmd(cmd, show_output=False)
+        res, txt, _err = runcmd(cmd, show_output=False)
         if res != 0:
             print(f"Error running mandoc: {err}", file=sys.stderr)
             return False
@@ -69,8 +69,7 @@ def safe_run(path) -> bool:
         else:
             outpath = path.with_suffix(".html")
         outpath.write_text(txt, encoding="utf8")
-        if not is_gzipped:
-            path.unlink()
+        path.unlink()
         return True
     finally:
         if is_gzipped and Path(tmp_path).exists():
@@ -93,7 +92,21 @@ def process_file(path) -> bool:
 def main() -> None:
     args = sys.argv[1:]
     cwd = Path.cwd()
-    base_exts = [".1", ".3", ".3am", ".3form", ".3menu", ".3ncurses", ".3readline", ".3t", ".4", ".5", ".7", ".8"]
+    base_exts = [
+        ".1",
+        ".3",
+        ".3am",
+        ".3pm",
+        ".3form",
+        ".3menu",
+        ".3ncurses",
+        ".3readline",
+        ".3t",
+        ".4",
+        ".5",
+        ".7",
+        ".8",
+    ]
     all_exts = base_exts + [f"{ext}.gz" for ext in base_exts]
     files = [Path(p) for p in args] if args else get_files(cwd, ext=all_exts)
     mpf3(process_file, files)

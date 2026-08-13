@@ -10,7 +10,7 @@ from pathlib import Path
 from xxhash import xxh64
 
 BACKUP_FILE = ".symlink_backup.json"
-MIN_FILE_SIZE = 1024
+MIN_FILE_SIZE = 1
 
 
 def calculate_file_hash(filepath, chunk_size=32768) -> str | None:

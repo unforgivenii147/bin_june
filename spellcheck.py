@@ -13,44 +13,12 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 from spellchecker import SpellChecker
-
-TEXT_EXTENSIONS = {
-    ".txt",
-    ".md",
-    ".rst",
-    ".py",
-    ".js",
-    ".ts",
-    ".html",
-    ".css",
-    ".json",
-    ".yaml",
-    ".yml",
-    ".cfg",
-    ".ini",
-    ".conf",
-    ".log",
-    ".csv",
-    ".xml",
-    ".sh",
-    ".bat",
-    ".ps1",
-    ".java",
-    ".c",
-    ".cpp",
-    ".h",
-    ".hpp",
-    ".rs",
-    ".go",
-    ".rb",
-    ".php",
-    ".sql",
-}
+from dh import TXT_EXT
 
 
 def find_text_files(root_dir: Path, extensions: set | None = None) -> List[Path]:
     if extensions is None:
-        extensions = TEXT_EXTENSIONS
+        extensions = TXT_EXT
     text_files = []
     for path in root_dir.rglob("*"):
         if path.is_file() and path.suffix.lower() in extensions:
@@ -208,7 +176,7 @@ Examples:
     if args.extensions:
         extensions = {ext if ext.startswith(".") else f".{ext}" for ext in args.extensions}
     else:
-        extensions = TEXT_EXTENSIONS
+        extensions = TXT_EXT
     root_dir = Path(args.directory).resolve()
     if not root_dir.exists():
         print(f"Error: Directory '{root_dir}' does not exist", file=sys.stderr)

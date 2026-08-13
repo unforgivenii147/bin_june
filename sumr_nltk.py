@@ -17,24 +17,20 @@ def summarize_nltk(text, num_sentences=5):
     words = word_tokenize(text.lower())
     stop_words = set(stopwords.words("english"))
 
-    # Word frequency scoring
     word_freq = Counter([w for w in words if w.isalnum() and w not in stop_words])
 
-    # Score sentences
     sentence_scores = {}
     for i, sent in enumerate(sentences):
         sent_words = word_tokenize(sent.lower())
         score = sum(word_freq.get(w, 0) for w in sent_words if w.isalnum())
         sentence_scores[i] = score / max(1, len(sent_words))
 
-    # Get top sentences
     top_indices = sorted(sentence_scores, key=sentence_scores.get, reverse=True)[:num_sentences]
     summary = " ".join([sentences[i] for i in sorted(top_indices)])
 
     return summary
 
 
-# Usage
 with open(sys.argv[1], "r") as f:
     text = f.read()
 summary = summarize_nltk(text, 5)

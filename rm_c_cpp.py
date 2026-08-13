@@ -18,12 +18,12 @@ import tree_sitter_c
 import tree_sitter_cpp
 from tree_sitter import Language, Parser
 
-# Define extensions for C and C++
+
 C_EXTS = {".c", ".h"}
 CPP_EXTS = {".cpp", ".hpp"}
 ALL_EXTS = C_EXTS | CPP_EXTS
 
-# Per-worker parser cache (each process has its own).
+
 _PARSERS: dict[str, Parser] = {}
 
 
@@ -51,7 +51,7 @@ def collect_comment_ranges(root) -> list[tuple[int, int]]:
         node = stack.pop()
         if node.type == "comment":
             ranges.append((node.start_byte, node.end_byte))
-            continue  # comments have no useful children to recurse into
+            continue
         for child in reversed(node.children):
             stack.append(child)
     return ranges
@@ -88,7 +88,7 @@ def process_file(path: Path, base: Path) -> tuple[str, int, str]:
         except ValueError:
             rel = str(path)
         return rel, count, ""
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return str(path), 0, str(exc)
 
 

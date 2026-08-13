@@ -114,7 +114,7 @@ def process_file(args: tuple) -> None:
                 idx += 1
         try:
             content = path.read_bytes()
-            new_path.write_bytes(contents)
+            new_path.write_bytes(content)
             print(f"  ⚠️  copied to: {new_path} | Error: {e}")
         except OSError as move_error:
             print(f"  ❌ Failed to move {path}: {move_error}")

@@ -44,7 +44,6 @@ def extract_metadata(toml_data: dict) -> dict[str, Any]:
         "entry_points": project.get("entry-points", {}),
         "dependencies": project.get("dependencies", []),
         "optional_dependencies": project.get("optional-dependencies", {}),
-        "include_package_data": project.get("include-package-data", False),
         "build_backend": build_system.get("build-backend", ""),
         "tool": tool,
     }

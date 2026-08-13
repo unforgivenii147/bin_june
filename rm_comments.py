@@ -20,7 +20,7 @@ except ImportError:
     print("Error: binaryornot is required. Install it with: pip install binaryornot")
     sys.exit(1)
 
-# File extensions to skip (even if they're non-binary)
+
 EXCLUDE_EXTENSIONS = {
     ".pyc",
     ".pyo",
@@ -66,7 +66,7 @@ EXCLUDE_EXTENSIONS = {
     ".woff2",
     ".eot",
     ".min.js",
-    ".min.css",  # Minified files
+    ".min.css",
 }
 
 
@@ -82,14 +82,12 @@ def remove_comments_from_content(content: str) -> Tuple[str, int]:
     string_delimiter = None
 
     for line in lines:
-        # Skip processing if we're inside a multi-line string
         if in_multiline_string:
             modified_lines.append(line)
             if string_delimiter in line:
                 in_multiline_string = False
             continue
 
-        # Check for multi-line string start (triple quotes)
         if '"""' in line or "'''" in line:
             # Find which delimiter is used
             for delim in ['"""', "'''"]:

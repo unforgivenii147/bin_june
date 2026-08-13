@@ -17,6 +17,16 @@ import lz4.frame
 import py7zr
 import zstandard as zstd
 
+ALGORITHMS = [
+    ("brotli", ".br", compress_brotli),
+    ("zstd", ".zst", compress_zstd),
+    ("xz", ".xz", compress_xz),
+    ("bz2", ".bz2", compress_bz2),
+    ("gzip", ".gz", compress_gzip),
+    ("lz4", ".lz4", compress_lz4),
+    ("blosc", ".blosc", compress_blosc),
+]
+
 CompressionResult = namedtuple("CompressionResult", ["name", "ext", "size", "ratio", "elapsed", "output_path"])
 
 
@@ -56,7 +66,7 @@ def compress_blosc(data: bytes) -> bytes:
 
 
 def compress_7z(data: bytes, output_path: Path) -> bytes:
-    tmp_input = Path(tempfile.mktemp(suffix=".tmp"))
+    tmp_input = Path(tempfile.mkstemp(suffix=".tmp"))
     try:
         tmp_input.write_bytes(data)
         with py7zr.SevenZipFile(output_path, mode="w") as archive:
@@ -65,17 +75,6 @@ def compress_7z(data: bytes, output_path: Path) -> bytes:
     finally:
         if tmp_input.exists():
             tmp_input.unlink()
-
-
-ALGORITHMS = [
-    ("brotli", ".br", compress_brotli),
-    ("zstd", ".zst", compress_zstd),
-    ("xz", ".xz", compress_xz),
-    ("bz2", ".bz2", compress_bz2),
-    ("gzip", ".gz", compress_gzip),
-    ("lz4", ".lz4", compress_lz4),
-    ("blosc", ".blosc", compress_blosc),
-]
 
 
 def prepare_input(target: Path) -> tuple[bytes, str]:

@@ -4,18 +4,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from dh import get_files, mpf3, rrs, runcmd
-
-
-def gsz(path: str | Path) -> int:
-    path = Path(path)
-    total = 0
-    if path.is_file():
-        return path.stat().st_size
-    for file in path.rglob("*"):
-        if file.is_file():
-            total += file.stat().st_size
-    return total
+from dh import get_files, mpf3, rrs, runcmd, gsz
 
 
 EXT = [".js", ".jsx", ".jsm", ".jsc"]
@@ -33,12 +22,16 @@ def safe_run(path: Path) -> bool:
 
 def process_file(path):
     path = Path(path)
+    if path.name.endswith(".min.js"):
+        return
     if "site-packages" in path.parts and "notebook" in path.parts:
         return
     before = gsz(path)
     if not path.exists() or not before:
         return
-    if len(path.read_text().splitlines()) == 1:
+    lines = path.read_text(encoding="utf-8").splitlines()
+    if len(lines) == 1:
+        del lines, before
         return
     if safe_run(path):
         after = gsz(path)

@@ -37,17 +37,17 @@ def is_in_restricted_scope(node: ast.AST, parent_map: dict) -> bool:
     ancestors = get_ancestors(node, parent_map)
 
     restricted_types = (
-        ast.Try,  # try-except blocks
-        ast.If,  # conditional imports
-        ast.With,  # context managers
-        ast.AsyncWith,  # async context managers
-        ast.ClassDef,  # class-level imports
-        ast.FunctionDef,  # function scope
-        ast.AsyncFunctionDef,  # async function scope
-        ast.Lambda,  # lambda scope
-        ast.For,  # loop imports
-        ast.AsyncFor,  # async loop imports
-        ast.While,  # while loop imports
+        ast.Try,
+        ast.If,
+        ast.With,
+        ast.AsyncWith,
+        ast.ClassDef,
+        ast.FunctionDef,
+        ast.AsyncFunctionDef,
+        ast.Lambda,
+        ast.For,
+        ast.AsyncFor,
+        ast.While,
     )
 
     return any(isinstance(ancestor, restricted_types) for ancestor in ancestors)
@@ -61,12 +61,10 @@ def find_imports_not_at_head(file_path: Path) -> List[Tuple[int, int, str]]:
         print(f"  [SKIP] {file_path}: Could not parse ({e})")
         return []
 
-    # Build parent map
     mapper = ParentMapper()
     mapper.visit(tree)
     parent_map = mapper.parents
 
-    # Find head end line (module-level imports and docstrings)
     head_end_line = 0
     for node in tree.body:
         if isinstance(node, (ast.Import, ast.ImportFrom)):
@@ -79,13 +77,12 @@ def find_imports_not_at_head(file_path: Path) -> List[Tuple[int, int, str]]:
         else:
             break
 
-    # Find misplaced module-level imports
     misplaced_imports = []
     for node in tree.body:
         if isinstance(node, (ast.Import, ast.ImportFrom)):
             if node.lineno <= head_end_line:
                 continue
-            # Skip imports in restricted scopes
+
             if is_in_restricted_scope(node, parent_map):
                 continue
             lines = source.split("\n")
@@ -211,7 +208,6 @@ def main():
     files_fixed = 0
     report_data = []
 
-    # Parallel file processing
     with ThreadPoolExecutor(max_workers=args.jobs) as executor:
         futures = {executor.submit(process_file, fp, args.autofix): fp for fp in files}
         for future in as_completed(futures):

@@ -138,7 +138,6 @@ def _should_preserve_comment(comment: str, *, is_line_start: bool) -> bool:
     if is_line_start and s.startswith("#!"):
         return True
 
-    # Encoding cookie: "# coding: xxx" / "# -*- coding: xxx -*-"
     if is_line_start and ("coding" in s) and s.startswith("#"):
         lower = s.lower()
         if lower.startswith("# coding:") or "coding:" in lower:

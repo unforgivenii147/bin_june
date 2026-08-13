@@ -90,7 +90,6 @@ def report_stats(results: list[ProcessResult], autofix: bool) -> None:
     success_count = sum(1 for r in results if r.status == "success")
     modified_count = sum(1 for r in results if r.replacements > 0)
 
-    # Calculate relative paths for better readability
     cwd = Path.cwd()
     rel_results = [(r.file.relative_to(cwd) if cwd in r.file.parents or r.file == cwd else r.file, r) for r in results]
 
@@ -133,7 +132,6 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    # Find all Python files
     python_files = find_python_files(args.paths)
 
     if not python_files:
@@ -142,17 +140,13 @@ def main() -> None:
 
     print(f"Found {len(python_files)} Python file(s). Processing in parallel...")
 
-    # Process files in parallel
-    # Pass autofix flag to each worker
     file_args = [(f, args.autofix) for f in python_files]
 
     with Pool() as pool:
         results = pool.map(process_file, file_args)
 
-    # Report statistics
     report_stats(results, args.autofix)
 
-    # Exit with error if any failures
     errors = [r for r in results if r.status == "error"]
     sys.exit(1 if errors else 0)
 

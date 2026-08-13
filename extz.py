@@ -52,10 +52,8 @@ def main():
         print("No files with recognized extensions found.")
         return
 
-    # Sort by count (descending) then by extension name
     sorted_extensions = sorted(ext_counts_total.items(), key=lambda x: (-x[1], x[0]))
 
-    # Find the longest extension name for column formatting
     max_ext_len = max(len(ext if ext != "NO_EXTENSION" else "(no extension)") for ext in ext_counts_total)
 
     for ext, count in sorted_extensions:

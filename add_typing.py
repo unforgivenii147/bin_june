@@ -14,6 +14,8 @@ from typing import Dict, Optional, Tuple
 
 import libcst as cst
 
+from dh import get_files, mpf3
+
 
 class TypingCollector(cst.CSTVisitor):
     """Extract type annotations from stub file."""
@@ -112,39 +114,35 @@ def validate_syntax(code: str, filename: str) -> bool:
         return False
 
 
-def apply_stub_annotations(source_path: Path, show_diff: bool = True) -> bool:
+def process_file(path: Path):
     """
     Apply type annotations from .pyi to .py file (in-place).
 
     Args:
-        source_path: Path to .py source file
+        path: Path to .py source file
         show_diff: Whether to display unified diff
 
     Returns:
         True if changes were applied, False otherwise
     """
-    # Derive stub path
-    stub_path = source_path.with_suffix(".pyi")
+    path = Path(path)
+    stub_path = path.with_suffix(".pyi")
 
     try:
-        # Validate paths exist
-        if not source_path.exists():
-            print(f"✗ Source file not found: {source_path}", file=sys.stderr)
-            return False
+        if not path.exists():
+            print(f"✗ Source file not found: {path}", file=sys.stderr)
+            return
 
         if not stub_path.exists():
             print(f"✗ Stub file not found: {stub_path}", file=sys.stderr)
-            return False
-
-        # Parse stub file
+            return
+        print(f"processing ... {path.name}")
         stub_code = stub_path.read_text(encoding="utf-8")
         stub_tree = cst.parse_module(stub_code)
 
-        # Parse source file
-        source_code = source_path.read_text(encoding="utf-8")
+        source_code = path.read_text(encoding="utf-8")
         source_tree = cst.parse_module(source_code)
 
-        # Extract annotations from stub
         collector = TypingCollector()
         stub_tree.visit(collector)
         print(
@@ -152,7 +150,6 @@ def apply_stub_annotations(source_path: Path, show_diff: bool = True) -> bool:
             file=sys.stderr,
         )
 
-        # Apply annotations to source
         transformer = TypingTransformer(collector.annotations)
         modified_tree = source_tree.visit(transformer)
         modified_code = modified_tree.code
@@ -162,70 +159,49 @@ def apply_stub_annotations(source_path: Path, show_diff: bool = True) -> bool:
             file=sys.stderr,
         )
 
-        # Check if changes were made
         if modified_tree.deep_equals(source_tree):
             print("ℹ No changes required", file=sys.stderr)
             return False
 
-        # Display diff
-        if show_diff:
-            diff_lines = list(
-                difflib.unified_diff(
-                    source_code.splitlines(keepends=True),
-                    modified_code.splitlines(keepends=True),
-                    fromfile=source_path.name,
-                    tofile=f"{source_path.name} (annotated)",
-                    n=2,
-                )
+        diff_lines = list(
+            difflib.unified_diff(
+                source_code.splitlines(keepends=True),
+                modified_code.splitlines(keepends=True),
+                fromfile=path.name,
+                tofile=f"{path.name} (annotated)",
+                n=2,
             )
-            if diff_lines:
-                print("".join(diff_lines), end="")
+        )
+        if diff_lines:
+            print("".join(diff_lines), end="")
 
-        # Validate syntax before writing
-        if not validate_syntax(modified_code, source_path.name):
+        if not validate_syntax(modified_code, path.name):
             print(
                 "✗ Validation failed: refusing to write invalid code",
                 file=sys.stderr,
             )
-            return False
+            return
 
-        # Write changes in-place
-        source_path.write_text(modified_code, encoding="utf-8")
-        print(f"✓ Updated {source_path.name} in-place", file=sys.stderr)
-        return True
+        path.write_text(modified_code, encoding="utf-8")
+        print(f"✓ Updated {path.name} in-place", file=sys.stderr)
+        return
 
     except cst.ParserSyntaxError as e:
         print(f"✗ Syntax error in input file: {e}", file=sys.stderr)
-        return False
+        return
     except Exception as e:
         print(f"✗ Unexpected error: {type(e).__name__}: {e}", file=sys.stderr)
-        return False
+        return
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Apply type annotations from .pyi stub to .py source file (in-place)",
-        epilog="Stub file (.pyi) must be in the same directory as the source file.",
-    )
-    parser.add_argument(
-        "source",
-        type=Path,
-        help="Path to .py source file",
-    )
-    parser.add_argument(
-        "--no-diff",
-        action="store_true",
-        help="Don't show unified diff",
-    )
-
-    args = parser.parse_args()
-
-    success = apply_stub_annotations(
-        source_path=args.source,
-        show_diff=not args.no_diff,
-    )
-
-    sys.exit(0 if success else 1)
+    cwd = Path.cwd()
+    args = sys.argv[1:]
+    files = [Path(p) for p in args] if args else get_files(cwd, ext=[".py"])
+    if len(files) == 1:
+        process_file(files[0])
+        sys.exit(0)
+    mpf3(process_file, files)
 
 
 if __name__ == "__main__":

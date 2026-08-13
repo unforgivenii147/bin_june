@@ -110,7 +110,6 @@ def main() -> None:
     parser.add_argument("-f", "--file", help="Process only the specified file instead of recursive directory search")
     args = parser.parse_args()
 
-    # If -r flag is set, force removal mode
     if args.remove:
         args.replace = ""
 

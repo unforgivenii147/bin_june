@@ -22,7 +22,7 @@ class ExtractionStats:
     """Statistics for a single archive extraction."""
 
     archive_path: Path
-    status: str  # 'success', 'failed', 'skipped'
+    status: str
     extraction_time: float
     output_dir: Optional[Path] = None
     extracted_files: int = 0
@@ -45,7 +45,6 @@ class ExtractionStats:
 class ArchiveExtractor:
     """Handles extraction of various archive formats using system tools."""
 
-    # Mapping of extensions to extraction commands
     EXTRACTION_COMMANDS = {
         ".7z": ["7z", "x", "-y", "-o"],
         ".zip": ["unzip", "-o"],
@@ -68,7 +67,6 @@ class ArchiveExtractor:
         ".ace": ["unace", "x"],
     }
 
-    # Extensions that typically extract to current directory without subfolder
     SINGLE_FILE_EXTENSIONS = {".gz", ".bz2", ".xz", ".lz4", ".lzma", ".zst"}
 
     def __init__(self, current_dir: Path):
@@ -88,28 +86,25 @@ class ArchiveExtractor:
 
     def _check_if_single_file_archive(self, archive_path: Path) -> bool:
         """Check if archive likely extracts to current directory without subfolder."""
-        # Check by extension
+
         if archive_path.suffix.lower() in self.SINGLE_FILE_EXTENSIONS:
             return True
 
-        # Check content of some archive types
         try:
             suffix = archive_path.suffix.lower()
 
-            # Check zip files
             if suffix == ".zip":
                 result = subprocess.run(["unzip", "-l", str(archive_path)], capture_output=True, text=True, timeout=30)
                 if result.returncode == 0:
                     lines = result.stdout.strip().split("\n")
-                    # Parse the file listing
+
                     entries = []
-                    for line in lines[3:-2]:  # Skip headers and footer
+                    for line in lines[3:-2]:
                         parts = line.strip().split()
                         if len(parts) >= 4:
                             entries.append(" ".join(parts[3:]))
 
                     if entries:
-                        # Check if all entries are in the same subdirectory
                         first_parts = set()
                         for entry in entries:
                             parts = Path(entry).parts
@@ -118,7 +113,6 @@ class ArchiveExtractor:
 
                         return len(first_parts) == 1 and not all("/" not in e for e in entries)
 
-            # Check tar files
             elif suffix in [".tar", ".tar.gz", ".tar.bz2", ".tar.xz", ".tgz", ".tbz2", ".txz"]:
                 result = subprocess.run(["tar", "-tf", str(archive_path)], capture_output=True, text=True, timeout=30)
                 if result.returncode == 0:
@@ -139,9 +133,9 @@ class ArchiveExtractor:
 
     def _get_output_directory(self, archive_path: Path) -> Path:
         """Determine the output directory for extraction."""
-        # Create directory named after archive (without extension)
+
         stem = archive_path.name
-        # Handle compound extensions
+
         for ext in [".tar.gz", ".tar.bz2", ".tar.xz", ".tar.lz4"]:
             if stem.endswith(ext):
                 stem = stem[: -len(ext)]
@@ -167,7 +161,6 @@ class ArchiveExtractor:
             archive_path=archive_path, status="failed", extraction_time=0, original_size=original_size
         )
 
-        # Determine the extension
         archive_name = archive_path.name.lower()
         ext = None
         for possible_ext in sorted(self.EXTRACTION_COMMANDS.keys(), key=len, reverse=True):
@@ -181,7 +174,6 @@ class ArchiveExtractor:
             stats.extraction_time = time.time() - start_time
             return stats
 
-        # Check if tool is available
         tool = self.EXTRACTION_COMMANDS[ext][0]
         if not shutil.which(tool):
             stats.status = "failed"
@@ -190,20 +182,17 @@ class ArchiveExtractor:
             return stats
 
         try:
-            # Determine output directory
             needs_subdir = self._check_if_single_file_archive(archive_path)
             output_dir = self._get_output_directory(archive_path) if needs_subdir else self.current_dir
 
             if needs_subdir:
                 output_dir.mkdir(exist_ok=True)
 
-            # Prepare command
             cmd = list(self.EXTRACTION_COMMANDS[ext])
 
-            # Customize command based on extension
             if ext == ".7z":
                 cmd.append(str(archive_path))
-                cmd[-2] = f"-o{output_dir}"  # 7z needs -o without space
+                cmd[-2] = f"-o{output_dir}"
             elif ext == ".zip":
                 cmd.extend([str(archive_path), "-d", str(output_dir)])
             elif ext in [".tar", ".tar.gz", ".tar.bz2", ".tar.xz", ".tgz", ".tbz2", ".txz"]:
@@ -211,11 +200,9 @@ class ArchiveExtractor:
             elif ext == ".rar":
                 cmd.extend([str(archive_path), str(output_dir)])
             elif ext == ".lz4":
-                # lz4 -d file.lz4 output_file
                 output_file = output_dir / archive_path.stem
                 cmd.extend([str(archive_path), str(output_file)])
             elif ext in [".gz", ".bz2", ".xz", ".lzma", ".zst"]:
-                # These extract to current dir, copy archive first
                 import shutil
 
                 temp_archive = output_dir / archive_path.name
@@ -223,11 +210,9 @@ class ArchiveExtractor:
                 cmd.append(str(temp_archive))
                 cwd = output_dir
 
-                # Run compression tool in output dir
                 result = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=300)
 
                 if result.returncode == 0:
-                    # Clean up temp archive
                     temp_archive.unlink(missing_ok=True)
 
                     stats.status = "success"
@@ -235,7 +220,6 @@ class ArchiveExtractor:
                     stats.extracted_files = self._count_files(output_dir)
                     stats.extraction_time = time.time() - start_time
 
-                    # Remove original
                     archive_path.unlink()
                     return stats
                 else:
@@ -247,7 +231,6 @@ class ArchiveExtractor:
                 if output_dir != self.current_dir:
                     cmd.append(str(output_dir))
 
-            # Run extraction command
             if ext not in [".gz", ".bz2", ".xz", ".lzma", ".zst"]:
                 result = subprocess.run(cmd, capture_output=True, text=True, timeout=300, cwd=self.current_dir)
 
@@ -256,11 +239,9 @@ class ArchiveExtractor:
                         result.returncode, cmd, output=result.stdout, stderr=result.stderr
                     )
 
-            # Count extracted files
             if needs_subdir:
                 extracted_count = self._count_files(output_dir)
             else:
-                # Count new files (simplified - just count files in dir)
                 extracted_count = self._count_files(self.current_dir)
 
             stats.status = "success"
@@ -268,7 +249,6 @@ class ArchiveExtractor:
             stats.extracted_files = extracted_count
             stats.extraction_time = time.time() - start_time
 
-            # Remove original archive if extraction successful
             try:
                 archive_path.unlink()
             except Exception as e:
@@ -339,7 +319,6 @@ def main():
         size_mb = archive.stat().st_size / (1024 * 1024)
         print(f"  • {archive.name} ({size_mb:.1f} MB)")
 
-    # Determine number of workers (use half of CPU cores, minimum 1)
     max_workers = max(1, os.cpu_count() // 2)
     print(f"\nProcessing with {max_workers} parallel worker(s)...")
 
@@ -348,23 +327,19 @@ def main():
 
     start_time = time.time()
 
-    # Process archives in parallel
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        # Submit all extraction tasks
         future_to_archive = {executor.submit(extractor.extract_archive, archive): archive for archive in archives}
 
-        # Process completed tasks as they finish
         for future in as_completed(future_to_archive):
             archive = future_to_archive[future]
             try:
                 result = future.result()
                 results.append(result)
-                # Print result immediately
+
                 print(f"\r{result}")
             except Exception as e:
                 print(f"\r✗ {archive.name} - Worker error: {e}")
 
-    # Print summary
     total_time = time.time() - start_time
     successful = sum(1 for r in results if r.status == "success")
     failed = sum(1 for r in results if r.status == "failed")
@@ -379,7 +354,6 @@ def main():
     print(f"○ Skipped: {skipped}")
     print(f"Total time: {total_time:.1f}s")
 
-    # Print detailed results
     if results:
         print(f"\nDetailed results:")
         for result in results:

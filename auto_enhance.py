@@ -97,11 +97,6 @@ def main():
     parser = argparse.ArgumentParser(
         description="Google Photos Style Auto-Enhancer (In-place replacement)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""Examples:
-  %(prog)s                    # Process all images in current directory (sequential)
-  %(prog)s image.jpg          # Process single image (sequential)
-  %(prog)s folder/ --parallel  # Process folder with parallel execution
-  %(prog)s . -j 8              # Process current dir with 8 parallel jobs""",
     )
     parser.add_argument("inputs", nargs="*", help="Files or folders to process. Defaults to recursive '.' if empty.")
     parser.add_argument("-v", "--verbose", action="store_true", help="Print details for every image processed.")
