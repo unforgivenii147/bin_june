@@ -1,6 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from pathlib import Path
-from dh import should_skip, get_files
+from dh import should_skip, get_files, move_dir
 
 
 def has_lua(root_dir):
@@ -16,7 +16,7 @@ def move_to_start(src):
     import shutil
 
     target_path = f"{dest}/{src.name}"
-    shutil.copy2(str(src), target_path)
+    shutil.copytree(str(src), target_path)
     shutil.rmtree(src)
 
 
