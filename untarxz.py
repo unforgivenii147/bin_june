@@ -48,11 +48,11 @@ def main():
             else:
                 failure_count += 1
             print(message)
-    print(f"\n{'=' * 50}")
+    print(f"\n{'=' * 42}")
     print(f"✅ Successfully processed: {success_count} file(s)")
     if failure_count > 0:
         print(f"❌ Failed: {failure_count} file(s)")
-    print(f"{'=' * 50}")
+    print(f"{'=' * 42}")
 
 
 if __name__ == "__main__":

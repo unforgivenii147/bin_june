@@ -97,7 +97,7 @@ Examples:
     )
     args = parser.parse_args()
     directories = [Path(d).resolve() for d in args.directories]
-    print("\n" + "=" * 70)
+    print("\n" + "=" * 42)
     print("🔍 GZIP Compression Tool (Maximum Compression - Level 9)".center(70))
     print("-" * 42)
     print("\n📂 Processing directories:")
@@ -146,7 +146,7 @@ Examples:
                 if error:
                     print(f"   ⚠ Error: {error}")
     elapsed_time = time.time() - start_time
-    print("\n" + "=" * 70)
+    print("\n" + "=" * 42)
     print("📊 COMPRESSION SUMMARY".center(70))
     print("-" * 42)
     print(f"  Total files processed:     {stats.total_files}")

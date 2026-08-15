@@ -10,6 +10,10 @@ from collections.abc import Generator
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
+from loguru import logger
+
+logger.remove()
+logger.add("/data/data/com.termux/files/home/tmp/log/apps/pyrg.log")
 IGNORED_DIRS = {".git", ".hg", ".svn", "node_modules", "__pycache__", ".ruff_cache", ".pytest_cache", ".mypy_cache"}
 BINARY_CHUNK = 8192
 DEFAULT_THREADS = 4

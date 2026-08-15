@@ -4,8 +4,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from dh import get_files, mpf3, rrs, runcmd, gsz
-
+from dh import get_files, gsz, mpf3, rrs, runcmd
 
 EXT = [".js", ".jsx", ".jsm", ".jsc"]
 

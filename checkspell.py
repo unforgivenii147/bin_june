@@ -167,7 +167,7 @@ def print_results(results: list[dict]) -> None:
     total_files = len(results)
     total_errors = sum(r.get("total_errors", 0) for r in results)
     files_with_errors = sum(1 for r in results if r.get("total_errors", 0) > 0)
-    print("\n" + "=" * 70)
+    print("\n" + "=" * 42)
     print(f"Spell Check Report: {total_files} file(s) checked")
     print("-" * 42)
     for result in results:
@@ -186,7 +186,7 @@ def print_results(results: list[dict]) -> None:
             print(f"    Suggestions: {suggestions}")
         if result.get("fixed"):
             print("  ✓ Fixed!")
-    print("\n" + "=" * 70)
+    print("\n" + "=" * 42)
     print(f"Summary: {total_errors} total error(s) in {files_with_errors} file(s)")
     print("-" * 42)
 
@@ -238,26 +238,16 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-
   python spell_checker.py
-
   python spell_checker.py document.txt
-
   python spell_checker.py -a document.txt
-
   python spell_checker.py -d ~/.my_words.json document.txt
 Personal dictionary Management:
-
   python spell_checker.py --add-words myword1 myword2 myword3
-
   python spell_checker.py --add-from-file custom_words.txt
-
   python spell_checker.py --remove-words word1 word2
-
   python spell_checker.py --list-dict
-
   python spell_checker.py --clear-dict
-
   python spell_checker.py -d /path/to/dict.json -a document.txt
         """,
     )

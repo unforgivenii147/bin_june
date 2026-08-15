@@ -7,7 +7,6 @@ import sys
 from pathlib import Path
 
 import gcld3
-import nltk
 from nltk.corpus import words
 
 

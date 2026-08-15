@@ -186,7 +186,7 @@ def main():
             print(f"  ➕ {file_info}")
     if not updated_files and (not added_shebang_files):
         print("\n✅ No files needed updating.")
-    print("\n" + "=" * 50)
+    print("\n" + "=" * 42)
     print("📊 Summary:")
     print(f"  ✏️  Updated existing shebangs: {len(updated_files)} files")
     print(f"  ➕ Added new shebangs: {len(added_shebang_files)} files")

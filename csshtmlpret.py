@@ -202,6 +202,7 @@ if BeautifulSoup:
         if extraline:
             html = "\n\n".join(html.replace("\t", "    ").splitlines()) + "\n"
         return html
+
 else:
 
     def html_prettify(html: str, extraline: bool = False) -> str:
@@ -328,7 +329,7 @@ def main() -> None:
         sys.exit(1)
     if args.after and getoutput:
         print(getoutput(str(args.after)))
-    print(f"\n {'-' * 80} \n Files Processed: {list_of_files}.")
+    print(f"\n {'-' * 42} \n Files Processed: {list_of_files}.")
     print(f"Number of Files Processed:\n          {(len(list_of_files) if isinstance(list_of_files, tuple) else 1)}")
 
 

@@ -22,12 +22,10 @@ def process_file(
         pattern = re.compile(re.escape(search_text))
         if not pattern.search(content):
             return False
-
         if remove_mode:
             replacement = ""
         else:
             replacement = replace_text
-
         if dry_run:
             matches = list(pattern.finditer(content))
             print(f"[DRY RUN] Found {len(matches)} match(es) in {path}")
@@ -109,24 +107,19 @@ def main() -> None:
     parser.add_argument("--dry-run", action="store_true", help="Show changes without applying them")
     parser.add_argument("-f", "--file", help="Process only the specified file instead of recursive directory search")
     args = parser.parse_args()
-
     if args.remove:
         args.replace = ""
-
     search_text = args.search
     replace_text = args.replace
-
     if args.remove:
         action = f"REMOVING '{search_text}'"
     elif replace_text:
         action = f"REPLACING '{search_text}' WITH '{replace_text}'"
     else:
         action = f"REMOVING '{search_text}'"
-
     if args.dry_run:
         print("--- RUNNING IN DRY RUN MODE (No files will be modified) ---")
     print(f"--- {action} ---")
-
     files_processed, files_changed = replace_in_files(
         search_text, replace_text, remove_mode=args.remove, target_file=args.file, dry_run=args.dry_run
     )

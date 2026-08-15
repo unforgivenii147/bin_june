@@ -10,6 +10,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 from fastwalk import walk_files
+from dh import TXT_EXT, BIN_EXT
+from binaryornot import is_binary
 
 
 def walk_paths(paths: list[str | Path]) -> Generator[Path, None, None]:
@@ -47,8 +49,11 @@ def colorize_line(line: str, matches) -> str:
     return "".join(parts)
 
 
-def ripgrep(paths: list[str | Path], pattern: str, max_workers: int = 4):
+def ripgrep(paths: list[str | Path], pattern: str, max_workers: int = 8):
     def process_file(file_path: Path):
+        if is_binary(file_path) or (file_path.suffix not in TXT_EXT) or (file_path.suffix in BIN_EXT):
+            return []
+        print(f"processing {file_path.name}")
         return list(search_file(file_path, pattern))
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:

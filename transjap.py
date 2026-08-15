@@ -131,7 +131,7 @@ def main() -> None:
             if future.result():
                 modified_count += 1
                 logger.info("✓ Updated: %s", future_to_file[future])
-    logger.info("\n" + "=" * 50)
+    logger.info("\n" + "=" * 42)
     logger.info("Completed! Modified %d out of %d files", modified_count, len(py_files))
 
 

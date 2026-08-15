@@ -106,7 +106,7 @@ class ImageDownscaler:
             print("\n[WARN] No images found in directory!")
             return
         self.process_images(image_paths)
-        print("\n" + "=" * 70)
+        print("\n" + "=" * 42)
         print("PROCESS COMPLETE - Images updated in-place")
         print("-" * 42)
 

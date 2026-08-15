@@ -407,9 +407,9 @@ def main():
                 lines.append(f"  other: {', '.join(pkg['entry_points']['other'])}")
             lines.append("")
         Path(args.ep_details_output).write_text("\n".join(lines))
-    print(f"\n{'=' * 50}")
+    print(f"\n{'=' * 42}")
     print("SUMMARY - Python Package Classification")
-    print(f"{'=' * 50}")
+    print(f"{'=' * 42}")
     print(f"Platform: {sys.platform}")
     print(f"Site directories: {len(site_dirs)}")
     print()
@@ -426,7 +426,7 @@ def main():
     print(
         f"Grand total: {len(unique_pure_noep) + len(unique_nonpure_noep) + len(unique_pure_ep) + len(unique_nonpure_ep)}"
     )
-    print(f"{'=' * 50}")
+    print(f"{'=' * 42}")
     if args.verbose:
         print("\nOutput files:")
         print(f"  Pure no-ep:      {args.pure_noep_output}")

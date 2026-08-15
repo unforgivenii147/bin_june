@@ -75,7 +75,7 @@ def main() -> None:
         print(f"  ⭐ {stars} | 🔤 {language} | {description[:80]}")
     with Path(f"{username}.txt").open("w", encoding="utf-8") as f:
         f.write(f"Repositories of '{username}':\n")
-        f.write("=" * 50 + "\n\n")
+        f.write("=" * 42 + "\n\n")
         for repo in repos:
             stars = repo.stargazers_count
             language = repo.language or "N/A"

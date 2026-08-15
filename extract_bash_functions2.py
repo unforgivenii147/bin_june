@@ -71,33 +71,6 @@ class ShellScriptFinder:
                         return True
         except (IOError, OSError, UnicodeDecodeError):
             return False
-        try:
-            with open(file_path, "rb") as f:
-                content = f.read(8192)
-                if b"\x00" in content:
-                    return False
-                try:
-                    text = content.decode("utf-8", errors="ignore")
-                    if re.search("^\\s*(?:function\\s+)?\\w+\\s*(?:\\(\\))?\\s*\\{", text, re.MULTILINE):
-                        return True
-                    shell_keywords = [
-                        "#!/bin/bash",
-                        "#!/bin/sh",
-                        "#!/usr/bin/env bash",
-                        "#!/usr/bin/env sh",
-                        "source ",
-                        ". /",
-                        "export ",
-                        "readonly ",
-                        "declare ",
-                        "local ",
-                    ]
-                    if any((keyword in text for keyword in shell_keywords)):
-                        return True
-                except UnicodeDecodeError:
-                    return False
-        except (IOError, OSError):
-            return False
         return False
 
     def walk_directory(self, directory: Path) -> Generator[Path, None, None]:

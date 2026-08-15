@@ -409,15 +409,10 @@ def main() -> None:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-
   python smart_archiver.py compress document.txt
-
   python smart_archiver.py compress *.log --parallel --output-dir compressed/
-
   python smart_archiver.py archive myfolder/ --compression auto
-
   python smart_archiver.py archive myfolder/ --compression zstd --level 22
-
   python smart_archiver.py decompress document.txt.zstd
         """,
     )

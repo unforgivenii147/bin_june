@@ -214,7 +214,7 @@ def main():
             indent=2,
             ensure_ascii=False,
         )
-    print(f"\n{'=' * 50}")
+    print(f"\n{'=' * 42}")
     print(f"Found {len(results)} non-English files")
     print(f"Results saved to: {output_path}")
     if results:

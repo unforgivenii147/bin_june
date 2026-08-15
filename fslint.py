@@ -407,7 +407,7 @@ def findwd(roots: list[Path]) -> int:
     return total
 
 
-_RS_RE = re.compile("  |^\s|\s$|\t")
+_RS_RE = re.compile(r"  |^\s|\s$|\t")
 
 
 def findrs(roots: list[Path]) -> int:

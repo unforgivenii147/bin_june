@@ -98,7 +98,7 @@ def main():
                 continue
         remaining_lines.append(line)
     urls_file.write_text("\n".join(remaining_lines) + "\n", encoding="utf-8")
-    print("\n" + "=" * 50)
+    print("\n" + "=" * 42)
     print(f"Download session completed!")
     print(f"✅ Successfully downloaded : {removed_count} files")
     print(f"❌ Remaining in urls.txt   : {len(download_tasks) - removed_count} files")

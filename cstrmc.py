@@ -1,7 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 
-import ast
 import os
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
@@ -10,7 +9,7 @@ import libcst as cst
 from libcst import EmptyLine, Pass, SimpleStatementLine
 from libcst.metadata import MetadataWrapper, PositionProvider
 
-ROOT = Path(".").resolve()
+from dh import get_files, mpf3
 
 
 class StripTransformer(cst.CSTTransformer):
@@ -128,21 +127,29 @@ def process_file(path: Path) -> None:
         return
     code = updated.code
     try:
-        ast.parse(code)
+        cst.parse_module(code)
     except SyntaxError as exc:
         print(f"ERROR {path}: transformed code is invalid: {exc}")
         return
     if code != source:
         path.write_text(code, encoding="utf-8")
     rel = os.path.relpath(path, ROOT)
-    print(f"{rel}: comments={transformer.comments_removed}, docstrings={transformer.docstrings_removed}")
+    if transformer.comments_removed and transformer.docstrings_removed:
+        print(f"{rel}: {transformer.comments_removed}/{transformer.docstrings_removed}")
+    if transformer.comments_removed and not transformer.docstrings_removed:
+        print(f"{rel}: {transformer.comments_removed}/0")
+    if not transformer.comments_removed and transformer.docstrings_removed:
+        print(f"{rel}: 0/{transformer.docstrings_removed}")
 
 
 def main() -> None:
-    paths = sorted(ROOT.rglob("*.py"))
-    workers = os.cpu_count() or 1
-    with ProcessPoolExecutor(max_workers=workers) as executor:
-        list(executor.map(process_file, paths))
+    cwd = Path.cwd()
+    args = sys.argv[1:]
+    files = [Path(p) for p in args] if args else get_files(cwd, ext=[".py"])
+    if len(files) == 1:
+        process_file(files[0])
+        sys.exit(0)
+    mpf3(process_file, files)
 
 
 if __name__ == "__main__":

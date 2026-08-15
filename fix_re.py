@@ -344,7 +344,7 @@ class RegexFixer:
         if not results:
             print("\nNo files processed.")
             return
-        print("\n" + "=" * 80)
+        print("\n" + "=" * 42)
         modified = []
         unchanged = []
         errors = []
@@ -367,7 +367,7 @@ class RegexFixer:
             for filepath, message in errors:
                 rel_path = self._get_relative_path(filepath)
                 print(f"  ✗ {rel_path}: {message}")
-        print("\n" + "=" * 80)
+        print("\n" + "=" * 42)
         print("\n📊 Summary:")
         print(f"  Total files:     {self.stats.total_files}")
         print(f"  Processed:       {self.stats.processed}")

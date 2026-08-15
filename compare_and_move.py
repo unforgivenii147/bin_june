@@ -38,7 +38,7 @@ def compare_and_move_common(source_dir: str, target_dir: str) -> None:
         target_size = (target / filename).stat().st_size
         size_match = "✓" if source_size == target_size else "⚠"
         print(f"  {size_match} {filename} (source: {source_size} bytes, target: {target_size} bytes)")
-    print("\n" + "=" * 50)
+    print("\n" + "=" * 42)
     response = input(f"Move these {len(common_files)} common file(s) from source to '{common_dir}'? (y/n): ").lower()
     if response != "y":
         print("Operation cancelled.")
@@ -68,7 +68,7 @@ def compare_and_move_common(source_dir: str, target_dir: str) -> None:
         except Exception as e:
             print(f"  ✗ Error moving {filename}: {e}")
             failed_files.append(filename)
-    print("\n" + "=" * 50)
+    print("\n" + "=" * 42)
     print(f"Summary: Successfully moved {moved_count} of {len(common_files)} common file(s)")
     if size_mismatches:
         print(f"\n⚠ Warning: {len(size_mismatches)} file(s) had different sizes in source vs target:")

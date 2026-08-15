@@ -4,30 +4,22 @@ from __future__ import annotations
 import sys
 from collections import Counter
 
-import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize, word_tokenize
-
-nltk.download("punkt", quiet=True)
-nltk.download("stopwords", quiet=True)
 
 
 def summarize_nltk(text, num_sentences=5):
     sentences = sent_tokenize(text)
     words = word_tokenize(text.lower())
     stop_words = set(stopwords.words("english"))
-
     word_freq = Counter([w for w in words if w.isalnum() and w not in stop_words])
-
     sentence_scores = {}
     for i, sent in enumerate(sentences):
         sent_words = word_tokenize(sent.lower())
         score = sum(word_freq.get(w, 0) for w in sent_words if w.isalnum())
         sentence_scores[i] = score / max(1, len(sent_words))
-
     top_indices = sorted(sentence_scores, key=sentence_scores.get, reverse=True)[:num_sentences]
     summary = " ".join([sentences[i] for i in sorted(top_indices)])
-
     return summary
 
 

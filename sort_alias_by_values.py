@@ -85,7 +85,7 @@ def main() -> None:
     print(f"Found {len(aliases)} alias(es)")
     print("\n--- BEFORE SORTING (first 10 by value) ---")
     display_aliases(aliases, limit=10)
-    print("\n" + "-" * 50)
+    print("\n" + "-" * 42)
     response = input(f"Sort all {len(aliases)} aliases by value? [y/N]: ").strip().lower()
     if response != "y":
         print("Operation cancelled")

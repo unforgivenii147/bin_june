@@ -85,7 +85,7 @@ def main():
                     f.writelines(lines)
         except Exception as e:
             print(f"✗ Error in {filename}: {e}")
-    print(f"\n{'=' * 50}")
+    print(f"\n{'=' * 42}")
     print("Summary:")
     print(f"  Fixed: {fixed}")
     print(f"  Skipped: {skipped}")

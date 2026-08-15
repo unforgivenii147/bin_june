@@ -11,7 +11,6 @@ from pathlib import Path
 
 
 def get_installed_packages() -> list[str]:
-    """Retrieve list of installed packages via dpkg."""
     try:
         result = subprocess.run(["dpkg", "-l"], capture_output=True, text=True, check=True)
         packages = []
@@ -25,7 +24,6 @@ def get_installed_packages() -> list[str]:
 
 
 def get_package_files(pkg_name: str) -> list[Path]:
-    """Get file list for a package from dpkg."""
     try:
         result = subprocess.run(["dpkg", "-L", pkg_name], capture_output=True, text=True, check=True)
         return [Path(f) for f in result.stdout.strip().split("\n") if f]
@@ -34,44 +32,35 @@ def get_package_files(pkg_name: str) -> list[Path]:
 
 
 def is_ignored_path(file_path: Path) -> bool:
-    """Check if path should be ignored."""
     ignore_dirs = {"share/man", "share/info", "share/doc"}
     parts = file_path.parts
-
     for i in range(len(parts) - 1):
         if (f"{parts[i]}/share" == "share" or parts[i] == "share") and i + 1 < len(parts):
             subdir = parts[i + 1]
             if subdir in {"man", "info", "doc"}:
                 return True
-
     path_str = str(file_path)
     return any(f"/{ignore}/" in path_str or path_str.endswith(f"/{ignore}") for ignore in ignore_dirs)
 
 
 def check_package(pkg_name: str) -> dict:
-    """Check all files in a package for existence."""
     files = get_package_files(pkg_name)
     missing = []
     checked = 0
-
     for file_path in files:
         if is_ignored_path(file_path):
             continue
-
         checked += 1
         if not file_path.exists():
             missing.append(str(file_path))
-
     return {"package": pkg_name, "total_checked": checked, "missing_count": len(missing), "missing_files": missing}
 
 
 def main():
     packages = get_installed_packages()
     print(f"Found {len(packages)} installed packages")
-
     with Pool(cpu_count()) as pool:
         results = pool.map(check_package, packages)
-
     report = {
         "timestamp": datetime.now().isoformat(),
         "total_packages": len(packages),
@@ -81,11 +70,9 @@ def main():
         },
         "packages": [r for r in results if r["missing_count"] > 0],
     }
-
     report_path = Path.home() / "pkg_audit_report.json"
     with open(report_path, "w") as f:
         json.dump(report, f, indent=2)
-
     print(f"\nReport: {report['summary']}")
     print(f"Saved to: {report_path}")
 

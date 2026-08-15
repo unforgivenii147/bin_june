@@ -15,6 +15,8 @@ from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 
+from dh import PY_KEYWORDS
+
 COMMON_SUBSTITUTIONS = {
     "0": "p",
     "1": "q",
@@ -48,7 +50,7 @@ QWERTY_ADJACENT = {
     "i": "uo",
     "o": "ip",
     "p": "o",
-    "a": "sw",
+    "a": "s",
     "s": "ad",
     "d": "sf",
     "f": "dg",
@@ -57,7 +59,7 @@ QWERTY_ADJACENT = {
     "j": "hk",
     "k": "jl",
     "l": "k",
-    "z": "xa",
+    "z": "x",
     "x": "zc",
     "c": "xv",
     "v": "cb",
@@ -155,30 +157,7 @@ class TypoFixerWithLearning:
         self.interactive_mode = False
         self.valid_words = set()
         self._load_word_list()
-        self.valid_words.update(
-            {
-                "print",
-                "function",
-                "class",
-                "def",
-                "return",
-                "import",
-                "from",
-                "true",
-                "false",
-                "null",
-                "undefined",
-                "const",
-                "let",
-                "var",
-                "async",
-                "await",
-                "promise",
-                "callback",
-                "component",
-                "react",
-            }
-        )
+        self.valid_words.update(PY_KEYWORDS)
 
     def _load_word_list(self) -> None:
         try:

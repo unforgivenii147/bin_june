@@ -20,26 +20,21 @@ class Module:
 
 
 def parse_module(module: Module):
-    """Parses a Python file into an AST and categorizes its nodes."""
     source = module.filepath.read_text(encoding="utf-8")
     tree = ast.parse(source, filename=str(module.filepath))
-
     for node in tree.body:
         if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == "__all__" for t in node.targets):
             module.dunder_all = node
             module.assignments.append(node)
             continue
-
         if isinstance(node, (ast.Import, ast.ImportFrom)):
             module.imports.append(node)
             continue
-
         if isinstance(node, ast.If):
             test = ast.unparse(node.test)
             if "__name__" in test and "__main__" in test:
                 module.main_body.extend(node.body)
                 continue
-
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             module.functions.append(node)
         elif isinstance(node, ast.ClassDef):
@@ -49,9 +44,7 @@ def parse_module(module: Module):
 
 
 def resolve_imports(modules: dict, root_pkg_name: str) -> list:
-    """Resolves relative imports to absolute imports."""
     final_imports = []
-
     for mod in modules.values():
         for imp in mod.imports:
             if isinstance(imp, ast.ImportFrom):
@@ -61,17 +54,13 @@ def resolve_imports(modules: dict, root_pkg_name: str) -> list:
                         base_parts = parts[: -(imp.level - 1)]
                     else:
                         base_parts = parts[:-1]
-
                     base_pkg = ".".join(base_parts)
-
                     if imp.module:
                         abs_module = f"{base_pkg}.{imp.module}" if base_pkg else imp.module
                     else:
                         abs_module = base_pkg
-
                     imp.module = abs_module
                     imp.level = 0
-
                     if abs_module == root_pkg_name and not imp.names[0].name == "*":
                         new_imports = []
                         for alias in imp.names:
@@ -82,24 +71,19 @@ def resolve_imports(modules: dict, root_pkg_name: str) -> list:
                             )
                         final_imports.extend(new_imports)
                         continue
-
             final_imports.append(imp)
         mod.imports = []
-
     return final_imports
 
 
 def package_assets(asset_dir: Path, root_pkg_name: str) -> tuple:
-    """Encodes asset files as Base64 and creates a loader AST node."""
     assets = {}
     for root, _, files in os.walk(asset_dir):
         for f in files:
             fp = Path(root) / f
             rel_path = fp.relative_to(asset_dir.parent)
             assets[str(rel_path)] = base64.b64encode(fp.read_bytes()).decode("utf-8")
-
     assets_json = json.dumps(assets, indent=4)
-
     loader_code = f"""
 import os, base64, tempfile
 _ASSETS = {assets_json}
@@ -109,7 +93,6 @@ for _rel_path, _b64 in _ASSETS.items():
     os.makedirs(os.path.dirname(_abs_path), exist_ok=True)
     with open(_abs_path, 'wb') as _f:
         _f.write(base64.b64decode(_b64))
-
 # Patching builtins to redirect asset file reads
 _orig_open = open
 def _patched_open(file, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None):
@@ -127,12 +110,9 @@ builtins.open = _patched_open
 def merge_package(project_dir: str, output_file: str):
     project_path = Path(project_dir).resolve()
     root_pkg_name = project_path.name
-
     py_files = list(project_path.rglob("*.py"))
     asset_dir = project_path / "assets"
-
     modules = {}
-
     for py_file in py_files:
         if py_file.name == "__pycache__":
             continue
@@ -140,36 +120,28 @@ def merge_package(project_dir: str, output_file: str):
         mod_name = ".".join(rel_path.with_suffix("").parts)
         if mod_name.endswith(".__init__"):
             mod_name = mod_name[:-9]
-
         mod = Module(mod_name, py_file)
         parse_module(mod)
         modules[mod_name] = mod
-
     all_imports = resolve_imports(modules, root_pkg_name)
-
     asset_nodes = []
     if asset_dir.exists():
         asset_nodes = package_assets(asset_dir, root_pkg_name)
-
     final_body = []
     final_body.extend(asset_nodes)
     final_body.extend(all_imports)
-
     for mod in modules.values():
         final_body.extend(mod.assignments)
     for mod in modules.values():
         final_body.extend(mod.classes)
     for mod in modules.values():
         final_body.extend(mod.functions)
-
     for mod in modules.values():
         if mod.main_body:
             final_body.append(ast.parse("if __name__ == '__main__':").body[0])
             final_body[-1].body = mod.main_body
-
     header = f'"""Single-file build of {root_pkg_name}"""\n'
     final_code = header + ast.unparse(ast.Module(body=final_body, type_ignores=[]))
-
     Path(output_file).write_text(final_code, encoding="utf-8")
     print(f"Successfully merged {root_pkg_name} into {output_file}")
 

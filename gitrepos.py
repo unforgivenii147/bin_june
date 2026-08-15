@@ -19,7 +19,7 @@ def get_github_repos(username: str, output_file=None) -> None:
             return
         with Path(output_file).open("w", encoding="utf-8") as f:
             f.write(f"GitHub repositories for user: {username}\n")
-            f.write("=" * 50 + "\n\n")
+            f.write("=" * 42 + "\n\n")
             for repo in repos:
                 name = repo["name"]
                 description = repo["description"] or "No description"
@@ -31,7 +31,7 @@ def get_github_repos(username: str, output_file=None) -> None:
                 f.write(f"Description: {description}\n")
                 f.write(f"URL: {url}\n")
                 f.write(f"Stars: {stars} | Forks: {forks} | Language: {language}\n")
-                f.write("-" * 50 + "\n")
+                f.write("-" * 42 + "\n")
         print(f"Successfully saved {len(repos)} repositories to {output_file}")
     except requests.exceptions.RequestException as e:
         print(f"Error fetching data: {e}")

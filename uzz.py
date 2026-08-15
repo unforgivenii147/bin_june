@@ -20,7 +20,6 @@ def extract_wheel(wheel_path: Path) -> tuple[str, bool]:
     pkg_name = get_package_name(wheel_path.name)
     output_dir = wheel_path.parent / pkg_name
     output_dir.mkdir(exist_ok=True)
-
     try:
         with ZipFile(wheel_path) as whl:
             whl.extractall(output_dir)
@@ -31,14 +30,11 @@ def extract_wheel(wheel_path: Path) -> tuple[str, bool]:
 
 def main():
     wheels = list(Path.cwd().glob("*.whl"))
-
     if not wheels:
         print("No .whl files found")
         return
-
     with ThreadPoolExecutor() as executor:
         results = executor.map(extract_wheel, wheels)
-
     for name, success in results:
         status = "✓" if success else "✗"
         print(f"{status} {name}")

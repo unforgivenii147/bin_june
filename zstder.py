@@ -51,7 +51,7 @@ def status_line(ok: bool, name: str, elapsed_ms: float, before: int, after: int)
     return f"[{icon}] {name} ({elapsed_ms:.0f}ms) {ratio_str(before, after)}"
 
 
-def compress_file(src: Path, dry_run: bool, verbose: bool, level: Union[int, None] = ..., threads: int = ...) -> dict:
+def compress_file(src: Path, dry_run: bool, verbose: bool, level: int = 21, threads: int = 4) -> dict:
     result = {"src": src, "ok": False, "line": "", "msg": ""}
     dst = src.with_suffix(src.suffix + ZSTD_EXT)
     if dst.exists():

@@ -3,11 +3,10 @@ from __future__ import annotations
 
 import argparse
 import sys
-from collections import deque
 from pathlib import Path
 from time import perf_counter as pff
 
-from dh import cprint, format_time, fsz, get_pyfiles, is_binary, is_python_file, mpf3
+from dh import cprint, format_time, fsz, get_pyfiles, mpf3
 
 MODE = "black"
 CHUNK_SIZE = 1024 * 1024
@@ -31,7 +30,9 @@ def process_file(path: str | Path, mode: str = MODE) -> bool:
 
                 code = fix_with_isort(original_code)
             case "black":
-                from black import Mode as _Mode, TargetVersion as _tv, format_str
+                from black import Mode as _Mode
+                from black import TargetVersion as _tv
+                from black import format_str
 
                 code = format_str(original_code, mode=_Mode(target_versions={_tv.PY310, _tv.PY313}, line_length=120))
             case "autopep":
@@ -43,7 +44,9 @@ def process_file(path: str | Path, mode: str = MODE) -> bool:
 
                 code, _ = fix_with_yapf(original_code)
             case _:
-                from black import Mode as _Mode, TargetVersion as _tv, format_str
+                from black import Mode as _Mode
+                from black import TargetVersion as _tv
+                from black import format_str
 
                 code = format_str(original_code, mode=_Mode(target_versions={_tv.PY310, _tv.PY313}, line_length=120))
         after = len(code)
@@ -52,7 +55,7 @@ def process_file(path: str | Path, mode: str = MODE) -> bool:
         if dsz:
             path.write_text(code, encoding="utf-8")
             ratio = dsz / before * 100
-            print(f"{path.name} ", end=" ")
+
             cprint(f"({format_time(etime - stime)}) | {fsz(dsz)} | {ratio:.1f}%", "cyan")
             return True
         else:

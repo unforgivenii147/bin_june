@@ -61,7 +61,7 @@ def create_chart(target_dir: str = ".") -> None:
     sorted_subdirs = sorted(subdir_sizes.items(), key=lambda item: item[1], reverse=True)
     top_subdirs = dict(sorted_subdirs[:MAX_DIRS])
     remaining_size = sum(size for name, size in subdir_sizes.items() if name not in top_subdirs)
-    percentages = {name: (size / total_size * 100) for name, size in top_subdirs.items()}
+    percentages = {name: size / total_size * 100 for name, size in top_subdirs.items()}
     if remaining_size > 0:
         percentages["Other"] = remaining_size / total_size * 100
     labels = list(top_subdirs.keys())

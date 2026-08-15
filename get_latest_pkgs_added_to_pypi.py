@@ -67,7 +67,7 @@ def save_to_text(packages: List[Dict[str, str]], filename: str) -> None:
     with open(filename, "w", encoding="utf-8") as f:
         f.write(f"PyPI Latest Package Updates\n")
         f.write(f"Fetched at: {datetime.now().isoformat()}\n")
-        f.write("=" * 60 + "\n\n")
+        f.write("=" * 42 + "\n\n")
         for i, pkg in enumerate(packages, 1):
             f.write(f"{i}. {pkg.get('package_name', 'Unknown')}\n")
             f.write(f"   Version: {pkg.get('version', 'N/A')}\n")

@@ -8,6 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import chardet
+from dh import is_binary
 from loguru import logger
 
 TARGET_EXTENSIONS = {".tar.gz", ".pdf", ".zip", ".css", ".js", ".tar.xz", ".7z", ".whl", ".html"}
@@ -15,32 +16,12 @@ COMPRESSED_ARCHIVES = {".tar.xz", ".tar.gz", ".tar.zst", ".7z", ".br", ".zip", "
 GITHUB_REPO_REGEX = re.compile(r"https?://(?:www\.)?github\.com/[a-zA-Z0-9\-]+/[a-zA-Z0-9\-]+")
 URL_REGEX = re.compile(r"(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?")
 MAX_WORKERS = 4
-BINARY_CHECK_THRESHOLD = 0.7
 
 
 def extract_links_from_text(text: str, file_path: Path | str):
     urls = URL_REGEX.findall(text)
     github_urls = GITHUB_REPO_REGEX.findall(text)
     return urls, github_urls
-
-
-def is_likely_binary(file_path: Path, chunk_size=1024) -> bool:
-    try:
-        with file_path.open("rb") as f:
-            chunk = f.read(chunk_size)
-            if not chunk:
-                return False
-            result = chardet.detect(chunk)
-            return bool(
-                (result["encoding"] is None or result["confidence"] < BINARY_CHECK_THRESHOLD)
-                and any(
-                    not (32 <= ord(c) <= 126 or c in "\n\r\t")
-                    for c in chunk.decode(result["encoding"] or "latin-1", errors="ignore")
-                )
-            )
-    except Exception as e:
-        logger.warning(f"Could not reliably determine if {file_path} is binary: {e}")
-        return True
 
 
 def read_file_with_encodings(
@@ -134,7 +115,7 @@ def process_file(file_path_str: str):
                         logger.warning(
                             f"7z extraction requires external library like 'py7zr'. Treating as binary for now: {file_path}"
                         )
-                        if is_likely_binary(file_path):
+                        if is_binary(file_path):
                             content, _ = read_file_with_encodings(file_path)
                             if content:
                                 urls, gh_urls = extract_links_from_text(content, file_path)
@@ -161,7 +142,7 @@ def process_file(file_path_str: str):
                 github_urls.extend(gh_urls)
                 logger.debug(f"Extracted from generic text file: {file_path}")
         if (
-            is_likely_binary(file_path)
+            is_binary(file_path)
             and file_extension not in TARGET_EXTENSIONS
             and file_extension not in COMPRESSED_ARCHIVES
         ):

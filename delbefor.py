@@ -7,7 +7,6 @@ from pathlib import Path
 from dh import read_lines
 
 THRESHOLD = 1048576
-
 if __name__ == "__main__":
     file_name = Path(sys.argv[1])
     nl = []

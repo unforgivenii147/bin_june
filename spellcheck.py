@@ -12,8 +12,8 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Dict, List, Tuple
 
-from spellchecker import SpellChecker
 from dh import TXT_EXT
+from spellchecker import SpellChecker
 
 
 def find_text_files(root_dir: Path, extensions: set | None = None) -> List[Path]:

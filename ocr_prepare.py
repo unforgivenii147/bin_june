@@ -154,7 +154,7 @@ def main():
         return 1
     logger.info(f"Found {len(image_files)} image(s) to process")
     results = process_images_parallel(image_files, args.workers)
-    logger.info("=" * 50)
+    logger.info("=" * 42)
     logger.info("Processing complete:")
     logger.info(f"  ✓ Success: {results['success']}")
     logger.info(f"  ✗ Failed:  {results['failed']}")

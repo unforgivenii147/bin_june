@@ -175,7 +175,7 @@ def merge_results(all_results: list[dict]) -> dict:
 
 
 def print_summary(results: dict, total_items: int, elapsed_time: float) -> None:
-    print("\n" + "=" * 80)
+    print("\n" + "=" * 42)
     print("📊 PERMISSION NORMALIZATION SUMMARY")
     print("-" * 42)
     print(f"⏱️  Time elapsed:          {elapsed_time:.2f} seconds")

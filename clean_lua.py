@@ -184,7 +184,7 @@ def main() -> int:
                 pct = (saved / s["before"] * 100) if s["before"] else 0.0
                 print(f"  ✓ {rel}  {s['comments']} comment(s) removed · {format_size(saved)} (-{pct:.1f}%)")
     elapsed = time.monotonic() - t0
-    print("\n" + "─" * 60)
+    print("\n" + "─" * 42)
     print(f"  Files processed  : {total_files}")
     print(f"  Comments removed : {total_comments}")
     print(f"  Bytes removed    : {format_size(total_removed)}")

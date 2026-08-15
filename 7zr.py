@@ -279,12 +279,12 @@ async def process_compress() -> None:
     if successful > 0:
         savings = total_original - total_compressed
         savings_percent = savings / total_original * 100
-        print(f"\n{'=' * 50}")
+        print(f"\n{'=' * 42}")
         print(f"✅ Compressed {successful}/{len(files_to_compress)} files")
         print(f"📊 Original size:  {fsz(total_original)}")
         print(f"📦 Compressed size: {fsz(total_compressed)}")
         print(f"💾 Space saved:    {fsz(savings)} ({savings_percent:.1f}%)")
-        print(f"{'=' * 50}")
+        print(f"{'=' * 42}")
     elif files_to_compress:
         print("\n❌ No files were successfully compressed")
 
@@ -325,11 +325,11 @@ async def process_decompress() -> None:
         except Exception as e:
             print(f"  ✗ Failed to decompress {path.name}: {e}")
     if successful > 0:
-        print(f"\n{'=' * 50}")
+        print(f"\n{'=' * 42}")
         print(f"✅ Decompressed {successful}/{len(files_to_decompress)} archives")
         print(f"📦 Compressed size:   {fsz(total_original)}")
         print(f"📊 Decompressed size: {fsz(total_decompressed)}")
-        print(f"{'=' * 50}")
+        print(f"{'=' * 42}")
     elif files_to_decompress:
         print("\n❌ No files were successfully decompressed")
 

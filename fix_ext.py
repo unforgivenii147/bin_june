@@ -3,6 +3,7 @@ import argparse
 import concurrent.futures
 import sys
 from pathlib import Path
+
 from dh import get_files
 
 try:
@@ -14,10 +15,6 @@ except ImportError:
 
 
 def get_extension_from_mime(mime_type: str) -> str:
-    """
-    Maps common MIME types to file extensions.
-    puremagic often returns mime types, so we map them back to extensions.
-    """
     mime_map = {
         "image/jpeg": ".jpg",
         "image/png": ".png",
@@ -37,86 +34,60 @@ def get_extension_from_mime(mime_type: str) -> str:
         "audio/mpeg": ".mp3",
         "audio/wav": ".wav",
         "text/plain": ".txt",
-        "application/octet-stream": "",  # Default binary fallback
+        "application/octet-stream": "",
     }
     return mime_map.get(mime_type, "")
 
 
 def detect_true_extension(file_path: Path) -> str:
-    """
-    Reads the file header and uses puremagic to determine the true extension.
-    """
     try:
-        # puremagic.magic_string returns a list of Magic objects.
-        # We take the most confident match (first element).
         magic_data = puremagic.magic_string(file_path.read_bytes())
         if magic_data:
             best_match = magic_data[0]
-            # Prefer the extension provided by puremagic, fallback to MIME mapping
+
             ext = best_match.extension
             if ext and ext != "":
                 return ext if ext.startswith(".") else f".{ext}"
-
             mime_ext = get_extension_from_mime(best_match.mime_type)
             if mime_ext:
                 return mime_ext
     except puremagic.main.PureError:
-        # Raised if the file type is completely unknown or has no magic bytes (e.g., empty file)
         pass
     except Exception as e:
         print(f"Error reading {file_path}: {e}")
-
     return ""
 
 
 def check_file(file_path: Path) -> tuple[Path, str, str] | None:
-    """
-    Checks a single file for extension mismatch.
-    Returns a tuple of (path, current_ext, true_ext) if mismatched, otherwise None.
-    """
     current_ext = file_path.suffix.lower()
 
-    # Skip files with no extension
     if not current_ext:
         return None
-
     true_ext = detect_true_extension(file_path)
 
-    # If true_ext is empty, we couldn't determine it. Skip to avoid false positives.
     if not true_ext:
         return None
-
     true_ext = true_ext.lower()
 
-    # If extensions differ, it's a mismatch
     if current_ext != true_ext:
-        # Edge case: .jpeg and .jpg are functionally identical. Normalize them.
         normalize_pairs = {".jpeg": ".jpg", ".htm": ".html", ".tif": ".tiff"}
         norm_current = normalize_pairs.get(current_ext, current_ext)
         norm_true = normalize_pairs.get(true_ext, true_ext)
-
         if norm_current != norm_true:
             return (file_path, current_ext, true_ext)
-
     return None
 
 
 def autofix_filename(file_path: Path, current_ext: str, true_ext: str) -> Path:
-    """
-    Updates the filename in place by replacing the old extension with the new one.
-    Appends a number if the target filename already exists.
-    """
-    # Remove old extension and add the new one
+
     new_name = file_path.stem + true_ext
     new_path = file_path.with_name(new_name)
 
-    # Handle name collisions (e.g., file.jpg exists, and we are renaming file.png to file.jpg)
     counter = 1
     original_new_path = new_path
     while new_path.exists() and new_path != file_path:
         new_path = original_new_path.with_name(f"{original_new_path.stem}_{counter}{true_ext}")
         counter += 1
-
     if new_path != file_path:
         file_path.rename(new_path)
         return new_path
@@ -133,43 +104,31 @@ def main():
     )
     parser.add_argument("-w", "--workers", type=int, default=4, help="Number of parallel worker threads (default: 4).")
     args = parser.parse_args()
-
     root_dir = Path(args.directory)
-
     if not root_dir.is_dir():
         print(f"Error: '{root_dir}' is not a valid directory.")
         sys.exit(1)
-
     print(f"Scanning '{root_dir}' for extension mismatches...")
     if args.autofix:
         print("Autofix is ENABLED. Files will be renamed.")
 
-    # Gather all files recursively
     cwd = Path.cwd()
     all_files = get_files(cwd)
-    # [f for f in root_dir.rglob('*') if f.is_file() and not f.is_symlink]
 
     mismatches = []
 
-    # Process files in parallel using ThreadPoolExecutor
-    # (Threads are used instead of processes because file I/O is the bottleneck here,
-    # and threads have lower overhead for sharing data back to the main thread)
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) as executor:
         futures = {executor.submit(check_file, f): f for f in all_files}
-
         for future in concurrent.futures.as_completed(futures):
             result = future.result()
             if result:
                 mismatches.append(result)
-
     if not mismatches:
         print("No extension mismatches found!")
         return
-
     print(f"\nFound {len(mismatches)} mismatches:")
     for file_path, current_ext, true_ext in sorted(mismatches):
         print(f"[MISMATCH] '{file_path}' | Current: '{current_ext}' | Detected: '{true_ext}'")
-
         if args.autofix:
             try:
                 new_path = autofix_filename(file_path, current_ext, true_ext)

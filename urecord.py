@@ -81,7 +81,7 @@ def main() -> None:
     print(f"Python version: {sys.version}")
     print(f"Site packages directories: {', '.join(site_dirs)}")
     total_files, total_updated = scan_and_update(site_dirs)
-    print(f"\n{'=' * 50}")
+    print(f"\n{'=' * 42}")
     print("Summary:")
     print(f"  Total RECORD files found: {total_files}")
     print(f"  Files that would be/are updated: {total_updated}")

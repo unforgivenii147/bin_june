@@ -26,7 +26,6 @@ ALGORITHMS = [
     ("lz4", ".lz4", compress_lz4),
     ("blosc", ".blosc", compress_blosc),
 ]
-
 CompressionResult = namedtuple("CompressionResult", ["name", "ext", "size", "ratio", "elapsed", "output_path"])
 
 
@@ -137,7 +136,7 @@ def run_benchmark(target: Path) -> None:
     results.sort(key=lambda r: r.ratio)
     top3 = results[:3]
     best = results[0]
-    print("\n" + "=" * 70)
+    print("\n" + "=" * 42)
     print("TOP 3 COMPRESSION RESULTS")
     print("-" * 42)
     for rank, r in enumerate(top3, 1):

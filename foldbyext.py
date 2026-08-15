@@ -46,7 +46,7 @@ def folderize_by_extension(cwd: Path):
                 print(f"Removed empty directory: {dir_path.relative_to(root_path)}")
             except OSError:
                 pass
-    print("\n" + "=" * 50)
+    print("\n" + "=" * 42)
     print("ORGANIZATION SUMMARY")
     print("-" * 42)
     total_files = 0

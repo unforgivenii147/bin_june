@@ -405,7 +405,7 @@ def process_stream(base_dir: Path, compress: bool, level: int, threads: int, rem
                     done_key = done
                     _, _ = futures.pop(done_key, (None, None))
                     completed += 1
-                    progress = int(completed / max(1, total_submitted + skipped) * 50)
+                    progress = int(completed / max(1, total_submitted + skipped) * 42)
                     bar = "█" * progress + "░" * (50 - progress)
                     print(f"\rProgress: [{bar}] {completed}/{total_submitted + skipped} files", end="", flush=True)
                     if not result[0]:
@@ -414,7 +414,7 @@ def process_stream(base_dir: Path, compress: bool, level: int, threads: int, rem
         for future in as_completed(futures):
             result = future.result()
             completed += 1
-            progress = int(completed / max(1, total_submitted + skipped) * 50)
+            progress = int(completed / max(1, total_submitted + skipped) * 42)
             bar = "█" * progress + "░" * (50 - progress)
             print(f"\rProgress: [{bar}] {completed}/{total_submitted + skipped} files", end="", flush=True)
             if not result[0]:

@@ -229,7 +229,7 @@ def validate_extensions(
 
 
 def print_report(results: dict):
-    print("\n" + "=" * 80)
+    print("\n" + "=" * 42)
     print("BINARY EXTENSION VALIDATION REPORT")
     print("-" * 42)
     print("\nSummary:")
@@ -253,7 +253,7 @@ def print_report(results: dict):
     print("-" * 42)
     for ext, stats in sorted(results["by_extension"].items()):
         print(f"  {ext:12} - Binary: {stats['binary']:6}  Text: {stats['text']:6}  Errors: {stats['error']:6}")
-    print("\n" + "=" * 80)
+    print("\n" + "=" * 42)
 
 
 if __name__ == "__main__":

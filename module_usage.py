@@ -197,51 +197,51 @@ def generate_report(per_file_data: list[tuple[str, dict[str, dict[str, int]]]], 
                 thirdparty_counts[mod] += total
                 for func in func_calls:
                     thirdparty_files[func].add(fname)
-    lines.append(f"{'=' * 80}")
+    lines.append(f"{'=' * 42}")
     lines.append(f"  IMPORT USAGE REPORT — {now:%Y-%m-%d %H:%M}")
-    lines.append(f"{'=' * 80}")
+    lines.append(f"{'=' * 42}")
     lines.append(f"  Scanned directory: {BIN_DIR}")
     lines.append(f"  Files scanned: {len(per_file_data)}")
     lines.append("")
-    lines.append(f"{'─' * 80}")
+    lines.append(f"{'─' * 42}")
     lines.append("  SECTION 1: STANDARD LIBRARY MODULES")
-    lines.append(f"{'─' * 80}")
+    lines.append(f"{'─' * 42}")
     if stdlib_counts:
         lines.append(f"\n  {'Module':<35} {'Total Calls':<15} {'Files':<10}")
-        lines.append("  " + "-" * 70)
+        lines.append("  " + "-" * 42)
         for mod in sorted(stdlib_counts, key=lambda m: -stdlib_counts[m]):
             files_used = len(stdlib_files.get(mod, set()))
             lines.append(f"  {mod:<35} {stdlib_counts[mod]:<15} {files_used:<10}")
         lines.append(f"\n  Total stdlib modules used: {len(stdlib_counts)}")
     else:
         lines.append("  (none)")
-    lines.append(f"\n{'─' * 80}")
+    lines.append(f"\n{'─' * 42}")
     lines.append("  SECTION 2: THIRD-PARTY PACKAGES")
-    lines.append(f"{'─' * 80}")
+    lines.append(f"{'─' * 42}")
     if thirdparty_counts:
         lines.append(f"\n  {'Package':<35} {'Total Calls':<15} {'Files':<10}")
-        lines.append("  " + "-" * 70)
+        lines.append("  " + "-" * 42)
         for mod in sorted(thirdparty_counts, key=lambda m: -thirdparty_counts[m]):
             files_used = len(thirdparty_files.get(mod, set()))
             lines.append(f"  {mod:<35} {thirdparty_counts[mod]:<15} {files_used:<10}")
         lines.append(f"\n  Total third-party packages used: {len(thirdparty_counts)}")
     else:
         lines.append("  (none)")
-    lines.append(f"\n{'─' * 80}")
+    lines.append(f"\n{'─' * 42}")
     lines.append(f"  SECTION 3: CUSTOM '{PACKAGE}' PACKAGE")
-    lines.append(f"{'─' * 80}")
+    lines.append(f"{'─' * 42}")
     if dh_counts:
         lines.append(f"\n  {'Function':<35} {'Total Calls':<15} {'Files':<10}")
-        lines.append("  " + "-" * 70)
+        lines.append("  " + "-" * 42)
         for func in sorted(dh_counts, key=lambda f: -dh_counts[f]):
             files_used = len(dh_files.get(func, set()))
             lines.append(f"  {func:<35} {dh_counts[func]:<15} {files_used:<10}")
         lines.append(f"\n  Total dh functions used: {len(dh_counts)}")
     else:
         lines.append("  (none)")
-    lines.append(f"\n{'─' * 80}")
+    lines.append(f"\n{'─' * 42}")
     lines.append("  SECTION 4: PER-FILE BREAKDOWN")
-    lines.append(f"{'─' * 80}")
+    lines.append(f"{'─' * 42}")
     for fname, module_calls in sorted(per_file_data, key=lambda x: -sum(sum(c.values()) for c in x[1].values())):
         total_calls = sum(sum(c.values()) for c in module_calls.values())
         lines.append(f"\n  📄 {fname}  ({total_calls} total calls)")
@@ -284,9 +284,9 @@ def generate_report(per_file_data: list[tuple[str, dict[str, dict[str, int]]]], 
                     if count > 0:
                         lines.append(f"        {func:<28} {count} time(s)")
     lines.append("")
-    lines.append(f"{'=' * 80}")
+    lines.append(f"{'=' * 42}")
     lines.append("  END OF REPORT")
-    lines.append(f"{'=' * 80}")
+    lines.append(f"{'=' * 42}")
     return "\n".join(lines)
 
 

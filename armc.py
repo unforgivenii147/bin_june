@@ -2,16 +2,6 @@
 """
 Python Comment Remover with AST Validation
 Removes comments from Python files recursively with parallel processing.
-Features:
-- Removes line comments (
-- Preserves docstrings
-- Preserves shebang lines
-- Preserves # type: and # fmt: comments
-- Validates code with AST before writing
-- Processes .py files, files without extension, and .whl archives
-- Processes files inside .whl archives
-- Parallel processing for performance
-- Detailed reporting
 """
 
 from __future__ import annotations
@@ -25,6 +15,8 @@ import zipfile
 from collections.abc import Generator
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+
+from dh import DOC_TH1, DOC_TH2
 
 
 class CommentRemover:
@@ -73,7 +65,7 @@ class CommentRemover:
         in_multiline_string = False
         string_delimiter = None
         for _line_index, line in enumerate(lines):
-            for delimiter in ('"""', "'''"):
+            for delimiter in (DOC_TH1, DOC_TH2):
                 if delimiter in line:
                     temp_line = line
                     i = 0
@@ -237,7 +229,7 @@ class CommentRemover:
                 for future in as_completed(futures):
                     file_path, comments_removed, success, message = future.result()
                     self.total_comments_removed += comments_removed
-                    if success:
+                    if success and comments_removed:
                         status = "✓" if comments_removed > 0 else "•"
                         print(f"{status} {file_path.name:50} | Comments removed: {comments_removed:3}")
                     else:
@@ -268,7 +260,7 @@ class CommentRemover:
             print("⚠ No Python files or wheel files found")
 
     def print_summary(self) -> None:
-        print("\n" + "=" * 80)
+        print("\n" + "=" * 42)
         print("📊 SUMMARY")
         print("-" * 42)
         print(f"Python files processed:     {self.total_files}")

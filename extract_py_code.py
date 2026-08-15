@@ -17,18 +17,14 @@ from pathlib import Path
 
 TARGET_NAMES = {"PKGINFO", "METADATA", "PKG-INFO"}
 TARGET_EXTENSIONS = {".md", ".txt", ".html"}
-
 PY_CODE_BLOCK = re.compile(
-    r"```python\s*\n(.*?)```"
-    r"\"\"\"(.*?)\"\"\"",
+    r"```python\s*\n(.*?)```" r"\"\"\"(.*?)\"\"\"",
     re.DOTALL | re.IGNORECASE,
 )
-
 INLINE_PY = re.compile(
     r"(?:^|\n)((?:import\s+\w+|from\s+\w+\s+import|def\s+\w+|class\s+\w+).*?)(?=\n\s*\n|\Z)",
     re.DOTALL | re.MULTILINE,
 )
-
 REPL_SESSION = re.compile(
     r"(?:^|\n)((?:>>>|\.\.\.).*?)(?=\n\s*\n|\Z)",
     re.DOTALL | re.MULTILINE,
@@ -61,20 +57,16 @@ def parse_repl_block(block):
     in_code = False
     for line in lines:
         stripped = line.strip()
-
         if stripped.startswith(">>>"):
             code = stripped[3:].strip()
             result_lines.append(code)
             in_code = True
-
         elif stripped.startswith("..."):
             code = stripped[3:].strip()
             result_lines.append(code)
             in_code = True
-
         elif in_code and stripped:
             result_lines.append(f"# {stripped}")
-
         elif not stripped:
             result_lines.append("")
     return "\n".join(result_lines)
@@ -86,19 +78,16 @@ def extract_python_blocks(file_path):
     except (OSError, UnicodeDecodeError):
         return []
     blocks = []
-
     for match in PY_CODE_BLOCK.finditer(content):
         code = match.group(1).strip()
         if code:
             if ">>>" in code:
                 code = parse_repl_block(code)
             blocks.append(code)
-
     for match in REPL_SESSION.finditer(content):
         code = parse_repl_block(match.group(1))
         if code.strip():
             blocks.append(code)
-
     if not blocks and file_path.name in TARGET_NAMES:
         for match in INLINE_PY.finditer(content):
             code = match.group(1).strip()
@@ -114,7 +103,6 @@ def process_file(file_path, output_dir):
         stem = file_path.stem.replace(" ", "_")
         out_name = f"{stem}_{idx:03d}.py"
         out_path = output_dir / out_name
-
         header = f"# Source: {file_path}\n# Block: {idx}\n# Extracted: {file_path.name}\n\n"
         out_path.write_text(header + code + "\n", encoding="utf-8")
         saved.append(out_path)
@@ -122,21 +110,17 @@ def process_file(file_path, output_dir):
 
 
 def main():
-
     if len(sys.argv) > 1:
         input_paths = sys.argv[1:]
     else:
         input_paths = ["."]
-
     output_dir = Path("extracted_code")
     output_dir.mkdir(exist_ok=True)
-
     target_files = find_target_files(input_paths)
     if not target_files:
         print("No target files found.")
         return
     print(f"Found {len(target_files)} target files. Processing...")
-
     results = []
     with ProcessPoolExecutor() as executor:
         futures = {executor.submit(process_file, f, output_dir): f for f in target_files}
@@ -144,7 +128,6 @@ def main():
             file_path, saved = future.result()
             results.append((file_path, saved))
             print(f"  ✓ {file_path}: {len(saved)} block(s) extracted")
-
     total_blocks = sum(len(saved) for _, saved in results)
     print(f"\nDone! Extracted {total_blocks} Python block(s) to '{output_dir}/'")
     print("Reference headers in each file indicate the source.")

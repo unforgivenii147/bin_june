@@ -152,7 +152,7 @@ def main():
     upgradable = check_updates_parallel(unique_packages, max_workers=20)
     output_file = Path.cwd() / "upgradable.txt"
     save_upgradable_packages(upgradable, output_file)
-    print("\n" + "=" * 50)
+    print("\n" + "=" * 42)
     print("Summary:")
     print(f"  Total packages checked: {len(unique_packages)}")
     print(f"  Updates available: {len(upgradable)}")

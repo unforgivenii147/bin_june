@@ -1,25 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+
+
 from __future__ import annotations
 
 import sys
 from pathlib import Path
 
-from dh import cprint, get_fast, runcmd
-
-
-def gsz(path: str | Path) -> int:
-    path = Path(path)
-    total = 0
-    if path.is_file():
-        return path.stat().st_size
-    for file in path.rglob("*"):
-        if file.is_file():
-            total += file.stat().st_size
-    return total
-
-
-START_DIR = Path.cwd()
-NUM_PROCESSES = 4
+from dh import get_files, gsz, mpf3, rrs, runcmd
 
 
 def process_file(path: str | Path) -> None:
@@ -37,32 +24,18 @@ def process_file(path: str | Path) -> None:
             str(path),
         ]
         _ret, txt, _err = runcmd(cmd, show_output=False)
-        if "skipping" in txt.lower():
-            print(f" Skipped: {path.name}")
-            return
         after = gsz(path)
-        dz = before - after
-        if not dz:
-            print(f"✅ : {path.name} : (no change)")
-            return
-        ratio = after / before * 100
-        print(f"✅ : {path.name}", end=" | ")
-        cprint(f"{ratio:.1f} %")
+        rrs(path, before, after)
         return
-    except FileNotFoundError:
-        print(
-            "❌ Error: 'pngquant' command not found. Please ensure the 'pngquant' binary is installed and in your system PATH."
-        )
     except Exception as e:
-        print(f"❌ Error compressing {path}: {e}")
-    return
+        return
 
 
 def main() -> None:
     cwd = Path.cwd()
-    for f in get_fast(cwd):
-        if f.suffix in {".png", ".PNG"}:
-            process_file(f)
+    args = sys.argv[1:]
+    files = [Path(p) for p in args] if args else get_files(cwd, ext=[".png", ".PNG"])
+    mpf3(process_file, files)
 
 
 if __name__ == "__main__":

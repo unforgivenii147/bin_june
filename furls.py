@@ -10,13 +10,8 @@ import sys
 import tarfile
 import tempfile
 import zipfile
-from collections.abc import Callable
-from functools import wraps
-from inspect import getfullargspec
-from itertools import chain
 from pathlib import Path
 from tarfile import TarFile
-from typing import Any
 from urllib.parse import urlparse
 from zipfile import ZipFile
 

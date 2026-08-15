@@ -4,7 +4,7 @@ from __future__ import annotations
 import sys
 import xml.etree.ElementTree as ET
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 
 import requests
 
@@ -54,10 +54,10 @@ def display_packages(packages: list[dict[str, str]], limit: Optional[int] = None
         print("No packages found in the RSS feed.")
         return
     display_packages = packages[:limit] if limit else packages
-    print(f"\n{'=' * 80}")
+    print(f"\n{'=' * 42}")
     print(f"PyPI Latest Packages (Total: {len(packages)}, Showing: {len(display_packages)})")
     print(f"Fetched at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print(f"{'=' * 80}\n")
+    print(f"{'=' * 42}\n")
     for i, pkg in enumerate(display_packages, 1):
         print(f"Package #{i}:")
         print(f"  Name:        {pkg['package_name']}")
@@ -77,7 +77,7 @@ def save_to_file(packages: list[dict[str, str]], filename: str = "pypi_packages.
     try:
         with open(filename, "w", encoding="utf-8") as f:
             f.write(f"PyPI Latest Packages - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-            f.write("=" * 80 + "\n\n")
+            f.write("=" * 42 + "\n\n")
             for i, pkg in enumerate(packages, 1):
                 f.write(f"Package #{i}:\n")
                 f.write(f"  Name:        {pkg['package_name']}\n")
@@ -86,7 +86,7 @@ def save_to_file(packages: list[dict[str, str]], filename: str = "pypi_packages.
                 f.write(f"  Published:   {pkg['pub_date']}\n")
                 f.write(f"  Description: {pkg['description']}\n")
                 f.write(f"  GUID:        {pkg['guid']}\n")
-                f.write("-" * 80 + "\n")
+                f.write("-" * 42 + "\n")
         print(f"\nPackages saved to '{filename}'")
     except IOError as e:
         print(f"Error saving to file: {e}", file=sys.stderr)

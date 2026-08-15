@@ -120,9 +120,9 @@ def main():
     print(f"Total missing scripts: {total_missing}")
     print()
     report_lines = []
-    report_lines.append("=" * 80)
+    report_lines.append("=" * 42)
     report_lines.append("PYTHON PACKAGE SCRIPT INTEGRITY REPORT")
-    report_lines.append("=" * 80)
+    report_lines.append("=" * 42)
     report_lines.append(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     report_lines.append(f"Site-packages: {site_packages}")
     report_lines.append(f"Bin directory: {bin_dir}")
@@ -134,9 +134,9 @@ def main():
     report_lines.append(f"Total missing scripts: {total_missing}")
     report_lines.append("")
     if packages_with_missing:
-        report_lines.append("-" * 80)
+        report_lines.append("-" * 42)
         report_lines.append("PACKAGES WITH MISSING SCRIPTS")
-        report_lines.append("-" * 80)
+        report_lines.append("-" * 42)
         report_lines.append("")
         for pkg in packages_with_missing:
             report_lines.append(f"Package: {pkg['package']}")
@@ -151,9 +151,9 @@ def main():
     else:
         report_lines.append("✓ No missing scripts found!")
         report_lines.append("")
-    report_lines.append("-" * 80)
+    report_lines.append("-" * 42)
     report_lines.append("SUMMARY")
-    report_lines.append("-" * 80)
+    report_lines.append("-" * 42)
     report_lines.append("")
     for pkg in sorted(results, key=lambda x: x["package"]):
         if pkg["has_entry_points"]:

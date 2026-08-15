@@ -131,7 +131,7 @@ def main():
         return
     results.sort(key=lambda x: x[0])
     for path, old_lines, new_lines, names in results:
-        print(f"\n{'=' * 60}")
+        print(f"\n{'=' * 42}")
         mode = "APPLY" if args.apply else "DRY RUN"
         print(f"[{mode}] {path.name}")
         print(f"  Functions to import from dh: {', '.join(names)}")

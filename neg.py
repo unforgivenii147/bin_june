@@ -98,7 +98,7 @@ def main():
         results = pool.map(invert_func, image_files)
     successful = sum((1 for _, success in results if success))
     failed = len(results) - successful
-    logger.info(f"\n{'=' * 50}")
+    logger.info(f"\n{'=' * 42}")
     logger.info("Processing complete!")
     logger.info(f"✓ Successful: {successful}")
     if failed > 0:

@@ -5,14 +5,11 @@ import argparse
 import ast
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime
 from pathlib import Path
-from typing import List, Optional, Set, Tuple
+from typing import List, Tuple
 
 
 class ParentMapper(ast.NodeVisitor):
-    """Build parent-child relationships in the AST."""
-
     def __init__(self):
         self.parents = {}
 
@@ -23,7 +20,6 @@ class ParentMapper(ast.NodeVisitor):
 
 
 def get_ancestors(node: ast.AST, parent_map: dict) -> List[ast.AST]:
-    """Get all ancestors of a node."""
     ancestors = []
     current = node
     while current in parent_map:
@@ -33,9 +29,7 @@ def get_ancestors(node: ast.AST, parent_map: dict) -> List[ast.AST]:
 
 
 def is_in_restricted_scope(node: ast.AST, parent_map: dict) -> bool:
-    """Check if import is in try/except/if/with/class/lambda scope."""
     ancestors = get_ancestors(node, parent_map)
-
     restricted_types = (
         ast.Try,
         ast.If,
@@ -49,7 +43,6 @@ def is_in_restricted_scope(node: ast.AST, parent_map: dict) -> bool:
         ast.AsyncFor,
         ast.While,
     )
-
     return any(isinstance(ancestor, restricted_types) for ancestor in ancestors)
 
 
@@ -60,11 +53,9 @@ def find_imports_not_at_head(file_path: Path) -> List[Tuple[int, int, str]]:
     except (SyntaxError, UnicodeDecodeError) as e:
         print(f"  [SKIP] {file_path}: Could not parse ({e})")
         return []
-
     mapper = ParentMapper()
     mapper.visit(tree)
     parent_map = mapper.parents
-
     head_end_line = 0
     for node in tree.body:
         if isinstance(node, (ast.Import, ast.ImportFrom)):
@@ -76,19 +67,16 @@ def find_imports_not_at_head(file_path: Path) -> List[Tuple[int, int, str]]:
                 break
         else:
             break
-
     misplaced_imports = []
     for node in tree.body:
         if isinstance(node, (ast.Import, ast.ImportFrom)):
             if node.lineno <= head_end_line:
                 continue
-
             if is_in_restricted_scope(node, parent_map):
                 continue
             lines = source.split("\n")
             import_text = "\n".join(lines[node.lineno - 1 : node.end_lineno])
             misplaced_imports.append((node.lineno, node.end_lineno or node.lineno, import_text))
-
     return misplaced_imports
 
 
@@ -130,13 +118,11 @@ def process_file(file_path: Path, autofix: bool) -> Tuple[bool, bool, List[str]]
     misplaced = find_imports_not_at_head(file_path)
     if not misplaced:
         return False, False, []
-
     details = []
     for line_num, _end_line, import_text in misplaced:
         detail = f"  Line {line_num}: {import_text.strip()}"
         print(detail)
         details.append(detail)
-
     if autofix:
         if autofix_imports(file_path, misplaced):
             msg = f"  [FIXED] Moved {len(misplaced)} import(s) to top"
@@ -156,14 +142,12 @@ def save_report(report_data: List[Tuple[Path, List[str]]], output_file: str, aut
         if not report_data:
             f.write("No misplaced imports found! All files are clean.\n")
             return
-
         for file_path, details in report_data:
             f.write(f"File: {file_path}\n")
             f.write(f"{'-' * 40}\n")
             for detail in details:
                 f.write(f"{detail}\n")
             f.write("\n")
-
         if autofix:
             fixed = sum(1 for _, details in report_data if any("[FIXED]" in d for d in details))
             f.write(f"  Files fixed: {fixed}\n")
@@ -185,29 +169,22 @@ def main():
     )
     parser.add_argument("-j", "--jobs", type=int, default=8, help="Number of parallel jobs (default: 4)")
     args = parser.parse_args()
-
     output_file = args.output or (None if args.autofix else "errors.txt")
-
     root = Path(args.directory)
     if not root.exists():
         print(f"Error: Directory '{root}' does not exist")
         sys.exit(1)
-
     if root.is_file():
         files = [root] if root.suffix == ".py" else []
     else:
         files = sorted(root.rglob("*.py"))
-
     if not files:
         print(f"No .py files found in '{root}'")
         return
-
     print(f"Scanning {len(files)} Python file(s) with {args.jobs} worker(s)...")
-
     files_with_issues = 0
     files_fixed = 0
     report_data = []
-
     with ThreadPoolExecutor(max_workers=args.jobs) as executor:
         futures = {executor.submit(process_file, fp, args.autofix): fp for fp in files}
         for future in as_completed(futures):
@@ -217,7 +194,6 @@ def main():
                 report_data.append((futures[future], details))
             if was_fixed:
                 files_fixed += 1
-
     print(f"\n{'=' * 40}")
     print(f"Summary:")
     print(f"  Files with misplaced imports: {files_with_issues}")
@@ -225,11 +201,9 @@ def main():
         print(f"  Files fixed: {files_fixed}")
     else:
         print(f"  Run with -a to autofix")
-
     if output_file and (files_with_issues > 0 or args.output):
         save_report(report_data, output_file, args.autofix)
         print(f"  Report saved to: {output_file}")
-
     if files_with_issues > 0 and not args.autofix:
         sys.exit(1)
 

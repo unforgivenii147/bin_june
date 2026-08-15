@@ -155,7 +155,7 @@ If no argument, recursively search current directory.""",
             after = get_dir_size(parent_dir)
             size_change = after - before
             size_change_mb = size_change / (1024 * 1024)
-            print(f"\n{'=' * 50}")
+            print(f"\n{'=' * 42}")
             print(f"Summary for {target_path.name}:")
             print(f"  Archive size: {arch_size / (1024 * 1024):.2f} MB")
             print(f"  Extracted size: {ext_size / (1024 * 1024):.2f} MB")
@@ -163,7 +163,7 @@ If no argument, recursively search current directory.""",
                 print(f"  Compression ratio: {ext_size / arch_size:.2f}:1")
             print(f"  Directory size change: {size_change_mb:+.2f} MB")
         elif args.dry_run:
-            print(f"\n{'=' * 50}")
+            print(f"\n{'=' * 42}")
             print(f"DRY RUN: Would extract {target_path.name}")
         return 0 if success else 1
     if not args.quiet:
@@ -200,7 +200,7 @@ If no argument, recursively search current directory.""",
         after = get_dir_size(target_path)
         size_change = after - before
         size_change_mb = size_change / (1024 * 1024)
-        print(f"\n{'=' * 50}")
+        print(f"\n{'=' * 42}")
         print("Summary:")
         print(f"  Processed: {processed_count} archives")
         if failed_count > 0:
@@ -213,7 +213,7 @@ If no argument, recursively search current directory.""",
             print(f"  Average compression ratio: {compression_ratio:.2f}:1")
             print(f"  Space saved by compression: {total_archive_size / (1024 * 1024):.2f} MB")
     else:
-        print(f"\n{'=' * 50}")
+        print(f"\n{'=' * 42}")
         print("DRY RUN SUMMARY:")
         print(f"  Would process: {len(archives)} archives")
     return 0

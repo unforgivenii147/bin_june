@@ -99,7 +99,7 @@ def print_compression_report(results):
     if not successful:
         print("No folders were compressed successfully")
         return
-    print("\n" + "=" * 80)
+    print("\n" + "=" * 42)
     print("COMPRESSION REPORT")
     print("-" * 42)
     print(f"{'Folder':<20} {'Original':<12} {'Compressed':<12} {'Freed':<12} {'Ratio':<10} {'Saved %':<10}")

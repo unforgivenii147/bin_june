@@ -194,7 +194,7 @@ def save_strings_to_file(repeated_strings: dict[str, list[tuple[Path, list[tuple
     try:
         with open(output_file, "w", encoding="utf-8") as f:
             f.write("Repeated Multiline Strings Report\n")
-            f.write("=" * 50 + "\n\n")
+            f.write("=" * 42 + "\n\n")
             for i, (norm_str, occurrences) in enumerate(repeated_strings.items(), 1):
                 f.write(f"String #{i} (found {len(occurrences)} times):\n")
                 f.write("-" * 30 + "\n")

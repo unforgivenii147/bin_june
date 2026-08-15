@@ -40,7 +40,7 @@ def _encode_varint(value: int) -> bytes:
 
 def _hash_4_bytes(data: bytes, pos: int) -> int:
     val = data[pos] | data[pos + 1] << 8 | data[pos + 2] << 16 | data[pos + 3] << 24
-    return val * 506832829 >> 32 - 14 & _HASH_TABLE_SIZE - 1
+    return val * 426832829 >> 32 - 14 & _HASH_TABLE_SIZE - 1
 
 
 def _emit_literal(output: bytearray, data: bytes, start: int, length: int) -> None:

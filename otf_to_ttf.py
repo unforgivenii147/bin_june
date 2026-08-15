@@ -52,7 +52,7 @@ def main():
         else:
             print(f"  ✗ Failed: {message}")
             stats["error"] += 1
-    print(f"\n{'=' * 50}")
+    print(f"\n{'=' * 42}")
     print(f"Summary: {stats['success']} converted, {stats['skipped']} skipped, {stats['error']} failed")
 
 

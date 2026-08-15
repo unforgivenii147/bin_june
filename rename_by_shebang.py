@@ -136,13 +136,13 @@ def main() -> None:
         new_path = file_path.parent / new_name
         if rename_file(file_path, new_path):
             renamed_count += 1
-    print(f"\n{'=' * 50}")
+    print(f"\n{'=' * 42}")
     print("📊 Summary:")
     print(f"   ✅ Renamed: {renamed_count} file(s)")
     print(f"   ⏭️  Skipped (already correct): {skipped_count} file(s)")
     if unknown_count:
         print(f"   ❓ Unknown shebangs: {unknown_count} file(s)")
-    print(f"{'=' * 50}")
+    print(f"{'=' * 42}")
     if unknown_count > 0:
         print("\n💡 Tip: You can add new shebang patterns to the SHEBANG_MAPPING dictionary")
 

@@ -177,7 +177,7 @@ Original archives are automatically removed after successful extraction.""",
         after = get_dir_size(target_path)
         size_change = after - before
         size_change_mb = size_change / (1024 * 1024)
-        print(f"\n{'=' * 50}")
+        print(f"\n{'=' * 42}")
         print("Summary:")
         print(f"  Processed: {processed_count} archives")
         if failed_count > 0:
@@ -189,7 +189,7 @@ Original archives are automatically removed after successful extraction.""",
             compression_ratio = total_extracted_size / total_archive_size
             print(f"  Compression ratio: {compression_ratio:.2f}:1")
     else:
-        print(f"\n{'=' * 50}")
+        print(f"\n{'=' * 42}")
         print(f"DRY RUN: Would process {len(archives)} archives")
     return 0
 

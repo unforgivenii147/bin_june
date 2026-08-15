@@ -295,7 +295,7 @@ Examples:
                     file_path = future_to_file[future]
                     results.append((file_path, False, f"Execution failed: {e}", None))
                     logger.error(f"Failed to process {file_path.name}: {e}")
-    print("\n" + "=" * 70)
+    print("\n" + "=" * 42)
     print("CONVERSION RESULTS")
     print("-" * 42)
     for file_path, success, message, output_path in results:

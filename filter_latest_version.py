@@ -79,7 +79,7 @@ def filter_latest_for_armv7(urls_file=None):
                     "url": url,
                 }
             )
-    print("\n" + "=" * 80)
+    print("\n" + "=" * 42)
     print(f"SUMMARY: Found {len(results)} ARMv7 wheel(s)")
     print("-" * 42)
     for result in results:

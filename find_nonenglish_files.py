@@ -110,7 +110,7 @@ def analyze_directory(directory: str = ".", show_all: bool = False) -> dict:
 
 
 def print_results(results: dict, show_files: bool = False) -> None:
-    print("\n" + "=" * 70)
+    print("\n" + "=" * 42)
     print("📊 LANGUAGE DETECTION RESULTS")
     print("-" * 42)
     total = results["total_files"]
@@ -150,7 +150,7 @@ def print_results(results: dict, show_files: bool = False) -> None:
                     print(f"      └─ {rel_path}")
                 if len(files) > 20:
                     print(f"      └─ ... and {len(files) - 20} more")
-    print("\n" + "=" * 70)
+    print("\n" + "=" * 42)
     print("🎯 RECOMMENDATION")
     print("-" * 42)
     if non_english_total == 0:

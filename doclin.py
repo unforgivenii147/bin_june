@@ -214,7 +214,7 @@ def print_stats(all_stats: list[FileStats], base_path: Path):
     if not all_stats:
         print("\n✨ No image references found to remove!")
         return
-    print("\n" + "=" * 80)
+    print("\n" + "=" * 42)
     print("📊 IMAGE REFERENCE REMOVAL REPORT")
     print("-" * 42)
     total_lines_before = 0
@@ -239,7 +239,7 @@ def print_stats(all_stats: list[FileStats], base_path: Path):
         total_size_before += stats.size_before
         total_size_after += stats.size_after
         total_removed_refs += stats.removed_refs
-    print("\n" + "=" * 80)
+    print("\n" + "=" * 42)
     print("📈 SUMMARY")
     print("-" * 42)
     print(f"Files modified: {len(all_stats)}")

@@ -362,7 +362,7 @@ def process_files(file_generator, compress: bool, level: int, threads: int, remo
         for future in as_completed(futures):
             result = future.result()
             processed += 1
-            progress = int(processed / total * 50)
+            progress = int(processed / total * 42)
             bar = "█" * progress + "░" * (50 - progress)
             print(f"\rProgress: [{bar}] {processed}/{total} files", end="", flush=True)
             if not result[0]:

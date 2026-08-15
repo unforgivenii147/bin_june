@@ -346,7 +346,7 @@ def main() -> int:
             cprint("  ⏭️  No changes needed", "white", attrs=["dark"])
     changed = [r for r in results if r["changed"]]
     errors = [r for r in results if r["error"]]
-    cprint("\n" + "=" * 50, "cyan")
+    cprint("\n" + "=" * 42, "cyan")
     cprint("📊 SUMMARY", "cyan", attrs=["bold"])
     cprint(f"  Total files: {len(files)}", "white")
     cprint(f"  Modified: {len(changed)}", "green" if changed else "white")

@@ -88,7 +88,7 @@ def main():
                 print(f"❌ Failed to process {file_path.name}: {e}")
                 failed += 1
     elapsed_time = time.time() - start_time
-    print("\n" + "=" * 50)
+    print("\n" + "=" * 42)
     print("✨ Translation complete!")
     print(f"   ✅ Successful: {successful} files")
     if failed > 0:

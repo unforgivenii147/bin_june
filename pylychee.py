@@ -1,25 +1,22 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+import argparse
+import base64
+import mimetypes
 import os
 import re
 import sys
-import base64
-import mimetypes
-import argparse
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from urllib.parse import urlparse, urljoin, unquote, urldefrag, parse_qsl
-from typing import Optional, Tuple, List
-import urllib.request
 import urllib.error
+import urllib.request
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import List, Optional, Tuple
+from urllib.parse import unquote, urldefrag
 
 EXT_IMAGE = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".tif", ".tiff", ".svg"}
 HTTP_SCHEMES = ("http://", "https://")
-
 HTML_ATTR_RE = re.compile(r'(?P<attr>href|src)\s*=\s*(?P<q>["\'])(?P<url>.*?)(?P=q)', re.IGNORECASE)
 MD_IMAGE_RE = re.compile(r"!\[([^\]]*?)\]\((?P<url>[^)\s]+)(?:\s+\"[^\"]*\")?\)")
 MD_LINK_RE = re.compile(r"\[(?P<text>[^\]]*?)\]\((?P<url>[^)\s]+)(?:\s+\"[^\"]*\")?\)")
-
 SPLIT_URL_RE = re.compile(r"^(?P<path>[^?#]+)(?P<rest>[?#].*)?$")
-
 DEFAULT_TIMEOUT = 8
 MAX_WORKERS = 32
 
@@ -120,10 +117,8 @@ def _replace_html(html: str, file_dir: str, timeout: int) -> Tuple[str, List[str
         url = m.group("url")
         raw = url
         target = url.strip()
-
         if not target or target.startswith("#") or target.startswith("data:"):
             return m.group(0)
-
         if _is_remote(target):
             if _is_imageish(target):
                 ok = _http_check(target, timeout)
@@ -133,7 +128,6 @@ def _replace_html(html: str, file_dir: str, timeout: int) -> Tuple[str, List[str
                     return f"{attr}={q}{q}"
                 return m.group(0)
             return m.group(0)
-
         if _is_local_ref(target):
             local_path = _local_target_resolve(file_dir, target)
             if not local_path or not os.path.isfile(local_path):
@@ -147,7 +141,6 @@ def _replace_html(html: str, file_dir: str, timeout: int) -> Tuple[str, List[str
                     return m.group(0)
                 changes += 1
                 return f"{attr}={q}{data_uri}{q}"
-
         return m.group(0)
 
     out = HTML_ATTR_RE.sub(html_attr_repl, html)
@@ -163,7 +156,6 @@ def _replace_md(md: str, file_dir: str, timeout: int) -> Tuple[str, List[str]]:
         url = match.group("url").strip()
         if not url or url.startswith("#") or url.startswith("data:"):
             return match.group(0)
-
         if _is_remote(url):
             if _is_imageish(url):
                 ok = _http_check(url, timeout)
@@ -172,7 +164,6 @@ def _replace_md(md: str, file_dir: str, timeout: int) -> Tuple[str, List[str]]:
                     changes += 1
                     return "" if url.endswith(".svg") else ""
             return match.group(0)
-
         if _is_local_ref(url) and _is_imageish(url):
             local_path = _local_target_resolve(file_dir, url)
             if not local_path or not os.path.isfile(local_path):
@@ -186,14 +177,12 @@ def _replace_md(md: str, file_dir: str, timeout: int) -> Tuple[str, List[str]]:
             changes += 1
             text = match.group(1) or ""
             return f"![{text}]({data_uri})"
-
         return match.group(0)
 
     def replace_md_links(match: re.Match) -> str:
         url = match.group("url").strip()
         if not url or url.startswith("#") or url.startswith("data:"):
             return match.group(0)
-
         if _is_remote(url):
             ext = _guess_ext(url)
             if ext == ".svg" or ext in EXT_IMAGE:
@@ -202,13 +191,11 @@ def _replace_md(md: str, file_dir: str, timeout: int) -> Tuple[str, List[str]]:
                     removals.append(f"REMOTE_UNAVAILABLE_IMAGE_MD_LINK {url}")
                     return match.group(0).replace(f"({url})", "()")
             return match.group(0)
-
         if _is_local_ref(url):
             local_path = _local_target_resolve(file_dir, url)
             if not local_path or not os.path.isfile(local_path):
                 removals.append(f"LOCAL_UNAVAILABLE_MD_LINK {url}")
             return match.group(0)
-
         return match.group(0)
 
     out = MD_IMAGE_RE.sub(replace_md_images, md)
@@ -220,10 +207,8 @@ def process_file(path: str, timeout: int) -> List[str]:
     file_dir = os.path.dirname(path)
     with open(path, "r", encoding="utf-8", errors="replace") as f:
         content = f.read()
-
     changed = False
     report = []
-
     if path.lower().endswith(".html") or path.lower().endswith(".htm"):
         new_content, report = _replace_html(content, file_dir, timeout)
         changed = new_content != content
@@ -232,11 +217,9 @@ def process_file(path: str, timeout: int) -> List[str]:
         changed = new_content != content
     else:
         return []
-
     if changed:
         with open(path, "w", encoding="utf-8", errors="replace") as f:
             f.write(new_content)
-
     return report
 
 
@@ -255,16 +238,13 @@ def main():
     p.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT)
     p.add_argument("--workers", type=int, default=MAX_WORKERS)
     args = p.parse_args()
-
     root = os.path.abspath(args.root)
     if not os.path.isdir(root):
         print("root is not a directory", file=sys.stderr)
         sys.exit(2)
-
     files = iter_files(root, (".md", ".html", ".htm"))
     if not files:
         return
-
     all_reports = []
     with ThreadPoolExecutor(max_workers=max(1, args.workers)) as ex:
         futs = {ex.submit(process_file, fp, args.timeout): fp for fp in files}
@@ -276,7 +256,6 @@ def main():
                 all_reports.append(f"FAILED {fp} {e}")
                 continue
             all_reports.extend(r)
-
     if all_reports:
         for line in all_reports:
             print(line)

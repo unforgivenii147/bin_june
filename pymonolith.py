@@ -1,12 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Monolith: Download a URL as a single, self-contained HTML file."""
 
+import argparse
+import sys
+from base64 import b64encode
+from mimetypes import guess_type
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
-from mimetypes import guess_type
-from base64 import b64encode
-import sys
-import argparse
 
 import requests
 from bs4 import BeautifulSoup
@@ -111,14 +111,11 @@ class Monolith:
         content = self.fetch(self.base_url)
         if not content:
             raise RuntimeError(f"Failed to fetch {self.base_url}")
-
         soup = BeautifulSoup(content, "html.parser")
-
         self.process_stylesheets(soup)
         self.process_scripts(soup)
         self.process_images(soup)
         self.process_fonts(soup)
-
         return str(soup.prettify())
 
 
@@ -127,13 +124,10 @@ def main():
     parser.add_argument("url", help="URL to download")
     parser.add_argument("-o", "--output", help="Output file (default: stdout)")
     parser.add_argument("-t", "--timeout", type=int, default=10, help="Request timeout in seconds")
-
     args = parser.parse_args()
-
     try:
         mono = Monolith(args.url, timeout=args.timeout)
         html = mono.convert()
-
         if args.output:
             Path(args.output).write_text(html, encoding="utf-8")
             print(f"✓ Saved to {args.output}", file=sys.stderr)

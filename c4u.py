@@ -158,9 +158,9 @@ def _is_upgradable(installed: str, latest: str) -> bool:
 
 
 def main() -> None:
-    logger.info("=" * 80)
+    logger.info("=" * 42)
     logger.info("🚀 PyPI Package Update Checker (Multiprocessing Enabled)")
-    logger.info("=" * 80)
+    logger.info("=" * 42)
     state_manager = PackageStateManager()
     installed = get_installed_packages()
     all_package_names = [name for name, _ in installed]
@@ -188,12 +188,12 @@ def main() -> None:
         logger.info(f"📝 {len(upgradable)} upgradable packages saved to {req_file}")
     else:
         logger.info("✓ All packages are up-to-date!")
-    logger.info("=" * 80)
+    logger.info("=" * 42)
     logger.info("📈 SUMMARY")
     logger.info(f"   Total packages: {len(state_manager.state)}")
     logger.info(f"   Upgradable: {len(upgradable)}")
     logger.info(f"   Up-to-date: {len(state_manager.state) - len(upgradable)}")
-    logger.info("=" * 80)
+    logger.info("=" * 42)
 
 
 if __name__ == "__main__":

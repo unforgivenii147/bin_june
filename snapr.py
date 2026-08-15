@@ -163,13 +163,9 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-
   python snappy_tool.py -c .
-
   python snappy_tool.py -d /path/to/directory
-
   python snappy_tool.py -c -t .
-
   python snappy_tool.py -c --keep-original .
         """,
     )

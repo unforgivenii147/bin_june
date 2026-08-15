@@ -391,7 +391,7 @@ def process_files(file_generator, compress: bool, level: int = 3, threads: int =
             else:
                 success, path, output_path, _decompressed_size, _compressed_size = result
             completed += 1
-            progress = int(completed / total_files * 50)
+            progress = int(completed / total_files * 42)
             bar = "█" * progress + "░" * (50 - progress)
             print(f"\rProgress: [{bar}] {completed}/{total_files} files", end="", flush=True)
             if not success:

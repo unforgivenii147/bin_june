@@ -80,9 +80,11 @@ def fetch_table_data(args):
                                     row_dict[k] = val
                                 except UnicodeEncodeError:
                                     row_dict[k] = {
-                                        "__blob_base64": base64.b64encode(
-                                            val.encode("utf-8", errors="surrogateescape")
-                                        ).decode("ascii")
+                                        "__blob_base64": (
+                                            base64.b64encode(val.encode("utf-8", errors="surrogateescape")).decode(
+                                                "ascii"
+                                            )
+                                        )
                                     }
                             else:
                                 row_dict[k] = val

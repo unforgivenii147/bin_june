@@ -36,7 +36,7 @@ EXCLUDED = {
     ".syntax",
 }
 IS_TERMUX = os.environ.get("TERMUX_VERSION") is not None or "com.termux" in os.environ.get("PREFIX", "")
-DEFAULT_WORKERS = 6 if IS_TERMUX else 12
+DEFAULT_WORKERS = 6 if IS_TERMUX else 8
 
 
 def is_bash_script(file_path: Path) -> bool:
@@ -62,35 +62,6 @@ def is_bash_script(file_path: Path) -> bool:
                 if any((shell in shebang_lower for shell in shell_patterns)):
                     return True
     except (IOError, OSError, UnicodeDecodeError):
-        return False
-    if file_path.suffix == ".sh":
-        return True
-    try:
-        with open(file_path, "rb") as f:
-            content = f.read(8192)
-            if b"\x00" in content:
-                return False
-            try:
-                text = content.decode("utf-8", errors="ignore")
-                if re.search("^\\s*(?:function\\s+)?\\w+\\s*(?:\\(\\))?\\s*\\{", text, re.MULTILINE):
-                    return True
-                shell_keywords = [
-                    "#!/bin/bash",
-                    "#!/bin/sh",
-                    "#!/usr/bin/env bash",
-                    "#!/usr/bin/env sh",
-                    "source ",
-                    ". /",
-                    "export ",
-                    "readonly ",
-                    "declare ",
-                    "local ",
-                ]
-                if any((keyword in text for keyword in shell_keywords)):
-                    return True
-            except UnicodeDecodeError:
-                return False
-    except (IOError, OSError):
         return False
     return False
 
@@ -158,7 +129,7 @@ def process_file(sh_file: Path, output_dir: Path, use_extension: bool = True) ->
     functions = extract_functions_from_file(sh_file)
     saved_functions = []
     for func_name, func_content, source_file in functions:
-        safe_func_name = re.sub("[^\\w\\-]", "_", func_name)
+        safe_func_name = re.sub(r"[^\w\-]", "_", func_name)
         try:
             rel_path = source_file.relative_to(Path.cwd())
         except ValueError:
@@ -169,13 +140,10 @@ def process_file(sh_file: Path, output_dir: Path, use_extension: bool = True) ->
         else:
             output_file = func_output_dir / safe_func_name
         func_output_dir.mkdir(parents=True, exist_ok=True)
-        header = f"#!/bin/bash\n# Function: {func_name}\n# Extracted from: {source_file}\n# Original file: {source_file.name}\n# Extraction date: {Path.cwd()}\n# Environment: {('Termux' if IS_TERMUX else 'Standard')}\n\n"
         try:
             with open(output_file, "w", encoding="utf-8") as f:
-                f.write(header)
                 f.write(func_content)
                 f.write("\n")
-            output_file.chmod(output_file.stat().st_mode | 73)
             saved_functions.append((func_name, output_file))
         except Exception as e:
             print(f"Error writing function '{func_name}' to {output_file}: {e}", file=sys.stderr)

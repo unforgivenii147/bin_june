@@ -5,7 +5,6 @@ import argparse
 import json
 import sys
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Optional
 
 import requests
@@ -40,10 +39,8 @@ class PyPISearch:
         except requests.RequestException as e:
             print(f"Error fetching PyPI data: {e}", file=sys.stderr)
             return []
-
         query_lower = query.lower()
         results = []
-
         for pkg_name, pkg_data in data.get("packages", {}).items():
             if query_lower in pkg_name.lower():
                 info = pkg_data.get("latest", {})
@@ -55,10 +52,8 @@ class PyPISearch:
                         url=f"{self.BASE_URL}/{pkg_name}/",
                     )
                 )
-
             if limit and len(results) >= limit:
                 break
-
         return sorted(results, key=lambda p: p.name.lower())
 
     def search_json(self, query: str, limit: Optional[int] = None) -> str:
@@ -103,20 +98,15 @@ def main():
         default=10,
         help="Request timeout in seconds (default: 10)",
     )
-
     args = parser.parse_args()
-
     searcher = PyPISearch(timeout=args.timeout)
-
     if args.json:
         print(searcher.search_json(args.query, args.limit))
     else:
         results = searcher.search(args.query, args.limit)
-
         if not results:
             print(f"No packages found for '{args.query}'", file=sys.stderr)
             sys.exit(1)
-
         print(f"Found {len(results)} package(s):\n")
         for pkg in results:
             print(pkg)

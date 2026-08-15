@@ -12,33 +12,26 @@ def sort_python_script(file_path: Path) -> None:
     except Exception as e:
         print(f"Error reading {file_path}: {e}")
         return
-
     lines = source_code.split("\n")
     shebang = ""
     module_docstring = ""
     code_start = 0
-
     if lines and lines[0].startswith("#!"):
         shebang = lines[0]
         code_start = 1
-
     remaining_code = "\n".join(lines[code_start:])
-
     try:
         tree = ast.parse(remaining_code)
     except SyntaxError as e:
         print(f"Error parsing Python code in {file_path}: {e}")
         return
-
     if tree.body and isinstance(tree.body[0], ast.Expr) and isinstance(tree.body[0].value, ast.Constant):
         if isinstance(tree.body[0].value.value, str):
             docstring_node = tree.body[0]
             module_docstring = ast.get_source_segment(remaining_code, docstring_node) or ""
             tree.body.pop(0)
-
     main_block = None
     other_nodes = []
-
     for node in tree.body:
         if isinstance(node, ast.If) and isinstance(node.test, ast.Compare):
             if (
@@ -53,13 +46,11 @@ def sort_python_script(file_path: Path) -> None:
                 main_block = node
                 continue
         other_nodes.append(node)
-
     imports = []
     constants = []
     classes = []
     functions = []
     misc = []
-
     for node in other_nodes:
         if isinstance(node, (ast.Import, ast.ImportFrom)):
             imports.append(node)
@@ -75,19 +66,14 @@ def sort_python_script(file_path: Path) -> None:
             functions.append(node)
         else:
             misc.append(node)
-
     constants.sort(key=lambda n: n.targets[0].id if n.targets else "")
     classes.sort(key=lambda n: n.name)
     functions.sort(key=lambda n: n.name)
-
     sorted_lines = []
-
     if shebang:
         sorted_lines.append(shebang)
-
     if module_docstring:
         sorted_lines.append(module_docstring)
-
     for section in [imports, misc, constants, classes, functions]:
         for node in section:
             segment = ast.get_source_segment(remaining_code, node)
@@ -95,14 +81,11 @@ def sort_python_script(file_path: Path) -> None:
                 sorted_lines.append(segment)
             else:
                 print(f"Warning: Could not preserve source for {node}")
-
     if main_block:
         segment = ast.get_source_segment(remaining_code, main_block)
         if segment:
             sorted_lines.append(segment)
-
     sorted_code = "\n".join(sorted_lines)
-
     try:
         with file_path.open("w", encoding="utf-8") as f:
             f.write(sorted_code)

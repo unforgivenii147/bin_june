@@ -87,7 +87,7 @@ def main():
     else:
         print("❌ No wheels found with entry_points.txt")
     if not args.quiet and no_entry_points:
-        print("\n" + "=" * 80)
+        print("\n" + "=" * 42)
         print(f"📋 {len(no_entry_points)} wheel(s) WITHOUT entry_points.txt:")
         print("-" * 42)
         if args.verbose:
@@ -96,12 +96,12 @@ def main():
         else:
             print("   (Use -v to see full list)")
     if errors:
-        print("\n" + "=" * 80)
+        print("\n" + "=" * 42)
         print(f"⚠️  {len(errors)} wheel(s) could not be read:")
         print("-" * 42)
         for whl_path in errors:
             print(f"   {whl_path}")
-    print("\n" + "=" * 80)
+    print("\n" + "=" * 42)
     print("SUMMARY")
     print("-" * 42)
     print(f"Total wheels checked:  {len(whl_files)}")

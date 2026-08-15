@@ -2,13 +2,11 @@
 from __future__ import annotations
 
 import json
-import re
 from pathlib import Path
 
 
 def merge_translation_files(base_dir=".", output_file="dic_en_fa.json", failed_file="failed-en.txt"):
     base_path = Path(base_dir)
-
     existing_dictionary = {}
     if (base_path / output_file).exists():
         try:
@@ -19,7 +17,6 @@ def merge_translation_files(base_dir=".", output_file="dic_en_fa.json", failed_f
             print(f"⚠️  Warning: Could not parse existing {output_file}, starting fresh")
         except Exception as e:
             print(f"⚠️  Warning: Error reading {output_file}: {e}, starting fresh")
-
     existing_failed = set()
     if (base_path / failed_file).exists():
         try:
@@ -28,12 +25,9 @@ def merge_translation_files(base_dir=".", output_file="dic_en_fa.json", failed_f
             print(f"📖 Loaded existing failed entries: {len(existing_failed)}")
         except Exception as e:
             print(f"⚠️  Warning: Error reading {failed_file}: {e}, starting fresh")
-
     all_files = [f for f in base_path.iterdir() if f.is_file()]
-
     en_files = []
     fa_files = {}
-
     for file in all_files:
         if file.name.endswith("_fa"):
             base_name = file.name[:-3]
@@ -48,39 +42,31 @@ def merge_translation_files(base_dir=".", output_file="dic_en_fa.json", failed_f
                 potential_fa = base_path / fa_name
             else:
                 potential_fa = base_path / f"{file.name}_fa"
-
             if potential_fa.exists():
                 en_files.append(file)
-
     dictionary = existing_dictionary.copy()
     failed_entries = existing_failed.copy()
     new_entries_count = 0
     updated_entries_count = 0
-
     for en_file in sorted(en_files, key=lambda x: x.name):
         if en_file.suffix:
             fa_file = base_path / f"{en_file.stem}_fa{en_file.suffix}"
         else:
             fa_file = base_path / f"{en_file.name}_fa"
-
         if not fa_file.exists():
             print(f"⚠️  Warning: Missing {fa_file.name} for {en_file.name}")
             continue
-
         with open(en_file, "r", encoding="utf-8") as f_en, open(fa_file, "r", encoding="utf-8") as f_fa:
             en_lines = [line.strip() for line in f_en if line.strip()]
             fa_lines = [line.strip() for line in f_fa if line.strip()]
-
             if len(en_lines) != len(fa_lines):
                 print(
                     f"⚠️  Mismatch: {en_file.name} has {len(en_lines)} lines, {fa_file.name} has {len(fa_lines)} lines"
                 )
-
             for en_word, fa_word in zip(en_lines, fa_lines, strict=False):
                 if en_word.lower() == fa_word.lower():
                     if en_word not in failed_entries:
                         failed_entries.add(en_word)
-
                     if en_word in dictionary:
                         del dictionary[en_word]
                 else:
@@ -88,18 +74,13 @@ def merge_translation_files(base_dir=".", output_file="dic_en_fa.json", failed_f
                         new_entries_count += 1
                     elif dictionary[en_word] != fa_word:
                         updated_entries_count += 1
-
                     dictionary[en_word] = fa_word
-
                     if en_word in failed_entries:
                         failed_entries.remove(en_word)
-
     with open(base_path / output_file, "w", encoding="utf-8") as f:
         json.dump(dictionary, f, ensure_ascii=False, indent=2)
-
     with open(base_path / failed_file, "w", encoding="utf-8") as f:
         f.write("\n".join(sorted(failed_entries)))
-
     print(f"✅ Total dictionary entries: {len(dictionary)}")
     print(f"   - Existing entries preserved: {len(existing_dictionary)}")
     print(f"   - New entries added: {new_entries_count}")
@@ -107,7 +88,6 @@ def merge_translation_files(base_dir=".", output_file="dic_en_fa.json", failed_f
     print(f"⚠️  Failed/untranslated entries: {len(failed_entries)}")
     print(f"✅ Dictionary saved → {output_file}")
     print(f"⚠️  Failed entries saved → {failed_file}")
-
     return dictionary, failed_entries
 
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 import re
 import sys
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 
 def parse_cargo_lock(filepath: str) -> dict:

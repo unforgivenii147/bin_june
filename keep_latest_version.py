@@ -234,9 +234,9 @@ def main() -> int:
     else:
         for pkg_name, versions in packages.items():
             print(f"  {pkg_name}: {len(versions)} version(s)")
-    print("\n" + "=" * 50)
+    print("\n" + "=" * 42)
     total_deleted, total_kept = keep_latest_versions(packages, args.dry_run)
-    print("\n" + "=" * 50)
+    print("\n" + "=" * 42)
     if total_deleted == 0:
         print("No files to delete. All packages have only one version.")
     elif args.dry_run:

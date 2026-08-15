@@ -120,7 +120,7 @@ def display_results(alias_conflicts, func_conflicts, path_duplicates, path_dirs:
     else:
         print("   ✓ No conflicts with PATH commands")
     total_conflicts = alias_total + func_total
-    print("\n" + "=" * 80)
+    print("\n" + "=" * 42)
     print(f"📊 SUMMARY: {total_conflicts} total conflict(s) found")
     if total_conflicts > 0:
         print("\n⚠️  Conflicts can cause unexpected behavior!")

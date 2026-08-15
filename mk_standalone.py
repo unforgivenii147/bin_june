@@ -1,9 +1,7 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """
 Make an HTML file standalone by inlining all assets.
-
 Usage: python standalone.py <html_file>
-
 - Remote assets (http/https) are downloaded and inlined
 - Local assets are read from disk and inlined
 - CSS files are inlined as <style> tags (with recursive url()/@import inlining)
@@ -12,15 +10,15 @@ Usage: python standalone.py <html_file>
 - The file is updated in place
 """
 
-import sys
-import os
-import re
 import base64
 import mimetypes
+import os
+import re
+import sys
 from urllib.parse import urlparse
+
 import requests
 from bs4 import BeautifulSoup
-
 
 mimetypes.add_type("application/font-woff", ".woff")
 mimetypes.add_type("font/woff2", ".woff2")
@@ -31,8 +29,6 @@ mimetypes.add_type("image/svg+xml", ".svg")
 mimetypes.add_type("text/css", ".css")
 mimetypes.add_type("application/javascript", ".js")
 mimetypes.add_type("application/json", ".json")
-
-
 session = requests.Session()
 session.headers.update({"User-Agent": "Mozilla/5.0 (compatible; StandaloneHTML/1.0)"})
 
@@ -48,16 +44,10 @@ def guess_mime(url, content_type=None):
 
 
 def fetch(url, base_dir):
-    """
-    Fetch a resource from a URL or local path.
-    Returns (content_bytes, mime_type) or (None, None) on failure.
-    """
     if not url or url.startswith("data:"):
         return None, None
-
     if url.startswith("//"):
         url = "https:" + url
-
     if url.startswith(("http://", "https://")):
         try:
             resp = session.get(url, timeout=30)
@@ -87,13 +77,11 @@ def fetch(url, base_dir):
 
 
 def to_data_uri(content, mime):
-    """Convert raw bytes to a base64 data URI."""
     b64 = base64.b64encode(content).decode("ascii")
     return f"data:{mime};base64,{b64}"
 
 
 def _css_base_for(css_source, fallback_base):
-    """Return the base for resolving relative URLs inside a CSS file."""
     if not css_source or css_source.startswith("data:"):
         return fallback_base
     if css_source.startswith(("http://", "https://")):
@@ -102,9 +90,6 @@ def _css_base_for(css_source, fallback_base):
 
 
 def process_css(css_text, base_dir, css_source=None):
-    """
-    Recursively inline all @import and url() references in CSS.
-    """
     css_base = _css_base_for(css_source, base_dir)
 
     def replace_import(match):
@@ -142,7 +127,6 @@ def process_css(css_text, base_dir, css_source=None):
         replace_url,
         css_text,
     )
-
     return css_text
 
 
@@ -170,18 +154,13 @@ def process_srcset(srcset, base_dir):
 def make_standalone(html_path):
     html_path = os.path.abspath(html_path)
     base_dir = os.path.dirname(html_path)
-
     if not os.path.isfile(html_path):
         print(f"ERROR: file not found: {html_path}")
         sys.exit(1)
-
     print(f"Processing: {html_path}\n")
-
     with open(html_path, "r", encoding="utf-8-sig", errors="replace") as f:
         html_content = f.read()
-
     soup = BeautifulSoup(html_content, "html.parser")
-
     for link in soup.find_all("link", rel=True):
         rels = link.get("rel", [])
         if isinstance(rels, str):
@@ -199,7 +178,6 @@ def make_standalone(html_path):
         style_tag = soup.new_tag("style")
         style_tag.string = css_text
         link.replace_with(style_tag)
-
     for link in soup.find_all("link", href=True):
         rels = link.get("rel", [])
         if isinstance(rels, str):
@@ -214,7 +192,6 @@ def make_standalone(html_path):
         content, mime = fetch(href, base_dir)
         if content is not None:
             link["href"] = to_data_uri(content, mime)
-
     for script in soup.find_all("script", src=True):
         src = script.get("src")
         if not src or src.startswith("data:"):
@@ -223,13 +200,10 @@ def make_standalone(html_path):
         if content is None:
             continue
         js_text = content.decode("utf-8", errors="replace")
-
         js_text = re.sub(r"\n?//#\s*sourceMappingURL=.*", "", js_text)
-
         js_text = re.sub(r"</script", r"<\\/script", js_text, flags=re.IGNORECASE)
         del script["src"]
         script.string = js_text
-
     for img in soup.find_all("img", src=True):
         src = img.get("src")
         if not src or src.startswith("data:"):
@@ -237,10 +211,8 @@ def make_standalone(html_path):
         content, mime = fetch(src, base_dir)
         if content is not None:
             img["src"] = to_data_uri(content, mime)
-
     for tag in soup.find_all(srcset=True):
         tag["srcset"] = process_srcset(tag["srcset"], base_dir)
-
     for source in soup.find_all("source", src=True):
         src = source.get("src")
         if not src or src.startswith("data:"):
@@ -248,7 +220,6 @@ def make_standalone(html_path):
         content, mime = fetch(src, base_dir)
         if content is not None:
             source["src"] = to_data_uri(content, mime)
-
     for video in soup.find_all("video", poster=True):
         poster = video.get("poster")
         if not poster or poster.startswith("data:"):
@@ -256,7 +227,6 @@ def make_standalone(html_path):
         content, mime = fetch(poster, base_dir)
         if content is not None:
             video["poster"] = to_data_uri(content, mime)
-
     for tag in soup.find_all(["audio", "video"], src=True):
         src = tag.get("src")
         if not src or src.startswith("data:"):
@@ -264,7 +234,6 @@ def make_standalone(html_path):
         content, mime = fetch(src, base_dir)
         if content is not None:
             tag["src"] = to_data_uri(content, mime)
-
     for obj in soup.find_all("object", data=True):
         data = obj.get("data")
         if not data or data.startswith("data:"):
@@ -272,7 +241,6 @@ def make_standalone(html_path):
         content, mime = fetch(data, base_dir)
         if content is not None:
             obj["data"] = to_data_uri(content, mime)
-
     for embed in soup.find_all("embed", src=True):
         src = embed.get("src")
         if not src or src.startswith("data:"):
@@ -280,7 +248,6 @@ def make_standalone(html_path):
         content, mime = fetch(src, base_dir)
         if content is not None:
             embed["src"] = to_data_uri(content, mime)
-
     for inp in soup.find_all("input", src=True):
         src = inp.get("src")
         if not src or src.startswith("data:"):
@@ -288,7 +255,6 @@ def make_standalone(html_path):
         content, mime = fetch(src, base_dir)
         if content is not None:
             inp["src"] = to_data_uri(content, mime)
-
     for track in soup.find_all("track", src=True):
         src = track.get("src")
         if not src or src.startswith("data:"):
@@ -296,7 +262,6 @@ def make_standalone(html_path):
         content, mime = fetch(src, base_dir)
         if content is not None:
             track["src"] = to_data_uri(content, mime)
-
     for style in soup.find_all("style"):
         css = style.string
         if not css:
@@ -305,16 +270,13 @@ def make_standalone(html_path):
             css = re.sub(r"^\s*<!--\s*", "", css)
             css = re.sub(r"\s*-->\s*$", "", css)
             style.string = process_css(css, base_dir)
-
     for tag in soup.find_all(style=True):
         val = tag.get("style", "")
         if val:
             tag["style"] = process_css(val, base_dir)
-
     result = str(soup)
     with open(html_path, "w", encoding="utf-8") as f:
         f.write(result)
-
     print(f"\n✓ Done — standalone HTML saved to: {html_path}")
 
 

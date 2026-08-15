@@ -3,14 +3,13 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-
-from dh import get_files
+from fastwalk import walk_files
 
 RM = "-r" in sys.argv
 
 
 def get_files(directory: Path):
-    for path in directory.rglob("*"):
+    for path in walk_files(directory):
         if ".git" in path.parts:
             continue
         if path.is_symlink():
@@ -19,26 +18,25 @@ def get_files(directory: Path):
 
 if __name__ == "__main__":
     cwd = Path.cwd()
-    bcount = 0
     broken_links = []
+
     for path in get_files(cwd):
         if not path.exists():
-            print(path.name)
-            bcount += 1
-            broken_links.append(str(path.relative_to(cwd)))
+            rel_path = path.relative_to(cwd)
+            broken_links.append(str(rel_path))
+            print(rel_path)
             if RM:
                 try:
                     path.unlink()
-                    print(f"Removed: {path.relative_to(cwd)}")
+                    print(f"Removed: {rel_path}")
                 except Exception as e:
                     print(f"Error deleting {path}: {e}")
-    if broken_links:
-        for link in broken_links:
-            print(f"{link}\n")
+
+    bcount = len(broken_links)
     if not bcount:
-        print("no broken link found.")
+        print("No broken links found.")
         sys.exit(0)
     if RM:
-        print(f"{bcount} broken link removed.")
+        print(f"\n{bcount} broken link{'s' if bcount > 1 else ''} removed.")
     else:
-        print(f"{bcount} broken link found. Use -r to remove them.")
+        print(f"\n{bcount} broken link{'s' if bcount > 1 else ''} found. Use -r to remove them.")

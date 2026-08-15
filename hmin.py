@@ -133,8 +133,7 @@ class HTMLMinifier:
             import re
 
             content = re.sub(
-                r"(</(?:span|a|strong|em|b|i|code|label)>)"
-                r"(<(?:span|a|strong|em|b|i|code|label))",
+                r"(</(?:span|a|strong|em|b|i|code|label)>)" r"(<(?:span|a|strong|em|b|i|code|label))",
                 r"\1 \2",
                 content,
             )

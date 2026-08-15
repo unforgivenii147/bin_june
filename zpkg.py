@@ -46,7 +46,7 @@ def create_loader_stub(pkg_name, site_packages):
     stub_path = site_packages / f"{pkg_name}.py"
     pkg_dir = site_packages / pkg_name
     has_main = (pkg_dir / "__main__.py").exists()
-    stub_content = f'''import sys\nfrom pathlib import Path\n\nZIP_DIR = Path(r"{site_packages.absolute()}")\nZIP_PATH = str(ZIP_DIR / "{pkg_name}.zip")\n\nif ZIP_PATH not in sys.path:\n    sys.path.insert(0, ZIP_PATH)\n\nmodule = __import__("{pkg_name}")\nsys.modules["{pkg_name}"] = module\n\n# Edge Case Fix: Support running via 'python -m {pkg_name}'\nif __name__ == "__main__" and {has_main}:\n    import importlib.util\n    import runpy\n    \n    # Locate and execute the __main__.py file safely inside the zip archive\n    spec = importlib.util.find_spec("{pkg_name}.__main__")\n    if spec and spec.origin:\n        runpy.run_path(spec.origin, run_name="__main__")\n'''
+    stub_content = f"""import sys\nfrom pathlib import Path\n\nZIP_DIR = Path(r"{site_packages.absolute()}")\nZIP_PATH = str(ZIP_DIR / "{pkg_name}.zip")\n\nif ZIP_PATH not in sys.path:\n    sys.path.insert(0, ZIP_PATH)\n\nmodule = __import__("{pkg_name}")\nsys.modules["{pkg_name}"] = module\n\n# Edge Case Fix: Support running via 'python -m {pkg_name}'\nif __name__ == "__main__" and {has_main}:\n    import importlib.util\n    import runpy\n    \n    # Locate and execute the __main__.py file safely inside the zip archive\n    spec = importlib.util.find_spec("{pkg_name}.__main__")\n    if spec and spec.origin:\n        runpy.run_path(spec.origin, run_name="__main__")\n"""
     with open(stub_path, "w", encoding="utf-8") as f:
         f.write(stub_content)
     print(f"  Created loader stub: {pkg_name}.py (with __main__ execution hook: {has_main})")

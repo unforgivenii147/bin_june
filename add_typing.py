@@ -6,20 +6,16 @@ Automatically finds .pyi file in same directory and updates .py in-place.
 
 from __future__ import annotations
 
-import argparse
 import difflib
 import sys
 from pathlib import Path
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional
 
 import libcst as cst
-
 from dh import get_files, mpf3
 
 
 class TypingCollector(cst.CSTVisitor):
-    """Extract type annotations from stub file."""
-
     def __init__(self):
         self.stack: list[tuple[str, ...]] = []
         self.annotations: Dict[
@@ -44,8 +40,6 @@ class TypingCollector(cst.CSTVisitor):
 
 
 class TypingTransformer(cst.CSTTransformer):
-    """Apply type annotations from stub to source file."""
-
     def __init__(
         self,
         annotations: Dict[
@@ -80,7 +74,6 @@ class TypingTransformer(cst.CSTTransformer):
     ) -> cst.CSTNode:
         key = tuple(self.stack)
         self.stack.pop()
-
         if key in self.annotations:
             params, returns = self.annotations[key]
             updated_node = updated_node.with_changes(
@@ -88,21 +81,10 @@ class TypingTransformer(cst.CSTTransformer):
                 returns=returns,
             )
             self.applied += 1
-
         return updated_node
 
 
 def validate_syntax(code: str, filename: str) -> bool:
-    """
-    Validate that code is syntactically correct.
-
-    Args:
-        code: Python source code to validate
-        filename: Filename for error reporting
-
-    Returns:
-        True if valid, False otherwise
-    """
     try:
         cst.parse_module(code)
         return True
@@ -115,54 +97,36 @@ def validate_syntax(code: str, filename: str) -> bool:
 
 
 def process_file(path: Path):
-    """
-    Apply type annotations from .pyi to .py file (in-place).
-
-    Args:
-        path: Path to .py source file
-        show_diff: Whether to display unified diff
-
-    Returns:
-        True if changes were applied, False otherwise
-    """
     path = Path(path)
     stub_path = path.with_suffix(".pyi")
-
     try:
         if not path.exists():
             print(f"✗ Source file not found: {path}", file=sys.stderr)
             return
-
         if not stub_path.exists():
             print(f"✗ Stub file not found: {stub_path}", file=sys.stderr)
             return
         print(f"processing ... {path.name}")
         stub_code = stub_path.read_text(encoding="utf-8")
         stub_tree = cst.parse_module(stub_code)
-
         source_code = path.read_text(encoding="utf-8")
         source_tree = cst.parse_module(source_code)
-
         collector = TypingCollector()
         stub_tree.visit(collector)
         print(
             f"✓ Collected {len(collector.annotations)} type annotations from {stub_path.name}",
             file=sys.stderr,
         )
-
         transformer = TypingTransformer(collector.annotations)
         modified_tree = source_tree.visit(transformer)
         modified_code = modified_tree.code
-
         print(
             f"✓ Applied {transformer.applied} annotations to source",
             file=sys.stderr,
         )
-
         if modified_tree.deep_equals(source_tree):
             print("ℹ No changes required", file=sys.stderr)
             return False
-
         diff_lines = list(
             difflib.unified_diff(
                 source_code.splitlines(keepends=True),
@@ -174,18 +138,15 @@ def process_file(path: Path):
         )
         if diff_lines:
             print("".join(diff_lines), end="")
-
         if not validate_syntax(modified_code, path.name):
             print(
                 "✗ Validation failed: refusing to write invalid code",
                 file=sys.stderr,
             )
             return
-
         path.write_text(modified_code, encoding="utf-8")
         print(f"✓ Updated {path.name} in-place", file=sys.stderr)
         return
-
     except cst.ParserSyntaxError as e:
         print(f"✗ Syntax error in input file: {e}", file=sys.stderr)
         return

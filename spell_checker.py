@@ -269,7 +269,7 @@ class ParallelMisspellingFinder:
 def check_files(*paths: str, languages: list[str] | None = None, apply_fixes: bool = False) -> None:
     languages = languages or ["en_US"]
     spellchecker = Hunspell()
-    sources = [FileSource(p) for p in (paths or [Path.cwd()])]
+    sources = [FileSource(p) for p in paths or [Path.cwd()]]
     source = MultiSource(sources) if len(sources) > 1 else sources[0]
     finder = ParallelMisspellingFinder(spellchecker, EchoHandler(apply_fixes), MarkdownRemover())
     finder.find(source, languages)

@@ -85,7 +85,7 @@ def save_tokens_to_files(tokens_data):
     try:
         with open("tokens.txt", "w", encoding="utf-8") as f:
             f.write(f"{'Model':<40} {'Token'}\n")
-            f.write("-" * 80 + "\n")
+            f.write("-" * 42 + "\n")
             for model, token in unique_tokens:
                 f.write(f"{model[:40]:<40} {token}\n")
         print(f"✅ Saved {len(unique_tokens)} tokens to tokens.txt")

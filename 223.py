@@ -1,7 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 
-from os import scandir as os_scandir
 from pathlib import Path
 
 from dh import get_pyfiles, mpf3, runcmd
@@ -72,7 +71,5 @@ def process_file(path: Path) -> None:
 if __name__ == "__main__":
     cwd = Path.cwd()
     args = sys.argv[1:]
-
     files = [Path(p) for p in args] if args else get_pyfiles(cwd)
-
     mpf3(process_file, files)

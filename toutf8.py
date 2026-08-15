@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Generator, Tuple
 
 import chardet
-from dh import is_binary
+from binaryornot import is_binary
 
 
 def detect_encoding(file_path: Path) -> str:
@@ -92,12 +92,12 @@ def main():
                     converted += 1
             else:
                 errors += 1
-    print(f"\n{'=' * 60}")
+    print(f"\n{'=' * 42}")
     print(f"Summary:")
     print(f"  Converted: {converted}")
     print(f"  Skipped:   {skipped}")
     print(f"  Errors:    {errors}")
-    print(f"{'=' * 60}")
+    print(f"{'=' * 42}")
     return 0 if errors == 0 else 1
 
 

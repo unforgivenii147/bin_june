@@ -43,8 +43,6 @@ EXCLUDED_EXTENSIONS = {
     ".iso", ".img", ".dmg", ".vdi", ".vmdk", ".qcow2",
 }
 # fmt: on
-
-
 @dataclass
 class CompressionResult:
     file_path: Path
@@ -438,7 +436,7 @@ def print_results_basic(results: list[CompressionResult], directory: Path, opera
         )
         operation_name = "Decompression"
         size_label = "Decompressed"
-    print("\n" + "=" * 80)
+    print("\n" + "=" * 42)
     print(f"🗜️  LZMA {operation_name} Results")
     print(f"📁 Directory: {directory}")
     print("-" * 42)
@@ -462,7 +460,7 @@ def print_results_basic(results: list[CompressionResult], directory: Path, opera
             print(f"  • {result.file_path.name}: {result.error}")
         if len(failed) > 10:
             print(f"  ... and {len(failed) - 10} more failures")
-    print("\n" + "=" * 80)
+    print("\n" + "=" * 42)
     print(f"📊 {operation_name} Summary")
     print("-" * 42)
     print(f"Total files processed: {len(results)}")

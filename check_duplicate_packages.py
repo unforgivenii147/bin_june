@@ -152,7 +152,7 @@ def main():
     print(f"  User packages found: {len(user_packages)}")
     print(f"  Duplicate packages: {len(duplicates)}")
     if duplicates:
-        print("\n" + "=" * 80)
+        print("\n" + "=" * 42)
         print("Packages installed in BOTH system and user directories:")
         print("-" * 42)
         for pkg_name, (system_loc, user_loc) in duplicates.items():
@@ -169,7 +169,7 @@ def main():
                     print("   ⚠️  Version mismatch!")
     else:
         print("\n✅ No duplicate packages found.")
-    print("\n" + "=" * 80)
+    print("\n" + "=" * 42)
     print("Note: Having packages in both locations can lead to confusion about")
     print("which version is being used. Consider removing user installations of")
     print("packages that are already available system-wide.")

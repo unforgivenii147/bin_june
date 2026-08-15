@@ -11,9 +11,7 @@ import sys
 from pathlib import Path
 
 INFO_BLOCK_PATTERN = re.compile(
-    r"^# Author\s*:\s*isaac\s*\n"
-    r"# Email\s*:\s*mkalafsaz@gmail\.com\s*\n"
-    r"# Time\s*:\s*.*?\n",
+    r"^# Author\s*:\s*isaac\s*\n" r"# Email\s*:\s*mkalafsaz@gmail\.com\s*\n" r"# Time\s*:\s*.*?\n",
     re.MULTILINE,
 )
 PYTHON_SHEBANG_PATTERNS = [

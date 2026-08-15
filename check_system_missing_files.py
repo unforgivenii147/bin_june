@@ -24,19 +24,15 @@ def check_package_files(pkg_name):
         result = subprocess.run(["dpkg", "-L", pkg_name], capture_output=True, text=True, timeout=5, check=False)
         if result.returncode != 0:
             return pkg_name, None
-
         missing = []
         for file_path in result.stdout.strip().split("\n"):
             if not file_path or should_ignore(file_path):
                 continue
-
             p = Path(file_path)
             if p.is_dir():
                 continue
-
             if not p.exists():
                 missing.append(file_path)
-
         return pkg_name, missing if missing else None
     except (subprocess.TimeoutExpired, Exception):
         return pkg_name, None
@@ -44,11 +40,9 @@ def check_package_files(pkg_name):
 
 def main():
     output_file = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("missing_files.json")
-
     result = subprocess.run(["dpkg", "-l"], capture_output=True, text=True, check=False)
     packages = [line.split()[1] for line in result.stdout.split("\n") if line.startswith("ii")]
     print(f"Scanning {len(packages)} packages...")
-
     results = {}
     with ProcessPoolExecutor(max_workers=os.cpu_count()) as executor:
         futures = {executor.submit(check_package_files, pkg): pkg for pkg in packages}
@@ -58,13 +52,11 @@ def main():
                 results[pkg] = missing
             if i % 10 == 0:
                 print(f"  {i}/{len(packages)}")
-
     try:
         with open(output_file, "w") as f:
             json.dump(results, f, indent=2)
         with open("missing.txt", "w") as f:
             f.write("\n".join(results.keys()))
-
         print(f"\n✓ {len(results)} packages with missing files → {output_file}")
         print(f"  Total missing: {sum(len(f) for f in results.values())}")
     except IOError as e:

@@ -200,7 +200,7 @@ async def process_compress() -> None:
         if successful > 0:
             saved = total_orig - total_comp
             logger.info(
-                f"\n{'=' * 50}\n✅ Compressed {successful} files\n📊 Saved {fsz(saved)} ({saved / total_orig * 100:.1f}%)\n{'=' * 50}"
+                f"\n{'=' * 42}\n✅ Compressed {successful} files\n📊 Saved {fsz(saved)} ({saved / total_orig * 100:.1f}%)\n{'=' * 42}"
             )
 
 

@@ -149,10 +149,10 @@ def main() -> None:
         new_path = out_dir / filepath.name
         filepath.rename(new_path)
     output_file.write_text(
-        f"Binary Analysis Results\nDirectory: {cwd}\nTotal binaries tested: {len(binaries)}\nFailed binaries: {len(failed_binaries)}\n{'=' * 70}\n\n"
+        f"Binary Analysis Results\nDirectory: {cwd}\nTotal binaries tested: {len(binaries)}\nFailed binaries: {len(failed_binaries)}\n{'=' * 42}\n\n"
         + (
             "\n".join(
-                (f"Binary: {filepath}\nError:  {error_msg}\n{'-' * 70}" for filepath, error_msg in failed_binaries)
+                (f"Binary: {filepath}\nError:  {error_msg}\n{'-' * 42}" for filepath, error_msg in failed_binaries)
             )
             if failed_binaries
             else "✓ All binaries tested successfully!\n"

@@ -193,7 +193,7 @@ def main() -> None:
         fixed, auto_yes = process_file(file_path, dups, args.dry_run, auto_yes, skip_blanks)
         if fixed:
             fixed_count += 1
-    print("\n" + "=" * 70)
+    print("\n" + "=" * 42)
     if args.dry_run:
         print("🔍 Dry run complete. Run without --dry-run to apply changes.")
     else:

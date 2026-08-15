@@ -169,9 +169,9 @@ def collect_files(paths: list[Path]) -> list[tuple[Path, Path]]:
 
 
 def print_header(paths: list[Path], preserve_single: bool, remove_spaces: bool, mmap_threshold: int):
-    print(f"\n{BOLD}{CYAN}╔══════════════════════════════════════════════╗{RESET}")
+    print(f"\n{BOLD}{CYAN}╔{'═' * 40}╗{RESET}")
     print(f"{BOLD}{CYAN}║{RESET}         {BOLD}Blank Line Remover{RESET}                    {BOLD}{CYAN}║{RESET}")
-    print(f"{BOLD}{CYAN}╚══════════════════════════════════════════════╝{RESET}")
+    print(f"{BOLD}{CYAN}╚{'═' * 40}╝{RESET}")
     print(f"{BOLD}Processing paths:{RESET}")
     for path in paths:
         path_type = "📄" if path.is_file() else "📁"

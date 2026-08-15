@@ -152,39 +152,39 @@ def main():
     output_path = Path(args.output)
     print(f"\nGenerating report: {output_path}")
     with open(output_path, "w", encoding="utf-8") as f:
-        f.write("=" * 80 + "\n")
+        f.write("=" * 42 + "\n")
         f.write("Non-English Lines Detection Report\n")
         f.write(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
         f.write(f"Directory scanned: {Path(args.directory).resolve()}\n")
         f.write(f"Files scanned: {len(text_files)}\n")
         f.write(f"Files with non-English content: {files_with_findings}\n")
         f.write(f"Total non-English lines found: {total_non_eng_lines}\n")
-        f.write("=" * 80 + "\n\n")
+        f.write("=" * 42 + "\n\n")
         if non_english_results:
             for file_path, lines in non_english_results:
-                f.write(f"\n{'─' * 80}\n")
+                f.write(f"\n{'─' * 42}\n")
                 f.write(f"File: {file_path}\n")
                 f.write(f"Non-English lines: {len(lines)}\n")
-                f.write(f"{'─' * 80}\n\n")
+                f.write(f"{'─' * 42}\n\n")
                 for line_num, line_text, lang, prob in lines:
                     f.write(f"  Line {line_num}: [{lang}] (confidence: {prob:.2f})\n")
                     f.write(f"  Content: {line_text}\n\n")
         else:
             f.write("No non-English lines found.\n")
         if errors:
-            f.write(f"\n{'=' * 80}\n")
+            f.write(f"\n{'=' * 42}\n")
             f.write(f"Errors encountered: {len(errors)}\n")
-            f.write(f"{'=' * 80}\n\n")
+            f.write(f"{'=' * 42}\n\n")
             for file_path, error in errors:
                 f.write(f"  {file_path}: {error}\n")
-    print(f"\n{'=' * 80}")
+    print(f"\n{'=' * 42}")
     print(f"Scan complete!")
     print(f"Files scanned: {len(text_files)}")
     print(f"Files with non-English content: {files_with_findings}")
     print(f"Total non-English lines found: {total_non_eng_lines}")
     print(f"Errors: {len(errors)}")
     print(f"Report saved to: {output_path.resolve()}")
-    print(f"{'=' * 80}")
+    print(f"{'=' * 42}")
 
 
 if __name__ == "__main__":

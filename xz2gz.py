@@ -46,7 +46,7 @@ def main() -> None:
     failure_count = 0
     total_original = 0
     total_new = 0
-    print("\n" + "=" * 70)
+    print("\n" + "=" * 42)
     print("CONVERSION RESULTS")
     print("-" * 42)
     for file_path, success, message in results:

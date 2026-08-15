@@ -150,7 +150,7 @@ def organize_files_in_root(root_path: str = ".", target_folders: int = 4, max_ge
         except Exception as e:
             print(f"  Error creating folder {folder_name}: {e}")
             error_count += len(folder_files)
-    print("\n" + "=" * 70)
+    print("\n" + "=" * 42)
     print("✓ Organization complete!")
     print(f"  Root directory: {root_path}")
     print(f"  Folders created: {len(created_folders)}")

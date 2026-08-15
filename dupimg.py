@@ -192,29 +192,29 @@ def main():
     if not groups:
         log_action("✓ No duplicates (near-duplicates) found.")
         sys.exit(0)
-    log_action(f"\n{'=' * 80}")
+    log_action(f"\n{'=' * 42}")
     log_action(f"✗ Found {len(groups)} duplicate group(s) (threshold={threshold})")
-    log_action(f"{'=' * 80}\n")
+    log_action(f"{'=' * 42}\n")
     for group_idx, group in enumerate(sorted(groups, key=len, reverse=True), 1):
         log_action(f"Group #{group_idx} ({len(group)} file(s)):")
-        log_action("-" * 80)
+        log_action("-" * 42)
         for filename in sorted(group):
             file_path = current_dir / filename
             log_action(f"  • {get_file_info(file_path)}")
         log_action()
     if dry_run:
-        log_action(f"\n{'=' * 80}")
+        log_action(f"\n{'=' * 42}")
         log_action("[DRY RUN] Preview of operations:")
-        log_action(f"{'=' * 80}\n")
+        log_action(f"{'=' * 42}\n")
     folders_created, files_moved = move_duplicates_to_folders(groups, current_dir, output_prefix, dry_run=dry_run)
-    log_action(f"\n{'=' * 80}")
+    log_action(f"\n{'=' * 42}")
     if dry_run:
         log_action(f"[DRY RUN] Would create {folders_created} folder(s) and move {files_moved} file(s)")
     else:
         log_action(f"✓ Created {folders_created} folder(s) and moved {files_moved} file(s)")
     total_dupes = sum(len(g) for g in groups)
     log_action(f"Summary: {len(groups)} group(s), {total_dupes} duplicate file(s)")
-    log_action(f"{'=' * 80}\n")
+    log_action(f"{'=' * 42}\n")
 
 
 if __name__ == "__main__":

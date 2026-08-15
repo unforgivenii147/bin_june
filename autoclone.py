@@ -1,6 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """
-Clone repositories from repos.txt that are smaller than 0.5MB
+Clone repositories from repos.txt that are smaller than 1MB
 Format in repos.txt: user/repo (one per line)
 Saves repository sizes to repo_sizes.json for caching
 """
@@ -167,27 +167,37 @@ def main():
     print(f"\n📚 Found {len(repos)} repositories")
     print("🔍 Checking and cloning in one pass...")
     print("-" * 42)
-    size_limit_mb = 5
+    size_limit_mb = 1
     cloned_count = 0
     skipped_count = 0
     failed_count = 0
     total_size = 0
     no_size_count = 0
     for idx, repo in enumerate(repos, 1):
+        repo_lower = repo.lower()
+        if "django" in repo_lower or "flask" in repo_lower:
+            skipped_count += 1
+            continue
+        if "torch" in repo_lower or "tensor" in repo_lower:
+            skipped_count += 1
+            continue
+        if "llm" in repo_lower or "mcp" in repo_lower:
+            skipped_count += 1
+            continue
+
         print(f"\n[{idx}/{len(repos)}] 📦 Processing {repo}")
         print("-" * 42)
         size_mb = get_repo_size(repo, token, cache_data)
         if size_mb is None:
-            print("  ⚠️  Could not determine size, skipping...")
             no_size_count += 1
             continue
-        print(f"  📊 Size: {size_mb:.2f} MB")
+        print(f"  📊 {size_mb:.2f} MB")
         if size_mb > size_limit_mb:
-            print(f"  ❌ Exceeds limit ({size_limit_mb} MB), skipping...")
             skipped_count += 1
             continue
         print(f"  ✅ Within limit ({size_limit_mb} MB)")
         total_size += size_mb
+
         if clone_repo(repo):
             cloned_count += 1
         else:

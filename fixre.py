@@ -240,7 +240,7 @@ def main():
             results.append(process_file(filepath, create_backup))
     successful = sum((1 for _, success, _ in results if success))
     changed = sum((1 for _, success, msg in results if success and "Converted" in msg))
-    print("\n" + "=" * 70)
+    print("\n" + "=" * 42)
     for filepath, success, message in results:
         status = "✓" if success else "✗"
         try:

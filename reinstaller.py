@@ -120,7 +120,7 @@ def get_package_size(dist: importlib.metadata.Distribution) -> str:
 def get_user_confirmation(package_name: str, package_data: Dict, include_deps: bool = False) -> str:
     groups = package_data.get("groups", set())
     info = package_data.get("info", {})
-    print("\n" + "=" * 70)
+    print("\n" + "=" * 42)
     print(f"📦 Package: {package_name}")
     print(f"   Version: {info.get('version', 'Unknown')}")
     print(f"   Entry points: {', '.join(groups)}")

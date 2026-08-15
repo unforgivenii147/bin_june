@@ -10,9 +10,7 @@ from dh import cprint, get_files
 from loguru import logger
 
 logger.remove()
-logger.add(
-    "/sdcard/soverify.log", level="ERROR", format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}", rotation="10 MB"
-)
+logger.add("/data/data/com.termux/files/home/tmp/log/apps/soverify.log")
 
 
 class CtypesVerifier:
@@ -113,16 +111,16 @@ def main() -> None:
         elif result is False:
             error_count += 1
             error_files.append(file_path)
-    print(f"\n{'=' * 50}")
+    print(f"\n{'=' * 42}")
     print("VERIFICATION SUMMARY")
-    print(f"{'=' * 50}")
+    print(f"{'=' * 42}")
     print(f"Total files checked: {len(files)}")
     print(f"✓ Valid files:       {valid_count}")
     print(f"✗ Files with errors: {error_count}")
     if error_files:
-        print(f"\n{'=' * 50}")
+        print(f"\n{'=' * 42}")
         print("FILES WITH ERRORS:")
-        print(f"{'=' * 50}")
+        print(f"{'=' * 42}")
         for file_path in error_files:
             print(f"  ✗ {file_path}")
     logger.info(f"Verification complete: {valid_count} valid, {error_count} errors out of {len(files)} files")

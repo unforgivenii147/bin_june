@@ -1,144 +1,155 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 
-import argparse
-import ast
-import shutil
-import tempfile
-import zipfile
+import os
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
+import libcst as cst
+from libcst import EmptyLine, Pass, SimpleStatementLine
+from libcst.metadata import MetadataWrapper, PositionProvider
 
-class CommentAndDocstringStripper(ast.NodeTransformer):
-    def __init__(self, is_module=True):
-        self.is_module = is_module
-        self.docstring_removed = False
-
-    def visit_FunctionDef(self, node):
-        self.remove_docstring(node)
-        return self.generic_visit(node)
-
-    def visit_AsyncFunctionDef(self, node):
-        self.remove_docstring(node)
-        return self.generic_visit(node)
-
-    def visit_ClassDef(self, node):
-        self.remove_docstring(node)
-        return self.generic_visit(node)
-
-    def remove_docstring(self, node):
-        if node.body and isinstance(node.body[0], ast.Expr) and isinstance(node.body[0].value, (ast.Str, ast.Constant)):
-            val = node.body[0].value
-            if isinstance(val, ast.Str) or (isinstance(val, ast.Constant) and isinstance(val.value, str)):
-                node.body.pop(0)
+from dh import get_files, mpf3
 
 
-def process_content(content: bytes) -> bytes:
+class StripTransformer(cst.CSTTransformer):
+    METADATA_DEPENDENCIES = (PositionProvider,)
+
+    def __init__(self) -> None:
+        self.comments_removed = 0
+        self.docstrings_removed = 0
+
+    @staticmethod
+    def _is_docstring_statement(stmt: cst.BaseStatement) -> bool:
+        if not isinstance(stmt, cst.SimpleStatementLine):
+            return False
+        if len(stmt.body) != 1:
+            return False
+        expr = stmt.body[0]
+        if not isinstance(expr, cst.Expr):
+            return False
+        return isinstance(expr.value, cst.SimpleString)
+
+    @staticmethod
+    def _is_preserved_comment(value: str) -> bool:
+        stripped = value.lstrip()
+        return stripped.startswith(("#!", "# fmt", "# type"))
+
+    def leave_Comment(
+        self,
+        original_node: cst.Comment,
+        updated_node: cst.Comment,
+    ) -> cst.Comment | cst.RemovalSentinel:
+        if self._is_preserved_comment(original_node.value):
+            return updated_node
+        self.comments_removed += 1
+        return cst.RemoveFromParent()
+
+    def leave_EmptyLine(
+        self,
+        original_node: EmptyLine,
+        updated_node: EmptyLine,
+    ) -> EmptyLine:
+        if updated_node.comment is None:
+            return updated_node
+        comment = updated_node.comment
+        if self._is_preserved_comment(comment.value):
+            return updated_node
+        self.comments_removed += 1
+        return updated_node.with_changes(comment=None)
+
+    def leave_Module(
+        self,
+        original_node: cst.Module,
+        updated_node: cst.Module,
+    ) -> cst.Module:
+        body = list(updated_node.body)
+        start = 1 if body and self._is_docstring_statement(body[0]) else 0
+        new_body = body[:start]
+        for stmt in body[start:]:
+            if self._is_docstring_statement(stmt):
+                self.docstrings_removed += 1
+            else:
+                new_body.append(stmt)
+        return updated_node.with_changes(body=new_body)
+
+    def _strip_suite(
+        self,
+        body: tuple[cst.BaseStatement, ...],
+    ) -> tuple[cst.BaseStatement, ...]:
+        statements = list(body)
+        if statements and self._is_docstring_statement(statements[0]):
+            self.docstrings_removed += 1
+            statements = statements[1:]
+        if not statements:
+            statements = [SimpleStatementLine(body=[Pass()])]
+        return tuple(statements)
+
+    def leave_FunctionDef(
+        self,
+        original_node: cst.FunctionDef,
+        updated_node: cst.FunctionDef,
+    ) -> cst.FunctionDef:
+        body = updated_node.body
+        if isinstance(body, cst.IndentedBlock):
+            return updated_node.with_changes(
+                body=body.with_changes(
+                    body=self._strip_suite(body.body),
+                )
+            )
+        return updated_node
+
+    def leave_ClassDef(
+        self,
+        original_node: cst.ClassDef,
+        updated_node: cst.ClassDef,
+    ) -> cst.ClassDef:
+        body = updated_node.body
+        if isinstance(body, cst.IndentedBlock):
+            return updated_node.with_changes(body=body.with_changes(body=self._strip_suite(body.body)))
+        return updated_node
+
+
+def process_file(path: Path) -> None:
+    path = path.resolve()
+    source = path.read_text(encoding="utf-8")
     try:
-        decoded = content.decode("utf-8")
-    except UnicodeDecodeError:
-        return content
-    lines = decoded.splitlines(keepends=True)
-    if not lines:
-        return content
-    header_lines = []
-    start_idx = 0
-    for i, line in enumerate(lines):
-        if line.startswith(("#!", "# type:", "# fmt:")):
-            header_lines.append(line)
-            start_idx = i + 1
-        else:
-            break
-    body_lines = lines[start_idx:]
-    if not body_lines:
-        return content
+        module = cst.parse_module(source)
+    except Exception as exc:
+        print(f"SKIP {path}: parse failed: {exc}")
+        return
+    wrapper = MetadataWrapper(module)
+    transformer = StripTransformer()
     try:
-        tree = ast.parse("".join(body_lines))
-    except SyntaxError:
-        return content
-    transformer = CommentAndDocstringStripper()
-    tree = transformer.visit(tree)
-    ast.fix_missing_locations(tree)
-    new_body = ast.unparse(tree)
-    final_code = "".join(header_lines) + new_body
-    if final_code.encode("utf-8") == content:
-        return content
-    return final_code.encode("utf-8")
-
-
-def process_single_file(file_path: Path, base_dir: Path) -> str:
+        updated = wrapper.visit(transformer)
+    except Exception as exc:
+        print(f"SKIP {path}: transform failed: {exc}")
+        return
+    code = updated.code
     try:
-        original_content = file_path.read_bytes()
-        new_content = process_content(original_content)
-        if original_content != new_content:
-            file_path.write_bytes(new_content)
-            return str(file_path.relative_to(base_dir))
-    except Exception as e:
-        return f"Error processing {file_path}: {e}"
-    return ""
+        cst.parse_module(code)
+    except SyntaxError as exc:
+        print(f"ERROR {path}: transformed code is invalid: {exc}")
+        return
+    if code != source:
+        path.write_text(code, encoding="utf-8")
+    rel = os.path.relpath(path, ROOT)
+    if transformer.comments_removed and transformer.docstrings_removed:
+        print(f"{rel}: {transformer.comments_removed}/{transformer.docstrings_removed}")
+    if transformer.comments_removed and not transformer.docstrings_removed:
+        print(f"{rel}: {transformer.comments_removed}/0")
+    if not transformer.comments_removed and transformer.docstrings_removed:
+        print(f"{rel}: 0/{transformer.docstrings_removed}")
 
 
-def process_wheel(wheel_path: Path, base_dir: Path) -> list[str]:
-    changed_files = []
-    temp_dir = Path(tempfile.mkdtemp())
-    try:
-        with zipfile.ZipFile(wheel_path, "r") as zin:
-            zin.extractall(temp_dir)
-        internal_changes = []
-        with ProcessPoolExecutor():
-            files_to_process = []
-            for p in temp_dir.rglob("*"):
-                if p.suffix == ".py" or (p.is_file() and (not p.suffix)):
-                    files_to_process.append(p)
-            for f in files_to_process:
-                res = process_single_file(f, temp_dir)
-                if res:
-                    internal_changes.append(f"{wheel_path.name} -> {res}")
-        if internal_changes:
-            with zipfile.ZipFile(wheel_path, "w", compression=zipfile.ZIP_DEFLATED) as zout:
-                for f in temp_dir.rglob("*"):
-                    if f.is_file():
-                        zout.write(f, f.relative_to(temp_dir))
-            changed_files.extend(internal_changes)
-    finally:
-        shutil.rmtree(temp_dir)
-    return changed_files
-
-
-def main():
-    parser = argparse.ArgumentParser(description="Strip docstrings and comments from Python files.")
-    parser.add_argument("inputs", nargs="*", help="Files or directories to process")
-    args = parser.parse_args()
-    targets = args.inputs if args.inputs else ["."]
-    work_items = []
-    base_path = Path(targets[0]).resolve()
-    for target in targets:
-        p = Path(target).resolve()
-        if p.is_dir():
-            for file in p.rglob("*"):
-                if file.is_file():
-                    if file.suffix == ".py" or (not file.suffix and (not file.name.startswith("."))):
-                        work_items.append((file, "file"))
-                    elif file.suffix == ".whl":
-                        work_items.append((file, "wheel"))
-        elif p.is_file():
-            if p.suffix == ".py" or (not p.suffix and (not p.name.startswith("."))):
-                work_items.append((p, "file"))
-            elif p.suffix == ".whl":
-                work_items.append((p, "wheel"))
-    print(f"Found {len(work_items)} items to inspect...")
-    with ProcessPoolExecutor() as executor:
-        files = [item[0] for item in work_items if item[1] == "file"]
-        wheels = [item[0] for item in work_items if item[1] == "wheel"]
-        file_results = executor.map(process_single_file, files, [base_path] * len(files))
-        for rel_path in file_results:
-            if rel_path:
-                print(rel_path)
-        for whl in wheels:
-            whl_changes = process_wheel(whl, base_path)
-            for change in whl_changes:
-                print(change)
+def main() -> None:
+    cwd = Path.cwd()
+    args = sys.argv[1:]
+    files = [Path(p) for p in args] if args else get_files(cwd, ext=[".py"])
+    if len(files) == 1:
+        process_file(files[0])
+        sys.exit(0)
+    mpf3(process_file, files)
 
 
 if __name__ == "__main__":

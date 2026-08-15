@@ -12,7 +12,6 @@ import os
 import subprocess
 import sys
 from functools import partial
-from pathlib import Path
 
 
 def get_pip_command():
@@ -154,7 +153,7 @@ def main():
     except Exception as e:
         print(f"\nError during parallel execution: {e}")
         sys.exit(1)
-    print("\n" + "=" * 50)
+    print("\n" + "=" * 42)
     print(f"Summary: {successful} successful, {failed} failed")
     if failed_packages:
         print("\nFailed packages:")

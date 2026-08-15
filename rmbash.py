@@ -4,7 +4,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from dh import get_files
+from dh import get_files, mpf3
 from loguru import logger
 
 

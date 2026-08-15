@@ -413,9 +413,9 @@ def print_results(results: dict[str, list[tuple[str, str]]], show_all: bool = Fa
         return
     total_files = len(results)
     total_missing = sum(len(missing) for missing in results.values())
-    print(f"\n{'=' * 70}")
+    print(f"\n{'=' * 42}")
     print(f" Found {total_missing} potentially missing import(s) in {total_files} file(s)")
-    print(f"{'=' * 70}\n")
+    print(f"{'=' * 42}\n")
     for filepath, missing in sorted(results.items()):
         rel_path = os.path.relpath(filepath)
         print(f"📄 {rel_path}")
@@ -474,9 +474,9 @@ Examples:
     results = scan_directory(args.directory, exclude_dirs)
     print_results(results)
     if args.show_all:
-        print(f"\n{'=' * 70}")
+        print(f"\n{'=' * 42}")
         print(" All scanned files:")
-        print(f"{'=' * 70}")
+        print(f"{'=' * 42}")
         root_path = Path(args.directory)
         for filepath in sorted(root_path.rglob("*.py")):
             if not any(excl in filepath.parts for excl in exclude_dirs):

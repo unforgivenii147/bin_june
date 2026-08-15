@@ -9,7 +9,6 @@ Optionally remove comments too while preserving:
 - standalone "# coding: ..." (encoding cookies)
 - standalone "#!..." (shebang)
 - preserves valid Python syntax by validating with ast.parse before write
-
 - Accepts multiple files/dirs as CLI args (if none: current dir recursively)
 - Uses pathlib
 - Uses parallel processing
@@ -40,40 +39,31 @@ def _first_statement_is_docstring(tree: ast.Module) -> bool:
 
 
 def _remove_docstrings_from_source(source: str) -> tuple[str, int]:
-
     try:
         tree = ast.parse(source)
     except SyntaxError:
         return source, 0
-
     to_remove: list[tuple[int, int, int, int]] = []
     preserve_module = _first_statement_is_docstring(tree)
-
     for node in ast.walk(tree):
         if not isinstance(node, ast.Expr):
             continue
         val = getattr(node, "value", None)
         if not isinstance(val, ast.Constant) or not isinstance(val.value, str):
             continue
-
         if preserve_module and tree.body and node is tree.body[0]:
             continue
-
         if hasattr(node, "lineno") and hasattr(node, "end_lineno"):
             to_remove.append((node.lineno, node.col_offset, node.end_lineno, node.end_col_offset))
-
     if not to_remove:
         return source, 0
-
     lines = source.splitlines(keepends=True)
     to_remove.sort(key=lambda r: (r[0], r[1]), reverse=True)
-
     for sline, scol, eline, ecol in to_remove:
         sidx = sline - 1
         eidx = eline - 1
         if sidx < 0 or eidx >= len(lines):
             continue
-
         if sidx == eidx:
             line = lines[sidx]
             lines[sidx] = line[:scol] + "" + line[ecol:]
@@ -84,7 +74,6 @@ def _remove_docstrings_from_source(source: str) -> tuple[str, int]:
             lines[eidx] = last[ecol:]
             for mid in range(sidx + 1, eidx):
                 lines[mid] = ""
-
     new_source = "".join(lines)
     return new_source, len(to_remove)
 
@@ -98,11 +87,9 @@ def _validate_syntax(source: str) -> bool:
 
 
 def _split_code_and_comment(line: str) -> tuple[str, str | None]:
-
     in_squote = False
     in_dquote = False
     escaped = False
-
     for i, ch in enumerate(line):
         if escaped:
             escaped = False
@@ -110,7 +97,6 @@ def _split_code_and_comment(line: str) -> tuple[str, str | None]:
         if ch == "\\":
             escaped = True
             continue
-
         if in_squote:
             if ch == "'":
                 in_squote = False
@@ -119,14 +105,12 @@ def _split_code_and_comment(line: str) -> tuple[str, str | None]:
             if ch == '"':
                 in_dquote = False
             continue
-
         if ch == "'":
             in_squote = True
             continue
         if ch == '"':
             in_dquote = True
             continue
-
         if ch == "#":
             return line[:i], line[i:]
     return line, None
@@ -134,46 +118,35 @@ def _split_code_and_comment(line: str) -> tuple[str, str | None]:
 
 def _should_preserve_comment(comment: str, *, is_line_start: bool) -> bool:
     s = comment.strip()
-
     if is_line_start and s.startswith("#!"):
         return True
-
     if is_line_start and ("coding" in s) and s.startswith("#"):
         lower = s.lower()
         if lower.startswith("# coding:") or "coding:" in lower:
             return True
-
     if s.startswith("# type:"):
         return True
-
     if s.startswith("# fmt") or s.startswith("#fmt"):
         return True
-
     return bool(s.startswith("# noqa") or s.startswith("# nosec") or s.startswith("# lint"))
 
 
 def _remove_comments_from_source(source: str) -> tuple[str, int]:
-
     out_lines: list[str] = []
     removed = 0
-
     lines = source.splitlines(keepends=True)
     for _idx, line in enumerate(lines):
         if line.strip() == "":
             out_lines.append(line)
             continue
-
         code, comment = _split_code_and_comment(line)
         if comment is None:
             out_lines.append(line)
             continue
-
         is_line_start = len(code.strip()) == 0
-
         if _should_preserve_comment(comment, is_line_start=is_line_start):
             out_lines.append(line)
             continue
-
         newline = ""
         if line.endswith("\r\n"):
             newline = "\r\n"
@@ -183,15 +156,12 @@ def _remove_comments_from_source(source: str) -> tuple[str, int]:
             code_part = code
         else:
             code_part = code
-
         if code_part.strip() == "":
             new_line = newline
         else:
             new_line = code_part.rstrip("\r\n") + newline
-
         out_lines.append(new_line)
         removed += 1
-
     return "".join(out_lines), removed
 
 
@@ -204,39 +174,31 @@ def _collect_py_files(paths: list[Path], *, recursive: bool = True) -> list[Path
         elif target.is_dir():
             pattern = "**/*.py" if recursive else "*.py"
             py_files.extend(target.glob(pattern))
-
     return sorted({p.resolve() for p in py_files})
 
 
 def process_file(path: Path, cwd: Path, *, strip_comments: bool) -> tuple[str, int, int] | None:
     rel = str(path.relative_to(cwd))
-
     try:
         source = path.read_text(encoding="utf-8")
     except UnicodeDecodeError:
         source = path.read_text(encoding="latin-1")
     except Exception:
         return None
-
     new_source, doc_count = _remove_docstrings_from_source(source)
-
     comment_count = 0
     if strip_comments and new_source == source:
         pass
     if strip_comments:
         new_source, comment_count = _remove_comments_from_source(new_source)
-
     if new_source == source:
         return None
-
     if not _validate_syntax(new_source):
         return None
-
     try:
         path.write_text(new_source, encoding="utf-8")
     except Exception:
         return None
-
     return rel, doc_count, comment_count
 
 
@@ -256,21 +218,16 @@ def main() -> None:
         help="Files or directories to process (default: current directory, recursive).",
     )
     args = parser.parse_args()
-
     cwd = Path(".").resolve()
-
     if args.targets:
         targets = [Path(t).resolve() for t in args.targets]
         py_files = _collect_py_files(targets, recursive=True)
     else:
         py_files = get_pyfiles(cwd)
         py_files = sorted(set(py_files))
-
     if not py_files:
         return
-
     strip_comments = True
-
     changed: list[tuple[str, int, int]] = []
     with ProcessPoolExecutor(max_workers=8) as ex:
         futures = {ex.submit(process_file, p, cwd, strip_comments=strip_comments): p for p in py_files}
@@ -278,7 +235,6 @@ def main() -> None:
             res = fut.result()
             if res is not None:
                 changed.append(res)
-
     for rel, doc_count, comment_count in sorted(changed, key=lambda x: x[0]):
         print(rel)
         if doc_count > 0:

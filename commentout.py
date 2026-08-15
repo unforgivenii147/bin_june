@@ -8,9 +8,11 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 
 COMMENT_MAP = {
+    ".vim": '"',
     ".lua": "--",
     ".py": "#",
     ".sh": "#",
+    ".toml": "#",
     ".yml": "#",
     ".yaml": "#",
     ".js": "//",

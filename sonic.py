@@ -61,7 +61,6 @@ class MmapReader(LineProcessor):
                 else:
                     f.seek(0)
                     for line in f:
-                        # Fix: line is bytes when opened in binary mode
                         decoded_line = line.decode(encoding).rstrip("\r\n")
                         if not skip_empty or decoded_line.strip():
                             yield decoded_line
@@ -74,7 +73,6 @@ class MmapReader(LineProcessor):
     ) -> Generator[str, None, None]:
         self.log(f"Reading {file_path} (regular mode)")
         try:
-            # Fix: Use text mode, not binary mode
             with Path(file_path).open("r", encoding=encoding) as f:
                 for line in f:
                     decoded_line = line.rstrip("\r\n")
@@ -196,12 +194,10 @@ class FileSorter(LineProcessor):
             msg = "error"
             raise FileNotFoundError(msg)
 
-        # Fix: Initialize output_path as Path if None
         if output_path is None:
             output_path_obj = input_path
         else:
             output_path_obj = Path(output_path)
-
         print("\n╔════════════════════════════════════════════════════════════╗")
         print("║              File Line Sorter & Deduplicator               ║")
         print("╚════════════════════════════════════════════════════════════╝\n")
@@ -282,7 +278,6 @@ class FileSorter(LineProcessor):
             report_file = "sort_report.json"
         report = {"timestamp": datetime.now(tz=UTC).isoformat(), "statistics": stats}
         try:
-            # Fix: report_file is now guaranteed to be str
             with Path(report_file).open("w", encoding="utf-8") as f:
                 json.dump(report, f, indent=2)
             print(f"\n✓ Report saved: {report_file}")

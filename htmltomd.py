@@ -143,7 +143,7 @@ Examples:
         with Pool(processes=args.workers) as pool:
             results = pool.map(process_file_wrapper, process_args)
         successful = sum(1 for _, success in results if success)
-        print(f"\n{'=' * 50}")
+        print(f"\n{'=' * 42}")
         print(f"Conversion complete: {successful}/{len(html_files)} files converted successfully")
 
 

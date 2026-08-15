@@ -192,9 +192,9 @@ def main() -> int:
         if args.verbose and len(versions) > 1:
             for version, path in versions:
                 print(f"    - {version}: {path.name}")
-    print("\n" + "=" * 50)
+    print("\n" + "=" * 42)
     total_deleted = keep_latest_versions(packages, args.dry_run)
-    print("\n" + "=" * 50)
+    print("\n" + "=" * 42)
     if total_deleted == 0:
         print("No files to delete. All packages have only one version.")
     elif args.dry_run:

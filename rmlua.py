@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Remove comments from Lua files using tree-sitter.
-
 Processes files in place using parallel workers.
 Supports both line comments (-- ...) and block comments (--[[ ... ]]).
 """
@@ -18,8 +17,6 @@ from tree_sitter import Language, Parser
 
 LUA_LANGUAGE = Language(tree_sitter_lua.language())
 LUA_EXTS = {".lua"}
-
-
 _PARSER: Parser | None = None
 
 
@@ -31,7 +28,6 @@ def get_parser() -> Parser:
 
 
 def collect_comment_ranges(root) -> list[tuple[int, int]]:
-    """Return (start_byte, end_byte) of every comment node via iterative DFS."""
     ranges: list[tuple[int, int]] = []
     stack = [root]
     while stack:
@@ -45,13 +41,11 @@ def collect_comment_ranges(root) -> list[tuple[int, int]]:
 
 
 def strip_comments(content: bytes) -> tuple[bytes, int]:
-    """Remove every comment from `content`; return (new_bytes, removed_count)."""
     tree = get_parser().parse(content)
     ranges = collect_comment_ranges(tree.root_node)
     if not ranges:
         return content, 0
     ranges.sort(key=lambda r: r[0])
-
     out = bytearray()
     last = 0
     for start, end in ranges:
@@ -62,7 +56,6 @@ def strip_comments(content: bytes) -> tuple[bytes, int]:
 
 
 def process_file(path: Path, base: Path) -> tuple[str, int, str]:
-    """Process one file in place. Returns (relpath, removed_count, error_str)."""
     try:
         content = path.read_bytes()
         new_content, count = strip_comments(content)
@@ -78,7 +71,6 @@ def process_file(path: Path, base: Path) -> tuple[str, int, str]:
 
 
 def iter_lua_files(paths: list[Path]):
-    """Yield unique .lua files from the given files/dirs (recursively for dirs)."""
     seen: set[Path] = set()
     for p in paths:
         if p.is_file() and p.suffix.lower() in LUA_EXTS:
@@ -110,18 +102,15 @@ def main() -> int:
         help="Number of parallel workers (default: CPU count).",
     )
     args = ap.parse_args()
-
     inputs = list(args.paths) if args.paths else [Path(".")]
     files = list(iter_lua_files(inputs))
     if not files:
         print("No Lua files to process.", file=sys.stderr)
         return 1
-
     base = Path.cwd()
     total_comments = 0
     files_changed = 0
     errors = 0
-
     with ProcessPoolExecutor(max_workers=args.jobs) as ex:
         futs = {ex.submit(process_file, p, base): p for p in files}
         for fut in as_completed(futs):
@@ -134,7 +123,6 @@ def main() -> int:
             if count > 0:
                 files_changed += 1
             print(f"{rel}: {count} comment(s) removed")
-
     print(
         f"\nSummary: {files_changed}/{len(files)} file(s) changed, "
         f"{total_comments} comment(s) removed, {errors} error(s)."

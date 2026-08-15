@@ -1,17 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""Remove comments and docstrings from Python files using tree-sitter.
-Processes files in place using parallel workers.
-- Preserves shebangs (
-- Removes function/class docstrings. If a docstring/comment is the only node
-  in a body, replaces it with 'pass' to prevent syntax errors.
-- Validates result code with ast.parse() before writing to disk.
-"""
-
-from __future__ import annotations
-
 import argparse
 import ast
-import os
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path

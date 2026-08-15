@@ -19,10 +19,10 @@ class GUIFramework:
     def show_dialog(self, title: str, message: str, buttons: list[str] | None = None) -> int:
         if buttons is None:
             buttons = ["OK"]
-        print(f"\n{'=' * 50}")
+        print(f"\n{'=' * 42}")
         print(f"[{title}]")
         print(f"{message}")
-        print(f"{'=' * 50}")
+        print(f"{'=' * 42}")
         for i, btn in enumerate(buttons):
             print(f"{i}: {btn}")
         choice = input("Select option: ").strip()
@@ -449,12 +449,12 @@ class TextEditor:
             self.close_document()
 
     def edit_document(self) -> None:
-        print(f"\n{'=' * 50}")
+        print(f"\n{'=' * 42}")
         print(f"Editing: {self.current_document.file_path.name}")
         print(f"Current content ({self.current_document.get_line_count()} lines):")
-        print(f"{'=' * 50}")
+        print(f"{'=' * 42}")
         print(self.current_document.content[:500] + ("..." if len(self.current_document.content) > 500 else ""))
-        print(f"{'=' * 50}")
+        print(f"{'=' * 42}")
         edit_choice = self.gui.show_menu("Edit Options", ["View Full", "Edit Full", "Append", "Back"])
         if edit_choice == 0:
             print("\n" + self.current_document.content)
@@ -471,11 +471,11 @@ class TextEditor:
 
     def show_preview(self) -> None:
         preview = self.current_document.get_preview()
-        print(f"\n{'=' * 50}")
+        print(f"\n{'=' * 42}")
         print(f"Preview: {self.current_document.file_path.name}")
-        print(f"{'=' * 50}")
+        print(f"{'=' * 42}")
         print(preview)
-        print(f"{'=' * 50}")
+        print(f"{'=' * 42}")
         input("Press Enter to continue...")
 
     def insert_template(self) -> None:

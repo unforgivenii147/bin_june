@@ -36,7 +36,6 @@ try:
     import py7zr
 except ImportError:
     py7zr = None
-
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",

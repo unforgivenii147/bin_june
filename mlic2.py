@@ -227,7 +227,7 @@ def save_to_file(repeated: dict[str, list[tuple[Path, int, str]]], output_file: 
     try:
         with open(output_file, "w", encoding="utf-8") as f:
             f.write("REPEATED MULTILINE BLOCKS FOUND\n")
-            f.write(f"{'=' * 50}\n\n")
+            f.write(f"{'=' * 42}\n\n")
             for block_num, (block, occurrences) in enumerate(repeated.items(), 1):
                 f.write(f"BLOCK #{block_num}\n")
                 f.write(f"{'-' * 40}\n")
@@ -236,7 +236,7 @@ def save_to_file(repeated: dict[str, list[tuple[Path, int, str]]], output_file: 
                 for filepath, lineno, context in occurrences:
                     f.write(f"  {filepath}:{lineno}\n")
                     f.write(f"    -> {context}\n")
-                f.write(f"\n{'=' * 50}\n\n")
+                f.write(f"\n{'=' * 42}\n\n")
         print(f"Results saved to {output_file}")
     except OSError as e:
         print(f"Error writing to {output_file}: {e}", file=sys.stderr)

@@ -72,7 +72,7 @@ class TextExtractor:
 class TextExtractionReport:
     @staticmethod
     def print_header(total_files: int) -> None:
-        print("\n" + "=" * 80)
+        print("\n" + "=" * 42)
         print(f"📄 TEXT EXTRACTION REPORT")
         print(f"⏱  Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print(f"📊 Total files to process: {total_files}")

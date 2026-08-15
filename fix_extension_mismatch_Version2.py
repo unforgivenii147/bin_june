@@ -6,13 +6,9 @@ file extension doesn't match a detected file type signature or MIME type.
 Usage:
   python fix_extension_mismatch.py [PATH] [--workers N] [--commit] [--dry-run] [--verbose]
 Examples:
-
   python fix_extension_mismatch.py
-
   python fix_extension_mismatch.py /path/to/dir
-
   python fix_extension_mismatch.py /path/to/dir --commit --workers 8
-
   python fix_extension_mismatch.py . --commit --verbose
 Notes:
   - The script prefers python-magic for accurate MIME-type detection. Install with:

@@ -85,7 +85,7 @@ def wav_to_text_chunked(input_file, output_file="out.txt", chunk_duration_ms=300
                     os.unlink(temp_wav_path)
             if i < num_chunks - 1 and not interrupted:
                 time.sleep(1)
-        print(f"\n{'=' * 50}")
+        print(f"\n{'=' * 42}")
         if interrupted:
             print(f"⚠️  Process interrupted. Progress saved to: {output_file}")
             print(f"Completed: {i + 1}/{num_chunks} chunks")

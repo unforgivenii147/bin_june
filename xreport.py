@@ -5,20 +5,16 @@ Auto-detects archives recursively, identifies specific archive types (.zip, .tar
 reports extracted & compressed sizes, tests archive integrity (-t), and auto-extracts (-a).
 """
 
-import os
-import sys
 import argparse
-import pathlib
-import zipfile
-import tarfile
-import gzip
 import bz2
-import lzma
+import gzip
+import json
+import os
+import pathlib
 import shutil
 import struct
-import json
-import time
-
+import tarfile
+import zipfile
 
 try:
     import py7zr
@@ -26,36 +22,28 @@ try:
     HAS_PY7ZR = True
 except ImportError:
     HAS_PY7ZR = False
-
 try:
     import zstandard as zstd
 
     HAS_ZSTD = True
 except ImportError:
     HAS_ZSTD = False
-
 try:
     import lz4.frame
 
     HAS_LZ4 = True
 except ImportError:
     HAS_LZ4 = False
-
 try:
-    import brotli
-
     HAS_BROTLI = True
 except ImportError:
     HAS_BROTLI = False
-
 try:
     import snappy
 
     HAS_SNAPPY = True
 except ImportError:
     HAS_SNAPPY = False
-
-
 CLI_ART_INTEGRITY = r"""
     ___               __     _             _____                  
    /   |  _____ _____/ /_   (_)_  _____   / ___/_________ _____   
@@ -64,7 +52,6 @@ CLI_ART_INTEGRITY = r"""
 /_/  |_/_/   \___/_/ /_//_/ |___/\___/ /____/\___/\__,_/_/ /_/   
   [ INTEGRITY VALIDATION & EXTRACTED SIZE SCANNER v1.4.2 ]
 """
-
 SUPPORTED_EXTENSIONS = (
     ".tar",
     ".tar.gz",
@@ -92,7 +79,6 @@ SUPPORTED_EXTENSIONS = (
     ".br",
     ".lz4",
 )
-
 ARCHIVE_TYPES = {
     ".tar": "TAR Archive (.tar)",
     ".tar.gz": "GZip Tarball (.tar.gz)",
@@ -181,14 +167,12 @@ def analyze_archive(filepath):
     file_count = 0
     integrity_ok = None
     error_msg = ""
-
     try:
         if ext in (".zip", ".whl"):
             with zipfile.ZipFile(filepath, "r") as zf:
                 ext_size = sum(info.file_size for info in zf.infolist())
                 file_count = len(zf.infolist())
                 integrity_ok = zf.testzip() is None
-
         elif ext and (ext.startswith(".tar") or ext in (".tgz", ".txz", ".tbz2", ".tzst")):
             mode = "r:*"
             if ext in (".tar.gz", ".tgz"):
@@ -197,7 +181,6 @@ def analyze_archive(filepath):
                 mode = "r:bz2"
             elif ext in (".tar.xz", ".txz"):
                 mode = "r:xz"
-
             try:
                 with tarfile.open(filepath, mode) as tf:
                     members = tf.getmembers()
@@ -216,7 +199,6 @@ def analyze_archive(filepath):
                     ext_size = int(comp_size * 3.5)
                     integrity_ok = False
                     error_msg = str(te)
-
         elif ext == ".7z":
             if HAS_PY7ZR:
                 with py7zr.SevenZipFile(filepath, mode="r") as sz:
@@ -226,52 +208,42 @@ def analyze_archive(filepath):
             else:
                 ext_size = int(comp_size * 4.1)
                 integrity_ok = True
-
         elif ext == ".gz":
             ext_size = analyze_gz_uncompressed_size(filepath)
             file_count = 1
             integrity_ok = True
-
         elif ext == ".bz2":
             ext_size = int(comp_size * 2.9)
             file_count = 1
             integrity_ok = True
-
         elif ext == ".xz":
             ext_size = int(comp_size * 3.8)
             file_count = 1
             integrity_ok = True
-
         elif ext == ".zst":
             ext_size = analyze_zstd_size(filepath)
             file_count = 1
             integrity_ok = True
-
         elif ext == ".lz4":
             ext_size = int(comp_size * 2.4)
             file_count = 1
             integrity_ok = True
-
         elif ext == ".br":
             ext_size = int(comp_size * 3.1)
             file_count = 1
             integrity_ok = True
-
         elif ext in (".snappy", ".bz3", ".tar.bz3", ".tar.snappy"):
             ext_size = analyze_snappy_size(filepath)
             file_count = 1
             integrity_ok = True
-
         else:
             ext_size = int(comp_size * 2.5)
             file_count = 1
             integrity_ok = True
-
     except Exception as e:
         integrity_ok = False
         error_msg = str(e)
         ext_size = comp_size
-
     return {
         "path": str(filepath),
         "filename": os.path.basename(filepath),
@@ -290,7 +262,6 @@ def extract_archive(filepath, out_dir):
     ext, _ = get_archive_type_info(filepath)
     dest = os.path.join(out_dir, os.path.basename(filepath) + "_extracted")
     os.makedirs(dest, exist_ok=True)
-
     try:
         if ext in (".zip", ".whl"):
             with zipfile.ZipFile(filepath, "r") as zf:
@@ -320,12 +291,9 @@ def extract_archive(filepath, out_dir):
 def scan_directory(target_dir, auto_extract=False, test_integrity=False, verbose=False):
     target = pathlib.Path(target_dir).resolve()
     print(f"\033[38;5;39mScanning directory recursively:\033[0m {target}")
-
     if test_integrity:
         print("\033[38;5;82m" + CLI_ART_INTEGRITY + "\033[0m")
-
     found_archives = []
-
     for root, dirs, files in os.walk(target):
         for f in files:
             full_path = os.path.join(root, f)
@@ -338,31 +306,25 @@ def scan_directory(target_dir, auto_extract=False, test_integrity=False, verbose
                     print(
                         f" -> Found: {res['filename']} | Type: {res['archive_type']} | Comp: {format_size(res['compressed_size'])} -> Ext: {format_size(res['extracted_size'])} | {status_str}"
                     )
-
     print("-" * 90)
     print(
         f"\033[1;37m{'FILENAME':<32} {'ARCHIVE TYPE':<26} {'COMPRESSED':<12} {'EXTRACTED':<12} {'INTEGRITY':<10}\033[0m"
     )
     print("-" * 90)
-
     total_compressed = 0
     total_extracted = 0
-
     for item in found_archives:
         total_compressed += item["compressed_size"]
         total_extracted += item["extracted_size"]
-
         if item["integrity"] is True:
             status = "\033[32mPASSED\033[0m"
         elif item["integrity"] is False:
             status = "\033[31mFAILED\033[0m"
         else:
             status = "\033[90mSKIP\033[0m"
-
         print(
             f"{item['filename'][:31]:<32} {item['archive_type'][:25]:<26} {format_size(item['compressed_size']):<12} {format_size(item['extracted_size']):<12} {status}"
         )
-
     print("=" * 90)
     print(f"\033[1;36mSUMMARY:\033[0m Found {len(found_archives)} archive files.")
     print(f"Total Compressed Size : {format_size(total_compressed)}")
@@ -370,7 +332,6 @@ def scan_directory(target_dir, auto_extract=False, test_integrity=False, verbose
     if total_compressed > 0:
         ratio = total_extracted / total_compressed
         print(f"Overall Expansion     : {ratio:.2f}x ({format_size(total_extracted - total_compressed)} saved)")
-
     if auto_extract and found_archives:
         out_subdir = os.path.join(target, "extracted_archives")
         print(f"\n\033[38;5;214m[-a] Auto-extracting {len(found_archives)} archives into:\033[0m {out_subdir}")
@@ -380,7 +341,6 @@ def scan_directory(target_dir, auto_extract=False, test_integrity=False, verbose
                 print(f"  \033[32m[✓]\033[0m Extracted {item['filename']} -> {dest_or_err}")
             else:
                 print(f"  \033[31m[✗]\033[0m Failed to extract {item['filename']}: {dest_or_err}")
-
     return found_archives
 
 
@@ -402,9 +362,7 @@ def main():
     )
     parser.add_argument("-v", "--verbose", action="store_true", help="Display verbose file logs while scanning")
     parser.add_argument("-j", "--json", action="store_true", help="Output results in JSON format")
-
     args = parser.parse_args()
-
     if args.json:
         target = pathlib.Path(args.directory).resolve()
         archives = []
