@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from pathlib import Path
-from dh import should_skip, get_files, move_dir
+
+from dh import get_files
 
 
 def has_lua(root_dir):
@@ -13,6 +14,8 @@ def has_lua(root_dir):
 
 def move_to_start(src):
     dest = "/data/data/com.termux/files/home/.vim/pack/plugins/start"
+    if not Path(dest).exists():
+        Path(dest).mkdir(exist_ok=True)
     import shutil
 
     target_path = f"{dest}/{src.name}"
@@ -27,6 +30,6 @@ if __name__ == "__main__":
             continue
         if not has_lua(dirpath):
             print(f" - {dirpath.name}")
-            ans = input(f"move {dirpath.name} ?")
-            if ans == "y":
-                move_to_start(dirpath)
+#            ans = input(f"move {dirpath.name} ?")
+#            if ans == "y":
+#                move_to_start(dirpath)

@@ -9,9 +9,9 @@ from collections.abc import Generator
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
-from fastwalk import walk_files
-from dh import TXT_EXT, BIN_EXT
 from binaryornot import is_binary
+from dh import BIN_EXT, TXT_EXT
+from fastwalk import walk_files
 
 
 def walk_paths(paths: list[str | Path]) -> Generator[Path, None, None]:

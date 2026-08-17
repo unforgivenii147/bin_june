@@ -2,13 +2,14 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import sys
 from pathlib import Path
 from time import perf_counter as pff
 
 from dh import cprint, format_time, fsz, get_pyfiles, mpf3
 
-MODE = "black"
+MODE = "yapf"
 CHUNK_SIZE = 1024 * 1024
 
 
@@ -16,10 +17,10 @@ def process_file(path: str | Path, mode: str = MODE) -> bool:
     stime = pff()
     path = Path(path)
     before: int = path.stat().st_size
-    after: int = before
+    after: int = copy.copy(before)
     try:
         original_code: str = path.read_text(encoding="utf-8")
-        code = original_code
+        code = copy.copy(original_code)
         match mode:
             case "autoflake":
                 from autoflake import fix_code as fix_with_autoflake

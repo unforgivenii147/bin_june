@@ -1,255 +1,134 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-"""
-HTML Minifier Wrapper for html-minifier-terser
-Finds and minifies HTML files recursively using parallel processing.
-"""
+"""HTML minifier wrapper using html-minifier-terser with parallel processing."""
 
-import argparse
-import os
 import subprocess
 import sys
+import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 
 @dataclass
 class MinifyResult:
-    path: Path
+    file_path: Path
     original_size: int
     minified_size: int
-    success: bool
+    duration: float
     error: Optional[str] = None
 
     @property
-    def savings_bytes(self) -> int:
-        return self.original_size - self.minified_size
+    def compression_ratio(self) -> float:
+        return (1 - self.minified_size / self.original_size) * 100 if self.original_size else 0
 
-    @property
-    def savings_percent(self) -> float:
-        if self.original_size == 0:
-            return 0.0
-        return (self.savings_bytes / self.original_size) * 100
+    def report(self, cwd: Path) -> str:
+        rel = self.file_path.relative_to(cwd)
+        if self.error:
+            return f"✗ {rel}: {self.error}"
+        saved = self.original_size - self.minified_size
+        return f"✓ {rel}: {self.original_size}B → {self.minified_size}B ({self.compression_ratio:.1f}% saved) [{self.duration:.2f}s]"
 
 
-def check_html_minifier() -> bool:
+def _minify_file(file_path: Path) -> MinifyResult:
+    start = time.perf_counter()
+    original_size = file_path.stat().st_size
+
+    args = [
+        "html-minifier-terser",
+        "--collapse-whitespace",
+        "--remove-comments",
+        "--remove-optional-tags",
+        "--remove-redundant-attributes",
+        "--remove-attribute-quotes",
+        "--minify-css",
+        "--minify-js",
+        "--minify-urls",
+        "--use-short-doctype",
+        "--remove-empty-attributes",
+        "--remove-empty-elements",
+        "--sort-attributes",
+        "--sort-class-name",
+        "--remove-script-type-attributes",
+        "--remove-style-link-type-attributes",
+        "--collapse-inline-tag-whitespace",
+        "--remove-tag-whitespace",
+        "--decode-entities",
+        "--output",
+        str(file_path),
+        str(file_path),
+    ]
+
     try:
-        result = subprocess.run(["html-minifier-terser", "--version"], capture_output=True, text=True, timeout=5)
-        return result.returncode == 0
-    except (subprocess.SubprocessError, FileNotFoundError):
-        return False
-
-
-def find_html_files(paths: List[Path]) -> List[Path]:
-    html_files = []
-    html_extensions = {".html", ".htm"}
-    for path in paths:
-        if path.is_file():
-            if path.suffix.lower() in html_extensions:
-                html_files.append(path)
-        elif path.is_dir():
-            for ext in html_extensions:
-                html_files.extend(path.rglob(f"*{ext}"))
-                html_files.extend(path.rglob(f"*{ext.upper()}"))
-
-    seen = set()
-    unique_files = []
-    for file in html_files:
-        if file not in seen:
-            seen.add(file)
-            unique_files.append(file)
-    return unique_files
-
-
-def minify_single_file(file_path: Path) -> MinifyResult:
-    try:
-        original_size = file_path.stat().st_size
-
-        temp_path = file_path.with_suffix(file_path.suffix + ".tmp")
-
-        cmd = [
-            "html-minifier-terser",
-            str(file_path),
-            "-o",
-            str(temp_path),
-            "--collapse-whitespace",
-            "--remove-comments",
-            "--remove-redundant-attributes",
-            "--remove-script-type-attributes",
-            "--remove-style-link-type-attributes",
-            "--minify-css",
-            "true",
-            "--minify-js",
-            "true",
-            "--case-sensitive",
-        ]
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        result = subprocess.run(args, capture_output=True, text=True, timeout=30)
         if result.returncode != 0:
-            return MinifyResult(
-                path=file_path,
-                original_size=original_size,
-                minified_size=original_size,
-                success=False,
-                error=result.stderr or "Unknown error",
-            )
+            error_msg = result.stderr.strip() or f"Exit code {result.returncode}"
+            return MinifyResult(file_path, original_size, original_size, time.perf_counter() - start, error_msg)
 
-        if not temp_path.exists():
-            return MinifyResult(
-                path=file_path,
-                original_size=original_size,
-                minified_size=original_size,
-                success=False,
-                error="Minified output not created",
-            )
+        minified_size = file_path.stat().st_size
+        return MinifyResult(file_path, original_size, minified_size, time.perf_counter() - start)
 
-        minified_size = temp_path.stat().st_size
-
-        temp_path.replace(file_path)
-        return MinifyResult(path=file_path, original_size=original_size, minified_size=minified_size, success=True)
+    except FileNotFoundError:
+        return MinifyResult(
+            file_path, original_size, original_size, time.perf_counter() - start, "html-minifier-terser not found"
+        )
     except subprocess.TimeoutExpired:
         return MinifyResult(
-            path=file_path,
-            original_size=file_path.stat().st_size if file_path.exists() else 0,
-            minified_size=file_path.stat().st_size if file_path.exists() else 0,
-            success=False,
-            error="Timeout exceeded",
+            file_path, original_size, original_size, time.perf_counter() - start, "Timeout (30s exceeded)"
         )
     except Exception as e:
-        return MinifyResult(
-            path=file_path,
-            original_size=file_path.stat().st_size if file_path.exists() else 0,
-            minified_size=file_path.stat().st_size if file_path.exists() else 0,
-            success=False,
-            error=str(e),
-        )
-    finally:
-        if "temp_path" in locals() and temp_path.exists():
-            temp_path.unlink()
+        return MinifyResult(file_path, original_size, original_size, time.perf_counter() - start, str(e))
 
 
-def format_size(size_bytes: int) -> str:
-    for unit in ["B", "KB", "MB", "GB"]:
-        if size_bytes < 1024.0:
-            return f"{size_bytes:.0f} {unit}" if unit == "B" else f"{size_bytes:.1f} {unit}"
-        size_bytes /= 1024.0
-    return f"{size_bytes:.1f} TB"
-
-
-def print_results(results: List[MinifyResult], base_path: Path):
-    print("\n" + "=" * 42)
-    print(f"{'File':<40} {'Savings':<10} {'Percent':<10} {'Status'}")
-    print("=" * 42)
-    total_original = 0
-    total_minified = 0
-    success_count = 0
-    fail_count = 0
-    for result in sorted(results, key=lambda r: r.path):
-        try:
-            rel_path = result.path.relative_to(base_path)
-        except ValueError:
-            rel_path = result.path
-        savings = result.savings_bytes
-        percent = result.savings_percent
-        if result.success:
-            status = "✓"
-            success_count += 1
-        else:
-            status = f"✗ ({result.error})"
-            fail_count += 1
-        total_original += result.original_size
-        total_minified += result.minified_size
-        print(f"{str(rel_path):<40} -{format_size(savings):>7}  {percent:>6.1f}%  {status}")
-    print("=" * 42)
-    if success_count > 0:
-        total_savings = total_original - total_minified
-        total_percent = (total_savings / total_original * 100) if total_original > 0 else 0
-        print(f"Total: {success_count} files minified, {fail_count} failed")
-        print(f"Total savings: {format_size(total_savings)} ({total_percent:.1f}%)")
-        print(f"Original size: {format_size(total_original)}")
-        print(f"Minified size: {format_size(total_minified)}")
-
-
-def main():
-    parser = argparse.ArgumentParser(
-        description="Minify HTML files using html-minifier-terser with parallel processing",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  %(prog)s                           # Minify all HTML files in current directory
-  %(prog)s index.html about.html     # Minify specific files
-  %(prog)s src/ templates/           # Minify files in specific directories
-  %(prog)s -w 8 src/                 # Use 8 worker processes
-        """,
-    )
-    parser.add_argument("paths", nargs="*", help="Files or directories to process (default: current directory)")
-    parser.add_argument(
-        "-w",
-        "--workers",
-        type=int,
-        default=os.cpu_count(),
-        help=f"Number of parallel workers (default: {os.cpu_count()})",
-    )
-    parser.add_argument("--no-parallel", action="store_true", help="Disable parallel processing")
-    args = parser.parse_args()
-
-    if not check_html_minifier():
-        print("Error: html-minifier-terser is not installed or not in PATH")
-        print("Install it with: npm install -g html-minifier-terser")
-        sys.exit(1)
-
-    if args.paths:
-        paths = [Path(p) for p in args.paths]
-    else:
-        paths = [Path.cwd()]
-
+def discover_html_files(paths: list[Path]) -> list[Path]:
+    html_files = []
     for path in paths:
-        if not path.exists():
-            print(f"Error: Path '{path}' does not exist")
-            sys.exit(1)
+        if path.is_file() and path.suffix.lower() in {".html", ".htm"}:
+            html_files.append(path)
+        elif path.is_dir():
+            html_files.extend(path.rglob("*.html"))
+            html_files.extend(path.rglob("*.htm"))
+    return sorted(set(html_files))
 
-    print("Finding HTML files...")
-    html_files = find_html_files(paths)
+
+def minify_batch(input_paths: list[Path], max_workers: int = None) -> int:
+    if not input_paths:
+        input_paths = [Path.cwd()]
+
+    html_files = discover_html_files(input_paths)
+
     if not html_files:
-        print("No HTML files found")
-        return
-    print(f"Found {len(html_files)} HTML file(s)")
-    print(f"Using {args.workers} worker(s) for parallel processing\n")
+        print("No HTML files found.", file=sys.stderr)
+        return 1
 
-    base_path = Path.cwd()
+    cwd = Path.cwd()
+    print(f"Found {len(html_files)} HTML file(s). Starting minification...\n")
 
     results = []
-    if args.no_parallel or len(html_files) == 1:
-        for file in html_files:
-            result = minify_single_file(file)
+    with ProcessPoolExecutor(max_workers=max_workers) as executor:
+        futures = {executor.submit(_minify_file, f): f for f in html_files}
+        for future in as_completed(futures):
+            result = future.result()
             results.append(result)
-            if result.success:
-                savings = result.savings_bytes
-                percent = result.savings_percent
-                rel_path = result.path.relative_to(base_path) if base_path in result.path.parents else result.path
-                print(f"  ✓ {rel_path} | -{format_size(savings)} | {percent:.1f}%")
-            else:
-                print(f"  ✗ {result.path} | Error: {result.error}")
-    else:
-        with ProcessPoolExecutor(max_workers=args.workers) as executor:
-            future_to_file = {executor.submit(minify_single_file, file): file for file in html_files}
-            for future in as_completed(future_to_file):
-                result = future.result()
-                results.append(result)
-                file = future_to_file[future]
-                if result.success:
-                    savings = result.savings_bytes
-                    percent = result.savings_percent
-                    try:
-                        rel_path = file.relative_to(base_path)
-                    except ValueError:
-                        rel_path = file
-                    print(f"  ✓ {rel_path} | -{format_size(savings)} | {percent:.1f}%")
-                else:
-                    print(f"  ✗ {file} | Error: {result.error}")
+            print(result.report(cwd))
 
-    print_results(results, base_path)
+    print("\n" + "=" * 70)
+    total_original = sum(r.original_size for r in results)
+    total_minified = sum(r.minified_size for r in results)
+    total_saved = total_original - total_minified
+    avg_compression = (1 - total_minified / total_original) * 100 if total_original else 0
+    errors = sum(1 for r in results if r.error)
+    total_time = sum(r.duration for r in results)
+
+    print(f"Files: {len(html_files)} ({errors} error{'s' if errors != 1 else ''})")
+    print(
+        f"Original: {total_original:,} B | Minified: {total_minified:,} B | Saved: {total_saved:,} B ({avg_compression:.1f}%)"
+    )
+    print(f"Total time: {total_time:.2f}s")
+
+    return 0 if errors == 0 else 1
 
 
 if __name__ == "__main__":
-    main()
+    input_paths = [Path(p) for p in sys.argv[1:]] if len(sys.argv) > 1 else []
+    sys.exit(minify_batch(input_paths))

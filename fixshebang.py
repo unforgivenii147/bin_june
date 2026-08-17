@@ -47,7 +47,7 @@ def get_shebang(content: str) -> str:
         content,
         re.MULTILINE,
     ):
-        return NEW_SHEBANG14
+        return NEW_SHEBANG12
     return NEW_SHEBANG12
 
 

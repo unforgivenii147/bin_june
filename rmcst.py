@@ -2,14 +2,13 @@
 from __future__ import annotations
 
 import os
-from concurrent.futures import ProcessPoolExecutor
+import sys
 from pathlib import Path
 
 import libcst as cst
+from dh import get_files, mpf3
 from libcst import EmptyLine, Pass, SimpleStatementLine
 from libcst.metadata import MetadataWrapper, PositionProvider
-
-from dh import get_files, mpf3
 
 
 class StripTransformer(cst.CSTTransformer):

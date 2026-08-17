@@ -12,6 +12,8 @@ from difflib import get_close_matches
 from pathlib import Path
 from typing import Final
 
+from faprint import faprint
+
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 DICT_FILE: Final[str] = Path("~/dic.json").expanduser()
@@ -130,12 +132,12 @@ def main() -> None:
         word = " ".join(args.word).strip()
         result = translate(word, fa_en, en_fa)
         if result:
-            print(result)
+            faprint(result)
             sys.exit(0)
         else:
             matches = fuzzy_search(word, all_words)
             if matches:
-                print(f"Not found. Did you mean: {', '.join(matches)}?", file=sys.stderr)
+                faprint(f"Not found. Did you mean: {', '.join(matches)}?", file=sys.stderr)
             else:
                 print("Not found", file=sys.stderr)
             sys.exit(1)

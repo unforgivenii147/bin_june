@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/home/.local/bin/python
 """
 Image Preprocessing for Tesseract OCR
 Processes images in-place to optimize them for Tesseract OCR.

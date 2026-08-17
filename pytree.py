@@ -1,10 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 import argparse
-import os
 import sys
-from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
-from typing import Generator, Tuple, Optional
+from pathlib import Path
+from typing import Generator, Tuple
 
 
 def sizeof_fmt(num: float, suffix: str = "B") -> str:

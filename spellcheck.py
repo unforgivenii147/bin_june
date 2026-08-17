@@ -1,34 +1,56 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """
-Spell check all text files in current directory recursively using pyspellchecker.
+Spell check all text files recursively using pyspellchecker.
 Supports parallel processing and optional auto-fix mode.
 """
 
 from __future__ import annotations
 
 import argparse
-import sys
+import re
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Dict, List, Tuple
 
 from dh import TXT_EXT
+from loguru import logger
 from spellchecker import SpellChecker
 
+logger.remove()
+log_dir = Path.home() / "tmp" / "log" / "apps"
+log_dir.mkdir(parents=True, exist_ok=True)
+log_file = log_dir / "spellchecker.log"
+logger.add(
+    log_file,
+    format="{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {message}",
+    level="INFO",
+    rotation="10 MB",
+    retention="7 days",
+)
 
-def find_text_files(root_dir: Path, extensions: set | None = None) -> List[Path]:
+
+def find_text_files(paths: List[Path], extensions: set | None = None) -> List[Path]:
     if extensions is None:
         extensions = TXT_EXT
     text_files = []
-    for path in root_dir.rglob("*"):
-        if path.is_file() and path.suffix.lower() in extensions:
-            text_files.append(path)
-    return text_files
+    for path in paths:
+        path = path.resolve()
+        if not path.exists():
+            logger.warning(f"Path does not exist: {path}")
+            continue
+        if path.is_file():
+            if path.suffix.lower() in extensions:
+                text_files.append(path)
+            else:
+                logger.debug(f"Skipped non-text file: {path}")
+        elif path.is_dir():
+            for file_path in path.rglob("*"):
+                if file_path.is_file() and file_path.suffix.lower() in extensions:
+                    text_files.append(file_path)
+    return list(set(text_files))
 
 
 def extract_words(text: str) -> List[Tuple[str, int, int]]:
-    import re
-
     words = []
     for match in re.finditer(r"\b[a-zA-Z]+\b", text):
         words.append((match.group(), match.start(), match.end()))
@@ -52,8 +74,13 @@ def check_file(file_path: Path) -> Dict:
                             "candidates": list(spell.candidates(word.lower()))[:5],
                         }
                     )
+        if misspellings:
+            logger.info(f"{file_path}: Found {len(misspellings)} misspellings")
+            for ms in misspellings:
+                logger.debug(f"  '{ms['word']}' → '{ms['correction']}' in {file_path}")
         return {"file": str(file_path), "misspellings": misspellings, "content": content}
     except Exception as e:
+        logger.error(f"Error checking {file_path}: {e}")
         return {"file": str(file_path), "error": str(e), "misspellings": [], "content": None}
 
 
@@ -69,9 +96,10 @@ def fix_file(file_path: Path, corrections: Dict[str, str]) -> bool:
         for start, end, correction in corrections_to_apply:
             content = content[:start] + correction + content[end:]
         file_path.write_text(content, encoding="utf-8")
+        logger.info(f"Fixed {len(corrections_to_apply)} words in {file_path}")
         return True
     except Exception as e:
-        print(f"Error fixing {file_path}: {e}", file=sys.stderr)
+        logger.error(f"Error fixing {file_path}: {e}")
         return False
 
 
@@ -87,7 +115,7 @@ def process_files_parallel(files: List[Path], max_workers: int | None = None) ->
                 if i % 10 == 0 or i == len(files):
                     print(f"\rProcessed {i}/{len(files)} files...", end="", flush=True)
             except Exception as e:
-                print(f"\nError processing {file_path}: {e}", file=sys.stderr)
+                logger.error(f"Error processing {file_path}: {e}")
                 results[str(file_path)] = {"file": str(file_path), "error": str(e), "misspellings": [], "content": None}
     print()
     return results
@@ -155,13 +183,18 @@ def main():
         epilog="""
 Examples:
   %(prog)s
-  %(prog)s -a
-  %(prog)s -a --interactive
-  %(prog)s -w 8
-  %(prog)s -e .txt .md
+  %(prog)s file.txt dir/
+  %(prog)s . -a
+  %(prog)s doc1.md doc2.txt ~/docs -a --interactive
+  %(prog)s -w 8 -e .txt .md
         """,
     )
-    parser.add_argument("directory", nargs="?", default=".", help="Directory to scan (default: current directory)")
+    parser.add_argument(
+        "paths",
+        nargs="*",
+        default=["."],
+        help="Files or directories to scan (default: current directory)",
+    )
     parser.add_argument("-a", "--autofix", action="store_true", help="Automatically fix misspelled words in-place")
     parser.add_argument(
         "-i", "--interactive", action="store_true", help="Ask for confirmation before each fix (only with -a)"
@@ -171,26 +204,33 @@ Examples:
     )
     parser.add_argument("-e", "--extensions", nargs="+", help="File extensions to check (default: common text files)")
     parser.add_argument("-c", "--candidates", action="store_true", help="Show candidate corrections")
-    parser.add_argument("--min-length", type=int, default=2, help="Minimum word length to check (default: 2)")
     args = parser.parse_args()
+
     if args.extensions:
         extensions = {ext if ext.startswith(".") else f".{ext}" for ext in args.extensions}
     else:
         extensions = TXT_EXT
-    root_dir = Path(args.directory).resolve()
-    if not root_dir.exists():
-        print(f"Error: Directory '{root_dir}' does not exist", file=sys.stderr)
-        sys.exit(1)
-    print(f"🔍 Scanning {root_dir} for text files...")
-    files = find_text_files(root_dir, extensions)
+
+    logger.info(f"Starting spell check with {len(args.paths)} path(s)")
+
+    input_paths = [Path(p) for p in args.paths]
+    print(f"🔍 Scanning {len(input_paths)} path(s) for text files...")
+    files = find_text_files(input_paths, extensions)
+
     if not files:
+        logger.warning("No text files found")
         print("No text files found.")
         return
+
+    logger.info(f"Found {len(files)} text files to check")
     print(f"📁 Found {len(files)} text files to check")
     print(f"⚡ Using {args.workers or 'default'} worker processes")
+    print(f"📝 Log file: {log_file}")
     print("\n🔄 Checking spelling...")
+
     results = process_files_parallel(files, args.workers)
     display_results(results, args.candidates)
+
     if args.autofix:
         total_misspellings = sum(len(r["misspellings"]) for r in results.values() if not r.get("error"))
         if total_misspellings == 0:
@@ -216,6 +256,7 @@ Examples:
                             print(f"  Candidates: {', '.join(ms['candidates'])}")
                         action = input("  Apply this fix? (y/n/s[kip all]/q[uit]): ").lower().strip()
                         if action in ["q", "quit"]:
+                            logger.info("User quit during interactive fix")
                             print("Quitting...")
                             return
                         elif action in ["s", "skip"]:
@@ -226,6 +267,7 @@ Examples:
                 if corrections and fix_file(Path(file_path), corrections):
                     fixed_count += len(corrections)
                     print(f"✅ Fixed {file_path}")
+            logger.info(f"Auto-fix complete: fixed {fixed_count} misspellings")
             print(f"\n✅ Fixed {fixed_count} misspellings across multiple files")
         else:
             print("❌ Fix cancelled")

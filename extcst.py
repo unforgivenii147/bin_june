@@ -5,19 +5,20 @@ Saves each entity as a separate .py file with its full source code.
 Processes files in parallel and updates them in-place.
 """
 
-import sys
-from pathlib import Path
-from concurrent.futures import ProcessPoolExecutor, as_completed
-from typing import List, Tuple, Dict, Set, Optional
+import argparse
 import json
+import logging
+import re
+import sys
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple
+
 import libcst as cst
 from libcst import MetadataWrapper
 from libcst.metadata import PositionProvider
-from dataclasses import dataclass
-import argparse
-import logging
-from datetime import datetime
-import re
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)

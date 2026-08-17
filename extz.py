@@ -13,6 +13,8 @@ from pathlib import Path
 
 from dh import get_files
 
+RECURSIVE = not "-n" in sys.argv
+
 
 def process_files_batch(file_paths: list[Path]) -> dict[str, int]:
     ext_counts = defaultdict(int)
@@ -24,6 +26,21 @@ def process_files_batch(file_paths: list[Path]) -> dict[str, int]:
 
 def main():
     cwd = Path.cwd()
+    if not RECURSIVE:
+        exts = {}
+        extz = set()
+        for path in cwd.iterdir():
+            if path.is_dir() or path.is_symlink():
+                continue
+            if path.is_file():
+                if path.suffix not in exts:
+                    extz.add(path.suffix)
+                    exts[path.suffix] = 1
+                else:
+                    exts[path.suffix] += 1
+        for ext, count in exts.items():
+            print(f" - {ext} : {count}")
+        sys.exit(0)
     files = get_files(cwd)
     batch_size = max(1, len(files) // 8)
     file_batches = [files[i : i + batch_size] for i in range(0, len(files), batch_size)]

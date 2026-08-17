@@ -345,7 +345,7 @@ def print_report(reports: list[FileReport], verbose: bool, use_colour: bool) -> 
             lineno_str = _coloured(f"line {ui.lineno:>4}", CYAN, use_colour)
             stmt_str = _coloured(ui.statement, YELLOW, use_colour)
             names_note = ""
-            if verbose and len(ui.names) < len(ui.statement.split(",")):
+            if len(ui.names) < len(ui.statement.split(",")):
                 names_note = "  [unused: " + _coloured(", ".join(ui.names), RED, use_colour) + "]"
             print(f"{label}  -->  {lineno_str}  {stmt_str}{names_note}")
             first = False
@@ -382,6 +382,8 @@ def collect_tasks(
                 source_tasks.extend(_extract_py_from_tar_zst(path))
         elif path.is_dir():
             for p in path.rglob("*"):
+                if p.name == "__init__.py":
+                    continue
                 if not p.is_file():
                     continue
                 if exclude_re and exclude_re.search(str(p)):
@@ -404,28 +406,24 @@ def run(
     workers: int,
     autofix: bool,
     dry_run: bool,
-    verbose: bool,
+    verbose: bool = True,
     exclude: list[str] | None = None,
 ) -> int:
     use_colour = sys.stdout.isatty()
-    if verbose:
-        print(f"Scanning {len(paths)} path(s) with {workers} worker(s) …\n")
     file_tasks, source_tasks = collect_tasks(paths, exclude)
-    if verbose:
-        print(f"  {len(file_tasks)} .py file(s), {len(source_tasks)} archive member(s) queued.\n")
+    print(f"  {len(file_tasks)} .py file(s), {len(source_tasks)} archive member(s) queued.\n")
     reports: list[FileReport] = []
     with multiprocessing.Pool(processes=workers) as pool:
         if file_tasks:
-            if verbose:
-                results = pool.imap_unordered(_process_file, file_tasks)
-                for i, report in enumerate(results, 1):
-                    reports.append(report)
-                    if i % 10 == 0 or i == len(file_tasks):
-                        print(f"  Processed {i}/{len(file_tasks)} files...", end="\r")
-                if file_tasks:
-                    print(f"  Processed {len(file_tasks)}/{len(file_tasks)} files.    ")
-            else:
-                reports.extend(pool.map(_process_file, file_tasks))
+            results = pool.imap_unordered(_process_file, file_tasks)
+            for i, report in enumerate(results, 1):
+                reports.append(report)
+                if i % 10 == 0 or i == len(file_tasks):
+                    print(f"  Processed {i}/{len(file_tasks)} files...", end="\r")
+            if file_tasks:
+                print(f"  Processed {len(file_tasks)}/{len(file_tasks)} files.    ")
+        #            else:
+        #                reports.extend(pool.map(_process_file, file_tasks))
         if source_tasks:
             reports.extend(pool.map(_process_source_tuple, source_tasks))
     reports.sort(key=lambda r: r.path)
@@ -436,12 +434,13 @@ def run(
             if not report.unused or report.error:
                 continue
             if "::" in report.path:
-                if verbose:
-                    print(f"  skip autofix for archive member: {report.path}")
+                print(f"  skip autofix for archive member: {report.path}")
                 continue
             p = Path(report.path)
+            #            bak=p.with_name(p.name+'.bak')
             try:
                 source = p.read_text(encoding="utf-8", errors="replace")
+            #                bak.write_text(source,encoding='utf-8')
             except OSError as exc:
                 print(f"  cannot read {p}: {exc}", file=sys.stderr)
                 continue
@@ -462,8 +461,7 @@ def run(
                 continue
             p.write_text(new_source, encoding="utf-8")
             fixed_count += 1
-            if verbose:
-                print(f"  {_coloured('fixed', GREEN, use_colour)} {p}  (backup → {bak})")
+            print(f"  {_coloured('fixed', GREEN, use_colour)} {p})")
         action = "would fix" if dry_run else "fixed"
         print(f"\n{action.capitalize()} {fixed_count} file(s).")
     elif dry_run and total == 0:
@@ -518,6 +516,7 @@ Examples:
     )
     parser.add_argument(
         "--ignore-init",
+        default=True,
         action="store_true",
         help="Ignore __init__.py files (treat imports as used)",
     )
@@ -529,7 +528,7 @@ def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
     paths = [Path(p).resolve() for p in args.paths]
-    valid_paths = []
+    valid_paths: list = []
     for p in paths:
         if p.exists():
             valid_paths.append(p)
@@ -545,10 +544,10 @@ def main() -> None:
     sys.exit(
         run(
             paths=valid_paths,
-            workers=max(1, args.workers),
+            workers=6,
             autofix=args.autofix,
             dry_run=args.dry_run,
-            verbose=args.verbose,
+            verbose=True,
             exclude=args.exclude,
         )
     )

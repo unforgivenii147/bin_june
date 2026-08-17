@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/python
+#!/data/data/com.termux/files/home/.local/bin/python
 """
 Folderize images based on face detection using multiprocessing (Termux version).
 Images without human faces are moved to 'noface' folder.
