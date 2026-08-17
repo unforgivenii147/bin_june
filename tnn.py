@@ -1,12 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import sys
 from pathlib import Path
-
 from dh import cprint, get_nobinary, mpf3
-
-
 def process_file(path: str | Path) -> None:
     path = Path(path)
     content = path.read_text(encoding="utf-8")
@@ -16,8 +12,6 @@ def process_file(path: str | Path) -> None:
         return
     path.write_text(new_content, encoding="utf-8")
     cprint(f"{path.name} (updated)", "cyan")
-
-
 def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -35,7 +29,5 @@ def main() -> None:
         process_file(files[0])
         sys.exit(1)
     mpf3(process_file, files)
-
-
 if __name__ == "__main__":
     sys.exit(main())

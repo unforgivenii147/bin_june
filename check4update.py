@@ -3,9 +3,7 @@
 Check installed packages for available updates using parallel processing.
 Saves upgradable packages to upgradable.txt
 """
-
 from __future__ import annotations
-
 import json
 import subprocess
 import sys
@@ -13,8 +11,6 @@ import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Dict, List, Tuple
-
-
 def get_installed_packages(site_dir: Path) -> List[Dict[str, str]]:
     packages = []
     try:
@@ -30,8 +26,6 @@ def get_installed_packages(site_dir: Path) -> List[Dict[str, str]]:
     except json.JSONDecodeError as e:
         print(f"Error parsing package list: {e}")
     return packages
-
-
 def check_package_update(package_info: Dict[str, str]) -> Tuple[str, str, str, bool]:
     package_name = package_info["name"]
     current_version = package_info["version"]
@@ -61,8 +55,6 @@ def check_package_update(package_info: Dict[str, str]) -> Tuple[str, str, str, b
     except Exception as e:
         print(f"Error checking {package_name}: {e}")
     return (package_name, current_version, current_version, False)
-
-
 def check_updates_parallel(packages: List[Dict[str, str]], max_workers: int = 8) -> List[Tuple[str, str, str]]:
     upgradable = []
     print(f"Checking {len(packages)} packages for updates using {max_workers} workers...")
@@ -83,8 +75,6 @@ def check_updates_parallel(packages: List[Dict[str, str]], max_workers: int = 8)
             except Exception as e:
                 print(f"[{completed}/{len(packages)}] Error processing {package_name}: {e}")
     return upgradable
-
-
 def save_upgradable_packages(upgradable: List[Tuple[str, str, str]], output_file: Path):
     try:
         with open(output_file, "w") as f:
@@ -97,8 +87,6 @@ def save_upgradable_packages(upgradable: List[Tuple[str, str, str]], output_file
         print(f"Found {len(upgradable)} packages with available updates")
     except IOError as e:
         print(f"Error saving results to {output_file}: {e}")
-
-
 def find_site_packages() -> List[Path]:
     site_dirs = []
     result = subprocess.run(
@@ -121,8 +109,6 @@ def find_site_packages() -> List[Path]:
     if user_site.exists() and user_site not in site_dirs:
         site_dirs.append(user_site)
     return site_dirs
-
-
 def main():
     print("Python Package Update Checker")
     print("-" * 42)
@@ -161,7 +147,5 @@ def main():
         print("\nPackages with available updates:")
         for name, current_ver, latest_ver in upgradable:
             print(f"  {name}: {current_ver} -> {latest_ver}")
-
-
 if __name__ == "__main__":
     main()

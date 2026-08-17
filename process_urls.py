@@ -1,12 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import re
 import sys
 from pathlib import Path
 from urllib.parse import urlparse
-
-
 def normalize_url(u: str) -> str:
     u = u.strip()
     if not u:
@@ -24,8 +21,6 @@ def normalize_url(u: str) -> str:
     except ValueError:
         print(f"Warning: Could not parse URL: {u}", file=sys.stderr)
         return ""
-
-
 def get_canonical_root(normalized_url: str) -> str:
     try:
         p = urlparse(normalized_url)
@@ -45,8 +40,6 @@ def get_canonical_root(normalized_url: str) -> str:
     except ValueError:
         print(f"Warning: Could not parse URL for root: {normalized_url}", file=sys.stderr)
         return normalized_url
-
-
 def prune_subaddresses(urls: list[str]) -> list[str]:
     if not urls:
         return []
@@ -86,8 +79,6 @@ def prune_subaddresses(urls: list[str]) -> list[str]:
             final_urls.append(cand_url)
     final_urls.sort()
     return final_urls
-
-
 def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: python script_name.py <input_file>")
@@ -104,7 +95,5 @@ def main() -> None:
     except Exception as e:
         print(f"An error occurred: {e}", file=sys.stderr)
         sys.exit(1)
-
-
 if __name__ == "__main__":
     main()

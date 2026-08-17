@@ -1,17 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import sys
 import zipfile
 from pathlib import Path
-
 from wheel.archive import wheel_load
 from wheel.wheelfile import WheelFile
-
 UNPACKED_WHEELS_SOURCE_DIR = Path.cwd()
 WHEELS_OUTPUT_DIR = None
-
-
 def find_dist_info_dir(pkg_dir: Path) -> Path | None:
     candidates = [p for p in pkg_dir.iterdir() if p.is_dir() and p.name.endswith(".dist-info")]
     if not candidates:
@@ -22,8 +17,6 @@ def find_dist_info_dir(pkg_dir: Path) -> Path | None:
             file=sys.stderr,
         )
     return candidates[0]
-
-
 def create_wheel_for_dir(pkg_dir: Path, dest_dir: Path | None = None) -> None:
     dist_info = find_dist_info_dir(pkg_dir)
     if dist_info is None:
@@ -53,8 +46,6 @@ def create_wheel_for_dir(pkg_dir: Path, dest_dir: Path | None = None) -> None:
         print(f"Error creating wheel for {pkg_dir}: {e}")
         if output_path.exists():
             output_path.unlink()
-
-
 def main() -> None:
     if WHEELS_OUTPUT_DIR:
         WHEELS_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -70,8 +61,6 @@ def main() -> None:
                 except Exception as e:
                     print(f"Critical error while processing {entry}: {e}", file=sys.stderr)
     print(f"\nDone. Processed {processed_count} directories.")
-
-
 if __name__ == "__main__":
     try:
         pass

@@ -1,13 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import os
 import re
 from pathlib import Path
-
 static_dir = "/sdcard/_static"
-
-
 def fix_links(file_path: Path) -> None:
     content: str = file_path.read_text(encoding="utf-8", errors="replace")
     links = re.findall(r"href=[\'\"]?([^\'\" >]+)", content)
@@ -19,15 +15,11 @@ def fix_links(file_path: Path) -> None:
     backup_path = file_path.with_suffix(".bak")
     Path(file_path).replace(backup_path)
     Path(file_path).write_text(content, encoding="utf-8")
-
-
 def main() -> None:
     for root, _dirs, files in os.walk("."):
         for file in files:
             if file.endswith((".md", ".html")):
                 file_path = Path(root) / file
                 fix_links(file_path)
-
-
 if __name__ == "__main__":
     main()

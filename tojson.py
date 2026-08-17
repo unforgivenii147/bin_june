@@ -1,11 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import json
 import sys
 from pathlib import Path
-
-
 def file_to_json(filepath: Path, delimiter: str):
     result = {}
     try:
@@ -32,8 +29,6 @@ def file_to_json(filepath: Path, delimiter: str):
         print(f"Error reading file: {e}", file=sys.stderr)
         sys.exit(1)
     return result
-
-
 if __name__ == "__main__":
     if len(sys.argv) != 3:
         print(f"Usage: python {sys.argv[0]} <filename> <delimiter>", file=sys.stderr)

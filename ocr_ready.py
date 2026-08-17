@@ -1,25 +1,19 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import multiprocessing
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-
 import numpy as np
 import pytesseract
-
 SUPPORTED_EXT = {".jpg", ".jpeg", ".png", ".tiff", ".bmp", ".webp"}
 BASE_DIR = Path.cwd()
 try:
     import cv2
-
     HAS_CV2 = True
 except ImportError:
     HAS_CV2 = False
     from PIL import Image, ImageEnhance, ImageFilter
-
-
 def deskew(image):
     if HAS_CV2:
         coords = np.column_stack(np.where(image > 0))
@@ -33,8 +27,6 @@ def deskew(image):
         return cv2.warpAffine(image, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
     else:
         return image
-
-
 def preprocess_image_cv2(img_path: Path):
     img = cv2.imread(str(img_path))
     if img is None:
@@ -48,8 +40,6 @@ def preprocess_image_cv2(img_path: Path):
     kernel = np.ones((1, 1), np.uint8)
     cleaned = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
     return deskew(cleaned)
-
-
 def preprocess_image_pillow(img_path: Path):
     try:
         img = Image.open(str(img_path))
@@ -65,19 +55,13 @@ def preprocess_image_pillow(img_path: Path):
         return img
     except Exception:
         return None
-
-
 def preprocess_image(img_path: Path):
     if HAS_CV2:
         return preprocess_image_cv2(img_path)
     else:
         return preprocess_image_pillow(img_path)
-
-
 def should_skip(path: Path) -> bool:
     return path.suffix.lower() not in SUPPORTED_EXT
-
-
 def save_processed_image(img, img_path: Path):
     if HAS_CV2 and isinstance(img, np.ndarray):
         cv2.imwrite(str(img_path), img)
@@ -85,8 +69,6 @@ def save_processed_image(img, img_path: Path):
         img.save(str(img_path))
     else:
         raise ValueError("Unsupported image format")
-
-
 def process_single_image(image_path: Path) -> dict:
     result = {"path": str(image_path), "success": False, "error": None, "size_before": 0, "size_after": 0}
     try:
@@ -107,8 +89,6 @@ def process_single_image(image_path: Path) -> dict:
     except Exception as e:
         result["error"] = str(e)
     return result
-
-
 def get_image_files():
     image_files = []
     for path in BASE_DIR.rglob("*"):
@@ -116,8 +96,6 @@ def get_image_files():
             continue
         image_files.append(path)
     return image_files
-
-
 def process() -> None:
     if not HAS_CV2:
         print("⚠️ OpenCV not found, using Pillow as fallback (limited functionality)")
@@ -165,8 +143,6 @@ def process() -> None:
         print(f"   📦 Total size after: {total_after / (1024 * 1024):.2f} MB")
         print(f"   📉 Size reduction: {size_reduction:.1f}%")
     print("-" * 42)
-
-
 if __name__ == "__main__":
     print("⚠️  WARNING: This script will MODIFY original image files in-place!")
     print("⚠️  NO BACKUPS will be created.")

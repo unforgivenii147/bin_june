@@ -1,15 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import argparse
 import sys
 from pathlib import Path
-
 from dh import unique_path
-
 SKIP_DIRS = {".git"}
-
-
 def remove_string_from_names(
     string_to_remove: str, dry_run: bool = False, recursive: bool = False, current_path: Path = Path.cwd()
 ) -> int:
@@ -42,8 +37,6 @@ def remove_string_from_names(
         if recursive and item.is_dir():
             renamed_count += remove_string_from_names(string_to_remove, dry_run, recursive, item)
     return renamed_count
-
-
 def replace_string_in_names(
     str1: str, str2: str, dry_run: bool = False, recursive: bool = False, current_path: Path = Path.cwd()
 ) -> int:
@@ -76,15 +69,11 @@ def replace_string_in_names(
         if recursive and item.is_dir():
             renamed_count += replace_string_in_names(str1, str2, dry_run, recursive, item)
     return renamed_count
-
-
 def should_skip(path):
     path = Path(path)
     if path.is_symlink():
         return True
     return any(part in SKIP_DIRS for part in path.parts)
-
-
 def rename_by_template(
     template: str, dry_run: bool = False, recursive: bool = False, current_path: Path = Path.cwd()
 ) -> int:
@@ -132,8 +121,6 @@ def rename_by_template(
         except PermissionError:
             print(f"Permission denied accessing subdirectory in {current_path}")
     return renamed_count
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Rename files and directories using pathlib",
@@ -175,7 +162,5 @@ def main() -> None:
     except Exception as e:
         print(f"An error occurred: {e}")
         sys.exit(1)
-
-
 if __name__ == "__main__":
     main()

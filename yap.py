@@ -1,18 +1,13 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import argparse
 import copy
 import sys
 from pathlib import Path
 from time import perf_counter as pff
-
 from dh import cprint, format_time, fsz, get_pyfiles, mpf3
-
 MODE = "yapf"
 CHUNK_SIZE = 1024 * 1024
-
-
 def process_file(path: str | Path, mode: str = MODE) -> bool:
     stime = pff()
     path = Path(path)
@@ -24,31 +19,25 @@ def process_file(path: str | Path, mode: str = MODE) -> bool:
         match mode:
             case "autoflake":
                 from autoflake import fix_code as fix_with_autoflake
-
                 code = fix_with_autoflake(original_code, remove_all_unused_imports=True)
             case "isort":
                 from isort import code as fix_with_isort
-
                 code = fix_with_isort(original_code)
             case "black":
                 from black import Mode as _Mode
                 from black import TargetVersion as _tv
                 from black import format_str
-
                 code = format_str(original_code, mode=_Mode(target_versions={_tv.PY310, _tv.PY313}, line_length=120))
             case "autopep":
                 from autopep8 import fix_code as fix_with_autopep
-
                 code = fix_with_autopep(original_code, options={"aggressive": 2})
             case "yapf":
                 from yapf.yapflib.yapf_api import FormatCode as fix_with_yapf
-
                 code, _ = fix_with_yapf(original_code)
             case _:
                 from black import Mode as _Mode
                 from black import TargetVersion as _tv
                 from black import format_str
-
                 code = format_str(original_code, mode=_Mode(target_versions={_tv.PY310, _tv.PY313}, line_length=120))
         after = len(code)
         dsz = abs(before - after)
@@ -56,7 +45,6 @@ def process_file(path: str | Path, mode: str = MODE) -> bool:
         if dsz:
             path.write_text(code, encoding="utf-8")
             ratio = dsz / before * 100
-
             cprint(f"({format_time(etime - stime)}) | {fsz(dsz)} | {ratio:.1f}%", "cyan")
             return True
         else:
@@ -67,8 +55,6 @@ def process_file(path: str | Path, mode: str = MODE) -> bool:
         cprint("[ERROR]", "red", end=" ")
         print(f"{path.name}: {e}")
         return False
-
-
 def main() -> None:
     global MODE
     p = argparse.ArgumentParser(description="Fast Python API-based formatter (Lazy Loading)")
@@ -93,7 +79,5 @@ def main() -> None:
     else:
         MODE = "black"
     mpf3(process_file, files)
-
-
 if __name__ == "__main__":
     sys.exit(main())

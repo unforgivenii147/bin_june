@@ -1,12 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import json
 import re
 import sys
 from pathlib import Path
-
-
 def replace_translations(input_file):
     json_file = input_file.with_suffix(".json")
     with open(json_file, "r", encoding="utf-8") as f:
@@ -22,8 +19,6 @@ def replace_translations(input_file):
     with open(input_file, "w", encoding="utf-8") as f:
         f.write(modified_content)
     print(f"Successfully updated {input_file}")
-
-
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python script.py <input_file>")

@@ -1,12 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Convert .info files to .md using info command and remove originals."""
-
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from re import sub
 from subprocess import PIPE, run
-
-
 def convert_info_file(info_path: Path) -> None:
     stem = info_path.name
     base_name = sub(r"\.info(-\d+)?$", "", stem)
@@ -20,14 +17,10 @@ def convert_info_file(info_path: Path) -> None:
     if result.returncode == 0:
         md_path.write_text(result.stdout)
         info_path.unlink()
-
-
 def main():
     cwd = Path.cwd()
     info_files = list(cwd.glob("*.info*"))
     with ThreadPoolExecutor(max_workers=4) as executor:
         executor.map(convert_info_file, info_files)
-
-
 if __name__ == "__main__":
     main()

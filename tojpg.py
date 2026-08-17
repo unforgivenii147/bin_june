@@ -1,21 +1,15 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import sys
 from pathlib import Path
-
 try:
     import cv2
     import numpy as np
-
     USE_CV2 = True
 except ImportError:
     from PIL import Image
-
     USE_CV2 = False
 SUPPORTED_FORMATS = {".png", ".bmp", ".tiff", ".webp", ".ico", ".jpg", ".jpeg"}
-
-
 def convert_to_jpg(file_path: str) -> bool:
     path = Path(file_path)
     if not path.is_file() or path.suffix.lower() not in SUPPORTED_FORMATS:
@@ -64,8 +58,6 @@ def convert_to_jpg(file_path: str) -> bool:
     except Exception as e:
         print(f"Error converting '{path.name}': {e}")
         return False
-
-
 def main():
     if len(sys.argv) != 2:
         print(f"Usage: {sys.argv[0]} <image_file>")
@@ -74,7 +66,5 @@ def main():
         sys.exit(0)
     else:
         sys.exit(1)
-
-
 if __name__ == "__main__":
     main()

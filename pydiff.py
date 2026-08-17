@@ -1,17 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-
 from dh import cprint, read_lines_mmap
-
-
 def count_lines(path: Path) -> int:
     return path.read_bytes().count(b"\n") + 1
-
-
 def read_lines(path: Path, use_mmap: bool = False, ke: bool = True) -> list[str]:
     if use_mmap:
         return read_lines_mmap(path, ke)
@@ -21,20 +15,14 @@ def read_lines(path: Path, use_mmap: bool = False, ke: bool = True) -> list[str]
     if lines and not lines[-1].endswith(("\n", "\r\n", "\r")) and data.endswith(b"\n"):
         lines.append("")
     return lines
-
-
 def read_file_task(path: Path, use_mmap: bool) -> tuple[Path, list[str]]:
     lines = read_lines(path, use_mmap=use_mmap)
     return path, lines
-
-
 def filter_diff_chunk(chunk: list[str], exclude_set: frozenset[str], mode: str) -> list[str]:
     if mode == "only_in_first":
         return [p for p in chunk if p not in exclude_set]
     else:
         return [p for p in chunk if p in exclude_set]
-
-
 def process_files_parallel(path1: Path, path2: Path, num_workers: int = 2) -> None:
     lines1_count = count_lines(path1)
     lines2_count = count_lines(path2)
@@ -71,8 +59,6 @@ def process_files_parallel(path1: Path, path2: Path, num_workers: int = 2) -> No
         f"common lines: {common_count}\nonly in {path1.name}: {len(only_in_first)}\nonly in {path2.name}: {len(only_in_second)}",
         "blue",
     )
-
-
 if __name__ == "__main__":
     f1 = Path(sys.argv[1])
     f2 = Path(sys.argv[2])

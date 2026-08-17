@@ -1,20 +1,16 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Convert regex strings to raw strings safely."""
-
 import argparse
 import ast
 from concurrent.futures import ThreadPoolExecutor
 from difflib import unified_diff
 from pathlib import Path
-
-
 class RegexRawConverter(ast.NodeTransformer):
     def __init__(self, source_lines, source_text):
         self.source_lines = source_lines
         self.source_text = source_text
         self.modified = False
         self.changes = []
-
     def visit_Call(self, node):
         if (
             isinstance(node.func, ast.Attribute)
@@ -30,8 +26,6 @@ class RegexRawConverter(ast.NodeTransformer):
                         self.modified = True
                         self.changes.append({"line": const.lineno, "col": const.col_offset, "value": const.value})
         return self.generic_visit(node)
-
-
 def convert_to_raw_string(source_text: str) -> str:
     lines = source_text.split("\n")
     try:
@@ -58,8 +52,6 @@ def convert_to_raw_string(source_text: str) -> str:
                 line = line.replace(pattern, raw_pattern, 1)
                 lines[line_idx] = line
     return "\n".join(lines)
-
-
 def process_file(file_path: Path, autofix: bool = False) -> dict:
     try:
         original = file_path.read_text(encoding="utf-8")
@@ -76,8 +68,6 @@ def process_file(file_path: Path, autofix: bool = False) -> dict:
         return {"status": "unchanged", "path": file_path}
     except (SyntaxError, UnicodeDecodeError) as e:
         return {"status": "error", "path": file_path, "error": str(e)}
-
-
 def main():
     parser = argparse.ArgumentParser(description="Convert regex strings to raw strings")
     parser.add_argument("-a", "--autofix", action="store_true", help="Apply changes")
@@ -102,7 +92,5 @@ def main():
     )
     if results["diff"] > 0 and not args.autofix:
         print("\n💡 Run with -a/--autofix to apply changes")
-
-
 if __name__ == "__main__":
     main()

@@ -1,34 +1,22 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 from pathlib import Path
-
 from dh import get_dirs, get_files, safe_delete
-
-
 def compress_folder_to_tar(folder_path: Path, output_base_name: str, format: str = "tar") -> bool:
     print(f"Simulating: Compressing folder '{folder_path}' to '{output_base_name}.tar'...")
     (folder_path.parent / f"{output_base_name}.tar").touch()
     print(f"Simulating: Created '{output_base_name}.tar'")
     return True
-
-
 def atomic_write(data: bytes, final_path: Path) -> bool:
     print(f"Simulating: Atomic write to {final_path}")
     return True
-
-
 def compress_file(path: Path) -> bool:
     print(f"Simulating: Compressing file '{path}' with XZ...")
     (path.parent / f"{path.stem}.xz").touch()
     print(f"Simulating: Created '{path.stem}.xz'")
     return True
-
-
 def should_compress(path: Path) -> bool:
     return True
-
-
 def main() -> None:
     cwd = Path()
     dirs_to_process = get_dirs(cwd)
@@ -62,7 +50,5 @@ def main() -> None:
                     f"Error: Failed to compress '{tar_file_path.name}' with XZ. Original tar file will NOT be deleted."
                 )
     print("--- .tar File Compression Complete ---")
-
-
 if __name__ == "__main__":
     main()

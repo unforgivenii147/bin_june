@@ -3,22 +3,16 @@
 Live WiFi/Cellular Signal Strength Monitor for Termux
 Displays real-time signal meters and connection info
 """
-
 from __future__ import annotations
-
 import os
 import re
 import subprocess
 import time
 from datetime import datetime
-
 from rich.align import Align
 from rich.console import Console
 from rich.panel import Panel
-
 console = Console()
-
-
 class SignalMonitor:
     def __init__(self) -> None:
         self.wifi_strength = None
@@ -26,7 +20,6 @@ class SignalMonitor:
         self.wifi_ssid = None
         self.cellular_status = None
         self.is_airplane_mode = False
-
     def get_wifi_signal(self):
         try:
             result = subprocess.run(["dumpsys", "wifi"], capture_output=True, text=True, timeout=2)
@@ -40,7 +33,6 @@ class SignalMonitor:
         except Exception:
             self.wifi_strength = None
             return None
-
     def get_cellular_signal(self):
         try:
             result = subprocess.run(["dumpsys", "telephony.registry"], capture_output=True, text=True, timeout=2)
@@ -65,7 +57,6 @@ class SignalMonitor:
         except Exception:
             self.cellular_strength = None
             return None
-
     def strength_to_bars(self, strength_db, max_db=-30, min_db=-120) -> tuple[str, int]:
         if strength_db is None:
             return "N/A", 0
@@ -74,7 +65,6 @@ class SignalMonitor:
         bars = int(percentage / 100 * 5)
         bars = max(0, min(5, bars))
         return f"{'█' * bars}{'░' * (5 - bars)}", int(percentage)
-
     def get_airplane_mode(self) -> bool:
         try:
             result = subprocess.run(
@@ -87,12 +77,10 @@ class SignalMonitor:
             return self.is_airplane_mode
         except:
             return False
-
     def update(self) -> None:
         self.get_wifi_signal()
         self.get_cellular_signal()
         self.get_airplane_mode()
-
     def render(self) -> None:
         os.system("clear")
         header = Panel(Align.center("[bold cyan]📡 SIGNAL STRENGTH MONITOR[/bold cyan]"), border_style="cyan")
@@ -117,8 +105,6 @@ class SignalMonitor:
             console.print("  [dim]No cellular data available[/dim]\n")
         console.print(f"[dim]Updated: {datetime.now().strftime('%H:%M:%S')}[/dim]")
         console.print("[dim]Press Ctrl+C to exit[/dim]")
-
-
 def main() -> None:
     monitor = SignalMonitor()
     try:
@@ -129,7 +115,5 @@ def main() -> None:
     except KeyboardInterrupt:
         console.print("\n[bold yellow]Exiting...[/bold yellow]")
         os.system("clear")
-
-
 if __name__ == "__main__":
     main()

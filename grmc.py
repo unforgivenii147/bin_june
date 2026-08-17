@@ -1,18 +1,13 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import argparse
 import ast
 import io
 import tokenize
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
-
 from loguru import logger
-
 SKIP_DIRS = {".git", "__pycache__", ".ruff_cache", ".pytest_cache"}
-
-
 def get_removal_zones(source: str):
     tree = ast.parse(source)
     zones = []
@@ -43,8 +38,6 @@ def get_removal_zones(source: str):
                 continue
             zones.append((start_line, start_col, end_line, end_col))
     return zones, replacements
-
-
 def apply_cleaning(source: str, zones, replacements):
     lines = source.splitlines(keepends=True)
     for start_l, start_c, end_l, end_c in zones:
@@ -58,8 +51,6 @@ def apply_cleaning(source: str, zones, replacements):
     for (line_idx, col_idx), text in replacements:
         lines[line_idx] = lines[line_idx][:col_idx] + text + lines[line_idx][col_idx:]
     return "".join(lines)
-
-
 def is_python_script(path: Path) -> bool:
     if path.suffix == ".py":
         return True
@@ -69,8 +60,6 @@ def is_python_script(path: Path) -> bool:
             return first_line.startswith("#!") and "python" in first_line.lower()
     except Exception:
         return False
-
-
 def process_file(args):
     path, root = args
     try:
@@ -88,8 +77,6 @@ def process_file(args):
     except Exception as e:
         logger.error(f"Failed {path}: {e}")
         return 0
-
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("targets", nargs="*", type=str)
@@ -114,7 +101,5 @@ def main():
         results = list(executor.map(process_file, files_to_process))
     total_removed = sum(results)
     logger.success(f"Cleanup complete. Total elements removed: {total_removed}")
-
-
 if __name__ == "__main__":
     main()

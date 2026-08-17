@@ -1,16 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import multiprocessing as mp
 import re
 import sys
 from pathlib import Path
-
 from dh import get_nobinary
-
 CHUNK_SIZE = 1024 * 1024
-
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -25,8 +20,6 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
-
 HTML_ENTITIES = {
     "&lt;": "<",
     "&gt;": ">",
@@ -53,15 +46,10 @@ HTML_ENTITIES = {
     "&rdquo;": '"',
 }
 ENTITY_PATTERN = re.compile("|".join((re.escape(k) for k in HTML_ENTITIES)))
-
-
 def replace_entities(text: str) -> str:
     def replacer(match) -> str:
         return HTML_ENTITIES[match.group(0)]
-
     return ENTITY_PATTERN.sub(replacer, text)
-
-
 def process_file(filepath: Path) -> tuple[Path, bool, str]:
     try:
         with open(filepath, encoding="utf-8") as f:
@@ -74,8 +62,6 @@ def process_file(filepath: Path) -> tuple[Path, bool, str]:
         return (filepath, changed, "")
     except Exception as e:
         return (filepath, False, str(e))
-
-
 def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -104,7 +90,5 @@ def main() -> None:
             print(f"  - {f.relative_to(cwd)}: {err}")
     print(f"   Modified: {len(changed_files)}")
     print(f"   Errors: {len(error_files)}")
-
-
 if __name__ == "__main__":
     main()

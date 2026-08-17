@@ -1,12 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import sys
 from pathlib import Path
-
 import PyPDF2
-
-
 def extract_text_from_pdf(pdf_filename: str):
     with Path(pdf_filename).open("rb") as file:
         pdf_reader = PyPDF2.PdfReader(file)
@@ -15,12 +11,8 @@ def extract_text_from_pdf(pdf_filename: str):
             page = pdf_reader.pages[page_num]
             extracted_text += page.extract_text()
     return extracted_text
-
-
 def save_text_to_file(text, output_filename: str) -> None:
     Path(output_filename).write_text(text, encoding="utf-8")
-
-
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python extract_pdf_text.py <pdf_filename>")

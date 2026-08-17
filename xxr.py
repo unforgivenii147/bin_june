@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import argparse
 import bz2
 import gzip
@@ -13,13 +12,11 @@ import zipfile
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-
 import brotlicffi as brotli
 import py7zr
 import zstandard as zstd
 from dh import cprint, fsz, gsz, mpf3
 from loguru import logger
-
 SUPPORTED_EXTS = {
     ".tar",
     ".tar.xz",
@@ -39,8 +36,6 @@ SUPPORTED_EXTS = {
 }
 COMPRESS_MODE = "zstd"
 CHUNK_SIZE = 1024 * 1024
-
-
 @dataclass
 class Result:
     ok: bool
@@ -49,20 +44,14 @@ class Result:
     error: str | None = None
     original_size: int = 0
     new_size: int = 0
-
-
 def has_compressed_suffix(path: Path) -> bool:
     name = path.name.lower()
     return any((name.endswith(ext) for ext in SUPPORTED_EXTS))
-
-
 def output_name_for_file(path: Path, mode: str) -> Path:
     ext_map = {"xz": ".xz", "gz": ".gz", "brotli": ".br", "zstd": ".zst", "7z": ".7z", "zip": ".zip"}
     if mode not in ext_map:
         raise ValueError(f"Unsupported mode: {mode}")
     return path.with_name(path.name + ext_map[mode])
-
-
 def output_name_for_dir(dir_path: Path, mode: str) -> Path:
     ext_map = {
         "xz": ".tar.xz",
@@ -75,13 +64,9 @@ def output_name_for_dir(dir_path: Path, mode: str) -> Path:
     if mode not in ext_map:
         raise ValueError(f"Unsupported mode: {mode}")
     return dir_path.parent / f"{dir_path.name}{ext_map[mode]}"
-
-
 def copy_chunks(src_fd, dst_fd, chunk_size: int = 32768) -> None:
     while chunk := src_fd.read(chunk_size):
         dst_fd.write(chunk)
-
-
 def compress_streaming(src: Path, dst: Path, compress_func: Callable, is_dir: bool = False) -> None:
     temp_path = dst.with_suffix(".tmp")
     try:
@@ -99,23 +84,15 @@ def compress_streaming(src: Path, dst: Path, compress_func: Callable, is_dir: bo
         if temp_path.exists():
             temp_path.unlink()
         raise e
-
-
 def compress_file_xz(src: Path, dst: Path) -> None:
     with src.open("rb") as fin, lzma.open(dst, "wb", preset=9 | lzma.PRESET_EXTREME) as fout:
         copy_chunks(fin, fout)
-
-
 def compress_file_gz(src: Path, dst: Path) -> None:
     with src.open("rb") as fin, gzip.open(dst, "wb", compresslevel=9) as fout:
         copy_chunks(fin, fout)
-
-
 def compress_file_bz2(src: Path, dst: Path) -> None:
     with src.open("rb") as fin, bz2.open(dst, "wb", compresslevel=9) as fout:
         copy_chunks(fin, fout)
-
-
 def compress_file_brotli(src: Path, dst: Path) -> None:
     if brotli is None:
         raise RuntimeError("brotlicffi is not installed")
@@ -126,28 +103,20 @@ def compress_file_brotli(src: Path, dst: Path) -> None:
             if compressed:
                 fout.write(compressed)
         fout.write(compressor.finish())
-
-
 def compress_file_zstd(src: Path, dst: Path) -> None:
     if zstd is None:
         raise RuntimeError("zstandard is not installed")
     cctx = zstd.ZstdCompressor(level=22)
     with src.open("rb") as fin, dst.open("wb") as fout, cctx.stream_writer(fout) as compressor:
         copy_chunks(fin, compressor)
-
-
 def compress_file_zip(src: Path, dst: Path) -> None:
     with zipfile.ZipFile(dst, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
         zf.write(src, arcname=src.name)
-
-
 def compress_file_7z(src: Path, dst: Path) -> None:
     if py7zr is None:
         raise RuntimeError("py7zr is not installed")
     with py7zr.SevenZipFile(dst, "w", filters=[{"id": py7zr.FILTER_LZMA2, "preset": 9}]) as zf:
         zf.write(src, arcname=src.name)
-
-
 def compress_one(path_str: str, mode: str, is_dir: bool) -> Result:
     src = Path(path_str)
     original_size = gsz(src)
@@ -180,8 +149,6 @@ def compress_one(path_str: str, mode: str, is_dir: bool) -> Result:
         logger.exception(f"Failed to compress {src}")
         result.error = str(e)
         return result
-
-
 def decompress_stream_tar(src: Path, decompress_func: Callable, dst_dir: Path, extension: str) -> Path:
     extracted_path = dst_dir / src.name[: -len(extension)]
     with tempfile.NamedTemporaryFile(delete=False, suffix=".tar") as tf:
@@ -194,8 +161,6 @@ def decompress_stream_tar(src: Path, decompress_func: Callable, dst_dir: Path, e
     finally:
         tar_temp.unlink()
     return extracted_path
-
-
 def decompress_one(path_str: str) -> Result:
     src = Path(path_str)
     original_size = gsz(src)
@@ -204,30 +169,24 @@ def decompress_one(path_str: str) -> Result:
     dst_dir = src.parent
     try:
         if name.endswith((".tar.xz", ".tar.gz", ".tar.bz2", ".tar.br", ".tar.zst")):
-
             def copy_via_lzma(fin, fout):
                 with lzma.open(fin, "rb") as lzma_fin:
                     copy_chunks(lzma_fin, fout)
-
             def copy_via_gzip(fin, fout):
                 with gzip.open(fin, "rb") as gz_fin:
                     copy_chunks(gz_fin, fout)
-
             def copy_via_bz2(fin, fout):
                 with bz2.open(fin, "rb") as bz2_fin:
                     copy_chunks(bz2_fin, fout)
-
             def copy_via_brotli(fin, fout):
                 decompressor = brotli.Decompressor()
                 while chunk := fin.read(CHUNK_SIZE):
                     fout.write(decompressor.process(chunk))
                 fout.write(decompressor.finish())
-
             def copy_via_zstd(fin, fout):
                 dctx = zstd.ZstdDecompressor()
                 with dctx.stream_reader(fin) as reader:
                     copy_chunks(reader, fout)
-
             ext_map = {
                 ".tar.xz": (7, copy_via_lzma),
                 ".tar.gz": (6, copy_via_gzip),
@@ -281,8 +240,6 @@ def decompress_one(path_str: str) -> Result:
         logger.exception(f"Failed to decompress {src}")
         result.error = str(e)
         return result
-
-
 def decompress_brotli_file(src: Path) -> Path:
     dst = src.with_suffix("")
     decompressor = brotli.Decompressor()
@@ -291,8 +248,6 @@ def decompress_brotli_file(src: Path) -> Path:
             fout.write(decompressor.process(chunk))
         fout.write(decompressor.finish())
     return dst
-
-
 def decompress_zstd_file(src: Path) -> Path:
     dst = src.with_suffix("")
     with src.open("rb") as fin, dst.open("wb") as fout:
@@ -300,8 +255,6 @@ def decompress_zstd_file(src: Path) -> Path:
         with dctx.stream_reader(fin) as reader:
             copy_chunks(reader, fout)
     return dst
-
-
 def collect_top_level_items(base: Path) -> list[tuple[Path, bool]]:
     items = []
     for p in base.iterdir():
@@ -312,13 +265,9 @@ def collect_top_level_items(base: Path) -> list[tuple[Path, bool]]:
         elif p.is_dir() and ".git" not in p.parts and (not has_compressed_suffix(p)):
             items.append((p, True))
     return items
-
-
 def worker_func(item_tuple: tuple[Path, bool]) -> Result:
     path, is_dir = item_tuple
     return compress_one(str(path), COMPRESS_MODE, is_dir)
-
-
 def main() -> None:
     global COMPRESS_MODE
     cwd = Path.cwd()
@@ -372,7 +321,5 @@ def main() -> None:
     ratio = space_freed / before * 100 if before > 0 else 0
     print("Space freed:", end=" ")
     cprint(f"{fsz(space_freed)} | {ratio:.1f}% reduction", "cyan")
-
-
 if __name__ == "__main__":
     main()

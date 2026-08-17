@@ -3,13 +3,9 @@
 Text replacer for Python files in current directory.
 Replaces exact text matches in all .py files.
 """
-
 from __future__ import annotations
-
 import sys
 from pathlib import Path
-
-
 def replace_in_file(filepath: Path, old_text: str, new_text: str) -> bool:
     try:
         with open(filepath, encoding="utf-8") as f:
@@ -23,8 +19,6 @@ def replace_in_file(filepath: Path, old_text: str, new_text: str) -> bool:
     except Exception as e:
         print(f"Error processing {filepath}: {e}")
         return False
-
-
 def main() -> None:
     if len(sys.argv) != 3:
         print("Usage: python replacer.py <old_text> <new_text>")
@@ -53,8 +47,6 @@ def main() -> None:
             print(f"  Skipped: {py_file} (no match)")
     print("-" * 42)
     print(f"Done! Modified {modified_count} file(s).")
-
-
 if __name__ == "__main__":
     main()
 _

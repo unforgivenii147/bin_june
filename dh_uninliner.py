@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import argparse
 import ast
 import difflib
@@ -9,21 +8,14 @@ import re
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-
 DH_SOURCE_DIR = Path.home() / "isaac/pkgs/dh/src/dh"
-
-
 def _sha256(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
-
-
 def _node_raw_source(source: str, node) -> str:
     lines = source.splitlines(keepends=True)
     start = node.lineno - 1
     end = node.end_lineno
     return "".join(lines[start:end])
-
-
 def _detect_newline(lines: list[str]) -> str:
     for line in lines:
         if line.endswith("\r\n"):
@@ -31,8 +23,6 @@ def _detect_newline(lines: list[str]) -> str:
         if line.endswith("\n"):
             return "\n"
     return "\n"
-
-
 def build_dh_index(dh_dir: Path) -> dict[str, str]:
     if not dh_dir.exists():
         raise SystemExit(f"dh source directory not found: {dh_dir}")
@@ -56,8 +46,6 @@ def build_dh_index(dh_dir: Path) -> dict[str, str]:
                     continue
                 index[h] = node.name
     return index
-
-
 def _find_import_insert_point(lines: list[str]) -> int:
     pos = 0
     if lines and lines[0].startswith("#!"):
@@ -71,8 +59,6 @@ def _find_import_insert_point(lines: list[str]) -> int:
     while pos < len(lines) and lines[pos].strip().startswith("#"):
         pos += 1
     return pos
-
-
 def process_file(py_file: Path, dh_index: dict[str, str]):
     try:
         source = py_file.read_text(encoding="utf-8")
@@ -114,8 +100,6 @@ def process_file(py_file: Path, dh_index: dict[str, str]):
             import_line += nl
         new_lines.insert(insert_pos, import_line)
     return (py_file, lines, new_lines, needed)
-
-
 def main():
     parser = argparse.ArgumentParser(description="Replace inlined dh functions with proper imports.")
     parser.add_argument("-a", "--apply", action="store_true", help="write changes back to disk (default is dry-run)")
@@ -150,7 +134,5 @@ def main():
         if args.apply:
             path.write_text("".join(new_lines), encoding="utf-8")
             print(f"  -> written.")
-
-
 if __name__ == "__main__":
     main()

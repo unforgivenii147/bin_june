@@ -1,9 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 from pathlib import Path
-
-
 def main() -> None:
     count = 0
     root = Path.cwd()
@@ -13,7 +10,5 @@ def main() -> None:
             path.rmdir()
             count += 1
     print(f"total {count} empty dirs removed")
-
-
 if __name__ == "__main__":
     main()

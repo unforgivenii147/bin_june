@@ -4,9 +4,7 @@ Repack installed Python packages from system site-packages into wheel files.
 Skips pure Python packages and .pyc files, uses parallel processing.
 Updated for Python 3.12+ (no pkg_resources dependency).
 """
-
 from __future__ import annotations
-
 import argparse
 import importlib.metadata
 import logging
@@ -17,15 +15,12 @@ import sys
 import tempfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger(__name__)
-
-
 def get_site_packages_paths() -> list[Path]:
     paths = []
     for path in site.getsitepackages():
@@ -36,8 +31,6 @@ def get_site_packages_paths() -> list[Path]:
         if user_path.exists():
             paths.append(user_path)
     return paths
-
-
 def get_installed_packages() -> list[tuple[str, str]]:
     packages = []
     all_dists = list(importlib.metadata.distributions())
@@ -50,8 +43,6 @@ def get_installed_packages() -> list[tuple[str, str]]:
         except Exception as e:
             logger.warning(f"Error getting info for package: {e}")
     return packages
-
-
 def is_pure_python(package_name: str, site_path: Path) -> bool:
     package_dir = site_path / package_name
     if not package_dir.exists():
@@ -67,8 +58,6 @@ def is_pure_python(package_name: str, site_path: Path) -> bool:
             return True
     extensions = [".so", ".pyd", ".dll", ".dylib"]
     return all(not any(package_dir.rglob(f"*{ext}")) for ext in extensions)
-
-
 def get_package_path(package_name: str, site_paths: list[Path]) -> Path | None:
     for site_path in site_paths:
         pkg_path = site_path / package_name
@@ -82,8 +71,6 @@ def get_package_path(package_name: str, site_paths: list[Path]) -> Path | None:
             if item.is_dir() and item.name.lower().replace("-", "_") == package_name.lower().replace("-", "_"):
                 return item
     return None
-
-
 def repack_package(
     args_tuple: tuple[str, str, Path, list[Path]],
 ) -> tuple[str, bool, str]:
@@ -168,27 +155,18 @@ def repack_package(
                 return package_name, False, f"Error running wheel: {e!s}"
     except Exception as e:
         return package_name, False, f"Error: {e!s}"
-
-
 def get_python_tag() -> str:
     major, minor = sys.version_info[:2]
     return f"cp{major}{minor}"
-
-
 def get_abi_tag() -> str:
     major, minor = sys.version_info[:2]
     debug = "d" if sys.flags.debug else ""
     if hasattr(sys, "pypy_version_info"):
         return f"pypy{major}{minor}_pypy{'_'.join(map(str, sys.pypy_version_info[:2]))}"
     return f"cp{major}{minor}{debug}"
-
-
 def get_platform_tag() -> str:
     import distutils.util
-
     return distutils.util.get_platform().replace("-", "_").replace(".", "_")
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(description="Repack installed Python packages into wheel files")
     parser.add_argument(
@@ -284,7 +262,5 @@ def main() -> int:
         for pkg, msg in failed:
             logger.error(f"  ✗ {pkg}: {msg}")
     return 1 if failed else 0
-
-
 if __name__ == "__main__":
     sys.exit(main())

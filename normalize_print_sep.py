@@ -6,31 +6,23 @@ Usage:
     python script.py [paths...]           # Dry-run (shows what would change)
     python script.py -a [paths...]        # Autofix (modifies files)
 """
-
 from __future__ import annotations
-
 import argparse
 import re
 import sys
 from multiprocessing import Pool
 from pathlib import Path
 from typing import NamedTuple
-
-
 class ProcessResult(NamedTuple):
     file: Path
     replacements: int
     status: str
     error: str | None = None
-
-
 def normalize_separators(content: str) -> tuple[str, int]:
     pattern = r"(cprint|print)\s*\(\s*['\"](.)['\"](\s*\*\s*)(\d+)([^)]*)\)"
     replacement = "print('-'*42)"
     new_content, count = re.subn(pattern, replacement, content)
     return new_content, count
-
-
 def process_file(args: tuple[Path, bool]) -> ProcessResult:
     file_path, autofix = args
     try:
@@ -41,8 +33,6 @@ def process_file(args: tuple[Path, bool]) -> ProcessResult:
         return ProcessResult(file=file_path, replacements=replacements, status="success")
     except Exception as e:
         return ProcessResult(file=file_path, replacements=0, status="error", error=str(e))
-
-
 def find_python_files(paths: list[str]) -> list[Path]:
     if not paths:
         paths = ["."]
@@ -54,8 +44,6 @@ def find_python_files(paths: list[str]) -> list[Path]:
         elif path.is_dir():
             all_files.update(path.resolve().rglob("*.py"))
     return sorted(all_files)
-
-
 def report_stats(results: list[ProcessResult], autofix: bool) -> None:
     total_files = len(results)
     total_replacements = sum(r.replacements for r in results)
@@ -79,8 +67,6 @@ def report_stats(results: list[ProcessResult], autofix: bool) -> None:
     print(f"Errors:             {total_files - success_count}")
     if not autofix and modified_count > 0:
         print(f"\n💡 Run with --autofix (or -a) to apply {total_replacements} change(s)")
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Normalize print separators in Python files.",
@@ -104,7 +90,5 @@ def main() -> None:
     report_stats(results, args.autofix)
     errors = [r for r in results if r.status == "error"]
     sys.exit(1 if errors else 0)
-
-
 if __name__ == "__main__":
     main()

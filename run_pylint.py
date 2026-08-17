@@ -1,18 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import sys
 from os import scandir as os_scandir
 from pathlib import Path
-
 from dh import runcmd
-
 CHUNK_SIZE = 1024 * 1024
-
-
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
-
     path = Path(path)
     if is_binary(path):
         return False
@@ -32,8 +26,6 @@ def is_python_file(path: str | Path) -> bool:
         except:
             return False
     return False
-
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -48,8 +40,6 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
-
 def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
     if path.is_file():
@@ -81,8 +71,6 @@ def get_pyfiles(path: str | Path) -> list[Path]:
         except (PermissionError, OSError):
             continue
     return sorted(pyfiles)
-
-
 def process_file(path) -> None:
     path = Path(path)
     cmd = [
@@ -95,8 +83,6 @@ def process_file(path) -> None:
         str(path),
     ]
     return runcmd(cmd, show_output=True)
-
-
 def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -112,7 +98,5 @@ def main() -> None:
         files = get_pyfiles(cwd)
     for f in files:
         process_file(f)
-
-
 if __name__ == "__main__":
     sys.exit(main())

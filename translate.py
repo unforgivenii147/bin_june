@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import argparse
 import logging
 import os
@@ -12,21 +11,15 @@ import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Final
-
 from deep_translator import GoogleTranslator
-
 MAX_WORKERS: Final[int] = 16
 RETRY_ATTEMPTS: Final[int] = 4
 RETRY_DELAY: Final[float] = 0.6
 MAX_CHUNK_SIZE: Final[int] = 2000
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s", datefmt="%H:%M:%S")
 logger = logging.getLogger(__name__)
-
-
 def contains_cyrillic(text: str) -> bool:
     return bool(re.search(r"[\u0400-\u04FF\u0500-\u052F\u2DE0-\u2DFF\uA640-\uA69F\u1C80-\u1C8F]", text))
-
-
 def create_chunks(lines: list[str], max_chunk_size: int) -> list[list[str]]:
     chunks: list[list[str]] = []
     current_chunk: list[str] = []
@@ -49,8 +42,6 @@ def create_chunks(lines: list[str], max_chunk_size: int) -> list[list[str]]:
     if current_chunk:
         chunks.append(current_chunk)
     return chunks
-
-
 class TranslationCache:
     def __init__(self, db_path: Path):
         self.db_path = db_path.expanduser()
@@ -70,7 +61,6 @@ class TranslationCache:
             """)
         self.conn.commit()
         self.lock = threading.Lock()
-
     def get_many(self, texts: list[str], source_lang: str, target_lang: str) -> dict[str, str]:
         if not texts:
             return {}
@@ -84,7 +74,6 @@ class TranslationCache:
             cur = self.conn.execute(query, params)
             rows = cur.fetchall()
             return {row[0]: row[1] for row in rows}
-
     def set_many(self, translations: dict[str, str], source_lang: str, target_lang: str) -> None:
         if not translations:
             return
@@ -101,7 +90,6 @@ class TranslationCache:
                 data,
             )
             self.conn.commit()
-
     def stats(self) -> dict:
         with self.lock:
             cur = self.conn.execute("SELECT COUNT(*) FROM translations")
@@ -118,13 +106,10 @@ class TranslationCache:
             pairs = cur.fetchall()
             pairs_list = [{"source": r[0], "target": r[1], "count": r[2]} for r in pairs]
             return {"total_entries": total, "last_updated": last, "pairs": pairs_list}
-
     def close(self) -> None:
         with self.lock:
             self.conn.commit()
             self.conn.close()
-
-
 def translate_chunk_factory(source_lang: str, target_lang: str):
     def translate_chunk(chunk: list[str]) -> tuple[list[str], str | None]:
         chunk_text = "\n".join(chunk)
@@ -149,10 +134,7 @@ def translate_chunk_factory(source_lang: str, target_lang: str):
                 if attempt < RETRY_ATTEMPTS:
                     time.sleep(sleep_time)
         return (chunk, None)
-
     return translate_chunk
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="Translate lines in a text file with persistent caching.")
     parser.add_argument("-i", "--input", help="Input text file (one phrase per line)")
@@ -340,7 +322,5 @@ def main() -> None:
     except Exception as e:
         logger.error("Error writing output file: %s", e)
     cache.close()
-
-
 if __name__ == "__main__":
     main()

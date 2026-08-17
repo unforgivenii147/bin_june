@@ -1,20 +1,15 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import itertools
 import time
 from pathlib import Path
-
 import cv2
 import pytesseract
 from dh import IMG_EXT
-
 OUTPUT_DIR = Path("ocr_results")
 OUTPUT_DIR.mkdir(exist_ok=True)
 OEM_OPTIONS = [0, 1, 2, 3]
 PSM_OPTIONS = [3, 4, 6, 11, 12, 13]
-
-
 def prepare_image_for_ocr(img_path: Path):
     img = cv2.imread(str(img_path))
     if img is None:
@@ -31,8 +26,6 @@ def prepare_image_for_ocr(img_path: Path):
     h, w = thresh.shape
     M = cv2.getRotationMatrix2D((w // 2, h // 2), angle, 1.0)
     return cv2.warpAffine(thresh, M, (w, h), flags=cv2.INTER_CUBIC)
-
-
 def run_tesseract_on_image(
     img, oem: int, psm: int
 ) -> tuple[bytes | dict[str, bytes | str] | str, str, float, str] | tuple[str, str, float, str]:
@@ -44,8 +37,6 @@ def run_tesseract_on_image(
         return "", config, 0.0, str(e)
     duration = time.time() - start
     return text, config, duration, ""
-
-
 def main() -> None:
     image_files = [f for f in Path().iterdir() if f.suffix.lower() in IMG_EXT]
     all_results = []
@@ -69,7 +60,5 @@ def main() -> None:
     df = pd.DataFrame(all_results)
     df.to_csv(OUTPUT_DIR / "ocr_summary.csv", index=False)
     print("\nDone. All results saved in:", OUTPUT_DIR)
-
-
 if __name__ == "__main__":
     main()

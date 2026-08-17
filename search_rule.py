@@ -1,12 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import sqlite3
 import sys
-
 DB_NAME = "/sdcard/data/ruff.db"
-
-
 def search_rule(code):
     conn = sqlite3.connect(DB_NAME)
     conn.row_factory = sqlite3.Row
@@ -30,8 +26,6 @@ def search_rule(code):
     if row["references_list"]:
         print(f"\n🔗 REFERENCES:\n{row['references_list']}")
     print("-" * 42)
-
-
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         search_rule(sys.argv[1])

@@ -1,12 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import re
 import sys
 from pathlib import Path
 from typing import Optional
-
-
 def parse_cargo_lock(filepath: str) -> dict:
     with open(filepath, "r", encoding="utf-8") as f:
         content = f.read()
@@ -26,8 +23,6 @@ def parse_cargo_lock(filepath: str) -> dict:
             if pkg:
                 packages.append(pkg)
     return {"version": lock_version, "packages": packages}
-
-
 def parse_package_block(block: str) -> Optional[dict]:
     pkg = {}
     name_match = re.search(r'^name\s*=\s*"([^"]*)"', block, re.MULTILINE)
@@ -56,8 +51,6 @@ def parse_package_block(block: str) -> Optional[dict]:
     if dependencies:
         pkg["dependencies"] = dependencies
     return pkg
-
-
 def parse_package_block_v1(block: str) -> Optional[dict]:
     pkg = {}
     name_match = re.search(r'^name\s*=\s*"([^"]*)"', block, re.MULTILINE)
@@ -74,8 +67,6 @@ def parse_package_block_v1(block: str) -> Optional[dict]:
     if dependencies:
         pkg["dependencies"] = dependencies
     return pkg
-
-
 def generate_cargo_toml(
     packages: list[dict],
     root_package_name: Optional[str] = None,
@@ -110,15 +101,11 @@ def generate_cargo_toml(
             for pkg in packages[1:]:
                 lines.append(f'{pkg["name"]} = "{pkg["version"]}"')
     return "\n".join(lines)
-
-
 def find_package(packages: list[dict], name: str) -> Optional[dict]:
     for pkg in packages:
         if pkg["name"] == name:
             return pkg
     return None
-
-
 def main():
     lock_file = "Cargo.lock"
     if len(sys.argv) > 1:
@@ -144,7 +131,5 @@ def main():
     print("\nPreview:")
     print("-" * 42)
     print(toml_content)
-
-
 if __name__ == "__main__":
     main()

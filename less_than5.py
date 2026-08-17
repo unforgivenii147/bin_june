@@ -1,19 +1,13 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import shutil
 import time
 from pathlib import Path
-
 TIME_THRESHOLD = 8 * 42
-
-
 def get_file_age(filepath: Path) -> float:
     current_time = time.time()
     file_creation_time = filepath.stat().st_ctime
     return current_time - file_creation_time
-
-
 def get_unique_filename(dest_dir: Path, filename: str) -> Path:
     dest_path = dest_dir / filename
     if not dest_path.exists():
@@ -27,8 +21,6 @@ def get_unique_filename(dest_dir: Path, filename: str) -> Path:
         if not new_path.exists():
             return new_path
         counter += 1
-
-
 def move_recent_files(start_dir: Path | str = ".") -> None:
     start_dir = Path(start_dir)
     if not start_dir.is_dir():
@@ -66,8 +58,6 @@ def move_recent_files(start_dir: Path | str = ".") -> None:
     print(f"Errors: {error_count}")
     print(f"Total processed: {moved_count + skipped_count + error_count}")
     print("-" * 42)
-
-
 def move_recent_files_with_filters(
     start_dir: Path | str = ".",
     extensions: list[str] | None = None,
@@ -108,8 +98,6 @@ def move_recent_files_with_filters(
         except Exception as e:
             print(f"Error processing {file_path.name}: {e}")
     print(f"\nMoved {moved_count} files ({filtered_count} filtered out)")
-
-
 def move_recent_files_by_age(
     start_dir: Path | str = ".", age_threshold: int = TIME_THRESHOLD, destination: str = "old_files"
 ) -> None:
@@ -136,11 +124,8 @@ def move_recent_files_by_age(
         except Exception as e:
             print(f"Error processing {file_path.name}: {e}")
     print(f"\nMoved {moved_count} old files to {destination}/")
-
-
 def main() -> None:
     import argparse
-
     parser = argparse.ArgumentParser(
         description="Move files created in the last N minutes",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -177,7 +162,5 @@ def main() -> None:
         print("\nOperation cancelled by user")
     except Exception as e:
         print(f"An error occurred: {e}")
-
-
 if __name__ == "__main__":
     main()

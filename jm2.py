@@ -1,13 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import json
 import sys
 from pathlib import Path
-
 from dh import cprint, fsz, get_files, mpf3
-
-
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -17,8 +13,6 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
-
-
 def process_file(path) -> None:
     path = Path(path)
     before = gsz(path)
@@ -44,8 +38,6 @@ def process_file(path) -> None:
     except:
         cprint(f"{path.name} Error", "yellow")
         return
-
-
 if __name__ == "__main__":
     cwd = Path.cwd()
     before = gsz(cwd)

@@ -1,14 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import re
 import subprocess
 import sys
 from pathlib import Path
-
 from dh import get_files, mpf3
-
-
 def fix_print_statements_manually(content):
     lines = content.split("\n")
     new_lines = []
@@ -26,8 +22,6 @@ def fix_print_statements_manually(content):
         else:
             new_lines.append(line)
     return "\n".join(new_lines)
-
-
 def is_in_string(line, text):
     in_string = False
     quote_char = None
@@ -42,8 +36,6 @@ def is_in_string(line, text):
         elif in_string and text in line[i - len(text) : i + 1]:
             return True
     return False
-
-
 def process_file(path):
     path = Path(path)
     try:
@@ -69,8 +61,6 @@ def process_file(path):
     except Exception as e:
         print(f"  ❌ Error: {e}")
         return False
-
-
 def main():
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -88,7 +78,5 @@ def main():
         process_file(files[0])
         sys.exit(1)
     mpf3(process_file, files)
-
-
 if __name__ == "__main__":
     sys.exit(main())

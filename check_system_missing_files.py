@@ -1,15 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """System package file integrity checker for Termux/Linux."""
-
 from __future__ import annotations
-
 import json
 import subprocess
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-
-
 def should_ignore(file_path):
     parts = Path(file_path).parts
     return any(
@@ -17,8 +13,6 @@ def should_ignore(file_path):
         for i in range(len(parts) - 1)
         if parts[i] == "share"
     )
-
-
 def check_package_files(pkg_name):
     try:
         result = subprocess.run(["dpkg", "-L", pkg_name], capture_output=True, text=True, timeout=5, check=False)
@@ -36,8 +30,6 @@ def check_package_files(pkg_name):
         return pkg_name, missing if missing else None
     except (subprocess.TimeoutExpired, Exception):
         return pkg_name, None
-
-
 def main():
     output_file = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("missing_files.json")
     result = subprocess.run(["dpkg", "-l"], capture_output=True, text=True, check=False)
@@ -62,9 +54,6 @@ def main():
     except IOError as e:
         print(f"Error writing output: {e}", file=sys.stderr)
         sys.exit(1)
-
-
 if __name__ == "__main__":
     import os
-
     main()

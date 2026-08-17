@@ -1,18 +1,13 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import ast
 import importlib.metadata
 import importlib.util
 import sys
 from pathlib import Path
-
 CHUNK_SIZE = 1024 * 1024
-
-
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
-
     path = Path(path)
     if is_binary(path):
         return False
@@ -32,8 +27,6 @@ def is_python_file(path: str | Path) -> bool:
         except:
             return False
     return False
-
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -48,8 +41,6 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
-
 PACKAGE_MAPPING = {
     "cv2": "opencv-python",
     "PIL": "Pillow",
@@ -67,8 +58,6 @@ PACKAGE_MAPPING = {
     "jwt": "PyJWT",
     "OpenGL": "PyOpenGL",
 }
-
-
 def get_imports_from_file(file_path: Path):
     imports = set()
     try:
@@ -82,8 +71,6 @@ def get_imports_from_file(file_path: Path):
     except (SyntaxError, UnicodeDecodeError):
         pass
     return imports
-
-
 def check_status(module_name) -> bool:
     try:
         importlib.metadata.distribution(module_name)
@@ -91,8 +78,6 @@ def check_status(module_name) -> bool:
     except importlib.metadata.PackageNotFoundError:
         spec = importlib.util.find_spec(module_name)
         return spec is not None
-
-
 def main() -> None:
     cwd = Path()
     output_file = cwd / "importz.txt"
@@ -130,7 +115,5 @@ def main() -> None:
             print("✨ Environment is fully satisfied!")
     else:
         print("ℹ️ No 3rd-party imports found.")
-
-
 if __name__ == "__main__":
     main()

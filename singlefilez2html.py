@@ -1,13 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import base64
 import json
 import re
 import sys
 from pathlib import Path
-
-
 def extract_embedded_html(text: str) -> str | None:
     m = re.search(r"__SINGLEFILE(?:_Z)?__\s*=\s*(\{.*?\})\s*;?", text, re.DOTALL)
     if m:
@@ -36,8 +33,6 @@ def extract_embedded_html(text: str) -> str | None:
         except Exception:
             pass
     return None
-
-
 def main() -> None:
     if len(sys.argv) < 2:
         print(f"Usage: {Path(sys.argv[0]).name} <singlefilez-file>")
@@ -54,7 +49,5 @@ def main() -> None:
     out_path = in_path.with_suffix(".html")
     out_path.write_text(html, encoding="utf-8")
     print(f"Wrote: {out_path}")
-
-
 if __name__ == "__main__":
     main()

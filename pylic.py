@@ -10,24 +10,17 @@ Excluded lines:
   - Shebang lines (e.g.,
   - Lines starting with '# type', '# fmt', '# pylint', '# ruff', '# mypy'
 """
-
 from __future__ import annotations
-
 import argparse
 import ast
 import sys
 from collections import defaultdict
 from pathlib import Path
-
 EXCLUDED_PREFIXES = ["#!", "# type", "# fmt", "# pylint", "# ruff", "# mypy"]
-
-
 def is_comment_line(stripped: str) -> bool:
     if not stripped.startswith("#"):
         return False
     return not any(stripped.startswith(prefix) for prefix in EXCLUDED_PREFIXES)
-
-
 def extract_comment_blocks(lines: list[str], start_line: int) -> list[tuple[str, int, list[str]]]:
     blocks = []
     i = 0
@@ -57,8 +50,6 @@ def extract_comment_blocks(lines: list[str], start_line: int) -> list[tuple[str,
         else:
             i += 1
     return blocks
-
-
 def collect_comment_blocks(root: Path) -> dict[str, list[tuple[Path, int, list[str]]]]:
     blocks: dict[str, list[tuple[Path, int, list[str]]]] = defaultdict(list)
     for py_file in root.rglob("*.py"):
@@ -72,14 +63,10 @@ def collect_comment_blocks(root: Path) -> dict[str, list[tuple[Path, int, list[s
         for block_text, start_lineno, original_lines in file_blocks:
             blocks[block_text].append((py_file, start_lineno, original_lines))
     return blocks
-
-
 def find_repeated_blocks(
     blocks: dict[str, list[tuple[Path, int, list[str]]]],
 ) -> dict[str, list[tuple[Path, int, list[str]]]]:
     return {block: occurrences for block, occurrences in blocks.items() if len(occurrences) >= 2}
-
-
 def report(repeated: dict[str, list[tuple[Path, int, list[str]]]]) -> None:
     if not repeated:
         print("No repeated multi-line comment blocks found.")
@@ -93,8 +80,6 @@ def report(repeated: dict[str, list[tuple[Path, int, list[str]]]]) -> None:
         print("  Found in:")
         for filepath, lineno, _ in occurrences:
             print(f"    {Path(filepath).name}:{lineno}")
-
-
 def remove_repeated_blocks(repeated: dict[str, list[tuple[Path, int, list[str]]]]) -> None:
     file_removals: dict[Path, list[tuple[int, list[str]]]] = defaultdict(list)
     for _block_text, occurrences in repeated.items():
@@ -138,8 +123,6 @@ def remove_repeated_blocks(repeated: dict[str, list[tuple[Path, int, list[str]]]
         except Exception as e:
             print(f"Error: cannot write {filepath}: {e}", file=sys.stderr)
     print(f"\nDone. Removed {removed_total} repeated comment line(s) from {files_changed} file(s).")
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -165,7 +148,5 @@ def main() -> None:
             remove_repeated_blocks(repeated)
     else:
         report(repeated)
-
-
 if __name__ == "__main__":
     main()

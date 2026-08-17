@@ -7,14 +7,11 @@ Usage:
     python excode.py mydir1 mydir2
     python excode.py
 """
-
 from __future__ import annotations
-
 import re
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-
 TARGET_NAMES = {"PKGINFO", "METADATA", "PKG-INFO"}
 TARGET_EXTENSIONS = {".md", ".txt", ".html"}
 PY_CODE_BLOCK = re.compile(
@@ -29,8 +26,6 @@ REPL_SESSION = re.compile(
     r"(?:^|\n)((?:>>>|\.\.\.).*?)(?=\n\s*\n|\Z)",
     re.DOTALL | re.MULTILINE,
 )
-
-
 def find_target_files(paths):
     files = []
     for p in paths:
@@ -43,14 +38,10 @@ def find_target_files(paths):
                 if f.is_file() and _is_target(f):
                     files.append(f)
     return files
-
-
 def _is_target(file_path):
     if file_path.name in TARGET_NAMES:
         return True
     return file_path.suffix.lower() in TARGET_EXTENSIONS
-
-
 def parse_repl_block(block):
     lines = block.strip().split("\n")
     result_lines = []
@@ -70,8 +61,6 @@ def parse_repl_block(block):
         elif not stripped:
             result_lines.append("")
     return "\n".join(result_lines)
-
-
 def extract_python_blocks(file_path):
     try:
         content = file_path.read_text(encoding="utf-8", errors="ignore")
@@ -94,8 +83,6 @@ def extract_python_blocks(file_path):
             if code and ("import" in code or "def " in code or "class " in code):
                 blocks.append(code)
     return blocks
-
-
 def process_file(file_path, output_dir):
     blocks = extract_python_blocks(file_path)
     saved = []
@@ -107,8 +94,6 @@ def process_file(file_path, output_dir):
         out_path.write_text(header + code + "\n", encoding="utf-8")
         saved.append(out_path)
     return file_path, saved
-
-
 def main():
     if len(sys.argv) > 1:
         input_paths = sys.argv[1:]
@@ -131,7 +116,5 @@ def main():
     total_blocks = sum(len(saved) for _, saved in results)
     print(f"\nDone! Extracted {total_blocks} Python block(s) to '{output_dir}/'")
     print("Reference headers in each file indicate the source.")
-
-
 if __name__ == "__main__":
     main()

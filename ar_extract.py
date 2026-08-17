@@ -3,9 +3,7 @@
 Parallel archive extractor for files in the current directory.
 Extracts various archive formats using system tools with parallel processing.
 """
-
 from __future__ import annotations
-
 import os
 import shutil
 import subprocess
@@ -14,8 +12,6 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional
-
-
 @dataclass
 class ExtractionStats:
     archive_path: Path
@@ -25,7 +21,6 @@ class ExtractionStats:
     extracted_files: int = 0
     error_message: Optional[str] = None
     original_size: int = 0
-
     def __str__(self):
         size_mb = self.original_size / (1024 * 1024)
         status_icon = "✓" if self.status == "success" else "✗" if self.status == "failed" else "○"
@@ -37,8 +32,6 @@ class ExtractionStats:
         elif self.status == "failed":
             result += f" - {self.error_message}"
         return result
-
-
 class ArchiveExtractor:
     EXTRACTION_COMMANDS = {
         ".7z": ["7z", "x", "-y", "-o"],
@@ -62,11 +55,9 @@ class ArchiveExtractor:
         ".ace": ["unace", "x"],
     }
     SINGLE_FILE_EXTENSIONS = {".gz", ".bz2", ".xz", ".lz4", ".lzma", ".zst"}
-
     def __init__(self, current_dir: Path):
         self.current_dir = current_dir
         self._check_available_tools()
-
     def _check_available_tools(self):
         available = {}
         for ext, cmd in self.EXTRACTION_COMMANDS.items():
@@ -76,7 +67,6 @@ class ArchiveExtractor:
             else:
                 available[ext] = False
         return available
-
     def _check_if_single_file_archive(self, archive_path: Path) -> bool:
         if archive_path.suffix.lower() in self.SINGLE_FILE_EXTENSIONS:
             return True
@@ -112,7 +102,6 @@ class ArchiveExtractor:
         except (subprocess.TimeoutExpired, Exception):
             pass
         return False
-
     def _get_output_directory(self, archive_path: Path) -> Path:
         stem = archive_path.name
         for ext in [".tar.gz", ".tar.bz2", ".tar.xz", ".tar.lz4"]:
@@ -122,13 +111,11 @@ class ArchiveExtractor:
         else:
             stem = archive_path.stem
         return self.current_dir / stem
-
     def _count_files(self, directory: Path) -> int:
         try:
             return sum(1 for _ in directory.rglob("*") if _.is_file())
         except Exception:
             return 0
-
     def extract_archive(self, archive_path: Path) -> ExtractionStats:
         start_time = time.time()
         original_size = archive_path.stat().st_size if archive_path.exists() else 0
@@ -172,7 +159,6 @@ class ArchiveExtractor:
                 cmd.extend([str(archive_path), str(output_file)])
             elif ext in [".gz", ".bz2", ".xz", ".lzma", ".zst"]:
                 import shutil
-
                 temp_archive = output_dir / archive_path.name
                 shutil.copy2(archive_path, temp_archive)
                 cmd.append(str(temp_archive))
@@ -222,8 +208,6 @@ class ArchiveExtractor:
             stats.error_message = str(e)
             stats.extraction_time = time.time() - start_time
         return stats
-
-
 def find_archives(directory: Path) -> List[Path]:
     archive_extensions = {
         ".7z",
@@ -255,8 +239,6 @@ def find_archives(directory: Path) -> List[Path]:
                     archives.append(item)
                     break
     return archives
-
-
 def main():
     current_dir = Path.cwd()
     print(f"Scanning for archives in: {current_dir}")
@@ -299,7 +281,5 @@ def main():
         print(f"\nDetailed results:")
         for result in results:
             print(f"  {result}")
-
-
 if __name__ == "__main__":
     main()

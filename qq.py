@@ -1,18 +1,13 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import contextlib
 import os
 import sys
-
 import matplotlib.pyplot as plt
-
 MAX_DIRS = 25
 MIN_SIZE_KB = 100
 OUTPUT_FILENAME = "dirinfo.png"
 CHART_TYPE = "bar"
-
-
 def fsz(size_bytes) -> str:
     if size_bytes < 1024:
         return f"{size_bytes} B"
@@ -24,8 +19,6 @@ def fsz(size_bytes) -> str:
         return f"{size_mb:.2f} MB"
     size_gb = size_mb / 1024
     return f"{size_gb:.2f} GB"
-
-
 def get_dir_size(start_path: str) -> int:
     total_size = 0
     try:
@@ -38,8 +31,6 @@ def get_dir_size(start_path: str) -> int:
     except Exception as e:
         print(f"Error walking directory {start_path}: {e}", file=sys.stderr)
     return total_size
-
-
 def create_chart(target_dir: str = ".") -> None:
     target_dir = os.path.abspath(target_dir)
     print(f"Analyzing directory: {target_dir}")
@@ -89,7 +80,5 @@ def create_chart(target_dir: str = ".") -> None:
     except Exception as e:
         print(f"Error saving chart: {e}", file=sys.stderr)
     plt.close()
-
-
 if __name__ == "__main__":
     create_chart()

@@ -1,12 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 from pathlib import Path
-
 TARGET_SHEBANG = "#!/data/data/com.termux/files/usr/bin/bash"
 cwd = Path.cwd()
-
-
 def process_file(path: Path) -> None:
     path = Path(path)
     print(f"processing {path.name}")
@@ -24,8 +20,6 @@ def process_file(path: Path) -> None:
         print(f"{path.relativeto(cwd)}")
     if "bin" in path.parts:
         path.chmod(0o755)
-
-
 if __name__ == "__main__":
     for path in cwd.rglob("*.sh"):
         process_file(path)

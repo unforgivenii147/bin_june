@@ -1,11 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import shutil
 import zipfile
 from pathlib import Path
-
-
 def inspect_and_move_wheels(root_dir="."):
     root_path = Path(root_dir).resolve()
     target_dir = root_path / "suspicious"
@@ -47,7 +44,5 @@ def inspect_and_move_wheels(root_dir="."):
         f"""
 Scan complete. Moved {bad_wheels_count} misconfigured wheel(s) to './suspicious/' out of {len(wheel_files)} total checked."""
     )
-
-
 if __name__ == "__main__":
     inspect_and_move_wheels()

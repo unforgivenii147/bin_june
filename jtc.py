@@ -1,12 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import ast
 from pathlib import Path
-
 from fastwalk import walk_files
-
-
 def process_file(path: str) -> bool:
     path = Path(path)
     try:
@@ -24,8 +20,6 @@ def process_file(path: str) -> bool:
     except Exception as e:
         print(f"Error processing {path.name}: {e}")
         return False
-
-
 def walk_directory(root: Path) -> list[str]:
     files = []
     for pth in walk_files(root):
@@ -33,14 +27,10 @@ def walk_directory(root: Path) -> list[str]:
         if path.suffix == ".py":
             files.append(path)
     return files
-
-
 def main() -> None:
     cwd = Path.cwd()
     files = walk_directory(cwd)
     for f in files:
         print(process_file(f))
-
-
 if __name__ == "__main__":
     main()

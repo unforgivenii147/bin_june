@@ -4,14 +4,10 @@ Generate lazy-lock.json for lazy.nvim plugin manager.
 Scans plugins in ~/.local/share/nvim/lazy and creates a lock file
 with current commit hashes.
 """
-
 from __future__ import annotations
-
 import json
 import subprocess
 from pathlib import Path
-
-
 def get_git_commit(repo_path):
     try:
         commit = subprocess.check_output(
@@ -23,8 +19,6 @@ def get_git_commit(repo_path):
         return commit, branch
     except subprocess.CalledProcessError:
         return None, None
-
-
 def generate_lazy_lock():
     lazy_dir = Path.home() / ".local" / "share" / "nvim" / "lazy"
     lock_file = Path.home() / ".config" / "nvim" / "lazy-lock.json"
@@ -57,8 +51,6 @@ def generate_lazy_lock():
     except IOError as e:
         print(f"Error writing lock file: {e}")
         return False
-
-
 def main():
     print("Generating lazy-lock.json for Neovim plugins...")
     print(f"Scanning: {Path.home() / '.local' / 'share' / 'nvim' / 'lazy'}")
@@ -70,7 +62,5 @@ def main():
     else:
         print("\nFailed to generate lock file.")
         exit(1)
-
-
 if __name__ == "__main__":
     main()

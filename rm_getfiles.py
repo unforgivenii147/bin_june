@@ -4,9 +4,7 @@ Remove a specific function implementation from Python files using parallel proce
 Matches the exact function structure using AST comparison.
 Excludes the script itself and fileutils.py files.
 """
-
 from __future__ import annotations
-
 import argparse
 import ast
 import sys
@@ -14,7 +12,6 @@ import textwrap
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-
 SKIP_DIRS = {
     ".git",
     "__pycache__",
@@ -30,12 +27,8 @@ SKIP_DIRS = {
 TARGET_FUNCTION_SOURCE = textwrap.dedent(
     '\ndef get_files(path: str | Path, include_hidden: bool = True, ext: list[str] | None = None) -> list[Path]:\n    path = Path(path)\n    if not path.exists():\n        raise FileNotFoundError(f"Path does not exist: {path}")\n    if not path.is_dir():\n        raise NotADirectoryError(f"Path is not a directory: {path}")\n\n    ext = tuple(ext) if ext else None\n    files = []\n    stack = [path]\n\n    while stack:\n        current = stack.pop()\n        try:\n            with os_scandir(current) as entries:\n                for entry in entries:\n                    if entry.is_symlink():\n                        continue\n                    if entry.is_dir(follow_symlinks=False):\n                        if entry.name not in SKIP_DIRS:\n                            stack.append(entry)\n                    elif entry.is_file(follow_symlinks=False):\n                        if not include_hidden and entry.name.startswith("."):\n                            continue\n                        if ext is None or entry.name.endswith(ext):\n                            files.append(Path(entry.path))\n        except (PermissionError, OSError):\n            continue\n\n    return sorted(files)\n'
 ).strip()
-
-
 def normalize_ast(node: ast.AST) -> str:
     return ast.dump(node, annotate_fields=True, include_attributes=False)
-
-
 def get_target_function_ast() -> ast.FunctionDef:
     wrapper = f"dummy_var = 1\n{TARGET_FUNCTION_SOURCE}"
     tree = ast.parse(wrapper)
@@ -43,8 +36,6 @@ def get_target_function_ast() -> ast.FunctionDef:
         if isinstance(node, ast.FunctionDef) and node.name == "get_files":
             return node
     raise ValueError("Could not parse target function")
-
-
 def functions_match(target_ast: ast.FunctionDef, candidate_ast: ast.FunctionDef) -> bool:
     def clean_node(node: ast.AST) -> ast.AST:
         if isinstance(node, ast.FunctionDef):
@@ -56,14 +47,11 @@ def functions_match(target_ast: ast.FunctionDef, candidate_ast: ast.FunctionDef)
             )
             return cleaned
         return node
-
     target_cleaned = clean_node(target_ast)
     candidate_cleaned = clean_node(candidate_ast)
     target_str = normalize_ast(target_cleaned)
     candidate_str = normalize_ast(candidate_cleaned)
     return target_str == candidate_str
-
-
 def find_python_files(path: Path, include_hidden: bool = False, script_path: Path | None = None) -> list[Path]:
     if not path.exists():
         raise FileNotFoundError(f"Path does not exist: {path}")
@@ -86,8 +74,6 @@ def find_python_files(path: Path, include_hidden: bool = False, script_path: Pat
     except (PermissionError, OSError):
         pass
     return sorted(files)
-
-
 def remove_matching_function(file_path: Path) -> tuple[bool, int, int]:
     try:
         original_size = file_path.stat().st_size
@@ -112,7 +98,6 @@ def remove_matching_function(file_path: Path) -> tuple[bool, int, int]:
         ast.fix_missing_locations(tree)
         new_source = ast.unparse(tree)
         import re
-
         new_source = re.sub("\\n{3,}", "\n\n", new_source)
         with open(file_path, "w", encoding="utf-8") as f:
             f.write(new_source)
@@ -121,8 +106,6 @@ def remove_matching_function(file_path: Path) -> tuple[bool, int, int]:
     except Exception as e:
         print(f"Error processing {file_path}: {e}", file=sys.stderr)
         return (False, 0, 0)
-
-
 def process_file(file_path: Path) -> tuple[Path, float, tuple[int, int, float] | None]:
     start_time = time.time()
     removed, original_size, new_size = remove_matching_function(file_path)
@@ -132,16 +115,12 @@ def process_file(file_path: Path) -> tuple[Path, float, tuple[int, int, float] |
         return (file_path, elapsed_time, (original_size, new_size, ratio))
     else:
         return (file_path, elapsed_time, None)
-
-
 def fsz(size: int) -> str:
     for unit in ["B", "KB", "MB", "GB"]:
         if size < 1024:
             return f"{size:.1f}{unit}"
         size /= 1024
     return f"{size:.1f}TB"
-
-
 def main():
     parser = argparse.ArgumentParser(description="Remove specific get_files function implementation from Python files")
     parser.add_argument("paths", nargs="*", help="Files or directories to process (default: current directory)")
@@ -233,7 +212,5 @@ def main():
         if files_modified > 0:
             total_ratio = total_new_size / total_original_size * 100 if total_original_size > 0 else 100
             print(f"  Total size change: {fsz(total_original_size)} -> {fsz(total_new_size)} ({total_ratio:.1f}%)")
-
-
 if __name__ == "__main__":
     main()

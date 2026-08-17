@@ -1,14 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import shutil
 import sys
 import tarfile
 from pathlib import Path
-
 import zstandard as zstd
-
-
 def create_archive_streaming_optimized():
     current_dir = Path.cwd()
     dir_name = current_dir.name
@@ -79,8 +75,6 @@ def create_archive_streaming_optimized():
         if archive_path.exists():
             archive_path.unlink()
         sys.exit(1)
-
-
 def verify_archive(archive_path):
     try:
         decompressor = zstd.ZstdDecompressor()
@@ -93,11 +87,8 @@ def verify_archive(archive_path):
                         )
     except Exception as e:
         print(f"Verification failed: {e}", file=sys.stderr)
-
-
 if __name__ == "__main__":
     import argparse
-
     parser = argparse.ArgumentParser(description="Create compressed tar.zst archive of current directory")
     parser.add_argument("--verify", action="store_true", help="Verify archive after creation")
     parser.add_argument("--no-remove", action="store_true", help="Don't prompt to remove original directory")

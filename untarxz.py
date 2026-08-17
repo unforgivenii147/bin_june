@@ -3,15 +3,11 @@
 Extract all .tar.xz files in current directory using parallel processing,
 then remove the original archive files.
 """
-
 from __future__ import annotations
-
 import sys
 import tarfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-
-
 def extract_and_remove(tar_path: Path) -> tuple[Path, bool, str]:
     try:
         extract_dir = tar_path.parent / tar_path.stem.replace(".tar", "")
@@ -28,8 +24,6 @@ def extract_and_remove(tar_path: Path) -> tuple[Path, bool, str]:
         return (tar_path, False, f"❌ Permission denied: {tar_path.name}")
     except Exception as e:
         return (tar_path, False, f"❌ Error processing {tar_path.name}: {e!s}")
-
-
 def main():
     current_dir = Path.cwd()
     tar_files = list(current_dir.glob("*.tar.xz"))
@@ -53,8 +47,6 @@ def main():
     if failure_count > 0:
         print(f"❌ Failed: {failure_count} file(s)")
     print(f"{'=' * 42}")
-
-
 if __name__ == "__main__":
     try:
         main()

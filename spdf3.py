@@ -1,12 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import os
 import shutil
 import subprocess
 import sys
-
-
 def shrink_pdf_mobile(file_path):
     if not os.path.exists(file_path):
         print(f"Error: File '{file_path}' not found.")
@@ -56,8 +53,6 @@ def shrink_pdf_mobile(file_path):
         if os.path.exists(temp_path):
             os.remove(temp_path)
         sys.exit(1)
-
-
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python shrink_pdf.py <filename.pdf>")

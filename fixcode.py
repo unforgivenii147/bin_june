@@ -1,10 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import ast
 import re
 from pathlib import Path
-
 INDENT = " " * 4
 DEF_CLASS = re.compile(r"^\s*(def|class)\s+")
 MAIN_GUARD = re.compile(r"^\s*if\s+__name__\s*==\s*['\"]__main__['\"]\s*:")
@@ -25,8 +23,6 @@ BLOCK_START = re.compile(
     """,
     re.VERBOSE,
 )
-
-
 def is_code_line(line: str) -> bool:
     s = line.strip()
     if not s:
@@ -56,8 +52,6 @@ def is_code_line(line: str) -> bool:
         or "(" in s
         or s.endswith(":")
     )
-
-
 def clean_text(text: str) -> str:
     out = []
     indent_level = 0
@@ -92,19 +86,14 @@ def clean_text(text: str) -> str:
             continue
         out.append(INDENT * indent_level + stripped)
     return "\n".join(out)
-
-
 def ast_validate(code: str) -> tuple[bool, str | None]:
     try:
         ast.parse(code)
         return True, None
     except SyntaxError as e:
         return False, f"{e.msg} (line {e.lineno}, col {e.offset})"
-
-
 def main() -> None:
     import sys
-
     src = Path(sys.argv[1])
     dst = Path(sys.argv[1])
     cleaned = clean_text(src.read_text(encoding="utf-8", errors="ignore"))
@@ -117,7 +106,5 @@ def main() -> None:
         print("✘ AST validation failed")
         print(err)
         print("Wrote for inspection")
-
-
 if __name__ == "__main__":
     main()

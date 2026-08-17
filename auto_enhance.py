@@ -1,14 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import argparse
 import sys
 from pathlib import Path
-
 import cv2
 import numpy as np
-
-
 def enhance_image(image_path: Path, verbose: bool = False, progress: tuple | None = None) -> bool:
     try:
         if progress:
@@ -50,8 +46,6 @@ def enhance_image(image_path: Path, verbose: bool = False, progress: tuple | Non
     except Exception as e:
         print(f"[FAILED] Error processing {image_path.name}: {e}")
         return False
-
-
 def collect_images(input_paths) -> list:
     valid_extensions = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tiff"}
     images_to_process = []
@@ -69,19 +63,14 @@ def collect_images(input_paths) -> list:
         else:
             print(f"[WARNING] Skipping invalid path or unsupported format: {path_str}")
     return list(set(images_to_process))
-
-
 def process_sequential(tasks, verbose):
     results = []
     for i, (img, _) in enumerate(tasks, 1):
         result = enhance_image(img, verbose, (i, len(tasks)))
         results.append(result)
     return results
-
-
 def process_parallel(tasks, num_cores):
     import multiprocessing as mp
-
     total = len(tasks)
     print(f"[SYSTEM] Utilizing {num_cores} parallel CPU threads.")
     parallel_tasks = []
@@ -91,8 +80,6 @@ def process_parallel(tasks, num_cores):
     with mp.Pool(processes=num_cores) as pool:
         results = pool.starmap(enhance_image, parallel_tasks)
     return results
-
-
 def main():
     parser = argparse.ArgumentParser(
         description="Google Photos Style Auto-Enhancer (In-place replacement)",
@@ -120,7 +107,6 @@ def main():
     if args.parallel:
         try:
             import multiprocessing as mp
-
             num_cores = args.jobs if args.jobs else mp.cpu_count()
             results = process_parallel(tasks, num_cores)
         except ImportError:
@@ -131,7 +117,5 @@ def main():
         results = process_sequential(tasks, args.verbose)
     successful_runs = sum(1 for r in results if r)
     print("[FINISHED] Done")
-
-
 if __name__ == "__main__":
     main()

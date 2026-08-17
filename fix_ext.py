@@ -3,17 +3,13 @@ import argparse
 import concurrent.futures
 import sys
 from pathlib import Path
-
 from dh import get_files
-
 try:
     import puremagic
 except ImportError:
     print("Error: This script requires the 'puremagic' library.")
     print("Please install it by running: pip install puremagic")
     sys.exit(1)
-
-
 def get_extension_from_mime(mime_type: str) -> str:
     mime_map = {
         "image/jpeg": ".jpg",
@@ -37,14 +33,11 @@ def get_extension_from_mime(mime_type: str) -> str:
         "application/octet-stream": "",
     }
     return mime_map.get(mime_type, "")
-
-
 def detect_true_extension(file_path: Path) -> str:
     try:
         magic_data = puremagic.magic_string(file_path.read_bytes())
         if magic_data:
             best_match = magic_data[0]
-
             ext = best_match.extension
             if ext and ext != "":
                 return ext if ext.startswith(".") else f".{ext}"
@@ -56,19 +49,14 @@ def detect_true_extension(file_path: Path) -> str:
     except Exception as e:
         print(f"Error reading {file_path}: {e}")
     return ""
-
-
 def check_file(file_path: Path) -> tuple[Path, str, str] | None:
     current_ext = file_path.suffix.lower()
-
     if not current_ext:
         return None
     true_ext = detect_true_extension(file_path)
-
     if not true_ext:
         return None
     true_ext = true_ext.lower()
-
     if current_ext != true_ext:
         normalize_pairs = {".jpeg": ".jpg", ".htm": ".html", ".tif": ".tiff"}
         norm_current = normalize_pairs.get(current_ext, current_ext)
@@ -76,13 +64,9 @@ def check_file(file_path: Path) -> tuple[Path, str, str] | None:
         if norm_current != norm_true:
             return (file_path, current_ext, true_ext)
     return None
-
-
 def autofix_filename(file_path: Path, current_ext: str, true_ext: str) -> Path:
-
     new_name = file_path.stem + true_ext
     new_path = file_path.with_name(new_name)
-
     counter = 1
     original_new_path = new_path
     while new_path.exists() and new_path != file_path:
@@ -92,8 +76,6 @@ def autofix_filename(file_path: Path, current_ext: str, true_ext: str) -> Path:
         file_path.rename(new_path)
         return new_path
     return file_path
-
-
 def main():
     parser = argparse.ArgumentParser(
         description="Recursively detect and optionally fix file extension mismatches based on file headers (magic numbers)."
@@ -111,12 +93,9 @@ def main():
     print(f"Scanning '{root_dir}' for extension mismatches...")
     if args.autofix:
         print("Autofix is ENABLED. Files will be renamed.")
-
     cwd = Path.cwd()
     all_files = get_files(cwd)
-
     mismatches = []
-
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) as executor:
         futures = {executor.submit(check_file, f): f for f in all_files}
         for future in concurrent.futures.as_completed(futures):
@@ -138,7 +117,5 @@ def main():
                     print(f"  -> Skipped fix: Filename collision or identical.")
             except Exception as e:
                 print(f"  -> Error fixing file: {e}")
-
-
 if __name__ == "__main__":
     main()

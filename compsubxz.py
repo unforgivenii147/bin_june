@@ -4,9 +4,7 @@ Compress/decompress subdirectories using tar + lzma with parallel processing.
 Usage: script.py -c [paths...]
        script.py -d [paths...]
 """
-
 from __future__ import annotations
-
 import argparse
 import lzma
 import os
@@ -14,8 +12,6 @@ import shutil
 import tarfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-
-
 def iter_target_dirs(paths, recursive=True):
     out = []
     for p in paths:
@@ -42,8 +38,6 @@ def iter_target_dirs(paths, recursive=True):
             seen.add(k)
             uniq.append(d)
     return uniq
-
-
 def iter_target_archives(paths):
     out = []
     for p in paths:
@@ -64,8 +58,6 @@ def iter_target_archives(paths):
             seen.add(k)
             uniq.append(a)
     return uniq
-
-
 def dir_size_bytes(path):
     total = 0
     path = Path(path)
@@ -80,8 +72,6 @@ def dir_size_bytes(path):
             except OSError:
                 continue
     return total
-
-
 def compress_directory(subdir, preset):
     subdir = Path(subdir)
     tar_lzma_path = subdir.parent / f"{subdir.name}.tar.xz"
@@ -108,14 +98,10 @@ def compress_directory(subdir, preset):
         except OSError:
             pass
         return {"success": False, "name": subdir.name, "error": str(e)}
-
-
 def is_within_directory(directory, target):
     directory = Path(directory).resolve()
     target = Path(target).resolve()
     return directory == target or directory in target.parents
-
-
 def safe_extract_stream(tar, dest_dir):
     dest_dir = Path(dest_dir)
     dest_dir.mkdir(parents=True, exist_ok=True)
@@ -127,8 +113,6 @@ def safe_extract_stream(tar, dest_dir):
         if not is_within_directory(dest_dir, target_path):
             continue
         tar.extract(member, path=str(dest_dir))
-
-
 def decompress_archive(archive_path):
     archive_path = Path(archive_path)
     try:
@@ -165,8 +149,6 @@ def decompress_archive(archive_path):
         }
     except Exception as e:
         return {"success": False, "name": archive_path.name, "error": str(e)}
-
-
 def fsz(size_bytes):
     size_bytes = float(size_bytes)
     for unit in ["B", "KB", "MB", "GB", "TB"]:
@@ -174,8 +156,6 @@ def fsz(size_bytes):
             return f"{size_bytes:.2f} {unit}"
         size_bytes /= 1024.0
     return f"{size_bytes:.2f} PB"
-
-
 def main():
     parser = argparse.ArgumentParser(description="Compress/decompress subdirectories with tar+lzma")
     group = parser.add_mutually_exclusive_group(required=True)
@@ -281,7 +261,5 @@ def main():
             print(f"Total archive size:     {fsz(total_archive)}")
             print(f"Total extracted size:   {fsz(total_extracted)}")
             print(f"Net space change:       {fsz(total_change)}")
-
-
 if __name__ == "__main__":
     main()

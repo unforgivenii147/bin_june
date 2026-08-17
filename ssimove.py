@@ -1,17 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import shutil
 from pathlib import Path
-
 import ssdeep
-
 SEARCH_DIR = Path.cwd()
 OUTPUT_DIR = SEARCH_DIR / "output"
 SIMILARITY_THRESHOLD = 60
 MIN_GROUP_SIZE = 2
-
-
 def calculate_fuzzy_hash(filepath: Path) -> str:
     try:
         return ssdeep.hash_from_file(str(filepath))
@@ -21,8 +16,6 @@ def calculate_fuzzy_hash(filepath: Path) -> str:
     except Exception as e:
         print(f"Unexpected error for {filepath}: {e}")
         return ""
-
-
 def find_similar_files(search_dir: Path, output_dir: Path, similarity_threshold: int, min_group_size: int) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     file_hashes: dict[Path, str] = {}
@@ -100,8 +93,6 @@ def find_similar_files(search_dir: Path, output_dir: Path, similarity_threshold:
     else:
         print(f"Moved {moved_files_count} files into {group_counter} groups.")
         print(f"Similar files have been moved to: {output_dir}")
-
-
 if __name__ == "__main__":
     if Path.cwd() == SEARCH_DIR:
         print("INFO: Processing files in the current directory.")

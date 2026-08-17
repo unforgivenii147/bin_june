@@ -1,18 +1,13 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import argparse
 import re
 from concurrent.futures import ProcessPoolExecutor
 from os import scandir as os_scandir
 from pathlib import Path
-
 CHUNK_SIZE = 1024 * 1024
-
-
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
-
     path = Path(path)
     if is_binary(path):
         return False
@@ -32,8 +27,6 @@ def is_python_file(path: str | Path) -> bool:
         except:
             return False
     return False
-
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -48,8 +41,6 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
-
 def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
     if path.is_file():
@@ -81,12 +72,8 @@ def get_pyfiles(path: str | Path) -> list[Path]:
         except (PermissionError, OSError):
             continue
     return sorted(pyfiles)
-
-
 NORMAL_IMPORT = "^import re\\b"
 REGEX_IMPORT = r"^import regex as re\b"
-
-
 def update_file(file_path, reverse: bool = False) -> str | None:
     try:
         lines = file_path.read_text(encoding="utf-8").splitlines(keepends=True)
@@ -106,8 +93,6 @@ def update_file(file_path, reverse: bool = False) -> str | None:
         return None
     except Exception as e:
         return f"Error processing {file_path}: {e}"
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="Recursively swap 'import re' with 'import regex as re'")
     parser.add_argument("-r", "--reverse", action="store_true", help="Reverse the replacement (regex as re -> re)")
@@ -121,7 +106,5 @@ def main() -> None:
     for msg in updates:
         print(msg)
     print(f"\nTask complete. Files modified: {len(updates)}")
-
-
 if __name__ == "__main__":
     main()

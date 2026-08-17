@@ -3,9 +3,7 @@
 Optimized version of trans_py.py for Python 3.12.
 Translates docstrings and comments in Python files using AST and parallel threads.
 """
-
 from __future__ import annotations
-
 import ast
 import logging
 import re
@@ -13,9 +11,7 @@ import shutil
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Final
-
 from deep_translator import GoogleTranslator
-
 CHUNK_SIZE = 1024 * 1024
 SKIP_DIRS: Final[frozenset[str]] = frozenset(
     {"lazy", ".git", "__pycache__", ".mypy_cache", ".ruff_cache", ".pytest_cache"}
@@ -25,8 +21,6 @@ NON_ASCII_PATTERN: Final[re.Pattern] = re.compile(r"[^\x00-\x7F]")
 MAX_WORKERS: Final[int] = 8
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
-
-
 def is_binary(path: Path) -> bool:
     try:
         with path.open("rb") as f:
@@ -34,8 +28,6 @@ def is_binary(path: Path) -> bool:
         return b"\x00" in chunk
     except Exception:
         return True
-
-
 def get_pyfiles(directory: Path) -> list[Path]:
     pyfiles: list[Path] = []
     for p in directory.rglob("*.py"):
@@ -44,8 +36,6 @@ def get_pyfiles(directory: Path) -> list[Path]:
         if p.is_file() and (not is_binary(p)):
             pyfiles.append(p)
     return sorted(pyfiles)
-
-
 def translate_text(text: str) -> str:
     if not text.strip() or not NON_ASCII_PATTERN.search(text):
         return text
@@ -56,12 +46,9 @@ def translate_text(text: str) -> str:
     except Exception as e:
         logger.debug("Translation error: %s for text: %s", e, text[:30])
         return text
-
-
 class DocstringCommentTransformer(ast.NodeTransformer):
     def __init__(self):
         self.modified = False
-
     def _translate_node_docstring(self, node: Any) -> None:
         docstring = ast.get_docstring(node)
         if docstring and NON_ASCII_PATTERN.search(docstring):
@@ -75,20 +62,15 @@ class DocstringCommentTransformer(ast.NodeTransformer):
                     and isinstance(node.body[0].value.value, str)
                 ):
                     node.body[0].value.value = translated
-
     def visit_FunctionDef(self, node: ast.FunctionDef) -> ast.FunctionDef:
         self._translate_node_docstring(node)
         return self.generic_visit(node)
-
     def visit_ClassDef(self, node: ast.ClassDef) -> ast.ClassDef:
         self._translate_node_docstring(node)
         return self.generic_visit(node)
-
     def visit_Module(self, node: ast.Module) -> ast.Module:
         self._translate_node_docstring(node)
         return self.generic_visit(node)
-
-
 def translate_comments(content: str) -> tuple[str, bool]:
     lines = content.splitlines(keepends=True)
     new_lines = []
@@ -105,8 +87,6 @@ def translate_comments(content: str) -> tuple[str, bool]:
                     continue
         new_lines.append(line)
     return ("".join(new_lines), modified)
-
-
 def process_file(filepath: Path) -> bool:
     try:
         backup_path = filepath.with_suffix(filepath.suffix + ".bak")
@@ -128,8 +108,6 @@ def process_file(filepath: Path) -> bool:
     except Exception as e:
         logger.error("Failed to process %s: %s", filepath, e)
     return False
-
-
 def main() -> None:
     cwd = Path.cwd()
     py_files = get_pyfiles(cwd)
@@ -145,7 +123,5 @@ def main() -> None:
                 modified_count += 1
                 logger.info("✓ Updated: %s", future_to_file[future].name)
     logger.info("Done. Modified %d files.", modified_count)
-
-
 if __name__ == "__main__":
     main()

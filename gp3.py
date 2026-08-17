@@ -1,29 +1,22 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import os
 import re
 import sys
 from datetime import datetime
 from pathlib import Path
-
 from dotenv import load_dotenv
 from git import Repo
 from git import exc as GitExc
 from github import Github, GithubException
-
 load_dotenv(Path.home() / ".env")
 GITHUB_USERNAME = "unforgivenii147"
-
-
 def ensure_git_repo() -> Repo:
     try:
         return Repo(".")
     except GitExc.InvalidGitRepositoryError:
         print("Not inside a Git repository.", file=sys.stderr)
         sys.exit(1)
-
-
 def symlink_global_gitignore() -> None:
     home_gitignore = Path.home() / ".gitignore"
     local_gitignore = Path(".gitignore")
@@ -38,8 +31,6 @@ def symlink_global_gitignore() -> None:
     except Exception as e:
         print(f"Failed to create symlink: {e}", file=sys.stderr)
         sys.exit(1)
-
-
 def get_repo_info_from_url(url: str) -> tuple[str, str] | None:
     patterns = [
         "https://github\\.com/([^/]+)/([^/]+?)(?:\\.git)?$",
@@ -50,8 +41,6 @@ def get_repo_info_from_url(url: str) -> tuple[str, str] | None:
         if match:
             return match.group(1), match.group(2)
     return None
-
-
 def create_new_remote_repo(repo: Repo, github_token: str) -> bool:
     current_dir = Path.cwd()
     repo_name = current_dir.name
@@ -72,8 +61,6 @@ def create_new_remote_repo(repo: Repo, github_token: str) -> bool:
     except Exception as e:
         print(f"Failed to create remote repository: {e}", file=sys.stderr)
         sys.exit(1)
-
-
 def fork_and_update_remote(repo: Repo, github_token: str) -> bool:
     try:
         origin = repo.remote("origin")
@@ -109,8 +96,6 @@ def fork_and_update_remote(repo: Repo, github_token: str) -> bool:
     except Exception as e:
         print(f"Failed to fork repository: {e}", file=sys.stderr)
         sys.exit(1)
-
-
 def ensure_remote_repo(repo: Repo, github_token: str) -> bool:
     try:
         repo.remote("origin")
@@ -123,8 +108,6 @@ def ensure_remote_repo(repo: Repo, github_token: str) -> bool:
     except Exception:
         pass
     return False
-
-
 def main() -> None:
     repo = ensure_git_repo()
     symlink_global_gitignore()
@@ -175,7 +158,5 @@ def main() -> None:
     finally:
         if modified_url:
             origin.set_url(old_url)
-
-
 if __name__ == "__main__":
     main()

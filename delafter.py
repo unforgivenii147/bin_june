@@ -1,14 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import sys
 from pathlib import Path
-
-
 def read_lines(path):
     return path.read_text(encoding="utf-8").splitlines(keepends=True)
-
-
 if __name__ == "__main__":
     file_name = Path(sys.argv[1])
     nl = []

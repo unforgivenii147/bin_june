@@ -4,12 +4,9 @@ Fix file extensions based on shebang detection.
 Scans files in current directory and renames them with .py or .sh extensions
 if they contain appropriate shebangs but have wrong or missing extensions.
 """
-
 from __future__ import annotations
-
 import os
 import sys
-
 SHEBANG_MAP = {
     "python": ".py",
     "python3": ".py",
@@ -21,8 +18,6 @@ SHEBANG_MAP = {
     "dash": ".sh",
 }
 TARGET_EXTENSIONS = {".py", ".sh"}
-
-
 def detect_shebang(filepath):
     try:
         with open(filepath, encoding="utf-8", errors="ignore") as f:
@@ -39,13 +34,9 @@ def detect_shebang(filepath):
     except OSError as e:
         print(f"Error reading {filepath}: {e}")
     return None
-
-
 def should_rename(filepath, target_ext):
     current_ext = os.path.splitext(filepath)[1].lower()
     return current_ext != target_ext
-
-
 def rename_file(filepath, target_ext):
     directory = os.path.dirname(filepath)
     basename = os.path.splitext(os.path.basename(filepath))[0]
@@ -66,8 +57,6 @@ def rename_file(filepath, target_ext):
         print(f"Error renaming {filepath} to {new_path}: {e}")
         return None
     return None
-
-
 def main():
     dry_run = "--dry-run" in sys.argv or "-n" in sys.argv
     verbose = "--verbose" in sys.argv or "-v" in sys.argv
@@ -107,7 +96,5 @@ def main():
     else:
         print(f"  Renamed: {renamed_count} files")
     print(f"  Skipped: {skipped_count} files")
-
-
 if __name__ == "__main__":
     main()

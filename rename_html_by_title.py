@@ -1,14 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import re
 import unicodedata
 from html.parser import HTMLParser
 from pathlib import Path
-
 from dh import get_files, mpf3
-
-
 def finglish(text: str) -> str:
     persian_map = {
         "ا": "a",
@@ -66,27 +62,20 @@ def finglish(text: str) -> str:
                 processed_word += persian_map.get(char, char)
         processed_words.append(processed_word)
     return " ".join(processed_words)
-
-
 class TitleParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__()
         self.in_title = False
         self.title = None
-
     def handle_starttag(self, tag, attrs) -> None:
         if tag.lower() == "title":
             self.in_title = True
-
     def handle_endtag(self, tag) -> None:
         if tag.lower() == "title":
             self.in_title = False
-
     def handle_data(self, data) -> None:
         if self.in_title and self.title is None:
             self.title = data.strip()
-
-
 def extract_title(html_path: Path) -> str | None:
     try:
         parser = TitleParser()
@@ -94,8 +83,6 @@ def extract_title(html_path: Path) -> str | None:
         return parser.title
     except Exception:
         return None
-
-
 def slugify(text: str) -> str:
     text = unicodedata.normalize("NFKD", text)
     temp = text
@@ -109,8 +96,6 @@ def slugify(text: str) -> str:
     if len(text) < 2:
         return temp.replace(":", "").replace("?", "").replace("=", "")
     return text
-
-
 def unique_path(path: Path) -> Path:
     counter = 1
     new_path = path
@@ -118,8 +103,6 @@ def unique_path(path: Path) -> Path:
         new_path = path.with_stem(f"{path.stem}-{counter}")
         counter += 1
     return new_path
-
-
 def process_file(path: str | Path) -> None:
     path = Path(path)
     title = extract_title(path)
@@ -136,8 +119,6 @@ def process_file(path: str | Path) -> None:
         return
     print(f"{path.name[:10]} -> {new_path.name[:25]}")
     path.rename(new_path)
-
-
 if __name__ == "__main__":
     cwd = Path.cwd()
     files = get_files(cwd, ext=[".html"])

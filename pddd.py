@@ -1,12 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 from operator import itemgetter
 from pathlib import Path
-
 from dh import fsz
-
-
 def get_dir_size(path: Path) -> int:
     total = 0
     for file_path in path.rglob("*"):
@@ -16,8 +12,6 @@ def get_dir_size(path: Path) -> int:
             except OSError:
                 continue
     return total
-
-
 def du_sort_python(path: Path) -> None:
     results = []
     total = 0
@@ -41,8 +35,6 @@ def du_sort_python(path: Path) -> None:
             else:
                 print(f"\x1b[5;92m{path.name:25}\x1b[0m  {sz}")
     print(f"total size : \x1b[5;94m{fsz(total)}\x1b[0m")
-
-
 if __name__ == "__main__":
     cwd = Path.cwd()
     du_sort_python(cwd)

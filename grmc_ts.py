@@ -1,23 +1,16 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import argparse
 import ast
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-
 import tree_sitter_python as tspython
 from tree_sitter import Language, Parser
-
 PY_LANGUAGE = Language(tspython.language())
-
-
 def get_parser() -> Parser:
     parser = Parser(PY_LANGUAGE)
     return parser
-
-
 def should_preserve_comment(comment_bytes: bytes) -> bool:
     text = comment_bytes.decode("utf-8", errors="ignore").strip()
     return (
@@ -26,8 +19,6 @@ def should_preserve_comment(comment_bytes: bytes) -> bool:
         or text == "# fmt: on"
         or text == "# fmt: off"
     )
-
-
 def process_file(file_path: Path) -> str:
     try:
         source_bytes = file_path.read_bytes()
@@ -87,8 +78,6 @@ def process_file(file_path: Path) -> str:
         return f"[SUCCESS] Processed and stripped: {file_path}"
     except Exception as e:
         return f"[ERROR] Failed to save updates to {file_path}: {e}"
-
-
 def gather_files(inputs) -> list[Path]:
     files = []
     if not inputs:
@@ -100,8 +89,6 @@ def gather_files(inputs) -> list[Path]:
         elif p.is_dir():
             files.extend(p.rglob("*.py"))
     return files
-
-
 def main():
     parser = argparse.ArgumentParser(description="Strip comments and docstrings using Tree-Sitter safely.")
     parser.add_argument("paths", nargs="*", help="Target files or directories to process. Defaults to '.' if empty.")
@@ -116,7 +103,5 @@ def main():
         for future in as_completed(futures):
             result_string = future.result()
             print(result_string)
-
-
 if __name__ == "__main__":
     main()

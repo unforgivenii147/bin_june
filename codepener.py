@@ -3,18 +3,12 @@
 Convert CodePen-style HTML (body only) to a complete HTML document.
 Adds proper <head> section with links to style.css and script.js
 """
-
 from __future__ import annotations
-
 import sys
 from pathlib import Path
-
-
 def convert_codepen_html(html_content, title="Document", charset="UTF-8"):
     full_html = f'<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="{charset}">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>{title}</title>\n    <link rel="stylesheet" href="style.css">\n</head>\n<body>\n{html_content}\n    <script src="script.js"></script>\n</body>\n</html>\n'
     return full_html
-
-
 def process_file(input_file, output_file=None, title=None):
     try:
         with open(input_file, encoding="utf-8") as f:
@@ -39,8 +33,6 @@ def process_file(input_file, output_file=None, title=None):
     except Exception as e:
         print(f"Error writing file: {e}")
         return False
-
-
 def main():
     if len(sys.argv) < 2:
         print("Usage: python codepen_converter.py <input_file> [output_file] [--title 'Page Title']")
@@ -62,7 +54,5 @@ def main():
             i += 1
     success = process_file(input_file, output_file, title)
     sys.exit(0 if success else 1)
-
-
 if __name__ == "__main__":
     main()

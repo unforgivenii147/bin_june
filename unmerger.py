@@ -2,8 +2,6 @@
 import re
 import sys
 from pathlib import Path
-
-
 def parse_merged_file(filepath):
     with open(filepath, "r") as f:
         content = f.read()
@@ -16,8 +14,6 @@ def parse_merged_file(filepath):
             file_content = parts[i + 1].lstrip("\n").rstrip()
             files[file_path] = file_content
     return files
-
-
 def get_unique_path(path):
     path = Path(path)
     if not path.exists():
@@ -32,8 +28,6 @@ def get_unique_path(path):
         if not new_path.exists():
             return new_path
         counter += 1
-
-
 def main():
     if len(sys.argv) < 2:
         print("Usage: python script.py <input_file>")
@@ -47,7 +41,5 @@ def main():
         unique_path.write_text(file_content)
         status = "Renamed to" if unique_path.name != path.name else "Created"
         print(f"{status}: {unique_path}")
-
-
 if __name__ == "__main__":
     main()

@@ -1,34 +1,24 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 from collections import defaultdict
 from pathlib import Path
-
 import tree_sitter_python as tsp
 from tree_sitter import Language, Parser, Tree
-
 parser = Parser()
 parser.language = Language(tsp.language())
 OUT_DIR = Path("output")
 OUT_DIR.mkdir(exist_ok=True)
 VALID = {"function_definition", "class_definition"}
-
-
 def get_node_text(src: bytes, node) -> str:
     return src[node.start_byte : node.end_byte].decode()
-
-
 def get_node_name(node):
     for child in node.children:
         if child.type == "identifier":
             return child.text.decode() if hasattr(child, "text") else None
     return None
-
-
 def extract_functions_and_classes(src: bytes, tree: Tree):
     root = tree.root_node
     definitions = []
-
     def traverse(node) -> None:
         if node.type in VALID:
             name = get_node_name(node)
@@ -50,18 +40,13 @@ def extract_functions_and_classes(src: bytes, tree: Tree):
             )
         for child in node.children:
             traverse(child)
-
     traverse(root)
     return definitions
-
-
 def get_relative_path(file_path: Path, base_path: Path) -> Path:
     try:
         return file_path.relative_to(base_path)
     except ValueError:
         return file_path
-
-
 folder_definitions = defaultdict(lambda: defaultdict(list))
 processed_files_count = 0
 folders_found = set()

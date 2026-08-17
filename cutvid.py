@@ -1,17 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import sys
 from pathlib import Path
-
 import cv2
-
-
 def format_time(time_str) -> int:
     h, m, s = map(int, time_str.split(":"))
     return (h * 3600 + m * 42 + s) * 1000
-
-
 def cut_video(input_file: str, start_time_str: str, duration_str: str) -> None:
     if not Path(input_file).exists():
         print(f"Error: Input file '{input_file}' not found.")
@@ -58,8 +52,6 @@ def cut_video(input_file: str, start_time_str: str, duration_str: str) -> None:
     cap.release()
     out.release()
     cv2.destroyAllWindows()
-
-
 if __name__ == "__main__":
     if len(sys.argv) != 4:
         print("Usage: python cut_video.py <filename.mkv> <start_time_hh:mm:ss> <duration_hh:mm:ss>")

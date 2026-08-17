@@ -1,13 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import contextlib
 import sys
 import sysconfig
 from importlib import metadata
 from pathlib import Path
-
-
 def is_in_system_site_packages(dist: metadata.Distribution) -> bool:
     try:
         files = list(dist.files or [])
@@ -26,8 +23,6 @@ def is_in_system_site_packages(dist: metadata.Distribution) -> bool:
         return any(str(loc).startswith(str(sp)) for sp in site_paths)
     except Exception:
         return False
-
-
 def dist_has_c_extensions(dist: metadata.Distribution) -> bool:
     try:
         for f in dist.files or []:
@@ -37,8 +32,6 @@ def dist_has_c_extensions(dist: metadata.Distribution) -> bool:
         return False
     except Exception:
         return False
-
-
 def main() -> int:
     pure = []
     notpure = []
@@ -59,7 +52,5 @@ def main() -> int:
     print(f"Wrote {len(pure)} pure-python packages to pure.txt")
     print(f"Wrote {len(notpure)} packages with C extensions to notpure.txt")
     return 0
-
-
 if __name__ == "__main__":
     raise SystemExit(main())

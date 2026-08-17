@@ -1,24 +1,18 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import argparse
 import ast
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import List, Tuple
-
-
 class ParentMapper(ast.NodeVisitor):
     def __init__(self):
         self.parents = {}
-
     def visit(self, node):
         for child in ast.iter_child_nodes(node):
             self.parents[child] = node
         self.generic_visit(node)
-
-
 def get_ancestors(node: ast.AST, parent_map: dict) -> List[ast.AST]:
     ancestors = []
     current = node
@@ -26,8 +20,6 @@ def get_ancestors(node: ast.AST, parent_map: dict) -> List[ast.AST]:
         current = parent_map[current]
         ancestors.append(current)
     return ancestors
-
-
 def is_in_restricted_scope(node: ast.AST, parent_map: dict) -> bool:
     ancestors = get_ancestors(node, parent_map)
     restricted_types = (
@@ -44,8 +36,6 @@ def is_in_restricted_scope(node: ast.AST, parent_map: dict) -> bool:
         ast.While,
     )
     return any(isinstance(ancestor, restricted_types) for ancestor in ancestors)
-
-
 def find_imports_not_at_head(file_path: Path) -> List[Tuple[int, int, str]]:
     try:
         source = file_path.read_text(encoding="utf-8")
@@ -78,8 +68,6 @@ def find_imports_not_at_head(file_path: Path) -> List[Tuple[int, int, str]]:
             import_text = "\n".join(lines[node.lineno - 1 : node.end_lineno])
             misplaced_imports.append((node.lineno, node.end_lineno or node.lineno, import_text))
     return misplaced_imports
-
-
 def autofix_imports(file_path: Path, misplaced_imports: List[Tuple[int, int, str]]) -> bool:
     if not misplaced_imports:
         return False
@@ -112,8 +100,6 @@ def autofix_imports(file_path: Path, misplaced_imports: List[Tuple[int, int, str
     new_lines = lines[:insert_index] + imports_to_move + [""] + lines[insert_index:]
     file_path.write_text("\n".join(new_lines), encoding="utf-8")
     return True
-
-
 def process_file(file_path: Path, autofix: bool) -> Tuple[bool, bool, List[str]]:
     misplaced = find_imports_not_at_head(file_path)
     if not misplaced:
@@ -135,8 +121,6 @@ def process_file(file_path: Path, autofix: bool) -> Tuple[bool, bool, List[str]]
             details.append(msg)
             return True, False, details
     return True, False, details
-
-
 def save_report(report_data: List[Tuple[Path, List[str]]], output_file: str, autofix: bool):
     with open(output_file, "w", encoding="utf-8") as f:
         if not report_data:
@@ -152,8 +136,6 @@ def save_report(report_data: List[Tuple[Path, List[str]]], output_file: str, aut
             fixed = sum(1 for _, details in report_data if any("[FIXED]" in d for d in details))
             f.write(f"  Files fixed: {fixed}\n")
             f.write(f"  Files with errors: {len(report_data) - fixed}\n")
-
-
 def main():
     parser = argparse.ArgumentParser(description="Find .py files with imports not at the head of the file")
     parser.add_argument("directory", nargs="?", default=".", help="Directory to scan (default: current directory)")
@@ -206,7 +188,5 @@ def main():
         print(f"  Report saved to: {output_file}")
     if files_with_issues > 0 and not args.autofix:
         sys.exit(1)
-
-
 if __name__ == "__main__":
     main()

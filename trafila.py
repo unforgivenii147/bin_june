@@ -1,15 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import sys
 from pathlib import Path
-
 import trafilatura
 from dh import get_files, mpf3
-
 remove_orig = "-r" in sys.argv
-
-
 def process_file(path: str | Path) -> tuple[Path, bool]:
     path = Path(path)
     md_file = path.with_suffix(".md")
@@ -28,7 +23,6 @@ def process_file(path: str | Path) -> tuple[Path, bool]:
         if not markdown:
             from bs4 import BeautifulSoup
             from markdownify import markdownify
-
             soup = BeautifulSoup(html_content, "html.parser")
             markdown = markdownify(str(soup))
         if markdown and markdown.strip():
@@ -42,8 +36,6 @@ def process_file(path: str | Path) -> tuple[Path, bool]:
     except Exception as e:
         print(f"✗ Error processing {path.name}: {e}")
         return path, False
-
-
 if __name__ == "__main__":
     cwd = Path.cwd()
     args = sys.argv[1:]

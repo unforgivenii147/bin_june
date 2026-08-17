@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import base64
 import re
 import sys
@@ -8,15 +7,10 @@ from email import policy
 from email.message import EmailMessage
 from email.parser import BytesParser
 from pathlib import Path
-
 from dh import get_files
-
-
 def sanitize_filename(name: str) -> str:
     name = name.strip().strip('"').strip("'")
     return re.sub("[^A-Za-z0-9._-]+", "_", name) or "resource"
-
-
 def split_data_url(src: str):
     if not src or not src.startswith("data:"):
         return None
@@ -30,8 +24,6 @@ def split_data_url(src: str):
         return (mime, raw)
     except Exception:
         return None
-
-
 def process_file(path) -> None:
     path = Path(path)
     base_name = ""
@@ -44,13 +36,11 @@ def process_file(path) -> None:
     msg = BytesParser(policy=policy.default).parsebytes(raw)
     parts = []
     if msg.is_multipart():
-
         def walk(m: EmailMessage) -> None:
             for p in m.iter_parts():
                 parts.append(p)
                 if p.is_multipart():
                     walk(p)
-
         walk(msg)
     else:
         parts = [msg]
@@ -80,7 +70,6 @@ def process_file(path) -> None:
     _, html_bytes = html_candidates[0]
     html_text = html_bytes.decode(errors="replace")
     cid_to_file = {}
-
     def get_name_from_headers(part) -> str:
         filename = part.get_param("name", header="Content-Type") if part.get("Content-Type") else None
         if filename:
@@ -90,7 +79,6 @@ def process_file(path) -> None:
         if m:
             return sanitize_filename(m.group(1))
         return None
-
     for cid, ctype, disp, payload, part in resource_parts:
         fname = ""
         if not payload:
@@ -119,13 +107,11 @@ def process_file(path) -> None:
                 i += 1
         with out_path.open("wb") as f:
             f.write(payload)
-
     def repl_cid(match):
         cid = match.group(1)
         if cid in cid_to_file:
             return f'src="{out_dir.name}/{cid_to_file[cid]}"'
         return match.group(0)
-
     html_text = re.sub(
         "(src|href)=[\\\\\\\"']cid:([^\\\\\\\"']+)[\\\\\\\"']",
         lambda m: (
@@ -136,7 +122,6 @@ def process_file(path) -> None:
         html_text,
         flags=re.IGNORECASE,
     )
-
     def data_uri_replacer(match):
         attr = match.group(1)
         data_url = match.group(2)
@@ -156,7 +141,6 @@ def process_file(path) -> None:
         with out_path.open("wb") as f:
             f.write(raw)
         return f'{attr}="{out_dir.name}/{fname}"'
-
     html_text = re.sub(
         "(src|href)=[\\\\\\\"'](data:[^\\\\\\\"']+)[\\\\\\\"']", data_uri_replacer, html_text, flags=re.IGNORECASE
     )
@@ -165,8 +149,6 @@ def process_file(path) -> None:
     print("Done.")
     print(f"HTML: {out_html}")
     print(f"Resources: {out_dir}/ (extracted {len(cid_to_file)} CID items)")
-
-
 if __name__ == "__main__":
     cwd = Path.cwd()
     args = sys.argv[1:]

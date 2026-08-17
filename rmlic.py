@@ -1,14 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import re
 from pathlib import Path
-
 from dh import cprint, fsz, get_nobinary
-
 CHUNK_SIZE = 1024 * 1024
-
-
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -18,8 +13,6 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
-
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -34,13 +27,9 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
-
 LIC_FILE = Path("/sdcard/lic")
 MIN_BLANK_LINES = 3
 NUM_WORKERS = 8
-
-
 def load_patterns(lic_path: Path) -> list[str]:
     try:
         content = Path(lic_path).read_text(encoding="utf-8", errors="ignore")
@@ -53,21 +42,15 @@ def load_patterns(lic_path: Path) -> list[str]:
     except Exception as e:
         print(f"Error loading patterns from {lic_path}: {e}")
         return []
-
-
 def escape_for_regex(text: str) -> str:
     escaped = re.escape(text)
     return escaped.replace("\\n", "\\s*\\n\\s*")
-
-
 def remove_patterns_from_content(content: str, patterns: list[str]) -> str:
     cleaned = content
     for pattern in patterns:
         regex_pattern = escape_for_regex(pattern)
         cleaned = re.sub(regex_pattern, "", cleaned, flags=re.IGNORECASE | re.MULTILINE)
     return cleaned
-
-
 def process_file(file_path: Path, patterns: list[str]) -> tuple:
     path = Path(file_path)
     path = Path(path)
@@ -80,8 +63,6 @@ def process_file(file_path: Path, patterns: list[str]) -> tuple:
         ds = before - gsz(path)
         cprint(f"{fsz(ds)}")
         del before, ds, cleaned_content, original_content, path
-
-
 def main() -> None:
     if not LIC_FILE.exists():
         print(f"Error: License file not found: {LIC_FILE}")
@@ -98,7 +79,5 @@ def main() -> None:
         return
     for f in all_files:
         process_file(f, patterns)
-
-
 if __name__ == "__main__":
     main()

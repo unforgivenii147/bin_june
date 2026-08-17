@@ -2,9 +2,7 @@
 """
 In-place translation of Chinese characters in text files with progress persistence.
 """
-
 from __future__ import annotations
-
 import json
 import logging
 import re
@@ -14,11 +12,9 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Final
-
 from deep_translator import GoogleTranslator
 from dh import get_nobinary
 from tenacity import before_sleep_log, retry, retry_if_exception_type, stop_after_attempt, wait_exponential_jitter
-
 CHUNK_SIZE = 1024 * 1024
 CHUNK_SIZE: Final[int] = 32768
 SKIP_DIRS: Final[frozenset[str]] = frozenset(
@@ -31,21 +27,13 @@ PROGRESS_SAVE_EVERY: Final[int] = 20
 logging.basicConfig(level=logging.WARNING)
 log = logging.getLogger(__name__)
 _interrupted = False
-
-
 def _sigint_handler(sig: Any, frame: Any) -> None:
     global _interrupted
     print("\n⚠️  Ctrl+C caught — completing current active requests and saving progress...")
     _interrupted = True
-
-
 signal.signal(signal.SIGINT, _sigint_handler)
-
-
 def find_chinese_segments(text: str) -> list[tuple[int, int, str]]:
     return [(m.start(), m.end(), m.group()) for m in CHINESE_PATTERN.finditer(text)]
-
-
 def reassemble_line(original: str, translations: dict[tuple[int, int], str]) -> str:
     result: list[str] = []
     last_end = 0
@@ -55,8 +43,6 @@ def reassemble_line(original: str, translations: dict[tuple[int, int], str]) -> 
         last_end = end
     result.append(original[last_end:])
     return "".join(result)
-
-
 def read_text(path: Path) -> tuple[str, str]:
     for enc in ("utf-8", "utf-8-sig", "gb18030", "gbk", "cp1252"):
         try:
@@ -64,16 +50,10 @@ def read_text(path: Path) -> tuple[str, str]:
         except (UnicodeDecodeError, LookupError):
             continue
     return (path.read_bytes().decode("utf-8", errors="replace"), "utf-8")
-
-
 class RateLimitError(Exception):
     pass
-
-
 class TranslationError(Exception):
     pass
-
-
 @retry(
     reraise=True,
     stop=stop_after_attempt(MAX_RETRIES),
@@ -94,8 +74,6 @@ def _translate(text: str) -> str:
         if any(k in msg for k in ("429", "rate limit", "too many", "quota")):
             raise RateLimitError(str(e))
         raise TranslationError(str(e))
-
-
 def translate_worker(line_idx: int, start: int, end: int, text: str) -> tuple[int, int, int, str, bool]:
     if _interrupted:
         return (line_idx, start, end, text, False)
@@ -103,12 +81,8 @@ def translate_worker(line_idx: int, start: int, end: int, text: str) -> tuple[in
         return (line_idx, start, end, _translate(text), True)
     except Exception:
         return (line_idx, start, end, text, False)
-
-
 def _progress_path(file_path: Path) -> Path:
     return file_path.with_suffix(file_path.suffix + ".xlprogress")
-
-
 def save_progress(file_path: Path, done: dict[int, dict[tuple[int, int], str]], total: int) -> None:
     try:
         serializable_done = {str(k): {f"{pos[0]},{pos[1]}": v for pos, v in v.items()} for k, v in done.items() if v}
@@ -121,8 +95,6 @@ def save_progress(file_path: Path, done: dict[int, dict[tuple[int, int], str]], 
         _progress_path(file_path).write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
     except Exception as e:
         log.error("Could not save progress for %s: %s", file_path, e)
-
-
 def load_progress(file_path: Path) -> dict[int, dict[tuple[int, int], str]]:
     p = _progress_path(file_path)
     if not p.exists():
@@ -136,12 +108,8 @@ def load_progress(file_path: Path) -> dict[int, dict[tuple[int, int], str]]:
         return restored
     except Exception:
         return {}
-
-
 def drop_progress(file_path: Path) -> None:
     _progress_path(file_path).unlink(missing_ok=True)
-
-
 def process_file(path: Path) -> bool:
     global _interrupted
     print(f"\n📄 Processing: {path}")
@@ -204,8 +172,6 @@ def process_file(path: Path) -> bool:
     except Exception as e:
         print(f"   ❌ Failed to write output: {e}")
         return False
-
-
 def main() -> None:
     args = sys.argv[1:]
     files = [Path(p) for p in args if Path(p).is_file()] if args else get_nobinary(Path.cwd())
@@ -217,7 +183,5 @@ def main() -> None:
         print("\n⚠️  Stopped early. Run again to resume.")
     else:
         print("\n✅ All files processed successfully.")
-
-
 if __name__ == "__main__":
     main()

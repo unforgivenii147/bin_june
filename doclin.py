@@ -3,17 +3,13 @@
 Remove image references (including shields.io badges) from .rst and .md files.
 Processes files in parallel and reports statistics.
 """
-
 from __future__ import annotations
-
 import re
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
-
-
 @dataclass
 class FileStats:
     path: Path
@@ -23,8 +19,6 @@ class FileStats:
     size_after: int
     removed_lines: int
     removed_refs: int
-
-
 RST_IMAGE_PATTERNS = [
     re.compile(r"^\s*\.\.\s+image::\s+https?://[^\s]+", re.IGNORECASE | re.MULTILINE),
     re.compile(r"^\s*\.\.\s+figure::\s+https?://[^\s]+", re.IGNORECASE | re.MULTILINE),
@@ -69,17 +63,11 @@ BADGE_DOMAINS = [
     "buymeacoffee.com",
     "patreon.com",
 ]
-
-
 def has_badge_domain(line: str) -> bool:
     return any(re.search(domain, line, re.IGNORECASE) for domain in BADGE_DOMAINS)
-
-
 def is_image_extension_url(line: str) -> bool:
     image_extensions = r"\.(?:png|jpg|jpeg|gif|svg|ico|webp|bmp)(?:\?|#|$|\))"
     return bool(re.search(image_extensions, line, re.IGNORECASE))
-
-
 def remove_image_lines_rst(content: str) -> tuple[str, int]:
     lines = content.split("\n")
     new_lines = []
@@ -106,8 +94,6 @@ def remove_image_lines_rst(content: str) -> tuple[str, int]:
             new_lines.append(line)
         i += 1
     return "\n".join(new_lines), removed_count
-
-
 def remove_image_lines_md(content: str) -> tuple[str, int]:
     lines = content.split("\n")
     new_lines = []
@@ -152,8 +138,6 @@ def remove_image_lines_md(content: str) -> tuple[str, int]:
     if content.endswith("\n"):
         result += "\n"
     return result, removed_count
-
-
 def process_file(file_path: Path) -> Optional[FileStats]:
     try:
         with open(file_path, "r", encoding="utf-8") as f:
@@ -186,8 +170,6 @@ def process_file(file_path: Path) -> Optional[FileStats]:
     except Exception as e:
         print(f"Error processing {file_path}: {e}", file=sys.stderr)
         return None
-
-
 def collect_files(directories: list[Path]) -> list[Path]:
     files = []
     for directory in directories:
@@ -200,16 +182,12 @@ def collect_files(directories: list[Path]) -> list[Path]:
         for ext in ["*.rst", "*.md"]:
             files.extend(directory.rglob(ext))
     return sorted(set(files))
-
-
 def fsz(size_bytes: int) -> str:
     for unit in ["B", "KB", "MB", "GB"]:
         if size_bytes < 1024.0:
             return f"{size_bytes:.1f} {unit}"
         size_bytes /= 1024.0
     return f"{size_bytes:.1f} TB"
-
-
 def print_stats(all_stats: list[FileStats], base_path: Path):
     if not all_stats:
         print("\n✨ No image references found to remove!")
@@ -252,8 +230,6 @@ def print_stats(all_stats: list[FileStats], base_path: Path):
     if total_size_before > 0:
         print(f"Overall reduction: {((total_size_before - total_size_after) / total_size_before * 100):.1f}%")
     print("-" * 42)
-
-
 def main():
     if len(sys.argv) > 1:
         directories = [Path(arg) for arg in sys.argv[1:]]
@@ -285,7 +261,5 @@ def main():
     base_path = Path.cwd()
     stats_list.sort(key=lambda x: str(x.path))
     print_stats(stats_list, base_path)
-
-
 if __name__ == "__main__":
     main()

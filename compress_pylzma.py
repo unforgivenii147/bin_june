@@ -2,25 +2,18 @@
 """
 Compress/decompress files recursively using pylzma with parallel processing.
 """
-
 from __future__ import annotations
-
 import argparse
 import io
 import tarfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-
 import pylzma
-
-
 def create_tar_for_directory(dir_path):
     tar_buffer = io.BytesIO()
     with tarfile.open(fileobj=tar_buffer, mode="w") as tar:
         tar.add(dir_path, arcname=dir_path.name)
     return tar_buffer.getvalue()
-
-
 def compress_file(file_path, output_dir, tar_subdirs_first=False):
     try:
         file_path = Path(file_path)
@@ -41,8 +34,6 @@ def compress_file(file_path, output_dir, tar_subdirs_first=False):
         return f"Compressed: {file_path} -> {output_file}"
     except Exception as e:
         return f"Error compressing {file_path}: {e!s}"
-
-
 def decompress_file(file_path, output_dir):
     try:
         file_path = Path(file_path)
@@ -65,8 +56,6 @@ def decompress_file(file_path, output_dir):
             return f"Skipped (not a .7z or .tar.7z file): {file_path}"
     except Exception as e:
         return f"Error decompressing {file_path}: {e!s}"
-
-
 def process_files_parallel(files, output_dir, mode, tar_subdirs_first=False, max_workers=None):
     results = []
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
@@ -80,8 +69,6 @@ def process_files_parallel(files, output_dir, mode, tar_subdirs_first=False, max
                 results.append(result)
                 print(result)
     return results
-
-
 def main():
     parser = argparse.ArgumentParser(
         description="Compress/decompress files recursively using pylzma with parallel processing"
@@ -162,7 +149,5 @@ def main():
         print(f"Found {len(compressed_files)} files to decompress")
         print(f"Decompressing to: {output_dir}")
         process_files_parallel(compressed_files, output_dir, "decompress", False, args.workers)
-
-
 if __name__ == "__main__":
     main()

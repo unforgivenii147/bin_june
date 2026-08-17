@@ -1,22 +1,17 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import json
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from threading import Lock
-
 from deep_translator import GoogleTranslator
 from tqdm import tqdm
-
 INPUT_FILE = "words.txt"
 OUTPUT_FILE = "dic.json"
 MAX_WORKERS = 12
 SAVE_EVERY = 1000
 lock = Lock()
-
-
 def translate_word(word) -> str | None:
     for attempt in range(3):
         try:
@@ -25,13 +20,9 @@ def translate_word(word) -> str | None:
             print(f"[WARN] Failed '{word}' (attempt {attempt + 1}): {e}")
             time.sleep(0.5)
     return None
-
-
 def load_words(input_file: str) -> list[str]:
     with Path(input_file).open(encoding="utf-8") as f:
         return [w.strip() for w in f if w.strip()]
-
-
 def load_existing_results(output_file: str):
     if Path(output_file).exists():
         try:
@@ -42,15 +33,11 @@ def load_existing_results(output_file: str):
         except Exception as e:
             print(f"[WARN] Could not load existing {output_file}: {e}")
     return {}
-
-
 def save_results_atomic(results, output_file: str) -> None:
     tmp = output_file + ".tmp"
     with Path(tmp).open("w", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
     Path(tmp).replace(output_file)
-
-
 def main() -> None:
     words = load_words(INPUT_FILE)
     print(f"[INFO] Loaded {len(words)} Persian words")
@@ -91,7 +78,5 @@ def main() -> None:
             save_results_atomic(results, OUTPUT_FILE)
         pbar.close()
         print(f"\n[SAVED] Translation dictionary saved to {OUTPUT_FILE}")
-
-
 if __name__ == "__main__":
     main()

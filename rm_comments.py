@@ -4,15 +4,12 @@ Remove comments from non-binary files recursively.
 Targets files using '#' for comments (like config files, scripts, etc.)
 Supports inline comments and updates files in-place.
 """
-
 from __future__ import annotations
-
 import argparse
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Optional, Set, Tuple
-
 try:
     from binaryornot.check import is_binary
 except ImportError:
@@ -65,8 +62,6 @@ EXCLUDE_EXTENSIONS = {
     ".min.js",
     ".min.css",
 }
-
-
 def remove_comments_from_content(content: str) -> Tuple[str, int]:
     lines = content.split("\n")
     modified_lines = []
@@ -88,18 +83,14 @@ def remove_comments_from_content(content: str) -> Tuple[str, int]:
                     modified_lines.append(line)
                     break
             continue
-
         stripped = line.strip()
-
         if not stripped:
             modified_lines.append(line)
             continue
-
         if stripped.startswith("#"):
             removed_count += 1
             modified_lines.append("")
             continue
-
         quote_char = None
         comment_pos = -1
         for i, char in enumerate(line):
@@ -122,34 +113,24 @@ def remove_comments_from_content(content: str) -> Tuple[str, int]:
         else:
             modified_lines.append(line)
     return "\n".join(modified_lines), removed_count
-
-
 def is_ignored_extension(file_path: Path) -> bool:
     suffix = file_path.suffix.lower()
     if suffix in EXCLUDE_EXTENSIONS:
         return True
-
     if len(file_path.suffixes) > 1:
         double_suffix = "".join(file_path.suffixes[-2:]).lower()
         if double_suffix in EXCLUDE_EXTENSIONS:
             return True
     return False
-
-
 def is_hidden(file_path: Path) -> bool:
     return any(part.startswith(".") for part in file_path.parts)
-
-
 def process_file(file_path: Path) -> Tuple[Path, int, Optional[str], bool]:
     try:
         if is_binary(str(file_path)):
             return file_path, 0, None, True
-
         with open(file_path, "r", encoding="utf-8") as f:
             original_content = f.read()
-
         modified_content, removed_count = remove_comments_from_content(original_content)
-
         if removed_count > 0:
             with open(file_path, "w", encoding="utf-8") as f:
                 f.write(modified_content)
@@ -158,8 +139,6 @@ def process_file(file_path: Path) -> Tuple[Path, int, Optional[str], bool]:
         return file_path, 0, "Unable to read as text file (encoding issue)", True
     except Exception as e:
         return file_path, 0, str(e), False
-
-
 def find_target_files(
     root_dir: Path, include_hidden: bool = False, exclude_dirs: Set[str] | None = None, ignore_extensions: bool = True
 ) -> list:
@@ -182,20 +161,15 @@ def find_target_files(
             "bower_components",
         }
     target_files = []
-
     for file_path in root_dir.rglob("*"):
         if not file_path.is_file():
             continue
-
         if any(excluded in file_path.parts for excluded in exclude_dirs):
             continue
-
         if not include_hidden and is_hidden(file_path):
             continue
-
         if ignore_extensions and is_ignored_extension(file_path):
             continue
-
         try:
             if file_path.stat().st_size > 10 * 1024 * 1024:
                 continue
@@ -203,8 +177,6 @@ def find_target_files(
             continue
         target_files.append(file_path)
     return target_files
-
-
 def main():
     parser = argparse.ArgumentParser(description="Remove comments from non-binary files using # comment syntax")
     parser.add_argument(
@@ -227,7 +199,6 @@ def main():
     if not root_dir.exists():
         print(f"Error: Directory '{root_dir}' does not exist", file=sys.stderr)
         sys.exit(1)
-
     exclude_dirs = {
         ".git",
         "__pycache__",
@@ -249,7 +220,6 @@ def main():
         exclude_dirs.update(args.exclude_dirs)
     print(f"Scanning directory: {root_dir}")
     print("Finding non-binary files...")
-
     target_files = find_target_files(
         root_dir,
         include_hidden=args.include_hidden,
@@ -267,7 +237,6 @@ def main():
         if len(target_files) > 20:
             print(f"  ... and {len(target_files) - 20} more files")
         return
-
     total_removed = 0
     files_changed = 0
     files_with_errors = 0
@@ -275,7 +244,6 @@ def main():
     print(f"\nProcessing files in parallel...")
     with ProcessPoolExecutor(max_workers=args.max_workers) as executor:
         future_to_file = {executor.submit(process_file, file_path): file_path for file_path in target_files}
-
         completed = 0
         for future in as_completed(future_to_file):
             file_path = future_to_file[future]
@@ -301,7 +269,6 @@ def main():
             except Exception as e:
                 print(f"[{completed}/{len(target_files)}] Unexpected error: {file_path}: {e}")
                 files_with_errors += 1
-
     print(f"\n{'=' * 42}")
     print(f"Summary:")
     print(f"  Files scanned: {len(target_files)}")
@@ -311,7 +278,5 @@ def main():
     if files_with_errors > 0:
         print(f"  Files with errors: {files_with_errors}")
     print(f"{'=' * 42}")
-
-
 if __name__ == "__main__":
     main()

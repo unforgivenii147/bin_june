@@ -10,14 +10,11 @@ Requirements:
   - detector.py available in the same directory (the module you already have)
   - optional: gcld3 and pycld2 for best accuracy
 """
-
 from __future__ import annotations
-
 import argparse
 import csv
 import os
 from typing import Iterable, List, Tuple
-
 from cld import (
     detect_language,
     detect_language_from_path,
@@ -25,11 +22,8 @@ from cld import (
     read_file_bytes,
     safe_text_from_bytes,
 )
-
 DEFAULT_MAX_PROBE = 4096
 DEFAULT_READ_BYTES = 2 * 1024 * 1024
-
-
 def find_files(
     root: str = ".", recursive: bool = True, exts: Iterable[str] | None = None, skip_hidden: bool = True
 ) -> Iterable[str]:
@@ -46,16 +40,12 @@ def find_files(
             yield full
         if not recursive:
             break
-
-
 def is_text_file(path: str, max_probe: int = DEFAULT_MAX_PROBE) -> bool:
     try:
         sample = read_file_bytes(path, max_bytes=max_probe)
         return is_probably_text_bytes(sample)
     except Exception:
         return False
-
-
 def scan_file_lines(path: str, min_confidence: float = 0.6) -> List[Tuple[str, int, str, float, str]]:
     results = []
     try:
@@ -77,8 +67,6 @@ def scan_file_lines(path: str, min_confidence: float = 0.6) -> List[Tuple[str, i
         if lang != "en" and lang != "und" and conf >= min_confidence:
             results.append((path, i, lang, conf, raw_line))
     return results
-
-
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="Find non-English lines in text files and save to noneng.txt")
     parser.add_argument("--root", "-r", default=".", help="Root directory to scan (default: .)")
@@ -118,7 +106,5 @@ def main(argv=None) -> int:
                 total_found += 1
     print(f"Scanned files: {files_scanned}; non-English lines found: {total_found}; results saved to {out_path}")
     return 0
-
-
 if __name__ == "__main__":
     raise SystemExit(main())

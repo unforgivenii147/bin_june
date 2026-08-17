@@ -1,23 +1,17 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import sys
 import time
 from collections import deque
 from urllib.parse import urljoin, urlparse
 from urllib.robotparser import RobotFileParser
-
 import requests
 from bs4 import BeautifulSoup
-
-
 def can_fetch(rp: RobotFileParser, url):
     try:
         return rp.can_fetch("*", url)
     except Exception:
         return True
-
-
 def crawl_for_ext(start_url: str, max_pages: int, delay: float, ext: str):
     parsed = urlparse(start_url)
     if not parsed.scheme:
@@ -79,14 +73,10 @@ def crawl_for_ext(start_url: str, max_pages: int, delay: float, ext: str):
             print(f"  ⚠️  Unexpected error: {e}")
         time.sleep(delay)
     return sorted(found_urls)
-
-
 def save_urls(urls, filename="urls.txt") -> None:
     with open(filename, "w", encoding="utf-8") as f:
         f.writelines(url + "\n" for url in urls)
     print(f"\n✅ Saved {len(urls)} URLs to '{filename}'")
-
-
 def main() -> None:
     if len(sys.argv) < 2:
         print(__doc__)
@@ -97,7 +87,5 @@ def main() -> None:
     delay = 1.0
     ext_urls = crawl_for_ext(start_url, max_pages, delay, ext)
     save_urls(ext_urls)
-
-
 if __name__ == "__main__":
     main()

@@ -1,26 +1,19 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import sys
 from concurrent.futures import ProcessPoolExecutor
 from multiprocessing import cpu_count
 from pathlib import Path
-
 import pytesseract
 from PIL import Image
-
 TESSDATA_DIRS = [
     Path.home() / ".local" / "share" / "tessdata_best",
     Path.home() / ".local" / "share" / "tessdata_fast",
 ]
 IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".webp", ".gif"}
-
-
 def get_images(path: str | Path | None = None) -> list[Path]:
     path = Path(path or Path.cwd())
     return sorted(path.rglob("*")) if path.is_dir() else [path] if path.is_file() else []
-
-
 def extract_text(image_path: Path, tessdata_dir: Path) -> dict:
     if image_path.suffix.lower() not in IMAGE_EXTS:
         return None
@@ -41,13 +34,9 @@ def extract_text(image_path: Path, tessdata_dir: Path) -> dict:
             "text": "",
             "status": f"error: {e}",
         }
-
-
 def process_image(args):
     image_path, tessdata_dir = args
     return extract_text(image_path, tessdata_dir)
-
-
 def main() -> None:
     args = sys.argv[1:]
     paths = [Path(p) for p in args] if args else [Path.cwd()]
@@ -71,7 +60,5 @@ def main() -> None:
             print(f"Status: {result['status']}")
             if result["text"]:
                 print(f"Text:\n{result['text']}")
-
-
 if __name__ == "__main__":
     main()

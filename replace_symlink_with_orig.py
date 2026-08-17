@@ -1,11 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import shutil
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
-
 def process_symlink(symlink_path: Path):
     try:
         raw_target = symlink_path.readlink()
@@ -24,8 +21,6 @@ def process_symlink(symlink_path: Path):
         return {"status": "replaced", "msg": f"Replaced: {symlink_path} -> {target_path}"}
     except Exception as e:
         return {"status": "error", "msg": f"Failed to process {symlink_path}: {e!s}"}
-
-
 def main():
     current_dir = Path.cwd()
     replaced_log = current_dir / "replaced.txt"
@@ -53,7 +48,5 @@ def main():
     if errors_list:
         errors_log.write_text("\n".join(errors_list) + "\n", encoding="utf-8")
         print(f"Encountered {len(errors_list)} errors. Logged to errors.txt")
-
-
 if __name__ == "__main__":
     main()

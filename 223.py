@@ -1,10 +1,7 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 from pathlib import Path
-
 from dh import get_pyfiles, mpf3, runcmd
-
 fixes = [
     "apply",
     "asserts",
@@ -58,16 +55,12 @@ fixes = [
     "xreadlines",
     "zip",
 ]
-
-
 def process_file(path: Path) -> None:
     path = Path(path)
     for fix in fixes:
         target_fix = f"--fix={fix}"
         cmd = ["2to3", "-w", target_fix, str(path)]
         runcmd(cmd, show_output=True)
-
-
 if __name__ == "__main__":
     cwd = Path.cwd()
     args = sys.argv[1:]

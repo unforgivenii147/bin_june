@@ -9,17 +9,14 @@ Usage: python standalone.py <html_file>
 - Images, fonts, and other binary assets are converted to data URIs
 - The file is updated in place
 """
-
 import base64
 import mimetypes
 import os
 import re
 import sys
 from urllib.parse import urlparse
-
 import requests
 from bs4 import BeautifulSoup
-
 mimetypes.add_type("application/font-woff", ".woff")
 mimetypes.add_type("font/woff2", ".woff2")
 mimetypes.add_type("font/ttf", ".ttf")
@@ -31,8 +28,6 @@ mimetypes.add_type("application/javascript", ".js")
 mimetypes.add_type("application/json", ".json")
 session = requests.Session()
 session.headers.update({"User-Agent": "Mozilla/5.0 (compatible; StandaloneHTML/1.0)"})
-
-
 def guess_mime(url, content_type=None):
     if content_type:
         ct = content_type.split(";")[0].strip()
@@ -41,8 +36,6 @@ def guess_mime(url, content_type=None):
     path = urlparse(url).path
     mime, _ = mimetypes.guess_type(path)
     return mime or "application/octet-stream"
-
-
 def fetch(url, base_dir):
     if not url or url.startswith("data:"):
         return None, None
@@ -74,24 +67,17 @@ def fetch(url, base_dir):
         else:
             print(f"  ⚠ file not found: {local_path}")
             return None, None
-
-
 def to_data_uri(content, mime):
     b64 = base64.b64encode(content).decode("ascii")
     return f"data:{mime};base64,{b64}"
-
-
 def _css_base_for(css_source, fallback_base):
     if not css_source or css_source.startswith("data:"):
         return fallback_base
     if css_source.startswith(("http://", "https://")):
         return css_source.rsplit("/", 1)[0] + "/"
     return os.path.dirname(css_source) or "."
-
-
 def process_css(css_text, base_dir, css_source=None):
     css_base = _css_base_for(css_source, base_dir)
-
     def replace_import(match):
         full = match.group(0)
         import_url = match.group(1).strip().strip("\"'")
@@ -105,13 +91,11 @@ def process_css(css_text, base_dir, css_source=None):
         except Exception:
             return full
         return process_css(imported, css_base, import_url)
-
     css_text = re.sub(
         r'@import\s+(?:url\(\s*)?["\']?([^"\')\s]+)["\']?\s*\)?[^;]*;',
         replace_import,
         css_text,
     )
-
     def replace_url(match):
         full = match.group(0)
         url = match.group(1).strip()
@@ -121,15 +105,12 @@ def process_css(css_text, base_dir, css_source=None):
         if content is None:
             return full
         return f'url("{to_data_uri(content, mime)}")'
-
     css_text = re.sub(
         r'url\(\s*["\']?([^"\')]+)["\']?\s*\)',
         replace_url,
         css_text,
     )
     return css_text
-
-
 def process_srcset(srcset, base_dir):
     parts = []
     for item in srcset.split(","):
@@ -149,8 +130,6 @@ def process_srcset(srcset, base_dir):
         else:
             parts.append(item)
     return ", ".join(parts)
-
-
 def make_standalone(html_path):
     html_path = os.path.abspath(html_path)
     base_dir = os.path.dirname(html_path)
@@ -278,8 +257,6 @@ def make_standalone(html_path):
     with open(html_path, "w", encoding="utf-8") as f:
         f.write(result)
     print(f"\n✓ Done — standalone HTML saved to: {html_path}")
-
-
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python standalone.py <html_file>")

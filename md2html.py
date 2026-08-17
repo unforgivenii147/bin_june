@@ -1,16 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import os
 import re
 import shutil
 import sys
 from pathlib import Path
-
 import markdown
 from bs4 import BeautifulSoup
-
-
 def modify_classes(html_content: str) -> str:
     soup = BeautifulSoup(html_content, "html.parser")
     tag_class_map = {
@@ -29,18 +25,12 @@ def modify_classes(html_content: str) -> str:
             combined_classes = list(set(existing_classes + new_classes))
             element["class"] = combined_classes
     return str(soup)
-
-
 def convert_latex_format(text: str) -> str:
     text = re.sub(r"\\\[(.*?)\\\]", '<div class="latex-displayr">\1</div>', text, flags=re.DOTALL)
     return re.sub(r"\\\((.*?)\\\)", '<span class="latex-inliner">\1</span>', text, flags=re.DOTALL)
-
-
 def read_markdown_file(file_path: str) -> str:
     with Path(file_path).open(encoding="utf-8", errors="ignore") as f:
         return f.read()
-
-
 def convert_markdown(md_path: str) -> str:
     if not md_path:
         raise ValueError(msg)
@@ -79,8 +69,6 @@ def convert_markdown(md_path: str) -> str:
     Path(temp_html_path).write_text(html_template, encoding="utf-8")
     shutil.copy(temp_html_path, final_output_path)
     return final_output_path
-
-
 if __name__ == "__main__":
     md_path = sys.argv[1]
     output_path = convert_markdown(md_path)

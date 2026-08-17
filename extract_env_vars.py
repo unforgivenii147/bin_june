@@ -1,10 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import builtins
 import re
 from pathlib import Path
-
 env_vars = set()
 env_var_pattern = re.compile(r"^([A-Z_0-9]+)=")
 for filepath in Path().rglob("*"):

@@ -1,11 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import argparse
 import re
 import sys
 from pathlib import Path
-
 try:
     from dh import colored
 except ImportError:
@@ -21,30 +19,22 @@ TRASH = re.compile(
     r"(HDTV|WEB[-\. ]?DL|WEBRIP|BLURAY|IMOVIE[-\. ]?DL|ELKA|PARISA|KILLERS|FUM|TURBO|FA)",
     re.IGNORECASE,
 )
-
-
 def extract_episode(name: str):
     for pat in EPISODE_PATTERNS:
         m = pat.search(name)
         if m:
             return m.group(m.lastindex)
     return None
-
-
 def clean_name(fname: str) -> str | None:
     name = LEADING_JUNK.sub("", fname)
     ep = extract_episode(name)
     if not ep:
         return None
     return f"E{ep.zfill(2)}"
-
-
 def collect_files(path: Path, recursive: bool) -> list[Path]:
     if recursive:
         return [p for p in path.rglob("*") if p.suffix.lower() in VIDEO_EXTS]
     return [p for p in path.iterdir() if p.is_file() and p.suffix.lower() in VIDEO_EXTS]
-
-
 def main() -> None:
     ap = argparse.ArgumentParser("Subtitle cleaner")
     ap.add_argument("-r", "--recursive", action="store_true")
@@ -70,7 +60,5 @@ def main() -> None:
                 f.rename(target)
     if not args.write:
         print(colored("\nDry-run only. Use -w to apply.", "yellow"))
-
-
 if __name__ == "__main__":
     main()

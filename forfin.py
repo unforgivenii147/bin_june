@@ -5,16 +5,12 @@ Usage: python run_script.py <extension> <cli_app> [args...]
 Example: python run_script.py .svg svgo
          python run_script.py .svg svgo -c config.json -o output/
 """
-
 from __future__ import annotations
-
 import subprocess
 import sys
 from functools import partial
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-
-
 def process_file(cli_app, cli_args, file_path):
     try:
         cmd = [cli_app] + cli_args + [str(file_path)]
@@ -25,8 +21,6 @@ def process_file(cli_app, cli_args, file_path):
             return f"❌ Failed: {file_path.name} - {result.stderr.strip()}"
     except Exception as e:
         return f"❌ Error processing {file_path.name}: {e!s}"
-
-
 def main():
     if len(sys.argv) < 3:
         print("Usage: python run_script.py <extension> <cli_app> [args...]")
@@ -57,7 +51,5 @@ def main():
     failure_count = len(results) - success_count
     print("-" * 42)
     print(f"Summary: {success_count} successful, {failure_count} failed")
-
-
 if __name__ == "__main__":
     main()

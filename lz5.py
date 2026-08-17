@@ -6,9 +6,7 @@ Usage:
     python script.py -c
     python script.py -d
 """
-
 from __future__ import annotations
-
 import argparse
 import io
 import os
@@ -16,10 +14,7 @@ import shutil
 import tarfile
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-
 import lz4.frame
-
-
 def get_folder_size(folder_path):
     total = 0
     for dirpath, _dirnames, filenames in os.walk(folder_path):
@@ -28,16 +23,12 @@ def get_folder_size(folder_path):
             if os.path.exists(fp):
                 total += os.path.getsize(fp)
     return total
-
-
 def fsz(bytes_size):
     for unit in ["B", "KB", "MB", "GB", "TB"]:
         if bytes_size < 1024.0:
             return f"{bytes_size:.2f} {unit}"
         bytes_size /= 1024.0
     return f"{bytes_size:.2f} PB"
-
-
 def compress_folder(folder_path):
     folder = Path(folder_path)
     if not folder.is_dir():
@@ -70,8 +61,6 @@ def compress_folder(folder_path):
         }
     except Exception as e:
         return {"folder": folder.name, "error": str(e), "status": "error"}
-
-
 def decompress_file(file_path):
     file = Path(file_path)
     if not file.suffix == ".lz4" or not file.stem.endswith(".tar"):
@@ -91,8 +80,6 @@ def decompress_file(file_path):
         return f"Decompressed: {file} -> {folder_path}"
     except Exception as e:
         return f"Error decompressing {file}: {e}"
-
-
 def print_compression_report(results):
     successful = [r for r in results if r.get("status") == "success"]
     errors = [r for r in results if r.get("status") == "error"]
@@ -126,8 +113,6 @@ def print_compression_report(results):
         print("-" * 42)
     print(f"\nTotal space freed: {fsz(total_freed)}")
     print(f"Average compression ratio: {(total_original / total_compressed if total_compressed > 0 else 0):.2f}x")
-
-
 def main():
     parser = argparse.ArgumentParser(
         description="Compress/decompress folders with LZ4",
@@ -160,7 +145,5 @@ def main():
         for result in results:
             print(result)
         print(f"\n{action} complete!")
-
-
 if __name__ == "__main__":
     main()

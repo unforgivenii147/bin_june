@@ -1,21 +1,16 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import operator
 import sys
 from abc import ABC, abstractmethod
 from datetime import datetime
 from pathlib import Path
 from typing import Any
-
 import markdown
-
-
 class GUIFramework:
     def __init__(self) -> None:
         self.session_id = None
         self.dialogs = {}
-
     def show_dialog(self, title: str, message: str, buttons: list[str] | None = None) -> int:
         if buttons is None:
             buttons = ["OK"]
@@ -27,7 +22,6 @@ class GUIFramework:
             print(f"{i}: {btn}")
         choice = input("Select option: ").strip()
         return int(choice) if choice.isdigit() else 0
-
     def show_text_input(self, title: str, hint: str = "", multi_line: bool = False) -> str | None:
         print(f"\n[{title}]")
         if hint:
@@ -42,43 +36,33 @@ class GUIFramework:
                 lines.append(line)
             return "\n".join(lines) if lines else None
         return input("Input: ").strip() or None
-
     def show_file_picker(self, initial_path: str | None = None) -> str | None:
         if initial_path is None:
             initial_path = str(Path.home())
         return input(f"Enter file path (starting from {initial_path}): ").strip() or None
-
     def show_toast(self, message: str) -> None:
         print(f"[Toast] {message}")
-
     def show_menu(self, title: str, items: list[str]) -> int:
         print(f"\n[{title}]")
         for i, item in enumerate(items):
             print(f"{i}: {item}")
         choice = input("Select: ").strip()
         return int(choice) if choice.isdigit() else -1
-
     def show_snackbar(self, message: str, action: str | None = None) -> None:
         msg = f"[Snackbar] {message}"
         if action:
             msg += f" [{action}]"
         print(msg)
-
-
 class DocumentFormat(ABC):
     @abstractmethod
     def get_syntax_highlight_rules(self) -> dict[str, str]:
         pass
-
     @abstractmethod
     def get_preview(self, content: str) -> str:
         pass
-
     @abstractmethod
     def get_format_actions(self) -> list[str]:
         pass
-
-
 class MarkdownFormat(DocumentFormat):
     def get_syntax_highlight_rules(self) -> dict[str, str]:
         return {
@@ -94,13 +78,11 @@ class MarkdownFormat(DocumentFormat):
             "list": "^[\\*\\-\\+] .*$",
             "blockquote": "^> .*$",
         }
-
     def get_preview(self, content: str) -> str:
         try:
             return markdown.markdown(content)
         except Exception as e:
             return f"<p>Error rendering preview: {e!s}</p>"
-
     def get_format_actions(self) -> list[str]:
         return [
             "Insert Heading",
@@ -112,8 +94,6 @@ class MarkdownFormat(DocumentFormat):
             "Insert List",
             "Insert Table",
         ]
-
-
 class TodoFormat(DocumentFormat):
     def get_syntax_highlight_rules(self) -> dict[str, str]:
         return {
@@ -126,7 +106,6 @@ class TodoFormat(DocumentFormat):
             "context": r"@\w+",
             "date": r"\d{4}-\d{2}-\d{2}",
         }
-
     def get_preview(self, content: str) -> str:
         lines = content.split("\n")
         preview = []
@@ -142,7 +121,6 @@ class TodoFormat(DocumentFormat):
             else:
                 preview.append(line)
         return "\n".join(preview)
-
     def get_format_actions(self) -> list[str]:
         return [
             "Insert Task",
@@ -153,8 +131,6 @@ class TodoFormat(DocumentFormat):
             "Add Project Tag",
             "Add Context Tag",
         ]
-
-
 class Document:
     def __init__(self, file_path: str, format_type: str = "markdown") -> None:
         self.file_path = Path(file_path)
@@ -163,19 +139,16 @@ class Document:
         self.last_modified = None
         self.format_handler = self._get_format_handler()
         self._load()
-
     def _get_format_handler(self) -> DocumentFormat:
         if self.format_type == "markdown":
             return MarkdownFormat()
         if self.format_type == "todo":
             return TodoFormat()
         return MarkdownFormat()
-
     def _load(self) -> None:
         if self.file_path.exists():
             self.content = self.file_path.read_text(encoding="utf-8")
             self.last_modified = datetime.fromtimestamp(self.file_path.stat().st_mtime)
-
     def save(self) -> bool:
         try:
             self.file_path.parent.mkdir(parents=True, exist_ok=True)
@@ -185,35 +158,26 @@ class Document:
         except Exception as e:
             print(f"Error saving file: {e}")
             return False
-
     def get_preview(self) -> str:
         return self.format_handler.get_preview(self.content)
-
     def get_syntax_rules(self) -> dict[str, str]:
         return self.format_handler.get_syntax_highlight_rules()
-
     def get_quick_actions(self) -> list[str]:
         return self.format_handler.get_format_actions()
-
     def insert_text(self, text: str, position: int | None = None) -> None:
         if position is None:
             position = len(self.content)
         self.content = self.content[:position] + text + self.content[position:]
-
     def replace_text(self, old: str, new: str) -> int:
         count = self.content.count(old)
         self.content = self.content.replace(old, new)
         return count
-
     def get_word_count(self) -> int:
         return len(self.content.split())
-
     def get_char_count(self) -> int:
         return len(self.content)
-
     def get_line_count(self) -> int:
         return len(self.content.split("\n"))
-
     def get_info(self) -> dict[str, Any]:
         return {
             "name": self.file_path.name,
@@ -225,21 +189,17 @@ class Document:
             "lines": self.get_line_count(),
             "last_modified": self.last_modified.isoformat() if self.last_modified else None,
         }
-
-
 class FileManager:
     def __init__(self, root_path: str | None = None) -> None:
         if root_path is None:
             root_path = str(Path.home() / "Documents" / "Markor")
         self.root_path = Path(root_path)
         self.root_path.mkdir(parents=True, exist_ok=True)
-
     def create_document(self, name: str, format_type: str = "markdown", parent_dir: str | None = None) -> Document:
         file_path = self.root_path / f"{name}.md" if parent_dir is None else self.root_path / parent_dir / f"{name}.md"
         doc = Document(str(file_path), format_type=format_type)
         doc.save()
         return doc
-
     def open_document(self, relative_path: str) -> Document | None:
         file_path = self.root_path / relative_path
         if not file_path.exists():
@@ -254,14 +214,12 @@ class FileManager:
         else:
             format_type = "text"
         return Document(str(file_path), format_type=format_type)
-
     def delete_document(self, relative_path: str) -> bool:
         file_path = self.root_path / relative_path
         if file_path.exists():
             file_path.unlink()
             return True
         return False
-
     def list_documents(self, folder: str | None = None, recursive: bool = False) -> list[dict[str, Any]]:
         search_path = self.root_path / folder if folder else self.root_path
         if not search_path.exists():
@@ -278,19 +236,16 @@ class FileManager:
             if file_path.is_file() and file_path.suffix in {".md", ".txt", ".json"}
         ]
         return sorted(documents, key=operator.itemgetter("name"))
-
     def create_folder(self, name: str, parent_dir: str | None = None) -> bool:
         folder_path = self.root_path / parent_dir / name if parent_dir else self.root_path / name
         folder_path.mkdir(parents=True, exist_ok=True)
         return True
-
     def list_folders(self, parent_dir: str | None = None) -> list[str]:
         search_path = self.root_path / parent_dir if parent_dir else self.root_path
         if not search_path.exists():
             return []
         folders = [d.name for d in search_path.iterdir() if d.is_dir()]
         return sorted(folders)
-
     def search_documents(self, query: str, search_content: bool = False) -> list[dict[str, Any]]:
         results = []
         for doc_info in self.list_documents(recursive=True):
@@ -301,13 +256,10 @@ class FileManager:
                 if doc and query.lower() in doc.content.lower():
                     results.append(doc_info)
         return results
-
     def get_recent_documents(self, limit: int = 10) -> list[dict[str, Any]]:
         docs = self.list_documents(recursive=True)
         docs.sort(key=operator.itemgetter("modified"), reverse=True)
         return docs[:limit]
-
-
 class TextEditor:
     def __init__(self) -> None:
         self.gui = GUIFramework()
@@ -316,14 +268,12 @@ class TextEditor:
         self.undo_stack = []
         self.redo_stack = []
         self.is_modified = False
-
     def run(self):
         while True:
             if self.current_document is None:
                 self.show_home_screen()
             else:
                 self.show_editor_screen()
-
     def show_home_screen(self) -> None:
         menu_items = [
             "New Document",
@@ -349,7 +299,6 @@ class TextEditor:
             self.show_settings()
         elif choice == 6:
             sys.exit(0)
-
     def create_new_document(self) -> None:
         name = self.gui.show_text_input("New Document", "Enter document name")
         if not name:
@@ -361,7 +310,6 @@ class TextEditor:
         format_type = formats[format_choice] if 0 <= format_choice < len(formats) else "markdown"
         self.current_document = self.file_manager.create_document(name, format_type=format_type)
         self.gui.show_toast(f"Created: {name}")
-
     def open_document(self) -> None:
         docs = self.file_manager.list_documents(recursive=True)
         if not docs:
@@ -373,7 +321,6 @@ class TextEditor:
             self.current_document = self.file_manager.open_document(docs[choice]["path"])
             if self.current_document:
                 self.gui.show_toast(f"Opened: {docs[choice]['name']}")
-
     def show_recent_documents(self) -> None:
         recent = self.file_manager.get_recent_documents()
         if not recent:
@@ -385,7 +332,6 @@ class TextEditor:
             self.current_document = self.file_manager.open_document(recent[choice]["path"])
             if self.current_document:
                 self.gui.show_toast(f"Opened: {recent[choice]['name']}")
-
     def search_documents(self) -> None:
         query = self.gui.show_text_input("Search", "Enter search query")
         if not query:
@@ -404,7 +350,6 @@ class TextEditor:
         choice = self.gui.show_menu("Search Results", result_names)
         if 0 <= choice < len(results):
             self.current_document = self.file_manager.open_document(results[choice]["path"])
-
     def manage_folders(self) -> None:
         menu_items = ["Create Folder", "List Folders", "Back to Home"]
         choice = self.gui.show_menu("Manage Folders", menu_items)
@@ -419,7 +364,6 @@ class TextEditor:
                 self.gui.show_dialog("Folders", "Folders:\n" + "\n".join(folders))
             else:
                 self.gui.show_dialog("No Folders", "No folders found")
-
     def show_editor_screen(self) -> None:
         doc_name = self.current_document.file_path.name
         menu_items = [
@@ -447,7 +391,6 @@ class TextEditor:
             self.save_document()
         elif choice == 7:
             self.close_document()
-
     def edit_document(self) -> None:
         print(f"\n{'=' * 42}")
         print(f"Editing: {self.current_document.file_path.name}")
@@ -468,7 +411,6 @@ class TextEditor:
             if append_text:
                 self.current_document.content += "\n" + append_text
                 self.is_modified = True
-
     def show_preview(self) -> None:
         preview = self.current_document.get_preview()
         print(f"\n{'=' * 42}")
@@ -477,7 +419,6 @@ class TextEditor:
         print(preview)
         print(f"{'=' * 42}")
         input("Press Enter to continue...")
-
     def insert_template(self) -> None:
         templates = {
             "markdown": {
@@ -511,14 +452,12 @@ class TextEditor:
             self.current_document.insert_text("\n" + template_text)
             self.is_modified = True
             self.gui.show_toast(f"Inserted: {template_name}")
-
     def show_format_actions(self) -> None:
         actions = self.current_document.get_quick_actions()
         choice = self.gui.show_menu("Format Actions", actions)
         if 0 <= choice < len(actions):
             action = actions[choice]
             self.gui.show_toast(f"Action: {action}")
-
     def find_and_replace(self) -> None:
         find_text = self.gui.show_text_input("Find", "Enter text to find")
         if not find_text:
@@ -534,19 +473,16 @@ class TextEditor:
                 replaced = self.current_document.replace_text(find_text, replace_text)
                 self.is_modified = True
                 self.gui.show_snackbar(f"Replaced {replaced} occurrence(s)")
-
     def show_document_info(self) -> None:
         info = self.current_document.get_info()
         info_text = f"\nDocument Information\n{'=' * 40}\nName: {info['name']}\nPath: {info['path']}\nFormat: {info['format']}\nSize: {info['size_bytes']} bytes\nWords: {info['words']}\nCharacters: {info['characters']}\nLines: {info['lines']}\nLast Modified: {info['last_modified']}\n"
         self.gui.show_dialog("Document Info", info_text)
-
     def save_document(self) -> None:
         if self.current_document.save():
             self.is_modified = False
             self.gui.show_snackbar("Document saved successfully")
         else:
             self.gui.show_dialog("Error", "Failed to save document")
-
     def close_document(self) -> None:
         if self.is_modified:
             save_choice = self.gui.show_dialog(
@@ -557,14 +493,11 @@ class TextEditor:
             elif save_choice == 2:
                 return
         self.current_document = None
-
     def show_settings(self) -> None:
         settings_menu = ["Theme (Dark/Light)", "Auto-save", "Font Size", "Word Wrap", "Show Line Numbers", "Back"]
         choice = self.gui.show_menu("Settings", settings_menu)
         if choice >= 0 and choice < 5:
             self.gui.show_toast(f"Setting {choice}: Not yet implemented")
-
-
 if __name__ == "__main__":
     editor = TextEditor()
     editor.run()

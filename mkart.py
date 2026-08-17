@@ -1,7 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 import os
-
-
 def create_english_style_art(word):
     """
     Creates artistic block-style rendering of English text with readable letters
@@ -643,17 +641,13 @@ def create_english_style_art(word):
             "     ",
         ],
     }
-
     # Prepare the text (handle empty input)
     if not word:
         return []
-
     # Split text into characters
     chars = list(word)
-
     # Determine the number of rows
     num_rows = 5  # Our characters are 5 rows tall
-
     # Build the art row by row
     art_lines = []
     for row in range(num_rows):
@@ -668,10 +662,7 @@ def create_english_style_art(word):
                 # For unknown characters, add spaces
                 line += "     "
         art_lines.append(line)
-
     return art_lines
-
-
 def create_arabic_style_art(word):
     """
     Creates artistic block-style rendering of Arabic text with readable letters
@@ -925,17 +916,13 @@ def create_arabic_style_art(word):
             "     ",
         ],
     }
-
     # Prepare the text (handle empty input)
     if not word:
         return []
-
     # Split text into characters
     chars = list(word)
-
     # Determine the number of rows
     num_rows = 5  # Our characters are 5 rows tall
-
     # Build the art row by row
     art_lines = []
     for row in range(num_rows):
@@ -947,10 +934,7 @@ def create_arabic_style_art(word):
                 # For unknown characters, add spaces
                 line += "     "
         art_lines.append(line)
-
     return art_lines
-
-
 def detect_script(text):
     """
     Detect if text contains Arabic or English characters
@@ -960,8 +944,6 @@ def detect_script(text):
         if char in arabic_chars:
             return "arabic"
     return "english"
-
-
 def main():
     print("Text Art Generator (English & Arabic)")
     print("=" * 50)
@@ -971,11 +953,9 @@ def main():
     print("  - Type 'clear' to clear screen")
     print("  - Supports both English and Arabic text")
     print()
-
     while True:
         # Get user input
         text = input("Enter text: ").strip()
-
         # Check for commands
         if text.lower() in ["quit", "exit", "q"]:
             print("Goodbye!")
@@ -983,22 +963,18 @@ def main():
         elif text.lower() == "clear":
             os.system("cls" if os.name == "nt" else "clear")
             continue
-
         # Check if input is empty
         if not text:
             print("Please enter some text.")
             continue
-
         # Detect script and generate art
         script = detect_script(text)
-
         if script == "arabic":
             art = create_arabic_style_art(text)
             script_name = "Arabic"
         else:
             art = create_english_style_art(text)
             script_name = "English"
-
         # Display the art
         print(f"\n{script_name} Text Art:")
         print("=" * 50)
@@ -1006,7 +982,5 @@ def main():
             print(f"  {line}")
         print("=" * 50)
         print()
-
-
 if __name__ == "__main__":
     main()

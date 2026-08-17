@@ -1,14 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import sys
 from pathlib import Path
-
 from dh import cprint, get_files, unique_path
-
 OUT_PATH = Path("/data/data/com.termux/files/home/tmp/metadata")
-
-
 def process_file(path: Path) -> bool | None:
     pkgname = ""
     path = Path(path)
@@ -45,14 +40,10 @@ def process_file(path: Path) -> bool | None:
         cprint(f"no data{path}", "cyan")
         input("what u wanna do?")
     return None
-
-
 def main() -> None:
     cwd = Path.cwd()
     for path in get_files(cwd):
         if path.is_file() and (path.name == "METADATA" or path.suffix == ".metadata"):
             process_file(path)
-
-
 if __name__ == "__main__":
     sys.exit(main())

@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import multiprocessing as mp
 import shutil
 import sys
@@ -8,15 +7,10 @@ import tarfile
 import tempfile
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-
 import zstandard as zstd
-
-
 def compress_chunk(chunk_data):
     compressor = zstd.ZstdCompressor(level=3, threads=4)
     return compressor.compress(chunk_data)
-
-
 def get_file_list(directory, exclude_patterns=None):
     if exclude_patterns is None:
         exclude_patterns = {".git", ".tar.zst", ".zst"}
@@ -28,8 +22,6 @@ def get_file_list(directory, exclude_patterns=None):
             continue
         files.append(item)
     return files
-
-
 def create_archive_optimized():
     current_dir = Path.cwd()
     dir_name = current_dir.name
@@ -52,10 +44,8 @@ def create_archive_optimized():
             tmp_tar_path = tmp_tar.name
             with tarfile.open(tmp_tar_path, "w") as tar:
                 with ThreadPoolExecutor(max_workers=min(4, mp.cpu_count())) as executor:
-
                     def add_file(file_path):
                         tar.add(file_path, arcname=file_path.relative_to(parent_dir))
-
                     list(executor.map(add_file, files))
             compressor = zstd.ZstdCompressor(level=3, threads=mp.cpu_count())
             CHUNK_SIZE = 1024 * 1024 * 8
@@ -90,8 +80,6 @@ def create_archive_optimized():
         if archive_path.exists():
             archive_path.unlink()
         sys.exit(1)
-
-
 def create_archive_streaming_fixed():
     current_dir = Path.cwd()
     dir_name = current_dir.name
@@ -136,7 +124,5 @@ def create_archive_streaming_fixed():
         if archive_path.exists():
             archive_path.unlink()
         sys.exit(1)
-
-
 if __name__ == "__main__":
     create_archive_optimized()

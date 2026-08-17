@@ -1,9 +1,7 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import os
 import sys
-
 EXTENSION_COMMENTS = {
     ".py": "#",
     ".sh": "#",
@@ -19,8 +17,6 @@ EXTENSION_COMMENTS = {
     ".html": "<!--",
     ".css": "/*",
 }
-
-
 def main():
     if len(sys.argv) < 4:
         print("Error: Missing arguments.\nUsage: python comment_range.py <filename> <start_line> <end_line>")
@@ -53,7 +49,5 @@ def main():
     with open(filepath, "w", encoding="utf-8") as f:
         f.writelines(lines)
     print(f"Success: Commented out lines {start_line} to {actual_end} in '{filepath}' using '{comment_char}'.")
-
-
 if __name__ == "__main__":
     main()

@@ -2,15 +2,11 @@
 """
 Convert .rst files to .md in-place using pandoc.
 """
-
 from __future__ import annotations
-
 import argparse
 import subprocess
 import sys
 from pathlib import Path
-
-
 def convert_file(filepath: Path, backup=True, remove_original=False) -> bool:
     filepath = Path(filepath)
     if not filepath.exists():
@@ -23,7 +19,6 @@ def convert_file(filepath: Path, backup=True, remove_original=False) -> bool:
     if backup and not remove_original:
         backup_path = filepath.with_suffix(".rst.bak")
         import shutil
-
         shutil.copy2(filepath, backup_path)
         print(f"Backup created: {backup_path}")
     try:
@@ -42,8 +37,6 @@ def convert_file(filepath: Path, backup=True, remove_original=False) -> bool:
     except subprocess.CalledProcessError as e:
         print(f"Error converting {filepath}: {e.stderr}")
         return False
-
-
 def convert_recursive(directory: Path, backup: bool = True, remove_original: bool = False) -> None:
     directory = Path(directory)
     if not directory.exists():
@@ -59,8 +52,6 @@ def convert_recursive(directory: Path, backup: bool = True, remove_original: boo
         if convert_file(rst_file, backup, remove_original):
             success_count += 1
     print(f"\nConverted {success_count}/{len(rst_files)} files")
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="Convert .rst files to .md using pandoc")
     parser.add_argument("paths", nargs="+", help="Files or directories to convert")
@@ -88,7 +79,5 @@ def main() -> None:
             convert_file(path_obj, backup, args.remove_original)
         else:
             print(f"Error: {path} is not valid")
-
-
 if __name__ == "__main__":
     main()

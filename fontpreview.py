@@ -1,16 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import os
 from pathlib import Path
-
 from dh import FONT_EXT
-
 FONT_EXTENSIONS = tuple(FONT_EXT)
 OUTPUT_HTML = "fonts_preview.html"
 FONT_SIZES = [14, 22]
-
-
 def find_fonts(cwd: str = "."):
     fonts = []
     for dirpath, _, filenames in os.walk(cwd):
@@ -18,8 +13,6 @@ def find_fonts(cwd: str = "."):
             os.path.join(dirpath, filename) for filename in filenames if filename.lower().endswith(FONT_EXTENSIONS)
         )
     return fonts
-
-
 def generate_html(font_files) -> str:
     html = [
         "<!DOCTYPE html>",
@@ -54,8 +47,6 @@ def generate_html(font_files) -> str:
         html.append("</div>")
     html.append("</body></html>")
     return "\n".join(html)
-
-
 def main() -> None:
     fonts = find_fonts()
     if not fonts:
@@ -63,7 +54,5 @@ def main() -> None:
     html_content = generate_html(fonts)
     Path(OUTPUT_HTML).write_text(html_content, encoding="utf-8")
     print("font-preview.html created.")
-
-
 if __name__ == "__main__":
     main()

@@ -1,14 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import ast
 import sys
 import textwrap
 from pathlib import Path
-
 from dh import DOC_TH1, DOC_TH2
-
-
 def format_python_file(filepath: Path) -> None:
     if not filepath.exists():
         print(f"Error: File not found at {filepath}", file=sys.stderr)
@@ -121,8 +117,6 @@ def format_python_file(filepath: Path) -> None:
         print(f"AST Syntax Error: {e}", file=sys.stderr)
         Path(backup_filepath).replace(filepath)
         print(f"Restored {filepath} from backup.")
-
-
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python format_python.py <file_path>")

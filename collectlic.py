@@ -1,20 +1,14 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 from pathlib import Path
-
 EXCLUDE_DIRS = {".git"}
 OUTPUT_FILE = Path("/sdcard/all2.txt")
-
-
 def read_file(path: Path) -> str | None:
     try:
         with path.open(encoding="utf-8", errors="ignore") as f:
             return f.read()
     except Exception:
         return None
-
-
 def collect_files(root: Path):
     try:
         for item in root.iterdir():
@@ -28,8 +22,6 @@ def collect_files(root: Path):
                     yield item
     except PermissionError:
         pass
-
-
 def build_all_txt(root_path: str) -> None:
     root = Path(root_path)
     files = list(collect_files(root))
@@ -46,7 +38,5 @@ def build_all_txt(root_path: str) -> None:
                 out.write("\n\n\n")
             print(f"Added: {path}")
     print(f"\nFinished: {OUTPUT_FILE} created.")
-
-
 if __name__ == "__main__":
     build_all_txt(".")

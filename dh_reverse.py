@@ -1,15 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Reverse inlined functions by replacing with dh package imports."""
-
 from __future__ import annotations
-
 import argparse
 import ast
 import hashlib
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-
-
 def normalize_function_source(node: ast.FunctionDef) -> str:
     func_copy = ast.FunctionDef(
         name=node.name,
@@ -28,13 +24,9 @@ def normalize_function_source(node: ast.FunctionDef) -> str:
     source = ast.unparse(func_copy)
     lines = [l.strip() for l in source.split("\n") if l.strip()]
     return "\n".join(lines)
-
-
 def hash_function_body(node: ast.FunctionDef) -> str:
     normalized = normalize_function_source(node)
     return hashlib.sha256(normalized.encode()).hexdigest()
-
-
 def extract_functions(filepath: Path) -> dict[str, tuple[str, ast.FunctionDef, str]]:
     try:
         tree = ast.parse(filepath.read_text())
@@ -47,8 +39,6 @@ def extract_functions(filepath: Path) -> dict[str, tuple[str, ast.FunctionDef, s
             normalized = normalize_function_source(node)
             functions[node.name] = (func_hash, node, normalized)
     return functions
-
-
 def load_dh_functions(dh_path: Path) -> dict[str, tuple[str, str]]:
     dh_functions = {}
     py_files = sorted(dh_path.glob("**/*.py"))
@@ -59,16 +49,12 @@ def load_dh_functions(dh_path: Path) -> dict[str, tuple[str, str]]:
                 print(f"Warning: duplicate function '{fname}' in dh package")
             dh_functions[fname] = (fhash, normalized)
     return dh_functions
-
-
 def get_function_source_lines(filepath: Path, func_name: str) -> int:
     tree = ast.parse(filepath.read_text())
     for node in ast.walk(tree):
         if isinstance(node, ast.FunctionDef) and node.name == func_name:
             return node.lineno, node.end_lineno
     return None, None
-
-
 def transform_file(
     filepath: Path, dh_functions: dict[str, tuple[str, str]], apply: bool, debug: bool = False
 ) -> tuple[Path, bool, str]:
@@ -129,8 +115,6 @@ def transform_file(
         return filepath, True, f"Updated {filepath.name}: removed {sorted(to_import)}"
     else:
         return filepath, False, f"Would update {filepath.name}: remove {sorted(to_import)}"
-
-
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -188,7 +172,5 @@ def main():
     else:
         print(f"Would update {updated_count} files (use -a/--apply to apply)")
     return 0
-
-
 if __name__ == "__main__":
     exit(main())

@@ -1,12 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import sys
 from pathlib import Path
-
 from dh import fsz, runcmd
-
-
 def process_file(path: Path) -> None:
     path = Path(path)
     temp_gs = path.with_name(f"temp_gs_{path.name}")
@@ -43,8 +39,6 @@ def process_file(path: Path) -> None:
             else:
                 print("original file is smaller")
                 temp_gs.unlink(missing_ok=True)
-
-
 def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -55,7 +49,5 @@ def main() -> None:
         sys.exit(0)
     for path in cwd.rglob("*.pdf"):
         process_file(path)
-
-
 if __name__ == "__main__":
     main()

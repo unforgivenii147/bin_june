@@ -6,9 +6,7 @@ verifies they are actually binary files, and reports mismatches.
 Uses memory-efficient os.walk traversal with progress reporting
 and optimized filesystem walking strategies.
 """
-
 from __future__ import annotations
-
 import logging
 import mimetypes
 import os
@@ -17,13 +15,9 @@ from collections.abc import Iterator
 from functools import lru_cache
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-
 from dh import BIN_EXT
-
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
-
-
 class OptimizedWalker:
     def __init__(self, skip_symlinks: bool = True, skip_mount_points: bool = True):
         self.skip_symlinks = skip_symlinks
@@ -33,12 +27,10 @@ class OptimizedWalker:
         self._is_symlink = os.path.islink
         self._stat = os.stat
         self._scandir = os.scandir if hasattr(os, "scandir") else None
-
     @staticmethod
     @lru_cache(maxsize=128)
     def _get_extensions_lower(extensions: tuple) -> set:
         return {ext.lower() for ext in extensions}
-
     def walk(self, root_dir: str, extensions: set[str], progress_callback=None) -> Iterator[Path]:
         extensions_lower = self._get_extensions_lower(tuple(extensions))
         file_count = 0
@@ -52,7 +44,6 @@ class OptimizedWalker:
         except KeyboardInterrupt:
             logger.info("Traversal interrupted by user")
             raise
-
     def _walk_recursive(
         self, current_dir: str, extensions_lower: set[str], progress_callback, file_count: int
     ) -> Iterator[Path]:
@@ -104,15 +95,12 @@ class OptimizedWalker:
             logger.debug(f"Permission denied: {current_dir}")
         except OSError as e:
             logger.debug(f"Error accessing {current_dir}: {e}")
-
-
 class SpinnerProgressReporter:
     def __init__(self, verbose: bool = True):
         self.verbose = verbose
         self.last_count = 0
         self.spinner = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
         self.spinner_index = 0
-
     def __call__(self, current_path: str, file_count: int):
         if not self.verbose:
             return
@@ -122,8 +110,6 @@ class SpinnerProgressReporter:
             path_display = current_path[:60] + "..." if len(current_path) > 60 else current_path
             msg = f"\r{self.spinner[self.spinner_index]} Files: {file_count:8d} | {path_display}"
             print(msg, end="", flush=True)
-
-
 def is_binary_file(file_path: Path) -> bool | None:
     try:
         if file_path.stat().st_size == 0:
@@ -152,8 +138,6 @@ def is_binary_file(file_path: Path) -> bool | None:
                 return True
     except (OSError, PermissionError):
         return None
-
-
 def check_file(file_path: Path) -> tuple[Path, str, bool | None, str]:
     try:
         extension = file_path.suffix.lower()
@@ -164,8 +148,6 @@ def check_file(file_path: Path) -> tuple[Path, str, bool | None, str]:
     except Exception as e:
         logger.error(f"Error processing {file_path}: {e}")
         return (file_path, file_path.suffix.lower(), None, "error")
-
-
 def validate_extensions(
     root_dir: str = "/", num_workers: int | None = None, verbose: bool = True, skip_mount_points: bool = True
 ) -> dict:
@@ -226,8 +208,6 @@ def validate_extensions(
         "mismatches": mismatches,
         "by_extension": by_extension,
     }
-
-
 def print_report(results: dict):
     print("\n" + "=" * 42)
     print("BINARY EXTENSION VALIDATION REPORT")
@@ -254,8 +234,6 @@ def print_report(results: dict):
     for ext, stats in sorted(results["by_extension"].items()):
         print(f"  {ext:12} - Binary: {stats['binary']:6}  Text: {stats['text']:6}  Errors: {stats['error']:6}")
     print("\n" + "=" * 42)
-
-
 if __name__ == "__main__":
     root_dir = "/data/data/com.termux"
     skip_mounts = True

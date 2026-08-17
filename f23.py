@@ -1,16 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import argparse
 import re
 import shutil
 from pathlib import Path
-
 PRINT_PATTERN = re.compile(r"^\s*print\s+(?!\()(.+)$")
 PRINT_BARE_PATTERN = re.compile(r"^\s*print\s*$")
 EXCEPT_PATTERN = re.compile(r"^\s*except\s+(\S+)\s*,\s*(\S+)\s*:")
-
-
 def fix_py2_to_py3_all(line):
     original = line
     line = line.replace("xrange(", "range(")
@@ -21,8 +17,6 @@ def fix_py2_to_py3_all(line):
         exc_type, exc_var = m.group(1), m.group(2)
         line = f"{indent}except {exc_type} as {exc_var}:\n"
     return line, line != original
-
-
 def fix_print_statements(text: str) -> tuple[str, bool]:
     lines = text.splitlines(True)
     new_lines = []
@@ -43,8 +37,6 @@ def fix_print_statements(text: str) -> tuple[str, bool]:
             continue
         new_lines.append(line)
     return "".join(new_lines), changed
-
-
 def apply_all_fixes(text: str):
     lines = text.splitlines(True)
     new_lines = []
@@ -55,12 +47,8 @@ def apply_all_fixes(text: str):
         changed = changed or c1 or c2
         new_lines.append(new_line2)
     return "".join(new_lines), changed
-
-
 changed_files = []
 error_files = []
-
-
 def process_file(path: Path, force=False, apply_all=False) -> None:
     path = Path(path)
     try:
@@ -77,13 +65,9 @@ def process_file(path: Path, force=False, apply_all=False) -> None:
             changed_files.append(str(path))
     except Exception as e:
         error_files.append((str(path), str(e)))
-
-
 def scan_and_fix(root: Path, force, apply_all) -> None:
     for f in root.rglob("*.py"):
         process_file(f, force=force, apply_all=apply_all)
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Fix Python2 print statements and optionally apply all Py2→Py3 conversions."

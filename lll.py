@@ -1,12 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import datetime
 from pathlib import Path
-
 from dh import fsz
-
-
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -16,8 +12,6 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
-
-
 EXCLUDED = {".mypy_cache", ".ruff_cache", ".git", "__pycache__"}
 if __name__ == "__main__":
     cwd = Path.cwd()

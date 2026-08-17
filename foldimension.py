@@ -8,21 +8,16 @@ If a resolution group contains only a single image, that image
 is moved into an "other" folder instead.
 Uses pathlib for all filesystem operations.
 """
-
 from __future__ import annotations
-
 import shutil
 from collections import defaultdict
 from pathlib import Path
-
 try:
     from PIL import Image
 except ImportError:
     print("Error: This script requires Pillow. Install it with: pip install Pillow")
     exit(1)
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".tif", ".webp", ".ico"}
-
-
 def collect_images(root: Path):
     size_to_files = defaultdict(list)
     for file_path in root.rglob("*"):
@@ -37,8 +32,6 @@ def collect_images(root: Path):
         except Exception as e:
             print(f"Warning: Skipping {file_path} - {e}")
     return size_to_files
-
-
 def unique_destination(dest: Path) -> Path:
     if not dest.exists():
         return dest
@@ -51,8 +44,6 @@ def unique_destination(dest: Path) -> Path:
         if not new_dest.exists():
             return new_dest
         counter += 1
-
-
 def organize_images(root: Path, size_to_files: dict) -> None:
     for (width, height), files in size_to_files.items():
         if len(files) == 1:
@@ -66,8 +57,6 @@ def organize_images(root: Path, size_to_files: dict) -> None:
             dest = unique_destination(dest)
             shutil.move(src, dest)
             print(f"Moved: {src} -> {dest}")
-
-
 def main() -> None:
     root = Path.cwd()
     print(f"Scanning {root} for image files...")
@@ -79,7 +68,5 @@ def main() -> None:
     print(f"Found {total_files} image(s) in {len(size_to_files)} resolution group(s).")
     organize_images(root, size_to_files)
     print("Done.")
-
-
 if __name__ == "__main__":
     main()

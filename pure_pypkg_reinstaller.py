@@ -4,16 +4,12 @@ Reinstall Python packages with force-reinstall and upgrade flags.
 Reads package names from ~/missing.txt or sys.argv[1] (one per line).
 Uses multiprocessing for parallel installation.
 """
-
 from __future__ import annotations
-
 import multiprocessing
 import os
 import subprocess
 import sys
 from functools import partial
-
-
 def get_pip_command():
     for pip_cmd in ["pip", "pip3"]:
         try:
@@ -22,8 +18,6 @@ def get_pip_command():
         except (subprocess.CalledProcessError, FileNotFoundError):
             continue
     return None
-
-
 def install_package(pkg_name, pip_cmd="pip3", dry_run=False):
     cmd = [
         pip_cmd,
@@ -59,8 +53,6 @@ def install_package(pkg_name, pip_cmd="pip3", dry_run=False):
     except Exception as e:
         print(f"✗ Error reinstalling {pkg_name}: {e}")
         return (pkg_name, False, str(e))
-
-
 def read_package_list(filepath):
     packages = []
     try:
@@ -76,12 +68,9 @@ def read_package_list(filepath):
         print(f"Error reading file: {e}")
         sys.exit(1)
     return packages
-
-
 def check_package_in_system_site(pkg_name):
     try:
         import site
-
         system_site = site.getsitepackages()
         user_site = site.getusersitepackages()
         result = subprocess.run(["pip3", "show", "-f", pkg_name], capture_output=True, text=True, check=False)
@@ -96,8 +85,6 @@ def check_package_in_system_site(pkg_name):
         return False
     except:
         return False
-
-
 def main():
     if len(sys.argv) > 1:
         input_file = sys.argv[1]
@@ -161,8 +148,6 @@ def main():
             print(f"  - {pkg}")
     print("-" * 42)
     sys.exit(0 if failed == 0 else 1)
-
-
 if __name__ == "__main__":
     multiprocessing.freeze_support()
     main()

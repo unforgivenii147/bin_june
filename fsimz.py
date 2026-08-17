@@ -1,14 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import os
 import sys
 from collections import defaultdict
-
 from dh import get_files
 from ppdeep import hash_from_file
-
-
 def find_dups(cwd: str):
     files_by_hash = defaultdict(list)
     duplicate_count = 0
@@ -41,8 +37,6 @@ def find_dups(cwd: str):
         else:
             continue
     return (duplicate_count, deleted_count, total_deleted_size)
-
-
 if __name__ == "__main__":
     root_folder = sys.argv[1].strip()
     find_dups(root_folder)

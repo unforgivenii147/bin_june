@@ -13,17 +13,13 @@ Behavior:
 - Uses pathlib and parallel processing for speed.
 - Only reports files that changed.
 """
-
 from __future__ import annotations
-
 import ast
 import concurrent.futures
 import multiprocessing
 import sys
 import tokenize
 from pathlib import Path
-
-
 class DocstringStripper(ast.NodeTransformer):
     def _maybe_strip_first_docstring(self, node: ast.AST) -> ast.AST:
         body = getattr(node, "body", None)
@@ -39,20 +35,15 @@ class DocstringStripper(ast.NodeTransformer):
             if not body:
                 body.append(ast.Pass())
         return node
-
     def visit_FunctionDef(self, node: ast.FunctionDef) -> ast.AST:
         self.generic_visit(node)
         return self._maybe_strip_first_docstring(node)
-
     def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> ast.AST:
         self.generic_visit(node)
         return self._maybe_strip_first_docstring(node)
-
     def visit_ClassDef(self, node: ast.ClassDef) -> ast.AST:
         self.generic_visit(node)
         return self._maybe_strip_first_docstring(node)
-
-
 def extract_prefix_comments_and_shebang(source: str) -> tuple[str, str]:
     lines = source.splitlines(keepends=True)
     prefix_lines: list[str] = []
@@ -84,8 +75,6 @@ def extract_prefix_comments_and_shebang(source: str) -> tuple[str, str]:
     prefix = "".join(prefix_lines)
     remainder = "".join(lines[i:]) if i < len(lines) else ""
     return prefix, remainder
-
-
 def process_file(path: Path) -> tuple[Path, str | None]:
     try:
         with tokenize.open(path) as f:
@@ -128,14 +117,10 @@ def process_file(path: Path) -> tuple[Path, str | None]:
     except Exception as exc:
         return path, f"write-error: {exc}"
     return path, None
-
-
 def should_skip_path(p: Path) -> bool:
     parts = {p_part.lower() for p_part in p.parts}
     skip_indicators = {".git", "__pycache__", "venv", ".venv", "env", ".env", "node_modules"}
     return bool(parts & skip_indicators)
-
-
 def collect_py_files(root: Path) -> list[Path]:
     files: list[Path] = []
     for p in root.rglob("*.py"):
@@ -145,8 +130,6 @@ def collect_py_files(root: Path) -> list[Path]:
             continue
         files.append(p)
     return files
-
-
 def main() -> int:
     root = Path(".").resolve()
     files = collect_py_files(root)
@@ -189,8 +172,6 @@ def main() -> int:
             print(f"  {p}: {e}")
         return 2
     return 0
-
-
 def process_file_check_changed(path: Path) -> tuple[Path | None, str | None]:
     try:
         with tokenize.open(path) as f:
@@ -226,8 +207,6 @@ def process_file_check_changed(path: Path) -> tuple[Path | None, str | None]:
     if new_source != original:
         return path, None
     return None, None
-
-
 if __name__ == "__main__":
     exit_code = main()
     sys.exit(exit_code)

@@ -1,17 +1,13 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import argparse
 import multiprocessing
 import re
 from functools import partial
 from pathlib import Path
-
 import cv2
 import numpy as np
 import pytesseract
-
-
 def _ocr_worker(frame_data: tuple, ocr_config: str) -> tuple[float, str]:
     time_pos, subtitle_region = frame_data
     try:
@@ -23,16 +19,12 @@ def _ocr_worker(frame_data: tuple, ocr_config: str) -> tuple[float, str]:
         return time_pos, text
     except Exception:
         return time_pos, ""
-
-
 def _frames_are_similar(a: np.ndarray, b: np.ndarray, threshold: float = 0.97) -> bool:
     small_a = cv2.resize(a, (64, 32))
     small_b = cv2.resize(b, (64, 32))
     diff = cv2.absdiff(small_a, small_b)
     similarity = 1.0 - diff.sum() / (diff.size * 255.0)
     return similarity >= threshold
-
-
 def extract_frames(
     video_path: str,
     sample_fps: float = 2.0,
@@ -67,8 +59,6 @@ def extract_frames(
         frame_count += 1
     cap.release()
     return frames
-
-
 def parse_time(time_str: str) -> float:
     parts = time_str.strip().split(":")
     if len(parts) != 3:
@@ -76,16 +66,12 @@ def parse_time(time_str: str) -> float:
     h, m, s = parts
     secs = float(s)
     return int(h) * 3600 + int(m) * 42 + secs
-
-
 def format_time(seconds: float) -> str:
     h = int(seconds // 3600)
     m = int(seconds % 3600 // 60)
     s = seconds % 60
     ms = int((s - int(s)) * 1000)
     return f"{h:02d}:{m:02d}:{int(s):02d},{ms:03d}"
-
-
 def parse_srt(filepath_path: Path) -> list[dict]:
     if not filepath_path.is_file():
         return []
@@ -113,14 +99,10 @@ def parse_srt(filepath_path: Path) -> list[dict]:
             if text:
                 subs.append({"start": start, "end": end, "text": text})
     return subs
-
-
 def _ts_to_seconds(ts: str) -> float:
     h, m, s_ms = ts.split(":")
     s, ms = s_ms.replace(",", ".").split(".")
     return int(h) * 3600 + int(m) * 42 + int(s) + int(ms) / 1000.0
-
-
 def _merge_subtitles(subtitles: list[dict], gap_threshold: float = 1.0) -> list[dict]:
     if not subtitles:
         return []
@@ -136,8 +118,6 @@ def _merge_subtitles(subtitles: list[dict], gap_threshold: float = 1.0) -> list[
             cur = dict(sub)
     merged.append(cur)
     return merged
-
-
 def extract_burned_subs_ocr(
     video_path: str,
     output_srt_path: str,
@@ -194,8 +174,6 @@ def extract_burned_subs_ocr(
             f.write(f"{format_time(sub['start'])} --> {format_time(sub['end'])}\n")
             f.write(f"{sub['text']}\n\n")
     print("Done.")
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Extract burned-in subtitles from video using OCR")
     parser.add_argument("video", help="Path to the video file")

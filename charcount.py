@@ -1,12 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import sys
 from pathlib import Path
-
 CHUNK_SIZE = 1024 * 1024
-
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -21,8 +17,6 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
-
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python count_chars_of_input_file.py <input_file>")

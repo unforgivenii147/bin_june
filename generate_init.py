@@ -3,14 +3,10 @@
 Generate __init__.py files that import all public functions and classes
 from Python modules in the current directory.
 """
-
 from __future__ import annotations
-
 import ast
 import sys
 from pathlib import Path
-
-
 def get_public_names(file_path: Path) -> list[str]:
     try:
         with open(file_path, "r", encoding="utf-8") as f:
@@ -26,16 +22,12 @@ def get_public_names(file_path: Path) -> list[str]:
         elif isinstance(node, ast.ClassDef) and not node.name.startswith("_"):
             public_names.append(node.name)
     return sorted(set(public_names))
-
-
 def get_python_modules(directory: Path) -> list[Path]:
     modules = []
     for file_path in directory.glob("*.py"):
         if file_path.name != "__init__.py" and (not file_path.name.startswith("_")):
             modules.append(file_path)
     return sorted(modules)
-
-
 def generate_init_content(modules: list[Path]) -> str:
     lines = []
     all_exports = []
@@ -53,8 +45,6 @@ def generate_init_content(modules: list[Path]) -> str:
     if lines:
         lines.append("")
     return "\n".join(lines)
-
-
 def main():
     cwd = Path.cwd()
     print(f"Scanning directory: {cwd}")
@@ -80,7 +70,5 @@ def main():
     print("-" * 42)
     print(init_content)
     print("-" * 42)
-
-
 if __name__ == "__main__":
     main()

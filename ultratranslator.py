@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import logging
 import re
 import shutil
@@ -10,22 +9,16 @@ import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Final
-
 from deep_translator import GoogleTranslator
 from dh import get_nobinary
-
 MAX_WORKERS: Final[int] = 4
 MAX_RETRIES: Final[int] = 2
 RETRY_DELAY: Final[float] = 3.0
 NON_ENGLISH_PATTERN: Final[re.Pattern] = re.compile(r"[^\x00-\x7F]")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-
 def is_english(text: str) -> bool:
     return not NON_ENGLISH_PATTERN.search(text)
-
-
 def main() -> None:
     args = sys.argv[1:]
     files = [Path(p) for p in args] if args else get_nobinary(Path.cwd())
@@ -34,8 +27,6 @@ def main() -> None:
         return
     logger.info(f"Found {len(files)} files to process.")
     process_files_with_retry(files)
-
-
 def process_file(path: Path) -> Path | None:
     logger.info(f"  Processing {path.name}...")
     try:
@@ -51,8 +42,6 @@ def process_file(path: Path) -> Path | None:
     except Exception as e:
         logger.error(f"  Failed to process {path}: {e}")
         return path
-
-
 def process_files_with_retry(files: list[Path]) -> None:
     files_to_process = files.copy()
     retry_count = 0
@@ -83,15 +72,11 @@ def process_files_with_retry(files: list[Path]) -> None:
         logger.error(f"""Failed to process {len(files_to_process)} files after {MAX_RETRIES} retries:""")
         for f in files_to_process:
             logger.error(f"  - {f}")
-
-
 def safe_overwrite(filepath: Path, content: str) -> None:
     with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False, dir=filepath.parent) as tmp:
         tmp.write(content)
         tmp_path = Path(tmp.name)
     shutil.move(tmp_path, filepath)
-
-
 def translate_file_content(path: Path, retries: int = MAX_RETRIES) -> str:
     for attempt in range(retries):
         try:
@@ -105,7 +90,5 @@ def translate_file_content(path: Path, retries: int = MAX_RETRIES) -> str:
             else:
                 logger.error(f"File translation failed after {retries} attempts for {path}: {e}")
                 return path.read_text(encoding="utf-8", errors="ignore")
-
-
 if __name__ == "__main__":
     main()

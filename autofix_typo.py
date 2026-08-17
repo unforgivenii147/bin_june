@@ -3,9 +3,7 @@
 Auto typo fixer with pattern learning.
 Learns from common substitution errors (b→n, 8→i, etc.) and user corrections.
 """
-
 from __future__ import annotations
-
 import argparse
 import json
 import re
@@ -14,9 +12,7 @@ import sys
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
-
 from dh import PY_KEYWORDS
-
 COMMON_SUBSTITUTIONS = {
     "0": "p",
     "1": "q",
@@ -67,8 +63,6 @@ QWERTY_ADJACENT = {
     "n": "bm",
     "m": "n",
 }
-
-
 class PatternLearner:
     def __init__(self, learning_db_path: str = "typo_patterns.json") -> None:
         self.learning_db_path = learning_db_path
@@ -77,7 +71,6 @@ class PatternLearner:
         self.error_frequency = defaultdict(int)
         self.context_rules = []
         self._load_learning_db()
-
     def _load_learning_db(self) -> None:
         if Path(self.learning_db_path).exists():
             try:
@@ -89,7 +82,6 @@ class PatternLearner:
                 print(f"Loaded {len(self.learned_corrections)} learned corrections", file=sys.stderr)
             except Exception as e:
                 print(f"Error loading learning DB: {e}", file=sys.stderr)
-
     def save(self) -> None:
         data = {
             "corrections": self.learned_corrections,
@@ -100,7 +92,6 @@ class PatternLearner:
         with open(self.learning_db_path, "w") as f:
             json.dump(data, f, indent=2)
         print(f"Saved learning patterns to {self.learning_db_path}", file=sys.stderr)
-
     def apply_substitutions(self, word: str) -> str:
         candidates = []
         if word in self.learned_corrections:
@@ -121,7 +112,6 @@ class PatternLearner:
             candidates.sort(key=lambda x: x[1], reverse=True)
             return candidates[0][0]
         return word
-
     def learn_from_correction(self, wrong: str, correct: str) -> None:
         if wrong == correct:
             return
@@ -146,8 +136,6 @@ class PatternLearner:
                     pattern = f"insert '{correct[i]}'"
                     self.error_frequency[pattern] += 1
         self.save()
-
-
 class TypoFixerWithLearning:
     def __init__(self, preview: bool = True, learning_db: str = "typo_patterns.json") -> None:
         self.preview = preview
@@ -158,12 +146,10 @@ class TypoFixerWithLearning:
         self.valid_words = set()
         self._load_word_list()
         self.valid_words.update(PY_KEYWORDS)
-
     def _load_word_list(self) -> None:
         try:
             import nltk
             from nltk.corpus import words
-
             try:
                 nltk.data.find("corpora/words.zip")
             except LookupError:
@@ -195,14 +181,12 @@ class TypoFixerWithLearning:
                 "at",
             }
             self.valid_words.update(common)
-
     def is_valid_word(self, word: str) -> bool:
         if len(word) < 3:
             return True
         if word.isupper() and 2 <= len(word) <= 5:
             return True
         return word.lower() in self.valid_words
-
     def suggest_correction(self, word: str, context: str = "") -> str | None:
         if self.is_valid_word(word):
             return None
@@ -219,7 +203,6 @@ class TypoFixerWithLearning:
             return self.learner.learned_corrections[word]
         try:
             from difflib import get_close_matches
-
             matches = get_close_matches(word.lower(), self.valid_words, n=1, cutoff=0.75)
             if matches:
                 if word[0].isupper():
@@ -228,7 +211,6 @@ class TypoFixerWithLearning:
         except:
             pass
         return None
-
     def interactive_fix(self, word: str, line: str) -> str:
         print(f"\nUnknown word: '{word}'")
         print(f"Context: {line.strip()}")
@@ -255,7 +237,6 @@ class TypoFixerWithLearning:
                 return word
             elif choice == "n":
                 return word
-
     def fix_file(self, filepath: Path) -> bool:
         try:
             with open(filepath, encoding="utf-8") as f:
@@ -268,7 +249,6 @@ class TypoFixerWithLearning:
         word_pattern = re.compile(r"\b([a-zA-Z]+(?:[-\'][a-zA-Z]+)*)\b")
         for line_num, line in enumerate(lines, 1):
             fixed_line = line
-
             def replace_word(match):
                 nonlocal changes
                 word = match.group(1)
@@ -287,7 +267,6 @@ class TypoFixerWithLearning:
                             changes += 1
                         return correction
                 return word
-
             fixed_line = word_pattern.sub(replace_word, line)
             fixed_lines.append(fixed_line)
         if changes > 0 and not self.preview:
@@ -300,7 +279,6 @@ class TypoFixerWithLearning:
             print(f"  Would fix {changes} typo(s) in {filepath}", file=sys.stderr)
         self.changes_made += changes
         return changes > 0
-
     def process_directory(self, cwd: str) -> None:
         root_path = Path(cwd)
         extensions = {".md", ".py", ".toml", ".json", ".html", ".css", ".js", ".txt"}
@@ -315,8 +293,6 @@ class TypoFixerWithLearning:
         print(f"Learned corrections: {len(self.learner.learned_corrections)}", file=sys.stderr)
         if self.changes_made > 0:
             self.learner.save()
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="Auto-fix typos with pattern learning")
     parser.add_argument("--apply", action="store_true", help="Actually apply fixes")
@@ -340,7 +316,5 @@ def main() -> None:
     fixer = TypoFixerWithLearning(preview=not args.apply, learning_db=args.db)
     fixer.interactive_mode = args.interactive
     fixer.process_directory(args.dir)
-
-
 if __name__ == "__main__":
     main()

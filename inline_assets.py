@@ -8,15 +8,12 @@ Make HTML files standalone by inlining referenced CSS and JS files.
 - Silently ignores missing local or remote resources.
 - Uses pathlib and parallel (threaded) processing.
 """
-
 from __future__ import annotations
-
 import argparse
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from urllib.parse import urlparse
-
 try:
     import requests
 except ImportError:
@@ -25,12 +22,8 @@ try:
     from bs4 import BeautifulSoup
 except ImportError:
     sys.exit("Please install 'beautifulsoup4': pip install beautifulsoup4")
-
-
 def is_remote(url: str) -> bool:
     return urlparse(url).scheme in ("http", "https")
-
-
 def fetch_remote(url: str):
     try:
         resp = requests.get(url, timeout=30)
@@ -40,8 +33,6 @@ def fetch_remote(url: str):
         return resp.text
     except Exception:
         return None
-
-
 def fetch_local(ref: str, base_dir: Path):
     try:
         ref = ref.split("?", 1)[0].split("#", 1)[0]
@@ -53,14 +44,10 @@ def fetch_local(ref: str, base_dir: Path):
     except Exception:
         pass
     return None
-
-
 def fetch_resource(ref: str, base_dir: Path):
     if is_remote(ref):
         return fetch_remote(ref)
     return fetch_local(ref, base_dir)
-
-
 def process_html_file(html_path: Path):
     try:
         content = html_path.read_text(encoding="utf-8", errors="ignore")
@@ -109,8 +96,6 @@ def process_html_file(html_path: Path):
         return html_path, "updated"
     except Exception as e:
         return html_path, f"write error: {e}"
-
-
 def gather_html_files(dirs):
     files = []
     seen = set()
@@ -129,8 +114,6 @@ def gather_html_files(dirs):
         else:
             print(f"Warning: skipping {p} (not a file or directory)", file=sys.stderr)
     return files
-
-
 def main():
     parser = argparse.ArgumentParser(description="Make HTML files standalone by inlining CSS/JS resources.")
     parser.add_argument(
@@ -169,7 +152,5 @@ def main():
                 errors += 1
                 print(f"[error]      {path} -> {status}", file=sys.stderr)
     print(f"\nDone. Updated: {updated}, Unchanged: {skipped}, Errors: {errors}")
-
-
 if __name__ == "__main__":
     main()

@@ -5,24 +5,19 @@ Supports parallel processing, AST validation, and performance comparison.
 Requirements:
   pip install tree-sitter==0.25.2 tree-sitter-python==0.25.0
 """
-
 from __future__ import annotations
-
 import ast
 import sys
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-
 try:
     from tree_sitter import Node, Parser
     from tree_sitter_python import language as python_language
 except ImportError:
     print("ERROR: Install tree-sitter==0.25.2 and tree-sitter-python==0.25.0")
     sys.exit(1)
-
-
 @dataclass
 class ProcessingResult:
     file_path: Path
@@ -31,20 +26,16 @@ class ProcessingResult:
     original_size: int = 0
     new_size: int = 0
     processing_time: float = 0.0
-
-
 class TreeSitterCommentRemover:
     QUERY = """
     (comment) @comment
     (string) @string
     """
-
     def __init__(self):
         self.parser = Parser()
         self.parser.set_language(python_language())
         lang = python_language()
         self.query = lang.query(self.QUERY)
-
     def remove_comments_and_docstrings(self, source: str) -> str:
         source_bytes = source.encode("utf-8")
         tree = self.parser.parse(source_bytes)
@@ -58,14 +49,12 @@ class TreeSitterCommentRemover:
         ranges_to_remove.sort(reverse=True)
         result = self._remove_ranges(source_bytes, ranges_to_remove)
         return result.decode("utf-8", errors="replace")
-
     def _is_docstring(self, node: Node) -> bool:
         parent = node.parent
         if parent and parent.type == "expression_statement":
             named_children = [c for c in parent.children if c.type not in ("comment", "NEWLINE", "INDENT", "DEDENT")]
             return len(named_children) == 1 and named_children[0] == node
         return False
-
     def _remove_ranges(self, source_bytes: bytes, ranges: list) -> bytes:
         if not ranges:
             return source_bytes
@@ -79,8 +68,6 @@ class TreeSitterCommentRemover:
                 replacement = b" " * (end - start)
             result[start:end] = replacement
         return bytes(result)
-
-
 class ASTCommentRemover:
     def remove_comments_and_docstrings(self, source: str) -> str:
         lines = source.split("\n")
@@ -115,7 +102,6 @@ class ASTCommentRemover:
         except SyntaxError:
             pass
         return source_cleaned
-
     def _extract_docstring_ranges(self, tree: ast.AST, source: str) -> list:
         ranges = []
         source.split("\n")
@@ -124,16 +110,12 @@ class ASTCommentRemover:
             if docstring and isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Module)):
                 pass
         return ranges
-
-
 def validate_syntax(source: str) -> bool:
     try:
         ast.parse(source)
         return True
     except SyntaxError:
         return False
-
-
 def process_file_tree_sitter(file_path: Path) -> ProcessingResult:
     start_time = time.perf_counter()
     try:
@@ -164,8 +146,6 @@ def process_file_tree_sitter(file_path: Path) -> ProcessingResult:
             error=str(e),
             processing_time=time.perf_counter() - start_time,
         )
-
-
 def process_file_ast(file_path: Path) -> ProcessingResult:
     start_time = time.perf_counter()
     try:
@@ -195,8 +175,6 @@ def process_file_ast(file_path: Path) -> ProcessingResult:
             error=str(e),
             processing_time=time.perf_counter() - start_time,
         )
-
-
 def process_directory(
     directory: Path = Path.cwd(), max_workers: int = 4, method: str = "tree-sitter"
 ) -> tuple[list, float]:
@@ -218,8 +196,6 @@ def process_directory(
             print(f"{status} {result.file_path.name}{error_msg}")
     total_time = time.perf_counter() - start_time
     return results, total_time
-
-
 def print_results(results: list, total_time: float, method: str):
     successful = [r for r in results if r.success]
     failed = [r for r in results if not r.success]
@@ -243,11 +219,8 @@ def print_results(results: list, total_time: float, method: str):
         print("\nFailed files:")
         for r in failed:
             print(f"  - {r.file_path}: {r.error}")
-
-
 def main():
     import argparse
-
     parser = argparse.ArgumentParser(
         description="Remove comments and docstrings from Python files",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -299,7 +272,5 @@ Examples:
     else:
         results, total_time = process_directory(directory, args.workers, args.method)
         print_results(results, total_time, args.method)
-
-
 if __name__ == "__main__":
     main()

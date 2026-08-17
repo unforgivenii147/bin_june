@@ -3,27 +3,19 @@
 Script to show various extensions in current directory with file count for each extension.
 Uses pathlib and parallel processing for speedup.
 """
-
 from __future__ import annotations
-
 import sys
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-
 from dh import get_files
-
 RECURSIVE = not "-n" in sys.argv
-
-
 def process_files_batch(file_paths: list[Path]) -> dict[str, int]:
     ext_counts = defaultdict(int)
     for file_path in file_paths:
         ext = file_path.suffix.lower() if file_path.suffix else "NO_EXTENSION"
         ext_counts[ext] += 1
     return dict(ext_counts)
-
-
 def main():
     cwd = Path.cwd()
     if not RECURSIVE:
@@ -70,8 +62,6 @@ def main():
     print("-" * 42)
     print(f"{'TOTAL':<{max_ext_len + 2}} {len(files)} files")
     print("-" * 42)
-
-
 if __name__ == "__main__":
     try:
         main()

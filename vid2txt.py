@@ -1,19 +1,14 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import sys
 from multiprocessing import Process, Queue, cpu_count
 from pathlib import Path
-
 import cv2
 import pytesseract
 from dh import cprint
 from PIL import Image
-
 video = sys.argv[1]
 txtfile = Path(video).with_suffix(".txt")
-
-
 def ocr_worker(q_in: Queue, q_out: Queue) -> None:
     while True:
         item = q_in.get()
@@ -30,8 +25,6 @@ def ocr_worker(q_in: Queue, q_out: Queue) -> None:
         else:
             cprint(f"frame {frame_id} --> no text", "blue")
         q_out.put((frame_id, text))
-
-
 def main() -> None:
     cap = cv2.VideoCapture(video)
     q_in = Queue(maxsize=cpu_count())
@@ -57,7 +50,5 @@ def main() -> None:
     cap.release()
     for w in workers:
         w.join()
-
-
 if __name__ == "__main__":
     main()

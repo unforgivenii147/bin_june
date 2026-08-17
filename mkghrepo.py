@@ -1,12 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import sys
 from pathlib import Path
-
 import requests
-
-
 def load_env_file(env_path):
     env_vars = {}
     try:
@@ -23,8 +19,6 @@ def load_env_file(env_path):
     except Exception as e:
         print(f"Error reading {env_path}: {e}")
         sys.exit(1)
-
-
 def create_github_repo(token, repo_name, description, public=True):
     url = "https://api.github.com/user/repos"
     headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
@@ -41,8 +35,6 @@ def create_github_repo(token, repo_name, description, public=True):
         print(f"❌ Failed to create repository: {response.status_code}")
         print(f"Error: {response.json().get('message', 'Unknown error')}")
         return None
-
-
 def main():
     if len(sys.argv) < 2:
         print("Usage: python create_repo.py <repo_name>")
@@ -64,7 +56,5 @@ def main():
         print(f"\n✨ Repository ready at: {result['html_url']}")
     else:
         sys.exit(1)
-
-
 if __name__ == "__main__":
     main()

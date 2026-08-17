@@ -3,23 +3,17 @@
 Report Python packages installed in both user and system site directories.
 Uses pathlib for path handling and concurrent.futures for parallel processing.
 """
-
 from __future__ import annotations
-
 import concurrent.futures
 import pathlib
 import site
 import sys
-
-
 def get_site_directories() -> tuple[list[pathlib.Path], list[pathlib.Path]]:
     site_dirs = [pathlib.Path(p) for p in site.getsitepackages()]
     user_site = pathlib.Path(site.getusersitepackages())
     system_site_dirs = [d for d in site_dirs if d != user_site]
     user_site_dirs = [user_site] if user_site.exists() else []
     return system_site_dirs, user_site_dirs
-
-
 def scan_directory_for_packages(directory: pathlib.Path) -> dict[str, pathlib.Path]:
     packages = {}
     if not directory.exists():
@@ -43,8 +37,6 @@ def scan_directory_for_packages(directory: pathlib.Path) -> dict[str, pathlib.Pa
     except Exception as e:
         print(f"Warning: Error scanning {directory}: {e}", file=sys.stderr)
     return packages
-
-
 def find_duplicate_packages(
     system_packages: dict[str, pathlib.Path], user_packages: dict[str, pathlib.Path]
 ) -> dict[str, tuple[pathlib.Path, pathlib.Path]]:
@@ -53,8 +45,6 @@ def find_duplicate_packages(
     for pkg_name in sorted(common_packages):
         duplicates[pkg_name] = (system_packages[pkg_name], user_packages[pkg_name])
     return duplicates
-
-
 def process_system_directories(system_dirs: list[pathlib.Path]) -> dict[str, pathlib.Path]:
     system_packages = {}
     with concurrent.futures.ThreadPoolExecutor(max_workers=len(system_dirs) or 1) as executor:
@@ -69,8 +59,6 @@ def process_system_directories(system_dirs: list[pathlib.Path]) -> dict[str, pat
             except Exception as e:
                 print(f"Error processing {directory}: {e}", file=sys.stderr)
     return system_packages
-
-
 def process_user_directories(user_dirs: list[pathlib.Path]) -> dict[str, pathlib.Path]:
     user_packages = {}
     with concurrent.futures.ThreadPoolExecutor(max_workers=len(user_dirs) or 1) as executor:
@@ -83,8 +71,6 @@ def process_user_directories(user_dirs: list[pathlib.Path]) -> dict[str, pathlib
             except Exception as e:
                 print(f"Error processing {directory}: {e}", file=sys.stderr)
     return user_packages
-
-
 def analyze_package_versions(
     package_name: str, system_location: pathlib.Path, user_location: pathlib.Path
 ) -> dict[str, str]:
@@ -121,8 +107,6 @@ def analyze_package_versions(
         except Exception:
             pass
     return versions
-
-
 def main():
     print("Python Package Duplicate Checker")
     print("-" * 42)
@@ -173,7 +157,5 @@ def main():
     print("Note: Having packages in both locations can lead to confusion about")
     print("which version is being used. Consider removing user installations of")
     print("packages that are already available system-wide.")
-
-
 if __name__ == "__main__":
     main()

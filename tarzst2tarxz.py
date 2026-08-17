@@ -1,15 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import lzma
 import os
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-
 import zstandard as zstd
 from dh import fsz, gsz
-
-
 def convert_one(src: str) -> tuple[str, int, bool, str]:
     src_path = Path(src)
     dst_xz = src_path.with_suffix("")
@@ -42,8 +38,6 @@ def convert_one(src: str) -> tuple[str, int, bool, str]:
         except Exception:
             pass
         return (src, 0, False, f"error: {e}")
-
-
 def main() -> None:
     cwd = Path(".").resolve()
     tar_zst_files = sorted(cwd.glob("*.tar.zst"))
@@ -73,7 +67,5 @@ def main() -> None:
         print(f"Extra used: {fsz(delta)}")
     else:
         print("No disk usage change (by summed file sizes in cwd).")
-
-
 if __name__ == "__main__":
     main()

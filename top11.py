@@ -1,20 +1,13 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import operator
 import sys
 from pathlib import Path
-
 from dh import fsz, get_files
-
 cwd = Path.cwd()
 N = int(sys.argv[1]) if len(sys.argv) > 1 else 11
-
-
 def get_sizes() -> list[tuple[Path, int]]:
     return [(file_path.relative_to(cwd), file_path.stat().st_size) for file_path in get_files(cwd)]
-
-
 def main() -> None:
     sizez = get_sizes()
     if not sizez:
@@ -33,7 +26,5 @@ def main() -> None:
             path_str = "..." + path_str[-(max_path_len - 3) :]
         size_str = fsz(size)
         print(f"{i:<3} {path_str[: max_path_len - 3]:<{max_path_len}} {size_str:>12}")
-
-
 if __name__ == "__main__":
     main()

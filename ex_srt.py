@@ -1,15 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Extract subtitles using ffmpy."""
-
 from __future__ import annotations
-
 import json
 import sys
 from pathlib import Path
-
 import ffmpy
-
-
 def get_subtitle_streams(input_file):
     ff = ffmpy.FFprobe(
         inputs={input_file: None},
@@ -34,8 +29,6 @@ def get_subtitle_streams(input_file):
     except Exception as e:
         print(f"Error probing file: {e}")
         sys.exit(1)
-
-
 def extract_subtitle(input_file, stream_index, output_file):
     ff = ffmpy.FFmpeg(
         inputs={input_file: None}, outputs={output_file: f"-map 0:s:{stream_index}"}, global_options=["-y"]
@@ -46,8 +39,6 @@ def extract_subtitle(input_file, stream_index, output_file):
     except Exception as e:
         print(f"Error: {e}")
         return False
-
-
 def main():
     if len(sys.argv) != 2:
         print(f"Usage: {sys.argv[0]} <video.mkv|video.mp4>")
@@ -67,7 +58,5 @@ def main():
         print(f"Extracting subtitle stream {stream['index']} -> {output_file}")
         extract_subtitle(input_file, i, output_file)
     print("Done.")
-
-
 if __name__ == "__main__":
     main()

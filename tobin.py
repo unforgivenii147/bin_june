@@ -1,14 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import sys
 from hashlib import sha256
 from pathlib import Path
-
 CHUNK_SIZE = 32768
 dest = Path.home() / "sbin"
-
-
 def get_sha256(path: str | Path) -> str:
     path = Path(path)
     h = sha256()
@@ -16,8 +12,6 @@ def get_sha256(path: str | Path) -> str:
         for chunk in iter(lambda: f.read(CHUNK_SIZE), b""):
             h.update(chunk)
     return h.hexdigest()
-
-
 def main() -> None:
     fn = Path(sys.argv[1])
     dest_path = dest / fn.name
@@ -28,7 +22,5 @@ def main() -> None:
             fn.unlink()
             sys.exit(1)
     fn.rename(dest_path)
-
-
 if __name__ == "__main__":
     sys.exit(main())

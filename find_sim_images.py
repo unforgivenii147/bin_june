@@ -1,17 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 from pathlib import Path
-
 import imagehash
 from PIL import Image
-
-
 def find_similar_images(userpaths, hashfunc=imagehash.average_hash) -> None:
     def is_image(filename):
         f = filename.lower()
         return f.endswith((".png", ".jpg", ".jpeg", ".bmp", ".gif", ".svg")) or ".jpg" in f
-
     image_filenames = []
     for userpath in userpaths:
         image_filenames += [path for path in Path(userpath).iterdir() if is_image(path)]
@@ -27,11 +22,8 @@ def find_similar_images(userpaths, hashfunc=imagehash.average_hash) -> None:
             if "dupPictures" in img:
                 print("rm -v", img)
         images[hash] = [*images.get(hash, []), img]
-
-
 if __name__ == "__main__":
     import sys
-
     def usage():
         sys.stderr.write(f"""SYNOPSIS: {sys.argv[0]} [ahash|phash|dhash|...] [<directory>]
 Identifies similar images in the directory.
@@ -46,7 +38,6 @@ Method:
 (C) Johannes Buchner, 2013-2017
 """)
         sys.exit(1)
-
     hashmethod = sys.argv[1] if len(sys.argv) > 1 else usage()
     if hashmethod == "ahash":
         hashfunc = imagehash.average_hash
@@ -57,10 +48,8 @@ Method:
     elif hashmethod == "whash-haar":
         hashfunc = imagehash.whash
     elif hashmethod == "whash-db4":
-
         def hashfunc(img):
             return imagehash.whash(img, mode="db4")
-
     elif hashmethod == "colorhash":
         hashfunc = imagehash.colorhash
     elif hashmethod == "crop-resistant":

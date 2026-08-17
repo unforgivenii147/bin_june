@@ -1,18 +1,13 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import ast
 import sys
 from os import scandir as os_scandir
 from pathlib import Path
-
 import tree_sitter_python as tspython
 from dh import mpf_async
 from tree_sitter import Language, Parser, Query, QueryCursor
-
 CHUNK_SIZE = 1024 * 1024
-
-
 def remove_blank_lines(text: str | Path) -> str:
     content = text
     if isinstance(text, Path):
@@ -31,11 +26,8 @@ def remove_blank_lines(text: str | Path) -> str:
         result_lines.append(line)
         prev_blank = is_blank
     return "".join(result_lines)
-
-
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
-
     path = Path(path)
     if is_binary(path):
         return False
@@ -55,8 +47,6 @@ def is_python_file(path: str | Path) -> bool:
         except:
             return False
     return False
-
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -71,8 +61,6 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
-
 def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
     if path.is_file():
@@ -104,18 +92,13 @@ def get_pyfiles(path: str | Path) -> list[Path]:
         except (PermissionError, OSError):
             continue
     return sorted(pyfiles)
-
-
 mpf = mpf_async
 QUERY_STRING = "\n(comment) @comment\n(block\n  . (expression_statement\n    (string)) @docstring)\n(module\n  . (expression_statement\n    (string)) @docstring)\n"
-
-
 class TSRemover:
     def __init__(self) -> None:
         self.language = Language(tspython.language())
         self.parser = Parser(self.language)
         self.query = Query(self.language, QUERY_STRING)
-
     def remove_comments(self, source: str) -> tuple[str, int, int]:
         source_bytes = source.encode("utf-8")
         tree = self.parser.parse(source_bytes)
@@ -147,8 +130,6 @@ class TSRemover:
         cleaned = new_source.decode("utf-8")
         cleaned = remove_blank_lines(cleaned)
         return (cleaned, comment_count, docstring_count)
-
-
 def process_file(path) -> None:
     path = Path(path)
     ts_rmc = TSRemover()
@@ -164,8 +145,6 @@ def process_file(path) -> None:
         path.write_text(result, encoding="utf-8")
     except:
         print(f"{path.name} : invalid code")
-
-
 def main() -> None:
     cwd = Path.cwd()
     before = gsz(".")
@@ -176,12 +155,8 @@ def main() -> None:
     diff_size = before - gsz(".")
     if diff_size != 0:
         print(fsz(diff_size))
-
-
 if __name__ == "__main__":
     main()
-
-
 def gsz(path):
     try:
         return Path(path).stat().st_size

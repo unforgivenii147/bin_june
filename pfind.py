@@ -1,15 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Search for filenames recursively with archive support and parallel processing."""
-
 from __future__ import annotations
-
 import sys
 import tarfile
 import tempfile
 import zipfile
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-
 try:
     import py7zr
 except ImportError:
@@ -22,8 +19,6 @@ try:
     import zstandard
 except ImportError:
     zstandard = None
-
-
 def collect_items(root_dirs, skip_patterns=None):
     if skip_patterns is None:
         skip_patterns = {".git"}
@@ -36,8 +31,6 @@ def collect_items(root_dirs, skip_patterns=None):
             if path.is_file():
                 items.append(path)
     return items
-
-
 def search_in_archive(archive_path, pattern):
     results = []
     pattern_lower = pattern.lower()
@@ -92,15 +85,11 @@ def search_in_archive(archive_path, pattern):
     except Exception:
         pass
     return results
-
-
 def search_file(file_path, pattern):
     pattern_lower = pattern.lower()
     if pattern_lower in file_path.name.lower():
         return [(str(file_path.relative_to(Path.cwd())), None)]
     return []
-
-
 def process_path(args):
     path, pattern = args
     if any(
@@ -109,8 +98,6 @@ def process_path(args):
     ):
         return search_in_archive(path, pattern)
     return search_file(path, pattern)
-
-
 def search(pattern, root_dirs=None, num_workers=None):
     if root_dirs is None:
         root_dirs = [Path.cwd()]
@@ -124,8 +111,6 @@ def search(pattern, root_dirs=None, num_workers=None):
         for results in pool.imap_unordered(process_path, work_items, chunksize=100):
             for result in results:
                 yield result
-
-
 def main():
     if len(sys.argv) < 2:
         print("Usage: python script.py <pattern> [directories...]")
@@ -137,7 +122,5 @@ def main():
             print(f"{file_path}:{archive_member}")
         else:
             print(file_path)
-
-
 if __name__ == "__main__":
     main()

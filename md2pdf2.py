@@ -1,32 +1,23 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import re
 import sys
-
 from markdown2 import markdown_path
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import TextLexer, get_lexer_by_name
 from weasyprint import CSS, HTML
-
-
 class ValidationError(Exception):
     pass
-
-
 TOC_HTML = """
 <nav class="toc">
 <h1>Contents</h1>
 <ul></ul>
 </nav>
 """
-
-
 def pygments_highlight(html: str) -> str:
     formatter = HtmlFormatter(cssclass="highlight")
     code_block_re = re.compile(r'<pre><code class="language-(\w+)">(.*?)</code></pre>', re.DOTALL)
-
     def repl(match) -> str:
         lang = match.group(1)
         code = match.group(2)
@@ -36,10 +27,7 @@ def pygments_highlight(html: str) -> str:
         except Exception:
             lexer = TextLexer()
         return highlight(code, lexer, formatter)
-
     return code_block_re.sub(repl, html)
-
-
 def md2pdf(pdf_file_path, md_file_path, css_file_path=None, base_url=None) -> None:
     extras = ["header-ids", "fenced-code-blocks", "tables", "cuddled-lists"]
     html = markdown_path(md_file_path, extras=extras)
@@ -52,8 +40,6 @@ def md2pdf(pdf_file_path, md_file_path, css_file_path=None, base_url=None) -> No
     if css_file_path:
         stylesheets.append(CSS(filename=css_file_path))
     html_doc.write_pdf(pdf_file_path, stylesheets=stylesheets)
-
-
 if __name__ == "__main__":
     md_file = sys.argv[1]
     pdf_file = md_file.replace(".md", ".pdf")

@@ -1,8 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 from urllib.parse import urlparse
-
 seen = set()
 gl = []
 with open("urls.txt") as f:

@@ -2,14 +2,10 @@
 """
 Sort bash aliases by their value (the part after =).
 """
-
 from __future__ import annotations
-
 import re
 import sys
 from pathlib import Path
-
-
 def parse_aliases(filepath: Path):
     aliases = []
     try:
@@ -30,15 +26,12 @@ def parse_aliases(filepath: Path):
         print(f"Error reading file: {e}")
         sys.exit(1)
     return aliases
-
-
 def write_sorted_aliases(aliases, filepath: Path, create_backup=True) -> None:
     sorted_aliases = sorted(aliases, key=lambda x: x[1])
     if create_backup:
         backup_path = f"{filepath}.backup"
         try:
             from shutil import copy2
-
             copy2(filepath, backup_path)
             print(f"Backup created: {backup_path}")
         except Exception as e:
@@ -52,8 +45,6 @@ def write_sorted_aliases(aliases, filepath: Path, create_backup=True) -> None:
     except Exception as e:
         print(f"Error writing file: {e}")
         sys.exit(1)
-
-
 def display_aliases(aliases, limit=None) -> None:
     if not aliases:
         print("No aliases found")
@@ -70,8 +61,6 @@ def display_aliases(aliases, limit=None) -> None:
         if len(value) > 60:
             value = value[:57] + "..."
         print(f"{name:<{max_name_len}}  {value:<{max_value_len}}")
-
-
 def main() -> None:
     aliases_file = Path.home() / ".config/bash.d/bash_aliases"
     if len(sys.argv) > 1:
@@ -98,7 +87,5 @@ def main() -> None:
     print("source ~/.bashrc")
     print("  # or")
     print("  exec $SHELL")
-
-
 if __name__ == "__main__":
     main()

@@ -1,11 +1,7 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 from pathlib import Path
-
 from dh import cprint
-
-
 def main() -> None:
     root = Path.cwd()
     kp = {}
@@ -24,12 +20,8 @@ def main() -> None:
             cprint(f"{k}:", "cyan")
             for i in v:
                 print(f"    - {i}")
-
-
 if __name__ == "__main__":
     main()
-
-
 def gsz(path):
     try:
         return Path(path).stat().st_size

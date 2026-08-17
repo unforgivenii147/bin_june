@@ -4,9 +4,7 @@ Parallel GZIP Compression Script
 Compresses files recursively using maximum compression with gzip module.
 Uses pathlib and parallel processing for efficiency.
 """
-
 from __future__ import annotations
-
 import argparse
 import gzip
 import shutil
@@ -14,10 +12,7 @@ import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import timedelta
 from pathlib import Path
-
 from dh import fsz
-
-
 class CompressionStats:
     def __init__(self):
         self.total_files = 0
@@ -25,18 +20,14 @@ class CompressionStats:
         self.failed = 0
         self.total_original_size = 0
         self.total_compressed_size = 0
-
     def add_success(self, original_size: int, compressed_size: int):
         self.total_files += 1
         self.successful += 1
         self.total_original_size += original_size
         self.total_compressed_size += compressed_size
-
     def add_failure(self):
         self.total_files += 1
         self.failed += 1
-
-
 def compress_file(file_path: Path) -> tuple[Path, bool, int, int, str]:
     gz_path = file_path.with_suffix(file_path.suffix + ".gz")
     try:
@@ -50,8 +41,6 @@ def compress_file(file_path: Path) -> tuple[Path, bool, int, int, str]:
         if gz_path.exists():
             gz_path.unlink()
         return (file_path, False, 0, 0, str(e))
-
-
 def find_files_to_compress(directories: list[Path], skip_extensions: set | None = None) -> list[Path]:
     if skip_extensions is None:
         skip_extensions = {".gz", ".zip", ".bz2", ".xz", ".7z", ".rar", ".tar"}
@@ -65,15 +54,11 @@ def find_files_to_compress(directories: list[Path], skip_extensions: set | None 
                 if not file_path.suffix.endswith(".gz"):
                     files_to_compress.append(file_path)
     return files_to_compress
-
-
 def format_ratio(original: int, compressed: int) -> str:
     if original == 0:
         return "N/A"
     ratio = (1 - compressed / original) * 100
     return f"{ratio:.1f}%"
-
-
 def main():
     parser = argparse.ArgumentParser(
         description="Compress files recursively with gzip (maximum compression)",
@@ -161,7 +146,5 @@ Examples:
         print(f"  Space saved:               {fsz(space_saved)}")
     print(f"  Time elapsed:               {timedelta(seconds=int(elapsed_time))}")
     print("-" * 42)
-
-
 if __name__ == "__main__":
     main()

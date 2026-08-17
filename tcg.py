@@ -3,15 +3,12 @@
 Termux script creator - Creates executable scripts from clipboard content.
 Archives existing files to ~/isaac/may/scripts/ if -a flag provided.
 """
-
 from __future__ import annotations
-
 import shutil
 import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-
 TERMUX_SHEBANGS = {
     "python": "#!/data/data/com.termux/files/home/.local/bin/python",
     "bash": "#!/data/data/com.termux/files/usr/bin/bash",
@@ -26,8 +23,6 @@ EXTENSION_MAP = {
 }
 SCRIPT_DIRS = {Path.home() / "bin", Path.home() / "bashbin", Path.home() / ".cargo" / "bin"}
 ARCHIVE_DIR = Path.home() / "isaac" / "may" / "scripts"
-
-
 def get_clipboard_content() -> str:
     try:
         result = subprocess.run(["termux-clipboard-get"], capture_output=True, text=True, check=True)
@@ -38,12 +33,8 @@ def get_clipboard_content() -> str:
     except FileNotFoundError:
         print("Error: termux-clipboard-get not found", file=sys.stderr)
         sys.exit(1)
-
-
 def get_language_from_extension(filename: str) -> str:
     return EXTENSION_MAP.get(Path(filename).suffix.lower(), "bash")
-
-
 def replace_shebang(content: str, lang: str) -> str:
     lines = content.splitlines()
     if lines and lines[0].startswith("#!"):
@@ -51,8 +42,6 @@ def replace_shebang(content: str, lang: str) -> str:
     lines.insert(0, TERMUX_SHEBANGS[lang])
     result = "\n".join(lines)
     return result if result.endswith("\n") else result + "\n"
-
-
 def archive_existing_file(file_path: Path) -> None:
     if not file_path.exists():
         return
@@ -71,8 +60,6 @@ def archive_existing_file(file_path: Path) -> None:
     except OSError as e:
         print(f"❌ Failed to archive: {e}", file=sys.stderr)
         sys.exit(1)
-
-
 def create_symlink(script_path: Path) -> None:
     if script_path.suffix.lower() == ".rs":
         return
@@ -85,8 +72,6 @@ def create_symlink(script_path: Path) -> None:
             print(f"  → Symlink: {symlink_path.name}")
         except OSError as e:
             print(f"  ⚠️  Symlink failed: {e}", file=sys.stderr)
-
-
 def main() -> None:
     archive = "-a" in sys.argv
     args = [arg for arg in sys.argv[1:] if arg != "-a"]
@@ -112,7 +97,5 @@ def main() -> None:
     if is_script_dir:
         output_path.chmod(0o755)
         create_symlink(output_path)
-
-
 if __name__ == "__main__":
     main()

@@ -3,17 +3,13 @@
 Find non-English lines in text files recursively using Compact Language Detector 2 (pycld2).
 Uses parallel processing for faster execution.
 """
-
 from __future__ import annotations
-
 import argparse
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import datetime
 from multiprocessing import cpu_count
 from pathlib import Path
-
 import pycld2 as cld2
-
 TEXT_EXTENSIONS = {
     ".txt",
     ".csv",
@@ -110,12 +106,8 @@ CLD2_LANG_MAP = {
     "pa": "PUNJABI",
     "unknown": "UNKNOWN",
 }
-
-
 def is_likely_text_file(file_path):
     return file_path.suffix.lower() in TEXT_EXTENSIONS
-
-
 def detect_language(text):
     if not text.strip():
         return None, None, 0, True
@@ -128,8 +120,6 @@ def detect_language(text):
         return lang_code, lang_name, percent, is_reliable
     except Exception as e:
         return "un", "UNKNOWN", 0, False
-
-
 def process_file(file_path):
     non_english_lines = []
     try:
@@ -159,8 +149,6 @@ def process_file(file_path):
         return file_path, non_english_lines, None
     except Exception as e:
         return file_path, None, f"Error processing file: {e}"
-
-
 def find_text_files(root_dir=".", extensions=TEXT_EXTENSIONS):
     root_path = Path(root_dir)
     text_files = []
@@ -170,8 +158,6 @@ def find_text_files(root_dir=".", extensions=TEXT_EXTENSIONS):
     text_files = [f for f in text_files if is_likely_text_file(f)]
     text_files.sort()
     return text_files
-
-
 def main():
     parser = argparse.ArgumentParser(description="Find non-English lines in text files using pycld2")
     parser.add_argument("directory", nargs="?", default=".", help="Directory to scan (default: current directory)")
@@ -260,7 +246,5 @@ def main():
     print(f"Errors: {len(errors)}")
     print(f"Report saved to: {output_path.resolve()}")
     print(f"{'=' * 42}")
-
-
 if __name__ == "__main__":
     main()

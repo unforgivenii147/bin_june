@@ -1,13 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Compile C/C++ source files using clang/clang++."""
-
 from __future__ import annotations
-
 import subprocess
 import sys
 from pathlib import Path
-
-
 def compile_file(source_path: str) -> None:
     source = Path(source_path)
     if not source.exists():
@@ -33,8 +29,6 @@ def compile_file(source_path: str) -> None:
         if e.stderr:
             print(e.stderr, file=sys.stderr)
         sys.exit(1)
-
-
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python mkc.py <file.c or file.cpp>", file=sys.stderr)

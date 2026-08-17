@@ -5,9 +5,7 @@ Separates pure Python packages from non-pure (binary/extension) packages based o
 Optimized for Linux/Termux - only checks for .so files.
 Uses multiprocessing for parallel scanning and pathlib for path operations.
 """
-
 from __future__ import annotations
-
 import argparse
 import json
 import re
@@ -16,12 +14,9 @@ from datetime import datetime
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 from typing import dict, list, tuple
-
-
 def get_site_packages_dirs() -> list[Path]:
     site_dirs = []
     import site
-
     for path in site.getsitepackages():
         site_dirs.append(Path(path))
     user_site = site.getusersitepackages()
@@ -39,8 +34,6 @@ def get_site_packages_dirs() -> list[Path]:
         if path.exists() and path not in site_dirs:
             site_dirs.append(path)
     return [d for d in site_dirs if d.exists() and d.is_dir()]
-
-
 def get_package_name_from_path(path: Path) -> str:
     name = path.name
     if name.endswith(".dist-info"):
@@ -52,8 +45,6 @@ def get_package_name_from_path(path: Path) -> str:
     name = re.sub(r"-py\d+\.\d+$", "", name)
     name = re.sub(r"-py\d+$", "", name)
     return name
-
-
 def is_pure_python_package(pkg_name: str, site_dir: Path) -> bool:
     try:
         dist_info_patterns = [
@@ -107,8 +98,6 @@ def is_pure_python_package(pkg_name: str, site_dir: Path) -> bool:
         return True
     except Exception:
         return True
-
-
 def scan_package(package_path: Path, site_dir: Path) -> dict[str, any]:
     pkg_name = get_package_name_from_path(package_path)
     result = {"name": pkg_name, "has_entry_points": False, "is_pure_python": True, "error": None}
@@ -155,8 +144,6 @@ def scan_package(package_path: Path, site_dir: Path) -> dict[str, any]:
     except Exception as e:
         result["error"] = str(e)
     return result
-
-
 def find_packages_without_entry_points(site_dir: Path) -> tuple[list[str], list[str]]:
     pure_packages = []
     non_pure_packages = []
@@ -188,8 +175,6 @@ def find_packages_without_entry_points(site_dir: Path) -> tuple[list[str], list[
     except Exception as e:
         print(f"Error scanning directory {site_dir}: {e}", file=sys.stderr)
     return pure_packages, non_pure_packages
-
-
 def main():
     parser = argparse.ArgumentParser(
         description="Find Python packages without entry_points.txt in system site directories (Linux/Termux optimized)"
@@ -288,7 +273,5 @@ def main():
                 print(f"  {pkg}")
             if len(unique_nonpure) > 10:
                 print(f"  ... and {len(unique_nonpure) - 10} more")
-
-
 if __name__ == "__main__":
     main()

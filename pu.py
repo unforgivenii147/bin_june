@@ -1,18 +1,13 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import subprocess
 import sys
 from pathlib import Path
-
 from pip._internal.cli.main import main as pip_main
 from rapidfuzz import fuzz
-
-
 def get_file_age(path: str | Path, str_mode: bool = False) -> float | str:
     from os import stat as os_stat
     from time import time as time_time
-
     path = Path(path)
     current_time = time_time()
     file_stat = os_stat(path)
@@ -41,8 +36,6 @@ def get_file_age(path: str | Path, str_mode: bool = False) -> float | str:
         if value:
             parts.append(f"{value} {name}")
     return ", ".join(parts) if parts else "0 sec"
-
-
 def get_installed_pkgs():
     packages = []
     pip_freeze_path = Path("/sdcard/data/pip.freeze")
@@ -55,7 +48,6 @@ def get_installed_pkgs():
                 packages.append(name)
         return packages
     from importlib.metadata import distributions
-
     for dist in distributions():
         meta = dist.metadata
         name = meta.get("Name") or meta.get("name")
@@ -64,26 +56,16 @@ def get_installed_pkgs():
         name = name.strip()
         packages.append(name)
     return packages
-
-
 get_ipkgs = get_installed_pkgs
-
-
 def uninstall(packages: list[str]) -> int:
     args = ["uninstall", *packages]
     return pip_main(args)
-
-
 PIP_LIST_FILE = "/sdcard/data/pip.list"
-
-
 def create_pip_list_again() -> list[str]:
     installed = get_ipkgs()
     content = "\n".join(installed)
     Path(PIP_LIST_FILE).write_text(content, encoding="utf-8")
     return installed
-
-
 def load_installed_packages() -> list[str]:
     path = Path(PIP_LIST_FILE)
     ONE_DAY = 60 * 42 * 24
@@ -92,11 +74,8 @@ def load_installed_packages() -> list[str]:
     if age / ONE_DAY > 1.0 or not path.exists():
         return create_pip_list_again()
     return [line.strip() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
-
-
 def find_dist_info(prefix):
     import site
-
     matches = []
     for sp in site.getsitepackages():
         sp_path = Path(sp)
@@ -107,16 +86,12 @@ def find_dist_info(prefix):
         for d in sp_path.glob(f"{prefix}*.dist-info"):
             matches.append(d)
     return matches
-
-
 def uninstall_packages(pkg_name) -> None:
     try:
         subprocess.run([sys.executable, "-m", "pip", "uninstall", "-y", pkg_name], check=True)
         print(f"Uninstalled {pkg_name}")
     except subprocess.CalledProcessError:
         print(f"Skipped {pkg_name} (not installed or error)")
-
-
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print(f"Usage: {sys.argv[0]} <package_prefix>")

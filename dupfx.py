@@ -1,26 +1,19 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import argparse
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
 from xxhash import xxh64
-
 DEFAULT_BLOCK = 32768
 QUICK_READ = 4096
 CHUNK_SIZE = 65536
-
-
 def file_stat_key(p: Path) -> tuple[int, int] | None:
     try:
         st = p.stat()
         return (st.st_ino, st.st_dev)
     except OSError:
         return None
-
-
 def quick_hash(path: Path, n: int = QUICK_READ) -> str:
     h = xxh64()
     try:
@@ -38,8 +31,6 @@ def quick_hash(path: Path, n: int = QUICK_READ) -> str:
     except OSError as e:
         raise OSError(f"quick_hash error {path}: {e}")
     return h.hexdigest()
-
-
 def full_hash(path: Path) -> tuple[str, Path]:
     try:
         if not path.stat().st_size:
@@ -57,8 +48,6 @@ def full_hash(path: Path) -> tuple[str, Path]:
         return (h.hexdigest(), path)
     except OSError:
         return ("", path)
-
-
 def iter_files(root: Path, recursive: bool, follow_symlinks: bool, min_size: int):
     if recursive:
         iterator = root.rglob("*")
@@ -76,8 +65,6 @@ def iter_files(root: Path, recursive: bool, follow_symlinks: bool, min_size: int
                 yield p
         except OSError:
             continue
-
-
 def choose_keep(files: list, policy: str = "oldest") -> Path:
     if not files:
         raise ValueError("Empty file list")
@@ -89,8 +76,6 @@ def choose_keep(files: list, policy: str = "oldest") -> Path:
         return max(files, key=lambda p: p.stat().st_mtime)
     else:
         return min(files, key=str)
-
-
 def main() -> None:
     cwd = Path.cwd()
     p = argparse.ArgumentParser(description="Find and delete duplicate files by content.")
@@ -226,7 +211,5 @@ def main() -> None:
         print(f"  Failed to delete: {failed}")
     if freed_space:
         print(f"  Space freed: {freed_space:,} bytes ({freed_space / 1024 / 1024:.2f} MB)")
-
-
 if __name__ == "__main__":
     main()

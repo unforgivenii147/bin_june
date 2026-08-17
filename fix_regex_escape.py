@@ -1,17 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import ast
 from ast import Call
 from os import scandir as os_scandir
 from pathlib import Path
-
 CHUNK_SIZE = 1024 * 1024
-
-
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
-
     path = Path(path)
     if is_binary(path):
         return False
@@ -31,8 +26,6 @@ def is_python_file(path: str | Path) -> bool:
         except:
             return False
     return False
-
-
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -47,8 +40,6 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
-
-
 def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
     if path.is_file():
@@ -80,8 +71,6 @@ def get_pyfiles(path: str | Path) -> list[Path]:
         except (PermissionError, OSError):
             continue
     return sorted(pyfiles)
-
-
 TARGET_FUNCS = {
     "compile",
     "search",
@@ -93,8 +82,6 @@ TARGET_FUNCS = {
     "sub",
     "subn",
 }
-
-
 class RegexFixer(ast.NodeTransformer):
     def visit_Call(self, node: ast.Call) -> Call:
         self.generic_visit(node)
@@ -114,8 +101,6 @@ class RegexFixer(ast.NodeTransformer):
                 node.args[0] = ast.Constant(value=fixed)
                 print(f"{original}\n{fixed}\n\n")
         return node
-
-
 def fix_file(path: Path) -> bool:
     source = path.read_text(encoding="utf-8")
     try:
@@ -132,8 +117,6 @@ def fix_file(path: Path) -> bool:
         print(f"[FIXED] {path}")
         return True
     return False
-
-
 def main() -> None:
     cwd = Path()
     files = get_pyfiles(cwd)
@@ -142,7 +125,5 @@ def main() -> None:
         if fix_file(f):
             changed += 1
     print(f"\nDone. Modified {changed} files.")
-
-
 if __name__ == "__main__":
     main()

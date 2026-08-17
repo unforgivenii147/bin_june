@@ -4,17 +4,13 @@ Duplicate Function Detector and Remover
 Detects functions with identical bodies (ignoring whitespace and comments)
 and optionally removes duplicates with user confirmation.
 """
-
 from __future__ import annotations
-
 import argparse
 import ast
 import re
 import sys
 from collections import defaultdict
 from pathlib import Path
-
-
 class FunctionInfo:
     def __init__(self, name: str, body: str, lineno: int, node: ast.FunctionDef) -> None:
         self.name = name
@@ -22,7 +18,6 @@ class FunctionInfo:
         self.original_body = body
         self.lineno = lineno
         self.node = node
-
     @staticmethod
     def _normalize_body(body: str) -> str:
         lines = []
@@ -32,13 +27,10 @@ class FunctionInfo:
         body = "\n".join(lines)
         lines = [line.strip() for line in body.split("\n") if line.strip()]
         return "\n".join(lines)
-
-
 class DuplicateFunctionFinder(ast.NodeVisitor):
     def __init__(self) -> None:
         self.functions: list[FunctionInfo] = []
         self.source_lines: list[str] = []
-
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
         body_start = node.body[0].lineno - 1
         body_end = node.body[-1].end_lineno
@@ -47,7 +39,6 @@ class DuplicateFunctionFinder(ast.NodeVisitor):
         func_info = FunctionInfo(name=node.name, body=body_code, lineno=node.lineno, node=node)
         self.functions.append(func_info)
         self.generic_visit(node)
-
     def analyze_file(self, filepath: str) -> dict[str, list[FunctionInfo]]:
         with open(filepath, encoding="utf-8") as f:
             content = f.read()
@@ -62,14 +53,11 @@ class DuplicateFunctionFinder(ast.NodeVisitor):
         for func in self.functions:
             groups[func.body].append(func)
         return {body: funcs for body, funcs in groups.items() if len(funcs) > 1}
-
-
 class DuplicateFunctionRemover:
     def __init__(self, filepath: str) -> None:
         self.filepath = Path(filepath)
         self.content = None
         self.lines = None
-
     def _get_function_lines(self, func_info: FunctionInfo) -> tuple[int, int]:
         node = func_info.node
         end_line = node.end_lineno if hasattr(node, "end_lineno") else node.lineno
@@ -78,11 +66,9 @@ class DuplicateFunctionRemover:
         else:
             start_line = node.lineno
         return start_line, end_line
-
     def _extract_function_code(self, func_info: FunctionInfo) -> str:
         start_line, end_line = self._get_function_lines(func_info)
         return "\n".join(self.lines[start_line - 1 : end_line])
-
     def remove_duplicates(self, groups: dict[str, list[FunctionInfo]], keep_choice: dict[str, int]) -> bool:
         with open(self.filepath, encoding="utf-8") as f:
             self.content = f.read()
@@ -108,14 +94,11 @@ class DuplicateFunctionRemover:
         except Exception as e:
             print(f"Error writing to file: {e}")
             return False
-
     def backup_file(self) -> str:
         backup_path = self.filepath.with_suffix(self.filepath.suffix + ".backup")
         with open(self.filepath, encoding="utf-8") as src, open(backup_path, "w", encoding="utf-8") as dst:
             dst.write(src.read())
         return str(backup_path)
-
-
 def display_duplicates(groups: dict[str, list[FunctionInfo]]) -> bool:
     if not groups:
         print("No duplicate functions found!")
@@ -133,8 +116,6 @@ def display_duplicates(groups: dict[str, list[FunctionInfo]]) -> bool:
         print(f"\n  Body preview:\n{body_preview}")
         print("-" * 42)
     return True
-
-
 def get_user_choices(groups: dict[str, list[FunctionInfo]]) -> dict[str, int]:
     choices = {}
     for body, funcs in groups.items():
@@ -153,8 +134,6 @@ def get_user_choices(groups: dict[str, list[FunctionInfo]]) -> dict[str, int]:
             except ValueError:
                 print("Please enter a valid number")
     return choices
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="Find and optionally remove duplicate functions in Python files")
     parser.add_argument("file", help="Python file to analyze")
@@ -202,7 +181,5 @@ def main() -> None:
             sys.exit(0)
     else:
         print("\nUse -r or --remove to remove duplicates with user confirmation")
-
-
 if __name__ == "__main__":
     main()

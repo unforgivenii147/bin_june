@@ -1,6 +1,5 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import bz2
 import gzip
 import lzma
@@ -10,13 +9,11 @@ import tempfile
 import time
 from collections import namedtuple
 from pathlib import Path
-
 import blosc
 import brotli
 import lz4.frame
 import py7zr
 import zstandard as zstd
-
 ALGORITHMS = [
     ("brotli", ".br", compress_brotli),
     ("zstd", ".zst", compress_zstd),
@@ -27,43 +24,26 @@ ALGORITHMS = [
     ("blosc", ".blosc", compress_blosc),
 ]
 CompressionResult = namedtuple("CompressionResult", ["name", "ext", "size", "ratio", "elapsed", "output_path"])
-
-
 def compress_brotli(data: bytes) -> bytes:
     return brotli.compress(data, quality=11)
-
-
 def compress_zstd(data: bytes) -> bytes:
     cctx = zstd.ZstdCompressor(level=21)
     return cctx.compress(data)
-
-
 def compress_xz(data: bytes) -> bytes:
     return lzma.compress(data, preset=9)
-
-
 def compress_bz2(data: bytes) -> bytes:
     return bz2.compress(data, compresslevel=9)
-
-
 def compress_gzip(data: bytes) -> bytes:
     import io
-
     buf = io.BytesIO()
     with gzip.GzipFile(fileobj=buf, mode="wb", compresslevel=9) as f:
         f.write(data)
     return buf.getvalue()
-
-
 def compress_lz4(data: bytes) -> bytes:
     return lz4.frame.compress(data, compression_level=lz4.frame.COMPRESSIONLEVEL_MAX)
-
-
 def compress_blosc(data: bytes) -> bytes:
     blosc.set_compressor("zstd")
     return blosc.compress(data, clevel=9, shuffle=blosc.BITSHUFFLE)
-
-
 def compress_7z(data: bytes, output_path: Path) -> bytes:
     tmp_input = Path(tempfile.mkstemp(suffix=".tmp"))
     try:
@@ -74,8 +54,6 @@ def compress_7z(data: bytes, output_path: Path) -> bytes:
     finally:
         if tmp_input.exists():
             tmp_input.unlink()
-
-
 def prepare_input(target: Path) -> tuple[bytes, str]:
     if target.is_file():
         return target.read_bytes(), target.name
@@ -91,8 +69,6 @@ def prepare_input(target: Path) -> tuple[bytes, str]:
         return data, target.name
     else:
         raise ValueError(f"Path is neither a file nor a directory: {target}")
-
-
 def run_benchmark(target: Path) -> None:
     print(f"\n📦 Compressing: {target}\n")
     data, base_name = prepare_input(target)
@@ -150,8 +126,6 @@ def run_benchmark(target: Path) -> None:
             print(f"✗ Deleted: {r.name}")
         except OSError as e:
             print(f"⚠ Could not delete {r.name}: {e}")
-
-
 def main():
     if len(sys.argv) != 2:
         print(f"Usage: python {sys.argv[0]} <file_or_directory>")
@@ -161,7 +135,5 @@ def main():
         print(f"⚠ Error: '{target}' does not exist.")
         sys.exit(1)
     run_benchmark(target)
-
-
 if __name__ == "__main__":
     main()

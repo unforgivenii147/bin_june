@@ -17,20 +17,16 @@ Notes:
   - Falls back to signature-based detection if python-magic is unavailable.
   - Always run with --dry-run first (the default).
 """
-
 from __future__ import annotations
-
 import argparse
 import shutil
 import sys
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-
 READ_BYTES = 8192
 MAGIC_AVAILABLE = False
 try:
     import magic
-
     MAGIC_AVAILABLE = True
 except ImportError:
     pass
@@ -169,8 +165,6 @@ SKIP_EXTS = {
     ".js",
     ".ts",
 }
-
-
 def detect_with_magic(path: Path) -> tuple[str, str] | None:
     if not MAGIC_AVAILABLE:
         return None
@@ -184,8 +178,6 @@ def detect_with_magic(path: Path) -> tuple[str, str] | None:
         return None
     except Exception:
         return None
-
-
 def detect_by_signature(path: Path, nbytes: int = READ_BYTES) -> tuple[str, str] | None:
     try:
         with path.open("rb") as f:
@@ -203,7 +195,6 @@ def detect_by_signature(path: Path, nbytes: int = READ_BYTES) -> tuple[str, str]
             continue
     try:
         import zipfile
-
         if zipfile.is_zipfile(path):
             with zipfile.ZipFile(path, "r") as z:
                 for nm in z.namelist():
@@ -216,7 +207,6 @@ def detect_by_signature(path: Path, nbytes: int = READ_BYTES) -> tuple[str, str]
         pass
     try:
         import tarfile
-
         if tarfile.is_tarfile(path):
             fname = path.name.lower()
             if fname.endswith((".tar.gz", ".tgz")):
@@ -235,16 +225,12 @@ def detect_by_signature(path: Path, nbytes: int = READ_BYTES) -> tuple[str, str]
     except Exception:
         pass
     return None
-
-
 def detect_file_type(path: Path) -> tuple[str, str] | None:
     if MAGIC_AVAILABLE:
         result = detect_with_magic(path)
         if result:
             return result
     return detect_by_signature(path)
-
-
 def safe_rename(src: Path, dst: Path) -> tuple[bool, str | None]:
     if src.samefile(dst) if dst.exists() and src.exists() else False:
         return False, "source and destination are identical"
@@ -274,8 +260,6 @@ def safe_rename(src: Path, dst: Path) -> tuple[bool, str | None]:
                 except Exception as e:
                     return False, f"rename/move failed for candidate: {e}"
     return False, "failed to find non-conflicting name"
-
-
 def process_file(args) -> dict:
     path_str, commit, _verbose = args
     path = Path(path_str)
@@ -329,8 +313,6 @@ def process_file(args) -> dict:
         result["action"] = "error"
         result["reason"] = info
     return result
-
-
 def gather_files(root: Path, follow_symlinks: bool = False, skip_hidden: bool = True) -> list[Path]:
     files: list[Path] = []
     for p in root.rglob("*"):
@@ -342,8 +324,6 @@ def gather_files(root: Path, follow_symlinks: bool = False, skip_hidden: bool = 
         except Exception:
             continue
     return files
-
-
 def print_summary(results: list[dict], verbose: bool = False) -> None:
     renamed = [r for r in results if r["action"] == "renamed"]
     would = [r for r in results if r["action"] == "would-rename"]
@@ -369,8 +349,6 @@ def print_summary(results: list[dict], verbose: bool = False) -> None:
             print("\nErrors:")
             for r in errors[:10]:
                 print(f"  {r['path']}: {r.get('reason')}")
-
-
 def print_header():
     print("fix_extension_mismatch.py")
     print(
@@ -379,8 +357,6 @@ def print_header():
     if not MAGIC_AVAILABLE:
         print("    Install with: pip install python-magic (Linux/macOS) or python-magic-bin (Windows)")
     print()
-
-
 def main():
     ap = argparse.ArgumentParser(
         prog="fix_extension_mismatch.py",
@@ -436,7 +412,5 @@ def main():
         print("Interrupted by user.", file=sys.stderr)
         sys.exit(1)
     print_summary(results, verbose=args.verbose)
-
-
 if __name__ == "__main__":
     main()

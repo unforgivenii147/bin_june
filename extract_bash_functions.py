@@ -4,9 +4,7 @@ Extract functions from shell scripts (.sh files and extensionless bash scripts) 
 Supports parallel processing for better performance.
 Optimized for Termux environment.
 """
-
 from __future__ import annotations
-
 import argparse
 import contextlib
 import os
@@ -15,9 +13,7 @@ import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import List, Set, Tuple
-
 from fastwalk import walk_files
-
 EXCLUDED = {
     ".py",
     ".h",
@@ -37,8 +33,6 @@ EXCLUDED = {
 }
 IS_TERMUX = os.environ.get("TERMUX_VERSION") is not None or "com.termux" in os.environ.get("PREFIX", "")
 DEFAULT_WORKERS = 6 if IS_TERMUX else 8
-
-
 def is_bash_script(file_path: Path) -> bool:
     if file_path.suffix == ".sh":
         return True
@@ -64,8 +58,6 @@ def is_bash_script(file_path: Path) -> bool:
     except (IOError, OSError, UnicodeDecodeError):
         return False
     return False
-
-
 def find_sh_files(paths: List[Path], include_extensionless: bool = True) -> Set[Path]:
     sh_files = set()
     for path in paths:
@@ -85,8 +77,6 @@ def find_sh_files(paths: List[Path], include_extensionless: bool = True) -> Set[
         else:
             print(f"Warning: {path} is not a file or directory, skipping...", file=sys.stderr)
     return sh_files
-
-
 def extract_functions_from_file(sh_file: Path) -> List[Tuple[str, str, Path]]:
     try:
         with open(sh_file, "r", encoding="utf-8", errors="ignore") as f:
@@ -123,8 +113,6 @@ def extract_functions_from_file(sh_file: Path) -> List[Tuple[str, str, Path]]:
         else:
             i += 1
     return functions
-
-
 def process_file(sh_file: Path, output_dir: Path, use_extension: bool = True) -> List[Tuple[str, Path]]:
     functions = extract_functions_from_file(sh_file)
     saved_functions = []
@@ -148,12 +136,8 @@ def process_file(sh_file: Path, output_dir: Path, use_extension: bool = True) ->
         except Exception as e:
             print(f"Error writing function '{func_name}' to {output_file}: {e}", file=sys.stderr)
     return saved_functions
-
-
 def get_optimal_workers() -> int:
     return DEFAULT_WORKERS
-
-
 def main():
     parser = argparse.ArgumentParser(
         description="Extract functions from shell scripts (.sh and extensionless) recursively",
@@ -241,8 +225,6 @@ def main():
         with contextlib.suppress(BaseException):
             args.output.chmod(args.output.stat().st_mode | 493)
     return 0
-
-
 if __name__ == "__main__":
     try:
         sys.exit(main())

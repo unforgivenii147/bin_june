@@ -1,17 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import ast
 import re
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-
 from dh import get_files
-
 DH_SRC_DIR = Path("~/isaac/pkgs/dh/src/dh").expanduser()
-
-
 def build_dh_public_mapping(dh_path: Path) -> dict[str, Path]:
     init_file = dh_path / "__init__.py"
     if not init_file.exists():
@@ -24,8 +19,6 @@ def build_dh_public_mapping(dh_path: Path) -> dict[str, Path]:
             for alias in node.names:
                 mapping[alias.name] = module_path
     return mapping
-
-
 def build_dh_symbol_index(dh_path: Path) -> dict[str, set[str]]:
     index: dict[str, set[str]] = {}
     for py_file in get_files(dh_path, ext=[".py"]):
@@ -47,16 +40,12 @@ def build_dh_symbol_index(dh_path: Path) -> dict[str, set[str]]:
             src = "\n".join(lines[node.lineno - 1 : node.end_lineno]).strip()
             index.setdefault(name, set()).add(src)
     return index
-
-
 def is_import_used(node: ast.Import | ast.ImportFrom, text: str) -> bool:
     for alias in node.names:
         bound_name = alias.asname or alias.name.split(".")[0]
         if re.search(rf"\b{re.escape(bound_name)}\b", text):
             return True
     return False
-
-
 def process_file(path: Path, public_map: dict[str, Path], symbol_index: dict[str, set[str]]):
     path = Path(path)
     if path.resolve() == Path(__file__).resolve():
@@ -114,8 +103,6 @@ def process_file(path: Path, public_map: dict[str, Path], symbol_index: dict[str
         path.write_text(new_content, encoding="utf-8")
         label = ", ".join(sorted(to_import)) if to_import else "(internal helpers only)"
         print(f"Reverted: {path} -> Restored import: {label}")
-
-
 def main():
     try:
         public_map = build_dh_public_mapping(DH_SRC_DIR)
@@ -128,7 +115,5 @@ def main():
     py_files = [Path(p) for p in args] if args else get_files(cwd, ext=[".py"])
     with ThreadPoolExecutor() as executor:
         executor.map(lambda p: process_file(p, public_map, symbol_index), py_files)
-
-
 if __name__ == "__main__":
     main()

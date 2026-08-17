@@ -1,14 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import stat
 from pathlib import Path
-
-
 def get_mode(path: Path) -> int:
     return stat.S_IMODE(path.stat().st_mode)
-
-
 def mkx(filename: Path) -> None:
     original_mode = filename.stat().st_mode
     levels = [stat.S_IXUSR, stat.S_IXGRP, stat.S_IXOTH]
@@ -21,12 +16,8 @@ def mkx(filename: Path) -> None:
             break
         except OSError:
             continue
-
-
 def is_exec(path: Path) -> bool:
     return bool(path.stat().st_mode & stat.S_IXUSR)
-
-
 def get_filez(p):
     if not p.is_dir():
         yield p
@@ -36,8 +27,6 @@ def get_filez(p):
         if f.is_dir():
             yield f
             yield from get_filez(f)
-
-
 def normalize_permissions(cwd: Path) -> None:
     DIR_PERM = 509
     FILE_PERM = 436
@@ -67,8 +56,6 @@ def normalize_permissions(cwd: Path) -> None:
             continue
         except OSError as e:
             print(f"OS error on {path.name}: {e}")
-
-
 if __name__ == "__main__":
     cwd = Path.cwd()
     normalize_permissions(cwd)

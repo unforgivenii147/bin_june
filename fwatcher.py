@@ -1,10 +1,7 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import os
 import time
-
-
 def watch_tor_log(log_path: str = "~/.tor/tor.log") -> None:
     log_path = os.path.expanduser(log_path)
     if not os.path.exists(log_path):
@@ -49,14 +46,9 @@ def watch_tor_log(log_path: str = "~/.tor/tor.log") -> None:
     except KeyboardInterrupt:
         print("\n\nMonitoring stopped by user")
         return
-
-
 def main() -> None:
     import sys
-
     log_path = sys.argv[1] if len(sys.argv) > 1 else "~/.tor/tor.log"
     watch_tor_log(log_path)
-
-
 if __name__ == "__main__":
     main()

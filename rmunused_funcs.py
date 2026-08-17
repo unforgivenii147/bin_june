@@ -1,16 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import ast
 import logging
 import multiprocessing
 import shutil
 from functools import partial
 from pathlib import Path
-
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-
-
 def get_defined_and_called(file_path):
     try:
         with Path(file_path).open("r", encoding="utf-8") as f:
@@ -28,8 +24,6 @@ def get_defined_and_called(file_path):
             elif isinstance(node.func, ast.Attribute):
                 called.add(node.func.attr)
     return defined, called, None
-
-
 def process_file(file_path, dry_run: bool = True) -> str | None:
     Path(path)
     defined, called, err = get_defined_and_called(file_path)
@@ -42,8 +36,6 @@ def process_file(file_path, dry_run: bool = True) -> str | None:
         return f"[DRY-RUN] Would remove {unused} from {file_path}"
     shutil.copy2(file_path, file_path.with_suffix(".py.bak"))
     return f"Processed {file_path}: Found {len(unused)} potentially unused functions."
-
-
 def run_cleaner(dry_run: bool = True) -> None:
     files = list(Path().rglob("*.py"))
     pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
@@ -52,7 +44,5 @@ def run_cleaner(dry_run: bool = True) -> None:
     for res in results:
         if res:
             print(res)
-
-
 if __name__ == "__main__":
     run_cleaner(dry_run=True)

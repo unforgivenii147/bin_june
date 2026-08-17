@@ -1,21 +1,15 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import os
 import re
 import sys
 from collections import defaultdict
 from pathlib import Path
-
 prefix = "/data/data/com.termux/files"
-
-
 def get_path_dirs() -> list[str]:
     path_env = os.environ.get("PATH", "")
     path_dirs = path_env.split(":")
     return [d for d in path_dirs if d and Path(d).exists()]
-
-
 def get_commands_from_path(path_dirs: list[str]):
     commands = {}
     duplicate_commands = defaultdict(list)
@@ -36,8 +30,6 @@ def get_commands_from_path(path_dirs: list[str]):
             continue
     conflicts = {cmd: paths for cmd, paths in duplicate_commands.items() if len(paths) > 1}
     return commands, conflicts
-
-
 def extract_aliases(aliases_file: Path):
     aliases = {}
     alias_pattern = re.compile(r"^\s*alias\s+([a-zA-Z_][a-zA-Z0-9_-]*)\s*=", re.MULTILINE)
@@ -52,8 +44,6 @@ def extract_aliases(aliases_file: Path):
     except Exception as e:
         print(f"Warning: Could not read aliases file: {e}")
     return aliases
-
-
 def extract_functions(functions_file: Path):
     functions = {}
     patterns = [
@@ -76,12 +66,8 @@ def extract_functions(functions_file: Path):
     except Exception as e:
         print(f"Warning: Could not read functions file: {e}")
     return functions
-
-
 def check_conflicts(names, path_commands, name_type: str):
     return {name: path_commands[name] for name in names if name in path_commands}
-
-
 def display_results(alias_conflicts, func_conflicts, path_duplicates, path_dirs: list[str]) -> None:
     print("-" * 42)
     print("🔍 PATH CONFLICT ANALYSIS")
@@ -128,8 +114,6 @@ def display_results(alias_conflicts, func_conflicts, path_duplicates, path_dirs:
         print("   To use the binary instead, prefix with 'command' or r''")
         print("   Example: command ls  or  \\ls")
     print("-" * 42)
-
-
 def suggest_fixes(alias_conflicts, func_conflicts) -> None:
     if not alias_conflicts and not func_conflicts:
         return
@@ -146,8 +130,6 @@ def suggest_fixes(alias_conflicts, func_conflicts) -> None:
             print(f"   • Rename function: {conflict}_func() {{ ... }}")
             print(f"   • Or use in scripts: command {conflict}")
     print("\nTo see all conflicts in detail, run with --verbose flag")
-
-
 def main():
     verbose = "--verbose" in sys.argv or "-v" in sys.argv
     config_dir = Path.home() / ".config/bash.d"
@@ -171,7 +153,5 @@ def main():
         sys.exit(1)
     print("\n✅ No conflicts detected! Your aliases and functions are safe.")
     sys.exit(0)
-
-
 if __name__ == "__main__":
     main()

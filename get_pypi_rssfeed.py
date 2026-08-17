@@ -1,16 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import sys
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from typing import Optional
-
 import requests
-
 PYPI_RSS_URL = "https://pypi.org/rss/packages.xml"
-
-
 def fetch_rss_feed(url: str) -> Optional[str]:
     try:
         response = requests.get(url, timeout=55)
@@ -19,8 +14,6 @@ def fetch_rss_feed(url: str) -> Optional[str]:
     except requests.exceptions.RequestException as e:
         print(f"Error fetching RSS feed: {e}", file=sys.stderr)
         return None
-
-
 def parse_rss_feed(xml_content: str) -> list[dict[str, str]]:
     packages = []
     try:
@@ -47,8 +40,6 @@ def parse_rss_feed(xml_content: str) -> list[dict[str, str]]:
     except Exception as e:
         print(f"Unexpected error during parsing: {e}", file=sys.stderr)
     return packages
-
-
 def display_packages(packages: list[dict[str, str]], limit: Optional[int] = None):
     if not packages:
         print("No packages found in the RSS feed.")
@@ -71,8 +62,6 @@ def display_packages(packages: list[dict[str, str]], limit: Optional[int] = None
         )
         print(f"  GUID:        {pkg['guid']}")
         print("-" * 42)
-
-
 def save_to_file(packages: list[dict[str, str]], filename: str = "pypi_packages.txt"):
     try:
         with open(filename, "w", encoding="utf-8") as f:
@@ -90,8 +79,6 @@ def save_to_file(packages: list[dict[str, str]], filename: str = "pypi_packages.
         print(f"\nPackages saved to '{filename}'")
     except IOError as e:
         print(f"Error saving to file: {e}", file=sys.stderr)
-
-
 def main():
     limit = None
     save_output = False
@@ -120,7 +107,5 @@ def main():
     if save_output:
         save_to_file(packages)
     print(f"\nSuccessfully extracted {len(packages)} packages from PyPI RSS feed.")
-
-
 if __name__ == "__main__":
     main()

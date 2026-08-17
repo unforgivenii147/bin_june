@@ -1,13 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 from pathlib import Path
-
 import cssbeautifier
 import yapf
 from bs4 import BeautifulSoup
-
-
 def beautify_html(file_path) -> bool:
     try:
         content = Path(file_path).read_text(encoding="utf-8")
@@ -18,8 +14,6 @@ def beautify_html(file_path) -> bool:
         print(f"Error beautifying HTML file {file_path}: {e}")
         return False
     return True
-
-
 def beautify_css(file_path) -> bool:
     try:
         content = Path(file_path).read_text(encoding="utf-8")
@@ -29,8 +23,6 @@ def beautify_css(file_path) -> bool:
         print(f"Error beautifying CSS file {file_path}: {e}")
         return False
     return True
-
-
 def beautify_js(file_path) -> bool:
     try:
         content = Path(file_path).read_text(encoding="utf-8")
@@ -40,8 +32,6 @@ def beautify_js(file_path) -> bool:
         print(f"Error beautifying JS file {file_path}: {e}")
         return False
     return True
-
-
 def beautify_directory(directory: str) -> None:
     failed_files = []
     base_path = Path(directory)
@@ -69,7 +59,5 @@ def beautify_directory(directory: str) -> None:
             print(failed_file)
     else:
         print("\nAll files beautified successfully.")
-
-
 if __name__ == "__main__":
     beautify_directory(".")

@@ -3,9 +3,7 @@
 Snappy Compression/Decompression Tool
 Recursively compresses/decompresses files using Snappy algorithm via cramjam
 """
-
 from __future__ import annotations
-
 import argparse
 import logging
 import multiprocessing
@@ -15,7 +13,6 @@ import tarfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import List, Optional, Tuple
-
 try:
     import cramjam
 except ImportError:
@@ -24,8 +21,6 @@ except ImportError:
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 COMPRESSED_EXT = ".snappy"
-
-
 def compress_file(file_path: Path, remove_original: bool = True) -> Tuple[bool, str]:
     try:
         compressed_path = file_path.with_suffix(file_path.suffix + COMPRESSED_EXT)
@@ -46,8 +41,6 @@ def compress_file(file_path: Path, remove_original: bool = True) -> Tuple[bool, 
     except Exception as e:
         logger.error(f"Error compressing {file_path}: {e!s}")
         return False, str(e)
-
-
 def decompress_file(file_path: Path, remove_original: bool = True) -> Tuple[bool, str]:
     try:
         if not file_path.suffix == COMPRESSED_EXT:
@@ -68,8 +61,6 @@ def decompress_file(file_path: Path, remove_original: bool = True) -> Tuple[bool
     except Exception as e:
         logger.error(f"Error decompressing {file_path}: {e!s}")
         return False, str(e)
-
-
 def process_file_worker(args):
     file_path, operation, remove_original = args
     if operation == "compress":
@@ -78,8 +69,6 @@ def process_file_worker(args):
         return decompress_file(file_path, remove_original)
     else:
         return False, f"Unknown operation: {operation}"
-
-
 def find_files(directory: Path, operation: str, recursive: bool = True) -> List[Path]:
     files = []
     if operation == "compress":
@@ -100,8 +89,6 @@ def find_files(directory: Path, operation: str, recursive: bool = True) -> List[
             if file_path.is_file():
                 files.append(file_path)
     return files
-
-
 def create_tar_archive(directory: Path, remove_original: bool = True) -> Optional[Path]:
     try:
         tar_path = directory.with_suffix(".tar")
@@ -116,8 +103,6 @@ def create_tar_archive(directory: Path, remove_original: bool = True) -> Optiona
     except Exception as e:
         logger.error(f"Error creating tar archive for {directory}: {e!s}")
         return None
-
-
 def tar_subdirectories(base_dir: Path, remove_original: bool = True) -> List[Path]:
     tar_files = []
     for item in base_dir.iterdir():
@@ -126,8 +111,6 @@ def tar_subdirectories(base_dir: Path, remove_original: bool = True) -> List[Pat
             if tar_path:
                 tar_files.append(tar_path)
     return tar_files
-
-
 def process_files(
     file_paths: List[Path], operation: str, remove_original: bool = True, max_workers: Optional[int] = None
 ) -> Tuple[int, int]:
@@ -155,8 +138,6 @@ def process_files(
                 failure_count += 1
                 logger.error(f"Error processing {file_path}: {e!s}")
     return success_count, failure_count
-
-
 def main():
     parser = argparse.ArgumentParser(
         description="Compress or decompress files recursively using Snappy (cramjam)",
@@ -206,7 +187,5 @@ Examples:
         sys.exit(1)
     else:
         sys.exit(0)
-
-
 if __name__ == "__main__":
     main()

@@ -3,14 +3,10 @@
 Create and push a git repository to GitHub from the current directory.
 If the repo already exists on GitHub, it will just commit and push changes.
 """
-
 from __future__ import annotations
-
 import os
 import subprocess
 import sys
-
-
 def run_command(cmd, check=True):
     print(f"Running: {' '.join(cmd)}")
     result = subprocess.run(cmd, capture_output=True, text=True)
@@ -18,17 +14,11 @@ def run_command(cmd, check=True):
         print(f"Error: {result.stderr}")
         sys.exit(1)
     return result
-
-
 def is_git_repo():
     result = subprocess.run(["git", "rev-parse", "--git-dir"], capture_output=True, text=True)
     return result.returncode == 0
-
-
 def get_dir_name():
     return os.path.basename(os.getcwd())
-
-
 def main():
     repo_name = get_dir_name()
     print(f"Repository name: {repo_name}")
@@ -74,7 +64,5 @@ def main():
             sys.exit(1)
     print(f"\n✅ Success! Repository '{repo_name}' is now on GitHub.")
     print(f"View it at: https://github.com/{repo_name}")
-
-
 if __name__ == "__main__":
     main()

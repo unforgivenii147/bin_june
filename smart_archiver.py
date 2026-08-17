@@ -3,9 +3,7 @@
 Smart Archiver - Automatically chooses best compression algorithm based on file type
 and supports parallel compression for multiple files.
 """
-
 from __future__ import annotations
-
 import argparse
 import json
 import multiprocessing
@@ -17,7 +15,6 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
-
 try:
     import zstandard as zstd
 except ImportError:
@@ -109,17 +106,11 @@ DEFAULT_SETTINGS = {
     "large_binary": {"algo": "zstd", "level": 21},
     "already_compressed": {"algo": "lz4", "level": 1},
 }
-
-
 def compress_zstd(data, level):
     compressor = zstd.ZstdCompressor(level=level)
     return compressor.compress(data)
-
-
 def compress_brotli_standard(data, level):
     return brotli.compress(data, quality=level)
-
-
 def compress_brotli_streaming(data, level, chunk_size=512 * 1024) -> bytes:
     compressor = brotli.Compressor(quality=level)
     result_parts = []
@@ -128,27 +119,17 @@ def compress_brotli_streaming(data, level, chunk_size=512 * 1024) -> bytes:
         result_parts.append(compressor.process(chunk))
     result_parts.append(compressor.finish())
     return b"".join(result_parts)
-
-
 def compress_lzma(data, level):
     return lzma.compress(data, preset=level)
-
-
 def compress_gzip(data, level) -> bytes:
     out = BytesIO()
     with gzip.GzipFile(fileobj=out, mode="wb", compresslevel=level) as gz:
         gz.write(data)
     return out.getvalue()
-
-
 def compress_bz2(data, level):
     return bz2.compress(data, compresslevel=level)
-
-
 def compress_lz4(data, level):
     return lz4.frame.compress(data, compression_level=level)
-
-
 def compress_data(data: bytes, algo: int | str, level, is_large: bool = False):
     if algo == "zstd":
         return compress_zstd(data, level)
@@ -167,8 +148,6 @@ def compress_data(data: bytes, algo: int | str, level, is_large: bool = False):
         return compress_lz4(data, level)
     else:
         raise ValueError(f"Unknown algorithm: {algo}")
-
-
 def is_already_compressed(data, sample_size=4096) -> bool:
     if len(data) < 4:
         return False
@@ -184,8 +163,6 @@ def is_already_compressed(data, sample_size=4096) -> bool:
         b"7z\xbc\xaf'\x1c": "7z",
     }
     return any(data.startswith(magic) for magic, name in magic_bytes.items())
-
-
 def choose_algorithm(file_path: Path, data: bytes | None = None, file_size: int | None = None) -> dict[str, int | str]:
     ext = Path(file_path).suffix.lower()
     if ext in EXTENSION_MAP:
@@ -213,8 +190,6 @@ def choose_algorithm(file_path: Path, data: bytes | None = None, file_size: int 
         return DEFAULT_SETTINGS["large_binary"]
     else:
         return DEFAULT_SETTINGS["small_binary"]
-
-
 def compress_single_file(file_path, output_path=None, remove_original: bool = False, verbose: bool = False):
     start_time = time.time()
     try:
@@ -258,8 +233,6 @@ def compress_single_file(file_path, output_path=None, remove_original: bool = Fa
         if verbose:
             print(f"✗ Failed to compress {file_path}: {e}")
         return {"file": str(file_path), "success": False, "error": str(e)}
-
-
 def compress_multiple_files(file_paths, output_dir=None, max_workers=None, remove_original=False, verbose=False):
     if max_workers is None:
         max_workers = multiprocessing.cpu_count()
@@ -279,8 +252,6 @@ def compress_multiple_files(file_paths, output_dir=None, max_workers=None, remov
                 file_name = Path(result["file"]).name
                 print(f"  Completed: {file_name} ({result['algorithm']})")
     return results
-
-
 def create_tar_archive(source_dir, output_path=None, compression="auto", level=None, parallel=False, max_workers=None):
     start_time = time.time()
     source_dir = Path(source_dir)
@@ -344,8 +315,6 @@ def create_tar_archive(source_dir, output_path=None, compression="auto", level=N
         print(f"  Size: {total_size / 1024 / 1024:.2f} MB")
         print(f"  Time: {elapsed:.2f}s")
         return tar_path, {"file_count": file_count, "original_size": total_size, "time": elapsed}
-
-
 def decompress_file(compressed_path, output_dir=None, verbose: bool = False):
     compressed_path = Path(compressed_path)
     ext = compressed_path.suffix.lower()
@@ -389,7 +358,6 @@ def decompress_file(compressed_path, output_dir=None, verbose: bool = False):
         f.write(data)
     if output_path.suffix == ".tar":
         import tarfile
-
         extract_dir = output_dir or output_path.parent / output_path.stem
         extract_dir.mkdir(exist_ok=True)
         with tarfile.open(output_path, "r") as tar:
@@ -401,8 +369,6 @@ def decompress_file(compressed_path, output_dir=None, verbose: bool = False):
     if verbose:
         print(f"✓ Decompressed to: {output_path}")
     return output_path
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Smart Archiver - Automatically chooses best compression algorithm",
@@ -502,7 +468,6 @@ Examples:
             decompress_file(file_path, args.output_dir, args.verbose)
     elif args.command == "benchmark":
         from hybrid_compression_benchmark import benchmark_hybrid
-
         input_path = Path(args.input)
         if input_path.is_dir():
             with tempfile.TemporaryDirectory() as tmpdir:
@@ -524,7 +489,5 @@ Examples:
             with open(input_path, "rb") as f:
                 data = f.read()
             results = benchmark_hybrid(data, len(data))
-
-
 if __name__ == "__main__":
     main()

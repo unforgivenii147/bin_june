@@ -3,14 +3,11 @@
 Rename files in current directory based on their shebang line.
 Optimized for Termux environment.
 """
-
 from __future__ import annotations
-
 import os
 import re
 import shutil
 from pathlib import Path
-
 SHEBANG_MAPPING = {
     "#!/data/data/com.termux/files/usr/bin/python3?": ".py",
     "#!/data/data/com.termux/files/usr/bin/env python3?": ".py",
@@ -54,8 +51,6 @@ SHEBANG_MAPPING = {
     "#!/usr/bin/env awk": ".awk",
     "#!/usr/bin/sed": ".sed",
 }
-
-
 def get_shebang(file_path: Path) -> str | None:
     try:
         with open(file_path, encoding="utf-8") as f:
@@ -65,15 +60,11 @@ def get_shebang(file_path: Path) -> str | None:
     except (OSError, UnicodeDecodeError):
         pass
     return None
-
-
 def get_extension_from_shebang(shebang: str) -> str | None:
     for pattern, extension in SHEBANG_MAPPING.items():
         if re.match(pattern, shebang):
             return extension
     return None
-
-
 def rename_file(old_path: Path, new_path: Path) -> bool:
     if old_path == new_path:
         return False
@@ -87,8 +78,6 @@ def rename_file(old_path: Path, new_path: Path) -> bool:
     print(f"  🔄 Renaming: {old_path.name} -> {new_path.name}")
     shutil.move(str(old_path), str(new_path))
     return True
-
-
 def check_termux() -> bool:
     termux_prefix = "/data/data/com.termux/files/usr"
     is_termux = os.path.exists(termux_prefix)
@@ -99,8 +88,6 @@ def check_termux() -> bool:
     else:
         print("💻 Standard Linux/Unix environment detected")
     return is_termux
-
-
 def main() -> None:
     cwd = Path.cwd()
     renamed_count = 0
@@ -145,8 +132,6 @@ def main() -> None:
     print(f"{'=' * 42}")
     if unknown_count > 0:
         print("\n💡 Tip: You can add new shebang patterns to the SHEBANG_MAPPING dictionary")
-
-
 def dry_run() -> None:
     cwd = Path.cwd()
     print("🔍 DRY RUN MODE - No files will be renamed\n")
@@ -163,11 +148,8 @@ def dry_run() -> None:
             new_name = f"{file_path.stem}{extension}"
             print(f"  Would rename: {file_path.name} -> {new_name}")
     print("\nRun without '--dry-run' to apply changes.")
-
-
 if __name__ == "__main__":
     import sys
-
     if len(sys.argv) > 1 and sys.argv[1] == "--dry-run":
         dry_run()
     elif len(sys.argv) > 1 and sys.argv[1] == "--help":

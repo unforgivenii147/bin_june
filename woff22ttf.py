@@ -1,14 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 from pathlib import Path
-
 from dh import cprint, get_files, mpf3
 from fontTools.ttLib import woff2
-
 cwd = Path.cwd()
-
-
 def process_file(path: Path) -> bool | None:
     path = Path(path)
     ttf_path = path.with_suffix(".ttf")
@@ -21,12 +16,8 @@ def process_file(path: Path) -> bool | None:
         path.unlink()
     except:
         cprint(f"error convering {path.name}")
-
-
 def main() -> None:
     files = get_files(cwd, ext=[".woff2"])
     _ = mpf3(process_file, files)
-
-
 if __name__ == "__main__":
     main()

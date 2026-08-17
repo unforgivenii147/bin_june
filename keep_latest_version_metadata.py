@@ -3,9 +3,7 @@
 Remove old versions of Python package metadata files, keeping only the latest version.
 Uses pathlib and parallel processing for efficiency.
 """
-
 from __future__ import annotations
-
 import argparse
 import re
 import shutil
@@ -13,10 +11,7 @@ from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Dict, List, Tuple
-
 from packaging.version import InvalidVersion, Version
-
-
 def parse_filename(filepath: Path) -> Tuple[str, Version, Path]:
     name = filepath.stem
     match = re.match(r"^(.+?)-(\d[\d._]*[a-zA-Z]*[\d]*)$", name)
@@ -32,18 +27,12 @@ def parse_filename(filepath: Path) -> Tuple[str, Version, Path]:
         print(f"Warning: Invalid version '{version_str}' in {filepath.name}")
         version = Version("0.0.0")
     return (pkg_name.lower(), version, filepath)
-
-
 def normalize_package_name(name: str) -> str:
     return re.sub(r"[-_.]+", "-", name).lower()
-
-
 def find_metadata_files(directory: Path) -> List[Path]:
     if not directory.exists():
         raise FileNotFoundError(f"Directory not found: {directory}")
     return list(directory.glob("*.metadata"))
-
-
 def process_file_batch(files: List[Path]) -> Dict[str, List[Tuple[Version, Path]]]:
     packages = defaultdict(list)
     for filepath in files:
@@ -51,8 +40,6 @@ def process_file_batch(files: List[Path]) -> Dict[str, List[Tuple[Version, Path]
         normalized_name = normalize_package_name(pkg_name)
         packages[normalized_name].append((version, path))
     return packages
-
-
 def find_old_versions(package_files: List[Tuple[Version, Path]]) -> List[Path]:
     if len(package_files) <= 1:
         return []
@@ -63,16 +50,12 @@ def find_old_versions(package_files: List[Tuple[Version, Path]]) -> List[Path]:
     for version, path in old_versions:
         print(f"  Removing: {path.name} (v{version})")
     return [path for version, path in old_versions]
-
-
 def merge_results(results: List[Dict[str, List[Tuple[Version, Path]]]]) -> Dict[str, List[Tuple[Version, Path]]]:
     merged = defaultdict(list)
     for result in results:
         for pkg_name, versions in result.items():
             merged[pkg_name].extend(versions)
     return merged
-
-
 def delete_files(paths: List[Path], dry_run: bool = True, backup_dir: Path | None = None):
     for path in paths:
         if dry_run:
@@ -84,8 +67,6 @@ def delete_files(paths: List[Path], dry_run: bool = True, backup_dir: Path | Non
         else:
             path.unlink()
             print(f"  Deleted: {path.name}")
-
-
 def main():
     parser = argparse.ArgumentParser(description="Remove old versions of Python package metadata files")
     parser.add_argument(
@@ -150,7 +131,5 @@ def main():
     else:
         print("\nNo duplicate versions found. All packages have single versions.")
     return 0
-
-
 if __name__ == "__main__":
     exit(main())

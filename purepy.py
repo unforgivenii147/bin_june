@@ -1,13 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
 import requests
-
-
 def has_native_wheels(info) -> bool:
     urls = info.get("urls", [])
     for u in urls:
@@ -15,8 +11,6 @@ def has_native_wheels(info) -> bool:
         if any(ext in filename for ext in [".so", ".pyd", ".dll", "win_amd64", "manylinux", "macosx"]):
             return True
     return False
-
-
 def check_package(name) -> tuple:
     url = f"https://pypi.org/pypi/{name}/json"
     try:
@@ -29,8 +23,6 @@ def check_package(name) -> tuple:
         return name, "pure"
     except Exception:
         return name, "not_found"
-
-
 def main() -> None:
     if len(sys.argv) < 2:
         print("Usage: python detect_pure_python.py <package_list.txt>")
@@ -58,7 +50,5 @@ def main() -> None:
     print(f"Pure Python: {len(pure)}")
     print(f"Native-required: {len(native)}")
     print(f"Not found: {len(missing)}")
-
-
 if __name__ == "__main__":
     main()

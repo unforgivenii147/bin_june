@@ -1,16 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import mmap
 import os
 import sys
 import tempfile
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-
 MB_5 = 5 * 1024 * 1024
-
-
 def sort_and_uniq(file_path: str) -> None:
     if not Path(file_path).exists():
         print(f"Error: File '{file_path}' not found.")
@@ -41,8 +37,6 @@ def sort_and_uniq(file_path: str) -> None:
             raise
     except Exception as e:
         print(f"Failed to process file: {e}")
-
-
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python script.py <filename>")

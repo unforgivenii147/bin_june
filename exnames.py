@@ -1,11 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import re
 import sys
 from pathlib import Path
-
-
 def load_names(names_filepath):
     names = set()
     try:
@@ -33,8 +30,6 @@ def load_names(names_filepath):
         print(f"Error loading names file: {e}")
         sys.exit(1)
     return names
-
-
 def find_names_in_files(names_db_path: str = "names.txt") -> None:
     names_to_find = load_names(names_db_path)
     if not names_to_find:
@@ -85,8 +80,6 @@ def find_names_in_files(names_db_path: str = "names.txt") -> None:
         print(f"\n- {name}:")
         for occ in occurrences:
             print(f"  - File: {occ['file']}, Match: '{occ['match']}'")
-
-
 if __name__ == "__main__":
     names_database_path = "/sdcard/data/male_names"
     if len(sys.argv) > 1:

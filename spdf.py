@@ -1,14 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import sys
 from pathlib import Path
-
 from dh import fsz, get_files, mpf_async, runcmd
-
 MAX_WORKERS = 4
-
-
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -18,8 +13,6 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
-
-
 def process_file(path: Path) -> None:
     path = Path(path)
     temp_gs = path.with_name(f"temp_gs_{path.name}")
@@ -62,8 +55,6 @@ def process_file(path: Path) -> None:
             else:
                 print("original file is smaller")
                 temp_gs.unlink(missing_ok=True)
-
-
 def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
@@ -77,7 +68,5 @@ def main() -> None:
     dsz = before - after
     if dsz:
         print(f"space freed : {fsz(dsz)}")
-
-
 if __name__ == "__main__":
     main()

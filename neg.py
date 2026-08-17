@@ -3,27 +3,19 @@
 Convert all images in a directory (and subdirectories) to negative/inverted colors.
 Processes images in parallel using multiprocessing.
 """
-
 from __future__ import annotations
-
 import argparse
 import logging
 import sys
 from functools import partial
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-
 from PIL import Image
-
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 SUPPORTED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".webp", ".gif"}
-
-
 def is_image_file(file_path: Path) -> bool:
     return file_path.suffix.lower() in SUPPORTED_EXTENSIONS
-
-
 def invert_image(image_path: Path, dry_run: bool = False) -> tuple[Path, bool]:
     try:
         if dry_run:
@@ -39,16 +31,12 @@ def invert_image(image_path: Path, dry_run: bool = False) -> tuple[Path, bool]:
     except Exception as e:
         logger.error(f"✗ Failed to process {image_path}: {e}")
         return (image_path, False)
-
-
 def find_images(root_dir: Path, recursive: bool = True) -> list[Path]:
     if recursive:
         image_files = [f for f in root_dir.rglob("*") if f.is_file() and is_image_file(f)]
     else:
         image_files = [f for f in root_dir.iterdir() if f.is_file() and is_image_file(f)]
     return sorted(image_files)
-
-
 def main():
     parser = argparse.ArgumentParser(
         description="Convert images to negative (invert colors) recursively in place",
@@ -104,7 +92,5 @@ def main():
     if failed > 0:
         logger.warning(f"✗ Failed: {failed}")
     logger.info(f"Total processed: {len(results)}")
-
-
 if __name__ == "__main__":
     main()

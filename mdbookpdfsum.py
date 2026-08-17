@@ -1,16 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import argparse
 import os
 import re
 import urllib
 from pathlib import Path
-
 import lxml.html
 import pypdf
-
-
 class Section:
     def __init__(self, title: str, source_file: str, depth: int, index: int) -> None:
         self.title = title
@@ -20,13 +16,10 @@ class Section:
         self.parent = None
         self.children = []
         self.outline_item = None
-
     def set_parent(self, parent: Section) -> None:
         self.parent = parent
-
     def add_children(self, child: Section) -> None:
         self.children.append(child)
-
     def path_to_root(self):
         path = []
         node = self
@@ -34,15 +27,11 @@ class Section:
             path.append(str(node.index + 1))
             node = node.parent
         return path[::-1]
-
     def is_root(self):
         return self.parent is None
-
     def __str__(self) -> str:
         path = self.path_to_root()
         return "{}. {}".format(".".join(path), self.title)
-
-
 def check_title(prefix_path: str, node: Section, overwrite: bool) -> bool:
     all_matched = True
     for child in node.children:
@@ -73,8 +62,6 @@ def check_title(prefix_path: str, node: Section, overwrite: bool) -> bool:
             f.writelines(lines)
         all_matched = True
     return all_matched
-
-
 def get_dom_id(node: Section) -> str:
     source_path = node.source_file
     source_path = source_path.removeprefix("./")
@@ -83,8 +70,6 @@ def get_dom_id(node: Section) -> str:
     result = result.lower()
     result = result.replace("/", "-")
     return result.replace(" ", "-")
-
-
 def add_outline(html_root, reader: pypdf.PdfReader, writer: pypdf.PdfWriter, node: Section) -> None:
     if not node.is_root():
         id = get_dom_id(node)
@@ -105,8 +90,6 @@ def add_outline(html_root, reader: pypdf.PdfReader, writer: pypdf.PdfWriter, nod
         node.outline_item = writer.add_outline_item(str(node), page, node.parent.outline_item, fit=fit)
     for child in node.children:
         add_outline(html_root, reader, writer, child)
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(prog="mdbook_pdf_summary", description="Add outline to the PDF file.")
     parser.add_argument(
@@ -155,14 +138,10 @@ def main() -> None:
     with Path(args.output_path).open("wb") as f:
         writer.write(f)
         print(f"[INFO] Write to {args.output_path}")
-
-
 def print_section_tree(root: Section) -> None:
     print(root)
     for child in root.children:
         print_section_tree(child)
-
-
 def parse_section_tree(md_text: str) -> Section:
     root = Section("root", "", 0, 0)
     bfs_map = {(0): [root]}
@@ -185,7 +164,5 @@ def parse_section_tree(md_text: str) -> Section:
         tmp.index = len(parent.children)
         parent.add_children(tmp)
     return root
-
-
 if __name__ == "__main__":
     main()

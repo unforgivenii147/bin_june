@@ -1,13 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
-
 import argparse
 import sys
 from pathlib import Path
-
 import gcld3
-
-
 def process_file_lines(input_path: Path, move_mode: bool):
     if not input_path.is_file():
         print(f"❌ Error: The file '{input_path}' does not exist or is not a file.")
@@ -52,8 +48,6 @@ def process_file_lines(input_path: Path, move_mode: bool):
             print(f"🔄 Original file updated in-place (non-English elements removed).")
         except Exception as e:
             print(f"❌ Error during file write operations: {e}")
-
-
 def main():
     parser = argparse.ArgumentParser(description="Scan text files and isolate non-English strings using Google CLD3.")
     parser.add_argument("file", type=str, help="The target file path to inspect line by line.")
@@ -65,7 +59,5 @@ def main():
     )
     args = parser.parse_args()
     process_file_lines(Path(args.file), args.move)
-
-
 if __name__ == "__main__":
     main()
