@@ -4,6 +4,7 @@ Text summarization script using sumy library.
 Usage: python summarize.py <input_file>
 Output: <input_file>_summary.txt
 """
+
 from __future__ import annotations
 import os
 import sys
@@ -14,6 +15,8 @@ from sumy.summarizers.lex_rank import LexRankSummarizer
 from sumy.summarizers.lsa import LsaSummarizer
 from sumy.summarizers.text_rank import TextRankSummarizer
 from sumy.utils import get_stop_words
+
+
 def summarize_file(input_file, sentences_count=5, method="lexrank", language="english"):
     parser = PlaintextParser.from_file(input_file, Tokenizer(language))
     if method == "lexrank":
@@ -27,6 +30,8 @@ def summarize_file(input_file, sentences_count=5, method="lexrank", language="en
     summarizer.stop_words = get_stop_words(language)
     summary = summarizer(parser.document, sentences_count)
     return " ".join([str(sentence) for sentence in summary])
+
+
 def main():
     if len(sys.argv) < 2:
         print("Usage: python summarize.py <input_file> [sentences_count] [method]")
@@ -52,5 +57,7 @@ def main():
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)
+
+
 if __name__ == "__main__":
     main()

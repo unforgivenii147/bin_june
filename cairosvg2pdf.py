@@ -4,6 +4,8 @@ import sys
 from pathlib import Path
 import cairosvg
 from dh import cprint, fsz, get_files
+
+
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -13,6 +15,8 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
+
+
 def process_file(path: Path) -> None:
     path = Path(path)
     try:
@@ -20,6 +24,8 @@ def process_file(path: Path) -> None:
         cairosvg.svg2pdf(url=str(path), write_to=str(outfile))
     except:
         return
+
+
 def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
@@ -29,5 +35,7 @@ def main() -> None:
         process_file(f)
     diff_size = before - gsz(cwd)
     cprint(f"space saved : {fsz(diff_size)}", "cyan")
+
+
 if __name__ == "__main__":
     main()

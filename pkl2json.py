@@ -4,6 +4,7 @@ import json
 import pickle
 import sys
 from pathlib import Path
+
 if __name__ == "__main__":
     fn = Path(sys.argv[1])
     outf = fn.with_suffix(".json")

@@ -4,6 +4,8 @@ import os
 import string
 import sys
 from pathlib import Path
+
+
 def main() -> None:
     if len(sys.argv) != 2:
         print(f"Usage: {sys.argv[0]} <filename>")
@@ -29,5 +31,7 @@ def main() -> None:
     finally:
         for f in files.values():
             f.close()
+
+
 if __name__ == "__main__":
     main()

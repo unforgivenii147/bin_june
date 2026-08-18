@@ -3,6 +3,8 @@ from __future__ import annotations
 import subprocess
 import sys
 from pathlib import Path
+
+
 def run_git_command(args: list[str]) -> str:
     try:
         result = subprocess.run(["git"] + args, capture_output=True, text=True, check=True)
@@ -10,6 +12,8 @@ def run_git_command(args: list[str]) -> str:
     except subprocess.CalledProcessError as e:
         print(f"❌ Git error executing {' '.join(e.cmd)}:\n{e.stderr.strip()}")
         sys.exit(1)
+
+
 def main():
     repo_root = Path(".")
     if not (repo_root / ".git").exists() and not run_git_command(["rev-parse", "--is-inside-work-tree"]) == "true":
@@ -61,5 +65,7 @@ def main():
         print(commit_output)
     else:
         print("\n❌ No files were successfully restored.")
+
+
 if __name__ == "__main__":
     main()

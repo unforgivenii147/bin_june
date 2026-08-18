@@ -3,6 +3,7 @@
 Initializes a new repository if not already inside one.
 Automatically pushes to remote if configured.
 """
+
 from __future__ import annotations
 import argparse
 import os
@@ -14,6 +15,8 @@ from pathlib import Path
 import requests
 from dotenv import load_dotenv
 from git import InvalidGitRepositoryError, Repo
+
+
 def parse_arguments() -> Namespace:
     parser = argparse.ArgumentParser(description="Commit and push all files to git repository")
     parser.add_argument(
@@ -24,6 +27,8 @@ def parse_arguments() -> Namespace:
     )
     parser.add_argument("-r", "--remote-name", default="origin", help="Remote name to use (default: origin)")
     return parser.parse_args()
+
+
 def load_git_token() -> str | None:
     env_path = Path.home() / ".env"
     if env_path.exists():
@@ -32,6 +37,8 @@ def load_git_token() -> str | None:
         return None
     token = os.getenv("GITHUB_TOKEN") or os.getenv("GH_TOKEN") or os.getenv("GIT_TOKEN")
     return token
+
+
 def create_github_repo(repo_name: str, description: str = "new git repo", private: bool = False):
     token = load_git_token()
     headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
@@ -41,6 +48,8 @@ def create_github_repo(repo_name: str, description: str = "new git repo", privat
         return response.json()["html_url"]
     else:
         raise Exception(f"GitHub API error: {response.json().get('message')}")
+
+
 def get_github_username(token: str) -> str | None:
     try:
         headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
@@ -53,10 +62,14 @@ def get_github_username(token: str) -> str | None:
     except Exception as e:
         print(f"Error getting GitHub username: {e}")
         return None
+
+
 def get_cwd_name() -> str:
     dir_name = Path.cwd().name
     dir_name = re.sub(r"[^\w\-\.]", "-", dir_name)
     return dir_name.lower()
+
+
 def setup_remote_repo(repo: Repo, token: str, remote_name: str, create_if_missing: bool) -> bool:
     existing_remote = None
     try:
@@ -85,6 +98,8 @@ def setup_remote_repo(repo: Repo, token: str, remote_name: str, create_if_missin
     except Exception as e:
         print(f"❌ Failed to create repository: {e}")
         return False
+
+
 def setup_git_auth(repo: Repo, token: str | None = None) -> None:
     if not token:
         return
@@ -105,6 +120,8 @@ def setup_git_auth(repo: Repo, token: str | None = None) -> None:
                         return
     except Exception as e:
         print(f"Could not update remote URL: {e}")
+
+
 def push_to_remote(repo: Repo, remote_name: str, token: str = load_git_token()) -> None:
     try:
         if remote_name not in [r.name for r in repo.remotes]:
@@ -153,6 +170,8 @@ def push_to_remote(repo: Repo, remote_name: str, token: str = load_git_token()) 
     except Exception as e:
         print(f"❌ Push failed: {e}", file=sys.stderr)
         print("Commit was successful, but push failed. You can push manually later.")
+
+
 def main() -> None:
     args = parse_arguments()
     token = load_git_token()
@@ -217,5 +236,7 @@ def main() -> None:
         print("\n⚠️ No remote configured. Changes committed locally only.")
         if args.create:
             print("Use --create flag to create and push to GitHub.")
+
+
 if __name__ == "__main__":
     main()

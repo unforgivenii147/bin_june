@@ -3,11 +3,15 @@ from __future__ import annotations
 import re
 import sys
 from pathlib import Path
+
+
 def extract_font_id(svg_text):
     match = re.search(r'<font[^>]*\bid="([^"]+)"', svg_text, re.IGNORECASE)
     if match:
         return match.group(1).strip()
     return None
+
+
 def rename_svg_font(file_path_obj: Path) -> None:
     if not file_path_obj.is_file():
         print(f"Skipping: Not a file - {file_path_obj.name}")
@@ -36,6 +40,8 @@ def rename_svg_font(file_path_obj: Path) -> None:
         print(f"Error renaming '{file_path_obj.name}' to '{new_name_obj.name}': Target file already exists.")
     except Exception as e:
         print(f"Error renaming '{file_path_obj.name}': {e}")
+
+
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         input_path = Path(sys.argv[1])

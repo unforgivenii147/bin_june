@@ -4,6 +4,7 @@ Install Python wheels with platform-aware installation strategy.
 Pure Python wheels -> user site-packages
 Platform-specific wheels -> system site-packages
 """
+
 from __future__ import annotations
 import platform
 import subprocess
@@ -11,6 +12,8 @@ import sys
 import zipfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+
+
 def is_pure_python_wheel(wheel_path: Path) -> bool:
     wheel_name = wheel_path.stem
     if "-none-any" in wheel_name:
@@ -36,6 +39,8 @@ def is_pure_python_wheel(wheel_path: Path) -> bool:
     except Exception as e:
         print(f"Warning: Could not inspect {wheel_path.name}: {e}")
         return False
+
+
 def install_wheel(wheel_path: Path, user_install: bool) -> tuple[Path, bool, str]:
     try:
         cmd = [sys.executable, "-m", "pip", "install", str(wheel_path)]
@@ -49,6 +54,8 @@ def install_wheel(wheel_path: Path, user_install: bool) -> tuple[Path, bool, str
         return wheel_path, False, f"✗ {wheel_path.name}: {error_msg}"
     except Exception as e:
         return wheel_path, False, f"✗ {wheel_path.name}: {e!s}"
+
+
 def get_wheel_type(wheel_path: Path) -> str:
     try:
         wheel_name = wheel_path.stem
@@ -66,6 +73,8 @@ def get_wheel_type(wheel_path: Path) -> str:
     except:
         pass
     return "Unknown"
+
+
 def main():
     current_dir = Path.cwd()
     wheel_files = list(current_dir.glob("*.whl"))
@@ -122,6 +131,8 @@ def main():
         for wheel, error in failed:
             print(f"  ✗ {wheel.name}: {error}")
     print("\nDone!")
+
+
 if __name__ == "__main__":
     try:
         main()

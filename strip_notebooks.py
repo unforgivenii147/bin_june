@@ -5,6 +5,7 @@ Usage:
     python strip_notebooks.py [paths...]
 If no paths are provided, processes all .ipynb files recursively from current directory.
 """
+
 from __future__ import annotations
 import argparse
 import json
@@ -12,6 +13,8 @@ import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import List, Set
+
+
 def find_notebook_files(paths: List[Path]) -> Set[Path]:
     notebook_files = set()
     for path in paths:
@@ -28,6 +31,8 @@ def find_notebook_files(paths: List[Path]) -> Set[Path]:
                 if ".ipynb_checkpoints" not in str(nb_file):
                     notebook_files.add(nb_file.resolve())
     return notebook_files
+
+
 def strip_notebook_output(notebook_path: Path) -> tuple:
     try:
         with open(notebook_path, "r", encoding="utf-8") as f:
@@ -56,6 +61,8 @@ def strip_notebook_output(notebook_path: Path) -> tuple:
         return (notebook_path, False, f"Invalid JSON: {e}")
     except Exception as e:
         return (notebook_path, False, f"Error: {e}")
+
+
 def process_notebooks(paths: List[Path], max_workers: int | None = None):
     notebook_files = find_notebook_files(paths)
     if not notebook_files:
@@ -77,6 +84,8 @@ def process_notebooks(paths: List[Path], max_workers: int | None = None):
         print(f"\nProcessed: {successful} succeeded, {failed} failed")
     else:
         print(f"\nSuccessfully processed {successful} notebook(s)")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Strip outputs from Jupyter notebook (.ipynb) files",
@@ -103,5 +112,7 @@ Examples:
     except KeyboardInterrupt:
         print("\nInterrupted by user", file=sys.stderr)
         sys.exit(1)
+
+
 if __name__ == "__main__":
     main()

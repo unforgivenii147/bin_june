@@ -3,6 +3,7 @@
 Updates files in-place. Accepts multiple files and directories as input.
 If no input is provided, processes files in the current directory recursively.
 """
+
 from __future__ import annotations
 import argparse
 import sys
@@ -11,6 +12,8 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from tree_sitter import Language, Parser
 from tree_sitter_lua import language as lua_language
+
+
 def _build_parser() -> Parser:
     lang = Language(lua_language())
     parser = Parser()
@@ -19,7 +22,11 @@ def _build_parser() -> Parser:
     except (AttributeError, TypeError):
         parser.set_language(lang)
     return parser
+
+
 PARSER = _build_parser()
+
+
 def _find_comment_ranges(tree) -> list[tuple[int, int]]:
     ranges: list[tuple[int, int]] = []
     stack = [tree.root_node]
@@ -30,6 +37,8 @@ def _find_comment_ranges(tree) -> list[tuple[int, int]]:
         else:
             stack.extend(node.children)
     return ranges
+
+
 def remove_comments(source: bytes) -> tuple[bytes, int, int]:
     tree = PARSER.parse(source)
     ranges = _find_comment_ranges(tree)
@@ -58,6 +67,8 @@ def remove_comments(source: bytes) -> tuple[bytes, int, int]:
         result = result[:cut_start] + result[cut_end:]
         bytes_removed += cut_end - cut_start
     return result, len(ranges), bytes_removed
+
+
 def process_file(path: Path, base: Path) -> dict:
     try:
         original = path.read_bytes()
@@ -96,6 +107,8 @@ def process_file(path: Path, base: Path) -> dict:
             "after": 0,
             "error": f"{type(exc).__name__}: {exc}",
         }
+
+
 def collect_files(paths: list[Path]) -> list[tuple[Path, Path]]:
     files: list[tuple[Path, Path]] = []
     for item in paths:
@@ -113,12 +126,16 @@ def collect_files(paths: list[Path]) -> list[tuple[Path, Path]]:
         else:
             print(f"warning: {item} is neither a file nor directory, skipping", file=sys.stderr)
     return files
+
+
 def format_size(n: int) -> str:
     if n < 1024:
         return f"{n} B"
     if n < 1024 * 1024:
         return f"{n / 1024:.1f} KiB"
     return f"{n / (1024 * 1024):.2f} MiB"
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Remove comments from Lua files using tree-sitter.")
     ap.add_argument(
@@ -172,5 +189,7 @@ def main() -> int:
     print(f"  Errors           : {errors}")
     print(f"  Elapsed          : {elapsed:.2f}s")
     return 1 if errors else 0
+
+
 if __name__ == "__main__":
     sys.exit(main())

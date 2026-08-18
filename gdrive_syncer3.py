@@ -8,7 +8,10 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import Resource, build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
+
 SCOPES = ["https://www.googleapis.com/auth/drive.readonly"]
+
+
 class GoogleDriveSyncer:
     def __init__(self, client_id=None, client_secret=None, token_file: str = "token.pickle") -> None:
         self.client_id = client_id or os.getenv("GOOGLE_CLIENT_ID")
@@ -17,6 +20,7 @@ class GoogleDriveSyncer:
             raise ValueError("Missing credentials in environment")
         self.token_file = token_file
         self.service = self.authenticate()
+
     def authenticate(self) -> Resource:
         creds = None
         if os.path.exists(self.token_file):
@@ -45,6 +49,7 @@ class GoogleDriveSyncer:
             else:
                 creds = self.manual_oauth_flow()
         return build("drive", "v3", credentials=creds)
+
     def manual_oauth_flow(self) -> Credentials:
         auth_params = {
             "client_id": self.client_id,
@@ -84,6 +89,7 @@ class GoogleDriveSyncer:
         with open(self.token_file, "wb") as token:
             pickle.dump(credentials, token)
         return credentials
+
     def get_all_files(self, folder_id: str = "root"):
         all_items = []
         page_token = None
@@ -108,6 +114,7 @@ class GoogleDriveSyncer:
                 print(f"An error occurred: {error}")
                 break
         return all_items
+
     def download_file(self, file_id, file_name, local_path) -> bool:
         try:
             request = self.service.files().get_media(fileId=file_id)
@@ -123,6 +130,7 @@ class GoogleDriveSyncer:
         except HttpError as error:
             print(f"✗ Failed to download {file_name}: {error}")
             return False
+
     def sync_folder(self, drive_folder_id: str, local_folder_path, folder_name: str = "root") -> None:
         print(f"\n📁 Syncing folder: {folder_name}")
         os.makedirs(local_folder_path, exist_ok=True)
@@ -140,6 +148,7 @@ class GoogleDriveSyncer:
                 if os.path.exists(local_item_path):
                     local_mtime = os.path.getmtime(local_item_path)
                     from datetime import datetime
+
                     remote_time = datetime.fromisoformat(remote_modified.replace("Z", "+00:00")).timestamp()
                     if local_mtime >= remote_time:
                         should_download = False
@@ -148,15 +157,20 @@ class GoogleDriveSyncer:
                     self.download_file(item_id, item_name, local_item_path)
                     if remote_modified:
                         from datetime import datetime
+
                         mod_time = datetime.fromisoformat(remote_modified.replace("Z", "+00:00")).timestamp()
                         os.utime(local_item_path, (mod_time, mod_time))
+
     def sync_all(self, local_base_path: str) -> None:
         print("Starting full Google Drive sync...")
         self.sync_folder("root", local_base_path, "My Drive")
         print("\n✅ Sync completed!")
+
+
 def install_minimal_packages() -> None:
     import subprocess
     import sys
+
     packages = ["google-api-python-client", "google-auth-oauthlib", "requests"]
     for package in packages:
         try:
@@ -164,9 +178,12 @@ def install_minimal_packages() -> None:
             print(f"✓ Installed {package}")
         except:
             print(f"✗ Failed to install {package}")
+
+
 def main() -> None:
     from pathlib import Path
     from dotenv import load_dotenv
+
     env_path = Path.home() / ".env"
     if env_path.exists():
         load_dotenv(dotenv_path=env_path)
@@ -180,5 +197,7 @@ def main() -> None:
         print("1. Ensure your ~/.env file has correct credentials")
         print("2. Check internet connection")
         print("3. On Android, ensure Termux has storage permission: termux-setup-storage")
+
+
 if __name__ == "__main__":
     main()

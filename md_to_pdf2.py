@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 import markdown
 import weasyprint
+
 CSS_TEMPLATE = """
 /* ==========================================================================
    0. LOCAL FONTS CONFIGURATION
@@ -158,6 +159,8 @@ img {
     border-radius: 4px;
 }
 """
+
+
 def convert_md_to_pdf(input_path_str: str):
     input_file = Path(input_path_str)
     if not input_file.exists():
@@ -187,6 +190,8 @@ def convert_md_to_pdf(input_path_str: str):
     except Exception as e:
         print(f"❌ WeasyPrint Error: {e}")
         sys.exit(1)
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("❌ Usage Error: Provide an input Markdown file.")

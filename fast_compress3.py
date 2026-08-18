@@ -4,6 +4,7 @@ Recursive file compression/decompression tool using Zstandard.
 Compresses files in current directory recursively, skipping certain extensions and .git folders.
 Uses pure generator for memory-efficient streaming traversal.
 """
+
 from __future__ import annotations
 import argparse
 import contextlib
@@ -13,6 +14,7 @@ import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 import zstandard as zstd
+
 SKIP_EXTENSIONS_COMPRESS = {
     ".xz",
     ".gz",
@@ -106,15 +108,19 @@ SKIP_DIRS = {
     "zstandard",
 }
 SKIP_DIR_PATTERNS = ["*.egg-info", "*.dist-info"]
+
+
 class SpaceStats:
     def __init__(self):
         self.original_size = 0
         self.compressed_size = 0
         self.lock = threading.Lock()
+
     def add(self, original: int, compressed: int):
         with self.lock:
             self.original_size += original
             self.compressed_size += compressed
+
     def get_savings(self):
         if self.original_size == 0:
             return 0, 0, 0
@@ -122,10 +128,14 @@ class SpaceStats:
         ratio = self.compressed_size / self.original_size * 100
         percent_saved = saved / self.original_size * 100
         return saved, ratio, percent_saved
+
+
 def should_skip_directory(dir_name: str) -> bool:
     if dir_name in SKIP_DIRS:
         return True
     return any(fnmatch.fnmatch(dir_name, pattern) for pattern in SKIP_DIR_PATTERNS)
+
+
 def is_editable_package_dir(root_path: Path) -> bool:
     try:
         for item in root_path.iterdir():
@@ -136,6 +146,7 @@ def is_editable_package_dir(root_path: Path) -> bool:
                 if direct_url.exists():
                     try:
                         import json
+
                         with open(direct_url) as f:
                             data = json.load(f)
                             if data.get("dir_info", {}).get("editable", False):
@@ -145,6 +156,8 @@ def is_editable_package_dir(root_path: Path) -> bool:
         return False
     except (PermissionError, OSError):
         return False
+
+
 def walk_files(directory: Path, compress: bool):
     stats = {
         "dirs": 0,
@@ -252,6 +265,8 @@ def walk_files(directory: Path, compress: bool):
     if stats["skipped_dirs"] > 0:
         print(f"ℹ️  Skipped {stats['skipped_dirs']} excluded directories")
     print(f"Scanned {stats['dirs']} directories, found {stats['files']} files to process")
+
+
 def compress_file(
     input_path: Path,
     output_path: Path,
@@ -277,6 +292,8 @@ def compress_file(
             with contextlib.suppress(BaseException):
                 output_path.unlink()
         return False, input_path, str(e), 0, 0
+
+
 def decompress_file(input_path: Path, output_path: Path, threads: int, remove_original: bool, stats: SpaceStats):
     try:
         compressed_size = input_path.stat().st_size
@@ -295,12 +312,16 @@ def decompress_file(input_path: Path, output_path: Path, threads: int, remove_or
             with contextlib.suppress(BaseException):
                 output_path.unlink()
         return False, input_path, str(e), 0, 0
+
+
 def fsz(bytes_size: int) -> str:
     for unit in ["B", "KB", "MB", "GB", "TB"]:
         if bytes_size < 1024.0:
             return f"{bytes_size:.2f} {unit}"
         bytes_size /= 1024.0
     return f"{bytes_size:.2f} PB"
+
+
 def process_files(file_generator, compress: bool, level: int, threads: int, remove_original: bool):
     stats = SpaceStats()
     failed = []
@@ -367,6 +388,8 @@ def process_files(file_generator, compress: bool, level: int, threads: int, remo
 ✅ Successfully {"compressed" if compress else "decompressed"} {success_count} files!""")
             if remove_original:
                 print("   Original files have been removed.")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Recursively compress or decompress files using Zstandard")
     action_group = parser.add_mutually_exclusive_group(required=False)
@@ -403,5 +426,7 @@ def main():
     print("\nScanning directory tree...")
     file_generator = walk_files(base_dir, args.compress)
     process_files(file_generator, args.compress, args.level, args.threads, remove_original)
+
+
 if __name__ == "__main__":
     main()

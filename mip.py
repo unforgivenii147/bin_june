@@ -5,15 +5,23 @@ import sys
 import zipfile
 from pathlib import Path
 from dh import get_files
+
+
 def parse_version_tuple(version_str: str) -> tuple:
     try:
         return tuple(int(x) for x in version_str.split(".") if x.isdigit())
     except Exception:
         return (version_str,)
+
+
 def get_files(directory: Path, ext: list[str]) -> list[Path]:
     return [p for p in directory.iterdir() if p.is_file() and p.suffix.lower() in ext]
+
+
 def get_installed_packages() -> dict[str, str]:
     return {dist.metadata["Name"].lower(): dist.version for dist in importlib.metadata.distributions()}
+
+
 def get_wheel_package_info(path: Path) -> tuple[str, str] | tuple[None, None]:
     try:
         with zipfile.ZipFile(path, "r") as zip_ref:
@@ -32,6 +40,8 @@ def get_wheel_package_info(path: Path) -> tuple[str, str] | tuple[None, None]:
     except Exception as e:
         print(f"Error reading {path.name}: {e}")
     return None, None
+
+
 def main() -> None:
     cwd = Path.cwd()
     files = get_files(cwd, ext=[".whl"])
@@ -54,5 +64,7 @@ def main() -> None:
                         f"🗑️  Installed version ({installed_version}) is newer than wheel ({pkg_version}), deleting {path.name}"
                     )
                     path.unlink()
+
+
 if __name__ == "__main__":
     main()

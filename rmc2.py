@@ -11,6 +11,7 @@ Examples:
     python rmc.py
     python rmc.py -r .
 """
+
 from __future__ import annotations
 import argparse
 import ast
@@ -22,14 +23,19 @@ from pathlib import Path
 from typing import Generator, Iterable
 import tree_sitter_python as tspython
 from tree_sitter import Language, Parser
+
 SKIP_DIRS = {".git", "__pycache__"}
 PRESERVED_COMMENT_MARKERS = ("# fmt", "# type")
+
+
 @dataclass(frozen=True)
 class Edit:
     start: int
     end: int
     replacement: bytes
     kind: str
+
+
 @dataclass
 class FileResult:
     path: str
@@ -37,10 +43,14 @@ class FileResult:
     docstrings_removed: int = 0
     changed: bool = False
     error: str | None = None
+
+
 def build_parser() -> Parser:
     language = Language(tspython.language())
     parser = Parser(language)
     return parser
+
+
 def iter_python_files(paths: Iterable[Path]) -> Generator[Path, None, None]:
     seen: set[Path] = set()
     for input_path in paths:
@@ -83,10 +93,15 @@ def iter_python_files(paths: Iterable[Path]) -> Generator[Path, None, None]:
                     yield file_path
         except OSError as exc:
             print(f"warning: cannot traverse {path}: {exc}", file=sys.stderr)
+
+
 def is_docstring_expr(node: ast.stmt) -> bool:
     return isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant) and isinstance(node.value.value, str)
+
+
 def collect_docstring_nodes(tree: ast.AST, remove_module_docstring: bool) -> list[ast.Expr]:
     result: list[ast.Expr] = []
+
     def visit_body_owner(node: ast.AST, is_module: bool = False) -> None:
         body = getattr(node, "body", None)
         if isinstance(body, list) and body and is_docstring_expr(body[0]):
@@ -101,17 +116,23 @@ def collect_docstring_nodes(tree: ast.AST, remove_module_docstring: bool) -> lis
                 (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef),
             ):
                 visit_nested(child)
+
     def visit_nested(node: ast.AST) -> None:
         for child in ast.iter_child_nodes(node):
             if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
                 visit_body_owner(child)
             else:
                 visit_nested(child)
+
     visit_body_owner(tree, is_module=True)
     return result
+
+
 def line_col_to_offset(source: str, line: int, col: int) -> int:
     lines = source.splitlines(keepends=True)
     return sum(len(item) for item in lines[: line - 1]) + col
+
+
 def ast_node_byte_range(source: str, node: ast.AST) -> tuple[int, int]:
     segment = ast.get_source_segment(source, node)
     if segment is None:
@@ -120,12 +141,16 @@ def ast_node_byte_range(source: str, node: ast.AST) -> tuple[int, int]:
     start_byte = len(source[:start_char].encode("utf-8"))
     segment_bytes = segment.encode("utf-8")
     return start_byte, start_byte + len(segment_bytes)
+
+
 def comment_should_be_preserved(comment: bytes, is_first_line: bool) -> bool:
     stripped = comment.lstrip()
     if is_first_line and stripped.startswith(b"#!"):
         return True
     lower = comment.lower()
     return any(marker.encode() in lower for marker in PRESERVED_COMMENT_MARKERS)
+
+
 def collect_comment_edits(source_bytes: bytes, parser: Parser) -> list[Edit]:
     tree = parser.parse(source_bytes)
     edits: list[Edit] = []
@@ -146,6 +171,8 @@ def collect_comment_edits(source_bytes: bytes, parser: Parser) -> list[Edit]:
                 )
         stack.extend(reversed(node.children))
     return edits
+
+
 def is_only_body_statement(docstring: ast.Expr, source_tree: ast.AST) -> bool:
     for node in ast.walk(source_tree):
         if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
@@ -153,6 +180,8 @@ def is_only_body_statement(docstring: ast.Expr, source_tree: ast.AST) -> bool:
         if node.body and node.body[0] is docstring:
             return len(node.body) == 1
     return False
+
+
 def indentation_before(source_bytes: bytes, byte_offset: int) -> bytes:
     line_start = source_bytes.rfind(b"\n", 0, byte_offset) + 1
     prefix = source_bytes[line_start:byte_offset]
@@ -163,6 +192,8 @@ def indentation_before(source_bytes: bytes, byte_offset: int) -> bytes:
         else:
             break
     return bytes(whitespace)
+
+
 def collect_docstring_edits(
     source: str,
     source_bytes: bytes,
@@ -186,6 +217,8 @@ def collect_docstring_edits(
             )
         )
     return edits
+
+
 def remove_empty_comment_lines(data: bytes) -> bytes:
     lines = data.splitlines(keepends=True)
     result: list[bytes] = []
@@ -195,6 +228,8 @@ def remove_empty_comment_lines(data: bytes) -> bytes:
             continue
         result.append(line)
     return b"".join(result)
+
+
 def apply_edits(source_bytes: bytes, edits: list[Edit]) -> bytes:
     if not edits:
         return source_bytes
@@ -207,6 +242,8 @@ def apply_edits(source_bytes: bytes, edits: list[Edit]) -> bytes:
         output = output[: edit.start] + edit.replacement + output[edit.end :]
         previous_start = edit.start
     return output
+
+
 def process_file(path_str: str, remove_module_docstring: bool) -> FileResult:
     path = Path(path_str)
     result = FileResult(path=str(path))
@@ -241,6 +278,8 @@ def process_file(path_str: str, remove_module_docstring: bool) -> FileResult:
     except Exception as exc:
         result.error = f"{type(exc).__name__}: {exc}"
         return result
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
@@ -268,6 +307,8 @@ def parse_args() -> argparse.Namespace:
         help="files and/or directories to process (default: current directory)",
     )
     return parser.parse_args()
+
+
 def main() -> int:
     args = parse_args()
     input_paths = args.paths or [Path(".")]
@@ -313,5 +354,7 @@ def main() -> int:
         f"errors={errors}"
     )
     return 1 if errors else 0
+
+
 if __name__ == "__main__":
     raise SystemExit(main())

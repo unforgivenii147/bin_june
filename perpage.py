@@ -4,6 +4,8 @@ import sys
 from pathlib import Path
 from dh import get_files, mpf_async
 from PyPDF2 import PdfReader
+
+
 def process_file(path) -> None:
     path = Path(path)
     if not path.is_file() or path.suffix.lower() != ".pdf":
@@ -43,6 +45,8 @@ def process_file(path) -> None:
                 print(f"Warning: No text extracted from page {page_num + 1}.")
         except Exception as e:
             print(f"Error processing page {page_num + 1}: {e}")
+
+
 if __name__ == "__main__":
     cwd = Path.cwd()
     args = sys.argv[1:]

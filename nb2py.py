@@ -4,8 +4,12 @@ import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 import nbformat
+
+
 def is_import_line(line):
     return line.startswith(("import ", "from "))
+
+
 def strip_magics(source: str) -> str:
     lines = source.split("\n")
     result = []
@@ -23,6 +27,8 @@ def strip_magics(source: str) -> str:
             result.append(line)
         i += 1
     return "\n".join(result)
+
+
 def nb2py(notebook):
     imports = []
     os_mods = []
@@ -64,6 +70,8 @@ def nb2py(notebook):
     indent = "    "
     main_indented = "\n".join(f"{indent}{ln}" for ln in main_str.split("\n"))
     return f"{imports_str}if __name__ == '__main__':\n{main_indented}"
+
+
 def process_file(path):
     path = Path(path)
     fo = path.with_suffix(".py")
@@ -75,6 +83,8 @@ def process_file(path):
     with fo.open("w", encoding="utf-8") as out:
         out.write(py_code)
     return f"Exported → {fo.name}"
+
+
 if __name__ == "__main__":
     cwd = Path.cwd()
     args = sys.argv[1:]

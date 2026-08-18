@@ -8,6 +8,7 @@ import numbers
 import time
 from collections import defaultdict
 from pathlib import Path
+
 STDLIB: frozenset = frozenset(
     {
         "AL",
@@ -500,9 +501,12 @@ STDLIB: frozenset = frozenset(
         "zoneinfo",
     }
 )
+
+
 def get_file_age(path: str | Path, str_mode: bool = False) -> float | str:
     from os import stat as os_stat
     from time import time as time_time
+
     path = Path(path)
     current_time = time_time()
     file_stat = os_stat(path)
@@ -531,6 +535,8 @@ def get_file_age(path: str | Path, str_mode: bool = False) -> float | str:
         if value:
             parts.append(f"{value} {name}")
     return ", ".join(parts) if parts else "0 sec"
+
+
 def get_installed_pkgs():
     packages = []
     pip_freeze_path = Path("/sdcard/data/pip.freeze")
@@ -543,6 +549,7 @@ def get_installed_pkgs():
                 packages.append(name)
         return packages
     from importlib.metadata import distributions
+
     for dist in distributions():
         meta = dist.metadata
         name = meta.get("Name") or meta.get("name")
@@ -551,8 +558,11 @@ def get_installed_pkgs():
         name = name.strip()
         packages.append(name)
     return packages
+
+
 try:
     from joblib import Parallel, delayed
+
     HAS_JOBLIB = True
 except ImportError:
     HAS_JOBLIB = False
@@ -571,17 +581,23 @@ SKIP_DIRS = {
     "*.egg-info",
     "node_modules",
 }
+
+
 class ImportVisitor(ast.NodeVisitor):
     def __init__(self) -> None:
         self.imports = set()
+
     def visit_Import(self, node) -> None:
         for node_name in node.names:
             self.imports.add(node_name.name.split(".")[0])
         self.generic_visit(node)
+
     def visit_ImportFrom(self, node) -> None:
         if node.level == 0 and node.module:
             self.imports.add(node.module.split(".")[0])
         self.generic_visit(node)
+
+
 def get_local_packages(start_path: Path) -> set:
     packages = set()
     for init_file in start_path.rglob("__init__.py"):
@@ -589,6 +605,8 @@ def get_local_packages(start_path: Path) -> set:
             continue
         packages.add(init_file.parent.name)
     return packages
+
+
 def _process_file(file_path: Path) -> tuple:
     imports = set()
     error = None
@@ -605,6 +623,8 @@ def _process_file(file_path: Path) -> tuple:
     except Exception as e:
         error = f"Error: {e}"
     return file_path, imports, error is None, error
+
+
 def has_python_files(dir_path: Path) -> bool:
     try:
         for item in dir_path.rglob("*.py"):
@@ -614,6 +634,8 @@ def has_python_files(dir_path: Path) -> bool:
     except (PermissionError, OSError):
         return False
     return False
+
+
 def find_imports_for_directory(dir_path: Path, start_path: Path, std_libs: set, all_local_packages: set) -> list:
     files = []
     for py_file in dir_path.rglob("*.py"):
@@ -645,6 +667,8 @@ def find_imports_for_directory(dir_path: Path, start_path: Path, std_libs: set, 
         ]
     )
     return result
+
+
 def save_requirements_file(modules: list, output_path: Path, pkgz: set) -> bool:
     modules = sorted(set(modules))
     results = []
@@ -681,6 +705,8 @@ def save_requirements_file(modules: list, output_path: Path, pkgz: set) -> bool:
     with output_path.open("w", encoding="utf-8") as f:
         f.write("\n".join(unique_cleaned))
     return True
+
+
 def get_version(module_name) -> str:
     try:
         return importlib.metadata.version(module_name)
@@ -697,6 +723,8 @@ def get_version(module_name) -> str:
     except Exception:
         return "Not Installed(unknown)"
     return "Not Installed(NA)"
+
+
 def get_valid_subdirs(start_path: Path) -> list:
     subdirs = []
     for d in start_path.iterdir():
@@ -711,6 +739,8 @@ def get_valid_subdirs(start_path: Path) -> list:
         if has_python_files(d):
             subdirs.append(d)
     return sorted(subdirs)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate requirements.txt by inspecting Python files")
     parser.add_argument(
@@ -849,5 +879,7 @@ def main() -> None:
     overall_elapsed = time.time() - overall_start
     if overall_elapsed > 1.0:
         print(f"\n⏱️  Total time: {overall_elapsed:.2f}s")
+
+
 if __name__ == "__main__":
     main()

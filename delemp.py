@@ -4,6 +4,7 @@ Remove blank lines from files recursively using parallel processing.
 Supports multiple input files/directories, optional space-only line removal,
 automatic binary file detection, and mmap for large files.
 """
+
 from __future__ import annotations
 import argparse
 import mmap
@@ -12,6 +13,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from binaryornot import is_binary
 from dh import fsz
+
 MMAP_THRESHOLD = 1024 * 1024
 BOLD = "\x1b[1m"
 GREEN = "\x1b[32m"
@@ -57,9 +59,13 @@ BINARY_SIGNATURES = (
 )
 _TEXT_CHARS = bytearray({7, 8, 9, 10, 12, 13, 27} | set(range(32, 127)) | set(range(128, 256)))
 _BINARY_CHECK_SIZE = 8192
+
+
 def remove_all_blank_lines(text: str) -> str:
     lines = text.splitlines(keepends=True)
     return "".join(line for line in lines if line.strip() != "")
+
+
 def preserve_single_blank_lines(text: str) -> str:
     lines = text.splitlines(keepends=True)
     result_lines = []
@@ -73,6 +79,8 @@ def preserve_single_blank_lines(text: str) -> str:
     while len(result_lines) > 1 and result_lines[-1].strip() == "":
         result_lines.pop()
     return "".join(result_lines)
+
+
 def process_small_file(file_path: Path, preserve_single: bool, remove_spaces: bool) -> tuple[str, int, int, str]:
     content = file_path.read_text(encoding="utf-8")
     total_lines = len(content.splitlines())
@@ -85,6 +93,8 @@ def process_small_file(file_path: Path, preserve_single: bool, remove_spaces: bo
     if removed_lines > 0:
         file_path.write_text(result, encoding="utf-8")
     return (str(file_path), total_lines, removed_lines, "processed")
+
+
 def process_large_file_mmap(file_path: Path, preserve_single: bool, remove_spaces: bool) -> tuple[str, int, int, str]:
     try:
         with open(file_path, "r+b") as f:
@@ -104,6 +114,8 @@ def process_large_file_mmap(file_path: Path, preserve_single: bool, remove_space
         return (str(file_path), total_lines, removed_lines, "processed")
     except Exception as e:
         return (str(file_path), 0, 0, f"Error with mmap: {e!s}")
+
+
 def remove_blank_lines(
     file_path: Path, preserve_single: bool = False, remove_spaces: bool = False
 ) -> tuple[str, int, int, str]:
@@ -115,6 +127,8 @@ def remove_blank_lines(
             return process_small_file(file_path, preserve_single, remove_spaces)
     except Exception as e:
         return (str(file_path), 0, 0, f"Error: {e!s}")
+
+
 def process_file(args: tuple[Path, Path, bool, bool]) -> tuple[str, int, int, str]:
     base_dir, file_path, preserve_single, remove_spaces = args
     if is_binary(file_path):
@@ -132,6 +146,8 @@ def process_file(args: tuple[Path, Path, bool, bool]) -> tuple[str, int, int, st
         return (str(rel_path), result[1], result[2], status)
     except ValueError:
         return result
+
+
 def collect_files(paths: list[Path]) -> list[tuple[Path, Path]]:
     files = []
     for path in paths:
@@ -148,6 +164,8 @@ def collect_files(paths: list[Path]) -> list[tuple[Path, Path]]:
         else:
             print(f"{YELLOW}⚠ Warning:{RESET} '{path}' is not a file or directory, skipping.")
     return files
+
+
 def print_header(paths: list[Path], preserve_single: bool, remove_spaces: bool, mmap_threshold: int):
     print(f"\n{BOLD}{CYAN}╔{'═' * 40}╗{RESET}")
     print(f"{BOLD}{CYAN}║{RESET}         {BOLD}Blank Line Remover{RESET}                    {BOLD}{CYAN}║{RESET}")
@@ -165,6 +183,8 @@ def print_header(paths: list[Path], preserve_single: bool, remove_spaces: bool, 
         print(f" {YELLOW}(+ whitespace-only lines){RESET}")
     else:
         print()
+
+
 def print_results(
     results: list[tuple],
     total_removed: int,
@@ -216,6 +236,8 @@ def print_results(
     if errors:
         print(f"  Errors:                {BOLD}{RED}{len(errors):,}{RESET}")
     print(f"{BOLD}{CYAN}{'─' * 42}{RESET}\n")
+
+
 def main():
     global MMAP_THRESHOLD
     parser = argparse.ArgumentParser(
@@ -318,5 +340,7 @@ def main():
         + " " * 20
     )
     print_results(results, total_removed, total_files, args.show_binary, MMAP_THRESHOLD)
+
+
 if __name__ == "__main__":
     main()

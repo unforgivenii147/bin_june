@@ -2,6 +2,7 @@
 """
 Find non-pure Python packages in system site-packages and save list to file.
 """
+
 from __future__ import annotations
 import argparse
 import logging
@@ -10,12 +11,15 @@ import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 import pkg_resources
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger(__name__)
+
+
 def get_site_packages_paths() -> list[Path]:
     paths = []
     for path in site.getsitepackages():
@@ -26,6 +30,8 @@ def get_site_packages_paths() -> list[Path]:
         if user_path.exists():
             paths.append(user_path)
     return paths
+
+
 def get_installed_packages() -> list[tuple[str, str]]:
     packages = []
     for dist in pkg_resources.working_set:
@@ -34,6 +40,8 @@ def get_installed_packages() -> list[tuple[str, str]]:
         except Exception as e:
             logger.warning(f"Error getting info for {dist.project_name}: {e}")
     return packages
+
+
 def find_package_path(package_name: str, site_paths: list[Path]) -> Path | None:
     for site_path in site_paths:
         pkg_path = site_path / package_name
@@ -47,6 +55,8 @@ def find_package_path(package_name: str, site_paths: list[Path]) -> Path | None:
             if item.is_dir() and item.name.lower().replace("-", "_") == package_name.lower().replace("-", "_"):
                 return item
     return None
+
+
 def is_pure_python(package_name: str, site_paths: list[Path]) -> bool:
     pkg_path = find_package_path(package_name, site_paths)
     if not pkg_path:
@@ -60,6 +70,8 @@ def is_pure_python(package_name: str, site_paths: list[Path]) -> bool:
         except (PermissionError, OSError):
             continue
     return True
+
+
 def check_package(args_tuple: tuple[str, str, list[Path]]) -> tuple[str, str, bool]:
     package_name, version, site_paths = args_tuple
     try:
@@ -68,6 +80,8 @@ def check_package(args_tuple: tuple[str, str, list[Path]]) -> tuple[str, str, bo
     except Exception as e:
         logger.error(f"Error checking {package_name}: {e}")
         return package_name, version, True
+
+
 def main():
     parser = argparse.ArgumentParser(description="Find non-pure Python packages in site-packages")
     parser.add_argument(
@@ -127,5 +141,7 @@ def main():
         if len(binary_packages) > 10:
             logger.info(f"  ... and {len(binary_packages) - 10} more")
     return 0
+
+
 if __name__ == "__main__":
     sys.exit(main())

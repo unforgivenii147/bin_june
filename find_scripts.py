@@ -2,7 +2,10 @@
 from __future__ import annotations
 from pathlib import Path
 from dh import is_binary, is_python_file, should_skip
+
 CHUNK_SIZE = 1024 * 1024
+
+
 def get_filez(root_dir: str | Path):
     visited_dirs: set[Path] = set()
     root_dir = Path(root_dir)
@@ -21,6 +24,8 @@ def get_filez(root_dir: str | Path):
                     yield filepath
     else:
         yield root_dir
+
+
 def find_scripts_without_extension(directory: Path):
     swe = []
     for item in get_filez(directory):
@@ -32,6 +37,8 @@ def find_scripts_without_extension(directory: Path):
             if is_python_file(item):
                 swe.append(item)
     return swe
+
+
 if __name__ == "__main__":
     cwd = Path.cwd()
     found_scripts = find_scripts_without_extension(cwd)

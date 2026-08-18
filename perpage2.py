@@ -5,6 +5,7 @@ Usage:
     python extract_pdf_pages.py [file_or_dir ...]
     If no arguments given, processes all PDFs in current directory recursively.
 """
+
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from io import StringIO
@@ -15,6 +16,8 @@ from pdfminer.pdfdocument import PDFDocument
 from pdfminer.pdfinterp import PDFPageInterpreter, PDFResourceManager
 from pdfminer.pdfpage import PDFPage
 from pdfminer.pdfparser import PDFParser
+
+
 def collect_pdf_files(inputs):
     pdf_files = []
     if not inputs:
@@ -28,6 +31,8 @@ def collect_pdf_files(inputs):
         else:
             print(f"Warning: {path} is not a valid PDF file or directory", file=sys.stderr)
     return pdf_files
+
+
 def extract_pages_from_pdf(pdf_path):
     pdf_path = Path(pdf_path)
     output_dir = pdf_path.parent / pdf_path.stem
@@ -56,6 +61,8 @@ def extract_pages_from_pdf(pdf_path):
     except Exception as e:
         print(f"Error processing {pdf_path}: {e}", file=sys.stderr)
     return results
+
+
 def main():
     inputs = sys.argv[1:] if len(sys.argv) > 1 else []
     pdf_files = collect_pdf_files(inputs)
@@ -72,5 +79,7 @@ def main():
                 print(f"Processed {pdf.name}: {len(results)} pages extracted")
             except Exception as e:
                 print(f"Failed to process {pdf}: {e}", file=sys.stderr)
+
+
 if __name__ == "__main__":
     main()

@@ -3,6 +3,8 @@ from __future__ import annotations
 import shutil
 import sys
 from pathlib import Path
+
+
 def unique_path(path: Path | str) -> Path:
     path = Path(path)
     if not path.exists():
@@ -23,6 +25,8 @@ def unique_path(path: Path | str) -> Path:
         if not new_path.exists():
             return new_path
         counter += 1
+
+
 if __name__ == "__main__":
     src = Path(sys.argv[1]).resolve()
     cwd = Path.home() / "repos"

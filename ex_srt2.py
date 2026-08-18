@@ -1,9 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Extract subtitles using ffmpeg-python."""
+
 from __future__ import annotations
 import sys
 from pathlib import Path
 import ffmpeg
+
+
 def extract_subtitles(input_file):
     try:
         probe = ffmpeg.probe(input_file)
@@ -24,11 +27,15 @@ def extract_subtitles(input_file):
     except FileNotFoundError:
         print("ffmpeg is required but not installed.")
         sys.exit(1)
+
+
 def main():
     if len(sys.argv) != 2:
         print(f"Usage: {sys.argv[0]} <video.mkv|video.mp4>")
         sys.exit(1)
     input_file = sys.argv[1]
     extract_subtitles(input_file)
+
+
 if __name__ == "__main__":
     main()

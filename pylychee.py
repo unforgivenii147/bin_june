@@ -10,6 +10,7 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Optional, Tuple
 from urllib.parse import unquote, urldefrag
+
 EXT_IMAGE = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".tif", ".tiff", ".svg"}
 HTTP_SCHEMES = ("http://", "https://")
 HTML_ATTR_RE = re.compile(r'(?P<attr>href|src)\s*=\s*(?P<q>["\'])(?P<url>.*?)(?P=q)', re.IGNORECASE)
@@ -18,18 +19,26 @@ MD_LINK_RE = re.compile(r"\[(?P<text>[^\]]*?)\]\((?P<url>[^)\s]+)(?:\s+\"[^\"]*\
 SPLIT_URL_RE = re.compile(r"^(?P<path>[^?#]+)(?P<rest>[?#].*)?$")
 DEFAULT_TIMEOUT = 8
 MAX_WORKERS = 32
+
+
 def _strip_fragment_query(u: str) -> str:
     v, _ = urldefrag(u)
     if "?" in v:
         v = v.split("?", 1)[0]
     return v
+
+
 def _guess_ext(u: str) -> str:
     p = _strip_fragment_query(u)
     _, ext = os.path.splitext(p.lower())
     return ext
+
+
 def _is_remote(u: str) -> bool:
     s = u.strip()
     return any(s.startswith(x) for x in HTTP_SCHEMES)
+
+
 def _is_local_ref(u: str) -> bool:
     s = u.strip()
     if not s:
@@ -39,12 +48,18 @@ def _is_local_ref(u: str) -> bool:
     if _is_remote(s):
         return False
     return True
+
+
 def _is_imageish(u: str) -> bool:
     ext = _guess_ext(u)
     return ext in EXT_IMAGE or ext == ".svg"
+
+
 def _read_bytes(path: str) -> bytes:
     with open(path, "rb") as f:
         return f.read()
+
+
 def _local_target_resolve(base_dir: str, u: str) -> Optional[str]:
     s = u.strip()
     if not s:
@@ -58,17 +73,23 @@ def _local_target_resolve(base_dir: str, u: str) -> Optional[str]:
     if not os.path.abspath(norm).startswith(os.path.abspath(base_dir).rsplit(os.sep, 1)[0]):
         return os.path.abspath(norm)
     return os.path.abspath(norm)
+
+
 def _mime_for_local(path: str) -> str:
     ext = os.path.splitext(path)[1].lower()
     if ext == ".svg":
         return "image/svg+xml"
     m, _ = mimetypes.guess_type(path)
     return m or "application/octet-stream"
+
+
 def _to_data_uri(path: str) -> str:
     mime = _mime_for_local(path)
     raw = _read_bytes(path)
     b64 = base64.b64encode(raw).decode("ascii")
     return f"data:{mime};base64,{b64}"
+
+
 def _http_check(url: str, timeout: int) -> bool:
     req = urllib.request.Request(url, method="HEAD")
     try:
@@ -83,9 +104,12 @@ def _http_check(url: str, timeout: int) -> bool:
                 return code < 400
         except Exception:
             return False
+
+
 def _replace_html(html: str, file_dir: str, timeout: int) -> Tuple[str, List[str]]:
     removals = []
     changes = 0
+
     def html_attr_repl(m: re.Match) -> str:
         nonlocal changes
         attr = m.group("attr")
@@ -118,11 +142,15 @@ def _replace_html(html: str, file_dir: str, timeout: int) -> Tuple[str, List[str
                 changes += 1
                 return f"{attr}={q}{data_uri}{q}"
         return m.group(0)
+
     out = HTML_ATTR_RE.sub(html_attr_repl, html)
     return out, removals
+
+
 def _replace_md(md: str, file_dir: str, timeout: int) -> Tuple[str, List[str]]:
     removals = []
     changes = 0
+
     def replace_md_images(match: re.Match) -> str:
         nonlocal changes
         url = match.group("url").strip()
@@ -150,6 +178,7 @@ def _replace_md(md: str, file_dir: str, timeout: int) -> Tuple[str, List[str]]:
             text = match.group(1) or ""
             return f"![{text}]({data_uri})"
         return match.group(0)
+
     def replace_md_links(match: re.Match) -> str:
         url = match.group("url").strip()
         if not url or url.startswith("#") or url.startswith("data:"):
@@ -168,9 +197,12 @@ def _replace_md(md: str, file_dir: str, timeout: int) -> Tuple[str, List[str]]:
                 removals.append(f"LOCAL_UNAVAILABLE_MD_LINK {url}")
             return match.group(0)
         return match.group(0)
+
     out = MD_IMAGE_RE.sub(replace_md_images, md)
     out = MD_LINK_RE.sub(replace_md_links, out)
     return out, removals
+
+
 def process_file(path: str, timeout: int) -> List[str]:
     file_dir = os.path.dirname(path)
     with open(path, "r", encoding="utf-8", errors="replace") as f:
@@ -189,6 +221,8 @@ def process_file(path: str, timeout: int) -> List[str]:
         with open(path, "w", encoding="utf-8", errors="replace") as f:
             f.write(new_content)
     return report
+
+
 def iter_files(root: str, exts: Tuple[str, ...]) -> List[str]:
     out = []
     for dirpath, dirnames, filenames in os.walk(root):
@@ -196,6 +230,8 @@ def iter_files(root: str, exts: Tuple[str, ...]) -> List[str]:
             if fn.lower().endswith(exts):
                 out.append(os.path.join(dirpath, fn))
     return out
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("root", help="Folder to scan")
@@ -223,5 +259,7 @@ def main():
     if all_reports:
         for line in all_reports:
             print(line)
+
+
 if __name__ == "__main__":
     main()

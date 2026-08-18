@@ -11,6 +11,7 @@ import brotli
 import lz4.frame
 import py7zr
 import zstandard as zstd
+
 SUPPORTED_EXTENSIONS = {
     "gz": gzip.open,
     "xz": lzma.open,
@@ -23,6 +24,8 @@ SUPPORTED_EXTENSIONS = {
     "whl": zipfile.ZipFile,
 }
 TAR_EXTENSIONS = ["tar.gz", "tar.xz", "tar.bz2", "tar.7z", "tar.zst", "tar.br", "tar.lz4", "tar"]
+
+
 def extract_file(file_path):
     print(f"Extracting: {file_path}")
     try:
@@ -62,11 +65,15 @@ def extract_file(file_path):
                 tar_ref.extractall(path=file_path.parent)
     except Exception as e:
         print(f"Failed to extract {file_path}: {e}")
+
+
 def main():
     current_dir = pathlib.Path(".")
     archive_files = list(current_dir.rglob("*.*"))
     archive_files = [f for f in archive_files if f.suffix[1:] in SUPPORTED_EXTENSIONS or f.suffix in TAR_EXTENSIONS]
     with mp.Pool(processes=mp.cpu_count()) as pool:
         pool.map(extract_file, archive_files)
+
+
 if __name__ == "__main__":
     main()

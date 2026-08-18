@@ -2,6 +2,7 @@
 """
 Convert MP3 files to half their original bitrate using ffmpeg with parallel processing.
 """
+
 from __future__ import annotations
 import argparse
 import json
@@ -12,6 +13,8 @@ import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
+
+
 class Colors:
     HEADER = "\033[95m"
     CYAN = "\033[96m"
@@ -22,6 +25,8 @@ class Colors:
     DIM = "\033[2m"
     END = "\033[0m"
     CLEAR_LINE = "\033[2K\r"
+
+
 @dataclass
 class ConversionStats:
     file_path: Path
@@ -32,6 +37,8 @@ class ConversionStats:
     success: bool
     error_message: str = ""
     duration: float = 0.0
+
+
 def check_ffmpeg():
     try:
         subprocess.run(["ffmpeg", "-version"], capture_output=True, check=True)
@@ -39,12 +46,16 @@ def check_ffmpeg():
     except (subprocess.CalledProcessError, FileNotFoundError):
         print(f"{Colors.RED}✗ ffmpeg/ffprobe is required but not installed.{Colors.END}")
         sys.exit(1)
+
+
 def fsz(size_bytes: int) -> str:
     for unit in ["B", "KB", "MB", "GB"]:
         if size_bytes < 1024:
             return f"{size_bytes:.1f} {unit}"
         size_bytes /= 1024
     return f"{size_bytes:.1f} TB"
+
+
 def format_duration(seconds: float) -> str:
     if seconds < 1:
         return f"{seconds * 1000:.0f}ms"
@@ -54,6 +65,8 @@ def format_duration(seconds: float) -> str:
         minutes = int(seconds // 60)
         secs = seconds % 60
         return f"{minutes}m {secs:.0f}s"
+
+
 def get_audio_info(mp3_file: Path) -> tuple[int | None, int | None]:
     try:
         result = subprocess.run(
@@ -76,6 +89,8 @@ def get_audio_info(mp3_file: Path) -> tuple[int | None, int | None]:
             return None, None
     except (subprocess.CalledProcessError, json.JSONDecodeError, KeyError, ValueError, OSError):
         return None, None
+
+
 def convert_single_file(mp3_file: Path, base_dir: Path) -> ConversionStats:
     start_time = time.time()
     rel_path = mp3_file.relative_to(base_dir)
@@ -161,6 +176,8 @@ def convert_single_file(mp3_file: Path, base_dir: Path) -> ConversionStats:
             error_message=str(e)[:100],
             duration=duration,
         )
+
+
 def print_file_result(stat: ConversionStats, index: int, total: int):
     status_icon = f"{Colors.GREEN}✓{Colors.END}" if stat.success else f"{Colors.RED}✗{Colors.END}"
     if stat.success:
@@ -176,6 +193,8 @@ def print_file_result(stat: ConversionStats, index: int, total: int):
     else:
         print(f"{Colors.CLEAR_LINE}{status_icon} [{index}/{total}] {Colors.RED}{stat.file_path}{Colors.END}")
         print(f"  {Colors.RED}Error: {stat.error_message}{Colors.END}")
+
+
 def print_final_summary(stats: list[ConversionStats], total_duration: float):
     successful = [s for s in stats if s.success]
     failed = [s for s in stats if not s.success]
@@ -195,6 +214,8 @@ def print_final_summary(stats: list[ConversionStats], total_duration: float):
         print(f"  Saved:  {Colors.GREEN}{fsz(total_saved)} ({total_saved / total_original * 100:.1f}%){Colors.END}")
     print(f"\n{Colors.BOLD}Total time:{Colors.END} {format_duration(total_duration)}")
     print(f"{'─' * 42}")
+
+
 def find_mp3_files(directories: list[Path]) -> list[Path]:
     mp3_files = []
     for directory in directories:
@@ -214,6 +235,8 @@ def find_mp3_files(directories: list[Path]) -> list[Path]:
             seen.add(resolved)
             unique_files.append(f)
     return sorted(unique_files)
+
+
 def process_directory(directory: Path, max_workers: int = 4):
     mp3_files = find_mp3_files([directory])
     if not mp3_files:
@@ -236,6 +259,8 @@ def process_directory(directory: Path, max_workers: int = 4):
         for stat in failed:
             print(f"  {Colors.RED}✗{Colors.END} {stat.file_path}: {stat.error_message}")
     print_final_summary(stats, total_duration)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Convert MP3 files to half their original bitrate",
@@ -275,5 +300,7 @@ Examples:
         process_directory(directory, max_workers=args.workers)
         if len(args.directories) > 1:
             print()
+
+
 if __name__ == "__main__":
     main()

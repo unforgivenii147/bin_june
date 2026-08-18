@@ -10,6 +10,8 @@ import zipfile
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+
+
 @dataclass
 class PackageInfo:
     name: str
@@ -23,12 +25,16 @@ class PackageInfo:
     platform_tag: str
     wheel_filename: str
     metadata_version: str = "2.1"
+
+
 class PackageDetector:
     def __init__(self, verbose: bool = False) -> None:
         self.verbose = verbose
+
     def log(self, message: str) -> None:
         if self.verbose:
             print(f"[DETECT] {message}")
+
     def detect_package_type(self, package_dir: Path) -> tuple[bool, bool, bool]:
         so_files = list(package_dir.rglob("*.so"))
         pyd_files = list(package_dir.rglob("*.pyd"))
@@ -46,10 +52,12 @@ class PackageDetector:
             )
         )
         return (is_pure_python, has_c_extension, has_binary)
+
     @staticmethod
     def get_python_version() -> str:
         major, minor = sys.version_info[:2]
         return f"py{major}{minor}"
+
     @staticmethod
     def get_abi_tag() -> str:
         major, minor = sys.version_info[:2]
@@ -57,13 +65,16 @@ class PackageDetector:
         if hasattr(sys, "implementation") and sys.implementation.name == "cpython":
             return f"cp{major}{minor}{flags}"
         return f"cp{major}{minor}"
+
     @staticmethod
     def get_platform_tag() -> str:
         import platform
+
         system = platform.system().lower()
         machine = platform.machine().lower()
         platform_map = {"linux": f"linux_{machine}", "darwin": f"macosx_10_9_{machine}", "windows": f"win_{machine}"}
         return platform_map.get(system, f"{system}_{machine}")
+
     @staticmethod
     def read_dist_info(dist_info_dir: Path) -> dict[str, str]:
         metadata = {}
@@ -80,6 +91,7 @@ class PackageDetector:
             except Exception:
                 pass
         return metadata
+
     def analyze_package(self, site_packages: Path, package_name: str) -> PackageInfo | None:
         package_dir = site_packages / package_name
         if not package_dir.is_dir():
@@ -114,12 +126,16 @@ class PackageDetector:
         except Exception as e:
             self.log(f"Error analyzing {package_name}: {e!s}")
             return None
+
+
 class WheelBuilder:
     def __init__(self, verbose: bool = False) -> None:
         self.verbose = verbose
+
     def log(self, message: str) -> None:
         if self.verbose:
             print(f"[BUILD] {message}")
+
     @staticmethod
     def calculate_hash(file_path: Path, algorithm: str = "sha256") -> str:
         hasher = hashlib.new(algorithm)
@@ -128,9 +144,11 @@ class WheelBuilder:
                 hasher.update(chunk)
         digest = hasher.digest()
         return base64.urlsafe_b64encode(digest).decode("ascii").rstrip("=")
+
     @staticmethod
     def get_file_size(file_path: Path) -> int:
         return file_path.stat().st_size
+
     def create_record(self, wheel_path: Path, dist_info_dir: str) -> str:
         records = []
         with zipfile.ZipFile(wheel_path, "r") as zf:
@@ -145,6 +163,7 @@ class WheelBuilder:
                 records.append(f"{info.filename},sha256={hash_str},{len(content)}")
         records.append(f"{dist_info_dir}/RECORD,,")
         return "\n".join(records) + "\n"
+
     def create_wheel(self, package_info: PackageInfo, source_dir: Path, output_dir: Path) -> tuple[bool, str]:
         try:
             output_dir.mkdir(parents=True, exist_ok=True)
@@ -189,6 +208,8 @@ class WheelBuilder:
             return (True, f"Successfully created {package_info.wheel_filename}")
         except Exception as e:
             return (False, f"Error creating wheel: {e!s}")
+
+
 class VenvRepacker:
     def __init__(
         self,
@@ -215,10 +236,12 @@ class VenvRepacker:
             "total_size_after": 0,
         }
         self.results = []
+
     def log(self, message: str, level: str = "INFO") -> None:
         if self.verbose or level in {"ERROR", "WARNING"}:
             timestamp = datetime.now().strftime("%H:%M:%S")
             print(f"[{timestamp}] [{level}] {message}")
+
     def find_packages(self) -> list[str]:
         exclude_patterns = {".dist-info", ".egg-info", ".egg", "__pycache__"}
         packages = {
@@ -230,6 +253,7 @@ class VenvRepacker:
         }
         self.log(f"Found {len(packages)} packages")
         return sorted(packages)
+
     def repack_package(self, package_name: str) -> tuple[bool, str, PackageInfo | None]:
         try:
             package_info = self.detector.analyze_package(self.site_packages, package_name)
@@ -246,6 +270,7 @@ class VenvRepacker:
             return (success, message, package_info)
         except Exception as e:
             return (False, f"Error: {e!s}", None)
+
     def repack_all(self) -> dict:
         print("\n╔════════════════════════════════════════════════════════════╗")
         print("║         Virtual Environment Package Repacker               ║")
@@ -285,6 +310,7 @@ class VenvRepacker:
                 print(f"✗ {message}")
                 self.results.append({"package": package_name, "success": False, "error": message})
         return self.stats
+
     def print_stats(self) -> None:
         print("\n" + "=" * 42)
         print("STATISTICS")
@@ -296,6 +322,7 @@ class VenvRepacker:
         print(f"Pure Python packages: {self.stats['pure_python_packages']}")
         print(f"Packages with C extensions: {self.stats['packages_with_c_extensions']}")
         print("-" * 42)
+
     def save_report(self, report_file: str = "repack_report.json") -> None:
         report = {
             "timestamp": datetime.now().isoformat(),
@@ -310,6 +337,7 @@ class VenvRepacker:
             print(f"\n✓ Report saved: {report_path}")
         except Exception as e:
             print(f"\n✗ Error saving report: {e!s}")
+
     def list_wheels(self) -> None:
         wheels = list(self.output_dir.glob("*.whl"))
         if not wheels:
@@ -325,8 +353,11 @@ class VenvRepacker:
         total_size_mb = total_size / (1024 * 1024)
         print("-" * 42)
         print(f"Total size: {total_size_mb:.2f} MB")
+
+
 def main() -> None:
     import argparse
+
     parser = argparse.ArgumentParser(
         description="Repack Python packages from site-packages into .whl files",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -352,5 +383,7 @@ def main() -> None:
     except Exception as e:
         print(f"Error: {e!s}", file=sys.stderr)
         sys.exit(1)
+
+
 if __name__ == "__main__":
     main()

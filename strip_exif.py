@@ -3,6 +3,7 @@
 Strip EXIF data from image files using pathlib only.
 Supports parallel processing, size reporting, and file/directory input.
 """
+
 from __future__ import annotations
 import argparse
 import io
@@ -12,6 +13,8 @@ from multiprocessing import cpu_count
 from pathlib import Path
 from dh import fsz, gsz
 from PIL import Image
+
+
 def strip_exif_single(image_path, backup=False, verbose=False):
     result = {
         "path": image_path,
@@ -65,8 +68,12 @@ def strip_exif_single(image_path, backup=False, verbose=False):
         if verbose:
             print(f"  ❌ {image_path.name}: {e!s}")
     return result
+
+
 def process_image_file(image_path, backup=False, verbose=False):
     return strip_exif_single(image_path, backup, verbose)
+
+
 def find_image_files(paths, extensions, recursive=True):
     image_files = []
     extensions = [(ext if ext.startswith(".") else f".{ext}") for ext in extensions]
@@ -95,6 +102,8 @@ def find_image_files(paths, extensions, recursive=True):
         else:
             print(f"⚠️  Unknown path type: {path}")
     return sorted(set(image_files))
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Strip EXIF data from image files with parallel processing",
@@ -223,6 +232,8 @@ Examples:
                 print(f"   📋 {backup_path.name}")
             if len(backups) > 5:
                 print(f"   ... and {len(backups) - 5} more")
+
+
 if __name__ == "__main__":
     try:
         main()

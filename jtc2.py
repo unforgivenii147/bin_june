@@ -4,6 +4,7 @@ import ast
 from pathlib import Path
 from sys import argv
 from dh import runcmd
+
 if __name__ == "__main__":
     path = Path(argv[1])
     orig_code = path.read_text(encoding="utf-8")

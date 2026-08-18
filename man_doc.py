@@ -6,6 +6,8 @@ from collections import deque
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from dh import cprint, mpf3, runcmd
+
+
 def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
     path = Path(path)
     skip_dirs = {".git", "__pycache__"}
@@ -42,6 +44,8 @@ def get_files(path: str | Path, ext: list[str] | None = None) -> list[Path]:
             ):
                 files.append(item)
     return files
+
+
 def safe_run(path) -> bool:
     path = Path(path)
     is_gzipped = path.suffix == ".gz"
@@ -68,6 +72,8 @@ def safe_run(path) -> bool:
     finally:
         if is_gzipped and Path(tmp_path).exists():
             Path(tmp_path).unlink()
+
+
 def process_file(path) -> bool:
     path = Path(path)
     if not path.exists():
@@ -79,6 +85,8 @@ def process_file(path) -> bool:
         return True
     cprint("[ERROR]", "red")
     return False
+
+
 def main() -> None:
     args = sys.argv[1:]
     cwd = Path.cwd()
@@ -100,5 +108,7 @@ def main() -> None:
     all_exts = base_exts + [f"{ext}.gz" for ext in base_exts]
     files = [Path(p) for p in args] if args else get_files(cwd, ext=all_exts)
     mpf3(process_file, files)
+
+
 if __name__ == "__main__":
     sys.exit(main())

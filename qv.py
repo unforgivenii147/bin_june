@@ -3,10 +3,14 @@ from __future__ import annotations
 import pathlib
 import pydoc
 import sys
+
+
 def view_file(file_path):
     with open(file_path, encoding="utf-8") as f:
         content = f.read()
         pydoc.pager(content)
+
+
 def main():
     recursive = "-r" in sys.argv
     current_dir = pathlib.Path(".")
@@ -18,5 +22,7 @@ def main():
     for file_path in files:
         print(f"Viewing: {file_path}")
         view_file(file_path)
+
+
 if __name__ == "__main__":
     main()

@@ -8,16 +8,22 @@ import importlib.metadata
 import shutil
 import site
 from pathlib import Path
+
+
 def get_user_site_path() -> Path:
     if not site.USER_SITE:
         site.main()
     return Path(site.USER_SITE).resolve()
+
+
 def get_packages_with_entry_points() -> list[str]:
     packages_with_eps = []
     for dist in importlib.metadata.distributions():
         if dist.entry_points:
             packages_with_eps.append(dist.metadata["Name"])
     return sorted(packages_with_eps)
+
+
 def get_matching_packages(pattern: str) -> list[str]:
     matching = []
     for dist in importlib.metadata.distributions():
@@ -25,6 +31,8 @@ def get_matching_packages(pattern: str) -> list[str]:
         if fnmatch.fnmatch(name.lower(), pattern.lower()):
             matching.append(name)
     return matching
+
+
 def resolve_package_list(patterns: list[str], entry_points_only: bool = False) -> tuple[list[str], list[str]]:
     if entry_points_only:
         packages_with_eps = get_packages_with_entry_points()
@@ -63,6 +71,8 @@ def resolve_package_list(patterns: list[str], entry_points_only: bool = False) -
                 else:
                     unmatched_patterns.append(pattern)
         return matched_packages, unmatched_patterns
+
+
 def copy_single_file(record_row: list[str], dist_location: Path, target_dir: Path) -> bool:
     if not record_row:
         return False
@@ -80,6 +90,8 @@ def copy_single_file(record_row: list[str], dist_location: Path, target_dir: Pat
     except Exception as e:
         print(f"   ❌ Error copying {relative_path_str}: {e}")
         return False
+
+
 def process_package(pkg_name: str, user_site: Path, base_target_dir: Path) -> str:
     try:
         dist = importlib.metadata.distribution(pkg_name)
@@ -126,6 +138,8 @@ def process_package(pkg_name: str, user_site: Path, base_target_dir: Path) -> st
             ep_list.append(f"{ep.group}:{ep.name}")
         ep_info = f" | Entry points: {', '.join(ep_list)}"
     return f"✅ Package '{pkg_name}' completely extracted! Copied {copied_count} files to {pkg_target_dir}{ep_info}"
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Extract installed user-site Python packages that have entry points to ~/tmp/pkgs/<pkgname>",
@@ -217,5 +231,7 @@ def main():
                 print(result_message)
             except Exception as exc:
                 print(f"❌ Package '{pkg_name}' generated an unhandled exception: {exc}")
+
+
 if __name__ == "__main__":
     main()

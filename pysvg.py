@@ -2,6 +2,8 @@
 from __future__ import annotations
 from pathlib import Path
 from dh import get_fast, rrs, runcmd
+
+
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -11,6 +13,8 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
+
+
 def process_file(path) -> None:
     path = Path(path)
     if "lazy" in path.parts:
@@ -25,10 +29,14 @@ def process_file(path) -> None:
         return
     except:
         return
+
+
 def main() -> None:
     cwd = Path.cwd()
     for f in get_fast(cwd):
         if f.suffix in {".svg", ".SVG"}:
             process_file(f)
+
+
 if __name__ == "__main__":
     main()

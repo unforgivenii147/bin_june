@@ -4,12 +4,15 @@ Find transliterated Persian words in a dictionary JSON file.
 Detects entries where the "translation" is just the English phonetic spelling
 of the Persian word rather than an actual translation.
 """
+
 from __future__ import annotations
 import argparse
 import json
 import re
 import sys
 from rapidfuzz import fuzz
+
+
 def is_finglish(text: str, finglish: str) -> int:
     persian_map = {
         "ا": "a",
@@ -70,6 +73,8 @@ def is_finglish(text: str, finglish: str) -> int:
     ratio = fuzz.partial_ratio(result, finglish)
     print(f"partial_ratio({result}, {finglish} = {ratio}")
     return ratio >= 60
+
+
 def is_transliteration(persian_word, english_word):
     if not english_word or not persian_word:
         return False
@@ -129,6 +134,8 @@ def is_transliteration(persian_word, english_word):
         if english_word not in potential_translations:
             return True
     return False
+
+
 def find_transliterations(words_dict):
     transliterations = {}
     valid_translations = {}
@@ -138,6 +145,8 @@ def find_transliterations(words_dict):
         else:
             valid_translations[persian_word] = english_word
     return transliterations, valid_translations
+
+
 def load_json_file(filepath):
     try:
         with open(filepath, "r", encoding="utf-8") as f:
@@ -149,9 +158,13 @@ def load_json_file(filepath):
     except json.JSONDecodeError as e:
         print(f"Error: Invalid JSON in '{filepath}': {e}")
         sys.exit(1)
+
+
 def save_json_file(data, filepath):
     with open(filepath, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Find transliterated Persian words in dictionary JSON")
     parser.add_argument("input_file", nargs="?", default="words.json", help="Input JSON file (default: words.json)")
@@ -193,5 +206,7 @@ def main():
     else:
         print("\nUse -m flag to move these entries to errors.json")
         print(f"Example: python {sys.argv[0]} words.json -m")
+
+
 if __name__ == "__main__":
     main()

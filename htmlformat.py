@@ -4,6 +4,8 @@ import sys
 from pathlib import Path
 from bs4 import BeautifulSoup
 from dh import get_files, mpf3, rrs
+
+
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -13,6 +15,8 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
+
+
 def process_file(path) -> None:
     path = Path(path)
     content = path.read_text(encoding="utf-8")
@@ -21,6 +25,8 @@ def process_file(path) -> None:
     new_content = soup.prettify()
     after = len(new_content)
     rrs(path, before, after)
+
+
 if __name__ == "__main__":
     cwd = Path.cwd()
     args = sys.argv[1:]

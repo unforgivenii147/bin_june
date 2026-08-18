@@ -3,6 +3,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 from dh import cprint, fsz, get_files, mpf3, rrs, runcmd
+
+
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -12,7 +14,11 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
+
+
 EXT = [".java", ".c", ".cpp", ".cxx", ".cc", ".h", ".hh", ".hpp", ".hxx", ".js", ".json"]
+
+
 def process_file(path):
     path = Path(path)
     before = gsz(path)
@@ -25,6 +31,8 @@ def process_file(path):
     except:
         del before, after
         return
+
+
 def main() -> None:
     files: list = []
     cwd = Path.cwd()
@@ -40,5 +48,7 @@ def main() -> None:
     after = gsz(cwd)
     dsz = before - after
     print(f"space change: {fsz(dsz)}")
+
+
 if __name__ == "__main__":
     main()

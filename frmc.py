@@ -4,7 +4,10 @@ import ast
 import sys
 from pathlib import Path
 from dh import SOURCE_CODE_EXT, cprint, fsz, get_nobinary, mpf3
+
 CHUNK_SIZE = 1024 * 1024
+
+
 def remove_blank_lines(text) -> str:
     lines = text.splitlines(keepends=True)
     result_lines = []
@@ -16,6 +19,8 @@ def remove_blank_lines(text) -> str:
         result_lines.append(line)
         prev_blank = is_blank
     return "".join(result_lines)
+
+
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -30,6 +35,8 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
+
+
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -39,6 +46,8 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
+
+
 def process_file(path: Path) -> None:
     path = Path(path)
     if path.suffix == ".md":
@@ -83,6 +92,8 @@ def process_file(path: Path) -> None:
         path.write_text(code, encoding="utf-8")
         diffsize = before - gsz(path)
         cprint(f"{fsz(diffsize)}|removed :{removed}|inline :{inline}", "yellow")
+
+
 def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -97,5 +108,7 @@ def main() -> None:
     _ = mpf3(process_file, files)
     diffsize = before - gsz(cwd)
     cprint(f"{fsz(diffsize)}", "cyan")
+
+
 if __name__ == "__main__":
     main()

@@ -4,12 +4,15 @@ Convert OTF files to TTF recursively using multiprocessing.
 Removes original OTF files after successful conversion.
 Requires: pip install fonttools brotli
 """
+
 from __future__ import annotations
 import sys
 from multiprocessing import Pool
 from pathlib import Path
 from fontTools.pens.ttGlyphPen import TTGlyphPen
 from fontTools.ttLib import TTFont
+
+
 def convert_otf_to_ttf(otf_path: Path) -> dict:
     ttf_path = otf_path.with_suffix(".ttf")
     result = {"otf": str(otf_path), "ttf": str(ttf_path), "status": "unknown"}
@@ -53,12 +56,16 @@ def convert_otf_to_ttf(otf_path: Path) -> dict:
         if ttf_path.exists():
             ttf_path.unlink()
     return result
+
+
 def find_otf_files(root_dir: Path | None = None, pattern: str = "**/*.otf") -> list[Path]:
     if root_dir is None:
         root_dir = Path.cwd()
     else:
         root_dir = Path(root_dir)
     return list(root_dir.glob(pattern))
+
+
 def process_file(args: tuple) -> dict:
     (otf_path,) = args
     print(f"Processing: {otf_path}")
@@ -73,6 +80,8 @@ def process_file(args: tuple) -> dict:
         error_msg = result.get("error", "Unknown error")
         print(f"  ✗ Failed: {result['otf']} - {error_msg}")
     return result
+
+
 def main():
     root_dir = Path.cwd()
     num_workers = 6
@@ -117,6 +126,8 @@ def main():
                 error = result.get("error", "Unknown error")
                 print(f"  ✗ {result['otf']}: {error}")
     return summary
+
+
 if __name__ == "__main__":
     try:
         main()

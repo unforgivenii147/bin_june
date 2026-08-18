@@ -5,6 +5,7 @@ Bidirectional converter between wheel files (.whl) and tar.xz archives.
 - Converts .tar.xz → .whl
 - Auto-detects file type and performs appropriate conversion
 """
+
 from __future__ import annotations
 import argparse
 import logging
@@ -15,18 +16,23 @@ import zipfile
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger(__name__)
+
+
 def convert_zip_time_to_timestamp(date_time: tuple[int, int, int, int, int, int]) -> float:
     try:
         dt = datetime(*date_time)
         return dt.timestamp()
     except (ValueError, TypeError):
         return datetime.now().timestamp()
+
+
 def get_unique_path(path: Path) -> Path:
     if not path.exists():
         return path
@@ -39,6 +45,8 @@ def get_unique_path(path: Path) -> Path:
         if not new_path.exists():
             return new_path
         counter += 1
+
+
 def preserve_zip_metadata(zip_member: zipfile.ZipInfo, tarinfo: tarfile.TarInfo) -> tarfile.TarInfo:
     tarinfo.size = zip_member.file_size
     if zip_member.date_time:
@@ -57,6 +65,8 @@ def preserve_zip_metadata(zip_member: zipfile.ZipInfo, tarinfo: tarfile.TarInfo)
     tarinfo.uname = "root"
     tarinfo.gname = "root"
     return tarinfo
+
+
 def preserve_tar_metadata(tarinfo: tarfile.TarInfo, zipinfo: zipfile.ZipInfo) -> zipfile.ZipInfo:
     if hasattr(tarinfo, "mtime") and tarinfo.mtime:
         dt = datetime.fromtimestamp(tarinfo.mtime)
@@ -64,6 +74,8 @@ def preserve_tar_metadata(tarinfo: tarfile.TarInfo, zipinfo: zipfile.ZipInfo) ->
     if hasattr(tarinfo, "mode") and tarinfo.mode:
         zipinfo.external_attr = (tarinfo.mode & 65535) << 16
     return zipinfo
+
+
 def convert_whl_to_tarxz(path: Path, remove_original: bool = False) -> tuple[bool, str, Path | None]:
     try:
         if not path.exists() or not path.is_file():
@@ -111,6 +123,8 @@ def convert_whl_to_tarxz(path: Path, remove_original: bool = False) -> tuple[boo
             return False, "Output file is empty or missing", None
     except Exception as e:
         return False, f"Conversion error: {e}", None
+
+
 def convert_tarxz_to_whl(path: Path, remove_original: bool = False) -> tuple[bool, str, Path | None]:
     try:
         if not path.exists() or not path.is_file():
@@ -168,6 +182,8 @@ def convert_tarxz_to_whl(path: Path, remove_original: bool = False) -> tuple[boo
         return False, f"Tar error: {e}", None
     except Exception as e:
         return False, f"Conversion error: {e}", None
+
+
 def process_file(path: Path, remove_original: bool = False) -> tuple[bool, str, Path | None]:
     path = Path(path)
     if not path.exists():
@@ -180,6 +196,8 @@ def process_file(path: Path, remove_original: bool = False) -> tuple[bool, str, 
         return convert_tarxz_to_whl(path, remove_original)
     else:
         return (False, f"Unsupported file type: {path.suffix} (only .whl or .tar.xz)", None)
+
+
 def find_convertible_files(directory: Path, recursive: bool = False) -> list[Path]:
     if not directory.exists() or not directory.is_dir():
         return []
@@ -189,10 +207,14 @@ def find_convertible_files(directory: Path, recursive: bool = False) -> list[Pat
     tarxz_pattern = "**/*.tar.xz" if recursive else "*.tar.xz"
     convertible_files.extend(directory.glob(tarxz_pattern))
     return convertible_files
+
+
 def process_single_file(args):
     file_path, remove_original = args
     success, message, output_path = process_file(file_path, remove_original)
     return file_path, success, message, output_path
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Bidirectional converter between .whl and .tar.xz files",
@@ -300,6 +322,8 @@ Examples:
     if args.remove_original and success_count > 0:
         print("✓ Original files were removed after successful conversion")
     return 0 if failure_count == 0 else 1
+
+
 if __name__ == "__main__":
     try:
         sys.exit(main())

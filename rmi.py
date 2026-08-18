@@ -3,7 +3,10 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 from dh import get_nobinary
+
 CHUNK_SIZE = 1024 * 1024
+
+
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -18,6 +21,8 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
+
+
 INVISIBLE_CHARS = {
     "\u200b",
     "\u200c",
@@ -31,6 +36,8 @@ INVISIBLE_CHARS = {
     "\u202d",
     "\u202e",
 }
+
+
 def clean_text(text: str) -> str:
     cleaned = ""
     for c in text:
@@ -43,6 +50,8 @@ def clean_text(text: str) -> str:
             continue
         cleaned += c
     return cleaned
+
+
 def process_file(path: Path) -> None:
     path = Path(path)
     text = path.read_text(encoding="utf-8", errors="ignore")
@@ -54,11 +63,15 @@ def process_file(path: Path) -> None:
         return
     print("No invisible characters found")
     return
+
+
 def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
     files = [Path(p) for p in args] if args else get_nobinary(cwd)
     for f in files:
         process_file(f)
+
+
 if __name__ == "__main__":
     main()

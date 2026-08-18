@@ -3,6 +3,7 @@
 Apply type annotations from .pyi stub files to source .py files using libcst.
 Automatically finds .pyi file in same directory and updates .py in-place.
 """
+
 from __future__ import annotations
 import difflib
 import sys
@@ -10,6 +11,8 @@ from pathlib import Path
 from typing import Dict, Optional
 import libcst as cst
 from dh import get_files, mpf3
+
+
 class TypingCollector(cst.CSTVisitor):
     def __init__(self):
         self.stack: list[tuple[str, ...]] = []
@@ -17,17 +20,23 @@ class TypingCollector(cst.CSTVisitor):
             tuple[str, ...],
             tuple[cst.Parameters, Optional[cst.Annotation]],
         ] = {}
+
     def visit_ClassDef(self, node: cst.ClassDef) -> Optional[bool]:
         self.stack.append(node.name.value)
         return True
+
     def leave_ClassDef(self, node: cst.ClassDef) -> None:
         self.stack.pop()
+
     def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
         self.stack.append(node.name.value)
         self.annotations[tuple(self.stack)] = (node.params, node.returns)
         return False
+
     def leave_FunctionDef(self, node: cst.FunctionDef) -> None:
         self.stack.pop()
+
+
 class TypingTransformer(cst.CSTTransformer):
     def __init__(
         self,
@@ -39,9 +48,11 @@ class TypingTransformer(cst.CSTTransformer):
         self.stack: list[tuple[str, ...]] = []
         self.annotations = annotations
         self.applied = 0
+
     def visit_ClassDef(self, node: cst.ClassDef) -> Optional[bool]:
         self.stack.append(node.name.value)
         return True
+
     def leave_ClassDef(
         self,
         original_node: cst.ClassDef,
@@ -49,9 +60,11 @@ class TypingTransformer(cst.CSTTransformer):
     ) -> cst.CSTNode:
         self.stack.pop()
         return updated_node
+
     def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
         self.stack.append(node.name.value)
         return False
+
     def leave_FunctionDef(
         self,
         original_node: cst.FunctionDef,
@@ -67,6 +80,8 @@ class TypingTransformer(cst.CSTTransformer):
             )
             self.applied += 1
         return updated_node
+
+
 def validate_syntax(code: str, filename: str) -> bool:
     try:
         cst.parse_module(code)
@@ -77,6 +92,8 @@ def validate_syntax(code: str, filename: str) -> bool:
             file=sys.stderr,
         )
         return False
+
+
 def process_file(path: Path):
     path = Path(path)
     stub_path = path.with_suffix(".pyi")
@@ -134,6 +151,8 @@ def process_file(path: Path):
     except Exception as e:
         print(f"✗ Unexpected error: {type(e).__name__}: {e}", file=sys.stderr)
         return
+
+
 def main():
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -142,5 +161,7 @@ def main():
         process_file(files[0])
         sys.exit(0)
     mpf3(process_file, files)
+
+
 if __name__ == "__main__":
     main()

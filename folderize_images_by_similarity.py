@@ -6,6 +6,8 @@ from pathlib import Path
 import cv2
 import numpy as np
 from tqdm import tqdm
+
+
 class ImageSimilarityOrganizer:
     def __init__(self, root_dir: str, similarity_threshold: float = 0.95, hash_size: int = 8):
         self.root_dir = Path(root_dir)
@@ -15,6 +17,7 @@ class ImageSimilarityOrganizer:
         print(f"[INIT] Root directory: {self.root_dir}")
         print(f"[INIT] Similarity threshold: {similarity_threshold}")
         print(f"[INIT] Hash size: {hash_size}x{hash_size}")
+
     def get_all_images(self) -> list[Path]:
         print("\n[SCAN] Scanning for image files...")
         image_files = []
@@ -24,6 +27,7 @@ class ImageSimilarityOrganizer:
         image_files = list(set(image_files))
         print(f"[SCAN] Found {len(image_files)} image(s)")
         return sorted(image_files)
+
     @staticmethod
     def compute_perceptual_hash(image_path: Path, hash_size: int = 8) -> tuple[Path, np.ndarray]:
         try:
@@ -37,11 +41,13 @@ class ImageSimilarityOrganizer:
         except Exception as e:
             print(f"[ERROR] Failed to hash {image_path}: {e!s}")
             return image_path, None
+
     def compute_hashes(self, image_paths: list[Path]) -> dict[Path, np.ndarray]:
         print(f"\n[HASH] Computing perceptual hashes using {cpu_count()} processes...")
         hashes = {}
         with Pool(processes=cpu_count()) as pool:
             from functools import partial
+
             compute_func = partial(self.compute_perceptual_hash, hash_size=self.hash_size)
             results = list(
                 tqdm(
@@ -56,9 +62,11 @@ class ImageSimilarityOrganizer:
                 hashes[image_path] = hash_array
         print(f"[HASH] Successfully hashed {len(hashes)} image(s)")
         return hashes
+
     @staticmethod
     def hamming_distance(hash1: np.ndarray, hash2: np.ndarray) -> int:
         return np.sum(hash1 != hash2)
+
     def find_similar_images(self, hashes: dict[Path, np.ndarray]) -> dict[int, list[Path]]:
         print(f"\n[GROUP] Grouping similar images (threshold: {self.similarity_threshold})...")
         image_list = list(hashes.keys())
@@ -83,6 +91,7 @@ class ImageSimilarityOrganizer:
             group_id += 1
         print(f"[GROUP] Created {len(groups)} group(s)")
         return groups
+
     def organize_images(self, groups: dict[int, list[Path]]) -> None:
         print("\n[ORGANIZE] Creating folders and organizing images...")
         for group_id, image_paths in tqdm(groups.items(), desc="Organizing", unit="group"):
@@ -103,6 +112,7 @@ class ImageSimilarityOrganizer:
                 except Exception as e:
                     print(f"[ERROR] Failed to move {img_path}: {e!s}")
         print(f"[ORGANIZE] Done! Check {self.root_dir} for organized groups")
+
     def run(self) -> None:
         print("-" * 42)
         print("IMAGE SIMILARITY ORGANIZER")
@@ -120,6 +130,8 @@ class ImageSimilarityOrganizer:
         print("\n" + "=" * 42)
         print("PROCESS COMPLETE")
         print("-" * 42)
+
+
 if __name__ == "__main__":
     ROOT_DIRECTORY = Path.cwd()
     SIMILARITY_THRESHOLD = 0.9

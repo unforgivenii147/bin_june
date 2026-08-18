@@ -5,6 +5,8 @@ from multiprocessing import Pool, cpu_count
 from pathlib import Path
 from dh import get_files
 from rich.progress import Progress
+
+
 def optimize_png(path) -> int:
     path = Path(path)
     try:
@@ -19,6 +21,8 @@ def optimize_png(path) -> int:
         return original_size - optimized_size
     except subprocess.CalledProcessError:
         return 0
+
+
 def main() -> None:
     cwd = Path.cwd()
     png_files = get_files(cwd, ext=[".png"])
@@ -33,5 +37,7 @@ def main() -> None:
                 progress.update(task, advance=1)
     total_space_freed = sum((optimize_png(path) for path in png_files)) / (1024 * 1024)
     print(f"\n[bold green]Total space freed: {total_space_freed:.2f} MB[/bold green]")
+
+
 if __name__ == "__main__":
     main()

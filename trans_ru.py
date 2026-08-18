@@ -9,12 +9,15 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Final
 from deep_translator import GoogleTranslator
+
 MAX_WORKERS: Final[int] = 16
 RETRY_ATTEMPTS: Final[int] = 4
 RETRY_DELAY: Final[float] = 0.6
 MAX_CHUNK_SIZE: Final[int] = 2000
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s", datefmt="%H:%M:%S")
 logger = logging.getLogger(__name__)
+
+
 def contains_cyrillic(text: str) -> bool:
     return bool(
         re.search(
@@ -22,6 +25,8 @@ def contains_cyrillic(text: str) -> bool:
             text,
         )
     )
+
+
 def create_chunks(lines: list[str]) -> list[list[str]]:
     chunks: list[list[str]] = []
     current_chunk: list[str] = []
@@ -44,6 +49,8 @@ def create_chunks(lines: list[str]) -> list[list[str]]:
     if current_chunk:
         chunks.append(current_chunk)
     return chunks
+
+
 def translate_chunk(chunk: list[str]) -> tuple[list[str], str | None]:
     chunk_text = "\n".join(chunk)
     translator = GoogleTranslator(source="ru", target="en")
@@ -67,8 +74,11 @@ def translate_chunk(chunk: list[str]) -> tuple[list[str], str | None]:
             if attempt < RETRY_ATTEMPTS:
                 time.sleep(sleep_time)
     return (chunk, None)
+
+
 def main() -> None:
     import sys
+
     if len(sys.argv) < 2:
         print(f"Usage: {sys.argv[0]} <input_file.txt>")
         return
@@ -185,5 +195,7 @@ def main() -> None:
         )
     except Exception as e:
         logger.error("Error updating input file: %s", e)
+
+
 if __name__ == "__main__":
     main()

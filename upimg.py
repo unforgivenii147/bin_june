@@ -4,6 +4,8 @@ import sys
 from pathlib import Path
 import cv2
 from dh import get_files
+
+
 def process_file(path) -> None:
     path_str = str(path)
     img = cv2.imread(path_str)
@@ -32,6 +34,8 @@ def process_file(path) -> None:
         return
     except:
         return
+
+
 if __name__ == "__main__":
     cwd = Path.cwd()
     args = sys.argv[1:]

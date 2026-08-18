@@ -6,6 +6,7 @@ and replace the URIs with relative links.
 Each asset is named after the SHA‑256 hash of the full data URI.
 Duplicate assets are only saved once.
 """
+
 from __future__ import annotations
 import base64
 import hashlib
@@ -13,9 +14,12 @@ import mimetypes
 import re
 from pathlib import Path
 from dh import MIME2EXT
+
 DATA_URI_PATTERN = re.compile(
     r"data:(?P<mime>[^;,]*)(?P<params>(?:;[^;,]+=[^;,]+)*?);base64,\s*(?P<data>[A-Za-z0-9+/=]+)"
 )
+
+
 def get_extension(mime: str) -> str:
     if mime:
         if mime in MIME2EXT:
@@ -27,6 +31,8 @@ def get_extension(mime: str) -> str:
         if len(parts) == 2 and parts[1]:
             return f".{parts[1]}"
     return ".bin"
+
+
 def process_file(file_path: Path, assets_dir: Path, processed: dict) -> None:
     try:
         content = file_path.read_text(encoding="utf-8")
@@ -34,6 +40,7 @@ def process_file(file_path: Path, assets_dir: Path, processed: dict) -> None:
         print(f"⚠ Skipping {file_path}: {e}")
         return
     rel_to_assets = Path(assets_dir, file_path.parent)
+
     def replace_match(match: re.Match) -> str:
         full = match.group(0)
         mime = match.group("mime") or None
@@ -56,10 +63,13 @@ def process_file(file_path: Path, assets_dir: Path, processed: dict) -> None:
             filename = processed[hash_digest]
         link = rel_to_assets / filename
         return link.as_posix()
+
     new_content = DATA_URI_PATTERN.sub(replace_match, content)
     if new_content != content:
         file_path.write_text(new_content, encoding="utf-8")
         print(f"✎ Updated {file_path}")
+
+
 def main() -> None:
     mimetypes.init()
     assets_dir = Path("assets")
@@ -70,5 +80,7 @@ def main() -> None:
         if file_path.is_file() and file_path.suffix.lower() in (".css", ".js", ".html"):
             process_file(file_path, assets_dir, processed)
     print("Done.")
+
+
 if __name__ == "__main__":
     main()

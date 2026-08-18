@@ -5,12 +5,17 @@ import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from dh import get_files, unique_path
+
 EXT = [".js", ".css", ".html", ".json", ".mjs", ".cjs", ".ts", ".jsx", ".tsx", ".tsm", ".jsm"]
 EXCLUDE_PATTERNS = {}
+
+
 def should_format(path: Path) -> bool:
     if path.suffix not in EXTENSIONS:
         return False
     return all((not path.name.endswith(p) for p in EXCLUDE_PATTERNS))
+
+
 def get_files_to_format(cwd: str = ".") -> list[Path]:
     cwd = Path.cwd()
     files: list[Path] = []
@@ -22,12 +27,16 @@ def get_files_to_format(cwd: str = ".") -> list[Path]:
         del path
     del root
     return files
+
+
 def move_to_error_folder(path: Path) -> None:
     error_dir = path.parent / "error"
     error_dir.mkdir(exist_ok=True)
     dest = unique_path(error_dir / path.name)
     shutil.move(str(path), str(dest))
     del error_dir, dest
+
+
 def format_file(path: Path) -> tuple[Path, bool, str | None]:
     try:
         result = subprocess.run(["prettier", "--write", str(path)], capture_output=True, text=True, timeout=900)
@@ -36,11 +45,15 @@ def format_file(path: Path) -> tuple[Path, bool, str | None]:
         return (path, False, result.stderr or result.stdout or "Unknown error")
     except Exception as e:
         return (path, False, str(e))
+
+
 def process_file_wrapper(path: Path) -> tuple[bool, Path, str | None]:
     path, success, error_msg = format_file(path)
     if not success:
         move_to_error_folder(path)
     return (success, path, error_msg)
+
+
 def main() -> None:
     cwd = Path.cwd()
     files = get_files(cwd, extensions=EXT)
@@ -60,5 +73,7 @@ def main() -> None:
                 print(f"❌ Error: {path.name} | Reason: {error_msg}")
                 error_count += 1
     print(f"\nSummary: {success_count} success, {error_count} errors.")
+
+
 if __name__ == "__main__":
     main()

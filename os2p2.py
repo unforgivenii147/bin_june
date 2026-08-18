@@ -9,9 +9,13 @@ from enum import Enum
 from os import scandir as os_scandir
 from pathlib import Path
 from dh import cprint
+
 CHUNK_SIZE = 1024 * 1024
+
+
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
+
     path = Path(path)
     if is_binary(path):
         return False
@@ -31,6 +35,8 @@ def is_python_file(path: str | Path) -> bool:
         except:
             return False
     return False
+
+
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -45,6 +51,8 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
+
+
 def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
     if path.is_file():
@@ -76,11 +84,15 @@ def get_pyfiles(path: str | Path) -> list[Path]:
         except (PermissionError, OSError):
             continue
     return sorted(pyfiles)
+
+
 class TransformationType(Enum):
     SIMPLE_REPLACE = "simple"
     FUNCTION_CALL = "function"
     JOIN_OPERATOR = "join"
     CONTEXT_DEPENDENT = "context"
+
+
 @dataclass
 class Transformation:
     pattern: str
@@ -88,11 +100,14 @@ class Transformation:
     type: TransformationType
     requires_import: bool = True
     description: str = ""
+
+
 class PathlibRefactorer:
     def __init__(self) -> None:
         self.transformations: list[Transformation] = []
         self._setup_transformations()
         self.used_transformations: set[str] = set()
+
     def _setup_transformations(self) -> None:
         simple_replacements = {
             "\\bos\\.getcwd\\s*\\(\\s*\\)": "Path.cwd()",
@@ -199,6 +214,7 @@ class PathlibRefactorer:
                 description="Convert os.walk to Path.rglob (limited support)",
             )
         )
+
     def _transform_join(self, match: re.Match) -> str:
         args = [arg.strip() for arg in match.group(1).split(",") if arg.strip()]
         if not args:
@@ -206,6 +222,7 @@ class PathlibRefactorer:
         if len(args) == 1:
             return f"Path({args[0]})"
         return " / ".join([f"Path({args[0]})", *args[1:]])
+
     def _transform_makedirs(self, match: re.Match) -> str:
         path_arg = match.group(1)
         rest_args = match.group(2) if match.group(2) else ""
@@ -213,9 +230,11 @@ class PathlibRefactorer:
             return f"Path({path_arg}).mkdir(parents=True, {rest_args})"
         else:
             return f"Path({path_arg}).mkdir(parents=True, exist_ok=True)"
+
     def _transform_walk(self, match: re.Match) -> str:
         path_arg = match.group(1)
         return f"((str(p), [d.name for d in p.iterdir() if d.is_dir()], [f.name for f in p.iterdir() if f.is_file()]) for p in Path({path_arg}).rglob('*') if p.is_dir())"
+
     def apply_transformations(self, source: str) -> tuple[str, set[str]]:
         result = source
         applied = set()
@@ -228,6 +247,7 @@ class PathlibRefactorer:
             except Exception as e:
                 cprint(f"  ⚠️ Transformation failed: {trans.description} - {e}", "yellow")
         return result, applied
+
     def add_pathlib_import(self, source: str) -> str:
         if "from pathlib import Path" in source or "import pathlib" in source:
             return source
@@ -241,6 +261,7 @@ class PathlibRefactorer:
                 break
         lines.insert(insert_idx, "from pathlib import Path\n")
         return "".join(lines)
+
     def refactor_file(self, file_path: Path, dry_run: bool = False, create_backup: bool = True) -> dict:
         result = {
             "path": file_path,
@@ -276,8 +297,11 @@ class PathlibRefactorer:
             result["error"] = str(e)
             result["success"] = False
         return result
+
+
 def main() -> int:
     import argparse
+
     parser = argparse.ArgumentParser(description="Refactor Python files from os/path to pathlib")
     parser.add_argument("paths", nargs="*", help="Files or directories to process")
     parser.add_argument("--dry-run", "-n", action="store_true", help="Preview changes without writing")
@@ -328,5 +352,7 @@ def main() -> int:
     if args.dry_run and changed:
         cprint("\n⚠️  This was a dry run. Run without --dry-run to apply changes.", "yellow")
     return 0
+
+
 if __name__ == "__main__":
     sys.exit(main())

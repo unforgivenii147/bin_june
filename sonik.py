@@ -1,6 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
 import sys
+
+
 def sort_and_dedup(file_name: str) -> None:
     with open(file_name) as f:
         lines = f.readlines()
@@ -15,6 +17,8 @@ def sort_and_dedup(file_name: str) -> None:
             print(line.strip())
     else:
         print("no change")
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python sort_uniq.py <file_name> [-d]")

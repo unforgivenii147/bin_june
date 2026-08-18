@@ -3,6 +3,7 @@
 Translate Chinese lines in files to English in-place using parallel processing.
 Optimized for Python 3.12.
 """
+
 from __future__ import annotations
 import argparse
 import logging
@@ -12,6 +13,7 @@ import time
 from pathlib import Path
 from typing import Final
 from deep_translator import GoogleTranslator
+
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 SKIP_DIRS: Final[frozenset[str]] = frozenset(
@@ -20,12 +22,16 @@ SKIP_DIRS: Final[frozenset[str]] = frozenset(
 CHINESE_PATTERN: Final[re.Pattern] = re.compile(
     r"[\u4e00-\u9fff\u3400-\u4dbf\u20000-\u2a6df\u2a700-\u2b73f\u2b740-\u2b81f\u2b820-\u2ceaf\uf900-\ufaff]"
 )
+
+
 def is_chinese_text(text: str, threshold: float = 0.3) -> bool:
     clean_text = "".join(text.split())
     if not clean_text:
         return False
     chinese_chars = len(CHINESE_PATTERN.findall(clean_text))
     return chinese_chars / len(clean_text) >= threshold
+
+
 def translate_line(text: str, translator: GoogleTranslator, max_retries: int = 3) -> str:
     if not text.strip():
         return text
@@ -43,6 +49,8 @@ def translate_line(text: str, translator: GoogleTranslator, max_retries: int = 3
             else:
                 logger.error("  Translation failed after %d attempts: %s", max_retries, e)
     return text
+
+
 def process_file(file_path: Path, dry_run: bool = False, threshold: float = 0.3) -> dict:
     stats = {"file": str(file_path), "total_lines": 0, "chinese_lines": 0, "translated_lines": 0, "errors": 0}
     prefix = "[DRY RUN] " if dry_run else ""
@@ -81,8 +89,12 @@ def process_file(file_path: Path, dry_run: bool = False, threshold: float = 0.3)
         logger.error("  ✗ Error processing %s: %s", file_path, e)
         stats["errors"] += 1
     return stats
+
+
 def worker(args: tuple[Path, bool, float]) -> dict:
     return process_file(*args)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Translate Chinese lines in-place.")
     parser.add_argument("files", nargs="+", help="Files or directories to process")
@@ -140,5 +152,7 @@ def main() -> None:
         print(f"Translated lines:  {sum(s['translated_lines'] for s in all_stats):,}")
     print(f"Errors:            {sum(s['errors'] for s in all_stats)}")
     print("-" * 42)
+
+
 if __name__ == "__main__":
     main()

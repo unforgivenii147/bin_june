@@ -8,9 +8,12 @@ from pathlib import Path
 import requests
 from dh import cprint
 from packaging.version import Version
+
+
 def get_file_age(path: str | Path, str_mode: bool = False) -> float | str:
     from os import stat as os_stat
     from time import time as time_time
+
     path = Path(path)
     current_time = time_time()
     file_stat = os_stat(path)
@@ -39,8 +42,11 @@ def get_file_age(path: str | Path, str_mode: bool = False) -> float | str:
         if value:
             parts.append(f"{value} {name}")
     return ", ".join(parts) if parts else "0 sec"
+
+
 def get_installed_packages() -> dict[str, str]:
     from operator import itemgetter
+
     packages = {}
     pip_freeze_path = Path("/sdcard/data/pip.freeze")
     file_age = get_file_age(pip_freeze_path)
@@ -52,6 +58,7 @@ def get_installed_packages() -> dict[str, str]:
                 packages[name] = version
         return packages
     from importlib.metadata import distributions as _distributions
+
     for dist in _distributions():
         meta = dist.metadata
         name = meta.get("Name") or meta.get("name")
@@ -61,11 +68,17 @@ def get_installed_packages() -> dict[str, str]:
         name = name.strip()
         packages[name] = version
     return dict(sorted(packages.items(), key=itemgetter(0)))
+
+
 MAX_WORKERS = 8
 TIMEOUT = 15
 RESULTS_FILE = "/sdcard/c4u.json"
+
+
 def save_output(text: str, pkg: str) -> None:
     Path(f"/sdcard/whl/json/{pkg}.html").write_text(text, encoding="utf-8")
+
+
 def get_latest_version(pkg_name: str) -> str | None:
     url = f"https://mirror-pypi.runflare.com/{pkg_name}/json"
     try:
@@ -89,6 +102,8 @@ def get_latest_version(pkg_name: str) -> str | None:
     if max_ver is not None:
         print(f"{pkg_name}:{max_ver}")
     return max_ver
+
+
 def load_previous_results() -> dict[str, dict]:
     if Path(RESULTS_FILE).exists():
         try:
@@ -98,9 +113,13 @@ def load_previous_results() -> dict[str, dict]:
             cprint(f"Warning: Corrupted results file '{RESULTS_FILE}'. Starting fresh.", "red")
             return {}
     return {}
+
+
 def save_results(results: dict[str, dict]) -> None:
     with Path(RESULTS_FILE).open("w", encoding="utf-8") as f:
         json.dump(results, f, indent=4)
+
+
 if __name__ == "__main__":
     start_time = time.time()
     installed_packages = get_installed_packages()

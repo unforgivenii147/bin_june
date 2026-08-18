@@ -3,6 +3,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 from dh import mpf3
+
+
 def process_file(path) -> None:
     path = Path(path)
     content = path.read_text(encoding="utf-8")
@@ -10,10 +12,14 @@ def process_file(path) -> None:
     if new_content != content:
         path.write_text(content, encoding="utf-8")
         print(f"{path.name} updated.")
+
+
 def main():
     cwd = Path.cwd()
     args = sys.argv[1:]
     files = [Path(p) for p in args] if args else get_pyfiles(cwd)
     mpf3(process_file, files)
+
+
 if __name__ == "__main__":
     main()

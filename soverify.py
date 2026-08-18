@@ -6,15 +6,20 @@ import sys
 from pathlib import Path
 from dh import cprint, get_files
 from loguru import logger
+
 logger.remove()
 logger.add("/data/data/com.termux/files/home/tmp/log/apps/soverify.log")
+
+
 class CtypesVerifier:
     def __init__(self, verbose: bool = False) -> None:
         self.verbose = verbose
         self.platform = sys.platform
+
     def log(self, message: str, level: str = "DEBUG") -> None:
         if self.verbose:
             getattr(logger, level.lower())(f"[CTYPES] {message}")
+
     def verify_so_file(self, file_path: Path) -> tuple[bool, str]:
         if not file_path.exists():
             return (False, "File does not exist")
@@ -34,6 +39,7 @@ class CtypesVerifier:
             error_msg = f"{type(e).__name__}: {e}"
             self.log(f"Failed to load {file_path.name}: {error_msg}", "ERROR")
             return (False, error_msg)
+
     def verify_with_symbols(self, file_path: Path) -> tuple[bool, dict]:
         can_load, msg = self.verify_so_file(file_path)
         symbol_info = {"can_load": can_load, "message": msg, "has_symbols": False, "symbol_count": 0}
@@ -53,6 +59,8 @@ class CtypesVerifier:
         except Exception as e:
             self.log(f"Could not extract symbols from {file_path.name}: {e}", "ERROR")
         return (can_load, symbol_info)
+
+
 def verify_single_file(file_path: Path) -> bool | None:
     try:
         verifier = CtypesVerifier()
@@ -68,6 +76,8 @@ def verify_single_file(file_path: Path) -> bool | None:
         logger.error(f"✗ {file_path.name}: Unexpected error - {e}")
         cprint(f"  ✗ {file_path}: Unexpected error - {e}", "red")
         return False
+
+
 def collect_files(args: list[str]) -> list[Path]:
     if not args:
         return get_files(Path.cwd(), ext=[".so"])
@@ -81,6 +91,8 @@ def collect_files(args: list[str]) -> list[Path]:
         else:
             cprint(f"Warning: {path} does not exist", "yellow")
     return files
+
+
 def main() -> None:
     files = collect_files(sys.argv[1:])
     if not files:
@@ -112,6 +124,8 @@ def main() -> None:
     logger.info(f"Verification complete: {valid_count} valid, {error_count} errors out of {len(files)} files")
     if error_count > 0:
         sys.exit(1)
+
+
 if __name__ == "__main__":
     gil_state = ctypes.pythonapi.PyGILState_Ensure()
     try:

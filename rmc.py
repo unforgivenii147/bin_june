@@ -4,31 +4,43 @@ import ast
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+
 import tree_sitter_python as tsp
 from tree_sitter import Language, Parser
+
 PY_EXTS = {".py"}
 _PARSER: Parser | None = None
+
+
 def get_parser() -> Parser:
     global _PARSER
     if _PARSER is None:
         lang = Language(tsp.language())
         _PARSER = Parser(lang)
     return _PARSER
+
+
 def get_first_named_child(node):
     for child in node.children:
         if child.is_named:
             return child
     return None
+
+
 def is_docstring_node(node) -> bool:
     if node.type != "expression_statement":
         return False
     first = get_first_named_child(node)
     return first is not None and first.type in ("string", "concatenated_string")
+
+
 def get_first_statement(parent):
     for child in parent.children:
         if child.is_named and child.type != "comment":
             return child
     return None
+
+
 def should_keep_comment(comment_bytes: bytes) -> bool:
     stripped = comment_bytes.lstrip()
     if not stripped.startswith(b"#"):
@@ -37,6 +49,8 @@ def should_keep_comment(comment_bytes: bytes) -> bool:
     if rest.lower().startswith((b"type:", b"fmt:")):
         return True
     return bool(b"coding" in stripped.lower() and b":" in stripped)
+
+
 def get_block_indent(block_node, content: bytes) -> bytes:
     for child in block_node.children:
         if child.is_named and child.type != "comment":
@@ -58,6 +72,8 @@ def get_block_indent(block_node, content: bytes) -> bytes:
     if parent_indent.strip() == b"":
         return parent_indent + b"    "
     return b"    "
+
+
 def collect_actions(root, content: bytes):
     actions = {}
     blocks = []
@@ -77,15 +93,20 @@ def collect_actions(root, content: bytes):
                 first_stmt = get_first_statement(parent)
                 if first_stmt and first_stmt.id == node.id:
                     if parent.type == "module":
-                        pass
+                        # Remove module-level docstrings (including one-liners).
+                        # Also consume the trailing newline so we don't leave
+                        # a blank line behind.
+                        end = node.end_byte
+                        if end < len(content) and content[end : end + 1] == b"\n":
+                            end += 1
+                        actions[id(node)] = (node.start_byte, end, b"")
                     elif parent.type == "block":
                         grandparent = parent.parent
-                        if grandparent and grandparent.type in ("function_definition", "class_definition"):
-                            named_children = [c for c in parent.children if c.is_named]
-                            if len(named_children) == 1:
-                                actions[id(node)] = (node.start_byte, node.end_byte, b"")
-                            else:
-                                actions[id(node)] = (node.start_byte, node.end_byte, b"")
+                        if grandparent and grandparent.type in (
+                            "function_definition",
+                            "class_definition",
+                        ):
+                            actions[id(node)] = (node.start_byte, node.end_byte, b"")
         if node.type == "block":
             blocks.append(node)
         for child in reversed(node.children):
@@ -105,6 +126,8 @@ def collect_actions(root, content: bytes):
             for c in named_children[1:]:
                 del actions[id(c)]
     return actions
+
+
 def strip_comments(content: bytes) -> tuple[bytes, int]:
     parser = get_parser()
     tree = parser.parse(content)
@@ -125,6 +148,8 @@ def strip_comments(content: bytes) -> tuple[bytes, int]:
     except SyntaxError as e:
         raise ValueError(f"Generated invalid Python: {e}") from e
     return new_content, len(sorted_actions)
+
+
 def process_file(path: Path, base: Path) -> tuple[str, int, str]:
     try:
         content = path.read_bytes()
@@ -138,6 +163,8 @@ def process_file(path: Path, base: Path) -> tuple[str, int, str]:
         return rel, count, ""
     except Exception as exc:
         return str(path), 0, str(exc)
+
+
 def iter_py_files(paths: list[Path]):
     seen: set[Path] = set()
     for p in paths:
@@ -152,6 +179,8 @@ def iter_py_files(paths: list[Path]):
                 if rp not in seen:
                     seen.add(rp)
                     yield f
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Remove comments and docstrings from Python files in place.")
     ap.add_argument(
@@ -187,5 +216,7 @@ def main() -> int:
         f"{total_removed} comment(s)/docstring(s) removed, {errors} error(s)."
     )
     return 1 if errors else 0
+
+
 if __name__ == "__main__":
     sys.exit(main())

@@ -2,6 +2,7 @@
 """
 File extension mismatch detector with auto-fix capability.
 """
+
 import argparse
 import subprocess
 import sys
@@ -10,32 +11,42 @@ from pathlib import Path
 from typing import Optional, Tuple
 from dh import MIME2EXT, SHEBANG_MAP
 from loguru import logger
+
 logger.remove()
 logger.add(
     sys.stderr,
     format="<level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan> - <level>{message}</level>",
 )
 PROTECTED_EXTENSIONS = {".css", ".js", ".min.js", ".min.css", ".md", ".json", ".yaml", ".yml", ".xml"}
+
+
 def detect_with_pure_magic(file_path: Path) -> Optional[str]:
     try:
         import magic
+
         mime = magic.Magic(mime=True)
         mime_type = mime.from_file(str(file_path))
         return _mime_to_ext(mime_type)
     except Exception as e:
         logger.debug(f"pure-magic failed for {file_path.name}: {e}")
         return None
+
+
 def detect_with_python_magic(file_path: Path) -> Optional[str]:
     try:
         import magic
+
         mime_type = magic.from_file(str(file_path), mime=True)
         return _mime_to_ext(mime_type)
     except Exception as e:
         logger.debug(f"python-magic failed for {file_path.name}: {e}")
         return None
+
+
 def detect_with_filetype(file_path: Path) -> Optional[str]:
     try:
         import filetype
+
         kind = filetype.guess(str(file_path))
         if kind:
             return f".{kind.extension}"
@@ -43,6 +54,8 @@ def detect_with_filetype(file_path: Path) -> Optional[str]:
     except Exception as e:
         logger.debug(f"filetype failed for {file_path.name}: {e}")
         return None
+
+
 def detect_with_file_command(file_path: Path) -> Optional[str]:
     try:
         result = subprocess.run(
@@ -58,11 +71,15 @@ def detect_with_file_command(file_path: Path) -> Optional[str]:
     except Exception as e:
         logger.debug(f"file command failed for {file_path.name}: {e}")
         return None
+
+
 def _mime_to_ext(mime_type: str) -> Optional[str]:
     if mime_type in MIME2EXT:
         exts = MIME2EXT[mime_type]
         return exts[0] if isinstance(exts, list) else exts
     return None
+
+
 def detect_shebang_ext(file_path: Path) -> Optional[str]:
     try:
         with open(file_path, "rb") as f:
@@ -76,6 +93,8 @@ def detect_shebang_ext(file_path: Path) -> Optional[str]:
     except Exception as e:
         logger.debug(f"shebang detection failed for {file_path.name}: {e}")
         return None
+
+
 def detect_extension(file_path: Path) -> Optional[str]:
     detectors = [
         detect_with_pure_magic,
@@ -88,6 +107,8 @@ def detect_extension(file_path: Path) -> Optional[str]:
         if ext:
             return ext
     return None
+
+
 def check_file(file_path: Path, auto_fix: bool = False) -> Tuple[Path, bool, Optional[str], Optional[str]]:
     if not file_path.is_file():
         return file_path, False, None, None
@@ -128,6 +149,8 @@ def check_file(file_path: Path, auto_fix: bool = False) -> Tuple[Path, bool, Opt
     else:
         logger.warning(f"Mismatch: {file_path.name} ({current_ext} → {detected_ext})")
         return file_path, True, current_ext, detected_ext
+
+
 def main():
     parser = argparse.ArgumentParser(description="Detect and fix file extension mismatches")
     parser.add_argument("-a", "--auto-fix", action="store_true", help="Automatically fix extension mismatches")
@@ -158,5 +181,7 @@ def main():
     logger.info(f"Mismatches found: {mismatches}")
     if args.auto_fix:
         logger.info(f"Files fixed: {fixed}")
+
+
 if __name__ == "__main__":
     main()

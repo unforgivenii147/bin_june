@@ -3,6 +3,8 @@ from __future__ import annotations
 import contextlib
 from datetime import datetime, timedelta
 from git import Repo
+
+
 def remove_old_commits(repo_path=".", days=30):
     repo = Repo(repo_path)
     cutoff_date = datetime.now() - timedelta(days=days)
@@ -72,6 +74,8 @@ def remove_old_commits(repo_path=".", days=30):
             print("4. git cherry-pick <subsequent commits if any>")
             print("5. git branch -D main  # delete old branch")
             print("6. git branch -m temp_branch main  # rename temp to main")
+
+
 def remove_commits_older_than_days(repo_path=".", days=30, auto_confirm=False):
     repo = Repo(repo_path)
     cutoff_timestamp = int((datetime.now() - timedelta(days=days)).timestamp())
@@ -108,8 +112,11 @@ def remove_commits_older_than_days(repo_path=".", days=30, auto_confirm=False):
         print(f"Error: {e}")
         with contextlib.suppress(BaseException):
             repo.git.checkout(current_branch.name)
+
+
 if __name__ == "__main__":
     import sys
+
     days = 30
     if len(sys.argv) > 1:
         try:

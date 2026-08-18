@@ -5,9 +5,13 @@ from os import scandir as os_scandir
 from pathlib import Path
 from dh import cprint, mpf3
 from xxhash import xxh64_hexdigest
+
 CHUNK_SIZE = 1024 * 1024
+
+
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
+
     path = Path(path)
     if is_binary(path):
         return False
@@ -27,6 +31,8 @@ def is_python_file(path: str | Path) -> bool:
         except:
             return False
     return False
+
+
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -41,6 +47,8 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
+
+
 def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
     if path.is_file():
@@ -72,9 +80,13 @@ def get_pyfiles(path: str | Path) -> list[Path]:
         except (PermissionError, OSError):
             continue
     return sorted(pyfiles)
+
+
 def process_file(path) -> tuple[str, Path]:
     path = Path(path)
     return (xxh64_hexdigest(ast.unparse(ast.parse(path.read_text(encoding="utf-8")))), path)
+
+
 def main() -> None:
     cwd = Path.cwd()
     files = get_pyfiles(cwd)
@@ -98,5 +110,7 @@ def main() -> None:
                     path.unlink()
     if deleted:
         cprint(f"{deleted} files removed.", "cyan")
+
+
 if __name__ == "__main__":
     main()

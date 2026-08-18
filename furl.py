@@ -4,11 +4,13 @@ Extract URLs from files in current directory recursively.
 Separates git links into a separate file and shows progress.
 Uses pathlib and parallel processing for efficiency.
 """
+
 from __future__ import annotations
 import re
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from tqdm import tqdm
+
 URL_PATTERN = re.compile(r'https?://[^\s<>r"{}|\^`\[\]]*', re.IGNORECASE)
 GIT_DOMAINS = {
     "github.com",
@@ -20,8 +22,12 @@ GIT_DOMAINS = {
     "gitbucket.org",
     "gogs.io",
 }
+
+
 def is_git_url(url: str) -> bool:
     return any(domain in url.lower() for domain in GIT_DOMAINS)
+
+
 def extract_urls_from_file(file_path: Path) -> tuple[set[str], set[str]]:
     regular_urls = set()
     git_urls = set()
@@ -44,6 +50,8 @@ def extract_urls_from_file(file_path: Path) -> tuple[set[str], set[str]]:
     except Exception:
         pass
     return regular_urls, git_urls
+
+
 def main():
     current_dir = Path.cwd()
     exclude_dirs = {".git", "__pycache__", ".venv", "venv", "node_modules", ".env", "dist", "build"}
@@ -76,5 +84,7 @@ def main():
     print("\n✓ Extraction complete!")
     print(f"  Regular URLs: {len(all_regular_urls)} → {urls_file.name}")
     print(f"  Git URLs: {len(all_git_urls)} → {gitlinks_file.name}")
+
+
 if __name__ == "__main__":
     main()

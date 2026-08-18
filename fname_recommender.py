@@ -3,6 +3,7 @@
 Analyze Python files and suggest meaningful filenames based on content analysis.
 Supports parallel processing with optional in-place renaming via --apply flag.
 """
+
 import argparse
 import ast
 import re
@@ -11,6 +12,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Generator
+
+
 @dataclass
 class FileStats:
     path: Path
@@ -20,6 +23,8 @@ class FileStats:
     error: str | None = None
     renamed: bool = False
     new_path: Path | None = None
+
+
 class FileAnalyzer:
     def __init__(self, filepath: Path):
         self.filepath = filepath
@@ -32,14 +37,17 @@ class FileAnalyzer:
             pass
         except Exception as e:
             raise RuntimeError(f"Failed to read {filepath}: {e}")
+
     def get_module_docstring(self) -> str | None:
         if not self.tree:
             return None
         return ast.get_docstring(self.tree)
+
     def get_argparse_epilog(self) -> str | None:
         pattern = r'epilog\s*=\s*[\'"]([^\'"]+)[\'"]'
         match = re.search(pattern, self.content, re.IGNORECASE)
         return match.group(1) if match else None
+
     def get_main_docstring(self) -> str | None:
         if not self.tree:
             return None
@@ -47,8 +55,10 @@ class FileAnalyzer:
             if isinstance(node, ast.FunctionDef) and node.name == "main":
                 return ast.get_docstring(node)
         return None
+
     def extract_purpose(self) -> str | None:
         return self.get_module_docstring() or self.get_argparse_epilog() or self.get_main_docstring()
+
     def is_meaningful_name(self) -> bool:
         name = self.filepath.stem
         if len(name) < 3 or name in {"main", "run", "test", "script", "app"}:
@@ -56,6 +66,7 @@ class FileAnalyzer:
         if re.match(r"^[a-z0-9]{1,2}$", name):
             return False
         return True
+
     def suggest_name(self) -> str | None:
         purpose = self.extract_purpose()
         if not purpose:
@@ -68,12 +79,16 @@ class FileAnalyzer:
         if keywords:
             return "_".join(keywords[:3])
         return "_".join(words[:2]) if len(words) >= 2 else None
+
+
 def collect_py_files(paths: list[Path]) -> Generator[Path, None, None]:
     for path in paths:
         if path.is_file() and path.suffix == ".py":
             yield path
         elif path.is_dir():
             yield from path.rglob("*.py")
+
+
 def analyze_file(filepath: Path) -> FileStats:
     stats = FileStats(path=filepath, current_name=filepath.stem, suggestion=None, has_meaning=False)
     try:
@@ -84,6 +99,8 @@ def analyze_file(filepath: Path) -> FileStats:
     except Exception as e:
         stats.error = str(e)
     return stats
+
+
 def rename_file(filepath: Path, new_name: str) -> tuple[bool, str | None]:
     try:
         new_path = filepath.parent / f"{new_name}.py"
@@ -95,6 +112,8 @@ def rename_file(filepath: Path, new_name: str) -> tuple[bool, str | None]:
         return True, None
     except Exception as e:
         return False, str(e)
+
+
 def process_files(paths: list[Path], apply: bool = False, max_workers: int = 4) -> list[FileStats]:
     results = []
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -113,6 +132,8 @@ def process_files(paths: list[Path], apply: bool = False, max_workers: int = 4) 
                     stats.error = f"Rename failed: {error}"
             results.append(stats)
     return sorted(results, key=lambda s: s.path)
+
+
 def report_stats(stats_list: list[FileStats], cwd: Path, apply: bool) -> None:
     meaningful = sum(1 for s in stats_list if s.has_meaning)
     unnamed = sum(1 for s in stats_list if not s.has_meaning)
@@ -147,6 +168,8 @@ def report_stats(stats_list: list[FileStats], cwd: Path, apply: bool) -> None:
                 rel_path = stats.path.relative_to(cwd)
                 print(f"  ❌ {rel_path}")
                 print(f"     {stats.error}\n")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Analyze Python files and suggest meaningful filenames",
@@ -180,5 +203,7 @@ Examples:
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
+
+
 if __name__ == "__main__":
     main()

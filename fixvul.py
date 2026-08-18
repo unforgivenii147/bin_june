@@ -3,10 +3,13 @@
 Comment out SKIP_DIRS lines from vulture output.
 Usage: python comment_skip_dirs.py <vulture_output_file>
 """
+
 from __future__ import annotations
 import os
 import re
 import sys
+
+
 def parse_vulture_output(filepath):
     skip_dirs_fixes = {}
     try:
@@ -28,12 +31,16 @@ def parse_vulture_output(filepath):
         print(f"Error reading file: {e}")
         sys.exit(1)
     return skip_dirs_fixes
+
+
 def find_file(filename, search_root="."):
     for root, dirs, files in os.walk(search_root):
         dirs[:] = [d for d in dirs if not d.startswith(".")]
         if filename in files:
             return os.path.join(root, filename)
     return None
+
+
 def main():
     if len(sys.argv) != 2:
         print("Usage: python comment_skip_dirs.py <vulture_output_file>")
@@ -82,5 +89,7 @@ def main():
     print(f"  Fixed: {fixed}")
     print(f"  Skipped: {skipped}")
     print(f"  Not found: {not_found}")
+
+
 if __name__ == "__main__":
     main()

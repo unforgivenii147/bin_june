@@ -3,11 +3,14 @@
 Strip comments from Lua files recursively using parallel processing.
 Supports multiple input directories and provides prettier-style output.
 """
+
 from __future__ import annotations
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
+
+
 @dataclass
 class FileStats:
     path: Path
@@ -15,17 +18,21 @@ class FileStats:
     new_size: int
     lines_removed: int
     comments_removed: int
+
     @property
     def size_reduction(self) -> float:
         if self.original_size > 0:
             return (1 - self.new_size / self.original_size) * 100
         return 0.0
+
     @property
     def relpath(self) -> Path:
         try:
             return self.path.relative_to(Path.cwd())
         except ValueError:
             return self.path
+
+
 def strip_lua_comments(content: str) -> tuple[str, int, int]:
     lines = content.splitlines(keepends=True)
     result_lines = []
@@ -104,6 +111,8 @@ def strip_lua_comments(content: str) -> tuple[str, int, int]:
         result_lines.append(stripped_line)
     stripped_content = "".join(result_lines)
     return (stripped_content, lines_removed, comments_removed)
+
+
 def process_lua_file(file_path: Path) -> FileStats | None:
     try:
         original_content = file_path.read_text(encoding="utf-8")
@@ -124,6 +133,8 @@ def process_lua_file(file_path: Path) -> FileStats | None:
     except Exception as e:
         print(f"Error processing {file_path}: {e}", file=sys.stderr)
         return None
+
+
 def find_lua_files(directories: list[Path]) -> list[Path]:
     lua_files = []
     for directory in directories:
@@ -132,12 +143,16 @@ def find_lua_files(directories: list[Path]) -> list[Path]:
         elif directory.suffix == ".lua":
             lua_files.append(directory)
     return sorted(set(lua_files))
+
+
 def fsz(size_bytes: int) -> str:
     for unit in ["B", "kB", "MB", "GB"]:
         if size_bytes < 1024.0:
             return f"{size_bytes:.2f} {unit}"
         size_bytes /= 1024.0
     return f"{size_bytes:.2f} TB"
+
+
 def main():
     if len(sys.argv) > 1:
         directories = [Path(d).resolve() for d in sys.argv[1:]]
@@ -196,5 +211,7 @@ def main():
         sys.exit(1)
     else:
         print(f"\n✅ Done in {processed} file(s)\n")
+
+
 if __name__ == "__main__":
     main()

@@ -1,11 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 import os
+
+
 def create_english_style_art(word):
     """
     Creates artistic block-style rendering of English text with readable letters
     """
-    # Dictionary mapping letters to their artistic representations
-    # Using a 5-row system for better readability
+
     letter_art = {
         "A": [
             " ███ ",
@@ -189,7 +190,6 @@ def create_english_style_art(word):
             " █   ",
             "█████",
         ],
-        # Lowercase letters (simplified but readable)
         "a": [
             "     ",
             " ███ ",
@@ -372,7 +372,6 @@ def create_english_style_art(word):
             " █   ",
             "████ ",
         ],
-        # Numbers
         "0": [
             " ███ ",
             "█  ██",
@@ -443,7 +442,6 @@ def create_english_style_art(word):
             "    █",
             " ███ ",
         ],
-        # Punctuation and special characters
         " ": [
             "     ",
             "     ",
@@ -641,33 +639,33 @@ def create_english_style_art(word):
             "     ",
         ],
     }
-    # Prepare the text (handle empty input)
+
     if not word:
         return []
-    # Split text into characters
+
     chars = list(word)
-    # Determine the number of rows
-    num_rows = 5  # Our characters are 5 rows tall
-    # Build the art row by row
+
+    num_rows = 5
+
     art_lines = []
     for row in range(num_rows):
         line = ""
         for char in chars:
-            # Look up character
             if char in letter_art:
                 line += letter_art[char][row]
             elif char.upper() in letter_art:
                 line += letter_art[char.upper()][row]
             else:
-                # For unknown characters, add spaces
                 line += "     "
         art_lines.append(line)
     return art_lines
+
+
 def create_arabic_style_art(word):
     """
     Creates artistic block-style rendering of Arabic text with readable letters
     """
-    # Dictionary mapping Arabic letters to their artistic representations
+
     letter_art = {
         "ا": [
             "  █  ",
@@ -907,7 +905,6 @@ def create_arabic_style_art(word):
             "  █  ",
             "████ ",
         ],
-        # Space character
         " ": [
             "     ",
             "     ",
@@ -916,14 +913,14 @@ def create_arabic_style_art(word):
             "     ",
         ],
     }
-    # Prepare the text (handle empty input)
+
     if not word:
         return []
-    # Split text into characters
+
     chars = list(word)
-    # Determine the number of rows
-    num_rows = 5  # Our characters are 5 rows tall
-    # Build the art row by row
+
+    num_rows = 5
+
     art_lines = []
     for row in range(num_rows):
         line = ""
@@ -931,10 +928,11 @@ def create_arabic_style_art(word):
             if char in letter_art:
                 line += letter_art[char][row]
             else:
-                # For unknown characters, add spaces
                 line += "     "
         art_lines.append(line)
     return art_lines
+
+
 def detect_script(text):
     """
     Detect if text contains Arabic or English characters
@@ -944,6 +942,8 @@ def detect_script(text):
         if char in arabic_chars:
             return "arabic"
     return "english"
+
+
 def main():
     print("Text Art Generator (English & Arabic)")
     print("=" * 50)
@@ -954,20 +954,19 @@ def main():
     print("  - Supports both English and Arabic text")
     print()
     while True:
-        # Get user input
         text = input("Enter text: ").strip()
-        # Check for commands
+
         if text.lower() in ["quit", "exit", "q"]:
             print("Goodbye!")
             break
         elif text.lower() == "clear":
             os.system("cls" if os.name == "nt" else "clear")
             continue
-        # Check if input is empty
+
         if not text:
             print("Please enter some text.")
             continue
-        # Detect script and generate art
+
         script = detect_script(text)
         if script == "arabic":
             art = create_arabic_style_art(text)
@@ -975,12 +974,14 @@ def main():
         else:
             art = create_english_style_art(text)
             script_name = "English"
-        # Display the art
+
         print(f"\n{script_name} Text Art:")
         print("=" * 50)
         for line in art:
             print(f"  {line}")
         print("=" * 50)
         print()
+
+
 if __name__ == "__main__":
     main()

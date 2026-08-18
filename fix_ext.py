@@ -4,12 +4,15 @@ import concurrent.futures
 import sys
 from pathlib import Path
 from dh import get_files
+
 try:
     import puremagic
 except ImportError:
     print("Error: This script requires the 'puremagic' library.")
     print("Please install it by running: pip install puremagic")
     sys.exit(1)
+
+
 def get_extension_from_mime(mime_type: str) -> str:
     mime_map = {
         "image/jpeg": ".jpg",
@@ -33,6 +36,8 @@ def get_extension_from_mime(mime_type: str) -> str:
         "application/octet-stream": "",
     }
     return mime_map.get(mime_type, "")
+
+
 def detect_true_extension(file_path: Path) -> str:
     try:
         magic_data = puremagic.magic_string(file_path.read_bytes())
@@ -49,6 +54,8 @@ def detect_true_extension(file_path: Path) -> str:
     except Exception as e:
         print(f"Error reading {file_path}: {e}")
     return ""
+
+
 def check_file(file_path: Path) -> tuple[Path, str, str] | None:
     current_ext = file_path.suffix.lower()
     if not current_ext:
@@ -64,6 +71,8 @@ def check_file(file_path: Path) -> tuple[Path, str, str] | None:
         if norm_current != norm_true:
             return (file_path, current_ext, true_ext)
     return None
+
+
 def autofix_filename(file_path: Path, current_ext: str, true_ext: str) -> Path:
     new_name = file_path.stem + true_ext
     new_path = file_path.with_name(new_name)
@@ -76,6 +85,8 @@ def autofix_filename(file_path: Path, current_ext: str, true_ext: str) -> Path:
         file_path.rename(new_path)
         return new_path
     return file_path
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Recursively detect and optionally fix file extension mismatches based on file headers (magic numbers)."
@@ -117,5 +128,7 @@ def main():
                     print(f"  -> Skipped fix: Filename collision or identical.")
             except Exception as e:
                 print(f"  -> Error fixing file: {e}")
+
+
 if __name__ == "__main__":
     main()

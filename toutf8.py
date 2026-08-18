@@ -3,6 +3,7 @@
 Convert files with non-UTF8 encoding to UTF8.
 Uses parallel processing to handle multiple files efficiently.
 """
+
 from __future__ import annotations
 import argparse
 import sys
@@ -11,6 +12,8 @@ from pathlib import Path
 from typing import Generator, Tuple
 import chardet
 from binaryornot import is_binary
+
+
 def detect_encoding(file_path: Path) -> str:
     try:
         with open(file_path, "rb") as f:
@@ -19,6 +22,8 @@ def detect_encoding(file_path: Path) -> str:
             return result.get("encoding", "utf-8") or "utf-8"
     except Exception:
         return "utf-8"
+
+
 def convert_file(file_path: Path) -> Tuple[Path, bool, str]:
     try:
         if is_binary(file_path):
@@ -33,6 +38,8 @@ def convert_file(file_path: Path) -> Tuple[Path, bool, str]:
         return file_path, True, f"Converted from {encoding}"
     except Exception as e:
         return file_path, False, f"Error: {e!s}"
+
+
 def collect_files(paths: list[str | Path]) -> Generator[Path, None, None]:
     for path_str in paths:
         path = Path(path_str).resolve()
@@ -42,6 +49,8 @@ def collect_files(paths: list[str | Path]) -> Generator[Path, None, None]:
             yield from path.rglob("*")
         else:
             print(f"⚠ Warning: {path} not found", file=sys.stderr)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Convert non-UTF8 files to UTF8 encoding (in-place)",
@@ -88,5 +97,7 @@ def main():
     print(f"  Errors:    {errors}")
     print(f"{'=' * 42}")
     return 0 if errors == 0 else 1
+
+
 if __name__ == "__main__":
     sys.exit(main())

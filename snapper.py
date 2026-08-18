@@ -3,6 +3,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 from dh import cprint, fsz, get_files, mpf3
+
+
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -12,9 +14,13 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
+
+
 _HASH_TABLE_SIZE = 1 << 14
 _MAX_OFFSET_1 = 2047
 _MAX_OFFSET_2 = 65535
+
+
 def _encode_varint(value: int) -> bytes:
     result = bytearray()
     while value >= 128:
@@ -22,9 +28,13 @@ def _encode_varint(value: int) -> bytes:
         value >>= 7
     result.append(value)
     return bytes(result)
+
+
 def _hash_4_bytes(data: bytes, pos: int) -> int:
     val = data[pos] | data[pos + 1] << 8 | data[pos + 2] << 16 | data[pos + 3] << 24
     return val * 426832829 >> 32 - 14 & _HASH_TABLE_SIZE - 1
+
+
 def _emit_literal(output: bytearray, data: bytes, start: int, length: int) -> None:
     if length <= 0:
         return
@@ -49,6 +59,8 @@ def _emit_literal(output: bytearray, data: bytes, start: int, length: int) -> No
         output.append(length - 1 >> 16 & 255)
         output.append(length - 1 >> 24 & 255)
     output.extend(data[start : start + length])
+
+
 def _emit_copy(output: bytearray, offset: int, length: int) -> None:
     while length > 0:
         if length >= 4 and length <= 11 and (offset <= _MAX_OFFSET_1):
@@ -72,6 +84,8 @@ def _emit_copy(output: bytearray, offset: int, length: int) -> None:
             output.append(offset >> 16 & 255)
             output.append(offset >> 24 & 255)
             length -= copy_len
+
+
 def compress(data: bytes) -> bytes:
     if not data:
         return _encode_varint(0)
@@ -110,12 +124,18 @@ def compress(data: bytes) -> bytes:
     if literal_start < data_len:
         _emit_literal(output, data, literal_start, data_len - literal_start)
     return bytes(output)
+
+
 class SnappyError(Exception):
     pass
+
+
 class CompressionError(SnappyError):
     def __init__(self, message: str, algorithm: str | None = None) -> None:
         super().__init__(message)
         self.algorithm = algorithm
+
+
 def _decode_varint(data: bytes, pos: int) -> tuple[int, int]:
     result = 0
     shift = 0
@@ -133,6 +153,8 @@ def _decode_varint(data: bytes, pos: int) -> tuple[int, int]:
             msg = "error length"
             raise CompressionError(msg, algorithm="snappy")
     return (result, pos)
+
+
 def decompress(data: bytes) -> bytes:
     if not data:
         return b""
@@ -227,9 +249,13 @@ def decompress(data: bytes) -> bytes:
         msg = "error length"
         raise CompressionError(msg, algorithm="snappy")
     return bytes(output)
+
+
 COMPRESS = "-c" in sys.argv
 DECOMPRESS = "-d" in sys.argv
 MODE = "COMPRESS"
+
+
 def compress_file(path: Path) -> None:
     before = gsz(path)
     if not before:
@@ -248,6 +274,8 @@ def compress_file(path: Path) -> None:
     cprint(f"{fsz(before)} -> {fsz(after)} | {fsz(diff_size)} | {ratio:.1f}%")
     path.unlink()
     return
+
+
 def decompress_file(path: Path) -> None:
     before = gsz(path)
     if not before:
@@ -266,12 +294,16 @@ def decompress_file(path: Path) -> None:
     cprint(f"{fsz(before)} -> {fsz(after)} | {fsz(diff_size)} | {ratio:.1f}%")
     path.unlink()
     return
+
+
 def process_file(path) -> None:
     path = Path(path)
     if MODE == "COMPRESS":
         compress_file(path)
     elif MODE == "DECOMPRESS":
         decompress_file(path)
+
+
 def main() -> None:
     global mode
     if COMPRESS:
@@ -291,5 +323,7 @@ def main() -> None:
     else:
         files = get_files(cwd)
     mpf3(process_file, files)
+
+
 if __name__ == "__main__":
     sys.exit(main())

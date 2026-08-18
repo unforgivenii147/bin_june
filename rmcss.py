@@ -3,13 +3,17 @@
 Remove HTML comments (<!-- ... -->) from HTML and CSS files recursively.
 Processes files in parallel and updates them in-place.
 """
+
 from __future__ import annotations
 import os
 import re
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+
 COMMENT_PATTERN = re.compile("<!--.*?-->", re.DOTALL)
+
+
 def remove_comments_from_file(file_path):
     try:
         with open(file_path, encoding="utf-8", errors="ignore") as f:
@@ -23,6 +27,8 @@ def remove_comments_from_file(file_path):
             return (file_path, False, None)
     except Exception as e:
         return (file_path, False, str(e))
+
+
 def find_files(directory, extensions=None):
     if extensions is None:
         extensions = {".html", ".htm", ".css"}
@@ -32,8 +38,11 @@ def find_files(directory, extensions=None):
     for file_path in directory.rglob("*"):
         if file_path.is_file() and file_path.suffix.lower() in extensions:
             yield file_path
+
+
 def main():
     import argparse
+
     parser = argparse.ArgumentParser(description="Remove HTML comments from HTML and CSS files recursively.")
     parser.add_argument("directory", nargs="?", default=".", help="Directory to process (default: current directory)")
     parser.add_argument(
@@ -77,5 +86,7 @@ def main():
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
+
+
 if __name__ == "__main__":
     main()

@@ -2,6 +2,8 @@
 from __future__ import annotations
 import sys
 from pathlib import Path
+
+
 def main() -> None:
     cwd = Path.cwd()
     ext1 = input("ext 1 :").strip()
@@ -22,5 +24,7 @@ def main() -> None:
                 else:
                     print(f"[✖] {twin}  (keeping {path})")
                     twin.unlink()
+
+
 if __name__ == "__main__":
     sys.exit(main())

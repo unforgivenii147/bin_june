@@ -4,13 +4,17 @@ Script to run git pull on all git repositories recursively.
 If a repo has no remote, create a new public repo on GitHub and set it as origin.
 Requires: pip install gitpython requests python-dotenv
 """
+
 from __future__ import annotations
 import os
 from pathlib import Path
 import requests
 from dotenv import load_dotenv
 from git import GitCommandError, Repo
+
 load_dotenv()
+
+
 def find_git_repos(root_path: Path) -> list[Path]:
     repos = []
     for item in root_path.iterdir():
@@ -20,6 +24,8 @@ def find_git_repos(root_path: Path) -> list[Path]:
             else:
                 repos.extend(find_git_repos(item))
     return repos
+
+
 def create_github_repo(repo_name: str, github_token: str) -> str | None:
     url = "https://api.github.com/user/repos"
     headers = {"Authorization": f"token {github_token}", "Accept": "application/vnd.github.v3+json"}
@@ -51,6 +57,8 @@ def create_github_repo(repo_name: str, github_token: str) -> str | None:
         else:
             print(f"   ❌ Failed to create repo: {e}")
         return None
+
+
 def get_github_username(github_token: str) -> str | None:
     url = "https://api.github.com/user"
     headers = {"Authorization": f"token {github_token}"}
@@ -60,6 +68,8 @@ def get_github_username(github_token: str) -> str | None:
         return response.json()["login"]
     except:
         return None
+
+
 def setup_remote_and_push(repo: Repo, repo_path: Path, remote_url: str) -> bool:
     try:
         if "origin" in repo.remotes:
@@ -79,6 +89,8 @@ def setup_remote_and_push(repo: Repo, repo_path: Path, remote_url: str) -> bool:
     except Exception as e:
         print(f"   ❌ Error: {e}")
         return False
+
+
 def process_repository(repo_path: Path, github_token: str) -> tuple[bool, str]:
     try:
         repo = Repo(repo_path)
@@ -106,6 +118,8 @@ def process_repository(repo_path: Path, github_token: str) -> tuple[bool, str]:
                 return False, "Failed to push to GitHub"
     except Exception as e:
         return False, f"Error: {e!s}"
+
+
 def main() -> None:
     github_token = os.getenv("GITHUB_TOKEN")
     if not github_token:
@@ -136,6 +150,8 @@ def main() -> None:
         print(f"\n❌ Failed ({len(failed)} repos):")
         for repo_path, _, msg in failed:
             print(f"   - {repo_path.relative_to(cwd)}: {msg}")
+
+
 if __name__ == "__main__":
     try:
         main()

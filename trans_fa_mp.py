@@ -3,6 +3,7 @@
 Persian to English word translator using parallel processing.
 Optimized for Python 3.12.
 """
+
 from __future__ import annotations
 import json
 import logging
@@ -11,11 +12,14 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Final
 from deep_translator import GoogleTranslator
+
 MAX_WORKERS: Final[int] = 16
 RETRY_ATTEMPTS: Final[int] = 3
 RETRY_DELAY: Final[float] = 0.5
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s", datefmt="%H:%M:%S")
 logger = logging.getLogger(__name__)
+
+
 def translate_word(word: str) -> str | None:
     translator = GoogleTranslator(source="auto", target="en")
     for attempt in range(RETRY_ATTEMPTS):
@@ -28,8 +32,11 @@ def translate_word(word: str) -> str | None:
             if attempt < RETRY_ATTEMPTS - 1:
                 time.sleep(RETRY_DELAY)
     return None
+
+
 def main() -> None:
     import sys
+
     input_path = Path(sys.argv[1].strip())
     output_path = input_path.with_suffix(".json")
     if not input_path.exists():
@@ -65,5 +72,7 @@ def main() -> None:
         logger.info("Translation dictionary saved to %s (%d entries)", output_path.name, len(results))
     except Exception as e:
         logger.error("Error saving results: %s", e)
+
+
 if __name__ == "__main__":
     main()

@@ -1,8 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Script to split a lazy.nvim plugin configuration file into individual files."""
+
 import re
 import sys
 from pathlib import Path
+
+
 def split_lua_plugins(input_path, move=False):
     input_file = Path(input_path)
     content = input_file.read_text()
@@ -42,6 +45,8 @@ def split_lua_plugins(input_path, move=False):
         target.write_text(f"return {block}")
     if move and blocks:
         input_file.write_text("return {\n}")
+
+
 if __name__ == "__main__":
     move = False
     input_path = None

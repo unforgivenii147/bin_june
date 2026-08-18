@@ -3,6 +3,7 @@
 Copy installed packages that have entry points to ~/tmp/packages/<pkgname>
 Uses parallel processing for efficient file copying.
 """
+
 from __future__ import annotations
 import contextlib
 import csv
@@ -15,8 +16,11 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from functools import lru_cache
 from pathlib import Path
 from typing import List, Optional, Tuple
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(processName)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+
+
 def get_python_paths() -> List[Path]:
     paths = []
     paths.extend(site.getsitepackages())
@@ -27,6 +31,8 @@ def get_python_paths() -> List[Path]:
     if pythonpath:
         paths.extend(Path(p) for p in pythonpath.split(os.pathsep) if p)
     return [p for p in paths if p.exists()]
+
+
 def find_dist_info_dirs(search_paths: List[Path]) -> List[Path]:
     dist_info_dirs = []
     for path in search_paths:
@@ -36,6 +42,8 @@ def find_dist_info_dirs(search_paths: List[Path]) -> List[Path]:
         dist_info_dirs.extend(path.glob("*.dist-info"))
     logger.info(f"Found {len(dist_info_dirs)} dist-info directories")
     return dist_info_dirs
+
+
 def has_entry_points(dist_info_dir: Path) -> bool:
     entry_points_file = dist_info_dir / "entry_points.txt"
     if entry_points_file.exists():
@@ -50,6 +58,8 @@ def has_entry_points(dist_info_dir: Path) -> bool:
         except Exception as e:
             logger.debug(f"Error reading {metadata_file}: {e}")
     return bool((dist_info_dir / "top_level.txt").exists() and any(dist_info_dir.glob("scripts*")))
+
+
 def parse_record_file(dist_info_dir: Path) -> List[Tuple[Path, str]]:
     record_file = dist_info_dir / "RECORD"
     if not record_file.exists():
@@ -68,6 +78,8 @@ def parse_record_file(dist_info_dir: Path) -> List[Tuple[Path, str]]:
     except Exception as e:
         logger.error(f"Error parsing RECORD file {record_file}: {e}")
     return files
+
+
 @lru_cache(maxsize=128)
 def find_file_in_paths(relative_path: str, search_paths: Tuple[Path, ...]) -> Optional[Path]:
     if Path(relative_path).is_absolute():
@@ -99,6 +111,8 @@ def find_file_in_paths(relative_path: str, search_paths: Tuple[Path, ...]) -> Op
     if candidate.exists():
         return candidate
     return None
+
+
 def copy_package_files(package_info: Tuple[str, Path, List[str]]) -> Tuple[str, bool, str]:
     package_name, dist_info_dir, search_paths = package_info
     try:
@@ -149,6 +163,8 @@ def copy_package_files(package_info: Tuple[str, Path, List[str]]) -> Tuple[str, 
         error_msg = f"Error: {e!s}"
         logger.error(f"{package_name}: {error_msg}")
         return (package_name, False, error_msg)
+
+
 def main():
     logger.info("Starting package copy process...")
     search_paths = get_python_paths()
@@ -197,6 +213,8 @@ def main():
             print(f"  - {pkg_name}: {msg}")
     print(f"\n📁 Packages copied to: {Path.home() / 'tmp' / 'packages'}")
     print("-" * 42)
+
+
 if __name__ == "__main__":
     try:
         main()

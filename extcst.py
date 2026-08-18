@@ -4,6 +4,7 @@ Extract entities (functions, classes, constants) from Python files recursively.
 Saves each entity as a separate .py file with its full source code.
 Processes files in parallel and updates them in-place.
 """
+
 import argparse
 import json
 import logging
@@ -17,8 +18,11 @@ from typing import Dict, List, Optional, Set, Tuple
 import libcst as cst
 from libcst import MetadataWrapper
 from libcst.metadata import PositionProvider
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+
+
 @dataclass
 class Entity:
     name: str
@@ -31,6 +35,8 @@ class Entity:
     parent: str = ""
     imports: List[str] = None
     decorators: List[str] = None
+
+
 class EntityExtractor(cst.CSTTransformer):
     def __init__(self, file_path: str, source_lines: List[str]):
         self.file_path = file_path
@@ -40,8 +46,10 @@ class EntityExtractor(cst.CSTTransformer):
         self.module_imports: List[str] = []
         self.constants: Set[str] = set()
         self.wrapper: Optional[MetadataWrapper] = None
+
     def set_wrapper(self, wrapper: MetadataWrapper):
         self.wrapper = wrapper
+
     def _get_node_position(self, node) -> Tuple[int, int]:
         if not self.wrapper:
             return (0, 0)
@@ -52,23 +60,27 @@ class EntityExtractor(cst.CSTTransformer):
             return (start_line, end_line)
         except (KeyError, AttributeError):
             return (0, 0)
+
     def _get_source_code(self, node, start_line: int, end_line: int) -> str:
         if start_line > 0 and end_line > 0 and start_line <= len(self.source_lines):
             return "".join(self.source_lines[start_line - 1 : end_line])
         else:
             return cst.Module(body=[cst.SimpleStatementLine(body=[node])]).code
+
     def visit_Import(self, node: cst.Import) -> bool:
         if not self.current_class:
             import_code = cst.Module(body=[cst.SimpleStatementLine(body=[node])]).code
             if import_code not in self.module_imports:
                 self.module_imports.append(import_code)
         return True
+
     def visit_ImportFrom(self, node: cst.ImportFrom) -> bool:
         if not self.current_class:
             import_code = cst.Module(body=[cst.SimpleStatementLine(body=[node])]).code
             if import_code not in self.module_imports:
                 self.module_imports.append(import_code)
         return True
+
     def leave_ClassDef(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.CSTNode:
         class_name = original_node.name.value
         start_line, end_line = self._get_node_position(original_node)
@@ -94,6 +106,7 @@ class EntityExtractor(cst.CSTTransformer):
         )
         self.current_class = class_name
         return updated_node
+
     def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef) -> cst.CSTNode:
         func_name = original_node.name.value
         start_line, end_line = self._get_node_position(original_node)
@@ -118,6 +131,7 @@ class EntityExtractor(cst.CSTTransformer):
             )
         )
         return updated_node
+
     def visit_Assign(self, node: cst.Assign) -> bool:
         if self.current_class:
             return True
@@ -144,6 +158,7 @@ class EntityExtractor(cst.CSTTransformer):
                             )
                         )
         return True
+
     def _extract_docstring(self, node) -> str:
         if not node.body:
             return ""
@@ -162,6 +177,8 @@ class EntityExtractor(cst.CSTTransformer):
                         doc = doc[1:-1]
                     return doc.strip()
         return ""
+
+
 def process_file(file_path: Path, output_dir: Path) -> Dict[str, int]:
     try:
         with open(file_path, "r", encoding="utf-8") as f:
@@ -239,14 +256,19 @@ def process_file(file_path: Path, output_dir: Path) -> Dict[str, int]:
     except Exception as e:
         logger.error(f"Error processing {file_path}: {e}")
         import traceback
+
         traceback.print_exc()
         return {}
+
+
 def sanitize_filename(name: str) -> str:
     name = re.sub(r'[<>:"/\\|?*]', "_", name)
     name = name.strip(". ")
     if not name:
         name = "unnamed"
     return name
+
+
 def get_py_files(paths: List[Path]) -> List[Path]:
     py_files = []
     for path in paths:
@@ -255,6 +277,8 @@ def get_py_files(paths: List[Path]) -> List[Path]:
         elif path.is_dir():
             py_files.extend(path.rglob("*.py"))
     return sorted(py_files)
+
+
 def process_entity_extraction(input_paths: List[Path], output_base: Path, max_workers: int = None) -> None:
     py_files = get_py_files(input_paths)
     if not py_files:
@@ -282,6 +306,8 @@ def process_entity_extraction(input_paths: List[Path], output_base: Path, max_wo
     for entity_type, count in sorted(total_stats.items()):
         logger.info(f"  {entity_type}: {count}")
     logger.info("=" * 42)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Extract entities (functions, classes, constants) from Python files.")
     parser.add_argument("paths", nargs="*", help="Files or directories to process (default: current directory)")
@@ -303,5 +329,7 @@ def main():
         sys.exit(1)
     output_dir = Path(args.output).resolve()
     process_entity_extraction(valid_paths, output_dir, args.jobs)
+
+
 if __name__ == "__main__":
     main()

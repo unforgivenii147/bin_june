@@ -5,12 +5,15 @@ Each file contains one Persian word per line.
 Results saved as JSON files with fa:en mappings.
 Uses pathlib and parallel processing.
 """
+
 from __future__ import annotations
 import json
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from deep_translator import GoogleTranslator
+
+
 def translate_file(file_path: Path) -> tuple[Path, dict]:
     try:
         with open(file_path, "r", encoding="utf-8") as f:
@@ -39,6 +42,8 @@ def translate_file(file_path: Path) -> tuple[Path, dict]:
     except Exception as e:
         print(f"❌ Error processing {file_path.name}: {e}")
         return file_path, {}
+
+
 def save_translation(input_path: Path, translations: dict, output_dir: Path | None = None):
     if output_dir is None:
         output_dir = input_path.parent
@@ -49,6 +54,8 @@ def save_translation(input_path: Path, translations: dict, output_dir: Path | No
         json.dump(translations, f, ensure_ascii=False, indent=2)
     print(f"💾 Saved: {output_path.name}")
     return output_path
+
+
 def main():
     current_dir = Path(".")
     max_workers = 4
@@ -86,5 +93,7 @@ def main():
         print(f"   ❌ Failed: {failed} files")
     print(f"   ⏱️  Time elapsed: {elapsed_time:.2f} seconds")
     print(f"   📁 Output directory: {output_dir.absolute()}")
+
+
 if __name__ == "__main__":
     main()

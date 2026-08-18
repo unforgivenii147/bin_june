@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Recursively replace or remove text in files with Python 3.12+ optimizations."""
+
 from __future__ import annotations
 import argparse
 import os
@@ -7,7 +8,10 @@ import re
 import sys
 from pathlib import Path
 from dh import is_binary
+
 MAX_CONTEXT_DISPLAY = 3
+
+
 def process_file(
     path: Path, search_text: str, replace_text: str = "", remove_mode: bool = False, dry_run: bool = False
 ) -> bool:
@@ -43,6 +47,8 @@ def process_file(
     except OSError as e:
         print(f"Error processing {path}: {e}", file=sys.stderr)
         return False
+
+
 def replace_in_files(
     search_text: str,
     replace_text: str = "",
@@ -73,6 +79,8 @@ def replace_in_files(
             if files_processed % 100 == 0:
                 print(f"Processed {files_processed} files...", end="\r")
     return files_processed, files_changed
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Recursively replace or remove text in files.",
@@ -114,5 +122,7 @@ def main() -> None:
         search_text, replace_text, remove_mode=args.remove, target_file=args.file, dry_run=args.dry_run
     )
     print(f"\n--- Complete: Processed {files_processed} files, modified {files_changed} files ---")
+
+
 if __name__ == "__main__":
     main()

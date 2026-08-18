@@ -6,9 +6,13 @@ import sys
 from os import scandir as os_scandir
 from pathlib import Path
 from dh import mpf3
+
 CHUNK_SIZE = 1024 * 1024
+
+
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
+
     path = Path(path)
     if is_binary(path):
         return False
@@ -28,6 +32,8 @@ def is_python_file(path: str | Path) -> bool:
         except:
             return False
     return False
+
+
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -42,6 +48,8 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
+
+
 def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
     if path.is_file():
@@ -73,9 +81,13 @@ def get_pyfiles(path: str | Path) -> list[Path]:
         except (PermissionError, OSError):
             continue
     return sorted(pyfiles)
+
+
 REMOVE_ORIG = False
 LEGACY_MODE = False
 OPTIMIZE_LEVEL = 2
+
+
 def process_file(path) -> bool | None:
     path = Path(path)
     if not path.exists():
@@ -94,6 +106,8 @@ def process_file(path) -> bool | None:
             path.unlink()
         return True
     return False
+
+
 def main():
     global REMOVE_ORIG, LEGACY_MODE, OPTIMIZE_LEVEL
     os.environ["PYTHONPYCACHEPREFIX"] = "__pycache__"
@@ -148,5 +162,7 @@ def main():
         return 0
     mpf3(process_file, files)
     return 0
+
+
 if __name__ == "__main__":
     sys.exit(main())

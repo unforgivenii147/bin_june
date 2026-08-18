@@ -6,11 +6,14 @@ from pathlib import Path
 import requests
 from dotenv import load_dotenv
 from git import InvalidGitRepositoryError, Repo
+
 load_dotenv(os.path.expanduser("~/.env"))
 GITHUB_USERNAME = "unforgivenii147"
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 REPO_NAME = Path.cwd().name
 BRANCH = "main"
+
+
 def get_or_create_repo():
     try:
         repo = Repo(Path.cwd())
@@ -21,6 +24,8 @@ def get_or_create_repo():
         repo = Repo.init(Path.cwd())
         print("Git repository initialized.")
         return repo
+
+
 def stage_and_commit(repo):
     if repo.is_dirty(untracked_files=True):
         repo.index.add(["*"])
@@ -28,6 +33,8 @@ def stage_and_commit(repo):
         print("Changes committed.")
     else:
         print("No changes to commit.")
+
+
 def get_or_create_remote(repo):
     try:
         origin = repo.remote("origin")
@@ -39,6 +46,8 @@ def get_or_create_remote(repo):
         origin = repo.create_remote("origin", remote_url)
         print(f"Remote 'origin' created: {remote_url}")
         return origin
+
+
 def create_github_repo():
     url = "https://api.github.com/user/repos"
     headers = {"Authorization": f"token {GITHUB_TOKEN}", "Accept": "application/vnd.github.v3+json"}
@@ -50,6 +59,8 @@ def create_github_repo():
     elif response.status_code != 201:
         raise Exception(f"Failed to create GitHub repo: {response.json()}")
     return response.json()["ssh_url"]
+
+
 def push_to_github(origin):
     try:
         origin.push(refspec=f"{BRANCH}:{BRANCH}")
@@ -57,6 +68,8 @@ def push_to_github(origin):
     except Exception as e:
         print(f"Push failed: {e}")
         origin.push(refspec=f"{BRANCH}:{BRANCH}", set_upstream=True)
+
+
 def main():
     if not GITHUB_TOKEN:
         print("Error: GITHUB_TOKEN not found in environment variables.")
@@ -70,5 +83,7 @@ def main():
     except Exception as e:
         print(f"❌ Error: {e}")
         exit(1)
+
+
 if __name__ == "__main__":
     main()

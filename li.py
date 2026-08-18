@@ -6,12 +6,15 @@ import stat
 import sys
 from pathlib import Path
 from dh import fsz, gsz
+
 CYAN = "\x1b[36m"
 BLUE = "\x1b[34m"
 GREEN = "\x1b[32m"
 RED = "\x1b[31m"
 RESET = "\x1b[0m"
 COMPRESSED_EXTS = {".zip", ".tar", ".gz", ".bz2", ".xz", ".rar", ".7z"}
+
+
 def list_dir(path: str = ".") -> None:
     entries = os.listdir(path)
     items = []
@@ -42,6 +45,8 @@ def list_dir(path: str = ".") -> None:
     for size, name, color in sorted(items, key=operator.itemgetter(0)):
         size_str = fsz(size).ljust(size_col_width)
         print(f"{size_str}  {color}{name}{RESET}")
+
+
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         list_dir(sys.argv[1])

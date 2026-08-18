@@ -3,11 +3,14 @@
 TOML Comment Remover - Removes comments from TOML files using parallel processing.
 Supports processing multiple files/directories recursively.
 """
+
 from __future__ import annotations
 import sys
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+
+
 def remove_toml_comments(content: str) -> str:
     lines = content.splitlines(keepends=True)
     result_lines = []
@@ -41,6 +44,8 @@ def remove_toml_comments(content: str) -> str:
         else:
             result_lines.append(line)
     return "".join(result_lines)
+
+
 def remove_line_comment(line: str) -> str:
     result = []
     in_string = False
@@ -67,6 +72,8 @@ def remove_line_comment(line: str) -> str:
     if line.endswith("\n"):
         return result_line.rstrip() + "\n"
     return result_line.rstrip()
+
+
 def process_file(file_path: Path) -> tuple[str, float, int, int]:
     start_time = time.perf_counter()
     try:
@@ -83,6 +90,8 @@ def process_file(file_path: Path) -> tuple[str, float, int, int]:
         print(f"Error processing {file_path}: {e}", file=sys.stderr)
         time_taken = (time.perf_counter() - start_time) * 1000
         return (str(file_path), time_taken, 0, 0)
+
+
 def collect_toml_files(paths: list[Path]) -> list[Path]:
     toml_files = []
     for path in paths:
@@ -92,6 +101,8 @@ def collect_toml_files(paths: list[Path]) -> list[Path]:
         elif path.is_dir():
             toml_files.extend(path.rglob("*.toml"))
     return toml_files
+
+
 def fsz(size_bytes: int) -> str:
     if size_bytes < 1024:
         return f"{size_bytes} B"
@@ -99,6 +110,8 @@ def fsz(size_bytes: int) -> str:
         return f"{size_bytes / 1024:.1f} KB"
     else:
         return f"{size_bytes / (1024 * 1024):.1f} MB"
+
+
 def main():
     if len(sys.argv) > 1:
         paths = [Path(arg) for arg in sys.argv[1:]]
@@ -130,5 +143,7 @@ def main():
     total_time = sum(r[1] for r in results)
     print(f"Total: {len(results)} file(s) processed in {total_time:.2f} ms")
     print(f"Size reduction: {fsz(total_before)} -> {fsz(total_after)} ({total_ratio:.1f}% of original)")
+
+
 if __name__ == "__main__":
     main()

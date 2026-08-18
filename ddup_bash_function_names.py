@@ -2,11 +2,14 @@
 """
 Check for duplicate function names in bash functions file.
 """
+
 from __future__ import annotations
 import re
 import sys
 from collections import Counter
 from pathlib import Path
+
+
 def extract_function_names(filepath: Path):
     functions = []
     patterns = [
@@ -34,10 +37,14 @@ def extract_function_names(filepath: Path):
         print(f"Error reading file: {e}")
         sys.exit(1)
     return functions
+
+
 def find_duplicates(functions):
     name_counts = Counter(name for name, _, _ in functions)
     duplicates = {name: count for name, count in name_counts.items() if count > 1}
     return duplicates
+
+
 def display_results(functions, duplicates, filepath: Path) -> bool:
     if not duplicates:
         print("✓ No duplicate function names found!")
@@ -53,6 +60,8 @@ def display_results(functions, duplicates, filepath: Path) -> bool:
             print(f"  {idx}. Line {line_num}: {line}")
     print("\n" + "=" * 42)
     return False
+
+
 def show_statistics(functions, duplicates) -> None:
     total_definitions = len(functions)
     unique_functions = len({name for name, _, _ in functions})
@@ -66,6 +75,8 @@ def show_statistics(functions, duplicates) -> None:
     if unique_functions > 0:
         duplication_rate = duplicate_definitions / unique_functions * 100
         print(f"   Duplication rate: {duplication_rate:.1f}%")
+
+
 def interactive_fix(duplicates, functions, filepath: Path) -> None:
     if not duplicates:
         return
@@ -77,6 +88,7 @@ def interactive_fix(duplicates, functions, filepath: Path) -> None:
     backup_path = f"{filepath}.backup"
     try:
         from shutil import copy2
+
         copy2(filepath, backup_path)
         print(f"   ✓ Backup created: {backup_path}")
     except Exception as e:
@@ -115,6 +127,8 @@ def interactive_fix(duplicates, functions, filepath: Path) -> None:
             print(f"     - Keep line {keep_line} for '{dup_name}', remove others")
         else:
             print(f"     - Review '{dup_name}' duplicates manually")
+
+
 def main():
     functions_file = Path.home() / ".config/bash.d/bash_functions"
     if len(sys.argv) > 1:
@@ -140,5 +154,7 @@ def main():
     else:
         print("\n✅ File is clean! No duplicate function names found.")
         sys.exit(0)
+
+
 if __name__ == "__main__":
     main()

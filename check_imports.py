@@ -5,6 +5,7 @@ import string
 import sys
 import traceback
 from importlib.machinery import SourceFileLoader
+
 if __name__ == "__main__":
     files = sys.argv[1:]
     has_failure = False

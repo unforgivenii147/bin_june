@@ -10,6 +10,7 @@ Strip comments and docstrings from Python files.
 - Reports the number of comments/docstrings removed per file.
 - Validates the resulting code with ast.parse; does not write invalid code.
 """
+
 from __future__ import annotations
 import argparse
 import ast
@@ -19,6 +20,8 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 import libcst as cst
 import libcst.matchers as m
+
+
 def find_module_docstring(source: str) -> tuple[int, int] | None:
     try:
         module = ast.parse(source)
@@ -40,12 +43,15 @@ def find_module_docstring(source: str) -> tuple[int, int] | None:
     if start_line is None or end_line is None:
         return None
     return start_line, end_line
+
+
 class StripCommentsAndDocstrings(cst.CSTTransformer):
     def __init__(self, module_doc_range: tuple[int, int] | None):
         super().__init__()
         self.module_doc_range = module_doc_range
         self.comments_removed = 0
         self.docstrings_removed = 0
+
     def leave_TrailingWhitespace(
         self, original_node: cst.TrailingWhitespace, updated_node: cst.TrailingWhitespace
     ) -> cst.TrailingWhitespace:
@@ -53,11 +59,13 @@ class StripCommentsAndDocstrings(cst.CSTTransformer):
             self.comments_removed += 1
             updated_node = updated_node.with_changes(comment=None)
         return updated_node
+
     def leave_EmptyLine(self, original_node: cst.EmptyLine, updated_node: cst.EmptyLine) -> cst.EmptyLine:
         if updated_node.comment is not None:
             self.comments_removed += 1
             updated_node = updated_node.with_changes(comment=None)
         return updated_node
+
     def _is_docstring_expr(self, node: cst.CSTNode) -> bool:
         if not isinstance(node, cst.SimpleStatementLine):
             return False
@@ -74,6 +82,7 @@ class StripCommentsAndDocstrings(cst.CSTTransformer):
                 m.ConcatenatedString(),
             ),
         )
+
     def leave_SimpleStatementLine(
         self, original_node: cst.SimpleStatementLine, updated_node: cst.SimpleStatementLine
     ) -> cst.CSTNode | None:
@@ -81,6 +90,8 @@ class StripCommentsAndDocstrings(cst.CSTTransformer):
             return updated_node
         self.docstrings_removed += 1
         return cst.RemovalSentinel
+
+
 def process_file(path: Path) -> tuple[Path, int, int, bool, str | None]:
     text = path.read_text(encoding="utf-8")
     shebang = ""
@@ -103,6 +114,8 @@ def process_file(path: Path) -> tuple[Path, int, int, bool, str | None]:
         return (path, transformer.comments_removed, transformer.docstrings_removed, False, str(e))
     path.write_text(new_code, encoding="utf-8")
     return (path, transformer.comments_removed, transformer.docstrings_removed, True, None)
+
+
 def iter_python_files_from_paths(paths: Iterable[Path]) -> list[Path]:
     result: list[Path] = []
     for p in paths:
@@ -111,6 +124,8 @@ def iter_python_files_from_paths(paths: Iterable[Path]) -> list[Path]:
         elif p.is_dir():
             result.extend(q for q in p.rglob("*.py") if q.is_file())
     return result
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Strip comments and non-module docstrings from Python files.")
     parser.add_argument(
@@ -127,6 +142,8 @@ def parse_args() -> argparse.Namespace:
         help=("Number of worker processes (default: CPU count). Use 1 to disable parallelism."),
     )
     return parser.parse_args()
+
+
 def main() -> None:
     args = parse_args()
     input_paths: list[Path] = args.paths or [Path(".")]
@@ -159,5 +176,7 @@ def main() -> None:
                         f"skipped write (removed {comments_removed} comments, "
                         f"{docstrings_removed} docstrings). Error: {error}"
                     )
+
+
 if __name__ == "__main__":
     main()

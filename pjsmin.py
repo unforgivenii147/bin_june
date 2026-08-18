@@ -4,7 +4,10 @@ import sys
 from pathlib import Path
 from dh import cprint, fsz, get_files, gext, mpf_async
 from rjsmin import jsmin
+
 mpf = mpf_async
+
+
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -14,6 +17,8 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
+
+
 def process_file(path: Path) -> str:
     before = gsz(path)
     path = Path(path)
@@ -42,6 +47,8 @@ def process_file(path: Path) -> str:
             return None
     except Exception as e:
         return f"{path}: {e}"
+
+
 def main() -> None:
     cwd = Path.cwd()
     files = get_files(cwd, ext=[".js", ".min.js"])
@@ -50,5 +57,7 @@ def main() -> None:
         sys.exit(0)
     print(f"Found {len(files)} files. Starting multiprocessing...")
     mpf(process_file, files)
+
+
 if __name__ == "__main__":
     main()

@@ -4,11 +4,13 @@ Change Python shebang in all Python files to Termux path.
 If a file has no shebang, add one at the beginning.
 Usage: python change_shebang.py
 """
+
 from __future__ import annotations
 import re
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+
 SHEBANG_PATTERN = re.compile(r"^#!.*python[23]?(?:\.\d+)?(?:[ \t]+.*)?$", re.MULTILINE)
 NEW_SHEBANG12 = "#!/data/data/com.termux/files/home/.local/bin/python"
 NEW_SHEBANG14 = "#!/data/data/com.termux/files/usr/bin/python"
@@ -36,6 +38,8 @@ COMMON_PYTHON_NAMES = {
     "run",
     "run.py",
 }
+
+
 def get_shebang(content: str) -> str:
     if re.search(
         r"^\s*(?:import\s+cv2\b|from\s+cv2\b)",
@@ -44,8 +48,12 @@ def get_shebang(content: str) -> str:
     ):
         return NEW_SHEBANG12
     return NEW_SHEBANG12
+
+
 def is_symlink(path: Path) -> bool:
     return path.is_symlink()
+
+
 def is_likely_python_file(path: Path) -> bool:
     try:
         with open(path, "rb") as f:
@@ -65,6 +73,8 @@ def is_likely_python_file(path: Path) -> bool:
             return any(re.search(pattern, text_sample, re.MULTILINE) for pattern in python_patterns)
     except (OSError, UnicodeDecodeError, PermissionError):
         return False
+
+
 def find_python_files(directory: Path) -> list[Path]:
     python_files = []
     for path in directory.rglob("*"):
@@ -96,6 +106,8 @@ def find_python_files(directory: Path) -> list[Path]:
         if "." not in path.name and is_likely_python_file(path):
             python_files.append(path)
     return python_files
+
+
 def process_file(path: Path, root_dir: Path) -> tuple[Path, bool, str | None, str, str]:
     rel_path = str(path.relative_to(root_dir))
     if is_symlink(path):
@@ -118,6 +130,8 @@ def process_file(path: Path, root_dir: Path) -> tuple[Path, bool, str | None, st
         return (path, True, None, rel_path, "updated")
     except Exception as e:
         return (path, False, str(e), rel_path, "error")
+
+
 def main():
     current_dir = Path.cwd()
     print(f"📁 Scanning directory: {current_dir}")
@@ -186,5 +200,7 @@ def main():
         for rel_path, error in errors:
             print(f"  - {rel_path}: {error}")
         sys.exit(1)
+
+
 if __name__ == "__main__":
     main()

@@ -1,11 +1,14 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """System package file integrity checker for Termux/Linux."""
+
 from __future__ import annotations
 import json
 import subprocess
 from datetime import datetime
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
+
+
 def get_installed_packages() -> list[str]:
     try:
         result = subprocess.run(["dpkg", "-l"], capture_output=True, text=True, check=True)
@@ -17,12 +20,16 @@ def get_installed_packages() -> list[str]:
         return packages
     except subprocess.CalledProcessError:
         return []
+
+
 def get_package_files(pkg_name: str) -> list[Path]:
     try:
         result = subprocess.run(["dpkg", "-L", pkg_name], capture_output=True, text=True, check=True)
         return [Path(f) for f in result.stdout.strip().split("\n") if f]
     except subprocess.CalledProcessError:
         return []
+
+
 def is_ignored_path(file_path: Path) -> bool:
     ignore_dirs = {"share/man", "share/info", "share/doc"}
     parts = file_path.parts
@@ -33,6 +40,8 @@ def is_ignored_path(file_path: Path) -> bool:
                 return True
     path_str = str(file_path)
     return any(f"/{ignore}/" in path_str or path_str.endswith(f"/{ignore}") for ignore in ignore_dirs)
+
+
 def check_package(pkg_name: str) -> dict:
     files = get_package_files(pkg_name)
     missing = []
@@ -44,6 +53,8 @@ def check_package(pkg_name: str) -> dict:
         if not file_path.exists():
             missing.append(str(file_path))
     return {"package": pkg_name, "total_checked": checked, "missing_count": len(missing), "missing_files": missing}
+
+
 def main():
     packages = get_installed_packages()
     print(f"Found {len(packages)} installed packages")
@@ -63,5 +74,7 @@ def main():
         json.dump(report, f, indent=2)
     print(f"\nReport: {report['summary']}")
     print(f"Saved to: {report_path}")
+
+
 if __name__ == "__main__":
     main()

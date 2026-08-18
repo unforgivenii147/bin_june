@@ -5,6 +5,8 @@ import sys
 from os import path
 from pathlib import Path
 from dh import get_files, mpf3
+
+
 def process_file(path) -> None:
     path = Path(path)
     print(f"processing {path.name}")
@@ -19,6 +21,8 @@ def process_file(path) -> None:
     except subprocess.CalledProcessError as e:
         print(f"[ERROR] {path.name}")
         print(f"  {e.stderr}")
+
+
 def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -36,5 +40,7 @@ def main() -> None:
         print("\nFiles without generated stubs:")
         for k in stubless:
             print(f" - {k.name}")
+
+
 if __name__ == "__main__":
     sys.exit(main())

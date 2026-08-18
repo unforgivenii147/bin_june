@@ -6,6 +6,8 @@ import shutil
 import sys
 from pathlib import Path
 from dh import unique_path
+
+
 def get_all_files(cwd: Path):
     files = []
     for path in cwd.rglob("*"):
@@ -15,6 +17,8 @@ def get_all_files(cwd: Path):
             size = path.stat().st_size
             files.append((path, size))
     return sorted(files, key=operator.itemgetter(1))
+
+
 def get_num_folders(files) -> int:
     if len(files) < 2:
         return 1
@@ -24,6 +28,8 @@ def get_num_folders(files) -> int:
     target_range_per_folder = range_size / 100
     num_folders = max(1, int(range_size / target_range_per_folder))
     return min(num_folders, len(files))
+
+
 def create_range_folders(cwd: Path, files, num_folders: int):
     sizes = sorted([size for _, size in files])
     folder_ranges = []
@@ -35,6 +41,7 @@ def create_range_folders(cwd: Path, files, num_folders: int):
         folder_files = sizes[start_idx:end_idx]
         if folder_files:
             min_size, max_size = (min(folder_files), max(folder_files))
+
             def fsz(size) -> str:
                 if size < 1000:
                     return f"{size}B"
@@ -43,12 +50,15 @@ def create_range_folders(cwd: Path, files, num_folders: int):
                 if size < 1000000000:
                     return f"{size // 1000000}M"
                 return f"{size // 1000000000}G"
+
             folder_name = f"{fsz(min_size)}-{fsz(max_size)}"
             folder_ranges.append((min_size, max_size, folder_name))
             folder_path = os.path.join(cwd, folder_name)
             Path(folder_path).mkdir(exist_ok=True, parents=True)
         start_idx = end_idx
     return folder_ranges
+
+
 def distribute_files(files, folders, cwd: Path) -> None:
     size_to_folder = {}
     for min_size, max_size, folder_name in folders:
@@ -69,6 +79,8 @@ def distribute_files(files, folders, cwd: Path) -> None:
                 break
         else:
             print(f"No folder match for {Path(filepath).name} ({size:,} bytes)")
+
+
 def main() -> None:
     cwd = Path.cwd()
     files = get_all_files(cwd)
@@ -80,5 +92,7 @@ def main() -> None:
     folders = create_range_folders(cwd, files, num_folders)
     distribute_files(files, folders, cwd)
     print("Folderization complete!")
+
+
 if __name__ == "__main__":
     main()

@@ -3,6 +3,8 @@ from __future__ import annotations
 import hashlib
 import shutil
 from pathlib import Path
+
+
 def calculate_hash(filepath: Path, chunk_size=8192):
     sha256 = hashlib.sha256()
     try:
@@ -12,6 +14,8 @@ def calculate_hash(filepath: Path, chunk_size=8192):
         return sha256.hexdigest()
     except (OSError, PermissionError):
         return None
+
+
 def get_system_bin_hashes():
     system_bin = Path("/system/bin")
     if not system_bin.exists():
@@ -29,6 +33,8 @@ def get_system_bin_hashes():
             continue
     print(f"✅ Scanned {len(hashes)} files in /system/bin\n")
     return hashes
+
+
 def check_and_move_files(system_hashes):
     current_dir = Path.cwd()
     matches_dir = current_dir / "matched_system_files"
@@ -61,6 +67,8 @@ def check_and_move_files(system_hashes):
             print(f"  ⚠️  Error with {filepath.name}: {e}")
             continue
     return (matches, moved)
+
+
 def main():
     print("-" * 42)
     print("🔐 File Hash Comparison & Move Tool")
@@ -85,5 +93,7 @@ def main():
     else:
         print("✅ No matching files found.")
     print("-" * 42)
+
+
 if __name__ == "__main__":
     main()

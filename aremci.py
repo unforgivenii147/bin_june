@@ -7,8 +7,11 @@ from concurrent.futures import ProcessPoolExecutor
 from os import scandir as os_scandir
 from pathlib import Path
 from dh import DOC_TH1, DOC_TH2
+
+
 def is_python_file(path: str | Path) -> bool:
     from ast import parse as ast_parse
+
     path = Path(path)
     if is_binary(path):
         return False
@@ -28,6 +31,8 @@ def is_python_file(path: str | Path) -> bool:
         except:
             return False
     return False
+
+
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -42,6 +47,8 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
+
+
 def get_pyfiles(path: str | Path) -> list[Path]:
     path = Path(path)
     if path.is_file():
@@ -73,12 +80,16 @@ def get_pyfiles(path: str | Path) -> list[Path]:
         except (PermissionError, OSError):
             continue
     return sorted(pyfiles)
+
+
 COMMENT_AND_DOCSTRING_REGEX = re.compile(
     f"(?:^(\\s*)#.*$)|(?:^(\\s*)({DOC_TH2}).*?(\\3)|^(\\s*)({DOC_TH1}).*?(\\5))|(?:\\b(def|class)\\s+\\w+[^():]*\\([^)]*\\)\\s*:\\s*)(\\s*)((DOC_TH2).*?(\\7)|({DOC_TH1}).*?(\\9))",
     re.MULTILINE | re.DOTALL,
 )
 DOCSTRING_START_REGEX = re.compile(f"^\\s*({DOC_TH2}|{DOC_TH1}).*?(\\1)\\s*", re.MULTILINE | re.DOTALL)
 MAX_WORKERS = 4
+
+
 def strip_comments_and_docstrings(file_path_str) -> bool:
     file_path = Path(file_path_str)
     backup_path = file_path.with_suffix(file_path.suffix + ".bak")
@@ -89,6 +100,7 @@ def strip_comments_and_docstrings(file_path_str) -> bool:
         print(f"Error reading file {file_path}: {e}")
         return False
     DOCSTRING_START_REGEX.sub("\x01", original_content, count=3)
+
     def replace_comments(match):
         _indent1, comment1, quote1, _indent2, _quote2, fn_type, indent3, quote3, quote4 = match.groups()
         if comment1:
@@ -98,6 +110,7 @@ def strip_comments_and_docstrings(file_path_str) -> bool:
         if quote3 or quote4:
             return f"{fn_type}{indent3}"
         return match.group(0)
+
     no_single_line_comments = re.sub(r"^\s*#.*$", "", original_content, flags=re.MULTILINE)
     try:
         ast.parse(no_single_line_comments)
@@ -129,6 +142,8 @@ def strip_comments_and_docstrings(file_path_str) -> bool:
         except Exception as restore_e:
             print(f"CRITICAL ERROR: Failed to write cleaned file and restore backup for {file_path}: {restore_e}")
         return False
+
+
 def process_directory(directory: str) -> None:
     python_files = get_pyfiles(directory)
     print(f"Found {len(python_files)} Python files to process.")
@@ -145,6 +160,8 @@ def process_directory(directory: str) -> None:
                 print(f"Error processing future for {file_path}: {e}")
     print(f"""
 Finished processing. Successfully stripped comments/docstrings from {processed_count}/{len(python_files)} files.""")
+
+
 if __name__ == "__main__":
     target_directory = "."
     print(f"Starting comment and docstring stripping in directory: {Path(target_directory).resolve()}")

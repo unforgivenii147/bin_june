@@ -6,10 +6,14 @@ import os
 import re
 from pathlib import Path
 from rcssmin import cssmin
+
+
 def minify_html(html: str) -> str:
     html = re.sub(r">\s+<", "><", html)
     html = re.sub(r"\s{2,}", " ", html)
     return html.strip()
+
+
 def process_file(path: str) -> str:
     path = Path(path)
     try:
@@ -28,6 +32,8 @@ def process_file(path: str) -> str:
         return f"OK → {path}"
     except Exception as e:
         return f"ERR ({path}): {e}"
+
+
 def collect_files() -> list:
     supported = ".css", ".json", ".html", ".htm"
     out = []
@@ -38,6 +44,8 @@ def collect_files() -> list:
             if lower.endswith(supported):
                 out.append(path)
     return out
+
+
 def main() -> None:
     files = collect_files()
     if not files:
@@ -47,5 +55,7 @@ def main() -> None:
     with multiprocessing.Pool(multiprocessing.cpu_count()) as pool:
         for result in pool.imap_unordered(process_file, files):
             print(result)
+
+
 if __name__ == "__main__":
     main()

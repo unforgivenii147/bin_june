@@ -7,6 +7,8 @@ import os
 import sys
 from collections import defaultdict
 from pathlib import Path
+
+
 def parse_file_definitions(file_path: Path) -> dict:
     definitions = {}
     try:
@@ -27,6 +29,8 @@ def parse_file_definitions(file_path: Path) -> dict:
                 node_key = ("constant", name, ast.unparse(node))
                 definitions[node_key] = {"name": name, "type": "constant", "node": node}
     return {node_key: (str(file_path), data) for node_key, data in definitions.items()}
+
+
 def modify_affected_file(file_path_str: str, obj_name: str, obj_type: str, raw_obj_code: str) -> str:
     file_path = Path(file_path_str)
     source = file_path.read_text(encoding="utf-8")
@@ -54,6 +58,8 @@ def modify_affected_file(file_path_str: str, obj_name: str, obj_type: str, raw_o
     modified_source = ast.unparse(tree)
     ast.parse(modified_source)
     return modified_source
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Recursively find and consolidate duplicate functions, classes, and constants."
@@ -124,5 +130,7 @@ def main():
             except Exception as e:
                 print(f"❌ Failed to parse or modify file safely {file_str}: {e}. Skipping structural changes.")
         print(f"\n📊 Refactor complete. Adjusted and verified {updated_count} files.")
+
+
 if __name__ == "__main__":
     main()

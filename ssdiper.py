@@ -5,6 +5,8 @@ import operator
 from pathlib import Path
 import ssdeep
 from dh import get_files
+
+
 def calculate_ssdeep_hash(filepath: Path, min_file_size: int = 1):
     try:
         if filepath.stat().st_size < min_file_size:
@@ -23,6 +25,8 @@ def calculate_ssdeep_hash(filepath: Path, min_file_size: int = 1):
     except Exception as e:
         print(f"An unexpected error occurred for {filepath}: {e}")
         return None
+
+
 def compare_files(file_paths: list[Path], similarity_threshold: int = 70):
     file_hashes = {}
     for filepath in file_paths:
@@ -54,12 +58,16 @@ def compare_files(file_paths: list[Path], similarity_threshold: int = 70):
                 print(f"An unexpected error occurred during comparison for {filepath1_str} and {filepath2_str}: {e}")
     similarities.sort(key=operator.itemgetter("similarity_score"), reverse=True)
     return similarities
+
+
 def save_to_json(data, filename: str = "simz.json") -> None:
     try:
         with Path(filename).open("w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
     except Exception as e:
         print(f"Error saving data to JSON file '{filename}': {e}")
+
+
 if __name__ == "__main__":
     cwd = Path.cwd()
     MIN_SIMILARITY_THRESHOLD = 50

@@ -3,6 +3,7 @@
 Word frequency counter for text files in current directory.
 Uses parallel processing for efficiency.
 """
+
 from __future__ import annotations
 import json
 import logging
@@ -12,8 +13,11 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import List
 from dh import get_nobinary
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+
+
 def process_file(file_path: Path) -> Counter:
     word_counter = Counter()
     try:
@@ -25,12 +29,16 @@ def process_file(file_path: Path) -> Counter:
     except Exception as e:
         logger.warning(f"Failed to process {file_path}: {e}")
     return word_counter
+
+
 def collect_text_files(directory: Path | None = None) -> List[Path]:
     if directory is None:
         directory = Path.cwd()
     text_files = get_nobinary(directory)
     logger.info(f"Found {len(text_files)} text files to process")
     return text_files
+
+
 def process_files_parallel(file_paths: List[Path], max_workers: int | None = None) -> Counter:
     total_counter = Counter()
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
@@ -44,6 +52,8 @@ def process_files_parallel(file_paths: List[Path], max_workers: int | None = Non
             except Exception as e:
                 logger.error(f"Error processing {file_path}: {e}")
     return total_counter
+
+
 def save_results_json(counter: Counter, output_file: Path):
     sorted_words = dict(sorted(counter.items(), key=lambda x: (-x[1], x[0])))
     results = {
@@ -57,9 +67,14 @@ def save_results_json(counter: Counter, output_file: Path):
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
     logger.info(f"Results saved to {output_file}")
+
+
 def import_datetime():
     from datetime import datetime
+
     return datetime.now()
+
+
 def main():
     directory = Path.cwd()
     output_file = Path("counter.json")
@@ -85,5 +100,7 @@ def main():
         print(f"{word:<20} {count:>8}")
     print("-" * 42)
     print(f"\nFull results saved to: {output_file.absolute()}")
+
+
 if __name__ == "__main__":
     main()

@@ -3,6 +3,8 @@ import os
 from pathlib import Path
 import requests
 from dotenv import load_dotenv
+
+
 def search_python_repos():
     load_dotenv(Path.home() / ".env")
     token = os.getenv("GITHUB_TOKEN")
@@ -21,5 +23,7 @@ def search_python_repos():
             f.write(f"  Updated: {repo['updated_at']}\n")
             f.write(f"  Stars: {repo['stargazers_count']}\n\n")
     print(f"Results saved to {output}")
+
+
 if __name__ == "__main__":
     search_python_repos()

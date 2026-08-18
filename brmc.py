@@ -16,12 +16,15 @@ Optionally remove comments too while preserving:
 - Reports number of docstrings removed for every file (only if removed)
 - If -c is set, also removes comments and reports comment removals count
 """
+
 from __future__ import annotations
 import argparse
 import ast
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from dh import get_pyfiles
+
+
 def _first_statement_is_docstring(tree: ast.Module) -> bool:
     if not tree.body:
         return False
@@ -31,6 +34,8 @@ def _first_statement_is_docstring(tree: ast.Module) -> bool:
         and isinstance(getattr(node, "value", None), ast.Constant)
         and isinstance(node.value.value, str)
     )
+
+
 def _remove_docstrings_from_source(source: str) -> tuple[str, int]:
     try:
         tree = ast.parse(source)
@@ -69,12 +74,16 @@ def _remove_docstrings_from_source(source: str) -> tuple[str, int]:
                 lines[mid] = ""
     new_source = "".join(lines)
     return new_source, len(to_remove)
+
+
 def _validate_syntax(source: str) -> bool:
     try:
         ast.parse(source)
         return True
     except SyntaxError:
         return False
+
+
 def _split_code_and_comment(line: str) -> tuple[str, str | None]:
     in_squote = False
     in_dquote = False
@@ -103,6 +112,8 @@ def _split_code_and_comment(line: str) -> tuple[str, str | None]:
         if ch == "#":
             return line[:i], line[i:]
     return line, None
+
+
 def _should_preserve_comment(comment: str, *, is_line_start: bool) -> bool:
     s = comment.strip()
     if is_line_start and s.startswith("#!"):
@@ -116,6 +127,8 @@ def _should_preserve_comment(comment: str, *, is_line_start: bool) -> bool:
     if s.startswith("# fmt") or s.startswith("#fmt"):
         return True
     return bool(s.startswith("# noqa") or s.startswith("# nosec") or s.startswith("# lint"))
+
+
 def _remove_comments_from_source(source: str) -> tuple[str, int]:
     out_lines: list[str] = []
     removed = 0
@@ -148,6 +161,8 @@ def _remove_comments_from_source(source: str) -> tuple[str, int]:
         out_lines.append(new_line)
         removed += 1
     return "".join(out_lines), removed
+
+
 def _collect_py_files(paths: list[Path], *, recursive: bool = True) -> list[Path]:
     py_files: list[Path] = []
     for target in paths:
@@ -158,6 +173,8 @@ def _collect_py_files(paths: list[Path], *, recursive: bool = True) -> list[Path
             pattern = "**/*.py" if recursive else "*.py"
             py_files.extend(target.glob(pattern))
     return sorted({p.resolve() for p in py_files})
+
+
 def process_file(path: Path, cwd: Path, *, strip_comments: bool) -> tuple[str, int, int] | None:
     rel = str(path.relative_to(cwd))
     try:
@@ -181,6 +198,8 @@ def process_file(path: Path, cwd: Path, *, strip_comments: bool) -> tuple[str, i
     except Exception:
         return None
     return rel, doc_count, comment_count
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Strip docstrings from Python files (preserves module docstrings). Optionally remove comments."
@@ -220,5 +239,7 @@ def main() -> None:
             print(f"  docstrings removed: {doc_count}")
         if strip_comments and comment_count > 0:
             print(f"  comments removed: {comment_count}")
+
+
 if __name__ == "__main__":
     main()

@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Remove duplicate functions from Python files based on content hash."""
+
 from __future__ import annotations
 import argparse
 import ast
@@ -7,6 +8,8 @@ import hashlib
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+
+
 def normalize_function_body(lines, start_idx, end_idx):
     """Extract and normalize function body lines."""
     body_lines = lines[start_idx:end_idx]
@@ -17,6 +20,8 @@ def normalize_function_body(lines, start_idx, end_idx):
         return ""
     min_indent = min(len(line) - len(line.lstrip()) for line in stripped)
     return "\n".join(line[min_indent:] if line.strip() else "" for line in body_lines)
+
+
 def compute_function_hash(filepath, func_node):
     """Compute hash of function signature + body, ignoring decorators."""
     try:
@@ -37,6 +42,8 @@ def compute_function_hash(filepath, func_node):
     body = normalize_function_body(func_lines, body_start, len(func_lines))
     content = f"{sig}\n{body}"
     return hashlib.md5(content.encode()).hexdigest()
+
+
 def extract_top_level_functions(filepath):
     """Parse file and extract top-level functions with metadata."""
     try:
@@ -57,6 +64,8 @@ def extract_top_level_functions(filepath):
                     "end_lineno": node.end_lineno,
                 }
     return functions
+
+
 def process_target_file(target_path, ref_hashes, apply=False):
     """Process single target file and return results."""
     funcs = extract_top_level_functions(target_path)
@@ -92,6 +101,8 @@ def process_target_file(target_path, ref_hashes, apply=False):
         except Exception as e:
             return {"file": target_path, "status": "error", "error": str(e), "duplicates": []}
     return {"file": target_path, "status": "found", "duplicates": duplicates}
+
+
 def expand_input_paths(inputs):
     """Expand files and directories to list of .py files."""
     py_files = set()
@@ -105,6 +116,8 @@ def expand_input_paths(inputs):
             elif path.is_dir():
                 py_files.update(path.rglob("*.py"))
     return sorted(py_files)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Remove duplicate functions from Python files",
@@ -169,5 +182,7 @@ def main():
     else:
         print(f"ℹ️  Found {total_duplicates} duplicate function(s)")
         print(f"   Run with -a/--apply to remove")
+
+
 if __name__ == "__main__":
     main()

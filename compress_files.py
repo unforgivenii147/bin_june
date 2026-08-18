@@ -6,6 +6,7 @@ import textwrap
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 import lzma_mt
+
 ARCHIVE_EXTENSIONS = {
     ".zip",
     ".br",
@@ -72,10 +73,16 @@ MEDIA_EXTENSIONS = {
     ".img",
 }
 EXCLUDE_DIRS = {".git", "__pycache__", ".venv", "venv", ".env", "node_modules"}
+
+
 def should_exclude(path: Path) -> bool:
     return any(part in EXCLUDE_DIRS for part in path.parts)
+
+
 def is_media_file(path: Path) -> bool:
     return path.suffix.lower() in MEDIA_EXTENSIONS
+
+
 def get_files_to_process(root_dir: Path, compress: bool) -> list[Path]:
     files = []
     if compress:
@@ -88,6 +95,8 @@ def get_files_to_process(root_dir: Path, compress: bool) -> list[Path]:
             if file.is_file() and not should_exclude(file) and file.suffix.lower() == ".xz":
                 files.append(file)
     return sorted(files)
+
+
 def compress_file(
     filepath: Path, preset: int = 9, threads: int = 4, remove_orig: bool = True
 ) -> tuple[Path, bool, str, int, int]:
@@ -107,6 +116,8 @@ def compress_file(
         return (filepath, True, f"Compressed to {output_path.name}", original_size, space_freed)
     except Exception as e:
         return filepath, False, f"Error: {e!s}", 0, 0
+
+
 def decompress_file(filepath: Path, remove_orig: bool = True) -> tuple[Path, bool, str, int, int]:
     try:
         if filepath.suffix.lower() != ".xz":
@@ -125,12 +136,16 @@ def decompress_file(filepath: Path, remove_orig: bool = True) -> tuple[Path, boo
         return (filepath, True, f"Decompressed to {output_path.name}", compressed_size, space_freed)
     except Exception as e:
         return filepath, False, f"Error: {e!s}", 0, 0
+
+
 def format_bytes(bytes_val: int) -> str:
     for unit in ["B", "KB", "MB", "GB", "TB"]:
         if bytes_val < 1024.0:
             return f"{bytes_val:.2f} {unit}"
         bytes_val /= 1024.0
     return f"{bytes_val:.2f} PB"
+
+
 def process_files(
     root_dir: Path,
     compress: bool,
@@ -181,6 +196,8 @@ def process_files(
         print(f"Total original size: {format_bytes(total_original_size)}")
         if total_space_freed > 0:
             print(f"Disk space freed: {format_bytes(total_space_freed)}")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Recursively compress or decompress files using lzma_mt with parallel processing",
@@ -242,5 +259,7 @@ def main():
         num_workers=args.num_workers,
         remove_orig=not args.keep_orig,
     )
+
+
 if __name__ == "__main__":
     main()

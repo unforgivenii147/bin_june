@@ -3,6 +3,7 @@
 Optimized version of transline2.py for Python 3.12.
 Parallel translation of text files in a directory or specified paths.
 """
+
 from __future__ import annotations
 import logging
 import re
@@ -14,14 +15,19 @@ from pathlib import Path
 from typing import Final
 from deep_translator import GoogleTranslator
 from dh import get_files
+
 NON_ENGLISH_PATTERN: Final[re.Pattern] = re.compile(r"[^\x00-\x7F]")
 MAX_WORKERS: Final[int] = 4
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler(sys.stdout)]
 )
 logger = logging.getLogger(__name__)
+
+
 def is_english(text: str) -> bool:
     return not NON_ENGLISH_PATTERN.search(text)
+
+
 def get_files(path: Path, include_hidden: bool = True, extensions: tuple[str, ...] | None = None) -> list[Path]:
     if not path.exists():
         raise FileNotFoundError(f"Path does not exist: {path}")
@@ -47,6 +53,8 @@ def get_files(path: Path, include_hidden: bool = True, extensions: tuple[str, ..
             logger.warning("Permission denied: %s", current)
             continue
     return sorted(files)
+
+
 def translate_text(text: str) -> str:
     if not text:
         return text
@@ -66,6 +74,8 @@ def translate_text(text: str) -> str:
                 logger.error("Translation error on line: %s", e)
                 translated_lines.append(line)
     return "".join(translated_lines)
+
+
 def safe_overwrite(filepath: Path, content: str) -> None:
     with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False, dir=filepath.parent) as tmp:
         tmp.write(content)
@@ -75,6 +85,8 @@ def safe_overwrite(filepath: Path, content: str) -> None:
     except Exception as e:
         tmp_path.unlink(missing_ok=True)
         raise RuntimeError(f"Failed to overwrite {filepath}: {e}") from e
+
+
 def process_file(path: Path) -> str:
     try:
         original = path.read_text(encoding="utf-8", errors="ignore")
@@ -90,6 +102,8 @@ def process_file(path: Path) -> str:
         return f"No changes: {path.name}"
     except Exception as e:
         return f"Failed to process {path}: {e}"
+
+
 def main() -> None:
     args = sys.argv[1:]
     cwd = Path.cwd()
@@ -106,5 +120,7 @@ def main() -> None:
         for future in as_completed(future_to_file):
             result = future.result()
             logger.info(result)
+
+
 if __name__ == "__main__":
     main()

@@ -4,6 +4,8 @@ import argparse
 import ast
 import sys
 from pathlib import Path
+
+
 def has_main_guard(tree: ast.AST) -> bool:
     for node in tree.body if isinstance(tree, ast.Module) else []:
         if isinstance(node, ast.If):
@@ -21,10 +23,14 @@ def has_main_guard(tree: ast.AST) -> bool:
             if isinstance(comp, ast.Constant) and comp.value == "__main__":
                 return True
     return False
+
+
 def is_docstring_expr(node: ast.AST) -> bool:
     if not isinstance(node, ast.Expr):
         return False
     return bool(isinstance(node.value, ast.Constant) and isinstance(node.value.value, str))
+
+
 def should_wrap_node(node: ast.stmt) -> bool:
     if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
         return False
@@ -41,6 +47,8 @@ def should_wrap_node(node: ast.stmt) -> bool:
                 if isinstance(comp, ast.Constant) and comp.value == "__main__":
                     return False
     return True
+
+
 def indent_block(block: str, spaces: int = 4) -> str:
     prefix = " " * spaces
     lines = block.splitlines(True)
@@ -51,6 +59,8 @@ def indent_block(block: str, spaces: int = 4) -> str:
         else:
             out.append(prefix + ln)
     return "".join(out)
+
+
 def rewrite_file(path: Path) -> tuple[bool, str]:
     src = path.read_text(encoding="utf-8")
     try:
@@ -64,8 +74,10 @@ def rewrite_file(path: Path) -> tuple[bool, str]:
     if not wrap_nodes:
         return False, "SKIP nothing to wrap"
     lines = src.splitlines(True)
+
     def segment(start: int, end: int) -> str:
         return "".join(lines[start - 1 : end])
+
     main_parts: list[str] = []
     keep_segments: list[tuple[int, int]] = []
     for n in nodes:
@@ -101,6 +113,8 @@ def rewrite_file(path: Path) -> tuple[bool, str]:
     new_src = "".join(new_parts).rstrip() + main_fn
     path.write_text(new_src, encoding="utf-8")
     return True, "OK autofixed"
+
+
 def iter_py_files(inputs: list[str]) -> list[Path]:
     if not inputs:
         roots = [Path(".")]
@@ -114,6 +128,8 @@ def iter_py_files(inputs: list[str]) -> list[Path]:
             if r.suffix == ".py" and r.is_file():
                 out.append(r)
     return sorted(set(out))
+
+
 def main(argv: list[str]) -> int:
     p = argparse.ArgumentParser()
     p.add_argument("paths", nargs="*", help="Files or directories to scan (default: current dir recursively)")
@@ -142,5 +158,7 @@ def main(argv: list[str]) -> int:
     if args.autofix:
         return 0 if any_changed else (0 if not any_missing else 2)
     return 0 if not any_missing else 1
+
+
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv[1:]))

@@ -6,6 +6,7 @@ import re
 from pathlib import Path
 from dotenv import load_dotenv
 from telethon import TelegramClient
+
 env_path = Path.home() / ".env"
 load_dotenv(env_path)
 api_id = os.environ.get("API_ID")
@@ -13,6 +14,8 @@ api_hash = os.environ.get("API_HASH")
 phone_number = "+989051708322"
 channel_handle = "https://t.me/pycode_hubb"
 search_query = "pdf"
+
+
 async def main():
     client = TelegramClient("session_name", api_id, api_hash)
     await client.start(phone=phone_number)
@@ -28,5 +31,7 @@ async def main():
                     for url in urls:
                         f.write(url + "\n")
     await client.disconnect()
+
+
 if __name__ == "__main__":
     asyncio.run(main())

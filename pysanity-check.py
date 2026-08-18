@@ -5,8 +5,12 @@ import re
 import subprocess
 import sys
 import pkg_resources
+
+
 def get_installed_python_packages() -> list[tuple[str, str]]:
     return [(d.project_name, d.version) for d in pkg_resources.working_set]
+
+
 def check_package_importable(package_name: str) -> tuple[bool, str]:
     try:
         importlib.import_module(package_name)
@@ -15,6 +19,8 @@ def check_package_importable(package_name: str) -> tuple[bool, str]:
         return False, f"ImportError: {e}"
     except Exception as e:
         return False, f"Unexpected error: {e}"
+
+
 def get_latest_version(package_name: str) -> str:
     try:
         result = subprocess.run(
@@ -29,6 +35,8 @@ def get_latest_version(package_name: str) -> str:
     except subprocess.CalledProcessError:
         pass
     return "Unknown"
+
+
 def main() -> None:
     print("=== Python Packages Sanity Check ===")
     installed_pkgs = get_installed_python_packages()
@@ -58,5 +66,7 @@ def main() -> None:
         print("All packages are importable.")
     else:
         print("Some packages may need attention.")
+
+
 if __name__ == "__main__":
     main()

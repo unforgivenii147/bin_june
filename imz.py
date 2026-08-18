@@ -13,7 +13,10 @@ from pathlib import Path
 import xxhash
 from dh import PKG_MAPPING, STDLIB
 from tqdm import tqdm
+
 CACHE_FILE = ".reqcache.json"
+
+
 def fast_hash(path: Path) -> str:
     try:
         h = xxhash.xxh64()
@@ -25,15 +28,21 @@ def fast_hash(path: Path) -> str:
         return h.hexdigest()
     except Exception:
         return "0"
+
+
 def load_json(path: Path) -> dict:
     try:
         with path.open(encoding="utf-8", errors="ignore") as f:
             return json.load(f)
     except Exception:
         return {}
+
+
 def save_json(path: Path, obj: dict) -> None:
     with path.open("w", encoding="utf-8") as f:
         json.dump(obj, f, indent=2, sort_keys=True)
+
+
 def load_set_file(path: str) -> set[str]:
     out = set()
     try:
@@ -45,6 +54,8 @@ def load_set_file(path: str) -> set[str]:
     except Exception:
         pass
     return out
+
+
 def load_mapping(path: str) -> dict[str, str]:
     out: dict[str, str] = {}
     try:
@@ -59,6 +70,8 @@ def load_mapping(path: str) -> dict[str, str]:
     except Exception:
         pass
     return out
+
+
 def extract_from_ast(code: str, path_hint: str | None = None) -> dict[str, set[str]]:
     result = {"imports": set(), "star_modules": set(), "dynamic": set(), "relative": set()}
     try:
@@ -96,15 +109,21 @@ def extract_from_ast(code: str, path_hint: str | None = None) -> dict[str, set[s
                 ) and (node.args and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str)):
                     result["dynamic"].add(node.args[0].value.split(".", 1)[0])
     return result
+
+
 def process_py_file_content(code: str, path_hint: str | None = None) -> dict[str, list[str]]:
     d = extract_from_ast(code, path_hint)
     return {k: sorted(v) for k, v in d.items()}
+
+
 def process_py_file(path: Path) -> dict[str, list[str]]:
     try:
         text = path.read_text(encoding="utf-8", errors="ignore")
     except Exception:
         return {"imports": [], "star_modules": [], "dynamic": [], "relative": []}
     return process_py_file_content(text, str(path))
+
+
 def process_noext_python_script(path: Path) -> dict[str, list[str]]:
     try:
         with path.open(encoding="utf-8", errors="ignore") as f:
@@ -115,6 +134,8 @@ def process_noext_python_script(path: Path) -> dict[str, list[str]]:
     except Exception:
         return {"imports": [], "star_modules": [], "dynamic": [], "relative": []}
     return process_py_file_content(code, str(path))
+
+
 def process_ipynb(path: Path) -> dict[str, list[str]]:
     out = {"imports": [], "star_modules": [], "dynamic": [], "relative": []}
     try:
@@ -139,6 +160,8 @@ def process_ipynb(path: Path) -> dict[str, list[str]]:
     out["dynamic"] = sorted(dyn)
     out["relative"] = sorted(rel)
     return out
+
+
 def process_zip_file(path: Path) -> dict[str, list[str]]:
     imports = set()
     stars = set()
@@ -160,6 +183,8 @@ def process_zip_file(path: Path) -> dict[str, list[str]]:
     except Exception:
         pass
     return {"imports": sorted(imports), "star_modules": sorted(stars), "dynamic": sorted(dyn), "relative": sorted(rel)}
+
+
 def process_tar_file(path: Path) -> dict[str, list[str]]:
     imports = set()
     stars = set()
@@ -185,6 +210,8 @@ def process_tar_file(path: Path) -> dict[str, list[str]]:
     except Exception:
         pass
     return {"imports": sorted(imports), "star_modules": sorted(stars), "dynamic": sorted(dyn), "relative": sorted(rel)}
+
+
 def process_raw(path: str) -> dict[str, list[str]]:
     p = Path(path)
     name = str(p).lower()
@@ -199,6 +226,8 @@ def process_raw(path: str) -> dict[str, list[str]]:
     if name.endswith((".tar.gz", ".tgz", ".tar.xz")):
         return process_tar_file(p)
     return {"imports": [], "star_modules": [], "dynamic": [], "relative": []}
+
+
 def build_project_module_map(sources: list[str]) -> dict[str, list[str]]:
     mapping: dict[str, list[str]] = {}
     for path in sources:
@@ -219,6 +248,8 @@ def build_project_module_map(sources: list[str]) -> dict[str, list[str]]:
         mapping.setdefault(mod, []).append(str(p))
         mapping.setdefault(top, [*mapping.get(top, []), str(p)])
     return mapping
+
+
 def trace_star_module(module: str, project_map: dict[str, list[str]]) -> set[str]:
     found_imports = set()
     candidates = []
@@ -258,6 +289,8 @@ def trace_star_module(module: str, project_map: dict[str, list[str]]) -> set[str
         except Exception:
             pass
     return found_imports
+
+
 def resolve_packages(
     imports: set[str], stdlib: set[str], mapping: dict[str, str], pip_available: set[str], project_toplevels: set[str]
 ) -> set[str]:
@@ -288,6 +321,8 @@ def resolve_packages(
                 continue
         out.add(out_name)
     return out
+
+
 def scan_sources(ignore_dirs: set[str]) -> list[str]:
     out = []
     cwd = Path.cwd()
@@ -299,6 +334,8 @@ def scan_sources(ignore_dirs: set[str]) -> list[str]:
             if lower.endswith((".py", ".ipynb", ".whl", ".zip", ".tar.gz", ".tgz", ".tar.xz")) or path.suffix == "":
                 out.append(str(path))
     return out
+
+
 def main() -> None:
     p = argparse.ArgumentParser(description="Offline requirements.txt generator (static + heuristics).")
     p.add_argument(
@@ -416,5 +453,7 @@ def main() -> None:
             print(pkg)
     else:
         print("(empty)")
+
+
 if __name__ == "__main__":
     main()

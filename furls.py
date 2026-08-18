@@ -15,9 +15,12 @@ from urllib.parse import urlparse
 from zipfile import ZipFile
 import zstd
 from dh import append_text, is_valid_url
+
 DEFAULT_MAX_MB = 15
 EXCLUDE_DIRS = {".git", "__pycache__"}
-URL_RE = re.compile(r"(https?://[^\sr'\"<>\)\(]+)", flags=re.IGNORECASE)
+URL_RE = re.compile(r"https?://[^\s'\"<>()]+", flags=re.IGNORECASE)
+# URL_RE = re.compile(r"https?://[\w.\-/~:?#\[\]@!$&*+,;=%]+", flags=re.IGNORECASE)
+
 GIT_FILE = Path("gitlinks.txt")
 REPO_FILE = Path("repos.txt")
 ARCHIVE_SUFFIXES = (
@@ -43,8 +46,12 @@ ARCHIVE_SUFFIXES = (
     ".tbz",
     "tzz",
 )
+
+
 def should_skip_dir(dirname: str) -> bool:
     return any((part in EXCLUDE_DIRS for part in dirname.split(os.sep)))
+
+
 def find_urls_in_text(text):
     found = set()
     for m in URL_RE.findall(text):
@@ -52,6 +59,8 @@ def find_urls_in_text(text):
         if url:
             found.add(url)
     return found
+
+
 def decode_bytes_to_text(b):
     for enc in ("utf-8", "latin-1", "utf-16"):
         try:
@@ -59,6 +68,8 @@ def decode_bytes_to_text(b):
         except Exception:
             continue
     return b.decode("utf-8", errors="ignore")
+
+
 def scan_bytes_for_urls(b: bytes, max_bytes, exts, name_hint=None):
     if exts is not None and name_hint:
         _, ext = os.path.splitext(name_hint)
@@ -68,9 +79,13 @@ def scan_bytes_for_urls(b: bytes, max_bytes, exts, name_hint=None):
         return set()
     text = decode_bytes_to_text(b)
     return find_urls_in_text(text)
+
+
 def is_archive_name(name) -> bool:
     nl = name.lower()
     return any((nl.endswith(suf) for suf in ARCHIVE_SUFFIXES))
+
+
 def open_tar_from_zst_path(path):
     temp = tempfile.TemporaryFile()
     with Path(path).open("rb") as fh:
@@ -93,6 +108,8 @@ def open_tar_from_zst_path(path):
         with contextlib.suppress(Exception):
             temp.close()
         return (None, None)
+
+
 def process_zipfile_zipped(zipf: ZipFile, max_bytes, exts, found, recursion_depth, max_recursion) -> None:
     for zi in zipf.infolist():
         if zi.is_dir():
@@ -109,6 +126,8 @@ def process_zipfile_zipped(zipf: ZipFile, max_bytes, exts, found, recursion_dept
             process_bytes_as_archive(b, name, max_bytes, exts, found, recursion_depth + 1, max_recursion)
         else:
             found.update(scan_bytes_for_urls(b, max_bytes, exts, name_hint=name))
+
+
 def process_tarfile_obj(tarf: TarFile, max_bytes, exts, found, recursion_depth, max_recursion) -> None:
     for member in tarf.getmembers():
         if not member.isfile():
@@ -127,6 +146,8 @@ def process_tarfile_obj(tarf: TarFile, max_bytes, exts, found, recursion_depth, 
             process_bytes_as_archive(b, name, max_bytes, exts, found, recursion_depth + 1, max_recursion)
         else:
             found.update(scan_bytes_for_urls(b, max_bytes, exts, name_hint=name))
+
+
 def process_bytes_as_archive(b, name, max_bytes, exts, found, recursion_depth: int = 0, max_recursion: int = 3) -> None:
     lname = name.lower()
     bio = io.BytesIO(b)
@@ -171,6 +192,8 @@ def process_bytes_as_archive(b, name, max_bytes, exts, found, recursion_depth: i
         found.update(scan_bytes_for_urls(b, max_bytes, exts, name_hint=name))
     except Exception:
         found.update(scan_bytes_for_urls(b, max_bytes, exts, name_hint=name))
+
+
 def process_path(path: str, max_bytes: int, exts, found, recursion_limit=999) -> None:
     p = Path(path)
     try:
@@ -214,8 +237,7 @@ def process_path(path: str, max_bytes: int, exts, found, recursion_limit=999) ->
                 with contextlib.suppress(Exception):
                     tmpf.close()
             return
-        # b = p.read_bytes()[: max_bytes + 1]
-        # found.update(scan_bytes_for_urls(b, max_bytes, exts, name_hint=path))
+
         b = p.read_bytes()[: max_bytes + 1]
         found.update(scan_bytes_for_urls(b, max_bytes, exts, found=found, name_hint=path))
     except TypeError:
@@ -226,15 +248,21 @@ def process_path(path: str, max_bytes: int, exts, found, recursion_limit=999) ->
             return
     except Exception:
         return
+
+
 def is_github_url(url):
     try:
         result = urlparse(url)
         return "github.com" in result.netloc
     except:
         return False
+
+
 def extract_git_repos(urls):
     github_regex = re.compile(r"https?://github\.com/([^/]+)/([^/?#]+?)(?:\.git)?(?:[/?#]|$)")
     return [f"{m.group(1)}/{m.group(2)}" for url in urls if (m := github_regex.search(url))]
+
+
 def extract_and_save_gitlinks(urllist) -> None:
     glinks = []
     for url in urllist:
@@ -250,6 +278,8 @@ def extract_and_save_gitlinks(urllist) -> None:
         print(f"{len(glinks)} links found.")
     else:
         print("no git link")
+
+
 def iter_files(root: Path):
     root = root.resolve()
     for current_dir, dirnames, filenames in os.walk(str(root), topdown=True, followlinks=False):
@@ -259,6 +289,8 @@ def iter_files(root: Path):
         cd = Path(current_dir)
         for fname in filenames:
             yield (cd / fname)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Find URLs in files and supported archives recursively and save them to a file."
@@ -310,5 +342,7 @@ def main() -> None:
         any((p.endswith(".tar.zst") for p in sorted_urls))
     except OSError as e:
         print(f"Error writing output file: {e}", file=sys.stderr)
+
+
 if __name__ == "__main__":
     main()

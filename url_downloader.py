@@ -3,19 +3,24 @@ from __future__ import annotations
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+
 try:
     import pycurl
+
     HAS_PYCURL = True
     print("Using pycurl backend")
 except ImportError:
     HAS_PYCURL = False
     try:
         import requests
+
         print("pycurl not available → falling back to requests")
     except ImportError:
         print("Error: Neither pycurl nor requests is installed!")
         print("Run: pip install pycurl requests")
         sys.exit(1)
+
+
 def download_file(url: str, filepath: Path, timeout: int = 120) -> bool:
     filepath.parent.mkdir(parents=True, exist_ok=True)
     if HAS_PYCURL:
@@ -48,6 +53,8 @@ def download_file(url: str, filepath: Path, timeout: int = 120) -> bool:
     except Exception as e:
         print(f"❌ Failed {filepath.name}: {e}")
         return False
+
+
 def main():
     urls_file = Path("urls.txt")
     if not urls_file.exists():
@@ -95,5 +102,7 @@ def main():
     print(f"✅ Successfully downloaded : {removed_count} files")
     print(f"❌ Remaining in urls.txt   : {len(download_tasks) - removed_count} files")
     print("-" * 42)
+
+
 if __name__ == "__main__":
     main()

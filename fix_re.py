@@ -10,6 +10,7 @@ Fix regex patterns in Python files:
 Usage:
   python fix_regex.py [paths] [--workers N] [--no-backup] [--dry-run] [--verbose]
 """
+
 from __future__ import annotations
 import ast
 import io
@@ -21,6 +22,7 @@ from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass, field
 from multiprocessing import cpu_count
 from pathlib import Path
+
 RE_FUNCTIONS = {"compile", "search", "match", "fullmatch", "split", "findall", "finditer", "sub", "subn"}
 SKIP_TOKEN_TYPES = {
     tokenize.NL,
@@ -68,6 +70,8 @@ REGEX_INDICATORS = {
     "\\9",
     "\\0",
 }
+
+
 @dataclass
 class StringModification:
     start: tuple[int, int]
@@ -75,6 +79,8 @@ class StringModification:
     original: str
     modified: str
     line_offset: int = 0
+
+
 @dataclass
 class ProcessingStats:
     total_files: int = 0
@@ -83,9 +89,12 @@ class ProcessingStats:
     errors: int = 0
     skipped: int = 0
     start_time: float = field(default_factory=time.time)
+
     @property
     def elapsed(self) -> float:
         return time.time() - self.start_time
+
+
 class RegexFixer:
     def __init__(
         self,
@@ -99,6 +108,7 @@ class RegexFixer:
         self.verbose = verbose
         self.max_workers = max_workers or min(cpu_count(), 8)
         self.stats = ProcessingStats()
+
     def should_convert_string(self, content: str) -> bool:
         if not content:
             return False
@@ -116,6 +126,7 @@ class RegexFixer:
                 i += 1
             i += 1
         return bool(any(indicator in content for indicator in REGEX_INDICATORS))
+
     def parse_string_literal(self, token_str: str) -> tuple[str, str, str, bool]:
         prefix_end = 0
         for ch in token_str:
@@ -139,6 +150,7 @@ class RegexFixer:
             return (prefix, opening, "", is_raw)
         content = token_str[content_start:content_end]
         return (prefix, opening, content, is_raw)
+
     def convert_string(self, token_str: str) -> str | None:
         prefix, opening, content, is_raw = self.parse_string_literal(token_str)
         if is_raw:
@@ -154,6 +166,7 @@ class RegexFixer:
         elif "r" not in prefix.lower():
             new_prefix = "r" + prefix
         return f"{new_prefix}{opening}{new_content}{opening}"
+
     def process_tokens(self, code: str) -> list[StringModification]:
         modifications = []
         try:
@@ -197,6 +210,7 @@ class RegexFixer:
             else:
                 i += 1
         return modifications
+
     def apply_modifications(self, code: str, modifications: list[StringModification]) -> str:
         if not modifications:
             return code
@@ -216,12 +230,14 @@ class RegexFixer:
         result_parts.append(code[:last_end])
         result_parts.reverse()
         return "".join(result_parts)
+
     def validate_code(self, code: str) -> bool:
         try:
             ast.parse(code)
             return True
         except SyntaxError:
             return False
+
     def process_file(self, filepath: Path) -> tuple[Path, bool, str]:
         try:
             original_code = filepath.read_text(encoding="utf-8")
@@ -252,6 +268,7 @@ class RegexFixer:
             return (filepath, True, f"✓ Modified {len(modifications)} string(s)")
         except Exception as e:
             return (filepath, False, f"Failed to write: {e}")
+
     def collect_files(self, paths: list[Path]) -> list[Path]:
         python_files = set()
         exclude_dirs = {
@@ -281,6 +298,7 @@ class RegexFixer:
                         continue
                     python_files.add(py_file)
         return sorted(python_files)
+
     def process_files(self, files: list[Path]) -> list[tuple[Path, bool, str]]:
         if not files:
             return []
@@ -309,6 +327,7 @@ class RegexFixer:
                         results.append((files[i - 1], False, f"Error: {e}"))
                         self.stats.errors += 1
                 return results
+
     def _update_stats(self, result: tuple[Path, bool, str]):
         _, success, message = result
         if success:
@@ -319,6 +338,7 @@ class RegexFixer:
                 self.stats.skipped += 1
         else:
             self.stats.errors += 1
+
     def print_summary(self, results: list[tuple[Path, bool, str]]):
         if not results:
             print("\nNo files processed.")
@@ -357,13 +377,17 @@ class RegexFixer:
         print(f"  Workers:         {self.max_workers}")
         print(f"  Backup:          {('Enabled' if self.create_backup else 'Disabled')}")
         print(f"  Dry run:         {('Yes' if self.dry_run else 'No')}")
+
     def _get_relative_path(self, path: Path) -> str:
         try:
             return str(path.relative_to(Path.cwd()))
         except ValueError:
             return str(path)
+
+
 def main():
     import argparse
+
     parser = argparse.ArgumentParser(
         description="Fix regex string literals in Python files",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -400,5 +424,7 @@ def main():
     fixer.print_summary(results)
     if fixer.stats.errors > 0:
         sys.exit(1)
+
+
 if __name__ == "__main__":
     main()

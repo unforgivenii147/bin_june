@@ -2,6 +2,7 @@
 from __future__ import annotations
 import site
 from pathlib import Path
+
 u = Path(site.getusersitepackages())
 nl = []
 for p in u.iterdir():

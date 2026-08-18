@@ -2,14 +2,19 @@
 from __future__ import annotations
 from pathlib import Path
 from dh import FONT_EXT
+
 FONT_EXTENSIONS = tuple(FONT_EXT)
 OUTPUT_HTML = "fa_fonts_preview.html"
 FONT_SIZES = [14, 22]
+
+
 def find_fonts(cwd: Path = Path.cwd()):
     fonts = []
     for dirpath, _, filenames in cwd.walk():
         fonts.extend(Path(dirpath) / filename for filename in filenames if filename.lower().endswith(FONT_EXTENSIONS))
     return fonts
+
+
 def generate_html(font_files) -> str:
     html = [
         "<!DOCTYPE html>",
@@ -39,6 +44,8 @@ def generate_html(font_files) -> str:
         html.append("</div>")
     html.append("</body></html>")
     return "\n".join(html)
+
+
 def main() -> None:
     fonts = find_fonts()
     if not fonts:
@@ -46,5 +53,7 @@ def main() -> None:
     html_content = generate_html(fonts)
     Path(OUTPUT_HTML).write_text(html_content, encoding="utf-8")
     print("font-preview.html created.")
+
+
 if __name__ == "__main__":
     main()

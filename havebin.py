@@ -4,9 +4,12 @@ import os
 import subprocess
 from pathlib import Path
 from Pathlib import Path
+
+
 def get_file_age(path: str | Path, str_mode: bool = False) -> float | str:
     from os import stat as os_stat
     from time import time as time_time
+
     path = Path(path)
     current_time = time_time()
     file_stat = os_stat(path)
@@ -35,6 +38,8 @@ def get_file_age(path: str | Path, str_mode: bool = False) -> float | str:
         if value:
             parts.append(f"{value} {name}")
     return ", ".join(parts) if parts else "0 sec"
+
+
 def get_installed_pkgs():
     packages = []
     pip_freeze_path = Path("/sdcard/data/pip.freeze")
@@ -47,6 +52,7 @@ def get_installed_pkgs():
                 packages.append(name)
         return packages
     from importlib.metadata import distributions
+
     for dist in distributions():
         meta = dist.metadata
         name = meta.get("Name") or meta.get("name")
@@ -55,7 +61,11 @@ def get_installed_pkgs():
         name = name.strip()
         packages.append(name)
     return packages
+
+
 get_ipkgs = get_installed_pkgs
+
+
 def find_packages_with_bin_scripts(output_file: str = "have_scripts.txt") -> None:
     print("Starting search for packages with 'bin' scripts...")
     try:
@@ -130,5 +140,7 @@ def find_packages_with_bin_scripts(output_file: str = "have_scripts.txt") -> Non
         print(f"Stderr: {e.stderr}")
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
+
+
 if __name__ == "__main__":
     find_packages_with_bin_scripts()

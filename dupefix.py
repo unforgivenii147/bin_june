@@ -5,6 +5,8 @@ import shutil
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import xxhash
+
+
 def get_file_hash(filepath):
     try:
         if not filepath.exists():
@@ -19,6 +21,8 @@ def get_file_hash(filepath):
         return filepath, xxh.hexdigest()
     except (OSError, PermissionError):
         return filepath, None
+
+
 def remove_duplicates(root_dir, dry_run=True):
     root = pathlib.Path(root_dir)
     size_map = defaultdict(list)
@@ -59,6 +63,7 @@ def remove_duplicates(root_dir, dry_run=True):
                     else:
                         if shutil.which("gio"):
                             import subprocess
+
                             subprocess.run(["gio", "trash", str(p)], check=True)
                         else:
                             p.unlink()
@@ -73,6 +78,8 @@ def remove_duplicates(root_dir, dry_run=True):
     else:
         print(f"Potential space to free: {total_freed / (1024 * 1024):.2f} MB")
         print("Run with dry_run=False to actually delete files.")
+
+
 if __name__ == "__main__":
     target_dir = "."
     print("DRY RUN - No files will be deleted")

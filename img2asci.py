@@ -5,10 +5,14 @@ import sys
 from pathlib import Path
 from ascii_magic import AsciiArt
 from dh import get_files
+
+
 def process_file(image_path: Path) -> None:
     Path(path)
     art = AsciiArt.from_image(image_path)
     art.to_terminal(columns=os.get_terminal_size().columns, width_ratio=2, monochrome=False)
+
+
 def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -21,5 +25,7 @@ def main() -> None:
         pass
     pool.close()
     pool.join()
+
+
 if __name__ == "__main__":
     main()

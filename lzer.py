@@ -3,10 +3,13 @@ from __future__ import annotations
 import os
 from pathlib import Path
 import lz4.frame
+
 CHUNK_SIZE = 1024 * 1024
 CHUNK_THRESHOLD = 5 * 1024 * 1024
 COMPRESSED_EXT = ".lz4"
 EXT = {".gz", ".br", ".xz", ".zst", ".bz2", ".zip", ".whl", ".lz4"}
+
+
 def compress_file(src_path: Path, compression_level=lz4.frame.COMPRESSIONLEVEL_MAX) -> None:
     if src_path.is_dir():
         return
@@ -36,6 +39,8 @@ def compress_file(src_path: Path, compression_level=lz4.frame.COMPRESSIONLEVEL_M
                 dst_path.unlink()
         except Exception:
             pass
+
+
 def compress_files_recursive(directory: str = ".") -> None:
     for root, _, files in os.walk(directory):
         for filename in files:
@@ -43,5 +48,7 @@ def compress_files_recursive(directory: str = ".") -> None:
             if path.suffix in EXT or ".tar." in path.name:
                 continue
             compress_file(path)
+
+
 if __name__ == "__main__":
     compress_files_recursive(".")

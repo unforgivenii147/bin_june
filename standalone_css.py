@@ -7,11 +7,18 @@ import sys
 from pathlib import Path
 import requests
 from loguru import logger
+
 STATIC_DIR = "/sdcard/_static"
+
+
 def get_file_extension(url):
     return os.path.splitext(url)[1].lower()
+
+
 def is_font_url(url) -> bool:
     return any(url.lower().endswith(ext) for ext in extensions)
+
+
 def find_local_font(font_filename: str) -> str | None:
     if not Path(STATIC_DIR).is_dir():
         return None
@@ -19,6 +26,8 @@ def find_local_font(font_filename: str) -> str | None:
         if font_filename in files:
             return os.path.join(root, font_filename)
     return None
+
+
 def get_local_font_base64(local_path: str) -> str | None:
     try:
         content = Path(local_path).read_bytes()
@@ -44,6 +53,8 @@ def get_local_font_base64(local_path: str) -> str | None:
     except Exception as e:
         print(f"An error occurred reading local font {local_path}: {e}")
         return None
+
+
 def get_remote_font_base64(url) -> str | None:
     try:
         response = requests.get(url, timeout=15, stream=True)
@@ -72,6 +83,8 @@ def get_remote_font_base64(url) -> str | None:
     except Exception as e:
         print(f"An unexpected error occurred for remote font {url}: {e}")
         return None
+
+
 def url_to_base64(url, base_css_path: Path) -> str | None:
     cleaned_url = url.strip("'\"")
     font_filename = Path(cleaned_url).name
@@ -88,6 +101,8 @@ def url_to_base64(url, base_css_path: Path) -> str | None:
             full_url = f"file:///{full_url}"
     print(f"Attempting to fetch remote font: {full_url}")
     return get_remote_font_base64(full_url)
+
+
 def make_css_standalone(input_css_path: Path, output_css_path: Path) -> None:
     input_css_path = Path(input_css_path).resolve()
     try:
@@ -148,6 +163,7 @@ def make_css_standalone(input_css_path: Path, output_css_path: Path) -> None:
             print(f"Could not import remote CSS from {current_import_url}: {e}")
         except Exception as e:
             print(f"An unexpected error occurred while processing import {current_import_url}: {e}")
+
     def replace_font_urls_in_content(match):
         url_part = match.group(2)
         quote_style = match.group(1)
@@ -158,6 +174,7 @@ def make_css_standalone(input_css_path: Path, output_css_path: Path) -> None:
             return f'url("{base64_data}")'
         print(f"Failed to process font URL: {url_part}. Keeping original.")
         return match.group(0)
+
     processed_content = font_url_pattern.sub(replace_font_urls_in_content, processed_content)
     try:
         output_dir = Path(output_css_path).parent
@@ -167,6 +184,8 @@ def make_css_standalone(input_css_path: Path, output_css_path: Path) -> None:
         print(f"Standalone CSS file created at: {output_css_path}")
     except Exception as e:
         print(f"Error writing output CSS file {output_css_path}: {e}")
+
+
 if __name__ == "__main__":
     infile = Path(sys.argv[1])
     outfile = infile.with_stem(infile.stem + "_standalone")

@@ -3,6 +3,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 from dh import get_files
+
+
 def process_file(path: Path) -> None:
     path = Path(path)
     if path.is_symlink():
@@ -15,6 +17,8 @@ def process_file(path: Path) -> None:
             c += 1
     if c > 1:
         print(path.name)
+
+
 def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -29,5 +33,7 @@ def main() -> None:
         files = get_files(cwd, ext=[".py"])
     for f in files:
         process_file(f)
+
+
 if __name__ == "__main__":
     sys.exit(main())

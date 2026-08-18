@@ -5,6 +5,8 @@ import time
 from datetime import datetime
 from multiprocessing import Pool
 from pathlib import Path
+
+
 def check_file_age(file_path):
     try:
         mod_time = file_path.stat().st_mtime
@@ -16,6 +18,8 @@ def check_file_age(file_path):
     except (OSError, PermissionError):
         pass
     return None
+
+
 def main():
     global n_minutes
     if len(sys.argv) < 2:
@@ -48,5 +52,7 @@ def main():
             print(f"{mod_time.strftime('%Y-%m-%d %H:%M:%S')} - {Path(file_path).relative_to(cwd)}")
     else:
         print(f"No files modified in the last {n_minutes} minute(s)")
+
+
 if __name__ == "__main__":
     main()

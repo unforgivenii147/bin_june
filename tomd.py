@@ -5,7 +5,10 @@ from pathlib import Path
 from dh import get_files, mpf3
 from markdownify import markdownify as md
 from readability import Document
+
 remove_orig = True
+
+
 def process_file(path) -> tuple[Path, bool]:
     path = Path(path)
     md_file = path.with_suffix(".md")
@@ -27,6 +30,8 @@ def process_file(path) -> tuple[Path, bool]:
     except Exception as e:
         print(f"✗ Error: {e}")
         return (path, False)
+
+
 if __name__ == "__main__":
     cwd = Path.cwd()
     args = sys.argv[1:]

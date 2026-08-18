@@ -5,6 +5,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from dh import cprint, fsz
 from xxhash import xxh64
+
+
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -14,7 +16,11 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
+
+
 CHUNKSIZE = 32768
+
+
 def should_skip(path: Path) -> bool:
     path = Path(path)
     return bool(
@@ -22,6 +28,8 @@ def should_skip(path: Path) -> bool:
         or not path.stat().st_size
         or any((pat in path.parts for pat in (".git", "__pycache__", ".mypy_cache", ".ruff_cache")))
     )
+
+
 def get_hash_file(path):
     if not path.exists() or not path.stat().st_size:
         return ("", path)
@@ -33,6 +41,8 @@ def get_hash_file(path):
         return (h.hexdigest(), path)
     except OSError:
         return ("", path)
+
+
 def find_duplicates() -> None:
     cwd = Path.cwd()
     files_by_hash = defaultdict(list)
@@ -69,5 +79,7 @@ def find_duplicates() -> None:
         cprint(f"total : {fsz(total)}")
     else:
         cprint(f"NO DUPS")
+
+
 if __name__ == "__main__":
     find_duplicates()

@@ -5,8 +5,11 @@ import sys
 from pathlib import Path
 from binaryornot import is_binary
 from nltk.tokenize import sent_tokenize
+
 DEFAULT_MAX = 5000
 BINARY_SAMPLE = 4096
+
+
 def split_long_by_words(segment: str, max_chars: int = DEFAULT_MAX):
     words = re.findall(r"\S+\s*", segment, flags=re.DOTALL)
     parts = []
@@ -29,6 +32,8 @@ def split_long_by_words(segment: str, max_chars: int = DEFAULT_MAX):
     if cur:
         parts.append(cur)
     return parts
+
+
 def chunk_text_with_nltk(text: str, max_chars: int):
     sentences = sent_tokenize(text)
     chunks = []
@@ -53,6 +58,8 @@ def chunk_text_with_nltk(text: str, max_chars: int):
     if cur:
         chunks.append(cur)
     return chunks
+
+
 def write_chunks(chunks, input_path: Path, out_dir: Path, encoding: str) -> None:
     stem = input_path.stem
     ext = "".join(input_path.suffixes)
@@ -62,6 +69,8 @@ def write_chunks(chunks, input_path: Path, out_dir: Path, encoding: str) -> None
         out_path = out_dir / out_name
         out_path.write_text(chunk, encoding=encoding)
         print(f"Wrote {out_path} ({len(chunk)} chars)")
+
+
 def main() -> None:
     inp = Path(sys.argv[1])
     if not inp.exists() or not inp.is_file() or is_binary(inp):
@@ -85,5 +94,7 @@ def main() -> None:
     out_dir = inp.parent
     write_chunks(chunks, inp, out_dir, "utf-8")
     print(f"Finished: {len(chunks)} files created")
+
+
 if __name__ == "__main__":
     main()

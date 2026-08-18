@@ -5,6 +5,8 @@ import json
 import os
 import sys
 from pathlib import Path
+
+
 class Module:
     def __init__(self, name: str, filepath: Path):
         self.name = name
@@ -15,6 +17,8 @@ class Module:
         self.assignments = []
         self.main_body = []
         self.dunder_all = None
+
+
 def parse_module(module: Module):
     source = module.filepath.read_text(encoding="utf-8")
     tree = ast.parse(source, filename=str(module.filepath))
@@ -37,6 +41,8 @@ def parse_module(module: Module):
             module.classes.append(node)
         else:
             module.assignments.append(node)
+
+
 def resolve_imports(modules: dict, root_pkg_name: str) -> list:
     final_imports = []
     for mod in modules.values():
@@ -68,6 +74,8 @@ def resolve_imports(modules: dict, root_pkg_name: str) -> list:
             final_imports.append(imp)
         mod.imports = []
     return final_imports
+
+
 def package_assets(asset_dir: Path, root_pkg_name: str) -> tuple:
     assets = {}
     for root, _, files in os.walk(asset_dir):
@@ -85,7 +93,6 @@ for _rel_path, _b64 in _ASSETS.items():
     os.makedirs(os.path.dirname(_abs_path), exist_ok=True)
     with open(_abs_path, 'wb') as _f:
         _f.write(base64.b64decode(_b64))
-# Patching builtins to redirect asset file reads
 _orig_open = open
 def _patched_open(file, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None):
     _str_file = str(file)
@@ -97,6 +104,8 @@ import builtins
 builtins.open = _patched_open
 """
     return ast.parse(loader_code).body
+
+
 def merge_package(project_dir: str, output_file: str):
     project_path = Path(project_dir).resolve()
     root_pkg_name = project_path.name
@@ -134,6 +143,8 @@ def merge_package(project_dir: str, output_file: str):
     final_code = header + ast.unparse(ast.Module(body=final_body, type_ignores=[]))
     Path(output_file).write_text(final_code, encoding="utf-8")
     print(f"Successfully merged {root_pkg_name} into {output_file}")
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 3:
         print("Usage: python merge_package.py <project_dir> <output_file>")

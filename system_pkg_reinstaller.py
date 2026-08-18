@@ -4,10 +4,13 @@ Reinstall system packages from a text file or command line argument.
 Reads package names (one per line) and runs 'yes | apt install --reinstall'
 for each package.
 """
+
 from __future__ import annotations
 import os
 import sys
 from dh import runcmd
+
+
 def install_package(pkg_name):
     cmd = ["apt", "install", "--reinstall", "-y", pkg_name]
     print(f"Reinstalling: {pkg_name}")
@@ -26,6 +29,8 @@ def install_package(pkg_name):
     except:
         print(f"✗ Error reinstalling {pkg_name}")
         return False
+
+
 def read_package_list(filepath):
     packages = []
     try:
@@ -41,6 +46,8 @@ def read_package_list(filepath):
         print(f"Error reading file: {e}")
         sys.exit(1)
     return packages
+
+
 def main():
     if len(sys.argv) > 1:
         input_file = sys.argv[1]
@@ -68,5 +75,7 @@ def main():
     print(f"Summary: {successful} successful, {failed} failed")
     print("-" * 42)
     sys.exit(0 if failed == 0 else 1)
+
+
 if __name__ == "__main__":
     main()

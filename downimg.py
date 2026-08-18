@@ -5,6 +5,8 @@ from multiprocessing import Pool, cpu_count
 from pathlib import Path
 import cv2
 from tqdm import tqdm
+
+
 class ImageDownscaler:
     def __init__(self, root_dir: str = ".", scale_factor: float = 0.5):
         self.root_dir = Path(root_dir)
@@ -20,6 +22,7 @@ class ImageDownscaler:
             raise ValueError("Scale factor must be between 0 (exclusive) and 1.0 (inclusive)")
         if scale_factor == 1.0:
             print("[WARN] Scale factor is 1.0 - no downscaling will occur")
+
     def get_all_images(self) -> list:
         print("\n[SCAN] Scanning for image files...")
         image_files = []
@@ -36,6 +39,7 @@ class ImageDownscaler:
             if len(image_files) > 3:
                 print(f"       ... and {len(image_files) - 3} more")
         return image_files
+
     @staticmethod
     def downscale_image(args: tuple[Path, float]) -> tuple[Path, bool, str]:
         image_path, scale_factor = args
@@ -58,6 +62,7 @@ class ImageDownscaler:
             return image_path, True, message
         except Exception as e:
             return image_path, False, f"Error: {e!s}"
+
     def process_images(self, image_paths: list) -> None:
         if not image_paths:
             print("[WARN] No images to process!")
@@ -92,6 +97,7 @@ class ImageDownscaler:
                 print(f"{status}  {rel_path:<50} {message}")
         print("-" * 42)
         print(f"[SUMMARY] Successful: {successful} | Failed: {failed} | Total: {len(image_paths)}")
+
     def run(self) -> None:
         image_paths = self.get_all_images()
         if not image_paths:
@@ -101,6 +107,8 @@ class ImageDownscaler:
         print("\n" + "=" * 42)
         print("PROCESS COMPLETE - Images updated in-place")
         print("-" * 42)
+
+
 def main():
     scale_factor = 0.5
     if len(sys.argv) > 1:
@@ -113,5 +121,7 @@ def main():
             sys.exit(1)
     downscaler = ImageDownscaler(root_dir=".", scale_factor=scale_factor)
     downscaler.run()
+
+
 if __name__ == "__main__":
     main()

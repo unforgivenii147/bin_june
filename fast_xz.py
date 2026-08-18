@@ -6,6 +6,7 @@ import textwrap
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 import lzma_mt
+
 ARCHIVE_EXTENSIONS = {
     ".zip",
     ".br",
@@ -27,8 +28,12 @@ ARCHIVE_EXTENSIONS = {
     ".xza",
 }
 EXCLUDE_DIRS = {".git", "__pycache__", ".venv", "venv", ".env", "node_modules"}
+
+
 def should_exclude(path: Path) -> bool:
     return any(part in EXCLUDE_DIRS for part in path.parts)
+
+
 def get_files_to_process(root_dir: Path, compress: bool) -> list[Path]:
     files = []
     if compress:
@@ -41,6 +46,8 @@ def get_files_to_process(root_dir: Path, compress: bool) -> list[Path]:
             if file.is_file() and not should_exclude(file) and file.suffix.lower() == ".xz":
                 files.append(file)
     return sorted(files)
+
+
 def compress_file(
     filepath: Path, preset: int = 9, threads: int = 4, remove_orig: bool = True
 ) -> tuple[Path, bool, str]:
@@ -56,6 +63,8 @@ def compress_file(
         return filepath, True, f"Compressed to {output_path.name}"
     except Exception as e:
         return filepath, False, f"Error: {e!s}"
+
+
 def decompress_file(filepath: Path, remove_orig: bool = True) -> tuple[Path, bool, str]:
     try:
         if filepath.suffix.lower() != ".xz":
@@ -71,6 +80,8 @@ def decompress_file(filepath: Path, remove_orig: bool = True) -> tuple[Path, boo
         return filepath, True, f"Decompressed to {output_path.name}"
     except Exception as e:
         return filepath, False, f"Error: {e!s}"
+
+
 def process_files(
     root_dir: Path,
     compress: bool,
@@ -112,6 +123,8 @@ def process_files(
     print(f"\n{'─' * 42}")
     print(f"Total successful: {total_success}")
     print(f"Total failed: {total_failed}")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Compress or decompress files using lzma_mt with parallel processing",
@@ -168,5 +181,7 @@ def main():
         num_workers=args.num_workers,
         remove_orig=not args.keep_orig,
     )
+
+
 if __name__ == "__main__":
     main()

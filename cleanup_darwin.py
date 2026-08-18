@@ -2,6 +2,7 @@
 from __future__ import annotations
 import sys
 from pathlib import Path
+
 DARWIN_PATTERNS = {
     ".DS_Store",
     ".AppleDouble",
@@ -27,6 +28,8 @@ WINDOWS_PATTERNS = {
     "$RECYCLE.BIN",
 }
 ALL_PATTERNS = DARWIN_PATTERNS | WINDOWS_PATTERNS
+
+
 def matches_pattern(path: Path, patterns: set) -> bool:
     name = path.name
     for pattern in patterns:
@@ -42,6 +45,8 @@ def matches_pattern(path: Path, patterns: set) -> bool:
         elif name == pattern or path.name.startswith(pattern.split("*")[0]):
             return True
     return False
+
+
 def walk_directory(root_dir: Path):
     try:
         for entry in root_dir.iterdir():
@@ -50,6 +55,8 @@ def walk_directory(root_dir: Path):
                 yield from walk_directory(entry)
     except (OSError, PermissionError) as e:
         print(f"Error accessing {root_dir}: {e}", file=sys.stderr)
+
+
 def process_path(path: Path) -> tuple[str, int]:
     try:
         if path.is_file():
@@ -62,11 +69,14 @@ def process_path(path: Path) -> tuple[str, int]:
                 if file_path.is_file():
                     total_size += file_path.stat().st_size
             import shutil
+
             shutil.rmtree(path)
             return (str(path), total_size)
     except (OSError, PermissionError) as e:
         print(f"Error deleting {path}: {e}", file=sys.stderr)
     return (str(path), 0)
+
+
 def find_and_remove_files(root_dir: Path | None = None) -> dict:
     if root_dir is None:
         root_dir = Path.cwd()
@@ -91,12 +101,14 @@ def find_and_remove_files(root_dir: Path | None = None) -> dict:
         results.append(result)
     total_freed = sum((size for _, size in results))
     successful = sum((1 for _, size in results if size > 0))
+
     def format_bytes(bytes_val: float) -> str:
         for unit in ["B", "KB", "MB", "GB", "TB"]:
             if bytes_val < 1024:
                 return f"{bytes_val:.2f} {unit}"
             bytes_val /= 1024
         return f"{bytes_val:.2f} PB"
+
     stats = {
         "files_removed": successful,
         "total_freed_bytes": total_freed,
@@ -104,6 +116,8 @@ def find_and_remove_files(root_dir: Path | None = None) -> dict:
         "details": results,
     }
     return stats
+
+
 def print_report(stats: dict) -> None:
     print("\n" + "=" * 42)
     print("REMOVAL REPORT")
@@ -111,8 +125,11 @@ def print_report(stats: dict) -> None:
     print(f"Files removed: {stats['files_removed']}")
     print(f"Total disk space freed: {stats['total_freed_human']} ({stats['total_freed_bytes']} bytes)")
     print("-" * 42)
+
+
 def main():
     import argparse
+
     parser = argparse.ArgumentParser(description="Remove Darwin and Windows related files recursively")
     parser.add_argument("directory", nargs="?", default=".", help="Directory to scan (default: current directory)")
     parser.add_argument("-v", "--verbose", action="store_true", help="Show details of each removed file")
@@ -124,5 +141,7 @@ def main():
         for path, size in stats["details"]:
             if size > 0:
                 print(f"  {path} ({size} bytes)")
+
+
 if __name__ == "__main__":
     main()

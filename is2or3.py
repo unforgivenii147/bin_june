@@ -4,6 +4,8 @@ import ast
 import sys
 from pathlib import Path
 from dh import get_files
+
+
 def detect_version(file_path: Path) -> None:
     try:
         source = file_path.read_text(encoding="utf-8")
@@ -50,6 +52,8 @@ def detect_version(file_path: Path) -> None:
         reasons.append("No strong indicators found; defaulting to Python 3.")
     if version == "2":
         print(f"{file_path.name} : {version}\nConfidence: {confidence}\nReason(s):")
+
+
 if __name__ == "__main__":
     args = sys.argv[1:]
     cwd = Path.cwd()

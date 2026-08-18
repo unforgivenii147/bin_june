@@ -3,6 +3,8 @@ from __future__ import annotations
 import argparse
 import csv
 from pathlib import Path
+
+
 def sort_packages_by_size(filename: str) -> None:
     with Path(filename).open(newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
@@ -17,6 +19,8 @@ def sort_packages_by_size(filename: str) -> None:
         writer.writeheader()
         writer.writerows(rows)
     print(f"File '{filename}' sorted by Installed-Size and overwritten.")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Sort Debian packages CSV by Installed-Size")
     parser.add_argument("fname", help="CSV file to sort")

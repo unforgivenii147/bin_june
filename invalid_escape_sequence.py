@@ -7,6 +7,8 @@ import os
 import tokenize
 import warnings
 from pathlib import Path
+
+
 def check_and_fix_file(file_path: Path, auto_fix: bool) -> dict:
     result = {"path": file_path, "has_issues": False, "fixed": False, "messages": []}
     try:
@@ -62,6 +64,8 @@ def check_and_fix_file(file_path: Path, auto_fix: bool) -> dict:
         except Exception as e:
             result["messages"].append(f"Error while fixing: {e}")
     return result
+
+
 def main():
     parser = argparse.ArgumentParser(description="Recursively scan and fix Python files for invalid escape sequences.")
     parser.add_argument(
@@ -101,5 +105,7 @@ def main():
     print(f"   Files with invalid escape sequences: {issues_count}")
     if args.auto_fix:
         print(f"   Files successfully auto-fixed:     {fixed_count}")
+
+
 if __name__ == "__main__":
     main()

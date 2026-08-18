@@ -3,6 +3,7 @@
 Spell check all text files recursively using pyspellchecker.
 Supports parallel processing and optional auto-fix mode.
 """
+
 from __future__ import annotations
 import argparse
 import re
@@ -12,6 +13,7 @@ from typing import Dict, List, Tuple
 from dh import TXT_EXT
 from loguru import logger
 from spellchecker import SpellChecker
+
 logger.remove()
 log_dir = Path.home() / "tmp" / "log" / "apps"
 log_dir.mkdir(parents=True, exist_ok=True)
@@ -23,6 +25,8 @@ logger.add(
     rotation="10 MB",
     retention="7 days",
 )
+
+
 def find_text_files(paths: List[Path], extensions: set | None = None) -> List[Path]:
     if extensions is None:
         extensions = TXT_EXT
@@ -42,11 +46,15 @@ def find_text_files(paths: List[Path], extensions: set | None = None) -> List[Pa
                 if file_path.is_file() and file_path.suffix.lower() in extensions:
                     text_files.append(file_path)
     return list(set(text_files))
+
+
 def extract_words(text: str) -> List[Tuple[str, int, int]]:
     words = []
     for match in re.finditer(r"\b[a-zA-Z]+\b", text):
         words.append((match.group(), match.start(), match.end()))
     return words
+
+
 def check_file(file_path: Path) -> Dict:
     try:
         spell = SpellChecker()
@@ -72,6 +80,8 @@ def check_file(file_path: Path) -> Dict:
     except Exception as e:
         logger.error(f"Error checking {file_path}: {e}")
         return {"file": str(file_path), "error": str(e), "misspellings": [], "content": None}
+
+
 def fix_file(file_path: Path, corrections: Dict[str, str]) -> bool:
     try:
         content = file_path.read_text(encoding="utf-8", errors="ignore")
@@ -89,6 +99,8 @@ def fix_file(file_path: Path, corrections: Dict[str, str]) -> bool:
     except Exception as e:
         logger.error(f"Error fixing {file_path}: {e}")
         return False
+
+
 def process_files_parallel(files: List[Path], max_workers: int | None = None) -> Dict:
     results = {}
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
@@ -105,6 +117,8 @@ def process_files_parallel(files: List[Path], max_workers: int | None = None) ->
                 results[str(file_path)] = {"file": str(file_path), "error": str(e), "misspellings": [], "content": None}
     print()
     return results
+
+
 def display_results(results: Dict, show_candidates: bool = False):
     total_misspellings = 0
     files_with_errors = 0
@@ -132,6 +146,8 @@ def display_results(results: Dict, show_candidates: bool = False):
     print("\n" + "=" * 42)
     print(f"📊 Summary: {files_with_errors} files with {total_misspellings} total misspellings")
     print("-" * 42)
+
+
 def get_context(content: str, position: Tuple[int, int], window: int = 40) -> Dict:
     if not content:
         return {"line": 0, "text": ""}
@@ -146,6 +162,8 @@ def get_context(content: str, position: Tuple[int, int], window: int = 40) -> Di
     if after:
         after = after + "..." if after_end < len(content) else after
     return {"line": line_num, "text": f"{before} [{content[start:end]}] {after}".strip()}
+
+
 def confirm_action(prompt: str) -> bool:
     while True:
         response = input(f"{prompt} (y/n): ").lower().strip()
@@ -154,6 +172,8 @@ def confirm_action(prompt: str) -> bool:
         elif response in ["n", "no"]:
             return False
         print("Please answer 'y' or 'n'")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Find and optionally fix misspelled words in text files",
@@ -242,5 +262,7 @@ Examples:
             print(f"\n✅ Fixed {fixed_count} misspellings across multiple files")
         else:
             print("❌ Fix cancelled")
+
+
 if __name__ == "__main__":
     main()

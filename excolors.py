@@ -3,7 +3,10 @@ from __future__ import annotations
 import re
 from pathlib import Path
 from dh import cprint, should_skip
+
 CHUNK_SIZE = 1024 * 1024
+
+
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -18,8 +21,11 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
+
+
 def get_filez(root_dir: str | Path):
     from os import walk as os_walk
+
     visited_dirs: set[Path] = set()
     root_dir = Path(root_dir)
     if root_dir.is_dir():
@@ -37,7 +43,11 @@ def get_filez(root_dir: str | Path):
                     yield filepath
     else:
         yield root_dir
+
+
 COLOR_RE = re.compile("#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})\\b")
+
+
 def pf(path: Path):
     content = path.read_text(encoding="utf-8", errors="ignore")
     found = []
@@ -48,6 +58,8 @@ def pf(path: Path):
         cprint(f"{len(found)}", "cyan")
         return found
     return []
+
+
 def main() -> None:
     cwd = Path.cwd()
     outfile = cwd / "colors"
@@ -71,5 +83,7 @@ def main() -> None:
     finals = sorted(set(finals))
     outfile.write_text("\n".join(finals), encoding="utf-8")
     cprint(f"{fc} colors found", "green")
+
+
 if __name__ == "__main__":
     main()

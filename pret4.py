@@ -5,12 +5,19 @@ import subprocess
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from dh import unique_path
+
 EXTENSIONS = {".js", ".css", ".html", ".json", ".mjs", ".cjs", ".ts", ".jsx", ".tsx"}
 EXCLUDE_PATTERNS = {".py", ".ipynb"}
+
+
 def should_format(file_path: Path) -> bool:
     return file_path.suffix in EXTENSIONS and (not any((file_path.name.endswith(p) for p in EXCLUDE_PATTERNS)))
+
+
 def get_files_to_format(cwd: str = ".") -> list[Path]:
     return [p for p in Path(cwd).resolve().rglob("*") if p.is_file() and "error" not in p.parts and should_format(p)]
+
+
 def format_file(file_path: Path) -> tuple[Path, bool, str | None]:
     try:
         result = subprocess.run(["prettier", "--write", str(file_path)], capture_output=True, text=True, timeout=300)
@@ -19,6 +26,8 @@ def format_file(file_path: Path) -> tuple[Path, bool, str | None]:
         return (file_path, False, result.stderr or "Unknown error")
     except Exception as e:
         return (file_path, False, str(e))
+
+
 def main() -> None:
     cwd = Path.cwd()
     files = get_files_to_format(cwd)
@@ -43,5 +52,7 @@ def main() -> None:
                 shutil.move(str(path), str(dest))
                 error_count += 1
     print(f"\n✅ Success: {success_count} | ❌ Errors: {error_count}")
+
+
 if __name__ == "__main__":
     main()

@@ -2,6 +2,7 @@
 from __future__ import annotations
 import re
 from pathlib import Path
+
 LANG_TO_EXT = {
     "python": ".py",
     "py": ".py",
@@ -46,6 +47,8 @@ LANG_TO_EXT = {
     "plain": ".txt",
 }
 CODE_BLOCK_RE = re.compile(r"```(?P<lang>[A-Za-z0-9_+\-.]*)[ \t]*\n(?P<code>.*?)(?<=\n)```", re.DOTALL | re.IGNORECASE)
+
+
 def get_extension(lang: str) -> str:
     if not lang:
         return ".txt"
@@ -55,9 +58,13 @@ def get_extension(lang: str) -> str:
     if lang.startswith("."):
         return lang
     return ".txt"
+
+
 def sanitize_filename(name: str, max_len: int = 200) -> str:
     safe = re.sub(r"[^\w\-.]", "_", name)
     return safe[:max_len].rstrip("_") or "code_block"
+
+
 def extract_code_blocks(md_file: Path, out_dir: Path):
     try:
         content = md_file.read_text(encoding="utf-8", errors="replace")
@@ -82,6 +89,8 @@ def extract_code_blocks(md_file: Path, out_dir: Path):
             continue
         extracted.append(out_path)
     return extracted
+
+
 def main() -> None:
     cwd = Path.cwd().resolve()
     out_dir = cwd / "output"
@@ -93,5 +102,7 @@ def main() -> None:
         extracted = extract_code_blocks(md_file, out_dir)
         total_blocks += len(extracted)
         all_extracted.extend(extracted)
+
+
 if __name__ == "__main__":
     main()

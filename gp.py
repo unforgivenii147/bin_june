@@ -3,11 +3,14 @@ from __future__ import annotations
 import sys
 from datetime import datetime
 from pathlib import Path
+
 try:
     from git import GitCommandError, InvalidGitRepositoryError, Repo
 except ImportError:
     print("GitPython not found. Install it with: pip install gitpython", file=sys.stderr)
     sys.exit(1)
+
+
 def symlink_global_gitignore() -> None:
     home_gitignore = Path.home() / ".gitignore"
     local_gitignore = Path(".gitignore")
@@ -21,6 +24,8 @@ def symlink_global_gitignore() -> None:
     except Exception as e:
         print(f"Failed to create symlink: {e}", file=sys.stderr)
         sys.exit(1)
+
+
 def main() -> None:
     try:
         repo = Repo(".", search_parent_directories=True)
@@ -49,5 +54,7 @@ def main() -> None:
     except Exception as e:
         print(f"Unexpected error: {e}", file=sys.stderr)
         sys.exit(1)
+
+
 if __name__ == "__main__":
     main()

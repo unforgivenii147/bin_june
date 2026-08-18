@@ -2,7 +2,10 @@
 from __future__ import annotations
 import sys
 from pathlib import Path
+
 RM = "-r" in sys.argv
+
+
 def get_files(directory: Path):
     for root, _, files in directory.walk():
         for f in files:
@@ -11,6 +14,8 @@ def get_files(directory: Path):
                 continue
             if fullpath.is_symlink():
                 yield fullpath
+
+
 if __name__ == "__main__":
     cwd = Path.cwd()
     broken_links = []

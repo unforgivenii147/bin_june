@@ -3,15 +3,19 @@
 Fix unused code based on Vulture output.
 Reads Vulture findings from stdin or a file and fixes the issues in-place.
 """
+
 from __future__ import annotations
 import os
 import re
 import sys
 from collections import defaultdict
 from typing import dict, list, set, tuple
+
 VULTURE_LINE_PATTERN = re.compile(
     r"^(.+?):(\d+):\s+(unused\s+(function|variable|class|attribute|method|import)\s+'([^']+)'|unreachable code after '(\w+)'|redundant if-condition|unreachable 'else' block|unused import '([^']+)'\s+\(\d+% confidence\))$"
 )
+
+
 def parse_vulture_output(lines: list[str]) -> dict[str, list[tuple[int, str, str]]]:
     results = defaultdict(list)
     for line in lines:
@@ -46,6 +50,8 @@ def parse_vulture_output(lines: list[str]) -> dict[str, list[tuple[int, str, str
             name = ""
         results[filepath].append((line_num, issue_type, name))
     return dict(results)
+
+
 def fix_file(filepath: str, issues: list[tuple[int, str, str]]) -> bool:
     if not os.path.exists(filepath):
         print(f"Warning: File not found: {filepath}")
@@ -121,14 +127,22 @@ def fix_file(filepath: str, issues: list[tuple[int, str, str]]) -> bool:
                 f.writelines(original_lines)
             return False
     return False
+
+
 def _comment_out_variable(line: str, name: str) -> str:
     indent = _get_indent(line)
     return f"{indent}# REMOVED: {line.strip()}\n"
+
+
 def _comment_out_line(line: str) -> str:
     indent = _get_indent(line)
     return f"{indent}# REMOVED: {line.strip()}\n"
+
+
 def _get_indent(line: str) -> str:
     return line[: len(line) - len(line.lstrip())]
+
+
 def _get_function_lines(lines: list[str], start_idx: int) -> tuple[int, int]:
     func_start = start_idx
     while func_start > 0:
@@ -148,6 +162,8 @@ def _get_function_lines(lines: list[str], start_idx: int) -> tuple[int, int]:
                 break
         end_idx += 1
     return func_start, end_idx - 1
+
+
 def _get_class_lines(lines: list[str], start_idx: int) -> tuple[int, int]:
     class_start = start_idx
     while class_start > 0:
@@ -167,6 +183,8 @@ def _get_class_lines(lines: list[str], start_idx: int) -> tuple[int, int]:
                 break
         end_idx += 1
     return class_start, end_idx - 1
+
+
 def _find_block_end(lines: list[str], start_idx: int) -> int:
     indent = _get_indent(lines[start_idx])
     end_idx = start_idx
@@ -178,6 +196,8 @@ def _find_block_end(lines: list[str], start_idx: int) -> int:
                 break
         end_idx += 1
     return end_idx
+
+
 def _cleanup_blank_lines(lines: list[str]) -> list[str]:
     cleaned = []
     blank_count = 0
@@ -190,6 +210,8 @@ def _cleanup_blank_lines(lines: list[str]) -> list[str]:
             blank_count = 0
             cleaned.append(line)
     return cleaned
+
+
 def main():
     if len(sys.argv) > 1:
         vulture_file = sys.argv[1]
@@ -222,5 +244,7 @@ def main():
         if fix_file(filepath, issues):
             fixed_count += 1
     print(f"\nDone! Fixed {fixed_count} files.")
+
+
 if __name__ == "__main__":
     main()

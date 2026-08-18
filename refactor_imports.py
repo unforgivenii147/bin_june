@@ -6,7 +6,10 @@ import json
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 import astor
+
 REPEATED_JSON_PATH = Path("repeated.json")
+
+
 def load_refactoring_maps():
     with open(REPEATED_JSON_PATH, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -17,27 +20,34 @@ def load_refactoring_maps():
             p = Path(file_path_str)
             file_to_objects[p.name].append(obj_name)
     return file_to_objects
+
+
 class ASTStripper(ast.NodeTransformer):
     def __init__(self, target_names):
         super().__init__()
         self.target_names = set(target_names)
         self.removed_something = False
+
     def visit_FunctionDef(self, node):
         if node.name in self.target_names:
             self.removed_something = True
             return None
         return self.generic_visit(node)
+
     def visit_ClassDef(self, node):
         if node.name in self.target_names:
             self.removed_something = True
             return None
         return self.generic_visit(node)
+
     def visit_Assign(self, node):
         for target in node.targets:
             if isinstance(target, ast.Name) and target.id in self.target_names:
                 self.removed_something = True
                 return None
         return self.generic_visit(node)
+
+
 def refactor_single_file(file_path: Path, objects_to_remove: list):
     try:
         source_code = file_path.read_text(encoding="utf-8")
@@ -72,6 +82,8 @@ def refactor_single_file(file_path: Path, objects_to_remove: list):
         print(f"✅ Refactored {file_path.name}: Stripped {objects_to_remove} -> added 'dh' import")
     except Exception as e:
         print(f"❌ Error writing updates back to {file_path.name}: {e}")
+
+
 def main():
     if not REPEATED_JSON_PATH.exists():
         print(f"Error: {REPEATED_JSON_PATH.name} not found in the current directory.")
@@ -91,5 +103,7 @@ def main():
         for file_path, objects in tasks:
             executor.submit(refactor_single_file, file_path, objects)
     print("🎉 Structural refactoring complete! All duplicate bodies stripped.")
+
+
 if __name__ == "__main__":
     main()

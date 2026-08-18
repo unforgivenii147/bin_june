@@ -6,6 +6,8 @@ import multiprocessing as mp
 import shutil
 import traceback
 from pathlib import Path
+
+
 def find_unused_functions(source: str):
     try:
         tree = ast.parse(source)
@@ -13,17 +15,22 @@ def find_unused_functions(source: str):
         return [], ["SyntaxError while parsing file"]
     defined = set()
     called = set()
+
     class Visitor(ast.NodeVisitor):
         def visit_FunctionDef(self, node) -> None:
             defined.add(node.name)
             self.generic_visit(node)
+
         def visit_Call(self, node) -> None:
             if isinstance(node.func, ast.Name):
                 called.add(node.func.id)
             self.generic_visit(node)
+
     Visitor().visit(tree)
     unused = defined - called
     return list(unused), []
+
+
 def remove_functions_from_source(source: str, unused_functions) -> str:
     tree = ast.parse(source)
     new_body = []
@@ -33,6 +40,8 @@ def remove_functions_from_source(source: str, unused_functions) -> str:
         new_body.append(node)
     tree.body = new_body
     return ast.unparse(tree)
+
+
 def process_file(filepath, dry_run: bool = False):
     Path(path)
     errors = []
@@ -55,10 +64,16 @@ def process_file(filepath, dry_run: bool = False):
         shutil.copy2(filepath, backup_path)
         filepath.write_text(new_source, encoding="utf-8")
     return filepath, unused, errors
+
+
 def gather_python_files(root: Path) -> list[Path]:
     return [p for p in root.rglob("*.py") if p.is_file()]
+
+
 def worker(args):
     return process_file(*args)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Remove unused functions recursively.")
     parser.add_argument("--dry-run", action="store_true", help="Show what would change without modifying files.")
@@ -78,5 +93,7 @@ def main() -> None:
                 print(f"Removed {unused} from {filepath} (backup created)")
         for err in errors:
             print(f"[ERROR] {filepath}: {err}")
+
+
 if __name__ == "__main__":
     main()

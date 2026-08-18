@@ -3,6 +3,7 @@
 Script to remove dependencies on the 'dh' custom module by inlining function code.
 Supports multiple files/folders as input with parallel processing.
 """
+
 from __future__ import annotations
 import argparse
 import ast
@@ -11,19 +12,25 @@ import traceback
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
+
 DH_SOURCE_PATH = Path.home() / "isaac" / "pkgs" / "dh" / "src" / "dh"
+
+
 @dataclass
 class ProcessResult:
     file_path: Path
     modified: bool
     new_content: str | None
     error: str | None
+
+
 class DHModuleAnalyzer:
     def __init__(self, dh_path: Path):
         self.dh_path = dh_path
         self.definitions: dict[str, str] = {}
         self.module_mapping: dict[str, set[str]] = {}
         self._load_dh_definitions()
+
     def _load_dh_definitions(self):
         if not self.dh_path.exists():
             raise FileNotFoundError(f"DH module path not found: {self.dh_path}")
@@ -48,16 +55,22 @@ class DHModuleAnalyzer:
                         self.module_mapping[module_name].add(func_name)
             except Exception as e:
                 print(f"⚠ Warning: Could not parse {py_file}: {e}", file=sys.stderr)
+
     def get_all_definitions(self) -> dict[str, str]:
         return self.definitions.copy()
+
+
 class ImportRemover(ast.NodeTransformer):
     def __init__(self, definitions: dict[str, str]):
         self.definitions = definitions
         self.inlined_code: list[str] = []
         self.has_dh_imports = False
+
+
 class PythonFileProcessor:
     def __init__(self, definitions: dict[str, str]):
         self.definitions = definitions
+
     def process(self, file_path: Path) -> ProcessResult:
         try:
             with open(file_path, encoding="utf-8") as f:
@@ -75,6 +88,7 @@ class PythonFileProcessor:
             return ProcessResult(
                 file_path=file_path, modified=False, new_content=None, error=f"{type(e).__name__}: {e}"
             )
+
     def _build_new_content(self, original_content: str, inlined_code: list[str]) -> str:
         lines = original_content.split("\n")
         import_end_idx = 0
@@ -94,6 +108,8 @@ class PythonFileProcessor:
             new_lines.append("\n# ===== End of inlined code =====\n")
         new_lines.extend(filtered_lines[import_end_idx:])
         return "\n".join(new_lines)
+
+
 class ProjectCleaner:
     def __init__(self, dh_path: Path = DH_SOURCE_PATH, max_workers: int | None = None):
         self.dh_path = dh_path.resolve()
@@ -101,6 +117,7 @@ class ProjectCleaner:
         self.analyzer = DHModuleAnalyzer(self.dh_path)
         self.processor = PythonFileProcessor(self.analyzer.get_all_definitions())
         self.results: list[ProcessResult] = []
+
     def find_python_files(self, paths: list[Path]) -> list[Path]:
         py_files = set()
         for path in paths:
@@ -118,6 +135,7 @@ class ProjectCleaner:
                     if not any(part.startswith(".") for part in py_file.parts):
                         py_files.add(py_file)
         return sorted(py_files)
+
     def process_parallel(self, py_files: list[Path], dry_run: bool = False) -> dict[str, int]:
         if not py_files:
             print("No Python files to process.")
@@ -152,6 +170,7 @@ class ProjectCleaner:
                     error_count += 1
         stats = {"total": len(py_files), "modified": modified_count, "errors": error_count}
         return stats
+
     def print_summary(self, stats: dict[str, int], dry_run: bool = False):
         print(f"\n{'=' * 42}")
         print("Processing Complete!")
@@ -166,6 +185,8 @@ class ProjectCleaner:
             print("\nModified files:")
             for f in modified_files:
                 print(f"  {f}")
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Remove dependencies on 'dh' module by inlining function code.",
@@ -182,6 +203,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--workers", type=int, default=None, help="Number of parallel workers (default: CPU count)")
     parser.add_argument("--verbose", action="store_true", help="Verbose output")
     return parser.parse_args()
+
+
 def main():
     args = parse_args()
     if args.paths:
@@ -205,5 +228,7 @@ def main():
         if args.verbose:
             traceback.print_exc()
         sys.exit(1)
+
+
 if __name__ == "__main__":
     main()

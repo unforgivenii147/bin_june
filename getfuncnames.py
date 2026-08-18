@@ -2,6 +2,8 @@
 from __future__ import annotations
 import ast
 import sys
+
+
 def get_function_names(filename, skip_main=True):
     try:
         with open(filename) as file:
@@ -22,6 +24,8 @@ def get_function_names(filename, skip_main=True):
     except Exception as e:
         print(f"Error: {e}")
         return []
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python script.py <python_file>")

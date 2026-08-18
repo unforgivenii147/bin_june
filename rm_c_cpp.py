@@ -4,6 +4,7 @@ Processes files in place using parallel workers.
 Supports both line comments (// ...) and block comments (/* ... */),
 including inline comments.
 """
+
 from __future__ import annotations
 import argparse
 import os
@@ -13,10 +14,13 @@ from pathlib import Path
 import tree_sitter_c
 import tree_sitter_cpp
 from tree_sitter import Language, Parser
+
 C_EXTS = {".c", ".h"}
 CPP_EXTS = {".cpp", ".hpp"}
 ALL_EXTS = C_EXTS | CPP_EXTS
 _PARSERS: dict[str, Parser] = {}
+
+
 def get_parser(ext: str) -> Parser:
     if ext not in _PARSERS:
         if ext in C_EXTS:
@@ -29,6 +33,8 @@ def get_parser(ext: str) -> Parser:
         parser.language = lang
         _PARSERS[ext] = parser
     return _PARSERS[ext]
+
+
 def collect_comment_ranges(root) -> list[tuple[int, int]]:
     ranges: list[tuple[int, int]] = []
     stack = [root]
@@ -40,6 +46,8 @@ def collect_comment_ranges(root) -> list[tuple[int, int]]:
         for child in reversed(node.children):
             stack.append(child)
     return ranges
+
+
 def strip_comments(content: bytes, ext: str) -> tuple[bytes, int]:
     parser = get_parser(ext)
     tree = parser.parse(content)
@@ -54,6 +62,8 @@ def strip_comments(content: bytes, ext: str) -> tuple[bytes, int]:
         last = end
     out.extend(content[last:])
     return bytes(out), len(ranges)
+
+
 def process_file(path: Path, base: Path) -> tuple[str, int, str]:
     try:
         content = path.read_bytes()
@@ -68,6 +78,8 @@ def process_file(path: Path, base: Path) -> tuple[str, int, str]:
         return rel, count, ""
     except Exception as exc:
         return str(path), 0, str(exc)
+
+
 def iter_cc_files(paths: list[Path]):
     seen: set[Path] = set()
     for p in paths:
@@ -83,6 +95,8 @@ def iter_cc_files(paths: list[Path]):
                     if rp not in seen:
                         seen.add(rp)
                         yield f
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Remove comments from C/C++ files in place (tree-sitter powered).")
     ap.add_argument(
@@ -125,5 +139,7 @@ def main() -> int:
         f"{total_comments} comment(s) removed, {errors} error(s)."
     )
     return 1 if errors else 0
+
+
 if __name__ == "__main__":
     sys.exit(main())

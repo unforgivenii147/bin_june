@@ -3,6 +3,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 import ffmpeg
+
+
 def get_subtitle_streams_info(input_path: str) -> list[dict]:
     try:
         probe_data = ffmpeg.probe(input_path, select_streams="s")
@@ -23,6 +25,8 @@ def get_subtitle_streams_info(input_path: str) -> list[dict]:
     except ffmpeg.Error as e:
         print(f"Error probing file: {e.stderr.decode('utf8')}")
         return []
+
+
 def main() -> None:
     if len(sys.argv) != 2:
         print(f"Usage: {sys.argv[0]} <video.mkv|video.mp4>")
@@ -61,5 +65,7 @@ def main() -> None:
             extracted_files.append(str(out_path))
     except:
         print(f"Extracting stream index {index} (Lang: {lang}, Forced: {forced}, Codec: {codec_name}) -> {out_path}")
+
+
 if __name__ == "__main__":
     main()

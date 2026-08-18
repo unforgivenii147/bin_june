@@ -7,9 +7,13 @@ from ast import Module
 from collections import defaultdict
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
+
+
 def parse_python_file(file_path) -> Module:
     with open(file_path, encoding="utf-8") as file:
         return ast.parse(file.read(), filename=file_path)
+
+
 def extract_definitions(tree: Module):
     functions = []
     classes = []
@@ -24,6 +28,8 @@ def extract_definitions(tree: Module):
                 if isinstance(target, ast.Name):
                     constants.append(target.id)
     return functions, classes, constants
+
+
 def find_repeated_definitions(file_paths):
     definition_counts = defaultdict(lambda: defaultdict(int))
     for file_path in file_paths:
@@ -41,15 +47,19 @@ def find_repeated_definitions(file_paths):
         "constants": [name for name, count in definition_counts["constants"].items() if count > 1],
     }
     return repeated_definitions
+
+
 def process_file(file_path, repeated_definitions, move) -> None:
     Path(path)
     tree = parse_python_file(file_path)
     _functions, _classes, _constants = extract_definitions(tree)
     utils_dir = "utils"
     os.makedirs(utils_dir, exist_ok=True)
+
     def write_to_file(filename: str, content: str) -> None:
         with open(os.path.join(utils_dir, filename), "a", encoding="utf-8") as f:
             f.write(content + "\n")
+
     with open(file_path, encoding="utf-8") as file:
         lines = file.readlines()
     new_lines = []
@@ -78,6 +88,8 @@ def process_file(file_path, repeated_definitions, move) -> None:
     if move:
         with open(file_path, "w", encoding="utf-8") as file:
             file.writelines(new_lines)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Inspect Python files and copy/move repeated definitions.")
     parser.add_argument("-m", "--move", action="store_true", help="Move definitions instead of copying")
@@ -93,5 +105,7 @@ def main() -> None:
             process_file,
             [(file_path, repeated_definitions, args.move) for file_path in python_files],
         )
+
+
 if __name__ == "__main__":
     main()

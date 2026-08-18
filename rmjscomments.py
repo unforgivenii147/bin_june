@@ -5,6 +5,8 @@ import sys
 from pathlib import Path
 from dh import cprint, fsz, get_files
 from joblib import Parallel, delayed
+
+
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -14,10 +16,14 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
+
+
 CHUNK_SIZE = 1024 * 1024
 N_JOBS = -1
 multi_line_comment_re = r"/\*.*?\*/"
 single_line_comment_re = "//.*"
+
+
 def process_file(path) -> None:
     path = Path(path)
     print(f"processing ...{path.name}")
@@ -29,6 +35,8 @@ def process_file(path) -> None:
     final_code = re.sub("\\n\\s*\\n", "\\n\\n", final_code)
     final_code = "\n".join((line.rstrip() for line in final_code.splitlines()))
     path.write_text(final_code, encoding="utf-8")
+
+
 def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
@@ -65,5 +73,7 @@ def main() -> None:
     Parallel(n_jobs=N_JOBS, backend="loky")((delayed(process_file)(f) for f in files))
     diffsize = before - gsz(cwd)
     cprint(f"space change : {fsz(diffsize)}", "cyan")
+
+
 if __name__ == "__main__":
     sys.exit(main())

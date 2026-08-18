@@ -2,6 +2,8 @@
 from __future__ import annotations
 import re
 import sys
+
+
 def clean_terminal_transcript(filepath):
     with open(filepath, encoding="utf-8", errors="replace") as f:
         content = f.read()
@@ -19,6 +21,8 @@ def clean_terminal_transcript(filepath):
     with open(filepath, "w", encoding="utf-8") as f:
         f.write(content)
     print(f"Cleaned: {filepath}")
+
+
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print(f"Usage: {sys.argv[0]} <transcript_file>")

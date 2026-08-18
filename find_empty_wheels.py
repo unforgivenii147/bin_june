@@ -3,9 +3,12 @@
 Check recursively for empty wheels in the current directory.
 An empty wheel is a .whl file (ZIP archive) that contains no .py files.
 """
+
 from __future__ import annotations
 import zipfile
 from pathlib import Path
+
+
 def is_empty_wheel(whl_path: Path) -> bool | None:
     try:
         with zipfile.ZipFile(whl_path, "r") as zf:
@@ -16,6 +19,8 @@ def is_empty_wheel(whl_path: Path) -> bool | None:
         print(f"Warning: {whl_path} is not a valid ZIP file. Skipping.")
         return False
     return True
+
+
 def main() -> None:
     empty_wheels = []
     cwd = Path.cwd()
@@ -34,5 +39,7 @@ def main() -> None:
             k.rename(new_path)
     else:
         print("No empty wheels found.")
+
+
 if __name__ == "__main__":
     main()

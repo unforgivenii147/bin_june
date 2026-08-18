@@ -6,6 +6,7 @@ Usage:
   python find_noneng.py -l
   python find_noneng.py -l -o out.json
 """
+
 from __future__ import annotations
 import argparse
 import json
@@ -14,6 +15,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import cpu_count
 from pathlib import Path
 import cld3
+
 TEXT_EXTENSIONS = {
     ".txt",
     ".py",
@@ -63,6 +65,8 @@ SKIP_DIRS = {
     "dist",
 }
 BATCH_SIZE = 100
+
+
 def is_english(text: str) -> tuple[bool, float]:
     if not text or len(text.strip()) < 3:
         return (True, 1.0)
@@ -74,6 +78,8 @@ def is_english(text: str) -> tuple[bool, float]:
         return (is_en, result.probability)
     except Exception:
         return (True, 0.0)
+
+
 def analyze_file(filepath: Path, detailed: bool = False) -> dict | None:
     try:
         content = None
@@ -148,6 +154,8 @@ def analyze_file(filepath: Path, detailed: bool = False) -> dict | None:
         return None
     except Exception as e:
         return {"file": str(filepath), "error": str(e), "non_english_lines": []}
+
+
 def scan_files(root_dir: Path, detailed: bool = False, max_workers: int | None = None) -> list[dict]:
     if max_workers is None:
         max_workers = min(cpu_count(), 8)
@@ -172,6 +180,8 @@ def scan_files(root_dir: Path, detailed: bool = False, max_workers: int | None =
             except Exception as e:
                 print(f"Error analyzing {filepath}: {e}")
     return results
+
+
 def main():
     parser = argparse.ArgumentParser(description="Find non-English files recursively")
     parser.add_argument("-l", "--detailed", action="store_true", help="Report non-English lines within each file")
@@ -213,5 +223,7 @@ def main():
             print(f"  {r['file']} → {lang} (confidence: {r.get('confidence', 0):.2%})")
             if args.detailed and lines:
                 print(f"    {lines} non-English lines")
+
+
 if __name__ == "__main__":
     main()

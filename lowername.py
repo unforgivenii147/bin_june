@@ -4,6 +4,8 @@ import sys
 from functools import partial
 from pathlib import Path
 from dh import mpf3, unique_path
+
+
 def rename_item_to_lowercase(path: Path, dry_run: bool = False, verbose: bool = False) -> tuple[Path, Path] | None:
     if not path.exists():
         if verbose:
@@ -35,6 +37,8 @@ def rename_item_to_lowercase(path: Path, dry_run: bool = False, verbose: bool = 
     except Exception as e:
         print(f"An unexpected error occurred for '{path.name}': {e}", file=sys.stderr)
         return None
+
+
 def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -61,5 +65,7 @@ def main() -> None:
     else:
         renamed_count = sum((1 for r in results if r is not None))
         print(f"\nSummary: Renamed {renamed_count} items.")
+
+
 if __name__ == "__main__":
     main()

@@ -7,14 +7,19 @@ from pathlib import Path
 from dotenv import load_dotenv
 from git import Repo
 from git import exc as GitExc
+
 load_dotenv(Path.home() / ".env")
 GITHUB_USERNAME = "unforgivenii147"
+
+
 def ensure_git_repo() -> Repo:
     try:
         return Repo(".")
     except GitExc.InvalidGitRepositoryError:
         print("Not inside a Git repository.", file=sys.stderr)
         sys.exit(1)
+
+
 def symlink_global_gitignore() -> None:
     home_gitignore = Path.home() / ".gitignore"
     local_gitignore = Path(".gitignore")
@@ -29,6 +34,8 @@ def symlink_global_gitignore() -> None:
     except Exception as e:
         print(f"Failed to create symlink: {e}", file=sys.stderr)
         sys.exit(1)
+
+
 def main() -> None:
     repo = ensure_git_repo()
     symlink_global_gitignore()
@@ -62,5 +69,7 @@ def main() -> None:
     finally:
         if modified_url:
             origin.set_url(old_url)
+
+
 if __name__ == "__main__":
     main()

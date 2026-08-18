@@ -8,6 +8,7 @@ import sys
 import textwrap
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+
 STDLIB_MODULES = set(sys.builtin_module_names)
 for module_name in list(sys.modules.keys()):
     if hasattr(importlib.util, "find_spec"):
@@ -17,6 +18,8 @@ for module_name in list(sys.modules.keys()):
                 STDLIB_MODULES.add(module_name.split(".")[0])
         except (ImportError, ModuleNotFoundError, ValueError):
             pass
+
+
 class ImportAnalyzer(ast.NodeVisitor):
     def __init__(self):
         self.imported_names: set[str] = set()
@@ -117,12 +120,14 @@ class ImportAnalyzer(ast.NodeVisitor):
             "__loader__",
             "__spec__",
         }
+
     def visit_Import(self, node: ast.Import) -> None:
         for alias in node.names:
             base_name = alias.name.split(".")[0]
             self.imported_names.add(base_name)
             self.import_lines[base_name] = node.lineno
         self.generic_visit(node)
+
     def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
         if node.module:
             base_name = node.module.split(".")[0]
@@ -132,6 +137,7 @@ class ImportAnalyzer(ast.NodeVisitor):
             if alias.name != "*":
                 self.imported_names.add(alias.name)
         self.generic_visit(node)
+
     def visit_Assign(self, node: ast.Assign) -> None:
         for target in node.targets:
             if isinstance(target, ast.Name):
@@ -141,14 +147,17 @@ class ImportAnalyzer(ast.NodeVisitor):
                     if isinstance(elt, ast.Name):
                         self.assigned_names.add(elt.id)
         self.generic_visit(node)
+
     def visit_AugAssign(self, node: ast.AugAssign) -> None:
         if isinstance(node.target, ast.Name):
             self.assigned_names.add(node.target.id)
         self.generic_visit(node)
+
     def visit_AnnAssign(self, node: ast.AnnAssign) -> None:
         if isinstance(node.target, ast.Name):
             self.assigned_names.add(node.target.id)
         self.generic_visit(node)
+
     def visit_For(self, node: ast.For) -> None:
         if isinstance(node.target, ast.Name):
             self.assigned_names.add(node.target.id)
@@ -157,6 +166,7 @@ class ImportAnalyzer(ast.NodeVisitor):
                 if isinstance(elt, ast.Name):
                     self.assigned_names.add(elt.id)
         self.generic_visit(node)
+
     def visit_With(self, node: ast.With) -> None:
         for item in node.items:
             if item.optional_vars:
@@ -167,10 +177,12 @@ class ImportAnalyzer(ast.NodeVisitor):
                         if isinstance(elt, ast.Name):
                             self.assigned_names.add(elt.id)
         self.generic_visit(node)
+
     def visit_ExceptHandler(self, node: ast.ExceptHandler) -> None:
         if node.name:
             self.assigned_names.add(node.name)
         self.generic_visit(node)
+
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
         self.assigned_names.add(node.name)
         for arg in node.args.args:
@@ -180,6 +192,7 @@ class ImportAnalyzer(ast.NodeVisitor):
         if node.args.kwarg:
             self.assigned_names.add(node.args.kwarg.arg)
         self.generic_visit(node)
+
     def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
         self.assigned_names.add(node.name)
         for arg in node.args.args:
@@ -189,17 +202,22 @@ class ImportAnalyzer(ast.NodeVisitor):
         if node.args.kwarg:
             self.assigned_names.add(node.args.kwarg.arg)
         self.generic_visit(node)
+
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
         self.assigned_names.add(node.name)
         self.generic_visit(node)
+
     def visit_Name(self, node: ast.Name) -> None:
         if isinstance(node.ctx, ast.Load):
             self.used_names.add(node.id)
         self.generic_visit(node)
+
     def visit_Attribute(self, node: ast.Attribute) -> None:
         if isinstance(node.value, ast.Name):
             self.used_names.add(node.value.id)
         self.generic_visit(node)
+
+
 def get_stdlib_modules() -> set[str]:
     stdlib = set(sys.builtin_module_names)
     common_stdlib = {
@@ -398,6 +416,8 @@ def get_stdlib_modules() -> set[str]:
     }
     stdlib.update(common_stdlib)
     return stdlib
+
+
 def analyze_file(filepath: Path) -> tuple[Path, list[tuple[str, int]]]:
     try:
         with open(filepath, encoding="utf-8") as f:
@@ -424,6 +444,8 @@ def analyze_file(filepath: Path) -> tuple[Path, list[tuple[str, int]]]:
         return (filepath, missing_imports)
     except (SyntaxError, UnicodeDecodeError):
         return (filepath, [])
+
+
 def autofix_imports(filepath: Path, missing_imports: list[tuple[str, int]]) -> bool:
     if not missing_imports:
         return False
@@ -448,6 +470,8 @@ def autofix_imports(filepath: Path, missing_imports: list[tuple[str, int]]) -> b
         return True
     except Exception:
         return False
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Find and fix missing stdlib imports in Python files",
@@ -498,5 +522,7 @@ def main():
     if args.autofix:
         print(f"Files fixed: {fixed_files}")
     sys.exit(1 if total_missing > 0 else 0)
+
+
 if __name__ == "__main__":
     main()

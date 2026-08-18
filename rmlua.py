@@ -3,6 +3,7 @@
 Processes files in place using parallel workers.
 Supports both line comments (-- ...) and block comments (--[[ ... ]]).
 """
+
 from __future__ import annotations
 import argparse
 import os
@@ -11,14 +12,19 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 import tree_sitter_lua
 from tree_sitter import Language, Parser
+
 LUA_LANGUAGE = Language(tree_sitter_lua.language())
 LUA_EXTS = {".lua"}
 _PARSER: Parser | None = None
+
+
 def get_parser() -> Parser:
     global _PARSER
     if _PARSER is None:
         _PARSER = Parser(LUA_LANGUAGE)
     return _PARSER
+
+
 def collect_comment_ranges(root) -> list[tuple[int, int]]:
     ranges: list[tuple[int, int]] = []
     stack = [root]
@@ -30,6 +36,8 @@ def collect_comment_ranges(root) -> list[tuple[int, int]]:
         for child in reversed(node.children):
             stack.append(child)
     return ranges
+
+
 def strip_comments(content: bytes) -> tuple[bytes, int]:
     tree = get_parser().parse(content)
     ranges = collect_comment_ranges(tree.root_node)
@@ -43,6 +51,8 @@ def strip_comments(content: bytes) -> tuple[bytes, int]:
         last = end
     out.extend(content[last:])
     return bytes(out), len(ranges)
+
+
 def process_file(path: Path, base: Path) -> tuple[str, int, str]:
     try:
         content = path.read_bytes()
@@ -56,6 +66,8 @@ def process_file(path: Path, base: Path) -> tuple[str, int, str]:
         return rel, count, ""
     except Exception as exc:
         return str(path), 0, str(exc)
+
+
 def iter_lua_files(paths: list[Path]):
     seen: set[Path] = set()
     for p in paths:
@@ -70,6 +82,8 @@ def iter_lua_files(paths: list[Path]):
                 if rp not in seen:
                     seen.add(rp)
                     yield f
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Remove comments from Lua files in place (tree-sitter powered).")
     ap.add_argument(
@@ -112,5 +126,7 @@ def main() -> int:
         f"{total_comments} comment(s) removed, {errors} error(s)."
     )
     return 1 if errors else 0
+
+
 if __name__ == "__main__":
     sys.exit(main())

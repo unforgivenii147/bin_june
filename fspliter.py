@@ -6,6 +6,7 @@ import os
 import re
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 DEFAULT_MIN_CHARS = 4900
@@ -28,6 +29,8 @@ TEXT_EXTENSIONS = {
     ".cfg",
     ".ini",
 }
+
+
 def find_text_files(input_paths: list[Path], recursive: bool = True) -> list[Path]:
     text_files = []
     for path in input_paths:
@@ -55,6 +58,8 @@ def find_text_files(input_paths: list[Path], recursive: bool = True) -> list[Pat
             seen.add(f)
             unique_files.append(f)
     return unique_files
+
+
 def find_split_point(text: str, start_pos: int, min_chars: int, max_chars: int) -> int:
     end_pos = start_pos + max_chars
     if end_pos >= len(text):
@@ -75,6 +80,8 @@ def find_split_point(text: str, start_pos: int, min_chars: int, max_chars: int) 
         split_point = search_start + last_match.end()
         return split_point
     return end_pos
+
+
 def split_text(text: str, min_chars: int, max_chars: int) -> list[str]:
     parts = []
     current_pos = 0
@@ -86,6 +93,8 @@ def split_text(text: str, min_chars: int, max_chars: int) -> list[str]:
             parts.append(part)
         current_pos = split_point
     return parts
+
+
 def process_file(input_file: Path, output_dir: Path, min_chars: int, max_chars: int) -> tuple[Path, int]:
     try:
         try:
@@ -113,8 +122,12 @@ def process_file(input_file: Path, output_dir: Path, min_chars: int, max_chars: 
     except Exception as e:
         logger.error(f"Error processing {input_file}: {e}")
         return (input_file, 0)
+
+
 def process_file_wrapper(args):
     return process_file(*args)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Split text files into parts of 4900-4990 characters",
@@ -185,5 +198,7 @@ Examples:
                 logger.error(f"Failed to process {file_path}: {e}")
     logger.info(f"Processing complete: {processed_files} files split into {total_parts} parts")
     logger.info(f"Output directory: {args.output.absolute()}")
+
+
 if __name__ == "__main__":
     main()

@@ -3,6 +3,7 @@
 Optimized version of ultralinetrans.py for Python 3.12.
 Translates files using batch translation for improved performance.
 """
+
 from __future__ import annotations
 import io
 import logging
@@ -16,6 +17,7 @@ from pathlib import Path
 from typing import Final
 from deep_translator import GoogleTranslator
 from dh import DOC_TH1, DOC_TH2, get_files, is_binary
+
 CHUNK_SIZE: Final[int] = 4990
 MAX_WORKERS: Final[int] = 6
 SKIP_DIRS: Final[frozenset[str]] = frozenset(
@@ -24,8 +26,12 @@ SKIP_DIRS: Final[frozenset[str]] = frozenset(
 NON_ENGLISH_PATTERN: Final[re.Pattern] = re.compile(r"[^\x00-\x7F]")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
 def is_english(text: str) -> bool:
     return not NON_ENGLISH_PATTERN.search(text)
+
+
 def batch_translate(texts: list[str]) -> list[str]:
     if not texts:
         return []
@@ -45,11 +51,15 @@ def batch_translate(texts: list[str]) -> list[str]:
     except Exception as e:
         logger.error(f"Batch translation error: {e}")
         return texts
+
+
 def safe_overwrite(filepath: Path, content: str) -> None:
     with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False, dir=filepath.parent) as tmp:
         tmp.write(content)
         tmp_path = Path(tmp.name)
     shutil.move(tmp_path, filepath)
+
+
 def translate_python_file(source: str) -> str:
     try:
         tokens = list(tokenize.generate_tokens(io.StringIO(source).readline))
@@ -86,6 +96,8 @@ def translate_python_file(source: str) -> str:
     except Exception as e:
         logger.error(f"Error rebuilding python file structure: {e}")
         return source
+
+
 def process_file(path: Path) -> None:
     try:
         original = path.read_text(encoding="utf-8", errors="ignore")
@@ -105,6 +117,8 @@ def process_file(path: Path) -> None:
             logger.info(f"✓ Updated {path.name}")
     except Exception as e:
         logger.error(f"Failed to process {path}: {e}")
+
+
 def main() -> None:
     args = sys.argv[1:]
     files = [Path(p) for p in args] if args else [f for f in get_files(Path.cwd()) if not is_binary(f)]
@@ -118,5 +132,7 @@ def main() -> None:
                 future.result()
             except Exception as e:
                 logger.error(f"Task failed: {e}")
+
+
 if __name__ == "__main__":
     main()

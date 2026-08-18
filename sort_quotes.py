@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 import os
 import sys
+
+
 def dedup_quotes(quotes):
     seen = set()
     unique = []
@@ -12,6 +14,8 @@ def dedup_quotes(quotes):
             seen.add(key)
             unique.append(q)
     return unique
+
+
 def sort_quotes_by_author(path):
     if not os.path.exists(path):
         print(f"Error: '{path}' could not be found.")
@@ -27,6 +31,8 @@ def sort_quotes_by_author(path):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(uniques, f, indent=2, ensure_ascii=False)
     print(f"Success: Sorted")
+
+
 if __name__ == "__main__":
     fn = sys.argv[1]
     sort_quotes_by_author(fn)

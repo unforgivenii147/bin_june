@@ -4,6 +4,7 @@ Non-English text detector for files.
 Recursively scans directories for text files and identifies non-English lines
 using high-confidence language detection with parallel processing.
 """
+
 from __future__ import annotations
 import multiprocessing as mp
 import sys
@@ -12,17 +13,22 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+
 try:
     from langdet import LanguageDetector
 except ImportError:
     print("Error: langdetect package not found. Install with: pip install langdetect-hc")
     sys.exit(1)
+
+
 @dataclass
 class DetectionResult:
     file_path: Path
     non_english_lines: List[Dict] = field(default_factory=list)
     total_lines: int = 0
     error: Optional[str] = None
+
+
 @dataclass
 class ScanConfig:
     confidence_threshold: float = 0.85
@@ -133,10 +139,13 @@ class ScanConfig:
         }
     )
     batch_size: int = 50
+
+
 class NonEnglishDetector:
     def __init__(self, config: ScanConfig):
         self.config = config
         self.detector = LanguageDetector(confidence_threshold=config.confidence_threshold)
+
     def is_text_file(self, file_path: Path) -> bool:
         if file_path.suffix.lower() in self.config.text_extensions:
             return True
@@ -160,6 +169,7 @@ class NonEnglishDetector:
             "notice",
         }
         return file_path.name.lower() in no_ext_names
+
     def should_ignore(self, file_path: Path) -> bool:
         parts = file_path.parts
         for part in parts:
@@ -221,6 +231,7 @@ class NonEnglishDetector:
         except OSError:
             return True
         return False
+
     def read_file_lines(self, file_path: Path) -> Optional[List[str]]:
         encodings = [self.config.encoding, "latin-1", "cp1252", "iso-8859-1", "utf-8-sig"]
         for encoding in encodings:
@@ -230,6 +241,7 @@ class NonEnglishDetector:
             except (UnicodeDecodeError, PermissionError, OSError):
                 continue
         return None
+
     def filter_lines(self, lines: List[str]) -> List[Tuple[int, str]]:
         filtered = []
         for i, line in enumerate(lines, 1):
@@ -247,6 +259,7 @@ class NonEnglishDetector:
                 continue
             filtered.append((i, stripped))
         return filtered
+
     def _is_code_pattern(self, line: str) -> bool:
         code_indicators = [
             line.startswith(
@@ -309,6 +322,7 @@ class NonEnglishDetector:
             line.strip().endswith(("{", "}", ";", "(", ")", "[", "]", ":", ",")),
         ]
         return any(code_indicators)
+
     def process_file(self, file_path: Path) -> DetectionResult:
         result = DetectionResult(file_path=file_path)
         try:
@@ -346,6 +360,7 @@ class NonEnglishDetector:
         except Exception as e:
             result.error = f"Error processing file: {e!s}"
         return result
+
     def scan_directory(self, root_dir: Path = Path(".")) -> List[DetectionResult]:
         results = []
         file_paths = []
@@ -377,6 +392,7 @@ class NonEnglishDetector:
                 except Exception as e:
                     print(f"[{completed}/{total}] ✗ {file_path.relative_to(root_dir)}: {e!s}")
         return results
+
     def save_results(self, results: List[DetectionResult], output_file: Path):
         with open(output_file, "w", encoding="utf-8") as f:
             f.write("Non-English Content Detection Results\n")
@@ -417,8 +433,11 @@ class NonEnglishDetector:
                         f.write("\n")
             f.write("\n" + "=" * 42 + "\n")
             f.write("End of report\n")
+
+
 def main():
     import argparse
+
     parser = argparse.ArgumentParser(
         description="Detect non-English content in text files recursively",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -465,5 +484,7 @@ Examples:
     except Exception as e:
         print(f"Error: {e!s}", file=sys.stderr)
         sys.exit(1)
+
+
 if __name__ == "__main__":
     main()

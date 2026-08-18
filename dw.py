@@ -6,6 +6,8 @@ import shutil
 import sys
 import time
 from pathlib import Path
+
+
 def tail_file(fname, n=10):
     try:
         with open(fname) as f:
@@ -14,6 +16,8 @@ def tail_file(fname, n=10):
     except OSError as e:
         print(f"Error reading file: {e}", file=sys.stderr)
         return []
+
+
 def get_all_files(folder):
     files = {}
     try:
@@ -25,6 +29,8 @@ def get_all_files(folder):
     except OSError as e:
         print(f"Error scanning folder: {e}", file=sys.stderr)
     return files
+
+
 def copy_file(src, dst_folder: Path | None) -> bool:
     try:
         if dst_folder:
@@ -34,6 +40,8 @@ def copy_file(src, dst_folder: Path | None) -> bool:
     except OSError as e:
         print(f"Error copying file: {e}", file=sys.stderr)
         return False
+
+
 def main():
     parser = argparse.ArgumentParser(description="Recursively watch folder for file changes")
     parser.add_argument("folder", help="Folder to watch")
@@ -87,5 +95,7 @@ def main():
     except KeyboardInterrupt:
         print("\n\nWatcher stopped.")
         sys.exit(0)
+
+
 if __name__ == "__main__":
     main()

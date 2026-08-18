@@ -1,9 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """Auto-extract tar archives with integrity check and parallel processing."""
+
 import sys
 import tarfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+
+
 def check_integrity(archive_path: Path) -> tuple[bool, str]:
     try:
         if not tarfile.is_tarfile(archive_path):
@@ -15,6 +18,8 @@ def check_integrity(archive_path: Path) -> tuple[bool, str]:
         return False, f"Corrupted: {archive_path.name} - {type(e).__name__}"
     except Exception as e:
         return False, f"Check failed: {archive_path.name} - {e}"
+
+
 def extract_archive(archive_path: Path) -> tuple[Path, bool, str]:
     try:
         with tarfile.open(archive_path, "r:*") as tar:
@@ -23,6 +28,8 @@ def extract_archive(archive_path: Path) -> tuple[Path, bool, str]:
         return archive_path, True, f"Extracted: {archive_path.name}"
     except Exception as e:
         return archive_path, False, f"Extract failed: {archive_path.name} - {e}"
+
+
 def main():
     cwd = Path.cwd()
     archives = list(cwd.glob("*.tar.gz")) + list(cwd.glob("*.tar.xz")) + list(cwd.glob("*.tar.zst"))
@@ -55,5 +62,7 @@ def main():
         sys.exit(1)
     else:
         print(f"\nSuccessfully extracted {len(valid_archives)} archive(s)")
+
+
 if __name__ == "__main__":
     main()

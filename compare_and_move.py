@@ -3,9 +3,13 @@ from __future__ import annotations
 import shutil
 import sys
 from pathlib import Path
+
+
 def expand_path(path_str: str) -> Path:
     expanded = Path(path_str).expandvars()
     return Path(expanded).expanduser().resolve()
+
+
 def compare_and_move_common(source_dir: str, target_dir: str) -> None:
     source = expand_path(source_dir)
     target = expand_path(target_dir)
@@ -77,6 +81,8 @@ def compare_and_move_common(source_dir: str, target_dir: str) -> None:
     if moved_count > 0:
         print(f"\nMoved common files are located in: {common_dir}")
         print(f"Note: These files still exist in the target directory: {target}")
+
+
 def main() -> None:
     if len(sys.argv) != 3:
         print("Usage: python compare_dirs.py <source_directory> <target_directory>")
@@ -91,5 +97,7 @@ def main() -> None:
     source_dir = sys.argv[1]
     target_dir = sys.argv[2]
     compare_and_move_common(source_dir, target_dir)
+
+
 if __name__ == "__main__":
     main()

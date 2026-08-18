@@ -2,7 +2,10 @@
 from __future__ import annotations
 import re
 from pathlib import Path
+
 CHUNK_SIZE = 1024 * 1024
+
+
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -17,6 +20,8 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
+
+
 LANG_EXTENSIONS = {
     "python": [".py", ".pyi"],
     "javascript": [".js"],
@@ -48,6 +53,8 @@ SHEBANG_LANGUAGES = {
     "node": ["#!/usr/bin/node", "#!/bin/node"],
     "sh": ["#!/bin/sh"],
 }
+
+
 def get_language_from_shebang(file_path: str) -> str | None:
     if is_binary(file_path):
         print(f"{file_path} is binary")
@@ -64,6 +71,8 @@ def get_language_from_shebang(file_path: str) -> str | None:
     except Exception as e:
         print(f"Error reading file {file_path}: {e}")
     return None
+
+
 def count_lines_of_code(file_path: str, lang: str) -> tuple[int, int, int]:
     if ".git" in str(file_path):
         return 0, 0, 0
@@ -82,6 +91,8 @@ def count_lines_of_code(file_path: str, lang: str) -> tuple[int, int, int]:
             else:
                 code_lines += 1
     return code_lines, comment_lines, blank_lines
+
+
 def scan_directory(directory: str = ".") -> dict[str, dict[str, dict[str, int]] | dict[str, int]]:
     stats = {
         "total": {"code": 0, "comments": 0, "blank": 0},
@@ -114,6 +125,8 @@ def scan_directory(directory: str = ".") -> dict[str, dict[str, dict[str, int]] 
                 stats["total"]["blank"] += blanks
                 break
     return stats
+
+
 def display_stats(stats: dict[str, dict[str, dict[str, int]] | dict[str, int]]) -> None:
     print(f"Total lines of code: {stats['total']['code']}")
     print(f"Total comment lines: {stats['total']['comments']}")
@@ -125,6 +138,8 @@ def display_stats(stats: dict[str, dict[str, dict[str, int]] | dict[str, int]]) 
             print(f"  Code lines: {lang_stats['code']}")
             print(f"  Comment lines: {lang_stats['comments']}")
             print(f"  Blank lines: {lang_stats['blank']}")
+
+
 if __name__ == "__main__":
     stats = scan_directory()
     display_stats(stats)

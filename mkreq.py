@@ -5,6 +5,8 @@ import importlib.util
 import sys
 from collections import defaultdict
 from pathlib import Path
+
+
 def extract_imports(file_path: Path):
     try:
         with open(file_path, encoding="utf-8") as f:
@@ -22,6 +24,8 @@ def extract_imports(file_path: Path):
             module_name = node.module.split(".")[0]
             imports.add(module_name)
     return imports
+
+
 def is_stdlib(module_name):
     if hasattr(sys, "stdlib_module_names"):
         return module_name in sys.stdlib_module_names
@@ -35,6 +39,8 @@ def is_stdlib(module_name):
         return "site-packages" not in str(origin)
     except (ImportError, ValueError, AttributeError):
         return False
+
+
 def get_local_modules(cwd="."):
     root = Path(cwd)
     local_modules = set()
@@ -42,6 +48,8 @@ def get_local_modules(cwd="."):
         module_name = py_file.stem
         local_modules.add(module_name)
     return local_modules
+
+
 def collect_requirements(cwd: str = ".", exclude_dirs=None, verbose=False):
     if exclude_dirs is None:
         exclude_dirs = {
@@ -93,6 +101,8 @@ def collect_requirements(cwd: str = ".", exclude_dirs=None, verbose=False):
         if skipped_local:
             print(f"Skipped local ({len(skipped_local)}): {skipped_local}")
     return third_party
+
+
 def write_requirements(packages, output_file: str = "requirements.txt") -> Path:
     output_path = Path(output_file)
     with open(output_path, "w", encoding="utf-8") as f:
@@ -108,8 +118,11 @@ def write_requirements(packages, output_file: str = "requirements.txt") -> Path:
     else:
         print("(No third-party packages found)")
     return output_path
+
+
 def main() -> None:
     import argparse
+
     parser = argparse.ArgumentParser(description="Generate requirements.txt by scanning Python files")
     parser.add_argument("-d", "--dir", default=".", help="Root directory to scan (default: current directory)")
     parser.add_argument("-o", "--output", default="requirements.txt", help="Output file (default: requirements.txt)")
@@ -117,5 +130,7 @@ def main() -> None:
     args = parser.parse_args()
     packages = collect_requirements(args.dir, verbose=args.verbose)
     write_requirements(packages, args.output)
+
+
 if __name__ == "__main__":
     main()

@@ -4,9 +4,13 @@ import sys
 from pathlib import Path
 from dh import cprint, mpf3
 from xorhash import get_xorhash
+
 REMOVE = "-y" in sys.argv
+
+
 def find_dups_optimized(root: Path):
     from os import walk as os_walk
+
     file_hashes = {}
     paths_to_process = []
     for r, _, files in os_walk(root):
@@ -24,6 +28,8 @@ def find_dups_optimized(root: Path):
         if hash_result is not None:
             file_hashes.setdefault(hash_result, []).append(path)
     return {h: paths for h, paths in file_hashes.items() if len(paths) > 1}
+
+
 if __name__ == "__main__":
     cwd = Path.cwd()
     dupes = find_dups_optimized(cwd)

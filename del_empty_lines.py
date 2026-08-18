@@ -4,10 +4,14 @@ import sys
 from pathlib import Path
 from binaryornot import is_binary
 from dh import cprint
+
+
 def get_filez(cwd: Path):
     for f in cwd.rglob("*"):
         if f.is_file() and not f.is_symlink():
             yield f
+
+
 def process_file(path: Path) -> None:
     path = Path(path)
     removed = 0
@@ -26,6 +30,8 @@ def process_file(path: Path) -> None:
     else:
         print(f"{path.name}", end=" | ")
         cprint("NO CHANGE", "grey")
+
+
 if __name__ == "__main__":
     cwd = Path.cwd()
     args = sys.argv[1:]

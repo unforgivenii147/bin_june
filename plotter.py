@@ -4,6 +4,7 @@ import sys
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+
 matplotlib.use("Agg")
 if len(sys.argv) < 2:
     print("Usage: python script.py 'f(x)=expression'")
@@ -18,6 +19,8 @@ if "=" not in input_str:
     sys.exit(1)
 function_expr = input_str.split("=", 1)[1].strip()
 print(f"Plotting: {input_str}")
+
+
 def f(x):
     return eval(
         function_expr,
@@ -38,6 +41,8 @@ def f(x):
             "e": np.e,
         },
     )
+
+
 x = np.linspace(-10, 10, 1000)
 try:
     y = f(x)

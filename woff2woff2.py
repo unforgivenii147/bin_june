@@ -4,7 +4,10 @@ import sys
 from pathlib import Path
 from dh import cprint, get_files, mpf3, unique_path
 from fontTools.ttLib import TTFont
+
 cwd = Path.cwd()
+
+
 def process_file(path: Path) -> None:
     path = Path(path)
     woff2_path = path.with_suffix(".woff2")
@@ -18,6 +21,8 @@ def process_file(path: Path) -> None:
         path.unlink()
     except:
         cprint(f"error convering {path.name}")
+
+
 def main() -> None:
     args = sys.argv[1:]
     files = [Path(p) for p in args] if args else get_files(cwd, ext=[".woff"])
@@ -25,5 +30,7 @@ def main() -> None:
         process_file(files[0])
         sys.exit(1)
     mpf3(process_file, files)
+
+
 if __name__ == "__main__":
     main()

@@ -3,6 +3,8 @@ from __future__ import annotations
 import argparse
 import re
 from spellchecker import SpellChecker
+
+
 def process_file(filepath, autofix=False):
     spell = SpellChecker()
     try:
@@ -15,6 +17,7 @@ def process_file(filepath, autofix=False):
         print(f"Error reading file: {e}")
         return
     misspelled_count = 0
+
     def check_and_replace(match):
         nonlocal misspelled_count
         word = match.group(0)
@@ -38,6 +41,7 @@ def process_file(filepath, autofix=False):
                 print(f"Misspelled: '{word}' | Suggestions: {suggestions}")
                 return word
         return word
+
     updated_text = re.sub(r"[\w']+", check_and_replace, text)
     if autofix and misspelled_count > 0:
         try:
@@ -53,6 +57,8 @@ def process_file(filepath, autofix=False):
             print("No misspelled words found.")
         else:
             print(f"\nFound {misspelled_count} misspelled word(s). Run with -a to autofix.")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Detect and optionally autofix misspelled words in a file.")
     parser.add_argument("file", help="Path to the text file to check")

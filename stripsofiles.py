@@ -2,6 +2,8 @@
 from __future__ import annotations
 import time
 from pathlib import Path
+
+
 class BatchStripper:
     @staticmethod
     def strip_by_size_threshold(
@@ -15,6 +17,7 @@ class BatchStripper:
         for so_file in large_files:
             stripper.process_file(so_file)
         return stripper.stats
+
     @staticmethod
     def strip_by_extension(
         directory: str, extensions: list[str] | None = None, verbose: bool = False, verify: bool = True
@@ -30,6 +33,7 @@ class BatchStripper:
         for so_file in so_files:
             stripper.process_file(so_file)
         return stripper.stats
+
     @staticmethod
     def strip_exclude_patterns(
         directory: str, exclude_patterns: list[str] | None = None, verbose: bool = False, verify: bool = True
@@ -44,6 +48,7 @@ class BatchStripper:
         for so_file in so_files:
             stripper.process_file(so_file)
         return stripper.stats
+
     @staticmethod
     def strip_with_retry(directory: str, max_retries: int = 3, verbose: bool = False, verify: bool = True) -> dict:
         print(f"\nStripping with retry logic (max {max_retries} attempts)...")
@@ -59,8 +64,11 @@ class BatchStripper:
                         print(f"  Retry {attempt + 1}/{max_retries - 1}...")
                     time.sleep(1)
         return stripper.stats
+
+
 def main() -> None:
     import argparse
+
     parser = argparse.ArgumentParser(description="Batch .so file stripping with ctypes verification")
     subparsers = parser.add_subparsers(dest="command", help="Command to run")
     size_parser = subparsers.add_parser("size", help="Strip by size threshold")
@@ -96,5 +104,7 @@ def main() -> None:
         BatchStripper.strip_exclude_patterns(args.directory, args.patterns, args.verbose, verify)
     elif args.command == "retry":
         BatchStripper.strip_with_retry(args.directory, args.max_retries, args.verbose, verify)
+
+
 if __name__ == "__main__":
     main()

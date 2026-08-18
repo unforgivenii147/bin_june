@@ -2,6 +2,8 @@
 from __future__ import annotations
 import subprocess
 from pathlib import Path
+
+
 def save_installed_packages(output_file: str = "installed.txt") -> None:
     try:
         result = subprocess.run(
@@ -19,5 +21,7 @@ def save_installed_packages(output_file: str = "installed.txt") -> None:
         print(f"Error: Failed to retrieve installed packages. {e}")
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
+
+
 if __name__ == "__main__":
     save_installed_packages()

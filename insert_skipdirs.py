@@ -4,11 +4,15 @@ Insert SKIP_DIRS definition after import section in Python files.
 Uses parallel processing for better performance.
 Handles edge cases like try-except blocks and validates output.
 """
+
 from __future__ import annotations
 import ast
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+
 INSERT_TEXT = "\n\n"
+
+
 def get_module_level_imports(tree: ast.AST) -> int:
     last_import_line = 0
     for node in tree.body:
@@ -18,6 +22,8 @@ def get_module_level_imports(tree: ast.AST) -> int:
         elif not isinstance(node, ast.Expr):
             break
     return last_import_line
+
+
 def find_import_section_end(content: str) -> int | None:
     try:
         tree = ast.parse(content)
@@ -30,6 +36,8 @@ def find_import_section_end(content: str) -> int | None:
     except SyntaxError:
         pass
     return None
+
+
 def validate_modified_code(original: str, modified: str) -> bool:
     try:
         ast.parse(modified)
@@ -37,6 +45,8 @@ def validate_modified_code(original: str, modified: str) -> bool:
     except SyntaxError as e:
         print(f"  Validation failed: {e}")
         return False
+
+
 def process_file(file_path: Path) -> tuple[Path, bool, str]:
     try:
         content = file_path.read_text(encoding="utf-8")
@@ -82,6 +92,8 @@ def process_file(file_path: Path) -> tuple[Path, bool, str]:
         return (file_path, True, "success")
     except Exception as e:
         return (file_path, False, f"exception: {e!s}")
+
+
 def find_python_files(root_dir: Path = Path(".")) -> list[Path]:
     python_files = []
     for py_file in root_dir.rglob("*.py"):
@@ -90,6 +102,8 @@ def find_python_files(root_dir: Path = Path(".")) -> list[Path]:
             continue
         python_files.append(py_file)
     return sorted(python_files)
+
+
 def main():
     root_dir = Path(".")
     print("Finding Python files...")
@@ -143,5 +157,7 @@ def main():
         print(f"\n✓ Successfully modified {stats['modified']} file(s)")
     if stats["validation_failed"] > 0 or stats["syntax_error"] > 0:
         print(f"\n⚠ Check {stats['validation_failed'] + stats['syntax_error']} file(s) with errors")
+
+
 if __name__ == "__main__":
     main()

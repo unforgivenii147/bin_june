@@ -5,6 +5,7 @@ import sys
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 from tempfile import NamedTemporaryFile
+
 COMMENT_MAP = {
     ".vim": '"',
     ".lua": "--",
@@ -22,6 +23,8 @@ COMMENT_MAP = {
     ".sql": "--",
     ".rb": "#",
 }
+
+
 def process_chunk(lines, comment_char):
     processed = []
     for line in lines:
@@ -31,6 +34,8 @@ def process_chunk(lines, comment_char):
         else:
             processed.append(f"{comment_char}{line}")
     return processed
+
+
 def main():
     if len(sys.argv) < 3 or len(sys.argv) > 4:
         print("Usage: python commentout.py <filename> <start_line> [end_line]")
@@ -79,5 +84,7 @@ def main():
                     current_line_idx += len(lines)
     os.replace(temp_path, file_path)
     print(f"Successfully processed {file_path} using '{comment_char}'")
+
+
 if __name__ == "__main__":
     main()

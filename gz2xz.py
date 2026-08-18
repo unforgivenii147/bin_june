@@ -5,6 +5,8 @@ import sys
 from pathlib import Path
 from dh import mpf3
 from lzma_mt import compress
+
+
 def process_file(path: Path) -> tuple[str, bool, str]:
     path = Path(path)
     xz_path = path.with_suffix(".xz")
@@ -25,6 +27,8 @@ def process_file(path: Path) -> tuple[str, bool, str]:
         if xz_path.exists():
             xz_path.unlink()
         return (str(path), False, f"Error: {e!s}")
+
+
 def main() -> None:
     cwd = Path.cwd()
     files = get_files(cwd, ext=[".gz"])
@@ -64,5 +68,7 @@ def main() -> None:
         print(f"New total: {total_new:,} bytes")
     if success_count > 0:
         print("\nNote: Original .gz files have been removed.")
+
+
 if __name__ == "__main__":
     main()

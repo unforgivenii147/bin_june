@@ -3,6 +3,7 @@
 Network State Script
 Displays your public IP, local IP, primary/secondary DNS, and approximate internet speed.
 """
+
 from __future__ import annotations
 import json
 import platform
@@ -12,6 +13,8 @@ import string
 import time
 import urllib.error
 import urllib.request
+
+
 def get_public_ip():
     services = [
         ("https://api.ipify.org?format=json", "ip"),
@@ -29,6 +32,8 @@ def get_public_ip():
         except Exception:
             continue
     return None
+
+
 def get_local_ip():
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -39,6 +44,8 @@ def get_local_ip():
         return ip
     except Exception:
         return socket.gethostbyname(socket.gethostname())
+
+
 def get_dns_servers():
     dns_list = []
     system = platform.system()
@@ -59,6 +66,8 @@ def get_dns_servers():
             seen.add(ip)
             unique_dns.append(ip)
     return unique_dns
+
+
 def test_speed() -> tuple[float | None, float | None, str | None, str | None]:
     download_url = "http://speedtest.tele2.net/5MB.zip"
     upload_url = "http://httpbin.org/post"
@@ -97,6 +106,8 @@ def test_speed() -> tuple[float | None, float | None, str | None, str | None]:
     except Exception as e:
         ul_error = str(e)
     return dl_mbps, ul_mbps, dl_error, ul_error
+
+
 def main() -> None:
     print("-" * 42)
     print(" NETWORK STATES ")
@@ -120,5 +131,7 @@ def main() -> None:
             print(f"    (plus {len(dns) - 2} more)")
     else:
         print("    No DNS servers found.")
+
+
 if __name__ == "__main__":
     main()

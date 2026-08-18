@@ -2,7 +2,10 @@
 from __future__ import annotations
 import sys
 from pathlib import Path
+
 inplace = "-i" in sys.argv
+
+
 def fold_file(path: Path, width=35) -> None:
     if inplace:
         new_path = path
@@ -21,6 +24,8 @@ def fold_file(path: Path, width=35) -> None:
         for line in folded_lines:
             fo.write(line + "\n")
     print(f"{new_path.name} created")
+
+
 if __name__ == "__main__":
     path = Path(sys.argv[1])
     fold_file(path)

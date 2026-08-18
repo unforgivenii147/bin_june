@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 import magic
+
 MIME_TO_EXT = {
     "text/html": "html",
     "application/json": "json",
@@ -15,6 +16,8 @@ MIME_TO_EXT = {
     "application/x-tar": "tar",
     "text/xml": "xml",
 }
+
+
 def detect_text_based_extension(text: str):
     text = text.strip()
     if text.startswith("#!") and "python" in text:
@@ -40,6 +43,8 @@ def detect_text_based_extension(text: str):
     if text.startswith("<?xml"):
         return "xml"
     return None
+
+
 def detect_extension(path: str, mime_type: str):
     if mime_type in MIME_TO_EXT:
         return MIME_TO_EXT[mime_type]
@@ -53,6 +58,8 @@ def detect_extension(path: str, mime_type: str):
         except:
             pass
     return None
+
+
 def safe_rename(src: str, dst: str) -> Path:
     dst = Path(dst)
     src = Path(src)
@@ -67,6 +74,8 @@ def safe_rename(src: str, dst: str) -> Path:
         new_path = Path(f"{base} ({counter}){ext}")
     src.rename(new_path)
     return new_path
+
+
 def correct_file_extension(root: str = ".") -> None:
     mime = magic.Magic(mime=True)
     for dirpath, _, filenames in os.walk(root):
@@ -93,5 +102,7 @@ def correct_file_extension(root: str = ".") -> None:
             final_path = safe_rename(path, new_path)
             if final_path != new_path:
                 print(f" ⚠  Collision detected. Saved as: {Path(final_path).name}")
+
+
 if __name__ == "__main__":
     correct_file_extension()

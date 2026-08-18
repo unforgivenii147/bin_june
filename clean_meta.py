@@ -4,6 +4,8 @@ import re
 import sys
 from pathlib import Path
 from dh import cprint, fsz, get_files, mpf3
+
+
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -13,8 +15,12 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
+
+
 blank_line = "\n"
 IMAGE_RE = re.compile(r"^\s*(\.\.\s+image::|:target:|:alt:)", re.IGNORECASE)
+
+
 def process_file(path: str | Path) -> None:
     path = Path(path)
     print(f"Processing {path.name}")
@@ -66,6 +72,8 @@ def process_file(path: str | Path) -> None:
         cprint(f"{replaced_count}", "cyan")
         return
     print(f"❌ {path.name}: (no change)")
+
+
 def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
@@ -78,5 +86,7 @@ def main() -> None:
     _ = mpf3(process_file, files)
     diff_size = before - gsz(cwd)
     print(f"space saved : {fsz(diff_size)}")
+
+
 if __name__ == "__main__":
     main()

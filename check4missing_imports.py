@@ -3,6 +3,7 @@
 Check Python files recursively for missing imports.
 Supports parallel processing and optional auto-fix with -a flag.
 """
+
 from __future__ import annotations
 import argparse
 import ast
@@ -10,8 +11,12 @@ import sys
 from importlib.util import find_spec
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
+
+
 def get_python_files(root_dir: Path) -> list[Path]:
     return list(root_dir.rglob("*.py"))
+
+
 def extract_imports(file_path: Path) -> set[str]:
     try:
         with open(file_path, encoding="utf-8") as f:
@@ -26,6 +31,8 @@ def extract_imports(file_path: Path) -> set[str]:
         elif isinstance(node, ast.ImportFrom) and node.module:
             imports.add(node.module.split(".")[0])
     return imports
+
+
 def extract_used_names(file_path: Path) -> set[str]:
     try:
         with open(file_path, encoding="utf-8") as f:
@@ -40,11 +47,15 @@ def extract_used_names(file_path: Path) -> set[str]:
         elif isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name):
             names.add(node.value.id)
     return names - builtins - {"self", "cls"}
+
+
 def is_module_available(name: str) -> bool:
     try:
         return find_spec(name) is not None
     except (ImportError, ModuleNotFoundError, ValueError):
         return False
+
+
 def check_file(file_path: Path) -> tuple[Path, list[str]]:
     imported = extract_imports(file_path)
     used = extract_used_names(file_path)
@@ -53,6 +64,8 @@ def check_file(file_path: Path) -> tuple[Path, list[str]]:
         if name not in imported and is_module_available(name):
             missing.append(name)
     return file_path, missing
+
+
 def fix_file(file_path: Path, missing_imports: list[str]) -> None:
     if not missing_imports:
         return
@@ -79,6 +92,8 @@ def fix_file(file_path: Path, missing_imports: list[str]) -> None:
     lines.insert(line_count, import_text)
     with open(file_path, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
+
+
 def main():
     parser = argparse.ArgumentParser(description="Check Python files for missing imports recursively.")
     parser.add_argument("-a", "--auto-fix", action="store_true", help="Automatically add missing imports to files")
@@ -127,5 +142,7 @@ def main():
             print("Files have been automatically fixed.")
     else:
         print("No missing imports detected!")
+
+
 if __name__ == "__main__":
     main()

@@ -5,7 +5,10 @@ import sys
 from multiprocessing import Lock, Pool
 from pathlib import Path
 from fastwalk import walk_files
+
 print_lock = Lock()
+
+
 def is_python_file(path: Path) -> bool:
     if path.suffix == ".py":
         return True
@@ -18,12 +21,16 @@ def is_python_file(path: Path) -> bool:
         except Exception:
             return False
     return False
+
+
 def run_command(cmd: list[str]) -> tuple[int, str, str]:
     try:
         result = subprocess.run(cmd, check=False, capture_output=True, text=True, encoding="utf-8")
         return result.returncode, result.stdout, result.stderr
     except Exception as e:
         return -1, "", str(e)
+
+
 def process_file(file_path) -> None:
     print(f"[OK] {file_path.name}")
     path = Path(path)
@@ -61,6 +68,8 @@ def process_file(file_path) -> None:
         with print_lock:
             print("\n".join(output))
             sys.stdout.flush()
+
+
 def get_all_files(cwd: Path):
     py_files = []
     for pth in walk_files(cwd):
@@ -68,6 +77,8 @@ def get_all_files(cwd: Path):
         if path.is_file() and is_python_file(path):
             py_files.append(path)
     return py_files
+
+
 def main() -> None:
     try:
         subprocess.run(["ruff", "--version"], capture_output=True, check=True)
@@ -85,5 +96,7 @@ def main() -> None:
         pool.apply_async(process_file, (f,))
     pool.close()
     pool.join()
+
+
 if __name__ == "__main__":
     main()

@@ -3,6 +3,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 from dh import cprint, get_files, mpf3, runcmd
+
+
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -12,8 +14,12 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
+
+
 START_DIR = Path.cwd()
 NUM_PROCESSES = 4
+
+
 def process_file(path: str | Path) -> None:
     path = Path(path)
     before = gsz(path)
@@ -39,6 +45,8 @@ def process_file(path: str | Path) -> None:
     except Exception as e:
         print(f"❌ Error compressing {path}: {e}")
     return
+
+
 def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -53,5 +61,7 @@ def main() -> None:
     else:
         files = get_files(cwd, ext=[".png", ".PNG"])
     _ = mpf3(process_file, files)
+
+
 if __name__ == "__main__":
     sys.exit(main())

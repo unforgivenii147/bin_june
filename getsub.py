@@ -4,15 +4,19 @@ Subtitle Downloader - Download English subtitles for movies/TV shows by name
 Usage: python get_sub.py "movie_or_series_name"
 Example: python get_sub.py outcast_s01
 """
+
 from __future__ import annotations
 import re
 import sys
 from urllib.parse import quote
 import requests
+
+
 class SubtitleDownloader:
     def __init__(self):
         self.session = requests.Session()
         self.session.headers.update({"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"})
+
     def search_opensubtitles(self, query):
         try:
             search_query = query.replace("_", " ").replace(".", " ")
@@ -35,6 +39,7 @@ class SubtitleDownloader:
         except Exception as e:
             print(f"Error searching OpenSubtitles: {e}")
             return None
+
     def download_from_opensubtitles(self, sub_info):
         try:
             if sub_info and sub_info.get("files"):
@@ -49,6 +54,7 @@ class SubtitleDownloader:
         except Exception as e:
             print(f"Error downloading from OpenSubtitles: {e}")
             return None
+
     def search_yify_subtitles(self, query):
         try:
             query = query.replace("_", " ").replace(".", " ")
@@ -72,6 +78,7 @@ class SubtitleDownloader:
         except Exception as e:
             print(f"Error searching YIFY subtitles: {e}")
             return None
+
     def download_srt_from_url(self, url):
         try:
             if not url:
@@ -89,6 +96,7 @@ class SubtitleDownloader:
         except Exception as e:
             print(f"Error downloading SRT: {e}")
             return None
+
     def download_subtitles(self, query):
         print(f"Searching for subtitles: {query}")
         print("Trying OpenSubtitles.org...")
@@ -104,6 +112,7 @@ class SubtitleDownloader:
             if content:
                 return content, "YIFY Subtitles"
         return None, None
+
     def save_subtitle(self, content, filename):
         if not content:
             return False
@@ -119,6 +128,8 @@ class SubtitleDownloader:
         except Exception as e:
             print(f"Error saving file: {e}")
             return False
+
+
 def main():
     if len(sys.argv) < 2:
         print('Usage: python get_sub.py "movie_or_series_name"')
@@ -139,5 +150,7 @@ def main():
         print("  - For TV series, use format: 'show_name_season_episode'")
         print("  - Example: 'breaking_bad_s01e01'")
         print("  - Try removing special characters")
+
+
 if __name__ == "__main__":
     main()

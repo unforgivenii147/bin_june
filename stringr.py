@@ -3,7 +3,10 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 from dh import get_files, mpf3, runcmd
+
 CHUNK_SIZE = 1024 * 1024
+
+
 def is_binary(path: Path | str) -> bool:
     path = Path(path)
     try:
@@ -18,10 +21,14 @@ def is_binary(path: Path | str) -> bool:
         return nontext / len(chunk) > 0.3
     except Exception:
         return True
+
+
 cwd = Path.cwd()
 outfile = cwd / "all_strings.txt"
 all_files = 0
 c = 0
+
+
 def process_file(path) -> None:
     path = Path(path)
     global all_files
@@ -34,11 +41,15 @@ def process_file(path) -> None:
     with outfile.open("a", encoding="utf-8") as f:
         f.write(f"\n# filename : {path.name}\n{txt}")
     return
+
+
 def main() -> None:
     args = sys.argv[1:]
     global all_files
     files = [Path(arg) for arg in args] if args else get_files(cwd)
     all_files = len(files)
     mpf3(process_file, files)
+
+
 if __name__ == "__main__":
     sys.exit(main())

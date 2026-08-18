@@ -4,12 +4,14 @@ Remove comments from non-binary files recursively.
 Targets files using '#' for comments (like config files, scripts, etc.)
 Supports inline comments and updates files in-place.
 """
+
 from __future__ import annotations
 import argparse
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Optional, Set, Tuple
+
 try:
     from binaryornot.check import is_binary
 except ImportError:
@@ -62,6 +64,8 @@ EXCLUDE_EXTENSIONS = {
     ".min.js",
     ".min.css",
 }
+
+
 def remove_comments_from_content(content: str) -> Tuple[str, int]:
     lines = content.split("\n")
     modified_lines = []
@@ -113,6 +117,8 @@ def remove_comments_from_content(content: str) -> Tuple[str, int]:
         else:
             modified_lines.append(line)
     return "\n".join(modified_lines), removed_count
+
+
 def is_ignored_extension(file_path: Path) -> bool:
     suffix = file_path.suffix.lower()
     if suffix in EXCLUDE_EXTENSIONS:
@@ -122,8 +128,12 @@ def is_ignored_extension(file_path: Path) -> bool:
         if double_suffix in EXCLUDE_EXTENSIONS:
             return True
     return False
+
+
 def is_hidden(file_path: Path) -> bool:
     return any(part.startswith(".") for part in file_path.parts)
+
+
 def process_file(file_path: Path) -> Tuple[Path, int, Optional[str], bool]:
     try:
         if is_binary(str(file_path)):
@@ -139,6 +149,8 @@ def process_file(file_path: Path) -> Tuple[Path, int, Optional[str], bool]:
         return file_path, 0, "Unable to read as text file (encoding issue)", True
     except Exception as e:
         return file_path, 0, str(e), False
+
+
 def find_target_files(
     root_dir: Path, include_hidden: bool = False, exclude_dirs: Set[str] | None = None, ignore_extensions: bool = True
 ) -> list:
@@ -177,6 +189,8 @@ def find_target_files(
             continue
         target_files.append(file_path)
     return target_files
+
+
 def main():
     parser = argparse.ArgumentParser(description="Remove comments from non-binary files using # comment syntax")
     parser.add_argument(
@@ -278,5 +292,7 @@ def main():
     if files_with_errors > 0:
         print(f"  Files with errors: {files_with_errors}")
     print(f"{'=' * 42}")
+
+
 if __name__ == "__main__":
     main()

@@ -4,6 +4,7 @@ Convert escaped regex strings back to raw string format.
 Handles all re module functions (compile, sub, findall, match, search, etc.).
 Processes Python files with optimized single-threaded or parallel processing.
 """
+
 from __future__ import annotations
 import ast
 import shutil
@@ -11,6 +12,7 @@ import sys
 from dataclasses import dataclass
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
+
 RE_FUNCTIONS = {"compile", "search", "match", "fullmatch", "split", "findall", "finditer", "sub", "subn"}
 REGEX_INDICATORS = {
     "\\d",
@@ -48,6 +50,8 @@ REGEX_INDICATORS = {
     "\\9",
 }
 STRING_ESCAPES = {"\\n", "\\t", "\\r", "\\f", "\\v", "\\\\", "\\'", '\\"', "\\a", "\\b"}
+
+
 @dataclass
 class StringInfo:
     value: str
@@ -57,6 +61,8 @@ class StringInfo:
     is_raw: bool = False
     is_fstring: bool = False
     quote_char: str = '"'
+
+
 def needs_raw_string(string_content: str) -> bool:
     if not string_content:
         return False
@@ -72,12 +78,15 @@ def needs_raw_string(string_content: str) -> bool:
             i += 1
         i += 1
     return False
+
+
 def extract_and_convert_strings(content: str) -> str | None:
     try:
         tree = ast.parse(content)
     except SyntaxError:
         return None
     conversions = []
+
     class RegexStringVisitor(ast.NodeVisitor):
         def visit_Call(self, node: ast.Call) -> None:
             if (
@@ -105,6 +114,7 @@ def extract_and_convert_strings(content: str) -> str | None:
                                 }
                             )
             self.generic_visit(node)
+
     visitor = RegexStringVisitor()
     visitor.visit(tree)
     if not conversions:
@@ -135,12 +145,16 @@ def extract_and_convert_strings(content: str) -> str | None:
     if not converted:
         return None
     return "\n".join(lines)
+
+
 def validate_python_file(content: str) -> bool:
     try:
         ast.parse(content)
         return True
     except SyntaxError:
         return False
+
+
 def process_file(filepath: Path, create_backup: bool = True) -> tuple[Path, bool, str]:
     try:
         original_content = filepath.read_text(encoding="utf-8")
@@ -161,6 +175,8 @@ def process_file(filepath: Path, create_backup: bool = True) -> tuple[Path, bool
         return (filepath, True, "✓ Converted and saved")
     except Exception as e:
         return (filepath, False, f"Failed to write: {e}")
+
+
 def collect_python_files(inputs: list[Path]) -> list[Path]:
     python_files = set()
     for input_path in inputs:
@@ -177,6 +193,8 @@ def collect_python_files(inputs: list[Path]) -> list[Path]:
                     continue
                 python_files.add(py_file)
     return sorted(python_files)
+
+
 def parse_arguments():
     args = sys.argv[1:]
     if not args:
@@ -197,6 +215,8 @@ def parse_arguments():
             break
     paths = [Path(arg).resolve() for arg in args] if args else [Path.cwd()]
     return (paths, create_backup, num_workers)
+
+
 def main():
     paths, create_backup, num_workers = parse_arguments()
     python_files = collect_python_files(paths)
@@ -234,5 +254,7 @@ def main():
     print(f"  Files converted: {changed}")
     if not create_backup:
         print("\n⚠️  Backup disabled. Use --no-backup with caution.")
+
+
 if __name__ == "__main__":
     main()

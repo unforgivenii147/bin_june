@@ -8,6 +8,8 @@ import sys
 from datetime import datetime
 from multiprocessing import Pool, cpu_count
 from dh import fsz
+
+
 def parse_size(size_str: str) -> int:
     size_str = size_str.strip()
     match = re.match(r"([\d.]+)\s*([KMGT]?)B?", size_str, re.IGNORECASE)
@@ -23,6 +25,8 @@ def parse_size(size_str: str) -> int:
         "T": 1024 * 1024 * 1024 * 1024,
     }
     return int(value * multipliers.get(unit, 1))
+
+
 def get_all_packages():
     try:
         print("📦 Fetching list of all available packages...")
@@ -38,6 +42,8 @@ def get_all_packages():
     except subprocess.CalledProcessError as e:
         print(f"Error getting package list: {e}")
         return []
+
+
 def get_package_info(package):
     try:
         result = subprocess.run(["apt", "show", package], capture_output=True, text=True, check=False, timeout=10)
@@ -53,6 +59,8 @@ def get_package_info(package):
         return package, 0, False
     except Exception:
         return package, 0, False
+
+
 def process_packages_parallel(packages, threshold_bytes: int, num_processes: int | None = None):
     if num_processes is None:
         num_processes = min(cpu_count(), 8)
@@ -81,6 +89,8 @@ def process_packages_parallel(packages, threshold_bytes: int, num_processes: int
                 no_size += 1
                 all_packages[pkg] = 0
         return large_packages, all_packages, no_size, total
+
+
 def save_json_results(data, filename: str, threshold_mb: float, include_all=False) -> bool:
     output = {
         "metadata": {
@@ -101,6 +111,8 @@ def save_json_results(data, filename: str, threshold_mb: float, include_all=Fals
     except Exception as e:
         print(f"Error saving JSON: {e}")
         return False
+
+
 def main() -> None:
     default_threshold_mb = 10
     if len(sys.argv) > 1:
@@ -173,7 +185,10 @@ def main() -> None:
             print('   Format: {"package1": 12345678, "package2": 98765432}')
         except Exception as e:
             print(f"Error saving simple JSON: {e}")
+
+
 if __name__ == "__main__":
     from multiprocessing import freeze_support
+
     freeze_support()
     main()

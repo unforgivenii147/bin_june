@@ -4,6 +4,8 @@ import re
 import sys
 from pathlib import Path
 from dh import cprint, fsz, get_files, mpf3
+
+
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -13,7 +15,11 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
+
+
 MAX_QUEUE = 8
+
+
 def process_file(path) -> None:
     path = Path(path)
     before = gsz(path)
@@ -27,6 +33,8 @@ def process_file(path) -> None:
     print(f"[OK] {path.name} ", end="")
     diffsize = before - after
     cprint(f"{fsz(diffsize)}", "cyan")
+
+
 def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
@@ -35,5 +43,7 @@ def main() -> None:
     mpf3(process_file, files)
     diff_size = before - gsz(cwd)
     print(f"space saved : {fsz(diff_size)}")
+
+
 if __name__ == "__main__":
     main()

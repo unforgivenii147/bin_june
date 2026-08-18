@@ -3,6 +3,7 @@
 Optimized version of transocr.py for Python 3.12.
 Translates text or images to English using OCR and Google Translator.
 """
+
 from __future__ import annotations
 import argparse
 import sys
@@ -12,11 +13,14 @@ import pytesseract
 from deep_translator import GoogleTranslator
 from langdetect import DetectorFactory, detect
 from PIL import Image, ImageEnhance, ImageFilter
+
 CHUNK_SIZE = 1024 * 1024
 DetectorFactory.seed = 0
 TEXT_EXT: Final[set[str]] = {".txt", ".md", ".csv", ".json", ".py"}
 IMAGE_EXT: Final[set[str]] = {".jpg", ".jpeg", ".png"}
 CHUNK_SIZE: Final[int] = 2000
+
+
 def detect_lang_from_text(text: str) -> str:
     if not (stripped := text.strip()):
         return "unknown"
@@ -24,15 +28,21 @@ def detect_lang_from_text(text: str) -> str:
         return detect(stripped[:500])
     except Exception:
         return "unknown"
+
+
 def read_text_file(path: Path) -> str:
     if path.suffix.lower() not in TEXT_EXT:
         raise ValueError(f"Unsupported text file extension: {path.suffix}")
     return path.read_text(encoding="utf-8")
+
+
 def preprocess_image(img: Image.Image) -> Image.Image:
     img = img.convert("L")
     img = ImageEnhance.Contrast(img).enhance(2.0)
     img = img.point(lambda x: 0 if x < 160 else 255)
     return img.filter(ImageFilter.MedianFilter(size=3))
+
+
 def read_image_ocr(path: Path) -> str:
     try:
         with Image.open(path) as img:
@@ -40,11 +50,17 @@ def read_image_ocr(path: Path) -> str:
             return pytesseract.image_to_string(processed_img)
     except Exception as e:
         raise RuntimeError(f"OCR failed for {path}: {e}") from e
+
+
 def chunk_text(text: str, size: int = 32768) -> list[str]:
     return [text[i : i + size] for i in range(0, len(text), size)]
+
+
 def translate_chunks(chunks: list[str], src_lang: str) -> str:
     translator = GoogleTranslator(source=src_lang, target="en")
     return "".join(translator.translate(chunk) for chunk in chunks)
+
+
 def build_output_paths(input_path: Path) -> tuple[Path, Path | None]:
     suffix = input_path.suffix.lower()
     if suffix in IMAGE_EXT:
@@ -53,6 +69,8 @@ def build_output_paths(input_path: Path) -> tuple[Path, Path | None]:
         return (translated, raw_ocr)
     translated = input_path.with_name(f"{input_path.stem}_eng{suffix}")
     return (translated, None)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Translate text or image to English.")
     parser.add_argument("input_path", type=Path, help="Path to the input file.")
@@ -86,5 +104,7 @@ def main() -> None:
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
+
+
 if __name__ == "__main__":
     main()

@@ -4,6 +4,7 @@ ArchiveScan v1.4.2 - Recursive Archive Detection, Size Analysis & Integrity Engi
 Auto-detects archives recursively, identifies specific archive types (.zip, .tar.gz, .7z, etc.),
 reports extracted & compressed sizes, tests archive integrity (-t), and auto-extracts (-a).
 """
+
 import argparse
 import bz2
 import gzip
@@ -14,18 +15,22 @@ import shutil
 import struct
 import tarfile
 import zipfile
+
 try:
     import py7zr
+
     HAS_PY7ZR = True
 except ImportError:
     HAS_PY7ZR = False
 try:
     import zstandard as zstd
+
     HAS_ZSTD = True
 except ImportError:
     HAS_ZSTD = False
 try:
     import lz4.frame
+
     HAS_LZ4 = True
 except ImportError:
     HAS_LZ4 = False
@@ -35,6 +40,7 @@ except ImportError:
     HAS_BROTLI = False
 try:
     import snappy
+
     HAS_SNAPPY = True
 except ImportError:
     HAS_SNAPPY = False
@@ -100,12 +106,16 @@ ARCHIVE_TYPES = {
     ".br": "Brotli Stream (.br)",
     ".lz4": "LZ4 Frame (.lz4)",
 }
+
+
 def format_size(bytes_val):
     for unit in ["B", "KB", "MB", "GB", "TB"]:
         if abs(bytes_val) < 1024.0:
             return f"{bytes_val:3.2f} {unit}"
         bytes_val /= 1024.0
     return f"{bytes_val:.2f} PB"
+
+
 def get_archive_type_info(filepath):
     fname = str(filepath).lower()
     for ext in sorted(SUPPORTED_EXTENSIONS, key=len, reverse=True):
@@ -113,6 +123,8 @@ def get_archive_type_info(filepath):
             type_label = ARCHIVE_TYPES.get(ext, f"Archive ({ext})")
             return ext, type_label
     return None, None
+
+
 def analyze_gz_uncompressed_size(filepath):
     try:
         with open(filepath, "rb") as f:
@@ -122,6 +134,8 @@ def analyze_gz_uncompressed_size(filepath):
     except Exception:
         compressed = os.path.getsize(filepath)
         return int(compressed * 2.8)
+
+
 def analyze_snappy_size(filepath):
     try:
         with open(filepath, "rb") as f:
@@ -131,6 +145,8 @@ def analyze_snappy_size(filepath):
     except Exception:
         pass
     return int(os.path.getsize(filepath) * 2.5)
+
+
 def analyze_zstd_size(filepath):
     if HAS_ZSTD:
         try:
@@ -142,6 +158,8 @@ def analyze_zstd_size(filepath):
         except Exception:
             pass
     return int(os.path.getsize(filepath) * 3.2)
+
+
 def analyze_archive(filepath):
     ext, archive_type = get_archive_type_info(filepath)
     comp_size = os.path.getsize(filepath)
@@ -238,6 +256,8 @@ def analyze_archive(filepath):
         "integrity": integrity_ok,
         "error": error_msg,
     }
+
+
 def extract_archive(filepath, out_dir):
     ext, _ = get_archive_type_info(filepath)
     dest = os.path.join(out_dir, os.path.basename(filepath) + "_extracted")
@@ -266,6 +286,8 @@ def extract_archive(filepath, out_dir):
             return True, dest
     except Exception as e:
         return False, str(e)
+
+
 def scan_directory(target_dir, auto_extract=False, test_integrity=False, verbose=False):
     target = pathlib.Path(target_dir).resolve()
     print(f"\033[38;5;39mScanning directory recursively:\033[0m {target}")
@@ -320,6 +342,8 @@ def scan_directory(target_dir, auto_extract=False, test_integrity=False, verbose
             else:
                 print(f"  \033[31m[✗]\033[0m Failed to extract {item['filename']}: {dest_or_err}")
     return found_archives
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="ArchiveScan CLI v1.4.2 - Recursive archive detection & size calculator"
@@ -353,5 +377,7 @@ def main():
         scan_directory(
             args.directory, auto_extract=args.auto_extract_all, test_integrity=args.test_integrity, verbose=args.verbose
         )
+
+
 if __name__ == "__main__":
     main()

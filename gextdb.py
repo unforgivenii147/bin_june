@@ -7,15 +7,19 @@ import re
 import sqlite3
 from pathlib import Path
 from typing import Any
+
 OUTPUT_DIR = Path("output")
 DB_PATH = Path("/sdcard/ext.db")
 ALLOWED_PYTHON_EXTENSIONS = ".py", ""
+
+
 class EntityExtractor(ast.NodeVisitor):
     def __init__(self, source_content: str, original_path: Path) -> None:
         self.entities = []
         self.source_lines = source_content.splitlines(keepends=True)
         self.original_path = original_path
         self.scope_stack = []
+
     def _get_source_slice(self, node: ast.AST) -> str:
         start_line = node.lineno - 1
         end_line = node.end_lineno or node.lineno
@@ -26,6 +30,7 @@ class EntityExtractor(ast.NodeVisitor):
             last_line = code_slice[-1]
             code_slice[-1] = last_line[: node.end_col_offset]
         return "".join(code_slice)
+
     def _extract_and_save(self, node: ast.AST, entity_type: str, name: str) -> None:
         entity_code = self._get_source_slice(node)
         scope_prefix = "_".join(self.scope_stack)
@@ -42,27 +47,34 @@ class EntityExtractor(ast.NodeVisitor):
                 "is_function": entity_type in {"function", "method"},
             }
         )
+
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
         if not self.scope_stack:
             self._extract_and_save(node, "function", node.name)
+
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
         self._extract_and_save(node, "class", node.name)
         self.scope_stack.append(f"class_{node.name}")
         self.generic_visit(node)
         self.scope_stack.pop()
+
     def visit_Assign(self, node: ast.Assign) -> None:
         if not self.scope_stack and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
             target_name = node.targets[0].id
             if re.match(r"^[A-Z_][A-Z0-9_]*$", target_name):
                 self._extract_and_save(node, "constant", target_name)
+
     def generic_visit(self, node: ast.AST) -> None:
         super().generic_visit(node)
+
+
 class EntityExtractor(ast.NodeVisitor):
     def __init__(self, source_content: str, original_path: Path) -> None:
         self.entities = []
         self.source_lines = source_content.splitlines(keepends=True)
         self.original_path = original_path
         self.scope_stack = []
+
     def _get_source_slice(self, node: ast.AST) -> str:
         start_line = node.lineno - 1
         end_line = node.end_lineno or node.lineno
@@ -73,6 +85,7 @@ class EntityExtractor(ast.NodeVisitor):
             last_line = code_slice[-1]
             code_slice[-1] = last_line[: node.end_col_offset]
         return "".join(code_slice)
+
     def _extract_and_save(self, node: ast.AST, entity_type: str, name: str) -> None:
         entity_code = self._get_source_slice(node)
         scope_prefix = "_".join(self.scope_stack)
@@ -89,30 +102,37 @@ class EntityExtractor(ast.NodeVisitor):
                 "is_function": entity_type in {"function", "method"},
             }
         )
+
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
         entity_type = "method" if self.scope_stack and self.scope_stack[-1].startswith("class_") else "function"
         self._extract_and_save(node, entity_type, node.name)
         self.scope_stack.append(f"func_{node.name}")
         self.generic_visit(node)
         self.scope_stack.pop()
+
     def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
         entity_type = "method" if self.scope_stack and self.scope_stack[-1].startswith("class_") else "function"
         self._extract_and_save(node, entity_type, node.name)
         self.scope_stack.append(f"async_func_{node.name}")
         self.generic_visit(node)
         self.scope_stack.pop()
+
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
         self._extract_and_save(node, "class", node.name)
         self.scope_stack.append(f"class_{node.name}")
         self.generic_visit(node)
         self.scope_stack.pop()
+
     def visit_Assign(self, node: ast.Assign) -> None:
         if not self.scope_stack and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
             target_name = node.targets[0].id
             if re.match(r"^[A-Z_][A-Z0-9_]*$", target_name):
                 self._extract_and_save(node, "constant", target_name)
+
     def generic_visit(self, node: ast.AST) -> None:
         super().generic_visit(node)
+
+
 def create_database() -> None:
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -131,6 +151,8 @@ def create_database() -> None:
     """)
     conn.commit()
     conn.close()
+
+
 def save_entity_to_db(entity: dict[str, Any]) -> None:
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -152,6 +174,8 @@ def save_entity_to_db(entity: dict[str, Any]) -> None:
     )
     conn.commit()
     conn.close()
+
+
 def extract_entities_from_content(content: str, path: Path) -> list[dict[str, Any]]:
     try:
         tree = ast.parse(content)
@@ -163,6 +187,8 @@ def extract_entities_from_content(content: str, path: Path) -> list[dict[str, An
     except Exception as e:
         print(f"Error parsing AST for {path}: {e}")
         return []
+
+
 def is_python_file_no_extension(path: Path) -> bool:
     if path.suffix:
         return False
@@ -175,6 +201,8 @@ def is_python_file_no_extension(path: Path) -> bool:
             )
     except:
         return False
+
+
 def process_single_file(path: Path) -> list[dict[str, Any]]:
     try:
         if path.suffix == ".py" or is_python_file_no_extension(path):
@@ -184,6 +212,8 @@ def process_single_file(path: Path) -> list[dict[str, Any]]:
     except Exception as e:
         print(f"Error reading file {path}: {e}")
         return []
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Extract Python entities and save to database.")
     parser.add_argument("-db", "--database", action="store_true", help="Save extracted entities to the database")
@@ -213,5 +243,7 @@ def main() -> None:
             save_entity_to_db(entity)
         print("All entities saved to database.")
     print("All tasks finished successfully!")
+
+
 if __name__ == "__main__":
     main()

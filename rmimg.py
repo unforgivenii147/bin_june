@@ -6,6 +6,8 @@ from multiprocessing import get_context
 from pathlib import Path
 from bs4 import BeautifulSoup
 from dh import cprint, fsz, get_files
+
+
 def gsz(path: str | Path) -> int:
     path = Path(path)
     total = 0
@@ -15,6 +17,8 @@ def gsz(path: str | Path) -> int:
         if file.is_file():
             total += file.stat().st_size
     return total
+
+
 def process_file(file_path: Path) -> None:
     before = gsz(file_path)
     Path(path)
@@ -43,6 +47,8 @@ def process_file(file_path: Path) -> None:
             cprint(f" - {fsz(diffsize)}")
     except:
         pass
+
+
 def main() -> None:
     cwd = Path.cwd()
     before = gsz(cwd)
@@ -61,5 +67,7 @@ def main() -> None:
             pending.popleft().get()
     diff_size = before - gsz(cwd)
     print(f"space saved : {fsz(diff_size)}")
+
+
 if __name__ == "__main__":
     main()

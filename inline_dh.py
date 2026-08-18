@@ -5,7 +5,10 @@ import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from dh import get_files
+
 DH_SRC_DIR = Path("~/isaac/pkgs/dh/src/dh").expanduser()
+
+
 def build_dh_mapping(dh_path: Path) -> dict:
     init_file = dh_path / "__init__.py"
     if not init_file.exists():
@@ -19,19 +22,26 @@ def build_dh_mapping(dh_path: Path) -> dict:
             for alias in node.names:
                 mapping[alias.name] = module_path
     return mapping
+
+
 class ModuleDependencyAnalyzer(ast.NodeVisitor):
     def __init__(self, global_names):
         self.global_names = global_names
         self.references = set()
         self.imported_modules = []
+
     def visit_Import(self, node):
         self.imported_modules.append(node)
+
     def visit_ImportFrom(self, node):
         if node.module != "dh" and node.level == 0:
             self.imported_modules.append(node)
+
     def visit_Name(self, node):
         if isinstance(node.ctx, ast.Load) and node.id in self.global_names:
             self.references.add(node.id)
+
+
 def get_all_dependencies(path: Path, target_symbol: str) -> tuple[set[str], list[str]]:
     if not path.exists():
         return (set(), [])
@@ -88,6 +98,8 @@ def get_all_dependencies(path: Path, target_symbol: str) -> tuple[set[str], list
         node = nodes_by_name[sym]
         source_blocks.append("\n".join(lines[node.lineno - 1 : node.end_lineno]))
     return (needed_imports, source_blocks)
+
+
 def process_file(path: Path, mapping: dict):
     path = Path(path)
     if path.resolve() == Path(__file__).resolve():
@@ -159,6 +171,8 @@ def process_file(path: Path, mapping: dict):
             print(f"Refactored: {path} -> Inlined: {', '.join(used_dh_symbols)}")
     except Exception as e:
         print(f"Error processing {path}: {e}")
+
+
 def main():
     try:
         mapping = build_dh_mapping(DH_SRC_DIR)
@@ -170,5 +184,7 @@ def main():
     py_files = [Path(p) for p in args] if args else get_files(cwd, ext=[".py"])
     with ThreadPoolExecutor() as executor:
         executor.map(lambda p: process_file(p, mapping), py_files)
+
+
 if __name__ == "__main__":
     main()

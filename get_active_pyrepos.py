@@ -2,6 +2,7 @@
 """
 Fetch GitHub Python repositories by recent activity and save metadata as JSON.
 """
+
 import json
 from pathlib import Path
 from datetime import datetime, timedelta
@@ -10,15 +11,21 @@ import argparse
 from github import Github, GithubException
 from dotenv import load_dotenv
 import os
+
+
 def load_github_client() -> Github:
     load_dotenv(Path.home() / ".env")
     token = os.getenv("GITHUB_TOKEN")
     if not token:
         raise ValueError("GITHUB_TOKEN not found in ~/.env")
     return Github(token)
+
+
 def get_time_window(days: int) -> str:
     cutoff = datetime.utcnow() - timedelta(days=days)
     return cutoff.strftime("%Y-%m-%d")
+
+
 def fetch_repo_metadata(repo) -> dict:
     return {
         "repo_url": repo.html_url,
@@ -27,6 +34,8 @@ def fetch_repo_metadata(repo) -> dict:
         "pushed_at": repo.pushed_at.isoformat() if repo.pushed_at else None,
         "stars": repo.stargazers_count,
     }
+
+
 def search_repos(period: str) -> list[dict]:
     g = load_github_client()
     days_map = {"d": 1, "w": 7, "m": 30, "y": 365}
@@ -48,12 +57,16 @@ def search_repos(period: str) -> list[dict]:
             except GithubException as e:
                 print(f"Error fetching {futures[future]}: {e}")
     return results
+
+
 def save_results(data: list[dict], period: str) -> None:
     timestamp = datetime.utcnow().isoformat().replace(":", "-")
     output_file = Path.cwd() / f"github_repos_{period}_{timestamp}.json"
     with output_file.open("w") as f:
         json.dump(data, f, indent=2)
     print(f"Saved {len(data)} repos to {output_file}")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Fetch active GitHub Python repos by time period")
     group = parser.add_mutually_exclusive_group(required=True)
@@ -73,5 +86,7 @@ def main():
     print(f"Fetching repos from last {period_key}...")
     repos = search_repos(period)
     save_results(repos, period_key)
+
+
 if __name__ == "__main__":
     main()

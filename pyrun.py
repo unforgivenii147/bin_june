@@ -8,6 +8,8 @@ import sys
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+
+
 def run_python_file(file_path: Path, timeout: int = 10) -> tuple[Path, bool, str | None, str | None]:
     try:
         result = runpy(
@@ -42,11 +44,15 @@ def run_python_file(file_path: Path, timeout: int = 10) -> tuple[Path, bool, str
         return (file_path, False, "SubprocessError", str(e))
     except Exception as e:
         return (file_path, False, "UnexpectedError", f"{type(e).__name__}: {e!s}")
+
+
 def find_python_files(root_dir: Path, recursive: bool = True) -> list[Path]:
     if recursive:
         return sorted(root_dir.rglob("*.py"))
     else:
         return sorted(root_dir.glob("*.py"))
+
+
 def run_files_parallel(
     files: list[Path], max_workers: int | None = None, timeout: int = 10, verbose: bool = False
 ) -> dict[str, list[tuple[Path, str]]]:
@@ -74,6 +80,8 @@ def run_files_parallel(
                 if verbose:
                     print(f"❌ {file_path}: FutureError - {e}")
     return results
+
+
 def main():
     parser = argparse.ArgumentParser(description="Recursively run Python files with timeout and parallel processing")
     parser.add_argument(
@@ -131,5 +139,7 @@ def main():
                 print(f"   Message: {error_msg}")
     if results["failed"]:
         sys.exit(1)
+
+
 if __name__ == "__main__":
     main()

@@ -1,4 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
+
+
 from __future__ import annotations
 import os
 import sys
@@ -7,11 +9,15 @@ import libcst as cst
 from dh import get_files, mpf3
 from libcst import EmptyLine, Pass, SimpleStatementLine
 from libcst.metadata import MetadataWrapper, PositionProvider
+
+
 class StripTransformer(cst.CSTTransformer):
     METADATA_DEPENDENCIES = (PositionProvider,)
+
     def __init__(self) -> None:
         self.comments_removed = 0
         self.docstrings_removed = 0
+
     @staticmethod
     def _is_docstring_statement(stmt: cst.BaseStatement) -> bool:
         if not isinstance(stmt, cst.SimpleStatementLine):
@@ -22,10 +28,12 @@ class StripTransformer(cst.CSTTransformer):
         if not isinstance(expr, cst.Expr):
             return False
         return isinstance(expr.value, cst.SimpleString)
+
     @staticmethod
     def _is_preserved_comment(value: str) -> bool:
         stripped = value.lstrip()
         return stripped.startswith(("#!", "# fmt", "# type"))
+
     def leave_Comment(
         self,
         original_node: cst.Comment,
@@ -35,6 +43,7 @@ class StripTransformer(cst.CSTTransformer):
             return updated_node
         self.comments_removed += 1
         return cst.RemoveFromParent()
+
     def leave_EmptyLine(
         self,
         original_node: EmptyLine,
@@ -47,6 +56,7 @@ class StripTransformer(cst.CSTTransformer):
             return updated_node
         self.comments_removed += 1
         return updated_node.with_changes(comment=None)
+
     def leave_Module(
         self,
         original_node: cst.Module,
@@ -61,6 +71,7 @@ class StripTransformer(cst.CSTTransformer):
             else:
                 new_body.append(stmt)
         return updated_node.with_changes(body=new_body)
+
     def _strip_suite(
         self,
         body: tuple[cst.BaseStatement, ...],
@@ -72,6 +83,7 @@ class StripTransformer(cst.CSTTransformer):
         if not statements:
             statements = [SimpleStatementLine(body=[Pass()])]
         return tuple(statements)
+
     def leave_FunctionDef(
         self,
         original_node: cst.FunctionDef,
@@ -85,6 +97,7 @@ class StripTransformer(cst.CSTTransformer):
                 )
             )
         return updated_node
+
     def leave_ClassDef(
         self,
         original_node: cst.ClassDef,
@@ -94,8 +107,11 @@ class StripTransformer(cst.CSTTransformer):
         if isinstance(body, cst.IndentedBlock):
             return updated_node.with_changes(body=body.with_changes(body=self._strip_suite(body.body)))
         return updated_node
+
+
 def process_file(path: Path) -> None:
-    path = path.resolve()
+
+    path = Path(path)
     source = path.read_text(encoding="utf-8")
     try:
         module = cst.parse_module(source)
@@ -124,6 +140,8 @@ def process_file(path: Path) -> None:
         print(f"{rel}: {transformer.comments_removed}/0")
     if not transformer.comments_removed and transformer.docstrings_removed:
         print(f"{rel}: 0/{transformer.docstrings_removed}")
+
+
 def main() -> None:
     cwd = Path.cwd()
     args = sys.argv[1:]
@@ -132,5 +150,7 @@ def main() -> None:
         process_file(files[0])
         sys.exit(0)
     mpf3(process_file, files)
+
+
 if __name__ == "__main__":
     main()
