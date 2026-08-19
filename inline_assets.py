@@ -10,6 +10,7 @@ Make HTML files standalone by inlining referenced CSS and JS files.
 """
 
 from __future__ import annotations
+
 import argparse
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed

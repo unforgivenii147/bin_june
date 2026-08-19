@@ -9,6 +9,7 @@ import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Optional, Tuple
+
 from dh import MIME2EXT, SHEBANG_MAP
 from loguru import logger
 

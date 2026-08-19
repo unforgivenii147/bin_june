@@ -6,10 +6,9 @@ import os
 import re
 from multiprocessing import Pool
 from pathlib import Path
-from urllib.parse import urlparse, unquote
+from urllib.parse import unquote, urlparse
 
 import requests
-
 
 # Extensions to extract. Matching is done against the URL path, so query
 # strings such as "?v=3.4.0" do not prevent a match.

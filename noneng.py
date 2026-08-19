@@ -1,6 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 from pathlib import Path
+
 from dh import get_nobinary, mpf3
 from langdetect import DetectorFactory, detect
 from langdetect.lang_detect_exception import LangDetectException

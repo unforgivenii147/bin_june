@@ -4,11 +4,11 @@ deborphan.py - Find orphaned packages in Termux
 Identifies packages that are not dependencies of any other installed package
 """
 
+import json
 import subprocess
 import sys
-import json
 from collections import defaultdict
-from typing import Set, List, Tuple
+from typing import List, Set, Tuple
 
 
 class TermuxDeborphan:

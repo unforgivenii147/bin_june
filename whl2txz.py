@@ -7,6 +7,7 @@ Bidirectional converter between wheel files (.whl) and tar.xz archives.
 """
 
 from __future__ import annotations
+
 import argparse
 import logging
 import sys

@@ -10,7 +10,6 @@ import warnings
 from io import StringIO
 from pathlib import Path
 
-
 import pdfminer
 from joblib import Parallel, delayed
 

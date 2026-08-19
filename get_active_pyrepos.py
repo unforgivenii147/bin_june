@@ -3,14 +3,15 @@
 Fetch GitHub Python repositories by recent activity and save metadata as JSON.
 """
 
-import json
-from pathlib import Path
-from datetime import datetime, timedelta
-from concurrent.futures import ThreadPoolExecutor, as_completed
 import argparse
-from github import Github, GithubException
-from dotenv import load_dotenv
+import json
 import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime, timedelta
+from pathlib import Path
+
+from dotenv import load_dotenv
+from github import Github, GithubException
 
 
 def load_github_client() -> Github:

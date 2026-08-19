@@ -1,10 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import argparse
 import operator
 import sys
 from collections import defaultdict
 from pathlib import Path
+
 import matplotlib.pyplot as plt
 
 

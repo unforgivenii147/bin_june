@@ -8,6 +8,7 @@ Save a comprehensive report to ~/dh_usage.txt
 """
 
 from __future__ import annotations
+
 import ast
 import pkgutil
 import sys

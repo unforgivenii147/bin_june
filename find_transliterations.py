@@ -6,10 +6,12 @@ of the Persian word rather than an actual translation.
 """
 
 from __future__ import annotations
+
 import argparse
 import json
 import re
 import sys
+
 from rapidfuzz import fuzz
 
 

@@ -5,6 +5,7 @@ Removes comments from Python files recursively with parallel processing.
 """
 
 from __future__ import annotations
+
 import argparse
 import ast
 import shutil
@@ -14,6 +15,7 @@ import zipfile
 from collections.abc import Generator
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+
 from dh import DOC_TH1, DOC_TH2
 
 

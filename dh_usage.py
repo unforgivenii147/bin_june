@@ -6,6 +6,7 @@ then save a report to ~/dh_usage.txt.
 """
 
 from __future__ import annotations
+
 import ast
 import sys
 from collections import Counter

@@ -5,7 +5,9 @@ Requires gitpython library: pip install gitpython
 """
 
 from __future__ import annotations
+
 from pathlib import Path
+
 from git import GitCommandError, Repo
 
 

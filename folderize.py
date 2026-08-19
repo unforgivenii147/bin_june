@@ -6,6 +6,7 @@ Numbers and special chars go into '0-9/' folder.
 """
 
 from __future__ import annotations
+
 import shutil
 from pathlib import Path
 

@@ -15,6 +15,7 @@ Behavior:
 """
 
 from __future__ import annotations
+
 import ast
 import concurrent.futures
 import multiprocessing

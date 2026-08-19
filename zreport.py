@@ -5,6 +5,7 @@ Optimized for Python 3.12 with modern syntax, type hints, and performance improv
 """
 
 from __future__ import annotations
+
 import argparse
 import bz2
 import gzip

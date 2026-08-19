@@ -1,7 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import sys
 from pathlib import Path
+
 from dh import read_lines
 
 THRESHOLD = 1024 * 1024

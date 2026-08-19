@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import argparse
 import contextlib
 import json
@@ -10,7 +11,8 @@ import tempfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Union, List
+from typing import List, Optional, Union
+
 from colorama import Fore, Style, init
 
 init(autoreset=True)

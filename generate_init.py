@@ -5,6 +5,7 @@ from Python modules in the current directory.
 """
 
 from __future__ import annotations
+
 import ast
 import sys
 from pathlib import Path

@@ -1,7 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+
 from dh import fsz, is_image
 
 

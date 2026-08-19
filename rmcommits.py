@@ -5,8 +5,10 @@ WARNING: This is a destructive operation. Use with caution!
 """
 
 from __future__ import annotations
+
 import sys
 from datetime import UTC, datetime, timedelta
+
 import git
 from git import GitCommandError, Repo
 

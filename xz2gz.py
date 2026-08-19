@@ -2,9 +2,11 @@
 "\nConvert man pages from .gz to .xz format with maximum compression.\nSkips symlinks and processes files recursively in the current directory.\n"
 
 from __future__ import annotations
+
 import sys
 from gzip import compress as gzip_compress
 from pathlib import Path
+
 from dh import get_files, mpf3
 from lzma_mt import decompress
 

@@ -5,10 +5,12 @@ Automatically finds .pyi file in same directory and updates .py in-place.
 """
 
 from __future__ import annotations
+
 import difflib
 import sys
 from pathlib import Path
 from typing import Dict, Optional
+
 import libcst as cst
 from dh import get_files, mpf3
 

@@ -5,6 +5,7 @@ Extract text from PDF files using PyMuPDF (fastest option)
 
 import sys
 from pathlib import Path
+
 import fitz  # PyMuPDF
 from joblib import Parallel, delayed
 

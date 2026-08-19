@@ -1,11 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import sys
 from lib2to3 import refactor
 from os import scandir as os_scandir
 from pathlib import Path
-from dh import mpf3, get_pyfiles
 
+from dh import get_pyfiles, mpf3
 
 fixers = collect_fixers()
 

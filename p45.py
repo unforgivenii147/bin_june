@@ -1,9 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import ast
 import sys
 import textwrap
 from pathlib import Path
+
 from dh import DOC_TH1, DOC_TH2
 
 

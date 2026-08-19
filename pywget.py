@@ -1,11 +1,13 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import argparse
 import re
 import sys
 import urllib
 from pathlib import Path
 from shutil import get_terminal_size
+
 from tqdm import tqdm
 
 

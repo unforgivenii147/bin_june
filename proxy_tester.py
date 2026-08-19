@@ -1,7 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
-import requests
 from concurrent.futures import ThreadPoolExecutor
 from time import sleep
+
+import requests
 from colorama import Fore, Style, init
 
 init(autoreset=True)

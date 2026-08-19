@@ -5,6 +5,7 @@ Recursively compresses/decompresses files using Snappy algorithm via cramjam
 """
 
 from __future__ import annotations
+
 import argparse
 import logging
 import multiprocessing

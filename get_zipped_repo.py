@@ -1,9 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import argparse
 import os
 import sys
 from pathlib import Path
+
 import requests
 from dotenv import load_dotenv
 from github import Github

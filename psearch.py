@@ -6,6 +6,7 @@ import json
 import sys
 from dataclasses import dataclass
 from typing import Optional
+
 import requests
 
 

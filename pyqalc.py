@@ -9,6 +9,7 @@ A simple, fast command-line calculator with support for:
 """
 
 from __future__ import annotations
+
 import argparse
 import math
 import re

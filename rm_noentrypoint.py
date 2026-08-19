@@ -5,6 +5,7 @@ that don't contain entry_points.txt using parallel processing.
 """
 
 from __future__ import annotations
+
 import argparse
 import zipfile
 from concurrent.futures import ProcessPoolExecutor, as_completed

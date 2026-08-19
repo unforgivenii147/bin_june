@@ -5,6 +5,7 @@ Attempts to decode a file using various encodings and saves as UTF-8
 """
 
 from __future__ import annotations
+
 import sys
 from pathlib import Path
 

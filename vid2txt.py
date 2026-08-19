@@ -1,8 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import sys
 from multiprocessing import Process, Queue, cpu_count
 from pathlib import Path
+
 import cv2
 import pytesseract
 from dh import cprint

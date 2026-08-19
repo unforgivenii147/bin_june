@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import argparse
 import ast
 import bz2
@@ -15,6 +16,7 @@ import zipfile
 from ast import Assign, AsyncFunctionDef, ClassDef, FunctionDef
 from collections import defaultdict
 from pathlib import Path
+
 from loguru import logger
 
 try:

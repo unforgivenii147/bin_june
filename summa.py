@@ -1,9 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import re
 import sys
 from collections import defaultdict
 from pathlib import Path
+
 from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize, word_tokenize
 

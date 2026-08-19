@@ -1,9 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import ast
 import os
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+
 import libcst as cst
 
 OUTPUT_DIR = Path("output")

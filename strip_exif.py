@@ -5,12 +5,14 @@ Supports parallel processing, size reporting, and file/directory input.
 """
 
 from __future__ import annotations
+
 import argparse
 import io
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import cpu_count
 from pathlib import Path
+
 from dh import fsz, gsz
 from PIL import Image
 

@@ -2,6 +2,7 @@
 """Reverse inlined functions by replacing with dh package imports."""
 
 from __future__ import annotations
+
 import argparse
 import ast
 import hashlib

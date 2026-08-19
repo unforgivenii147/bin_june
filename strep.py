@@ -6,6 +6,7 @@ import sys
 import tempfile
 from pathlib import Path
 from zipfile import ZipFile
+
 from dh import cprint, fsz, gsz, mpf3, runcmd
 
 SO_PATTERN = re.compile(r"\.so(\.\d+)*$")

@@ -2,10 +2,12 @@
 """Extract constant definitions from Python files using libcst."""
 
 from __future__ import annotations
+
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import NamedTuple
+
 import libcst as cst
 
 

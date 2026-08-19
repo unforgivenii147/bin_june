@@ -2,6 +2,7 @@
 """Check for Python packages with missing console scripts in system bin directory."""
 
 from __future__ import annotations
+
 import multiprocessing as mp
 import sys
 from configparser import ConfigParser

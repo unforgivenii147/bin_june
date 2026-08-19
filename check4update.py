@@ -5,6 +5,7 @@ Saves upgradable packages to upgradable.txt
 """
 
 from __future__ import annotations
+
 import json
 import subprocess
 import sys

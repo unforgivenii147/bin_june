@@ -1,7 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import sys
 from pathlib import Path
+
 from pip._internal.cli.main import main as pip_main
 
 

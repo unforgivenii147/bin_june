@@ -4,9 +4,11 @@ Advanced script to download English subtitles with multiple providers.
 """
 
 from __future__ import annotations
+
 import logging
 import sys
 from pathlib import Path
+
 import babelfish
 from subliminal import download_best_subtitles, save_subtitles
 from subliminal.video import scan_video

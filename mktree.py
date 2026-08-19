@@ -6,8 +6,8 @@ Usage: python create_tree.py [tree_file]
        (defaults to 'tree.txt' if no argument is provided)
 """
 
-import sys
 import re
+import sys
 from pathlib import Path
 
 

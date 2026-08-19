@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import argparse
 import ast
 import sys
@@ -7,6 +8,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from multiprocessing import Pool, cpu_count
 from os import scandir as os_scandir
 from pathlib import Path
+from dh import get_pyfiles
 
 
 def process_file(args: tuple) -> None:

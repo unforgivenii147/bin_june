@@ -22,7 +22,6 @@ from pathlib import Path
 
 from joblib import Parallel, delayed
 
-
 WORKERS = 4
 
 

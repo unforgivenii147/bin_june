@@ -5,6 +5,7 @@ Adds proper <head> section with links to style.css and script.js
 """
 
 from __future__ import annotations
+
 import sys
 from pathlib import Path
 

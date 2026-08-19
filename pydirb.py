@@ -15,50 +15,47 @@ Examples:
 
 from __future__ import annotations
 
-import asyncio
-import aiohttp
 import argparse
-import sys
-import time
+import asyncio
 import json
+import logging
 import re
 import signal
-from pathlib import Path
-from urllib.parse import urljoin, urlparse
+import sys
+import time
 from collections import defaultdict
-from datetime import datetime
-from typing import (
-    Optional, List, Dict, Set, Tuple, Any, AsyncIterator, Callable
-)
 from dataclasses import dataclass, field
+from datetime import datetime
 from enum import Enum
-import logging
+from pathlib import Path
+from typing import Any, AsyncIterator, Callable, Dict, List, Optional, Set, Tuple
+from urllib.parse import urljoin, urlparse
+
+import aiohttp
 
 # ─── Optional: Rich output for colors ───────────────────
 try:
     from rich.console import Console
-    from rich.table import Table
-    from rich.progress import (
-        Progress, SpinnerColumn, BarColumn,
-        TextColumn, TimeRemainingColumn
-    )
     from rich.panel import Panel
+    from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeRemainingColumn
+    from rich.table import Table
     from rich.text import Text
+
     RICH_AVAILABLE = True
 except ImportError:
     RICH_AVAILABLE = False
 
 # ─── ANSI fallback ──────────────────────────────────────
 ANSI = {
-    "RED":     "\033[91m",
-    "GREEN":   "\033[92m",
-    "YELLOW":  "\033[93m",
-    "BLUE":    "\033[94m",
+    "RED": "\033[91m",
+    "GREEN": "\033[92m",
+    "YELLOW": "\033[93m",
+    "BLUE": "\033[94m",
     "MAGENTA": "\033[95m",
-    "CYAN":    "\033[96m",
-    "BOLD":    "\033[1m",
-    "DIM":     "\033[2m",
-    "RESET":   "\033[0m",
+    "CYAN": "\033[96m",
+    "BOLD": "\033[1m",
+    "DIM": "\033[2m",
+    "RESET": "\033[0m",
 }
 
 # ─── Logging ────────────────────────────────────────────
@@ -73,6 +70,7 @@ logger = logging.getLogger("pydirb")
 #  DATA MODELS
 # ═══════════════════════════════════════════════════════
 
+
 class ResultStatus(Enum):
     FOUND = "FOUND"
     REDIRECT = "REDIRECT"
@@ -81,6 +79,7 @@ class ResultStatus(Enum):
     ERROR = "ERROR"
     TIMEOUT = "TIMEOUT"
     RATE_LIMITED = "RATE_LIMITED"
+
 
 STATUS_MAP: Dict[int, ResultStatus] = {
     200: ResultStatus.FOUND,
@@ -99,6 +98,7 @@ STATUS_MAP: Dict[int, ResultStatus] = {
     502: ResultStatus.ERROR,
     503: ResultStatus.ERROR,
 }
+
 
 @dataclass
 class ScanResult:
@@ -139,14 +139,10 @@ class ScanConfig:
     timeout: int = 10
     recursive: bool = False
     recursive_depth: int = 2
-    recursive_status_codes: Set[int] = field(
-        default_factory=lambda: {301, 302, 403}
-    )
+    recursive_status_codes: Set[int] = field(default_factory=lambda: {301, 302, 403})
     follow_redirects: bool = False
     include_status_codes: Set[int] = field(default_factory=set)
-    exclude_status_codes: Set[int] = field(
-        default_factory=lambda: {404}
-    )
+    exclude_status_codes: Set[int] = field(default_factory=lambda: {404})
     include_content_length: Set[int] = field(default_factory=set)
     exclude_content_length: Set[int] = field(default_factory=set)
     headers: Dict[str, str] = field(default_factory=dict)
@@ -177,23 +173,23 @@ class ScanConfig:
 #  WORDLIST HANDLER (pathlib-based)
 # ═══════════════════════════════════════════════════════
 
+
 class WordlistLoader:
     """Loads and processes wordlists using pathlib."""
 
     BUILTIN_WORDLISTS = {
         "common": "admin\nadministrator\nlogin\nwp-admin\ndashboard\nconfig\nbackup\ntest\ndebug\napi\n"
-                   "old\nnew\ntmp\ntemp\nprivate\nsecret\nhidden\n.git\n.svn\n.env\nrobots.txt\nsitemap.xml\n"
-                   "server-status\nphpinfo.php\ninfo.php\nindex.html\nindex.php\ndefault.html\n"
-                   "uploads\nfiles\ndownload\nimages\ncss\njs\nassets\nstatic\nmedia\n"
-                   "backup.zip\nbackup.sql\ndatabase.sql\ndb.sql\ndump.sql\n"
-                   "wp-config.php\nconfiguration.php\nsettings.php\nconfig.php\n"
-                   ".htaccess\n.htpasswd\nweb.config\ncrossdomain.xml\nclientaccesspolicy.xml\n"
-                   "readme\nreadme.txt\nreadme.md\nchangelog\nlicense\n",
+        "old\nnew\ntmp\ntemp\nprivate\nsecret\nhidden\n.git\n.svn\n.env\nrobots.txt\nsitemap.xml\n"
+        "server-status\nphpinfo.php\ninfo.php\nindex.html\nindex.php\ndefault.html\n"
+        "uploads\nfiles\ndownload\nimages\ncss\njs\nassets\nstatic\nmedia\n"
+        "backup.zip\nbackup.sql\ndatabase.sql\ndb.sql\ndump.sql\n"
+        "wp-config.php\nconfiguration.php\nsettings.php\nconfig.php\n"
+        ".htaccess\n.htpasswd\nweb.config\ncrossdomain.xml\nclientaccesspolicy.xml\n"
+        "readme\nreadme.txt\nreadme.md\nchangelog\nlicense\n",
     }
 
     @staticmethod
-    def load(path: Path, extensions: List[str],
-             prefix: str = "", suffix: str = "") -> List[str]:
+    def load(path: Path, extensions: List[str], prefix: str = "", suffix: str = "") -> List[str]:
         """Load wordlist from file or builtin, apply extensions."""
         words: List[str] = []
 
@@ -246,10 +242,13 @@ class WordlistLoader:
     def count_lines(path: Path) -> int:
         """Count non-empty, non-comment lines in a wordlist."""
         if path.name in WordlistLoader.BUILTIN_WORDLISTS:
-            return len([
-                l for l in WordlistLoader.BUILTIN_WORDLISTS[path.name].splitlines()
-                if l.strip() and not l.startswith("#")
-            ])
+            return len(
+                [
+                    l
+                    for l in WordlistLoader.BUILTIN_WORDLISTS[path.name].splitlines()
+                    if l.strip() and not l.startswith("#")
+                ]
+            )
         count = 0
         for line in path.read_text(encoding="utf-8", errors="ignore").splitlines():
             if line.strip() and not line.startswith("#"):
@@ -260,6 +259,7 @@ class WordlistLoader:
 # ═══════════════════════════════════════════════════════
 #  OUTPUT HANDLER
 # ═══════════════════════════════════════════════════════
+
 
 class OutputHandler:
     """Handles verbose output and result formatting."""
@@ -401,7 +401,11 @@ class OutputHandler:
         print(self.color("│", "CYAN") + f"  Found          : {self.color(str(self.found_count), 'GREEN')}")
         print(self.color("│", "CYAN") + f"  Errors         : {self.color(str(self.error_count), 'RED')}")
         print(self.color("│", "CYAN") + f"  Time Elapsed   : {elapsed:.2f}s")
-        print(self.color("│", "CYAN") + f"  Requests/sec   : {self.completed_requests / elapsed:.1f}" if elapsed > 0 else "")
+        print(
+            self.color("│", "CYAN") + f"  Requests/sec   : {self.completed_requests / elapsed:.1f}"
+            if elapsed > 0
+            else ""
+        )
         print(self.color("│", "CYAN") + "")
 
         print(self.color("│", "CYAN") + "  Status Code Breakdown:")
@@ -418,11 +422,7 @@ class OutputHandler:
             else:
                 color = "RED"
             bar = "▓" * min(count, 50)
-            print(
-                self.color("│", "CYAN") +
-                f"    {self.color(f'{status}', color)} "
-                f"{count:>5}  {bar}"
-            )
+            print(self.color("│", "CYAN") + f"    {self.color(f'{status}', color)} {count:>5}  {bar}")
 
         print(self.color("│", "CYAN") + "")
         print(self.color("│", "CYAN") + "  Discovered URLs:")
@@ -450,17 +450,14 @@ class OutputHandler:
         else:
             for r in self.results:
                 if r.status in (ResultStatus.FOUND, ResultStatus.REDIRECT, ResultStatus.FORBIDDEN):
-                    self._file_handle.write(
-                        f"{r.status_code}\t{r.content_length}\t{r.url}\n"
-                    )
+                    self._file_handle.write(f"{r.status_code}\t{r.content_length}\t{r.url}\n")
 
     async def add_result(self, result: ScanResult):
         async with self._lock:
             self.results.append(result)
             self.completed_requests += 1
 
-            if result.status in (ResultStatus.FOUND, ResultStatus.REDIRECT,
-                                 ResultStatus.FORBIDDEN):
+            if result.status in (ResultStatus.FOUND, ResultStatus.REDIRECT, ResultStatus.FORBIDDEN):
                 self.found_count += 1
                 self.print_found(result)
             elif result.status == ResultStatus.ERROR:
@@ -471,9 +468,7 @@ class OutputHandler:
                 self.print_verbose(result.word, result.status_code, result.url)
 
             if not self.config.quiet and self.completed_requests % 10 == 0:
-                self.print_progress(
-                    self.completed_requests, self.total_requests, self.found_count
-                )
+                self.print_progress(self.completed_requests, self.total_requests, self.found_count)
 
     def close(self):
         if self._file_handle:
@@ -484,17 +479,21 @@ class OutputHandler:
 #  WILDCARD DETECTOR
 # ═══════════════════════════════════════════════════════
 
+
 class WildcardDetector:
     """Detects wildcard responses to eliminate false positives."""
 
     RANDOM_WORDS = [
-        "xqzwkpyjhg", "mnbvcxzlkj", "qazwsxedcrf",
-        "plokmijnuhb", "zxcvbnmasdf", "qwertyuiopz",
+        "xqzwkpyjhg",
+        "mnbvcxzlkj",
+        "qazwsxedcrf",
+        "plokmijnuhb",
+        "zxcvbnmasdf",
+        "qwertyuiopz",
     ]
 
     @staticmethod
-    async def detect(session: aiohttp.ClientSession,
-                     base_url: str, config: ScanConfig) -> Optional[Tuple[int, int]]:
+    async def detect(session: aiohttp.ClientSession, base_url: str, config: ScanConfig) -> Optional[Tuple[int, int]]:
         """
         Send random non-existent paths to detect wildcard responses.
         Returns (status_code, content_length) if wildcard detected, None otherwise.
@@ -504,7 +503,8 @@ class WildcardDetector:
             url = urljoin(base_url, word)
             try:
                 async with session.request(
-                    config.http_method, url,
+                    config.http_method,
+                    url,
                     timeout=aiohttp.ClientTimeout(total=config.timeout),
                     allow_redirects=False,
                 ) as resp:
@@ -523,6 +523,7 @@ class WildcardDetector:
 # ═══════════════════════════════════════════════════════
 #  SCANNER ENGINE
 # ═══════════════════════════════════════════════════════
+
 
 class DirbScanner:
     """Main scanner engine with async concurrency."""
@@ -588,16 +589,13 @@ class DirbScanner:
             # Wildcard detection
             if self.config.wildcard_detection:
                 print(self.color_msg("  [*] Detecting wildcard responses...", "YELLOW"))
-                self.wildcard_info = await WildcardDetector.detect(
-                    session, self.config.base_url, self.config
-                )
+                self.wildcard_info = await WildcardDetector.detect(session, self.config.base_url, self.config)
                 if self.wildcard_info:
                     wc_status, wc_size = self.wildcard_info
                     print(
                         self.color_msg(
-                            f"  [!] Wildcard detected: {wc_status} / {wc_size}b "
-                            f"— filtering matching responses",
-                            "YELLOW"
+                            f"  [!] Wildcard detected: {wc_status} / {wc_size}b — filtering matching responses",
+                            "YELLOW",
                         )
                     )
                 else:
@@ -626,8 +624,9 @@ class DirbScanner:
     def color_msg(self, text: str, color: str) -> str:
         return self.output.color(text, color)
 
-    async def _scan_word(self, word: str, session: aiohttp.ClientSession,
-                         depth: int = 0, base_url: Optional[str] = None) -> Optional[ScanResult]:
+    async def _scan_word(
+        self, word: str, session: aiohttp.ClientSession, depth: int = 0, base_url: Optional[str] = None
+    ) -> Optional[ScanResult]:
         """Scan a single word/path."""
         if self._stop:
             return None
@@ -656,8 +655,9 @@ class DirbScanner:
 
             return result
 
-    async def _make_request(self, session: aiohttp.ClientSession,
-                            url: str, word: str, depth: int) -> Optional[ScanResult]:
+    async def _make_request(
+        self, session: aiohttp.ClientSession, url: str, word: str, depth: int
+    ) -> Optional[ScanResult]:
         """Make a single HTTP request."""
         retries = 0
         last_error = None
@@ -683,11 +683,13 @@ class DirbScanner:
                         if status_code == wc_status and content_length == wc_size:
                             # Likely wildcard false positive
                             return ScanResult(
-                                url=url, status_code=status_code,
+                                url=url,
+                                status_code=status_code,
                                 status=ResultStatus.NOT_FOUND,
                                 content_length=content_length,
                                 response_time=elapsed,
-                                word=word, depth=depth,
+                                word=word,
+                                depth=depth,
                             )
 
                     # Determine result status
@@ -744,9 +746,11 @@ class DirbScanner:
 
         # All retries exhausted
         result = ScanResult(
-            url=url, status_code=0,
+            url=url,
+            status_code=0,
             status=ResultStatus.ERROR,
-            word=word, depth=depth,
+            word=word,
+            depth=depth,
             error=last_error,
         )
         if self.config.verbose:
@@ -763,8 +767,7 @@ class DirbScanner:
             return False
 
         # Include only specific status codes
-        if self.config.include_status_codes and \
-           result.status_code not in self.config.include_status_codes:
+        if self.config.include_status_codes and result.status_code not in self.config.include_status_codes:
             return False
 
         # Exclude by content length
@@ -772,14 +775,12 @@ class DirbScanner:
             return False
 
         # Include only specific content lengths
-        if self.config.include_content_length and \
-           result.content_length not in self.config.include_content_length:
+        if self.config.include_content_length and result.content_length not in self.config.include_content_length:
             return False
 
         return True
 
-    async def _recursive_scan(self, session: aiohttp.ClientSession,
-                              base_words: List[str]):
+    async def _recursive_scan(self, session: aiohttp.ClientSession, base_words: List[str]):
         """Perform recursive scanning on discovered directories."""
         print(self.color_msg("\n  [*] Starting recursive scan...\n", "CYAN"))
 
@@ -789,18 +790,15 @@ class DirbScanner:
 
             # Find directories to recurse into
             dirs_to_scan = [
-                r for r in self.output.results
-                if r.status_code in self.config.recursive_status_codes
-                and r.depth == depth - 1
+                r
+                for r in self.output.results
+                if r.status_code in self.config.recursive_status_codes and r.depth == depth - 1
             ]
 
             if not dirs_to_scan:
                 break
 
-            print(self.color_msg(
-                f"  [*] Recursion depth {depth}: {len(dirs_to_scan)} directories\n",
-                "CYAN"
-            ))
+            print(self.color_msg(f"  [*] Recursion depth {depth}: {len(dirs_to_scan)} directories\n", "CYAN"))
 
             tasks = []
             for dir_result in dirs_to_scan:
@@ -809,16 +807,13 @@ class DirbScanner:
                 for word in base_words:
                     if self._stop:
                         break
-                    task = asyncio.create_task(
-                        self._scan_word(word, session, depth=depth, base_url=base)
-                    )
+                    task = asyncio.create_task(self._scan_word(word, session, depth=depth, base_url=base))
                     tasks.append(task)
 
             if tasks:
                 await asyncio.gather(*tasks, return_exceptions=True)
 
-    async def _save_response(self, result: ScanResult,
-                             session: aiohttp.ClientSession):
+    async def _save_response(self, result: ScanResult, session: aiohttp.ClientSession):
         """Save response body to file."""
         if not self.config.response_dir:
             return
@@ -827,7 +822,7 @@ class DirbScanner:
 
         # Create safe filename from URL
         parsed = urlparse(result.url)
-        safe_name = re.sub(r'[^a-zA-Z0-9._-]', '_', parsed.path.strip("/"))
+        safe_name = re.sub(r"[^a-zA-Z0-9._-]", "_", parsed.path.strip("/"))
         if not safe_name:
             safe_name = "root"
         filepath = self.config.response_dir / f"{result.status_code}_{safe_name}.html"
@@ -849,6 +844,7 @@ class DirbScanner:
 #  ARGUMENT PARSER
 # ═══════════════════════════════════════════════════════
 
+
 def parse_args() -> ScanConfig:
     parser = argparse.ArgumentParser(
         prog="pydirb",
@@ -865,60 +861,41 @@ Examples:
     )
 
     parser.add_argument("url", help="Target URL (e.g., http://example.com)")
-    parser.add_argument("-w", "--wordlist", default="common",
-                        help="Wordlist file path or builtin name (common)")
-    parser.add_argument("-x", "--extensions",
-                        help="Comma-separated extensions (e.g., .php,.html,.txt)")
-    parser.add_argument("-t", "--threads", type=int, default=30,
-                        help="Number of concurrent threads (default: 30)")
-    parser.add_argument("-to", "--timeout", type=int, default=10,
-                        help="Request timeout in seconds (default: 10)")
-    parser.add_argument("-r", "--recursive", action="store_true",
-                        help="Enable recursive scanning")
-    parser.add_argument("--recursive-depth", type=int, default=2,
-                        help="Maximum recursion depth (default: 2)")
-    parser.add_argument("-f", "--follow-redirects", action="store_true",
-                        help="Follow HTTP redirects")
-    parser.add_argument("-H", "--header", action="append", default=[],
-                        help="Custom header (format: 'Key: Value')")
-    parser.add_argument("-c", "--cookie", action="append", default=[],
-                        help="Cookie (format: name=value)")
-    parser.add_argument("-a", "--user-agent",
-                        help="Custom User-Agent string")
-    parser.add_argument("-m", "--method", default="GET",
-                        choices=["GET", "HEAD", "POST", "OPTIONS", "PUT"],
-                        help="HTTP method (default: GET)")
-    parser.add_argument("-d", "--delay", type=float, default=0,
-                        help="Delay between requests in seconds (default: 0)")
+    parser.add_argument("-w", "--wordlist", default="common", help="Wordlist file path or builtin name (common)")
+    parser.add_argument("-x", "--extensions", help="Comma-separated extensions (e.g., .php,.html,.txt)")
+    parser.add_argument("-t", "--threads", type=int, default=30, help="Number of concurrent threads (default: 30)")
+    parser.add_argument("-to", "--timeout", type=int, default=10, help="Request timeout in seconds (default: 10)")
+    parser.add_argument("-r", "--recursive", action="store_true", help="Enable recursive scanning")
+    parser.add_argument("--recursive-depth", type=int, default=2, help="Maximum recursion depth (default: 2)")
+    parser.add_argument("-f", "--follow-redirects", action="store_true", help="Follow HTTP redirects")
+    parser.add_argument("-H", "--header", action="append", default=[], help="Custom header (format: 'Key: Value')")
+    parser.add_argument("-c", "--cookie", action="append", default=[], help="Cookie (format: name=value)")
+    parser.add_argument("-a", "--user-agent", help="Custom User-Agent string")
+    parser.add_argument(
+        "-m",
+        "--method",
+        default="GET",
+        choices=["GET", "HEAD", "POST", "OPTIONS", "PUT"],
+        help="HTTP method (default: GET)",
+    )
+    parser.add_argument("-d", "--delay", type=float, default=0, help="Delay between requests in seconds (default: 0)")
     parser.add_argument("--proxy", help="HTTP proxy URL")
     parser.add_argument("-o", "--output", help="Output file path")
-    parser.add_argument("--output-format", default="txt",
-                        choices=["txt", "json"],
-                        help="Output format (default: txt)")
-    parser.add_argument("-v", "--verbose", action="store_true", default=True,
-                        help="Verbose output (default: on)")
-    parser.add_argument("-vv", "--very-verbose", action="store_true",
-                        help="Very verbose output (show all requests)")
-    parser.add_argument("-q", "--quiet", action="store_true",
-                        help="Quiet mode (minimal output)")
-    parser.add_argument("--no-color", action="store_true",
-                        help="Disable colored output")
+    parser.add_argument("--output-format", default="txt", choices=["txt", "json"], help="Output format (default: txt)")
+    parser.add_argument("-v", "--verbose", action="store_true", default=True, help="Verbose output (default: on)")
+    parser.add_argument("-vv", "--very-verbose", action="store_true", help="Very verbose output (show all requests)")
+    parser.add_argument("-q", "--quiet", action="store_true", help="Quiet mode (minimal output)")
+    parser.add_argument("--no-color", action="store_true", help="Disable colored output")
     parser.add_argument("--save-responses", help="Save response bodies to directory")
     parser.add_argument("--include-status", help="Only show these status codes (comma-separated)")
     parser.add_argument("--exclude-status", help="Exclude these status codes (comma-separated)")
     parser.add_argument("--exclude-size", help="Exclude responses of this size (comma-separated)")
-    parser.add_argument("--no-wildcard", action="store_true",
-                        help="Disable wildcard detection")
-    parser.add_argument("--show-all", action="store_true",
-                        help="Show all results (no filtering)")
-    parser.add_argument("--prefix", default="",
-                        help="Prefix to add to all words")
-    parser.add_argument("--suffix", default="",
-                        help="Suffix to add to all words")
-    parser.add_argument("--max-retries", type=int, default=2,
-                        help="Max retries per request (default: 2)")
-    parser.add_argument("--list-wordlists", action="store_true",
-                        help="List builtin wordlists and exit")
+    parser.add_argument("--no-wildcard", action="store_true", help="Disable wildcard detection")
+    parser.add_argument("--show-all", action="store_true", help="Show all results (no filtering)")
+    parser.add_argument("--prefix", default="", help="Prefix to add to all words")
+    parser.add_argument("--suffix", default="", help="Suffix to add to all words")
+    parser.add_argument("--max-retries", type=int, default=2, help="Max retries per request (default: 2)")
+    parser.add_argument("--list-wordlists", action="store_true", help="List builtin wordlists and exit")
 
     args = parser.parse_args()
 
@@ -932,8 +909,7 @@ Examples:
     # Parse extensions
     extensions = []
     if args.extensions:
-        extensions = [e.strip() if e.strip().startswith(".") else f".{e.strip()}"
-                      for e in args.extensions.split(",")]
+        extensions = [e.strip() if e.strip().startswith(".") else f".{e.strip()}" for e in args.extensions.split(",")]
 
     # Parse headers
     headers = {}
@@ -1014,6 +990,7 @@ Examples:
 #  MAIN
 # ═══════════════════════════════════════════════════════
 
+
 async def async_main():
     config = parse_args()
     scanner = DirbScanner(config)
@@ -1053,10 +1030,11 @@ def main():
 #  TESTS
 # ═══════════════════════════════════════════════════════
 
+
 def run_tests():
     """Run unit tests for pydirb components."""
-    import tempfile
     import os
+    import tempfile
 
     print("\n" + "=" * 60)
     print("  🧪 pydirb Unit Tests")
@@ -1152,8 +1130,7 @@ def run_tests():
     # Test 8: WildcardDetector random words
     print("\n[Test 8] WildcardDetector - random words exist")
     assert_eq(len(WildcardDetector.RANDOM_WORDS) >= 3, True, "Has 3+ random words")
-    assert_eq(all(len(w) > 5 for w in WildcardDetector.RANDOM_WORDS), True,
-              "Random words are long enough")
+    assert_eq(all(len(w) > 5 for w in WildcardDetector.RANDOM_WORDS), True, "Random words are long enough")
 
     # Test 9: ScanConfig defaults
     print("\n[Test 9] ScanConfig - default values")

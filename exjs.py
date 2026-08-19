@@ -1,7 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import sys
 from pathlib import Path
+
 from bs4 import BeautifulSoup
 from bs4.element import PageElement
 from dh import cprint, get_files, get_random_filename, mpf3

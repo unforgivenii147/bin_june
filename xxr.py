@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import argparse
 import bz2
 import gzip
@@ -12,6 +13,7 @@ import zipfile
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
+
 import brotlicffi as brotli
 import py7zr
 import zstandard as zstd

@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import bz2
 import contextlib
 import gzip
@@ -8,6 +9,7 @@ import os
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+
 import brotli
 import lz4.frame
 import py7zr

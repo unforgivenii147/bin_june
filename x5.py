@@ -7,6 +7,7 @@ Can optionally tar subdirectories before LZMA compression for better ratio
 """
 
 from __future__ import annotations
+
 import argparse
 import lzma
 import multiprocessing as mp
@@ -17,6 +18,7 @@ import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
+
 from dh import fsz
 from rich import box
 from rich.console import Console

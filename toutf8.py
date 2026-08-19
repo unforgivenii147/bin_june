@@ -5,11 +5,13 @@ Uses parallel processing to handle multiple files efficiently.
 """
 
 from __future__ import annotations
+
 import argparse
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Generator, Tuple
+
 import chardet
 from binaryornot import is_binary
 

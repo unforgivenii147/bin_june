@@ -5,6 +5,7 @@ Translates files using batch translation for improved performance.
 """
 
 from __future__ import annotations
+
 import io
 import logging
 import re
@@ -15,6 +16,7 @@ import tokenize
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Final
+
 from deep_translator import GoogleTranslator
 from dh import DOC_TH1, DOC_TH2, get_files, is_binary
 

@@ -1,8 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import os
 import shutil
 from pathlib import Path
+
 import cv2
 import numpy as np
 from numpy import ndarray

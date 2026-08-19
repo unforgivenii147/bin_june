@@ -7,6 +7,7 @@ If no paths are provided, processes all .ipynb files recursively from current di
 """
 
 from __future__ import annotations
+
 import argparse
 import json
 import sys

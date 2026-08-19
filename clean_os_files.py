@@ -5,6 +5,7 @@ Optionally remove them with the -a (--auto-remove) CLI argument.
 """
 
 from __future__ import annotations
+
 import argparse
 import os
 

@@ -2,6 +2,7 @@
 """Remove duplicate functions from Python files based on content hash."""
 
 from __future__ import annotations
+
 import argparse
 import ast
 import hashlib

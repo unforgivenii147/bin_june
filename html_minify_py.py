@@ -1,12 +1,13 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """HTML minifier - Python port of nodejs html-minifier."""
 
-import sys
 import re
+import sys
 from pathlib import Path
+
+from dh import get_files, mpf3
 from lxml import html as lxml_html
 from lxml.html import HtmlElement
-from dh import get_files, mpf3
 
 
 class HTMLMinifier:

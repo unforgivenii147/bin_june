@@ -5,11 +5,13 @@ Optimized for Python 3.12.
 """
 
 from __future__ import annotations
+
 import logging
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Final
+
 from deep_translator import GoogleTranslator
 
 CHUNK_SIZE = 1024 * 1024

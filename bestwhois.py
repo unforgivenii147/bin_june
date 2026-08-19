@@ -1,11 +1,13 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import contextlib
 import datetime
 import json
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
+
 import requests
 from pygments import highlight
 from pygments.formatters import TerminalFormatter

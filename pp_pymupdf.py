@@ -6,6 +6,7 @@ Processes files sequentially, pages in parallel
 
 import sys
 from pathlib import Path
+
 import fitz  # PyMuPDF
 from joblib import Parallel, delayed
 

@@ -6,6 +6,7 @@ using high-confidence language detection with parallel processing.
 """
 
 from __future__ import annotations
+
 import multiprocessing as mp
 import sys
 import time

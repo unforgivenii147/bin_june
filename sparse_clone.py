@@ -2,6 +2,7 @@
 """Clone files of specified extensions from git repositories."""
 
 from __future__ import annotations
+
 import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed

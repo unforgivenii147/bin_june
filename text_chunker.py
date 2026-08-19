@@ -5,6 +5,7 @@ Splits text files into chunks (< 5000 chars) while respecting word and sentence 
 """
 
 from __future__ import annotations
+
 import argparse
 import re
 import sys

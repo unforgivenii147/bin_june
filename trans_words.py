@@ -5,6 +5,7 @@ Chunks text files, detects language, and translates to English, saving in JSON.
 """
 
 from __future__ import annotations
+
 import json
 import logging
 import sys
@@ -12,6 +13,7 @@ import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Final
+
 import langdetect
 from deep_translator import GoogleTranslator
 

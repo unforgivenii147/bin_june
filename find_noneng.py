@@ -12,10 +12,12 @@ Requirements:
 """
 
 from __future__ import annotations
+
 import argparse
 import csv
 import os
 from typing import Iterable, List, Tuple
+
 from cld import (
     detect_language,
     detect_language_from_path,

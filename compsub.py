@@ -6,6 +6,7 @@ Usage: script.py -c [paths...]
 """
 
 from __future__ import annotations
+
 import argparse
 import os
 import shutil
@@ -13,6 +14,7 @@ import sys
 import tarfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+
 import zstandard as zstd
 
 

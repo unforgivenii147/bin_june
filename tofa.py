@@ -1,8 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import sys
 import time
 from pathlib import Path
+
 from deep_translator import GoogleTranslator
 from tqdm import tqdm
 

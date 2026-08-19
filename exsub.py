@@ -1,10 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import argparse
 import multiprocessing
 import re
 from functools import partial
 from pathlib import Path
+
 import cv2
 import numpy as np
 import pytesseract

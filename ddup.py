@@ -11,6 +11,7 @@ Requires Python 3.9+ (for ast.unparse).
 """
 
 from __future__ import annotations
+
 import argparse
 import ast
 import concurrent.futures

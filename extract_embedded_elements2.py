@@ -1,9 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import base64
 import mimetypes
 import re
 from pathlib import Path
+
 import requests
 from bs4 import BeautifulSoup
 from bs4.element import AttributeValueList

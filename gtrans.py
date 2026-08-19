@@ -6,6 +6,7 @@ Optimized for Python 3.12.
 """
 
 from __future__ import annotations
+
 import argparse
 import logging
 import re

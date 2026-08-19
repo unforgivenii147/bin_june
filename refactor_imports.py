@@ -1,10 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import ast
 import collections
 import json
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+
 import astor
 
 REPEATED_JSON_PATH = Path("repeated.json")

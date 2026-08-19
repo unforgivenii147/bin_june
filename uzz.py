@@ -2,6 +2,7 @@
 """Extract .whl files from current directory to subdirectories."""
 
 from __future__ import annotations
+
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from zipfile import ZipFile

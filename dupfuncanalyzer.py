@@ -2,6 +2,7 @@
 """Duplicate function analyzer and refactorer."""
 
 from __future__ import annotations
+
 import argparse
 import ast
 from collections import defaultdict

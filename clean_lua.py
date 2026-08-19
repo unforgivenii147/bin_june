@@ -5,11 +5,13 @@ If no input is provided, processes files in the current directory recursively.
 """
 
 from __future__ import annotations
+
 import argparse
 import sys
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+
 from tree_sitter import Language, Parser
 from tree_sitter_lua import language as lua_language
 

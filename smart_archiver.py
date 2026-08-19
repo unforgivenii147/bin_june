@@ -5,6 +5,7 @@ and supports parallel compression for multiple files.
 """
 
 from __future__ import annotations
+
 import argparse
 import json
 import multiprocessing

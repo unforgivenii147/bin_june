@@ -1,7 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import re
 from pathlib import Path
+
 from bs4 import BeautifulSoup
 
 meta_tag_pattern = re.compile(r"<meta[^>]*>", re.IGNORECASE)

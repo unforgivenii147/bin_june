@@ -1,6 +1,8 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 from pathlib import Path
+
 from dh import is_binary, is_python_file, should_skip
 
 CHUNK_SIZE = 1024 * 1024

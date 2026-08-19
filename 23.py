@@ -1,9 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import subprocess
 import sys
 from multiprocessing import Lock, Pool
 from pathlib import Path
+
 from fastwalk import walk_files
 
 print_lock = Lock()

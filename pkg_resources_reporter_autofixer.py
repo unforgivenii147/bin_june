@@ -9,7 +9,6 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
 
-
 # ---------------------------------------------------------------------------
 # Patterns we recognize.
 # ---------------------------------------------------------------------------

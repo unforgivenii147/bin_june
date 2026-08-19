@@ -2,11 +2,13 @@
 """Ripgrep-like implementation in Python."""
 
 from __future__ import annotations
+
 import argparse
 import re
 from collections.abc import Generator
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+
 from binaryornot import is_binary
 from dh import BIN_EXT, TXT_EXT
 from fastwalk import walk_files

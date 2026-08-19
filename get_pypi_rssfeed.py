@@ -1,9 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import sys
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from typing import Optional
+
 import requests
 
 PYPI_RSS_URL = "https://pypi.org/rss/packages.xml"

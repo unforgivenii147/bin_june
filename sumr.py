@@ -6,8 +6,10 @@ Output: <input_file>_summary.txt
 """
 
 from __future__ import annotations
+
 import os
 import sys
+
 from sumy.nlp.stemmers import Stemmer
 from sumy.nlp.tokenizers import Tokenizer
 from sumy.parsers.plaintext import PlaintextParser

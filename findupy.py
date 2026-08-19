@@ -1,10 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import hashlib
 import json
 import os
 from collections import defaultdict
 from pathlib import Path
+
 from tqdm import tqdm
 
 SKIPPED_PATHS = []

@@ -5,12 +5,14 @@ Processes images in parallel using multiprocessing.
 """
 
 from __future__ import annotations
+
 import argparse
 import logging
 import sys
 from functools import partial
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
+
 from PIL import Image
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

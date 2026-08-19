@@ -4,6 +4,7 @@ Zstandard Recursive File Compressor/Decompressor
 """
 
 from __future__ import annotations
+
 import argparse
 import sys
 import tarfile
@@ -11,6 +12,7 @@ import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
+
 import zstandard as zstd
 from dh import fsz
 

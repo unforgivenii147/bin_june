@@ -1,8 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import ast
 from os import scandir as os_scandir
 from pathlib import Path
+
 from dh import cprint, mpf3
 from xxhash import xxh64_hexdigest
 

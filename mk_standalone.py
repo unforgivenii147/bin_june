@@ -16,6 +16,7 @@ import os
 import re
 import sys
 from urllib.parse import urlparse
+
 import requests
 from bs4 import BeautifulSoup
 

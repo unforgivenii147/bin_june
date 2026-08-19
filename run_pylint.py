@@ -1,8 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import sys
 from os import scandir as os_scandir
 from pathlib import Path
+
 from dh import runcmd
 
 CHUNK_SIZE = 1024 * 1024

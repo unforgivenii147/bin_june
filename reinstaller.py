@@ -5,6 +5,7 @@ Compatible with Python 3.12+ and pip 26.1.2+
 """
 
 from __future__ import annotations
+
 import argparse
 import importlib.metadata
 import logging
@@ -14,6 +15,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
+
 from pip._internal.commands.install import InstallCommand
 from pip._internal.exceptions import InstallationError
 

@@ -1,9 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import os
 import sys
 from os import chdir as os_chdir
 from pathlib import Path
+
 from dh import get_files, mpf3
 
 START_DIR = Path.cwd()

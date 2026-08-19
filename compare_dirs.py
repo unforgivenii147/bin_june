@@ -1,10 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import shlex
 import stat
 import sys
 from hashlib import sha256
 from pathlib import Path
+
 from dh import cprint
 
 CHUNK_SIZE = 32768

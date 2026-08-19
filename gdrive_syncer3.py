@@ -1,8 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import os
 import pickle
 from urllib.parse import urlencode
+
 import requests
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import Resource, build
@@ -182,6 +184,7 @@ def install_minimal_packages() -> None:
 
 def main() -> None:
     from pathlib import Path
+
     from dotenv import load_dotenv
 
     env_path = Path.home() / ".env"

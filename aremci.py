@@ -1,13 +1,14 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import ast
 import re
 import shutil
 from concurrent.futures import ProcessPoolExecutor
 from os import scandir as os_scandir
 from pathlib import Path
-from dh import DOC_TH1, DOC_TH2, get_pyfiles
 
+from dh import DOC_TH1, DOC_TH2, get_pyfiles
 
 COMMENT_AND_DOCSTRING_REGEX = re.compile(
     f"(?:^(\\s*)#.*$)|(?:^(\\s*)({DOC_TH2}).*?(\\3)|^(\\s*)({DOC_TH1}).*?(\\5))|(?:\\b(def|class)\\s+\\w+[^():]*\\([^)]*\\)\\s*:\\s*)(\\s*)((DOC_TH2).*?(\\7)|({DOC_TH1}).*?(\\9))",

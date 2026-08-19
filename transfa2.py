@@ -5,6 +5,7 @@ Translates Persian text in files in-place using parallel processing.
 """
 
 from __future__ import annotations
+
 import logging
 import re
 import sys
@@ -12,6 +13,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Final
+
 from deep_translator import GoogleTranslator
 
 CHUNK_SIZE = 1024 * 1024

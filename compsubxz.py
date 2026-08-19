@@ -6,6 +6,7 @@ Usage: script.py -c [paths...]
 """
 
 from __future__ import annotations
+
 import argparse
 import lzma
 import os

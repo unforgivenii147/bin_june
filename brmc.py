@@ -18,10 +18,12 @@ Optionally remove comments too while preserving:
 """
 
 from __future__ import annotations
+
 import argparse
 import ast
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+
 from dh import get_pyfiles
 
 

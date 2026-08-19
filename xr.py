@@ -1,11 +1,13 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import argparse
 import asyncio
 import bz2
 import gzip
 import sys
 from pathlib import Path
+
 import brotlicffi as brotli
 import lz4.frame
 import py7zr

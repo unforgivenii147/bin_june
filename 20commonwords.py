@@ -1,9 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import re
 import sys
 from collections import Counter
 from pathlib import Path
+
 import regex as re
 from dh import unique_path
 

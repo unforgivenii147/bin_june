@@ -2,6 +2,7 @@
 """Process directory and set execute permissions on executable files."""
 
 from __future__ import annotations
+
 import re
 import stat
 from concurrent.futures import ThreadPoolExecutor, as_completed

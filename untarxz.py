@@ -5,6 +5,7 @@ then remove the original archive files.
 """
 
 from __future__ import annotations
+
 import sys
 import tarfile
 from concurrent.futures import ProcessPoolExecutor, as_completed

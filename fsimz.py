@@ -1,8 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import os
 import sys
 from collections import defaultdict
+
 from dh import get_files
 from ppdeep import hash_from_file
 

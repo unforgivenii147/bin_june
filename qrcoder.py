@@ -5,8 +5,10 @@ Install: pip install pyzbar pillow
 """
 
 from __future__ import annotations
+
 import os
 import sys
+
 import pyzbar.pyzbar as pyzbar
 from PIL import Image
 

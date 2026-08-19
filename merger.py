@@ -2,6 +2,7 @@
 """Merge non-binary files from current directory into a single text file."""
 
 from __future__ import annotations
+
 from pathlib import Path
 from random import choice
 from string import ascii_lowercase

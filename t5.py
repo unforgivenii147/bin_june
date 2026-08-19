@@ -1,9 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import ast
 import sys
 from os import scandir as os_scandir
 from pathlib import Path
+
 import tree_sitter_python as tspython
 from dh import mpf_async
 from tree_sitter import Language, Parser, Query, QueryCursor

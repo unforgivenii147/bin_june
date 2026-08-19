@@ -6,6 +6,7 @@ only the best result based on compression ratio.
 """
 
 from __future__ import annotations
+
 import bz2
 import contextlib
 import gzip
@@ -19,6 +20,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Final
+
 import blosc2
 import brotli
 import lz4.frame

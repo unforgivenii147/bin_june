@@ -5,6 +5,7 @@ Automatically detects __main__.py or cli.py and adds console_scripts entry point
 """
 
 from __future__ import annotations
+
 import os
 import re
 import sys

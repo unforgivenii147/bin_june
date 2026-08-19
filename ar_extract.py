@@ -5,6 +5,7 @@ Extracts various archive formats using system tools with parallel processing.
 """
 
 from __future__ import annotations
+
 import os
 import shutil
 import subprocess

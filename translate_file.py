@@ -5,11 +5,13 @@ Translates lines containing foreign characters using parallel process pool.
 """
 
 from __future__ import annotations
+
 import logging
 import re
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 from typing import Final
+
 from deep_translator import GoogleTranslator
 
 SKIP_DIRS: Final[frozenset[str]] = frozenset(

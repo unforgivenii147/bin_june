@@ -1,9 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import argparse
 import sys
 from multiprocessing import cpu_count
 from pathlib import Path
+
 from bs4 import BeautifulSoup
 from html_to_markdown import Options, convert
 

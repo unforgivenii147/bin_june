@@ -1,7 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import shutil
 from pathlib import Path
+
 import dh
 from PIL import Image
 

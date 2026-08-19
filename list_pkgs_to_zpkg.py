@@ -2,6 +2,7 @@
 """List pure Python packages with specific naming and structure constraints."""
 
 from __future__ import annotations
+
 import sys
 from concurrent.futures import ProcessPoolExecutor
 from importlib.metadata import distributions

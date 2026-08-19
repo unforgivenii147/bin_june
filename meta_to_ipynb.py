@@ -6,6 +6,7 @@ Output filename is based on the package name found in the header.
 """
 
 from __future__ import annotations
+
 import json
 import re
 import sys

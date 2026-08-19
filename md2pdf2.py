@@ -1,7 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import re
 import sys
+
 from markdown2 import markdown_path
 from pygments import highlight
 from pygments.formatters import HtmlFormatter

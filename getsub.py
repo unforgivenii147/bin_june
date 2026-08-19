@@ -6,9 +6,11 @@ Example: python get_sub.py outcast_s01
 """
 
 from __future__ import annotations
+
 import re
 import sys
 from urllib.parse import quote
+
 import requests
 
 

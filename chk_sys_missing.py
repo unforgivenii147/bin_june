@@ -2,6 +2,7 @@
 """System package file integrity checker for Termux/Linux."""
 
 from __future__ import annotations
+
 import json
 import subprocess
 from datetime import datetime

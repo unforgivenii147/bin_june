@@ -1,10 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import argparse
 import json
 import shutil
 from collections import defaultdict
 from pathlib import Path
+
 import xxhash
 
 CACHE_PATH = Path.home() / ".cache" / "dups_cache.json"

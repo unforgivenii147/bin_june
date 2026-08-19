@@ -1,7 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import json
 from pathlib import Path
+
 from deep_translator import GoogleTranslator
 
 INPUT_FILE = "words.txt"

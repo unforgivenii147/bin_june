@@ -1,9 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import csv
 import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
+
 import requests
 from bs4 import BeautifulSoup
 

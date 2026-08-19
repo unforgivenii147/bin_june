@@ -1,10 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import argparse
 import sys
 import textwrap
 from collections.abc import Generator
 from pathlib import Path
+
 import lzma_mt
 
 ARCHIVE_EXTENSIONS = {

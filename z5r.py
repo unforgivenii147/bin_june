@@ -5,6 +5,7 @@ Optimized for Python 3.12 with streaming and parallel processing.
 """
 
 from __future__ import annotations
+
 import argparse
 import multiprocessing as mp
 import shutil
@@ -14,6 +15,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Final
+
 import zstandard as zstd
 from dh import fsz, gsz
 

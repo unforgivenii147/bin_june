@@ -5,6 +5,7 @@ Supports processing multiple files/directories recursively.
 """
 
 from __future__ import annotations
+
 import sys
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed

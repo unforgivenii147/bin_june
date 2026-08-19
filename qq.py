@@ -1,8 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import contextlib
 import os
 import sys
+
 import matplotlib.pyplot as plt
 
 MAX_DIRS = 25

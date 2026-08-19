@@ -7,6 +7,7 @@ Example: python run_script.py .svg svgo
 """
 
 from __future__ import annotations
+
 import subprocess
 import sys
 from functools import partial

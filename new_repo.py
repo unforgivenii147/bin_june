@@ -1,8 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import json
 import os
 from pathlib import Path
+
 import requests
 from dotenv import load_dotenv
 from git import InvalidGitRepositoryError, Repo

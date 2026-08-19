@@ -1,10 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import os
 import re
 import shutil
 import sys
 from pathlib import Path
+
 import markdown
 from bs4 import BeautifulSoup
 

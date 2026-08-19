@@ -5,6 +5,7 @@ Supports parallel processing of multiple directories.
 """
 
 from __future__ import annotations
+
 import argparse
 import json
 import sys

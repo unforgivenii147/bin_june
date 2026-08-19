@@ -6,6 +6,7 @@ Uses Path.walk() for memory-efficient traversal.
 """
 
 from __future__ import annotations
+
 import argparse
 import contextlib
 import fnmatch
@@ -15,6 +16,7 @@ import sys
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+
 import zstandard as zstd
 
 SKIP_EXTENSIONS_COMPRESS = {

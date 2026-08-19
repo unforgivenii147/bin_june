@@ -1,11 +1,13 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import io
 import re
 import sys
 import tokenize
 from os import scandir as os_scandir
 from pathlib import Path
+
 from dh import mpf3
 
 CHUNK_SIZE = 1024 * 1024

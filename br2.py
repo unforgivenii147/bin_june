@@ -1,9 +1,11 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import io
 import tarfile
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+
 import brotli
 
 BROTLI_QUALITY = 11

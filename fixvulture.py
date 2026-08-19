@@ -5,6 +5,7 @@ Reads Vulture findings from stdin or a file and fixes the issues in-place.
 """
 
 from __future__ import annotations
+
 import os
 import re
 import sys

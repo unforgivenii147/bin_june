@@ -10,6 +10,7 @@ Detect non-English lines in text files recursively.
 """
 
 from __future__ import annotations
+
 import argparse
 import json
 import sys
@@ -17,6 +18,7 @@ import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Dict, Iterable, Iterator, List, Optional
+
 import gcld3
 import pycld2 as cld2
 from binaryornot import is_binary

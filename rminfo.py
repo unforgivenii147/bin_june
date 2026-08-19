@@ -5,6 +5,7 @@ Handles both .py files and Python files without extension (detected via shebang)
 """
 
 from __future__ import annotations
+
 import re
 import sys
 from pathlib import Path

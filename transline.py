@@ -4,6 +4,7 @@ In-place translation of Chinese characters in text files with progress persisten
 """
 
 from __future__ import annotations
+
 import json
 import logging
 import re
@@ -13,6 +14,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Final
+
 from deep_translator import GoogleTranslator
 from dh import get_nobinary
 from tenacity import before_sleep_log, retry, retry_if_exception_type, stop_after_attempt, wait_exponential_jitter

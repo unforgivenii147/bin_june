@@ -1,8 +1,10 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import os
 import sys
 import tempfile
+
 import speech_recognition as sr
 from pydub import AudioSegment
 

@@ -9,10 +9,12 @@ Each created part will be a valid .tar.zst file that can be independently extrac
 """
 
 from __future__ import annotations
+
 import os
 import sys
 import tarfile
 from pathlib import Path
+
 import zstandard as zstd
 
 

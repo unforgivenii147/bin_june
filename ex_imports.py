@@ -1,7 +1,9 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 from __future__ import annotations
+
 import sys
 from pathlib import Path
+
 import tree_sitter_python as tsp
 from dh import get_files, mpf3, unique_path
 from tree_sitter import Language, Parser
