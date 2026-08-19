@@ -89,11 +89,8 @@ profile_default/
 rabbitmq-data/
 rabbitmq/
 sdist/
-share/python-wheels/
 target/
-tempCodeRunnerFile.py
 var/
-venv.bak/
 venv/
 wheels/
 *.txt

@@ -23,7 +23,7 @@ def check_integrity(archive_path: Path) -> tuple[bool, str]:
 def extract_archive(archive_path: Path) -> tuple[Path, bool, str]:
     try:
         with tarfile.open(archive_path, "r:*") as tar:
-            tar.extractall(path=archive_path.parent)
+            tar.extractall(path=archive_path.parent, filter="data")
         archive_path.unlink()
         return archive_path, True, f"Extracted: {archive_path.name}"
     except Exception as e:

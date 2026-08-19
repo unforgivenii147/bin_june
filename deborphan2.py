@@ -1,0 +1,194 @@
+#!/data/data/com.termux/files/home/.local/bin/python
+"""
+deborphan.py - Find orphaned packages in Termux
+Identifies packages that are not dependencies of any other installed package
+"""
+
+import subprocess
+import sys
+import json
+from collections import defaultdict
+from typing import Set, List, Tuple
+
+
+class TermuxDeborphan:
+    def __init__(self):
+        self.all_packages = set()
+        self.dependencies = defaultdict(set)  # pkg -> set of packages that depend on it
+        self.keep_list = set()
+
+    def get_installed_packages(self) -> Set[str]:
+        """Get all installed packages"""
+        try:
+            result = subprocess.run(["pkg", "list-installed"], capture_output=True, text=True)
+            packages = set()
+            for line in result.stdout.strip().split("\n"):
+                if line:
+                    pkg_name = line.split("/")[0]
+                    packages.add(pkg_name)
+            return packages
+        except Exception as e:
+            print(f"Error getting installed packages: {e}")
+            sys.exit(1)
+
+    def get_package_dependencies(self, package: str) -> Set[str]:
+        """Get direct dependencies of a package"""
+        try:
+            result = subprocess.run(["pkg", "show", package], capture_output=True, text=True)
+            dependencies = set()
+            for line in result.stdout.split("\n"):
+                if line.startswith("Depends:"):
+                    deps_str = line.replace("Depends:", "").strip()
+                    for dep in deps_str.split(","):
+                        dep_name = dep.strip().split()[0]
+                        if dep_name:
+                            dependencies.add(dep_name)
+                elif line.startswith("Pre-Depends:"):
+                    deps_str = line.replace("Pre-Depends:", "").strip()
+                    for dep in deps_str.split(","):
+                        dep_name = dep.strip().split()[0]
+                        if dep_name:
+                            dependencies.add(dep_name)
+            return dependencies
+        except Exception:
+            return set()
+
+    def analyze(self) -> List[str]:
+        """Analyze packages and find orphans"""
+        print("Analyzing installed packages...")
+        self.all_packages = self.get_installed_packages()
+        print(f"Found {len(self.all_packages)} installed packages")
+
+        # Build reverse dependency map
+        print("Building dependency graph...")
+        packages_with_dependents = set()
+
+        for pkg in self.all_packages:
+            deps = self.get_package_dependencies(pkg)
+            for dep in deps:
+                # Track which packages are dependencies of something
+                if dep in self.all_packages:
+                    packages_with_dependents.add(dep)
+                    self.dependencies[dep].add(pkg)
+
+        # Find orphans - packages with no dependents
+        orphans = []
+        for pkg in self.all_packages:
+            if pkg not in packages_with_dependents and pkg not in self.keep_list:
+                orphans.append(pkg)
+
+        return sorted(orphans)
+
+    def load_keep_list(self, filename: str = None):
+        """Load list of packages to keep"""
+        if filename is None:
+            filename = "/data/data/com.termux/files/home/.deborphan-keep"
+
+        try:
+            with open(filename, "r") as f:
+                self.keep_list = set(line.strip() for line in f if line.strip())
+            print(f"Loaded {len(self.keep_list)} packages to keep")
+        except FileNotFoundError:
+            self.keep_list = set()
+
+    def save_keep_list(self, filename: str = None):
+        """Save list of packages to keep"""
+        if filename is None:
+            filename = "/data/data/com.termux/files/home/.deborphan-keep"
+
+        try:
+            with open(filename, "w") as f:
+                for pkg in sorted(self.keep_list):
+                    f.write(f"{pkg}\n")
+            print(f"Saved keep list to {filename}")
+        except Exception as e:
+            print(f"Error saving keep list: {e}")
+
+    def add_to_keep(self, package: str):
+        """Add a package to the keep list"""
+        self.keep_list.add(package)
+
+    def remove_from_keep(self, package: str):
+        """Remove a package from the keep list"""
+        self.keep_list.discard(package)
+
+
+def interactive_mode():
+    """Interactive mode for identifying orphans"""
+    deborphan = TermuxDeborphan()
+    deborphan.load_keep_list()
+
+    orphans = deborphan.analyze()
+
+    if not orphans:
+        print("\n✓ No orphaned packages found!")
+        return
+
+    print(f"\n⚠ Found {len(orphans)} orphaned packages:\n")
+
+    for i, pkg in enumerate(orphans, 1):
+        print(f"{i}. {pkg}")
+
+    print("\n--- Interactive Mode ---")
+    print("Commands: 'keep <pkg>' (add to keep list), 'remove <pkg>' (remove from keep list),")
+    print("          'list' (show keep list), 'save' (save keep list), 'quit' (exit)")
+    print("-" * 40)
+
+    while True:
+        cmd = input("\n> ").strip()
+
+        if cmd.startswith("keep "):
+            pkg = cmd[5:].strip()
+            if pkg in orphans:
+                deborphan.add_to_keep(pkg)
+                print(f"Added '{pkg}' to keep list")
+            else:
+                print(f"Package '{pkg}' not found in orphans")
+
+        elif cmd.startswith("remove "):
+            pkg = cmd[7:].strip()
+            deborphan.remove_from_keep(pkg)
+            print(f"Removed '{pkg}' from keep list")
+
+        elif cmd == "list":
+            if deborphan.keep_list:
+                print("\nKeep list:")
+                for pkg in sorted(deborphan.keep_list):
+                    print(f"  - {pkg}")
+            else:
+                print("Keep list is empty")
+
+        elif cmd == "save":
+            deborphan.save_keep_list()
+
+        elif cmd == "quit":
+            print("Exiting...")
+            break
+
+        else:
+            print("Unknown command")
+
+
+def batch_mode(args):
+    """Batch mode for listing orphans"""
+    deborphan = TermuxDeborphan()
+    deborphan.load_keep_list()
+
+    orphans = deborphan.analyze()
+
+    if not orphans:
+        print("No orphaned packages found.")
+        return 0
+
+    for pkg in orphans:
+        print(pkg)
+
+    return len(orphans)
+
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "--interactive":
+        interactive_mode()
+    else:
+        count = batch_mode(sys.argv[1:])
+        print(f"\nTotal orphaned packages: {count}")

@@ -5,9 +5,9 @@ from urllib.parse import urljoin
 import requests
 from bs4 import BeautifulSoup
 
-BASE_URL = "https://sr.moviesho.com/Series/"
+BASE_URL = "https://dls2.aparatchi-dlcenter.top/DonyayeSerial/"
 OUTPUT_FILE = "movies.txt"
-MAX_SIZE_MB = 400
+MAX_SIZE_MB = 300
 visited = set()
 found_movies = []
 
@@ -27,18 +27,11 @@ def is_valid_movie(filename: str, size_mb: float | None) -> bool:
     return not (size_mb is None or size_mb >= MAX_SIZE_MB)
 
 
-def crawl(url: str) -> None:
-    if url in visited:
-        return
-    print(f"Crawling: {url}")
-    visited.add(url)
-    try:
-        response = requests.get(url, timeout=10)
-        response.raise_for_status()
-    except Exception as e:
-        print(f"Failed to access {url}: {e}")
-        return
-    soup = BeautifulSoup(response.text, "html.parser")
+def extract_movie_links(soup: BeautifulSoup, page_url: str) -> list[str]:
+    """Extract movie links from both table rows and the div with copy button"""
+    movie_links = []
+
+    # Method 1: Extract from table rows (existing functionality)
     rows = soup.find_all("tr")
     for row in rows:
         cols = row.find_all("td")
@@ -50,20 +43,95 @@ def crawl(url: str) -> None:
         name = link_tag.text.strip()
         href = link_tag.get("href")
         size_text = cols[1].text.strip()
-        full_url = urljoin(url, href)
+        full_url = urljoin(page_url, href)
+
         if "Parent directory" in name:
             continue
+
         if href.endswith("/"):
             crawl(full_url)
         else:
             size_mb = size_to_mb(size_text)
             if is_valid_movie(name, size_mb):
-                print(f"Found: {full_url} ({size_mb} MB)")
-                found_movies.append(full_url)
+                print(f"  ✓ Found in table: {full_url} ({size_mb} MB)")
+                movie_links.append(full_url)
+
+    # Method 2: Extract from div with class="copy-btn" and textarea
+    textareas = soup.find_all("textarea", class_="value")
+    for textarea in textareas:
+        content = textarea.text.strip()
+        if content:
+            print(f"  📋 Found textarea with {len(content.splitlines())} links")
+            for line in content.splitlines():
+                line = line.strip()
+                if line.endswith(".mkv") and ("480p" in line.lower() or "720p" in line.lower()):
+                    print(f"  ✓ Found in textarea: {line}")
+                    movie_links.append(line)
+
+    # Method 3: Extract from p tags with center alignment
+    p_tags = soup.find_all("p", style=lambda value: value and "text-align: center" in value)
+    for p_tag in p_tags:
+        links = p_tag.find_all("a", href=True)
+        for link in links:
+            href = link.get("href")
+            if href and href.endswith(".mkv") and ("480p" in href.lower() or "720p" in href.lower()):
+                print(f"  ✓ Found in p tag: {href}")
+                movie_links.append(href)
+
+    return movie_links
+
+
+def crawl(url: str) -> None:
+    if url in visited:
+        return
+
+    print(f"\n🔍 Crawling: {url}")
+    visited.add(url)
+    if "movie" in url:
+        return
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        print(f"  📡 Status: {response.status_code}")
+    except Exception as e:
+        print(f"  ❌ Failed to access {url}: {e}")
+        return
+
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    # Extract all movie links from the page
+    movie_links = extract_movie_links(soup, url)
+
+    # Add unique links to found_movies
+    for link in movie_links:
+        if link not in found_movies:
+            found_movies.append(link)
+            print(f"  ✅ Added to list: {link}")
 
 
 if __name__ == "__main__":
+    print("🚀 Starting crawler...")
+    print(f"📁 Base URL: {BASE_URL}")
+    print(f"📊 Max size: {MAX_SIZE_MB} MB")
+    print(f"💾 Output file: {OUTPUT_FILE}")
+    print("-" * 50)
+
     crawl(BASE_URL)
+
+    print("\n" + "=" * 50)
+    print(f"✅ Crawling complete!")
+    print(f"📈 Total unique movies found: {len(found_movies)}")
+
+    # Save to file
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         f.writelines(movie + "\n" for movie in found_movies)
-    print(f"\n✅ Done. {len(found_movies)} movies saved to {OUTPUT_FILE}")
+
+    print(f"💾 Movies saved to: {OUTPUT_FILE}")
+
+    # Print all found movies
+    if found_movies:
+        print("\n📋 All found movies:")
+        for i, movie in enumerate(found_movies, 1):
+            print(f"  {i}. {movie}")
+    else:
+        print("\n⚠️ No movies found matching the criteria!")

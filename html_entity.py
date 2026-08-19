@@ -75,7 +75,7 @@ def process_file(filepath: Path) -> tuple[Path, bool, str]:
 
 
 def main() -> None:
-    cwd = Path.cwd()
+    cwd = Path.cwd().resolve()
     args = sys.argv[1:]
     files = [Path(p) for p in args] if args else get_nobinary(cwd)
     changed_files = []
@@ -93,13 +93,15 @@ def main() -> None:
     if changed_files:
         print(f"\n✅ Modified {len(changed_files)} file(s):")
         for f in changed_files:
-            print(f"  - {f.relative_to(cwd)}")
+            p = Path(f).resolve()
+            print(f"  - {p.relative_to(cwd)}")
     else:
         print("\n✅ No files were modified")
     if error_files:
         print(f"\n❌ Errors in {len(error_files)} file(s):")
         for f, err in error_files:
-            print(f"  - {f.relative_to(cwd)}: {err}")
+            p = Path(f).resolve()
+            print(f"  - {p.relative_to(cwd)}: {err}")
     print(f"   Modified: {len(changed_files)}")
     print(f"   Errors: {len(error_files)}")
 

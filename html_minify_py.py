@@ -1,10 +1,12 @@
 #!/data/data/com.termux/files/home/.local/bin/python
 """HTML minifier - Python port of nodejs html-minifier."""
 
+import sys
 import re
 from pathlib import Path
 from lxml import html as lxml_html
 from lxml.html import HtmlElement
+from dh import get_files, mpf3
 
 
 class HTMLMinifier:
@@ -98,7 +100,7 @@ def minify(
     return minifier.minify(html_str)
 
 
-def minify_file(
+def process_file(
     file_path: str | Path,
     **options,
 ) -> str:
@@ -107,3 +109,14 @@ def minify_file(
     minified = minify(html_str, **options)
     file_path.write_text(minified, encoding="utf-8")
     return minified
+
+
+def main():
+    cwd = Path.cwd()
+    args = sys.argv[1:]
+    files = [Path(p) for p in args] if args else get_files(cwd, ext=[".html"])
+    mpf3(process_file, files)
+
+
+if __name__ == "__main__":
+    main()
