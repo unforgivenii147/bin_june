@@ -16,105 +16,15 @@ import os
 import shutil
 import hashlib
 from dataclasses import dataclass
+from dh import TXT_EXT as TEXT_EXTENSIONS
+from dh import get_nobinary
 
 # Constants
 LICENSE_FILE = Path("/sdcard/lic")
-WORKERS = 4
+WORKERS = 8
 CHUNK_SIZE = 8192  # 8KB chunks for streaming
 
 # File extensions to process (can be expanded)
-TEXT_EXTENSIONS = {
-    ".py",
-    ".txt",
-    ".md",
-    ".rst",
-    ".cfg",
-    ".ini",
-    ".json",
-    ".xml",
-    ".yml",
-    ".yaml",
-    ".html",
-    ".css",
-    ".js",
-    ".ts",
-    ".jsx",
-    ".tsx",
-    ".c",
-    ".cpp",
-    ".h",
-    ".hpp",
-    ".java",
-    ".go",
-    ".rs",
-    ".rb",
-    ".php",
-    ".sh",
-    ".bash",
-    ".zsh",
-    ".fish",
-    ".sql",
-    ".graphql",
-    ".toml",
-    ".csv",
-    ".log",
-    ".tex",
-    ".bib",
-    ".asm",
-    ".asm",
-    ".s",
-    ".S",
-    ".pl",
-    ".pm",
-    ".swift",
-    ".kt",
-    ".kts",
-    ".dart",
-    ".scala",
-    ".clj",
-    ".cljs",
-    ".edn",
-    ".ex",
-    ".exs",
-    ".erl",
-    ".hrl",
-    ".hs",
-    ".lhs",
-    ".vim",
-    ".el",
-    ".lisp",
-    ".lsp",
-    ".r",
-    ".R",
-    ".m",
-    ".mm",
-    ".f",
-    ".f90",
-    ".f95",
-    ".for",
-    ".v",
-    ".vhd",
-    ".vhdl",
-    ".sv",
-    ".bat",
-    ".cmd",
-    ".ps1",
-    ".psm1",
-    ".psd1",
-    ".properties",
-    ".env",
-    ".gitignore",
-    ".dockerignore",
-    ".license",
-    ".licence",
-    ".copying",
-    ".conf",
-    ".config",
-    ".make",
-    ".mk",
-    ".cmake",
-    ".gradle",
-}
 
 
 @dataclass
@@ -170,17 +80,8 @@ def find_text_files(directories: List[Path]) -> Iterator[Path]:
             if directory.suffix.lower() in TEXT_EXTENSIONS or not directory.suffix:
                 yield directory
         else:
-            for file_path in directory.rglob("*"):
-                if file_path.is_file():
-                    if file_path.suffix.lower() in TEXT_EXTENSIONS or not file_path.suffix:
-                        # Skip binary files by checking for null bytes
-                        try:
-                            with open(file_path, "rb") as f:
-                                if b"\x00" in f.read(1024):
-                                    continue
-                        except (IOError, OSError):
-                            continue
-                        yield file_path
+            for path in get_nobinary(directory):
+                yield path
 
 
 def calculate_pattern_fingerprint(pattern: str) -> str:
@@ -188,20 +89,20 @@ def calculate_pattern_fingerprint(pattern: str) -> str:
     return hashlib.sha256(pattern.encode("utf-8")).hexdigest()
 
 
-def process_file(file_path: Path, pattern: str, pattern_fingerprint: str) -> FileStats:
+def process_file(path: Path, pattern: str, pattern_fingerprint: str) -> FileStats:
     """
     Process a single file to remove the pattern.
 
     Uses streaming approach for memory efficiency on large files.
     """
-    stats = FileStats(path=file_path)
+    stats = FileStats(path=path)
 
     try:
-        file_size = file_path.stat().st_size
+        file_size = path.stat().st_size
         stats.bytes_processed = file_size
 
         # Quick check if file contains the pattern
-        if pattern not in file_path.read_text(encoding="utf-8", errors="ignore"):
+        if pattern not in path.read_text(encoding="utf-8", errors="ignore"):
             return stats
 
         # Use temporary file for atomic replacement
@@ -209,7 +110,7 @@ def process_file(file_path: Path, pattern: str, pattern_fingerprint: str) -> Fil
             temp_path = Path(temp_file.name)
 
             try:
-                with open(file_path, "r", encoding="utf-8", errors="ignore") as source:
+                with open(path, "r", encoding="utf-8", errors="ignore") as source:
                     content = source.read()
 
                     # Count occurrences
@@ -230,7 +131,7 @@ def process_file(file_path: Path, pattern: str, pattern_fingerprint: str) -> Fil
                     stats.modified = True
 
                 # Atomic replace
-                shutil.move(str(temp_path), str(file_path))
+                shutil.move(str(temp_path), str(path))
 
             except Exception:
                 # Clean up temp file on error
@@ -303,13 +204,13 @@ Examples:
     if args.auto_remove or args.dry_run:
         print("Processing files in parallel...")
         stats_list = Parallel(n_jobs=args.jobs, verbose=1)(
-            delayed(process_file)(file_path, pattern, pattern_fingerprint) for file_path in files
+            delayed(process_file)(path, pattern, pattern_fingerprint) for path in files
         )
 
         # Report stats
-        print("\n" + "=" * 60)
+        print("\n" + "=" * 42)
         print("PROCESSING REPORT")
-        print("=" * 60)
+        print("=" * 42)
 
         total_files = len(stats_list)
         modified_files = sum(1 for s in stats_list if s.modified)
@@ -321,7 +222,7 @@ Examples:
         for stats in stats_list:
             print(stats)
 
-        print("\n" + "=" * 60)
+        print("\n" + "=" * 42)
         print(f"Files processed: {total_files}")
         print(f"Files modified: {modified_files}")
         print(f"Pattern removed: {total_removed} occurrence(s)")
@@ -342,13 +243,13 @@ Examples:
                     if f.stat().st_size < 10 * 1024 * 1024
                     else False,
                 )
-            )(file_path)
-            for file_path in files
+            )(path)
+            for path in files
         )
 
-        for file_path, contains in preview_stats:
+        for path, contains in preview_stats:
             if contains:
-                rel = file_path.relative_to(Path.cwd())
+                rel = path.relative_to(Path.cwd())
                 print(f"  {rel}")
 
 
